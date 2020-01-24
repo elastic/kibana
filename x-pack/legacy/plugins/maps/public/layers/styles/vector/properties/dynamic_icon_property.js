@@ -5,9 +5,20 @@
  */
 
 import _ from 'lodash';
+import React from 'react';
+import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { getIconPalette, getSymbolId } from '../symbol_utils';
-import { assignCategoriesToPalette } from '../style_util';
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+  EuiTextColor,
+} from '@elastic/eui';
+import { Category } from '../components/legend/category';
 
 export class DynamicIconProperty extends DynamicStyleProperty {
   isOrdinal() {
@@ -73,5 +84,57 @@ export class DynamicIconProperty extends DynamicStyleProperty {
 
   _isIconDynamicConfigComplete() {
     return this._field && this._field.isValid();
+  }
+
+  renderBreakedLegend({ fieldLabel, isPointsOnly, isLinesOnly }) {
+    const categories = [];
+    const { stops, fallback } = this._getPaletteStops();
+    stops.map(({ stop, style }) => {
+      categories.push(
+        <Category
+          key={stop}
+          styleName={this.getStyleName()}
+          label={this.formatField(stop)}
+          color="grey"
+          isLinesOnly={isLinesOnly}
+          isPointsOnly={isPointsOnly}
+          symbolId={style}
+        />
+      );
+    });
+
+    if (fallback) {
+      categories.push(
+        <Category
+          key="fallbackCategory"
+          styleName={this.getStyleName()}
+          label={<EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>}
+          color="grey"
+          isLinesOnly={isLinesOnly}
+          isPointsOnly={isPointsOnly}
+          symbolId={fallback}
+        />
+      );
+    }
+
+    return (
+      <div>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {categories}
+        </EuiFlexGroup>
+        <EuiFlexGroup gutterSize="xs" justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiToolTip position="top" title={this.getDisplayStyleName()} content={fieldLabel}>
+              <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
+                <small>
+                  <strong>{fieldLabel}</strong>
+                </small>
+              </EuiText>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    );
   }
 }
