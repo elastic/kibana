@@ -18,7 +18,7 @@ import {
   httpServiceMock,
   loggingServiceMock,
 } from '../../../../../src/core/server/mocks';
-import { EndpointData, EndpointResultList } from '../../common/types';
+import { EndpointMetadata, EndpointResultList } from '../../common/types';
 import { SearchResponse } from 'elasticsearch';
 import { registerEndpointRoutes } from './endpoints';
 import { EndpointConfigSchema } from '../config';
@@ -49,8 +49,8 @@ describe('test endpoint route', () => {
   it('test find the latest of all endpoints', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({});
 
-    const response: SearchResponse<EndpointData> = (data as unknown) as SearchResponse<
-      EndpointData
+    const response: SearchResponse<EndpointMetadata> = (data as unknown) as SearchResponse<
+      EndpointMetadata
     >;
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
@@ -73,8 +73,8 @@ describe('test endpoint route', () => {
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as EndpointResultList;
-    expect(endpointResultList.endpoints.length).toEqual(3);
-    expect(endpointResultList.total).toEqual(3);
+    expect(endpointResultList.endpoints.length).toEqual(2);
+    expect(endpointResultList.total).toEqual(2);
     expect(endpointResultList.request_page_index).toEqual(0);
     expect(endpointResultList.request_page_size).toEqual(10);
   });
@@ -93,7 +93,7 @@ describe('test endpoint route', () => {
       },
     });
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
-      Promise.resolve((data as unknown) as SearchResponse<EndpointData>)
+      Promise.resolve((data as unknown) as SearchResponse<EndpointMetadata>)
     );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/endpoints')
@@ -115,8 +115,8 @@ describe('test endpoint route', () => {
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as EndpointResultList;
-    expect(endpointResultList.endpoints.length).toEqual(3);
-    expect(endpointResultList.total).toEqual(3);
+    expect(endpointResultList.endpoints.length).toEqual(2);
+    expect(endpointResultList.total).toEqual(2);
     expect(endpointResultList.request_page_index).toEqual(10);
     expect(endpointResultList.request_page_size).toEqual(10);
   });

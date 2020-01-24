@@ -9,11 +9,11 @@ import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 
 import { kibanaRequestToEndpointListQuery } from '../services/endpoint/endpoint_query_builders';
-import { EndpointData, EndpointResultList } from '../../common/types';
+import { EndpointMetadata, EndpointResultList } from '../../common/types';
 import { EndpointAppContext } from '../types';
 
 interface HitSource {
-  _source: EndpointData;
+  _source: EndpointMetadata;
 }
 
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
@@ -44,7 +44,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           queryParams
-        )) as SearchResponse<EndpointData>;
+        )) as SearchResponse<EndpointMetadata>;
         return res.ok({ body: mapToEndpointResultList(queryParams, response) });
       } catch (err) {
         return res.internalError({ body: err });
@@ -55,7 +55,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
 
 function mapToEndpointResultList(
   queryParams: Record<string, any>,
-  searchResponse: SearchResponse<EndpointData>
+  searchResponse: SearchResponse<EndpointMetadata>
 ): EndpointResultList {
   const totalNumberOfEndpoints = searchResponse?.aggregations?.total?.value || 0;
   if (searchResponse.hits.hits.length > 0) {

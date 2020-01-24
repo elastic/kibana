@@ -6,37 +6,36 @@
     "index": "endpoint-agent",
     "mappings": {
       "properties": {
-        "created_at": {
-          "type": "date"
+        "@timestamp": {
+          "type": "long"
+        },
+        "agent": {
+          "properties": {
+            "id": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "version": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
         },
         "endpoint": {
           "properties": {
-            "active_directory_distinguished_name": {
-              "type": "text"
-            },
-            "active_directory_hostname": {
-              "type": "text"
-            },
-            "domain": {
-              "type": "text"
-            },
-            "is_base_image": {
-              "type": "boolean"
-            },
-            "isolation": {
-              "properties": {
-                "status": {
-                  "type": "boolean"
-                }
-              }
-            },
             "policy": {
               "properties": {
                 "id": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                },
-                "name": {
                   "fields": {
                     "keyword": {
                       "ignore_above": 256,
@@ -46,57 +45,101 @@
                   "type": "text"
                 }
               }
-            },
-            "sensor": {
-              "properties": {
-                "persistence": {
-                  "type": "boolean"
-                },
-                "status": {
-                  "type": "object"
-                }
-              }
-            },
-            "upgrade": {
-              "type": "object"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "created": {
+              "type": "date"
             }
           }
         },
         "host": {
           "properties": {
+            "architecture": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
             "hostname": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "id": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
               "type": "text"
             },
             "ip": {
-              "ignore_above": 256,
-              "type": "keyword"
-            },
-            "mac_address": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
               "type": "text"
             },
-            "name": {
+            "mac": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
               "type": "text"
             },
             "os": {
               "properties": {
                 "full": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
                   "type": "text"
                 },
                 "name": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "version": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
                   "type": "text"
                 }
               }
             }
           }
-        },
-        "machine_id": {
-          "type": "keyword"
         }
       }
     },
     "settings": {
       "index": {
-        "number_of_replicas": "0",
+        "number_of_replicas": "1",
         "number_of_shards": "1"
       }
     }

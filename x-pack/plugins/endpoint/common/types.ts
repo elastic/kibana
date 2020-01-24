@@ -10,7 +10,7 @@ export class EndpointAppConstants {
 
 export interface EndpointResultList {
   // the endpoint restricted by the page size
-  endpoints: EndpointData[];
+  endpoints: EndpointMetadata[];
   // the total number of unique endpoints in the index
   total: number;
   // the page size requested
@@ -19,40 +19,28 @@ export interface EndpointResultList {
   request_page_index: number;
 }
 
-export interface EndpointData {
-  machine_id: string;
-  created_at: Date;
+export interface EndpointMetadata {
+  event: {
+    created: string;
+  };
+  endpoint: {
+    policy: {
+      id: string;
+    };
+  };
+  agent: {
+    version: string;
+    id: string;
+  };
   host: {
-    name: string;
+    id: string;
     hostname: string;
-    ip: string;
-    mac_address: string;
+    ip: string[];
+    mac: string[];
     os: {
       name: string;
       full: string;
-    };
-  };
-  endpoint: {
-    domain: string;
-    is_base_image: boolean;
-    active_directory_distinguished_name: string;
-    active_directory_hostname: string;
-    upgrade: {
-      status?: string;
-      updated_at?: Date;
-    };
-    isolation: {
-      status: boolean;
-      request_status?: string | boolean;
-      updated_at?: Date;
-    };
-    policy: {
-      name: string;
-      id: string;
-    };
-    sensor: {
-      persistence: boolean;
-      status: object;
+      version: string;
     };
   };
 }

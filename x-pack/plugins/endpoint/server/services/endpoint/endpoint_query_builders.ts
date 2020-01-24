@@ -18,23 +18,23 @@ export const kibanaRequestToEndpointListQuery = async (
         match_all: {},
       },
       collapse: {
-        field: 'machine_id',
+        field: 'host.id.keyword',
         inner_hits: {
           name: 'most_recent',
           size: 1,
-          sort: [{ created_at: 'desc' }],
+          sort: [{ 'event.created': 'desc' }],
         },
       },
       aggs: {
         total: {
           cardinality: {
-            field: 'machine_id',
+            field: 'host.id.keyword',
           },
         },
       },
       sort: [
         {
-          created_at: {
+          'event.created': {
             order: 'desc',
           },
         },
