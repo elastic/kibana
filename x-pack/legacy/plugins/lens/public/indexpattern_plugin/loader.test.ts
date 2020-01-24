@@ -537,8 +537,8 @@ describe('loader', () => {
   describe('syncExistingFields', () => {
     it('should call once for each index pattern', async () => {
       const setState = jest.fn();
-      const fetchJson = jest.fn(async (url: string) => {
-        const indexPatternTitle = _.last(url.split('/'));
+      const fetchJson = jest.fn(({ path }: { path: string }) => {
+        const indexPatternTitle = _.last(path.split('/'));
         return {
           indexPatternTitle,
           existingFieldNames: ['field_1', 'field_2'].map(
