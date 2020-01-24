@@ -18,8 +18,8 @@
  */
 
 import { get } from 'lodash';
-import { TimelionFunctionArgs } from '../../common/types';
 import { getIndexPatterns, getSavedObjectsClient } from './plugin_services';
+import { TimelionFunctionArgs } from '../../../../../plugins/timelion/common/types';
 
 export interface Location {
   min: number;

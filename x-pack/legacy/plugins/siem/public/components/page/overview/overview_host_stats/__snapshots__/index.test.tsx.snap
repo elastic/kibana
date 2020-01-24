@@ -245,8 +245,8 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         >
           <EuiText>
             <FormattedMessage
-              defaultMessage="Endgame"
-              id="xpack.siem.overview.hostStatGroupEndgame"
+              defaultMessage="Elastic Endpoint Security"
+              id="xpack.siem.overview.hostStatGroupElasticEndpointSecurity"
               values={Object {}}
             />
           </EuiText>
@@ -602,7 +602,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   >
     <EuiFlexGroup
       justifyContent="spaceBetween"
-      key="winlogbeat"
+      key="winlogbeatSecurity"
     >
       <EuiFlexItem
         grow={false}
@@ -613,19 +613,51 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         >
           <styled.div>
             <FormattedMessage
-              defaultMessage="Winlogbeat"
-              id="xpack.siem.overview.winlogbeatTitle"
+              defaultMessage="Security"
+              id="xpack.siem.overview.winlogbeatSecurityTitle"
               values={Object {}}
             />
           </styled.div>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem
-        data-test-subj="host-stat-winlogbeat"
+        data-test-subj="host-stat-winlogbeatSecurity"
         grow={false}
       >
         <StatValue
-          count={296999}
+          count={195929}
+          isGroupStat={false}
+          isLoading={false}
+          max={296999}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+      key="winlogbeatMWSysmonOperational"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiText
+          color="subdued"
+          size="s"
+        >
+          <styled.div>
+            <FormattedMessage
+              defaultMessage="Microsoft-Windows-Sysmon/Operational"
+              id="xpack.siem.overview.winlogbeatMWSysmonOperational"
+              values={Object {}}
+            />
+          </styled.div>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem
+        data-test-subj="host-stat-winlogbeatMWSysmonOperational"
+        grow={false}
+      >
+        <StatValue
+          count={101070}
           isGroupStat={false}
           isLoading={false}
           max={296999}
