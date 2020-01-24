@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopoverProps, EuiCode, EuiToolTip } from '@elastic/eui';
+import { EuiPopoverProps, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -16,14 +16,14 @@ import { findInventoryModel, findInventoryFields } from '../../../common/invento
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import {
-  ActionMenu,
   Section,
+  SectionLinkProps,
+  ActionMenu,
   SectionTitle,
   SectionSubtitle,
   SectionLinks,
   SectionLink,
-  SectionLinkProps,
-} from './action_menu';
+} from '../../../../../../../x-pack/plugins/observability/public';
 
 interface Props {
   options: InfraWaffleMapOptions;
