@@ -4,16 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Middleware, Dispatch } from 'redux';
+import { Dispatch, MiddlewareAPI } from 'redux';
 import { CoreStart } from 'kibana/public';
 import { AlertData } from '../../../../../endpoint_app_types';
 import { GlobalState } from '../reducer';
 import { AppAction } from '../action';
 
-export const alertMiddlewareFactory: (
+// TODO, move this somewhere
+type MiddlewareFactory = (
   coreStart: CoreStart
-) => Middleware<{}, GlobalState, Dispatch<AppAction>> = coreStart => {
-  return store => next => async action => {
+) => (
+  api: MiddlewareAPI<Dispatch<AppAction>, GlobalState>
+) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
+
+export const alertMiddlewareFactory: MiddlewareFactory = coreStart => {
+  return store => next => async (action: AppAction) => {
     next(action);
     if (action.type === 'userNavigatedToPage' && action.payload === 'alertsPage') {
       const response: AlertData[] = await coreStart.http.get('/api/endpoint/alerts');
