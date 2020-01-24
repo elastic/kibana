@@ -20,7 +20,7 @@ describe('ProfileTree', () => {
   });
 
   it('does not throw despite bad profile data', async () => {
-    // For now, ignore the console.error that logged.
+    // For now, ignore the console.error that gets logged.
     const props: Props = {
       onHighlight: () => {},
       target: 'searches',
