@@ -80,12 +80,12 @@ As an example, some agents store cookie values in `http.request.cookies`.
 Since `http.request` has disabled dynamic indexing, and `http.request.cookies` is not declared in a custom mapping,
 the values in `http.request.cookies` are not indexed and thus not searchable.
 
-There are two things you can do to ensure indexed searchable:
+There are two things you can do to if you'd like to ensure a field is indexed and searchable:
 
 1. Index your additional data as {apm-overview-ref}/metadata.html[labels].
-These are dynamic by default, which means they will get indexed and become searchable and aggregatable.
+These are dynamic by default, which means they will be indexed and become searchable and aggregatable.
 
-2. Use the experimental {apm-server-ref}/configuration-template.html[`append_fields`] feature. As an example,
+2. Use the {apm-server-ref}/configuration-template.html[`append_fields`] feature. As an example,
 adding the following to `apm-server.yml` will enable dynamic indexing for `http.request.cookies`:
 
 [source,yml]
