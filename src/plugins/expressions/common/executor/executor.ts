@@ -32,7 +32,7 @@ import { IRegistry } from './types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
 import { getType } from '../expression_types';
-import { ExpressionAstExpression, ExpressionAstNode } from '../parser';
+import { ExpressionAstExpression, ExpressionAstNode, parseExpression } from '../parser';
 
 export class TypesRegistry implements IRegistry<ExpressionType> {
   constructor(private readonly executor: Executor) {}
@@ -161,12 +161,21 @@ export class Executor {
     }
   }
 
-  public async interpretExpression<T>(ast: ExpressionAstExpression, input: T): Promise<unknown> {
+  public async interpretExpression<T>(
+    ast: string | ExpressionAstExpression,
+    input: T
+  ): Promise<unknown> {
+    const execution = this.createExecution(ast);
+    execution.start(input);
+    return await execution.result;
+  }
+
+  public createExecution(ast: string | ExpressionAstExpression): Execution {
+    if (typeof ast === 'string') ast = parseExpression(ast);
     const execution = new Execution({
       ast,
       executor: this,
     });
-    execution.start(input);
-    return await execution.result;
+    return execution;
   }
 }

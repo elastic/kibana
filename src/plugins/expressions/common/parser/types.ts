@@ -20,8 +20,7 @@
 export type ExpressionAstNode =
   | ExpressionAstExpression
   | ExpressionAstFunction
-  | ExpressionAstArgument
-  | ExpressionAstBoxedPrimitive;
+  | ExpressionAstArgument;
 
 export interface ExpressionAstExpression {
   type: 'expression';
@@ -35,12 +34,3 @@ export interface ExpressionAstFunction {
 }
 
 export type ExpressionAstArgument = string | boolean | number | ExpressionAstExpression;
-
-/**
- * Not sure where we have objects like this, but we have a case for them in
- * Executor.prototype.interpret(), thus creating a type for them for now,
- * in the future will investigate if we can remove this.
- */
-export interface ExpressionAstBoxedPrimitive {
-  type: 'string' | 'number' | 'null' | 'boolean';
-}

@@ -20,6 +20,8 @@
 import { Executor } from './executor';
 import * as expressionTypes from '../expression_types';
 import * as expressionFunctions from '../expression_functions';
+import { Execution } from '../execution';
+import { parseExpression } from '../parser';
 
 describe('Executor', () => {
   test('can instantiate', () => {
@@ -117,6 +119,27 @@ describe('Executor', () => {
         foo: 'bar',
         abortSignal,
         env,
+      });
+    });
+  });
+
+  describe('execution', () => {
+    describe('createExecution()', () => {
+      test('returns Execution object from string', () => {
+        const executor = new Executor();
+        const execution = executor.createExecution('foo bar="baz"');
+
+        expect(execution).toBeInstanceOf(Execution);
+        expect(execution.params.ast.chain[0].function).toBe('foo');
+      });
+
+      test('returns Execution object from AST', () => {
+        const executor = new Executor();
+        const ast = parseExpression('foo bar="baz"');
+        const execution = executor.createExecution(ast);
+
+        expect(execution).toBeInstanceOf(Execution);
+        expect(execution.params.ast.chain[0].function).toBe('foo');
       });
     });
   });
