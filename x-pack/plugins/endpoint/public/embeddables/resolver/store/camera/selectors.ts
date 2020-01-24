@@ -63,7 +63,11 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
   },
   (scalingFactor, animation, maybeViewableBoundingBox) => time => {
     const scaleNotCountingAnimation = scaleFromScalingFactor(scalingFactor);
-    if (animation !== undefined && animationIsActive(animation, time)) {
+    if (
+      animation !== undefined &&
+      animationIsActive(animation, time) &&
+      animationIsGreaterThanNudge(animation, scaleNotCountingAnimation)
+    ) {
       /**
        * 0 meaning it just started,
        * 1 meaning it is done.
@@ -359,3 +363,21 @@ export const scalingFactor = (state: CameraState): CameraState['scalingFactor'] 
  * Whether or not the user is current panning the map.
  */
 export const userIsPanning = (state: CameraState): boolean => state.panning !== undefined;
+
+/**
+ * If the distance between the start and end translation is greater than a 'nudge'.
+ */
+function animationIsGreaterThanNudge(
+  animation: CameraAnimationState,
+  scaleNotConsideringAnimation: Vector2
+): boolean {
+  return (
+    vector2.distance(animation.initialTranslation, animation.targetTranslation) >
+    vector2.length(
+      vector2.divide(
+        [scalingConstants.unitsPerNudge, scalingConstants.unitsPerNudge],
+        scaleNotConsideringAnimation
+      )
+    )
+  );
+}

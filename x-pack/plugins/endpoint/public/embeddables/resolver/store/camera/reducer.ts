@@ -5,6 +5,7 @@
  */
 
 import { Reducer } from 'redux';
+import { unitsPerNudge } from './scaling_constants';
 import { animatePanning } from './methods';
 import * as vector2 from '../../lib/vector2';
 import * as selectors from './selectors';
@@ -148,7 +149,6 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
     }
   } else if (action.type === 'userNudgedCamera') {
     const { direction, time } = action.payload;
-    const unitsPerNudge = 50;
     /**
      * Nudge less when zoomed in.
      */

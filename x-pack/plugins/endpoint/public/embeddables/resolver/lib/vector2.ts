@@ -80,3 +80,10 @@ export function scale(a: Vector2, n: number): Vector2 {
 export function lerp(a: Vector2, b: Vector2, t: number): Vector2 {
   return add(scale(a, 1 - t), scale(b, t));
 }
+
+/**
+ * The length of the vector
+ */
+export function length([x, y]: Vector2): number {
+  return Math.sqrt(x * x + y * y);
+}

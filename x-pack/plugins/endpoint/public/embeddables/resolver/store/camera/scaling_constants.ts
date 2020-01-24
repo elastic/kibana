@@ -18,3 +18,8 @@ export const maximum = 6;
  * The curve of the zoom function growth rate. The higher the scale factor is, the higher the zoom rate will be.
  */
 export const zoomCurveRate = 4;
+
+/**
+ * The size, in world units, of a 'nudge' as caused by clicking the up, right, down, or left panning buttons.
+ */
+export const unitsPerNudge = 50;
