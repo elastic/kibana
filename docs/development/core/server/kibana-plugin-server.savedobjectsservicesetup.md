@@ -20,15 +20,25 @@ When plugins access the Saved Objects client, a new client is created using the 
 
 ## Example
 
+
+```ts
 import { SavedObjectsClient, CoreSetup } from 'src/core/server';
 
-export class Plugin() { setup: (core: CoreSetup) =<!-- -->&gt; { core.savedObjects.setClientFactory((<!-- -->{ request: KibanaRequest }<!-- -->) =<!-- -->&gt; { return new SavedObjectsClient(core.savedObjects.scopedRepository(request)); }<!-- -->) } }
+export class Plugin() {
+  setup: (core: CoreSetup) => {
+    core.savedObjects.setClientFactory(({ request: KibanaRequest }) => {
+      return new SavedObjectsClient(core.savedObjects.scopedRepository(request));
+    })
+  }
+}
+
+```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [addClientWrapper](./kibana-plugin-server.savedobjectsservicesetup.addclientwrapper.md) | <code>(priority: number, id: string, factory: SavedObjectsClientWrapperFactory) =&gt; void</code> | Add a [client wrapper factory](./kibana-plugin-server.savedobjectsclientwrapperfactory.md) with the given priority. |
-|  [registerMappings](./kibana-plugin-server.savedobjectsservicesetup.registermappings.md) | <code>(mappings: SavedObjectsTypeMappingDefinitions) =&gt; void</code> | TODO: doc + exemple |
+|  [registerMappings](./kibana-plugin-server.savedobjectsservicesetup.registermappings.md) | <code>(mappings: SavedObjectsTypeMappingDefinitions) =&gt; void</code> | Register [saved object type mappings](./kibana-plugin-server.savedobjectstypemappingdefinitions.md) |
 |  [setClientFactoryProvider](./kibana-plugin-server.savedobjectsservicesetup.setclientfactoryprovider.md) | <code>(clientFactoryProvider: SavedObjectsClientFactoryProvider) =&gt; void</code> | Set the default [factory provider](./kibana-plugin-server.savedobjectsclientfactoryprovider.md) for creating Saved Objects clients. Only one provider can be set, subsequent calls to this method will fail. |
 

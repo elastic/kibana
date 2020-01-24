@@ -72,6 +72,7 @@ import { convertLegacyMappings } from './utils';
  * constructor.
  *
  * @example
+ * ```ts
  * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
  *
  * export class Plugin() {
@@ -81,6 +82,7 @@ import { convertLegacyMappings } from './utils';
  *     })
  *   }
  * }
+ * ```
  *
  * @public
  */
@@ -100,9 +102,40 @@ export interface SavedObjectsServiceSetup {
     factory: SavedObjectsClientWrapperFactory
   ) => void;
 
-  // registerMapping: (type: string, mapping: SavedObjectsMapping) => void;
   /**
-   * TODO: doc + exemple
+   * Register {@link SavedObjectsTypeMappingDefinitions | saved object type mappings}
+   *
+   * @example
+   *
+   * ```ts
+   * // my-plugin/server/mappings.ts
+   * import { SavedObjectsTypeMappingDefinitions } from 'src/core/server';
+   *
+   * export const mappings: SavedObjectsTypeMappingDefinitions = {
+   *   'my-type': {
+   *     properties: {
+   *       afield: {
+   *         type: "text"
+   *       }
+   *     }
+   *   }
+   * }
+   * ```
+   *
+   * ```ts
+   * // my-plugin/server/plugin.ts
+   * import { mappings } from './mappings';
+   *
+   * export class MyPlugin implements Plugin {
+   *   setup({ savedObjects }) {
+   *     savedObjects.registerMappings(mappings);
+   *   }
+   * }
+   * ```
+   *
+   * @remarks
+   * It's possible to directly use an imported json mappings file to call this API. However, as typescript
+   * ensure type validation of the mappings, it's strongly encouraged to use a typescript definition instead.
    */
   registerMappings: (mappings: SavedObjectsTypeMappingDefinitions) => void;
 }
