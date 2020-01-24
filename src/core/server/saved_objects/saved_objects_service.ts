@@ -35,7 +35,7 @@ import { KibanaConfigType } from '../kibana_config';
 import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { SavedObjectsConfigType } from './saved_objects_config';
 import { KibanaRequest } from '../http';
-import { SavedObjectsClientContract, SavedObjectsLegacyMapping } from './types';
+import { SavedObjectsClientContract } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,
@@ -46,7 +46,7 @@ import { SavedObjectsTypeMapping } from './mappings';
 import { MigrationDefinition } from './migrations/core/document_migrator';
 import { SavedObjectsSchemaDefinition } from './schema';
 import { PropertyValidators } from './validation';
-// import { PluginOpaqueId } from '..';
+import { convertLegacyMappings } from './utils';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -377,18 +377,3 @@ export class SavedObjectsService
     });
   }
 }
-
-const convertLegacyMappings = (
-  legacyMappings: SavedObjectsLegacyMapping[]
-): SavedObjectsTypeMapping[] => {
-  return legacyMappings.reduce((mappings, { pluginId, properties }) => {
-    return [
-      ...mappings,
-      ...Object.entries(properties).map(([type, definition]) => ({
-        pluginId,
-        type,
-        definition,
-      })),
-    ];
-  }, [] as SavedObjectsTypeMapping[]);
-};
