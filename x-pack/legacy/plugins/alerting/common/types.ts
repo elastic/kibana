@@ -39,3 +39,5 @@ export interface Alert {
   muteAll: boolean;
   mutedInstanceIds: string[];
 }
+
+export type SanitizedAlert = Omit<Alert, 'apiKey'>;

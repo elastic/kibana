@@ -5,8 +5,8 @@
  */
 import { capabilities } from 'ui/capabilities';
 import { TypeRegistry } from './application/type_registry';
-import { Alert } from '../../../alerting/common';
-export { Alert, AlertAction } from '../../../alerting/common';
+import { SanitizedAlert as Alert } from '../../../alerting/common';
+export { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Record<string, AlertType>;
