@@ -268,6 +268,7 @@ const StatefulTimelineComponent = React.memo<Props>(
             columns={columns}
             dataProviders={dataProviders!}
             end={end}
+            eventType={eventType}
             filters={filters}
             flyoutHeaderHeight={flyoutHeaderHeight}
             flyoutHeight={flyoutHeight}

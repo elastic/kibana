@@ -114,7 +114,6 @@ export interface PaginationOptions {
 export interface FetchRulesProps {
   pagination?: PaginationOptions;
   filterOptions?: FilterOptions;
-  id?: string;
   signal: AbortSignal;
 }
 
@@ -122,6 +121,9 @@ export interface FilterOptions {
   filter: string;
   sortField: string;
   sortOrder: 'asc' | 'desc';
+  showCustomRules?: boolean;
+  showElasticRules?: boolean;
+  tags?: string[];
 }
 
 export interface FetchRulesResponse {
