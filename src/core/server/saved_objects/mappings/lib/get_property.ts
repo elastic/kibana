@@ -18,12 +18,12 @@
  */
 
 import toPath from 'lodash/internal/toPath';
-import { CoreFieldMapping, FieldMapping, IndexMapping } from '../types';
+import { CoreFieldMapping, SavedObjectsFieldMapping, IndexMapping } from '../types';
 
 function getPropertyMappingFromObjectMapping(
-  mapping: IndexMapping | FieldMapping,
+  mapping: IndexMapping | SavedObjectsFieldMapping,
   path: string[]
-): FieldMapping | undefined {
+): SavedObjectsFieldMapping | undefined {
   const props =
     (mapping && (mapping as IndexMapping).properties) ||
     (mapping && (mapping as CoreFieldMapping).fields);
@@ -39,6 +39,9 @@ function getPropertyMappingFromObjectMapping(
   }
 }
 
-export function getProperty(mappings: IndexMapping | FieldMapping, path: string | string[]) {
+export function getProperty(
+  mappings: IndexMapping | SavedObjectsFieldMapping,
+  path: string | string[]
+) {
   return getPropertyMappingFromObjectMapping(mappings, toPath(path));
 }

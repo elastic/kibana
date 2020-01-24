@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { MappingProperties } from '../../mappings';
+import { SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import { SavedObjectsSchema } from '../../schema';
 import { LegacyConfig } from '../../../legacy';
 
@@ -25,12 +25,12 @@ export interface CreateIndexMapOptions {
   config: LegacyConfig;
   kibanaIndexName: string;
   schema: SavedObjectsSchema;
-  indexMap: MappingProperties;
+  indexMap: SavedObjectsTypeMappingDefinitions;
 }
 
 export interface IndexMap {
   [index: string]: {
-    typeMappings: MappingProperties;
+    typeMappings: SavedObjectsTypeMappingDefinitions;
     script?: string;
   };
 }

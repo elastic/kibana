@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ComplexFieldMapping, IndexMapping, MappingProperties } from '../types';
+import { ComplexFieldMapping, IndexMapping, SavedObjectsMappingProperties } from '../types';
 import { getRootProperties } from './get_root_properties';
 
 /**
@@ -48,5 +48,5 @@ export function getRootPropertiesObjects(mappings: IndexMapping) {
       acc[key] = value;
     }
     return acc;
-  }, {} as MappingProperties);
+  }, {} as SavedObjectsMappingProperties);
 }

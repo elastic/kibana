@@ -20,16 +20,15 @@
 import { KibanaMigrator } from './kibana_migrator';
 import { buildActiveMappings } from '../core';
 import { SavedObjectsMapping } from '../../mappings';
-const { mergeProperties } = jest.requireActual('./kibana_migrator');
+const { mergeTypes } = jest.requireActual('./kibana_migrator');
 
 const defaultSavedObjectMappings = [
   {
     pluginId: 'testplugin',
-    properties: {
-      testtype: {
-        properties: {
-          name: { type: 'keyword' },
-        },
+    type: 'testtype',
+    definition: {
+      properties: {
+        name: { type: 'keyword' },
       },
     },
   },
@@ -49,7 +48,7 @@ const createMigrator = (
   };
 
   mockMigrator.getActiveMappings.mockReturnValue(
-    buildActiveMappings({ properties: mergeProperties(savedObjectMappings) })
+    buildActiveMappings(mergeTypes(savedObjectMappings))
   );
   mockMigrator.migrateDocument.mockImplementation(doc => doc);
   return mockMigrator;

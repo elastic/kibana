@@ -22,31 +22,31 @@
  */
 
 import crypto from 'crypto';
-import _ from 'lodash';
-import { IndexMapping, MappingProperties } from './../../mappings';
+import { cloneDeep, mapValues } from 'lodash';
+import {
+  IndexMapping,
+  SavedObjectsMappingProperties,
+  SavedObjectsTypeMappingDefinitions,
+} from './../../mappings';
 
 /**
  * Creates an index mapping with the core properties required by saved object
  * indices, as well as the specified additional properties.
  *
- * @param {Opts} opts
- * @prop {MappingDefinition} properties - The mapping's properties
- * @returns {IndexMapping}
+ * @param typeDefinitions - the type definitions to build mapping from.
  */
-export function buildActiveMappings({
-  properties,
-}: {
-  properties: MappingProperties;
-}): IndexMapping {
+export function buildActiveMappings(
+  typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties
+): IndexMapping {
   const mapping = defaultMapping();
 
-  properties = validateAndMerge(mapping.properties, properties);
+  const mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
 
-  return _.cloneDeep({
+  return cloneDeep({
     ...mapping,
-    properties,
+    properties: mergedProperties,
     _meta: {
-      migrationMappingPropertyHashes: md5Values(properties),
+      migrationMappingPropertyHashes: md5Values(mergedProperties),
     },
   });
 }
@@ -113,7 +113,7 @@ function canonicalStringify(obj: any): string {
 
 // Convert an object's values to md5 hash strings
 function md5Values(obj: any) {
-  return _.mapValues(obj, md5Object);
+  return mapValues(obj, md5Object);
 }
 
 // If something exists in actual, but is missing in expected, we don't
@@ -171,12 +171,14 @@ function defaultMapping(): IndexMapping {
   };
 }
 
-function validateAndMerge(dest: MappingProperties, source: MappingProperties) {
+function validateAndMerge(
+  dest: SavedObjectsMappingProperties,
+  source: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties
+) {
   Object.keys(source).forEach(k => {
     if (k.startsWith('_')) {
       throw new Error(`Invalid mapping "${k}". Mappings cannot start with _.`);
     }
-
     if (dest.hasOwnProperty(k)) {
       throw new Error(`Cannot redefine core mapping "${k}".`);
     }

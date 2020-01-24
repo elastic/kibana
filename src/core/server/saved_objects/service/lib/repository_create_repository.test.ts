@@ -35,25 +35,33 @@ describe('SavedObjectsRepository#createRepository', () => {
   const mappings = [
     {
       pluginId: 'testplugin',
-      properties: {
-        nsAgnosticType: {
-          properties: {
-            name: { type: 'keyword' },
-          },
+      type: 'nsAgnosticType',
+      definition: {
+        properties: {
+          name: { type: 'keyword' },
         },
-        nsType: {
-          properties: {
-            name: { type: 'keyword' },
-          },
+      },
+    },
+    {
+      pluginId: 'testplugin',
+      type: 'nsType',
+      definition: {
+        properties: {
+          name: { type: 'keyword' },
         },
-        hiddenType: {
-          properties: {
-            name: { type: 'keyword' },
-          },
+      },
+    },
+    {
+      pluginId: 'testplugin',
+      type: 'hiddenType',
+      definition: {
+        properties: {
+          name: { type: 'keyword' },
         },
       },
     },
   ];
+
   const migrator = mockKibanaMigrator.create({ savedObjectMappings: mappings });
   const RepositoryConstructor = (SavedObjectsRepository as unknown) as jest.Mock<
     SavedObjectsRepository

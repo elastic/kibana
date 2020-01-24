@@ -18,9 +18,11 @@
  */
 export { getTypes, getProperty, getRootProperties, getRootPropertiesObjects } from './lib';
 export {
-  FieldMapping,
-  MappingMeta,
-  MappingProperties,
-  IndexMapping,
   SavedObjectsMapping,
+  SavedObjectsTypeMappingDefinition,
+  SavedObjectsTypeMappingDefinitions,
+  SavedObjectsMappingProperties,
+  SavedObjectsFieldMapping,
+  MappingMeta,
+  IndexMapping,
 } from './types';

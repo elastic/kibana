@@ -24,7 +24,12 @@ type LegacyServiceMock = jest.Mocked<PublicMethodsOf<LegacyService> & { legacyId
 
 const createDiscoverPluginsMock = (): LegacyServiceDiscoverPlugins => ({
   pluginSpecs: [],
-  uiExports: {} as any,
+  uiExports: {
+    savedObjectSchemas: {},
+    savedObjectMappings: [],
+    savedObjectMigrations: {},
+    savedObjectValidations: {},
+  },
   navLinks: [],
   pluginExtendedConfig: {
     get: jest.fn(),
