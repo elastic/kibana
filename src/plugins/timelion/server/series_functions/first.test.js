@@ -17,13 +17,16 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import fn from './first';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+const expect = require('chai').expect;
+const seriesList = require('./fixtures/series_list.js')();
+import invoke from './helpers/invoke_series_fn.js';
+
+describe('first.js', function() {
+  it('should return exactly the data input', function() {
+    return invoke(fn, [seriesList]).then(function(result) {
+      expect(result.input[0]).to.eql(result.output);
+    });
+  });
+});

@@ -17,13 +17,21 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import fn from './log';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+import _ from 'lodash';
+const expect = require('chai').expect;
+import invoke from './helpers/invoke_series_fn.js';
+
+describe('log.js', () => {
+  let seriesList;
+  beforeEach(() => {
+    seriesList = require('./fixtures/series_list.js')();
+  });
+
+  it('should return the log10 value of every value', () => {
+    return invoke(fn, [seriesList]).then(r => {
+      expect(_.map(r.output.list[4].data, 1)).to.eql([1, 2, 1, 0]);
+    });
+  });
+});

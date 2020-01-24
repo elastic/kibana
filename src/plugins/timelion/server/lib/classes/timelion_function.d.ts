@@ -17,13 +17,24 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { TimelionFunctionArgs } from '../../../common/types';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export interface TimelionFunctionInterface extends TimelionFunctionConfig {
+  chainable: boolean;
+  originalFn: Function;
+  argsByName: TimelionFunctionArgs[];
+}
+
+export interface TimelionFunctionConfig {
+  name: string;
+  help: string;
+  extended: boolean;
+  aliases: string[];
+  fn: Function;
+  args: TimelionFunctionArgs[];
+}
+
+// eslint-disable-next-line import/no-default-export
+export default class TimelionFunction {
+  constructor(name: string, config: TimelionFunctionConfig);
+}
