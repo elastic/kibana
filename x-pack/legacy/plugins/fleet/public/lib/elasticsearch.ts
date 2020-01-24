@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AutocompleteSuggestion } from '../../../../../../src/plugins/data/public';
-import { ElasticsearchAdapter } from './adapters/elasticsearch/adapter_types';
+import { autocomplete } from '../../../../../../src/plugins/data/public';
+import { RestElasticsearchAdapter } from './adapters/elasticsearch/rest';
 
 const HIDDEN_FIELDS = ['agents.actions'];
 
 export class ElasticsearchLib {
-  constructor(private readonly adapter: ElasticsearchAdapter) {}
+  constructor(private readonly adapter: RestElasticsearchAdapter) {}
 
   public isKueryValid(kuery: string): boolean {
     return this.adapter.isKueryValid(kuery);
@@ -20,7 +20,7 @@ export class ElasticsearchLib {
     kuery: string,
     selectionStart: any,
     fieldPrefix?: string
-  ): Promise<AutocompleteSuggestion[]> {
+  ): Promise<autocomplete.QuerySuggestion[]> {
     const suggestions = await this.adapter.getSuggestions(kuery, selectionStart);
 
     const filteredSuggestions = suggestions.filter(suggestion => {
