@@ -239,7 +239,7 @@ export class SavedObjectsService
       savedObjectValidations,
     } = setupDeps.legacyPlugins.uiExports;
 
-    this.mappings = convertLegacyMappings(legacyMappings);
+    this.mappings = convertLegacyMappings(legacyMappings || []);
     this.migrations = savedObjectMigrations;
     this.schemas = savedObjectsSchemasDefinition;
     this.validations = savedObjectValidations;
