@@ -222,6 +222,8 @@ export {
   ImageValidation,
   DeprecationSettings,
   StringValidation,
+  StringValidationRegex,
+  StringValidationRegexString,
 } from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';
