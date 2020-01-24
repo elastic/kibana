@@ -44,17 +44,17 @@ export function useTrackMetric(
       console.warn(
         'usageCollection.reportUiStats is unavailable. Ensure this is setup via <KibanaContextProvider />.'
       );
+    } else {
+      let decoratedMetric = metric;
+      if (delay > 0) {
+        decoratedMetric += `__delayed_${delay}ms`;
+      }
+      const id = setTimeout(
+        () => reportUiStats(app, metricType, decoratedMetric),
+        Math.max(delay, 0)
+      );
+      return () => clearTimeout(id);
     }
-    let decoratedMetric = metric;
-    if (delay > 0) {
-      decoratedMetric += `__delayed_${delay}ms`;
-    }
-    const id = setTimeout(
-      () => reportUiStats(app, metricType, decoratedMetric),
-      Math.max(delay, 0)
-    );
-    return () => clearTimeout(id);
-
     // the dependencies are managed externally
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, effectDependencies);
