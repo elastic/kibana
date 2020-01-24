@@ -24,5 +24,5 @@ const colors = new ColorsService();
 colors.init(coreMock.createSetup().uiSettings);
 
 export const colorsServiceMock: ColorsService = {
-  vislibColor: jest.fn(colors.vislibColor),
+  createColorLookupFunction: jest.fn(colors.createColorLookupFunction),
 } as any;

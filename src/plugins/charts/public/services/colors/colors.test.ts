@@ -46,7 +46,7 @@ describe('Vislib Color Service', () => {
   beforeEach(() => {
     previousConfig = config.get('visualization:colorMapping');
     config.set('visualization:colorMapping', {});
-    color = colors.vislibColor(arr, {});
+    color = colors.createColorLookupFunction(arr, {});
   });
 
   afterEach(() => {
@@ -56,47 +56,47 @@ describe('Vislib Color Service', () => {
   it('should throw error if not initialized', () => {
     const colorsBad = new ColorsService();
 
-    expect(() => colorsBad.vislibColor(arr, {})).toThrowError();
+    expect(() => colorsBad.createColorLookupFunction(arr, {})).toThrowError();
   });
 
   it('should throw an error if input is not an array', () => {
     expect(() => {
-      colors.vislibColor(200);
+      colors.createColorLookupFunction(200);
     }).toThrowError();
 
     expect(() => {
-      colors.vislibColor('help');
+      colors.createColorLookupFunction('help');
     }).toThrowError();
 
     expect(() => {
-      colors.vislibColor(true);
+      colors.createColorLookupFunction(true);
     }).toThrowError();
 
     expect(() => {
-      colors.vislibColor();
+      colors.createColorLookupFunction();
     }).toThrowError();
 
     expect(() => {
-      colors.vislibColor(nullValue);
+      colors.createColorLookupFunction(nullValue);
     }).toThrowError();
 
     expect(() => {
-      colors.vislibColor(emptyObject);
+      colors.createColorLookupFunction(emptyObject);
     }).toThrowError();
   });
 
   describe('when array is not composed of numbers, strings, or undefined values', () => {
     it('should throw an error', () => {
       expect(() => {
-        colors.vislibColor(arrayOfObjects);
+        colors.createColorLookupFunction(arrayOfObjects);
       }).toThrowError();
 
       expect(() => {
-        colors.vislibColor(arrayOfBooleans);
+        colors.createColorLookupFunction(arrayOfBooleans);
       }).toThrowError();
 
       expect(() => {
-        colors.vislibColor(arrayOfNullValues);
+        colors.createColorLookupFunction(arrayOfNullValues);
       }).toThrowError();
     });
   });
@@ -104,21 +104,21 @@ describe('Vislib Color Service', () => {
   describe('when input is an array of strings, numbers, or undefined values', () => {
     it('should not throw an error', () => {
       expect(() => {
-        colors.vislibColor(arr);
+        colors.createColorLookupFunction(arr);
       }).not.toThrowError();
 
       expect(() => {
-        colors.vislibColor(arrayOfNumbers);
+        colors.createColorLookupFunction(arrayOfNumbers);
       }).not.toThrowError();
 
       expect(() => {
-        colors.vislibColor(arrayOfUndefinedValues);
+        colors.createColorLookupFunction(arrayOfUndefinedValues);
       }).not.toThrowError();
     });
   });
 
   it('should be a function', () => {
-    expect(typeof colors.vislibColor).toBe('function');
+    expect(typeof colors.createColorLookupFunction).toBe('function');
   });
 
   it('should return a function', () => {
@@ -134,7 +134,7 @@ describe('Vislib Color Service', () => {
   });
 
   it('should return the value from the specified color mapping overrides', () => {
-    const colorFn = colors.vislibColor(arr, { good: 'red' });
+    const colorFn = colors.createColorLookupFunction(arr, { good: 'red' });
     expect(colorFn('good')).toBe('red');
   });
 });

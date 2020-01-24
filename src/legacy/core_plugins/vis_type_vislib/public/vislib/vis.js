@@ -55,7 +55,7 @@ export class Vis extends EventEmitter {
       this.data,
       this.uiState,
       this.element,
-      this.deps.charts.colors.vislibColor.bind(this.deps.charts.colors)
+      this.deps.charts.colors.createColorLookupFunction.bind(this.deps.charts.colors)
     );
   }
 

@@ -47,23 +47,27 @@ export class ColorsService {
     this._mappedColors = new MappedColors(uiSettings);
   }
 
-  vislibColor(arrayOfStringsOrNumbers?: any, colorMapping = {}) {
+  createColorLookupFunction(
+    arrayOfStringsOrNumbers?: any,
+    colorMapping: Partial<Record<string, string>> = {}
+  ) {
     if (!Array.isArray(arrayOfStringsOrNumbers)) {
       throw new Error(
-        `vislibColor expects an array but recived: ${typeof arrayOfStringsOrNumbers}`
+        `createColorLookupFunction expects an array but recived: ${typeof arrayOfStringsOrNumbers}`
       );
     }
 
     arrayOfStringsOrNumbers.forEach(function(val) {
       if (!_.isString(val) && !_.isNumber(val) && !_.isUndefined(val)) {
-        throw new TypeError('ColorUtil expects an array of strings, numbers, or undefined values');
+        throw new TypeError(
+          'createColorLookupFunction expects an array of strings, numbers, or undefined values'
+        );
       }
     });
 
     this.mappedColors.mapKeys(arrayOfStringsOrNumbers);
 
     return (value: string) => {
-      // @ts-ignore
       return colorMapping[value] || this.mappedColors.get(value);
     };
   }
