@@ -11,6 +11,8 @@ import { isSetupStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
+  MissingResultsPrivilegesPrompt,
+  MissingSetupPrivilegesPrompt,
   MlUnavailablePrompt,
 } from '../../../components/logging/log_analysis_setup';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
@@ -19,7 +21,11 @@ import { LogEntryCategoriesSetupContent } from './page_setup_content';
 import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
 
 export const LogEntryCategoriesPageContent = () => {
-  const { hasLogAnalysisCapabilites } = useLogAnalysisCapabilitiesContext();
+  const {
+    hasLogAnalysisCapabilites,
+    hasLogAnalysisReadCapabilities,
+    hasLogAnalysisSetupCapabilities,
+  } = useLogAnalysisCapabilitiesContext();
 
   const {
     fetchJobStatus,
@@ -34,6 +40,8 @@ export const LogEntryCategoriesPageContent = () => {
 
   if (!hasLogAnalysisCapabilites) {
     return <MlUnavailablePrompt />;
+  } else if (!hasLogAnalysisReadCapabilities) {
+    return <MissingResultsPrivilegesPrompt />;
   } else if (setupStatus === 'initializing') {
     return (
       <LoadingPage
@@ -46,6 +54,8 @@ export const LogEntryCategoriesPageContent = () => {
     return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
   } else if (isSetupStatusWithResults(setupStatus)) {
     return <LogEntryCategoriesResultsContent />;
+  } else if (!hasLogAnalysisSetupCapabilities) {
+    return <MissingSetupPrivilegesPrompt />;
   } else {
     return <LogEntryCategoriesSetupContent />;
   }

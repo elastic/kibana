@@ -11,6 +11,8 @@ import { isSetupStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
+  MissingResultsPrivilegesPrompt,
+  MissingSetupPrivilegesPrompt,
   MlUnavailablePrompt,
 } from '../../../components/logging/log_analysis_setup';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
@@ -19,7 +21,11 @@ import { LogEntryRateSetupContent } from './page_setup_content';
 import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
 
 export const LogEntryRatePageContent = () => {
-  const { hasLogAnalysisCapabilites } = useLogAnalysisCapabilitiesContext();
+  const {
+    hasLogAnalysisCapabilites,
+    hasLogAnalysisReadCapabilities,
+    hasLogAnalysisSetupCapabilities,
+  } = useLogAnalysisCapabilitiesContext();
 
   const { fetchJobStatus, fetchModuleDefinition, setupStatus } = useLogEntryRateModuleContext();
 
@@ -30,6 +36,8 @@ export const LogEntryRatePageContent = () => {
 
   if (!hasLogAnalysisCapabilites) {
     return <MlUnavailablePrompt />;
+  } else if (!hasLogAnalysisReadCapabilities) {
+    return <MissingResultsPrivilegesPrompt />;
   } else if (setupStatus === 'initializing') {
     return (
       <LoadingPage
@@ -42,6 +50,8 @@ export const LogEntryRatePageContent = () => {
     return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
   } else if (isSetupStatusWithResults(setupStatus)) {
     return <LogEntryRateResultsContent />;
+  } else if (!hasLogAnalysisSetupCapabilities) {
+    return <MissingSetupPrivilegesPrompt />;
   } else {
     return <LogEntryRateSetupContent />;
   }
