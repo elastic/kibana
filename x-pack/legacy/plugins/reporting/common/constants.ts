@@ -14,6 +14,7 @@ export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
 export const API_BASE_URL = '/api/reporting'; // "Generation URL" from share menu
 export const API_BASE_URL_V1 = '/api/reporting/v1'; //
 export const API_BASE_GENERATE_V1 = `${API_BASE_URL_V1}/generate`;
+export const API_LIST_URL = '/api/reporting/jobs';
 
 export const CONTENT_TYPE_CSV = 'text/csv';
 
