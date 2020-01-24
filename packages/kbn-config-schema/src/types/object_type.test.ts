@@ -30,6 +30,11 @@ test('returns value by default', () => {
   expect(type.validate(value)).toEqual({ name: 'test' });
 });
 
+test('fails if undefined', () => {
+  const type = schema.object({});
+  expect(() => type.validate(undefined)).toThrow();
+});
+
 test('fails if missing required value', () => {
   const type = schema.object({
     name: schema.string(),
@@ -81,7 +86,9 @@ test('undefined object within object', () => {
     }),
   });
 
-  expect(type.validate({})).toEqual({
+  expect(() => type.validate({})).toThrow();
+
+  expect(type.validate({ foo: {} })).toEqual({
     foo: {
       bar: 'hello world',
     },
