@@ -7,7 +7,7 @@
 import {
   EuiBasicTable,
   EuiContextMenuPanel,
-  EuiFieldSearch,
+  EuiEmptyPrompt,
   EuiLoadingContent,
   EuiSpacer,
 } from '@elastic/eui';
@@ -16,7 +16,11 @@ import React, { useCallback, useEffect, useMemo, useReducer, useState } from 're
 import { useHistory } from 'react-router-dom';
 import uuid from 'uuid';
 
-import { useRules, CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
+import {
+  useRules,
+  CreatePreBuiltRules,
+  FilterOptions,
+} from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../components/header_section';
 import {
   UtilityBar,
@@ -35,7 +39,9 @@ import * as i18n from '../translations';
 import { EuiBasicTableOnChange, TableData } from '../types';
 import { getBatchItems } from './batch_actions';
 import { getColumns } from './columns';
+import { showRulesTable } from './helpers';
 import { allRulesReducer, State } from './reducer';
+import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 
 const initialState: State = {
   isLoading: true,
@@ -62,6 +68,7 @@ interface AllRulesProps {
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
   refetchPrePackagedRulesStatus: () => void;
+  rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
@@ -84,6 +91,7 @@ export const AllRules = React.memo<AllRulesProps>(
     loading,
     loadingCreatePrePackagedRules,
     refetchPrePackagedRulesStatus,
+    rulesCustomInstalled,
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,
@@ -102,6 +110,7 @@ export const AllRules = React.memo<AllRulesProps>(
       dispatch,
     ] = useReducer(allRulesReducer, initialState);
     const history = useHistory();
+    const [oldRefreshToggle, setOldRefreshToggle] = useState(refreshToggle);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [isGlobalLoading, setIsGlobalLoad] = useState(false);
     const [, dispatchToaster] = useStateToaster();
@@ -125,19 +134,15 @@ export const AllRules = React.memo<AllRulesProps>(
     const tableOnChangeCallback = useCallback(
       ({ page, sort }: EuiBasicTableOnChange) => {
         dispatch({
-          type: 'updatePagination',
-          pagination: { ...pagination, page: page.index + 1, perPage: page.size },
-        });
-        dispatch({
           type: 'updateFilterOptions',
           filterOptions: {
-            ...filterOptions,
             sortField: 'enabled', // Only enabled is supported for sorting currently
             sortOrder: sort?.direction ?? 'desc',
           },
+          pagination: { page: page.index + 1, perPage: page.size },
         });
       },
-      [dispatch, filterOptions, pagination]
+      [dispatch]
     );
 
     const columns = useMemo(() => {
@@ -169,11 +174,18 @@ export const AllRules = React.memo<AllRulesProps>(
     }, [importCompleteToggle]);
 
     useEffect(() => {
-      if (reFetchRulesData != null) {
+      if (!isInitialLoad && reFetchRulesData != null && oldRefreshToggle !== refreshToggle) {
+        setOldRefreshToggle(refreshToggle);
         reFetchRulesData();
+        refetchPrePackagedRulesStatus();
       }
-      refetchPrePackagedRulesStatus();
-    }, [refreshToggle, reFetchRulesData, refetchPrePackagedRulesStatus]);
+    }, [
+      isInitialLoad,
+      refreshToggle,
+      oldRefreshToggle,
+      reFetchRulesData,
+      refetchPrePackagedRulesStatus,
+    ]);
 
     useEffect(() => {
       if (reFetchRulesData != null) {
@@ -209,6 +221,22 @@ export const AllRules = React.memo<AllRulesProps>(
       []
     );
 
+    const onFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
+      dispatch({
+        type: 'updateFilterOptions',
+        filterOptions: {
+          ...newFilterOptions,
+        },
+        pagination: { page: 1 },
+      });
+    }, []);
+
+    const emptyPrompt = useMemo(() => {
+      return (
+        <EuiEmptyPrompt title={<h3>{i18n.NO_RULES}</h3>} titleSize="xs" body={i18n.NO_RULES_BODY} />
+      );
+    }, []);
+
     return (
       <>
         <RuleDownloader
@@ -230,43 +258,32 @@ export const AllRules = React.memo<AllRulesProps>(
 
         <Panel loading={isGlobalLoading}>
           <>
-            {rulesInstalled != null && rulesInstalled > 0 && (
-              <HeaderSection split title={i18n.ALL_RULES} border={true}>
-                <EuiFieldSearch
-                  aria-label={i18n.SEARCH_RULES}
-                  fullWidth
-                  incremental={false}
-                  placeholder={i18n.SEARCH_PLACEHOLDER}
-                  onSearch={filterString => {
-                    dispatch({
-                      type: 'updateFilterOptions',
-                      filterOptions: {
-                        ...filterOptions,
-                        filter: filterString,
-                      },
-                    });
-                    dispatch({
-                      type: 'updatePagination',
-                      pagination: { ...pagination, page: 1 },
-                    });
-                  }}
+            {((rulesCustomInstalled && rulesCustomInstalled > 0) ||
+              (rulesInstalled != null && rulesInstalled > 0)) && (
+              <HeaderSection split title={i18n.ALL_RULES}>
+                <RulesTableFilters
+                  onFilterChanged={onFilterChangedCallback}
+                  rulesCustomInstalled={rulesCustomInstalled}
+                  rulesInstalled={rulesInstalled}
                 />
               </HeaderSection>
             )}
-            {isInitialLoad && isEmpty(tableData) && (
+            {isInitialLoad && (
               <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
             )}
-            {isGlobalLoading && !isEmpty(tableData) && (
+            {isGlobalLoading && !isEmpty(tableData) && !isInitialLoad && (
               <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
             )}
-            {isEmpty(tableData) && prePackagedRuleStatus === 'ruleNotInstalled' && (
-              <PrePackagedRulesPrompt
-                createPrePackagedRules={handleCreatePrePackagedRules}
-                loading={loadingCreatePrePackagedRules}
-                userHasNoPermissions={hasNoPermissions}
-              />
-            )}
-            {!isEmpty(tableData) && (
+            {rulesCustomInstalled != null &&
+              rulesCustomInstalled === 0 &&
+              prePackagedRuleStatus === 'ruleNotInstalled' && (
+                <PrePackagedRulesPrompt
+                  createPrePackagedRules={handleCreatePrePackagedRules}
+                  loading={loadingCreatePrePackagedRules}
+                  userHasNoPermissions={hasNoPermissions}
+                />
+              )}
+            {showRulesTable({ isInitialLoad, rulesCustomInstalled, rulesInstalled }) && (
               <>
                 <UtilityBar border>
                   <UtilityBarSection>
@@ -301,6 +318,7 @@ export const AllRules = React.memo<AllRulesProps>(
                   isSelectable={!hasNoPermissions ?? false}
                   itemId="id"
                   items={tableData}
+                  noItemsMessage={emptyPrompt}
                   onChange={tableOnChangeCallback}
                   pagination={{
                     pageIndex: pagination.page - 1,

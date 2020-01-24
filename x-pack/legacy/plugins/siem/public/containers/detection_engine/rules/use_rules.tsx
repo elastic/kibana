@@ -36,7 +36,7 @@ export const useRules = (pagination: PaginationOptions, filterOptions: FilterOpt
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    async function fetchData() {
+    async function fetchData(forceReload: boolean = false) {
       try {
         setLoading(true);
         const fetchRulesResult = await fetchRules({
@@ -59,7 +59,7 @@ export const useRules = (pagination: PaginationOptions, filterOptions: FilterOpt
     }
 
     fetchData();
-    reFetchRules.current = fetchData;
+    reFetchRules.current = fetchData.bind(null, true);
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
@@ -70,6 +70,9 @@ export const useRules = (pagination: PaginationOptions, filterOptions: FilterOpt
     filterOptions.filter,
     filterOptions.sortField,
     filterOptions.sortOrder,
+    filterOptions.tags?.sort().join(),
+    filterOptions.showCustomRules,
+    filterOptions.showElasticRules,
   ]);
 
   return [loading, rules, reFetchRules.current];

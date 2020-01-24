@@ -31,11 +31,10 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
   async handler(request: QueryRequest, headers) {
     const { id, rule_id: ruleId } = request.query;
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-    const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
     const savedObjectsClient = isFunction(request.getSavedObjectsClient)
       ? request.getSavedObjectsClient()
       : null;
-    if (!alertsClient || !actionsClient || !savedObjectsClient) {
+    if (!alertsClient || !savedObjectsClient) {
       return headers.response().code(404);
     }
     try {

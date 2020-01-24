@@ -4,7 +4,7 @@
 
 ## HttpHandler interface
 
-A function for making an HTTP requests to Kibana's backend. See [HttpFetchOptions](./kibana-plugin-public.httpfetchoptions.md) for options and [IHttpResponse](./kibana-plugin-public.ihttpresponse.md) for the response.
+A function for making an HTTP requests to Kibana's backend. See [HttpFetchOptions](./kibana-plugin-public.httpfetchoptions.md) for options and [HttpResponse](./kibana-plugin-public.httpresponse.md) for the response.
 
 <b>Signature:</b>
 
