@@ -17,7 +17,30 @@
  * under the License.
  */
 
-export class Collector {
+import { Logger } from 'kibana/server';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+
+export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
+
+export interface CollectorOptions<T = unknown, U = T> {
+  type: string;
+  init?: Function;
+  fetch: (callCluster: CallCluster) => Promise<T> | T;
+  /*
+   * A hook for allowing the fetched data payload to be organized into a typed
+   * data model for internal bulk upload. See defaultFormatterForBulkUpload for
+   * a generic example.
+   */
+  formatForBulkUpload?: CollectorFormatForBulkUpload<T, U>;
+  isReady: () => Promise<boolean> | boolean;
+}
+
+export class Collector<T = unknown, U = T> {
+  public readonly type: CollectorOptions<T, U>['type'];
+  public readonly init?: CollectorOptions<T, U>['init'];
+  public readonly fetch: CollectorOptions<T, U>['fetch'];
+  private readonly _formatForBulkUpload?: CollectorFormatForBulkUpload<T, U>;
+  public readonly isReady: CollectorOptions<T, U>['isReady'];
   /*
    * @param {Object} logger - logger object
    * @param {String} options.type - property name as the key for the data
@@ -27,8 +50,8 @@ export class Collector {
    * @param {Function} options.rest - optional other properties
    */
   constructor(
-    logger,
-    { type, init, fetch, formatForBulkUpload = null, isReady = null, ...options } = {}
+    protected readonly log: Logger,
+    { type, init, fetch, formatForBulkUpload, isReady, ...options }: CollectorOptions<T, U>
   ) {
     if (type === undefined) {
       throw new Error('Collector must be instantiated with a options.type string property');
@@ -42,41 +65,27 @@ export class Collector {
       throw new Error('Collector must be instantiated with a options.fetch function property');
     }
 
-    this.log = logger;
-
     Object.assign(this, options); // spread in other properties and mutate "this"
 
     this.type = type;
     this.init = init;
     this.fetch = fetch;
+    this.isReady = isReady;
+    this._formatForBulkUpload = formatForBulkUpload;
+  }
 
-    const defaultFormatterForBulkUpload = result => ({ type, payload: result });
-    this._formatForBulkUpload = formatForBulkUpload || defaultFormatterForBulkUpload;
-    if (typeof isReady === 'function') {
-      this.isReady = isReady;
+  public formatForBulkUpload(result: T) {
+    if (this._formatForBulkUpload) {
+      return this._formatForBulkUpload(result);
+    } else {
+      return this.defaultFormatterForBulkUpload(result);
     }
   }
 
-  /*
-   * @param {Function} callCluster - callCluster function
-   */
-  fetchInternal(callCluster) {
-    if (typeof callCluster !== 'function') {
-      throw new Error('A `callCluster` function must be passed to the fetch methods of collectors');
-    }
-    return this.fetch(callCluster);
-  }
-
-  /*
-   * A hook for allowing the fetched data payload to be organized into a typed
-   * data model for internal bulk upload. See defaultFormatterForBulkUpload for
-   * a generic example.
-   */
-  formatForBulkUpload(result) {
-    return this._formatForBulkUpload(result);
-  }
-
-  isReady() {
-    throw `isReady() must be implemented in ${this.type} collector`;
+  protected defaultFormatterForBulkUpload(result: T) {
+    return {
+      type: this.type,
+      payload: result,
+    };
   }
 }
