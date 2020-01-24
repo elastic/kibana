@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
 import { SavedObjectsSchema } from '../../schema';
@@ -29,11 +28,17 @@ describe('KibanaMigrator', () => {
       options.savedObjectMappings = [
         {
           pluginId: 'aaa',
-          properties: { amap: { type: 'text' } },
+          type: 'amap',
+          definition: {
+            properties: { field: { type: 'text' } },
+          },
         },
         {
           pluginId: 'bbb',
-          properties: { bmap: { type: 'text' } },
+          type: 'bmap',
+          definition: {
+            properties: { field: { type: 'text' } },
+          },
         },
       ];
       const mappings = new KibanaMigrator(options).getActiveMappings();
@@ -45,11 +50,17 @@ describe('KibanaMigrator', () => {
       options.savedObjectMappings = [
         {
           pluginId: 'aaa',
-          properties: { amap: { type: 'text' } },
+          type: 'amap',
+          definition: {
+            properties: { field: { type: 'text' } },
+          },
         },
         {
           pluginId: 'bbb',
-          properties: { amap: { type: 'long' } },
+          type: 'amap',
+          definition: {
+            properties: { field: { type: 'long' } },
+          },
         },
       ];
       expect(() => new KibanaMigrator(options).getActiveMappings()).toThrow(
@@ -94,21 +105,19 @@ function mockOptions({ configValues }: { configValues?: any } = {}): KibanaMigra
     savedObjectMappings: [
       {
         pluginId: 'testtype',
-        properties: {
-          testtype: {
-            properties: {
-              name: { type: 'keyword' },
-            },
+        type: 'testtype',
+        definition: {
+          properties: {
+            name: { type: 'keyword' },
           },
         },
       },
       {
         pluginId: 'testtype2',
-        properties: {
-          testtype2: {
-            properties: {
-              name: { type: 'keyword' },
-            },
+        type: 'testtype2',
+        definition: {
+          properties: {
+            name: { type: 'keyword' },
           },
         },
       },

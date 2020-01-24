@@ -24,7 +24,11 @@
 
 import { Logger } from 'src/core/server/logging';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
-import { MappingProperties, SavedObjectsMapping, IndexMapping } from '../../mappings';
+import {
+  SavedObjectsMapping,
+  IndexMapping,
+  SavedObjectsTypeMappingDefinitions,
+} from '../../mappings';
 import { SavedObjectsSchema } from '../../schema';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator, PropertyValidators } from '../../validation';
@@ -63,7 +67,7 @@ export class KibanaMigrator {
   private readonly documentMigrator: VersionedTransformer;
   private readonly kibanaConfig: KibanaConfigType;
   private readonly log: Logger;
-  private readonly mappingProperties: MappingProperties;
+  private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
   private readonly schema: SavedObjectsSchema;
   private readonly serializer: SavedObjectsSerializer;
   private migrationResult?: Promise<Array<{ status: string }>>;
@@ -89,7 +93,7 @@ export class KibanaMigrator {
     this.savedObjectsConfig = savedObjectsConfig;
     this.schema = savedObjectSchemas;
     this.serializer = new SavedObjectsSerializer(this.schema);
-    this.mappingProperties = mergeProperties(savedObjectMappings || []);
+    this.mappingProperties = mergeTypes(savedObjectMappings || []);
     this.log = logger;
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion,
@@ -159,7 +163,7 @@ export class KibanaMigrator {
    *
    */
   public getActiveMappings(): IndexMapping {
-    return buildActiveMappings({ properties: this.mappingProperties });
+    return buildActiveMappings(this.mappingProperties);
   }
 
   /**
@@ -177,12 +181,15 @@ export class KibanaMigrator {
  * Merges savedObjectMappings properties into a single object, verifying that
  * no mappings are redefined.
  */
-export function mergeProperties(mappings: SavedObjectsMapping[]): MappingProperties {
-  return mappings.reduce((acc, { pluginId, properties }) => {
-    const duplicate = Object.keys(properties).find(k => acc.hasOwnProperty(k));
+export function mergeTypes(mappings: SavedObjectsMapping[]): SavedObjectsTypeMappingDefinitions {
+  return mappings.reduce((acc, { pluginId, type, definition }) => {
+    const duplicate = acc.hasOwnProperty(type);
     if (duplicate) {
-      throw new Error(`Plugin ${pluginId} is attempting to redefine mapping "${duplicate}".`);
+      throw new Error(`Plugin ${pluginId} is attempting to redefine mapping "${type}".`);
     }
-    return Object.assign(acc, properties);
+    return {
+      ...acc,
+      [type]: definition,
+    };
   }, {});
 }

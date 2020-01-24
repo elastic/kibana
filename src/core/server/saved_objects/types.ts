@@ -18,7 +18,7 @@
  */
 
 import { SavedObjectsClient } from './service/saved_objects_client';
-import { SavedObjectsMapping } from './mappings';
+import { SavedObjectsTypeMappingDefinitions } from './mappings';
 import { MigrationDefinition } from './migrations/core/document_migrator';
 import { SavedObjectsSchemaDefinition } from './schema';
 import { PropertyValidators } from './validation';
@@ -213,8 +213,17 @@ export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObj
  * @deprecated
  */
 export interface SavedObjectsLegacyUiExports {
-  savedObjectMappings: SavedObjectsMapping[];
+  savedObjectMappings: SavedObjectsLegacyMapping[];
   savedObjectMigrations: MigrationDefinition;
   savedObjectSchemas: SavedObjectsSchemaDefinition;
   savedObjectValidations: PropertyValidators;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacyMapping {
+  pluginId: string;
+  properties: SavedObjectsTypeMappingDefinitions;
 }

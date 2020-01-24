@@ -34,7 +34,7 @@ import { KibanaConfigType } from '../kibana_config';
 import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { SavedObjectsConfigType } from './saved_objects_config';
 import { KibanaRequest } from '../http';
-import { SavedObjectsClientContract } from './types';
+import { SavedObjectsClientContract, SavedObjectsLegacyMapping } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,
@@ -45,6 +45,7 @@ import { SavedObjectsMapping } from './mappings';
 import { MigrationDefinition } from './migrations/core/document_migrator';
 import { SavedObjectsSchemaDefinition } from './schema';
 import { PropertyValidators } from './validation';
+// import { PluginOpaqueId } from '..';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -97,6 +98,9 @@ export interface SavedObjectsServiceSetup {
     id: string,
     factory: SavedObjectsClientWrapperFactory
   ) => void;
+
+  // registerMapping: (type: string, mapping: SavedObjectsMapping) => void;
+  // registerMappingFile: (mappings: Map<string, SOMapping>) => void;
 }
 
 /**
@@ -223,11 +227,12 @@ export class SavedObjectsService
 
     const {
       savedObjectSchemas: savedObjectsSchemasDefinition,
-      savedObjectMappings,
+      savedObjectMappings: legacyMappings,
       savedObjectMigrations,
       savedObjectValidations,
     } = setupDeps.legacyPlugins.uiExports;
-    this.mappings = savedObjectMappings;
+
+    this.mappings = convertLegacyMappings(legacyMappings);
     this.migrations = savedObjectMigrations;
     this.schemas = savedObjectsSchemasDefinition;
     this.validations = savedObjectValidations;
@@ -356,3 +361,18 @@ export class SavedObjectsService
     });
   }
 }
+
+const convertLegacyMappings = (
+  legacyMappings: SavedObjectsLegacyMapping[]
+): SavedObjectsMapping[] => {
+  return legacyMappings.reduce((mappings, { pluginId, properties }) => {
+    return [
+      ...mappings,
+      ...Object.entries(properties).map(([type, definition]) => ({
+        pluginId,
+        type,
+        definition,
+      })),
+    ];
+  }, [] as SavedObjectsMapping[]);
+};
