@@ -31,7 +31,6 @@ import { DETECTIONS_HISTOGRAM_ID } from '..';
 interface HistogramSignalsProps {
   filters?: esFilters.Filter[];
   from: number;
-  isInspect: boolean;
   legendPosition?: Position;
   loadingInitial: boolean;
   query?: Query;
