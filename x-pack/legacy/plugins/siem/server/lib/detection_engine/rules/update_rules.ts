@@ -137,31 +137,20 @@ export const updateRules = async ({
     }
   );
 
-  const ruleCurrentStatus = savedObjectsClient
-    ? await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>({
-        type: ruleStatusSavedObjectType,
-        perPage: 1,
-        sortField: 'statusDate',
-        sortOrder: 'desc',
-        search: rule.id,
-        searchFields: ['alertId'],
-      })
-    : null;
-
   if (rule.enabled && enabled === false) {
     await alertsClient.disable({ id: rule.id });
-    // set current status for this rule to null to represent disabled,
-    // but keep last_success_at / last_failure_at properties intact for
-    // use on frontend while rule is disabled.
-    if (ruleCurrentStatus && ruleCurrentStatus.saved_objects.length > 0) {
-      const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
-      currentStatusToDisable.attributes.status = null;
-      await savedObjectsClient?.update(ruleStatusSavedObjectType, currentStatusToDisable.id, {
-        ...currentStatusToDisable.attributes,
-      });
-    }
   } else if (!rule.enabled && enabled === true) {
     await alertsClient.enable({ id: rule.id });
+    const ruleCurrentStatus = savedObjectsClient
+      ? await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>({
+          type: ruleStatusSavedObjectType,
+          perPage: 1,
+          sortField: 'statusDate',
+          sortOrder: 'desc',
+          search: rule.id,
+          searchFields: ['alertId'],
+        })
+      : null;
     // set current status for this rule to be 'going to run'
     if (ruleCurrentStatus && ruleCurrentStatus.saved_objects.length > 0) {
       const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
