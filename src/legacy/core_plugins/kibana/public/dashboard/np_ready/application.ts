@@ -19,7 +19,7 @@
 
 import { EuiConfirmModal, EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
-import { createHashHistory, History } from 'history';
+import { History } from 'history';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import {
   AppMountContext,
@@ -28,11 +28,7 @@ import {
   LegacyCoreStart,
   SavedObjectsClientContract,
 } from 'kibana/public';
-import {
-  createKbnUrlStateStorage,
-  IKbnUrlStateStorage,
-  Storage,
-} from '../../../../../../plugins/kibana_utils/public';
+import { IKbnUrlStateStorage, Storage } from '../../../../../../plugins/kibana_utils/public';
 import {
   configureAppAngularModule,
   confirmModalFactory,
@@ -52,10 +48,7 @@ import {
 import { initDashboardApp } from './legacy_app';
 import { IEmbeddableStart } from '../../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
-import {
-  DataPublicPluginStart as NpDataStart,
-  syncQuery,
-} from '../../../../../../plugins/data/public';
+import { DataPublicPluginStart as NpDataStart } from '../../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
 
 export interface RenderDeps {
@@ -73,49 +66,18 @@ export interface RenderDeps {
   embeddables: IEmbeddableStart;
   localStorage: Storage;
   share: SharePluginStart;
-
-  // hack:
-  // renderApp() called each time the app is mounted,
-  // but initialisation of angular module happens only once.
-  // On each app mount, new history and kbnUrlStateStorage instances are created
-  // and we have to make sure, that those new instances will be used in DashboardAppController
-  // and not the ones which where created when angular module was initialised.
-  // This is achieved by having reference to initial object, which angular module was initialised with,
-  // and then by mutating that object on subsequent mounts we can pass new instances down to controller.
-  // If not for this hack, we could end up that global state syncing uses different history instance then app state syncing
-  // Which could cause excessive browser history entries.
-  angularGlobalStateHacks?: AngularGlobalStateHacks;
+  history: History;
+  kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
-interface AngularGlobalStateHacks {
-  hasInheritedGlobalState?: boolean;
-  kbnUrlStateStorage?: IKbnUrlStateStorage;
-  history?: History;
-}
 let angularModuleInstance: IModule | null = null;
-const angularGlobalStateHacks: AngularGlobalStateHacks = {};
 
 export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
-  const history = createHashHistory();
-  const kbnUrlStateStorage = createKbnUrlStateStorage({
-    history,
-    useHash: deps.uiSettings.get('state:storeInSessionStorage'),
-  });
-  const { stop: stopSyncingGlobalState, hasInheritedQueryFromUrl } = syncQuery(
-    deps.npDataStart.query,
-    kbnUrlStateStorage
-  );
-
-  angularGlobalStateHacks.hasInheritedGlobalState = hasInheritedQueryFromUrl;
-  angularGlobalStateHacks.history = history;
-  angularGlobalStateHacks.kbnUrlStateStorage = kbnUrlStateStorage;
-
   if (!angularModuleInstance) {
     angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
     // global routing stuff
     configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart, true);
     // custom routing stuff
-    deps.angularGlobalStateHacks = angularGlobalStateHacks;
     initDashboardApp(angularModuleInstance, deps);
   }
 
@@ -123,7 +85,6 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
 
   return () => {
     $injector.get('$rootScope').$destroy();
-    stopSyncingGlobalState();
   };
 };
 

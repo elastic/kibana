@@ -42,6 +42,7 @@ import {
   Query,
   SavedQuery,
   syncAppFilters,
+  syncQuery,
 } from '../../../../../../plugins/data/public';
 
 import {
@@ -107,20 +108,21 @@ export class DashboardAppController {
     embeddables,
     share,
     dashboardCapabilities,
-    npDataStart: {
-      query: {
-        filterManager,
-        timefilter: { timefilter },
-      },
-    },
+    npDataStart: { query: queryService },
     core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects, http },
-    angularGlobalStateHacks,
+    history,
+    kbnUrlStateStorage,
   }: DashboardAppControllerDependencies) {
-    const history = angularGlobalStateHacks!.history!;
-    const kbnUrlStateStorage = angularGlobalStateHacks!.kbnUrlStateStorage!;
-    const hasInheritedGlobalState = angularGlobalStateHacks!.hasInheritedGlobalState!;
-
+    const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
+    const timefilter = queryService.timefilter.timefilter;
+
+    // starts syncing `_g` portion of url with query services
+    // note: dashboard_state_manager.ts syncs `_a` portion of url
+    const {
+      stop: stopSyncingGlobalStateWithUrl,
+      hasInheritedQueryFromUrl: hasInheritedGlobalStateFromUrl,
+    } = syncQuery(queryService, kbnUrlStateStorage);
 
     let lastReloadRequestTime = 0;
 
@@ -145,7 +147,7 @@ export class DashboardAppController {
 
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
-    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !hasInheritedGlobalState) {
+    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !hasInheritedGlobalStateFromUrl) {
       dashboardStateManager.syncTimefilterWithDashboard(timefilter);
     }
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
@@ -884,6 +886,7 @@ export class DashboardAppController {
 
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
+      stopSyncingGlobalStateWithUrl();
       stopSyncingAppFilters();
       visibleSubscription.unsubscribe();
       $scope.timefilterSubscriptions$.unsubscribe();
