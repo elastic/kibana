@@ -29,3 +29,7 @@ export { Binder } from 'ui/binder';
 export { getFormat, getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
+// @ts-ignore
+export { buildHierarchicalData } from 'ui/agg_response/hierarchical/build_hierarchical_data';
+// @ts-ignore
+export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';

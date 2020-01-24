@@ -20,13 +20,6 @@
 import { npSetup, npStart } from 'ui/new_platform';
 import { PluginInitializerContext } from 'kibana/public';
 
-/* eslint-disable prettier/prettier */
-import {
-  vislibSeriesResponseHandlerProvider,
-  vislibSlicesResponseHandlerProvider,
-  // @ts-ignore
-} from 'ui/vis/response_handlers/vislib';
-
 import { plugin } from '.';
 import {
   VisTypeVislibPluginSetupDependencies,
@@ -41,10 +34,6 @@ const setupPlugins: Readonly<VisTypeVislibPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
   visualizations: visualizationsSetup,
   charts: npSetup.plugins.charts,
-  __LEGACY: {
-    vislibSeriesResponseHandlerProvider,
-    vislibSlicesResponseHandlerProvider,
-  },
 };
 
 const startPlugins: Readonly<VisTypeVislibPluginStartDependencies> = {

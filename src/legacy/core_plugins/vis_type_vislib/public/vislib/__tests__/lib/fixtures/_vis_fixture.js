@@ -20,11 +20,6 @@
 import _ from 'lodash';
 import $ from 'jquery';
 
-import {
-  vislibSeriesResponseHandlerProvider,
-  vislibSlicesResponseHandlerProvider,
-} from 'ui/vis/response_handlers/vislib';
-
 import { Vis } from '../../../vis';
 
 // TODO: Remove when converted to jest mocks
@@ -74,8 +69,6 @@ const getDeps = () => {
     charts: {
       colors,
     },
-    vislibSeriesResponseHandlerProvider,
-    vislibSlicesResponseHandlerProvider,
   };
 };
 

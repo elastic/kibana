@@ -26,7 +26,7 @@ import {
 
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
-import { createVisTypeVislibFn } from './vis_type_vislib_vis_fn';
+import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
 import {
   createHistogramVisTypeDefinition,
@@ -40,28 +40,16 @@ import {
 } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 
-type ResponseHandlerProvider = () => {
-  name: string;
-  handler: (response: any, dimensions: any) => Promise<any>;
-};
-type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies>;
-
-export interface LegacyDependencies {
-  vislibSeriesResponseHandlerProvider: ResponseHandlerProvider;
-  vislibSlicesResponseHandlerProvider: ResponseHandlerProvider;
-}
-
-export type VisTypeVislibDependencies = LegacyDependencies & {
+export interface VisTypeVislibDependencies {
   uiSettings: IUiSettingsClient;
   charts: ChartsPluginSetup;
-};
+}
 
 /** @internal */
 export interface VisTypeVislibPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
-  __LEGACY: LegacyDependencies;
 }
 
 /** @internal */
@@ -70,22 +58,23 @@ export interface VisTypeVislibPluginStartDependencies {
   visualizations: VisualizationsStart;
 }
 
+type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies>;
+
 /** @internal */
 export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
   public async setup(
     core: VisTypeVislibCoreSetup,
-    { expressions, visualizations, charts, __LEGACY }: VisTypeVislibPluginSetupDependencies
+    { expressions, visualizations, charts }: VisTypeVislibPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<VisTypeVislibDependencies> = {
       uiSettings: core.uiSettings,
       charts,
-      ...__LEGACY,
     };
 
-    expressions.registerFunction(createVisTypeVislibFn(visualizationDependencies));
-    expressions.registerFunction(createPieVisFn(visualizationDependencies));
+    expressions.registerFunction(createVisTypeVislibVisFn);
+    expressions.registerFunction(createPieVisFn);
 
     [
       createHistogramVisTypeDefinition,

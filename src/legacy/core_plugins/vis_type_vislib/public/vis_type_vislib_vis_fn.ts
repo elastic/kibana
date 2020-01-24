@@ -24,7 +24,8 @@ import {
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
-import { VisTypeVislibDependencies } from './plugin';
+// @ts-ignore
+import { vislibSeriesResponseHandler } from './vislib/response_handler';
 
 const name = 'vislib';
 
@@ -42,9 +43,9 @@ interface RenderValue {
   visConfig: VisParams;
 }
 
-type Return = Promise<Render<RenderValue>>;
+type Return = Render<RenderValue>;
 
-export const createVisTypeVislibFn = (deps: VisTypeVislibDependencies) => (): ExpressionFunction<
+export const createVisTypeVislibVisFn = (): ExpressionFunction<
   typeof name,
   Context,
   Arguments,
@@ -70,11 +71,9 @@ export const createVisTypeVislibFn = (deps: VisTypeVislibDependencies) => (): Ex
       help: '',
     },
   },
-  async fn(context, args) {
-    const responseHandler = deps.vislibSeriesResponseHandlerProvider().handler;
+  fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig);
-
-    const convertedData = await responseHandler(context, visConfigParams.dimensions);
+    const convertedData = vislibSeriesResponseHandler(context, visConfigParams.dimensions);
 
     return {
       type: 'render',
