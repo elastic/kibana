@@ -108,6 +108,7 @@ export default function(kibana) {
           // to determine what url to use for the app link.
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
           euiIconType: 'dashboardApp',
+          disableSubUrlTracking: true,
           category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
