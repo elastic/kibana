@@ -72,7 +72,6 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   cd ..
 
                   set -e
-                  set +x
 
                   . src/dev/code_coverage/shell_scripts/extract_archives.sh
 
