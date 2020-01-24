@@ -226,17 +226,15 @@ async function fetchIndexPatternStats({
       match_all: {},
     };
   }
-  const viableFields = fields.filter(
-    f => !f.isScript && !f.isAlias && !metaFields.includes(f.name)
-  );
   const scriptedFields = fields.filter(f => f.isScript);
 
   const result = await client.callAsCurrentUser('search', {
     index,
     body: {
       size: SAMPLE_SIZE,
-      _source: viableFields.map(f => f.name),
       query,
+      // _source is required because we are also providing script fields.
+      _source: '*',
       script_fields: scriptedFields.reduce((acc, field) => {
         acc[field.name] = {
           script: {

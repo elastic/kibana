@@ -14,6 +14,7 @@ import {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
+  ruleStatusSavedObjectType,
 } from './saved_objects';
 
 export type SiemPluginSecurity = Pick<SecurityPlugin, 'authc'>;
@@ -57,6 +58,7 @@ export class Plugin {
               noteSavedObjectType,
               pinnedEventSavedObjectType,
               timelineSavedObjectType,
+              ruleStatusSavedObjectType,
             ],
             read: ['config'],
           },
@@ -80,6 +82,7 @@ export class Plugin {
               noteSavedObjectType,
               pinnedEventSavedObjectType,
               timelineSavedObjectType,
+              ruleStatusSavedObjectType,
             ],
           },
           ui: [

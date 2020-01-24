@@ -110,8 +110,8 @@ export class ValidationResults {
 
   public createNoExamplesResult() {
     this._results.push({
-      id: VALIDATION_RESULT.NULL_VALUES,
-      valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID,
+      id: VALIDATION_RESULT.NO_EXAMPLES,
+      valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID,
       message: i18n.translate('xpack.ml.models.jobService.categorization.messages.noDataFound', {
         defaultMessage:
           'No examples for this field could be found. Please ensure the selected date range contains data.',
