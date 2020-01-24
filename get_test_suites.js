@@ -54,6 +54,56 @@ module.exports = async () => {
     },
   });
 
-  console.log(testSuites);
-  fs.writeFileSync('test-suites.json', JSON.stringify(testSuites, null, 4));
+  // {
+  //   oss: {
+  //     configs: [
+  //       {
+  //         file: 'x',
+  //         count: 10,
+  //         suites: [
+  //           {
+  //             file: 'x',
+  //             count: 5,
+  //             tests: [
+  //               {
+  //                 file: 'x',
+  //                 duration: 1,
+  //               },
+  //             ],
+  //           },
+  //         ],
+  //       },
+  //     ];
+  //   }
+  // }
+
+  const final = {};
+  Object.keys(testSuites).forEach(group => {
+    final[group] = {
+      configs: [],
+    };
+    Object.keys(testSuites[group]).forEach(configFile => {
+      const suites = testSuites[group][configFile];
+      const config = {
+        file: configFile,
+        suites: [],
+      };
+      final[group].configs.push(config);
+
+      Object.keys(suites).forEach(index => {
+        const suite = {
+          file: index,
+          tests: suites[index].map(t => ({ tag: t, duration: 1 })),
+        };
+        suite.total = suite.tests.reduce((sum, curr) => sum + curr.duration, 0);
+
+        config.suites.push(suite);
+      });
+
+      config.total = config.suites.reduce((sum, curr) => sum + curr.total, 0);
+    });
+  });
+
+  console.log(final);
+  fs.writeFileSync('test-suites.json', JSON.stringify(final, null, 4));
 };
