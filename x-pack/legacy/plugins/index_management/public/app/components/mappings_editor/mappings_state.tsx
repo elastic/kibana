@@ -32,7 +32,7 @@ export interface Types {
 
 export interface OnUpdateHandlerArg {
   isValid?: boolean;
-  getData: (isValid: boolean) => Mappings;
+  getData: (isValid: boolean) => Mappings | { [key: string]: Mappings };
   validate: () => Promise<boolean>;
 }
 
@@ -135,11 +135,17 @@ export const MappingsState = React.memo(
           const configurationData = nextState.configuration.data.format();
           const templatesData = nextState.templates.data.format();
 
-          return {
+          const mappings = {
             ...configurationData,
             ...templatesData,
             properties: fields,
           };
+
+          return mappingsType === undefined
+            ? mappings
+            : {
+                [mappingsType]: mappings,
+              };
         },
         validate: async () => {
           const configurationFormValidator =
