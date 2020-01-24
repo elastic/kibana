@@ -19,7 +19,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { ExpressionArgAST } from '@kbn/interpreter/target/common/lib/ast';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
@@ -33,7 +32,7 @@ import { IRegistry } from './types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
 import { getType } from '../expression_types';
-import { ExpressionAstExpression } from '../parser';
+import { ExpressionAstExpression, ExpressionAstNode } from '../parser';
 
 export class TypesRegistry implements IRegistry<ExpressionType> {
   constructor(private readonly executor: Executor) {}
@@ -81,8 +80,17 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
 
 export class Executor {
   public readonly state: ExecutorContainer;
+
+  /**
+   * @deprecated
+   */
   public readonly functions: FunctionsRegistry;
+
+  /**
+   * @deprecated
+   */
   public readonly types: TypesRegistry;
+
   public readonly renderers: RenderFunctionsRegistry;
 
   constructor(state?: ExecutorState) {
@@ -139,7 +147,7 @@ export class Executor {
     return this.state.selectors.getContext();
   }
 
-  public async interpret<T>(ast: ExpressionArgAST, input: T): Promise<unknown> {
+  public async interpret<T>(ast: ExpressionAstNode, input: T): Promise<unknown> {
     switch (getType(ast)) {
       case 'expression':
         return await this.interpretExpression(ast as ExpressionAstExpression, input);
