@@ -266,7 +266,11 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchSource.setField('size', getServices().uiSettings.get('discover:sampleSize'));
     searchSource.setField(
       'sort',
-      getSortForSearchSource(this.searchScope.sort, this.searchScope.indexPattern)
+      getSortForSearchSource(
+        this.searchScope.sort,
+        this.searchScope.indexPattern,
+        getServices().uiSettings.get('discover:sort:defaultOrder')
+      )
     );
 
     // Log request to inspector

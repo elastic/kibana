@@ -18,7 +18,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
         <h3>
           <FormattedMessage
             defaultMessage="Y-axes"
-            id="kbnVislibVisTypes.controls.pointSeries.valueAxes.yAxisTitle"
+            id="visTypeVislib.controls.pointSeries.valueAxes.yAxisTitle"
             values={Object {}}
           />
         </h3>
