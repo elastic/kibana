@@ -19,7 +19,7 @@ for x in jest functional mocha; do
 
   COVERAGE_SUMMARY_FILE=target/kibana-coverage/${x}-combined/coverage-summary.json
 
-  node scripts/ingest_coverage.js --verbose --path $COVERAGE_SUMMARY_FILE || echo "### ${COVERAGE_SUMMARY_FILE} not found?"
+  node scripts/ingest_coverage.js --verbose --path $COVERAGE_SUMMARY_FILE
 done
 
 echo "###  Ingesting Code Coverage - Complete"

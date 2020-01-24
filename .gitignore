@@ -47,3 +47,4 @@ npm-debug.log*
 x-pack/legacy/plugins/apm/tsconfig.json
 apm.tsconfig.json
 .nyc_output
+tre.sh
