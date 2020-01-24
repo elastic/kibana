@@ -10,7 +10,6 @@ import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown'
 import { TransactionBreakdownHeader } from './TransactionBreakdownHeader';
 import { TransactionBreakdownKpiList } from './TransactionBreakdownKpiList';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
-import { trackEvent } from '../../../../../../../plugins/infra/public';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 
 const emptyMessage = i18n.translate('xpack.apm.transactionBreakdown.noData', {
@@ -38,9 +37,11 @@ const TransactionBreakdown: React.FC<{
             onToggleClick={() => {
               setShowChart(!showChart);
               if (showChart) {
-                trackEvent({ app: 'apm', name: 'hide_breakdown_chart' });
+                // TODO: Migrate to useTrackMetric
+                // trackEvent({ app: 'apm', name: 'hide_breakdown_chart' });
               } else {
-                trackEvent({ app: 'apm', name: 'show_breakdown_chart' });
+                // TODO: Migrate to useTrackMetric
+                // trackEvent({ app: 'apm', name: 'show_breakdown_chart' });
               }
             }}
           />

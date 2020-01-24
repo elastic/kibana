@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { APMClient } from '../../../../../services/rest/createCallApmApi';
-import { trackEvent } from '../../../../../../../../../plugins/infra/public';
 import { isRumAgentName } from '../../../../../../common/agent_name';
 import {
   getOptionLabel,
@@ -41,7 +40,8 @@ export async function saveConfig({
   agentName?: string;
   toasts: NotificationsStart['toasts'];
 }) {
-  trackEvent({ app: 'apm', name: 'save_agent_configuration' });
+  // TODO: Migrate to useTrackMetric
+  // trackEvent({ app: 'apm', name: 'save_agent_configuration' });
 
   try {
     const settings: Settings = {

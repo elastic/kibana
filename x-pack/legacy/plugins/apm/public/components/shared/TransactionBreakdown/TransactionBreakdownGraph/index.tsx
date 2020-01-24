@@ -14,7 +14,6 @@ import { TransactionLineChart } from '../../charts/TransactionCharts/Transaction
 import { asPercent } from '../../../../utils/formatters';
 import { unit } from '../../../../style/variables';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { trackEvent } from '../../../../../../../../plugins/infra/public';
 
 interface Props {
   timeseries: TimeSeries[];
@@ -30,10 +29,10 @@ const formatTooltipValue = (coordinate: Coordinate) => {
     : NOT_AVAILABLE_LABEL;
 };
 
-const trackHoverBreakdownChart = throttle(
-  () => trackEvent({ app: 'apm', name: 'hover_breakdown_chart' }),
-  60000
-);
+const trackHoverBreakdownChart = throttle(() => {
+  // TODO: Migrate to useTrackMetric
+  // trackEvent({ app: 'apm', name: 'hover_breakdown_chart' })
+}, 60000);
 
 const TransactionBreakdownGraph: React.FC<Props> = props => {
   const { timeseries } = props;
