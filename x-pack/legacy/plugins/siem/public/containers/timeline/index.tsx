@@ -11,6 +11,7 @@ import { Query } from 'react-apollo';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetTimelineQuery,
@@ -23,9 +24,8 @@ import { inputsModel, inputsSelectors, State } from '../../store';
 import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
-
+import { EventType } from '../../store/timeline/model';
 import { timelineQuery } from './index.gql_query';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -45,6 +45,7 @@ export interface TimelineQueryReduxProps {
 
 export interface OwnProps extends QueryTemplateProps {
   children?: (args: TimelineArgs) => React.ReactNode;
+  eventType?: EventType;
   id: string;
   indexPattern?: IIndexPattern;
   indexToAdd?: string[];
@@ -70,6 +71,7 @@ class TimelineQueryComponent extends QueryTemplate<
   public render() {
     const {
       children,
+      eventType = 'raw',
       id,
       indexPattern,
       indexToAdd = [],
@@ -81,10 +83,12 @@ class TimelineQueryComponent extends QueryTemplate<
       sourceId,
       sortField,
     } = this.props;
-    // I needed to do that to avoid test to yell at me since there is no good way yet to mock withKibana
-    const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY) ?? [];
+    const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
     const defaultIndex = isEmpty(indexPattern)
-      ? [...defaultKibanaIndex, ...indexToAdd]
+      ? [
+          ...(['all', 'raw'].includes(eventType) ? defaultKibanaIndex : []),
+          ...(['all', 'signal'].includes(eventType) ? indexToAdd : []),
+        ]
       : indexPattern?.title.split(',') ?? [];
     const variables: GetTimelineQuery.Variables = {
       fieldRequested: fields,

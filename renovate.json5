@@ -282,6 +282,14 @@
         ],
       },
       {
+        groupSlug: 'flot',
+        groupName: 'flot related packages',
+        packageNames: [
+          'flot',
+          '@types/flot',
+        ],
+      },
+      {
         groupSlug: 'getopts',
         groupName: 'getopts related packages',
         packageNames: [
@@ -655,6 +663,14 @@
         packageNames: [
           'nodemailer',
           '@types/nodemailer',
+        ],
+      },
+      {
+        groupSlug: 'numeral',
+        groupName: 'numeral related packages',
+        packageNames: [
+          'numeral',
+          '@types/numeral',
         ],
       },
       {

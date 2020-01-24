@@ -170,6 +170,32 @@ describe('filter_manager', () => {
       expect(fetchStub).toBeCalledTimes(0);
       expect(updateStub).toBeCalledTimes(1);
     });
+
+    test('should merge multiple conflicting app filters', async function() {
+      filterManager.addFilters(readyFilters, true);
+      const appFilter1 = _.cloneDeep(readyFilters[1]);
+      appFilter1.meta.negate = true;
+      appFilter1.$state = {
+        store: esFilters.FilterStateStore.APP_STATE,
+      };
+      const appFilter2 = _.cloneDeep(readyFilters[2]);
+      appFilter2.meta.negate = true;
+      appFilter2.$state = {
+        store: esFilters.FilterStateStore.APP_STATE,
+      };
+
+      const globalFilters = filterManager.getFilters();
+      filterManager.setFilters([...globalFilters, appFilter1, appFilter2]);
+
+      // global filters are taking precedence over same app filters when setting
+      const res = filterManager.getFilters();
+      expect(res).toHaveLength(3);
+      expect(
+        res.filter(function(filter) {
+          return filter.$state && filter.$state.store === esFilters.FilterStateStore.GLOBAL_STATE;
+        }).length
+      ).toBe(3);
+    });
   });
 
   describe('add filters', () => {

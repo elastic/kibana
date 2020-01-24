@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import ngMock from 'ng_mock';
 import _ from 'lodash';
 import d3 from 'd3';
-
+import $ from 'jquery';
 import expect from '@kbn/expect';
-import 'ui/persisted_state';
 
 // Data
 import series from '../lib/fixtures/mock_data/date_histogram/_series';
@@ -31,11 +29,11 @@ import seriesNeg from '../lib/fixtures/mock_data/date_histogram/_series_neg';
 import termsColumns from '../lib/fixtures/mock_data/terms/_columns';
 import histogramRows from '../lib/fixtures/mock_data/histogram/_rows';
 import stackedSeries from '../lib/fixtures/mock_data/date_histogram/_stacked_series';
+
 import { seriesMonthlyInterval } from '../lib/fixtures/mock_data/date_histogram/_series_monthly_interval';
 import { rowsSeriesWithHoles } from '../lib/fixtures/mock_data/date_histogram/_rows_series_with_holes';
 import rowsWithZeros from '../lib/fixtures/mock_data/date_histogram/_rows';
-import $ from 'jquery';
-import getFixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+import { getVis, getMockUiState } from '../lib/fixtures/_vis_fixture';
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [
@@ -54,7 +52,7 @@ dataTypesArray.forEach(function(dataType) {
 
   describe('Vislib Column Chart Test Suite for ' + name + ' Data', function() {
     let vis;
-    let persistedState;
+    let mockUiState;
     const visLibParams = {
       type: 'histogram',
       addLegend: true,
@@ -67,16 +65,12 @@ dataTypesArray.forEach(function(dataType) {
       },
     };
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(
-      ngMock.inject(function(Private, $injector) {
-        const getVis = getFixturesVislibVisFixtureProvider(Private);
-        vis = getVis(visLibParams);
-        persistedState = new ($injector.get('PersistedState'))();
-        vis.on('brush', _.noop);
-        vis.render(data, persistedState);
-      })
-    );
+    beforeEach(() => {
+      vis = getVis(visLibParams);
+      mockUiState = getMockUiState();
+      vis.on('brush', _.noop);
+      vis.render(data, mockUiState);
+    });
 
     afterEach(function() {
       vis.destroy();
@@ -200,7 +194,7 @@ dataTypesArray.forEach(function(dataType) {
     describe('defaultYExtents is true', function() {
       beforeEach(function() {
         vis.visConfigArgs.defaultYExtents = true;
-        vis.render(data, persistedState);
+        vis.render(data, mockUiState);
       });
 
       it('should return yAxis extents equal to data extents', function() {
@@ -219,7 +213,7 @@ dataTypesArray.forEach(function(dataType) {
         beforeEach(function() {
           vis.visConfigArgs.defaultYExtents = true;
           vis.visConfigArgs.boundsMargin = boundsMarginValue;
-          vis.render(data, persistedState);
+          vis.render(data, mockUiState);
         });
 
         it('should return yAxis extents equal to data extents with boundsMargin', function() {
@@ -247,7 +241,7 @@ dataTypesArray.forEach(function(dataType) {
 
 describe('stackData method - data set with zeros in percentage mode', function() {
   let vis;
-  let persistedState;
+  let mockUiState;
   const visLibParams = {
     type: 'histogram',
     addLegend: true,
@@ -256,22 +250,18 @@ describe('stackData method - data set with zeros in percentage mode', function()
     zeroFill: true,
   };
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function(Private, $injector) {
-      const getVis = getFixturesVislibVisFixtureProvider(Private);
-      vis = getVis(visLibParams);
-      persistedState = new ($injector.get('PersistedState'))();
-      vis.on('brush', _.noop);
-    })
-  );
+  beforeEach(() => {
+    vis = getVis(visLibParams);
+    mockUiState = getMockUiState();
+    vis.on('brush', _.noop);
+  });
 
   afterEach(function() {
     vis.destroy();
   });
 
   it('should not mutate the injected zeros', function() {
-    vis.render(seriesMonthlyInterval, persistedState);
+    vis.render(seriesMonthlyInterval, mockUiState);
 
     expect(vis.handler.charts).to.have.length(1);
     const chart = vis.handler.charts[0];
@@ -284,7 +274,7 @@ describe('stackData method - data set with zeros in percentage mode', function()
   });
 
   it('should not mutate zeros that exist in the data', function() {
-    vis.render(rowsWithZeros, persistedState);
+    vis.render(rowsWithZeros, mockUiState);
 
     expect(vis.handler.charts).to.have.length(2);
     const chart = vis.handler.charts[0];
@@ -298,7 +288,7 @@ describe('stackData method - data set with zeros in percentage mode', function()
 
 describe('datumWidth - split chart data set with holes', function() {
   let vis;
-  let persistedState;
+  let mockUiState;
   const visLibParams = {
     type: 'histogram',
     addLegend: true,
@@ -307,16 +297,12 @@ describe('datumWidth - split chart data set with holes', function() {
     zeroFill: true,
   };
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function(Private, $injector) {
-      const getVis = getFixturesVislibVisFixtureProvider(Private);
-      vis = getVis(visLibParams);
-      persistedState = new ($injector.get('PersistedState'))();
-      vis.on('brush', _.noop);
-      vis.render(rowsSeriesWithHoles, persistedState);
-    })
-  );
+  beforeEach(() => {
+    vis = getVis(visLibParams);
+    mockUiState = getMockUiState();
+    vis.on('brush', _.noop);
+    vis.render(rowsSeriesWithHoles, mockUiState);
+  });
 
   afterEach(function() {
     vis.destroy();
@@ -336,7 +322,7 @@ describe('datumWidth - split chart data set with holes', function() {
 
 describe('datumWidth - monthly interval', function() {
   let vis;
-  let persistedState;
+  let mockUiState;
   const visLibParams = {
     type: 'histogram',
     addLegend: true,
@@ -345,16 +331,12 @@ describe('datumWidth - monthly interval', function() {
     zeroFill: true,
   };
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function(Private, $injector) {
-      const getVis = getFixturesVislibVisFixtureProvider(Private);
-      vis = getVis(visLibParams);
-      persistedState = new ($injector.get('PersistedState'))();
-      vis.on('brush', _.noop);
-      vis.render(seriesMonthlyInterval, persistedState);
-    })
-  );
+  beforeEach(() => {
+    vis = getVis(visLibParams);
+    mockUiState = getMockUiState();
+    vis.on('brush', _.noop);
+    vis.render(seriesMonthlyInterval, mockUiState);
+  });
 
   afterEach(function() {
     vis.destroy();

@@ -12,6 +12,10 @@ export const ALERTS_COUNT_BY = (groupByField: string) =>
     defaultMessage: 'Alerts count by {groupByField}',
   });
 
+export const ALERTS_GRAPH_TITLE = i18n.translate('xpack.siem.overview.alertsGraphTitle', {
+  defaultMessage: 'Alert detection frequency',
+});
+
 export const EVENTS_COUNT_BY = (groupByField: string) =>
   i18n.translate('xpack.siem.overview.eventsCountByTitle', {
     values: { groupByField },
@@ -28,15 +32,6 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.overview.pageTitle', {
 
 export const PAGE_SUBTITLE = i18n.translate('xpack.siem.overview.pageSubtitle', {
   defaultMessage: 'Security Information & Event Management with the Elastic Stack',
-});
-
-export const PAGE_BADGE_LABEL = i18n.translate('xpack.siem.overview.pageBadgeLabel', {
-  defaultMessage: 'Beta',
-});
-
-export const PAGE_BADGE_TOOLTIP = i18n.translate('xpack.siem.overview.pageBadgeTooltip', {
-  defaultMessage:
-    'SIEM is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
 });
 
 export const RECENT_TIMELINES = i18n.translate('xpack.siem.overview.recentTimelinesSidebarTitle', {

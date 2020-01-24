@@ -22,7 +22,7 @@ import { act } from 'react-dom/test-utils';
 import { mount, shallow, ReactWrapper } from 'enzyme';
 import { EuiComboBoxProps, EuiComboBox } from '@elastic/eui';
 import { Field } from '../../../../../../../plugins/data/public';
-import { ComboBoxGroupedOptions, SubAggParamsProp } from '..';
+import { ComboBoxGroupedOptions } from '..';
 import { FieldParamEditor, FieldParamEditorProps } from './field';
 import { AggConfig, VisState } from '../../..';
 
@@ -69,6 +69,7 @@ describe('FieldParamEditor component', () => {
         editorComponent: () => null,
         onChange,
       } as any,
+      formIsTouched: false,
       value: undefined,
       editorConfig: {},
       indexedFields,
@@ -78,7 +79,6 @@ describe('FieldParamEditor component', () => {
       setTouched,
       state: {} as VisState,
       metricAggs: [] as AggConfig[],
-      subAggParams: {} as SubAggParamsProp,
     };
   });
 
@@ -128,15 +128,6 @@ describe('FieldParamEditor component', () => {
     mount(<FieldParamEditor {...defaultProps} />);
 
     expect(setValidity).toHaveBeenCalledWith(false);
-  });
-
-  it('should call setTouched when the control is invalid', () => {
-    defaultProps.value = field;
-    const comp = mount(<FieldParamEditor {...defaultProps} />);
-    expect(setTouched).not.toHaveBeenCalled();
-    comp.setProps({ customError: 'customError' });
-
-    expect(setTouched).toHaveBeenCalled();
   });
 
   it('should call onChange when a field selected', () => {

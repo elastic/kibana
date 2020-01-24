@@ -151,11 +151,25 @@ export const sendSignalToTimelineAction = async ({
       updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
     }
   } else {
-    const query = `_id: ${ecsData._id}`;
     createTimeline({
       from,
       timeline: {
         ...timelineDefaults,
+        dataProviders: [
+          {
+            and: [],
+            id: `send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-signal-id-${ecsData._id}`,
+            name: ecsData._id,
+            enabled: true,
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field: '_id',
+              value: ecsData._id,
+              operator: ':',
+            },
+          },
+        ],
         id: 'timeline-1',
         dateRange: {
           start: from,
@@ -166,13 +180,13 @@ export const sendSignalToTimelineAction = async ({
           filterQuery: {
             kuery: {
               kind: 'kuery',
-              expression: query,
+              expression: '',
             },
-            serializedQuery: convertKueryToElasticSearchQuery(query),
+            serializedQuery: '',
           },
           filterQueryDraft: {
             kind: 'kuery',
-            expression: query,
+            expression: '',
           },
         },
       },
