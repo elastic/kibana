@@ -120,7 +120,10 @@ function DefaultEditorAggGroup({
         });
       });
     }
-  }, [aggsState, formIsTouched, isAllAggsTouched]);
+    // adding all of the values to the deps array cause a circular re-render
+    // the logic should be rewised
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formIsTouched]);
 
   useEffect(() => {
     setValidity(`aggGroup__${groupName}`, isGroupValid);
