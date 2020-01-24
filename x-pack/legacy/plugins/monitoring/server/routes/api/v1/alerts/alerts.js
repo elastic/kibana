@@ -10,14 +10,9 @@ import {
   ALERT_TYPE_LICENSE_EXPIRATION,
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
 } from '../../../../../common/constants';
-import { getDateFormat } from '../../../../lib/get_date_format';
-import { getTimezone } from '../../../../lib/get_timezone';
 
 async function createAlerts(req, alertsClient, { selectedEmailActionId }) {
   const createdAlerts = [];
-  const dateFormat = await getDateFormat(req);
-  const timezone = await getTimezone(req);
-  const alertParams = { dateFormat, timezone };
 
   // Create alerts
   const ALERT_TYPES = {
@@ -51,7 +46,6 @@ async function createAlerts(req, alertsClient, { selectedEmailActionId }) {
       data: {
         enabled: true,
         alertTypeId,
-        params: alertParams,
         ...ALERT_TYPES[alertTypeId],
       },
     });

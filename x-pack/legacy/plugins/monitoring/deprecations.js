@@ -15,9 +15,8 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
  * major version!
  * @return {Array} array of rename operations and callback function for rename logging
  */
-export const deprecations = ({ unused }) => {
+export const deprecations = () => {
   return [
-    unused(CLUSTER_ALERTS_ADDRESS_CONFIG_KEY),
     (settings, log) => {
       const clusterAlertsEnabled = get(settings, 'cluster_alerts.enabled');
       const emailNotificationsEnabled =

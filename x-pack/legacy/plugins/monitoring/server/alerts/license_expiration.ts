@@ -20,7 +20,6 @@ import {
   AlertClusterState,
   AlertClusterUiState,
   LicenseExpirationAlertExecutorOptions,
-  AlertParams,
 } from './types';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { executeActions, getUiMessage } from '../lib/alerts/license_expiration.lib';
@@ -55,7 +54,6 @@ export const getLicenseExpiration = (
       logger.debug(
         `Firing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
       );
-      const { dateFormat, timezone } = params as AlertParams;
 
       const callCluster = await getCallCluster(services);
 
@@ -81,12 +79,13 @@ export const getLicenseExpiration = (
       const uiSettings = server.newPlatform.__internals.uiSettings.asScopedToClient(
         services.savedObjectsClient
       );
+      const dateFormat: string = await uiSettings.get<string>('dateFormat');
+      const timezone: string = await uiSettings.get<string>('dateFormat:tz');
       const emailAddress = await fetchDefaultEmailAddress(uiSettings);
       if (!emailAddress) {
         // TODO: we can do more here
         logger.warn(
-          `Unable to send email for ${ALERT_TYPE_LICENSE_EXPIRATION} because there is no email configured.` +
-            ` Please configure 'xpack.monitoring.cluster_alerts.email_notifications.email_address'.`
+          `Unable to send email for ${ALERT_TYPE_LICENSE_EXPIRATION} because there is no email configured.`
         );
         return;
       }
