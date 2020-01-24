@@ -26,7 +26,6 @@ import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabil
 
 import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
-import { AlertDetailsRoute } from './sections/alert_details/components/alert_details_route';
 
 interface MatchParams {
   section: Section;
