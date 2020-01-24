@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { bisector } from 'd3-array';
-import sortBy from 'lodash/fp/sortBy';
 import debounce from 'lodash/fp/debounce';
 import { VariableSizeList } from 'react-window';
 import { LogTextStreamLoadingItemView } from './loading_item_view';
@@ -15,7 +13,6 @@ import { useLogEntryMessageColumnWidthContext } from './log_entry_message_column
 import { BoundingBoxes1D } from './bounding_boxes_1d';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
-import { Rect } from './measurable_item_view';
 
 const DEFAULT_ITEM_HEIGHT = 25;
 const ITEM_PADDING = 4;
@@ -51,25 +48,29 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
   onScrollLockChange,
   isStreaming,
 }) => {
+  const maxDisplayedItems = Math.ceil(height / DEFAULT_ITEM_HEIGHT);
+
   const windowRef = useRef<VariableSizeList>(null);
-  const outerRef = useRef(null);
   const {
     messageColumnWidth,
     characterDimensions,
     getLogEntryHeightFromMessageContent,
     recalculateColumnSize,
   } = useLogEntryMessageColumnWidthContext();
-
+  console.log(messageColumnWidth);
   const [scrollTop, setScrollTop] = useState(0);
 
   const [isScrollLocked, setIsScrollLocked] = useState(false);
   useEffect(() => onScrollLockChange(isScrollLocked), [isScrollLocked]);
   useEffect(() => setIsScrollLocked(false), [isStreaming]);
-
   // Prevent FOUC before initial column width is rendered
   const [hasInitializedColumnWidth, setHasInitializedColumnWidth] = useState(false);
 
-  const childrenArray = useMemo(() => React.Children.toArray(children), [children]);
+  const childrenArray = useMemo(() => {
+    const arr = React.Children.toArray(children);
+    if (isStreaming && !isScrollLocked) return arr.slice(-maxDisplayedItems);
+    return arr;
+  }, [children, isStreaming, isScrollLocked]);
 
   const targetChild = useMemo(
     () =>
@@ -217,13 +218,13 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
         width={width}
         onScroll={handleScroll}
         ref={windowRef}
-        outerRef={outerRef}
         isHidden={!hasInitializedColumnWidth}
         itemCount={childrenArray.length}
         itemSize={index => childHeights.pxHeights[index]}
         onItemsRendered={onItemsRendered}
         estimatedItemSize={DEFAULT_ITEM_HEIGHT * 4}
-        overscanCount={4}
+        overscanCount={isStreaming && !isScrollLocked ? 9999 : 4}
+        fixStreamToBottom={isStreaming && !isScrollLocked}
       >
         {({ index, style }) => <div style={style}>{childrenArray[index]}</div>}
       </ScrollPanelWrapper>
@@ -267,4 +268,14 @@ const ScrollPanelWrapper = euiStyled(VariableSizeList)<ScrollPanelWrapperProps>`
   & * {
     overflow-anchor: none;
   }
+  ${props =>
+    props.fixStreamToBottom
+      ? `
+     & > div {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+    }
+  `
+      : ''}
 `;
