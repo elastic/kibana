@@ -5,7 +5,6 @@
  */
 
 import { callWithRequestFactory } from '../client/call_with_request_factory';
-import { wrapError } from '../client/errors';
 import { importDataProvider } from '../models/import_data';
 import { updateTelemetry } from '../telemetry/telemetry';
 import { MAX_BYTES } from '../../common/constants/file_import';
@@ -18,107 +17,124 @@ function importData({ callWithRequest, id, index, settings, mappings, ingestPipe
   return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
 }
 
-export function getImportRouteHandler(elasticsearchPlugin, getSavedObjectsRepository) {
-  return async (con, req, res) => {
+const queryValidation = (data, { ok, badRequest }) => {
+  const validQuery = schema
+    .maybe(
+      schema.object({
+        id: schema.nullable(schema.string()),
+      })
+    )
+    .validate(data);
 
-    const requestObj = {
-      query: req.query,
-      body: req.body,
-      headers: req.headers,
-    };
+  return validQuery ? ok(validQuery) : badRequest('Invalid query', ['query']);
+};
 
-    // `id` being `undefined` tells us that this is a new import due to create a new index.
-    // follow-up import calls to just add additional data will include the `id` of the created
-    // index, we'll ignore those and don't increment the counter.
-    const { id } = requestObj.query;
-    if (!id) {
+const bodyValidation = (data, { ok, badRequest }) => {
+  const validBody = schema
+    .object(
+      {
+        app: schema.maybe(schema.string()),
+        index: schema.string(),
+        fileType: schema.string(),
+        ingestPipeline: schema.maybe(
+          schema.object(
+            {},
+            {
+              defaultValue: {},
+              allowUnknowns: true,
+            }
+          )
+        ),
+      },
+      { allowUnknowns: true }
+    )
+    .validate(data);
+
+  return validBody ? ok(validBody) : badRequest('Invalid payload', ['body']);
+};
+
+const idConditionalValidation = (body, boolHasId) => {
+  const validConditionalBodyParams = schema
+    .object(
+      {
+        data: boolHasId
+          ? schema.arrayOf(schema.object({}, { allowUnknowns: true }), { minSize: 1 })
+          : schema.any(),
+        settings: boolHasId
+          ? schema.any()
+          : schema.object(
+              {},
+              {
+                defaultValue: {
+                  number_of_shards: 1,
+                },
+                allowUnknowns: true,
+              }
+            ),
+        mappings: boolHasId
+          ? schema.any()
+          : schema.object(
+              {},
+              {
+                defaultValue: {},
+                allowUnknowns: true,
+              }
+            ),
+      },
+      { allowUnknowns: true }
+    )
+    .validate(body);
+
+  return validConditionalBodyParams;
+};
+
+const finishValidationAndProcessReq = (elasticsearchPlugin, getSavedObjectsRepository) => {
+  return async (con, req, { ok, badRequest }) => {
+    // Validate with or without id
+    const {
+      query: { id },
+      body,
+    } = req;
+    const boolHasId = !!id;
+    const validIdReqData = idConditionalValidation(body, boolHasId);
+
+    // If no id's been established then this is a new index, update telemetry
+    if (!boolHasId) {
       await updateTelemetry({ elasticsearchPlugin, getSavedObjectsRepository });
     }
 
-    const requestContentWithDefaults = {
-      id,
-      callWithRequest: callWithRequestFactory(elasticsearchPlugin, requestObj),
-      ...requestObj.body,
-    };
-    const importDataResult = await importData(requestContentWithDefaults).catch(wrapError);
-    return res.ok({
-      body: importDataResult
-    });
+    try {
+      const processedReq = await importData({
+        id,
+        callWithRequest: callWithRequestFactory(elasticsearchPlugin, validIdReqData),
+        ...validIdReqData,
+      });
+      return processedReq.success
+        ? ok({ body: processedReq })
+        : badRequest(`Error processing request: ${processedReq.error.message}`, ['body']);
+    } catch (e) {
+      return badRequest(`Invalid use of request/id. Error: ${e.message}`, ['id']);
+    }
   };
-}
-
-export const validateBodySchema = (data, boolHasId) => {
-  const bodySchema = schema.object({
-      app: schema.maybe(schema.string()),
-      index: schema.string(),
-      data: boolHasId
-        ? schema.arrayOf(
-          schema.object(
-            {},
-            { allowUnknowns: true }
-          ),
-          { minSize: 1 }
-        )
-        : schema.any(),
-      fileType: schema.string(),
-      ingestPipeline: schema.maybe(schema.object(
-        {},
-        {
-          defaultValue: {},
-          allowUnknowns: true
-        }
-      )),
-      settings: boolHasId
-        ? schema.any()
-        : schema.object(
-          {},
-          {
-            defaultValue: {
-              number_of_shards: 1
-            },
-            allowUnknowns: true
-          }
-        ),
-      mappings: boolHasId
-        ? schema.any()
-        : schema.object(
-          {},
-          {
-            defaultValue: {},
-            allowUnknowns: true
-          }
-        ),
-    },
-    { allowUnknowns: true }
-  );
-  return bodySchema.validate(data);
 };
 
 export const initRoutes = (router, esPlugin, getSavedObjectsRepository) => {
-  let boolHasId = false;
-  router.post({
+  const options = {
+    body: {
+      maxBytes: MAX_BYTES,
+      accepts: ['application/json'],
+    },
+  };
+
+  router.post(
+    {
       path: `${IMPORT_ROUTE}{id?}`,
       validate: {
-        query: (data, { ok, badRequest }) => {
-          const validQuery = schema.maybe(schema.object({id: schema.nullable(schema.string())})).validate(data);
-          boolHasId = !!data.id;
-          return validQuery
-            ? ok(validQuery)
-            : badRequest('Invalid query', ['query']);
-        },
-        body: (data, { ok, badRequest }) => {
-          return validateBodySchema(data, boolHasId)
-            ? ok(data)
-            : badRequest('Invalid payload', ['body']);
-        },
+        query: queryValidation,
+        body: bodyValidation,
       },
-      options: {
-        body: {
-          maxBytes: MAX_BYTES,
-          accepts: ['application/json'],
-        },
-      },
+      options,
     },
-    getImportRouteHandler(esPlugin, getSavedObjectsRepository)
+    finishValidationAndProcessReq(esPlugin, getSavedObjectsRepository)
   );
 };
