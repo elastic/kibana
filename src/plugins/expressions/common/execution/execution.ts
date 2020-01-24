@@ -26,8 +26,8 @@ import { isExpressionValueError } from '../expression_types/specs/error';
 import { ExpressionAstExpression, ExpressionAstFunction } from '../parser';
 import { ExecutionContext } from './types';
 import { getType } from '../expression_types';
-import { AnyExpressionFunctionDefinition, ArgumentType } from '../expression_functions';
-import { getByAlias } from './get_by_alias';
+import { ArgumentType, ExpressionFunction } from '../expression_functions';
+import { getByAlias } from '../util/get_by_alias';
 import { parse } from '../parser/parse';
 
 export interface ExecutionParams {
@@ -84,7 +84,7 @@ export class Execution {
    * because in legacy interpreter it was set to `null` by default.
    */
   public start(input: unknown = null) {
-    if (!this.hasStarted) throw new Error('Execution already started.');
+    if (this.hasStarted) throw new Error('Execution already started.');
     this.hasStarted = true;
 
     this.input = input;
@@ -118,7 +118,7 @@ export class Execution {
   }
 
   async invokeFunction(
-    fnDef: AnyExpressionFunctionDefinition,
+    fnDef: ExpressionFunction,
     input: unknown,
     args: Record<string, unknown>
   ): Promise<any> {
@@ -151,11 +151,7 @@ export class Execution {
   }
 
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
-  async resolveArgs(
-    fnDef: AnyExpressionFunctionDefinition,
-    input: unknown,
-    argAsts: any
-  ): Promise<any> {
+  async resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Promise<any> {
     const argDefs = fnDef.args;
 
     // Use the non-alias name from the argument definition

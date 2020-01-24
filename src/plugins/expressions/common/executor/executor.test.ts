@@ -141,6 +141,15 @@ describe('Executor', () => {
         expect(execution).toBeInstanceOf(Execution);
         expect(execution.params.ast.chain[0].function).toBe('foo');
       });
+
+      test('Execution inherits context from Executor', () => {
+        const executor = new Executor();
+        const foo = {};
+        executor.extendContext({ foo });
+        const execution = executor.createExecution('foo bar="baz"');
+
+        expect((execution.context as any).foo).toBe(foo);
+      });
     });
   });
 });

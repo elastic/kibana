@@ -17,19 +17,18 @@
  * under the License.
  */
 
-import { ExpressionFunction } from '../expression_functions';
-
 /**
  * This is used for looking up function/argument definitions. It looks through
  * the given object/array for a case-insensitive match, which could be either the
  * `name` itself, or something under the `aliases` property.
  */
-export function getByAlias(
-  functions: Record<string, ExpressionFunction>,
-  functionName: string
-): ExpressionFunction | undefined {
-  const lowerCaseName = functionName.toLowerCase();
-  return Object.values(functions).find(({ name, aliases }) => {
+export function getByAlias<T extends { name?: string; aliases?: string[] }>(
+  node: Record<string, T>,
+  nodeName: string
+): T | undefined {
+  const lowerCaseName = nodeName.toLowerCase();
+  return Object.values(node).find(({ name, aliases }) => {
+    if (!name) return false;
     if (name.toLowerCase() === lowerCaseName) return true;
     return (aliases || []).some(alias => {
       return alias.toLowerCase() === lowerCaseName;
