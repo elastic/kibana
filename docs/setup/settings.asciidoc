@@ -86,8 +86,8 @@ Elasticsearch nodes immediately following a connection fault.
 `elasticsearch.ssl.alwaysPresentCertificate:`:: *Default: false* Controls {kib}'s behavior in regard to presenting a client certificate when
 requested by {es}. This setting applies to all outbound SSL/TLS connections to {es}, including requests that are proxied for end users.
 +
-WARNING: Setting this to `true` when {es} is using certificates to authenticate end users with a PKI realm can lead to proxied requests for
-end users being executed as the identity tied to the {kib} server.
+WARNING: If {es} uses certificates to authenticate end users with a PKI realm and `elasticsearch.ssl.alwaysPresentCertificate` is `true`,
+proxied requests may be executed as the identity that is tied to the {kib} server.
 
 `elasticsearch.ssl.certificate:` and `elasticsearch.ssl.key:`:: Paths to a PEM-encoded X.509 client certificate and its corresponding
 private key. These are used by {kib} to authenticate itself when making outbound SSL/TLS connections to {es}. For this setting to take
@@ -363,7 +363,7 @@ NOTE: These settings cannot be used in conjunction with `server.ssl.keystore.pat
 
 `server.ssl.certificateAuthorities:`:: Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates which make up a
 trusted certificate chain for {kib}. This chain is used by {kib} to establish trust when receiving inbound SSL/TLS connections from end
-users. This chain is also used by {kib} to verify client certificates from end users when PKI authentication is enabled.
+users. If PKI authentication is enabled, this chain is also used by {kib} to verify client certificates from end users.
 +
 In addition to this setting, trusted certificates may be specified via `server.ssl.keystore.path` and/or `server.ssl.truststore.path`.
 
@@ -400,7 +400,7 @@ keystore has no password, leave this unset. If the keystore has an empty passwor
 
 `server.ssl.truststore.path:`:: Path to a PKCS#12 trust store that contains one or more X.509 certificate authority (CA) certificates which
 make up a trusted certificate chain for {kib}. This chain is used by {kib} to establish trust when receiving inbound SSL/TLS connections
-from end users. This chain is also used by {kib} to verify client certificates from end users when PKI authentication is enabled.
+from end users. If PKI authentication is enabled, this chain is also used by {kib} to verify client certificates from end users.
 +
 In addition to this setting, trusted certificates may be specified via `server.ssl.certificateAuthorities` and/or
 `server.ssl.keystore.path`.

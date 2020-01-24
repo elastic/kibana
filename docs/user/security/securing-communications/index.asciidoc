@@ -5,7 +5,7 @@
 ++++
 
 Secure Sockets Layer (SSL) and Transport Layer Security (TLS) provide encryption for data-in-transit. While these terms are often used
-interchangeably, {kib} only supports TLS, which supersedes the old SSL protocols.
+interchangeably, {kib} supports only TLS, which supersedes the old SSL protocols.
 
 Browsers send traffic to {kib} and {kib} sends traffic to {es}. These communication channels are configured separately to use TLS.
 
@@ -18,7 +18,7 @@ supports certificates and private keys in PEM or PKCS#12 format.
 
 NOTE: You do not need to enable {security-features} for this type of encryption.
 
-. *Obtain a server certificate and private key for {kib}.*
+. Obtain a server certificate and private key for {kib}.
 +
 --
 {kib} will need to use this "server certificate" and corresponding private key when receiving connections from web browsers.
@@ -45,7 +45,7 @@ NOTE: You will need to use a certificate authority (CA) to sign your CSR to obta
 will be verified by web browsers that are configured to trust the CA.
 --
 
-. *Configure {kib} to access the server certificate and private key.*
+. Configure {kib} to access the server certificate and private key.
 
 .. If your server certificate and private key are in PEM format:
 +
@@ -90,7 +90,7 @@ TIP: If your PKCS#12 file isn't protected with a password, depending on how it w
 +
 For more information about settings for certificates and keys, see <<settings,{kib} configuration settings>>.
 
-. *Configure {kib} to enable TLS for inbound connections.*
+. Configure {kib} to enable TLS for inbound connections.
 +
 --
 Specify that TLS is used in `kibana.yml`:
@@ -101,7 +101,7 @@ server.ssl.enabled: true
 --------------------------------------------------------------------------------
 --
 
-. *Restart {kib}.*
+. Restart {kib}.
 
 After making these changes, you must always access {kib} via HTTPS. For example, https://<your_kibana_host>.com.
 
@@ -111,14 +111,14 @@ After making these changes, you must always access {kib} via HTTPS. For example,
 NOTE: To perform this step, you must {ref}/configuring-security.html[enable the {es} {security-features}] or you must have a proxy that
 provides an HTTPS endpoint for {es}.
 
-. *{ref}/configuring-tls.html#tls-http[Enable TLS on the HTTP layer in {es}].*
+. {ref}/configuring-tls.html#tls-http[Enable TLS on the HTTP layer in {es}].
 
-. *Obtain the certificate authority (CA) certificate chain for {es}.*
+. Obtain the certificate authority (CA) certificate chain for {es}.
 +
 --
 {kib} needs the appropriate CA certificate chain to properly establish trust when connecting to {es}.
 
-If you followed the {es} documentation for {ref}/configuring-tls.html#node-certificates[Generating Node Certificates], then you likely have
+If you followed the {es} documentation for {ref}/configuring-tls.html#node-certificates[generating node certificates], then you likely have
 a PKCS#12 file for each your {es} nodes. You can extract the CA certificate chain from one of these files. For example:
 
 [source,sh]
@@ -129,7 +129,7 @@ openssl pkcs12 -in elastic-certificates.p12 -cacerts -nokeys -out elasticsearch-
 This will produce a PEM-formatted file named `elasticsearch-ca.crt` that contains all CA certificates from the PKCS#12 file.
 --
 
-. *Configure {kib} to trust the {es} CA certificate chain for the HTTP layer.*
+. Configure {kib} to trust the {es} CA certificate chain for the HTTP layer.
 
 .. If your CA certificate chain is in PEM format:
 +
@@ -169,7 +169,7 @@ TIP: If your PKCS#12 file isn't protected with a password, depending on how it w
 +
 For more information about settings for certificates and keys, see <<settings,{kib} configuration settings>>.
 
-. *Configure {kib} to enable TLS for outbound connections to {es}.*
+. Configure {kib} to enable TLS for outbound connections to {es}.
 +
 --
 Specify the HTTPS URL for {es} in `kibana.yml`:
