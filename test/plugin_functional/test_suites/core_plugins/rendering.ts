@@ -22,43 +22,55 @@ import expect from '@kbn/expect';
 import '../../plugins/core_provider_plugin/types';
 import { PluginFunctionalProviderContext } from '../../services';
 
+declare global {
+  interface Window {
+    /**
+     * We use this global variable to track page history changes to ensure that
+     * navigation is done without causing a full page reload.
+     */
+    __RENDERING_SESSION__: string[];
+  }
+}
+
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
+  const appsMenu = getService('appsMenu');
   const browser = getService('browser');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
 
-  function navigate(path: string) {
-    return browser.get(`${PageObjects.common.getHostPort()}${path}`);
-  }
-
-  function getLegacyMode() {
+  const navigateTo = (path: string) =>
+    browser.navigateTo(`${PageObjects.common.getHostPort()}${path}`);
+  const navigateToApp = async (title: string) => {
+    await appsMenu.clickLink(title);
     return browser.execute(() => {
+      if (!('__RENDERING_SESSION__' in window)) {
+        window.__RENDERING_SESSION__ = [];
+      }
+
+      window.__RENDERING_SESSION__.push(window.location.pathname);
+    });
+  };
+  const getLegacyMode = () =>
+    browser.execute(() => {
       return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
         .legacyMode;
     });
-  }
-
-  function getUserSettings() {
-    return browser.execute(() => {
+  const getUserSettings = () =>
+    browser.execute(() => {
       return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
         .legacyMetadata.uiSettings.user;
     });
-  }
-
-  async function init() {
-    const loading = await testSubjects.find('kbnLoadingMessage', 5000);
-
-    return () => find.waitForElementStale(loading);
-  }
+  const exists = (selector: string) => testSubjects.exists(selector, { timeout: 2000 });
+  const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage', 5000);
 
   describe('rendering service', () => {
     it('renders "core" application', async () => {
-      await navigate('/render/core');
+      await navigateTo('/render/core');
 
-      const [loaded, legacyMode, userSettings] = await Promise.all([
-        init(),
+      const [loadingMessage, legacyMode, userSettings] = await Promise.all([
+        findLoadingMessage(),
         getLegacyMode(),
         getUserSettings(),
       ]);
@@ -66,16 +78,16 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       expect(legacyMode).to.be(false);
       expect(userSettings).to.not.be.empty();
 
-      await loaded();
+      await find.waitForElementStale(loadingMessage);
 
-      expect(await testSubjects.exists('renderingHeader')).to.be(true);
+      expect(await exists('renderingHeader')).to.be(true);
     });
 
     it('renders "core" application without user settings', async () => {
-      await navigate('/render/core?includeUserSettings=false');
+      await navigateTo('/render/core?includeUserSettings=false');
 
-      const [loaded, legacyMode, userSettings] = await Promise.all([
-        init(),
+      const [loadingMessage, legacyMode, userSettings] = await Promise.all([
+        findLoadingMessage(),
         getLegacyMode(),
         getUserSettings(),
       ]);
@@ -83,16 +95,16 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       expect(legacyMode).to.be(false);
       expect(userSettings).to.be.empty();
 
-      await loaded();
+      await find.waitForElementStale(loadingMessage);
 
-      expect(await testSubjects.exists('renderingHeader')).to.be(true);
+      expect(await exists('renderingHeader')).to.be(true);
     });
 
     it('renders "legacy" application', async () => {
-      await navigate('/render/core_plugin_legacy');
+      await navigateTo('/render/core_plugin_legacy');
 
-      const [loaded, legacyMode, userSettings] = await Promise.all([
-        init(),
+      const [loadingMessage, legacyMode, userSettings] = await Promise.all([
+        findLoadingMessage(),
         getLegacyMode(),
         getUserSettings(),
       ]);
@@ -100,17 +112,17 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       expect(legacyMode).to.be(true);
       expect(userSettings).to.not.be.empty();
 
-      await loaded();
+      await find.waitForElementStale(loadingMessage);
 
-      expect(await testSubjects.exists('coreLegacyCompatH1')).to.be(true);
-      expect(await testSubjects.exists('renderingHeader')).to.be(false);
+      expect(await exists('coreLegacyCompatH1')).to.be(true);
+      expect(await exists('renderingHeader')).to.be(false);
     });
 
     it('renders "legacy" application without user settings', async () => {
-      await navigate('/render/core_plugin_legacy?includeUserSettings=false');
+      await navigateTo('/render/core_plugin_legacy?includeUserSettings=false');
 
-      const [loaded, legacyMode, userSettings] = await Promise.all([
-        init(),
+      const [loadingMessage, legacyMode, userSettings] = await Promise.all([
+        findLoadingMessage(),
         getLegacyMode(),
         getUserSettings(),
       ]);
@@ -118,10 +130,58 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       expect(legacyMode).to.be(true);
       expect(userSettings).to.be.empty();
 
-      await loaded();
+      await find.waitForElementStale(loadingMessage);
 
-      expect(await testSubjects.exists('coreLegacyCompatH1')).to.be(true);
-      expect(await testSubjects.exists('renderingHeader')).to.be(false);
+      expect(await exists('coreLegacyCompatH1')).to.be(true);
+      expect(await exists('renderingHeader')).to.be(false);
+    });
+
+    // Flaky: https://github.com/elastic/kibana/issues/55750
+    it.skip('navigates between standard application and one with custom appRoute', async () => {
+      await navigateTo('/');
+      await find.waitForElementStale(await findLoadingMessage());
+
+      await navigateToApp('App Status');
+      expect(await exists('appStatusApp')).to.be(true);
+      expect(await exists('renderingHeader')).to.be(false);
+
+      await navigateToApp('Rendering');
+      expect(await exists('appStatusApp')).to.be(false);
+      expect(await exists('renderingHeader')).to.be(true);
+
+      await navigateToApp('App Status');
+      expect(await exists('appStatusApp')).to.be(true);
+      expect(await exists('renderingHeader')).to.be(false);
+
+      expect(
+        await browser.execute(() => {
+          return window.__RENDERING_SESSION__;
+        })
+      ).to.eql(['/app/app_status', '/render/core', '/app/app_status']);
+    });
+
+    // Flaky: https://github.com/elastic/kibana/issues/55736
+    it.skip('navigates between applications with custom appRoutes', async () => {
+      await navigateTo('/');
+      await find.waitForElementStale(await findLoadingMessage());
+
+      await navigateToApp('Rendering');
+      expect(await exists('renderingHeader')).to.be(true);
+      expect(await exists('customAppRouteHeader')).to.be(false);
+
+      await navigateToApp('Custom App Route');
+      expect(await exists('renderingHeader')).to.be(false);
+      expect(await exists('customAppRouteHeader')).to.be(true);
+
+      await navigateToApp('Rendering');
+      expect(await exists('renderingHeader')).to.be(true);
+      expect(await exists('customAppRouteHeader')).to.be(false);
+
+      expect(
+        await browser.execute(() => {
+          return window.__RENDERING_SESSION__;
+        })
+      ).to.eql(['/render/core', '/custom/appRoute', '/render/core']);
     });
   });
 }
