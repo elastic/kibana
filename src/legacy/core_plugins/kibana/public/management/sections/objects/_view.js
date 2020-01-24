@@ -174,6 +174,7 @@ uiModules
                 : -1;
               return orderIndex > -1 ? orderIndex : Infinity;
             });
+            $scope.$digest();
           })
           .catch(error => fatalError(error, location));
 
