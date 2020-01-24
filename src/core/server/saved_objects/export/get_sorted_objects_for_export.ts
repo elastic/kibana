@@ -69,6 +69,7 @@ export interface SavedObjectsExportResultDetails {
   }>;
 }
 
+// sorts objects by id for consistent object sequence
 function compareSavedObjects(a: SavedObject, b: SavedObject) {
   return a.id > b.id ? 1 : -1;
 }
