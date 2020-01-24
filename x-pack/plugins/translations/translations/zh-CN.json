@@ -8240,7 +8240,6 @@
     "xpack.ml.jobsList.startDatafeedModal.cancelButtonLabel": "取消",
     "xpack.ml.jobsList.startDatafeedModal.continueFromNowLabel": "从当前继续",
     "xpack.ml.jobsList.startDatafeedModal.continueFromSpecifiedTimeLabel": "从指定时间继续",
-    "xpack.ml.jobsList.startDatafeedModal.continueFromStartTimeLabel": "从 {formattedStartTime} 继续",
     "xpack.ml.jobsList.startDatafeedModal.createWatchDescription": "在数据馈送开始后创建监视",
     "xpack.ml.jobsList.startDatafeedModal.noEndTimeLabel": "无结束时间（实时搜索）",
     "xpack.ml.jobsList.startDatafeedModal.searchEndTimeTitle": "搜索结束时间",
