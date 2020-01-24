@@ -17,15 +17,14 @@ interface FieldFormatMapItem {
   id?: string;
   params?: FieldFormatParams;
 }
-type FieldFormatParams = Pick<
-  Field,
-  | 'pattern'
-  | 'input_format'
-  | 'output_format'
-  | 'output_precision'
-  | 'label_template'
-  | 'openLinkInCurrentTab'
->;
+interface FieldFormatParams {
+  pattern?: string;
+  inputFormat?: string;
+  outputFormat?: string;
+  outputPrecision?: number;
+  labelTemplate?: string;
+  openLinkInCurrentTab?: boolean;
+}
 /* this should match https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/kibana/fields_transformer.go */
 interface TypeMap {
   [key: string]: string;
@@ -282,7 +281,7 @@ export const flattenFields = (allFields: Fields): Fields => {
 export const createFieldFormatMap = (fields: Fields): FieldFormatMap =>
   fields.reduce<FieldFormatMap>((acc, field) => {
     if (field.format || field.pattern) {
-      const fieldFormatMapItem: any = {};
+      const fieldFormatMapItem: FieldFormatMapItem = {};
       if (field.format) {
         fieldFormatMapItem.id = field.format;
       }
@@ -294,12 +293,12 @@ export const createFieldFormatMap = (fields: Fields): FieldFormatMap =>
   }, {});
 
 const getFieldFormatParams = (field: Field): FieldFormatParams => {
-  const params: any = {};
+  const params: FieldFormatParams = {};
   if (field.pattern) params.pattern = field.pattern;
-  if (field.input_format) params.input_format = field.input_format;
-  if (field.output_format) params.output_format = field.output_format;
-  if (field.output_precision) params.output_precision = field.output_precision;
-  if (field.label_template) params.label_template = field.label_template;
-  if (field.openLinkInCurrentTab) params.openLinkInCurrentTab = field.openLinkInCurrentTab;
+  if (field.input_format) params.inputFormat = field.input_format;
+  if (field.output_format) params.outputFormat = field.output_format;
+  if (field.output_precision) params.outputPrecision = field.output_precision;
+  if (field.label_template) params.labelTemplate = field.label_template;
+  if (field.open_link_in_current_tab) params.openLinkInCurrentTab = field.open_link_in_current_tab;
   return params;
 };

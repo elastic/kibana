@@ -245,7 +245,7 @@ describe('creating index patterns from yaml fields', () => {
         fieldName: {
           params: {
             pattern: 'patternVal',
-            input_format: 'inputFormatVal',
+            inputFormat: 'inputFormatVal',
           },
         },
       };
@@ -267,7 +267,7 @@ describe('creating index patterns from yaml fields', () => {
           id: 'formatVal',
           params: {
             pattern: 'patternVal',
-            input_format: 'inputFormatVal',
+            inputFormat: 'inputFormatVal',
           },
         },
       };
