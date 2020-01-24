@@ -18,8 +18,14 @@
  */
 
 import * as controls from './controls';
-import { BUCKET_TYPES, METRIC_TYPES } from '../legacy_imports';
+import {
+  BUCKET_TYPES,
+  METRIC_TYPES,
+  siblingPipelineType,
+  parentPipelineType,
+} from '../legacy_imports';
 import { AggGroupNames } from '../agg_groups';
+import { wrapWithInlineComp } from './controls/utils';
 
 const buckets = {
   [BUCKET_TYPES.DATE_HISTOGRAM]: {
@@ -49,15 +55,43 @@ const buckets = {
     ipRangeType: controls.IpRangeTypeParamEditor,
     ranges: controls.IpRangesParamEditor,
   },
+  [BUCKET_TYPES.RANGE]: {
+    ranges: controls.RangesControl,
+  },
+  [BUCKET_TYPES.SIGNIFICANT_TERMS]: {
+    size: controls.SizeParamEditor,
+  },
 };
 
-const metrics = {};
+const metrics = {
+  [METRIC_TYPES.TOP_HITS]: {
+    field: controls.TopFieldParamEditor,
+    aggregate: wrapWithInlineComp(controls.TopAggregateParamEditor),
+    size: wrapWithInlineComp(controls.TopSizeParamEditor),
+    sortField: controls.TopSortFieldParamEditor,
+    sortOrder: controls.OrderParamEditor,
+  },
+  [METRIC_TYPES.PERCENTILES]: {
+    percents: controls.PercentilesEditor,
+  },
+  [METRIC_TYPES.PERCENTILE_RANKS]: {
+    values: controls.PercentileRanksEditor,
+  },
+};
 
 export const aggParamsMap = {
   common: {
     string: controls.StringParamEditor,
     json: controls.RawJsonParamEditor,
     field: controls.FieldParamEditor,
+  },
+  [siblingPipelineType]: {
+    customBucket: controls.SubMetricParamEditor,
+    customMetric: controls.SubMetricParamEditor,
+  },
+  [parentPipelineType]: {
+    metricAgg: controls.MetricAggParamEditor,
+    customMetric: controls.SubAggParamEditor,
   },
   [AggGroupNames.Buckets]: buckets,
   [AggGroupNames.Metrics]: metrics,

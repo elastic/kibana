@@ -65,10 +65,15 @@ const [bucketAggSchema] = new Schemas([
   },
 ]).all;
 
-const siblingPipelineAggHelper = {
-  subtype: i18n.translate('common.ui.aggTypes.metrics.siblingPipelineAggregationsSubtypeTitle', {
+const siblingPipelineType = i18n.translate(
+  'common.ui.aggTypes.metrics.siblingPipelineAggregationsSubtypeTitle',
+  {
     defaultMessage: 'Sibling pipeline aggregations',
-  }),
+  }
+);
+
+const siblingPipelineAggHelper = {
+  subtype: siblingPipelineType,
   params() {
     return [
       {
@@ -115,4 +120,4 @@ const siblingPipelineAggHelper = {
   },
 };
 
-export { siblingPipelineAggHelper };
+export { siblingPipelineAggHelper, siblingPipelineType };

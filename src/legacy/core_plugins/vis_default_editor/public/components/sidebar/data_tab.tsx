@@ -22,7 +22,7 @@ import { findLast } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { AggConfig, parentPipelineAggHelper, MetricAggType } from '../../legacy_imports';
+import { AggConfig, parentPipelineType, MetricAggType } from '../../legacy_imports';
 import { DefaultEditorAggGroup } from '../agg_group';
 import { AggGroupNames } from '../../agg_groups';
 import {
@@ -63,7 +63,7 @@ function DefaultEditorDataTab({
     () =>
       findLast(
         metricAggs,
-        ({ type }: { type: MetricAggType }) => type.subtype === parentPipelineAggHelper.subtype
+        ({ type }: { type: MetricAggType }) => type.subtype === parentPipelineType
       ),
     [metricAggs]
   );

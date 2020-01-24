@@ -80,6 +80,7 @@ export class AggType<
   name: string;
 
   type: string;
+  subtype?: string;
   /**
    * the name of the elasticsearch aggregation that this aggType represents. Usually just this.name
    *

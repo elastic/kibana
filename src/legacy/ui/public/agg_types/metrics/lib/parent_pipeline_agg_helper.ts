@@ -40,13 +40,6 @@ const metricAggTitle = i18n.translate('common.ui.aggTypes.metrics.metricAggTitle
   defaultMessage: 'Metric agg',
 });
 
-const subtypeLabel = i18n.translate(
-  'common.ui.aggTypes.metrics.parentPipelineAggregationsSubtypeTitle',
-  {
-    defaultMessage: 'Parent Pipeline Aggregations',
-  }
-);
-
 const [metricAggSchema] = new Schemas([
   {
     group: 'none',
@@ -57,9 +50,15 @@ const [metricAggSchema] = new Schemas([
   },
 ]).all;
 
-export const parentPipelineAggHelper = {
-  subtype: subtypeLabel,
+const parentPipelineType = i18n.translate(
+  'common.ui.aggTypes.metrics.parentPipelineAggregationsSubtypeTitle',
+  {
+    defaultMessage: 'Parent Pipeline Aggregations',
+  }
+);
 
+const parentPipelineAggHelper = {
+  subtype: parentPipelineType,
   params() {
     return [
       {
@@ -104,3 +103,5 @@ export const parentPipelineAggHelper = {
     return subAgg.type.getFormat(subAgg);
   },
 };
+
+export { parentPipelineAggHelper, parentPipelineType };
