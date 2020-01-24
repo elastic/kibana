@@ -486,7 +486,14 @@ function discoverController(
 
     const { searchFields, selectFields } = await getSharingDataFields();
     searchSource.setField('fields', searchFields);
-    searchSource.setField('sort', getSortForSearchSource($state.sort, $scope.indexPattern));
+    searchSource.setField(
+      'sort',
+      getSortForSearchSource(
+        $state.sort,
+        $scope.indexPattern,
+        config.get('discover:sort:defaultOrder')
+      )
+    );
     searchSource.setField('highlight', null);
     searchSource.setField('highlightAll', null);
     searchSource.setField('aggs', null);
@@ -517,11 +524,7 @@ function discoverController(
           language:
             localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
         },
-      sort: getSort.array(
-        savedSearch.sort,
-        $scope.indexPattern,
-        config.get('discover:sort:defaultOrder')
-      ),
+      sort: getSort.array(savedSearch.sort, $scope.indexPattern),
       columns:
         savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
@@ -934,7 +937,10 @@ function discoverController(
     const { indexPattern, searchSource } = $scope;
     searchSource
       .setField('size', $scope.opts.sampleSize)
-      .setField('sort', getSortForSearchSource($state.sort, indexPattern))
+      .setField(
+        'sort',
+        getSortForSearchSource($state.sort, indexPattern, config.get('discover:sort:defaultOrder'))
+      )
       .setField('query', !$state.query ? null : $state.query)
       .setField('filter', filterManager.getFilters());
   });
@@ -1000,7 +1006,7 @@ function discoverController(
       query: '',
       language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
     };
-    filterManager.removeAll();
+    filterManager.setFilters(filterManager.getGlobalFilters());
     $state.save();
     $scope.fetch();
   };
@@ -1008,7 +1014,9 @@ function discoverController(
   const updateStateFromSavedQuery = savedQuery => {
     $state.query = savedQuery.attributes.query;
     $state.save();
-    filterManager.setFilters(savedQuery.attributes.filters || []);
+    const savedQueryFilters = savedQuery.attributes.filters || [];
+    const globalFilters = filterManager.getGlobalFilters();
+    filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
 
     if (savedQuery.attributes.timefilter) {
       timefilter.setTime({
