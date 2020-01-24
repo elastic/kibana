@@ -121,6 +121,7 @@ export class VisualizePlugin implements Plugin {
           share,
           toastNotifications: contextCore.notifications.toasts,
           uiSettings: contextCore.uiSettings,
+          config: kibana_legacy.config,
           visualizeCapabilities: contextCore.application.capabilities.visualize,
           visualizations,
           usageCollection,

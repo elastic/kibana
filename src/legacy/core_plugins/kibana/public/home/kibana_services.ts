@@ -30,6 +30,7 @@ import {
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
 import { Environment, FeatureCatalogueEntry } from '../../../../../plugins/home/public';
+import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
@@ -51,6 +52,7 @@ export interface HomeKibanaServices {
   chrome: ChromeStart;
   telemetryOptInProvider: any;
   uiSettings: IUiSettingsClient;
+  config: KibanaLegacySetup['config'];
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];

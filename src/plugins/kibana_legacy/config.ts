@@ -17,20 +17,10 @@
  * under the License.
  */
 
-export function injectVars(server) {
-  const serverConfig = server.config();
+import { schema, TypeOf } from '@kbn/config-schema';
 
-  // Get types that are import and exportable, by default yes unless isImportableAndExportable is set to false
-  const { types: allTypes } = server.savedObjects;
-  const savedObjectsManagement = server.getSavedObjectsManagement();
-  const importAndExportableTypes = allTypes.filter(type =>
-    savedObjectsManagement.isImportAndExportable(type)
-  );
+export const configSchema = schema.object({
+  defaultAppId: schema.string({ defaultValue: 'home' }),
+});
 
-  return {
-    disableWelcomeScreen: serverConfig.get('kibana.disableWelcomeScreen'),
-    importAndExportableTypes,
-    autocompleteTerminateAfter: serverConfig.get('kibana.autocompleteTerminateAfter'),
-    autocompleteTimeout: serverConfig.get('kibana.autocompleteTimeout'),
-  };
-}
+export type ConfigSchema = TypeOf<typeof configSchema>;

@@ -95,6 +95,7 @@ export class HomePlugin implements Plugin {
           getBasePath: core.http.basePath.get,
           indexPatternService: this.dataStart!.indexPatterns,
           environment: this.environment!,
+          config: kibana_legacy.config,
           ...angularDependencies,
         });
         const { renderApp } = await import('./np_ready/application');
