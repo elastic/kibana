@@ -22,6 +22,8 @@ import { savedObjectsMixin } from './saved_objects_mixin';
 import { mockKibanaMigrator } from '../../../core/server/saved_objects/migrations/kibana/kibana_migrator.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientProviderMock } from '../../../core/server/saved_objects/service/lib/scoped_client_provider.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { convertLegacyMappings } from '../../../core/server/saved_objects/utils';
 
 const savedObjectMappings = [
   {
@@ -61,7 +63,9 @@ const savedObjectMappings = [
   },
 ];
 
-const migrator = mockKibanaMigrator.create({ savedObjectMappings });
+const migrator = mockKibanaMigrator.create({
+  savedObjectMappings: convertLegacyMappings(savedObjectMappings),
+});
 
 describe('Saved Objects Mixin', () => {
   let mockKbnServer;
