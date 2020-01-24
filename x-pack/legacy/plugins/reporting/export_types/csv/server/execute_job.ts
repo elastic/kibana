@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaRequest } from '../../../../../../../src/core/server';
 import { CSV_JOB_TYPE } from '../../../common/constants';
 import { cryptoFactory } from '../../../server/lib';

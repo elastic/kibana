@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IFieldFormatType } from './types';
+import { IFieldFormatType } from '../types';
 
 import {
   BoolFormat,
@@ -35,7 +35,7 @@ import {
   StringFormat,
   TruncateFormat,
   UrlFormat,
-} from './converters';
+} from '../converters';
 
 export const baseFormatters: IFieldFormatType[] = [
   BoolFormat,

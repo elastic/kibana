@@ -27,6 +27,7 @@ import {
   FieldFormatConvertFunction,
   HtmlContextTypeOptions,
   TextContextTypeOptions,
+  IFieldFormatMetaParams,
 } from './types';
 import {
   htmlContentTypeSetup,
@@ -37,15 +38,6 @@ import {
 import { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
 
 const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
-
-export interface IFieldFormatMetaParams {
-  [key: string]: any;
-  parsedUrl?: {
-    origin: string;
-    pathname?: string;
-    basePath?: string;
-  };
-}
 
 export abstract class FieldFormat {
   /**

@@ -18,11 +18,12 @@
  */
 
 export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
-export { FieldFormat, IFieldFormatMetaParams } from './field_format';
+export { FieldFormat } from './field_format';
 export { FieldFormatRegistry } from './field_formats_registry';
 export { getHighlightRequest, asPrettyString, getHighlightHtml } from './utils';
-export { baseFormatters } from './base_formatters';
+
+export { baseFormatters } from './constants/base_formatters';
+export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
 
 export * from './converters';
-export * from './constants';
 export * from './types';

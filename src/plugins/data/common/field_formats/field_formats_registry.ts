@@ -28,9 +28,10 @@ import {
   FIELD_FORMAT_IDS,
   IFieldFormatType,
   IFieldFormatId,
+  IFieldFormatMetaParams,
 } from './types';
-import { baseFormatters } from './base_formatters';
-import { FieldFormat, IFieldFormatMetaParams } from './field_format';
+import { baseFormatters } from './constants/base_formatters';
+import { FieldFormat } from './field_format';
 
 export class FieldFormatRegistry {
   protected fieldFormats: Map<IFieldFormatId, IFieldFormatType> = new Map();

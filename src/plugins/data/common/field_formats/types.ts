@@ -85,3 +85,12 @@ export type IFieldFormatType = (new (params?: any, getConfig?: GetConfigFn) => F
   id: IFieldFormatId;
   fieldType: string | string[];
 };
+
+export interface IFieldFormatMetaParams {
+  [key: string]: any;
+  parsedUrl?: {
+    origin: string;
+    pathname?: string;
+    basePath?: string;
+  };
+}
