@@ -62,4 +62,6 @@ describe('Async search strategy', () => {
     expect(mockSearch.mock.calls[0][0]).toEqual(mockRequest);
     expect(mockSearch.mock.calls[1][0]).toEqual({ id: 1, serverStrategy: 'foo' });
   });
+
+  it('sends a DELETE request and stops polling when the signal is aborted', async () => {});
 });

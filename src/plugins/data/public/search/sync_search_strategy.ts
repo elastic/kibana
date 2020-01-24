@@ -48,9 +48,7 @@ export const syncSearchStrategyProvider: TSearchStrategyProvider<typeof SYNC_SEA
     return from(response);
   };
 
-  const strategy: ISearchStrategy<typeof SYNC_SEARCH_STRATEGY> = {
-    search,
-  };
+  const strategy: ISearchStrategy<typeof SYNC_SEARCH_STRATEGY> = { search };
 
   return strategy;
 };

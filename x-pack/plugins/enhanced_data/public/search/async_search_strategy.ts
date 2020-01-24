@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, of } from 'rxjs';
-import { mergeMap, takeWhile, expand, delay } from 'rxjs/operators';
+import { fromEvent, NEVER, Observable, of } from 'rxjs';
+import { mergeMap, takeWhile, expand, delay, first, tap, takeUntil } from 'rxjs/operators';
 import {
   IKibanaSearchResponse,
   ISearchContext,
@@ -34,9 +34,21 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
       { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
     ): Observable<IKibanaSearchResponse> => {
       const { serverStrategy } = request;
+      let id: string | undefined;
+
+      const aborted$ = options.signal
+        ? fromEvent(options.signal, 'abort').pipe(
+            first(),
+            tap(() => {
+              if (id === undefined) return;
+              context.core.http.delete(`/internal/search/${request.serverStrategy}/${id}`);
+            })
+          )
+        : NEVER;
 
       return search(request, options, SYNC_SEARCH_STRATEGY).pipe(
-        expand(({ id }) => {
+        expand(response => {
+          id = response.id;
           return of(null).pipe(
             // Delay by the given poll interval
             delay(pollInterval),
@@ -44,6 +56,10 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
             mergeMap(() => search({ id, serverStrategy }, options, SYNC_SEARCH_STRATEGY))
           );
         }),
+
+        // Stop polling if the signal is aborted
+        takeUntil(aborted$),
+
         // Continue polling until the response indicates it is complete
         takeWhile(({ total = 1, loaded = 1 }) => loaded < total, true)
       );
