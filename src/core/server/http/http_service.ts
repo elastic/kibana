@@ -70,7 +70,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
     this.config$ = combineLatest([
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path),
-    ]).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
+    ]).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
     this.httpServer = new HttpServer(logger, 'Kibana');
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
