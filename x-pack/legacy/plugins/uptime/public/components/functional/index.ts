@@ -9,7 +9,7 @@ export { EmptyState } from './empty_state';
 export { MonitorStatusBar } from './monitor_status_details';
 export { FilterGroup } from './filter_group';
 export { IntegrationLink } from './integration_link';
-export { KueryBar } from './kuery_bar';
+export { KueryBarComponent } from './kuery_bar/kuery_bar';
 export { MonitorCharts } from './monitor_charts';
 export { MonitorList } from './monitor_list';
 export { OverviewPageParsingErrorCallout } from './overview_page_parsing_error_callout';

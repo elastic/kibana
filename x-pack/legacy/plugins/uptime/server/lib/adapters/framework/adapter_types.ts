@@ -8,25 +8,11 @@ import { GraphQLSchema } from 'graphql';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   SavedObjectsLegacyService,
-  RequestHandler,
   IRouter,
   CallAPIOptions,
   SavedObjectsClientContract,
 } from 'src/core/server';
-import { ObjectType } from '@kbn/config-schema';
 import { UMKibanaRoute } from '../../../rest_api';
-
-export interface UMFrameworkRouteOptions<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType
-> {
-  path: string;
-  method: string;
-  handler: RequestHandler<P, Q, B>;
-  config?: any;
-  validate: any;
-}
 
 type APICaller = (
   endpoint: string,
@@ -56,4 +42,5 @@ export interface UptimeCorePlugins {
 export interface UMBackendFrameworkAdapter {
   registerRoute(route: UMKibanaRoute): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
+  getIndexPatternsService();
 }

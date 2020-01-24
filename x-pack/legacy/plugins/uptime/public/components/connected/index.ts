@@ -4,8 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const toStaticIndexPattern = (indexPattern: any) => ({
-  ...indexPattern,
-  fields: JSON.parse(indexPattern.attributes.fields),
-  title: indexPattern.id,
-});
+export * from './kuerybar/kuery_bar_container';
+export * from './pages/overview_container';

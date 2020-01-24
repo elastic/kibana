@@ -28,3 +28,7 @@ export const selectSelectedMonitor = (state: AppState) => {
 export const selectMonitorStatus = (state: AppState) => {
   return state.monitorStatus.status;
 };
+
+export const selectIndexPattern = ({ indexPattern }: AppState) => {
+  return indexPattern.index_pattern;
+};
