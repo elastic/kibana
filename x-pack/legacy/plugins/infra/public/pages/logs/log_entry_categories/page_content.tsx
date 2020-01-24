@@ -34,9 +34,11 @@ export const LogEntryCategoriesPageContent = () => {
   } = useLogEntryCategoriesModuleContext();
 
   useEffect(() => {
-    fetchModuleDefinition();
-    fetchJobStatus();
-  }, [fetchJobStatus, fetchModuleDefinition]);
+    if (hasLogAnalysisReadCapabilities) {
+      fetchModuleDefinition();
+      fetchJobStatus();
+    }
+  }, [fetchJobStatus, fetchModuleDefinition, hasLogAnalysisReadCapabilities]);
 
   if (!hasLogAnalysisCapabilites) {
     return <MlUnavailablePrompt />;

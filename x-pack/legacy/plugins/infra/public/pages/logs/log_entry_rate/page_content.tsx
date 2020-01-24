@@ -30,9 +30,11 @@ export const LogEntryRatePageContent = () => {
   const { fetchJobStatus, fetchModuleDefinition, setupStatus } = useLogEntryRateModuleContext();
 
   useEffect(() => {
-    fetchModuleDefinition();
-    fetchJobStatus();
-  }, [fetchJobStatus, fetchModuleDefinition]);
+    if (hasLogAnalysisReadCapabilities) {
+      fetchModuleDefinition();
+      fetchJobStatus();
+    }
+  }, [fetchJobStatus, fetchModuleDefinition, hasLogAnalysisReadCapabilities]);
 
   if (!hasLogAnalysisCapabilites) {
     return <MlUnavailablePrompt />;
