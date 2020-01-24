@@ -26,6 +26,7 @@ import { toArray } from 'rxjs/operators';
 import { deleteIndex } from './delete_index';
 import { collectUiExports } from '../../../legacy/ui/ui_exports';
 import { KibanaMigrator } from '../../../core/server/saved_objects/migrations';
+import { convertLegacyMappings } from '../../../core/server/saved_objects/utils';
 import { SavedObjectsSchema } from '../../../core/server/saved_objects';
 import { findPluginSpecs } from '../../../legacy/plugin_discovery';
 
@@ -103,7 +104,7 @@ export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
     },
     version: kibanaVersion,
     savedObjectSchemas: new SavedObjectsSchema(uiExports.savedObjectSchemas),
-    savedObjectMappings: uiExports.savedObjectMappings,
+    savedObjectMappings: convertLegacyMappings(uiExports.savedObjectMappings),
     savedObjectMigrations: uiExports.savedObjectMigrations,
     savedObjectValidations: uiExports.savedObjectValidations,
     callCluster: (path, ...args) => _.get(client, path).call(client, ...args),
