@@ -57,7 +57,7 @@ export default function({ getService, getPageObjects }) {
     await PageObjects.visEditor.selectField('machine.ram', 'metrics');
     // go to options page
     log.debug('Going to axis options');
-    await pointSeriesVis.clickAxisOptions();
+    await PageObjects.visEditor.clickMetricsAndAxes();
     // add another value axis
     log.debug('adding axis');
     await pointSeriesVis.clickAddAxis();

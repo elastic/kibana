@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RuleAlertParamsRest } from '../types';
+import { PrepackagedRules } from '../types';
 import { addPrepackagedRulesSchema } from '../routes/schemas/add_prepackaged_rules_schema';
 import { rawRules } from './prepackaged_rules';
 
@@ -13,19 +13,19 @@ import { rawRules } from './prepackaged_rules';
  * that they are adding incorrect schema rules. Also this will auto-flush in all the default
  * aspects such as default interval of 5 minutes, default arrays, etc...
  */
-export const validateAllPrepackagedRules = (
-  rules: RuleAlertParamsRest[]
-): RuleAlertParamsRest[] => {
+export const validateAllPrepackagedRules = (rules: PrepackagedRules[]): PrepackagedRules[] => {
   return rules.map(rule => {
     const validatedRule = addPrepackagedRulesSchema.validate(rule);
     if (validatedRule.error != null) {
-      const ruleName = rule.name ? rule.name : '(rule_name unknown)';
-      const ruleId = rule.rule_id ? rule.rule_id : '(rule_id unknown)';
+      const ruleName = rule.name ? rule.name : '(rule name unknown)';
+      const ruleId = rule.rule_id ? rule.rule_id : '(rule rule_id unknown)';
       throw new TypeError(
         `name: "${ruleName}", rule_id: "${ruleId}" within the folder rules/prepackaged_rules ` +
           `is not a valid detection engine rule. Expect the system ` +
           `to not work with pre-packaged rules until this rule is fixed ` +
-          `or the file is removed. Error is: ${validatedRule.error.message}`
+          `or the file is removed. Error is: ${
+            validatedRule.error.message
+          }, Full rule contents are:\n${JSON.stringify(rule, null, 2)}`
       );
     } else {
       return validatedRule.value;
@@ -33,6 +33,6 @@ export const validateAllPrepackagedRules = (
   });
 };
 
-export const getPrepackagedRules = (rules = rawRules): RuleAlertParamsRest[] => {
+export const getPrepackagedRules = (rules = rawRules): PrepackagedRules[] => {
   return validateAllPrepackagedRules(rules);
 };

@@ -20,7 +20,7 @@
 import angular from 'angular';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import 'plugins/kibana/discover/index';
+import 'plugins/kibana/discover/legacy';
 
 let $parentScope;
 

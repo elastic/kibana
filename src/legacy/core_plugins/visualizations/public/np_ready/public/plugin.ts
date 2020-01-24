@@ -16,10 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { TypesService, TypesSetup, TypesStart } from './types';
-import { setUISettings, setTypes, setI18n } from './services';
-
+import {
+  setUISettings,
+  setTypes,
+  setI18n,
+  setCapabilities,
+  setHttp,
+  setIndexPatterns,
+  setSavedObjects,
+  setUsageCollector,
+  setFilterManager,
+} from './services';
+import { VisualizeEmbeddableFactory } from '../../embeddable/visualize_embeddable_factory';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../embeddable';
+import { ExpressionsSetup } from '../../../../../../plugins/expressions/public';
+import { IEmbeddableSetup } from '../../../../../../plugins/embeddable/public';
+import { visualization as visualizationFunction } from './expressions/visualization_function';
+import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
+import { DataPublicPluginStart } from '../../../../../../plugins/data/public';
+import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
 /**
  * Interface for this plugin's returned setup/start contracts.
  *
@@ -34,6 +52,16 @@ export interface VisualizationsStart {
   types: TypesStart;
 }
 
+export interface VisualizationsSetupDeps {
+  expressions: ExpressionsSetup;
+  embeddable: IEmbeddableSetup;
+  usageCollection: UsageCollectionSetup;
+}
+
+export interface VisualizationsStartDeps {
+  data: DataPublicPluginStart;
+}
+
 /**
  * Visualizations Plugin - public
  *
@@ -42,22 +70,46 @@ export interface VisualizationsStart {
  *
  * @internal
  */
-export class VisualizationsPlugin implements Plugin<VisualizationsSetup, VisualizationsStart> {
+export class VisualizationsPlugin
+  implements
+    Plugin<
+      VisualizationsSetup,
+      VisualizationsStart,
+      VisualizationsSetupDeps,
+      VisualizationsStartDeps
+    > {
   private readonly types: TypesService = new TypesService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup) {
+  public setup(
+    core: CoreSetup,
+    { expressions, embeddable, usageCollection }: VisualizationsSetupDeps
+  ) {
     setUISettings(core.uiSettings);
+    setUsageCollector(usageCollection);
+
+    expressions.registerFunction(visualizationFunction);
+    expressions.registerRenderer(visualizationRenderer);
+
+    const embeddableFactory = new VisualizeEmbeddableFactory();
+    embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+
     return {
       types: this.types.setup(),
     };
   }
 
-  public start(core: CoreStart) {
-    setI18n(core.i18n);
+  public start(core: CoreStart, { data }: VisualizationsStartDeps) {
     const types = this.types.start();
+    setI18n(core.i18n);
     setTypes(types);
+    setCapabilities(core.application.capabilities);
+    setHttp(core.http);
+    setSavedObjects(core.savedObjects);
+    setIndexPatterns(data.indexPatterns);
+    setFilterManager(data.query.filterManager);
+
     return {
       types,
     };

@@ -139,7 +139,9 @@ exports[`PingList component renders sorted list without errors 1`] = `
           Object {
             "align": "right",
             "field": "http.response.status_code",
-            "name": "Response code",
+            "name": <ForwardRef(styled.span)>
+              Response code
+            </ForwardRef(styled.span)>,
             "render": [Function],
           },
           Object {

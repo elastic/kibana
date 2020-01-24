@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ScaleType } from '@elastic/charts';
 
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import { EuiLoadingContent, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSelect } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as i18n from './translations';
 import { BarChart } from '../charts/barchart';
@@ -26,35 +26,32 @@ import {
   HistogramAggregation,
   MatrixHistogramQueryProps,
 } from './types';
-import { generateTablePaginationOptions } from '../paginated_table/helpers';
 import { ChartSeriesData } from '../charts/common';
 import { InspectButtonContainer } from '../inspect';
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   MatrixHistogramQueryProps> = ({
   activePage,
-
   dataKey,
   defaultStackByOption,
   endDate,
   errorMessage,
   filterQuery,
+  headerChildren,
   hideHistogramIfEmpty = false,
   id,
   isAlertsHistogram,
   isAnomaliesHistogram,
   isAuthenticationsHistogram,
-  isDNSHistogram,
-  isEventsType,
-  isPtrIncluded,
+  isDnsHistogram,
+  isEventsHistogram,
   isInspected,
-  legendPosition,
-  limit,
+  legendPosition = 'right',
   mapping,
   query,
   scaleType = ScaleType.Time,
   setQuery,
-  showLegend,
+  showLegend = true,
   skip,
   stackByOptions,
   startDate,
@@ -66,12 +63,12 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
 }) => {
   const barchartConfigs = getBarchartConfigs({
     from: startDate,
+    legendPosition,
     to: endDate,
     onBrushEnd: updateDateRange,
     scaleType,
     yTickFormatter,
     showLegend,
-    legendPosition,
   });
   const [showInspect, setShowInspect] = useState(false);
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
@@ -90,6 +87,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
     defaultStackByOption
   );
+
+  const [titleWithStackByField, setTitle] = useState<string>('');
   const [subtitleWithCounts, setSubtitle] = useState<string>('');
   const [hideHistogram, setHideHistogram] = useState<boolean>(hideHistogramIfEmpty);
   const [barChartData, setBarChartData] = useState<ChartSeriesData[] | null>(null);
@@ -101,10 +100,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     },
     []
   );
-  const getPagination = () =>
-    activePage != null && limit != null
-      ? generateTablePaginationOptions(activePage, limit)
-      : undefined;
 
   const { data, loading, inspect, totalCount, refetch = noop } = useQuery<{}, HistogramAggregation>(
     {
@@ -115,21 +110,20 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
       query,
       skip,
       startDate,
-      sort,
       title,
       isAlertsHistogram,
       isAnomaliesHistogram,
       isAuthenticationsHistogram,
-      isDNSHistogram,
-      isEventsType,
+      isDnsHistogram,
+      isEventsHistogram,
       isInspected,
-      isPtrIncluded,
-      pagination: useMemo(() => getPagination(), [activePage, limit]),
       stackByField: selectedStackByOption.value,
     }
   );
 
   useEffect(() => {
+    if (title != null) setTitle(typeof title === 'function' ? title(selectedStackByOption) : title);
+
     if (subtitle != null)
       setSubtitle(typeof subtitle === 'function' ? subtitle(totalCount) : subtitle);
 
@@ -157,6 +151,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     isInspected,
     loading,
     data,
+    refetch,
   ]);
 
   return !hideHistogram ? (
@@ -169,17 +164,22 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
       >
         <HeaderSection
           id={id}
-          title={title}
+          title={titleWithStackByField}
           subtitle={!loading && (totalCount >= 0 ? subtitleWithCounts : null)}
         >
-          {stackByOptions && (
-            <EuiSelect
-              onChange={setSelectedChartOptionCallback}
-              options={stackByOptions}
-              prepend={i18n.STACK_BY}
-              value={selectedStackByOption?.value}
-            />
-          )}
+          <EuiFlexGroup alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              {stackByOptions?.length > 1 && (
+                <EuiSelect
+                  onChange={setSelectedChartOptionCallback}
+                  options={stackByOptions}
+                  prepend={i18n.STACK_BY}
+                  value={selectedStackByOption?.value}
+                />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{headerChildren}</EuiFlexItem>
+          </EuiFlexGroup>
         </HeaderSection>
         {loading ? (
           <EuiLoadingContent data-test-subj="initialLoadingPanelMatrixOverTime" lines={10} />

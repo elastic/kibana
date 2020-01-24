@@ -35,7 +35,7 @@ exports[`renders without crashing 1`] = `
     labelType="label"
   >
     <EuiColorPicker
-      color="#F19F58"
+      color="#DA8B45"
       isInvalid={false}
       onChange={[Function]}
     />

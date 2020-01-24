@@ -5,11 +5,11 @@
  */
 
 import React, { useContext } from 'react';
+import moment from 'moment';
 import styled from 'styled-components';
 import { EuiBadge, EuiText } from '@elastic/eui';
-import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { UptimeSettingsContext } from '../../../contexts';
+import { UptimeThemeContext } from '../../../contexts';
 import { MonitorLocation } from '../../../../common/runtime_types';
 
 const TimeStampSpan = styled.span`
@@ -25,6 +25,7 @@ const BadgeItem = styled.div`
   margin-bottom: 5px;
 `;
 
+// Set height so that it remains within panel, enough height to display 7 locations tags
 const TagContainer = styled.div`
   padding: 10px;
   max-height: 229px;
@@ -47,7 +48,7 @@ interface StatusTag {
 export const LocationStatusTags = ({ locations }: Props) => {
   const {
     colors: { gray, danger },
-  } = useContext(UptimeSettingsContext);
+  } = useContext(UptimeThemeContext);
 
   const upLocations: StatusTag[] = [];
   const downLocations: StatusTag[] = [];
@@ -60,49 +61,62 @@ export const LocationStatusTags = ({ locations }: Props) => {
     }
   });
 
-  // Sort by recent timestamp
+  // Sort lexicographically by label
   upLocations.sort((a, b) => {
-    return a.timestamp < b.timestamp ? 1 : b.timestamp < a.timestamp ? -1 : 0;
+    return a.label > b.label ? 1 : b.label > a.label ? -1 : 0;
   });
 
-  moment.locale('en', {
-    relativeTime: {
-      future: 'in %s',
-      past: '%s ago',
-      s: '%ds',
-      ss: '%ss',
-      m: '%dm',
-      mm: '%dm',
-      h: '%dh',
-      hh: '%dh',
-      d: '%dd',
-      dd: '%dd',
-      M: '%d Mon',
-      MM: '%d Mon',
-      y: '%d Yr',
-      yy: '%d Yr',
-    },
-  });
+  const tagLabel = (item: StatusTag, ind: number, color: string) => {
+    return (
+      <BadgeItem key={ind}>
+        <EuiBadge color={color}>
+          <EuiText size="m">
+            <TextStyle>{item.label}</TextStyle>
+          </EuiText>
+        </EuiBadge>
+        <TimeStampSpan>
+          <EuiText color="subdued">{moment(item.timestamp).fromNow()}</EuiText>
+        </TimeStampSpan>
+      </BadgeItem>
+    );
+  };
 
-  const tagLabel = (item: StatusTag, ind: number, color: string) => (
-    <BadgeItem key={ind}>
-      <EuiBadge color={color}>
-        <EuiText size="m">
-          <TextStyle>{item.label}</TextStyle>
-        </EuiText>
-      </EuiBadge>
-      <TimeStampSpan>
-        <EuiText color="subdued">{moment(item.timestamp).fromNow()}</EuiText>
-      </TimeStampSpan>
-    </BadgeItem>
-  );
+  const prevLocal: string = moment.locale() ?? 'en';
 
-  return (
-    <>
+  const renderTags = () => {
+    moment.defineLocale('en-tag', {
+      relativeTime: {
+        future: 'in %s',
+        past: '%s ago',
+        s: '%ds',
+        ss: '%ss',
+        m: '%dm',
+        mm: '%dm',
+        h: '%dh',
+        hh: '%dh',
+        d: '%dd',
+        dd: '%dd',
+        M: '%d Mon',
+        MM: '%d Mon',
+        y: '%d Yr',
+        yy: '%d Yr',
+      },
+    });
+    const tags = (
       <TagContainer>
         <span>{downLocations.map((item, ind) => tagLabel(item, ind, danger))}</span>
         <span>{upLocations.map((item, ind) => tagLabel(item, ind, gray))}</span>
       </TagContainer>
+    );
+
+    // Need to reset locale so it doesn't effect other parts of the app
+    moment.locale(prevLocal);
+    return tags;
+  };
+
+  return (
+    <>
+      {renderTags()}
       {locations.length > 7 && (
         <OtherLocationsDiv>
           <EuiText color="subdued">

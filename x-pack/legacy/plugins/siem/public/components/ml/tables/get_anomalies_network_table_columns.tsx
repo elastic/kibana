@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 
 import { Columns } from '../../paginated_table';
-import { Anomaly, NarrowDateRange, AnomaliesByNetwork } from '../types';
+import { Anomaly, AnomaliesByNetwork } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
 import { EntityDraggable } from '../entity_draggable';
 import { createCompoundNetworkKey } from './create_compound_key';
@@ -23,12 +23,12 @@ import { createExplorerLink } from '../links/create_explorer_link';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { NetworkType } from '../../../store/network/model';
 import { escapeDataProviderId } from '../../drag_and_drop/helpers';
+import { FlowTarget } from '../../../graphql/types';
 
 export const getAnomaliesNetworkTableColumns = (
   startDate: number,
   endDate: number,
-  interval: string,
-  narrowDateRange: NarrowDateRange
+  flowTarget?: FlowTarget
 ): [
   Columns<AnomaliesByNetwork['ip'], AnomaliesByNetwork>,
   Columns<Anomaly['severity'], AnomaliesByNetwork>,
@@ -46,7 +46,7 @@ export const getAnomaliesNetworkTableColumns = (
         rowItem: ip,
         attrName: anomaliesByNetwork.type,
         idPrefix: `anomalies-network-table-ip-${createCompoundNetworkKey(anomaliesByNetwork)}`,
-        render: item => <IPDetailsLink ip={item} />,
+        render: item => <IPDetailsLink ip={item} flowTarget={flowTarget} />,
       }),
   },
   {
@@ -129,10 +129,9 @@ export const getAnomaliesNetworkTableColumnsCurated = (
   pageType: NetworkType,
   startDate: number,
   endDate: number,
-  interval: string,
-  narrowDateRange: NarrowDateRange
+  flowTarget?: FlowTarget
 ) => {
-  const columns = getAnomaliesNetworkTableColumns(startDate, endDate, interval, narrowDateRange);
+  const columns = getAnomaliesNetworkTableColumns(startDate, endDate, flowTarget);
 
   // Columns to exclude from ip details pages
   if (pageType === NetworkType.details) {

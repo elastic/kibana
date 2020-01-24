@@ -204,6 +204,7 @@ class ForecastsTableUI extends Component {
         render: date => formatDate(date, TIME_FORMAT),
         textOnly: true,
         sortable: true,
+        scope: 'row',
       },
       {
         field: 'forecast_start_timestamp',

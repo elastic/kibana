@@ -809,7 +809,7 @@ Object {
   },
   "serviceColors": Object {
     "opbeans-node": "#6092c0",
-    "opbeans-ruby": "#5bbaa0",
+    "opbeans-ruby": "#54b399",
   },
 }
 `;

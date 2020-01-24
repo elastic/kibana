@@ -137,7 +137,6 @@ Object {
           "events": Object {
             "terms": Object {
               "field": "processor.event",
-              "size": 2,
             },
           },
         },

@@ -40,7 +40,7 @@ function PrecisionParamEditor({ agg, value, setValue }: AggParamEditorProps<numb
       <EuiRange
         min={1}
         max={config.get('visualization:tileMap:maxPrecision')}
-        value={value}
+        value={value || ''}
         onChange={(ev: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) =>
           setValue(Number(ev.currentTarget.value))
         }

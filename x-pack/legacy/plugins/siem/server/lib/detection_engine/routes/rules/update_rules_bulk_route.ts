@@ -7,12 +7,17 @@
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { BulkUpdateRulesRequest } from '../../rules/types';
+import {
+  BulkUpdateRulesRequest,
+  IRuleSavedAttributesSavedObjectAttributes,
+} from '../../rules/types';
 import { ServerFacade } from '../../../../types';
 import { transformOrBulkError, getIdBulkError } from './utils';
 import { transformBulkError } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { updateRules } from '../../rules/update_rules';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
 export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
@@ -29,11 +34,13 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
     },
     async handler(request: BulkUpdateRulesRequest, headers) {
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = isFunction(request.getActionsClient)
-        ? request.getActionsClient()
+      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
+        KibanaRequest.from((request as unknown) as Hapi.Request)
+      );
+      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+        ? request.getSavedObjectsClient()
         : null;
-
-      if (!alertsClient || !actionsClient) {
+      if (!alertsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
@@ -44,7 +51,6 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             enabled,
             false_positives: falsePositives,
             from,
-            immutable,
             query,
             language,
             output_index: outputIndex,
@@ -77,11 +83,11 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               enabled,
               falsePositives,
               from,
-              immutable,
               query,
               language,
               outputIndex,
               savedId,
+              savedObjectsClient,
               timelineId,
               timelineTitle,
               meta,
@@ -102,7 +108,17 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               version,
             });
             if (rule != null) {
-              return transformOrBulkError(rule.id, rule);
+              const ruleStatuses = await savedObjectsClient.find<
+                IRuleSavedAttributesSavedObjectAttributes
+              >({
+                type: ruleStatusSavedObjectType,
+                perPage: 1,
+                sortField: 'statusDate',
+                sortOrder: 'desc',
+                search: rule.id,
+                searchFields: ['alertId'],
+              });
+              return transformOrBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
             } else {
               return getIdBulkError({ id, ruleId });
             }
