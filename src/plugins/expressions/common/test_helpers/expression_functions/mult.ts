@@ -17,13 +17,28 @@
  * under the License.
  */
 
-import { Executor } from '../executor';
-import { add } from './expression_functions/add';
-import { mult } from './expression_functions/mult';
+import { ExpressionFunctionDefinition } from '../../expression_functions';
+import { ExpressionValueNum } from '../../expression_types';
 
-export const createUnitTestExecutor = () => {
-  const executor = Executor.createWithDefaults();
-  executor.registerFunction(add);
-  executor.registerFunction(mult);
-  return executor;
+export const mult: ExpressionFunctionDefinition<
+  'mult',
+  ExpressionValueNum,
+  { val: number },
+  ExpressionValueNum
+> = {
+  name: 'mult',
+  help: 'This function multiplies input by a number',
+  args: {
+    val: {
+      default: 0,
+      help: 'Number to multiply input by',
+      types: ['number'],
+    },
+  },
+  fn: ({ value }, args, context) => {
+    return {
+      type: 'num',
+      value: value * args.val,
+    };
+  },
 };

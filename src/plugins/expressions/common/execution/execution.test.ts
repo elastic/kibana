@@ -84,4 +84,19 @@ describe('Execution', () => {
       value: 5,
     });
   });
+
+  test('executes a chain of "add" and "mult" functions', async () => {
+    const execution = createExecution('add val=5 | mult val=-1 | add val=-10 | mult val=2');
+    execution.start({
+      type: 'num',
+      value: 0,
+    });
+
+    const result = await execution.result;
+
+    expect(result).toEqual({
+      type: 'num',
+      value: -30,
+    });
+  });
 });
