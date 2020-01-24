@@ -7,8 +7,9 @@
 import { defaults } from 'lodash/fp';
 import { AlertAction, IntervalSchedule } from '../../../../../alerting/server/types';
 import { readRules } from './read_rules';
-import { UpdateRuleParams } from './types';
+import { UpdateRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './types';
 import { addTags } from './add_tags';
+import { ruleStatusSavedObjectType } from './saved_object_mappings';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -140,6 +141,24 @@ export const updateRules = async ({
     await alertsClient.disable({ id: rule.id });
   } else if (!rule.enabled && enabled === true) {
     await alertsClient.enable({ id: rule.id });
+    const ruleCurrentStatus = savedObjectsClient
+      ? await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>({
+          type: ruleStatusSavedObjectType,
+          perPage: 1,
+          sortField: 'statusDate',
+          sortOrder: 'desc',
+          search: rule.id,
+          searchFields: ['alertId'],
+        })
+      : null;
+    // set current status for this rule to be 'going to run'
+    if (ruleCurrentStatus && ruleCurrentStatus.saved_objects.length > 0) {
+      const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
+      currentStatusToDisable.attributes.status = 'going to run';
+      await savedObjectsClient?.update(ruleStatusSavedObjectType, currentStatusToDisable.id, {
+        ...currentStatusToDisable.attributes,
+      });
+    }
   } else {
     // enabled is null or undefined and we do not touch the rule
   }
