@@ -90,14 +90,8 @@ describe('autocomplete', () => {
         suggestion =>
           suggestion.fnDef.type === 'datatable' &&
           suggestion.fnDef.context &&
+          suggestion.fnDef.context.types &&
           !(suggestion.fnDef.context.types as string[]).includes('datatable')
-      );
-
-      const withContextOnly = suggestions.findIndex(
-        suggestion =>
-          suggestion.fnDef.type !== 'datatable' &&
-          suggestion.fnDef.context &&
-          (suggestion.fnDef.context.types as string[]).includes('datatable')
       );
 
       const withNeither = suggestions.findIndex(
@@ -110,8 +104,7 @@ describe('autocomplete', () => {
       expect(suggestions[0].fnDef.type).toBe('datatable');
       expect(suggestions[0].fnDef.context?.types).toEqual(['datatable']);
 
-      expect(withReturnOnly).toBeLessThan(withContextOnly);
-      expect(withContextOnly).toBeLessThan(withNeither);
+      expect(withReturnOnly).toBeLessThan(withNeither);
     });
 
     it('should suggest arguments inside an expression', () => {
@@ -148,7 +141,6 @@ describe('autocomplete', () => {
         expression.length - 1
       );
       const shapeFn = functionSpecs.find(spec => spec.name === 'shape');
-      // const matchingValues = shapeFn.args.shape.options.filter((key: string) => key.includes('ar'));
       expect(suggestions.length).toBe(shapeFn.args.shape.options.length);
       expect(suggestions[0].start).toBe(expression.length - '"ar"'.length);
       expect(suggestions[0].end).toBe(expression.length);
