@@ -21,17 +21,22 @@ import { isEmpty } from 'lodash/fp';
 import { useQuerySignals } from '../../../../../containers/detection_engine/signals/use_query';
 import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
 import { esFilters, esQuery } from '../../../../../../../../../../src/plugins/data/common/es_query';
-import { SignalsAggregation, SignalsTotal } from '../types';
+import { RegisterQuery, SignalsAggregation, SignalsTotal } from '../types';
 import { formatSignalsData, getSignalsHistogramQuery } from './helpers';
 import { useTheme } from '../../../../../components/charts/common';
 import { useKibana } from '../../../../../lib/kibana';
+import { inputsModel } from '../../../../../store';
+import { DETECTIONS_HISTOGRAM_ID } from '..';
 
 interface HistogramSignalsProps {
   filters?: esFilters.Filter[];
   from: number;
+  isInspect: boolean;
   legendPosition?: Position;
   loadingInitial: boolean;
   query?: Query;
+  registerQuery: (params: RegisterQuery) => void;
+  signalIndexName: string | null;
   setTotalSignalsCount: React.Dispatch<SignalsTotal>;
   stackByField: string;
   to: number;
@@ -46,17 +51,41 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
     filters,
     legendPosition = 'right',
     loadingInitial,
+    registerQuery,
+    signalIndexName,
     setTotalSignalsCount,
     stackByField,
     updateDateRange,
   }) => {
-    const [isLoadingSignals, signalsData, setQuery] = useQuerySignals<{}, SignalsAggregation>(
-      getSignalsHistogramQuery(stackByField, from, to, [])
+    const {
+      loading: isLoadingSignals,
+      data: signalsData,
+      setQuery,
+      response,
+      request,
+      refetch,
+    } = useQuerySignals<{}, SignalsAggregation>(
+      getSignalsHistogramQuery(stackByField, from, to, []),
+      signalIndexName
     );
     const theme = useTheme();
     const kibana = useKibana();
 
     const formattedSignalsData = useMemo(() => formatSignalsData(signalsData), [signalsData]);
+
+    useEffect(() => {
+      if (refetch != null && registerQuery != null) {
+        registerQuery({
+          id: DETECTIONS_HISTOGRAM_ID,
+          inspect: {
+            dsl: [request],
+            response: [response],
+          },
+          loading: isLoadingSignals,
+          refetch: refetch as inputsModel.Refetch,
+        });
+      }
+    }, [registerQuery, isLoadingSignals, signalsData, response, request, refetch]);
 
     useEffect(() => {
       setTotalSignalsCount(
