@@ -77,6 +77,7 @@ exports[`MonitorList component renders a no items message when no data is provid
         <OverviewPageLink
           dataTestSubj="xpack.uptime.monitorList.prevButton"
           direction="prev"
+          pagination=""
         />
       </EuiFlexItem>
       <EuiFlexItem
@@ -85,6 +86,7 @@ exports[`MonitorList component renders a no items message when no data is provid
         <OverviewPageLink
           dataTestSubj="xpack.uptime.monitorList.nextButton"
           direction="next"
+          pagination=""
         />
       </EuiFlexItem>
     </EuiFlexGroup>
