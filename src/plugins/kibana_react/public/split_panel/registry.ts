@@ -30,10 +30,6 @@ export class PanelRegistry {
     this.panels.push(panel);
   }
 
-  getResizerNeighbours(idx: number) {
-    return [this.panels[idx], this.panels[idx + 1]];
-  }
-
   getPanels() {
     return this.panels;
   }
