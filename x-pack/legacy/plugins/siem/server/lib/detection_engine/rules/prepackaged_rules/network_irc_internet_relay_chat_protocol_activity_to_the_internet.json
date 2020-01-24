@@ -1,16 +1,51 @@
 {
-  "description": "Network - IRC (Internet Relay Chat) Protocol Activity to the Internet\t",
+  "description": "This signal detects events that use common ports for IRC to the Internet. IRC\nis a common protocol that can be used chat and file transfer. This protocol\nalso makes a good candidate for remote control of malware and data transfer in\nand out of a network.\n",
   "enabled": false,
   "filters": [],
   "from": "now-6m",
-  "immutable": true,
   "interval": "5m",
   "language": "kuery",
-  "name": "Network - IRC (Internet Relay Chat) Protocol Activity to the Internet\t",
-  "query": "(destination.port:20 or destination.port:21) and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
-  "risk_score": 50,
+  "name": "IRC (Internet Relay Chat) Protocol Activity to the Internet",
+  "query": "network.transport: tcp and destination.port:(6667 or 6697) and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
+  "risk_score": 25,
   "rule_id": "c6474c34-4953-447a-903e-9fcb7b6661aa",
   "severity": "low",
+  "tags": [
+    "Elastic",
+    "network"
+  ],
+  "threats": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "techniques": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0010",
+        "name": "Exfiltration",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "techniques": [
+        {
+          "id": "T1043",
+          "name": "Exfiltration Over Alternative Protocol",
+          "reference": "https://attack.mitre.org/techniques/T1048/"
+        }
+      ]
+    }
+  ],
   "to": "now",
   "type": "query",
   "version": 1
