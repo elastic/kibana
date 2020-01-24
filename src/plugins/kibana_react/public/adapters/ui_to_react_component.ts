@@ -32,7 +32,7 @@ export const uiToReactComponent = <Props extends object>(
         uiComp.render(ref.current, props);
       }
       return () => {
-        uiComp.unmount();
+        if (uiComp.unmount) uiComp.unmount();
       };
     });
 

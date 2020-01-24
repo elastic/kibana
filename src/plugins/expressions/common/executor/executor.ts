@@ -22,13 +22,8 @@
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
-import {
-  ExpressionRenderFunction,
-  ExpressionRenderDefinition,
-  RenderFunctionsRegistry,
-} from './expression_renderers';
 import { Execution } from '../execution/execution';
-import { IRegistry } from './types';
+import { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
 import { getType } from '../expression_types';
@@ -100,13 +95,10 @@ export class Executor {
    */
   public readonly types: TypesRegistry;
 
-  public readonly renderers: RenderFunctionsRegistry;
-
   constructor(state?: ExecutorState) {
     this.state = createExecutorContainer(state);
     this.functions = new FunctionsRegistry(this);
     this.types = new TypesRegistry(this);
-    this.renderers = new RenderFunctionsRegistry(this);
   }
 
   public registerFunction(
@@ -133,19 +125,6 @@ export class Executor {
 
   public getTypes(): Record<string, ExpressionType> {
     return { ...this.state.get().types };
-  }
-
-  public registerRenderer(
-    definition: ExpressionRenderDefinition | (() => ExpressionRenderDefinition)
-  ) {
-    const renderFunction = new ExpressionRenderFunction(
-      typeof definition === 'object' ? definition : definition()
-    );
-    this.state.transitions.addRenderer(renderFunction);
-  }
-
-  public getRenderers(): Record<string, undefined | ExpressionRenderFunction> {
-    return { ...this.state.get().renderers };
   }
 
   public extendContext(extraContext: Record<string, unknown>) {

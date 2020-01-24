@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './ui';
+export * from './ui_component';

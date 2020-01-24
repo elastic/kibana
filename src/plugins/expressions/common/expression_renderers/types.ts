@@ -17,13 +17,29 @@
  * under the License.
  */
 
-export {
-  TypeToString,
-  KnownTypeToString,
-  TypeString,
-  UnmappedTypeStrings,
-  SerializedFieldFormat,
-} from './common';
+import { ExecutionContext } from '../execution';
 
-export * from './style';
-export * from './registry';
+export interface ExpressionRenderDefinition<
+  Config = any,
+  Context extends ExecutionContext = ExecutionContext
+> {
+  /**
+   * Name of the renderer.
+   */
+  name: string;
+
+  /**
+   * Name of the renderer as will be displayed to user.
+   */
+  displayName: string;
+
+  /**
+   * Help text as will be displayed to user.
+   */
+  help?: string;
+
+  validate?: () => undefined | Error;
+  reuseDomNode: boolean;
+
+  render: (domNode: HTMLElement, config: Config, context: Context) => Promise<void>;
+}

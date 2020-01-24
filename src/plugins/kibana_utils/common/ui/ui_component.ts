@@ -39,5 +39,5 @@ export interface UiComponent<Props extends object> {
    * Un-mount UI component. Call it to remove view from DOM. Implementers of this
    * interface should clear DOM from this UI component and destroy any internal state.
    */
-  unmount(): void;
+  unmount?(): void;
 }

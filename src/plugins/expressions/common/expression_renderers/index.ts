@@ -17,13 +17,6 @@
  * under the License.
  */
 
-export {
-  TypeToString,
-  KnownTypeToString,
-  TypeString,
-  UnmappedTypeStrings,
-  SerializedFieldFormat,
-} from './common';
-
-export * from './style';
-export * from './registry';
+export * from './types';
+export * from './expression_renderer';
+export * from './expression_renderer_registry';

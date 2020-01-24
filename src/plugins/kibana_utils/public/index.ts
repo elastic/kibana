@@ -17,8 +17,7 @@
  * under the License.
  */
 
-export { defer, Defer, of, createGetterSetter, Get, Set } from '../common';
-export * from './types';
+export { defer, Defer, of, createGetterSetter, Get, Set, UiComponent } from '../common';
 export * from './core';
 export * from './errors';
 export * from './field_mapping';

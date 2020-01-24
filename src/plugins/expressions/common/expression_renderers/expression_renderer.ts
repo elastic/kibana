@@ -17,21 +17,10 @@
  * under the License.
  */
 
-/* eslint-disable max-classes-per-file */
+import { ExpressionRenderDefinition } from './types';
+import { ExecutionContext } from '../execution';
 
-import { IRegistry } from './types';
-import { Executor } from './executor';
-
-export interface ExpressionRenderDefinition<Config = any> {
-  name: string;
-  displayName: string;
-  help?: string;
-  validate?: () => void | Error;
-  reuseDomNode: boolean;
-  render: (domNode: HTMLElement, config: Config, handlers: any) => Promise<void>;
-}
-
-export class ExpressionRenderFunction {
+export class ExpressionRenderer {
   /**
    * This must match the name of the function that is used to create the `type: render` object.
    */
@@ -60,7 +49,7 @@ export class ExpressionRenderFunction {
   /**
    * The function called to render the data.
    */
-  render: (domNode: HTMLElement, config: any, handlers: any) => Promise<void>;
+  render: (el: HTMLElement, config: any, context: ExecutionContext) => Promise<void>;
 
   constructor(config: ExpressionRenderDefinition) {
     const { name, displayName, help, validate, reuseDomNode, render } = config;
@@ -71,25 +60,5 @@ export class ExpressionRenderFunction {
     this.validate = validate || (() => {});
     this.reuseDomNode = Boolean(reuseDomNode);
     this.render = render;
-  }
-}
-
-export class RenderFunctionsRegistry implements IRegistry<ExpressionRenderFunction> {
-  constructor(private readonly executor: Executor) {}
-
-  register(definition: ExpressionRenderDefinition | (() => ExpressionRenderDefinition)) {
-    this.executor.registerRenderer(definition);
-  }
-
-  public get(id: string): ExpressionRenderFunction | null {
-    return this.executor.state.selectors.getRenderer(id);
-  }
-
-  public toJS(): Record<string, ExpressionRenderFunction> {
-    return this.executor.getRenderers();
-  }
-
-  public toArray(): ExpressionRenderFunction[] {
-    return Object.values(this.toJS());
   }
 }
