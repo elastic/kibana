@@ -337,8 +337,6 @@ function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIn
   return alerts.map(alert => ({
     ...alert,
     tagsText: alert.tags.join(', '),
-    alertType: alertTypesIndex[alert.alertTypeId]
-      ? alertTypesIndex[alert.alertTypeId].name
-      : alert.alertTypeId,
+    alertType: alertTypesIndex[alert.alertTypeId]?.name ?? alert.alertTypeId,
   }));
 }
