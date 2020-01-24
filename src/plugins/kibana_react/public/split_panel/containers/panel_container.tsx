@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Children, ReactNode, useRef, useState, useCallback } from 'react';
+import React, { Children, ReactNode, useRef, useState, useCallback, useEffect } from 'react';
 
 import { keyCodes } from '@elastic/eui';
 import { PanelContextProvider } from '../context';
@@ -46,7 +46,8 @@ export function PanelsContainer({
   onPanelWidthChange,
   resizerClassName,
 }: Props) {
-  const [firstChild, secondChild] = Children.toArray(children);
+  const childrenArray = Children.toArray(children);
+  const [firstChild, secondChild] = childrenArray;
 
   const registryRef = useRef(new PanelRegistry());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -90,6 +91,18 @@ export function PanelsContainer({
     },
     [onPanelWidthChange]
   );
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') {
+      // For now we only support bi-split
+      if (childrenArray.length > 2) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          '[Split Panels Container] Detected more than two children; ignoring additional children.'
+        );
+      }
+    }
+  }, [childrenArray.length]);
 
   const childrenWithResizer = [
     firstChild,
