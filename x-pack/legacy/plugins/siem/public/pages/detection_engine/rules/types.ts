@@ -134,5 +134,5 @@ export interface IMitreAttack {
 export interface IMitreEnterpriseAttack {
   framework: string;
   tactic: IMitreAttack;
-  techniques: IMitreAttack[];
+  technique: IMitreAttack[];
 }

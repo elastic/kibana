@@ -96,7 +96,7 @@ const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson =>
       .map(threat => ({
         ...threat,
         framework: 'MITRE ATT&CK',
-        techniques: threat.techniques.map(technique => {
+        technique: threat.technique.map(technique => {
           const { id, name, reference } = technique;
           return { id, name, reference };
         }),

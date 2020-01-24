@@ -91,7 +91,7 @@ export const threats = Joi.array().items(
   Joi.object({
     framework: threat_framework.required(),
     tactic: threat_tactic.required(),
-    techniques: threat_techniques.required(),
+    technique: threat_techniques.required(),
   })
 );
 export const created_at = Joi.string()

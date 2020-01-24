@@ -289,7 +289,7 @@ describe('import rules schema', () => {
                 name: 'fakeName',
                 reference: 'fakeRef',
               },
-              techniques: [
+              technique: [
                 {
                   id: 'techniqueId',
                   name: 'techniqueName',
@@ -714,7 +714,7 @@ describe('import rules schema', () => {
                 name: 'fakeName',
                 reference: 'fakeRef',
               },
-              techniques: [
+              technique: [
                 {
                   id: 'techniqueId',
                   name: 'techniqueName',
@@ -754,7 +754,7 @@ describe('import rules schema', () => {
           threats: [
             {
               framework: 'fake',
-              techniques: [
+              technique: [
                 {
                   id: 'techniqueId',
                   name: 'techniqueName',
@@ -769,7 +769,7 @@ describe('import rules schema', () => {
       );
     });
 
-    test('You cannot send in an array of threats that are missing "techniques"', () => {
+    test('You cannot send in an array of threats that are missing "technique"', () => {
       expect(
         importRulesSchema.validate<
           Partial<Omit<ImportRuleAlertRest, 'threats'>> & {
@@ -803,7 +803,7 @@ describe('import rules schema', () => {
           ],
         }).error.message
       ).toEqual(
-        'child "threats" fails because ["threats" at position 0 fails because [child "techniques" fails because ["techniques" is required]]]'
+        'child "threats" fails because ["threats" at position 0 fails because [child "technique" fails because ["technique" is required]]]'
       );
     });
 

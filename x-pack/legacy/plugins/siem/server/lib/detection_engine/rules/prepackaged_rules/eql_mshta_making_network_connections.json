@@ -25,7 +25,7 @@
         "name": "Execution",
         "reference": "https://attack.mitre.org/tactics/TA0002/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1170",
           "name": "Mshta",

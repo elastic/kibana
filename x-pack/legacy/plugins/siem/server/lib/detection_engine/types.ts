@@ -18,7 +18,7 @@ export interface IMitreAttack {
 export interface ThreatParams {
   framework: string;
   tactic: IMitreAttack;
-  techniques: IMitreAttack[];
+  technique: IMitreAttack[];
 }
 
 export interface RuleAlertParams {

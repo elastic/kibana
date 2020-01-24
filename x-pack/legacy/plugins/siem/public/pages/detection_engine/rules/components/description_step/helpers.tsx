@@ -132,7 +132,7 @@ export const buildThreatsDescription = ({
                     {tactic != null ? tactic.text : ''}
                   </EuiLink>
                   <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-                    {threat.techniques.map(technique => {
+                    {threat.technique.map(technique => {
                       const myTechnique = techniquesOptions.find(t => t.id === technique.id);
                       return (
                         <EuiFlexItem>

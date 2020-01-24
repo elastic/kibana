@@ -11,7 +11,7 @@ export const threatsDefault = [
   {
     framework: 'MITRE ATT&CK',
     tactic: { id: 'none', name: 'none', reference: 'none' },
-    techniques: [],
+    technique: [],
   },
 ];
 

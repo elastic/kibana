@@ -62,10 +62,10 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
     if (!isEmpty(values[values.length - 1])) {
       field.setValue([
         ...values,
-        { tactic: { id: 'none', name: 'none', reference: 'none' }, techniques: [] },
+        { tactic: { id: 'none', name: 'none', reference: 'none' }, technique: [] },
       ]);
     } else {
-      field.setValue([{ tactic: { id: 'none', name: 'none', reference: 'none' }, techniques: [] }]);
+      field.setValue([{ tactic: { id: 'none', name: 'none', reference: 'none' }, technique: [] }]);
     }
   }, [field]);
 
@@ -82,7 +82,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
         {
           ...values[index],
           tactic: { id, reference, name },
-          techniques: [],
+          technique: [],
         },
         ...values.slice(index + 1),
       ]);
@@ -96,7 +96,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
         ...values.slice(0, index),
         {
           ...values[index],
-          techniques: selectedOptions,
+          technique: selectedOptions,
         },
         ...values.slice(index + 1),
       ]);
@@ -133,9 +133,9 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
   );
 
   const getSelectTechniques = (item: IMitreEnterpriseAttack, index: number, disabled: boolean) => {
-    const invalid = isMitreAttackInvalid(item.tactic.name, item.techniques);
+    const invalid = isMitreAttackInvalid(item.tactic.name, item.technique);
     const options = techniquesOptions.filter(t => t.tactics.includes(kebabCase(item.tactic.name)));
-    const selectedOptions = item.techniques.map(technic => ({
+    const selectedOptions = item.technique.map(technic => ({
       ...technic,
       label: `${technic.name} (${technic.id})`, // API doesn't allow for label field
     }));

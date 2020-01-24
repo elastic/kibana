@@ -720,7 +720,7 @@ describe('update rules schema', () => {
           name: 'fakeName',
           reference: 'fakeRef',
         },
-        techniques: [
+        technique: [
           {
             id: 'techniqueId',
             name: 'techniqueName',
@@ -752,7 +752,7 @@ describe('update rules schema', () => {
               name: 'fakeName',
               reference: 'fakeRef',
             },
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -792,7 +792,7 @@ describe('update rules schema', () => {
               name: 'fakeName',
               reference: 'fakeRef',
             },
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -830,7 +830,7 @@ describe('update rules schema', () => {
         threats: [
           {
             framework: 'fake',
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -845,11 +845,11 @@ describe('update rules schema', () => {
     );
   });
 
-  test('threats is invalid when updated with missing techniques', () => {
+  test('threats is invalid when updated with missing technique', () => {
     expect(
       updateRulesSchema.validate<
         Partial<Omit<UpdateRuleAlertParamsRest, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'techniques'>>>;
+          threats: Array<Partial<Omit<ThreatParams, 'technique'>>>;
         }
       >({
         id: 'rule-1',
@@ -877,7 +877,7 @@ describe('update rules schema', () => {
         ],
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "techniques" fails because ["techniques" is required]]]'
+      'child "threats" fails because ["threats" at position 0 fails because [child "technique" fails because ["technique" is required]]]'
     );
   });
 

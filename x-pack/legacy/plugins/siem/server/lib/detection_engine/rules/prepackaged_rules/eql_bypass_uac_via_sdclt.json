@@ -22,7 +22,7 @@
         "name": "Privilege Escalation",
         "reference": "https://attack.mitre.org/tactics/TA0004/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1088",
           "name": "Bypass User Account Control",

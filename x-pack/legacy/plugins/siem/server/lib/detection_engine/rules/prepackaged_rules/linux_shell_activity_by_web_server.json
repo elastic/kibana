@@ -33,7 +33,7 @@
         "name": "Persistence",
         "reference": "https://attack.mitre.org/techniques/TA0003/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1100",
           "name": "Web Shell",

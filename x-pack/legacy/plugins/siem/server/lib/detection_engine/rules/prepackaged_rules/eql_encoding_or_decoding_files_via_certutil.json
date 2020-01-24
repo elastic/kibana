@@ -22,7 +22,7 @@
         "name": "Defense Evasion",
         "reference": "https://attack.mitre.org/tactics/TA0005/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1140",
           "name": "Deobfuscate/Decode Files or Information",

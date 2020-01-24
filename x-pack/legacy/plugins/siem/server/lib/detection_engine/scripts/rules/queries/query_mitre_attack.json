@@ -13,7 +13,7 @@
         "name": "impact",
         "reference": "https://attack.mitre.org/tactics/TA0040/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1499",
           "name": "endpoint denial of service",
@@ -28,7 +28,7 @@
         "name": "Automated Exfiltration",
         "reference": "https://attack.mitre.org/techniques/T1020/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1002",
           "name": "Data Compressed",

@@ -60,7 +60,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -123,7 +123,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -188,7 +188,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -253,7 +253,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -316,7 +316,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -382,7 +382,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -448,7 +448,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -514,7 +514,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -631,7 +631,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -704,7 +704,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -866,7 +866,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -987,7 +987,7 @@ describe('utils', () => {
                 name: 'impact',
                 reference: 'https://attack.mitre.org/tactics/TA0040/',
               },
-              techniques: [
+              technique: [
                 {
                   id: 'T1499',
                   name: 'endpoint denial of service',
@@ -1047,7 +1047,7 @@ describe('utils', () => {
                 name: 'impact',
                 reference: 'https://attack.mitre.org/tactics/TA0040/',
               },
-              techniques: [
+              technique: [
                 {
                   id: 'T1499',
                   name: 'endpoint denial of service',
@@ -1096,7 +1096,7 @@ describe('utils', () => {
                 name: 'impact',
                 reference: 'https://attack.mitre.org/tactics/TA0040/',
               },
-              techniques: [
+              technique: [
                 {
                   id: 'T1499',
                   name: 'endpoint denial of service',

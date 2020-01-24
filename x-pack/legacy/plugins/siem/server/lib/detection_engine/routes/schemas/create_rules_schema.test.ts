@@ -284,7 +284,7 @@ describe('create rules schema', () => {
               name: 'fakeName',
               reference: 'fakeRef',
             },
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -707,7 +707,7 @@ describe('create rules schema', () => {
               name: 'fakeName',
               reference: 'fakeRef',
             },
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -747,7 +747,7 @@ describe('create rules schema', () => {
         threats: [
           {
             framework: 'fake',
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -762,7 +762,7 @@ describe('create rules schema', () => {
     );
   });
 
-  test('You cannot send in an array of threats that are missing "techniques"', () => {
+  test('You cannot send in an array of threats that are missing "technique"', () => {
     expect(
       createRulesSchema.validate<
         Partial<Omit<RuleAlertParamsRest, 'threats'>> & {
@@ -796,7 +796,7 @@ describe('create rules schema', () => {
         ],
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "techniques" fails because ["techniques" is required]]]'
+      'child "threats" fails because ["threats" at position 0 fails because [child "technique" fails because ["technique" is required]]]'
     );
   });
 

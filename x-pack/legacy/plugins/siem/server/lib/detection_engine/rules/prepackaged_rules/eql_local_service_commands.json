@@ -22,7 +22,7 @@
         "name": "Execution",
         "reference": "https://attack.mitre.org/tactics/TA0002/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1021",
           "name": "Remote Services",

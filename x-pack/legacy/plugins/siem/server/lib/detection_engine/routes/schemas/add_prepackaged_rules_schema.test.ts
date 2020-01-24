@@ -267,7 +267,7 @@ describe('add prepackaged rules schema', () => {
               name: 'fakeName',
               reference: 'fakeRef',
             },
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -793,7 +793,7 @@ describe('add prepackaged rules schema', () => {
               name: 'fakeName',
               reference: 'fakeRef',
             },
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -833,7 +833,7 @@ describe('add prepackaged rules schema', () => {
         threats: [
           {
             framework: 'fake',
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -849,7 +849,7 @@ describe('add prepackaged rules schema', () => {
     );
   });
 
-  test('You cannot send in an array of threats that are missing "techniques"', () => {
+  test('You cannot send in an array of threats that are missing "technique"', () => {
     expect(
       addPrepackagedRulesSchema.validate<
         Partial<Omit<PrepackagedRules, 'threats'>> & {
@@ -883,7 +883,7 @@ describe('add prepackaged rules schema', () => {
         version: 1,
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "techniques" fails because ["techniques" is required]]]'
+      'child "threats" fails because ["threats" at position 0 fails because [child "technique" fails because ["technique" is required]]]'
     );
   });
 

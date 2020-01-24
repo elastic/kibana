@@ -22,7 +22,7 @@
         "name": "Persistence",
         "reference": "https://attack.mitre.org/tactics/TA0003/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1044",
           "name": "File System Permissions Weakness",

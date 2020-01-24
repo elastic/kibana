@@ -38,7 +38,7 @@ export const mockPrepackagedRule = (): PrepackagedRules => ({
     {
       framework: 'fake',
       tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
+      technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
   enabled: true,
@@ -73,7 +73,7 @@ export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
     {
       framework: 'fake',
       tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
+      technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
 });
@@ -306,7 +306,7 @@ export const getResult = (): RuleAlertType => ({
           name: 'impact',
           reference: 'https://attack.mitre.org/tactics/TA0040/',
         },
-        techniques: [
+        technique: [
           {
             id: 'T1499',
             name: 'endpoint denial of service',

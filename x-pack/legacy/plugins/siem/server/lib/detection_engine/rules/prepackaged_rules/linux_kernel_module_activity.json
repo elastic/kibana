@@ -32,7 +32,7 @@
         "name": "Persistence",
         "reference": "https://attack.mitre.org/techniques/TA0003/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1215",
           "name": "Kernel Modules and Extensions",

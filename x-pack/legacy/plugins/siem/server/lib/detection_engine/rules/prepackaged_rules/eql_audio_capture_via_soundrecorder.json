@@ -22,7 +22,7 @@
         "name": "Collection",
         "reference": "https://attack.mitre.org/tactics/TA0009/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1123",
           "name": "Audio Capture",
