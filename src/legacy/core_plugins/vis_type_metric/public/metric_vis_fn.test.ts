@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { npSetup } from 'ui/new_platform';
-
 import { createMetricVisFn } from './metric_vis_fn';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
@@ -26,7 +24,7 @@ import { functionWrapper } from '../../../../plugins/expressions/public/function
 jest.mock('ui/new_platform');
 
 describe('interpreter/functions#metric', () => {
-  const fn = functionWrapper(() => createMetricVisFn(npSetup.plugins.charts));
+  const fn = functionWrapper(createMetricVisFn);
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],
