@@ -31,3 +31,9 @@ export const functionSpecs: AnyExpressionFunctionDefinition[] = [
   variableSet,
   variable,
 ];
+
+export * from './clog';
+export * from './font';
+export * from './kibana';
+export * from './var_set';
+export * from './var';

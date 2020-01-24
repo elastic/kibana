@@ -18,36 +18,106 @@
  */
 
 import { Executor } from './executor';
-import * as expressionTypes from '../expression_types/specs';
+import * as expressionTypes from '../expression_types';
+import * as expressionFunctions from '../expression_functions';
 
 describe('Executor', () => {
   test('can instantiate', () => {
     new Executor();
   });
 
-  test('can register a type', () => {
-    const executor = new Executor();
-    executor.registerType(expressionTypes.datatable);
+  describe('type registry', () => {
+    test('can register a type', () => {
+      const executor = new Executor();
+      executor.registerType(expressionTypes.datatable);
+    });
+
+    test('can register all types', () => {
+      const executor = new Executor();
+      for (const type of expressionTypes.typeSpecs) executor.registerType(type);
+    });
+
+    test('can retrieve all types', () => {
+      const executor = new Executor();
+      executor.registerType(expressionTypes.datatable);
+      const types = executor.getTypes();
+      expect(Object.keys(types)).toEqual(['datatable']);
+    });
+
+    test('can retrieve all types - 2', () => {
+      const executor = new Executor();
+      for (const type of expressionTypes.typeSpecs) executor.registerType(type);
+      const types = executor.getTypes();
+      expect(Object.keys(types).sort()).toEqual(
+        expressionTypes.typeSpecs.map(spec => spec.name).sort()
+      );
+    });
   });
 
-  test('can register all types', () => {
-    const executor = new Executor();
-    for (const type of expressionTypes.typeSpecs) executor.registerType(type);
+  describe('function registry', () => {
+    test('can register a function', () => {
+      const executor = new Executor();
+      executor.registerFunction(expressionFunctions.clog);
+    });
+
+    test('can register all functions', () => {
+      const executor = new Executor();
+      for (const functionDefinition of expressionFunctions.functionSpecs)
+        executor.registerFunction(functionDefinition);
+    });
+
+    test('can retrieve all functions', () => {
+      const executor = new Executor();
+      executor.registerFunction(expressionFunctions.clog);
+      const functions = executor.getFunctions();
+      expect(Object.keys(functions)).toEqual(['clog']);
+    });
+
+    test('can retrieve all functions - 2', () => {
+      const executor = new Executor();
+      for (const functionDefinition of expressionFunctions.functionSpecs)
+        executor.registerFunction(functionDefinition);
+      const functions = executor.getFunctions();
+      expect(Object.keys(functions).sort()).toEqual(
+        expressionFunctions.functionSpecs.map(spec => spec.name).sort()
+      );
+    });
   });
 
-  test('can retrieve all types', () => {
-    const executor = new Executor();
-    executor.registerType(expressionTypes.datatable);
-    const types = executor.getTypes();
-    expect(Object.keys(types)).toEqual(['datatable']);
-  });
+  describe('context', () => {
+    test('context is empty by default', () => {
+      const executor = new Executor();
+      expect(executor.context).toEqual({});
+    });
 
-  test('can retrieve all types - 2', () => {
-    const executor = new Executor();
-    for (const type of expressionTypes.typeSpecs) executor.registerType(type);
-    const types = executor.getTypes();
-    expect(Object.keys(types).sort()).toEqual(
-      expressionTypes.typeSpecs.map(spec => spec.name).sort()
-    );
+    test('can extend context', () => {
+      const executor = new Executor();
+      executor.extendContext({
+        foo: 'bar',
+      });
+      expect(executor.context).toEqual({
+        foo: 'bar',
+      });
+    });
+
+    test('can extend context multiple times with multiple keys', () => {
+      const executor = new Executor();
+      const abortSignal = {};
+      const env = {};
+
+      executor.extendContext({
+        foo: 'bar',
+      });
+      executor.extendContext({
+        abortSignal,
+        env,
+      });
+
+      expect(executor.context).toEqual({
+        foo: 'bar',
+        abortSignal,
+        env,
+      });
+    });
   });
 });
