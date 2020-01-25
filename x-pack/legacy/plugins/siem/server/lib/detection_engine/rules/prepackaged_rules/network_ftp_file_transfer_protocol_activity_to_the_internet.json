@@ -1,5 +1,13 @@
 {
   "description": "This signal detects events that may indicate the use of FTP network connections.\nThe File Transfer Protocol (FTP) has been around in its current form since the\n1980's. It can be an efficient and normal procedure on your network to send and\nreceive files. Because it is common and efficient, adversaries will also often\nuse this protocol to exfiltrate data from your network or download new tools.\nAdditionally, FTP is a plaintext protocol which may expose your username and\npassword, if intercepted.\n",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "FTP (File Transfer Protocol) Activity to the Internet",
   "query": "network.transport: tcp and destination.port: (20 or 21) and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
@@ -7,7 +15,7 @@
   "rule_id": "87ec6396-9ac4-4706-bcf0-2ebb22002f43",
   "severity": "low",
   "tags": ["Elastic", "network"],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {

@@ -3,6 +3,14 @@
   "false_positives": [
     "Some normal use of this command may originate from server or network administrators engaged in network troubleshooting."
   ],
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "max_signals": 33,
   "name": "Network Sniffing via Tcpdump",
@@ -11,7 +19,7 @@
   "rule_id": "7a137d76-ce3d-48e2-947d-2747796a78c0",
   "severity": "low",
   "tags": ["Elastic", "linux"],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {

@@ -16,7 +16,7 @@
   "rule_id": "a4ec1382-4557-452b-89ba-e413b22ed4b8",
   "severity": "medium",
   "tags": ["EIA"],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {

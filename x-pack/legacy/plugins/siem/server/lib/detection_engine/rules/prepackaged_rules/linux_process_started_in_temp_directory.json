@@ -3,6 +3,14 @@
   "false_positives": [
     "Build systems like Jenkins may start processes in the /tmp directory. These can be exempted by name or by username."
   ],
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "max_signals": 33,
   "name": "Unusual Process Execution - Temp",

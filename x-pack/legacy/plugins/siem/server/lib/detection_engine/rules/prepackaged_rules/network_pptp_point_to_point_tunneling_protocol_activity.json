@@ -1,5 +1,13 @@
 {
   "description": "This signal detects events that may indicate use of a PPTP VPN connection. Some threat actors use these types of connections to tunnel their traffic while avoiding detection.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "PPTP (Point to Point Tunneling Protocol) Activity",
   "query": "network.transport: tcp and destination.port: 1723",

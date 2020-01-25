@@ -7,7 +7,7 @@
 import { AboutStepRule } from '../../types';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/search_super_select/translations';
 
-export const threatsDefault = [
+export const threatDefault = [
   {
     framework: 'MITRE ATT&CK',
     tactic: { id: 'none', name: 'none', reference: 'none' },
@@ -28,5 +28,5 @@ export const stepAboutDefaultValue: AboutStepRule = {
     id: null,
     title: DEFAULT_TIMELINE_TITLE,
   },
-  threats: threatsDefault,
+  threat: threatDefault,
 };

@@ -224,7 +224,7 @@ describe('add prepackaged rules schema', () => {
     ).toBeFalsy();
   });
 
-  test('You can send in an empty array to threats', () => {
+  test('You can send in an empty array to threat', () => {
     expect(
       addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
         rule_id: 'rule-1',
@@ -241,12 +241,12 @@ describe('add prepackaged rules schema', () => {
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [],
+        threat: [],
         version: 1,
       }).error
     ).toBeFalsy();
   });
-  test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, version, threats] does validate', () => {
+  test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, version, s] does validate', () => {
     expect(
       addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
         rule_id: 'rule-1',
@@ -259,7 +259,7 @@ describe('add prepackaged rules schema', () => {
         severity: 'low',
         interval: '5m',
         type: 'query',
-        threats: [
+        threat: [
           {
             framework: 'someFramework',
             tactic: {
@@ -744,11 +744,11 @@ describe('add prepackaged rules schema', () => {
     );
   });
 
-  test('You cannot send in an array of threats that are missing "framework"', () => {
+  test('You cannot send in an array of threat that are missing "framework"', () => {
     expect(
       addPrepackagedRulesSchema.validate<
-        Partial<Omit<PrepackagedRules, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'framework'>>>;
+        Partial<Omit<PrepackagedRules, 'threat'>> & {
+          threat: Array<Partial<Omit<ThreatParams, 'framework'>>>;
         }
       >({
         rule_id: 'rule-1',
@@ -765,7 +765,7 @@ describe('add prepackaged rules schema', () => {
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [
+        threat: [
           {
             tactic: {
               id: 'fakeId',
@@ -784,15 +784,15 @@ describe('add prepackaged rules schema', () => {
         version: 1,
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "framework" fails because ["framework" is required]]]'
+      'child "threat" fails because ["threat" at position 0 fails because [child "framework" fails because ["framework" is required]]]'
     );
   });
 
-  test('You cannot send in an array of threats that are missing "tactic"', () => {
+  test('You cannot send in an array of threat that are missing "tactic"', () => {
     expect(
       addPrepackagedRulesSchema.validate<
-        Partial<Omit<PrepackagedRules, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
+        Partial<Omit<PrepackagedRules, 'threat'>> & {
+          threat: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
         }
       >({
         rule_id: 'rule-1',
@@ -809,7 +809,7 @@ describe('add prepackaged rules schema', () => {
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [
+        threat: [
           {
             framework: 'fake',
             technique: [
@@ -824,15 +824,15 @@ describe('add prepackaged rules schema', () => {
         version: 1,
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "tactic" fails because ["tactic" is required]]]'
+      'child "threat" fails because ["threat" at position 0 fails because [child "tactic" fails because ["tactic" is required]]]'
     );
   });
 
-  test('You cannot send in an array of threats that are missing "technique"', () => {
+  test('You cannot send in an array of threat that are missing "technique"', () => {
     expect(
       addPrepackagedRulesSchema.validate<
-        Partial<Omit<PrepackagedRules, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'technique'>>>;
+        Partial<Omit<PrepackagedRules, 'threat'>> & {
+          threat: Array<Partial<Omit<ThreatParams, 'technique'>>>;
         }
       >({
         rule_id: 'rule-1',
@@ -849,7 +849,7 @@ describe('add prepackaged rules schema', () => {
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [
+        threat: [
           {
             framework: 'fake',
             tactic: {
@@ -862,7 +862,7 @@ describe('add prepackaged rules schema', () => {
         version: 1,
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "technique" fails because ["technique" is required]]]'
+      'child "threat" fails because ["threat" at position 0 fails because [child "technique" fails because ["technique" is required]]]'
     );
   });
 
@@ -1241,6 +1241,7 @@ describe('add prepackaged rules schema', () => {
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
+        index: ['auditbeat-*'],
         name: 'some-name',
         severity: 'low',
         type: 'query',
@@ -1259,6 +1260,7 @@ describe('add prepackaged rules schema', () => {
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
+        index: ['auditbeat-*'],
         name: 'some-name',
         severity: 'junk',
         type: 'query',

@@ -244,7 +244,7 @@ describe('import rules schema', () => {
       ).toBeFalsy();
     });
 
-    test('You can send in an empty array to threats', () => {
+    test('You can send in an empty array to threat', () => {
       expect(
         importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
           rule_id: 'rule-1',
@@ -262,12 +262,12 @@ describe('import rules schema', () => {
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
-          threats: [],
+          threat: [],
         }).error
       ).toBeFalsy();
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threats] does validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
       expect(
         importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
           rule_id: 'rule-1',
@@ -281,7 +281,7 @@ describe('import rules schema', () => {
           severity: 'low',
           interval: '5m',
           type: 'query',
-          threats: [
+          threat: [
             {
               framework: 'someFramework',
               tactic: {
@@ -685,11 +685,11 @@ describe('import rules schema', () => {
       );
     });
 
-    test('You cannot send in an array of threats that are missing "framework"', () => {
+    test('You cannot send in an array of threat that are missing "framework"', () => {
       expect(
         importRulesSchema.validate<
-          Partial<Omit<ImportRuleAlertRest, 'threats'>> & {
-            threats: Array<Partial<Omit<ThreatParams, 'framework'>>>;
+          Partial<Omit<ImportRuleAlertRest, 'threat'>> & {
+            threat: Array<Partial<Omit<ThreatParams, 'framework'>>>;
           }
         >({
           rule_id: 'rule-1',
@@ -707,7 +707,7 @@ describe('import rules schema', () => {
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
-          threats: [
+          threat: [
             {
               tactic: {
                 id: 'fakeId',
@@ -725,15 +725,15 @@ describe('import rules schema', () => {
           ],
         }).error.message
       ).toEqual(
-        'child "threats" fails because ["threats" at position 0 fails because [child "framework" fails because ["framework" is required]]]'
+        'child "threat" fails because ["threat" at position 0 fails because [child "framework" fails because ["framework" is required]]]'
       );
     });
 
-    test('You cannot send in an array of threats that are missing "tactic"', () => {
+    test('You cannot send in an array of threat that are missing "tactic"', () => {
       expect(
         importRulesSchema.validate<
-          Partial<Omit<ImportRuleAlertRest, 'threats'>> & {
-            threats: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
+          Partial<Omit<ImportRuleAlertRest, 'threat'>> & {
+            threat: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
           }
         >({
           rule_id: 'rule-1',
@@ -751,7 +751,7 @@ describe('import rules schema', () => {
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
-          threats: [
+          threat: [
             {
               framework: 'fake',
               technique: [
@@ -765,15 +765,15 @@ describe('import rules schema', () => {
           ],
         }).error.message
       ).toEqual(
-        'child "threats" fails because ["threats" at position 0 fails because [child "tactic" fails because ["tactic" is required]]]'
+        'child "threat" fails because ["threat" at position 0 fails because [child "tactic" fails because ["tactic" is required]]]'
       );
     });
 
-    test('You cannot send in an array of threats that are missing "technique"', () => {
+    test('You cannot send in an array of threat that are missing "technique"', () => {
       expect(
         importRulesSchema.validate<
-          Partial<Omit<ImportRuleAlertRest, 'threats'>> & {
-            threats: Array<Partial<Omit<ThreatParams, 'technique'>>>;
+          Partial<Omit<ImportRuleAlertRest, 'threat'>> & {
+            threat: Array<Partial<Omit<ThreatParams, 'technique'>>>;
           }
         >({
           rule_id: 'rule-1',
@@ -791,7 +791,7 @@ describe('import rules schema', () => {
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
-          threats: [
+          threat: [
             {
               framework: 'fake',
               tactic: {
@@ -803,7 +803,7 @@ describe('import rules schema', () => {
           ],
         }).error.message
       ).toEqual(
-        'child "threats" fails because ["threats" at position 0 fails because [child "technique" fails because ["technique" is required]]]'
+        'child "threat" fails because ["threat" at position 0 fails because [child "technique" fails because ["technique" is required]]]'
       );
     });
 

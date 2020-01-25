@@ -1,5 +1,13 @@
 {
   "description": "This signal detects network events that may indicate the use of Tor traffic\nto the Internet. Tor is a network protocol that sends traffic through a\nseries of encrypted tunnels used to conceal a user's location and usage.\nTor may be used by threat actors as an alternate communication pathway to\nconceal the actor's indentity and avoid detection.\n",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Tor Activity to the Internet",
   "query": "network.transport: tcp and destination.port: (9001 or 9030) and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
@@ -7,7 +15,7 @@
   "rule_id": "7d2c38d7-ede7-4bdf-b140-445906e6c540",
   "severity": "low",
   "tags": ["Elastic", "network"],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {

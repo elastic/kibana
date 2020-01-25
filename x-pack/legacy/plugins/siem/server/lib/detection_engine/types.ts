@@ -46,7 +46,7 @@ export interface RuleAlertParams {
   to: string;
   timelineId: string | undefined | null;
   timelineTitle: string | undefined | null;
-  threats: ThreatParams[] | undefined | null;
+  threat: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
   version: number;
   updatedAt: string;

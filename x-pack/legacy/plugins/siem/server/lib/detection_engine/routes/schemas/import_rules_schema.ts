@@ -36,7 +36,7 @@ import {
   tags,
   to,
   type,
-  threats,
+  threat,
   references,
   version,
 } from './schemas';
@@ -82,7 +82,7 @@ export const importRulesSchema = Joi.object({
   tags: tags.default([]),
   to: to.default('now'),
   type: type.required(),
-  threats: threats.default([]),
+  threat: threat.default([]),
   references: references.default([]),
   version: version.default(1),
   created_at,

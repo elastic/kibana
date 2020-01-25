@@ -3,6 +3,14 @@
   "false_positives": [
     "Mknod is a Linux system program. Some normal use of this program, at varying levels of frequency, may originate from scripts, automation tools and frameworks. Usage by web servers is more likely to be suspicious."
   ],
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "max_signals": 33,
   "name": "Mknod Process Activity",

@@ -1,5 +1,13 @@
 {
   "description": "This signal detects events that may describe SMTP traffic from internal\nhosts to a host across the Internet. In an enterprise network, there is typically\na dedicate host that is internal that could perform this function. It is also\nfrequently abused by threat actors for command and control or data exfiltration.\n",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "SMTP to the Internet",
   "query": "network.transport: tcp and destination.port: (25 or 465 or 587) and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
@@ -7,7 +15,7 @@
   "rule_id": "67a9beba-830d-4035-bfe8-40b7e28f8ac4",
   "severity": "low",
   "tags": ["Elastic", "network"],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {

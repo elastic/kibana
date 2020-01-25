@@ -1,11 +1,11 @@
 {
   "name": "Query which has Mitre Attack Data",
-  "description": "Example query which has Mitre Attack Data as threats",
+  "description": "Example query which has Mitre Attack Data as threat",
   "risk_score": 1,
   "severity": "high",
   "type": "query",
   "query": "user.name: root or user.name: admin",
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {

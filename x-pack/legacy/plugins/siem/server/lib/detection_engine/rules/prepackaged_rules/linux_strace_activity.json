@@ -3,6 +3,14 @@
   "false_positives": [
     "Strace is a dual-use tool that can be used for benign or malicious activity. Some normal use of this command may originate from developers or SREs engaged in debugging or system call tracing."
   ],
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "max_signals": 33,
   "name": "Strace Process Activity",

@@ -139,7 +139,7 @@ export const schema: FormSchema = {
     ),
     labelAppend: OptionalFieldLabel,
   },
-  threats: {
+  threat: {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldMitreThreatLabel',
       {

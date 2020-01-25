@@ -13,7 +13,7 @@
   "rule_id": "231876e7-4d1f-4d63-a47c-47dd1acdc1cb",
   "severity": "low",
   "tags": ["Elastic", "linux"],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {

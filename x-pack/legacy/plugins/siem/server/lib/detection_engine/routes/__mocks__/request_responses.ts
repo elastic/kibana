@@ -34,7 +34,7 @@ export const mockPrepackagedRule = (): PrepackagedRules => ({
   severity: 'high',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
-  threats: [
+  threat: [
     {
       framework: 'fake',
       tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
@@ -69,7 +69,7 @@ export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
   severity: 'high',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
-  threats: [
+  threat: [
     {
       framework: 'fake',
       tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
@@ -298,7 +298,7 @@ export const getResult = (): RuleAlertType => ({
     severity: 'high',
     to: 'now',
     type: 'query',
-    threats: [
+    threat: [
       {
         framework: 'MITRE ATT&CK',
         tactic: {

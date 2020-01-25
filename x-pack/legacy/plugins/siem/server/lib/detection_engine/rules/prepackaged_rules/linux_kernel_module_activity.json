@@ -14,7 +14,7 @@
   "rule_id": "81cc58f5-8062-49a2-ba84-5cc4b4d31c40",
   "severity": "low",
   "tags": ["EIA", "auditbeat"],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {

@@ -3,6 +3,14 @@
   "false_positives": [
     "Security scans and tests may result in these errors. Misconfigured or buggy applications may produce large numbers of these errors. If the source is unexpected, or the user is unauthorized, or the request is unusual, these may be suspicious or malicious activity."
   ],
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "max_signals": 33,
   "name": "Web Application Suspicious Activity: Unauthorized Method",

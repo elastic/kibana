@@ -3,6 +3,14 @@
   "false_positives": [
     "ld.so is a dual-use tool that can be used for benign or malicious activity. Some normal use of this command may originate from developers or administrators. Use of ld.so by non-engineers or ordinary users is uncommon."
   ],
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "max_signals": 33,
   "name": "Ld.so Process Activity",

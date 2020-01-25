@@ -30,7 +30,7 @@ import {
   tags,
   to,
   type,
-  threats,
+  threat,
   references,
   version,
 } from './schemas';
@@ -58,7 +58,7 @@ export const addPrepackagedRulesSchema = Joi.object({
     .forbidden()
     .default(true)
     .valid(true),
-  index,
+  index: index.required(),
   interval: interval.default('5m'),
   query: query.allow('').default(''),
   language: language.default('kuery'),
@@ -77,7 +77,7 @@ export const addPrepackagedRulesSchema = Joi.object({
   tags: tags.default([]),
   to: to.default('now'),
   type: type.required(),
-  threats: threats.default([]),
+  threat: threat.default([]),
   references: references.default([]),
   version: version.required(),
 });

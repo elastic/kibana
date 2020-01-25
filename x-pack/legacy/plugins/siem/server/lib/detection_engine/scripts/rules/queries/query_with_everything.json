@@ -40,7 +40,7 @@
   "from": "now-6m",
   "severity": "high",
   "type": "query",
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {

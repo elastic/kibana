@@ -3,6 +3,14 @@
   "false_positives": [
     "You should apply a filter to this rule to exclude your enterprise nameservers that are expected to reach out to the Internet"
   ],
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "name": "DNS Activity to the Internet",
   "query": "destination.port:53 and (\n    network.direction: outbound or (\n        source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip:( 169.254.169.254/32 or 127.0.0.53/32 or 10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 or 224.0.0.251 or ff02\\:\\:fb or 255.255.255.255 )\n    )\n)\n",
   "references": [
@@ -13,7 +21,7 @@
   "rule_id": "6ea71ff0-9e95-475b-9506-2580d1ce6154",
   "severity": "low",
   "tags": ["Elastic", "network"],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {

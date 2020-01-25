@@ -1,5 +1,13 @@
 {
   "description": "TCP Port 8000 is commonly used for development environments of web server\nsoftware. It generally should not be exposed directly to the Internet. If you are\nrunning software like this on the Internet, you should consider placing it behind\na reverse proxy.\n",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "TCP Port 8000 Activity to the Internet",
   "query": "network.transport: tcp and destination.port: 8000 and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
@@ -7,7 +15,7 @@
   "rule_id": "08d5d7e2-740f-44d8-aeda-e41f4263efaf",
   "severity": "low",
   "tags": ["Elastic", "network"],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {

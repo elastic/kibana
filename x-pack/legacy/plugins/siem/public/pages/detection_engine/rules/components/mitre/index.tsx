@@ -21,7 +21,7 @@ import styled from 'styled-components';
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../translations';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
-import { threatsDefault } from '../step_about_rule/default_value';
+import { threatDefault } from '../step_about_rule/default_value';
 import { IMitreEnterpriseAttack } from '../../types';
 import { MyAddItemButton } from '../add_item_form';
 import { isMitreAttackInvalid } from './helpers';
@@ -49,7 +49,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
       const values = field.value as string[];
       const newValues = [...values.slice(0, index), ...values.slice(index + 1)];
       if (isEmpty(newValues)) {
-        field.setValue(threatsDefault);
+        field.setValue(threatDefault);
       } else {
         field.setValue(newValues);
       }
