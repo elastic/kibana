@@ -28,7 +28,7 @@ import { Logger } from '../logging';
 import { ElasticsearchServiceSetup, IClusterClient } from '../elasticsearch';
 import { PulseChannel, PulseInstruction } from './channel';
 import { sendUsageFrom, sendPulse, Fetcher } from './send_pulse';
-import { SavedObjectsServiceSetup } from '../saved_objects';
+// import { SavedObjectsServiceSetup } from '../saved_objects';
 import { InternalHttpServiceSetup } from '../http';
 import { PulseElasticsearchClient } from './client_wrappers/elasticsearch';
 import { registerPulseRoutes } from './routes';
@@ -39,7 +39,7 @@ export interface InternalPulseService {
 
 export interface PulseSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
-  savedObjects: SavedObjectsServiceSetup;
+  // savedObjects: SavedObjectsServiceSetup;
   http: InternalHttpServiceSetup;
 }
 
@@ -72,7 +72,7 @@ export class PulseService {
     this.log = coreContext.logger.get('pulse-service');
     this.channels = new Map(
       channelNames.map((id): [string, PulseChannel] => {
-        const instructions$ = new Subject<PulseInstruction>();
+        const instructions$ = new Subject<PulseInstruction[]>();
         this.instructions$.set(id, instructions$);
         const channel = new PulseChannel({ id, instructions$, logger: this.log });
         return [channel.id, channel];

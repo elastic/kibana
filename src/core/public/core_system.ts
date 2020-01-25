@@ -164,9 +164,9 @@ export class CoreSystem {
       await this.integrations.setup();
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
-      const notifications = this.notifications.setup({ uiSettings });
-      const pulse = await this.pulse.setup();
 
+      const pulse = await this.pulse.setup();
+      const notifications = this.notifications.setup({ uiSettings, pulse });
       const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({
         // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:

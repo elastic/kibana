@@ -44,11 +44,10 @@ export async function sendPulse<Response>(
 
   const channelsToSend = [];
   for (const channel of channels.values()) {
-    // eslint-disable-next-line no-console
-    console.log(`Getting records from channel ${channel.id}`);
     const records = await channel.getRecords();
-    // eslint-disable-next-line no-console
-    console.log(`Got some records! ${JSON.stringify(records)}`);
+    // if (!records || !records.length) {
+    //   return;
+    // }
     channelsToSend.push({
       records,
       channel_id: channel.id,

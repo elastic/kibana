@@ -48,7 +48,7 @@ export class PulseService {
   constructor() {
     this.channels = new Map(
       channelNames.map((id): [string, PulseChannel] => {
-        const instructions$ = new Subject<PulseInstruction>();
+        const instructions$ = new Subject<PulseInstruction[]>();
         this.instructions$.set(id, instructions$);
         const channel = new PulseChannel({ id, instructions$, logger });
         return [channel.id, channel];

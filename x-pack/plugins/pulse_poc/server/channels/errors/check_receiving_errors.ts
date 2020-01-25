@@ -8,54 +8,46 @@ import { IScopedClusterClient } from 'src/core/server';
 import { CheckContext } from '../../types';
 
 export async function check(es: IScopedClusterClient, { deploymentId, indexName }: CheckContext) {
-  // TODO: modify the search query for full text search
+  // TODO: modify the search query for full text search and for the correct search!
   const response = await es.callAsInternalUser('search', {
     index: indexName,
-    size: 100,
+    size: 10,
     allow_no_indices: true,
     ignore_unavailable: true,
     body: {
+      sort: [{ timestamp: { order: 'desc' } }],
       query: {
-        term: {
-          deployment_id: {
-            value: deploymentId,
+        bool: {
+          must: [
+            {
+              term: { deployment_id: deploymentId },
+            },
+            {
+              match: { status: 'new' },
+            },
+          ],
+          filter: {
+            range: {
+              timestamp: {
+                gte: 'now-5s',
+                lte: 'now',
+              },
+            },
           },
         },
       },
     },
   });
 
-  if (response.hits.total.value === 0) {
-    // we haven't recorded any errors so there aren't instructions to send back
-    return undefined;
+  if (response.hits.hits.length) {
+    const sources = response.hits.hits.map((hit: any) => {
+      const source = {
+        ...hit._source,
+      };
+      return source;
+    });
+    return sources;
   } else {
-    /*
-     we have recorded errors and need to send instructions back that will help
-     plugin owners resolve the errors
-     we'll need to parse the stack trace and get information from it regarding:
-      plugin name
-      error type (fatal, warning etc)
-      where it was first encountered
-      etc
-      TODO: see the logger for more info
-     */
-    return [
-      {
-        owner: 'core',
-        id: 'pulse_error',
-        value: {
-          error_id: '1',
-          fix_version: '7.7.0',
-        },
-      },
-      {
-        owner: 'core',
-        id: 'pulse_error',
-        value: {
-          error_id: '2',
-          fix_version: null,
-        },
-      },
-    ];
+    return undefined;
   }
 }

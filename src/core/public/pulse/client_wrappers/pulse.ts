@@ -18,7 +18,6 @@
  */
 
 export class PulseClient {
-
   constructor() {}
 
   public async putRecord(channel: string, doc: any) {

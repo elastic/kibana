@@ -95,6 +95,7 @@ export class PulsePocPlugin {
                 properties: {
                   channel_id: { type: 'keyword' },
                   deployment_id: { type: 'keyword' },
+                  timestamp: { type: 'date' },
                 },
               },
             };
@@ -110,6 +111,7 @@ export class PulsePocPlugin {
               index,
               body: {
                 ...record,
+                timestamp: new Date(),
                 channel_id: channel.channel_id,
                 deployment_id: deploymentId,
               },
