@@ -215,6 +215,17 @@ function mockConfig() {
     core: {
       uiSettings: config,
     },
+    plugins: {
+      advancedSettings: {
+        componentRegistry: {
+          get: () => <div>Hello</div>,
+          componentType: {
+            PAGE_TITLE_COMPONENT: 'page_title_component',
+            PAGE_SUBTITLE_COMPONENT: 'page_subtitle_component',
+          },
+        },
+      },
+    },
   };
 }
 
