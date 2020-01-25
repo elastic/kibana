@@ -43,9 +43,9 @@ export const getStepsData = ({
     rule != null
       ? {
           isNew: false,
-          ...pick(['description', 'name', 'references', 'severity', 'tags', 'threats'], rule),
+          ...pick(['description', 'name', 'references', 'severity', 'tags', 'threat'], rule),
           ...(detailsView ? { name: '' } : {}),
-          threats: rule.threats as IMitreEnterpriseAttack[],
+          threat: rule.threat as IMitreEnterpriseAttack[],
           falsePositives: rule.false_positives,
           riskScore: rule.risk_score,
           timeline: {

@@ -1,8 +1,15 @@
 {
   "description": "A request to a web application server contained no identifying user agent string.",
-  "enabled": false,
   "false_positives": [
     "Some normal applications and scripts may contain no user agent. Most legitmate web requests from the Internet contain a user agent string. Requests from web browsers almost always contain a user agent string. If the source is unexpected, or the user is unauthorized, or the request is unusual, these may be suspicious or malicious activity."
+  ],
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
   ],
   "filters": [
     {
@@ -22,24 +29,15 @@
       }
     }
   ],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
   "language": "kuery",
   "max_signals": 33,
   "name": "Web Application Suspicious Activity: No User Agent",
   "query": "url.path: *",
-  "references": [
-    "https://en.wikipedia.org/wiki/User_agent"
-  ],
+  "references": ["https://en.wikipedia.org/wiki/User_agent"],
   "risk_score": 50,
   "rule_id": "43303fd4-4839-4e48-b2b2-803ab060758d",
   "severity": "low",
-  "tags": [
-    "Elastic",
-    "apm"
-  ],
-  "to": "now",
+  "tags": ["Elastic", "apm"],
   "type": "query",
   "version": 1
 }

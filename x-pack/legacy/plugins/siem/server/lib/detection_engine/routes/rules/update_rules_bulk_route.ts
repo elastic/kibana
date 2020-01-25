@@ -69,7 +69,7 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             tags,
             to,
             type,
-            threats,
+            threat,
             references,
             version,
           } = payloadRule;
@@ -102,7 +102,7 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               tags,
               to,
               type,
-              threats,
+              threat,
               references,
               version,
             });
