@@ -15,7 +15,7 @@ const spacesPlugin: SpacesPlugin = plugin();
 const pluginsSetup: PluginsSetup = {
   home: npSetup.plugins.home,
   management: managementSetup,
-  advanced_settings: npSetup.plugins.advanced_settings,
+  advancedSettings: npSetup.plugins.advancedSettings,
 };
 
 const pluginsStart: PluginsStart = {

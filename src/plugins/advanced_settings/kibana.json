@@ -1,5 +1,5 @@
 {
-  "id": "advanced_settings",
+  "id": "advancedSettings",
   "version": "kibana",
   "server": false,
   "ui": true,

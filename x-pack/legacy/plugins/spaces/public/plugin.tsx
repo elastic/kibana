@@ -23,7 +23,7 @@ export interface SpacesPluginStart {
 export interface PluginsSetup {
   home?: HomePublicPluginSetup;
   management: ManagementSetup;
-  advanced_settings: AdvancedSettingsSetup;
+  advancedSettings: AdvancedSettingsSetup;
 }
 
 export interface PluginsStart {
@@ -48,7 +48,7 @@ export class SpacesPlugin implements Plugin<void, SpacesPluginStart, PluginsSetu
     const advancedSettingsService = new AdvancedSettingsService();
     advancedSettingsService.setup({
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
-      componentRegistry: plugins.advanced_settings.componentRegistry,
+      componentRegistry: plugins.advancedSettings.componentRegistry,
     });
 
     if (plugins.home) {

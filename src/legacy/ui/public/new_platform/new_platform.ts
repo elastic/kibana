@@ -57,7 +57,7 @@ export interface PluginsSetup {
   kibana_legacy: KibanaLegacySetup;
   share: SharePluginSetup;
   usageCollection: UsageCollectionSetup;
-  advanced_settings: AdvancedSettingsSetup;
+  advancedSettings: AdvancedSettingsSetup;
 }
 
 export interface PluginsStart {
@@ -74,7 +74,7 @@ export interface PluginsStart {
   kibana_legacy: KibanaLegacyStart;
   share: SharePluginStart;
   management: ManagementStart;
-  advanced_settings: AdvancedSettingsStart;
+  advancedSettings: AdvancedSettingsStart;
 }
 
 export const npSetup = {
