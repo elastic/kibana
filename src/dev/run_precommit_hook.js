@@ -20,7 +20,7 @@
 import { run, combineErrors } from '@kbn/dev-utils';
 import * as Eslint from './eslint';
 import * as Sasslint from './sasslint';
-import { getFilesForCommit, checkFileCasing, checkLockfileSymlinks } from './precommit_hook';
+import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 
 run(
   async ({ log, flags }) => {
@@ -29,12 +29,6 @@ run(
 
     try {
       await checkFileCasing(log, files);
-    } catch (error) {
-      errors.push(error);
-    }
-
-    try {
-      await checkLockfileSymlinks(log, files);
     } catch (error) {
       errors.push(error);
     }
