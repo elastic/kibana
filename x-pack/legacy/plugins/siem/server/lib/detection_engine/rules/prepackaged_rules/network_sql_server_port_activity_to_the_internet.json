@@ -1,16 +1,19 @@
 {
-  "description": "Network - SQL Server Port Activity to the Internet\t",
+  "description": "This signal detects events that may describe database traffic\n(MS SQL, Oracle, MySQL, and Postgresql) across the Internet. Databases\nshould almost never be directly exposed to the Internet, as they are\nfrequently targeted by threat actors to gain initial access to network resources.\n",
   "enabled": false,
   "filters": [],
   "from": "now-6m",
-  "immutable": true,
   "interval": "5m",
   "language": "kuery",
-  "name": "Network - SQL Server Port Activity to the Internet\t",
-  "query": "destination.port:1433 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "name": "SQL Traffic to the Internet",
+  "query": "network.transport: tcp and destination.port: (1433 or 1521 or 3336 or 5432) and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
   "risk_score": 50,
   "rule_id": "139c7458-566a-410c-a5cd-f80238d6a5cd",
   "severity": "low",
+  "tags": [
+    "Elastic",
+    "network"
+  ],
   "to": "now",
   "type": "query",
   "version": 1

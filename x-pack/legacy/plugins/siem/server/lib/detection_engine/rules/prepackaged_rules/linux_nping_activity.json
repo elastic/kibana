@@ -1,15 +1,26 @@
 {
-  "description": "Linux: Nping Activity",
+  "description": "Nping ran on a Linux host. Nping is part of the Nmap tool suite and has the ability to construct raw packets for a wide variety of security testing applications including denial of service testing.",
   "enabled": false,
+  "false_positives": [
+    "Some normal use of this command may originate from security engineers and network or server administrators but this is usually not routine or unannounced. Use of nping by non-engineers or ordinary users is uncommon."
+  ],
   "from": "now-6m",
   "immutable": true,
   "interval": "5m",
   "language": "kuery",
-  "name": "Linux: Nping Activity",
+  "max_signals": 33,
+  "name": "Nping Process Activity",
   "query": "process.name: nping and event.action:executed",
+  "references": [
+    "https://en.wikipedia.org/wiki/Nmap"
+  ],
   "risk_score": 50,
   "rule_id": "0d69150b-96f8-467c-a86d-a67a3378ce77",
-  "severity": "low",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "linux"
+  ],
   "to": "now",
   "type": "query",
   "version": 1

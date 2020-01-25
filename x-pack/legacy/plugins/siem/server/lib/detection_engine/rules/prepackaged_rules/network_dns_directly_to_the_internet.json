@@ -1,16 +1,43 @@
 {
-  "description": "Network - DNS Directly to the Internet\t",
+  "description": "This signal detects DNS network traffic logs that indicate an internal network\nclient reaching out to infrastructure on the Internet directly to answer name\nqueries. This activity could be a default or misconfiguration. This impacts\nyour organization's ability to provide enterprise monitoring and logging of DNS\nand opens your network to a variety of abuses or malicious communications.\n",
   "enabled": false,
+  "false_positives": [
+    "You should apply a filter to this rule to exclude your enterprise nameservers that are expected to reach out to the Internet"
+  ],
   "filters": [],
   "from": "now-6m",
-  "immutable": true,
   "interval": "5m",
   "language": "kuery",
-  "name": "Network - DNS Directly to the Internet\t",
-  "query": "destination.port:53 and not destination.ip: 169.254.169.254/32 and not destination.ip:127.0.0.53/32 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "name": "DNS Activity to the Internet",
+  "query": "destination.port:53 and (\n    network.direction: outbound or (\n        source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip:( 169.254.169.254/32 or 127.0.0.53/32 or 10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 or 224.0.0.251 or ff02\\:\\:fb or 255.255.255.255 )\n    )\n)\n",
+  "references": [
+    "https://www.us-cert.gov/ncas/alerts/TA15-240A",
+    "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-81-2.pdf"
+  ],
   "risk_score": 50,
   "rule_id": "6ea71ff0-9e95-475b-9506-2580d1ce6154",
   "severity": "low",
+  "tags": [
+    "Elastic",
+    "network"
+  ],
+  "threats": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "techniques": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    }
+  ],
   "to": "now",
   "type": "query",
   "version": 1
