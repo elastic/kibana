@@ -10,10 +10,23 @@ export {
   NewDataStream,
   AgentConfig,
   NewAgentConfig,
-  // Schemas
+  AgentConfigStatus,
+  // Common schemas
   ListWithKuerySchema,
+  // Data stream schemas
   GetDataStreamsRequestSchema,
   GetOneDataStreamRequestSchema,
   CreateDataStreamRequestSchema,
   UpdateDataStreamRequestSchema,
+  // Agent config schemas
+  GetAgentConfigsRequestSchema,
+  GetOneAgentConfigRequestSchema,
+  CreateAgentConfigRequestSchema,
+  UpdateAgentConfigRequestSchema,
+  DeleteAgentConfigsRequestSchema,
 } from '../../common';
+
+export type AgentConfigUpdateHandler = (
+  action: 'created' | 'updated' | 'deleted',
+  policyId: string
+) => Promise<void>;

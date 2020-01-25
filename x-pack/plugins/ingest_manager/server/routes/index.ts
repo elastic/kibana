@@ -3,4 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+export { registerRoutes as registerAgentConfigRoutes } from './agent_config';
+export { registerRoutes as registerDataStreamRoutes } from './data_stream';
 export { registerRoutes as registerEPMRoutes } from './epm';

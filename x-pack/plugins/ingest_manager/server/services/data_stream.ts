@@ -99,7 +99,7 @@ class DataStreamService {
     id: string,
     dataStream: NewDataStream
   ): Promise<DataStream> {
-    await soClient.update<NewDataStream>(SAVED_OBJECT_TYPE, id, dataStream);
+    await soClient.update<DataStream>(SAVED_OBJECT_TYPE, id, dataStream);
     return (await this.get(soClient, id)) as DataStream;
   }
 

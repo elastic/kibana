@@ -4,21 +4,67 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract } from 'kibana/server';
-import { NewAgentConfig, AgentConfig, ListWithKuery } from '../types';
+import { DEFAULT_AGENT_CONFIG_ID } from '../constants';
+import {
+  NewAgentConfig,
+  AgentConfig,
+  AgentConfigStatus,
+  AgentConfigUpdateHandler,
+  ListWithKuery,
+} from '../types';
+import { dataStreamService } from './data_stream';
 
 const SAVED_OBJECT_TYPE = 'agent_configs';
 
 class AgentConfigService {
+  private eventsHandler: AgentConfigUpdateHandler[] = [];
+
+  public registerAgentConfigUpdateHandler(handler: AgentConfigUpdateHandler) {
+    this.eventsHandler.push(handler);
+  }
+
+  public triggerPolicyUpdatedEvent: AgentConfigUpdateHandler = async (action, agentConfigId) => {
+    for (const handler of this.eventsHandler) {
+      await handler(action, agentConfigId);
+    }
+  };
+
+  private async _update(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    agentConfig: NewAgentConfig
+  ): Promise<AgentConfig> {
+    await soClient.update<AgentConfig>(SAVED_OBJECT_TYPE, id, {
+      ...agentConfig,
+      updated_on: new Date().toString(),
+      updated_by: 'system', // TODO: Check with Platform about how to access requesting user info
+    });
+
+    await this.triggerPolicyUpdatedEvent('updated', id);
+
+    return (await this.get(soClient, id)) as AgentConfig;
+  }
+
+  public async ensureDefaultPolicy() {
+    // TODO: Check with platform about using saved object client as an internal user
+  }
+
   public async create(
     soClient: SavedObjectsClientContract,
     agentConfig: NewAgentConfig,
-    options?: { id?: string }
+    options?: { id?: string; username?: string }
   ): Promise<AgentConfig> {
     const newSo = await soClient.create<AgentConfig>(
       SAVED_OBJECT_TYPE,
-      agentConfig as AgentConfig,
+      {
+        ...agentConfig,
+        updated_on: new Date().toISOString(),
+        updated_by: options?.username || 'system', // TODO: Check with Platform about how to access requesting user info
+      } as AgentConfig,
       options
     );
+
+    await this.triggerPolicyUpdatedEvent('created', newSo.id);
 
     return {
       id: newSo.id,
@@ -39,6 +85,11 @@ class AgentConfigService {
     return {
       id: agentConfigSO.id,
       ...agentConfigSO.attributes,
+      data_streams:
+        (await dataStreamService.getByIDs(
+          soClient,
+          (agentConfigSO.attributes.data_streams as string[]) || []
+        )) || [],
     };
   }
 
@@ -77,14 +128,71 @@ class AgentConfigService {
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
-    agentConfig: AgentConfig
+    agentConfig: NewAgentConfig
   ): Promise<AgentConfig> {
-    await soClient.update<AgentConfig>(SAVED_OBJECT_TYPE, id, agentConfig);
-    return agentConfig;
+    const oldAgentConfig = await this.get(soClient, id);
+
+    if (!oldAgentConfig) {
+      throw new Error('Agent config not found');
+    }
+
+    if (
+      oldAgentConfig.status === AgentConfigStatus.Inactive &&
+      agentConfig.status !== AgentConfigStatus.Active
+    ) {
+      throw new Error(
+        `Agent config ${id} cannot be updated because it is ${oldAgentConfig.status}`
+      );
+    }
+
+    return this._update(soClient, id, agentConfig);
   }
 
-  public async delete(soClient: SavedObjectsClientContract, id: string): Promise<void> {
-    await soClient.delete(SAVED_OBJECT_TYPE, id);
+  public async assignDataStreams(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    dataStreamIds: string[]
+  ): Promise<AgentConfig> {
+    const oldAgentConfig = await this.get(soClient, id);
+
+    if (!oldAgentConfig) {
+      throw new Error('Agent config not found');
+    }
+
+    return await this._update(soClient, id, {
+      ...oldAgentConfig,
+      data_streams: [...((oldAgentConfig.data_streams || []) as string[])].concat(dataStreamIds),
+    });
+  }
+
+  public async unassignDataStreams(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    dataStreamIds: string[]
+  ): Promise<AgentConfig> {
+    const oldAgentConfig = await this.get(soClient, id);
+
+    if (!oldAgentConfig) {
+      throw new Error('Agent config not found');
+    }
+
+    return await this._update(soClient, id, {
+      ...oldAgentConfig,
+      data_streams: [...((oldAgentConfig.data_streams || []) as string[])].filter(
+        dsId => !dataStreamIds.includes(dsId)
+      ),
+    });
+  }
+
+  public async delete(soClient: SavedObjectsClientContract, ids: string[]): Promise<void> {
+    if (ids.includes(DEFAULT_AGENT_CONFIG_ID)) {
+      throw new Error('The default agent configuration cannot be deleted');
+    }
+
+    for (const id of ids) {
+      await soClient.delete(SAVED_OBJECT_TYPE, id);
+      await this.triggerPolicyUpdatedEvent('deleted', id);
+    }
   }
 }
 

@@ -14,3 +14,4 @@ export const ListWithKuerySchema = schema.object({
 export type ListWithKuery = TypeOf<typeof ListWithKuerySchema>;
 
 export * from './data_stream';
+export * from './agent_config';

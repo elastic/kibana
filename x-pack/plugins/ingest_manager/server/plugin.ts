@@ -8,8 +8,8 @@ import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import { IngestManagerConfigType } from './';
 import { PLUGIN_ID } from './constants';
-import { licenseService, configService } from './services';
-import { registerEPMRoutes } from './routes';
+import { licenseService, configService, agentConfigService } from './services';
+import { registerEPMRoutes, registerDataStreamRoutes, registerAgentConfigRoutes } from './routes';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -25,12 +25,19 @@ export class IngestManagerPlugin implements Plugin {
     this.licensing$ = deps.licensing.license$;
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
 
-    // Create router and register routes
+    // Create router and Elasticsearch client
     const clusterClient = core.elasticsearch.createClient(PLUGIN_ID);
     const router = core.http.createRouter();
     const ingestManagerContext = {
       clusterClient,
     };
+
+    // Register routes
+    registerAgentConfigRoutes(router, ingestManagerContext);
+    registerDataStreamRoutes(router, ingestManagerContext);
+
+    // Optional route registration depending on Kibana config
+    // TODO: Use this.config$ to register routing
     registerEPMRoutes(router, ingestManagerContext);
   }
 
