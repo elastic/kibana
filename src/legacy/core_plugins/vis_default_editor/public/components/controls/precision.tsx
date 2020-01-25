@@ -22,25 +22,24 @@ import React from 'react';
 import { EuiRange, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import chrome from 'ui/chrome';
+import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { AggParamEditorProps } from '../agg_param_props';
 
-const config = chrome.getUiSettingsClient();
-
 function PrecisionParamEditor({ agg, value, setValue }: AggParamEditorProps<number>) {
-  if (agg.params.autoPrecision) {
-    return null;
-  }
-
+  const { services } = useKibana();
   const label = i18n.translate('common.ui.aggTypes.precisionLabel', {
     defaultMessage: 'Precision',
   });
+
+  if (agg.params.autoPrecision) {
+    return null;
+  }
 
   return (
     <EuiFormRow label={label} compressed>
       <EuiRange
         min={1}
-        max={config.get('visualization:tileMap:maxPrecision')}
+        max={services.uiSettings.get('visualization:tileMap:maxPrecision')}
         value={value || ''}
         onChange={(ev: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) =>
           setValue(Number(ev.currentTarget.value))

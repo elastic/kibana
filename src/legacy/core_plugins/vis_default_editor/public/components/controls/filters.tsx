@@ -22,13 +22,12 @@ import { omit, isEqual } from 'lodash';
 import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import chrome from 'ui/chrome';
 import { Query } from 'src/plugins/data/public';
+import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { FilterRow } from './filter';
 import { AggParamEditorProps } from '../agg_param_props';
 
 const generateId = htmlIdGenerator();
-const config = chrome.getUiSettingsClient();
 
 interface FilterValue {
   input: Query;
@@ -62,11 +61,13 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
     setFilters(updatedFilters);
   };
 
+  const { services } = useKibana();
+
   const onAddFilter = () =>
     updateFilters([
       ...filters,
       {
-        input: { query: '', language: config.get('search:queryLanguage') },
+        input: { query: '', language: services.uiSettings.get('search:queryLanguage') },
         label: '',
         id: generateId(),
       },

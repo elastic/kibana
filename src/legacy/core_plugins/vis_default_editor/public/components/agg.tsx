@@ -72,6 +72,7 @@ function DefaultEditorAgg({
   const [validState, setValidState] = useState(true);
   const showDescription = !isEditorOpen && validState;
   const showError = !isEditorOpen && !validState;
+  const aggName = agg.type?.name;
   let disabledParams;
   let aggError;
   // When a Parent Pipeline agg is selected and this agg is the last bucket.
@@ -88,7 +89,7 @@ function DefaultEditorAgg({
   }
 
   if (isLastBucketAgg) {
-    if (['date_histogram', 'histogram'].includes(agg.type.name)) {
+    if (['date_histogram', 'histogram'].includes(aggName)) {
       disabledParams = ['min_doc_count'];
     } else {
       aggError = i18n.translate('common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage', {
@@ -114,16 +115,16 @@ function DefaultEditorAgg({
   }
 
   useEffect(() => {
-    if (isLastBucketAgg && ['date_histogram', 'histogram'].includes(agg.type.name)) {
+    if (isLastBucketAgg && ['date_histogram', 'histogram'].includes(aggName)) {
       setAggParamValue(
         agg.id,
         'min_doc_count',
         // "histogram" agg has an editor for "min_doc_count" param, which accepts boolean
         // "date_histogram" agg doesn't have an editor for "min_doc_count" param, it should be set as a numeric value
-        agg.type.name === 'histogram' ? true : 0
+        aggName === 'histogram' ? true : 0
       );
     }
-  }, [lastParentPipelineAggTitle, agg.type, isLastBucketAgg, agg.id, setAggParamValue]);
+  }, [aggName, isLastBucketAgg, agg.id, setAggParamValue]);
 
   const setTouched = useCallback(
     (touched: boolean) => {

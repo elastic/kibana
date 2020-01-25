@@ -85,7 +85,7 @@ function NumberList({
     if (!numberArray.length) {
       onChange([models[0].value as number]);
     }
-  }, [models, numberArray.length, onChange]);
+  }, []);
 
   const isValid = !hasInvalidValues(models);
   useValidation(setValidity, isValid);

@@ -27,8 +27,7 @@
 import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 // @ts-ignore
-import { Vis } from '../../../../visualizations/public/np_ready/public/vis';
-import { updateOldState } from '../../../../visualizations/public';
+import { updateOldState, Vis } from '../../../../visualizations/public';
 import { extractReferences, injectReferences } from './saved_visualization_references';
 import { IIndexPattern } from '../../../../../../plugins/data/public';
 import { VisSavedObject } from '../legacy_imports';
