@@ -1,20 +1,21 @@
 {
   "description": "This signal detects network events that may indicate the use of Telnet traffic.\nTelnet is commonly used by system administrators to remotely control older or embeded\nsystems using the command line shell. It should almost never be directly exposed to\nthe Internet, as it is frequently targetted and exploited by threat actors as an\ninitial access or backdoor vector. As a plaintext protocol, it may also expose\n",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "interval": "5m",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Telnet Port Activity",
   "query": "network.transport: tcp and destination.port: 23",
   "risk_score": 50,
   "rule_id": "34fde489-94b0-4500-a76f-b8a157cf9269",
   "severity": "low",
-  "tags": [
-    "Elastic",
-    "network"
-  ],
-  "threats": [
+  "tags": ["Elastic", "network"],
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -22,7 +23,7 @@
         "name": "Initial Access",
         "reference": "https://attack.mitre.org/tactics/TA0011/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1190",
           "name": "Exploit Public-Facing Application",
@@ -37,7 +38,7 @@
         "name": "Command and Control",
         "reference": "https://attack.mitre.org/tactics/TA0011/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1043",
           "name": "Commonly Used Port",
@@ -46,7 +47,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }
