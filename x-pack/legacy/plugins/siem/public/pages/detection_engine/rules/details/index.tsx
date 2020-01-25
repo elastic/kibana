@@ -248,7 +248,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
         {({ indicesExist, indexPattern }) => {
           return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <GlobalTime>
-              {({ to, from }) => (
+              {({ to, from, deleteQuery, setQuery }) => (
                 <StickyContainer>
                   <FiltersGlobal>
                     <SiemSearchBar id="global" indexPattern={indexPattern} />
@@ -355,9 +355,12 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
                         </EuiFlexGroup>
                         <EuiSpacer />
                         <SignalsHistogramPanel
+                          deleteQuery={deleteQuery}
                           filters={signalMergedFilters}
                           query={query}
                           from={from}
+                          signalIndexName={signalIndexName}
+                          setQuery={setQuery}
                           stackByOptions={signalsHistogramOptions}
                           to={to}
                           updateDateRange={updateDateRangeCallback}
