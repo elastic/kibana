@@ -41,6 +41,7 @@ export {
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
   InternalSavedObjectsServiceSetup,
+  SavedObjectsRepositoryFactory,
 } from './saved_objects_service';
 
 export {

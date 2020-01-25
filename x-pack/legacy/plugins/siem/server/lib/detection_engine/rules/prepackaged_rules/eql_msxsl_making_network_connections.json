@@ -1,17 +1,37 @@
 {
-  "description": "EQL - MsXsl Making Network Connections",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "Identifies MsXsl.exe making outbound network connections. This may indicate adversarial activity as MsXsl is often leveraged by adversaries to execute malicious scripts and evade detection.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
-  "name": "EQL - MsXsl Making Network Connections",
+  "name": "MsXsl Making Network Connections",
   "query": "process.name:msxsl.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
   "risk_score": 50,
   "rule_id": "d7351b03-135d-43ba-8b36-cc9b07854525",
-  "severity": "low",
-  "to": "now",
+  "severity": "medium",
+  "tags": ["Elastic"],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1220",
+          "name": "XSL Script Processing",
+          "reference": "https://attack.mitre.org/techniques/T1220/"
+        }
+      ]
+    }
+  ],
   "type": "query",
   "version": 1
 }

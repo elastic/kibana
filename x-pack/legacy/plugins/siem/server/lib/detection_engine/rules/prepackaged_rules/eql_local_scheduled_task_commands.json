@@ -1,17 +1,37 @@
 {
-  "description": "EQL - Local Scheduled Task Commands",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "A scheduled task can be used by an adversary to establish persistence, move laterally, and/or escalate privileges.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
-  "name": "EQL - Local Scheduled Task Commands",
+  "name": "Local Scheduled Task Commands",
   "query": " event.action:\"Process Create (rule: ProcessCreate)\" and process.name:schtasks.exe and process.args:(\"/create\" or \"-create\" or \"/S\" or \"-s\" or \"/run\" or \"-run\" or \"/change\" or \"-change\")",
-  "risk_score": 50,
+  "risk_score": 25,
   "rule_id": "afcce5ad-65de-4ed2-8516-5e093d3ac99a",
   "severity": "low",
-  "to": "now",
+  "tags": ["Elastic"],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1053",
+          "name": "Scheduled Task",
+          "reference": "https://attack.mitre.org/techniques/T1053/"
+        }
+      ]
+    }
+  ],
   "type": "query",
   "version": 1
 }
