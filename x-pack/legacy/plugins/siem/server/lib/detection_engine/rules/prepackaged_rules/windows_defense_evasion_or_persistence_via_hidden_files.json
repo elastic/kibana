@@ -14,6 +14,7 @@
   "risk_score": 50,
   "rule_id": "340a0063-baba-447b-8396-26a5cc1eb684",
   "severity": "low",
+  "tags": ["Elastic"],
   "type": "query",
   "version": 1
 }

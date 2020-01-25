@@ -15,7 +15,7 @@
   "risk_score": 50,
   "rule_id": "a4ec1382-4557-452b-89ba-e413b22ed4b8",
   "severity": "medium",
-  "tags": ["EIA"],
+  "tags": ["Elastic"],
   "threat": [
     {
       "framework": "MITRE ATT&CK",
