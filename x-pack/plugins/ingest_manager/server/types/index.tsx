@@ -3,4 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { Agent } from '../../common';
+export {
+  // Types
+  ListWithKuery,
+  DataStream,
+  NewDataStream,
+  AgentConfig,
+  NewAgentConfig,
+  // Schemas
+  ListWithKuerySchema,
+  GetDataStreamsRequestSchema,
+  GetOneDataStreamRequestSchema,
+  CreateDataStreamRequestSchema,
+  UpdateDataStreamRequestSchema,
+} from '../../common';

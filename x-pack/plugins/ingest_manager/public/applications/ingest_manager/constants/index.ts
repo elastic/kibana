@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { PLUGIN_ID, EPM_ROUTES } from '../../../../common';
+export { PLUGIN_ID, EPM_API_ROUTES } from '../../../../common';
 export const BASE_PATH = '/app/ingest';
 export const EPM_PATH = '/epm';
 export const FLEET_PATH = '/fleet';

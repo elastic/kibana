@@ -5,12 +5,12 @@
  */
 import { IRouter } from 'kibana/server';
 import { IngestManagerAppContext } from '../../';
-import { PLUGIN_ID, EPM_ROUTES } from '../../constants';
+import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
 
 export const registerRoutes = (router: IRouter, { clusterClient }: IngestManagerAppContext) => {
   router.get(
     {
-      path: EPM_ROUTES.API_CATEGORIES_PATTERN,
+      path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       validate: false,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
@@ -21,7 +21,7 @@ export const registerRoutes = (router: IRouter, { clusterClient }: IngestManager
 
   router.get(
     {
-      path: EPM_ROUTES.API_LIST_PATTERN,
+      path: EPM_API_ROUTES.LIST_PATTERN,
       validate: false,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
@@ -32,7 +32,7 @@ export const registerRoutes = (router: IRouter, { clusterClient }: IngestManager
 
   router.get(
     {
-      path: `${EPM_ROUTES.API_INFO_PATTERN}/{filePath*}`,
+      path: `${EPM_API_ROUTES.INFO_PATTERN}/{filePath*}`,
       validate: false,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
@@ -43,7 +43,7 @@ export const registerRoutes = (router: IRouter, { clusterClient }: IngestManager
 
   router.get(
     {
-      path: EPM_ROUTES.API_INFO_PATTERN,
+      path: EPM_API_ROUTES.INFO_PATTERN,
       validate: false,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
@@ -54,7 +54,7 @@ export const registerRoutes = (router: IRouter, { clusterClient }: IngestManager
 
   router.get(
     {
-      path: EPM_ROUTES.API_INSTALL_PATTERN,
+      path: EPM_API_ROUTES.INSTALL_PATTERN,
       validate: false,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
@@ -65,18 +65,7 @@ export const registerRoutes = (router: IRouter, { clusterClient }: IngestManager
 
   router.get(
     {
-      path: EPM_ROUTES.API_DELETE_PATTERN,
-      validate: false,
-      options: { tags: [`access:${PLUGIN_ID}`] },
-    },
-    async (context, req, res) => {
-      return res.ok({ body: { hello: 'world' } });
-    }
-  );
-
-  router.post(
-    {
-      path: EPM_ROUTES.API_INSTALL_DATASOURCE_PATTERN,
+      path: EPM_API_ROUTES.DELETE_PATTERN,
       validate: false,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },

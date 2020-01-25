@@ -8,17 +8,25 @@ import { PLUGIN_ID } from './plugin';
 // Base API paths
 export const API_ROOT = `/api/${PLUGIN_ID}`;
 export const EPM_API_ROOT = `${API_ROOT}/epm`;
-export const FLEET_API_ROOT = `${API_ROOT}/fleet`;
+export const DATA_STREAM_API_ROOT = `${API_ROOT}/data_streams`;
 export const CONFIG_API_ROOT = `${API_ROOT}/config`;
+export const FLEET_API_ROOT = `${API_ROOT}/fleet`;
 
 // EPM API routes
-export const EPM_ROUTES = {
-  API_LIST_PATTERN: `${EPM_API_ROOT}/list`,
-  API_INFO_PATTERN: `${EPM_API_ROOT}/package/{pkgkey}`,
-  API_INSTALL_PATTERN: `${EPM_API_ROOT}/install/{pkgkey}`,
-  API_DELETE_PATTERN: `${EPM_API_ROOT}/delete/{pkgkey}`,
-  API_CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
-  API_INSTALL_DATASOURCE_PATTERN: `${EPM_API_ROOT}/datasources`,
+export const EPM_API_ROUTES = {
+  LIST_PATTERN: `${EPM_API_ROOT}/list`,
+  INFO_PATTERN: `${EPM_API_ROOT}/package/{pkgkey}`,
+  INSTALL_PATTERN: `${EPM_API_ROOT}/install/{pkgkey}`,
+  DELETE_PATTERN: `${EPM_API_ROOT}/delete/{pkgkey}`,
+  CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
+};
+
+// Data stream API routes
+export const DATA_STREAM_API_ROUTES = {
+  LIST_PATTERN: `${DATA_STREAM_API_ROOT}`,
+  INFO_PATTERN: `${DATA_STREAM_API_ROOT}/{dataStreamId}`,
+  CREATE_PATTERN: `${DATA_STREAM_API_ROOT}`,
+  UPDATE_PATTERN: `${DATA_STREAM_API_ROOT}/{dataStreamId}`,
 };
 
 // Fleet API routes

@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+import { schema, TypeOf } from '@kbn/config-schema';
+import { DataStreamSchema } from './data_stream';
+
+export enum AgentConfigStatus {
+  Active = 'active',
+  Inactive = 'inactive',
+}
+
+const AgentConfigBaseSchema = {
+  name: schema.string(),
+  namespace: schema.string(),
+  description: schema.maybe(schema.string()),
+  status: schema.oneOf([
+    schema.literal(AgentConfigStatus.Active),
+    schema.literal(AgentConfigStatus.Inactive),
+  ]),
+  data_streams: schema.arrayOf(schema.string()),
+};
+
+export const NewAgentConfigSchema = schema.object({
+  ...AgentConfigBaseSchema,
+});
+
+export const AgentConfigSchema = schema.object({
+  ...AgentConfigBaseSchema,
+  id: schema.string(),
+  updated_on: schema.string(),
+  updated_by: schema.string(),
+  data_streams: schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(DataStreamSchema)]),
+});
+
+export type NewAgentConfig = TypeOf<typeof NewAgentConfigSchema>;
+
+export type AgentConfig = TypeOf<typeof AgentConfigSchema>;

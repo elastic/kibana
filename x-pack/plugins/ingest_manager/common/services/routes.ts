@@ -5,7 +5,7 @@
  */
 import {
   EPM_API_ROOT,
-  EPM_ROUTES,
+  EPM_API_ROUTES,
   FLEET_API_ROOT,
   FLEET_ROUTES,
   CONFIG_API_ROOT,
@@ -14,15 +14,15 @@ import {
 
 export const epmRouteService = {
   getCategoriesPath: () => {
-    return EPM_ROUTES.API_CATEGORIES_PATTERN;
+    return EPM_API_ROUTES.CATEGORIES_PATTERN;
   },
 
   getListPath: () => {
-    return EPM_ROUTES.API_LIST_PATTERN;
+    return EPM_API_ROUTES.LIST_PATTERN;
   },
 
   getInfoPath: (pkgkey: string) => {
-    return EPM_ROUTES.API_INFO_PATTERN.replace('{pkgkey}', pkgkey);
+    return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgkey}', pkgkey);
   },
 
   getFilePath: (filePath: string) => {
@@ -30,11 +30,11 @@ export const epmRouteService = {
   },
 
   getInstallPath: (pkgkey: string) => {
-    return EPM_ROUTES.API_INSTALL_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
+    return EPM_API_ROUTES.INSTALL_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
   },
 
   getRemovePath: (pkgkey: string) => {
-    return EPM_ROUTES.API_DELETE_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
+    return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
   },
 };
 

@@ -3,4 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export * from './domain_data';
+export * from './agent_config';
+export * from './data_stream';
