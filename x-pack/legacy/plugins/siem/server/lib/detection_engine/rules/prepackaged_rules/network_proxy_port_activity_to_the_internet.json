@@ -1,20 +1,21 @@
 {
   "description": "This signal detects events that may describe network events of proxy use to the\nInternet. It includes popular HTTP proxy ports and SOCKS proxy ports. Typically\nenvironments will use an internal IP address for a proxy server. It can also\nbe used to circumvent network controls and detection mechanisms.\n",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "interval": "5m",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Proxy Port Activity to the Internet",
   "query": "network.transport: tcp and destination.port: (3128 or 8080 or 1080) and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
   "risk_score": 25,
   "rule_id": "ad0e5e75-dd89-4875-8d0a-dfdc1828b5f3",
   "severity": "low",
-  "tags": [
-    "Elastic",
-    "network"
-  ],
-  "threats": [
+  "tags": ["Elastic", "network"],
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -22,7 +23,7 @@
         "name": "Command and Control",
         "reference": "https://attack.mitre.org/tactics/TA0011/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1043",
           "name": "Commonly Used Port",
@@ -31,7 +32,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

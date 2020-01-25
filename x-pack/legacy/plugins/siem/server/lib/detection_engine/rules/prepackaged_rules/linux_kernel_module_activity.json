@@ -1,16 +1,9 @@
 {
   "description": "Identifies loadable kernel module errors, often indicative of potential persistence attempts.",
-  "enabled": false,
   "false_positives": [
     "Security tools and device drivers may run these programs in order to load legitimate kernel modules. Use of these programs by ordinary users is uncommon."
   ],
-  "from": "now-6m",
-  "immutable": true,
-  "index": [
-    "auditbeat-*"
-  ],
-  "interval": "5m",
-  "language": "kuery",
+  "index": ["auditbeat-*"],
   "max_signals": 33,
   "name": "Persistence via Kernel Module Modification",
   "query": "process.name: (insmod or kmod or modprobe or rmod) and event.action:executed",
@@ -20,11 +13,8 @@
   "risk_score": 25,
   "rule_id": "81cc58f5-8062-49a2-ba84-5cc4b4d31c40",
   "severity": "low",
-  "tags": [
-    "EIA",
-    "auditbeat"
-  ],
-  "threats": [
+  "tags": ["Elastic", "auditbeat"],
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -32,7 +22,7 @@
         "name": "Persistence",
         "reference": "https://attack.mitre.org/techniques/TA0003/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1215",
           "name": "Kernel Modules and Extensions",
@@ -41,7 +31,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

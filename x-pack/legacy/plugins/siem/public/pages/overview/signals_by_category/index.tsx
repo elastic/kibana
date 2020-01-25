@@ -63,7 +63,7 @@ export const SignalsByCategory = React.memo<Props>(
         showLinkToSignals={true}
         defaultStackByOption={{
           text: `${i18n.SIGNALS_BY_CATEGORY}`,
-          value: 'signal.rule.threats',
+          value: 'signal.rule.threat',
         }}
         legendPosition={'right'}
         to={to}
