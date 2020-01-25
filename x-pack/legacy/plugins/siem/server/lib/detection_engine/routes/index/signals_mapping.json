@@ -88,7 +88,37 @@
                 "type": "keyword"
               },
               "threat": {
-                "type": "object"
+                "properties": {
+                  "framework": {
+                    "type": "keyword"
+                  },
+                  "tactic": {
+                    "properties": {
+                      "id": {
+                        "type": "keyword"
+                      },
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "reference": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "technique": {
+                    "properties": {
+                      "id": {
+                        "type": "keyword"
+                      },
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "reference": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
               },
               "type": {
                 "type": "keyword"
