@@ -1,28 +1,26 @@
 {
   "description": "An SSH processes ran with the `-R` flag which can be used to forward a port to a remote destination for purposes of pivoting and persistence. This technique often used to create encrypted tunnels and circumvent firewalls, security groups or network access lists.",
-  "enabled": false,
   "false_positives": [
     "Some normal use of this command may originate from usage by engineers as an alternative or ad-hoc remote access solution. Use of this command by non-administrative users is uncommon."
   ],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "max_signals": 33,
   "name": "Potential Lateral Movement via SSH Port Forwarding",
   "query": "process.name:ssh and process.args:\"-R\" and event.action:executed",
-  "references": [
-    "https://www.ssh.com/ssh/tunneling",
-    "https://www.ssh.com/ssh/tunneling/example"
-  ],
+  "references": ["https://www.ssh.com/ssh/tunneling", "https://www.ssh.com/ssh/tunneling/example"],
   "risk_score": 50,
   "rule_id": "45d256ab-e665-445b-8306-2f83a8db59f8",
   "severity": "medium",
-  "tags": [
-    "Elastic",
-    "linux"
-  ],
-  "threats": [
+  "tags": ["Elastic", "linux"],
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -30,7 +28,7 @@
         "name": "Lateral Movement",
         "reference": "https://attack.mitre.org/tactics/TA0008/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1184",
           "name": "SSH Hijacking",
@@ -39,7 +37,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }
