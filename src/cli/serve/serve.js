@@ -195,7 +195,7 @@ export default function(program) {
       []
     )
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
-    .option('--optimize', 'Optimize and then stop the server');
+    .option('--optimize', 'Run the legacy plugin optimizer and then stop the server');
 
   if (CAN_REPL) {
     command.option('--repl', 'Run the server with a REPL prompt and access to the server object');

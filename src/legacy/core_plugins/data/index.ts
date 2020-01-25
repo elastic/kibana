@@ -37,7 +37,6 @@ export default function DataPlugin(kibana: any) {
     uiExports: {
       interpreter: ['plugins/data/search/expressions/boot'],
       injectDefaultVars: () => ({}),
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
       savedObjectsManagement: {
         query: {

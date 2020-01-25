@@ -43,6 +43,7 @@ import {
   DownloadNodeBuildsTask,
   ExtractNodeBuildsTask,
   InstallDependenciesTask,
+  BuildNewPlatformPluginsTask,
   OptimizeBuildTask,
   RemovePackageJsonDepsTask,
   RemoveWorkspacesTask,
@@ -118,6 +119,7 @@ export async function buildDistributables(options) {
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
   await run(TranspileScssTask);
+  await run(BuildNewPlatformPluginsTask);
   await run(OptimizeBuildTask);
   await run(CleanClientModulesOnDLLTask);
   await run(CleanTypescriptTask);

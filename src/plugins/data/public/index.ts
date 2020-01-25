@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './_index.scss';
+
 import { PluginInitializerContext } from '../../../core/public';
 import * as autocomplete from './autocomplete';
 

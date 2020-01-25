@@ -2,6 +2,12 @@
 
 source src/dev/ci_setup/setup_env.sh
 
+echo " -> building new platform plugins"
+node scripts/build_new_platform_plugins \
+  --oss \
+  --scan-dir "$KIBANA_DIR/test/plugin_functional/plugins" \
+  --verbose;
+
 echo " -> downloading es snapshot"
 node scripts/es snapshot --license=oss --download-only;
 

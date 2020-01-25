@@ -153,7 +153,7 @@
     "react-docgen-typescript-loader": "^3.1.1",
     "react-test-renderer": "^16.12.0",
     "rxjs-marbles": "^5.0.3",
-    "sass-loader": "^7.3.1",
+    "sass-loader": "^8.0.2",
     "sass-resources-loader": "^2.0.1",
     "simple-git": "1.116.0",
     "sinon": "^7.4.2",
@@ -345,7 +345,7 @@
     "uuid": "3.3.2",
     "venn.js": "0.2.20",
     "vscode-languageserver": "^5.2.1",
-    "webpack": "4.41.0",
+    "webpack": "^4.41.5",
     "wellknown": "^0.5.0",
     "xml2js": "^0.4.22",
     "xregexp": "4.2.4"

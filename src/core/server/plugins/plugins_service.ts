@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Path from 'path';
 import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types';
@@ -214,7 +215,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           }
 
           if (plugin.includesUiPlugin) {
-            this.uiPluginInternalInfo.set(plugin.name, { entryPointPath: `${plugin.path}/public` });
+            this.uiPluginInternalInfo.set(plugin.name, {
+              publicTargetDir: Path.resolve(plugin.path, 'target/public'),
+            });
           }
 
           pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });

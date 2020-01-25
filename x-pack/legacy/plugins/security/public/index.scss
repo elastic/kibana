@@ -7,14 +7,9 @@
 //   secChart__legend--small
 //   secChart__legend-isLoading
 
-$secFormWidth: 460px;
-
 // Public components
 @import './components/index';
 
 // Public views
 @import './views/index';
-
-// Styles of Kibana Platform plugin
-@import '../../../../plugins/security/public/index';
 

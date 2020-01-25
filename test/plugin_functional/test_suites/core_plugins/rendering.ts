@@ -62,8 +62,8 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
         .legacyMetadata.uiSettings.user;
     });
-  const exists = (selector: string) => testSubjects.exists(selector, { timeout: 2000 });
-  const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage', 5000);
+  const exists = (selector: string) => testSubjects.exists(selector);
+  const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage');
 
   describe('rendering service', () => {
     it('renders "core" application', async () => {

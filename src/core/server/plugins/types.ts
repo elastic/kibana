@@ -190,10 +190,10 @@ export interface DiscoveredPlugin {
  */
 export interface InternalPluginInfo {
   /**
-   * Path to the client-side entrypoint file to be used to build the client-side
-   * bundle for a plugin.
+   * Path to the target/public directory of the plugin which should be
+   * served
    */
-  readonly entryPointPath: string;
+  readonly publicTargetDir: string;
 }
 
 /**

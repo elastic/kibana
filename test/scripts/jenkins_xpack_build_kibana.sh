@@ -3,6 +3,11 @@
 cd "$KIBANA_DIR"
 source src/dev/ci_setup/setup_env.sh
 
+echo " -> building new platform plugins"
+node scripts/build_new_platform_plugins \
+  --scan-dir "$XPACK_DIR/test/plugin_functional/plugins" \
+  --verbose;
+
 echo " -> downloading es snapshot"
 node scripts/es snapshot --download-only;
 

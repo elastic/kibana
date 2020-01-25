@@ -18,17 +18,17 @@
  */
 
 import _ from 'lodash';
+import Chalk from 'chalk';
 
 import help from './help';
 import { Command } from 'commander';
-import { red } from './color';
 
 Command.prototype.error = function(err) {
   if (err && err.message) err = err.message;
 
   console.log(
     `
-${red(' ERROR ')} ${err}
+${Chalk.white.bgRed(' ERROR ')} ${err}
 
 ${help(this, '  ')}
 `

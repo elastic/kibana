@@ -21,6 +21,7 @@ import { isAbsolute, extname } from 'path';
 import LruCache from 'lru-cache';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { createDynamicAssetResponse } from './dynamic_asset_response';
+import { assertIsNpUiPluginPublicDirs } from '../np_ui_plugin_public_dirs';
 
 /**
  *  Creates the routes that serves files from `bundlesPath` or from
@@ -29,6 +30,7 @@ import { createDynamicAssetResponse } from './dynamic_asset_response';
  *  PUBLIC_PATH_PLACEHOLDER and replaces them with `publicPath`.
  *
  *  @param {Object} options
+ *  @property {Array<{id,path}>} options.npUiPluginPublicDirs array of ids and paths that should be served for new platform plugins
  *  @property {string} options.regularBundlesPath
  *  @property {string} options.dllBundlesPath
  *  @property {string} options.basePublicPath
@@ -40,11 +42,13 @@ export function createBundlesRoute({
   dllBundlesPath,
   basePublicPath,
   builtCssPath,
+  npUiPluginPublicDirs = [],
 }) {
   // rather than calculate the fileHash on every request, we
-  // provide a cache object to `createDynamicAssetResponse()` that
+  // provide a cache object to `resolveDynamicAssetResponse()` that
   // will store the 100 most recently used hashes.
   const fileHashCache = new LruCache(100);
+  assertIsNpUiPluginPublicDirs(npUiPluginPublicDirs);
 
   if (typeof regularBundlesPath !== 'string' || !isAbsolute(regularBundlesPath)) {
     throw new TypeError(
@@ -72,6 +76,14 @@ export function createBundlesRoute({
       '/bundles/kbn-ui-shared-deps/',
       UiSharedDeps.distDir,
       fileHashCache
+    ),
+    ...npUiPluginPublicDirs.map(({ id, path }) =>
+      buildRouteForBundles(
+        `${basePublicPath}/bundles/plugin/${id}/`,
+        `/bundles/plugin/${id}/`,
+        path,
+        fileHashCache
+      )
     ),
     buildRouteForBundles(
       `${basePublicPath}/bundles/`,

@@ -1,5 +1,6 @@
 var kbnCsp = JSON.parse(document.querySelector('kbn-csp').getAttribute('data'));
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
+window.__kbnDarkMode__ = {{darkMode}};
 
 if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   var legacyBrowserError = document.getElementById('kbn_legacy_browser_error');
@@ -14,10 +15,12 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   window.onload = function () {
     var files = [
       '{{dllBundlePath}}/vendors_runtime.bundle.dll.js',
-      {{#each dllJsChunks}}
-        '{{this}}',
-      {{/each}}
-      '{{regularBundlePath}}/kbn-ui-shared-deps/{{sharedDepsFilename}}',
+      [
+        {{#each dllJsChunks}}
+          '{{this}}',
+        {{/each}}
+        '{{regularBundlePath}}/kbn-ui-shared-deps/{{sharedDepsFilename}}',
+      ],
       '{{regularBundlePath}}/commons.bundle.js',
       '{{regularBundlePath}}/{{appId}}.bundle.js'
     ];
@@ -57,6 +60,28 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       document.head.appendChild(dom);
     }
 
+    function loadJs(file, cb) {
+      var dom = document.createElement('script');
+
+      dom.setAttribute('async', '');
+      dom.addEventListener('error', failure);
+      dom.setAttribute('src', file);
+      dom.addEventListener('load', cb);
+      document.head.appendChild(dom);
+    }
+
+    function loadJsInParallel(files, cb) {
+      var pending = files.length;
+      for (var i = 0; i < files.length; i++) {
+        loadJs(files[i], function () {
+          pending = pending - 1;
+          if (pending === 0) {
+            cb();
+          }
+        })
+      }
+    }
+
     {{#each styleSheetPaths}}
       loadStyleSheet('{{this}}');
     {{/each}}
@@ -64,14 +89,11 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
     (function next() {
       var file = files.shift();
       if (!file) return;
-
-      var dom = document.createElement('script');
-
-      dom.setAttribute('async', '');
-      dom.addEventListener('error', failure);
-      dom.setAttribute('src', file);
-      dom.addEventListener('load', next);
-      document.head.appendChild(dom);
+      if (typeof file === 'string') {
+        loadJs(file, next);
+      } else {
+        loadJsInParallel(file, next);
+      }
     }());
   };
 }
