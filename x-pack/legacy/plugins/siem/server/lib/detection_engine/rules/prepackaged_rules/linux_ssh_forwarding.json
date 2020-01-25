@@ -20,7 +20,7 @@
         "name": "Lateral Movement",
         "reference": "https://attack.mitre.org/tactics/TA0008/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1184",
           "name": "SSH Hijacking",

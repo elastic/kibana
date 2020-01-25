@@ -15,7 +15,7 @@
         "name": "Initial Access",
         "reference": "https://attack.mitre.org/tactics/TA0011/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1190",
           "name": "Exploit Public-Facing Application",
@@ -30,7 +30,7 @@
         "name": "Exfiltration",
         "reference": "https://attack.mitre.org/tactics/TA0011/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1043",
           "name": "Exfiltration Over Alternative Protocol",
