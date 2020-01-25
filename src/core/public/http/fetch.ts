@@ -20,10 +20,16 @@
 import { merge } from 'lodash';
 import { format } from 'url';
 
-import { IBasePath, HttpInterceptor, HttpHandler, HttpFetchOptions, IHttpResponse } from './types';
+import {
+  IBasePath,
+  HttpInterceptor,
+  HttpHandler,
+  HttpFetchOptions,
+  HttpResponse,
+  HttpFetchOptionsWithPath,
+} from './types';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
-import { HttpResponse } from './response';
 import { interceptRequest, interceptResponse } from './intercept';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
 
@@ -60,29 +66,30 @@ export class Fetch {
   public readonly put = this.shorthand('PUT');
 
   public fetch: HttpHandler = async <TResponseBody>(
-    path: string,
-    options: HttpFetchOptions = {}
+    pathOrOptions: string | HttpFetchOptionsWithPath,
+    options?: HttpFetchOptions
   ) => {
-    const initialRequest = this.createRequest(path, options);
+    const optionsWithPath = validateFetchArguments(pathOrOptions, options);
     const controller = new HttpInterceptController();
 
     // We wrap the interception in a separate promise to ensure that when
     // a halt is called we do not resolve or reject, halting handling of the promise.
-    return new Promise<TResponseBody | IHttpResponse<TResponseBody>>(async (resolve, reject) => {
+    return new Promise<TResponseBody | HttpResponse<TResponseBody>>(async (resolve, reject) => {
       try {
-        const interceptedRequest = await interceptRequest(
-          initialRequest,
+        const interceptedOptions = await interceptRequest(
+          optionsWithPath,
           this.interceptors,
           controller
         );
-        const initialResponse = this.fetchResponse(interceptedRequest);
+        const initialResponse = this.fetchResponse(interceptedOptions);
         const interceptedResponse = await interceptResponse(
+          interceptedOptions,
           initialResponse,
           this.interceptors,
           controller
         );
 
-        if (options.asResponse) {
+        if (optionsWithPath.asResponse) {
           resolve(interceptedResponse);
         } else {
           resolve(interceptedResponse.body);
@@ -95,38 +102,44 @@ export class Fetch {
     });
   };
 
-  private createRequest(path: string, options?: HttpFetchOptions): Request {
+  private createRequest(options: HttpFetchOptionsWithPath): Request {
     // Merge and destructure options out that are not applicable to the Fetch API.
-    const { query, prependBasePath: shouldPrependBasePath, asResponse, ...fetchOptions } = merge(
+    const {
+      query,
+      prependBasePath: shouldPrependBasePath,
+      asResponse,
+      asSystemRequest,
+      ...fetchOptions
+    } = merge(
       {
         method: 'GET',
         credentials: 'same-origin',
         prependBasePath: true,
-        headers: {
-          'kbn-version': this.params.kibanaVersion,
-          'Content-Type': 'application/json',
-        },
       },
-      options || {}
+      options,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+          'kbn-version': this.params.kibanaVersion,
+        },
+      }
     );
     const url = format({
-      pathname: shouldPrependBasePath ? this.params.basePath.prepend(path) : path,
+      pathname: shouldPrependBasePath ? this.params.basePath.prepend(options.path) : options.path,
       query,
     });
 
-    if (
-      options &&
-      options.headers &&
-      'Content-Type' in options.headers &&
-      options.headers['Content-Type'] === undefined
-    ) {
-      delete fetchOptions.headers['Content-Type'];
+    // Make sure the system request header is only present if `asSystemRequest` is true.
+    if (asSystemRequest) {
+      fetchOptions.headers['kbn-system-request'] = 'true';
     }
 
     return new Request(url, fetchOptions);
   }
 
-  private async fetchResponse(request: Request) {
+  private async fetchResponse(fetchOptions: HttpFetchOptionsWithPath): Promise<HttpResponse<any>> {
+    const request = this.createRequest(fetchOptions);
     let response: Response;
     let body = null;
 
@@ -164,11 +177,46 @@ export class Fetch {
       throw new HttpFetchError(response.statusText, request, response, body);
     }
 
-    return new HttpResponse({ request, response, body });
+    return { fetchOptions, request, response, body };
   }
 
-  private shorthand(method: string) {
-    return (path: string, options: HttpFetchOptions = {}) =>
-      this.fetch(path, { ...options, method });
+  private shorthand(method: string): HttpHandler {
+    return (pathOrOptions: string | HttpFetchOptionsWithPath, options?: HttpFetchOptions) => {
+      const optionsWithPath = validateFetchArguments(pathOrOptions, options);
+      return this.fetch({ ...optionsWithPath, method });
+    };
   }
 }
+
+/**
+ * Ensure that the overloaded arguments to `HttpHandler` are valid.
+ */
+const validateFetchArguments = (
+  pathOrOptions: string | HttpFetchOptionsWithPath,
+  options?: HttpFetchOptions
+): HttpFetchOptionsWithPath => {
+  let fullOptions: HttpFetchOptionsWithPath;
+
+  if (typeof pathOrOptions === 'string' && (typeof options === 'object' || options === undefined)) {
+    fullOptions = { ...options, path: pathOrOptions };
+  } else if (typeof pathOrOptions === 'object' && options === undefined) {
+    fullOptions = pathOrOptions;
+  } else {
+    throw new Error(
+      `Invalid fetch arguments, must either be (string, object) or (object, undefined), received (${typeof pathOrOptions}, ${typeof options})`
+    );
+  }
+
+  const invalidHeaders = Object.keys(fullOptions.headers ?? {}).filter(headerName =>
+    headerName.startsWith('kbn-')
+  );
+  if (invalidHeaders.length) {
+    throw new Error(
+      `Invalid fetch headers, headers beginning with "kbn-" are not allowed: [${invalidHeaders.join(
+        ','
+      )}]`
+    );
+  }
+
+  return fullOptions;
+};

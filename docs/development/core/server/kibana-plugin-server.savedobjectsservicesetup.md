@@ -4,7 +4,7 @@
 
 ## SavedObjectsServiceSetup interface
 
-Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for creating and registering Saved Object client wrappers.
+Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for creating and registering Saved Object client wrappers.
 
 <b>Signature:</b>
 
@@ -20,16 +20,14 @@ When plugins access the Saved Objects client, a new client is created using the 
 
 ## Example
 
-import {<!-- -->SavedObjectsClient, CoreSetup<!-- -->} from 'src/core/server';
+import { SavedObjectsClient, CoreSetup } from 'src/core/server';
 
-export class Plugin() { setup: (core: CoreSetup) =<!-- -->&gt; { core.savedObjects.setClientFactory((<!-- -->{<!-- -->request: KibanaRequest<!-- -->}<!-- -->) =<!-- -->&gt; { return new SavedObjectsClient(core.savedObjects.scopedRepository(request)); }<!-- -->) } }
+export class Plugin() { setup: (core: CoreSetup) =<!-- -->&gt; { core.savedObjects.setClientFactory((<!-- -->{ request: KibanaRequest }<!-- -->) =<!-- -->&gt; { return new SavedObjectsClient(core.savedObjects.scopedRepository(request)); }<!-- -->) } }
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [addClientWrapper](./kibana-plugin-server.savedobjectsservicesetup.addclientwrapper.md) | <code>(priority: number, id: string, factory: SavedObjectsClientWrapperFactory&lt;KibanaRequest&gt;) =&gt; void</code> | Add a client wrapper with the given priority. |
-|  [createInternalRepository](./kibana-plugin-server.savedobjectsservicesetup.createinternalrepository.md) | <code>(extraTypes?: string[]) =&gt; ISavedObjectsRepository</code> | Creates a [Saved Objects repository](./kibana-plugin-server.isavedobjectsrepository.md) that uses the internal Kibana user for authenticating with Elasticsearch. |
-|  [createScopedRepository](./kibana-plugin-server.savedobjectsservicesetup.createscopedrepository.md) | <code>(req: KibanaRequest, extraTypes?: string[]) =&gt; ISavedObjectsRepository</code> | Creates a [Saved Objects repository](./kibana-plugin-server.isavedobjectsrepository.md) that uses the credentials from the passed in request to authenticate with Elasticsearch. |
-|  [setClientFactory](./kibana-plugin-server.savedobjectsservicesetup.setclientfactory.md) | <code>(customClientFactory: SavedObjectsClientFactory&lt;KibanaRequest&gt;) =&gt; void</code> | Set a default factory for creating Saved Objects clients. Only one client factory can be set, subsequent calls to this method will fail. |
+|  [addClientWrapper](./kibana-plugin-server.savedobjectsservicesetup.addclientwrapper.md) | <code>(priority: number, id: string, factory: SavedObjectsClientWrapperFactory) =&gt; void</code> | Add a [client wrapper factory](./kibana-plugin-server.savedobjectsclientwrapperfactory.md) with the given priority. |
+|  [setClientFactoryProvider](./kibana-plugin-server.savedobjectsservicesetup.setclientfactoryprovider.md) | <code>(clientFactoryProvider: SavedObjectsClientFactoryProvider) =&gt; void</code> | Set the default [factory provider](./kibana-plugin-server.savedobjectsclientfactoryprovider.md) for creating Saved Objects clients. Only one provider can be set, subsequent calls to this method will fail. |
 

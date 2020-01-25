@@ -79,10 +79,10 @@ export const getFieldConfig = (param: ParameterName, prop?: string): FieldConfig
     ) {
       throw new Error(`No field config found for prop "${prop}" on param "${param}" `);
     }
-    return (PARAMETERS_DEFINITION[param] as any).props[prop].fieldConfig || {};
+    return (PARAMETERS_DEFINITION[param] as any).props[prop]?.fieldConfig || {};
   }
 
-  return (PARAMETERS_DEFINITION[param] as any).fieldConfig || {};
+  return (PARAMETERS_DEFINITION[param] as any)?.fieldConfig || {};
 };
 
 /**

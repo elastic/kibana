@@ -399,7 +399,7 @@ export const ecsSchema = gql`
     references: ToStringArray
     severity: ToStringArray
     tags: ToStringArray
-    threats: ToAny
+    threat: ToAny
     type: ToStringArray
     size: ToStringArray
     to: ToStringArray
