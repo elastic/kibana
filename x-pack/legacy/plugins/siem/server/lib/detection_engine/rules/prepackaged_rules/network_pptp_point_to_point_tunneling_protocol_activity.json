@@ -1,19 +1,12 @@
 {
-  "description": "Network - PPTP (Point to Point Tunneling Protocol) Activity",
-  "index": [
-    "apm-*-transaction*",
-    "auditbeat-*",
-    "endgame-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
-  ],
+  "description": "This signal detects events that may indicate use of a PPTP VPN connection. Some threat actors use these types of connections to tunnel their traffic while avoiding detection.",
   "language": "kuery",
-  "name": "Network - PPTP (Point to Point Tunneling Protocol) Activity",
-  "query": "destination.port:1723",
-  "risk_score": 50,
+  "name": "PPTP (Point to Point Tunneling Protocol) Activity",
+  "query": "network.transport: tcp and destination.port: 1723",
+  "risk_score": 25,
   "rule_id": "d2053495-8fe7-4168-b3df-dad844046be3",
   "severity": "low",
+  "tags": ["Elastic", "network"],
   "type": "query",
   "version": 1
 }

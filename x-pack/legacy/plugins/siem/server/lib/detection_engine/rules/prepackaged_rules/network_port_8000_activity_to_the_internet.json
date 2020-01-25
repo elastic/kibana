@@ -1,19 +1,29 @@
 {
-  "description": "Network - Port 8000 Activity to the Internet",
-  "index": [
-    "apm-*-transaction*",
-    "auditbeat-*",
-    "endgame-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
-  ],
+  "description": "TCP Port 8000 is commonly used for development environments of web server\nsoftware. It generally should not be exposed directly to the Internet. If you are\nrunning software like this on the Internet, you should consider placing it behind\na reverse proxy.\n",
   "language": "kuery",
-  "name": "Network - Port 8000 Activity to the Internet",
-  "query": "destination.port:8000 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
-  "risk_score": 50,
+  "name": "TCP Port 8000 Activity to the Internet",
+  "query": "network.transport: tcp and destination.port: 8000 and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
+  "risk_score": 25,
   "rule_id": "08d5d7e2-740f-44d8-aeda-e41f4263efaf",
   "severity": "low",
+  "tags": ["Elastic", "network"],
+  "threats": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "techniques": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    }
+  ],
   "type": "query",
   "version": 1
 }

@@ -3,12 +3,12 @@
   "index": ["auditbeat-*"],
   "language": "kuery",
   "max_signals": 33,
-  "name": "Linux: User Discovery Via The Whoami Commmand",
+  "name": "User Discovery via Whoami",
   "query": "process.name: whoami and event.action:executed",
-  "risk_score": 50,
+  "risk_score": 25,
   "rule_id": "120559c6-5e24-49f4-9e30-8ffe697df6b9",
   "severity": "low",
-  "tags": ["EIA", "auditbeat"],
+  "tags": ["Elastic", "linux"],
   "threats": [
     {
       "framework": "MITRE ATT&CK",

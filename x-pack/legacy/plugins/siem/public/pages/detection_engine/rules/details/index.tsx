@@ -119,21 +119,16 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.signals);
-  const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
-    rule,
-    detailsView: true,
-  });
+  const { aboutRuleData, defineRuleData, scheduleRuleData } =
+    rule != null
+      ? getStepsData({
+          rule,
+          detailsView: true,
+        })
+      : { aboutRuleData: null, defineRuleData: null, scheduleRuleData: null };
   const [lastSignals] = useSignalInfo({ ruleId });
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
-
-  if (
-    isSignalIndexExists != null &&
-    isAuthenticated != null &&
-    (!isSignalIndexExists || !isAuthenticated)
-  ) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
-  }
 
   const title = isLoading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
   const subTitle = useMemo(
@@ -217,6 +212,10 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     [rule, ruleDetailTab]
   );
 
+  const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
+    signalIndexName,
+  ]);
+
   const updateDateRangeCallback = useCallback(
     (min: number, max: number) => {
       setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
@@ -233,11 +232,19 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     [ruleEnabled, setRuleEnabled]
   );
 
+  if (
+    isSignalIndexExists != null &&
+    isAuthenticated != null &&
+    (!isSignalIndexExists || !isAuthenticated)
+  ) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+  }
+
   return (
     <>
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
       {userHasNoPermissions && <ReadOnlyCallOut />}
-      <WithSource sourceId="default">
+      <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indicesExist, indexPattern }) => {
           return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <GlobalTime>
