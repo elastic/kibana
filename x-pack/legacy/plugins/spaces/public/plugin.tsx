@@ -8,6 +8,7 @@ import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { ManagementSetup } from 'src/legacy/core_plugins/management/public';
 import { ManagementStart } from 'src/plugins/management/public';
+import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
 import { SpacesManager } from './spaces_manager';
 import { initSpacesNavControl } from './nav_control';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
@@ -22,13 +23,7 @@ export interface SpacesPluginStart {
 export interface PluginsSetup {
   home?: HomePublicPluginSetup;
   management: ManagementSetup;
-  __managementLegacyCompat: {
-    registerSettingsComponent: (
-      id: string,
-      component: string | React.FC<any>,
-      allowOverride: boolean
-    ) => void;
-  };
+  advanced_settings: AdvancedSettingsSetup;
 }
 
 export interface PluginsStart {
@@ -53,7 +48,7 @@ export class SpacesPlugin implements Plugin<void, SpacesPluginStart, PluginsSetu
     const advancedSettingsService = new AdvancedSettingsService();
     advancedSettingsService.setup({
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
-      registerSettingsComponent: plugins.__managementLegacyCompat.registerSettingsComponent,
+      componentRegistry: plugins.advanced_settings.componentRegistry,
     });
 
     if (plugins.home) {

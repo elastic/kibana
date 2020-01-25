@@ -1,0 +1,7 @@
+{
+  "id": "advanced_settings",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": []
+}

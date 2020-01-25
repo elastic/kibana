@@ -33,6 +33,10 @@ import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
 import { ManagementStart } from '../../../../plugins/management/public';
+import {
+  AdvancedSettingsSetup,
+  AdvancedSettingsStart,
+} from '../../../../plugins/advanced_settings/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
 import {
@@ -53,6 +57,7 @@ export interface PluginsSetup {
   kibana_legacy: KibanaLegacySetup;
   share: SharePluginSetup;
   usageCollection: UsageCollectionSetup;
+  advanced_settings: AdvancedSettingsSetup;
 }
 
 export interface PluginsStart {
@@ -69,6 +74,7 @@ export interface PluginsStart {
   kibana_legacy: KibanaLegacyStart;
   share: SharePluginStart;
   management: ManagementStart;
+  advanced_settings: AdvancedSettingsStart;
 }
 
 export const npSetup = {
