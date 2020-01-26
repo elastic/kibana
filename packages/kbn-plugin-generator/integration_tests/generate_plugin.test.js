@@ -78,7 +78,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       });
     });
 
-    it(`'yarn test:server' should exit 0`, async () => {
+    it.skip(`'yarn test:server' should exit 0`, async () => {
       await execa('yarn', ['test:server'], {
         cwd: generatedPath,
         env: {
@@ -87,7 +87,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       });
     });
 
-    it(`'yarn build' should exit 0`, async () => {
+    it.skip(`'yarn build' should exit 0`, async () => {
       await execa('yarn', ['build'], { cwd: generatedPath });
     });
 
@@ -98,7 +98,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       beforeAll(es.start);
       afterAll(es.stop);
 
-      it(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
+      it.skip(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
         await withProcRunner(log, async proc => {
           await proc.run('kibana', {
             cmd: 'yarn',
@@ -120,7 +120,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       await execa('yarn', ['preinstall'], { cwd: generatedPath });
     });
 
-    it(`'yarn lint' should exit 0`, async () => {
+    it.skip(`'yarn lint' should exit 0`, async () => {
       await execa('yarn', ['lint'], { cwd: generatedPath });
     });
 
