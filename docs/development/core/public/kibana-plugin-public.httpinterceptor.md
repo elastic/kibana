@@ -16,7 +16,7 @@ export interface HttpInterceptor
 
 |  Method | Description |
 |  --- | --- |
-|  [request(request, controller)](./kibana-plugin-public.httpinterceptor.request.md) | Define an interceptor to be executed before a request is sent. |
+|  [request(fetchOptions, controller)](./kibana-plugin-public.httpinterceptor.request.md) | Define an interceptor to be executed before a request is sent. |
 |  [requestError(httpErrorRequest, controller)](./kibana-plugin-public.httpinterceptor.requesterror.md) | Define an interceptor to be executed if a request interceptor throws an error or returns a rejected Promise. |
 |  [response(httpResponse, controller)](./kibana-plugin-public.httpinterceptor.response.md) | Define an interceptor to be executed after a response is received. |
 |  [responseError(httpErrorResponse, controller)](./kibana-plugin-public.httpinterceptor.responseerror.md) | Define an interceptor to be executed if a response interceptor throws an error or returns a rejected Promise. |

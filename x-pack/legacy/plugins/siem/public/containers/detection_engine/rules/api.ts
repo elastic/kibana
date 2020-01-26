@@ -389,6 +389,7 @@ export const getPrePackagedRulesStatus = async ({
 }: {
   signal: AbortSignal;
 }): Promise<{
+  rules_custom_installed: number;
   rules_installed: number;
   rules_not_installed: number;
   rules_not_updated: number;
