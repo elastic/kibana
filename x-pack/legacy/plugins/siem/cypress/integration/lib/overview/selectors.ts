@@ -61,9 +61,13 @@ export const STAT_USER = {
   value: '789',
   domId: '[data-test-subj="host-stat-auditbeatUser"]',
 };
-export const STAT_WINLOGBEAT = {
-  value: '100',
-  domId: '[data-test-subj="host-stat-winlogbeat"]',
+export const STAT_WINLOGBEAT_SECURITY = {
+  value: '70',
+  domId: '[data-test-subj="host-stat-winlogbeatSecurity"]',
+};
+export const STAT_WINLOGBEAT_MWSYSMON_OPERATIONAL = {
+  value: '30',
+  domId: '[data-test-subj="host-stat-winlogbeatMWSysmonOperational"]',
 };
 
 export const HOST_STATS = [
@@ -81,7 +85,8 @@ export const HOST_STATS = [
   STAT_PACKAGE,
   STAT_PROCESS,
   STAT_USER,
-  STAT_WINLOGBEAT,
+  STAT_WINLOGBEAT_SECURITY,
+  STAT_WINLOGBEAT_MWSYSMON_OPERATIONAL,
 ];
 
 // Network Stats
