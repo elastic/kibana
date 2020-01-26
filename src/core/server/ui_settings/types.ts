@@ -16,7 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
+import { SavedObjectsClientContract } from '../saved_objects/types';
+import { UiSettingsParams, UserProvidedValues } from '../../types';
+export {
+  UiSettingsParams,
+  StringValidationRegexString,
+  StringValidationRegex,
+  StringValidation,
+  DeprecationSettings,
+  ImageValidation,
+  UiSettingsType,
+  UserProvidedValues,
+} from '../../types';
+
 /**
  * Server-side client that provides access to the advanced settings stored in elasticsearch.
  * The settings provide control over the behavior of the Kibana application.
@@ -62,76 +74,6 @@ export interface IUiSettingsClient {
    * Shows whether the uiSettings value set by the user.
    */
   isOverridden: (key: string) => boolean;
-}
-
-/**
- * Describes the values explicitly set by user.
- * @public
- * */
-export interface UserProvidedValues<T = any> {
-  userValue?: T;
-  isOverridden?: boolean;
-}
-
-/**
- * UiSettings deprecation field options.
- * @public
- * */
-export interface DeprecationSettings {
-  /** Deprecation message */
-  message: string;
-  /** Key to documentation links */
-  docLinksKey: string;
-}
-
-/**
- * UI element type to represent the settings.
- * @public
- * */
-export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
-
-/**
- * UiSettings parameters defined by the plugins.
- * @public
- * */
-export interface UiSettingsParams {
-  /** title in the UI */
-  name?: string;
-  /** default value to fall back to if a user doesn't provide any */
-  value?: SavedObjectAttribute;
-  /** description provided to a user in UI */
-  description?: string;
-  /** used to group the configured setting in the UI */
-  category?: string[];
-  /** array of permitted values for this setting */
-  options?: string[];
-  /** text labels for 'select' type UI element */
-  optionLabels?: Record<string, string>;
-  /** a flag indicating whether new value applying requires page reloading */
-  requiresPageReload?: boolean;
-  /** a flag indicating that value cannot be changed */
-  readonly?: boolean;
-  /** defines a type of UI element {@link UiSettingsType} */
-  type?: UiSettingsType;
-  /** optional deprecation information. Used to generate a deprecation warning. */
-  deprecation?: DeprecationSettings;
-  /*
-   * Allows defining a custom validation applicable to value change on the client.
-   * @deprecated
-   */
-  validation?: ImageValidation | StringValidation;
-}
-
-export interface StringValidation {
-  regexString: string;
-  message: string;
-}
-
-export interface ImageValidation {
-  maxSize: {
-    length: number;
-    description: string;
-  };
 }
 
 /** @internal */

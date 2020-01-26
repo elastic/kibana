@@ -57,6 +57,7 @@ export function LayerControl({
   closeLayerTOC,
   openLayerTOC,
   layerList,
+  isAddButtonActive,
 }) {
   if (!isLayerTOCOpen) {
     const hasErrors = layerList.some(layer => {
@@ -85,6 +86,7 @@ export function LayerControl({
       <Fragment>
         <EuiSpacer size="s" />
         <EuiButton
+          isDisabled={!isAddButtonActive}
           className="mapLayerControl__addLayerButton"
           fill
           fullWidth

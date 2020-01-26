@@ -84,7 +84,7 @@ describe('import rules schema', () => {
           from: 'now-5m',
           to: 'now',
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
         }).error
       ).toBeTruthy();
     });
@@ -97,7 +97,7 @@ describe('import rules schema', () => {
           from: 'now-5m',
           to: 'now',
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           type: 'query',
         }).error
       ).toBeTruthy();
@@ -111,7 +111,7 @@ describe('import rules schema', () => {
           from: 'now-5m',
           to: 'now',
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
         }).error
@@ -126,7 +126,7 @@ describe('import rules schema', () => {
           from: 'now-5m',
           to: 'now',
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           type: 'query',
           interval: '5m',
           index: ['index-1'],
@@ -143,7 +143,7 @@ describe('import rules schema', () => {
           from: 'now-5m',
           to: 'now',
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           type: 'query',
           query: 'some query',
           index: ['index-1'],
@@ -161,7 +161,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           query: 'some query',
@@ -180,7 +180,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           query: 'some query',
@@ -200,7 +200,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           query: 'some query',
@@ -218,7 +218,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           risk_score: 50,
@@ -237,14 +237,14 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
         }).error
       ).toBeFalsy();
     });
 
-    test('You can send in an empty array to threats', () => {
+    test('You can send in an empty array to threat', () => {
       expect(
         importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
           rule_id: 'rule-1',
@@ -255,19 +255,19 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
-          threats: [],
+          threat: [],
         }).error
       ).toBeFalsy();
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threats] does validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
       expect(
         importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
           rule_id: 'rule-1',
@@ -278,10 +278,10 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
-          threats: [
+          threat: [
             {
               framework: 'someFramework',
               tactic: {
@@ -289,7 +289,7 @@ describe('import rules schema', () => {
                 name: 'fakeName',
                 reference: 'fakeRef',
               },
-              techniques: [
+              technique: [
                 {
                   id: 'techniqueId',
                   name: 'techniqueName',
@@ -313,7 +313,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -334,7 +334,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           query: 'some-query',
@@ -356,7 +356,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           query: 'some-query',
@@ -381,7 +381,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: [5],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           query: 'some-query',
@@ -403,7 +403,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           type: 'query',
         }).value.interval
       ).toEqual('5m');
@@ -420,7 +420,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
         }).value.max_signals
@@ -438,7 +438,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'saved_query',
         }).error.message
@@ -456,7 +456,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'saved_query',
           saved_id: 'some id',
@@ -475,7 +475,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'saved_query',
           saved_id: 'some id',
@@ -497,7 +497,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'saved_query',
           saved_id: 'some id',
@@ -517,7 +517,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -538,7 +538,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -559,7 +559,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -580,7 +580,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -602,7 +602,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -624,7 +624,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -646,7 +646,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -670,7 +670,7 @@ describe('import rules schema', () => {
             to: 'now',
             index: ['index-1'],
             name: 'some-name',
-            severity: 'severity',
+            severity: 'low',
             interval: '5m',
             type: 'query',
             references: ['index-1'],
@@ -685,11 +685,11 @@ describe('import rules schema', () => {
       );
     });
 
-    test('You cannot send in an array of threats that are missing "framework"', () => {
+    test('You cannot send in an array of threat that are missing "framework"', () => {
       expect(
         importRulesSchema.validate<
-          Partial<Omit<ImportRuleAlertRest, 'threats'>> & {
-            threats: Array<Partial<Omit<ThreatParams, 'framework'>>>;
+          Partial<Omit<ImportRuleAlertRest, 'threat'>> & {
+            threat: Array<Partial<Omit<ThreatParams, 'framework'>>>;
           }
         >({
           rule_id: 'rule-1',
@@ -700,21 +700,21 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
-          threats: [
+          threat: [
             {
               tactic: {
                 id: 'fakeId',
                 name: 'fakeName',
                 reference: 'fakeRef',
               },
-              techniques: [
+              technique: [
                 {
                   id: 'techniqueId',
                   name: 'techniqueName',
@@ -725,15 +725,15 @@ describe('import rules schema', () => {
           ],
         }).error.message
       ).toEqual(
-        'child "threats" fails because ["threats" at position 0 fails because [child "framework" fails because ["framework" is required]]]'
+        'child "threat" fails because ["threat" at position 0 fails because [child "framework" fails because ["framework" is required]]]'
       );
     });
 
-    test('You cannot send in an array of threats that are missing "tactic"', () => {
+    test('You cannot send in an array of threat that are missing "tactic"', () => {
       expect(
         importRulesSchema.validate<
-          Partial<Omit<ImportRuleAlertRest, 'threats'>> & {
-            threats: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
+          Partial<Omit<ImportRuleAlertRest, 'threat'>> & {
+            threat: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
           }
         >({
           rule_id: 'rule-1',
@@ -744,17 +744,17 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
-          threats: [
+          threat: [
             {
               framework: 'fake',
-              techniques: [
+              technique: [
                 {
                   id: 'techniqueId',
                   name: 'techniqueName',
@@ -765,15 +765,15 @@ describe('import rules schema', () => {
           ],
         }).error.message
       ).toEqual(
-        'child "threats" fails because ["threats" at position 0 fails because [child "tactic" fails because ["tactic" is required]]]'
+        'child "threat" fails because ["threat" at position 0 fails because [child "tactic" fails because ["tactic" is required]]]'
       );
     });
 
-    test('You cannot send in an array of threats that are missing "techniques"', () => {
+    test('You cannot send in an array of threat that are missing "technique"', () => {
       expect(
         importRulesSchema.validate<
-          Partial<Omit<ImportRuleAlertRest, 'threats'>> & {
-            threats: Array<Partial<Omit<ThreatParams, 'technique'>>>;
+          Partial<Omit<ImportRuleAlertRest, 'threat'>> & {
+            threat: Array<Partial<Omit<ThreatParams, 'technique'>>>;
           }
         >({
           rule_id: 'rule-1',
@@ -784,14 +784,14 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
-          threats: [
+          threat: [
             {
               framework: 'fake',
               tactic: {
@@ -803,7 +803,7 @@ describe('import rules schema', () => {
           ],
         }).error.message
       ).toEqual(
-        'child "threats" fails because ["threats" at position 0 fails because [child "techniques" fails because ["techniques" is required]]]'
+        'child "threat" fails because ["threat" at position 0 fails because [child "technique" fails because ["technique" is required]]]'
       );
     });
 
@@ -819,7 +819,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -844,7 +844,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -857,7 +857,30 @@ describe('import rules schema', () => {
       );
     });
 
-    test('You can optionally set the immutable to be true', () => {
+    test('You can optionally set the immutable to be false', () => {
+      expect(
+        importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: false,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannnot set immutable to be true', () => {
       expect(
         importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
           rule_id: 'rule-1',
@@ -869,15 +892,15 @@ describe('import rules schema', () => {
           immutable: true,
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
-        }).error
-      ).toBeFalsy();
+        }).error.message
+      ).toEqual('child "immutable" fails because ["immutable" must be one of [false]]');
     });
 
     test('You cannot set the immutable to be a number', () => {
@@ -894,7 +917,7 @@ describe('import rules schema', () => {
           immutable: 5,
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -914,10 +937,10 @@ describe('import rules schema', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
-          immutable: true,
+          immutable: false,
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -937,10 +960,10 @@ describe('import rules schema', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
-          immutable: true,
+          immutable: false,
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -960,10 +983,10 @@ describe('import rules schema', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
-          immutable: true,
+          immutable: false,
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -983,10 +1006,10 @@ describe('import rules schema', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
-          immutable: true,
+          immutable: false,
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -1006,10 +1029,10 @@ describe('import rules schema', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
-          immutable: true,
+          immutable: false,
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -1032,10 +1055,10 @@ describe('import rules schema', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
-          immutable: true,
+          immutable: false,
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -1056,10 +1079,10 @@ describe('import rules schema', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
-          immutable: true,
+          immutable: false,
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -1081,7 +1104,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -1104,7 +1127,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -1126,7 +1149,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -1149,7 +1172,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -1174,7 +1197,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -1197,7 +1220,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -1219,7 +1242,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -1240,7 +1263,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -1265,7 +1288,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -1290,7 +1313,7 @@ describe('import rules schema', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           references: ['index-1'],
@@ -1343,5 +1366,60 @@ describe('import rules schema', () => {
     test('does validate with a file object', () => {
       expect(importRulesPayloadSchema.validate({ file: {} }).error).toBeFalsy();
     });
+  });
+
+  test('The default for "from" will be "now-6m"', () => {
+    expect(
+      importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).value.from
+    ).toEqual('now-6m');
+  });
+
+  test('The default for "to" will be "now"', () => {
+    expect(
+      importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).value.to
+    ).toEqual('now');
+  });
+
+  test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
+    expect(
+      importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'junk',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "severity" fails because ["severity" must be one of [low, medium, high, critical]]'
+    );
   });
 });
