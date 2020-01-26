@@ -28,6 +28,7 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_RULES_STATUS_URL,
   DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
+  DETECTION_ENGINE_TAGS_URL,
 } from '../../../../common/constants';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
 
@@ -54,61 +55,72 @@ export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule>
 };
 
 /**
- * Fetches all rules or single specified rule from the Detection Engine API
+ * Fetches all rules from the Detection Engine API
  *
  * @param filterOptions desired filters (e.g. filter/sortField/sortOrder)
  * @param pagination desired pagination options (e.g. page/perPage)
- * @param id if specified, will return specific rule if exists
  * @param signal to cancel request
+ *
  */
 export const fetchRules = async ({
   filterOptions = {
     filter: '',
-    sortField: 'name',
+    sortField: 'enabled',
     sortOrder: 'desc',
+    showCustomRules: false,
+    showElasticRules: false,
+    tags: [],
   },
   pagination = {
     page: 1,
     perPage: 20,
     total: 0,
   },
-  id,
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
+  const filters = [
+    ...(filterOptions.filter.length !== 0
+      ? [`alert.attributes.name:%20${encodeURIComponent(filterOptions.filter)}`]
+      : []),
+    ...(filterOptions.showCustomRules
+      ? ['alert.attributes.tags:%20%22__internal_immutable:false%22']
+      : []),
+    ...(filterOptions.showElasticRules
+      ? ['alert.attributes.tags:%20%22__internal_immutable:true%22']
+      : []),
+    ...(filterOptions.tags?.map(t => `alert.attributes.tags:${encodeURIComponent(t)}`) ?? []),
+  ];
+
   const queryParams = [
     `page=${pagination.page}`,
     `per_page=${pagination.perPage}`,
     `sort_field=${filterOptions.sortField}`,
     `sort_order=${filterOptions.sortOrder}`,
-    ...(filterOptions.filter.length !== 0
-      ? [`filter=alert.attributes.name:%20${encodeURIComponent(filterOptions.filter)}`]
-      : []),
+    ...(filters.length > 0 ? [`filter=${filters.join('%20AND%20')}`] : []),
   ];
 
-  const endpoint =
-    id != null
-      ? `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id="${id}"`
-      : `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_find?${queryParams.join('&')}`;
-
-  const response = await fetch(endpoint, {
-    method: 'GET',
-    signal,
-  });
+  const response = await fetch(
+    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_find?${queryParams.join('&')}`,
+    {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: {
+        'content-type': 'application/json',
+        'kbn-xsrf': 'true',
+      },
+      signal,
+    }
+  );
   await throwIfNotOk(response);
-  return id != null
-    ? {
-        page: 0,
-        perPage: 1,
-        total: 1,
-        data: response.json(),
-      }
-    : response.json();
+  return response.json();
 };
 
 /**
  * Fetch a Rule by providing a Rule ID
  *
  * @param id Rule ID's (not rule_id)
+ * @param signal to cancel request
+ *
  */
 export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> => {
   const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
@@ -345,6 +357,27 @@ export const getRuleStatusById = async ({
 };
 
 /**
+ * Fetch all unique Tags used by Rules
+ *
+ * @param signal to cancel request
+ *
+ */
+export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> => {
+  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_TAGS_URL}`, {
+    method: 'GET',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-xsrf': 'true',
+    },
+    signal,
+  });
+
+  await throwIfNotOk(response);
+  return response.json();
+};
+
+/**
  * Get pre packaged rules Status
  *
  * @param signal AbortSignal for cancelling request
@@ -356,6 +389,7 @@ export const getPrePackagedRulesStatus = async ({
 }: {
   signal: AbortSignal;
 }): Promise<{
+  rules_custom_installed: number;
   rules_installed: number;
   rules_not_installed: number;
   rules_not_updated: number;
