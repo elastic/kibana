@@ -40,7 +40,7 @@
   "from": "now-6m",
   "severity": "high",
   "type": "query",
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -48,7 +48,7 @@
         "name": "impact",
         "reference": "https://attack.mitre.org/tactics/TA0040/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1499",
           "name": "endpoint denial of service",
@@ -63,7 +63,7 @@
         "name": "Some other name",
         "reference": "https://example.com"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "some-other-id",
           "name": "some other technique name",
