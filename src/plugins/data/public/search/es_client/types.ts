@@ -17,8 +17,14 @@
  * under the License.
  */
 
-import { addSearchStrategy, defaultSearchStrategy } from '../index';
+export type SearchRequest = any;
+export type SearchResponse = any;
 
-addSearchStrategy(defaultSearchStrategy);
+export interface LegacyApiCaller {
+  search: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
+  msearch: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
+}
 
-export { defaultSearchStrategy };
+interface LegacyApiCallerResponse extends Promise<SearchResponse> {
+  abort: () => void;
+}

@@ -18,6 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { MaybePromise } from '@kbn/utility-types';
 
 /** @public */
 export interface HttpSetup {
@@ -110,7 +111,11 @@ export interface IAnonymousPaths {
   register(path: string): void;
 }
 
-/** @public */
+/**
+ * Headers to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause
+ * {@link HttpHandler} to throw an error.
+ * @public
+ */
 export interface HttpHeadersInit {
   [name: string]: any;
 }
@@ -217,30 +222,54 @@ export interface HttpFetchOptions extends HttpRequestInit {
   headers?: HttpHeadersInit;
 
   /**
-   * When `true` the return type of {@link HttpHandler} will be an {@link IHttpResponse} with detailed request and
+   * Whether or not the request should include the "system request" header to differentiate an end user request from
+   * Kibana internal request.
+   * Can be read on the server-side using KibanaRequest#isSystemRequest. Defaults to `false`.
+   */
+  asSystemRequest?: boolean;
+
+  /**
+   * When `true` the return type of {@link HttpHandler} will be an {@link HttpResponse} with detailed request and
    * response information. When `false`, the return type will just be the parsed response body. Defaults to `false`.
    */
   asResponse?: boolean;
 }
 
 /**
+ * Similar to {@link HttpFetchOptions} but with the URL path included.
+ * @public
+ */
+export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
+  /*
+   * The path on the Kibana server to send the request to. Should not include the basePath.
+   */
+  path: string;
+}
+
+/**
  * A function for making an HTTP requests to Kibana's backend. See {@link HttpFetchOptions} for options and
- * {@link IHttpResponse} for the response.
+ * {@link HttpResponse} for the response.
  *
  * @param path the path on the Kibana server to send the request to. Should not include the basePath.
  * @param options {@link HttpFetchOptions}
- * @returns a Promise that resolves to a {@link IHttpResponse}
+ * @returns a Promise that resolves to a {@link HttpResponse}
  * @public
  */
 export interface HttpHandler {
   <TResponseBody = any>(path: string, options: HttpFetchOptions & { asResponse: true }): Promise<
-    IHttpResponse<TResponseBody>
+    HttpResponse<TResponseBody>
+  >;
+  <TResponseBody = any>(options: HttpFetchOptionsWithPath & { asResponse: true }): Promise<
+    HttpResponse<TResponseBody>
   >;
   <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+  <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
 
 /** @public */
-export interface IHttpResponse<TResponseBody = any> {
+export interface HttpResponse<TResponseBody = any> {
+  /** The original {@link HttpFetchOptionsWithPath} used to send this request. */
+  readonly fetchOptions: Readonly<HttpFetchOptionsWithPath>;
   /** Raw request sent to Kibana server. */
   readonly request: Readonly<Request>;
   /** Raw response received, may be undefined if there was an error. */
@@ -276,12 +305,13 @@ export interface IHttpFetchError extends Error {
 }
 
 /** @public */
-export interface HttpErrorResponse extends IHttpResponse {
+export interface HttpInterceptorResponseError extends HttpResponse {
+  request: Readonly<Request>;
   error: Error | IHttpFetchError;
 }
 /** @public */
-export interface HttpErrorRequest {
-  request: Request;
+export interface HttpInterceptorRequestError {
+  fetchOptions: Readonly<HttpFetchOptionsWithPath>;
   error: Error;
 }
 
@@ -298,39 +328,39 @@ export interface HttpInterceptor {
    * @param controller {@link IHttpInterceptController}
    */
   request?(
-    request: Request,
+    fetchOptions: Readonly<HttpFetchOptionsWithPath>,
     controller: IHttpInterceptController
-  ): Promise<Request> | Request | void;
+  ): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
 
   /**
    * Define an interceptor to be executed if a request interceptor throws an error or returns a rejected Promise.
-   * @param httpErrorRequest {@link HttpErrorRequest}
+   * @param httpErrorRequest {@link HttpInterceptorRequestError}
    * @param controller {@link IHttpInterceptController}
    */
   requestError?(
-    httpErrorRequest: HttpErrorRequest,
+    httpErrorRequest: HttpInterceptorRequestError,
     controller: IHttpInterceptController
-  ): Promise<Request> | Request | void;
+  ): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
 
   /**
    * Define an interceptor to be executed after a response is received.
-   * @param httpResponse {@link IHttpResponse}
+   * @param httpResponse {@link HttpResponse}
    * @param controller {@link IHttpInterceptController}
    */
   response?(
-    httpResponse: IHttpResponse,
+    httpResponse: HttpResponse,
     controller: IHttpInterceptController
-  ): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
+  ): MaybePromise<IHttpResponseInterceptorOverrides> | void;
 
   /**
    * Define an interceptor to be executed if a response interceptor throws an error or returns a rejected Promise.
-   * @param httpErrorResponse {@link HttpErrorResponse}
+   * @param httpErrorResponse {@link HttpInterceptorResponseError}
    * @param controller {@link IHttpInterceptController}
    */
   responseError?(
-    httpErrorResponse: HttpErrorResponse,
+    httpErrorResponse: HttpInterceptorResponseError,
     controller: IHttpInterceptController
-  ): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
+  ): MaybePromise<IHttpResponseInterceptorOverrides> | void;
 }
 
 /**
