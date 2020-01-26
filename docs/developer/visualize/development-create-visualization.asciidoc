@@ -62,7 +62,7 @@ The list of common parameters:
 - *visualization*: A constructor function for a Visualization.
 - *requestHandler*: <string> one of the available request handlers or a <function> for a custom request handler
 - *responseHandler*: <string> one of the available response handlers or a <function> for a custom response handler
-- *editor*: <string> one of the available editors or Editor class for custom one
+- *editor*: Editor class for custom one
 - *editorConfig*: object holding editor parameters
 - *options.showTimePicker*: <bool> show or hide time filter (defaults to true)
 - *options.showQueryBar*: <bool> show or hide query bar (defaults to true)
@@ -218,7 +218,6 @@ These tabs should be React components.
     title: 'My New Vis',
     icon: 'my_icon',
     description: 'Cool new chart',
-    editor: 'default',
     editorConfig: {
        optionsTemplate: MyReactComponent // or if multiple tabs are required:
        optionTabs: [

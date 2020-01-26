@@ -6,7 +6,7 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { ActionResult } from '../../../../../../actions/server/types';
+import { ActionResult } from '../../../../../../../../plugins/actions/server';
 import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -34,11 +34,11 @@ export const mockPrepackagedRule = (): PrepackagedRules => ({
   severity: 'high',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
-  threats: [
+  threat: [
     {
       framework: 'fake',
       tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
+      technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
   enabled: true,
@@ -69,11 +69,11 @@ export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
   severity: 'high',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
-  threats: [
+  threat: [
     {
       framework: 'fake',
       tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
+      technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
 });
@@ -298,7 +298,7 @@ export const getResult = (): RuleAlertType => ({
     severity: 'high',
     to: 'now',
     type: 'query',
-    threats: [
+    threat: [
       {
         framework: 'MITRE ATT&CK',
         tactic: {
@@ -306,7 +306,7 @@ export const getResult = (): RuleAlertType => ({
           name: 'impact',
           reference: 'https://attack.mitre.org/tactics/TA0040/',
         },
-        techniques: [
+        technique: [
           {
             id: 'T1499',
             name: 'endpoint denial of service',
@@ -371,7 +371,7 @@ export const getMockPrivileges = () => ({
     create_snapshot: true,
   },
   index: {
-    '.siem-signals-frank-hassanabad-test-space': {
+    '.siem-signals-test-space': {
       all: false,
       manage_ilm: true,
       read: false,

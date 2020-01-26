@@ -16,17 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import chrome from 'ui/chrome';
+
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from './index';
 
-// Legacy compatiblity part - to be removed at cutover, replaced by a kibana.json file
+// Legacy compatibility part - to be removed at cutover, replaced by a kibana.json file
 export const pluginInstance = plugin({} as PluginInitializerContext);
 export const setup = pluginInstance.setup(npSetup.core, {
   ...npSetup.plugins,
-  __LEGACY: {
-    chrome,
-  },
 });
 export const start = pluginInstance.start(npStart.core, npStart.plugins);

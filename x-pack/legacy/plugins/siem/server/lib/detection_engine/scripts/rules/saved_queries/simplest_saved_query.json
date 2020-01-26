@@ -4,7 +4,5 @@
   "risk_score": 5,
   "severity": "high",
   "type": "saved_query",
-  "from": "now-6m",
-  "to": "now",
   "saved_id": "test-saved-id"
 }

@@ -214,5 +214,6 @@ export interface DocLinksStart {
     readonly date: {
       readonly dateMath: string;
     };
+    readonly management: Record<string, string>;
   };
 }

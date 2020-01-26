@@ -56,7 +56,7 @@ export const buildRule = ({
     filters: ruleParams.filters,
     created_by: createdBy,
     updated_by: updatedBy,
-    threats: ruleParams.threats,
+    threat: ruleParams.threat,
     version: ruleParams.version,
     created_at: ruleParams.createdAt,
     updated_at: ruleParams.updatedAt,
