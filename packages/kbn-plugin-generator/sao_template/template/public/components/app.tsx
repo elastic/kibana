@@ -81,7 +81,7 @@ export const <%= upperCamelCaseName %>App = ({ basename, notifications, http, na
                   <h1>
                     <FormattedMessage
                       id="<%= camelCase(name) %>.helloWorldText"
-                      defaultMessage="{name}!"
+                      defaultMessage="{name}"
                       values={{ name: PLUGIN_NAME }}
                     />
                   </h1>
@@ -93,7 +93,7 @@ export const <%= upperCamelCaseName %>App = ({ basename, notifications, http, na
                     <h2>
                       <FormattedMessage
                         id="<%= camelCase(name) %>.congratulationsTitle"
-                        defaultMessage="Congratulations, you have successfully created your first Kibana Plugin!"
+                        defaultMessage="Congratulations, you have successfully created a new Kibana Plugin!"
                       />
                     </h2>
                   </EuiTitle>
@@ -115,7 +115,7 @@ export const <%= upperCamelCaseName %>App = ({ basename, notifications, http, na
                       />
                     </p>
                     <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                      <FormattedMessage id="<%= camelCase(name) %>.buttonText" defaultMessage="<%_ if (generateApi) { -%>Fetch data<%_ } else { -%>Click me<%_ } -%>" />
+                      <FormattedMessage id="<%= camelCase(name) %>.buttonText" defaultMessage="<%_ if (generateApi) { -%>Get data<%_ } else { -%>Click me<%_ } -%>" />
                     </EuiButton>
                   </EuiText>
                 </EuiPageContentBody>
