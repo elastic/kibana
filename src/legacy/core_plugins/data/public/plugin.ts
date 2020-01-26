@@ -44,6 +44,13 @@ export interface DataPluginStartDependencies {
 }
 
 /**
+ * Interface for this plugin's returned `start` contract.
+ *
+ * @public
+ */
+export interface DataStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+/**
  * Data Plugin - public
  *
  * This is the entry point for the entire client-side public contract of the plugin.
@@ -56,7 +63,7 @@ export interface DataPluginStartDependencies {
  */
 
 export class DataPlugin
-  implements Plugin<void, void, DataPluginSetupDependencies, DataPluginStartDependencies> {
+  implements Plugin<void, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
   public setup(core: CoreSetup) {
     setInjectedMetadata(core.injectedMetadata);
 
@@ -64,12 +71,14 @@ export class DataPlugin
     addSearchStrategy(defaultSearchStrategy);
   }
 
-  public start(core: CoreStart, { data }: DataPluginStartDependencies) {
+  public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
     setUiSettings(core.uiSettings);
     setQueryService(data.query);
     setIndexPatterns(data.indexPatterns);
     setFieldFormats(data.fieldFormats);
     setSearchService(data.search);
+
+    return {};
   }
 
   public stop() {}
