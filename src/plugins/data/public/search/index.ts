@@ -40,3 +40,5 @@ export { SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 
 export { ISearchStart } from './search_service';
+
+export { LegacyApiCaller } from './es_client';
