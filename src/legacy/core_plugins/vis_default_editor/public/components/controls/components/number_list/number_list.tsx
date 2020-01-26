@@ -72,7 +72,7 @@ function NumberList({
       setAscendingError(
         isValidOrder
           ? EMPTY_STRING
-          : i18n.translate('common.ui.aggTypes.numberList.invalidAscOrderErrorMessage', {
+          : i18n.translate('visDefaultEditor.controls.numberList.invalidAscOrderErrorMessage', {
               defaultMessage: 'The values should be in ascending order.',
             })
       );
@@ -160,7 +160,7 @@ function NumberList({
       <EuiFlexItem>
         <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
           <FormattedMessage
-            id="common.ui.aggTypes.numberList.addUnitButtonLabel"
+            id="visDefaultEditor.controls.numberList.addUnitButtonLabel"
             defaultMessage="Add {unitName}"
             values={{ unitName }}
           />

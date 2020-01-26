@@ -26,7 +26,7 @@ type AggFilter = string[];
 
 const DEFAULT_METRIC = 'custom';
 const CUSTOM_METRIC = {
-  text: i18n.translate('common.ui.aggTypes.customMetricLabel', {
+  text: i18n.translate('visDefaultEditor.controls.customMetricLabel', {
     defaultMessage: 'Custom metric',
   }),
   value: DEFAULT_METRIC,
@@ -77,7 +77,7 @@ function useAvailableOptions(
   const options = useMemo(
     () => [
       ...metricAggs.map(respAgg => ({
-        text: i18n.translate('common.ui.aggTypes.definiteMetricLabel', {
+        text: i18n.translate('visDefaultEditor.controls.definiteMetricLabel', {
           defaultMessage: 'Metric: {metric}',
           values: {
             metric: safeMakeLabel(respAgg),
@@ -111,7 +111,7 @@ function safeMakeLabel(agg: AggConfig): string {
   try {
     return agg.makeLabel();
   } catch (e) {
-    return i18n.translate('common.ui.aggTypes.aggNotValidLabel', {
+    return i18n.translate('visDefaultEditor.controls.aggNotValidLabel', {
       defaultMessage: '- agg not valid -',
     });
   }

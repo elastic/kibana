@@ -92,7 +92,7 @@ function DefaultEditorAgg({
     if (['date_histogram', 'histogram'].includes(aggName)) {
       disabledParams = ['min_doc_count'];
     } else {
-      aggError = i18n.translate('common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage', {
+      aggError = i18n.translate('visDefaultEditor.metrics.wrongLastBucketTypeErrorMessage', {
         defaultMessage:
           'Last bucket aggregation must be "Date Histogram" or "Histogram" when using "{type}" metric aggregation.',
         values: { type: lastParentPipelineAggTitle },
@@ -167,7 +167,7 @@ function DefaultEditorAgg({
         id: 'hasErrors',
         color: 'danger',
         type: 'alert',
-        tooltip: i18n.translate('common.ui.vis.editors.agg.errorsAriaLabel', {
+        tooltip: i18n.translate('visDefaultEditor.agg.errorsAriaLabel', {
           defaultMessage: 'Aggregation has errors',
         }),
         dataTestSubj: 'hasErrorsAggregationIcon',
@@ -181,7 +181,7 @@ function DefaultEditorAgg({
         disabled: isDisabled,
         type: 'eye',
         onClick: () => onToggleEnableAgg(agg.id, false),
-        tooltip: i18n.translate('common.ui.vis.editors.agg.disableAggButtonTooltip', {
+        tooltip: i18n.translate('visDefaultEditor.agg.disableAggButtonTooltip', {
           defaultMessage: 'Disable aggregation',
         }),
         dataTestSubj: 'toggleDisableAggregationBtn disable',
@@ -193,7 +193,7 @@ function DefaultEditorAgg({
         color: 'text',
         type: 'eyeClosed',
         onClick: () => onToggleEnableAgg(agg.id, true),
-        tooltip: i18n.translate('common.ui.vis.editors.agg.enableAggButtonTooltip', {
+        tooltip: i18n.translate('visDefaultEditor.agg.enableAggButtonTooltip', {
           defaultMessage: 'Enable aggregation',
         }),
         dataTestSubj: 'toggleDisableAggregationBtn enable',
@@ -203,7 +203,7 @@ function DefaultEditorAgg({
       actionIcons.push({
         id: 'dragHandle',
         type: 'grab',
-        tooltip: i18n.translate('common.ui.vis.editors.agg.modifyPriorityButtonTooltip', {
+        tooltip: i18n.translate('visDefaultEditor.agg.modifyPriorityButtonTooltip', {
           defaultMessage: 'Modify priority by dragging',
         }),
         dataTestSubj: 'dragHandleBtn',
@@ -215,7 +215,7 @@ function DefaultEditorAgg({
         color: 'danger',
         type: 'cross',
         onClick: () => removeAgg(agg.id),
-        tooltip: i18n.translate('common.ui.vis.editors.agg.removeDimensionButtonTooltip', {
+        tooltip: i18n.translate('visDefaultEditor.agg.removeDimensionButtonTooltip', {
           defaultMessage: 'Remove dimension',
         }),
         dataTestSubj: 'removeDimensionBtn',
@@ -270,7 +270,7 @@ function DefaultEditorAgg({
       buttonClassName="eui-textTruncate"
       buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
       className="visEditorSidebar__section visEditorSidebar__collapsible visEditorSidebar__collapsible--marginBottom"
-      aria-label={i18n.translate('common.ui.vis.editors.agg.toggleEditorButtonAriaLabel', {
+      aria-label={i18n.translate('visDefaultEditor.agg.toggleEditorButtonAriaLabel', {
         defaultMessage: 'Toggle {schema} editor',
         values: { schema: agg.schema.title },
       })}

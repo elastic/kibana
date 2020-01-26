@@ -67,13 +67,13 @@ export function TopAggregateParamEditor({
   const label = (
     <>
       <FormattedMessage
-        id="common.ui.aggTypes.aggregateWithLabel"
+        id="visDefaultEditor.controls.aggregateWithLabel"
         defaultMessage="Aggregate with"
       />{' '}
       <EuiIconTip
         position="right"
         type="questionInCircle"
-        content={i18n.translate('common.ui.aggTypes.aggregateWithTooltip', {
+        content={i18n.translate('visDefaultEditor.controls.aggregateWithTooltip', {
           defaultMessage:
             'Choose a strategy for combining multiple hits or a multi-valued field into a single metric.',
         })}

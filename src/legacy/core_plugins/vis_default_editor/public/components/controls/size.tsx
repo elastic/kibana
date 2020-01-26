@@ -40,7 +40,7 @@ function SizeParamEditor({
 }: SizeParamEditorProps) {
   const label = (
     <>
-      <FormattedMessage id="common.ui.aggTypes.sizeLabel" defaultMessage="Size" />
+      <FormattedMessage id="visDefaultEditor.controls.sizeLabel" defaultMessage="Size" />
       {iconTip}
     </>
   );

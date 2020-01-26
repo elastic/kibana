@@ -57,12 +57,12 @@ function DefaultEditorAggSelect({
 
   const label = isSubAggregation ? (
     <FormattedMessage
-      id="common.ui.vis.defaultEditor.aggSelect.subAggregationLabel"
+      id="visDefaultEditor.aggSelect.subAggregationLabel"
       defaultMessage="Sub aggregation"
     />
   ) : (
     <FormattedMessage
-      id="common.ui.vis.defaultEditor.aggSelect.aggregationLabel"
+      id="visDefaultEditor.aggSelect.aggregationLabel"
       defaultMessage="Aggregation"
     />
   );
@@ -76,7 +76,7 @@ function DefaultEditorAggSelect({
     <EuiLink href={aggHelpLink} target="_blank" rel="noopener">
       <EuiText size="xs">
         <FormattedMessage
-          id="common.ui.vis.defaultEditor.aggSelect.helpLinkLabel"
+          id="visDefaultEditor.aggSelect.helpLinkLabel"
           defaultMessage="{aggTitle} help"
           values={{ aggTitle: value ? value.title : '' }}
         />
@@ -88,7 +88,7 @@ function DefaultEditorAggSelect({
 
   if (!aggTypeOptions.length) {
     errors.push(
-      i18n.translate('common.ui.vis.defaultEditor.aggSelect.noCompatibleAggsDescription', {
+      i18n.translate('visDefaultEditor.aggSelect.noCompatibleAggsDescription', {
         defaultMessage:
           'The index pattern {indexPatternTitle} does not have any aggregatable fields.',
         values: {
@@ -139,7 +139,7 @@ function DefaultEditorAggSelect({
       compressed
     >
       <EuiComboBox
-        placeholder={i18n.translate('common.ui.vis.defaultEditor.aggSelect.selectAggPlaceholder', {
+        placeholder={i18n.translate('visDefaultEditor.aggSelect.selectAggPlaceholder', {
           defaultMessage: 'Select an aggregation',
         })}
         id={`visDefaultEditorAggSelect${id}`}

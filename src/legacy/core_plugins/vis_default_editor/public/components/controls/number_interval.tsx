@@ -29,14 +29,14 @@ import { AggParamEditorProps } from '../agg_param_props';
 const label = (
   <>
     <FormattedMessage
-      id="common.ui.aggTypes.numberInterval.minimumIntervalLabel"
+      id="visDefaultEditor.controls.numberInterval.minimumIntervalLabel"
       defaultMessage="Minimum interval"
     />{' '}
     <EuiIconTip
       position="right"
       content={
         <FormattedMessage
-          id="common.ui.aggTypes.numberInterval.minimumIntervalTooltip"
+          id="visDefaultEditor.controls.numberInterval.minimumIntervalTooltip"
           defaultMessage="Interval will be automatically scaled in the event that the provided value creates more buckets than specified by Advanced Setting's {histogramMaxBars}"
           values={{ histogramMaxBars: 'histogram:maxBars' }}
         />
@@ -87,9 +87,12 @@ function NumberIntervalParamEditor({
         onBlur={setTouched}
         fullWidth={true}
         compressed
-        placeholder={i18n.translate('common.ui.aggTypes.numberInterval.selectIntervalPlaceholder', {
-          defaultMessage: 'Enter an interval',
-        })}
+        placeholder={i18n.translate(
+          'visDefaultEditor.controls.numberInterval.selectIntervalPlaceholder',
+          {
+            defaultMessage: 'Enter an interval',
+          }
+        )}
       />
     </EuiFormRow>
   );

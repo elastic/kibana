@@ -27,10 +27,10 @@ function ScaleMetricsParamEditor(props: AggParamEditorProps<boolean>) {
   return (
     <SwitchParamEditor
       dataTestSubj="scaleMetricsSwitch"
-      displayLabel={i18n.translate('common.ui.aggTypes.scaleMetricsLabel', {
+      displayLabel={i18n.translate('visDefaultEditor.controls.scaleMetricsLabel', {
         defaultMessage: 'Scale metric values (deprecated)',
       })}
-      displayToolTip={i18n.translate('common.ui.aggTypes.scaleMetricsTooltip', {
+      displayToolTip={i18n.translate('visDefaultEditor.controls.scaleMetricsTooltip', {
         defaultMessage:
           'If you select a manual minimum interval and a larger interval will be used, enabling this will ' +
           'cause count and sum metrics to be scaled to the manual selected interval.',

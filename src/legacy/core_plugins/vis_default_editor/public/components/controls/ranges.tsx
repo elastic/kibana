@@ -139,7 +139,7 @@ function RangesParamEditor({
       <>
         {ranges.map(({ from, to, id }, index) => {
           const deleteBtnTitle = i18n.translate(
-            'common.ui.aggTypes.ranges.removeRangeButtonAriaLabel',
+            'visDefaultEditor.controls.ranges.removeRangeButtonAriaLabel',
             {
               defaultMessage: 'Remove the range of {from} to {to}',
               values: {
@@ -157,30 +157,36 @@ function RangesParamEditor({
           }
 
           const gtePrependLabel = i18n.translate(
-            'common.ui.aggTypes.ranges.greaterThanOrEqualPrepend',
+            'visDefaultEditor.controls.ranges.greaterThanOrEqualPrepend',
             {
               defaultMessage: '\u2265',
             }
           );
           const gteTooltipContent = i18n.translate(
-            'common.ui.aggTypes.ranges.greaterThanOrEqualTooltip',
+            'visDefaultEditor.controls.ranges.greaterThanOrEqualTooltip',
             {
               defaultMessage: 'Greater than or equal to',
             }
           );
-          const ltPrependLabel = i18n.translate('common.ui.aggTypes.ranges.lessThanPrepend', {
-            defaultMessage: '\u003c',
-          });
-          const ltTooltipContent = i18n.translate('common.ui.aggTypes.ranges.lessThanTooltip', {
-            defaultMessage: 'Less than',
-          });
+          const ltPrependLabel = i18n.translate(
+            'visDefaultEditor.controls.ranges.lessThanPrepend',
+            {
+              defaultMessage: '\u003c',
+            }
+          );
+          const ltTooltipContent = i18n.translate(
+            'visDefaultEditor.controls.ranges.lessThanTooltip',
+            {
+              defaultMessage: 'Less than',
+            }
+          );
 
           return (
             <Fragment key={id}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem>
                   <EuiFieldNumber
-                    aria-label={i18n.translate('common.ui.aggTypes.ranges.fromLabel', {
+                    aria-label={i18n.translate('visDefaultEditor.controls.ranges.fromLabel', {
                       defaultMessage: 'From',
                     })}
                     data-test-subj={`${dataTestSubj}${index}__from`}
@@ -202,7 +208,7 @@ function RangesParamEditor({
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFieldNumber
-                    aria-label={i18n.translate('common.ui.aggTypes.ranges.toLabel', {
+                    aria-label={i18n.translate('visDefaultEditor.controls.ranges.toLabel', {
                       defaultMessage: 'To',
                     })}
                     data-test-subj={`${dataTestSubj}${index}__to`}
@@ -246,7 +252,7 @@ function RangesParamEditor({
             size="xs"
           >
             <FormattedMessage
-              id="common.ui.aggTypes.ranges.addRangeButtonLabel"
+              id="visDefaultEditor.controls.ranges.addRangeButtonLabel"
               defaultMessage="Add range"
             />
           </EuiButtonEmpty>

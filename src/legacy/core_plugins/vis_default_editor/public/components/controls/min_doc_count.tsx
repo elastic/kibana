@@ -26,10 +26,10 @@ import { AggParamEditorProps } from '../agg_param_props';
 function MinDocCountParamEditor(props: AggParamEditorProps<boolean>) {
   return (
     <SwitchParamEditor
-      displayLabel={i18n.translate('common.ui.aggTypes.showEmptyBucketsLabel', {
+      displayLabel={i18n.translate('visDefaultEditor.controls.showEmptyBucketsLabel', {
         defaultMessage: 'Show empty buckets',
       })}
-      displayToolTip={i18n.translate('common.ui.aggTypes.showEmptyBucketsTooltip', {
+      displayToolTip={i18n.translate('visDefaultEditor.controls.showEmptyBucketsTooltip', {
         defaultMessage: 'Show all buckets, not only the buckets with results',
       })}
       {...props}

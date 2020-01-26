@@ -60,7 +60,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
       to: { value: item.to || EMPTY_STRING, model: item.to || EMPTY_STRING, isInvalid: false },
     }),
     getRemoveBtnAriaLabel: (item: FromToModel) =>
-      i18n.translate('common.ui.aggTypes.ipRanges.removeRangeAriaLabel', {
+      i18n.translate('visDefaultEditor.controls.ipRanges.removeRangeAriaLabel', {
         defaultMessage: 'Remove the range of {from} to {to}',
         values: { from: item.from.value || '*', to: item.to.value || '*' },
       }),
@@ -79,7 +79,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
       <>
         <EuiFlexItem>
           <EuiFieldText
-            aria-label={i18n.translate('common.ui.aggTypes.ipRanges.ipRangeFromAriaLabel', {
+            aria-label={i18n.translate('visDefaultEditor.controls.ipRanges.ipRangeFromAriaLabel', {
               defaultMessage: 'IP range from: {value}',
               values: { value: item.from.value || '*' },
             })}
@@ -98,7 +98,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
-            aria-label={i18n.translate('common.ui.aggTypes.ipRanges.ipRangeToAriaLabel', {
+            aria-label={i18n.translate('visDefaultEditor.controls.ipRanges.ipRangeToAriaLabel', {
               defaultMessage: 'IP range to: {value}',
               values: { value: item.to.value || '*' },
             })}

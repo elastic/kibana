@@ -50,7 +50,7 @@ function FilterRow({
   onRemoveFilter,
 }: FilterRowProps) {
   const [showCustomLabel, setShowCustomLabel] = useState(false);
-  const filterLabel = i18n.translate('common.ui.aggTypes.filters.filterLabel', {
+  const filterLabel = i18n.translate('visDefaultEditor.controls.filters.filterLabel', {
     defaultMessage: 'Filter {index}',
     values: {
       index: arrayIndex + 1,
@@ -61,9 +61,12 @@ function FilterRow({
     <div>
       <EuiButtonIcon
         iconType="tag"
-        aria-label={i18n.translate('common.ui.aggTypes.filters.toggleFilterButtonAriaLabel', {
-          defaultMessage: 'Toggle filter label',
-        })}
+        aria-label={i18n.translate(
+          'visDefaultEditor.controls.filters.toggleFilterButtonAriaLabel',
+          {
+            defaultMessage: 'Toggle filter label',
+          }
+        )}
         aria-expanded={showCustomLabel}
         aria-controls={`visEditorFilterLabel${arrayIndex}`}
         onClick={() => setShowCustomLabel(!showCustomLabel)}
@@ -72,9 +75,12 @@ function FilterRow({
         iconType="trash"
         color="danger"
         disabled={disableRemove}
-        aria-label={i18n.translate('common.ui.aggTypes.filters.removeFilterButtonAriaLabel', {
-          defaultMessage: 'Remove this filter',
-        })}
+        aria-label={i18n.translate(
+          'visDefaultEditor.controls.filters.removeFilterButtonAriaLabel',
+          {
+            defaultMessage: 'Remove this filter',
+          }
+        )}
         onClick={() => onRemoveFilter(id)}
       />
     </div>
@@ -100,7 +106,7 @@ function FilterRow({
       {showCustomLabel ? (
         <EuiFormRow
           id={`visEditorFilterLabel${arrayIndex}`}
-          label={i18n.translate('common.ui.aggTypes.filters.definiteFilterLabel', {
+          label={i18n.translate('visDefaultEditor.controls.filters.definiteFilterLabel', {
             defaultMessage: 'Filter {index} label',
             description:
               "'Filter {index}' represents the name of the filter as a noun, similar to 'label for filter 1'.",
@@ -113,7 +119,7 @@ function FilterRow({
         >
           <EuiFieldText
             value={customLabel}
-            placeholder={i18n.translate('common.ui.aggTypes.filters.labelPlaceholder', {
+            placeholder={i18n.translate('visDefaultEditor.controls.filters.labelPlaceholder', {
               defaultMessage: 'Label',
             })}
             onChange={ev => onChangeValue(id, value, ev.target.value)}

@@ -25,13 +25,19 @@ import { AggParamEditorProps } from '../agg_param_props';
 function IsFilteredByCollarParamEditor(props: AggParamEditorProps<boolean>) {
   return (
     <SwitchParamEditor
-      displayLabel={i18n.translate('common.ui.aggTypes.onlyRequestDataAroundMapExtentLabel', {
-        defaultMessage: 'Only request data around map extent',
-      })}
-      displayToolTip={i18n.translate('common.ui.aggTypes.onlyRequestDataAroundMapExtentTooltip', {
-        defaultMessage:
-          'Apply geo_bounding_box filter aggregation to narrow the subject area to the map view box with collar',
-      })}
+      displayLabel={i18n.translate(
+        'visDefaultEditor.controls.onlyRequestDataAroundMapExtentLabel',
+        {
+          defaultMessage: 'Only request data around map extent',
+        }
+      )}
+      displayToolTip={i18n.translate(
+        'visDefaultEditor.controls.onlyRequestDataAroundMapExtentTooltip',
+        {
+          defaultMessage:
+            'Apply geo_bounding_box filter aggregation to narrow the subject area to the map view box with collar',
+        }
+      )}
       dataTestSubj="isFilteredByCollarCheckbox"
       {...props}
     />

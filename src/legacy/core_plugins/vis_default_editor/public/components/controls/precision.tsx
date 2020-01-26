@@ -27,7 +27,7 @@ import { AggParamEditorProps } from '../agg_param_props';
 
 function PrecisionParamEditor({ agg, value, setValue }: AggParamEditorProps<number>) {
   const { services } = useKibana();
-  const label = i18n.translate('common.ui.aggTypes.precisionLabel', {
+  const label = i18n.translate('visDefaultEditor.controls.precisionLabel', {
     defaultMessage: 'Precision',
   });
 

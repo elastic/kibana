@@ -29,7 +29,9 @@ import { formatListAsProse, parseCommaSeparatedList, useValidation } from './uti
 import { AggParamEditorProps } from '../agg_param_props';
 import { ComboBoxGroupedOptions } from '../../utils';
 
-const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
+const label = i18n.translate('visDefaultEditor.controls.field.fieldLabel', {
+  defaultMessage: 'Field',
+});
 
 export interface FieldParamEditorProps extends AggParamEditorProps<Field> {
   customError?: string;
@@ -66,7 +68,7 @@ function FieldParamEditor({
 
   if (!indexedFields.length) {
     errors.push(
-      i18n.translate('common.ui.aggTypes.field.noCompatibleFieldsDescription', {
+      i18n.translate('visDefaultEditor.controls.field.noCompatibleFieldsDescription', {
         defaultMessage:
           'The index pattern {indexPatternTitle} does not contain any of the following compatible field types: {fieldTypes}',
         values: {
@@ -106,7 +108,7 @@ function FieldParamEditor({
     >
       <EuiComboBox
         compressed
-        placeholder={i18n.translate('common.ui.aggTypes.field.selectFieldPlaceholder', {
+        placeholder={i18n.translate('visDefaultEditor.controls.field.selectFieldPlaceholder', {
           defaultMessage: 'Select a field',
         })}
         options={indexedFields}

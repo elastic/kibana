@@ -83,7 +83,7 @@ function DefaultEditorAggParams({
     groupName,
   ]);
   const error = aggIsTooLow
-    ? i18n.translate('common.ui.vis.editors.aggParams.errors.aggWrongRunOrderErrorMessage', {
+    ? i18n.translate('visDefaultEditor.aggParams.errors.aggWrongRunOrderErrorMessage', {
         defaultMessage: '"{schema}" aggs must run before all other buckets!',
         values: { schema: agg.schema.title },
       })
@@ -218,12 +218,9 @@ function DefaultEditorAggParams({
           <EuiAccordion
             id="advancedAccordion"
             data-test-subj={`advancedParams-${agg.id}`}
-            buttonContent={i18n.translate(
-              'common.ui.vis.editors.advancedToggle.advancedLinkLabel',
-              {
-                defaultMessage: 'Advanced',
-              }
-            )}
+            buttonContent={i18n.translate('visDefaultEditor.advancedToggle.advancedLinkLabel', {
+              defaultMessage: 'Advanced',
+            })}
           >
             <EuiSpacer size="s" />
             {params.advanced.map(param => {

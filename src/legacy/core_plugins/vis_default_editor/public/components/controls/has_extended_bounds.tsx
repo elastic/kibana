@@ -31,10 +31,10 @@ function HasExtendedBoundsParamEditor(props: AggParamEditorProps<boolean>) {
 
   return (
     <SwitchParamEditor
-      displayLabel={i18n.translate('common.ui.aggTypes.extendedBoundsLabel', {
+      displayLabel={i18n.translate('visDefaultEditor.controls.extendedBoundsLabel', {
         defaultMessage: 'Extend bounds',
       })}
-      displayToolTip={i18n.translate('common.ui.aggTypes.extendedBoundsTooltip', {
+      displayToolTip={i18n.translate('visDefaultEditor.controls.extendedBoundsTooltip', {
         defaultMessage:
           'Min and Max do not filter the results, but rather extend the bounds of the result set.',
       })}

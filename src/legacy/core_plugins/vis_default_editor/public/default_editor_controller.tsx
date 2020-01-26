@@ -49,7 +49,7 @@ class DefaultEditorController {
         ? [
             {
               name: 'data',
-              title: i18n.translate('common.ui.vis.editors.sidebar.tabs.dataLabel', {
+              title: i18n.translate('visDefaultEditor.sidebar.tabs.dataLabel', {
                 defaultMessage: 'Data',
               }),
               editor: DefaultEditorDataTab,
@@ -61,7 +61,7 @@ class DefaultEditorController {
         ? [
             {
               name: 'options',
-              title: i18n.translate('common.ui.vis.editors.sidebar.tabs.optionsLabel', {
+              title: i18n.translate('visDefaultEditor.sidebar.tabs.optionsLabel', {
                 defaultMessage: 'Options',
               }),
               editor: visType.editorConfig.optionsTemplate,

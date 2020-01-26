@@ -36,10 +36,10 @@ function SubMetricParamEditor({
   setValidity,
   setTouched,
 }: AggParamEditorProps<AggConfig, AggParamType>) {
-  const metricTitle = i18n.translate('common.ui.aggTypes.metrics.metricTitle', {
+  const metricTitle = i18n.translate('visDefaultEditor.controls.metrics.metricTitle', {
     defaultMessage: 'Metric',
   });
-  const bucketTitle = i18n.translate('common.ui.aggTypes.metrics.bucketTitle', {
+  const bucketTitle = i18n.translate('visDefaultEditor.controls.metrics.bucketTitle', {
     defaultMessage: 'Bucket',
   });
   const type = aggParam.name;

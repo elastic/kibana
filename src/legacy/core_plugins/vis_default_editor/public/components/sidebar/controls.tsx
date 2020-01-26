@@ -78,7 +78,7 @@ function DefaultEditorControls({
               size="s"
             >
               <FormattedMessage
-                id="common.ui.vis.editors.sidebar.discardChangesButtonLabel"
+                id="visDefaultEditor.sidebar.discardChangesButtonLabel"
                 defaultMessage="Discard"
               />
             </EuiButtonEmpty>
@@ -87,13 +87,13 @@ function DefaultEditorControls({
           <EuiFlexItem grow={false}>
             {isInvalid && isTouched ? (
               <EuiToolTip
-                content={i18n.translate('common.ui.vis.editors.sidebar.errorButtonTooltip', {
+                content={i18n.translate('visDefaultEditor.sidebar.errorButtonTooltip', {
                   defaultMessage: 'Errors in the highlighted fields need to be resolved.',
                 })}
               >
                 <EuiButton color="danger" iconType="alert" size="s" disabled>
                   <FormattedMessage
-                    id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
+                    id="visDefaultEditor.sidebar.updateChartButtonLabel"
                     defaultMessage="Update"
                   />
                 </EuiButton>
@@ -108,7 +108,7 @@ function DefaultEditorControls({
                 size="s"
               >
                 <FormattedMessage
-                  id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
+                  id="visDefaultEditor.sidebar.updateChartButtonLabel"
                   defaultMessage="Update"
                 />
               </EuiButton>
@@ -120,19 +120,19 @@ function DefaultEditorControls({
         <EuiToolTip
           title={
             autoApplyEnabled
-              ? i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesOnLabel', {
+              ? i18n.translate('visDefaultEditor.sidebar.autoApplyChangesOnLabel', {
                   defaultMessage: 'Auto apply is on',
                 })
-              : i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesOffLabel', {
+              : i18n.translate('visDefaultEditor.sidebar.autoApplyChangesOffLabel', {
                   defaultMessage: 'Auto apply is off',
                 })
           }
-          content={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesTooltip', {
+          content={i18n.translate('visDefaultEditor.sidebar.autoApplyChangesTooltip', {
             defaultMessage: 'Auto updates the visualization on every change.',
           })}
         >
           <EuiButtonToggle
-            label={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesAriaLabel', {
+            label={i18n.translate('visDefaultEditor.sidebar.autoApplyChangesAriaLabel', {
               defaultMessage: 'Auto apply editor changes',
             })}
             className="visEditorSidebar__autoApplyButton"

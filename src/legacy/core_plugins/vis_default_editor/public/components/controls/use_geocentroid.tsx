@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from '../agg_param_props';
 
 function UseGeocentroidParamEditor({ value = false, setValue }: AggParamEditorProps<boolean>) {
-  const label = i18n.translate('common.ui.aggTypes.placeMarkersOffGridLabel', {
+  const label = i18n.translate('visDefaultEditor.controls.placeMarkersOffGridLabel', {
     defaultMessage: 'Place markers off grid (use geocentroid)',
   });
 

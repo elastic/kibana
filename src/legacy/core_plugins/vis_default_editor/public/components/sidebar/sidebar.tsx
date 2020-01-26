@@ -153,7 +153,7 @@ function DefaultEditorSideBar({
             {vis.type.requiresSearch && vis.type.options.showIndexSelection ? (
               <EuiTitle size="xs" className="visEditorSidebar__indexPattern">
                 <h2
-                  title={i18n.translate('common.ui.vis.editors.sidebar.indexPatternAriaLabel', {
+                  title={i18n.translate('visDefaultEditor.sidebar.indexPatternAriaLabel', {
                     defaultMessage: 'Index pattern: {title}',
                     values: {
                       title: vis.indexPattern.title,
@@ -209,7 +209,7 @@ function DefaultEditorSideBar({
 
       <EuiButtonIcon
         aria-expanded={!isCollapsed}
-        aria-label={i18n.translate('common.ui.vis.editors.sidebar.collapseButtonAriaLabel', {
+        aria-label={i18n.translate('visDefaultEditor.sidebar.collapseButtonAriaLabel', {
           defaultMessage: 'Toggle sidebar',
         })}
         className="visEditor__collapsibleSidebarButton"

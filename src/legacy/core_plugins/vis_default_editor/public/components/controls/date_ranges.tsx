@@ -117,7 +117,7 @@ function DateRangesParamEditor({
         <EuiText size="xs">
           <EuiLink href={getDocLink('date.dateMath')} target="_blank">
             <FormattedMessage
-              id="common.ui.aggTypes.dateRanges.acceptedDateFormatsLinkText"
+              id="visDefaultEditor.controls.dateRanges.acceptedDateFormatsLinkText"
               defaultMessage="Acceptable date formats"
             />
           </EuiLink>
@@ -126,7 +126,7 @@ function DateRangesParamEditor({
 
         {ranges.map(({ from, to, id }) => {
           const deleteBtnTitle = i18n.translate(
-            'common.ui.aggTypes.dateRanges.removeRangeButtonAriaLabel',
+            'visDefaultEditor.controls.dateRanges.removeRangeButtonAriaLabel',
             {
               defaultMessage: 'Remove the range of {from} to {to}',
               values: { from: from || FROM_PLACEHOLDER, to: to || TO_PLACEHOLDER },
@@ -139,11 +139,14 @@ function DateRangesParamEditor({
               <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                 <EuiFlexItem>
                   <EuiFieldText
-                    aria-label={i18n.translate('common.ui.aggTypes.dateRanges.fromColumnLabel', {
-                      defaultMessage: 'From',
-                      description:
-                        'Beginning of a date range, e.g. *From* 2018-02-26 To 2018-02-28',
-                    })}
+                    aria-label={i18n.translate(
+                      'visDefaultEditor.controls.dateRanges.fromColumnLabel',
+                      {
+                        defaultMessage: 'From',
+                        description:
+                          'Beginning of a date range, e.g. *From* 2018-02-26 To 2018-02-28',
+                      }
+                    )}
                     compressed
                     fullWidth={true}
                     isInvalid={areBothEmpty || !validateDateMath(from)}
@@ -157,10 +160,13 @@ function DateRangesParamEditor({
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFieldText
-                    aria-label={i18n.translate('common.ui.aggTypes.dateRanges.toColumnLabel', {
-                      defaultMessage: 'To',
-                      description: 'End of a date range, e.g. From 2018-02-26 *To* 2018-02-28',
-                    })}
+                    aria-label={i18n.translate(
+                      'visDefaultEditor.controls.dateRanges.toColumnLabel',
+                      {
+                        defaultMessage: 'To',
+                        description: 'End of a date range, e.g. From 2018-02-26 *To* 2018-02-28',
+                      }
+                    )}
                     compressed
                     fullWidth={true}
                     isInvalid={areBothEmpty || !validateDateMath(to)}
@@ -188,7 +194,7 @@ function DateRangesParamEditor({
         {hasInvalidRange && (
           <EuiFormErrorText>
             <FormattedMessage
-              id="common.ui.aggTypes.dateRanges.errorMessage"
+              id="visDefaultEditor.controls.dateRanges.errorMessage"
               defaultMessage="Each range should have at least one valid date."
             />
           </EuiFormErrorText>
@@ -198,7 +204,7 @@ function DateRangesParamEditor({
         <EuiFlexItem>
           <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAddRange} size="xs">
             <FormattedMessage
-              id="common.ui.aggTypes.dateRanges.addRangeButtonLabel"
+              id="visDefaultEditor.controls.dateRanges.addRangeButtonLabel"
               defaultMessage="Add range"
             />
           </EuiButtonEmpty>

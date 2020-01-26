@@ -31,11 +31,11 @@ function RadiusRatioOptionControl({ editorStateParams, setStateParamValue }: Agg
   const label = (
     <>
       <FormattedMessage
-        id="common.ui.vis.defaultEditor.controls.dotSizeRatioLabel"
+        id="visDefaultEditor.controls.dotSizeRatioLabel"
         defaultMessage="Dot size ratio"
       />{' '}
       <EuiIconTip
-        content={i18n.translate('common.ui.vis.defaultEditor.controls.dotSizeRatioHelpText', {
+        content={i18n.translate('visDefaultEditor.controls.dotSizeRatioHelpText', {
           defaultMessage:
             'Change the ratio of the radius of the smallest point to the largest point.',
         })}

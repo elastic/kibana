@@ -33,13 +33,13 @@ function RowsOrColumnsControl({ agg, setAggParamValue }: AggControlProps) {
   const options = [
     {
       id: PARAMS.ROWS,
-      label: i18n.translate('common.ui.vis.defaultEditor.controls.rowsLabel', {
+      label: i18n.translate('visDefaultEditor.controls.rowsLabel', {
         defaultMessage: 'Rows',
       }),
     },
     {
       id: PARAMS.COLUMNS,
-      label: i18n.translate('common.ui.vis.defaultEditor.controls.columnsLabel', {
+      label: i18n.translate('visDefaultEditor.controls.columnsLabel', {
         defaultMessage: 'Columns',
       }),
     },
@@ -54,7 +54,7 @@ function RowsOrColumnsControl({ agg, setAggParamValue }: AggControlProps) {
       <EuiFormRow compressed fullWidth={true}>
         <EuiButtonGroup
           data-test-subj="visEditorSplitBy"
-          legend={i18n.translate('common.ui.vis.defaultEditor.controls.splitByLegend', {
+          legend={i18n.translate('visDefaultEditor.controls.splitByLegend', {
             defaultMessage: 'Split chart by rows or columns.',
           })}
           options={options}

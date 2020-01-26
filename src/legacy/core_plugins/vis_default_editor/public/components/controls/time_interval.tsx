@@ -67,7 +67,7 @@ function TimeIntervalParamEditor({
     interval && interval.scaled && isValid ? (
       <strong className="eui-displayBlock">
         <FormattedMessage
-          id="common.ui.aggTypes.timeInterval.scaledHelpText"
+          id="visDefaultEditor.controls.timeInterval.scaledHelpText"
           defaultMessage="Currently scaled to {bucketDescription}"
           values={{ bucketDescription: get(interval, 'description') || '' }}
         />{' '}
@@ -90,7 +90,7 @@ function TimeIntervalParamEditor({
 
   if (!isValid && value) {
     errors.push(
-      i18n.translate('common.ui.aggTypes.timeInterval.invalidFormatErrorMessage', {
+      i18n.translate('visDefaultEditor.controls.timeInterval.invalidFormatErrorMessage', {
         defaultMessage: 'Invalid interval format.',
       })
     );
@@ -125,7 +125,7 @@ function TimeIntervalParamEditor({
       fullWidth={true}
       helpText={helpText}
       isInvalid={showValidation ? !isValid : false}
-      label={i18n.translate('common.ui.aggTypes.timeInterval.minimumIntervalLabel', {
+      label={i18n.translate('visDefaultEditor.controls.timeInterval.minimumIntervalLabel', {
         defaultMessage: 'Minimum interval',
       })}
     >
@@ -140,9 +140,12 @@ function TimeIntervalParamEditor({
         options={options}
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
-        placeholder={i18n.translate('common.ui.aggTypes.timeInterval.selectIntervalPlaceholder', {
-          defaultMessage: 'Select an interval',
-        })}
+        placeholder={i18n.translate(
+          'visDefaultEditor.controls.timeInterval.selectIntervalPlaceholder',
+          {
+            defaultMessage: 'Select an interval',
+          }
+        )}
         onBlur={setTouched}
       />
     </EuiFormRow>
@@ -151,19 +154,19 @@ function TimeIntervalParamEditor({
 
 const tooManyBucketsTooltip = (
   <FormattedMessage
-    id="common.ui.aggTypes.timeInterval.createsTooManyBucketsTooltip"
+    id="visDefaultEditor.controls.timeInterval.createsTooManyBucketsTooltip"
     defaultMessage="This interval creates too many buckets to show in the selected time range, so it has been scaled up."
   />
 );
 const tooLargeBucketsTooltip = (
   <FormattedMessage
-    id="common.ui.aggTypes.timeInterval.createsTooLargeBucketsTooltip"
+    id="visDefaultEditor.controls.timeInterval.createsTooLargeBucketsTooltip"
     defaultMessage="This interval creates buckets that are too large to show in the selected time range, so it has been scaled down."
   />
 );
 const selectOptionHelpText = (
   <FormattedMessage
-    id="common.ui.aggTypes.timeInterval.selectOptionHelpText"
+    id="visDefaultEditor.controls.timeInterval.selectOptionHelpText"
     defaultMessage="Select an option or create a custom value. Examples: 30s, 20m, 24h, 2d, 1w, 1M"
   />
 );

@@ -32,7 +32,7 @@ function OrderParamEditor({
   setValidity,
   setTouched,
 }: AggParamEditorProps<OptionedValueProp> & OptionedParamEditorProps) {
-  const label = i18n.translate('common.ui.aggTypes.orderLabel', {
+  const label = i18n.translate('visDefaultEditor.controls.orderLabel', {
     defaultMessage: 'Order',
   });
   const isValid = !!value;

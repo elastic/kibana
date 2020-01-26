@@ -54,7 +54,7 @@ function NumberRow({
   onChange,
 }: NumberRowProps) {
   const deleteBtnAriaLabel = i18n.translate(
-    'common.ui.aggTypes.numberList.removeUnitButtonAriaLabel',
+    'visDefaultEditor.controls.numberList.removeUnitButtonAriaLabel',
     {
       defaultMessage: 'Remove the rank value of {value}',
       values: { value: model.value },
@@ -80,9 +80,12 @@ function NumberRow({
           autoFocus={autoFocus}
           compressed={true}
           isInvalid={isInvalid}
-          placeholder={i18n.translate('common.ui.aggTypes.numberList.enterValuePlaceholder', {
-            defaultMessage: 'Enter a value',
-          })}
+          placeholder={i18n.translate(
+            'visDefaultEditor.controls.numberList.enterValuePlaceholder',
+            {
+              defaultMessage: 'Enter a value',
+            }
+          )}
           onChange={onValueChanged}
           value={model.value}
           fullWidth={true}

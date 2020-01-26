@@ -62,14 +62,14 @@ function DefaultEditorAggAdd({
       data-test-subj={`visEditorAdd_${groupName}`}
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
     >
-      <FormattedMessage id="common.ui.vis.editors.aggAdd.addButtonLabel" defaultMessage="Add" />
+      <FormattedMessage id="visDefaultEditor.aggAdd.addButtonLabel" defaultMessage="Add" />
     </EuiButtonEmpty>
   );
 
   const groupNameLabel =
     groupName === AggGroupNames.Buckets
-      ? i18n.translate('common.ui.vis.editors.aggAdd.bucketLabel', { defaultMessage: 'bucket' })
-      : i18n.translate('common.ui.vis.editors.aggAdd.metricLabel', { defaultMessage: 'metric' });
+      ? i18n.translate('visDefaultEditor.aggAdd.bucketLabel', { defaultMessage: 'bucket' })
+      : i18n.translate('visDefaultEditor.aggAdd.metricLabel', { defaultMessage: 'metric' });
 
   const isSchemaDisabled = (schema: Schema): boolean => {
     const count = group.filter(agg => agg.schema.name === schema.name).length;
@@ -90,14 +90,14 @@ function DefaultEditorAggAdd({
           <EuiPopoverTitle>
             {(groupName !== AggGroupNames.Buckets || !stats.count) && (
               <FormattedMessage
-                id="common.ui.vis.editors.aggAdd.addGroupButtonLabel"
+                id="visDefaultEditor.aggAdd.addGroupButtonLabel"
                 defaultMessage="Add {groupNameLabel}"
                 values={{ groupNameLabel }}
               />
             )}
             {groupName === AggGroupNames.Buckets && stats.count > 0 && (
               <FormattedMessage
-                id="common.ui.vis.editors.aggAdd.addSubGroupButtonLabel"
+                id="visDefaultEditor.aggAdd.addSubGroupButtonLabel"
                 defaultMessage="Add sub-{groupNameLabel}"
                 values={{ groupNameLabel }}
               />
