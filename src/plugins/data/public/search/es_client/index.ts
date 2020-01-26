@@ -18,3 +18,4 @@
  */
 
 export { getEsClient } from './get_es_client';
+export { LegacyApiCaller } from './types';
