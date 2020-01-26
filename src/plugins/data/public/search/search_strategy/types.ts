@@ -19,7 +19,7 @@
 
 import { IndexPattern } from '../..';
 import { FetchHandlers } from '../fetch/types';
-import { SearchRequest, SearchResponse } from '../types';
+import { SearchRequest, SearchResponse } from '..';
 
 export interface SearchStrategyProvider {
   id: string;

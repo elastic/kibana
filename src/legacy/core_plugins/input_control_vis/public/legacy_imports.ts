@@ -18,8 +18,8 @@
  */
 
 import { Class } from '@kbn/utility-types';
-
 import { SearchSource as SearchSourceClass, ISearchSource } from '../../../../plugins/data/public';
+
 export { SearchSourceFields } from '../../../../plugins/data/public';
 
 export { Vis, VisParams } from 'ui/vis';

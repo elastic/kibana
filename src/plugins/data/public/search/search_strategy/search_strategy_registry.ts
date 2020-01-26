@@ -20,7 +20,7 @@
 import { IndexPattern } from '../..';
 import { SearchStrategyProvider } from './types';
 import { noOpSearchStrategy } from './no_op_search_strategy';
-import { SearchResponse } from '../types';
+import { SearchResponse } from '..';
 
 export const searchStrategies: SearchStrategyProvider[] = [];
 

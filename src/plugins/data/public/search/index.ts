@@ -40,22 +40,21 @@ export { SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
 
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 
+export { LegacyApiCaller, SearchRequest, SearchResponse } from './es_client';
+
 export {
   addSearchStrategy,
-  defaultSearchStrategy,
   hasSearchStategyForIndexPattern,
-  getSearchErrorType,
+  defaultSearchStrategy,
   SearchError,
 } from './search_strategy';
 
-export { SearchRequest, SearchResponse } from './types';
-
-export { FetchOptions } from './fetch';
-
 export {
-  SearchSource,
   ISearchSource,
+  SearchSource,
+  SearchSourceFields,
   EsQuerySortValue,
   SortDirection,
-  SearchSourceFields,
 } from './search_source';
+
+export { FetchOptions } from './fetch';

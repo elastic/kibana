@@ -19,3 +19,12 @@
 
 export type SearchRequest = any;
 export type SearchResponse = any;
+
+export interface LegacyApiCaller {
+  search: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
+  msearch: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
+}
+
+interface LegacyApiCallerResponse extends Promise<SearchResponse> {
+  abort: () => void;
+}

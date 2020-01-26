@@ -18,7 +18,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { SearchService, SearchStart } from './search';
 import {
   DataPublicPluginStart,
   addSearchStrategy,
@@ -31,8 +30,8 @@ import {
   setQueryService,
   setUiSettings,
   setInjectedMetadata,
-  setSearchService,
   setFieldFormats,
+  setSearchService,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
 
@@ -42,15 +41,6 @@ export interface DataPluginSetupDependencies {
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
-}
-
-/**
- * Interface for this plugin's returned `start` contract.
- *
- * @public
- */
-export interface DataStart {
-  search: SearchStart;
 }
 
 /**
@@ -66,9 +56,7 @@ export interface DataStart {
  */
 
 export class DataPlugin
-  implements Plugin<void, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
-  private readonly search = new SearchService();
-
+  implements Plugin<void, void, DataPluginSetupDependencies, DataPluginStartDependencies> {
   public setup(core: CoreSetup) {
     setInjectedMetadata(core.injectedMetadata);
 
@@ -76,19 +64,13 @@ export class DataPlugin
     addSearchStrategy(defaultSearchStrategy);
   }
 
-  public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
+  public start(core: CoreStart, { data }: DataPluginStartDependencies) {
     setUiSettings(core.uiSettings);
     setQueryService(data.query);
     setIndexPatterns(data.indexPatterns);
-    setSearchService(data.search);
     setFieldFormats(data.fieldFormats);
-
-    return {
-      search: this.search.start(core),
-    };
+    setSearchService(data.search);
   }
 
-  public stop() {
-    this.search.stop();
-  }
+  public stop() {}
 }
