@@ -18,7 +18,7 @@ export const createGetIndexPatternRoute: UMRestApiRouteFactory = (libs: UMServer
     try {
       return response.ok({
         body: {
-          ...(await libs.savedObjects.getUptimeIndexPattern(callES, undefined)),
+          ...(await libs.savedObjects.getUptimeIndexPattern({ callES })),
         },
       });
     } catch (e) {

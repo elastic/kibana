@@ -6,7 +6,7 @@
 
 import { getApiPath } from '../../lib/helper';
 
-export interface APIParams {
+interface APIParams {
   basePath: string;
 }
 

@@ -42,5 +42,4 @@ export interface UptimeCorePlugins {
 export interface UMBackendFrameworkAdapter {
   registerRoute(route: UMKibanaRoute): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
-  getIndexPatternsService();
 }

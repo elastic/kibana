@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMSavedObjectsQueryFn } from '../framework';
+import { UMElasticsearchQueryFn } from '../framework';
 
 export interface UMSavedObjectsAdapter {
-  getUptimeIndexPattern: UMSavedObjectsQueryFn;
+  getUptimeIndexPattern: UMElasticsearchQueryFn<any>;
 }
