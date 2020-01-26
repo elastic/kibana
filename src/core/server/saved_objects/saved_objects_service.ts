@@ -18,7 +18,7 @@
  */
 
 import { CoreService } from 'src/core/types';
-import { first } from 'rxjs/operators';
+import { first, filter, take } from 'rxjs/operators';
 import {
   SavedObjectsClient,
   SavedObjectsSchema,
@@ -282,6 +282,14 @@ export class SavedObjectsService
      */
     const cliArgs = this.coreContext.env.cliArgs;
     const skipMigrations = cliArgs.optimize || savedObjectsConfig.skip;
+
+    this.logger.debug(
+      'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
+    );
+    await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
+      filter(nodes => nodes.isCompatible),
+      take(1)
+    ).toPromise();
 
     this.logger.debug('Starting saved objects migration');
     await migrator.runMigrations(skipMigrations);

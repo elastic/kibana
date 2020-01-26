@@ -31,11 +31,14 @@ import { configServiceMock } from '../mocks';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { legacyServiceMock } from '../legacy/legacy_service.mock';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
+import { BehaviorSubject } from 'rxjs';
+import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
 
 describe('SavedObjectsService', () => {
   const createSetupDeps = () => {
+    const elasticsearchMock = elasticsearchServiceMock.createInternalSetup();
     return {
-      elasticsearch: elasticsearchServiceMock.createInternalSetup(),
+      elasticsearch: elasticsearchMock,
       legacyPlugins: legacyServiceMock.createDiscoverPlugins(),
     };
   };
@@ -147,6 +150,38 @@ describe('SavedObjectsService', () => {
       await soService.setup(createSetupDeps());
       await soService.start({});
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledWith(true);
+    });
+
+    it('waits for all es nodes to be compatible before running migrations', async done => {
+      expect.assertions(3);
+      const configService = configServiceMock.create({ atPath: { skip: false } });
+      const coreContext = mockCoreContext.create({ configService });
+      const soService = new SavedObjectsService(coreContext);
+      const setupDeps = createSetupDeps();
+      // Create an new subject so that we can control when isCompatible=true
+      // is emitted.
+      setupDeps.elasticsearch.esNodesCompatibility$ = new BehaviorSubject({
+        isCompatible: false,
+        incompatibleNodes: [],
+        warningNodes: [],
+        kibanaVersion: '8.0.0',
+      });
+      await soService.setup(setupDeps);
+      soService.start({});
+      expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
+      ((setupDeps.elasticsearch.esNodesCompatibility$ as any) as BehaviorSubject<
+        NodesVersionCompatibility
+      >).next({
+        isCompatible: true,
+        incompatibleNodes: [],
+        warningNodes: [],
+        kibanaVersion: '8.0.0',
+      });
+      setImmediate(() => {
+        expect(migratorInstanceMock.runMigrations).toHaveBeenCalledWith(false);
+        expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
+        done();
+      });
     });
 
     it('resolves with KibanaMigrator after waiting for migrations to complete', async () => {
