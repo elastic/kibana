@@ -83,9 +83,6 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
 
                   . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
 
-                  echo '### List ./target/kibana-coverage'
-                  ls -R ./target/kibana-coverage
-
                   . src/dev/code_coverage/shell_scripts/ingest_coverage.sh
 
                   echo '### List ./target/kibana-coverage'
