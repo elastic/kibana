@@ -12,7 +12,14 @@ import styled from 'styled-components';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { parseTimestamp } from './parse_timestamp';
 import { Check } from '../../../../common/graphql/types';
-import { DOWN, SHORT_TIMESPAN_LOCALE, UNNAMED_LOCATION, UP } from '../../../../common/constants';
+import {
+  STATUS,
+  SHORT_TIMESPAN_LOCALE,
+  UNNAMED_LOCATION,
+  SHORT_TS_LOCALE,
+} from '../../../../common/constants';
+
+import * as labels from './translations';
 
 interface MonitorListStatusColumnProps {
   status: string;
@@ -26,9 +33,9 @@ const PaddedSpan = styled.span`
 
 const getHealthColor = (status: string): string => {
   switch (status) {
-    case UP:
+    case STATUS.UP:
       return 'success';
-    case DOWN:
+    case STATUS.DOWN:
       return 'danger';
     default:
       return '';
@@ -37,31 +44,29 @@ const getHealthColor = (status: string): string => {
 
 const getHealthMessage = (status: string): string | null => {
   switch (status) {
-    case UP:
-      return i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
-        defaultMessage: 'Up',
-      });
-    case DOWN:
-      return i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
-        defaultMessage: 'Down',
-      });
+    case STATUS.UP:
+      return labels.UP;
+    case STATUS.DOWN:
+      return labels.DOWN;
     default:
       return null;
   }
 };
 
 const getRelativeShortTimeStamp = (timeStamp: any) => {
-  const prevLocal: string = moment.locale() ?? 'en';
+  const prevLocale: string = moment.locale() ?? 'en';
 
-  const shortLocale = moment.locale('en-tag') === 'en-tag';
+  const shortLocale = moment.locale(SHORT_TS_LOCALE) === SHORT_TS_LOCALE;
 
   if (!shortLocale) {
-    moment.defineLocale('en-tag', SHORT_TIMESPAN_LOCALE);
+    moment.defineLocale(SHORT_TS_LOCALE, SHORT_TIMESPAN_LOCALE);
   }
 
   const shortTimestamp = parseTimestamp(timeStamp).fromNow();
-  moment.locale(prevLocal);
-  return shortTimeStamp;
+
+  // Reset it so, it does't impact other part of the app
+  moment.locale(prevLocale);
+  return shortTimestamp;
 };
 
 const getLocationStatus = (checks: Check[], status: string) => {
@@ -71,9 +76,9 @@ const getLocationStatus = (checks: Check[], status: string) => {
   checks.forEach((check: Check) => {
     const location = check?.observer?.geo?.name ?? UNNAMED_LOCATION;
 
-    if (check.monitor.status === UP) {
+    if (check.monitor.status === STATUS.UP) {
       upChecks.add(capitalize(location));
-    } else if (check.monitor.status === DOWN) {
+    } else if (check.monitor.status === STATUS.DOWN) {
       downChecks.add(capitalize(location));
     }
   });
@@ -83,7 +88,7 @@ const getLocationStatus = (checks: Check[], status: string) => {
 
   const totalLocations = absUpChecks.size + downChecks.size;
   let statusMessage = '';
-  if (status === DOWN) {
+  if (status === STATUS.DOWN) {
     statusMessage = `${downChecks.size}/${totalLocations}`;
   } else {
     statusMessage = `${absUpChecks.size}/${totalLocations}`;

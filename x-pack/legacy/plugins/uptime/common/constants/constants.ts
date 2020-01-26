@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const UP = 'up';
-
-export const DOWN = 'down';
+export enum STATUS {
+  UP = 'up',
+  DOWN = 'down',
+}
 
 export const UNNAMED_LOCATION = 'Unnamed-location';
+
+export const SHORT_TS_LOCALE = 'en-short-locale';
 
 export const SHORT_TIMESPAN_LOCALE = {
   relativeTime: {

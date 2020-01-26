@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Check } from '../../../../../common/graphql/types';
 import { LocationLink } from './location_link';
 import { MonitorStatusRow } from './monitor_status_row';
-import { DOWN, UNNAMED_LOCATION, UP } from '../../../../../common/constants';
+import { STATUS, UNNAMED_LOCATION } from '../../../../../common/constants';
 
 interface MonitorStatusListProps {
   /**
@@ -28,9 +28,9 @@ export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
     // Doing this way because name is either string or null, get() default value only works on undefined value
     const location = get<string | null>(check, 'observer.geo.name', null) || UNNAMED_LOCATION;
 
-    if (check.monitor.status === UP) {
+    if (check.monitor.status === STATUS.UP) {
       upChecks.add(capitalize(location));
-    } else if (check.monitor.status === DOWN) {
+    } else if (check.monitor.status === STATUS.DOWN) {
       downChecks.add(capitalize(location));
     }
   });
@@ -40,8 +40,8 @@ export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
 
   return (
     <>
-      <MonitorStatusRow locationNames={downChecks} status={DOWN} />
-      <MonitorStatusRow locationNames={absUpChecks} status={UP} />
+      <MonitorStatusRow locationNames={downChecks} status={STATUS.DOWN} />
+      <MonitorStatusRow locationNames={absUpChecks} status={STATUS.UP} />
       {(downChecks.has(UNNAMED_LOCATION) || upChecks.has(UNNAMED_LOCATION)) && (
         <>
           <EuiSpacer size="s" />

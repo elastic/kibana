@@ -11,7 +11,7 @@ import { EuiBadge, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UptimeThemeContext } from '../../../contexts';
 import { MonitorLocation } from '../../../../common/runtime_types';
-import { SHORT_TIMESPAN_LOCALE } from '../../../../common/constants';
+import { SHORT_TIMESPAN_LOCALE, SHORT_TS_LOCALE } from '../../../../common/constants';
 
 const TimeStampSpan = styled.span`
   display: inline-block;
@@ -85,9 +85,9 @@ export const LocationStatusTags = ({ locations }: Props) => {
   const prevLocal: string = moment.locale() ?? 'en';
 
   const renderTags = () => {
-    const shortLocale = moment.locale('en-tag') === 'en-tag';
+    const shortLocale = moment.locale(SHORT_TS_LOCALE) === SHORT_TS_LOCALE;
     if (!shortLocale) {
-      moment.defineLocale('en-tag', SHORT_TIMESPAN_LOCALE);
+      moment.defineLocale(SHORT_TS_LOCALE, SHORT_TIMESPAN_LOCALE);
     }
 
     const tags = (
