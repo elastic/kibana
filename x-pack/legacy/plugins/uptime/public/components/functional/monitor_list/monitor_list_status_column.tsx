@@ -59,7 +59,7 @@ const getRelativeShortTimeStamp = (timeStamp: any) => {
     moment.defineLocale('en-tag', SHORT_TIMESPAN_LOCALE);
   }
 
-  const shortTimeStamp = parseTimestamp(timeStamp).fromNow();
+  const shortTimestamp = parseTimestamp(timeStamp).fromNow();
   moment.locale(prevLocal);
   return shortTimeStamp;
 };
