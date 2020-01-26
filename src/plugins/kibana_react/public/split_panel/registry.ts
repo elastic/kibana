@@ -17,11 +17,20 @@
  * under the License.
  */
 
-import { version as kibanaVersion } from '../../../../../package.json';
+export interface PanelController {
+  setWidth: (percent: number) => void;
+  getWidth: () => number;
+  width: number;
+}
 
-export default {
-  // Make the version stubbable to improve testability.
-  get() {
-    return kibanaVersion;
-  },
-};
+export class PanelRegistry {
+  private panels: PanelController[] = [];
+
+  registerPanel(panel: PanelController) {
+    this.panels.push(panel);
+  }
+
+  getPanels() {
+    return this.panels;
+  }
+}

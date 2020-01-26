@@ -17,29 +17,11 @@
  * under the License.
  */
 
-import React from 'react';
-import { EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { version as kibanaVersion } from '../../../../../../package.json';
 
-export type ResizerMouseEvent = React.MouseEvent<HTMLButtonElement, MouseEvent>;
-export type ResizerKeyDownEvent = React.KeyboardEvent<HTMLButtonElement>;
-
-export interface Props {
-  onKeyDown: (eve: ResizerKeyDownEvent) => void;
-  onMouseDown: (eve: ResizerMouseEvent) => void;
-  className?: string;
-}
-
-export function Resizer(props: Props) {
-  return (
-    <button
-      {...props}
-      data-test-subj="splitPanelResizer"
-      aria-label={i18n.translate('console.splitPanel.adjustPanelSizeAriaLabel', {
-        defaultMessage: 'Press left/right to adjust panels size',
-      })}
-    >
-      <EuiIcon type="grabHorizontal" />
-    </button>
-  );
-}
+export default {
+  // Make the version stubbable to improve testability.
+  get() {
+    return kibanaVersion;
+  },
+};
