@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -37,10 +37,13 @@ function PercentilesEditor({
   });
   const [isValid, setIsValid] = useState(true);
 
-  const setModelValidity = (isListValid: boolean) => {
-    setIsValid(isListValid);
-    setValidity(isListValid);
-  };
+  const setModelValidity = useCallback(
+    (isListValid: boolean) => {
+      setIsValid(isListValid);
+      setValidity(isListValid);
+    },
+    [setValidity]
+  );
 
   return (
     <EuiFormRow
