@@ -32,7 +32,7 @@ const client = new Client({ node });
 export default (obs$, log) => {
   const ms = process.env.DELAY || 0;
   log.debug(`### Code coverage indexer set to delay for: ${ms} milliseconds\n`);
-  log.debug(`### Code coverage indexer set to ES_HOST: ${redacted}`);
+  log.debug(`### Code coverage indexer set to ES_HOST (redacted): ${redacted}`);
 
   const postWithLogger = post.bind(null, log);
 
