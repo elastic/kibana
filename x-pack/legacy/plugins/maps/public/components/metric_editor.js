@@ -16,11 +16,13 @@ import { METRIC_TYPE } from '../../common/constants';
 
 function filterFieldsForAgg(fields, aggType) {
   if (aggType === METRIC_TYPE.UNIQUE_COUNT) {
-    return fields;
+    return fields.filter(field => {
+      return field.aggregatable;
+    });
   }
 
   return fields.filter(field => {
-    return field.type === 'number';
+    return field.aggregatable && field.type === 'number';
   });
 }
 
