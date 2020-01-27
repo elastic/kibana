@@ -28,7 +28,7 @@ import { ALERT_EMAIL_SERVICES } from '../../../common/constants';
 export interface EmailActionData {
   service: string;
   host: string;
-  port: number | ''; // support a string to ensure the user can backspace to an empty field
+  port?: number;
   secure: boolean;
   from: string;
   user: string;
@@ -211,7 +211,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
       >
         <EuiFieldNumber
           value={data.port}
-          onChange={e => setData({ ...data, port: parseInt(e.target.value, 10) || '' })}
+          onChange={e => setData({ ...data, port: parseInt(e.target.value, 10) })}
           isInvalid={showErrors && !!errors.port}
         />
       </EuiFormRow>

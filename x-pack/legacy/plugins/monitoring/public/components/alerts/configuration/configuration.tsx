@@ -91,7 +91,12 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
       });
     } catch (err) {
       setIsSaving(false);
-      setSaveError(err.body.message);
+      setSaveError(
+        err?.body?.message ||
+          i18n.translate('xpack.monitoring.alerts.configuration.unknownError', {
+            defaultMessage: 'Something went wrong. Please consult the server logs.',
+          })
+      );
       return;
     }
 
