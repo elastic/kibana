@@ -7,10 +7,7 @@
 import { IScopedClusterClient } from 'src/core/server';
 import { CheckContext } from '../../types';
 
-export async function check(
-  es: IScopedClusterClient,
-  { deploymentId, indexName }: CheckContext
-) {
+export async function check(es: IScopedClusterClient, { deploymentId, indexName }: CheckContext) {
   const response = await es.callAsInternalUser('search', {
     index: indexName,
     size: 8,
@@ -27,13 +24,11 @@ export async function check(
       },
     },
   });
-
-  if (response.hits.hits) {
+  if (response.hits.hits && response.hits.hits.length) {
     const sources = response.hits.hits.map((hit: any) => {
       const { deployment_id, ...notification } = hit._source;
       return notification;
     });
-
     return sources;
   }
 
@@ -52,7 +47,6 @@ export async function check(
       publishOn: '1575151200000',
       expireOn: '1580508000000',
       status: 'new',
-      seenOn: '1579683152216',
       timestamp: '2020-01-22T08:52:37.042Z',
       channel_id: 'notifications',
     },
@@ -67,7 +61,6 @@ export async function check(
       publishOn: '1575151200000',
       expireOn: '1580508000000',
       status: 'new',
-      seenOn: '1579683152216',
       timestamp: '2020-01-22T08:52:37.023Z',
       channel_id: 'notifications',
     },
@@ -82,7 +75,6 @@ export async function check(
       publishOn: '1575151200000',
       expireOn: '1580508000000',
       status: 'new',
-      seenOn: '1579683152216',
       timestamp: '2020-01-22T08:52:37.003Z',
       channel_id: 'notifications',
     },
@@ -97,7 +89,6 @@ export async function check(
       publishOn: '1575151200000',
       expireOn: '1580508000000',
       status: 'new',
-      seenOn: '1579683152216',
       timestamp: '2020-01-22T08:52:36.983Z',
       channel_id: 'notifications',
     },
@@ -111,7 +102,6 @@ export async function check(
       publishOn: '1575151200000',
       expireOn: '1580508000000',
       status: 'new',
-      seenOn: '1579683152215',
       timestamp: '2020-01-22T08:52:36.964Z',
       channel_id: 'notifications',
     },
@@ -126,7 +116,6 @@ export async function check(
       publishOn: '1575151200000',
       expireOn: '1580508000000',
       status: 'new',
-      seenOn: '1579683152215',
       timestamp: '2020-01-22T08:52:36.946Z',
       channel_id: 'notifications',
     },
@@ -141,7 +130,6 @@ export async function check(
       publishOn: '1575151200000',
       expireOn: '1580508000000',
       status: 'new',
-      seenOn: '1579683152215',
       timestamp: '2020-01-22T08:52:36.926Z',
       channel_id: 'notifications',
     },
@@ -157,7 +145,6 @@ export async function check(
       publishOn: '1578434400000',
       expireOn: '1580508000000',
       status: 'new',
-      seenOn: '1579683152215',
       timestamp: '2020-01-22T08:52:36.909Z',
       channel_id: 'notifications',
     },

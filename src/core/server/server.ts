@@ -136,6 +136,8 @@ export class Server {
 
     const pulseSetup = await this.pulse.setup({
       elasticsearch: elasticsearchServiceSetup,
+      savedObjects: savedObjectsSetup,
+      http: httpSetup,
     });
 
     const coreSetup: InternalCoreSetup = {

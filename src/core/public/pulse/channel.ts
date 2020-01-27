@@ -18,7 +18,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ChannelConfig, PulseInstruction } from 'src/core/server/pulse/channel';
+import { ChannelConfig, PulseInstruction } from '../../server/pulse/channel';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { PulseInstruction, ChannelConfig } from '../../server/pulse/channel';
@@ -26,7 +26,8 @@ export { PulseInstruction, ChannelConfig } from '../../server/pulse/channel';
 export class PulseChannel<I = PulseInstruction> {
   constructor(private readonly config: ChannelConfig<I>) {}
 
-  public async sendPulse<T = any>(doc: T) {
+  public async sendPulse<T = any | any[]>(doc: T) {
+    const records = Array.isArray(doc) ? doc : [doc];
     await fetch(`/api/pulse_local/${this.config.id}`, {
       method: 'post',
       headers: {
@@ -35,8 +36,7 @@ export class PulseChannel<I = PulseInstruction> {
       },
       body: JSON.stringify({
         payload: {
-          ...doc,
-          channel_id: this.config.id,
+          records,
           deployment_id: '123',
         },
       }),

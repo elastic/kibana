@@ -18,25 +18,32 @@
  */
 
 import { readdirSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, parse } from 'path';
+
 import { Subject } from 'rxjs';
 // @ts-ignore
 import fetch from 'node-fetch';
-
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { ElasticsearchServiceSetup } from '../elasticsearch';
+import { ElasticsearchServiceSetup, IClusterClient } from '../elasticsearch';
 import { PulseChannel, PulseInstruction } from './channel';
+import { sendUsageFrom, sendPulse, Fetcher } from './send_pulse';
+import { SavedObjectsServiceSetup } from '../saved_objects';
+import { InternalHttpServiceSetup } from '../http';
+import { PulseElasticsearchClient } from './client_wrappers/elasticsearch';
+import { registerPulseRoutes } from './routes';
 
 export interface InternalPulseService {
   getChannel: (id: string) => PulseChannel;
 }
 
-export type PulseServiceSetup = InternalPulseService;
-
 export interface PulseSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
+  savedObjects: SavedObjectsServiceSetup;
+  http: InternalHttpServiceSetup;
 }
+
+export type PulseServiceSetup = InternalPulseService;
 
 interface ChannelResponse {
   id: string;
@@ -50,20 +57,23 @@ export interface InstructionsResponse {
 const channelNames = readdirSync(resolve(__dirname, 'collectors'))
   .filter((fileName: string) => !fileName.startsWith('.'))
   .map((fileName: string) => {
-    return fileName.slice(0, -3);
+    // Get the base name without the extension
+    return parse(fileName).name;
   });
 
 export class PulseService {
+  private retriableErrors = 0;
   private readonly log: Logger;
   private readonly channels: Map<string, PulseChannel>;
-  private readonly instructions: Map<string, Subject<any>> = new Map();
+  private readonly instructions$: Map<string, Subject<any>> = new Map();
+  private elasticsearch?: IClusterClient;
 
   constructor(coreContext: CoreContext) {
     this.log = coreContext.logger.get('pulse-service');
     this.channels = new Map(
       channelNames.map((id): [string, PulseChannel] => {
         const instructions$ = new Subject<PulseInstruction[]>();
-        this.instructions.set(id, instructions$);
+        this.instructions$.set(id, instructions$);
         const channel = new PulseChannel({ id, instructions$, logger: this.log });
         return [channel.id, channel];
       })
@@ -72,21 +82,36 @@ export class PulseService {
 
   public async setup(deps: PulseSetupDeps): Promise<InternalPulseService> {
     this.log.debug('Setting up pulse service');
+    this.elasticsearch = deps.elasticsearch.createClient('pulse-service');
 
-    // poll for instructions every second for this deployment
-    setInterval(() => {
-      // eslint-disable-next-line no-console
-      this.loadInstructions().catch(err => console.error(err.stack));
-    }, 1000);
+    this.log.debug('Setting up pulse service routes');
 
-    // eslint-disable-next-line no-console
-    console.log('Will attempt first telemetry collection in 5 seconds...');
-    setTimeout(() => {
+    const router = deps.http.createRouter('');
+    const pulseElasticsearchClient = new PulseElasticsearchClient(this.elasticsearch!);
+
+    registerPulseRoutes(router, this.channels);
+
+    this.channels.forEach(channel =>
+      channel.setup({
+        rawElasticsearch: this.elasticsearch,
+        elasticsearch: pulseElasticsearchClient,
+        // savedObjects: deps.savedObjects,
+      })
+    );
+    if (sendUsageFrom === 'server') {
+      // poll for instructions every second for this deployment
       setInterval(() => {
-        // eslint-disable-next-line no-console
-        this.sendTelemetry().catch(err => console.error(err.stack));
+        this.loadInstructions().catch(err => this.log.error(err.stack));
+      }, 10000);
+
+      this.log.debug('Will attempt first telemetry collection in 5 seconds...');
+
+      setTimeout(() => {
+        setInterval(() => {
+          this.sendTelemetry().catch(err => this.log.error(err.stack));
+        }, 5000);
       }, 5000);
-    }, 5000);
+    }
 
     return {
       getChannel: (id: string) => {
@@ -99,7 +124,6 @@ export class PulseService {
     };
   }
 
-  private retriableErrors = 0;
   private async loadInstructions() {
     const url = 'http://localhost:5601/api/pulse_poc/instructions/123';
     let response: any;
@@ -125,7 +149,7 @@ export class PulseService {
     const responseBody: InstructionsResponse = await response.json();
 
     responseBody.channels.forEach(channel => {
-      const instructions$ = this.instructions.get(channel.id);
+      const instructions$ = this.instructions$.get(channel.id);
       if (!instructions$) {
         throw new Error(
           `Channel (${channel.id}) from service has no corresponding channel handler in client`
@@ -139,8 +163,7 @@ export class PulseService {
   private handleRetriableError() {
     this.retriableErrors++;
     if (this.retriableErrors === 1) {
-      // eslint-disable-next-line no-console
-      console.warn(
+      this.log.warn(
         'Kibana is not yet available at http://localhost:5601/api, will continue to check for the next 120 seconds...'
       );
     } else if (this.retriableErrors > 120) {
@@ -149,21 +172,10 @@ export class PulseService {
   }
 
   private async sendTelemetry() {
-    const url = 'http://localhost:5601/api/pulse_poc/intake/123';
-
-    const channels = [];
-    for (const channel of this.channels.values()) {
-      const records = await channel.getRecords();
-      channels.push({
-        records,
-        channel_id: channel.id,
-      });
-    }
-
-    let response: any;
-    try {
-      response = await fetch(url, {
+    const fetcher: Fetcher<any> = async (url, channels) => {
+      return await fetch(url, {
         method: 'post',
+
         headers: {
           'content-type': 'application/json',
           'kbn-xsrf': 'true',
@@ -172,21 +184,8 @@ export class PulseService {
           channels,
         }),
       });
-    } catch (err) {
-      if (!err.message.includes('ECONNREFUSED')) {
-        throw err;
-      }
-      // the instructions polling should handle logging for this case, yay for POCs
-      return;
-    }
-    if (response.status === 503) {
-      // the instructions polling should handle logging for this case, yay for POCs
-      return;
-    }
+    };
 
-    if (response.status !== 200) {
-      const responseBody = await response.text();
-      throw new Error(`${response.status}: ${responseBody}`);
-    }
+    return await sendPulse(this.channels, fetcher);
   }
 }

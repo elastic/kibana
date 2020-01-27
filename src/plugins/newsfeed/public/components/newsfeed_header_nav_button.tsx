@@ -23,7 +23,7 @@ import { EuiHeaderSectionItemButton, EuiIcon, EuiNotificationBadge } from '@elas
 // eslint-disable-next-line
 import { PulseChannel } from 'src/core/server/pulse/channel';
 // eslint-disable-next-line
-import { NotificationInstruction } from 'src/core/public/pulse/collectors/notifications';
+import { NotificationInstruction } from 'src/core/server/pulse/collectors/notifications';
 import moment from 'moment';
 import { NewsfeedFlyout } from './flyout_list';
 import { FetchResult } from '../../types';
@@ -107,9 +107,11 @@ export const NewsfeedNavButton = ({ apiFetchResult, notificationsChannel }: Prop
       }
     }
 
-    const subscription = notificationsInstructions$.subscribe(instructions =>
-      handleStatusChange(instructions)
-    );
+    const subscription = notificationsInstructions$.subscribe(instructions => {
+      if (instructions && instructions.length) {
+        return handleStatusChange(instructions);
+      }
+    });
     return () => subscription.unsubscribe();
   }, [notificationsInstructions$]);
 

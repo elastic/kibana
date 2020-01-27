@@ -36,7 +36,7 @@ export const registerGetRoute: RegisterRoute = (
     },
     async (context, request, response) => {
       try {
-        const { channel } = request.params;
+        const { channel } = request.params as any;
         const results = await channels.get(channel)?.getRecords();
         return response.ok({
           body: results,
