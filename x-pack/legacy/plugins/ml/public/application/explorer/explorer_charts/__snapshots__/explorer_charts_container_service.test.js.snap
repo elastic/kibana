@@ -3,15 +3,6 @@
 exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 1`] = `
 Object {
   "chartsPerRow": 1,
-  "seriesToPlot": Array [],
-  "timeFieldName": "timestamp",
-  "tooManyBuckets": false,
-}
-`;
-
-exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 2`] = `
-Object {
-  "chartsPerRow": 1,
   "seriesToPlot": Array [
     Object {
       "bucketSpanSeconds": 900,
@@ -69,7 +60,7 @@ Object {
 }
 `;
 
-exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 3`] = `
+exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 2`] = `
 Object {
   "chartsPerRow": 1,
   "seriesToPlot": Array [

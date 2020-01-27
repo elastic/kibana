@@ -80,7 +80,7 @@ const ErrorGroupOverview: React.FC = () => {
 
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
-      filterNames: ['host', 'containerId', 'podName'],
+      filterNames: ['host', 'containerId', 'podName', 'serviceVersion'],
       params: {
         serviceName
       },

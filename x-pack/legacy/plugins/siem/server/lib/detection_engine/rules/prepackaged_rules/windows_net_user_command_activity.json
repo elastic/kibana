@@ -1,0 +1,20 @@
+{
+  "description": "Windows net user command activity",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "name": "Windows net user command activity",
+  "query": "process.name:net.exe and process.args:user and event.code:1",
+  "risk_score": 50,
+  "rule_id": "b039a69d-7fba-4c84-8029-57ac12548a15",
+  "severity": "low",
+  "tags": ["Elastic"],
+  "type": "query",
+  "version": 1
+}

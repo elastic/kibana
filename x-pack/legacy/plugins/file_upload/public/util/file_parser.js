@@ -24,9 +24,8 @@ export const fileHandler = async ({
   setFileProgress,
   cleanAndValidate,
   getFileParseActive,
-  fileReader = new FileReader()
+  fileReader = new FileReader(),
 }) => {
-
   if (!file) {
     return Promise.reject(
       new Error(
@@ -36,7 +35,6 @@ export const fileHandler = async ({
       )
     );
   }
-
 
   // Halt any previous file reading & pattern checking activity
   if (prevFileReader) {
@@ -87,7 +85,7 @@ export const fileHandler = async ({
         setFileProgress({
           featuresProcessed,
           bytesProcessed: stop || file.size,
-          totalBytes: file.size
+          totalBytes: file.size,
         });
         patternReader.writeDataToPatternStream(result);
         if (!stop) {
@@ -104,10 +102,13 @@ export const fileHandler = async ({
     fileReader.onerror = () => {
       fileReader.abort();
       patternReader.abortStream();
-      reject(new Error(i18n.translate(
-        'xpack.fileUpload.fileParser.errorReadingFile', {
-          defaultMessage: 'Error reading file',
-        })));
+      reject(
+        new Error(
+          i18n.translate('xpack.fileUpload.fileParser.errorReadingFile', {
+            defaultMessage: 'Error reading file',
+          })
+        )
+      );
     };
   });
   readSlice(fileReader, file, start, stop);
@@ -126,24 +127,21 @@ export async function parseFile({
   transformDetails,
   onFileUpload: previewCallback = null,
   setFileProgress,
-  getFileParseActive
+  getFileParseActive,
 }) {
   let cleanAndValidate;
   if (typeof transformDetails === 'object') {
     cleanAndValidate = transformDetails.cleanAndValidate;
   } else {
-    switch(transformDetails) {
+    switch (transformDetails) {
       case 'geo':
         cleanAndValidate = geoJsonCleanAndValidate;
         break;
       default:
-        throw(
-          i18n.translate(
-            'xpack.fileUpload.fileParser.transformDetailsNotDefined', {
-              defaultMessage: 'Index options for {transformDetails} not defined',
-              values: { transformDetails }
-            })
-        );
+        throw i18n.translate('xpack.fileUpload.fileParser.transformDetailsNotDefined', {
+          defaultMessage: 'Index options for {transformDetails} not defined',
+          values: { transformDetails },
+        });
     }
   }
 
@@ -151,7 +149,7 @@ export async function parseFile({
     file,
     setFileProgress,
     cleanAndValidate,
-    getFileParseActive
+    getFileParseActive,
   });
   jsonPreview(fileResults, previewCallback);
   return fileResults;

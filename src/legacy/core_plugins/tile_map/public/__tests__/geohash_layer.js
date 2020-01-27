@@ -26,8 +26,7 @@ import scaledCircleMarkersPng from './scaledCircleMarkers.png';
 import { ImageComparator } from 'test_utils/image_comparator';
 import GeoHashSampleData from './dummy_es_response.json';
 
-describe('geohash_layer', function () {
-
+describe('geohash_layer', function() {
   let domNode;
   let expectCanvas;
   let kibanaMap;
@@ -53,23 +52,22 @@ describe('geohash_layer', function () {
     document.body.removeChild(expectCanvas);
   }
 
-  describe('GeohashGridLayer', function () {
-
-    beforeEach(async function () {
+  describe('GeohashGridLayer', function() {
+    beforeEach(async function() {
       setupDOM();
       imageComparator = new ImageComparator();
       kibanaMap = new KibanaMap(domNode, {
         minZoom: 1,
-        maxZoom: 10
+        maxZoom: 10,
       });
       kibanaMap.setZoomLevel(3);
       kibanaMap.setCenter({
         lon: -100,
-        lat: 40
+        lat: 40,
       });
     });
 
-    afterEach(function () {
+    afterEach(function() {
       // return;
       kibanaMap.destroy();
       teardownDOM();
@@ -79,7 +77,7 @@ describe('geohash_layer', function () {
     [
       {
         options: { mapType: 'Scaled Circle Markers', colorRamp: 'Yellow to Red' },
-        expected: scaledCircleMarkersPng
+        expected: scaledCircleMarkersPng,
       },
       // https://github.com/elastic/kibana/issues/19393
       // {
@@ -96,14 +94,16 @@ describe('geohash_layer', function () {
       //   },
       //   expected: heatmapPng
       // }
-    ].forEach(function (test) {
-
-      it(`${test.options.mapType} (may fail in dev env)`, async function () {
-
+    ].forEach(function(test) {
+      it(`${test.options.mapType} (may fail in dev env)`, async function() {
         const geohashGridOptions = test.options;
         const geohashLayer = new GeohashLayer(
           GeoHashSampleData.featureCollection,
-          GeoHashSampleData.meta, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
+          GeoHashSampleData.meta,
+          geohashGridOptions,
+          kibanaMap.getZoomLevel(),
+          kibanaMap
+        );
         kibanaMap.addLayer(geohashLayer);
 
         const elementList = domNode.querySelectorAll('canvas');
@@ -112,16 +112,20 @@ describe('geohash_layer', function () {
 
         const mismatchedPixels = await imageComparator.compareImage(canvas, test.expected, 0.1);
         expect(mismatchedPixels).to.be.lessThan(16);
-
       });
     });
 
-    it('should not throw when fitting on empty-data layer', function () {
+    it('should not throw when fitting on empty-data layer', function() {
       const geohashLayer = new GeohashLayer(
         {
           type: 'FeatureCollection',
-          features: []
-        }, {}, { 'mapType': 'Scaled Circle Markers', colorRamp: 'Yellow to Red' }, kibanaMap.getZoomLevel(), kibanaMap);
+          features: [],
+        },
+        {},
+        { mapType: 'Scaled Circle Markers', colorRamp: 'Yellow to Red' },
+        kibanaMap.getZoomLevel(),
+        kibanaMap
+      );
       kibanaMap.addLayer(geohashLayer);
 
       expect(() => {
@@ -129,26 +133,27 @@ describe('geohash_layer', function () {
       }).to.not.throwException();
     });
 
-    it('should not throw when resizing to 0 on heatmap', function () {
-
+    it('should not throw when resizing to 0 on heatmap', function() {
       const geohashGridOptions = {
         mapType: 'Heatmap',
         heatmap: {
-          heatClusterSize: '2'
-        }
+          heatClusterSize: '2',
+        },
       };
 
-      const geohashLayer = new GeohashLayer(GeoHashSampleData.featureCollection,
-        GeoHashSampleData.meta, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
+      const geohashLayer = new GeohashLayer(
+        GeoHashSampleData.featureCollection,
+        GeoHashSampleData.meta,
+        geohashGridOptions,
+        kibanaMap.getZoomLevel(),
+        kibanaMap
+      );
       kibanaMap.addLayer(geohashLayer);
       domNode.style.width = 0;
       domNode.style.height = 0;
       expect(() => {
         kibanaMap.resize();
       }).to.not.throwException();
-
     });
-
-
   });
 });

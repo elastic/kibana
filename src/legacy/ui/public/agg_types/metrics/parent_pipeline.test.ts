@@ -111,7 +111,7 @@ describe('parent pipeline aggs', function() {
 
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
         metricAgg = metric.provider;
-        aggConfig = aggConfigs.aggs[1];
+        aggConfig = aggConfigs.aggs[1] as IMetricAggConfig;
         aggDsl = aggConfig.toDsl(aggConfigs);
       };
 

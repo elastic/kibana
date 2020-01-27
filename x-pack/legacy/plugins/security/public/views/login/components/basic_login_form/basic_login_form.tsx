@@ -9,7 +9,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, FormEvent, Fragment, MouseEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { EuiText } from '@elastic/eui';
-import { LoginState } from '../../../../../common/login_state';
+import { LoginState } from '../../login_state';
 
 interface Props {
   http: any;
@@ -190,7 +190,7 @@ class BasicLoginFormUI extends Component<Props, State> {
 
     const { username, password } = this.state;
 
-    http.post('./api/security/v1/login', { username, password }).then(
+    http.post('./internal/security/login', { username, password }).then(
       () => (window.location.href = next),
       (error: any) => {
         const { statusCode = 500 } = error.data || {};

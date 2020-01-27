@@ -20,6 +20,7 @@ const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
 export const LINE_COLOR = themeName.euiColorPrimary;
 export const MODEL_COLOR = themeName.euiColorPrimary;
 export const EVENT_RATE_COLOR = themeName.euiColorPrimary;
+export const EVENT_RATE_COLOR_WITH_ANOMALIES = themeName.euiColorLightShade;
 
 export interface ChartSettings {
   width: string;

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { InfraConfig } from '../../../../plugins/infra/server';
 import { initInfraServer } from './infra_server';
@@ -16,16 +17,29 @@ import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_sta
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
-import { InfraLogAnalysis } from './lib/log_analysis';
+import { LogEntryCategoriesAnalysis, LogEntryRateAnalysis } from './lib/log_analysis';
 import { InfraSnapshot } from './lib/snapshot';
 import { InfraSourceStatus } from './lib/source_status';
 import { InfraSources } from './lib/sources';
 import { InfraServerPluginDeps } from './lib/adapters/framework';
 import { METRICS_FEATURE, LOGS_FEATURE } from './features';
 import { UsageCollector } from './usage/usage_collector';
+import { APP_ID } from '../index';
+import { InfraStaticSourceConfiguration } from './lib/sources/types';
 
 export interface KbnServer extends Server {
   usage: any;
+}
+
+const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
+  defaultMessage: 'Logs',
+});
+
+export interface InfraPluginSetup {
+  defineInternalSourceConfiguration: (
+    sourceId: string,
+    sourceProperties: InfraStaticSourceConfiguration
+  ) => void;
 }
 
 const DEFAULT_CONFIG: InfraConfig = {
@@ -73,7 +87,8 @@ export class InfraServerPlugin {
       }
     );
     const snapshot = new InfraSnapshot({ sources, framework });
-    const logAnalysis = new InfraLogAnalysis({ framework });
+    const logEntryCategoriesAnalysis = new LogEntryCategoriesAnalysis({ framework });
+    const logEntryRateAnalysis = new LogEntryRateAnalysis({ framework });
 
     // TODO: separate these out individually and do away with "domains" as a temporary group
     const domainLibs: InfraDomainLibs = {
@@ -89,7 +104,8 @@ export class InfraServerPlugin {
     this.libs = {
       configuration: this.config,
       framework,
-      logAnalysis,
+      logEntryCategoriesAnalysis,
+      logEntryRateAnalysis,
       snapshot,
       sources,
       sourceStatus,
@@ -99,9 +115,23 @@ export class InfraServerPlugin {
     plugins.features.registerFeature(METRICS_FEATURE);
     plugins.features.registerFeature(LOGS_FEATURE);
 
+    plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
+      {
+        path: `/app/${APP_ID}#/logs`,
+        label: logsSampleDataLinkLabel,
+        icon: 'logsApp',
+      },
+    ]);
+
     initInfraServer(this.libs);
 
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);
+
+    return {
+      defineInternalSourceConfiguration(sourceId, sourceProperties) {
+        sources.defineInternalSourceConfiguration(sourceId, sourceProperties);
+      },
+    } as InfraPluginSetup;
   }
 }

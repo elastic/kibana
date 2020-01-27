@@ -22,35 +22,26 @@ const _ = require('lodash');
 import {
   URL_PATH_END_MARKER,
   UrlPatternMatcher,
-  ListComponent
+  ListComponent,
 } from '../../autocomplete/components';
 
 import { populateContext } from '../../autocomplete/engine';
 
 describe('Url autocomplete', () => {
-  function patternsTest(
-    name,
-    endpoints,
-    tokenPath,
-    expectedContext,
-    globalUrlComponentFactories
-  ) {
-    test(name, function () {
+  function patternsTest(name, endpoints, tokenPath, expectedContext, globalUrlComponentFactories) {
+    test(name, function() {
       const patternMatcher = new UrlPatternMatcher(globalUrlComponentFactories);
-      _.each(endpoints, function (e, id) {
+      _.each(endpoints, function(e, id) {
         e.id = id;
-        _.each(e.patterns, function (p) {
+        _.each(e.patterns, function(p) {
           patternMatcher.addEndpoint(p, e);
         });
       });
       if (typeof tokenPath === 'string') {
         if (tokenPath[tokenPath.length - 1] === '$') {
-          tokenPath =
-            tokenPath.substr(0, tokenPath.length - 1) +
-            '/' +
-            URL_PATH_END_MARKER;
+          tokenPath = tokenPath.substr(0, tokenPath.length - 1) + '/' + URL_PATH_END_MARKER;
         }
-        tokenPath = _.map(tokenPath.split('/'), function (p) {
+        tokenPath = _.map(tokenPath.split('/'), function(p) {
           p = p.split(',');
           if (p.length === 1) {
             return p[0];
@@ -60,19 +51,13 @@ describe('Url autocomplete', () => {
       }
 
       if (expectedContext.autoCompleteSet) {
-        expectedContext.autoCompleteSet = _.map(
-          expectedContext.autoCompleteSet,
-          function (t) {
-            if (_.isString(t)) {
-              t = { name: t };
-            }
-            return t;
+        expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function(t) {
+          if (_.isString(t)) {
+            t = { name: t };
           }
-        );
-        expectedContext.autoCompleteSet = _.sortBy(
-          expectedContext.autoCompleteSet,
-          'name'
-        );
+          return t;
+        });
+        expectedContext.autoCompleteSet = _.sortBy(expectedContext.autoCompleteSet, 'name');
       }
 
       const context = {};
@@ -107,76 +92,64 @@ describe('Url autocomplete', () => {
     return name;
   }
 
-  (function () {
+  (function() {
     const endpoints = {
       '1': {
         patterns: ['a/b'],
-        methods: ['GET']
+        methods: ['GET'],
       },
     };
     patternsTest('simple single path - completion', endpoints, 'a/b$', {
       endpoint: '1',
-      method: 'GET'
+      method: 'GET',
     });
 
-    patternsTest(
-      'simple single path - completion, with auto complete',
-      endpoints,
-      'a/b',
-      { method: 'GET', autoCompleteSet: [] }
-    );
+    patternsTest('simple single path - completion, with auto complete', endpoints, 'a/b', {
+      method: 'GET',
+      autoCompleteSet: [],
+    });
 
-    patternsTest(
-      'simple single path - partial, without auto complete',
-      endpoints,
-      'a',
-      {}
-    );
+    patternsTest('simple single path - partial, without auto complete', endpoints, 'a', {});
 
-    patternsTest(
-      'simple single path - partial, with auto complete',
-      endpoints,
-      'a',
-      { method: 'GET', autoCompleteSet: ['b'] }
-    );
+    patternsTest('simple single path - partial, with auto complete', endpoints, 'a', {
+      method: 'GET',
+      autoCompleteSet: ['b'],
+    });
 
-    patternsTest(
-      'simple single path - partial, with auto complete',
-      endpoints,
-      [],
-      { method: 'GET', autoCompleteSet: ['a/b'] }
-    );
+    patternsTest('simple single path - partial, with auto complete', endpoints, [], {
+      method: 'GET',
+      autoCompleteSet: ['a/b'],
+    });
 
     patternsTest('simple single path - different path', endpoints, 'a/c', {});
-  }());
+  })();
 
-  (function () {
+  (function() {
     const endpoints = {
       '1': {
         patterns: ['a/b', 'a/b/{p}'],
-        methods: ['GET']
+        methods: ['GET'],
       },
       '2': {
         patterns: ['a/c'],
-        methods: ['GET']
+        methods: ['GET'],
       },
     };
     patternsTest('shared path  - completion 1', endpoints, 'a/b$', {
       endpoint: '1',
-      method: 'GET'
+      method: 'GET',
     });
 
     patternsTest('shared path  - completion 2', endpoints, 'a/c$', {
       endpoint: '2',
-      method: 'GET'
+      method: 'GET',
     });
 
-    patternsTest(
-      'shared path  - completion 1 with param',
-      endpoints,
-      'a/b/v$',
-      { method: 'GET', endpoint: '1', p: 'v' }
-    );
+    patternsTest('shared path  - completion 1 with param', endpoints, 'a/b/v$', {
+      method: 'GET',
+      endpoint: '1',
+      p: 'v',
+    });
 
     patternsTest('shared path - partial, with auto complete', endpoints, 'a', {
       autoCompleteSet: ['b', 'c'],
@@ -190,40 +163,30 @@ describe('Url autocomplete', () => {
       { method: 'GET', autoCompleteSet: [] }
     );
 
-    patternsTest(
-      'shared path - partial, without auto complete',
-      endpoints,
-      'a',
-      { method: 'GET', }
-    );
+    patternsTest('shared path - partial, without auto complete', endpoints, 'a', { method: 'GET' });
 
-    patternsTest(
-      'shared path - different path - with auto complete',
-      endpoints,
-      'a/e',
-      { method: 'GET', autoCompleteSet: [] }
-    );
+    patternsTest('shared path - different path - with auto complete', endpoints, 'a/e', {
+      method: 'GET',
+      autoCompleteSet: [],
+    });
 
-    patternsTest(
-      'shared path - different path - without auto complete',
-      endpoints,
-      'a/e',
-      { method: 'GET',  }
-    );
-  }());
+    patternsTest('shared path - different path - without auto complete', endpoints, 'a/e', {
+      method: 'GET',
+    });
+  })();
 
-  (function () {
+  (function() {
     const endpoints = {
       '1': {
         patterns: ['a/{p}'],
         url_components: {
           p: ['a', 'b'],
         },
-        methods: [ 'GET' ]
+        methods: ['GET'],
       },
       '2': {
         patterns: ['a/c'],
-        methods: [ 'GET' ]
+        methods: ['GET'],
       },
     };
     patternsTest('option testing - completion 1', endpoints, 'a/a$', {
@@ -249,46 +212,39 @@ describe('Url autocomplete', () => {
       endpoint: '2',
     });
 
-    patternsTest('option testing  - completion 5', endpoints, 'a/d$', { method: 'GET', });
+    patternsTest('option testing  - completion 5', endpoints, 'a/d$', { method: 'GET' });
 
-    patternsTest(
-      'option testing - partial, with auto complete',
-      endpoints,
-      'a',
-      { method: 'GET', autoCompleteSet: [t('a', 'p'), t('b', 'p'), 'c'] }
-    );
+    patternsTest('option testing - partial, with auto complete', endpoints, 'a', {
+      method: 'GET',
+      autoCompleteSet: [t('a', 'p'), t('b', 'p'), 'c'],
+    });
 
-    patternsTest(
-      'option testing - partial, without auto complete',
-      endpoints,
-      'a',
-      { method: 'GET', }
-    );
+    patternsTest('option testing - partial, without auto complete', endpoints, 'a', {
+      method: 'GET',
+    });
 
-    patternsTest(
-      'option testing - different path - with auto complete',
-      endpoints,
-      'a/e',
-      { method: 'GET', autoCompleteSet: [] }
-    );
-  }());
+    patternsTest('option testing - different path - with auto complete', endpoints, 'a/e', {
+      method: 'GET',
+      autoCompleteSet: [],
+    });
+  })();
 
-  (function () {
+  (function() {
     const endpoints = {
       '1': {
         patterns: ['a/{p}'],
         url_components: {
           p: ['a', 'b'],
         },
-        methods: [ 'GET' ]
+        methods: ['GET'],
       },
       '2': {
         patterns: ['b/{p}'],
-        methods: [ 'GET' ]
+        methods: ['GET'],
       },
       '3': {
         patterns: ['b/{l}/c'],
-        methods: [ 'GET' ],
+        methods: ['GET'],
         url_components: {
           l: {
             type: 'list',
@@ -299,12 +255,12 @@ describe('Url autocomplete', () => {
       },
     };
     const globalFactories = {
-      p: function (name, parent) {
+      p: function(name, parent) {
         return new ListComponent(name, ['g1', 'g2'], parent);
       },
       getComponent(name) {
         return this[name];
-      }
+      },
     };
 
     patternsTest(
@@ -337,12 +293,7 @@ describe('Url autocomplete', () => {
       'b',
       {
         method: 'GET',
-        autoCompleteSet: [
-          t('g1', 'p'),
-          t('g2', 'p'),
-          t('la', 'l'),
-          t('lb', 'l'),
-        ],
+        autoCompleteSet: [t('g1', 'p'), t('g2', 'p'), t('la', 'l'), t('lb', 'l')],
       },
       globalFactories
     );
@@ -361,13 +312,13 @@ describe('Url autocomplete', () => {
       { method: 'GET', autoCompleteSet: ['c'], l: ['non_valid'] },
       globalFactories
     );
-  }());
+  })();
 
-  (function () {
+  (function() {
     const endpoints = {
       '1': {
         patterns: ['a/b/{p}/c/e'],
-        methods: [ 'GET' ]
+        methods: ['GET'],
       },
     };
     patternsTest('look ahead - autocomplete before param 1', endpoints, 'a', {
@@ -380,22 +331,20 @@ describe('Url autocomplete', () => {
       autoCompleteSet: ['a/b'],
     });
 
-    patternsTest(
-      'look ahead - autocomplete after param 1',
-      endpoints,
-      'a/b/v',
-      { method: 'GET', autoCompleteSet: ['c/e'], p: 'v' }
-    );
+    patternsTest('look ahead - autocomplete after param 1', endpoints, 'a/b/v', {
+      method: 'GET',
+      autoCompleteSet: ['c/e'],
+      p: 'v',
+    });
 
-    patternsTest(
-      'look ahead - autocomplete after param 2',
-      endpoints,
-      'a/b/v/c',
-      { method: 'GET', autoCompleteSet: ['e'], p: 'v' }
-    );
-  }());
+    patternsTest('look ahead - autocomplete after param 2', endpoints, 'a/b/v/c', {
+      method: 'GET',
+      autoCompleteSet: ['e'],
+      p: 'v',
+    });
+  })();
 
-  (function () {
+  (function() {
     const endpoints = {
       '1_param': {
         patterns: ['a/{p}'],
@@ -428,9 +377,9 @@ describe('Url autocomplete', () => {
       method: 'GET',
       endpoint: '2_explicit',
     });
-  }());
+  })();
 
-  (function () {
+  (function() {
     const endpoints = {
       '1_GET': {
         patterns: ['a'],
@@ -449,30 +398,21 @@ describe('Url autocomplete', () => {
         methods: ['DELETE'],
       },
     };
-    patternsTest(
-      'Competing endpoint - sub url of another - auto complete',
-      endpoints,
-      'a',
-      { method: 'GET', autoCompleteSet: ['b'] }
-    );
-    patternsTest(
-      'Competing endpoint - sub url of another, complete 1',
-      endpoints,
-      'a$',
-      { method: 'GET', endpoint: '1_GET' }
-    );
-    patternsTest(
-      'Competing endpoint - sub url of another, complete 2',
-      endpoints,
-      'a$',
-      { method: 'PUT', endpoint: '1_PUT' }
-    );
-    patternsTest(
-      'Competing endpoint - sub url of another, complete 3',
-      endpoints,
-      'a$',
-      { method: 'DELETE' }
-    );
+    patternsTest('Competing endpoint - sub url of another - auto complete', endpoints, 'a', {
+      method: 'GET',
+      autoCompleteSet: ['b'],
+    });
+    patternsTest('Competing endpoint - sub url of another, complete 1', endpoints, 'a$', {
+      method: 'GET',
+      endpoint: '1_GET',
+    });
+    patternsTest('Competing endpoint - sub url of another, complete 2', endpoints, 'a$', {
+      method: 'PUT',
+      endpoint: '1_PUT',
+    });
+    patternsTest('Competing endpoint - sub url of another, complete 3', endpoints, 'a$', {
+      method: 'DELETE',
+    });
 
     patternsTest(
       'Competing endpoint - extension of another, complete 1, auto complete',
@@ -481,24 +421,17 @@ describe('Url autocomplete', () => {
       { method: 'PUT', autoCompleteSet: [] }
     );
 
-    patternsTest(
-      'Competing endpoint - extension of another, complete 1',
-      endpoints,
-      'a/b$',
-      { method: 'GET', endpoint: '2_GET' }
-    );
+    patternsTest('Competing endpoint - extension of another, complete 1', endpoints, 'a/b$', {
+      method: 'GET',
+      endpoint: '2_GET',
+    });
 
-    patternsTest(
-      'Competing endpoint - extension of another, complete 1',
-      endpoints,
-      'a/b$',
-      { method: 'DELETE', endpoint: '2_DELETE' }
-    );
-    patternsTest(
-      'Competing endpoint - extension of another, complete 1',
-      endpoints,
-      'a/b$',
-      { method: 'PUT' }
-    );
-  }());
+    patternsTest('Competing endpoint - extension of another, complete 1', endpoints, 'a/b$', {
+      method: 'DELETE',
+      endpoint: '2_DELETE',
+    });
+    patternsTest('Competing endpoint - extension of another, complete 1', endpoints, 'a/b$', {
+      method: 'PUT',
+    });
+  })();
 });

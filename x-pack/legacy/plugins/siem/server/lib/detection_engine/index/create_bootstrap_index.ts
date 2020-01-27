@@ -5,7 +5,7 @@
  */
 
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
-import { CallWithRequest } from './types';
+import { CallWithRequest } from '../types';
 
 // See the reference(s) below on explanations about why -000001 was chosen and
 // why the is_write_index is true as well as the bootstrapping step which is needed.
@@ -19,7 +19,7 @@ export const createBootstrapIndex = async (
   index: string
 ): Promise<unknown> => {
   return callWithRequest('transport.request', {
-    path: `${index}-000001`,
+    path: `/${index}-000001`,
     method: 'PUT',
     body: {
       aliases: {

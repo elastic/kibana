@@ -22,7 +22,10 @@ import {
 import { uiMetricService } from '../../services/ui_metric';
 import { openDetailPanel, closeDetailPanel } from '../actions/detail_panel';
 import { loadIndexDataSuccess } from '../actions/load_index_data';
-import { updateIndexSettingsSuccess, updateIndexSettingsError } from '../actions/update_index_settings';
+import {
+  updateIndexSettingsSuccess,
+  updateIndexSettingsError,
+} from '../actions/update_index_settings';
 import { deleteIndicesSuccess } from '../actions/delete_indices';
 
 const defaultState = {};
@@ -39,11 +42,7 @@ export const detailPanel = handleActions(
       }
     },
     [openDetailPanel](state, action) {
-      const {
-        panelType,
-        indexName,
-        title
-      } = action.payload;
+      const { panelType, indexName, title } = action.payload;
 
       const panelTypeToUiMetricMap = {
         [TAB_SUMMARY]: UIM_DETAIL_PANEL_SUMMARY_TAB,
@@ -60,7 +59,7 @@ export const detailPanel = handleActions(
       return {
         panelType: panelType || state.panelType || TAB_SUMMARY,
         indexName,
-        title
+        title,
       };
     },
     [closeDetailPanel]() {
@@ -70,7 +69,7 @@ export const detailPanel = handleActions(
       const { data } = action.payload;
       const newState = {
         ...state,
-        data
+        data,
       };
       return newState;
     },
@@ -78,7 +77,7 @@ export const detailPanel = handleActions(
       const { error } = action.payload;
       const newState = {
         ...state,
-        error
+        error,
       };
       return newState;
     },

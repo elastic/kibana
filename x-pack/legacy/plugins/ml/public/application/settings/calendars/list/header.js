@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for the header section of the calendars list page.
  */
@@ -27,7 +26,7 @@ import {
 import { metadata } from 'ui/metadata';
 
 // metadata.branch corresponds to the version used in documentation links.
-const docsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-calendars.html`;
+const docsUrl = `https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-calendars.html`;
 
 export function CalendarsListHeader({ totalCount, refreshCalendars }) {
   return (
@@ -63,11 +62,7 @@ export function CalendarsListHeader({ totalCount, refreshCalendars }) {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                iconType="refresh"
-                onClick={refreshCalendars}
-              >
+              <EuiButtonEmpty size="s" iconType="refresh" onClick={refreshCalendars}>
                 <FormattedMessage
                   id="xpack.ml.settings.calendars.listHeader.refreshButtonLabel"
                   defaultMessage="Refresh"
@@ -77,7 +72,7 @@ export function CalendarsListHeader({ totalCount, refreshCalendars }) {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m"/>
+      <EuiSpacer size="m" />
       <EuiText>
         <p>
           <EuiTextColor color="subdued">
@@ -100,12 +95,11 @@ export function CalendarsListHeader({ totalCount, refreshCalendars }) {
           </EuiTextColor>
         </p>
       </EuiText>
-      <EuiSpacer size="m"/>
+      <EuiSpacer size="m" />
     </React.Fragment>
   );
-
 }
 CalendarsListHeader.propTypes = {
   totalCount: PropTypes.number.isRequired,
-  refreshCalendars: PropTypes.func.isRequired
+  refreshCalendars: PropTypes.func.isRequired,
 };

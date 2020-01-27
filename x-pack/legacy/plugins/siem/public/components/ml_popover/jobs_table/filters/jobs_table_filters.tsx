@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState, useCallback } from 'react';
 
 import {
   EuiFilterButton,
@@ -40,7 +40,22 @@ export const JobsTableFiltersComponent = ({ siemJobs, onFilterChanged }: JobsTab
   // Propagate filter changes to parent
   useEffect(() => {
     onFilterChanged({ filterQuery, showCustomJobs, showElasticJobs, selectedGroups });
-  }, [filterQuery, selectedGroups.sort().join(), showCustomJobs, showElasticJobs]);
+  }, [filterQuery, selectedGroups, showCustomJobs, showElasticJobs, onFilterChanged]);
+
+  const handleChange = useCallback(
+    (query: EuiSearchBarQuery) => setFilterQuery(query.queryText.trim()),
+    [setFilterQuery]
+  );
+
+  const handleElasticJobsClick = useCallback(() => {
+    setShowElasticJobs(!showElasticJobs);
+    setShowCustomJobs(false);
+  }, [setShowElasticJobs, showElasticJobs, setShowCustomJobs]);
+
+  const handleCustomJobsClick = useCallback(() => {
+    setShowCustomJobs(!showCustomJobs);
+    setShowElasticJobs(false);
+  }, [setShowElasticJobs, showCustomJobs, setShowCustomJobs]);
 
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
@@ -51,7 +66,7 @@ export const JobsTableFiltersComponent = ({ siemJobs, onFilterChanged }: JobsTab
             placeholder: i18n.FILTER_PLACEHOLDER,
             incremental: true,
           }}
-          onChange={(query: EuiSearchBarQuery) => setFilterQuery(query.queryText.trim())}
+          onChange={handleChange}
         />
       </EuiFlexItem>
 
@@ -65,10 +80,7 @@ export const JobsTableFiltersComponent = ({ siemJobs, onFilterChanged }: JobsTab
         <EuiFilterGroup>
           <EuiFilterButton
             hasActiveFilters={showElasticJobs}
-            onClick={() => {
-              setShowElasticJobs(!showElasticJobs);
-              setShowCustomJobs(false);
-            }}
+            onClick={handleElasticJobsClick}
             data-test-subj="show-elastic-jobs-filter-button"
             withNext
           >
@@ -76,10 +88,7 @@ export const JobsTableFiltersComponent = ({ siemJobs, onFilterChanged }: JobsTab
           </EuiFilterButton>
           <EuiFilterButton
             hasActiveFilters={showCustomJobs}
-            onClick={() => {
-              setShowCustomJobs(!showCustomJobs);
-              setShowElasticJobs(false);
-            }}
+            onClick={handleCustomJobsClick}
             data-test-subj="show-custom-jobs-filter-button"
           >
             {i18n.SHOW_CUSTOM_JOBS}

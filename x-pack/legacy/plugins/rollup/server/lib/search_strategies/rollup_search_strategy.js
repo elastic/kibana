@@ -1,8 +1,8 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 import { indexBy, isString } from 'lodash';
 import { callWithRequestFactory } from '../call_with_request_factory';
 import { mergeCapabilitiesWithFields } from '../merge_capabilities_with_fields';
@@ -13,11 +13,15 @@ const ROLLUP_INDEX_CAPABILITIES_METHOD = 'rollup.rollupIndexCapabilities';
 const getRollupIndices = rollupData => Object.keys(rollupData);
 
 const isIndexPatternContainsWildcard = indexPattern => indexPattern.includes('*');
-const isIndexPatternValid = indexPattern => indexPattern &&
-  isString(indexPattern) && !isIndexPatternContainsWildcard(indexPattern);
+const isIndexPatternValid = indexPattern =>
+  indexPattern && isString(indexPattern) && !isIndexPatternContainsWildcard(indexPattern);
 
-export const getRollupSearchStrategy = (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabilities) =>
-  (class RollupSearchStrategy extends AbstractSearchStrategy {
+export const getRollupSearchStrategy = (
+  AbstractSearchStrategy,
+  RollupSearchRequest,
+  RollupSearchCapabilities
+) =>
+  class RollupSearchStrategy extends AbstractSearchStrategy {
     name = 'rollup';
 
     constructor(server) {
@@ -63,4 +67,4 @@ export const getRollupSearchStrategy = (AbstractSearchStrategy, RollupSearchRequ
 
       return mergeCapabilitiesWithFields(rollupIndexCapabilities, fieldsFromFieldCapsApi);
     }
-  });
+  };

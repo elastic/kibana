@@ -32,10 +32,10 @@ export class ObjectComponent extends SharedComponent {
   }
   getTerms(context, editor) {
     const options = [];
-    _.each(this.constants, function (component) {
+    _.each(this.constants, function(component) {
       options.push.apply(options, component.getTerms(context, editor));
     });
-    _.each(this.patternsAndWildCards, function (component) {
+    _.each(this.patternsAndWildCards, function(component) {
       options.push.apply(options, component.getTerms(context, editor));
     });
     return options;
@@ -43,9 +43,9 @@ export class ObjectComponent extends SharedComponent {
 
   match(token, context, editor) {
     const result = {
-      next: []
+      next: [],
     };
-    _.each(this.constants, function (component) {
+    _.each(this.constants, function(component) {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
         result.next.push.apply(result.next, componentResult.next);
@@ -61,7 +61,7 @@ export class ObjectComponent extends SharedComponent {
     if (result.next.length) {
       return result;
     }
-    _.each(this.patternsAndWildCards, function (component) {
+    _.each(this.patternsAndWildCards, function(component) {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
         result.next.push.apply(result.next, componentResult.next);
@@ -69,6 +69,5 @@ export class ObjectComponent extends SharedComponent {
     });
 
     return result;
-
   }
 }

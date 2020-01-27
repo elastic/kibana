@@ -27,7 +27,7 @@ import {
   RangeOption,
   SelectOption,
   SwitchOption,
-} from '../../../kbn_vislib_vis_types/public/components';
+} from '../../../vis_type_vislib/public';
 import { WmsOptions } from './wms_options';
 import { TileMapVisParams } from '../types';
 import { MapTypes } from '../map_types';
@@ -41,7 +41,7 @@ function TileMapOptions(props: TileMapOptionsProps) {
     if (!stateParams.mapType) {
       setValue('mapType', vis.type.editorConfig.collections.mapTypes[0]);
     }
-  }, []);
+  }, [setValue, stateParams.mapType, vis.type.editorConfig.collections.mapTypes]);
 
   return (
     <>

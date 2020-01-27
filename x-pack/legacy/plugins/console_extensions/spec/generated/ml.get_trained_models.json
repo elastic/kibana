@@ -1,0 +1,19 @@
+{
+  "ml.get_trained_models": {
+    "url_params": {
+      "allow_no_match": "__flag__",
+      "include_model_definition": "__flag__",
+      "decompress_definition": "__flag__",
+      "from": 0,
+      "size": 0
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ml/inference/{model_id}",
+      "_ml/inference"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-inference.html"
+  }
+}

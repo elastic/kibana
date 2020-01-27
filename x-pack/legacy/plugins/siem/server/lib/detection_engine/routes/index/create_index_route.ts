@@ -48,7 +48,7 @@ export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
             const template = getSignalsTemplate(index);
             await setTemplate(callWithRequest, index, template);
           }
-          createBootstrapIndex(callWithRequest, index);
+          await createBootstrapIndex(callWithRequest, index);
           return { acknowledged: true };
         }
       } catch (err) {

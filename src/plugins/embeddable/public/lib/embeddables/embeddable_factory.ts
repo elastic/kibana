@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectAttributes } from 'src/core/server';
+import { SavedObjectAttributes } from 'src/core/public';
 import { SavedObjectMetaData } from '../types';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';

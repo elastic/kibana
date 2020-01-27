@@ -98,6 +98,7 @@ const notificationsStart = notificationServiceMock.createStartContract();
 const overlayStart = overlayServiceMock.createStartContract();
 const uiSettingsStart = uiSettingsServiceMock.createStartContract();
 const savedObjectsStart = savedObjectsMock.createStartContract();
+const fatalErrorsStart = fatalErrorsServiceMock.createStartContract();
 const mockStorage = { getItem: jest.fn() } as any;
 
 const defaultStartDeps = {
@@ -112,6 +113,7 @@ const defaultStartDeps = {
     overlays: overlayStart,
     uiSettings: uiSettingsStart,
     savedObjects: savedObjectsStart,
+    fatalErrors: fatalErrorsStart,
   },
   lastSubUrlStorage: mockStorage,
   targetDomElement: document.createElement('div'),
@@ -167,6 +169,20 @@ describe('#start()', () => {
 
     expect(mockUiNewPlatformStart).toHaveBeenCalledTimes(1);
     expect(mockUiNewPlatformStart).toHaveBeenCalledWith(expect.any(Object), {});
+  });
+
+  it('resolves getStartServices with core and plugin APIs', async () => {
+    const legacyPlatform = new LegacyPlatformService({
+      ...defaultParams,
+    });
+
+    legacyPlatform.setup(defaultSetupDeps);
+    legacyPlatform.start(defaultStartDeps);
+
+    const { getStartServices } = mockUiNewPlatformSetup.mock.calls[0][0];
+    const [coreStart, pluginsStart] = await getStartServices();
+    expect(coreStart).toEqual(expect.any(Object));
+    expect(pluginsStart).toBe(defaultStartDeps.plugins);
   });
 
   describe('useLegacyTestHarness = false', () => {

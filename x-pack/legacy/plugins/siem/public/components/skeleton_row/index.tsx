@@ -26,8 +26,6 @@ RowComponent.displayName = 'RowComponent';
 
 const Row = React.memo(RowComponent);
 
-Row.displayName = 'Row';
-
 interface CellProps {
   cellColor?: string;
   cellMargin?: string;
@@ -50,8 +48,6 @@ CellComponent.displayName = 'CellComponent';
 
 const Cell = React.memo(CellComponent);
 
-Cell.displayName = 'Cell';
-
 export interface SkeletonRowProps extends CellProps, RowProps {
   cellCount?: number;
   style?: object;
@@ -65,7 +61,7 @@ export const SkeletonRow = React.memo<SkeletonRowProps>(
           (_, i) => <Cell cellColor={cellColor} cellMargin={cellMargin} key={i} />,
           [cellCount]
         ),
-      [cellCount]
+      [cellCount, cellColor, cellMargin]
     );
 
     return (

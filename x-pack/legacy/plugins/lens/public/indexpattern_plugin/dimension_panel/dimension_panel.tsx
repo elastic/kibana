@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React, { memo, useMemo } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpServiceBase } from 'src/core/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
@@ -29,7 +29,7 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   storage: IStorageWrapper;
   savedObjectsClient: SavedObjectsClientContract;
   layerId: string;
-  http: HttpServiceBase;
+  http: HttpSetup;
   uniqueLabel: string;
   dateRange: DateRange;
 };

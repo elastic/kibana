@@ -18,7 +18,7 @@ const KEY_CODES = {
   DOWN: 40,
   ENTER: 13,
   ESC: 27,
-  TAB: 9
+  TAB: 9,
 };
 
 export class Typeahead extends Component {
@@ -26,13 +26,13 @@ export class Typeahead extends Component {
     isSuggestionsVisible: false,
     index: null,
     value: '',
-    inputIsPristine: true
+    inputIsPristine: true,
   };
 
   static getDerivedStateFromProps(props, state) {
     if (state.inputIsPristine && props.initialValue) {
       return {
-        value: props.initialValue
+        value: props.initialValue,
       };
     }
 
@@ -127,7 +127,7 @@ export class Typeahead extends Component {
       value,
       inputIsPristine: false,
       isSuggestionsVisible: hasValue,
-      index: null
+      index: null,
     });
 
     if (!hasValue) {
@@ -157,23 +157,16 @@ export class Typeahead extends Component {
 
   render() {
     return (
-      <ClickOutside
-        onClickOutside={this.onClickOutside}
-        style={{ position: 'relative' }}
-      >
+      <ClickOutside onClickOutside={this.onClickOutside} style={{ position: 'relative' }}>
         <div data-test-subj="xpack.uptime.filterBar" style={{ position: 'relative' }}>
           <EuiFieldSearch
             fullWidth
             style={{
-              backgroundImage: 'none'
+              backgroundImage: 'none',
             }}
-            placeholder={i18n.translate(
-              'xpack.uptime.kueryBar.searchPlaceholder',
-              {
-                defaultMessage:
-                  'Search monitor IDs, names, and protocol types...',
-              }
-            )}
+            placeholder={i18n.translate('xpack.uptime.kueryBar.searchPlaceholder', {
+              defaultMessage: 'Search monitor IDs, names, and protocol types...',
+            })}
             inputRef={node => {
               if (node) {
                 this.inputRef = node;
@@ -196,7 +189,7 @@ export class Typeahead extends Component {
               position="absolute"
               style={{
                 bottom: 0,
-                top: 'initial'
+                top: 'initial',
               }}
             />
           )}
@@ -221,11 +214,11 @@ Typeahead.propTypes = {
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   suggestions: PropTypes.array.isRequired,
-  queryExample: PropTypes.string.isRequired
+  queryExample: PropTypes.string.isRequired,
 };
 
 Typeahead.defaultProps = {
   isLoading: false,
   disabled: false,
-  suggestions: []
+  suggestions: [],
 };

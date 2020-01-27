@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect } from 'react';
-import chrome from 'ui/chrome';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 interface HelpCenterContentProps {
   feedbackLink: string;
@@ -13,8 +13,10 @@ interface HelpCenterContentProps {
 }
 
 export const HelpCenterContent: React.FC<HelpCenterContentProps> = ({ feedbackLink, appName }) => {
+  const chrome = useKibana().services.chrome;
+
   useEffect(() => {
-    chrome.helpExtension.set({
+    return chrome?.setHelpExtension({
       appName,
       links: [
         {
@@ -23,7 +25,7 @@ export const HelpCenterContent: React.FC<HelpCenterContentProps> = ({ feedbackLi
         },
       ],
     });
-  }, [feedbackLink, appName]);
+  }, [feedbackLink, appName, chrome]);
 
   return null;
 };

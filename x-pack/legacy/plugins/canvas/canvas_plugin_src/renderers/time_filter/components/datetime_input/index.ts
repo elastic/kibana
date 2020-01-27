@@ -21,15 +21,20 @@ export const DatetimeInput = compose<ComponentProps, Props>(
     moment ? moment.format('YYYY-MM-DD HH:mm:ss') : ''
   ),
   lifecycle<Props & ComponentProps, {}>({
-    // TODO: Refactor to no longer use componentWillReceiveProps since it is being deprecated
-    componentWillReceiveProps({ moment, setStrValue, setValid }) {
-      if (!moment) return;
+    componentDidUpdate(prevProps) {
+      const prevMoment = prevProps.moment;
 
-      if (this.props.moment && this.props.moment.isSame(moment)) {
+      // If we don't have a current moment, do nothing
+      if (!this.props.moment) return;
+
+      // If we previously had a moment and it's the same as the current moment, do nothing
+      if (prevMoment && prevMoment.isSame(this.props.moment)) {
         return;
       }
-      setStrValue(moment.format('YYYY-MM-DD HH:mm:ss'));
-      setValid(true);
+
+      // Set the string value of the current moment and mark as valid
+      this.props.setStrValue(this.props.moment.format('YYYY-MM-DD HH:mm:ss'));
+      this.props.setValid(true);
     },
   })
 )(Component);

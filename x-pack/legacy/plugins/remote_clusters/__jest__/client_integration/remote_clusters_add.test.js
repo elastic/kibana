@@ -7,6 +7,8 @@
 import { pageHelpers, nextTick, setupEnvironment } from './helpers';
 import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './helpers/constants';
 
+jest.mock('ui/new_platform');
+
 const { setup } = pageHelpers.remoteClustersAdd;
 
 describe('Create Remote cluster', () => {
@@ -42,7 +44,9 @@ describe('Create Remote cluster', () => {
       expect(exists('remoteClusterFormSkipUnavailableFormToggle')).toBe(true);
 
       // By default it should be set to "false"
-      expect(find('remoteClusterFormSkipUnavailableFormToggle').props()['aria-checked']).toBe(false);
+      expect(find('remoteClusterFormSkipUnavailableFormToggle').props()['aria-checked']).toBe(
+        false
+      );
 
       form.toggleEuiSwitch('remoteClusterFormSkipUnavailableFormToggle');
 
@@ -84,14 +88,16 @@ describe('Create Remote cluster', () => {
       });
 
       test('should only allow alpha-numeric characters, "-" (dash) and "_" (underscore)', () => {
-        const expectInvalidChar = (char) => {
+        const expectInvalidChar = char => {
           if (char === '-' || char === '_') {
             return;
           }
 
           try {
             form.setInputValue('remoteClusterFormNameInput', `with${char}`);
-            expect(form.getErrorsMessages()).toContain(`Remove the character ${char} from the name.`);
+            expect(form.getErrorsMessages()).toContain(
+              `Remove the character ${char} from the name.`
+            );
           } catch {
             throw Error(`Char "${char}" expected invalid but was allowed`);
           }
@@ -116,9 +122,11 @@ describe('Create Remote cluster', () => {
 
         const notInArray = array => value => array.indexOf(value) < 0;
 
-        const expectInvalidChar = (char) => {
+        const expectInvalidChar = char => {
           form.setComboBoxValue('remoteClusterFormSeedsInput', `192.16${char}:3000`);
-          expect(form.getErrorsMessages()).toContain(`Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.`); // eslint-disable-line max-len
+          expect(form.getErrorsMessages()).toContain(
+            `Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.`
+          );
         };
 
         [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS]

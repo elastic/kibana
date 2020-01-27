@@ -1,7 +1,7 @@
 {
   "name": "demo_data_search",
   "version": "1.0.0",
-  "main": "target/test/plugin_functional/plugins/demo_data_search",
+  "main": "target/examples/demo_data_search",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
@@ -12,6 +12,6 @@
     "build": "rm -rf './target' && tsc"
   },
   "devDependencies": {
-    "typescript": "3.5.3"
+    "typescript": "3.7.2"
   }
 }

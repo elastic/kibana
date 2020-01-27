@@ -1,0 +1,20 @@
+{
+  "description": "Windows Defense evasion via Filter Manager",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "name": "Windows Defense evasion via Filter Manager",
+  "query": "event.code:1 and process.name:fltmc.exe",
+  "risk_score": 50,
+  "rule_id": "06dceabf-adca-48af-ac79-ffdf4c3b1e9a",
+  "severity": "low",
+  "tags": ["Elastic"],
+  "type": "query",
+  "version": 1
+}

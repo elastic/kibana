@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { PLUGIN } from '../../common/constants';
 import { Breadcrumb } from './application/breadcrumbs';
 

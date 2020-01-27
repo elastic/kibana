@@ -5,16 +5,11 @@
  */
 
 import * as rt from 'io-ts';
-
-export const InfraMetadataNodeTypeRT = rt.keyof({
-  host: null,
-  pod: null,
-  container: null,
-});
+import { ItemTypeRT } from '../../common/inventory_models/types';
 
 export const InfraMetadataRequestRT = rt.type({
   nodeId: rt.string,
-  nodeType: InfraMetadataNodeTypeRT,
+  nodeType: ItemTypeRT,
   sourceId: rt.string,
 });
 
@@ -96,5 +91,3 @@ export type InfraMetadataMachine = rt.TypeOf<typeof InfraMetadataMachineRT>;
 export type InfraMetadataHost = rt.TypeOf<typeof InfraMetadataHostRT>;
 
 export type InfraMetadataOS = rt.TypeOf<typeof InfraMetadataOSRT>;
-
-export type InfraMetadataNodeType = rt.TypeOf<typeof InfraMetadataNodeTypeRT>;

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile, getService }) {
+export default function({ loadTestFile, getService }) {
   const browser = getService('browser');
 
-  describe.skip('InfraUI Visual Regression', function () {
+  describe.skip('InfraUI Visual Regression', function() {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
     });

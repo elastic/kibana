@@ -23,21 +23,23 @@ import { uiModules } from '../../modules';
 
 const newPlatformChrome = npStart.core.chrome;
 
-uiModules.get('kibana')
-  .service('globalNavState', ($rootScope) => {
-    let isOpen = false;
-    newPlatformChrome.getIsCollapsed$().pipe(distinctUntilChanged()).subscribe(isCollapsed => {
+uiModules.get('kibana').service('globalNavState', $rootScope => {
+  let isOpen = false;
+  newPlatformChrome
+    .getIsCollapsed$()
+    .pipe(distinctUntilChanged())
+    .subscribe(isCollapsed => {
       $rootScope.$evalAsync(() => {
         isOpen = !isCollapsed;
         $rootScope.$broadcast('globalNavState:change');
       });
     });
 
-    return {
-      isOpen: () => isOpen,
+  return {
+    isOpen: () => isOpen,
 
-      setOpen: newValue => {
-        newPlatformChrome.setIsCollapsed(!newValue);
-      }
-    };
-  });
+    setOpen: newValue => {
+      newPlatformChrome.setIsCollapsed(!newValue);
+    },
+  };
+});

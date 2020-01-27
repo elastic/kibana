@@ -58,13 +58,15 @@ export interface TestCase {
     classname: string;
     /* number of seconds this test took */
     time: string;
+    /* optional JSON encoded metadata */
+    'metadata-json'?: string;
   };
   /* contents of system-out elements */
-  'system-out'?: string[];
+  'system-out'?: Array<string | { _: string }>;
   /* contents of failure elements */
   failure?: Array<string | { _: string }>;
   /* contents of skipped elements */
-  skipped?: string[];
+  skipped?: Array<string | { _: string }>;
 }
 
 export interface FailedTestCase extends TestCase {
@@ -82,19 +84,23 @@ export async function readTestReport(testReportPath: string) {
   return await parseTestReport(await readAsync(testReportPath, 'utf8'));
 }
 
-export function* makeFailedTestCaseIter(report: TestReport) {
-  // Grab the failures. Reporters may report multiple testsuites in a single file.
+export function* makeTestCaseIter(report: TestReport) {
+  // Reporters may report multiple testsuites in a single file.
   const testSuites = 'testsuites' in report ? report.testsuites.testsuite : [report.testsuite];
 
   for (const testSuite of testSuites) {
     for (const testCase of testSuite.testcase) {
-      const { failure } = testCase;
-
-      if (!failure) {
-        continue;
-      }
-
-      yield testCase as FailedTestCase;
+      yield testCase;
     }
+  }
+}
+
+export function* makeFailedTestCaseIter(report: TestReport) {
+  for (const testCase of makeTestCaseIter(report)) {
+    if (!testCase.failure) {
+      continue;
+    }
+
+    yield testCase as FailedTestCase;
   }
 }

@@ -29,13 +29,9 @@ import {
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import { getRouterLinkProps, extractQueryParams, listBreadcrumb } from '../../services';
 
-import {
-  JobTable,
-} from './job_table';
+import { JobTable } from './job_table';
 
-import {
-  DetailPanel,
-} from './detail_panel';
+import { DetailPanel } from './detail_panel';
 
 const REFRESH_RATE_MS = 30000;
 
@@ -46,15 +42,13 @@ export class JobListUi extends Component {
     openDetailPanel: PropTypes.func,
     hasJobs: PropTypes.bool,
     isLoading: PropTypes.bool,
-  }
+  };
 
   static getDerivedStateFromProps(props) {
     const {
       openDetailPanel,
       history: {
-        location: {
-          search,
-        },
+        location: { search },
       },
     } = props;
 
@@ -73,7 +67,7 @@ export class JobListUi extends Component {
 
     props.loadJobs();
 
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
+    chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb]);
 
     this.state = {};
   }
@@ -95,10 +89,7 @@ export class JobListUi extends Component {
       <EuiPageContentHeaderSection data-test-subj="jobListPageHeader">
         <EuiTitle size="l">
           <h1>
-            <FormattedMessage
-              id="xpack.rollupJobs.jobListTitle"
-              defaultMessage="Rollup Jobs"
-            />
+            <FormattedMessage id="xpack.rollupJobs.jobListTitle" defaultMessage="Rollup Jobs" />
           </h1>
         </EuiTitle>
       </EuiPageContentHeaderSection>
@@ -133,10 +124,7 @@ export class JobListUi extends Component {
   renderError(error) {
     // We can safely depend upon the shape of this error coming from Angular $http, because we
     // handle unexpected error shapes in the API action.
-    const {
-      statusCode,
-      error: errorString,
-    } = error.data;
+    const { statusCode, error: errorString } = error.data;
 
     const { intl } = this.props;
     const title = intl.formatMessage({
@@ -147,12 +135,7 @@ export class JobListUi extends Component {
       <Fragment>
         {this.getHeaderSection()}
         <EuiSpacer size="m" />
-        <EuiCallOut
-          data-test-subj="jobListError"
-          title={title}
-          color="danger"
-          iconType="alert"
-        >
+        <EuiCallOut data-test-subj="jobListError" title={title} color="danger" iconType="alert">
           {statusCode} {errorString}
         </EuiCallOut>
       </Fragment>
@@ -164,14 +147,14 @@ export class JobListUi extends Component {
       <EuiEmptyPrompt
         data-test-subj="jobListEmptyPrompt"
         iconType="indexRollupApp"
-        title={(
+        title={
           <h1>
             <FormattedMessage
               id="xpack.rollupJobs.jobList.emptyPromptTitle"
               defaultMessage="Create your first rollup job"
             />
           </h1>
-        )}
+        }
         body={
           <Fragment>
             <p>
@@ -202,11 +185,7 @@ export class JobListUi extends Component {
 
   renderLoading() {
     return (
-      <EuiFlexGroup
-        justifyContent="flexStart"
-        alignItems="center"
-        gutterSize="s"
-      >
+      <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
@@ -268,10 +247,7 @@ export class JobListUi extends Component {
     }
 
     return (
-      <EuiPageContent
-        horizontalPosition="center"
-        className="rollupJobsListPanel"
-      >
+      <EuiPageContent horizontalPosition="center" className="rollupJobsListPanel">
         {content}
       </EuiPageContent>
     );

@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
-import { Feature } from './feature';
+import { Feature } from '../common/feature';
 
 const ELIGIBLE_FLAT_MERGE_KEYS = ['catalogue'];
 

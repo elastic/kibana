@@ -30,14 +30,22 @@ test('renders KuiLocalTab', () => {
 
 describe('property isSelected', () => {
   test('renders the isSelected modifier', () => {
-    const component = <KuiLocalTab isSelected {...requiredProps}>children</KuiLocalTab>;
+    const component = (
+      <KuiLocalTab isSelected {...requiredProps}>
+        children
+      </KuiLocalTab>
+    );
     expect(render(component)).toMatchSnapshot();
   });
 });
 
 describe('property isDisabled', () => {
   test('renders the isDisabled modifier', () => {
-    const component = <KuiLocalTab isDisabled {...requiredProps}>children</KuiLocalTab>;
+    const component = (
+      <KuiLocalTab isDisabled {...requiredProps}>
+        children
+      </KuiLocalTab>
+    );
     expect(render(component)).toMatchSnapshot();
   });
 });

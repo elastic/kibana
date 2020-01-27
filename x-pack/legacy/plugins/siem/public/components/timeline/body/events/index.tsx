@@ -8,11 +8,16 @@ import React from 'react';
 import { AutoSizer, List, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 
 import { BrowserFields } from '../../../../containers/source';
-import { TimelineItem } from '../../../../graphql/types';
-import { maxDelay } from '../../../../lib/helpers/scheduler';
+import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
-import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
+import {
+  OnColumnResized,
+  OnPinEvent,
+  OnRowSelected,
+  OnUnPinEvent,
+  OnUpdateColumns,
+} from '../../events';
 import { EventsTbody } from '../../styles';
 import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
@@ -36,12 +41,16 @@ interface Props {
   getNotesByIds: (noteIds: string[]) => Note[];
   id: string;
   isEventViewer?: boolean;
+  loadingEventIds: Readonly<string[]>;
   onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
+  onRowSelected: OnRowSelected;
   onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   rowRenderers: RowRenderer[];
+  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  showCheckboxes: boolean;
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
 }
@@ -49,47 +58,51 @@ interface Props {
 // Passing the styles directly to the component because the width is
 // being calculated and is recommended by Styled Components for performance
 // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-export const Events = React.memo<Props>(
-  ({
-    actionsColumnWidth,
-    addNoteToEvent,
-    browserFields,
-    columnHeaders,
-    columnRenderers,
-    data,
-    eventIdToNoteIds,
-    getNotesByIds,
-    id,
-    isEventViewer = false,
-    onColumnResized,
-    onPinEvent,
-    onUpdateColumns,
-    onUnPinEvent,
-    pinnedEventIds,
-    rowRenderers,
-    toggleColumn,
-    updateNote,
-  }) => (
-    <AutoSizer>
-      {({ height, width }) => (
-        <List
-          height={height}
-          width={width}
-          rowHeight={listCache.rowHeight}
-          rowCount={data.length}
-          deferredMeasurementCache={listCache}
-          overscanRowCount={0}
-          rowRenderer={({ index, key, style, parent }) => {
-            const event = data[index];
-            return (
-              <CellMeasurer
-                key={key}
-                cache={listCache}
-                parent={parent}
-                columnIndex={0}
-                rowIndex={index}
-              >
-                <div style={style}>
+const EventsComponent: React.FC<Props> = ({
+  actionsColumnWidth,
+  addNoteToEvent,
+  browserFields,
+  columnHeaders,
+  columnRenderers,
+  data,
+  eventIdToNoteIds,
+  getNotesByIds,
+  id,
+  isEventViewer = false,
+  loadingEventIds,
+  onColumnResized,
+  onPinEvent,
+  onRowSelected,
+  onUpdateColumns,
+  onUnPinEvent,
+  pinnedEventIds,
+  rowRenderers,
+  selectedEventIds,
+  showCheckboxes,
+  toggleColumn,
+  updateNote,
+}) => (
+  <AutoSizer>
+    {({ height, width }) => (
+      <List
+        height={height}
+        width={width}
+        rowHeight={listCache.rowHeight}
+        rowCount={data.length}
+        deferredMeasurementCache={listCache}
+        overscanRowCount={10}
+        rowRenderer={({ index, key, style, parent }) => {
+          const event = data[index];
+          return (
+            <CellMeasurer
+              key={key}
+              cache={listCache}
+              parent={parent}
+              columnIndex={0}
+              rowIndex={index}
+            >
+              {({ measure }) => (
+                <div style={{ ...style, overflow: 'hidden' }}>
                   <StatefulEvent
                     actionsColumnWidth={actionsColumnWidth}
                     addNoteToEvent={addNoteToEvent}
@@ -102,23 +115,28 @@ export const Events = React.memo<Props>(
                     isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
                     isEventViewer={isEventViewer}
                     key={event._id}
-                    maxDelay={maxDelay(index)}
+                    loadingEventIds={loadingEventIds}
                     onColumnResized={onColumnResized}
                     onPinEvent={onPinEvent}
+                    onRowSelected={onRowSelected}
                     onUnPinEvent={onUnPinEvent}
                     onUpdateColumns={onUpdateColumns}
                     rowRenderers={rowRenderers}
+                    selectedEventIds={selectedEventIds}
+                    showCheckboxes={showCheckboxes}
                     timelineId={id}
                     toggleColumn={toggleColumn}
                     updateNote={updateNote}
+                    measure={measure}
                   />
                 </div>
-              </CellMeasurer>
-            );
-          }}
-        />
-      )}
-    </AutoSizer>
-  )
+              )}
+            </CellMeasurer>
+          );
+        }}
+      />
+    )}
+  </AutoSizer>
 );
-Events.displayName = 'Events';
+
+export const Events = React.memo(EventsComponent);

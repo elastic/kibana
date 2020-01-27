@@ -13,7 +13,7 @@ describe('Beats CPU Utilization Metric', () => {
       label: 'stats.cpu.value',
       description: 'cpu_description',
       uuidField: 'cluster_uuid',
-      timestampField: 'timestamp'
+      timestampField: 'timestamp',
     });
 
     expect(myUtilizationMetric.calculation()).toBe(null);
@@ -25,11 +25,11 @@ describe('Beats CPU Utilization Metric', () => {
       label: 'stats.cpu.value',
       description: 'cpu_description',
       uuidField: 'cluster_uuid',
-      timestampField: 'timestamp'
+      timestampField: 'timestamp',
     });
 
     const bucket = {
-      metric_deriv: { normalized_value: -33 }
+      metric_deriv: { normalized_value: -33 },
     };
     expect(myUtilizationMetric.calculation(bucket)).toBe(null);
   });
@@ -40,11 +40,11 @@ describe('Beats CPU Utilization Metric', () => {
       label: 'stats.cpu.value',
       description: 'cpu_description',
       uuidField: 'cluster_uuid',
-      timestampField: 'timestamp'
+      timestampField: 'timestamp',
     });
 
     const bucket = {
-      metric_deriv: { normalized_value: -33 }
+      metric_deriv: { normalized_value: -33 },
     };
     expect(myUtilizationMetric.calculation(bucket)).toBe(null);
   });
@@ -55,11 +55,11 @@ describe('Beats CPU Utilization Metric', () => {
       label: 'stats.cpu.value',
       description: 'cpu_description',
       uuidField: 'cluster_uuid',
-      timestampField: 'timestamp'
+      timestampField: 'timestamp',
     });
 
     const bucket = {
-      metric_deriv: { value: -33 }
+      metric_deriv: { value: -33 },
     };
     expect(myUtilizationMetric.calculation(bucket)).toBe(null);
   });
@@ -70,11 +70,11 @@ describe('Beats CPU Utilization Metric', () => {
       label: 'stats.cpu.value',
       description: 'cpu_description',
       uuidField: 'cluster_uuid',
-      timestampField: 'timestamp'
+      timestampField: 'timestamp',
     });
 
     const bucket = {
-      metric_deriv: { value: 33 }
+      metric_deriv: { value: 33 },
     };
     expect(myUtilizationMetric.calculation(bucket, null, null, 30)).toBe(0.11);
   });

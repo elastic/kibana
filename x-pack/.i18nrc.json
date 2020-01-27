@@ -1,10 +1,11 @@
 {
   "prefix": "xpack",
   "paths": {
-    "xpack.actions": "legacy/plugins/actions",
+    "xpack.actions": "plugins/actions",
     "xpack.advancedUiActions": "plugins/advanced_ui_actions",
     "xpack.alerting": "legacy/plugins/alerting",
-    "xpack.apm": "legacy/plugins/apm",
+    "xpack.triggersActionsUI": "legacy/plugins/triggers_actions_ui",
+    "xpack.apm": ["legacy/plugins/apm", "plugins/apm"],
     "xpack.beatsManagement": "legacy/plugins/beats_management",
     "xpack.canvas": "legacy/plugins/canvas",
     "xpack.crossClusterReplication": "legacy/plugins/cross_cluster_replication",
@@ -12,7 +13,7 @@
     "xpack.endpoint": "plugins/endpoint",
     "xpack.features": "plugins/features",
     "xpack.fileUpload": "legacy/plugins/file_upload",
-    "xpack.graph": "legacy/plugins/graph",
+    "xpack.graph": ["legacy/plugins/graph", "plugins/graph"],
     "xpack.grokDebugger": "legacy/plugins/grokdebugger",
     "xpack.idxMgmt": "legacy/plugins/index_management",
     "xpack.indexLifecycleMgmt": "legacy/plugins/index_lifecycle_management",
@@ -27,9 +28,9 @@
     "xpack.ml": "legacy/plugins/ml",
     "xpack.monitoring": "legacy/plugins/monitoring",
     "xpack.remoteClusters": "legacy/plugins/remote_clusters",
-    "xpack.reporting": [ "plugins/reporting", "legacy/plugins/reporting" ],
+    "xpack.reporting": ["plugins/reporting", "legacy/plugins/reporting"],
     "xpack.rollupJobs": "legacy/plugins/rollup",
-    "xpack.searchProfiler": "legacy/plugins/searchprofiler",
+    "xpack.searchProfiler": "plugins/searchprofiler",
     "xpack.security": ["legacy/plugins/security", "plugins/security"],
     "xpack.server": "legacy/server",
     "xpack.siem": "legacy/plugins/siem",
@@ -39,7 +40,7 @@
     "xpack.transform": "legacy/plugins/transform",
     "xpack.upgradeAssistant": "legacy/plugins/upgrade_assistant",
     "xpack.uptime": "legacy/plugins/uptime",
-    "xpack.watcher": "legacy/plugins/watcher"
+    "xpack.watcher": "plugins/watcher"
   },
   "translations": [
     "plugins/translations/translations/zh-CN.json",

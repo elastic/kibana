@@ -9,12 +9,12 @@ import { render } from '@testing-library/react';
 import { MetadataTable } from '..';
 import {
   expectTextsInDocument,
-  MockPluginContextWrapper
+  MockApmPluginContextWrapper
 } from '../../../../utils/testHelpers';
 import { SectionsWithRows } from '../helper';
 
 const renderOptions = {
-  wrapper: MockPluginContextWrapper
+  wrapper: MockApmPluginContextWrapper
 };
 
 describe('MetadataTable', () => {

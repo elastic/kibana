@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import { AutocompleteComponent } from './autocomplete_component';
-export class  SharedComponent extends AutocompleteComponent {
+export class SharedComponent extends AutocompleteComponent {
   constructor(name, parent) {
     super(name);
     this._nextDict = {};

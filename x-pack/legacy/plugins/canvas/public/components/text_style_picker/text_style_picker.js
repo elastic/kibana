@@ -127,6 +127,7 @@ export const TextStylePicker = ({
             value={color}
             onChange={value => doChange('color', value)}
             colors={colors}
+            ariaLabel={strings.getFontColorLabel()}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

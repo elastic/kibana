@@ -10,7 +10,7 @@ import {
 } from '../../../../../server/lib/create_router/error_wrappers';
 import { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
 import { deserializeSnapshotDetails } from '../../../common/lib';
-import { Plugins } from '../../../shim';
+import { Plugins } from '../../shim';
 import { getManagedRepositoryName } from '../../lib';
 
 let callWithInternalUser: any;
@@ -38,7 +38,7 @@ export const getAllHandler: RouterRouteHandler = async (
   // Attempt to retrieve policies
   // This could fail if user doesn't have access to read SLM policies
   try {
-    const policiesByName = await callWithRequest('slm.policies');
+    const policiesByName = await callWithRequest('sr.policies');
     policies = Object.keys(policiesByName);
   } catch (e) {
     // Silently swallow error as policy names aren't required in UI

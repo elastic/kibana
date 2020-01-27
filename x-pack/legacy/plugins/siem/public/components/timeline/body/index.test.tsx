@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { mockBrowserFields } from '../../../containers/source/mock';
 import { Direction } from '../../../graphql/types';
@@ -16,8 +15,7 @@ import { Body, BodyProps } from '.';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { wait } from '../../../lib/helpers';
-
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
@@ -34,6 +32,8 @@ jest.mock('../../../lib/helpers/scheduler', () => ({
 }));
 
 describe('Body', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders the column headers', () => {
       const wrapper = mount(
@@ -47,18 +47,24 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
+            isSelectAllChecked={false}
             getNotesByIds={mockGetNotesByIds}
+            loadingEventIds={[]}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
             onFilterChange={jest.fn()}
             onPinEvent={jest.fn()}
+            onRowSelected={jest.fn()}
+            onSelectAll={jest.fn()}
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
             range={'1 Day'}
             rowRenderers={rowRenderers}
+            selectedEventIds={{}}
             sort={mockSort}
+            showCheckboxes={false}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
@@ -85,18 +91,24 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
+            isSelectAllChecked={false}
             getNotesByIds={mockGetNotesByIds}
+            loadingEventIds={[]}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
             onFilterChange={jest.fn()}
             onPinEvent={jest.fn()}
+            onRowSelected={jest.fn()}
+            onSelectAll={jest.fn()}
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
             range={'1 Day'}
             rowRenderers={rowRenderers}
+            selectedEventIds={{}}
             sort={mockSort}
+            showCheckboxes={false}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
@@ -123,18 +135,24 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
+            isSelectAllChecked={false}
             getNotesByIds={mockGetNotesByIds}
+            loadingEventIds={[]}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
             onFilterChange={jest.fn()}
             onPinEvent={jest.fn()}
+            onRowSelected={jest.fn()}
+            onSelectAll={jest.fn()}
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
             range={'1 Day'}
             rowRenderers={rowRenderers}
+            selectedEventIds={{}}
             sort={mockSort}
+            showCheckboxes={false}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
@@ -163,18 +181,24 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
+            isSelectAllChecked={false}
             getNotesByIds={mockGetNotesByIds}
+            loadingEventIds={[]}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
             onFilterChange={jest.fn()}
             onPinEvent={jest.fn()}
+            onRowSelected={jest.fn()}
+            onSelectAll={jest.fn()}
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
             range={'1 Day'}
             rowRenderers={rowRenderers}
+            selectedEventIds={{}}
             sort={mockSort}
+            showCheckboxes={false}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
@@ -199,7 +223,7 @@ describe('Body', () => {
     const dispatchAddNoteToEvent = jest.fn();
     const dispatchOnPinEvent = jest.fn();
 
-    const addaNoteToEvent = (wrapper: ReactWrapper, note: string) => {
+    const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
       wrapper
         .find('[data-test-subj="add-note"]')
         .first()
@@ -250,18 +274,24 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
+            isSelectAllChecked={false}
             getNotesByIds={mockGetNotesByIds}
+            loadingEventIds={[]}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
             onFilterChange={jest.fn()}
             onPinEvent={dispatchOnPinEvent}
+            onRowSelected={jest.fn()}
+            onSelectAll={jest.fn()}
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
             range={'1 Day'}
             rowRenderers={rowRenderers}
+            selectedEventIds={{}}
             sort={mockSort}
+            showCheckboxes={false}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
@@ -290,18 +320,24 @@ describe('Body', () => {
           eventIdToNoteIds={{}}
           height={testBodyHeight}
           id={'timeline-test'}
+          isSelectAllChecked={false}
           getNotesByIds={mockGetNotesByIds}
+          loadingEventIds={[]}
           onColumnRemoved={jest.fn()}
           onColumnResized={jest.fn()}
           onColumnSorted={jest.fn()}
           onFilterChange={jest.fn()}
           onPinEvent={dispatchOnPinEvent}
+          onRowSelected={jest.fn()}
+          onSelectAll={jest.fn()}
           onUnPinEvent={jest.fn()}
           onUpdateColumns={jest.fn()}
           pinnedEventIds={{}}
           range={'1 Day'}
           rowRenderers={rowRenderers}
+          selectedEventIds={{}}
           sort={mockSort}
+          showCheckboxes={false}
           toggleColumn={jest.fn()}
           updateNote={jest.fn()}
         />

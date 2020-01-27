@@ -45,7 +45,7 @@ function expandAliases(indicesOrAliases) {
   if (typeof indicesOrAliases === 'string') {
     indicesOrAliases = [indicesOrAliases];
   }
-  indicesOrAliases = $.map(indicesOrAliases, function (iOrA) {
+  indicesOrAliases = $.map(indicesOrAliases, function(iOrA) {
     if (perAliasIndexes[iOrA]) {
       return perAliasIndexes[iOrA];
     }
@@ -54,7 +54,7 @@ function expandAliases(indicesOrAliases) {
   let ret = [].concat.apply([], indicesOrAliases);
   ret.sort();
   let last;
-  ret = $.map(ret, function (v) {
+  ret = $.map(ret, function(v) {
     const r = last === v ? null : v;
     last = v;
     return r;
@@ -63,7 +63,7 @@ function expandAliases(indicesOrAliases) {
 }
 
 function getTemplates() {
-  return [ ...templates ];
+  return [...templates];
 }
 
 function getFields(indices, types) {
@@ -82,7 +82,7 @@ function getFields(indices, types) {
       ret = f ? f : [];
     } else {
       // filter what we need
-      $.each(typeDict, function (type, fields) {
+      $.each(typeDict, function(type, fields) {
         if (!types || types.length === 0 || $.inArray(type, types) !== -1) {
           ret.push(fields);
         }
@@ -92,7 +92,7 @@ function getFields(indices, types) {
     }
   } else {
     // multi index mode.
-    $.each(perIndexTypes, function (index) {
+    $.each(perIndexTypes, function(index) {
       if (!indices || indices.length === 0 || $.inArray(index, indices) !== -1) {
         ret.push(getFields(index, types));
       }
@@ -100,7 +100,7 @@ function getFields(indices, types) {
     ret = [].concat.apply([], ret);
   }
 
-  return _.uniq(ret, function (f) {
+  return _.uniq(ret, function(f) {
     return f.name + ':' + f.type;
   });
 }
@@ -115,14 +115,12 @@ function getTypes(indices) {
     }
 
     // filter what we need
-    $.each(typeDict, function (type) {
+    $.each(typeDict, function(type) {
       ret.push(type);
     });
-
-  }
-  else {
+  } else {
     // multi index mode.
-    $.each(perIndexTypes, function (index) {
+    $.each(perIndexTypes, function(index) {
       if (!indices || $.inArray(index, indices) !== -1) {
         ret.push(getTypes(index));
       }
@@ -135,11 +133,11 @@ function getTypes(indices) {
 
 function getIndices(includeAliases) {
   const ret = [];
-  $.each(perIndexTypes, function (index) {
+  $.each(perIndexTypes, function(index) {
     ret.push(index);
   });
   if (typeof includeAliases === 'undefined' ? true : includeAliases) {
-    $.each(perAliasIndexes, function (alias) {
+    $.each(perAliasIndexes, function(alias) {
       ret.push(alias);
     });
   }
@@ -155,7 +153,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   function applyPathSettings(nestedFieldNames) {
     const pathType = fieldMapping.path || 'full';
     if (pathType === 'full') {
-      return $.map(nestedFieldNames, function (f) {
+      return $.map(nestedFieldNames, function(f) {
         f.name = fieldName + '.' + f.name;
         return f;
       });
@@ -178,7 +176,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   }
 
   if (fieldMapping.fields) {
-    nestedFields = $.map(fieldMapping.fields, function (fieldMapping, fieldName) {
+    nestedFields = $.map(fieldMapping.fields, function(fieldMapping, fieldName) {
       return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
     });
     nestedFields = applyPathSettings(nestedFields);
@@ -190,13 +188,12 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
 }
 
 function getFieldNamesFromProperties(properties = {}) {
-  const fieldList =
-    $.map(properties, function (fieldMapping, fieldName) {
-      return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
-    });
+  const fieldList = $.map(properties, function(fieldMapping, fieldName) {
+    return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
+  });
 
   // deduping
-  return _.uniq(fieldList, function (f) {
+  return _.uniq(fieldList, function(f) {
     return f.name + ':' + f.type;
   });
 }
@@ -208,7 +205,7 @@ function loadTemplates(templatesObject = {}) {
 function loadMappings(mappings) {
   perIndexTypes = {};
 
-  $.each(mappings, function (index, indexMapping) {
+  $.each(mappings, function(index, indexMapping) {
     const normalizedIndexMappings = {};
 
     // Migrate 1.0.0 mappings. This format has changed, so we need to extract the underlying mapping.
@@ -216,7 +213,7 @@ function loadMappings(mappings) {
       indexMapping = indexMapping.mappings;
     }
 
-    $.each(indexMapping, function (typeName, typeMapping) {
+    $.each(indexMapping, function(typeName, typeMapping) {
       if (typeName === 'properties') {
         const fieldList = getFieldNamesFromProperties(typeMapping);
         normalizedIndexMappings[typeName] = fieldList;
@@ -231,11 +228,11 @@ function loadMappings(mappings) {
 
 function loadAliases(aliases) {
   perAliasIndexes = {};
-  $.each(aliases || {}, function (index, omdexAliases) {
+  $.each(aliases || {}, function(index, omdexAliases) {
     // verify we have an index defined. useful when mapping loading is disabled
     perIndexTypes[index] = perIndexTypes[index] || {};
 
-    $.each(omdexAliases.aliases || {}, function (alias) {
+    $.each(omdexAliases.aliases || {}, function(alias) {
       if (alias === index) {
         return;
       } // alias which is identical to index means no index.
@@ -275,7 +272,7 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
       return settingsPromise.resolve();
     }
     // If the user doesn't want autocomplete suggestions, then clear any that exist
-    return settingsPromise.resolveWith(this, [ [JSON.stringify({})] ]);
+    return settingsPromise.resolveWith(this, [[JSON.stringify({})]]);
   }
 }
 
@@ -290,57 +287,58 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
 //      unchanged alone (both selected and unselected).
 //   3. Poll: Use saved. Fetch selected. Ignore unselected.
 
-
 function clearSubscriptions() {
   if (pollTimeoutId) {
     clearTimeout(pollTimeoutId);
   }
 }
 
-
-function retrieveAutoCompleteInfo(settingsToRetrieve = legacyBackDoorToSettings().getAutocomplete()) {
+function retrieveAutoCompleteInfo(
+  settingsToRetrieve = legacyBackDoorToSettings().getAutocomplete()
+) {
   clearSubscriptions();
 
   const mappingPromise = retrieveSettings('fields', settingsToRetrieve);
   const aliasesPromise = retrieveSettings('indices', settingsToRetrieve);
   const templatesPromise = retrieveSettings('templates', settingsToRetrieve);
 
-  $.when(mappingPromise, aliasesPromise, templatesPromise)
-    .done((mappings, aliases, templates) => {
-      let mappingsResponse;
-      if (mappings) {
-        const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
-        if (maxMappingSize) {
-          console.warn(`Mapping size is larger than 10MB (${mappings[0].length / 1024 / 1024} MB). Ignoring...`);
-          mappingsResponse = '[{}]';
-        } else {
-          mappingsResponse = mappings[0];
-        }
-        loadMappings(JSON.parse(mappingsResponse));
+  $.when(mappingPromise, aliasesPromise, templatesPromise).done((mappings, aliases, templates) => {
+    let mappingsResponse;
+    if (mappings) {
+      const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
+      if (maxMappingSize) {
+        console.warn(
+          `Mapping size is larger than 10MB (${mappings[0].length / 1024 / 1024} MB). Ignoring...`
+        );
+        mappingsResponse = '[{}]';
+      } else {
+        mappingsResponse = mappings[0];
       }
+      loadMappings(JSON.parse(mappingsResponse));
+    }
 
-      if (aliases) {
-        loadAliases(JSON.parse(aliases[0]));
+    if (aliases) {
+      loadAliases(JSON.parse(aliases[0]));
+    }
+
+    if (templates) {
+      loadTemplates(JSON.parse(templates[0]));
+    }
+
+    if (mappings && aliases) {
+      // Trigger an update event with the mappings, aliases
+      $(mappingObj).trigger('update', [mappingsResponse, aliases[0]]);
+    }
+
+    // Schedule next request.
+    pollTimeoutId = setTimeout(() => {
+      // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
+      // a scheduled request if the user turns off polling.
+      if (legacyBackDoorToSettings().getPolling()) {
+        retrieveAutoCompleteInfo();
       }
-
-      if (templates) {
-        loadTemplates(JSON.parse(templates[0]));
-      }
-
-      if (mappings && aliases) {
-        // Trigger an update event with the mappings, aliases
-        $(mappingObj).trigger('update', [mappingsResponse, aliases[0]]);
-      }
-
-      // Schedule next request.
-      pollTimeoutId = setTimeout(() => {
-        // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
-        // a scheduled request if the user turns off polling.
-        if (legacyBackDoorToSettings().getPolling()) {
-          retrieveAutoCompleteInfo();
-        }
-      }, POLL_INTERVAL);
-    });
+    }, POLL_INTERVAL);
+  });
 }
 
 export default {
@@ -353,5 +351,5 @@ export default {
   expandAliases,
   clear,
   retrieveAutoCompleteInfo,
-  clearSubscriptions
+  clearSubscriptions,
 };

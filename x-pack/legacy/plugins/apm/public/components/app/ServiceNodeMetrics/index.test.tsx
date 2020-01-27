@@ -7,11 +7,18 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { ServiceNodeMetrics } from '.';
+import { MockApmPluginContextWrapper } from '../../../utils/testHelpers';
 
 describe('ServiceNodeMetrics', () => {
   describe('render', () => {
     it('renders', () => {
-      expect(() => shallow(<ServiceNodeMetrics />)).not.toThrowError();
+      expect(() =>
+        shallow(
+          <MockApmPluginContextWrapper>
+            <ServiceNodeMetrics />
+          </MockApmPluginContextWrapper>
+        )
+      ).not.toThrowError();
     });
   });
 });

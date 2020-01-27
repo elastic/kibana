@@ -6,17 +6,17 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security']);
   const testSubjects = getService('testSubjects');
 
-  describe('Security', function () {
+  describe('Security', function() {
     this.tags('smoke');
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
       });
 
       after(async () => {
@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       afterEach(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
       });
 
       it('can login', async () => {
@@ -32,7 +32,9 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('displays message if login fails', async () => {
-        await PageObjects.security.loginPage.login('wrong-user', 'wrong-password', { expectSuccess: false });
+        await PageObjects.security.loginPage.login('wrong-user', 'wrong-password', {
+          expectSuccess: false,
+        });
         const errorMessage = await PageObjects.security.loginPage.getErrorMessage();
         expect(errorMessage).to.be('Invalid username or password. Please try again.');
       });

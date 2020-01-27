@@ -35,13 +35,13 @@ export function GlobalStateProvider(Private) {
   // if the url param is missing, write it back
   GlobalState.prototype._persistAcrossApps = true;
 
-  GlobalState.prototype.removeFromUrl = function (url) {
+  GlobalState.prototype.removeFromUrl = function(url) {
     return QueryString.replaceParamInUrl(url, this._urlParam, null);
   };
 
   return new GlobalState();
 }
 
-module.service('globalState', function (Private) {
+module.service('globalState', function(Private) {
   return Private(GlobalStateProvider);
 });

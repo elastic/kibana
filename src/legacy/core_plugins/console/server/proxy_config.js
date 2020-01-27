@@ -20,28 +20,28 @@
 import { values } from 'lodash';
 import { format as formatUrl } from 'url';
 import { Agent as HttpsAgent } from 'https';
-import { readFileSync } from 'fs';
 
 import { WildcardMatcher } from './wildcard_matcher';
 
 export class ProxyConfig {
   constructor(config) {
     config = {
-      ...config
+      ...config,
     };
 
     // -----
     // read "match" info
     // -----
     const rawMatches = {
-      ...config.match
+      ...config.match,
     };
-    this.id = formatUrl({
-      protocol: rawMatches.protocol,
-      hostname: rawMatches.host,
-      port: rawMatches.port,
-      pathname: rawMatches.path
-    }) || '*';
+    this.id =
+      formatUrl({
+        protocol: rawMatches.protocol,
+        hostname: rawMatches.host,
+        port: rawMatches.port,
+        pathname: rawMatches.path,
+      }) || '*';
 
     this.matchers = {
       protocol: new WildcardMatcher(rawMatches.protocol),
@@ -62,9 +62,9 @@ export class ProxyConfig {
     this.verifySsl = ssl.verify;
 
     const sslAgentOpts = {
-      ca: ssl.ca && ssl.ca.map(ca => readFileSync(ca)),
-      cert: ssl.cert && readFileSync(ssl.cert),
-      key: ssl.key && readFileSync(ssl.key),
+      ca: ssl.ca,
+      cert: ssl.cert,
+      key: ssl.key,
     };
 
     if (values(sslAgentOpts).filter(Boolean).length) {
@@ -83,7 +83,7 @@ export class ProxyConfig {
     return {
       timeout: this.timeout,
       rejectUnauthorized: this.sslAgent ? undefined : this.verifySsl,
-      agent: protocol === 'https:' ? this.sslAgent : undefined
+      agent: protocol === 'https:' ? this.sslAgent : undefined,
     };
   }
 }

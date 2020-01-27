@@ -27,9 +27,8 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
-import { SearchSourceContract, FetchOptions } from '../courier/types';
+import { ISearchSource, FetchOptions } from '../courier/types';
 import { AggType } from './agg_type';
-import { FieldParamType } from './param_types/field';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { writeParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
@@ -124,6 +123,7 @@ export class AggConfig {
   public enabled: boolean;
   public params: any;
   public parent?: AggConfigs;
+  public brandNew?: boolean;
 
   private __schema: Schema;
   private __type: AggType;
@@ -204,7 +204,7 @@ export class AggConfig {
   }
 
   write(aggs?: AggConfigs) {
-    return writeParams(this.type.params, this, aggs);
+    return writeParams<AggConfig>(this.type.params, this, aggs);
   }
 
   isFilterable() {
@@ -237,7 +237,7 @@ export class AggConfig {
    *  @param {Courier.FetchOptions} options
    *  @return {Promise<undefined>}
    */
-  onSearchRequestStart(searchSource: SearchSourceContract, options?: FetchOptions) {
+  onSearchRequestStart(searchSource: ISearchSource, options?: FetchOptions) {
     if (!this.type) {
       return Promise.resolve();
     }
@@ -425,13 +425,15 @@ export class AggConfig {
     }
 
     this.__type = type;
+    let availableFields = [];
 
-    const fieldParam =
-      this.type && (this.type.params.find((p: any) => p.type === 'field') as FieldParamType);
-    // @ts-ignore
-    const availableFields = fieldParam
-      ? fieldParam.getAvailableFields(this.getIndexPattern().fields)
-      : [];
+    const fieldParam = this.type && this.type.params.find((p: any) => p.type === 'field');
+
+    if (fieldParam) {
+      // @ts-ignore
+      availableFields = fieldParam.getAvailableFields(this.getIndexPattern().fields);
+    }
+
     // clear out the previous params except for a few special ones
     this.setParams({
       // split row/columns is "outside" of the agg, so don't reset it

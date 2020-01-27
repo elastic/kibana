@@ -138,7 +138,7 @@ describe('PUT role', () => {
   });
 
   describe('failure', () => {
-    putRoleTest(`returns result of license checker`, {
+    putRoleTest('returns result of license checker', {
       name: 'foo-role',
       licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },

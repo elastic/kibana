@@ -8,7 +8,7 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import * as React from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { mockTimelineResults } from '../../../mock/timeline_results';

@@ -8,7 +8,6 @@
  * {@code CloudServiceResponse} represents a single response from any individual {@code CloudService}.
  */
 export class CloudServiceResponse {
-
   /**
    * Create an unconfirmed {@code CloudServiceResponse} by the {@code name}.
    *
@@ -16,7 +15,7 @@ export class CloudServiceResponse {
    * @return {CloudServiceResponse} Never {@code null}.
    */
   static unconfirmed(name) {
-    return new CloudServiceResponse(name, false, { });
+    return new CloudServiceResponse(name, false, {});
   }
 
   /**
@@ -75,8 +74,7 @@ export class CloudServiceResponse {
       vm_type: this._vmType,
       region: this._region,
       zone: this._zone,
-      metadata: this._metadata
+      metadata: this._metadata,
     };
   }
-
 }

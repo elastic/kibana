@@ -8,8 +8,6 @@ import {
   Axis,
   BarSeries,
   Chart,
-  getAxisId,
-  getSpecId,
   niceTimeFormatter,
   Settings,
   TooltipValue,
@@ -37,8 +35,6 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
     [timeRange]
   );
 
-  const logEntryRateSpecId = getSpecId('averageValues');
-
   const tooltipProps = useMemo(
     () => ({
       headerFormatter: (tooltipData: TooltipValue) =>
@@ -61,18 +57,18 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
     <div style={{ height: 200, width: '100%' }}>
       <Chart className="log-entry-rate-chart">
         <Axis
-          id={getAxisId('timestamp')}
+          id="timestamp"
           position="bottom"
           showOverlappingTicks
           tickFormat={chartDateFormatter}
         />
         <Axis
-          id={getAxisId('values')}
+          id="values"
           position="left"
           tickFormat={value => numeral(value.toPrecision(3)).format('0[.][00]a')} // https://github.com/adamwdraper/Numeral-js/issues/194
         />
         <BarSeries
-          id={logEntryRateSpecId}
+          id="averageValues"
           name={i18n.translate('xpack.infra.logs.analysis.logRateSectionLineSeriesName', {
             defaultMessage: 'Log entries per 15 minutes (avg)',
           })}

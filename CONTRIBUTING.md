@@ -190,6 +190,19 @@ These snapshots are built on a nightly basis which expire after a couple weeks. 
 yarn es snapshot
 ```
 
+##### Keeping data between snapshots
+
+If you want to keep the data inside your Elasticsearch between usages of this command,
+you should use the following command, to keep your data folder outside the downloaded snapshot 
+folder:
+
+```bash
+yarn es snapshot -E path.data=../data
+```
+
+The same parameter can be used with the source and archive command shown in the following
+paragraphs.
+
 #### Source
 
 By default, it will reference an [elasticsearch](https://github.com/elastic/elasticsearch) checkout which is a sibling to the Kibana directory named `elasticsearch`. If you wish to use a checkout in another location you can provide that by supplying `--source-path`
@@ -218,6 +231,7 @@ node scripts/makelogs --auth <username>:<password>
 > The default username and password combination are `elastic:changeme`
 
 > Make sure to execute `node scripts/makelogs` *after* elasticsearch is up and running!
+
 ### Running Elasticsearch Remotely
 
 You can save some system resources, and the effort of generating sample data, if you have a remote Elasticsearch cluster to connect to. (**Elasticians: you do! Check with your team about where to find credentials**)
@@ -238,6 +252,41 @@ If many other users will be interacting with your remote cluster, you'll want to
 kibana.index: '.{YourGitHubHandle}-kibana'
 xpack.task_manager.index: '.{YourGitHubHandle}-task-manager-kibana'
 ```
+
+### Running remote clusters
+Setup remote clusters for cross cluster search (CCS) and cross cluster replication (CCR).
+
+Start your primary cluster by running:
+```bash
+yarn es snapshot -E path.data=../data_prod1
+```
+
+Start your remote cluster by running:
+```bash
+yarn es snapshot -E transport.port=9500 -E http.port=9201 -E path.data=../data_prod2
+```
+
+Once both clusters are running, start kibana. Kibana will connect to the primary cluster.
+
+Setup the remote cluster in Kibana from either `Management` -> `Elasticsearch` -> `Remote Clusters` UI or by running the following script in `Console`.
+```
+PUT _cluster/settings
+{
+  "persistent": {
+    "cluster": {
+      "remote": {
+        "cluster_one": {
+          "seeds": [
+            "localhost:9500"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+Follow the [cross-cluster search](https://www.elastic.co/guide/en/kibana/current/management-cross-cluster-search.html) instructions for setting up index patterns to search across clusters.
 
 ### Running Kibana
 
@@ -289,7 +338,7 @@ The `config/kibana.yml` file stores user configuration directives. Since this fi
 
 #### Setting Up SSL
 
-Kibana includes a self-signed certificate that can be used for development purposes: `yarn start --ssl`.
+Kibana includes self-signed certificates that can be used for development purposes in the browser and for communicating with Elasticsearch: `yarn start --ssl` & `yarn es snapshot --ssl`.
 
 ### Linting
 
@@ -506,7 +555,7 @@ yarn test:browser --dev # remove the --dev flag to run them once and close
 * In System Preferences > Sharing, change your computer name to be something simple, e.g. "computer".
 * Run Kibana with `yarn start --host=computer.local` (substituting your computer name).
 * Now you can run your VM, open the browser, and navigate to `http://computer.local:5601` to test Kibana.
-* Alternatively you can use browserstack 
+* Alternatively you can use browserstack
 
 #### Running Browser Automation Tests
 

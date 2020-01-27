@@ -21,26 +21,41 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getPolicyPath } from '../../services/navigation';
 const getHeaders = () => {
   return {
-    policy: i18n.translate('xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.lifecyclePolicyHeader', {
-      defaultMessage: 'Lifecycle policy',
-    }),
-    phase: i18n.translate('xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentPhaseHeader', {
-      defaultMessage: 'Current phase',
-    }),
-    action: i18n.translate('xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentActionHeader', {
-      defaultMessage: 'Current action',
-    }),
-    action_time_millis: i18n.translate('xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentActionTimeHeader', {
-      defaultMessage: 'Current action time',
-    }),
-    failed_step: i18n.translate('xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.failedStepHeader', {
-      defaultMessage: 'Failed step',
-    }),
+    policy: i18n.translate(
+      'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.lifecyclePolicyHeader',
+      {
+        defaultMessage: 'Lifecycle policy',
+      }
+    ),
+    phase: i18n.translate(
+      'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentPhaseHeader',
+      {
+        defaultMessage: 'Current phase',
+      }
+    ),
+    action: i18n.translate(
+      'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentActionHeader',
+      {
+        defaultMessage: 'Current action',
+      }
+    ),
+    action_time_millis: i18n.translate(
+      'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentActionTimeHeader',
+      {
+        defaultMessage: 'Current action time',
+      }
+    ),
+    failed_step: i18n.translate(
+      'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.failedStepHeader',
+      {
+        defaultMessage: 'Failed step',
+      }
+    ),
   };
 };
 export class IndexLifecycleSummary extends Component {
@@ -53,16 +68,16 @@ export class IndexLifecycleSummary extends Component {
   }
   toggleStackPopover = () => {
     this.setState({ showStackPopover: !this.state.showStackPopover });
-  }
+  };
   closeStackPopover = () => {
     this.setState({ showStackPopover: false });
-  }
+  };
   togglePhaseExecutionPopover = () => {
     this.setState({ showPhaseExecutionPopover: !this.state.showPhaseExecutionPopover });
-  }
+  };
   closePhaseExecutionPopover = () => {
     this.setState({ showPhaseExecutionPopover: false });
-  }
+  };
   renderStackPopoverButton(ilm) {
     if (!ilm.stack_trace) {
       return null;
@@ -132,11 +147,13 @@ export class IndexLifecycleSummary extends Component {
     );
   }
   buildRows() {
-    const { index: { ilm = {} } } = this.props;
+    const {
+      index: { ilm = {} },
+    } = this.props;
     const headers = getHeaders();
     const rows = {
       left: [],
-      right: []
+      right: [],
     };
     Object.keys(headers).forEach((fieldName, arrayIndex) => {
       const value = ilm[fieldName];
@@ -144,7 +161,7 @@ export class IndexLifecycleSummary extends Component {
       if (fieldName === 'action_time_millis') {
         content = moment(value).format('YYYY-MM-DD HH:mm:ss');
       } else if (fieldName === 'policy') {
-        content = (<EuiLink href={getPolicyPath(value)}>{value}</EuiLink>);
+        content = <EuiLink href={getPolicyPath(value)}>{value}</EuiLink>;
       } else {
         content = value;
       }
@@ -155,7 +172,7 @@ export class IndexLifecycleSummary extends Component {
         </EuiDescriptionListTitle>,
         <EuiDescriptionListDescription key={fieldName + '_desc'}>
           {content}
-        </EuiDescriptionListDescription>
+        </EuiDescriptionListDescription>,
       ];
       if (arrayIndex % 2 === 0) {
         rows.left.push(cell);
@@ -168,7 +185,9 @@ export class IndexLifecycleSummary extends Component {
   }
 
   render() {
-    const { index: { ilm = {} } } = this.props;
+    const {
+      index: { ilm = {} },
+    } = this.props;
     if (!ilm.managed) {
       return null;
     }
@@ -183,9 +202,9 @@ export class IndexLifecycleSummary extends Component {
             />
           </h3>
         </EuiTitle>
-        { ilm.step_info && ilm.step_info.type ? (
+        {ilm.step_info && ilm.step_info.type ? (
           <Fragment>
-            <EuiSpacer size="s"/>
+            <EuiSpacer size="s" />
             <EuiCallOut
               color="danger"
               title={
@@ -202,9 +221,9 @@ export class IndexLifecycleSummary extends Component {
             </EuiCallOut>
           </Fragment>
         ) : null}
-        { ilm.step_info && ilm.step_info.message && !ilm.step_info.stack_trace ? (
+        {ilm.step_info && ilm.step_info.message && !ilm.step_info.stack_trace ? (
           <Fragment>
-            <EuiSpacer size="s"/>
+            <EuiSpacer size="s" />
             <EuiCallOut
               color="primary"
               title={
@@ -218,17 +237,13 @@ export class IndexLifecycleSummary extends Component {
             </EuiCallOut>
           </Fragment>
         ) : null}
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiDescriptionList  type="column">
-              {left}
-            </EuiDescriptionList>
+            <EuiDescriptionList type="column">{left}</EuiDescriptionList>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiDescriptionList  type="column">
-              {right}
-            </EuiDescriptionList>
+            <EuiDescriptionList type="column">{right}</EuiDescriptionList>
           </EuiFlexItem>
         </EuiFlexGroup>
       </Fragment>

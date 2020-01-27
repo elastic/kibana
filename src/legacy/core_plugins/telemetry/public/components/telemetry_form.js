@@ -31,7 +31,7 @@ import {
 } from '@elastic/eui';
 import { PRIVACY_STATEMENT_URL } from '../../common/constants';
 import { OptInExampleFlyout } from './opt_in_details_component';
-import { Field } from 'ui/management';
+import { Field } from '../../../kibana/public/management/sections/settings/components/field/field';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -50,34 +50,30 @@ export class TelemetryForm extends Component {
     processing: false,
     showExample: false,
     queryMatches: null,
-  }
+  };
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    const {
-      query
-    } = nextProps;
+    const { query } = nextProps;
 
     const searchTerm = (query.text || '').toLowerCase();
     const searchTermMatches = SEARCH_TERMS.some(term => term.indexOf(searchTerm) >= 0);
 
     if (searchTermMatches !== this.state.queryMatches) {
-      this.setState({
-        queryMatches: searchTermMatches
-      }, () => {
-        this.props.onQueryMatchChange(searchTermMatches);
-      });
+      this.setState(
+        {
+          queryMatches: searchTermMatches,
+        },
+        () => {
+          this.props.onQueryMatchChange(searchTermMatches);
+        }
+      );
     }
   }
 
   render() {
-    const {
-      telemetryOptInProvider,
-    } = this.props;
+    const { telemetryOptInProvider } = this.props;
 
-    const {
-      showExample,
-      queryMatches,
-    } = this.state;
+    const { showExample, queryMatches } = this.state;
 
     if (!telemetryOptInProvider.canChangeOptInStatus()) {
       return null;
@@ -89,22 +85,19 @@ export class TelemetryForm extends Component {
 
     return (
       <Fragment>
-        {showExample &&
+        {showExample && (
           <OptInExampleFlyout
             fetchTelemetry={() => telemetryOptInProvider.fetchExample()}
             onClose={this.toggleExample}
           />
-        }
+        )}
         <EuiPanel paddingSize="l">
           <EuiForm>
             <EuiText>
               <EuiFlexGroup alignItems="baseline">
                 <EuiFlexItem grow={false}>
                   <h2>
-                    <FormattedMessage
-                      id="telemetry.usageDataTitle"
-                      defaultMessage="Usage Data"
-                    />
+                    <FormattedMessage id="telemetry.usageDataTitle" defaultMessage="Usage Data" />
                   </h2>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -118,7 +111,9 @@ export class TelemetryForm extends Component {
                 value: telemetryOptInProvider.getOptIn() || false,
                 description: this.renderDescription(),
                 defVal: true,
-                ariaName: i18n.translate('telemetry.provideUsageStatisticsLabel', { defaultMessage: 'Provide usage statistics' })
+                ariaName: i18n.translate('telemetry.provideUsageStatisticsLabel', {
+                  defaultMessage: 'Provide usage statistics',
+                }),
               }}
               save={this.toggleOptIn}
               clear={this.toggleOptIn}
@@ -151,14 +146,14 @@ export class TelemetryForm extends Component {
                       defaultMessage="all of Kibana."
                     />
                   </strong>
-                )
+                ),
               }}
             />
           </p>
         }
       />
     );
-  }
+  };
 
   renderDescription = () => (
     <Fragment>
@@ -175,7 +170,7 @@ export class TelemetryForm extends Component {
                   defaultMessage="Privacy Statement"
                 />
               </EuiLink>
-            )
+            ),
           }}
         />
       </p>
@@ -188,32 +183,37 @@ export class TelemetryForm extends Component {
         </EuiLink>
       </p>
     </Fragment>
-  )
+  );
 
   toggleOptIn = async () => {
     const newOptInValue = !this.props.telemetryOptInProvider.getOptIn();
 
     return new Promise((resolve, reject) => {
-      this.setState({
-        enabled: newOptInValue,
-        processing: true
-      }, () => {
-        this.props.telemetryOptInProvider.setOptIn(newOptInValue).then(() => {
-          this.setState({ processing: false });
-          resolve();
-        }, (e) => {
-          // something went wrong
-          this.setState({ processing: false });
-          reject(e);
-        });
-      });
+      this.setState(
+        {
+          enabled: newOptInValue,
+          processing: true,
+        },
+        () => {
+          this.props.telemetryOptInProvider.setOptIn(newOptInValue).then(
+            () => {
+              this.setState({ processing: false });
+              resolve();
+            },
+            e => {
+              // something went wrong
+              this.setState({ processing: false });
+              reject(e);
+            }
+          );
+        }
+      );
     });
-
-  }
+  };
 
   toggleExample = () => {
     this.setState({
-      showExample: !this.state.showExample
+      showExample: !this.state.showExample,
     });
-  }
+  };
 }

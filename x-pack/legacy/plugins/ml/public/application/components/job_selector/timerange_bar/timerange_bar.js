@@ -4,35 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React, { Fragment } from 'react';
 import { PropTypes } from 'prop-types';
 import { EuiToolTip } from '@elastic/eui';
 
-export function TimeRangeBar({
-  isRunning,
-  timerange,
-  ganttBarWidth
-}) {
+export function TimeRangeBar({ isRunning, timerange, ganttBarWidth }) {
   const style = {
     width: timerange.widthPx,
-    marginLeft: timerange.fromPx
+    marginLeft: timerange.fromPx,
   };
 
-  const className =
-    `mlJobSelector__ganttBar${isRunning ? ' mlJobSelector__ganttBarRunning' : ''}`;
+  const className = `mlJobSelector__ganttBar${isRunning ? ' mlJobSelector__ganttBarRunning' : ''}`;
 
   return (
-    <EuiToolTip
-      position="top"
-      content={timerange.label}
-    >
+    <EuiToolTip position="top" content={timerange.label}>
       <Fragment>
         <div className="mlJobSelector__ganttBarBackEdge">
-          <div className="mlJobSelector__ganttBarDashed" style={{ width: `${ganttBarWidth}px` }}/>
+          <div className="mlJobSelector__ganttBarDashed" style={{ width: `${ganttBarWidth}px` }} />
         </div>
-        <div style={style} className={className}/>
+        <div style={style} className={className} />
       </Fragment>
     </EuiToolTip>
   );
@@ -45,5 +35,5 @@ TimeRangeBar.propTypes = {
     widthPx: PropTypes.number,
     label: PropTypes.string,
     fromPx: PropTypes.number,
-  })
+  }),
 };

@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import { shallow } from 'enzyme';
+import React from 'react';
 
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
@@ -14,10 +13,11 @@ import { TestProviders } from '../../mock/test_providers';
 import { EventDetails } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { defaultHeaders } from '../../mock/header';
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('EventDetails', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('should match snapshot', () => {
       const wrapper = shallow(
@@ -33,7 +33,7 @@ describe('EventDetails', () => {
           toggleColumn={jest.fn()}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 

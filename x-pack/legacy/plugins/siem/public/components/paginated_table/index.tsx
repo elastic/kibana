@@ -5,6 +5,7 @@
  */
 import {
   EuiBasicTable,
+  EuiBasicTableProps,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -14,12 +15,12 @@ import {
   EuiLoadingContent,
   EuiPagination,
   EuiPopover,
+  Direction,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { memo, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { FC, memo, useMemo, useState, useEffect, ComponentType } from 'react';
 import styled from 'styled-components';
 
-import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
 import { HostsTableColumns } from '../page/hosts/hosts_table';
 import { NetworkDnsColumns } from '../page/network/network_dns_table/columns';
@@ -42,6 +43,7 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 import * as i18n from './translations';
 import { Panel } from '../panel';
+import { InspectButtonContainer } from '../inspect';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -123,136 +125,127 @@ export interface Columns<T, U = T> {
   width?: string;
 }
 
-export const PaginatedTable = memo<SiemTables>(
-  ({
-    activePage,
-    columns,
-    dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
-    headerCount,
-    headerSupplement,
-    headerTitle,
-    headerTooltip,
-    headerUnit,
-    id,
-    isInspect,
-    itemsPerRow,
-    limit,
-    loading,
-    loadPage,
-    onChange = noop,
-    pageOfItems,
-    showMorePagesIndicator,
-    sorting = null,
-    totalCount,
-    updateActivePage,
-    updateLimitPagination,
-  }) => {
-    const [myLoading, setMyLoading] = useState(loading);
-    const [myActivePage, setActivePage] = useState(activePage);
-    const [showInspect, setShowInspect] = useState(false);
-    const [loadingInitial, setLoadingInitial] = useState(headerCount === -1);
-    const [isPopoverOpen, setPopoverOpen] = useState(false);
+const PaginatedTableComponent: FC<SiemTables> = ({
+  activePage,
+  columns,
+  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
+  headerCount,
+  headerSupplement,
+  headerTitle,
+  headerTooltip,
+  headerUnit,
+  id,
+  isInspect,
+  itemsPerRow,
+  limit,
+  loading,
+  loadPage,
+  onChange = noop,
+  pageOfItems,
+  showMorePagesIndicator,
+  sorting = null,
+  totalCount,
+  updateActivePage,
+  updateLimitPagination,
+}) => {
+  const [myLoading, setMyLoading] = useState(loading);
+  const [myActivePage, setActivePage] = useState(activePage);
+  const [loadingInitial, setLoadingInitial] = useState(headerCount === -1);
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
 
-    const pageCount = Math.ceil(totalCount / limit);
-    const dispatchToaster = useStateToaster()[1];
+  const pageCount = Math.ceil(totalCount / limit);
+  const dispatchToaster = useStateToaster()[1];
 
-    useEffect(() => {
-      setActivePage(activePage);
-    }, [activePage]);
+  useEffect(() => {
+    setActivePage(activePage);
+  }, [activePage]);
 
-    useEffect(() => {
-      if (headerCount >= 0 && loadingInitial) {
-        setLoadingInitial(false);
-      }
-    }, [loadingInitial, headerCount]);
+  useEffect(() => {
+    if (headerCount >= 0 && loadingInitial) {
+      setLoadingInitial(false);
+    }
+  }, [loadingInitial, headerCount]);
 
-    useEffect(() => {
-      setMyLoading(loading);
-    }, [loading]);
+  useEffect(() => {
+    setMyLoading(loading);
+  }, [loading]);
 
-    const onButtonClick = () => {
-      setPopoverOpen(!isPopoverOpen);
-    };
+  const onButtonClick = () => {
+    setPopoverOpen(!isPopoverOpen);
+  };
 
-    const closePopover = () => {
-      setPopoverOpen(false);
-    };
+  const closePopover = () => {
+    setPopoverOpen(false);
+  };
 
-    const goToPage = (newActivePage: number) => {
-      if ((newActivePage + 1) * limit >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-        const toast: Toast = {
-          id: 'PaginationWarningMsg',
-          title: headerTitle + i18n.TOAST_TITLE,
-          color: 'warning',
-          iconType: 'alert',
-          toastLifeTimeMs: 10000,
-          text: i18n.TOAST_TEXT,
-        };
-        return dispatchToaster({
-          type: 'addToaster',
-          toast,
-        });
-      }
-      setActivePage(newActivePage);
-      loadPage(newActivePage);
-      updateActivePage(newActivePage);
-    };
+  const goToPage = (newActivePage: number) => {
+    if ((newActivePage + 1) * limit >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      const toast: Toast = {
+        id: 'PaginationWarningMsg',
+        title: headerTitle + i18n.TOAST_TITLE,
+        color: 'warning',
+        iconType: 'alert',
+        toastLifeTimeMs: 10000,
+        text: i18n.TOAST_TEXT,
+      };
+      return dispatchToaster({
+        type: 'addToaster',
+        toast,
+      });
+    }
+    setActivePage(newActivePage);
+    loadPage(newActivePage);
+    updateActivePage(newActivePage);
+  };
 
-    const button = (
-      <EuiButtonEmpty
-        size="xs"
-        color="text"
-        iconType="arrowDown"
-        iconSide="right"
-        onClick={onButtonClick}
+  const button = (
+    <EuiButtonEmpty
+      size="xs"
+      color="text"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={onButtonClick}
+    >
+      {`${i18n.ROWS}: ${limit}`}
+    </EuiButtonEmpty>
+  );
+
+  const rowItems =
+    itemsPerRow &&
+    itemsPerRow.map((item: ItemsPerRow) => (
+      <EuiContextMenuItem
+        key={item.text}
+        icon={limit === item.numberOfRow ? 'check' : 'empty'}
+        onClick={() => {
+          closePopover();
+          updateLimitPagination(item.numberOfRow);
+          updateActivePage(0); // reset results to first page
+        }}
       >
-        {`${i18n.ROWS}: ${limit}`}
-      </EuiButtonEmpty>
-    );
+        {item.text}
+      </EuiContextMenuItem>
+    ));
 
-    const rowItems =
-      itemsPerRow &&
-      itemsPerRow.map((item: ItemsPerRow) => (
-        <EuiContextMenuItem
-          key={item.text}
-          icon={limit === item.numberOfRow ? 'check' : 'empty'}
-          onClick={() => {
-            closePopover();
-            updateLimitPagination(item.numberOfRow);
-            updateActivePage(0); // reset results to first page
-          }}
-        >
-          {item.text}
-        </EuiContextMenuItem>
-      ));
-    const PaginationWrapper = showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem;
+  const PaginationWrapper = showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem;
 
-    const basicTableSorting = useMemo(
-      () =>
-        sorting
-          ? {
-              sort: {
-                field: sorting.field,
-                direction: sorting.direction,
-              },
-            }
-          : null,
-      [sorting]
-    );
+  const basicTableSorting = useMemo(
+    () =>
+      sorting
+        ? {
+            sort: {
+              field: sorting.field as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+              direction: sorting.direction,
+            },
+          }
+        : undefined,
+    [sorting]
+  );
 
-    const onMouseEnter = useCallback(() => setShowInspect(true), [setShowInspect]);
-    const onMouseLeave = useCallback(() => setShowInspect(false), [setShowInspect]);
-
-    return (
-      <Panel
-        data-test-subj={`${dataTestSubj}-loading-${loading}`}
-        loading={loading}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-      >
+  return (
+    <InspectButtonContainer show={!loadingInitial}>
+      <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
         <HeaderSection
           id={id}
-          showInspect={!loadingInitial && showInspect}
           subtitle={
             !loadingInitial &&
             `${i18n.SHOWING}: ${headerCount >= 0 ? headerCount.toLocaleString() : 0} ${headerUnit}`
@@ -267,11 +260,16 @@ export const PaginatedTable = memo<SiemTables>(
           <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
         ) : (
           <>
+            {
+              // @ts-ignore avoid some type mismatches
+            }
             <BasicTable
+              // @ts-ignore `Columns` interface differs from EUI's `column` type and is used all over this plugin, so ignore the differences instead of refactoring a lot of code
               columns={columns}
               compressed
               items={pageOfItems}
               onChange={onChange}
+              // @ts-ignore TS complains sorting.field is type `never`
               sorting={basicTableSorting}
             />
             <FooterAction>
@@ -305,13 +303,16 @@ export const PaginatedTable = memo<SiemTables>(
           </>
         )}
       </Panel>
-    );
-  }
-);
+    </InspectButtonContainer>
+  );
+};
 
-PaginatedTable.displayName = 'PaginatedTable';
+export const PaginatedTable = memo(PaginatedTableComponent);
 
-const BasicTableComponent = styled(EuiBasicTable)`
+type BasicTableType = ComponentType<EuiBasicTableProps<any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
+const BasicTableComponent: typeof EuiBasicTable & { displayName: string } = styled(
+  EuiBasicTable as BasicTableType
+)`
   tbody {
     th,
     td {
@@ -322,13 +323,11 @@ const BasicTableComponent = styled(EuiBasicTable)`
       display: block;
     }
   }
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 BasicTableComponent.displayName = 'BasicTableComponent';
 
 const BasicTable = React.memo(BasicTableComponent);
-
-BasicTable.displayName = 'BasicTable';
 
 const FooterAction = styled(EuiFlexGroup).attrs(() => ({
   alignItems: 'center',

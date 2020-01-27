@@ -20,7 +20,7 @@ import routes from 'ui/routes';
 import template from './main.html';
 import { manageAngularLifecycle } from './services/manage_angular_lifecycle';
 let elem;
-const renderReact = async (elem) => {
+const renderReact = async elem => {
   render(
     <I18nContext>
       <Provider store={indexLifecycleManagementStore()}>
@@ -44,7 +44,7 @@ if (chrome.getInjected('ilmUiEnabled')) {
           change(url) {
             kbnUrl.change(url);
             $rootScope.$digest();
-          }
+          },
         });
         $scope.$$postDigest(() => {
           elem = document.getElementById('indexLifecycleManagementReactRoot');
@@ -52,8 +52,6 @@ if (chrome.getInjected('ilmUiEnabled')) {
           manageAngularLifecycle($scope, $route, elem);
         });
       }
-    }
+    },
   });
 }
-
-

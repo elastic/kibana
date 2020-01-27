@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpServiceBase } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -32,7 +32,7 @@ interface StartedMLJobApiResponse {
   jobs: MlResponseItem[];
 }
 
-async function getTransactionIndices(http: HttpServiceBase) {
+async function getTransactionIndices(http: HttpSetup) {
   const callApmApi: APMClient = createCallApmApi(http);
   const indices = await callApmApi({
     method: 'GET',
@@ -48,7 +48,7 @@ export async function startMLJob({
 }: {
   serviceName: string;
   transactionType: string;
-  http: HttpServiceBase;
+  http: HttpSetup;
 }) {
   const transactionIndices = await getTransactionIndices(http);
   const groups = ['apm', serviceName.toLowerCase()];
@@ -90,7 +90,7 @@ export async function getHasMLJob({
 }: {
   serviceName: string;
   transactionType: string;
-  http: HttpServiceBase;
+  http: HttpSetup;
 }) {
   try {
     await callApi<MLJobApiResponse>(http, {

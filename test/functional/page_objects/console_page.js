@@ -29,7 +29,7 @@ export function ConsolePageProvider({ getService }) {
     return linesText.join('\n');
   }
 
-  return new class ConsolePage {
+  return new (class ConsolePage {
     async getRequestEditor() {
       return await testSubjects.find('request-editor');
     }
@@ -78,5 +78,5 @@ export function ConsolePageProvider({ getService }) {
     async getRequestFontSize() {
       return await this.getFontSize(await this.getRequestEditor());
     }
-  };
+  })();
 }

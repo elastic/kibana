@@ -6,11 +6,7 @@
 
 import _ from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import {
-  SavedObjectsClientContract,
-  SavedObjectAttributes,
-  HttpServiceBase,
-} from 'src/core/public';
+import { SavedObjectsClientContract, SavedObjectAttributes, HttpSetup } from 'src/core/public';
 import { SimpleSavedObject } from 'src/core/public';
 import { StateSetter } from '../types';
 import {
@@ -19,6 +15,7 @@ import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
   IndexPatternField,
+  AggregationRestrictions,
 } from './types';
 import { updateLayerIndexPattern } from './state_helpers';
 import { DateRange, ExistingFields } from '../../common/types';
@@ -34,19 +31,7 @@ interface SavedIndexPatternAttributes extends SavedObjectAttributes {
 }
 
 interface SavedRestrictionsObject {
-  aggs: Record<
-    string,
-    Record<
-      string,
-      {
-        agg: string;
-        fixed_interval?: string;
-        calendar_interval?: string;
-        delay?: string;
-        time_zone?: string;
-      }
-    >
-  >;
+  aggs: Record<string, AggregationRestrictions>;
 }
 
 type SetState = StateSetter<IndexPatternPrivateState>;
@@ -88,9 +73,11 @@ export async function loadIndexPatterns({
 export async function loadInitialState({
   state,
   savedObjectsClient,
+  defaultIndexPatternId,
 }: {
   state?: IndexPatternPersistedState;
   savedObjectsClient: SavedObjectsClient;
+  defaultIndexPatternId?: string;
 }): Promise<IndexPatternPrivateState> {
   const indexPatternRefs = await loadIndexPatternRefs(savedObjectsClient);
   const requiredPatterns = _.unique(
@@ -98,7 +85,7 @@ export async function loadInitialState({
       ? Object.values(state.layers)
           .map(l => l.indexPatternId)
           .concat(state.currentIndexPatternId)
-      : [indexPatternRefs[0].id]
+      : [defaultIndexPatternId || indexPatternRefs[0].id]
   );
 
   const currentIndexPatternId = requiredPatterns[0];
@@ -232,8 +219,8 @@ export async function syncExistingFields({
   setState,
 }: {
   dateRange: DateRange;
-  indexPatterns: Array<{ title: string; timeFieldName?: string | null }>;
-  fetchJson: HttpServiceBase['get'];
+  indexPatterns: Array<{ id: string; timeFieldName?: string | null }>;
+  fetchJson: HttpSetup['get'];
   setState: SetState;
 }) {
   const emptinessInfo = await Promise.all(
@@ -247,7 +234,8 @@ export async function syncExistingFields({
         query.timeFieldName = pattern.timeFieldName;
       }
 
-      return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.title}`, {
+      return fetchJson({
+        path: `${BASE_API_URL}/existing_fields/${pattern.id}`,
         query,
       }) as Promise<ExistingFields>;
     })
@@ -284,7 +272,7 @@ function fromSavedObject(
     type,
     title: attributes.title,
     fields: (JSON.parse(attributes.fields) as IndexPatternField[])
-      .filter(({ aggregatable }) => !!aggregatable)
+      .filter(({ aggregatable, scripted }) => !!aggregatable || !!scripted)
       .concat(documentField),
     typeMeta: attributes.typeMeta
       ? (JSON.parse(attributes.typeMeta) as SavedRestrictionsInfo)
@@ -303,8 +291,9 @@ function fromSavedObject(
   newFields.forEach((field, index) => {
     const restrictionsObj: IndexPatternField['aggregationRestrictions'] = {};
     aggs.forEach(agg => {
-      if (typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name]) {
-        restrictionsObj[agg] = typeMeta.aggs[agg][field.name];
+      const restriction = typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name];
+      if (restriction) {
+        restrictionsObj[agg] = restriction;
       }
     });
     if (Object.keys(restrictionsObj).length) {

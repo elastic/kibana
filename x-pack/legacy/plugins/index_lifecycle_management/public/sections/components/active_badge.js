@@ -9,10 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export const ActiveBadge = () => {
   return (
     <EuiBadge className="eui-alignMiddle">
-      <FormattedMessage
-        id="xpack.indexLifecycleMgmt.activePhaseMessage"
-        defaultMessage="Active"
-      />
+      <FormattedMessage id="xpack.indexLifecycleMgmt.activePhaseMessage" defaultMessage="Active" />
     </EuiBadge>
   );
 };

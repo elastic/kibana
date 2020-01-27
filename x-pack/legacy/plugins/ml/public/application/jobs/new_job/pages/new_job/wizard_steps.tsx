@@ -34,10 +34,10 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   const [additionalExpanded, setAdditionalExpanded] = useState(false);
 
   function getSummaryStepTitle() {
-    if (kibanaContext.currentSavedSearch.id !== undefined) {
+    if (kibanaContext.currentSavedSearch !== null) {
       return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleSavedSearch', {
         defaultMessage: 'New job from saved search {title}',
-        values: { title: kibanaContext.currentSavedSearch.title },
+        values: { title: kibanaContext.currentSavedSearch.attributes.title as string },
       });
     } else if (kibanaContext.currentIndexPattern.id !== undefined) {
       return i18n.translate(
@@ -143,8 +143,8 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
 const Title: FC<{ 'data-test-subj': string }> = ({ 'data-test-subj': dataTestSubj, children }) => {
   return (
     <Fragment>
-      <EuiTitle>
-        <h2 data-test-subj={dataTestSubj}>{children}</h2>
+      <EuiTitle size="s">
+        <h3 data-test-subj={dataTestSubj}>{children}</h3>
       </EuiTitle>
       <EuiSpacer />
     </Fragment>

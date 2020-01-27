@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import nodeDetailFixture from './fixtures/node_detail';
 import nodeDetailAdvancedFixture from './fixtures/node_detail_advanced';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -16,7 +16,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/logstash-pipelines';
     const timeRange = {
       min: '2018-01-22T09:33:13.000Z',
-      max: '2018-01-22T09:41:04.000Z'
+      max: '2018-01-22T09:41:04.000Z',
     };
 
     before('load archive', () => {
@@ -29,7 +29,9 @@ export default function ({ getService }) {
 
     it('should summarize the Logstash node with non-advanced chart data metrics', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/1rhApLfQShSh3JsNqYCkmA/logstash/node/838a2ada-1951-4043-8a23-4b450f6160a4')
+        .post(
+          '/api/monitoring/v1/clusters/1rhApLfQShSh3JsNqYCkmA/logstash/node/838a2ada-1951-4043-8a23-4b450f6160a4'
+        )
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange, is_advanced: false })
         .expect(200);
@@ -39,7 +41,9 @@ export default function ({ getService }) {
 
     it('should summarize the Logstash node with advanced chart data metrics', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/1rhApLfQShSh3JsNqYCkmA/logstash/node/838a2ada-1951-4043-8a23-4b450f6160a4')
+        .post(
+          '/api/monitoring/v1/clusters/1rhApLfQShSh3JsNqYCkmA/logstash/node/838a2ada-1951-4043-8a23-4b450f6160a4'
+        )
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange, is_advanced: true })
         .expect(200);

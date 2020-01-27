@@ -7,11 +7,7 @@
 import { checkParam } from '../error_missing_required';
 import { BeatsClusterMetric } from '../metrics';
 import { createBeatsQuery } from './create_beats_query';
-import {
-  beatsAggFilterPath,
-  beatsUuidsAgg,
-  beatsAggResponseHandler,
-} from './_beats_stats';
+import { beatsAggFilterPath, beatsUuidsAgg, beatsAggResponseHandler } from './_beats_stats';
 
 export function handleResponse(clusterUuid, response) {
   const { beatTotal, beatTypes, totalEvents, bytesSent } = beatsAggResponseHandler(response);
@@ -23,7 +19,7 @@ export function handleResponse(clusterUuid, response) {
     beats: {
       total: beatTotal,
       types: beatTypes,
-    }
+    },
   };
 
   return {
@@ -40,26 +36,28 @@ export function getBeatsForClusters(req, beatsIndexPattern, clusters) {
   const config = req.server.config();
   const maxBucketSize = config.get('xpack.monitoring.max_bucket_size');
 
-  return Promise.all(clusters.map(async cluster => {
-    const clusterUuid = cluster.cluster_uuid;
-    const params = {
-      index: beatsIndexPattern,
-      size: 0,
-      ignoreUnavailable: true,
-      filterPath: beatsAggFilterPath,
-      body: {
-        query: createBeatsQuery({
-          start,
-          end,
-          clusterUuid,
-          metric: BeatsClusterMetric.getMetricFields() // override default of BeatMetric.getMetricFields
-        }),
-        aggs: beatsUuidsAgg(maxBucketSize)
-      }
-    };
+  return Promise.all(
+    clusters.map(async cluster => {
+      const clusterUuid = cluster.cluster_uuid;
+      const params = {
+        index: beatsIndexPattern,
+        size: 0,
+        ignoreUnavailable: true,
+        filterPath: beatsAggFilterPath,
+        body: {
+          query: createBeatsQuery({
+            start,
+            end,
+            clusterUuid,
+            metric: BeatsClusterMetric.getMetricFields(), // override default of BeatMetric.getMetricFields
+          }),
+          aggs: beatsUuidsAgg(maxBucketSize),
+        },
+      };
 
-    const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-    const response = await callWithRequest(req, 'search', params);
-    return handleResponse(clusterUuid, response);
-  }));
+      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+      const response = await callWithRequest(req, 'search', params);
+      return handleResponse(clusterUuid, response);
+    })
+  );
 }

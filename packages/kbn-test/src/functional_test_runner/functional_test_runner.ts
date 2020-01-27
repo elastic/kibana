@@ -23,6 +23,7 @@ import { Suite, Test } from './fake_mocha_types';
 import {
   Lifecycle,
   LifecyclePhase,
+  FailureMetadata,
   readConfigFile,
   ProviderCollection,
   readProviderSpec,
@@ -33,6 +34,7 @@ import {
 
 export class FunctionalTestRunner {
   public readonly lifecycle = new Lifecycle();
+  public readonly failureMetadata = new FailureMetadata(this.lifecycle);
   private closed = false;
 
   constructor(
@@ -114,6 +116,7 @@ export class FunctionalTestRunner {
       const coreProviders = readProviderSpec('Service', {
         lifecycle: () => this.lifecycle,
         log: () => this.log,
+        failureMetadata: () => this.failureMetadata,
         config: () => config,
       });
 

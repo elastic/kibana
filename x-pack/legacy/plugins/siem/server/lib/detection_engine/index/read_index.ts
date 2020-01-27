@@ -6,7 +6,7 @@
 
 import { IndicesGetSettingsParams } from 'elasticsearch';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
-import { CallWithRequest } from './types';
+import { CallWithRequest } from '../types';
 
 export const readIndex = async (
   callWithRequest: CallWithRequest<IndicesGetSettingsParams, CallClusterOptions, unknown>,

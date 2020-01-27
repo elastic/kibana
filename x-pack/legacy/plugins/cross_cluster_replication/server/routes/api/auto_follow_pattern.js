@@ -10,12 +10,12 @@ import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
 import {
   deserializeAutoFollowPattern,
   deserializeListAutoFollowPatterns,
-  serializeAutoFollowPattern
+  serializeAutoFollowPattern,
 } from '../../../common/services/auto_follow_pattern_serialization';
-import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { API_BASE_PATH } from '../../../common/constants';
 
-export const registerAutoFollowPatternRoutes = (server) => {
+export const registerAutoFollowPatternRoutes = server => {
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
 
@@ -26,17 +26,17 @@ export const registerAutoFollowPatternRoutes = (server) => {
     path: `${API_BASE_PATH}/auto_follow_patterns`,
     method: 'GET',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
         const response = await callWithRequest('ccr.autoFollowPatterns');
-        return ({
-          patterns: deserializeListAutoFollowPatterns(response.patterns)
-        });
-      } catch(err) {
+        return {
+          patterns: deserializeListAutoFollowPatterns(response.patterns),
+        };
+      } catch (err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
         }
@@ -52,9 +52,9 @@ export const registerAutoFollowPatternRoutes = (server) => {
     path: `${API_BASE_PATH}/auto_follow_patterns`,
     method: 'POST',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id, ...rest } = request.payload;
       const body = serializeAutoFollowPattern(rest);
@@ -67,7 +67,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
         await callWithRequest('ccr.autoFollowPattern', { id });
         // If we get here it means that an auto-follow pattern with the same id exists
         const error = Boom.conflict(`An auto-follow pattern with the name "${id}" already exists.`);
-        throw(error);
+        throw error;
       } catch (err) {
         if (err.statusCode !== 404) {
           if (isEsError(err)) {
@@ -79,7 +79,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
 
       try {
         return await callWithRequest('ccr.saveAutoFollowPattern', { id, body });
-      } catch(err) {
+      } catch (err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
         }
@@ -95,16 +95,16 @@ export const registerAutoFollowPatternRoutes = (server) => {
     path: `${API_BASE_PATH}/auto_follow_patterns/{id}`,
     method: 'PUT',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.params;
       const body = serializeAutoFollowPattern(request.payload);
 
       try {
         return await callWithRequest('ccr.saveAutoFollowPattern', { id, body });
-      } catch(err) {
+      } catch (err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
         }
@@ -120,9 +120,9 @@ export const registerAutoFollowPatternRoutes = (server) => {
     path: `${API_BASE_PATH}/auto_follow_patterns/{id}`,
     method: 'GET',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.params;
 
@@ -131,7 +131,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
         const autoFollowPattern = response.patterns[0];
 
         return deserializeAutoFollowPattern(autoFollowPattern);
-      } catch(err) {
+      } catch (err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
         }
@@ -147,9 +147,9 @@ export const registerAutoFollowPatternRoutes = (server) => {
     path: `${API_BASE_PATH}/auto_follow_patterns/{id}`,
     method: 'DELETE',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.params;
       const ids = id.split(',');
@@ -157,21 +157,23 @@ export const registerAutoFollowPatternRoutes = (server) => {
       const itemsDeleted = [];
       const errors = [];
 
-      await Promise.all(ids.map((_id) => (
-        callWithRequest('ccr.deleteAutoFollowPattern', { id: _id })
-          .then(() => itemsDeleted.push(_id))
-          .catch(err => {
-            if (isEsError(err)) {
-              errors.push({ id: _id, error: wrapEsError(err) });
-            } else {
-              errors.push({ id: _id, error: wrapUnknownError(err) });
-            }
-          })
-      )));
+      await Promise.all(
+        ids.map(_id =>
+          callWithRequest('ccr.deleteAutoFollowPattern', { id: _id })
+            .then(() => itemsDeleted.push(_id))
+            .catch(err => {
+              if (isEsError(err)) {
+                errors.push({ id: _id, error: wrapEsError(err) });
+              } else {
+                errors.push({ id: _id, error: wrapUnknownError(err) });
+              }
+            })
+        )
+      );
 
       return {
         itemsDeleted,
-        errors
+        errors,
       };
     },
   });

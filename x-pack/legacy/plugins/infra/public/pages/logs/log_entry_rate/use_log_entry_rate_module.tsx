@@ -31,7 +31,7 @@ export const useLogEntryRateModule = ({
       spaceId,
       timestampField,
     }),
-    [indexPattern]
+    [indexPattern, sourceId, spaceId, timestampField]
   );
 
   return useLogAnalysisModule({

@@ -82,7 +82,7 @@ export function createApi() {
               // if any validation is defined. Not having validation currently
               // means we don't get the payload. See
               // https://github.com/elastic/kibana/issues/50179
-              body: schema.nullable(anyObject) as typeof anyObject,
+              body: schema.nullable(anyObject),
               params: anyObject,
               query: anyObject
             }

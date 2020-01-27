@@ -5,7 +5,7 @@
  */
 
 jest.mock('../../../components/navigation_menu', () => ({
-  NavigationMenu: () => <div id="mockNavigationMenu" />
+  NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
 
 // Define the required mocks used for loading, saving and validating the filter list.

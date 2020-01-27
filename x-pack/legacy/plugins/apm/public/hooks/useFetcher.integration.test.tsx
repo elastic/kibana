@@ -4,25 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { render, wait } from '@testing-library/react';
-import { delay } from '../utils/testHelpers';
+import React from 'react';
+import { delay, MockApmPluginContextWrapper } from '../utils/testHelpers';
 import { useFetcher } from './useFetcher';
-import { KibanaCoreContext } from '../../../observability/public/context/kibana_core';
-import { LegacyCoreStart } from 'kibana/public';
 
-// Wrap the hook with a provider so it can useKibanaCore
-const wrapper = ({ children }: { children?: React.ReactNode }) => (
-  <KibanaCoreContext.Provider
-    value={
-      ({
-        notifications: { toasts: { addWarning: () => {} } }
-      } as unknown) as LegacyCoreStart
-    }
-  >
-    {children}
-  </KibanaCoreContext.Provider>
-);
+const wrapper = MockApmPluginContextWrapper;
 
 async function asyncFn(name: string, ms: number) {
   await delay(ms);

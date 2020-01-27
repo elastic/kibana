@@ -24,9 +24,16 @@ export { UiSettingsService } from './ui_settings_service';
 
 export {
   UiSettingsServiceSetup,
+  UiSettingsServiceStart,
   IUiSettingsClient,
   UiSettingsParams,
   InternalUiSettingsServiceSetup,
+  InternalUiSettingsServiceStart,
   UiSettingsType,
   UserProvidedValues,
+  ImageValidation,
+  DeprecationSettings,
+  StringValidation,
+  StringValidationRegex,
+  StringValidationRegexString,
 } from './types';

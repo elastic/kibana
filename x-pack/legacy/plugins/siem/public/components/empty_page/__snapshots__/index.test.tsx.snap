@@ -3,8 +3,12 @@
 exports[`renders correctly 1`] = `
 <EmptyPrompt
   actions={
-    <ForwardRef>
-      <EuiFlexItem>
+    <ForwardRef
+      justifyContent="center"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
         <EuiButton
           fill={true}
           href="my/url/from/nowwhere"
@@ -14,6 +18,7 @@ exports[`renders correctly 1`] = `
       </EuiFlexItem>
     </ForwardRef>
   }
+  iconType="securityAnalyticsApp"
   title={
     <h2>
       My Super Title

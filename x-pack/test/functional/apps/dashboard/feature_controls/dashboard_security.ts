@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-// eslint-disable-next-line max-len
 import {
   createDashboardEditUrl,
   DashboardConstants,
-} from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
+} from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/dashboard_constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
@@ -76,10 +75,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
-          'Dashboard',
-          'Management',
-        ]);
+        expect(navLinks.map(link => link.text)).to.eql(['Dashboard', 'Stack Management']);
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
@@ -108,7 +104,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('emptyDashboardAddPanelButton', { timeout: 10000 });
+        await testSubjects.existOrFail('emptyDashboardWidget', { timeout: 10000 });
       });
 
       it(`can view existing Dashboard`, async () => {
@@ -256,10 +252,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows dashboard navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Dashboard', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Dashboard', 'Stack Management']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {

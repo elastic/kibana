@@ -10,7 +10,7 @@ import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { mlJobService } from '../../../../../services/job_service';
 import { ValidateJob } from '../../../../../components/validate_job';
-import { JOB_TYPE } from '../../../common/job_creator/util/constants';
+import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const idFilterList = [
   'job_id_valid',

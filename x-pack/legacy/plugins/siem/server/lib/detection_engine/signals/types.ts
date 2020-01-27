@@ -15,12 +15,32 @@ export interface SignalsParams {
   status: 'open' | 'closed';
 }
 
-export type SignalsRestParams = Omit<SignalsParams, 'signalIds'> & {
-  signal_ids: SignalsParams['signalIds'];
+export interface SignalsStatusParams {
+  signalIds: string[] | undefined | null;
+  query: object | undefined | null;
+  status: 'open' | 'closed';
+}
+
+export interface SignalQueryParams {
+  query: object | undefined | null;
+  aggs: object | undefined | null;
+  _source: string[] | undefined | null;
+  size: number | undefined | null;
+  track_total_hits: boolean | undefined | null;
+}
+
+export type SignalsStatusRestParams = Omit<SignalsStatusParams, 'signalIds'> & {
+  signal_ids: SignalsStatusParams['signalIds'];
 };
 
-export interface SignalsRequest extends RequestFacade {
-  payload: SignalsRestParams;
+export type SignalsQueryRestParams = SignalQueryParams;
+
+export interface SignalsStatusRequest extends RequestFacade {
+  payload: SignalsStatusRestParams;
+}
+
+export interface SignalsQueryRequest extends RequestFacade {
+  payload: SignalsQueryRestParams;
 }
 
 export type SearchTypes =
@@ -31,11 +51,16 @@ export type SearchTypes =
   | boolean
   | boolean[]
   | object
-  | object[];
+  | object[]
+  | undefined;
 
 export interface SignalSource {
   [key: string]: SearchTypes;
   '@timestamp': string;
+  signal?: {
+    parent: Ancestor;
+    ancestors: Ancestor[];
+  };
 }
 
 export interface BulkResponse {
@@ -103,14 +128,18 @@ export type SignalRuleAlertTypeDefinition = Omit<AlertType, 'executor'> & {
   executor: ({ services, params, state }: RuleExecutorOptions) => Promise<State | void>;
 };
 
+export interface Ancestor {
+  rule: string;
+  id: string;
+  type: string;
+  index: string;
+  depth: number;
+}
+
 export interface Signal {
   rule: Partial<OutputRuleAlertRest>;
-  parent: {
-    id: string;
-    type: string;
-    index: string;
-    depth: number;
-  };
+  parent: Ancestor;
+  ancestors: Ancestor[];
   original_time: string;
   original_event?: SearchTypes;
   status: 'open' | 'closed';

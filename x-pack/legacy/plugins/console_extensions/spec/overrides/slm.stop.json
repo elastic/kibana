@@ -1,0 +1,8 @@
+{
+  "slm.stop": {
+    "url_params": {
+      "timeout": "",
+      "master_timeout": ""
+    }
+  }
+}

@@ -21,7 +21,7 @@ const { extname } = require('path');
 
 const { transform } = require('@babel/core');
 
-exports.createServerCodeTransformer = (sourceMaps) => {
+exports.createServerCodeTransformer = sourceMaps => {
   return (content, path) => {
     switch (extname(path)) {
       case '.js':

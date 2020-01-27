@@ -28,6 +28,7 @@ export const StatefulEventDetails = React.memo<Props>(
     const [view, setView] = useState<View>('table-view');
 
     const handleSetView = useCallback(newView => setView(newView), []);
+
     return (
       <EventDetails
         browserFields={browserFields}

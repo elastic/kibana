@@ -9,9 +9,7 @@ import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_fro
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { verifyCcsAvailability } from '../../../../lib/elasticsearch/verify_ccs_availability';
 import { handleError } from '../../../../lib/errors';
-import {
-  INDEX_PATTERN_FILEBEAT
-} from '../../../../../common/constants';
+import { INDEX_PATTERN_FILEBEAT } from '../../../../../common/constants';
 import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 
 export function clustersRoute(server) {
@@ -27,13 +25,15 @@ export function clustersRoute(server) {
         payload: Joi.object({
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
+            max: Joi.date().required(),
           }).required(),
-          codePaths: Joi.array().items(Joi.string().required()).required()
-        })
-      }
+          codePaths: Joi.array()
+            .items(Joi.string().required())
+            .required(),
+        }),
+      },
     },
-    handler: async (req) => {
+    handler: async req => {
       let clusters = [];
 
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
@@ -42,15 +42,17 @@ export function clustersRoute(server) {
       try {
         await verifyMonitoringAuth(req);
         await verifyCcsAvailability(req);
-        const indexPatterns = getIndexPatterns(server, { filebeatIndexPattern: INDEX_PATTERN_FILEBEAT });
+        const indexPatterns = getIndexPatterns(server, {
+          filebeatIndexPattern: INDEX_PATTERN_FILEBEAT,
+        });
         clusters = await getClustersFromRequest(req, indexPatterns, {
-          codePaths: req.payload.codePaths
+          codePaths: req.payload.codePaths,
         });
       } catch (err) {
         throw handleError(err, req);
       }
 
       return clusters;
-    }
+    },
   });
 }

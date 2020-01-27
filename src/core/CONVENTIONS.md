@@ -1,6 +1,12 @@
 # Kibana Conventions
 
-- [Plugin Structure](#plugin-structure)
+- [Kibana Conventions](#kibana-conventions)
+  - [Plugin Structure](#plugin-structure)
+    - [The PluginInitializer](#the-plugininitializer)
+    - [The Plugin class](#the-plugin-class)
+    - [Applications](#applications)
+    - [Services](#services)
+    - [Usage Collection](#usage-collection)
 
 ## Plugin Structure
 
@@ -32,6 +38,7 @@ my_plugin/
     ├── index.ts
     └── plugin.ts
 ```
+- [Manifest file](/docs/development/core/server/kibana-plugin-server.pluginmanifest.md) should be defined on top level.
 - Both `server` and `public` should have an `index.ts` and a `plugin.ts` file:
   - `index.ts` should only contain:
     - The `plugin` export
@@ -130,16 +137,16 @@ leverage this pattern.
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ApplicationMountContext } from '../../src/core/public';
+import { CoreStart, AppMountParams } from '../../src/core/public';
 
 import { MyAppRoot } from './components/app.ts';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
-export const renderApp = (context: ApplicationMountContext, domElement: HTMLDivElement) => {
-  ReactDOM.render(<MyAppRoot context={context} />, domElement);
-  return () => ReactDOM.unmountComponentAtNode(domElement);
+export const renderApp = (core: CoreStart, deps: MyPluginDepsStart, { element, appBasePath }: AppMountParams) => {
+  ReactDOM.render(<MyAppRoot core={core} deps={deps} routerBasePath={appBasePath} />, element);
+  return () => ReactDOM.unmountComponentAtNode(element);
 }
 ```
 
@@ -152,10 +159,12 @@ export class MyPlugin implements Plugin {
   public setup(core) {
     core.application.register({
       id: 'my-app',
-      async mount(context, domElement) {
+      async mount(params) {
         // Load application bundle
         const { renderApp } = await import('./application/my_app');
-        return renderApp(context, domElement);
+        // Get start services
+        const [coreStart, depsStart] = core.getStartServices();
+        return renderApp(coreStart, depsStart, params);
       }
     });
   }

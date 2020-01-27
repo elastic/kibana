@@ -189,6 +189,22 @@ export const timelineQuery = gql`
                 region_name
                 country_iso_code
               }
+              signal {
+                original_time
+                rule {
+                  id
+                  saved_id
+                  timeline_id
+                  timeline_title
+                  output_index
+                  from
+                  index
+                  language
+                  query
+                  to
+                  filters
+                }
+              }
               suricata {
                 eve {
                   proto

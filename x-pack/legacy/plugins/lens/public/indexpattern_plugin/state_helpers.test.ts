@@ -32,8 +32,8 @@ describe('state_helpers', () => {
         operationType: 'terms',
         sourceField: 'source',
         params: {
-          orderBy: { type: 'alphabetical' },
-          orderDirection: 'asc',
+          orderBy: { type: 'column', columnId: 'col2' },
+          orderDirection: 'desc',
           size: 5,
         },
       };
@@ -65,11 +65,18 @@ describe('state_helpers', () => {
       expect(
         deleteColumn({ state, columnId: 'col2', layerId: 'first' }).layers.first.columns
       ).toEqual({
-        col1: termsColumn,
+        col1: {
+          ...termsColumn,
+          params: {
+            ...termsColumn.params,
+            orderBy: { type: 'alphabetical' },
+            orderDirection: 'asc',
+          },
+        },
       });
     });
 
-    it('should execute adjustments for other columns', () => {
+    it('should adjust when deleting other columns', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top values of source',
         dataType: 'string',

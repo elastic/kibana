@@ -42,7 +42,7 @@ export class NodeAllocation extends Component {
       phaseData,
       showNodeDetailsFlyout,
       nodeOptions,
-      errors
+      errors,
     } = this.props;
     if (!nodeOptions) {
       return (
@@ -82,7 +82,7 @@ export class NodeAllocation extends Component {
         <ErrableFormRow
           id={`${phase}-${PHASE_NODE_ATTRS}`}
           label={i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeAllocationLabel', {
-            defaultMessage: 'Select a node attribute to control shard allocation'
+            defaultMessage: 'Select a node attribute to control shard allocation',
           })}
           errorKey={PHASE_NODE_ATTRS}
           isShowingErrors={isShowingErrors}
@@ -96,7 +96,6 @@ export class NodeAllocation extends Component {
               setPhaseData(PHASE_NODE_ATTRS, e.target.value);
             }}
           />
-
         </ErrableFormRow>
         {!!phaseData[PHASE_NODE_ATTRS] ? (
           <EuiButtonEmpty
@@ -110,7 +109,9 @@ export class NodeAllocation extends Component {
               defaultMessage="View a list of nodes attached to this configuration"
             />
           </EuiButtonEmpty>
-        ) : <div /> }
+        ) : (
+          <div />
+        )}
         {learnMoreLinks}
         <EuiSpacer size="m" />
       </Fragment>

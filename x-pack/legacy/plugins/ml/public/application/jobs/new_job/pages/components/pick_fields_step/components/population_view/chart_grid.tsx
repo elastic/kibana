@@ -11,7 +11,7 @@ import { AggFieldPair, SplitField } from '../../../../../../../../../common/type
 import { ChartSettings } from '../../../charts/common/settings';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { ModelItem, Anomaly } from '../../../../../common/results_loader';
-import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
+import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 import { SplitCards, useAnimateSplit } from '../split_cards';
 import { DetectorTitle } from '../detector_title';
 import { ByFieldSelector } from '../split_field';

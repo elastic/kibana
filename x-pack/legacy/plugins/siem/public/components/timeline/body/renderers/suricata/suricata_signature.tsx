@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { DragEffects, DraggableWrapper } from '../../../../drag_and_drop/draggable_wrapper';
@@ -115,7 +115,6 @@ export const SuricataSignature = React.memo<{
           data-test-subj="draggable-signature-link"
           field={SURICATA_SIGNATURE_FIELD_NAME}
           id={`suricata-signature-default-draggable-${contextId}-${id}-${SURICATA_SIGNATURE_FIELD_NAME}`}
-          name={name}
           value={signature}
         >
           <div>

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { useServicesContext, ServicesContextProvider } from './services_context';
+export { useServicesContext, ServicesContextProvider, ContextValue } from './services_context';
 
 export {
   useRequestActionContext,

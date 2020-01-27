@@ -22,59 +22,59 @@ export function ConfirmDeleteModal({
   const confirmText =
     numPipelinesSelected === 1
       ? {
-        message: (
-          <FormattedMessage
-            id="xpack.logstash.confirmDeleteModal.deletedPipelineWarningMessage"
-            defaultMessage="You cannot recover a deleted pipeline"
-          />
-        ),
-        button: (
-          <FormattedMessage
-            id="xpack.logstash.confirmDeleteModal.deletedPipelineConfirmButtonLabel"
-            defaultMessage="Delete pipeline"
-          />
-        ),
-        title: (
-          <FormattedMessage
-            id="xpack.logstash.confirmDeleteModal.deletedPipelineTitle"
-            defaultMessage="Delete pipeline &quot;{id}&quot;"
-            values={{ id: selection[0].id }}
-          />
-        ),
-      }
+          message: (
+            <FormattedMessage
+              id="xpack.logstash.confirmDeleteModal.deletedPipelineWarningMessage"
+              defaultMessage="You cannot recover a deleted pipeline"
+            />
+          ),
+          button: (
+            <FormattedMessage
+              id="xpack.logstash.confirmDeleteModal.deletedPipelineConfirmButtonLabel"
+              defaultMessage="Delete pipeline"
+            />
+          ),
+          title: (
+            <FormattedMessage
+              id="xpack.logstash.confirmDeleteModal.deletedPipelineTitle"
+              defaultMessage='Delete pipeline "{id}"'
+              values={{ id: selection[0].id }}
+            />
+          ),
+        }
       : {
-        message: (
-          <FormattedMessage
-            id="xpack.logstash.confirmDeleteModal.deletedPipelinesWarningMessage"
-            defaultMessage="You cannot recover deleted pipelines."
-          />
-        ),
-        button: (
-          <FormattedMessage
-            id="xpack.logstash.confirmDeleteModal.deletedPipelinesConfirmButtonLabel"
-            defaultMessage="Delete {numPipelinesSelected} pipelines"
-            values={{ numPipelinesSelected }}
-          />
-        ),
-        title: (
-          <FormattedMessage
-            id="xpack.logstash.confirmDeleteModal.deletedPipelinesTitle"
-            defaultMessage="Delete {numPipelinesSelected} pipelines"
-            values={{ numPipelinesSelected }}
-          />
-        ),
-      };
+          message: (
+            <FormattedMessage
+              id="xpack.logstash.confirmDeleteModal.deletedPipelinesWarningMessage"
+              defaultMessage="You cannot recover deleted pipelines."
+            />
+          ),
+          button: (
+            <FormattedMessage
+              id="xpack.logstash.confirmDeleteModal.deletedPipelinesConfirmButtonLabel"
+              defaultMessage="Delete {numPipelinesSelected} pipelines"
+              values={{ numPipelinesSelected }}
+            />
+          ),
+          title: (
+            <FormattedMessage
+              id="xpack.logstash.confirmDeleteModal.deletedPipelinesTitle"
+              defaultMessage="Delete {numPipelinesSelected} pipelines"
+              values={{ numPipelinesSelected }}
+            />
+          ),
+        };
 
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
         buttonColor="danger"
-        cancelButtonText={(
+        cancelButtonText={
           <FormattedMessage
             id="xpack.logstash.confirmDeleteModal.cancelButtonLabel"
             defaultMessage="Cancel"
           />
-        )}
+        }
         confirmButtonText={confirmText.button}
         defaultFocusedButton={EUI_MODAL_CANCEL_BUTTON}
         onCancel={cancelDeletePipelines}

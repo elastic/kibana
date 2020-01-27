@@ -6,30 +6,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { SAMLLoginStep } from '../../authentication';
+import { createCustomResourceResponse } from '.';
 import { RouteDefinitionParams } from '..';
 
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineSAMLRoutes({
-  router,
-  logger,
-  authc,
-  getLegacyAPI,
-  basePath,
-}: RouteDefinitionParams) {
-  function createCustomResourceResponse(body: string, contentType: string) {
-    return {
-      body,
-      headers: {
-        'content-type': contentType,
-        'cache-control': 'private, no-cache, no-store',
-        'content-security-policy': getLegacyAPI().cspRules,
-      },
-      statusCode: 200,
-    };
-  }
-
+export function defineSAMLRoutes({ router, logger, authc, csp, basePath }: RouteDefinitionParams) {
   router.get(
     {
       path: '/api/security/saml/capture-url-fragment',
@@ -46,7 +29,8 @@ export function defineSAMLRoutes({
           <link rel="icon" href="data:,">
           <script src="${basePath.serverBasePath}/api/security/saml/capture-url-fragment.js"></script>
         `,
-          'text/html'
+          'text/html',
+          csp.header
         )
       );
     }
@@ -66,7 +50,8 @@ export function defineSAMLRoutes({
             '${basePath.serverBasePath}/api/security/saml/start?redirectURLFragment=' + encodeURIComponent(window.location.hash)
           );
         `,
-          'text/javascript'
+          'text/javascript',
+          csp.header
         )
       );
     }
@@ -75,7 +60,9 @@ export function defineSAMLRoutes({
   router.get(
     {
       path: '/api/security/saml/start',
-      validate: { query: schema.object({ redirectURLFragment: schema.string() }) },
+      validate: {
+        query: schema.object({ redirectURLFragment: schema.string() }),
+      },
       options: { authRequired: false },
     },
     async (context, request, response) => {

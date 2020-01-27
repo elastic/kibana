@@ -39,9 +39,9 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
   return {
     Query: {
       async getMonitorStates(
-        resolver,
+        _resolver,
         { dateRangeStart, dateRangeEnd, filters, pagination, statusFilter },
-        { req }
+        { APICaller }
       ): Promise<MonitorSummaryResult> {
         const decodedPagination = pagination
           ? JSON.parse(decodeURIComponent(pagination))
@@ -50,15 +50,18 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           totalSummaryCount,
           { summaries, nextPagePagination, prevPagePagination },
         ] = await Promise.all([
-          libs.pings.getDocCount(req),
-          libs.monitorStates.getMonitorStates(
-            req,
+          libs.pings.getDocCount({ callES: APICaller }),
+          libs.monitorStates.getMonitorStates({
+            callES: APICaller,
             dateRangeStart,
             dateRangeEnd,
-            decodedPagination,
+            pagination: decodedPagination,
             filters,
-            statusFilter
-          ),
+            // this is added to make typescript happy,
+            // this sort of reassignment used to be further downstream but I've moved it here
+            // because this code is going to be decomissioned soon
+            statusFilter: statusFilter || undefined,
+          }),
         ]);
         return {
           summaries,
@@ -67,8 +70,8 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           totalSummaryCount,
         };
       },
-      async getStatesIndexStatus(resolver, {}, { req }): Promise<StatesIndexStatus> {
-        return await libs.monitorStates.statesIndexExists(req);
+      async getStatesIndexStatus(_resolver, {}, { APICaller }): Promise<StatesIndexStatus> {
+        return await libs.monitorStates.statesIndexExists({ callES: APICaller });
       },
     },
   };

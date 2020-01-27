@@ -1,0 +1,20 @@
+{
+  "description": "Windows Persistence via Application Shimming",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "name": "Windows Persistence via Application Shimming",
+  "query": "event.code:1 and process.name:sdbinst.exe",
+  "risk_score": 50,
+  "rule_id": "fd4a992d-6130-4802-9ff8-829b89ae801f",
+  "severity": "low",
+  "tags": ["Elastic"],
+  "type": "query",
+  "version": 1
+}

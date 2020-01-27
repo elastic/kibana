@@ -20,18 +20,17 @@
 import expect from '@kbn/expect';
 import { TabifyBuckets } from '../_buckets';
 
-describe('Buckets wrapper', function () {
-
+describe('Buckets wrapper', function() {
   function test(aggResp, count, keys) {
-    it('reads the length', function () {
+    it('reads the length', function() {
       const buckets = new TabifyBuckets(aggResp);
       expect(buckets).to.have.length(count);
     });
 
-    it('iterates properly, passing in the key', function () {
+    it('iterates properly, passing in the key', function() {
       const buckets = new TabifyBuckets(aggResp);
       const keysSent = [];
-      buckets.forEach(function (bucket, key) {
+      buckets.forEach(function(bucket, key) {
         keysSent.push(key);
       });
 
@@ -40,13 +39,13 @@ describe('Buckets wrapper', function () {
     });
   }
 
-  describe('with object style buckets', function () {
+  describe('with object style buckets', function() {
     const aggResp = {
       buckets: {
         '0-100': {},
         '100-200': {},
-        '200-300': {}
-      }
+        '200-300': {},
+      },
     };
 
     const count = 3;
@@ -59,7 +58,7 @@ describe('Buckets wrapper', function () {
         buckets: {
           'response:200': {},
           'response:404': {},
-        }
+        },
       };
 
       const aggParams = {
@@ -77,7 +76,7 @@ describe('Buckets wrapper', function () {
 
       const buckets = new TabifyBuckets(aggResp, aggParams);
       expect(buckets).to.have.length(2);
-      buckets._keys.forEach((key) => {
+      buckets._keys.forEach(key => {
         expect(key).to.be.a('string');
       });
     });
@@ -87,7 +86,7 @@ describe('Buckets wrapper', function () {
         buckets: {
           'response:200': {},
           'response:404': {},
-        }
+        },
       };
 
       const aggParams = {
@@ -105,7 +104,7 @@ describe('Buckets wrapper', function () {
 
       const buckets = new TabifyBuckets(aggResp, aggParams);
       expect(buckets).to.have.length(2);
-      buckets._keys.forEach((key) => {
+      buckets._keys.forEach(key => {
         expect(key).to.be.a('string');
       });
     });
@@ -114,7 +113,7 @@ describe('Buckets wrapper', function () {
       const aggResp = {
         buckets: {
           '{match_all: {}}': {},
-        }
+        },
       };
 
       const aggParams = {
@@ -128,21 +127,19 @@ describe('Buckets wrapper', function () {
 
       const buckets = new TabifyBuckets(aggResp, aggParams);
       expect(buckets).to.have.length(1);
-      buckets._keys.forEach((key) => {
+      buckets._keys.forEach(key => {
         expect(key).to.be.a('string');
       });
     });
-
-
   });
 
-  describe('with array style buckets', function () {
+  describe('with array style buckets', function() {
     const aggResp = {
       buckets: [
         { key: '0-100', value: {} },
         { key: '100-200', value: {} },
-        { key: '200-300', value: {} }
-      ]
+        { key: '200-300', value: {} },
+      ],
     };
 
     const count = 3;
@@ -151,86 +148,86 @@ describe('Buckets wrapper', function () {
     test(aggResp, count, keys);
   });
 
-  describe('with single bucket aggregations (filter)', function () {
-    it('creates single bucket from agg content', function () {
+  describe('with single bucket aggregations (filter)', function() {
+    it('creates single bucket from agg content', function() {
       const aggResp = {
         single_bucket: {},
-        doc_count: 5
+        doc_count: 5,
       };
       const buckets = new TabifyBuckets(aggResp);
       expect(buckets).to.have.length(1);
     });
   });
 
-  describe('drop_partial option', function () {
+  describe('drop_partial option', function() {
     const aggResp = {
       buckets: [
         { key: 0, value: {} },
         { key: 100, value: {} },
         { key: 200, value: {} },
-        { key: 300, value: {} }
-      ]
+        { key: 300, value: {} },
+      ],
     };
 
-    it('drops partial buckets when enabled', function () {
+    it('drops partial buckets when enabled', function() {
       const aggParams = {
         drop_partials: true,
         field: {
-          name: 'date'
-        }
+          name: 'date',
+        },
       };
       const timeRange = {
         gte: 150,
         lte: 350,
-        name: 'date'
+        name: 'date',
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
       expect(buckets).to.have.length(1);
     });
 
-    it('keeps partial buckets when disabled', function () {
+    it('keeps partial buckets when disabled', function() {
       const aggParams = {
         drop_partials: false,
         field: {
-          name: 'date'
-        }
+          name: 'date',
+        },
       };
       const timeRange = {
         gte: 150,
         lte: 350,
-        name: 'date'
+        name: 'date',
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
       expect(buckets).to.have.length(4);
     });
 
-    it('keeps aligned buckets when enabled', function () {
+    it('keeps aligned buckets when enabled', function() {
       const aggParams = {
         drop_partials: true,
         field: {
-          name: 'date'
-        }
+          name: 'date',
+        },
       };
       const timeRange = {
         gte: 100,
         lte: 400,
-        name: 'date'
+        name: 'date',
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
       expect(buckets).to.have.length(3);
     });
 
-    it('does not drop buckets for non-timerange fields', function () {
+    it('does not drop buckets for non-timerange fields', function() {
       const aggParams = {
         drop_partials: true,
         field: {
-          name: 'other_time'
-        }
+          name: 'other_time',
+        },
       };
       const timeRange = {
         gte: 150,
         lte: 350,
-        name: 'date'
+        name: 'date',
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
       expect(buckets).to.have.length(4);

@@ -11,6 +11,7 @@ import {
   sampleIdGuid,
 } from './__mocks__/es_results';
 import { buildBulkBody } from './build_bulk_body';
+import { SignalHit } from './types';
 
 describe('buildBulkBody', () => {
   beforeEach(() => {
@@ -32,18 +33,28 @@ describe('buildBulkBody', () => {
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
-    expect(fakeSignalSourceHit).toEqual({
+    const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
       event: {
         kind: 'signal',
       },
       signal: {
         parent: {
+          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           id: sampleIdGuid,
           type: 'event',
           index: 'myFakeSignalIndex',
           depth: 1,
         },
+        ancestors: [
+          {
+            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 1,
+          },
+        ],
         original_time: 'someTimeStamp',
         status: 'open',
         rule: {
@@ -69,9 +80,13 @@ describe('buildBulkBody', () => {
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
+          version: 1,
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
         },
       },
-    });
+    };
+    expect(fakeSignalSourceHit).toEqual(expected);
   });
 
   test('if bulk body builds original_event if it exists on the event to begin with', () => {
@@ -96,7 +111,7 @@ describe('buildBulkBody', () => {
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
-    expect(fakeSignalSourceHit).toEqual({
+    const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
       event: {
         action: 'socket_opened',
@@ -112,11 +127,21 @@ describe('buildBulkBody', () => {
           module: 'system',
         },
         parent: {
+          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           id: sampleIdGuid,
           type: 'event',
           index: 'myFakeSignalIndex',
           depth: 1,
         },
+        ancestors: [
+          {
+            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 1,
+          },
+        ],
         original_time: 'someTimeStamp',
         status: 'open',
         rule: {
@@ -142,9 +167,13 @@ describe('buildBulkBody', () => {
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
+          version: 1,
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
         },
       },
-    });
+    };
+    expect(fakeSignalSourceHit).toEqual(expected);
   });
 
   test('if bulk body builds original_event if it exists on the event to begin with but no kind information', () => {
@@ -168,7 +197,7 @@ describe('buildBulkBody', () => {
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
-    expect(fakeSignalSourceHit).toEqual({
+    const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
       event: {
         action: 'socket_opened',
@@ -183,11 +212,21 @@ describe('buildBulkBody', () => {
           module: 'system',
         },
         parent: {
+          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           id: sampleIdGuid,
           type: 'event',
           index: 'myFakeSignalIndex',
           depth: 1,
         },
+        ancestors: [
+          {
+            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 1,
+          },
+        ],
         original_time: 'someTimeStamp',
         status: 'open',
         rule: {
@@ -213,9 +252,13 @@ describe('buildBulkBody', () => {
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
+          version: 1,
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
         },
       },
-    });
+    };
+    expect(fakeSignalSourceHit).toEqual(expected);
   });
 
   test('if bulk body builds original_event if it exists on the event to begin with with only kind information', () => {
@@ -237,7 +280,7 @@ describe('buildBulkBody', () => {
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
-    expect(fakeSignalSourceHit).toEqual({
+    const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
       event: {
         kind: 'signal',
@@ -247,11 +290,21 @@ describe('buildBulkBody', () => {
           kind: 'event',
         },
         parent: {
+          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           id: sampleIdGuid,
           type: 'event',
           index: 'myFakeSignalIndex',
           depth: 1,
         },
+        ancestors: [
+          {
+            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 1,
+          },
+        ],
         original_time: 'someTimeStamp',
         status: 'open',
         rule: {
@@ -277,8 +330,12 @@ describe('buildBulkBody', () => {
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
+          version: 1,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
         },
       },
-    });
+    };
+    expect(fakeSignalSourceHit).toEqual(expected);
   });
 });

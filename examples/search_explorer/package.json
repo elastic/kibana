@@ -1,7 +1,7 @@
 {
   "name": "search_explorer",
   "version": "1.0.0",
-  "main": "target/test/plugin_functional/plugins/search_explorer",
+  "main": "target/examples/search_explorer",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
@@ -12,6 +12,6 @@
     "build": "rm -rf './target' && tsc"
   },
   "devDependencies": {
-    "typescript": "3.5.3"
+    "typescript": "3.7.2"
   }
 }

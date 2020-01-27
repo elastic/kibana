@@ -37,7 +37,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           ...fieldsByName[item.field],
           valuesConcatenated: item.values != null ? item.values.join() : '',
         })),
-      []
+      [data, fieldsByName]
     );
     const columns = useMemo(
       () =>
@@ -55,6 +55,7 @@ export const EventFieldsBrowser = React.memo<Props>(
     return (
       <div className="euiTable--compressed">
         <EuiInMemoryTable
+          // @ts-ignore items going in match Partial<BrowserField>, column `render` callbacks expect complete BrowserField
           items={items}
           columns={columns}
           pagination={false}

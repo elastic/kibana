@@ -40,7 +40,7 @@ class Vis extends EventEmitter {
 
     if (_.isString(visState)) {
       visState = {
-        type: visState
+        type: visState,
       };
     }
 
@@ -73,7 +73,8 @@ class Vis extends EventEmitter {
       this.type = type;
     }
 
-    this.params = _.defaults({},
+    this.params = _.defaults(
+      {},
       _.cloneDeep(state.params || {}),
       _.cloneDeep(this.type.visConfig.defaults || {})
     );
@@ -81,7 +82,11 @@ class Vis extends EventEmitter {
     updateVisualizationConfig(state.params, this.params);
 
     if (state.aggs || !this.aggs) {
-      this.aggs = new AggConfigs(this.indexPattern, state.aggs ? state.aggs.aggs || state.aggs : [], this.type.schemas.all);
+      this.aggs = new AggConfigs(
+        this.indexPattern,
+        state.aggs ? state.aggs.aggs || state.aggs : [],
+        this.type.schemas.all
+      );
     }
   }
 
@@ -90,6 +95,10 @@ class Vis extends EventEmitter {
     if (updateCurrentState) {
       this.setCurrentState(this._state);
     }
+  }
+
+  setVisType(type) {
+    this.type.type = type;
   }
 
   updateState() {
@@ -109,25 +118,17 @@ class Vis extends EventEmitter {
       aggs: this.aggs.aggs
         .map(agg => agg.toJSON())
         .filter(agg => includeDisabled || agg.enabled)
-        .filter(Boolean)
-    };
-  }
-
-  getSerializableState(state) {
-    return {
-      title: state.title,
-      type: state.type,
-      params: _.cloneDeep(state.params),
-      aggs: state.aggs.aggs
-        .map(agg => agg.toJSON())
-        .filter(agg => agg.enabled)
-        .filter(Boolean)
+        .filter(Boolean),
     };
   }
 
   copyCurrentState(includeDisabled = false) {
     const state = this.getCurrentState(includeDisabled);
-    state.aggs = new AggConfigs(this.indexPattern, state.aggs.aggs || state.aggs, this.type.schemas.all);
+    state.aggs = new AggConfigs(
+      this.indexPattern,
+      state.aggs.aggs || state.aggs,
+      this.type.schemas.all
+    );
     return state;
   }
 
@@ -136,8 +137,7 @@ class Vis extends EventEmitter {
       title: this._state.title,
       type: this._state.type,
       params: this._state.params,
-      aggs: this._state.aggs
-        .filter(agg => includeDisabled || agg.enabled)
+      aggs: this._state.aggs.filter(agg => includeDisabled || agg.enabled),
     };
   }
 
@@ -163,7 +163,7 @@ class Vis extends EventEmitter {
 
   hasSchemaAgg(schemaName, aggTypeName) {
     const aggs = this.aggs.bySchemaName(schemaName) || [];
-    return aggs.some(function (agg) {
+    return aggs.some(function(agg) {
       if (!agg.type || !agg.type.name) return false;
       return agg.type.name === aggTypeName;
     });

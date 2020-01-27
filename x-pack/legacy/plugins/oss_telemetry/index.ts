@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, PluginInitializerContext } from 'kibana/server';
+import { Logger, PluginInitializerContext, CoreStart } from 'kibana/server';
+import { Legacy } from 'kibana';
 import { PLUGIN_ID } from './constants';
 import { OssTelemetryPlugin } from './server/plugin';
 import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
+import { getTaskManagerSetup, getTaskManagerStart } from '../task_manager/server';
 
 export const ossTelemetry: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -15,7 +17,7 @@ export const ossTelemetry: LegacyPluginInitializer = kibana => {
     require: ['elasticsearch', 'xpack_main'],
     configPrefix: 'xpack.oss_telemetry',
 
-    init(server) {
+    init(server: Legacy.Server) {
       const plugin = new OssTelemetryPlugin({
         logger: {
           get: () =>
@@ -27,14 +29,24 @@ export const ossTelemetry: LegacyPluginInitializer = kibana => {
             } as Logger),
         },
       } as PluginInitializerContext);
-      plugin.setup(server.newPlatform.setup.core, {
+
+      const deps = {
         usageCollection: server.newPlatform.setup.plugins.usageCollection,
-        taskManager: server.plugins.task_manager,
         __LEGACY: {
           config: server.config(),
           xpackMainStatus: ((server.plugins.xpack_main as unknown) as { status: any }).status
             .plugin,
         },
+      };
+
+      plugin.setup(server.newPlatform.setup.core, {
+        ...deps,
+        taskManager: getTaskManagerSetup(server),
+      });
+
+      plugin.start((server.newPlatform.setup.core as unknown) as CoreStart, {
+        ...deps,
+        taskManager: getTaskManagerStart(server),
       });
     },
   });

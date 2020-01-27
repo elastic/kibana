@@ -23,20 +23,18 @@ export class Esqueue extends EventEmitter {
       interval: constants.DEFAULT_SETTING_INTERVAL,
       timeout: constants.DEFAULT_SETTING_TIMEOUT,
       dateSeparator: constants.DEFAULT_SETTING_DATE_SEPARATOR,
-      ...omit(options, [ 'client' ])
+      ...omit(options, ['client']),
     };
     this.client = options.client;
-    this._logger = options.logger || function () {};
+    this._logger = options.logger || function() {};
     this._workers = [];
-    this._initTasks().catch((err) => this.emit(constants.EVENT_QUEUE_ERROR, err));
+    this._initTasks().catch(err => this.emit(constants.EVENT_QUEUE_ERROR, err));
   }
 
   _initTasks() {
-    const initTasks = [
-      this.client.callWithInternalUser('ping'),
-    ];
+    const initTasks = [this.client.callWithInternalUser('ping')];
 
-    return Promise.all(initTasks).catch((err) => {
+    return Promise.all(initTasks).catch(err => {
       this._logger(['initTasks', 'error'], err);
       throw err;
     });
@@ -51,7 +49,7 @@ export class Esqueue extends EventEmitter {
 
     const options = Object.assign(defaults, opts, {
       indexSettings: this.settings.indexSettings,
-      logger: this._logger
+      logger: this._logger,
     });
 
     return new Job(this, index, jobtype, payload, options);
@@ -64,11 +62,11 @@ export class Esqueue extends EventEmitter {
   }
 
   getWorkers() {
-    return this._workers.map((fn) => fn);
+    return this._workers.map(fn => fn);
   }
 
   destroy() {
-    const workers = this._workers.filter((worker) => worker.destroy());
+    const workers = this._workers.filter(worker => worker.destroy());
     this._workers = workers;
   }
 }

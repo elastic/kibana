@@ -9,7 +9,6 @@ import { shallow } from 'enzyme';
 
 import { TooltipSelector } from './tooltip_selector';
 
-
 class MockField {
   constructor({ name, label, type }) {
     this._name = name;
@@ -32,36 +31,28 @@ class MockField {
 
 const defaultProps = {
   tooltipFields: [new MockField({ name: 'iso2' })],
-  onChange: (()=>{}),
+  onChange: () => {},
   fields: [
     new MockField({
       name: 'iso2',
       label: 'ISO 3166-1 alpha-2 code',
-      type: 'string'
+      type: 'string',
     }),
     new MockField({
       name: 'iso3',
-      type: 'string'
-    })
-  ]
+      type: 'string',
+    }),
+  ],
 };
 
 describe('TooltipSelector', () => {
-
   test('should render component', async () => {
-
-    const component = shallow(
-      <TooltipSelector
-        {...defaultProps}
-      />
-    );
+    const component = shallow(<TooltipSelector {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
     expect(component).toMatchSnapshot();
-
   });
-
 });

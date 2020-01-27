@@ -6,15 +6,16 @@
 
 import { of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { IClusterClient, CoreSetup } from '../../../../src/core/server';
+import { ICustomClusterClient } from '../../../../src/core/server';
+import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 import { Plugin, PluginSetupDependencies } from './plugin';
 
 import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
 
 describe('Security Plugin', () => {
   let plugin: Plugin;
-  let mockCoreSetup: MockedKeys<CoreSetup>;
-  let mockClusterClient: jest.Mocked<IClusterClient>;
+  let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
+  let mockClusterClient: jest.Mocked<ICustomClusterClient>;
   let mockDependencies: PluginSetupDependencies;
   beforeEach(() => {
     plugin = new Plugin(
@@ -34,9 +35,9 @@ describe('Security Plugin', () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreSetup.http.isTlsEnabled = true;
 
-    mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    mockClusterClient = elasticsearchServiceMock.createCustomClusterClient();
     mockCoreSetup.elasticsearch.createClient.mockReturnValue(
-      (mockClusterClient as unknown) as jest.Mocked<IClusterClient>
+      (mockClusterClient as unknown) as jest.Mocked<ICustomClusterClient>
     );
 
     mockDependencies = { licensing: { license$: of({}) } } as PluginSetupDependencies;
@@ -48,21 +49,22 @@ describe('Security Plugin', () => {
               Object {
                 "__legacyCompat": Object {
                   "config": Object {
-                    "authc": Object {
-                      "providers": Array [
-                        "saml",
-                        "token",
-                      ],
-                    },
                     "cookieName": "sid",
                     "loginAssistanceMessage": undefined,
                     "secureCookies": true,
-                    "session": Object {
-                      "idleTimeout": 1500,
-                      "lifespan": null,
-                    },
                   },
                   "license": Object {
+                    "features$": Observable {
+                      "_isScalar": false,
+                      "operator": MapOperator {
+                        "project": [Function],
+                        "thisArg": undefined,
+                      },
+                      "source": Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      },
+                    },
                     "getFeatures": [Function],
                     "isEnabled": [Function],
                   },
@@ -115,7 +117,7 @@ describe('Security Plugin', () => {
 
       expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledTimes(1);
       expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledWith('security', {
-        plugins: [require('../../../legacy/server/lib/esjs_shield_plugin')],
+        plugins: [elasticsearchClientPlugin],
       });
     });
   });

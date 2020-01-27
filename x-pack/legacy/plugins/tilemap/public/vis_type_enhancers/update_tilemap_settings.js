@@ -8,7 +8,7 @@ import uiRoutes from 'ui/routes';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import 'ui/vis/map/service_settings';
 
-uiRoutes.addSetupWork(function ($injector, serviceSettings) {
+uiRoutes.addSetupWork(function($injector, serviceSettings) {
   const tileMapPluginInfo = xpackInfo.get('features.tilemap');
 
   if (!tileMapPluginInfo) {
@@ -20,5 +20,4 @@ uiRoutes.addSetupWork(function ($injector, serviceSettings) {
   }
   serviceSettings.addQueryParams({ license: tileMapPluginInfo.license.uid });
   serviceSettings.disableZoomMessage();
-
 });

@@ -7,12 +7,10 @@ exports[`Filter Lists renders a list of filters 1`] = `
   />
   <EuiPage
     className="ml-list-filter-lists"
-    restrictWidth={false}
   >
     <EuiPageContent
       className="ml-list-filter-lists-content"
       horizontalPosition="center"
-      panelPaddingSize="l"
       verticalPosition="center"
     >
       <FilterListsHeader

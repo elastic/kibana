@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
@@ -30,7 +29,7 @@ let $timeout;
 function init() {
   ngMock.module('kibana');
 
-  ngMock.inject(function ($injector, _$timeout_, Private) {
+  ngMock.inject(function($injector, _$timeout_, Private) {
     $timeout = _$timeout_;
 
     debounce = $injector.get('debounce');
@@ -38,14 +37,14 @@ function init() {
   });
 }
 
-describe('debounce service', function () {
+describe('debounce service', function() {
   let spy;
-  beforeEach(function () {
+  beforeEach(function() {
     spy = sinon.spy();
     init();
   });
 
-  it('should have a cancel method', function () {
+  it('should have a cancel method', function() {
     const bouncer = debounce(() => {}, 100);
     const bouncerFromProvider = debounceFromProvider(() => {}, 100);
 
@@ -53,13 +52,13 @@ describe('debounce service', function () {
     expect(bouncerFromProvider).to.have.property('cancel');
   });
 
-  describe('delayed execution', function () {
+  describe('delayed execution', function() {
     const sandbox = sinon.createSandbox();
 
     beforeEach(() => sandbox.useFakeTimers());
     afterEach(() => sandbox.restore());
 
-    it('should delay execution', function () {
+    it('should delay execution', function() {
       const bouncer = debounce(spy, 100);
       const bouncerFromProvider = debounceFromProvider(spy, 100);
 
@@ -76,7 +75,7 @@ describe('debounce service', function () {
       sinon.assert.calledOnce(spy);
     });
 
-    it('should fire on leading edge', function () {
+    it('should fire on leading edge', function() {
       const bouncer = debounce(spy, 100, { leading: true });
       const bouncerFromProvider = debounceFromProvider(spy, 100, { leading: true });
 
@@ -93,9 +92,12 @@ describe('debounce service', function () {
       sinon.assert.calledTwice(spy);
     });
 
-    it('should only fire on leading edge', function () {
+    it('should only fire on leading edge', function() {
       const bouncer = debounce(spy, 100, { leading: true, trailing: false });
-      const bouncerFromProvider = debounceFromProvider(spy, 100, { leading: true, trailing: false });
+      const bouncerFromProvider = debounceFromProvider(spy, 100, {
+        leading: true,
+        trailing: false,
+      });
 
       bouncer();
       sinon.assert.calledOnce(spy);
@@ -110,7 +112,7 @@ describe('debounce service', function () {
       sinon.assert.calledOnce(spy);
     });
 
-    it('should reset delayed execution', function () {
+    it('should reset delayed execution', function() {
       const cancelSpy = sinon.spy($timeout, 'cancel');
       const bouncer = debounce(spy, 100);
       const bouncerFromProvider = debounceFromProvider(spy, 100);
@@ -138,8 +140,8 @@ describe('debounce service', function () {
     });
   });
 
-  describe('cancel', function () {
-    it('should cancel the $timeout', function () {
+  describe('cancel', function() {
+    it('should cancel the $timeout', function() {
       const cancelSpy = sinon.spy($timeout, 'cancel');
       const bouncer = debounce(spy, 100);
       const bouncerFromProvider = debounceFromProvider(spy, 100);
@@ -160,4 +162,3 @@ describe('debounce service', function () {
     });
   });
 });
-

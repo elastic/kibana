@@ -11,7 +11,7 @@ import {
   EuiPageContent,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 

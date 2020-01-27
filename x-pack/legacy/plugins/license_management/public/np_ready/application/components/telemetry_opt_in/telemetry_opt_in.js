@@ -5,15 +5,13 @@
  */
 
 import React, { Fragment } from 'react';
+import { EuiLink, EuiCheckbox, EuiSpacer, EuiText, EuiTitle, EuiPopover } from '@elastic/eui';
 import {
-  EuiLink,
-  EuiCheckbox,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiPopover
-} from '@elastic/eui';
-import { shouldShowTelemetryOptIn, getTelemetryFetcher, PRIVACY_STATEMENT_URL, OptInExampleFlyout } from '../../lib/telemetry';
+  shouldShowTelemetryOptIn,
+  getTelemetryFetcher,
+  PRIVACY_STATEMENT_URL,
+  OptInExampleFlyout,
+} from '../../lib/telemetry';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class TelemetryOptIn extends React.Component {
@@ -22,27 +20,27 @@ export class TelemetryOptIn extends React.Component {
     this.state = {
       showMoreTelemetryInfo: false,
       isOptingInToTelemetry: false,
-      showExample: false
+      showExample: false,
     };
   }
   isOptingInToTelemetry = () => {
     return this.state.isOptingInToTelemetry;
-  }
+  };
   closeReadMorePopover = () => {
     this.setState({ showMoreTelemetryInfo: false });
-  }
+  };
   onClickReadMore = () => {
     const { showMoreTelemetryInfo } = this.state;
     this.setState({ showMoreTelemetryInfo: !showMoreTelemetryInfo });
-  }
+  };
   onClickExample = () => {
     this.setState({ showExample: true });
     this.closeReadMorePopover();
-  }
+  };
   onChangeOptIn = event => {
     const isOptingInToTelemetry = event.target.checked;
     this.setState({ isOptingInToTelemetry });
-  }
+  };
   render() {
     const { showMoreTelemetryInfo, isOptingInToTelemetry, showExample } = this.state;
     const { isStartTrial } = this.props;
@@ -61,7 +59,7 @@ export class TelemetryOptIn extends React.Component {
     if (!isStartTrial) {
       toCurrentCustomers = (
         <Fragment>
-          <EuiSpacer  size="s"/>
+          <EuiSpacer size="s" />
           <EuiTitle size="s">
             <h4>
               <FormattedMessage
@@ -70,7 +68,7 @@ export class TelemetryOptIn extends React.Component {
               />
             </h4>
           </EuiTitle>
-          <EuiSpacer  size="s"/>
+          <EuiSpacer size="s" />
         </Fragment>
       );
     }
@@ -93,7 +91,7 @@ export class TelemetryOptIn extends React.Component {
         closePopover={this.closeReadMorePopover}
         className="eui-AlignBaseline"
       >
-        <EuiText className="licManagement__narrowText" >
+        <EuiText className="licManagement__narrowText">
           <p>
             <FormattedMessage
               id="xpack.licenseMgmt.telemetryOptIn.featureUsageWarningMessage"
@@ -108,18 +106,16 @@ export class TelemetryOptIn extends React.Component {
                       id="xpack.licenseMgmt.telemetryOptIn.exampleLinkText"
                       defaultMessage="example"
                     />
-                  </EuiLink>),
+                  </EuiLink>
+                ),
                 telemetryPrivacyStatementLink: (
-                  <EuiLink
-                    href={PRIVACY_STATEMENT_URL}
-                    target="_blank"
-                  >
+                  <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
                     <FormattedMessage
                       id="xpack.licenseMgmt.telemetryOptIn.telemetryPrivacyStatementLinkText"
                       defaultMessage="telemetry privacy statement"
                     />
                   </EuiLink>
-                )
+                ),
               }}
             />
           </p>
@@ -138,7 +134,7 @@ export class TelemetryOptIn extends React.Component {
                 id="xpack.licenseMgmt.telemetryOptIn.sendBasicFeatureStatisticsLabel"
                 defaultMessage="Send basic feature usage statistics to Elastic periodically. {popover}"
                 values={{
-                  popover
+                  popover,
                 }}
               />
             </span>

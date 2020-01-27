@@ -8,12 +8,9 @@ import React, { FC, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiText, EuiTitle, EuiFlexGroup } from '@elastic/eui';
 
-import { IndexPattern } from 'ui/index_patterns';
-
-import { EuiPanel, EuiSpacer, EuiText, EuiTitle, EuiFlexGroup } from '@elastic/eui';
-
-import { useUiChromeContext } from '../../../../contexts/ui/use_ui_chrome_context';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 
@@ -31,20 +28,18 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
     },
   };
 
-  const basePath = useUiChromeContext().getBasePath();
-
   function openAdvancedJobWizard() {
     // TODO - pass the search string to the advanced job page as well as the index pattern
     //       (add in with new advanced job wizard?)
-    window.open(`${basePath}/app/ml#/jobs/new_job/advanced?index=${indexPattern}`, '_self');
+    window.open(`#/jobs/new_job/advanced?index=${indexPattern}`, '_self');
   }
 
   // Note we use display:none for the DataRecognizer section as it needs to be
   // passed the recognizerResults object, and then run the recognizer check which
   // controls whether the recognizer section is ultimately displayed.
   return (
-    <EuiPanel data-test-subj="mlDataVisualizerActionsPanel">
-      <EuiTitle>
+    <div data-test-subj="mlDataVisualizerActionsPanel">
+      <EuiTitle size="s">
         <h2>
           <FormattedMessage
             id="xpack.ml.datavisualizer.actionsPanel.createJobTitle"
@@ -54,7 +49,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
       </EuiTitle>
       <EuiSpacer size="s" />
       <div style={recognizerResultsCount === 0 ? { display: 'none' } : {}}>
-        <EuiText>
+        <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
               id="xpack.ml.datavisualizer.actionsPanel.selectKnownConfigurationDescription"
@@ -64,11 +59,15 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
         </EuiText>
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="l" responsive={true} wrap={true}>
-          <DataRecognizer indexPattern={indexPattern} results={recognizerResults} />
+          <DataRecognizer
+            indexPattern={indexPattern}
+            savedSearch={null}
+            results={recognizerResults}
+          />
         </EuiFlexGroup>
         <EuiSpacer size="l" />
       </div>
-      <EuiText>
+      <EuiText size="s" color="subdued">
         <p>
           <FormattedMessage
             id="xpack.ml.datavisualizer.actionsPanel.createJobDescription"
@@ -87,8 +86,8 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
             'Use the full range of options to create a job for more advanced use cases',
         })}
         onClick={openAdvancedJobWizard}
-        href={`${basePath}/app/ml#/jobs/new_job/advanced?index=${indexPattern}`}
+        href={`#/jobs/new_job/advanced?index=${indexPattern}`}
       />
-    </EuiPanel>
+    </div>
   );
 };

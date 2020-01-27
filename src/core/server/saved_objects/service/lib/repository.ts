@@ -52,7 +52,7 @@ import {
   MutatingOperationRefreshSetting,
 } from '../../types';
 import { validateConvertFilterToKueryNode } from './filter_utils';
-import { LegacyConfig } from '../../../legacy/config';
+import { LegacyConfig } from '../../../legacy';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -141,7 +141,7 @@ export class SavedObjectsRepository {
     callCluster: APICaller,
     extraTypes: string[] = [],
     injectedConstructor: any = SavedObjectsRepository
-  ) {
+  ): ISavedObjectsRepository {
     const mappings = migrator.getActiveMappings();
     const allTypes = Object.keys(getRootPropertiesObjects(mappings));
     const serializer = new SavedObjectsSerializer(schema);

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for selecting the rule to edit, create or delete.
  */
@@ -12,11 +11,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { DetectorDescriptionList } from '../components/detector_description_list';
 import { RuleActionPanel } from './rule_action_panel';
@@ -28,8 +23,8 @@ export function SelectRuleAction({
   setEditRuleIndex,
   updateRuleAtIndex,
   deleteRuleAtIndex,
-  addItemToFilterList }) {
-
+  addItemToFilterList,
+}) {
   const detectorIndex = anomaly.detectorIndex;
   const detector = job.analysis_config.detectors[detectorIndex];
   const rules = detector.custom_rules || [];
@@ -47,7 +42,7 @@ export function SelectRuleAction({
             deleteRuleAtIndex={deleteRuleAtIndex}
             addItemToFilterList={addItemToFilterList}
           />
-          <EuiSpacer size="l"/>
+          <EuiSpacer size="l" />
         </React.Fragment>
       );
     });
@@ -55,27 +50,21 @@ export function SelectRuleAction({
 
   return (
     <div className="select-rule-action">
-      {rules.length > 0 &&
+      {rules.length > 0 && (
         <React.Fragment>
-          <DetectorDescriptionList
-            job={job}
-            detector={detector}
-            anomaly={anomaly}
-          />
+          <DetectorDescriptionList job={job} detector={detector} anomaly={anomaly} />
           <EuiSpacer size="m" />
           {ruleActionPanels}
           <EuiSpacer size="m" />
           <EuiText style={{ display: 'inline' }}>
             <FormattedMessage
               id="xpack.ml.ruleEditor.selectRuleAction.orText"
-              defaultMessage="or&nbsp;"
+              defaultMessage="Or&nbsp;"
             />
           </EuiText>
         </React.Fragment>
-      }
-      <EuiLink
-        onClick={() => setEditRuleIndex(rules.length)}
-      >
+      )}
+      <EuiLink onClick={() => setEditRuleIndex(rules.length)}>
         <FormattedMessage
           id="xpack.ml.ruleEditor.selectRuleAction.createRuleLinkText"
           defaultMessage="create a rule"
@@ -83,7 +72,6 @@ export function SelectRuleAction({
       </EuiLink>
     </div>
   );
-
 }
 SelectRuleAction.propTypes = {
   job: PropTypes.object.isRequired,

@@ -17,15 +17,46 @@
  * under the License.
  */
 
+export { defer, Defer, of } from '../common';
 export * from './core';
 export * from './errors';
-export * from './errors';
 export * from './field_mapping';
+export * from './field_wildcard';
 export * from './parse';
 export * from './render_complete';
 export * from './resize_checker';
 export * from './state_containers';
 export * from './storage';
-export * from './storage/hashed_item_store';
-export * from './state_management/state_hash';
-export * from './state_management/url';
+export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';
+export {
+  createStateHash,
+  persistState,
+  retrieveState,
+  isStateHash,
+} from './state_management/state_hash';
+export {
+  hashQuery,
+  hashUrl,
+  unhashUrl,
+  unhashQuery,
+  createUrlTracker,
+  createKbnUrlControls,
+  getStateFromKbnUrl,
+  getStatesFromKbnUrl,
+  setStateToKbnUrl,
+} from './state_management/url';
+export {
+  syncState,
+  syncStates,
+  createKbnUrlStateStorage,
+  createSessionStorageStateStorage,
+  IStateSyncConfig,
+  ISyncStateRef,
+  IKbnUrlStateStorage,
+  INullableBaseStateContainer,
+  ISessionStorageStateStorage,
+  StartSyncStateFnType,
+  StopSyncStateFnType,
+} from './state_sync';
+export { removeQueryParam } from './history';
+export { applyDiff } from './state_management/utils/diff_object';

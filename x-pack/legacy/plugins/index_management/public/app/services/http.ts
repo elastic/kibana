@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpServiceBase } from '../../../../../../../src/core/public';
+import { HttpSetup } from '../../../../../../../src/core/public';
 
 class HttpService {
   private client: any;
 
-  public init(httpClient: HttpServiceBase): void {
+  public init(httpClient: HttpSetup): void {
     this.client = httpClient;
   }
 
-  public get httpClient(): HttpServiceBase {
+  public get httpClient(): HttpSetup {
     return this.client;
   }
 }

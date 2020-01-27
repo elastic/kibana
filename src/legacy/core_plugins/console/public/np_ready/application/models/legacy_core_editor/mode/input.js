@@ -37,18 +37,18 @@ export function Mode() {
   this.$behaviour = new CstyleBehaviour();
   this.foldingRules = new CStyleFoldMode();
   this.createModeDelegates({
-    'script-': ScriptMode
+    'script-': ScriptMode,
   });
 }
 oop.inherits(Mode, TextMode);
 
-(function () {
-  this.getCompletions = function () {
+(function() {
+  this.getCompletions = function() {
     // autocomplete is done by the autocomplete module.
     return [];
   };
 
-  this.getNextLineIndent = function (state, line, tab) {
+  this.getNextLineIndent = function(state, line, tab) {
     let indent = this.$getIndent(line);
 
     if (state !== 'string_literal') {
@@ -61,26 +61,24 @@ oop.inherits(Mode, TextMode);
     return indent;
   };
 
-  this.checkOutdent = function (state, line, input) {
+  this.checkOutdent = function(state, line, input) {
     return this.$outdent.checkOutdent(line, input);
   };
 
-  this.autoOutdent = function (state, doc, row) {
+  this.autoOutdent = function(state, doc, row) {
     this.$outdent.autoOutdent(doc, row);
   };
-  this.createWorker = function (session) {
+  this.createWorker = function(session) {
     const worker = new WorkerClient(['ace', 'sense_editor'], workerModule, 'SenseWorker');
     worker.attachToDocument(session.getDocument());
-    worker.on('error', function (e) {
+    worker.on('error', function(e) {
       session.setAnnotations([e.data]);
     });
 
-    worker.on('ok', function (anno) {
+    worker.on('ok', function(anno) {
       session.setAnnotations(anno.data);
     });
 
     return worker;
   };
-
-
-}).call(Mode.prototype);
+}.call(Mode.prototype));

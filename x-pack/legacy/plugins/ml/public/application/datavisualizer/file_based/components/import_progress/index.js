@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 export { ImportProgress, IMPORT_STATUS } from './import_progress';

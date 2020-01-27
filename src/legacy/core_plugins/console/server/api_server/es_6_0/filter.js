@@ -21,290 +21,268 @@ const filters = {};
 
 filters.and = {
   __template: {
-    filters: [
-      {}
-    ]
+    filters: [{}],
   },
   filters: [
     {
-      __scope_link: '.'
-    }
+      __scope_link: '.',
+    },
   ],
 };
 
-
 filters.bool = {
-  __scope_link: 'GLOBAL.query'
+  __scope_link: 'GLOBAL.query',
 };
-
 
 filters.exists = {
   __template: {
-    'field': 'FIELD_NAME'
+    field: 'FIELD_NAME',
   },
-  'field': '{field}'
+  field: '{field}',
 };
-
 
 filters.ids = {
   __template: {
-    'values': ['ID']
+    values: ['ID'],
   },
-  'type': '{type}',
-  'values': ['']
+  type: '{type}',
+  values: [''],
 };
-
 
 filters.limit = {
   __template: {
-    value: 100
+    value: 100,
   },
-  value: 100
+  value: 100,
 };
-
 
 filters.type = {
   __template: {
-    value: 'TYPE'
+    value: 'TYPE',
   },
-  value: '{type}'
+  value: '{type}',
 };
-
 
 filters.geo_bounding_box = {
   __template: {
-    'FIELD': {
-      'top_left': {
-        'lat': 40.73,
-        'lon': -74.1
+    FIELD: {
+      top_left: {
+        lat: 40.73,
+        lon: -74.1,
       },
-      'bottom_right': {
-        'lat': 40.717,
-        'lon': -73.99
-      }
-    }
+      bottom_right: {
+        lat: 40.717,
+        lon: -73.99,
+      },
+    },
   },
 
   '{field}': {
     top_left: {
       lat: 40.73,
-      lon: -74.1
+      lon: -74.1,
     },
     bottom_right: {
       lat: 40.73,
-      lon: -74.1
-    }
+      lon: -74.1,
+    },
   },
   type: {
-    __one_of: ['memory', 'indexed']
+    __one_of: ['memory', 'indexed'],
   },
 };
-
 
 filters.geo_distance = {
   __template: {
     distance: 100,
     distance_unit: 'km',
-    'FIELD': {
+    FIELD: {
       lat: 40.73,
-      lon: -74.1
-    }
+      lon: -74.1,
+    },
   },
   distance: 100,
   distance_unit: {
-    __one_of: ['km', 'miles']
+    __one_of: ['km', 'miles'],
   },
   distance_type: {
-    __one_of: ['arc', 'plane']
+    __one_of: ['arc', 'plane'],
   },
   optimize_bbox: {
-    __one_of: ['memory', 'indexed', 'none']
+    __one_of: ['memory', 'indexed', 'none'],
   },
   '{field}': {
     lat: 40.73,
-    lon: -74.1
+    lon: -74.1,
   },
 };
-
 
 filters.geo_distance_range = {
   __template: {
     from: 100,
     to: 200,
     distance_unit: 'km',
-    'FIELD': {
+    FIELD: {
       lat: 40.73,
-      lon: -74.1
-    }
+      lon: -74.1,
+    },
   },
   from: 100,
   to: 200,
 
   distance_unit: {
-    __one_of: ['km', 'miles']
+    __one_of: ['km', 'miles'],
   },
   distance_type: {
-    __one_of: ['arc', 'plane']
+    __one_of: ['arc', 'plane'],
   },
   include_lower: {
-    __one_of: [true, false]
+    __one_of: [true, false],
   },
   include_upper: {
-    __one_of: [true, false]
+    __one_of: [true, false],
   },
 
   '{field}': {
     lat: 40.73,
-    lon: -74.1
-  }
+    lon: -74.1,
+  },
 };
-
 
 filters.geo_polygon = {
   __template: {
-    'FIELD': {
-      'points': [
+    FIELD: {
+      points: [
         {
           lat: 40.73,
-          lon: -74.1
+          lon: -74.1,
         },
         {
           lat: 40.83,
-          lon: -75.1
-        }
-      ]
-    }
+          lon: -75.1,
+        },
+      ],
+    },
   },
   '{field}': {
     points: [
       {
         lat: 40.73,
-        lon: -74.1
-      }
-    ]
-  }
+        lon: -74.1,
+      },
+    ],
+  },
 };
-
 
 filters.geo_shape = {
   __template: {
-    'FIELD': {
+    FIELD: {
       shape: {
         type: 'envelope',
         coordinates: [
           [-45, 45],
-          [45, -45]
-        ]
+          [45, -45],
+        ],
       },
-      'relation': 'within'
-    }
+      relation: 'within',
+    },
   },
   '{field}': {
     shape: {
       type: '',
-      coordinates: []
+      coordinates: [],
     },
     indexed_shape: {
       id: '',
       index: '{index}',
       type: '{type}',
-      shape_field_name: 'shape'
+      shape_field_name: 'shape',
     },
     relation: {
-      __one_of: ['within', 'intersects', 'disjoint']
-    }
-  }
+      __one_of: ['within', 'intersects', 'disjoint'],
+    },
+  },
 };
-
 
 filters.has_child = {
   __template: {
     type: 'TYPE',
-    filter: {}
+    filter: {},
   },
   type: '{type}',
   query: {},
   filter: {},
   _scope: '',
   min_children: 1,
-  max_children: 10
+  max_children: 10,
 };
-
 
 filters.has_parent = {
   __template: {
     parent_type: 'TYPE',
-    filter: {}
+    filter: {},
   },
   parent_type: '{type}',
   query: {},
   filter: {},
-  _scope: ''
+  _scope: '',
 };
-
 
 filters.m = filters.missing = {
   __template: {
-    field: 'FIELD'
+    field: 'FIELD',
   },
   existence: {
-    __one_of: [true, false]
+    __one_of: [true, false],
   },
   null_value: {
-    __one_of: [true, false]
+    __one_of: [true, false],
   },
-  field: '{field}'
+  field: '{field}',
 };
-
 
 filters.not = {
   __template: {
-    filter: {}
+    filter: {},
   },
-  filter: {}
+  filter: {},
 };
-
 
 filters.range = {
   __template: {
-    'FIELD': {
+    FIELD: {
       gte: 10,
-      lte: 20
-    }
+      lte: 20,
+    },
   },
   '{field}': {
     gte: 1,
     gt: 1,
     lte: 20,
     lt: 20,
-    time_zone: '+1:00',
-    'format': 'dd/MM/yyyy||yyyy',
-    execution: { __one_of: ['index', 'fielddata'] }
-  }
+    time_zone: '+01:00',
+    format: 'dd/MM/yyyy||yyyy',
+    execution: { __one_of: ['index', 'fielddata'] },
+  },
 };
-
 
 filters.or = {
   __template: {
-    filters: [
-      {}
-    ]
+    filters: [{}],
   },
   filters: [
     {
-      __scope_link: '.'
-    }
-  ]
+      __scope_link: '.',
+    },
+  ],
 };
-
 
 filters.prefix = {
   __template: {
-    'FIELD': 'VALUE'
+    FIELD: 'VALUE',
   },
-  '{field}': ''
+  '{field}': '',
 };
-
 
 filters.query = {
   // global query
@@ -312,44 +290,40 @@ filters.query = {
 
 filters.script = {
   __template: {
-    script: {}
+    script: {},
   },
   script: {
     // populated by a global rule
-  }
+  },
 };
-
 
 filters.term = {
   __template: {
-    'FIELD': 'VALUE'
+    FIELD: 'VALUE',
   },
-  '{field}': ''
+  '{field}': '',
 };
-
 
 filters.terms = {
   __template: {
-    'FIELD': ['VALUE1', 'VALUE2']
+    FIELD: ['VALUE1', 'VALUE2'],
   },
   field: ['{field}'],
   execution: {
-    __one_of: ['plain', 'bool', 'and', 'or', 'bool_nocache', 'and_nocache', 'or_nocache']
-  }
+    __one_of: ['plain', 'bool', 'and', 'or', 'bool_nocache', 'and_nocache', 'or_nocache'],
+  },
 };
-
 
 filters.nested = {
   __template: {
     path: 'path_to_nested_doc',
-    query: {}
+    query: {},
   },
   query: {},
   path: '',
-  _name: ''
+  _name: '',
 };
 
-export default function (api) {
+export default function(api) {
   api.addGlobalAutocompleteRules('filter', filters);
 }
-

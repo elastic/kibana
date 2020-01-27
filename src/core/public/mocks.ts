@@ -46,6 +46,9 @@ function createCoreSetupMock({ basePath = '' } = {}) {
     application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+    getStartServices: jest.fn<Promise<[ReturnType<typeof createCoreStartMock>, object]>, []>(() =>
+      Promise.resolve([createCoreStartMock({ basePath }), {}])
+    ),
     http: httpServiceMock.createSetupContract({ basePath }),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
@@ -71,10 +74,12 @@ function createCoreStartMock({ basePath = '' } = {}) {
     injectedMetadata: {
       getInjectedVar: injectedMetadataServiceMock.createStartContract().getInjectedVar,
     },
+    fatalErrors: fatalErrorsServiceMock.createStartContract(),
   };
 
   return mock;
 }
+
 function pluginInitializerContextMock() {
   const mock: PluginInitializerContext = {
     opaqueId: Symbol(),

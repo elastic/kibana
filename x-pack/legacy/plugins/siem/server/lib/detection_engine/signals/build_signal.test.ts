@@ -5,9 +5,8 @@
  */
 
 import { sampleDocNoSortId, sampleRule } from './__mocks__/es_results';
-import { buildSignal } from './build_signal';
-import { OutputRuleAlertRest } from '../types';
-import { Signal } from './types';
+import { buildSignal, buildAncestor, buildAncestorsSignal } from './build_signal';
+import { Signal, Ancestor } from './types';
 
 describe('buildSignal', () => {
   beforeEach(() => {
@@ -17,15 +16,25 @@ describe('buildSignal', () => {
   test('it builds a signal as expected without original_event if event does not exist', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     delete doc._source.event;
-    const rule: Partial<OutputRuleAlertRest> = sampleRule();
+    const rule = sampleRule();
     const signal = buildSignal(doc, rule);
     const expected: Signal = {
       parent: {
+        rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
         type: 'event',
         index: 'myFakeSignalIndex',
         depth: 1,
       },
+      ancestors: [
+        {
+          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 1,
+        },
+      ],
       original_time: 'someTimeStamp',
       status: 'open',
       rule: {
@@ -51,6 +60,8 @@ describe('buildSignal', () => {
         tags: ['some fake tag 1', 'some fake tag 2'],
         to: 'now',
         type: 'query',
+        updated_at: signal.rule.updated_at,
+        created_at: signal.rule.created_at,
       },
     };
     expect(signal).toEqual(expected);
@@ -64,15 +75,25 @@ describe('buildSignal', () => {
       kind: 'event',
       module: 'system',
     };
-    const rule: Partial<OutputRuleAlertRest> = sampleRule();
+    const rule = sampleRule();
     const signal = buildSignal(doc, rule);
     const expected: Signal = {
       parent: {
+        rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
         type: 'event',
         index: 'myFakeSignalIndex',
         depth: 1,
       },
+      ancestors: [
+        {
+          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 1,
+        },
+      ],
       original_time: 'someTimeStamp',
       original_event: {
         action: 'socket_opened',
@@ -104,8 +125,137 @@ describe('buildSignal', () => {
         tags: ['some fake tag 1', 'some fake tag 2'],
         to: 'now',
         type: 'query',
+        updated_at: signal.rule.updated_at,
+        created_at: signal.rule.created_at,
       },
     };
+    expect(signal).toEqual(expected);
+  });
+
+  test('it builds a ancestor correctly if the parent does not exist', () => {
+    const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+    doc._source.event = {
+      action: 'socket_opened',
+      dataset: 'socket',
+      kind: 'event',
+      module: 'system',
+    };
+    const rule = sampleRule();
+    const signal = buildAncestor(doc, rule);
+    const expected: Ancestor = {
+      rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+      id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+      type: 'event',
+      index: 'myFakeSignalIndex',
+      depth: 1,
+    };
+    expect(signal).toEqual(expected);
+  });
+
+  test('it builds a ancestor correctly if the parent does exist', () => {
+    const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+    doc._source.event = {
+      action: 'socket_opened',
+      dataset: 'socket',
+      kind: 'event',
+      module: 'system',
+    };
+    doc._source.signal = {
+      parent: {
+        rule: '98c0bf9e-4d38-46f4-9a6a-8a820426256b',
+        id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 1,
+      },
+      ancestors: [
+        {
+          rule: '98c0bf9e-4d38-46f4-9a6a-8a820426256b',
+          id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 1,
+        },
+      ],
+    };
+    const rule = sampleRule();
+    const signal = buildAncestor(doc, rule);
+    const expected: Ancestor = {
+      rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+      id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+      type: 'signal',
+      index: 'myFakeSignalIndex',
+      depth: 2,
+    };
+    expect(signal).toEqual(expected);
+  });
+
+  test('it builds a signal ancestor correctly if the parent does not exist', () => {
+    const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+    doc._source.event = {
+      action: 'socket_opened',
+      dataset: 'socket',
+      kind: 'event',
+      module: 'system',
+    };
+    const rule = sampleRule();
+    const signal = buildAncestorsSignal(doc, rule);
+    const expected: Ancestor[] = [
+      {
+        rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 1,
+      },
+    ];
+    expect(signal).toEqual(expected);
+  });
+
+  test('it builds a signal ancestor correctly if the parent does exist', () => {
+    const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+    doc._source.event = {
+      action: 'socket_opened',
+      dataset: 'socket',
+      kind: 'event',
+      module: 'system',
+    };
+    doc._source.signal = {
+      parent: {
+        rule: '98c0bf9e-4d38-46f4-9a6a-8a820426256b',
+        id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 1,
+      },
+      ancestors: [
+        {
+          rule: '98c0bf9e-4d38-46f4-9a6a-8a820426256b',
+          id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 1,
+        },
+      ],
+    };
+    const rule = sampleRule();
+    const signal = buildAncestorsSignal(doc, rule);
+    const expected: Ancestor[] = [
+      {
+        rule: '98c0bf9e-4d38-46f4-9a6a-8a820426256b',
+        id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 1,
+      },
+      {
+        rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+        type: 'signal',
+        index: 'myFakeSignalIndex',
+        depth: 2,
+      },
+    ];
     expect(signal).toEqual(expected);
   });
 });

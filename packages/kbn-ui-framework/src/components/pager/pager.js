@@ -37,17 +37,17 @@ export function KuiPager({
   const classes = classNames('kuiPager', className);
   return (
     <div className={classes} {...rest}>
-      <div className="kuiPagerText">{startNumber}&ndash;{endNumber} of {totalItems}</div>
-      {
-        (startNumber === 1 && endNumber === totalItems)
-          ? null
-          : <KuiPagerButtonGroup
-            hasNext={hasNextPage}
-            hasPrevious={hasPreviousPage}
-            onNext={onNextPage}
-            onPrevious={onPreviousPage}
-          />
-      }
+      <div className="kuiPagerText">
+        {startNumber}&ndash;{endNumber} of {totalItems}
+      </div>
+      {startNumber === 1 && endNumber === totalItems ? null : (
+        <KuiPagerButtonGroup
+          hasNext={hasNextPage}
+          hasPrevious={hasPreviousPage}
+          onNext={onNextPage}
+          onPrevious={onPreviousPage}
+        />
+      )}
     </div>
   );
 }
@@ -60,7 +60,5 @@ KuiPager.propTypes = {
   hasNextPage: PropTypes.bool.isRequired,
   onNextPage: PropTypes.func.isRequired,
   onPreviousPage: PropTypes.func.isRequired,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
-
-

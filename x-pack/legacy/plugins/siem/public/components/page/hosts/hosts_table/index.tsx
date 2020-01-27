@@ -115,31 +115,6 @@ const HostsTableComponent = React.memo<HostsTableProps>(
     updateTableActivePage,
     updateTableLimit,
   }) => {
-    const onChange = useCallback(
-      (criteria: Criteria) => {
-        if (criteria.sort != null) {
-          const sort: HostsSortField = {
-            field: getSortField(criteria.sort.field),
-            direction: criteria.sort.direction,
-          };
-          if (sort.direction !== direction || sort.field !== sortField) {
-            updateHostsSort({
-              sort,
-              hostsType: type,
-            });
-          }
-        }
-      },
-      [direction, sortField, type]
-    );
-
-    const hostsColumns = useMemo(() => getHostsColumns(), []);
-
-    const sorting = useMemo(() => getSorting(`${sortField}-${direction}`, sortField, direction), [
-      sortField,
-      direction,
-    ]);
-
     const updateLimitPagination = useCallback(
       newLimit =>
         updateTableLimit({
@@ -159,6 +134,31 @@ const HostsTableComponent = React.memo<HostsTableProps>(
         }),
       [updateTableActivePage, type, tableType]
     );
+
+    const onChange = useCallback(
+      (criteria: Criteria) => {
+        if (criteria.sort != null) {
+          const sort: HostsSortField = {
+            field: getSortField(criteria.sort.field),
+            direction: criteria.sort.direction as Direction,
+          };
+          if (sort.direction !== direction || sort.field !== sortField) {
+            updateHostsSort({
+              sort,
+              hostsType: type,
+            });
+          }
+        }
+      },
+      [direction, sortField, type, updateHostsSort]
+    );
+
+    const hostsColumns = useMemo(() => getHostsColumns(), []);
+
+    const sorting = useMemo(() => getSorting(`${sortField}-${direction}`, sortField, direction), [
+      sortField,
+      direction,
+    ]);
 
     return (
       <PaginatedTable

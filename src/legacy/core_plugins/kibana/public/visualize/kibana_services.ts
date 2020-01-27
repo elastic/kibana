@@ -25,35 +25,36 @@ import {
   IUiSettingsClient,
 } from 'kibana/public';
 
-import { NavigationStart } from '../../../navigation/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { DataPublicPluginStart, IndexPatternsContract } from '../../../../../plugins/data/public';
 import { VisualizationsStart } from '../../../visualizations/public';
-import { SavedVisualizations } from './types';
+import { SavedVisualizations } from './np_ready/types';
+import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
+import { Chrome } from './legacy_imports';
 
 export interface VisualizeKibanaServices {
   addBasePath: (url: string) => string;
   chrome: ChromeStart;
   core: LegacyCoreStart;
   data: DataPublicPluginStart;
-  editorTypes: any;
   embeddables: IEmbeddableStart;
   getBasePath: () => string;
   indexPatterns: IndexPatternsContract;
-  legacyChrome: any;
+  legacyChrome: Chrome;
   localStorage: Storage;
   navigation: NavigationStart;
   toastNotifications: ToastsStart;
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectRegistry: any;
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   savedVisualizations: SavedVisualizations;
   share: SharePluginStart;
   uiSettings: IUiSettingsClient;
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
+  usageCollection?: UsageCollectionSetup;
 }
 
 let services: VisualizeKibanaServices | null = null;

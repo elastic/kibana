@@ -50,7 +50,7 @@ describe('ensureValidConfiguration', () => {
       coreHandledConfigPaths: ['core', 'elastic'],
       pluginSpecs: 'pluginSpecs',
       disabledPluginSpecs: 'disabledPluginSpecs',
-      inputSettings: 'settings',
+      settings: 'settings',
       legacyConfig: 'pluginExtendedConfig',
     });
   });

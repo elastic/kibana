@@ -24,27 +24,25 @@ import { getUpdateStatus, Status } from './update_status';
 // in Status, that actually change on the passed $scope, what needs to be changed
 // so that we expect the getUpdateStatus function to actually detect a change.
 const changeFunctions = {
-  [Status.AGGS]: ($scope) => $scope.vis.aggs = { foo: 'new' },
-  [Status.DATA]: ($scope) => $scope.visData = { foo: 'new' },
-  [Status.PARAMS]: ($scope) => $scope.vis.params = { foo: 'new' },
-  [Status.RESIZE]: ($scope) => $scope.vis.size = [50, 50],
-  [Status.TIME]: ($scope) => $scope.vis.filters.timeRange = { from: 'now-7d', to: 'now' },
-  [Status.UI_STATE]: ($scope) => $scope.uiState = { foo: 'new' },
+  [Status.AGGS]: $scope => ($scope.vis.aggs = { foo: 'new' }),
+  [Status.DATA]: $scope => ($scope.visData = { foo: 'new' }),
+  [Status.PARAMS]: $scope => ($scope.vis.params = { foo: 'new' }),
+  [Status.RESIZE]: $scope => ($scope.vis.size = [50, 50]),
+  [Status.TIME]: $scope => ($scope.vis.filters.timeRange = { from: 'now-7d', to: 'now' }),
+  [Status.UI_STATE]: $scope => ($scope.uiState = { foo: 'new' }),
 };
 
 describe('getUpdateStatus', () => {
-
   function getScope() {
     return {
       vis: {
         aggs: {},
         size: [100, 100],
-        params: {
-        },
-        filters: {}
+        params: {},
+        filters: {},
       },
       uiState: {},
-      visData: {}
+      visData: {},
     };
   }
 

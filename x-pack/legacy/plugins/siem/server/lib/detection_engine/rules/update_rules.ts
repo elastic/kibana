@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaults } from 'lodash/fp';
-import { AlertAction } from '../../../../../alerting/server/types';
+import { defaults, pickBy, isEmpty } from 'lodash/fp';
 import { readRules } from './read_rules';
-import { UpdateRuleParams } from './types';
+import { UpdateRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './types';
+import { addTags } from './add_tags';
+import { ruleStatusSavedObjectType } from './saved_object_mappings';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -19,6 +20,41 @@ export const calculateInterval = (
     return ruleInterval;
   } else {
     return '5m';
+  }
+};
+
+export const calculateVersion = (
+  immutable: boolean,
+  currentVersion: number,
+  updateProperties: Partial<Omit<UpdateRuleParams, 'enabled' | 'ruleId'>>
+): number => {
+  // early return if we are pre-packaged/immutable rule to be safe. We are never responsible
+  // for changing the version number of an immutable. Immutables are only responsible for changing
+  // their own version number. This would be really bad if an immutable version number is bumped by us
+  // due to a bug, hence the extra check and early bail if that is detected.
+  if (immutable === true) {
+    if (updateProperties.version != null) {
+      // we are an immutable rule but we are asking to update the version number so go ahead
+      // and update it to what is asked.
+      return updateProperties.version;
+    } else {
+      // we are immutable and not asking to update the version number so return the existing version
+      return currentVersion;
+    }
+  }
+
+  // white list all properties but the enabled/disabled flag. We don't want to auto-increment
+  // the version number if only the enabled/disabled flag is being set. Likewise if we get other
+  // properties we are not expecting such as updatedAt we do not to cause a version number bump
+  // on that either.
+  const removedNullValues = pickBy<UpdateRuleParams>(
+    (value: unknown) => value != null,
+    updateProperties
+  );
+  if (isEmpty(removedNullValues)) {
+    return currentVersion;
+  } else {
+    return currentVersion + 1;
   }
 };
 
@@ -44,6 +80,7 @@ export const calculateName = ({
 export const updateRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
+  savedObjectsClient,
   description,
   falsePositives,
   enabled,
@@ -51,6 +88,8 @@ export const updateRules = async ({
   language,
   outputIndex,
   savedId,
+  timelineId,
+  timelineTitle,
   meta,
   filters,
   from,
@@ -64,25 +103,46 @@ export const updateRules = async ({
   name,
   severity,
   tags,
-  threats,
+  threat,
   to,
   type,
   references,
+  version,
 }: UpdateRuleParams) => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
     return null;
   }
 
-  // TODO: Remove this as cast as soon as rule.actions TypeScript bug is fixed
-  // where it is trying to return AlertAction[] or RawAlertAction[]
-  const actions = (rule.actions as AlertAction[] | undefined) || [];
-
-  const params = rule.params || {};
+  const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
+    description,
+    falsePositives,
+    query,
+    language,
+    outputIndex,
+    savedId,
+    timelineId,
+    timelineTitle,
+    meta,
+    filters,
+    from,
+    index,
+    interval,
+    maxSignals,
+    riskScore,
+    name,
+    severity,
+    tags,
+    threat,
+    to,
+    type,
+    references,
+    version,
+  });
 
   const nextParams = defaults(
     {
-      ...params,
+      ...rule.params,
     },
     {
       description,
@@ -93,31 +153,61 @@ export const updateRules = async ({
       language,
       outputIndex,
       savedId,
+      timelineId,
+      timelineTitle,
       meta,
       filters,
       index,
       maxSignals,
       riskScore,
       severity,
-      threats,
+      threat,
       to,
       type,
+      updatedAt: new Date().toISOString(),
       references,
+      version: calculatedVersion,
     }
   );
 
-  if (rule.enabled && !enabled) {
+  if (rule.enabled && enabled === false) {
     await alertsClient.disable({ id: rule.id });
-  } else if (!rule.enabled && enabled) {
+  } else if (!rule.enabled && enabled === true) {
     await alertsClient.enable({ id: rule.id });
+    const ruleCurrentStatus = savedObjectsClient
+      ? await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>({
+          type: ruleStatusSavedObjectType,
+          perPage: 1,
+          sortField: 'statusDate',
+          sortOrder: 'desc',
+          search: rule.id,
+          searchFields: ['alertId'],
+        })
+      : null;
+    // set current status for this rule to be 'going to run'
+    if (ruleCurrentStatus && ruleCurrentStatus.saved_objects.length > 0) {
+      const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
+      currentStatusToDisable.attributes.status = 'going to run';
+      await savedObjectsClient?.update(ruleStatusSavedObjectType, currentStatusToDisable.id, {
+        ...currentStatusToDisable.attributes,
+      });
+    }
+  } else {
+    // enabled is null or undefined and we do not touch the rule
   }
   return alertsClient.update({
     id: rule.id,
     data: {
-      tags: tags != null ? tags : [],
+      tags: addTags(
+        tags != null ? tags : rule.tags, // Add tags as an update if it exists, otherwise re-use the older tags
+        rule.params.ruleId,
+        immutable != null ? immutable : rule.params.immutable // Add new one if it exists, otherwise re-use old one
+      ),
       name: calculateName({ updatedName: name, originalName: rule.name }),
-      interval: calculateInterval(interval, rule.interval),
-      actions,
+      schedule: {
+        interval: calculateInterval(interval, rule.schedule.interval),
+      },
+      actions: rule.actions,
       params: nextParams,
     },
   });

@@ -33,14 +33,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('logstash_functional');
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     after(async () => {
       await esArchiver.unload('discover/feature_controls/security');
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     describe('global discover all privileges', () => {
@@ -81,10 +81,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
-          'Discover',
-          'Management',
-        ]);
+        expect(navLinks.map(link => link.text)).to.eql(['Discover', 'Stack Management']);
       });
 
       it('shows save button', async () => {
@@ -170,10 +167,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows discover navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 
       it(`doesn't show save button`, async () => {

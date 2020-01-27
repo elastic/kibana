@@ -22,8 +22,16 @@ import _ from 'lodash';
 /**
  * Search for visualizations and convert them into a list display-friendly format.
  */
-export async function findListItems({ visTypes, search, size, savedObjectsClient, mapSavedObjectApiHits }) {
-  const extensions = _.compact(visTypes.map(v => v.appExtensions && v.appExtensions.visualizations));
+export async function findListItems({
+  visTypes,
+  search,
+  size,
+  savedObjectsClient,
+  mapSavedObjectApiHits,
+}) {
+  const extensions = _.compact(
+    visTypes.map(v => v.appExtensions && v.appExtensions.visualizations)
+  );
   const extensionByType = extensions.reduce((acc, m) => {
     return m.docTypes.reduce((_acc, type) => {
       acc[type] = m;
@@ -44,22 +52,21 @@ export async function findListItems({ visTypes, search, size, savedObjectsClient
     search: search ? `${search}*` : undefined,
     perPage: size,
     page: 1,
-    defaultSearchOperator: 'AND'
+    defaultSearchOperator: 'AND',
   };
 
   const { total, savedObjects } = await savedObjectsClient.find(searchOptions);
 
   return {
     total,
-    hits: savedObjects
-      .map((savedObject) => {
-        const config = extensionByType[savedObject.type];
+    hits: savedObjects.map(savedObject => {
+      const config = extensionByType[savedObject.type];
 
-        if (config) {
-          return config.toListItem(savedObject);
-        } else {
-          return mapSavedObjectApiHits(savedObject);
-        }
-      })
+      if (config) {
+        return config.toListItem(savedObject);
+      } else {
+        return mapSavedObjectApiHits(savedObject);
+      }
+    }),
   };
 }

@@ -19,27 +19,24 @@
 
 import React, { Component } from 'react';
 
-import {
-  KuiCollapseButton
-} from '../../../../components';
+import { KuiCollapseButton } from '../../../../components';
 
 import { htmlIdGenerator } from '../../../../src/services';
 
 export default class extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
-      isExpanded: false
+      isExpanded: false,
     };
   }
 
-  onToggleContent = (ev) => {
+  onToggleContent = ev => {
     ev.preventDefault();
-    this.setState((state) => ({
-      isExpanded: !state.isExpanded
+    this.setState(state => ({
+      isExpanded: !state.isExpanded,
     }));
-  }
+  };
 
   render() {
     const { isExpanded } = this.state;
@@ -53,14 +50,10 @@ export default class extends Component {
           aria-expanded={isExpanded}
           aria-controls={idGen('collapsible')}
         />
-        <div
-          id={idGen('collapsible')}
-          style={{ display: isExpanded ? 'block' : 'none' }}
-        >
+        <div id={idGen('collapsible')} style={{ display: isExpanded ? 'block' : 'none' }}>
           Here is some collapsible content.
         </div>
       </div>
     );
   }
-
 }

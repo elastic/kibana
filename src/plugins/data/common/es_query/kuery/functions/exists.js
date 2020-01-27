@@ -27,8 +27,13 @@ export function buildNodeParams(fieldName) {
 }
 
 export function toElasticsearchQuery(node, indexPattern = null, config, context = {}) {
-  const { arguments: [ fieldNameArg ] } = node;
-  const fullFieldNameArg = { ...fieldNameArg, value: context.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value };
+  const {
+    arguments: [fieldNameArg],
+  } = node;
+  const fullFieldNameArg = {
+    ...fieldNameArg,
+    value: context.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
+  };
   const fieldName = literal.toElasticsearchQuery(fullFieldNameArg);
   const field = get(indexPattern, 'fields', []).find(field => field.name === fieldName);
 
@@ -36,6 +41,6 @@ export function toElasticsearchQuery(node, indexPattern = null, config, context 
     throw new Error(`Exists query does not support scripted fields`);
   }
   return {
-    exists: { field: fieldName }
+    exists: { field: fieldName },
   };
 }

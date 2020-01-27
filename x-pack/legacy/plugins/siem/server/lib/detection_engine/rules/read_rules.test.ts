@@ -5,14 +5,9 @@
  */
 
 import { alertsClientMock } from '../../../../../alerting/server/alerts_client.mock';
-import { readRules, readRuleByRuleId, findRuleInArrayByRuleId } from './read_rules';
+import { readRules } from './read_rules';
 import { AlertsClient } from '../../../../../alerting';
-import {
-  getResult,
-  getFindResultWithSingleHit,
-  getFindResultWithMultiHits,
-} from '../routes/__mocks__/request_responses';
-import { SIGNALS_ID } from '../../../../common/constants';
+import { getResult, getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 
 describe('read_rules', () => {
   describe('readRules', () => {
@@ -95,143 +90,6 @@ describe('read_rules', () => {
         id: undefined,
         ruleId: undefined,
       });
-      expect(rule).toEqual(null);
-    });
-  });
-
-  describe('readRuleByRuleId', () => {
-    test('should return a single value if the rule id matches', async () => {
-      const alertsClient = alertsClientMock.create();
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const rule = await readRuleByRuleId({
-        alertsClient: unsafeCast,
-        ruleId: 'rule-1',
-      });
-      expect(rule).toEqual(getResult());
-    });
-
-    test('should not return a single value if the rule id does not match', async () => {
-      const alertsClient = alertsClientMock.create();
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const rule = await readRuleByRuleId({
-        alertsClient: unsafeCast,
-        ruleId: 'rule-that-should-not-match-anything',
-      });
-      expect(rule).toEqual(null);
-    });
-
-    test('should return a single value of rule-1 with multiple values', async () => {
-      const result1 = getResult();
-      result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.params.ruleId = 'rule-1';
-
-      const result2 = getResult();
-      result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result2.params.ruleId = 'rule-2';
-
-      const alertsClient = alertsClientMock.create();
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1, result2]));
-
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const rule = await readRuleByRuleId({
-        alertsClient: unsafeCast,
-        ruleId: 'rule-1',
-      });
-      expect(rule).toEqual(result1);
-    });
-
-    test('should return a single value of rule-2 with multiple values', async () => {
-      const result1 = getResult();
-      result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.params.ruleId = 'rule-1';
-
-      const result2 = getResult();
-      result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result2.params.ruleId = 'rule-2';
-
-      const alertsClient = alertsClientMock.create();
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1, result2]));
-
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const rule = await readRuleByRuleId({
-        alertsClient: unsafeCast,
-        ruleId: 'rule-2',
-      });
-      expect(rule).toEqual(result2);
-    });
-
-    test('should return null for a made up value with multiple values', async () => {
-      const result1 = getResult();
-      result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.params.ruleId = 'rule-1';
-
-      const result2 = getResult();
-      result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result2.params.ruleId = 'rule-2';
-
-      const alertsClient = alertsClientMock.create();
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1, result2]));
-
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const rule = await readRuleByRuleId({
-        alertsClient: unsafeCast,
-        ruleId: 'rule-that-should-not-match-anything',
-      });
-      expect(rule).toEqual(null);
-    });
-  });
-
-  describe('findRuleInArrayByRuleId', () => {
-    test('returns null if the objects are not of a signal rule type', () => {
-      const rule = findRuleInArrayByRuleId(
-        [
-          { alertTypeId: 'made up 1', params: { ruleId: '123' } },
-          { alertTypeId: 'made up 2', params: { ruleId: '456' } },
-        ],
-        '123'
-      );
-      expect(rule).toEqual(null);
-    });
-
-    test('returns correct type if the objects are of a signal rule type', () => {
-      const rule = findRuleInArrayByRuleId(
-        [
-          { alertTypeId: SIGNALS_ID, params: { ruleId: '123' } },
-          { alertTypeId: 'made up 2', params: { ruleId: '456' } },
-        ],
-        '123'
-      );
-      expect(rule).toEqual({ alertTypeId: 'siem.signals', params: { ruleId: '123' } });
-    });
-
-    test('returns second correct type if the objects are of a signal rule type', () => {
-      const rule = findRuleInArrayByRuleId(
-        [
-          { alertTypeId: SIGNALS_ID, params: { ruleId: '123' } },
-          { alertTypeId: SIGNALS_ID, params: { ruleId: '456' } },
-        ],
-        '456'
-      );
-      expect(rule).toEqual({ alertTypeId: 'siem.signals', params: { ruleId: '456' } });
-    });
-
-    test('returns null with correct types but data does not exist', () => {
-      const rule = findRuleInArrayByRuleId(
-        [
-          { alertTypeId: SIGNALS_ID, params: { ruleId: '123' } },
-          { alertTypeId: SIGNALS_ID, params: { ruleId: '456' } },
-        ],
-        '892'
-      );
       expect(rule).toEqual(null);
     });
   });
