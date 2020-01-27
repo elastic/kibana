@@ -17,25 +17,19 @@
  * under the License.
  */
 
-import { createBrowserHistory, History, Location } from 'history';
+import { createBrowserHistory, History, UnregisterCallback } from 'history';
 import { getRelativeToHistoryPath, setStateToKbnUrl } from './kbn_url_storage';
-import { BehaviorSubject, from, InteropObservable, Observable, ObservableLike, Subject, Subscribable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import {
+  BehaviorSubject,
+  Observable,
+} from 'rxjs';
 import { AppUpdater } from 'kibana/public';
-import { createRealUrlTracker, UrlTrackingEvent } from './url_tracker';
-import { getQueryObservable } from '../../../../data/public/query/state_sync/sync_query';
-import { QueryStart } from '../../../../data/public/query';
 
 export interface KbnUrlTracker {
   appMounted: () => void;
   appUnMounted: () => void;
   stop: () => void;
 }
-
-export type KbnUrlTrackingEvent =
-  | { type: 'STATE_UPDATED'; newState: unknown }
-  | { type: 'APP_MOUNT' }
-  | { type: 'APP_UNMOUNT' };
 
 /**
  * Replicates what src/legacy/ui/public/chrome/api/nav.ts did
@@ -44,48 +38,50 @@ export type KbnUrlTrackingEvent =
 export function createKbnUrlTracker(
   baseUrl: string,
   useHash: boolean,
+  // storage key,
+  storageKey: string,
   // _g
   urlKey: string,
   stateUpdate$: Observable<unknown>,
   navLinkUpdater$: BehaviorSubject<AppUpdater>
 ): KbnUrlTracker {
-  const key = 'sdfdsf';
   const storage: Storage = sessionStorage;
-  const storedUrl = storage.getItem(key);
+  const storedUrl = storage.getItem(storageKey);
   let currentUrl: string = '';
   const history: History = createBrowserHistory();
-  const stopHistory = history.listen(location => {
-    const url = getRelativeToHistoryPath(history.createHref(location), history);
-    currentUrl = url;
-    storage.setItem(key, currentUrl);
-  });
+  let stopHistory: UnregisterCallback | undefined;
+  function listenToHistory() {
+    unlistenHistory();
+    stopHistory = history.listen(location => {
+      const url = getRelativeToHistoryPath(history.createHref(location), history);
+      currentUrl = url;
+      storage.setItem(storageKey, currentUrl);
+    });
+  }
+  function unlistenHistory() {
+    if (stopHistory) {
+      stopHistory();
+    }
+  }
   const sub = stateUpdate$.subscribe(state => {
-      currentUrl = setStateToKbnUrl(urlKey, state, { useHash }, currentUrl);
-      storage.setItem(key, currentUrl);
-    })
-  ;
+    currentUrl = setStateToKbnUrl(urlKey, state, { useHash }, currentUrl);
+    storage.setItem(storageKey, currentUrl);
+  });
   if (storedUrl) {
     navLinkUpdater$.next(() => ({ url: storedUrl }));
   }
   return {
     appMounted() {
+      listenToHistory();
       navLinkUpdater$.next(() => ({ url: currentUrl }));
     },
     appUnMounted() {
+      unlistenHistory();
       navLinkUpdater$.next(() => ({ url: baseUrl }));
     },
     stop() {
-      stopHistory();
+      unlistenHistory();
       sub.unsubscribe();
     },
   };
 }
-
-// thats in the app
-createKbnUrlTracker(
-  '',
-  true,
-  '_g',
-  getQueryObservable({} as QueryStart),
-  coreStart.sdkjhflskjdhfjklsd
-);

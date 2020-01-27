@@ -17,8 +17,10 @@
  * under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import {
   App,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   LegacyCoreStart,
@@ -28,7 +30,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { RenderDeps } from './np_ready/application';
 import { DataStart } from '../../../data/public';
-import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
+import {
+  DataPublicPluginStart as NpDataStart,
+  DataPublicPluginSetup as NpDataSetup,
+} from '../../../../../plugins/data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -40,6 +45,8 @@ import {
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
+import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public/state_management/url/kbn_url_tracker';
+import { getQuerySyncStateContainer } from '../../../../../plugins/data/public/query/state_sync/sync_query';
 
 export interface LegacyAngularInjectedDependencies {
   dashboardConfig: any;
@@ -59,6 +66,7 @@ export interface DashboardPluginSetupDependencies {
   };
   home: HomePublicPluginSetup;
   kibana_legacy: KibanaLegacySetup;
+  npData: NpDataSetup;
 }
 
 export class DashboardPlugin implements Plugin {
@@ -70,17 +78,36 @@ export class DashboardPlugin implements Plugin {
     share: SharePluginStart;
   } | null = null;
 
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private stopUrlTracking: (() => void) | undefined = undefined;
+
   public setup(
     core: CoreSetup,
-    { __LEGACY: { getAngularDependencies }, home, kibana_legacy }: DashboardPluginSetupDependencies
+    {
+      __LEGACY: { getAngularDependencies },
+      home,
+      kibana_legacy,
+      npData,
+    }: DashboardPluginSetupDependencies
   ) {
+    const { appMounted, appUnMounted, stop } = createKbnUrlTracker(
+      '',
+      core.uiSettings.get('state.storeInSessionStorage', false),
+      '_g',
+      'lastUrl:dashboard',
+      getQuerySyncStateContainer(npData.query).state$,
+      this.appStateUpdater
+    );
+    this.stopUrlTracking = stop;
     const app: App = {
       id: '',
       title: 'Dashboards',
+      updater$: this.appStateUpdater,
       mount: async ({ core: contextCore }, params) => {
         if (this.startDependencies === null) {
           throw new Error('not started yet');
         }
+        appMounted();
         const {
           savedObjectsClient,
           embeddables,
@@ -113,7 +140,11 @@ export class DashboardPlugin implements Plugin {
           localStorage: new Storage(localStorage),
         };
         const { renderApp } = await import('./np_ready/application');
-        return renderApp(params.element, params.appBasePath, deps);
+        const unmount = renderApp(params.element, params.appBasePath, deps);
+        return () => {
+          unmount();
+          appUnMounted();
+        };
       },
     };
     kibana_legacy.registerLegacyApp({ ...app, id: 'dashboard' });
@@ -145,5 +176,11 @@ export class DashboardPlugin implements Plugin {
       navigation,
       share,
     };
+  }
+
+  stop() {
+    if (this.stopUrlTracking) {
+      this.stopUrlTracking();
+    }
   }
 }

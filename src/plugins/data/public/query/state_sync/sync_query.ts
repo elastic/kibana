@@ -26,7 +26,7 @@ import {
 } from '../../../../kibana_utils/public';
 import { COMPARE_ALL_OPTIONS, compareFilters } from '../filter_manager/lib/compare_filters';
 import { esFilters, RefreshInterval, TimeRange } from '../../../common';
-import { QueryStart } from '../query_service';
+import { QuerySetup, QueryStart } from '../query_service';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 
@@ -166,9 +166,10 @@ export const syncQuery = (
   };
 };
 
-export const getQueryObservable = (
-  { timefilter: { timefilter }, filterManager }: QueryStart,
-) => {
+export const getQuerySyncStateContainer = ({
+  timefilter: { timefilter },
+  filterManager,
+}: QuerySetup) => {
   const defaultState: QuerySyncState = {
     time: timefilter.getTime(),
     refreshInterval: timefilter.getRefreshInterval(),
@@ -251,5 +252,5 @@ export const getQueryObservable = (
   // trigger initial syncing from state container to services if needed
   filtersSyncStateContainer.set(initialState);
 
-  return filtersSyncStateContainer.state$;
+  return filtersSyncStateContainer;
 };
