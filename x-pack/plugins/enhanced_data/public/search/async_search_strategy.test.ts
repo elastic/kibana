@@ -5,15 +5,15 @@
  */
 
 import { of } from 'rxjs';
-import { CoreSetup } from '../../../../../src/core/public';
 import { coreMock } from '../../../../../src/core/public/mocks';
-import { asyncSearchStrategyProvider, IAsyncSearchOptions } from './async_search_strategy';
+import { asyncSearchStrategyProvider } from './async_search_strategy';
+import { IAsyncSearchOptions } from './types';
 
 describe('Async search strategy', () => {
-  let mockCoreSetup: MockedKeys<CoreSetup>;
+  let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
   const mockSearch = jest.fn();
   const mockRequest = { params: {}, serverStrategy: 'foo' };
-  const mockOptions = { pollInterval: 0 };
+  const mockOptions: IAsyncSearchOptions = { pollInterval: 0 };
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
@@ -61,5 +61,28 @@ describe('Async search strategy', () => {
     expect(mockSearch).toBeCalledTimes(2);
     expect(mockSearch.mock.calls[0][0]).toEqual(mockRequest);
     expect(mockSearch.mock.calls[1][0]).toEqual({ id: 1, serverStrategy: 'foo' });
+  });
+
+  it('sends a DELETE request and stops polling when the signal is aborted', async () => {
+    mockSearch
+      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 1 }))
+      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }))
+      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }));
+
+    const asyncSearch = asyncSearchStrategyProvider({ core: mockCoreSetup }, mockSearch);
+    const abortController = new AbortController();
+    const options = { ...mockOptions, signal: abortController.signal };
+
+    const promise = asyncSearch.search(mockRequest, options).toPromise();
+    abortController.abort();
+
+    expect.assertions(2);
+
+    try {
+      await promise;
+    } catch (e) {
+      expect(mockSearch).toBeCalledTimes(1);
+      expect(mockCoreSetup.http.delete).toBeCalled();
+    }
   });
 });

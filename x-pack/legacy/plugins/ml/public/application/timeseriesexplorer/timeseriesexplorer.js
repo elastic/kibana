@@ -965,16 +965,15 @@ export class TimeSeriesExplorer extends React.Component {
       !isEqual(previousProps.lastRefresh, this.props.lastRefresh) ||
       !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
       !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
-      !isEqual(previousProps.selectedForecastId, this.props.selectedForecastId) ||
+      previousProps.selectedForecastId !== this.props.selectedForecastId ||
       previousProps.selectedJobId !== this.props.selectedJobId
     ) {
       const fullRefresh =
         previousProps === undefined ||
         !isEqual(previousProps.bounds, this.props.bounds) ||
-        !isEqual(previousProps.lastRefresh, this.props.lastRefresh) ||
         !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
         !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
-        !isEqual(previousProps.selectedForecastId, this.props.selectedForecastId) ||
+        previousProps.selectedForecastId !== this.props.selectedForecastId ||
         previousProps.selectedJobId !== this.props.selectedJobId;
       this.loadSingleMetricData(fullRefresh);
     }
@@ -1204,7 +1203,7 @@ export class TimeSeriesExplorer extends React.Component {
           (fullRefresh === false || loading === false) &&
           hasResults === true && (
             <div>
-              {/* Make sure ChartTooltip is inside this plain wrapping element without padding so positioning can be infered correctly. */}
+              {/* Make sure ChartTooltip is inside this plain wrapping element without padding so positioning can be inferred correctly. */}
               <ChartTooltip />
               <EuiText className="results-container">
                 <span className="panel-title">

@@ -51,10 +51,10 @@ export const createAppMountSearchContext = (
       mergeMap(strategy => {
         loadingCount$.next(loadingCount$.getValue() + 1);
         return strategy.search(request, options).pipe(
-          tap(
-            error => loadingCount$.next(loadingCount$.getValue() - 1),
-            complete => loadingCount$.next(loadingCount$.getValue() - 1)
-          )
+          tap({
+            error: () => loadingCount$.next(loadingCount$.getValue() - 1),
+            complete: () => loadingCount$.next(loadingCount$.getValue() - 1),
+          })
         );
       })
     );

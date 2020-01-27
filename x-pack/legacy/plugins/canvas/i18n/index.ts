@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export * from './angular';
+export * from './capabilities';
 export * from './components';
 export * from './constants';
 export * from './errors';
