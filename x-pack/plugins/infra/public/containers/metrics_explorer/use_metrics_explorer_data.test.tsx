@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetch } from '../../utils/fetch';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 
 import { renderHook } from '@testing-library/react-hooks';
@@ -41,11 +40,31 @@ const renderUseMetricsExplorerDataHook = () =>
     }
   );
 
-jest.mock('../../utils/fetch');
-const mockedFetch = fetch as jest.Mocked<typeof fetch>;
+const mockedFetch = jest.fn();
+
+jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
+  return {
+    useKibana: () => {
+      return {
+        services: {
+          http: {
+            fetch: mockedFetch,
+          },
+        },
+      };
+    },
+  };
+});
+
+jest.mock('../../utils/kuery', () => {
+  return {
+    convertKueryToElasticSearchQuery: (query: string) => query,
+  };
+});
+
 describe('useMetricsExplorerData Hook', () => {
   it('should just work', async () => {
-    mockedFetch.post.mockResolvedValue({ data: resp } as any);
+    mockedFetch.mockResolvedValue(resp as any);
     const { result, waitForNextUpdate } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBe(null);
     expect(result.current.loading).toBe(true);
@@ -58,7 +77,7 @@ describe('useMetricsExplorerData Hook', () => {
   });
 
   it('should paginate', async () => {
-    mockedFetch.post.mockResolvedValue({ data: resp } as any);
+    mockedFetch.mockResolvedValue(resp as any);
     const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBe(null);
     expect(result.current.loading).toBe(true);
@@ -68,11 +87,9 @@ describe('useMetricsExplorerData Hook', () => {
     const { series, pageInfo } = result.current.data!;
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
-    mockedFetch.post.mockResolvedValue({
-      data: {
-        pageInfo: { total: 10, afterKey: 'host-06' },
-        series: [createSeries('host-04'), createSeries('host-05'), createSeries('host-06')],
-      },
+    mockedFetch.mockResolvedValue({
+      pageInfo: { total: 10, afterKey: 'host-06' },
+      series: [createSeries('host-04'), createSeries('host-05'), createSeries('host-06')],
     } as any);
     rerender({
       options,
@@ -92,7 +109,7 @@ describe('useMetricsExplorerData Hook', () => {
 
   it('should reset error upon recovery', async () => {
     const error = new Error('Network Error');
-    mockedFetch.post.mockRejectedValue(error);
+    mockedFetch.mockRejectedValue(error);
     const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBe(null);
     expect(result.current.error).toEqual(null);
@@ -101,7 +118,7 @@ describe('useMetricsExplorerData Hook', () => {
     expect(result.current.data).toEqual(null);
     expect(result.current.error).toEqual(error);
     expect(result.current.loading).toBe(false);
-    mockedFetch.post.mockResolvedValue({ data: resp } as any);
+    mockedFetch.mockResolvedValue(resp as any);
     rerender({
       options,
       source,
@@ -117,7 +134,7 @@ describe('useMetricsExplorerData Hook', () => {
   });
 
   it('should not paginate on option change', async () => {
-    mockedFetch.post.mockResolvedValue({ data: resp } as any);
+    mockedFetch.mockResolvedValue(resp as any);
     const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBe(null);
     expect(result.current.loading).toBe(true);
@@ -127,7 +144,7 @@ describe('useMetricsExplorerData Hook', () => {
     const { series, pageInfo } = result.current.data!;
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
-    mockedFetch.post.mockResolvedValue({ data: resp } as any);
+    mockedFetch.mockResolvedValue(resp as any);
     rerender({
       options: {
         ...options,
@@ -147,7 +164,7 @@ describe('useMetricsExplorerData Hook', () => {
   });
 
   it('should not paginate on time change', async () => {
-    mockedFetch.post.mockResolvedValue({ data: resp } as any);
+    mockedFetch.mockResolvedValue(resp as any);
     const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBe(null);
     expect(result.current.loading).toBe(true);
@@ -157,7 +174,7 @@ describe('useMetricsExplorerData Hook', () => {
     const { series, pageInfo } = result.current.data!;
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
-    mockedFetch.post.mockResolvedValue({ data: resp } as any);
+    mockedFetch.mockResolvedValue(resp as any);
     rerender({
       options,
       source,

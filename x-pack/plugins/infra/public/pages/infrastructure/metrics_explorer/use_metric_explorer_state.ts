@@ -144,5 +144,8 @@ export const useMetricsExplorerState = (
     handleLoadMore: setAfterKey,
     defaultViewState,
     onViewStateChange,
+
+    refreshSignal,
+    afterKey,
   };
 };
