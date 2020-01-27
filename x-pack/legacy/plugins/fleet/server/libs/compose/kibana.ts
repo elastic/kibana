@@ -25,13 +25,11 @@ import { ElasticsearchAdapter } from '../../adapters/elasticsearch/default';
 import { AgentPolicyLib } from '../agent_policy';
 import { AgentEventLib } from '../agent_event';
 import { makePolicyUpdateHandler } from '../policy_update';
+import { agentConfigService, outputService } from '../../../../../../plugins/ingest_manager/server';
 
 export function compose(server: any): FleetServerLib {
   const frameworkAdapter = new FrameworkAdapter(server);
-  const policyAdapter = new PoliciesRepository(
-    server.plugins.ingest.policy,
-    server.plugins.ingest.outputs
-  );
+  const policyAdapter = new PoliciesRepository(agentConfigService, outputService);
 
   const framework = new FrameworkLib(frameworkAdapter);
   const soDatabaseAdapter = new SODatabaseAdapter(
@@ -49,7 +47,7 @@ export function compose(server: any): FleetServerLib {
     encryptedObjectAdapter
   );
 
-  const policies = new PolicyLib(policyAdapter);
+  const policies = new PolicyLib(policyAdapter, soDatabaseAdapter);
   const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, esAdapter, framework);
   const agentsPolicy = new AgentPolicyLib(agentsRepository, policies);
   const agentEvents = new AgentEventLib(agentEventsRepository);
@@ -71,7 +69,7 @@ export function compose(server: any): FleetServerLib {
     framework,
   };
   const policyUpdateHandler = makePolicyUpdateHandler(libs);
-  server.plugins.ingest.policy.registerPolicyUpdateHandler(policyUpdateHandler);
+  agentConfigService.registerAgentConfigUpdateHandler(policyUpdateHandler);
 
   return libs;
 }

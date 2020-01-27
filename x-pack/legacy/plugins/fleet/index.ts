@@ -20,7 +20,7 @@ export const config = Joi.object({
 export function fleet(kibana: any) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'encryptedSavedObjects', 'ingest'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'encryptedSavedObjects', 'ingestManager'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       // app: {

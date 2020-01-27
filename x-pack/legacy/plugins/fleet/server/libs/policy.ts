@@ -10,7 +10,10 @@ import { FrameworkUser } from '../adapters/framework/adapter_types';
 import { AgentPolicy, PoliciesRepository } from '../repositories/policies/types';
 
 export class PolicyLib {
-  constructor(private readonly policyAdapter: PoliciesRepository) {}
+  constructor(
+    private readonly policyAdapter: PoliciesRepository,
+    private readonly soAdapter: any
+  ) {}
 
   private storedDatasourceToAgentStreams(datasources: Datasource[] = []): AgentPolicy['streams'] {
     return flatten(
@@ -37,7 +40,7 @@ export class PolicyLib {
   }
 
   public async getFullPolicy(user: FrameworkUser, id: string): Promise<AgentPolicy | null> {
-    const policy = await this.policyAdapter.get(user, id);
+    const policy = await this.policyAdapter.get(this.soAdapter, id);
     if (!policy) {
       return null;
     }
@@ -46,7 +49,7 @@ export class PolicyLib {
       outputs: {
         ...(
           await this.policyAdapter.getPolicyOutputByIDs(
-            user,
+            this.soAdapter,
             this.outputIDsFromDatasources(policy.datasources)
           )
         ).reduce((outputs, { config, ...output }) => {
