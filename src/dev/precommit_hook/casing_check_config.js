@@ -55,9 +55,6 @@ export const IGNORE_FILE_GLOBS = [
 
   // filename is required by storybook
   'packages/kbn-storybook/storybook_config/preview-head.html',
-
-  // filename required by api-extractor
-  'api-documenter.json',
 ];
 
 /**

@@ -83,7 +83,7 @@ const runBuildTypes = async () => {
 const runApiDocumenter = async (folder: string) => {
   await execa(
     'api-documenter',
-    ['generate', '-i', `./build/${folder}`, '-o', `./docs/development/core/${folder}`],
+    ['markdown', '-i', `./build/${folder}`, '-o', `./docs/development/core/${folder}`],
     {
       preferLocal: true,
     }
