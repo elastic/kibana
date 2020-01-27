@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromEvent, NEVER, Observable, of } from 'rxjs';
-import { mergeMap, takeWhile, expand, delay, first, tap, takeUntil } from 'rxjs/operators';
+import { EMPTY, fromEvent, NEVER, Observable, of, throwError } from 'rxjs';
+import { mergeMap, takeWhile, expand, delay, first, takeUntil } from 'rxjs/operators';
 import {
   IKibanaSearchResponse,
   ISearchContext,
@@ -34,14 +34,19 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
       { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
     ): Observable<IKibanaSearchResponse> => {
       const { serverStrategy } = request;
-      let id: string | undefined;
+      let id: string | undefined = request.id;
 
       const aborted$ = options.signal
         ? fromEvent(options.signal, 'abort').pipe(
             first(),
-            tap(() => {
-              if (id === undefined) return;
+            mergeMap(() => {
+              // If we haven't received the response to the initial request, including the ID, then
+              // we don't need to send a follow-up request to delete this search
+              if (id === undefined) return EMPTY; // mergeMap expects to return an observable
+
+              // Send the follow-up request to delete this search, then throw an abort error
               context.core.http.delete(`/internal/search/${request.serverStrategy}/${id}`);
+              return throwError(new AbortError());
             })
           )
         : NEVER;
@@ -56,13 +61,18 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
             mergeMap(() => search({ id, serverStrategy }, options, SYNC_SEARCH_STRATEGY))
           );
         }),
-
         // Stop polling if the signal is aborted
         takeUntil(aborted$),
-
         // Continue polling until the response indicates it is complete
         takeWhile(({ total = 1, loaded = 1 }) => loaded < total, true)
       );
     },
   };
 };
+
+export class AbortError extends Error {
+  constructor(...args: Parameters<ErrorConstructor>) {
+    super(...args);
+    this.name = 'AbortError';
+  }
+}

@@ -40,7 +40,7 @@ export function createApi({
       const strategy = await strategyProvider(caller, api.search);
       return strategy.search(request, options);
     },
-    cancel: async (request, strategyName) => {
+    cancel: async (id, strategyName) => {
       const name = strategyName ?? DEFAULT_SEARCH_STRATEGY;
       const strategyProvider = searchStrategies[name];
       if (!strategyProvider) {
@@ -48,8 +48,7 @@ export function createApi({
       }
       // Give providers access to other search strategies by injecting this function
       const strategy = await strategyProvider(caller, api.search);
-      const { cancel = () => {} } = strategy;
-      return cancel(request);
+      return strategy.cancel && strategy.cancel(id);
     },
   };
   return api;

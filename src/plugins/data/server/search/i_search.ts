@@ -52,4 +52,4 @@ export type ISearch<T extends TStrategyTypes> = (
   options?: ISearchOptions
 ) => Promise<IResponseTypesMap[T]>;
 
-export type ICancel<T extends TStrategyTypes> = (request: IRequestTypesMap[T]) => Promise<void>;
+export type ICancel<T extends TStrategyTypes> = (id: string) => Promise<void>;

@@ -18,7 +18,7 @@
  */
 
 import { mergeMap, tap } from 'rxjs/operators';
-import { from, BehaviorSubject, PartialObserver } from 'rxjs';
+import { from, BehaviorSubject } from 'rxjs';
 import { ISearchAppMountContext } from './i_search_app_mount_context';
 import { ISearchGeneric } from './i_search';
 import {
@@ -50,11 +50,12 @@ export const createAppMountSearchContext = (
     return from(strategyPromise).pipe(
       mergeMap(strategy => {
         loadingCount$.next(loadingCount$.getValue() + 1);
-        const observer: PartialObserver = {
-          error: () => loadingCount$.next(loadingCount$.getValue() - 1),
-          complete: () => loadingCount$.next(loadingCount$.getValue() - 1),
-        };
-        return strategy.search(request, options).pipe(tap(observer));
+        return strategy.search(request, options).pipe(
+          tap({
+            error: () => loadingCount$.next(loadingCount$.getValue() - 1),
+            complete: () => loadingCount$.next(loadingCount$.getValue() - 1),
+          })
+        );
       })
     );
   };

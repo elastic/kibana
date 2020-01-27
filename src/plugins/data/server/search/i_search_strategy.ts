@@ -18,7 +18,7 @@
  */
 
 import { APICaller } from 'kibana/server';
-import { ISearch, ICancel, ISearchGeneric } from './i_search';
+import { ISearch, ICancel, ISearchGeneric, ICancelGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { ISearchContext } from './i_search_context';
 
@@ -38,7 +38,8 @@ export interface ISearchStrategy<T extends TStrategyTypes> {
  */
 export type TSearchStrategyProviderEnhanced<T extends TStrategyTypes> = (
   caller: APICaller,
-  search: ISearchGeneric
+  search: ISearchGeneric,
+  cancel?: ICancelGeneric
 ) => Promise<ISearchStrategy<T>>;
 
 /**
