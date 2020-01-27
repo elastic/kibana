@@ -723,7 +723,6 @@
     "data.filter.options.pinAllFiltersButtonLabel": "すべてピン付け",
     "data.filter.options.unpinAllFiltersButtonLabel": "すべてのピンを外す",
     "data.filter.searchBar.changeAllFiltersTitle": "すべてのフィルターの変更",
-    "data.indexPatterns.fetchFieldErrorTitle": "フィールドの取得中にエラーが発生",
     "data.indexPatterns.unableWriteLabel": "インデックスパターンを書き込めません！このインデックスパターンへの最新の変更を取得するには、ページを更新してください。",
     "data.indexPatterns.unknownFieldErrorMessage": "インデックスパターン「{title}」のフィールド「{name}」が不明なフィールドタイプを使用しています。",
     "data.indexPatterns.unknownFieldHeader": "不明なフィールドタイプ {type}",

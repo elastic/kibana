@@ -24,7 +24,7 @@ import { isColorDark } from '@elastic/eui';
 
 import { getFormat, Vis } from '../legacy_imports';
 import { MetricVisValue } from './metric_vis_value';
-import { FieldFormat, ContentType } from '../../../../../plugins/data/public';
+import { fieldFormats } from '../../../../../plugins/data/public';
 import { Context } from '../metric_vis_fn';
 import { KibanaDatatable } from '../../../../../plugins/expressions/public';
 import { getHeatmapColors } from '../../../../../plugins/charts/public';
@@ -100,9 +100,9 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
   }
 
   private getFormattedValue = (
-    fieldFormatter: FieldFormat,
+    fieldFormatter: fieldFormats.FieldFormat,
     value: any,
-    format: ContentType = 'text'
+    format: fieldFormats.ContentType = 'text'
   ) => {
     if (isNaN(value)) return '-';
     return fieldFormatter.convert(value, format);
@@ -119,7 +119,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     const metrics: MetricVisMetric[] = [];
 
     let bucketColumnId: string;
-    let bucketFormatter: FieldFormat;
+    let bucketFormatter: fieldFormats.FieldFormat;
 
     if (dimensions.bucket) {
       bucketColumnId = table.columns[dimensions.bucket.accessor].id;

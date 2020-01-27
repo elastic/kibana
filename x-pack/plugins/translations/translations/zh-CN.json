@@ -723,7 +723,6 @@
     "data.filter.options.pinAllFiltersButtonLabel": "全部固定",
     "data.filter.options.unpinAllFiltersButtonLabel": "全部取消固定",
     "data.filter.searchBar.changeAllFiltersTitle": "更改所有筛选",
-    "data.indexPatterns.fetchFieldErrorTitle": "提取字段时出错",
     "data.indexPatterns.unableWriteLabel": "无法写入索引模式！请刷新页面以获取此索引模式的最新更改。",
     "data.indexPatterns.unknownFieldErrorMessage": "indexPattern “{title}” 中的字段 “{name}” 使用未知字段类型。",
     "data.indexPatterns.unknownFieldHeader": "未知字段类型 {type}",

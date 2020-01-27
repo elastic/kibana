@@ -24,7 +24,7 @@ import { npStart } from 'ui/new_platform';
 import getStubIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 import { Vis } from '../../visualizations/public';
-import { UrlFormat } from '../../../../plugins/data/public';
+import { fieldFormats } from '../../../../plugins/data/public';
 import {
   setup as visualizationsSetup,
   start as visualizationsStart,
@@ -39,7 +39,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
   beforeAll(() => {
     visualizationsSetup.types.createReactVisualization(createMetricVisTypeDefinition());
     (npStart.plugins.data.fieldFormats.getType as jest.Mock).mockImplementation(() => {
-      return UrlFormat;
+      return fieldFormats.UrlFormat;
     });
   });
 
