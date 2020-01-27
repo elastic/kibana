@@ -12,6 +12,7 @@ import {
   getOptionLabel,
   omitAllOption
 } from '../../../../../../common/agent_configuration_constants';
+import { UiTracker } from '../../../../../../../../../plugins/infra/public';
 
 interface Settings {
   transaction_sample_rate: number;
@@ -28,7 +29,8 @@ export async function saveConfig({
   transactionMaxSpans,
   configurationId,
   agentName,
-  toasts
+  toasts,
+  trackEvent
 }: {
   callApmApi: APMClient;
   serviceName: string;
@@ -39,9 +41,9 @@ export async function saveConfig({
   configurationId?: string;
   agentName?: string;
   toasts: NotificationsStart['toasts'];
+  trackEvent: UiTracker;
 }) {
-  // TODO: Migrate to useTrackMetric
-  // trackEvent({ app: 'apm', name: 'save_agent_configuration' });
+  trackEvent({ metric: 'save_agent_configuration' });
 
   try {
     const settings: Settings = {
