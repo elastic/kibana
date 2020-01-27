@@ -200,9 +200,7 @@ def uploadCoverageStaticSite(timestamp) {
   withEnv([
     "GCS_UPLOAD_PREFIX=${uploadPrefix}"
   ], {
-    sh "echo '### Uploading to ${uploadPrefix}'"
     ARTIFACT_PATTERNS.each { pattern ->
-      sh "echo '### Uploading: ${pattern}'"
       uploadGcsArtifact(uploadPrefix, pattern)
     }
   })

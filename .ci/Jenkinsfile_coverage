@@ -73,7 +73,6 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
 
                   set -e
 
-
                   . src/dev/code_coverage/shell_scripts/extract_archives.sh
 
                   . src/dev/code_coverage/shell_scripts/extract_xpack_tests.sh
@@ -85,9 +84,6 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
 
                   . src/dev/code_coverage/shell_scripts/ingest_coverage.sh
-
-                  echo '### List target'
-                  ls -R ./target
 
                 """,
                 "### Run `yarn kbn bootstrap && merge coverage` and Ingest Code Coverage to ES Cluster"
