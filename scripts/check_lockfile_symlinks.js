@@ -17,27 +17,5 @@
  * under the License.
  */
 
-module.exports = function(grunt) {
-  grunt.registerTask('jenkins:docs', ['docker:docs']);
-
-  grunt.registerTask('jenkins:unit', [
-    'run:eslint',
-    'run:sasslint',
-    'run:checkTsProjects',
-    'run:checkDocApiChanges',
-    'run:typeCheck',
-    'run:i18nCheck',
-    'run:checkFileCasing',
-    'run:checkLockfileSymlinks',
-    'run:licenses',
-    'run:verifyDependencyVersions',
-    'run:verifyNotice',
-    'run:mocha',
-    'run:test_jest',
-    'run:test_jest_integration',
-    'run:test_projects',
-    'run:test_karma_ci',
-    'run:test_hardening',
-    'run:apiIntegrationTests',
-  ]);
-};
+require('../src/setup_node_env');
+require('../src/dev/run_check_lockfile_symlinks');
