@@ -76,7 +76,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     // add the new view
     const newObj = await this.props.container.addSavedObjectEmbeddable(type, id);
 
-    const finalPanels = this.props.container.getInput().panels;
+    const finalPanels = _.cloneDeep(this.props.container.getInput().panels);
     (finalPanels[newObj.id] as DashboardPanelState).gridData.w = nnw;
     (finalPanels[newObj.id] as DashboardPanelState).gridData.h = nnh;
     (finalPanels[newObj.id] as DashboardPanelState).gridData.x = nnx;
@@ -86,7 +86,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     delete finalPanels[this.props.panelToRemove.id];
 
     // apply changes
-    this.props.container.updateInput(finalPanels);
+    this.props.container.updateInput({ panels: finalPanels });
     this.props.container.reload();
 
     this.showToast(name);
