@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export {
-  // Types
-  ListWithKuery,
+  // Object types
   DataStream,
   NewDataStream,
   AgentConfig,
   NewAgentConfig,
   AgentConfigStatus,
+  Output,
+  NewOutput,
+  OutputType,
   // Common schemas
+  ListWithKuery,
   ListWithKuerySchema,
   // Data stream schemas
   GetDataStreamsRequestSchema,

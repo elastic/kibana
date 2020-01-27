@@ -10,6 +10,8 @@ export {
   AGENT_CONFIG_API_ROUTES,
   DEFAULT_AGENT_CONFIG_ID,
   DEFAULT_AGENT_CONFIG,
+  DEFAULT_OUTPUT_ID,
+  DEFAULT_OUTPUT,
 } from '../../common';
 
 export const DEFAULT_REGISTRY_URL = 'https://epr-staging.elastic.co';

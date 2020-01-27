@@ -16,7 +16,11 @@ class AppContextService {
     this.security = appContext.security;
   }
 
-  public stop() {}
+  public stop() {
+    if (this.clusterClient) {
+      this.clusterClient.close();
+    }
+  }
 
   public getClusterClient() {
     return this.clusterClient;

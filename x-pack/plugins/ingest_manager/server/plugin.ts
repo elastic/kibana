@@ -15,7 +15,13 @@ import {
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
 import { PLUGIN_ID } from './constants';
-import { licenseService, configService, appContextService, agentConfigService } from './services';
+import {
+  licenseService,
+  configService,
+  appContextService,
+  agentConfigService,
+  outputService,
+} from './services';
 import { registerEPMRoutes, registerDataStreamRoutes, registerAgentConfigRoutes } from './routes';
 import { IngestManagerConfigType } from './';
 
@@ -62,8 +68,9 @@ export class IngestManagerPlugin implements Plugin {
     licenseService.start(this.licensing$);
     configService.start(this.config$);
 
-    // Create default saved objects
-    agentConfigService.ensureDefaultAgentConfig(internalSoClient);
+    // Create default saved objects using internal client
+    await agentConfigService.ensureDefaultAgentConfig(internalSoClient);
+    await outputService.ensureDefaultOutput(internalSoClient);
   }
 
   public async stop() {

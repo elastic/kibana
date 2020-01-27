@@ -5,3 +5,4 @@
  */
 export * from './agent_config';
 export * from './data_stream';
+export * from './output';

@@ -29,12 +29,8 @@ class ConfigService {
     }
   }
 
-  public getconfig() {
+  public getConfig() {
     return this.config;
-  }
-
-  public getconfig$() {
-    return this.observable;
   }
 }
 

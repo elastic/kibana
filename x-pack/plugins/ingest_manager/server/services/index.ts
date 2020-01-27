@@ -11,3 +11,4 @@ export { configService } from './config';
 // Saved object services
 export { dataStreamService } from './data_stream';
 export { agentConfigService } from './agent_config';
+export { outputService } from './output';

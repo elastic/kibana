@@ -7,3 +7,4 @@ export * from './plugin';
 export * from './routes';
 
 export * from './agent_config';
+export * from './output';

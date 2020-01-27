@@ -21,6 +21,7 @@ export const config = {
     }),
     fleet: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
+      defaultOutputHost: schema.string({ defaultValue: 'http://localhost:9200' }),
     }),
   }),
 };
