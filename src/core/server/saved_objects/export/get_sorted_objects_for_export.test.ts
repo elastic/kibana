@@ -394,7 +394,10 @@ describe('getSortedObjectsForExport()', () => {
   });
 
   test('sorts objects within type', async () => {
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+    savedObjectsClient.find.mockResolvedValueOnce({
+      total: 3,
+      per_page: 10000,
+      page: 1,
       saved_objects: [
         {
           id: '3',
@@ -426,20 +429,6 @@ describe('getSortedObjectsForExport()', () => {
       exportSizeLimit: 10000,
       savedObjectsClient,
       types: ['index-pattern'],
-      objects: [
-        {
-          type: 'index-pattern',
-          id: '3',
-        },
-        {
-          type: 'index-pattern',
-          id: '1',
-        },
-        {
-          type: 'index-pattern',
-          id: '2',
-        },
-      ],
     });
     const response = await readStreamToCompletion(exportStream);
     expect(response).toMatchInlineSnapshot(`
@@ -474,37 +463,6 @@ describe('getSortedObjectsForExport()', () => {
           "missingReferences": Array [],
         },
       ]
-    `);
-    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
-              Object {
-                "id": "3",
-                "type": "index-pattern",
-              },
-              Object {
-                "id": "1",
-                "type": "index-pattern",
-              },
-              Object {
-                "id": "2",
-                "type": "index-pattern",
-              },
-            ],
-            Object {
-              "namespace": undefined,
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
     `);
   });
 

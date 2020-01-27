@@ -69,11 +69,6 @@ export interface SavedObjectsExportResultDetails {
   }>;
 }
 
-// sorts objects by id for consistent object sequence
-function compareSavedObjects(a: SavedObject, b: SavedObject) {
-  return a.id > b.id ? 1 : -1;
-}
-
 async function fetchObjectsToExport({
   objects,
   types,
@@ -116,7 +111,11 @@ async function fetchObjectsToExport({
     if (findResponse.total > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
     }
-    return findResponse.saved_objects;
+
+    // sorts server-side by _id, since it's only available in fielddata
+    return findResponse.saved_objects.sort((a: SavedObject, b: SavedObject) =>
+      a.id > b.id ? 1 : -1
+    );
   } else {
     throw Boom.badRequest('Either `type` or `objects` are required.');
   }
@@ -140,14 +139,17 @@ export async function getSortedObjectsForExport({
     exportSizeLimit,
     namespace,
   });
-  let exportedObjects = [...rootObjects.sort(compareSavedObjects)];
+  let exportedObjects = [...rootObjects];
   let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
+
   if (includeReferencesDeep) {
     const fetchResult = await fetchNestedDependencies(rootObjects, savedObjectsClient, namespace);
-    exportedObjects = fetchResult.objects;
+    exportedObjects = sortObjects(fetchResult.objects);
     missingReferences = fetchResult.missingRefs;
+  } else {
+    exportedObjects = sortObjects(rootObjects);
   }
-  exportedObjects = sortObjects(exportedObjects);
+
   const exportDetails: SavedObjectsExportResultDetails = {
     exportedCount: exportedObjects.length,
     missingRefCount: missingReferences.length,
