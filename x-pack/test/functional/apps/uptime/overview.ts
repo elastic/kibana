@@ -68,8 +68,6 @@ export default ({ getPageObjects }: FtrProviderContext) => {
         '0019-up',
       ]);
       await pageObjects.uptime.setStatusFilter('up');
-      // ensure that pagination is removed from the URL
-      await pageObjects.uptime.pageUrlContains('pagination', false);
       await pageObjects.uptime.pageHasExpectedIds([
         '0000-intermittent',
         '0001-up',
@@ -82,6 +80,8 @@ export default ({ getPageObjects }: FtrProviderContext) => {
         '0008-up',
         '0009-up',
       ]);
+      // ensure that pagination is removed from the URL
+      await pageObjects.uptime.pageUrlContains('pagination', false);
     });
 
     // Flakey, see https://github.com/elastic/kibana/issues/54541
