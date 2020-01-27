@@ -19,12 +19,15 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChannelConfig } from 'src/core/server/pulse/channel';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { PulseClient } from './client_wrappers/pulse';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { PulseInstruction, PulseErrorInstructionValue } from '../../server/pulse/channel';
 
 export class PulseChannel<Payload = any> {
+  private readonly stop$ = new Subject();
   private readonly pulseClient: PulseClient;
 
   constructor(private readonly config: ChannelConfig) {
@@ -44,6 +47,11 @@ export class PulseChannel<Payload = any> {
   }
 
   public instructions$() {
-    return this.config.instructions$.asObservable();
+    return this.config.instructions$.pipe(takeUntil(this.stop$));
+  }
+
+  public stop() {
+    this.stop$.next();
+    this.config.instructions$.complete();
   }
 }

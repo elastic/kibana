@@ -24,7 +24,10 @@
 import moment from 'moment';
 import { PulseCollector, CollectorSetupContext } from '../types';
 
-export type Payload = Exclude<ErrorInstruction, 'channel_id' | 'deployment_id' | 'timestamp'>;
+export type Payload = Omit<
+  ErrorInstruction,
+  'channel_id' | 'deployment_id' | 'timestamp' | 'status'
+>;
 export interface ErrorInstruction {
   channel_id: string;
   currentKibanaVersion?: string;
@@ -110,6 +113,7 @@ export class Collector extends PulseCollector<Payload> {
           ...payload,
           channel_id: 'errors',
           deployment_id: '123',
+          status: 'new',
           id: payload.hash,
           timestamp: moment(),
         });

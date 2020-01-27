@@ -123,6 +123,11 @@ export class PulseService {
     };
   }
 
+  public async stop() {
+    this.channels.forEach(channel => channel.stop());
+    // TODO: Stop Instructions and SendTelemetry timers
+  }
+
   private async loadInstructions() {
     const url = 'http://localhost:5601/api/pulse_poc/instructions/123';
     let response: any;
