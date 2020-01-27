@@ -17,24 +17,5 @@
  * under the License.
  */
 
-import { IHttpResponse } from './types';
-
-export class HttpResponse<TResponseBody = any> implements IHttpResponse<TResponseBody> {
-  public readonly request: Request;
-  public readonly response?: Response;
-  public readonly body?: TResponseBody;
-
-  constructor({
-    request,
-    response,
-    body,
-  }: {
-    request: Request;
-    response?: Response;
-    body?: TResponseBody;
-  }) {
-    this.request = request;
-    this.response = response;
-    this.body = body;
-  }
-}
+export { syncQuery } from './sync_query';
+export { syncAppFilters } from './sync_app_filters';
