@@ -7,3 +7,9 @@
 import { EndpointListState } from './types';
 
 export const endpointListData = (state: EndpointListState) => state.endpoints;
+
+export const endpointListPageIndex = (state: EndpointListState) => state.request_index;
+
+export const endpointListPageSize = (state: EndpointListState) => state.request_page_size;
+
+export const endpointTotalHits = (state: EndpointListState) => state.total;

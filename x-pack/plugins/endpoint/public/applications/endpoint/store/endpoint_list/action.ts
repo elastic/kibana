@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointListData } from './types';
+import { EndpointListData, EndpointListPagination } from './types';
 
 interface ServerReturnedEndpointList {
   type: 'serverReturnedEndpointList';
@@ -19,7 +19,13 @@ interface UserExitedEndpointListPage {
   type: 'userExitedEndpointListPage';
 }
 
+interface UserPaginatedEndpointListTable {
+  type: 'userPaginatedEndpointListTable';
+  payload: EndpointListPagination;
+}
+
 export type EndpointListAction =
   | ServerReturnedEndpointList
   | UserEnteredEndpointListPage
-  | UserExitedEndpointListPage;
+  | UserExitedEndpointListPage
+  | UserPaginatedEndpointListTable;
