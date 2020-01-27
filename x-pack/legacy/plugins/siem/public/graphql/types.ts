@@ -1015,7 +1015,7 @@ export interface RuleField {
 
   tags?: Maybe<string[]>;
 
-  threats?: Maybe<ToAny>;
+  threat?: Maybe<ToAny>;
 
   type?: Maybe<string[]>;
 

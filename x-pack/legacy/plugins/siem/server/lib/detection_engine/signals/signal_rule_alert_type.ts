@@ -53,7 +53,7 @@ export const signalRulesAlertType = ({
         maxSignals: schema.number({ defaultValue: DEFAULT_MAX_SIGNALS }),
         riskScore: schema.number(),
         severity: schema.string(),
-        threats: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
+        threat: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         to: schema.string(),
         type: schema.string(),
         updatedAt: schema.string(),
