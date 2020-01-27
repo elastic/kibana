@@ -1,0 +1,60 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { Legacy } from 'kibana';
+import { resolve } from 'path';
+import { PLUGIN_ID } from './common/constants';
+import { Plugin as IndexLifecycleManagementPlugin } from './plugin';
+import { createShim } from './shim';
+
+export function indexLifecycleManagement(kibana: any) {
+  return new kibana.Plugin({
+    id: PLUGIN_ID,
+    configPrefix: 'xpack.ilm',
+    publicDir: resolve(__dirname, 'public'),
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'index_management'],
+    uiExports: {
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      managementSections: ['plugins/index_lifecycle_management'],
+      injectDefaultVars(server: Legacy.Server) {
+        const config = server.config();
+        return {
+          ilmUiEnabled: config.get('xpack.ilm.ui.enabled'),
+        };
+      },
+    },
+    config: (Joi: any) => {
+      return Joi.object({
+        // display menu item
+        ui: Joi.object({
+          enabled: Joi.boolean().default(true),
+        }).default(),
+
+        // enable plugin
+        enabled: Joi.boolean().default(true),
+
+        filteredNodeAttributes: Joi.array()
+          .items(Joi.string())
+          .default([]),
+      }).default();
+    },
+    isEnabled(config: any) {
+      return (
+        config.get('xpack.ilm.enabled') &&
+        config.has('xpack.index_management.enabled') &&
+        config.get('xpack.index_management.enabled')
+      );
+    },
+    init(server: Legacy.Server) {
+      const { coreSetup } = createShim(server);
+
+      const indexLifecycleManagementPlugin = new IndexLifecycleManagementPlugin();
+
+      // Set up plugin.
+      indexLifecycleManagementPlugin.setup(coreSetup);
+    },
+  });
+}

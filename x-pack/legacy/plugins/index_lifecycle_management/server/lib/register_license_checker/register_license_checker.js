@@ -5,8 +5,8 @@
  */
 
 import { mirrorPluginStatus } from '../../../../../server/lib/mirror_plugin_status';
-import { checkLicense } from '../check_license';
 import { PLUGIN_ID } from '../../../common/constants';
+import { checkLicense } from '../check_license';
 
 export function registerLicenseChecker(server) {
   const xpackMainPlugin = server.plugins.xpack_main;

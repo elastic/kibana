@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { merge } from 'lodash';
+
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
-import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
+import { isEsError } from '../../../lib/is_es_error';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { merge } from 'lodash';
 
 async function getIndexTemplate(callWithRequest, templateName) {
   const response = await callWithRequest('indices.getTemplate', { name: templateName });
@@ -40,7 +41,6 @@ async function updateIndexTemplate(callWithRequest, indexTemplatePatch) {
 }
 
 export function registerAddPolicyRoute(server) {
-  const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({

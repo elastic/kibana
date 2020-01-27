@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { isEsErrorFactory } from './is_es_error_factory';
+export const PLUGIN_ID = 'index_lifecycle_management';
+export const BASE_PATH = '/management/elasticsearch/index_lifecycle_management/';

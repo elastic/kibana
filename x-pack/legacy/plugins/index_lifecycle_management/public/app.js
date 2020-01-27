@@ -6,7 +6,8 @@
 
 import React, { useEffect } from 'react';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
-import { BASE_PATH, UIM_APP_LOAD } from '../common/constants';
+import { BASE_PATH } from '../common/constants';
+import { UIM_APP_LOAD } from './constants';
 import { EditPolicy } from './sections/edit_policy';
 import { PolicyTable } from './sections/policy_table';
 import { trackUiMetric } from './services';

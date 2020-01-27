@@ -5,7 +5,7 @@
  */
 
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
-import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
+import { isEsError } from '../../../lib/is_es_error';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
@@ -25,7 +25,6 @@ async function removeLifecycle(callWithRequest, indexNames) {
 }
 
 export function registerRemoveRoute(server) {
-  const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
