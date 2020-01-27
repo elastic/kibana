@@ -23,7 +23,7 @@ import { getTermsFields } from '../../../../index_pattern_util';
 import { indexPatternService } from '../../../../kibana_services';
 
 import { npStart } from 'ui/new_platform';
-import { isNestedField } from '../../../../../../../../../src/plugins/data/common';
+import { isNestedField } from '../../../../../../../../../src/plugins/data/public';
 const { IndexPatternSelect } = npStart.plugins.data.ui;
 
 export class JoinExpression extends Component {

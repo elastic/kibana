@@ -26,7 +26,7 @@ import { DEFAULT_MAX_INNER_RESULT_WINDOW, SORT_ORDER } from '../../../../common/
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { loadIndexSettings } from './load_index_settings';
-import { isNestedField } from '../../../../../../../../src/plugins/data/common';
+import { isNestedField } from '../../../../../../../../src/plugins/data/public';
 
 export class UpdateSourceEditor extends Component {
   static propTypes = {

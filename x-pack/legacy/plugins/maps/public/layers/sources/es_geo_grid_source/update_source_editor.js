@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { isMetricCountable } from '../../util/is_metric_countable';
-import { isNestedField } from '../../../../../../../../src/plugins/data/common';
+import { isNestedField } from '../../../../../../../../src/plugins/data/public';
 
 export class UpdateSourceEditor extends Component {
   state = {

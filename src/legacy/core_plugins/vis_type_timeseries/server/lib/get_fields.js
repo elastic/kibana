@@ -19,7 +19,7 @@
 import { SearchStrategiesRegister } from './search_strategies/search_strategies_register';
 import { uniq } from 'lodash';
 import { getIndexPatternObject } from './vis_data/helpers/get_index_pattern';
-import { isNestedField } from '../../../../../plugins/data/common';
+import { isNestedField } from '../../../../../plugins/data/server';
 
 export async function getFields(req) {
   const indexPattern = req.query.index;

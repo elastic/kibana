@@ -26,7 +26,7 @@ import { BaseParamType } from './base';
 import { toastNotifications } from '../../notify';
 import { propFilter } from '../filter';
 import { Field, IFieldList } from '../../../../../plugins/data/public';
-import { isNestedField } from '../../../../../plugins/data/common';
+import { isNestedField } from '../../../../../plugins/data/public';
 
 const filterByType = propFilter('type');
 

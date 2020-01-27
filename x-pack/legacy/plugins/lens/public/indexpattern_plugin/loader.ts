@@ -21,7 +21,7 @@ import { updateLayerIndexPattern } from './state_helpers';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
 import { documentField } from './document_field';
-import { isNestedField, IFieldType } from '../../../../../../src/plugins/data/common';
+import { isNestedField, IFieldType } from '../../../../../../src/plugins/data/public';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;

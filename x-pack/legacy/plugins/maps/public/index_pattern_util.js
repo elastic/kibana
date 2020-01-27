@@ -5,7 +5,7 @@
  */
 
 import { indexPatternService } from './kibana_services';
-import { isNestedField } from '../../../../../src/plugins/data/common';
+import { isNestedField } from '../../../../../src/plugins/data/public';
 
 export async function getIndexPatternsFromIds(indexPatternIds = []) {
   const promises = [];
