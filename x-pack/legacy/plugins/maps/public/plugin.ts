@@ -11,8 +11,6 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { MapListing } from './components/map_listing';
 // @ts-ignore
 import { setLicenseId, setInspector } from './kibana_services';
-// @ts-ignore
-import { MapView } from './inspector/views/map_view';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -27,7 +25,7 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
   public setup(core: any, plugins: any) {
     const {
       __LEGACY: { uiModules },
-      np: { licensing, inspector },
+      np: { licensing },
     } = plugins;
 
     uiModules
@@ -39,8 +37,6 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
     if (licensing) {
       licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
     }
-
-    inspector.registerView(MapView);
   }
 
   public start(core: CoreStart, plugins: any) {
