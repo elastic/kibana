@@ -46,36 +46,37 @@ export function createKbnUrlTracker(
   useHash: boolean,
   // _g
   urlKey: string,
-  stateUpdate$: Subscribable<unknown>,
+  stateUpdate$: Observable<unknown>,
   navLinkUpdater$: BehaviorSubject<AppUpdater>
 ): KbnUrlTracker {
-  const events$ = new Subject<UrlTrackingEvent>();
+  const key = 'sdfdsf';
+  const storage: Storage = sessionStorage;
+  const storedUrl = storage.getItem(key);
+  let currentUrl: string = '';
   const history: History = createBrowserHistory();
   const stopHistory = history.listen(location => {
     const url = getRelativeToHistoryPath(history.createHref(location), history);
-    events$.next({ type: 'CONTEXT_CHANGED', urlUpdater: () => url });
+    currentUrl = url;
+    storage.setItem(key, currentUrl);
   });
-  stateUpdate$.pipe(
-    map<unknown, UrlTrackingEvent>(state => {
-      return {
-        type: 'CONTEXT_CHANGED',
-        urlUpdater: (oldUrl: string) => {
-          return setStateToKbnUrl(urlKey, state, { useHash }, oldUrl);
-        },
-      };
+  const sub = stateUpdate$.subscribe(state => {
+      currentUrl = setStateToKbnUrl(urlKey, state, { useHash }, currentUrl);
+      storage.setItem(key, currentUrl);
     })
-  );
-  const stop = createRealUrlTracker(baseUrl, events$.asObservable(), navLinkUpdater$);
+  ;
+  if (storedUrl) {
+    navLinkUpdater$.next(() => ({ url: storedUrl }));
+  }
   return {
     appMounted() {
-      events$.next({ type: 'APP_MOUNT' });
+      navLinkUpdater$.next(() => ({ url: currentUrl }));
     },
     appUnMounted() {
-      events$.next({ type: 'APP_UNMOUNT' });
+      navLinkUpdater$.next(() => ({ url: baseUrl }));
     },
     stop() {
-      stop();
       stopHistory();
+      sub.unsubscribe();
     },
   };
 }
@@ -85,6 +86,6 @@ createKbnUrlTracker(
   '',
   true,
   '_g',
-  getQueryObservable({} as QueryStart).state$,
-  undefined
+  getQueryObservable({} as QueryStart),
+  coreStart.sdkjhflskjdhfjklsd
 );

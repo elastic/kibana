@@ -251,5 +251,5 @@ export const getQueryObservable = (
   // trigger initial syncing from state container to services if needed
   filtersSyncStateContainer.set(initialState);
 
-  return filtersSyncStateContainer;
+  return filtersSyncStateContainer.state$;
 };
