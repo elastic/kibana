@@ -1743,7 +1743,7 @@
     "kbn.management.settings.form.clearSearchResultText": "（清除搜索）",
     "kbn.management.settings.form.noSearchResultText": "未找到设置{clearSearch}",
     "kbn.management.settings.form.searchResultText": "搜索词隐藏了 {settingsCount} 个设置{clearSearch}",
-    "kbn.management.settings.pageTitle": "设置",
+    "advancedSettings.pageTitle": "设置",
     "kbn.management.settings.searchBar.unableToParseQueryErrorMessage": "无法解析查询",
     "kbn.management.settings.searchBarAriaLabel": "搜索高级设置",
     "kbn.management.settings.sectionLabel": "高级设置",

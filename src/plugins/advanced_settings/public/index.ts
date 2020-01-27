@@ -17,6 +17,10 @@
  * under the License.
  */
 
-export { MANAGEMENT_BREADCRUMB } from './breadcrumbs';
-import { npStart } from 'ui/new_platform';
-export const management = npStart.plugins.management.legacy;
+import { PluginInitializerContext } from 'kibana/public';
+import { AdvancedSettingsPlugin } from './plugin';
+export { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new AdvancedSettingsPlugin();
+}

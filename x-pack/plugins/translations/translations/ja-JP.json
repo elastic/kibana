@@ -1743,7 +1743,7 @@
     "kbn.management.settings.form.clearSearchResultText": "(検索結果を消去)",
     "kbn.management.settings.form.noSearchResultText": "設定が見つかりませんでした {clearSearch}",
     "kbn.management.settings.form.searchResultText": "検索用語により {settingsCount} 件の設定が非表示になっています {clearSearch}",
-    "kbn.management.settings.pageTitle": "設定",
+    "advancedSettings.pageTitle": "設定",
     "kbn.management.settings.searchBar.unableToParseQueryErrorMessage": "クエリをパースできません",
     "kbn.management.settings.searchBarAriaLabel": "高度な設定を検索",
     "kbn.management.settings.sectionLabel": "高度な設定",

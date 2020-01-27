@@ -17,6 +17,11 @@
  * under the License.
  */
 
-export { MANAGEMENT_BREADCRUMB } from './breadcrumbs';
-import { npStart } from 'ui/new_platform';
-export const management = npStart.plugins.management.legacy;
+import { componentRegistry } from './component_registry';
+
+export interface AdvancedSettingsSetup {
+  componentRegistry: typeof componentRegistry;
+}
+export interface AdvancedSettingsStart {
+  componentRegistry: typeof componentRegistry;
+}

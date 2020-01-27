@@ -58,6 +58,15 @@ const mockCore = {
 export const npSetup = {
   core: mockCore,
   plugins: {
+    advancedSettings: {
+      componentRegistry: {
+        register: sinon.fake(),
+        componentType: {
+          PAGE_TITLE_COMPONENT: 'page_title_component',
+          PAGE_SUBTITLE_COMPONENT: 'page_subtitle_component',
+        },
+      },
+    },
     usageCollection: {
       allowTrackUserAgent: sinon.fake(),
       reportUiStats: sinon.fake(),
