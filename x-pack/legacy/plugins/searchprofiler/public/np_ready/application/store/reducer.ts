@@ -9,6 +9,7 @@ import { State } from './store';
 
 import { OnHighlightChangeArgs } from '../components/profile_tree';
 import { ShardSerialized, Targets } from '../types';
+import { hasSearch, hasAggregations } from '../utils';
 
 export type Action =
   | { type: 'setProfiling'; value: boolean }
@@ -54,8 +55,26 @@ export const reducer: Reducer<State, Action> = (state, action) => {
   if (action.type === 'setCurrentResponse') {
     nextState.currentResponse = action.value;
     if (nextState.currentResponse) {
-      // Default to the searches tab
-      nextState.activeTab = 'searches';
+      const currentResponseHasAggregations = hasAggregations(nextState.currentResponse);
+      const currentResponseHasSearch = hasSearch(nextState.currentResponse);
+      if (
+        nextState.activeTab === 'searches' &&
+        !currentResponseHasSearch &&
+        currentResponseHasAggregations
+      ) {
+        nextState.activeTab = 'aggregations';
+      } else if (
+        nextState.activeTab === 'aggregations' &&
+        !currentResponseHasAggregations &&
+        currentResponseHasSearch
+      ) {
+        nextState.activeTab = 'searches';
+      } else if (!nextState.activeTab) {
+        // Default to searches tab
+        nextState.activeTab = 'searches';
+      }
+    } else {
+      nextState.activeTab = null;
     }
     return nextState;
   }
