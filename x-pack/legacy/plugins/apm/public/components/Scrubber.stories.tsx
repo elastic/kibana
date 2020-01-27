@@ -4,24 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  BarSeries,
+  Chart,
+  getSpecId,
+  ScaleType,
+  SeriesIdentifier,
+  Settings,
+  Theme
+} from '@elastic/charts';
 import '@elastic/charts/dist/theme_light.css';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import {
-  Chart,
-  Settings,
-  Axis,
-  getAxisId,
-  BarSeries,
-  getSpecId,
-  ScaleType,
-  Position,
-  Theme,
-  SeriesIdentifier
-} from '@elastic/charts';
-import data from './scrubber.data.json';
+import { getWaterfall } from './app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import response from './scrubber.data.json';
 
-console.log(data.items);
+// The contents of scrubber.data.json is was directly copied from a trace API
+// response, originally http://localhost:5601/kbn/api/apm/traces/21bd90461ba6355df98352070360f5f7.
+// You can paste the contents of any trace to see the response.
+const entryTransactionId = '6528d29667c22f62';
+const waterfall = getWaterfall(response, entryTransactionId);
+
+const data = waterfall.items.map((item, index) => ({
+  min: item.offset,
+  max: item.offset + item.duration,
+  'service.name': item.doc.service.name,
+  x: index
+}));
 
 function onBrushEnd() {
   console.log('onBrushEnd');
@@ -36,8 +45,10 @@ const theme: Partial<Theme> = {
 function barSeriesColorAccessor(series: SeriesIdentifier) {
   if (series.splitAccessors.get('service.name') === 'opbeans-java') {
     return 'rgb(96, 146, 192)';
-  } else {
+  } else if (series.splitAccessors.get('service.name') === 'opbeans-python') {
     return 'rgb(84, 179, 153)';
+  } else {
+    return '#9170b8';
   }
 }
 
@@ -52,16 +63,12 @@ storiesOf('TimelineScrubber', module).add(
             id={getSpecId('lines')}
             customSeriesColors={barSeriesColorAccessor}
             xScaleType={ScaleType.Linear}
-            yScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['max']}
             y0Accessors={['min']}
             splitSeriesAccessors={['service.name']}
-            data={[
-              { x: 1, min: 2, max: 12 },
-              { x: 2, min: 2, max: 8, 'service.name': 'opbeans-java' },
-              { x: 3, min: 2, max: 5 }
-            ]}
+            data={data}
           />
         </Chart>
       </div>
