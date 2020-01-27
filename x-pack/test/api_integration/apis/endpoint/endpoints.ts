@@ -12,7 +12,7 @@ export default function({ getService }: FtrProviderContext) {
   describe('test endpoints api', () => {
     describe('POST /api/endpoint/endpoints when index is empty', () => {
       it('endpoints api should return empty result when index is empty', async () => {
-        await esArchiver.unload('endpoint/endpoints');
+        await esArchiver.unload('endpoint/endpoints/api_feature');
         const { body } = await supertest
           .post('/api/endpoint/endpoints')
           .set('kbn-xsrf', 'xxx')
@@ -26,8 +26,8 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     describe('POST /api/endpoint/endpoints when index is not empty', () => {
-      before(() => esArchiver.load('endpoint/endpoints'));
-      after(() => esArchiver.unload('endpoint/endpoints'));
+      before(() => esArchiver.load('endpoint/endpoints/api_feature'));
+      after(() => esArchiver.unload('endpoint/endpoints/api_feature'));
       it('endpoints api should return one entry for each endpoint with default paging', async () => {
         const { body } = await supertest
           .post('/api/endpoint/endpoints')
