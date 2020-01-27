@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PageId } from '../../../../../endpoint_app_types';
+import { PageId } from '../../../../../common/types';
 
 interface UserNavigatedToPage {
   readonly type: 'userNavigatedToPage';
-
   readonly payload: PageId;
 }
 

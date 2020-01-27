@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertData, Immutable } from '../../../../../endpoint_app_types';
+import { Immutable, AlertData } from '../../../../../common/types';
 
 export type AlertListState = Immutable<{
   alerts: AlertData[];

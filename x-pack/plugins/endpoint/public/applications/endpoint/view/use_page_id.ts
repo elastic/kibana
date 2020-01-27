@@ -6,7 +6,7 @@
 
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { PageId } from '../../../../endpoint_app_types';
+import { PageId } from '../../../../common/types';
 import { RoutingAction } from '../store/routing';
 
 /**

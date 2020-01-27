@@ -6,7 +6,7 @@
 
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { CoreStart } from 'kibana/public';
-import { AlertData } from '../../../../../endpoint_app_types';
+import { AlertData } from '../../../../../common/types';
 import { GlobalState } from '../reducer';
 import { AppAction } from '../action';
 
