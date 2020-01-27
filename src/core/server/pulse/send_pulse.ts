@@ -19,7 +19,7 @@
 
 import { PulseChannel } from './channel';
 
-export const sendUsageFrom: 'browser' | 'server' = 'browser';
+export const sendUsageFrom: 'browser' | 'server' = 'server';
 export const CLUSTER_UUID = '123';
 export const BASE_URL = 'http://localhost:5601/api/pulse_poc';
 export interface ChannelsToSend {
