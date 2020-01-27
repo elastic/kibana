@@ -15,6 +15,10 @@ import { SingleFieldSelect } from './single_field_select';
 import { METRIC_TYPE } from '../../common/constants';
 
 function filterFieldsForAgg(fields, aggType) {
+  if (!fields) {
+    return [];
+  }
+
   if (aggType === METRIC_TYPE.UNIQUE_COUNT) {
     return fields.filter(field => {
       return field.aggregatable;
