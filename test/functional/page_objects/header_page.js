@@ -73,19 +73,19 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async setFromRelativeTime(count, unit) {
-      await testSubjects.click('superDatePickerstartDatePopoverButton').click();
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
       await PageObjects.common.sleep(50);
-      await testSubjects.click('superDatePickerRelativeTab').click();
+      await testSubjects.click('superDatePickerRelativeTab');
       await PageObjects.common.sleep(51);
-      await testSubjects.click('superDatePickerRelativeDateInputNumber').click();
+      await testSubjects.click('superDatePickerRelativeDateInputNumber');
       await PageObjects.common.sleep(51);
-      await testSubjects.find('superDatePickerRelativeDateInputNumber').clearValue();
-      await testSubjects.find('superDatePickerRelativeDateInputNumber').type(count);
+      await (await testSubjects.find('superDatePickerRelativeDateInputNumber')).clearValue();
+      await (await testSubjects.find('superDatePickerRelativeDateInputNumber')).type(count);
       await PageObjects.common.sleep(52);
-      await testSubjects.click('superDatePickerRelativeDateInputUnitSelector').click();
+      await testSubjects.click('superDatePickerRelativeDateInputUnitSelector');
       await PageObjects.common.sleep(53);
       await find.clickByCssSelector(`select[data-test-subj="superDatePickerRelativeDateInputUnitSelector"] option[value="${unit}"]`);
-      await testSubjects.click('superDatePickerstartDatePopoverButton').click();
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
     }
 
     async getToastMessage() {
@@ -102,8 +102,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('superDatePickerAbsoluteTab');
       await PageObjects.common.sleep(200);
       await testSubjects.click('superDatePickerAbsoluteDateInput');
-      await testSubjects.find('superDatePickerAbsoluteDateInput').clearValue();
-      await testSubjects.find('superDatePickerAbsoluteDateInput').type(timeString);
+      await (await testSubjects.find('superDatePickerAbsoluteDateInput')).clearValue();
+      await (await testSubjects.find('superDatePickerAbsoluteDateInput')).type(timeString);
     }
 
     async clickToastOK() {
@@ -130,8 +130,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(55);
       await testSubjects.click('superDatePickerRelativeDateInputNumber');
       await PageObjects.common.sleep(51);
-      await testSubjects.find('superDatePickerRelativeDateInputNumber').clearValue();
-      await testSubjects.find('superDatePickerRelativeDateInputNumber').type(count);
+      await (await testSubjects.find('superDatePickerRelativeDateInputNumber')).clearValue();
+      await (await testSubjects.find('superDatePickerRelativeDateInputNumber')).type(count);
       await PageObjects.common.sleep(56);
       await testSubjects.click('superDatePickerRelativeDateInputUnitSelector');
       await PageObjects.common.sleep(57);
