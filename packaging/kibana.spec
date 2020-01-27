@@ -33,7 +33,7 @@ fi
 unzip -q resources/plugins/kbn_network*.zip -d plugins/
 if [ $? -ne 0 ]; then
    echo "Exiting build. Could not unzip plugin."
-   exit $?
+   exit 1
 fi
 mv plugins/kbn_network* plugins/network_vis
 rm -rf plugins/network_vis/images/
