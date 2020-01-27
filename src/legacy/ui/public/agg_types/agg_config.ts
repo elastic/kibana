@@ -27,13 +27,17 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
-import { ISearchSource, FetchOptions } from '../courier/types';
 import { AggType } from './agg_type';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { writeParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
 import { Schema } from '../vis/editors/default/schemas';
-import { ContentType, KBN_FIELD_TYPES } from '../../../../plugins/data/public';
+import {
+  ISearchSource,
+  ContentType,
+  KBN_FIELD_TYPES,
+  FetchOptions,
+} from '../../../../plugins/data/public';
 
 export interface AggConfigOptions {
   enabled: boolean;
