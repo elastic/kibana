@@ -20,77 +20,35 @@
 import { Subscription } from 'rxjs';
 import _ from 'lodash';
 import { filter, map } from 'rxjs/operators';
-import {
-  createStateContainer,
-  IKbnUrlStateStorage,
-  syncState,
-} from '../../../../kibana_utils/public';
+import { BaseStateContainer } from '../../../../kibana_utils/public';
 import { COMPARE_ALL_OPTIONS, compareFilters } from '../filter_manager/lib/compare_filters';
 import { esFilters, RefreshInterval, TimeRange } from '../../../common';
 import { QueryStart } from '../query_service';
 
-const GLOBAL_STATE_STORAGE_KEY = '_g';
-
-export interface QuerySyncState {
+export interface QueryState {
   time?: TimeRange;
   refreshInterval?: RefreshInterval;
   filters?: esFilters.Filter[];
 }
 
 /**
- * Helper utility to set up syncing between query services and url's '_g' query param
+ * Helper utility to sync global data from query services with state container
+ * @param filterManager
+ * @param appState
  */
-export const syncQuery = (
+export const syncQuery = <S extends QueryState>(
   { timefilter: { timefilter }, filterManager }: QueryStart,
-  urlStateStorage: IKbnUrlStateStorage
+  globalState: BaseStateContainer<S>
 ) => {
-  const defaultState: QuerySyncState = {
-    time: timefilter.getTime(),
-    refreshInterval: timefilter.getRefreshInterval(),
-    filters: filterManager.getGlobalFilters(),
-  };
-
-  // retrieve current state from `_g` url
-  const initialStateFromUrl = urlStateStorage.get<QuerySyncState>(GLOBAL_STATE_STORAGE_KEY);
-
-  // remember whether there were info in the URL
-  const hasInheritedQueryFromUrl = Boolean(
-    initialStateFromUrl && Object.keys(initialStateFromUrl).length
-  );
-
-  // prepare initial state, whatever was in URL takes precedences over current state in services
-  const initialState: QuerySyncState = {
-    ...defaultState,
-    ...initialStateFromUrl,
-  };
-
-  // create state container, which will be used for syncing with syncState() util
-  const querySyncStateContainer = createStateContainer(
-    initialState,
-    {
-      setTime: (state: QuerySyncState) => (time: TimeRange) => ({ ...state, time }),
-      setRefreshInterval: (state: QuerySyncState) => (refreshInterval: RefreshInterval) => ({
-        ...state,
-        refreshInterval,
-      }),
-      setFilters: (state: QuerySyncState) => (filters: esFilters.Filter[]) => ({
-        ...state,
-        filters,
-      }),
-    },
-    {
-      time: (state: QuerySyncState) => () => state.time,
-      refreshInterval: (state: QuerySyncState) => () => state.refreshInterval,
-      filters: (state: QuerySyncState) => () => state.filters,
-    }
-  );
-
   const subs: Subscription[] = [
     timefilter.getTimeUpdate$().subscribe(() => {
-      querySyncStateContainer.transitions.setTime(timefilter.getTime());
+      globalState.set({ ...globalState.get(), time: timefilter.getTime() } as S);
     }),
     timefilter.getRefreshIntervalUpdate$().subscribe(() => {
-      querySyncStateContainer.transitions.setRefreshInterval(timefilter.getRefreshInterval());
+      globalState.set({
+        ...globalState.get(),
+        refreshInterval: timefilter.getRefreshInterval(),
+      } as S);
     }),
     filterManager
       .getUpdates$()
@@ -99,7 +57,7 @@ export const syncQuery = (
         filter(newGlobalFilters => {
           // continue only if global filters changed
           // and ignore app state filters
-          const oldGlobalFilters = querySyncStateContainer.get().filters;
+          const oldGlobalFilters = globalState.get().filters;
           return (
             !oldGlobalFilters ||
             !compareFilters(newGlobalFilters, oldGlobalFilters, COMPARE_ALL_OPTIONS)
@@ -107,61 +65,29 @@ export const syncQuery = (
         })
       )
       .subscribe(newGlobalFilters => {
-        querySyncStateContainer.transitions.setFilters(newGlobalFilters);
+        globalState.set({ ...globalState.get(), filters: newGlobalFilters } as S);
       }),
-    querySyncStateContainer.state$.subscribe(
-      ({ time, filters: globalFilters, refreshInterval }) => {
-        // cloneDeep is required because services are mutating passed objects
-        // and state in state container is frozen
-        if (time && !_.isEqual(time, timefilter.getTime())) {
-          timefilter.setTime(_.cloneDeep(time));
-        }
-
-        if (refreshInterval && !_.isEqual(refreshInterval, timefilter.getRefreshInterval())) {
-          timefilter.setRefreshInterval(_.cloneDeep(refreshInterval));
-        }
-
-        if (
-          globalFilters &&
-          !compareFilters(globalFilters, filterManager.getGlobalFilters(), COMPARE_ALL_OPTIONS)
-        ) {
-          filterManager.setGlobalFilters(_.cloneDeep(globalFilters));
-        }
+    globalState.state$.subscribe(({ time, filters: globalFilters, refreshInterval }) => {
+      // cloneDeep is required because services are mutating passed objects
+      // and state in state container is frozen
+      if (time && !_.isEqual(time, timefilter.getTime())) {
+        timefilter.setTime(_.cloneDeep(time));
       }
-    ),
+
+      if (refreshInterval && !_.isEqual(refreshInterval, timefilter.getRefreshInterval())) {
+        timefilter.setRefreshInterval(_.cloneDeep(refreshInterval));
+      }
+
+      if (
+        globalFilters &&
+        !compareFilters(globalFilters, filterManager.getGlobalFilters(), COMPARE_ALL_OPTIONS)
+      ) {
+        filterManager.setGlobalFilters(_.cloneDeep(globalFilters));
+      }
+    }),
   ];
 
-  // if there weren't any initial state in url,
-  // then put _g key into url
-  if (!initialStateFromUrl) {
-    urlStateStorage.set<QuerySyncState>(GLOBAL_STATE_STORAGE_KEY, initialState, {
-      replace: true,
-    });
-  }
-
-  // trigger initial syncing from state container to services if needed
-  querySyncStateContainer.set(initialState);
-
-  const { start, stop } = syncState({
-    stateStorage: urlStateStorage,
-    stateContainer: {
-      ...querySyncStateContainer,
-      set: state => {
-        if (state) {
-          // syncState utils requires to handle incoming "null" value
-          querySyncStateContainer.set(state);
-        }
-      },
-    },
-    storageKey: GLOBAL_STATE_STORAGE_KEY,
-  });
-
-  start();
-  return {
-    stop: () => {
-      subs.forEach(s => s.unsubscribe());
-      stop();
-    },
-    hasInheritedQueryFromUrl,
+  return () => {
+    subs.forEach(s => s.unsubscribe());
   };
 };

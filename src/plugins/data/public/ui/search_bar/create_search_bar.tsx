@@ -22,7 +22,7 @@ import { Subscription } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
-import { DataPublicPluginStart, esFilters } from '../..';
+import { DataPublicPluginStart, esFilters, Query, TimeRange } from '../..';
 import { QueryStart } from '../../query';
 import { SearchBarOwnProps, SearchBar } from './search_bar';
 
@@ -63,6 +63,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
     const [refreshPaused, setRefreshPaused] = useState(tfRefreshInterval.pause);
 
     const [filters, setFilters] = useState(fmFilters);
+    const [query, setQuery] = useState<Query>({ language: 'kql', query: '' });
 
     // We do not really need to keep track of the time
     // since this is just for initialization
@@ -116,8 +117,15 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           refreshInterval={refreshInterval}
           isRefreshPaused={refreshPaused}
           filters={filters}
+          query={query}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
+          onQuerySubmit={(payload: { dateRange: TimeRange; query?: Query }) => {
+            timefilter.timefilter.setTime(payload.dateRange);
+            if (payload.query) {
+              setQuery(payload.query);
+            }
+          }}
           {...props}
         />
       </KibanaContextProvider>

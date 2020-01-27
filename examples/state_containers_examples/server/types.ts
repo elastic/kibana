@@ -17,5 +17,7 @@
  * under the License.
  */
 
-export { syncQuery, QueryState } from './sync_query';
-export { syncAppFilters } from './sync_app_filters';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StateDemoPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StateDemoPluginStart {}

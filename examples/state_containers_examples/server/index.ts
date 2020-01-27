@@ -17,5 +17,12 @@
  * under the License.
  */
 
-export { syncQuery, QueryState } from './sync_query';
-export { syncAppFilters } from './sync_app_filters';
+import { PluginInitializerContext } from '../../../src/core/server';
+import { StateDemoServerPlugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new StateDemoServerPlugin(initializerContext);
+}
+
+export { StateDemoServerPlugin as Plugin };
+export * from '../common';

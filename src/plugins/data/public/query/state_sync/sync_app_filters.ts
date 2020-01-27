@@ -21,20 +21,20 @@ import _ from 'lodash';
 import { filter, map } from 'rxjs/operators';
 import { COMPARE_ALL_OPTIONS, compareFilters } from '../filter_manager/lib/compare_filters';
 import { esFilters } from '../../../common';
-import { FilterManager } from '../filter_manager';
 import { BaseStateContainer } from '../../../../../plugins/kibana_utils/public';
+import { QueryStart } from '../query_service';
 
 /**
  * Helper utility to sync application's state filters, with filter manager
  * @param filterManager
  * @param appState
  */
-export function syncAppFilters(
-  filterManager: FilterManager,
-  appState: BaseStateContainer<esFilters.Filter[]>
+export function syncAppFilters<S extends { appFilters: esFilters.Filter[] }>(
+  { filterManager }: QueryStart,
+  appState: BaseStateContainer<S>
 ) {
   // make sure initial app filters are picked by filterManager
-  filterManager.setAppFilters(_.cloneDeep(appState.get()));
+  filterManager.setAppFilters(_.cloneDeep(appState.get().appFilters));
 
   const subs = [
     filterManager
@@ -43,18 +43,24 @@ export function syncAppFilters(
         map(() => filterManager.getAppFilters()),
         filter(
           // continue only if app state filters updated
-          appFilters => !compareFilters(appFilters, appState.get(), COMPARE_ALL_OPTIONS)
+          appFilters => !compareFilters(appFilters, appState.get().appFilters, COMPARE_ALL_OPTIONS)
         )
       )
       .subscribe(appFilters => {
-        appState.set(appFilters);
+        appState.set({ ...appState.get(), appFilters } as S);
       }),
 
     // if appFilters in dashboardStateManager changed (e.g browser history update),
     // sync it to filterManager
     appState.state$.subscribe(() => {
-      if (!compareFilters(appState.get(), filterManager.getAppFilters(), COMPARE_ALL_OPTIONS)) {
-        filterManager.setAppFilters(_.cloneDeep(appState.get()));
+      if (
+        !compareFilters(
+          appState.get().appFilters,
+          filterManager.getAppFilters(),
+          COMPARE_ALL_OPTIONS
+        )
+      ) {
+        filterManager.setAppFilters(_.cloneDeep(appState.get().appFilters));
       }
     }),
   ];

@@ -55,6 +55,9 @@ interface SearchBarInjectedDeps {
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   isRefreshPaused?: boolean;
   refreshInterval?: number;
+
+  // Query bar - should be in SearchBarInjectedDeps
+  query?: Query;
 }
 
 export interface SearchBarOwnProps {
@@ -69,8 +72,6 @@ export interface SearchBarOwnProps {
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
-  // Query bar - should be in SearchBarInjectedDeps
-  query?: Query;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;

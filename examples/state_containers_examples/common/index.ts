@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { syncQuery, QueryState } from './sync_query';
-export { syncAppFilters } from './sync_app_filters';
+export const PLUGIN_ID = 'stateContainersExampleWithDataServices';
+export const PLUGIN_NAME = 'State containers example - with data services';

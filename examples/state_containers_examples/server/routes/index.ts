@@ -17,5 +17,20 @@
  * under the License.
  */
 
-export { syncQuery, QueryState } from './sync_query';
-export { syncAppFilters } from './sync_app_filters';
+import { IRouter } from '../../../../src/core/server';
+
+export function defineRoutes(router: IRouter) {
+  router.get(
+    {
+      path: '/api/state_demo/example',
+      validate: false,
+    },
+    async (context, request, response) => {
+      return response.ok({
+        body: {
+          time: new Date().toISOString(),
+        },
+      });
+    }
+  );
+}

@@ -17,5 +17,15 @@
  * under the License.
  */
 
-export { syncQuery, QueryState } from './sync_query';
-export { syncAppFilters } from './sync_app_filters';
+import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StateDemoPublicPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StateDemoPublicPluginStart {}
+
+export interface AppPluginDependencies {
+  data: DataPublicPluginStart;
+  navigation: NavigationPublicPluginStart;
+}
