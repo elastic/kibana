@@ -20,8 +20,17 @@
 import { IIndexPattern } from '../../../../../../../../../plugins/data/public';
 import { SortOrder } from '../components/table_header/helpers';
 
+export type SortInput =
+  | Record<string, string>
+  | SortOrder
+  | SortOrder[]
+  | Array<Record<string, string>>
+  | string[];
+
 export function getSort(
-  sort?: SortOrder[],
+  sort?: SortInput,
   indexPattern?: IIndexPattern,
-  defaultSortOrder?: SortOrder
+  defaultSortOrder?: string
 ): any;
+
+export function getSortArray(sort: SortInput, indexPattern?: IIndexPattern): any;

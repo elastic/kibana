@@ -53,10 +53,10 @@ export function getSort(sort, indexPattern) {
   return [];
 }
 
-getSort.array = function(sort, indexPattern) {
+export function getSortArray(sort, indexPattern) {
   return getSort(sort, indexPattern).map(sortPair =>
     _(sortPair)
       .pairs()
       .pop()
   );
-};
+}
