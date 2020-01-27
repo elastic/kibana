@@ -467,7 +467,6 @@
     "react-popper-tooltip": "^2.10.1",
     "react-textarea-autosize": "^7.1.2",
     "regenerate": "^1.4.0",
-    "rimraf": "^3.0.0",
     "sass-lint": "^1.12.1",
     "selenium-webdriver": "^4.0.0-alpha.5",
     "simple-git": "1.116.0",
