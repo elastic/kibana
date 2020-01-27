@@ -1,16 +1,20 @@
 {
   "description": "Windows nmap scan activity",
-  "enabled": false,
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows nmap scan activity",
   "query": "process.name:nmap.exe and event.action:\"Network connection detected (rule: NetworkConnect)\"",
   "risk_score": 50,
   "rule_id": "54413985-a3da-4f45-b238-75afb65a1bae",
   "severity": "low",
-  "to": "now",
+  "tags": ["Elastic"],
   "type": "query",
   "version": 1
 }

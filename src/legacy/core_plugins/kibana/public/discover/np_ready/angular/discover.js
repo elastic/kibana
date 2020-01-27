@@ -37,6 +37,7 @@ import { showOpenSearchPanel } from '../components/top_nav/show_open_search_pane
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
+import { discoverResponseHandler } from './response_handler';
 import {
   angular,
   buildVislibDimensions,
@@ -52,7 +53,6 @@ import {
   stateMonitorFactory,
   subscribeWithScope,
   tabifyAggResponse,
-  vislibSeriesResponseHandlerProvider,
   Vis,
   SavedObjectSaveModal,
   getAngularModule,
@@ -187,7 +187,6 @@ function discoverController(
   $timeout,
   $window,
   AppState,
-  Private,
   Promise,
   config,
   kbnUrl,
@@ -196,7 +195,6 @@ function discoverController(
   getAppState,
   globalState
 ) {
-  const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
 
   const inspectorAdapters = {
@@ -850,11 +848,9 @@ function discoverController(
           timeRange: $scope.timeRange,
           searchSource: $scope.searchSource,
         })
-      )
-        .then(resp => responseHandler(tabifiedData, resp))
-        .then(resp => {
-          $scope.histogramData = resp;
-        });
+      ).then(resp => {
+        $scope.histogramData = discoverResponseHandler(tabifiedData, resp);
+      });
     }
 
     $scope.hits = resp.hits.total;

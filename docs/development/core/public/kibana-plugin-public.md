@@ -59,14 +59,16 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ErrorToastOptions](./kibana-plugin-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-public.itoasts.md) APIs. |
 |  [FatalErrorInfo](./kibana-plugin-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
-|  [HttpErrorRequest](./kibana-plugin-public.httperrorrequest.md) |  |
-|  [HttpErrorResponse](./kibana-plugin-public.httperrorresponse.md) |  |
 |  [HttpFetchOptions](./kibana-plugin-public.httpfetchoptions.md) | All options that may be used with a [HttpHandler](./kibana-plugin-public.httphandler.md)<!-- -->. |
+|  [HttpFetchOptionsWithPath](./kibana-plugin-public.httpfetchoptionswithpath.md) | Similar to [HttpFetchOptions](./kibana-plugin-public.httpfetchoptions.md) but with the URL path included. |
 |  [HttpFetchQuery](./kibana-plugin-public.httpfetchquery.md) |  |
-|  [HttpHandler](./kibana-plugin-public.httphandler.md) | A function for making an HTTP requests to Kibana's backend. See [HttpFetchOptions](./kibana-plugin-public.httpfetchoptions.md) for options and [IHttpResponse](./kibana-plugin-public.ihttpresponse.md) for the response. |
-|  [HttpHeadersInit](./kibana-plugin-public.httpheadersinit.md) |  |
+|  [HttpHandler](./kibana-plugin-public.httphandler.md) | A function for making an HTTP requests to Kibana's backend. See [HttpFetchOptions](./kibana-plugin-public.httpfetchoptions.md) for options and [HttpResponse](./kibana-plugin-public.httpresponse.md) for the response. |
+|  [HttpHeadersInit](./kibana-plugin-public.httpheadersinit.md) | Headers to append to the request. Any headers that begin with <code>kbn-</code> are considered private to Core and will cause [HttpHandler](./kibana-plugin-public.httphandler.md) to throw an error. |
 |  [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md) | An object that may define global interceptor functions for different parts of the request and response lifecycle. See [IHttpInterceptController](./kibana-plugin-public.ihttpinterceptcontroller.md)<!-- -->. |
+|  [HttpInterceptorRequestError](./kibana-plugin-public.httpinterceptorrequesterror.md) |  |
+|  [HttpInterceptorResponseError](./kibana-plugin-public.httpinterceptorresponseerror.md) |  |
 |  [HttpRequestInit](./kibana-plugin-public.httprequestinit.md) | Fetch API options available to [HttpHandler](./kibana-plugin-public.httphandler.md)<!-- -->s. |
+|  [HttpResponse](./kibana-plugin-public.httpresponse.md) |  |
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
 |  [I18nStart](./kibana-plugin-public.i18nstart.md) | I18nStart.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
 |  [IAnonymousPaths](./kibana-plugin-public.ianonymouspaths.md) | APIs for denoting paths as not requiring authentication |
@@ -74,7 +76,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IContextContainer](./kibana-plugin-public.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [IHttpFetchError](./kibana-plugin-public.ihttpfetcherror.md) |  |
 |  [IHttpInterceptController](./kibana-plugin-public.ihttpinterceptcontroller.md) | Used to halt a request Promise chain in a [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md)<!-- -->. |
-|  [IHttpResponse](./kibana-plugin-public.ihttpresponse.md) |  |
 |  [IHttpResponseInterceptorOverrides](./kibana-plugin-public.ihttpresponseinterceptoroverrides.md) | Properties that can be returned by HttpInterceptor.request to override the response. |
 |  [ImageValidation](./kibana-plugin-public.imagevalidation.md) |  |
 |  [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) |

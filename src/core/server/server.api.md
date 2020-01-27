@@ -583,13 +583,13 @@ export interface CoreStart {
 // @public
 export class CspConfig implements ICspConfig {
     // @internal
-    constructor(env: Env, rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
+    constructor(rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
+    // (undocumented)
+    static readonly DEFAULT: CspConfig;
     // (undocumented)
     readonly header: string;
     // (undocumented)
     readonly rules: string[];
-    // (undocumented)
-    readonly rulesChangedFromDefault: boolean;
     // (undocumented)
     readonly strict: boolean;
     // (undocumented)
@@ -774,7 +774,6 @@ export type IContextProvider<THandler extends HandlerFunction<any>, TContextName
 export interface ICspConfig {
     readonly header: string;
     readonly rules: string[];
-    readonly rulesChangedFromDefault: boolean;
     readonly strict: boolean;
     readonly warnLegacyBrowsers: boolean;
 }
@@ -884,6 +883,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     // @internal
     static from<P, Q, B>(req: Request, routeSchemas?: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P, Q, B, any>;
     readonly headers: Headers;
+    readonly isSystemRequest: boolean;
     // (undocumented)
     readonly params: Params;
     // (undocumented)
