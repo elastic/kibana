@@ -15,7 +15,7 @@ describe('IfVertex', () => {
   beforeEach(() => {
     graph = {};
     vertexJson = {
-      condition: '[action] == "login"'
+      condition: '[action] == "login"',
     };
   });
 

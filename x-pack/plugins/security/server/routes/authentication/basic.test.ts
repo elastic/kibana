@@ -15,7 +15,6 @@ import {
 import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
 import { Authentication, AuthenticationResult } from '../../authentication';
 import { ConfigType } from '../../config';
-import { LegacyAPI } from '../../plugin';
 import { defineBasicRoutes } from './basic';
 
 import {
@@ -50,7 +49,7 @@ describe('Basic authentication routes', () => {
       config: { authc: { providers: ['saml'] } } as ConfigType,
       authc,
       authz: authorizationMock.create(),
-      getLegacyAPI: () => ({ cspRules: 'test-csp-rule' } as LegacyAPI),
+      csp: httpServiceMock.createSetupContract().csp,
     });
   });
 

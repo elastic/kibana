@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -14,7 +12,11 @@ import { EuiLoadingChart, EuiSpacer } from '@elastic/eui';
 export function LoadingIndicator({ height, label }) {
   height = height ? +height : 100;
   return (
-    <div className="ml-loading-indicator" style={{ height: `${height}px` }}>
+    <div
+      className="ml-loading-indicator"
+      style={{ height: `${height}px` }}
+      data-test-subj="mlLoadingIndicator"
+    >
       <EuiLoadingChart size="xl" mono />
       {label && (
         <>
@@ -27,5 +29,5 @@ export function LoadingIndicator({ height, label }) {
 }
 LoadingIndicator.propTypes = {
   height: PropTypes.number,
-  label: PropTypes.string
+  label: PropTypes.string,
 };

@@ -28,8 +28,8 @@ export function stubbedSavedObjectIndexPattern(id) {
     type: 'index-pattern',
     attributes: {
       customFormats: '{}',
-      fields: mockLogstashFields
+      fields: mockLogstashFields,
     },
-    version: 2
+    version: 2,
   });
 }

@@ -21,12 +21,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import classNames from 'classnames';
 
-const DIRECTIONS = [
-  'down',
-  'up',
-  'left',
-  'right'
-];
+const DIRECTIONS = ['down', 'up', 'left', 'right'];
 
 const directionToClassNameMap = {
   down: 'fa-chevron-circle-down',
@@ -40,11 +35,7 @@ const KuiCollapseButton = ({ className, direction, ...rest }) => {
   const childClasses = classNames('kuiIcon', directionToClassNameMap[direction]);
 
   return (
-    <button
-      type="button"
-      className={classes}
-      {...rest}
-    >
+    <button type="button" className={classes} {...rest}>
       <span className={childClasses} />
     </button>
   );
@@ -52,10 +43,7 @@ const KuiCollapseButton = ({ className, direction, ...rest }) => {
 
 KuiCollapseButton.propTypes = {
   className: PropTypes.string,
-  direction: PropTypes.oneOf(DIRECTIONS).isRequired
+  direction: PropTypes.oneOf(DIRECTIONS).isRequired,
 };
 
-export {
-  DIRECTIONS,
-  KuiCollapseButton
-};
+export { DIRECTIONS, KuiCollapseButton };

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { countBy, isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../alerting/server/types';
 import { SignalSearchResponse, BulkResponse } from './types';
@@ -27,6 +28,28 @@ interface SingleBulkCreateParams {
   tags: string[];
 }
 
+/**
+ * This is for signals on signals to work correctly. If given a rule id this will check if
+ * that rule id already exists in the ancestor tree of each signal search response and remove
+ * those documents so they cannot be created as a signal since we do not want a rule id to
+ * ever be capable of re-writing the same signal continuously if both the _input_ and _output_
+ * of the signals index happens to be the same index.
+ * @param ruleId The rule id
+ * @param signalSearchResponse The search response that has all the documents
+ */
+export const filterDuplicateRules = (
+  ruleId: string,
+  signalSearchResponse: SignalSearchResponse
+) => {
+  return signalSearchResponse.hits.hits.filter(doc => {
+    if (doc._source.signal == null) {
+      return true;
+    } else {
+      return !doc._source.signal.ancestors.some(ancestor => ancestor.rule === ruleId);
+    }
+  });
+};
+
 // Bulk Index documents.
 export const singleBulkCreate = async ({
   someResult,
@@ -42,6 +65,8 @@ export const singleBulkCreate = async ({
   enabled,
   tags,
 }: SingleBulkCreateParams): Promise<boolean> => {
+  someResult.hits.hits = filterDuplicateRules(id, someResult);
+
   if (someResult.hits.hits.length === 0) {
     return true;
   }
@@ -68,39 +93,30 @@ export const singleBulkCreate = async ({
     },
     buildBulkBody({ doc, ruleParams, id, name, createdBy, updatedBy, interval, enabled, tags }),
   ]);
-  const time1 = performance.now();
-  const firstResult: BulkResponse = await services.callCluster('bulk', {
+  const start = performance.now();
+  const response: BulkResponse = await services.callCluster('bulk', {
     index: signalsIndex,
     refresh: false,
     body: bulkBody,
   });
-  const time2 = performance.now();
-  logger.debug(
-    `individual bulk process time took: ${Number(time2 - time1).toFixed(2)} milliseconds`
-  );
-  logger.debug(`took property says bulk took: ${firstResult.took} milliseconds`);
-  if (firstResult.errors) {
-    // go through the response status errors and see what
-    // types of errors they are, count them up, and log them.
-    const errorCountMap = firstResult.items.reduce((acc: { [key: string]: number }, item) => {
-      if (item.create.error) {
-        const responseStatusKey = item.create.status.toString();
-        acc[responseStatusKey] = acc[responseStatusKey] ? acc[responseStatusKey] + 1 : 1;
-      }
-      return acc;
-    }, {});
-    /*
-     the logging output below should look like
-     {'409': 55}
-     which is read as "there were 55 counts of 409 errors returned from bulk create"
-    */
-    logger.error(
-      `[-] bulkResponse had errors with response statuses:counts of...\n${JSON.stringify(
-        errorCountMap,
-        null,
-        2
-      )}`
-    );
+  const end = performance.now();
+  logger.debug(`individual bulk process time took: ${Number(end - start).toFixed(2)} milliseconds`);
+  logger.debug(`took property says bulk took: ${response.took} milliseconds`);
+
+  if (response.errors) {
+    const itemsWithErrors = response.items.filter(item => item.create.error);
+    const errorCountsByStatus = countBy(itemsWithErrors, item => item.create.status);
+    delete errorCountsByStatus['409']; // Duplicate signals are expected
+
+    if (!isEmpty(errorCountsByStatus)) {
+      logger.error(
+        `[-] bulkResponse had errors with response statuses:counts of...\n${JSON.stringify(
+          errorCountsByStatus,
+          null,
+          2
+        )}`
+      );
+    }
   }
   return true;
 };

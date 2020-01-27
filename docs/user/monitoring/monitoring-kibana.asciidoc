@@ -96,7 +96,8 @@ used when {kib} sends monitoring data to the production cluster.
 .. Configure {kib} to encrypt communications between the {kib} server and the
 production cluster. This set up involves generating a server certificate and
 setting `server.ssl.*` and `elasticsearch.ssl.certificateAuthorities` settings
-in the `kibana.yml` file on the {kib} server. For example:
+in the `kibana.yml` file on the {kib} server. For example, using a PEM-formatted
+certificate and private key:
 +
 --
 [source,yaml]
@@ -105,13 +106,18 @@ server.ssl.key: /path/to/your/server.key
 server.ssl.certificate: /path/to/your/server.crt
 --------------------------------------------------------------------------------
 
-If you are using your own certificate authority to sign certificates, specify
-the location of the PEM file in the `kibana.yml` file:
+If you are using your own certificate authority (CA) to sign certificates,
+specify the location of the PEM file in the `kibana.yml` file:
 
 [source,yaml]
 --------------------------------------------------------------------------------
 elasticsearch.ssl.certificateAuthorities: /path/to/your/cacert.pem
 --------------------------------------------------------------------------------
+
+NOTE: Alternatively, the PKCS #12 format can be used for the Kibana certificate
+and key, along with any included CA certificates, by setting
+`server.ssl.keystore.path`. If your CA certificate chain is in a separate trust
+store, you can also use `server.ssl.truststore.path`.
 
 For more information, see <<using-kibana-with-security>>.
 --

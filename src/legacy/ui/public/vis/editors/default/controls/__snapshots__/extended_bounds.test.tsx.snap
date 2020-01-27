@@ -21,7 +21,6 @@ exports[`ExtendedBoundsParamEditor should be rendered with default set of props 
         compressed={true}
         fullWidth={true}
         isInvalid={false}
-        isLoading={false}
         onChange={[Function]}
         prepend="Min"
         value=""
@@ -33,7 +32,6 @@ exports[`ExtendedBoundsParamEditor should be rendered with default set of props 
         compressed={true}
         fullWidth={true}
         isInvalid={false}
-        isLoading={false}
         onChange={[Function]}
         prepend="Max"
         value=""

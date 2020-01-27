@@ -6,8 +6,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { ValidationIndicesError } from '../../../../common/http_api';
 import { isExampleDataIndex } from '../../../../common/log_analysis';
+import {
+  ValidatedIndex,
+  ValidationIndicesUIError,
+} from '../../../components/logging/log_analysis_setup/initial_configuration_step';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
 
@@ -17,38 +20,19 @@ type SetupHandler = (
   endTime: number | undefined
 ) => void;
 
-export type ValidationIndicesUIError =
-  | ValidationIndicesError
-  | { error: 'NETWORK_ERROR' }
-  | { error: 'TOO_FEW_SELECTED_INDICES' };
-
-interface ValidIndex {
-  validity: 'valid';
-  name: string;
-  isSelected: boolean;
-}
-
-interface InvalidIndex {
-  validity: 'invalid';
-  name: string;
-  errors: ValidationIndicesError[];
-}
-
-export type ValidatedIndex = ValidIndex | InvalidIndex;
-
 interface AnalysisSetupStateArguments<JobType extends string> {
-  cleanupAndSetupModule: SetupHandler;
+  cleanUpAndSetUpModule: SetupHandler;
   moduleDescriptor: ModuleDescriptor<JobType>;
-  setupModule: SetupHandler;
+  setUpModule: SetupHandler;
   sourceConfiguration: ModuleSourceConfiguration;
 }
 
 const fourWeeksInMs = 86400000 * 7 * 4;
 
 export const useAnalysisSetupState = <JobType extends string>({
-  cleanupAndSetupModule,
+  cleanUpAndSetUpModule,
   moduleDescriptor: { validateSetupIndices },
-  setupModule,
+  setUpModule,
   sourceConfiguration,
 }: AnalysisSetupStateArguments<JobType>) => {
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
@@ -107,13 +91,13 @@ export const useAnalysisSetupState = <JobType extends string>({
     [validatedIndices]
   );
 
-  const setup = useCallback(() => {
-    return setupModule(selectedIndexNames, startTime, endTime);
-  }, [setupModule, selectedIndexNames, startTime, endTime]);
+  const setUp = useCallback(() => {
+    return setUpModule(selectedIndexNames, startTime, endTime);
+  }, [setUpModule, selectedIndexNames, startTime, endTime]);
 
-  const cleanupAndSetup = useCallback(() => {
-    return cleanupAndSetupModule(selectedIndexNames, startTime, endTime);
-  }, [cleanupAndSetupModule, selectedIndexNames, startTime, endTime]);
+  const cleanUpAndSetUp = useCallback(() => {
+    return cleanUpAndSetUpModule(selectedIndexNames, startTime, endTime);
+  }, [cleanUpAndSetUpModule, selectedIndexNames, startTime, endTime]);
 
   const isValidating = useMemo(
     () =>
@@ -143,13 +127,13 @@ export const useAnalysisSetupState = <JobType extends string>({
   }, [isValidating, validateIndicesRequest.state, selectedIndexNames, validatedIndices]);
 
   return {
-    cleanupAndSetup,
+    cleanUpAndSetUp,
     endTime,
     isValidating,
     selectedIndexNames,
     setEndTime,
     setStartTime,
-    setup,
+    setUp,
     startTime,
     validatedIndices,
     setValidatedIndices,

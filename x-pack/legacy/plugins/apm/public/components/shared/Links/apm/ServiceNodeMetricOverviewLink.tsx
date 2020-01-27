@@ -24,7 +24,8 @@ const ServiceNodeMetricOverviewLink = ({
     urlParams,
     'host',
     'containerId',
-    'podName'
+    'podName',
+    'serviceVersion'
   );
 
   return (

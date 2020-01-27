@@ -26,15 +26,15 @@ import { getConfig } from '../config';
 import { getVersionInfo } from '../version_info';
 
 describe('dev/build/lib/config', () => {
-  const setup = async function ({ targetAllPlatforms = true } = {}) {
+  const setup = async function({ targetAllPlatforms = true } = {}) {
     const isRelease = Boolean(Math.round(Math.random()));
     const config = await getConfig({
       isRelease,
-      targetAllPlatforms
+      targetAllPlatforms,
     });
     const buildInfo = await getVersionInfo({
       isRelease,
-      pkg
+      pkg,
     });
     return { config, buildInfo };
   };
@@ -63,25 +63,24 @@ describe('dev/build/lib/config', () => {
   describe('#resolveFromRepo()', () => {
     it('resolves a relative path', async () => {
       const { config } = await setup();
-      expect(config.resolveFromRepo('src/dev/build/lib/__tests__'))
-        .to.be(__dirname);
+      expect(config.resolveFromRepo('src/dev/build/lib/__tests__')).to.be(__dirname);
     });
 
     it('resolves a series of relative paths', async () => {
       const { config } = await setup();
-      expect(config.resolveFromRepo('src', 'dev', 'build', 'lib', '__tests__'))
-        .to.be(__dirname);
+      expect(config.resolveFromRepo('src', 'dev', 'build', 'lib', '__tests__')).to.be(__dirname);
     });
   });
 
   describe('#getTargetPlatforms()', () => {
     it('returns an array of all platform objects', async () => {
       const { config } = await setup();
-      expect(config.getTargetPlatforms().map(p => p.getName()).sort()).to.eql([
-        'darwin',
-        'linux',
-        'windows'
-      ]);
+      expect(
+        config
+          .getTargetPlatforms()
+          .map(p => p.getName())
+          .sort()
+      ).to.eql(['darwin', 'linux', 'windows']);
     });
 
     it('returns just this platform when targetAllPlatforms = false', async () => {
@@ -97,11 +96,12 @@ describe('dev/build/lib/config', () => {
   describe('#getNodePlatforms()', () => {
     it('returns all platforms', async () => {
       const { config } = await setup();
-      expect(config.getTargetPlatforms().map(p => p.getName()).sort()).to.eql([
-        'darwin',
-        'linux',
-        'windows'
-      ]);
+      expect(
+        config
+          .getTargetPlatforms()
+          .map(p => p.getName())
+          .sort()
+      ).to.eql(['darwin', 'linux', 'windows']);
     });
 
     it('returns this platform and linux, when targetAllPlatforms = false', async () => {

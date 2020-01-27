@@ -4,28 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiToolTip
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-
 
 function getAddFilter({ entityName, entityValue, filter }) {
   return (
     <EuiToolTip
-      content={<FormattedMessage
-        id="xpack.ml.anomaliesTable.entityCell.addFilterTooltip"
-        defaultMessage="Add filter"
-      />}
+      content={
+        <FormattedMessage
+          id="xpack.ml.anomaliesTable.entityCell.addFilterTooltip"
+          defaultMessage="Add filter"
+        />
+      }
     >
       <EuiButtonIcon
         size="xs"
@@ -33,7 +27,7 @@ function getAddFilter({ entityName, entityValue, filter }) {
         onClick={() => filter(entityName, entityValue, '+')}
         iconType="plusInCircle"
         aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.addFilterAriaLabel', {
-          defaultMessage: 'Add filter'
+          defaultMessage: 'Add filter',
         })}
       />
     </EuiToolTip>
@@ -43,10 +37,12 @@ function getAddFilter({ entityName, entityValue, filter }) {
 function getRemoveFilter({ entityName, entityValue, filter }) {
   return (
     <EuiToolTip
-      content={<FormattedMessage
-        id="xpack.ml.anomaliesTable.entityCell.removeFilterTooltip"
-        defaultMessage="Remove filter"
-      />}
+      content={
+        <FormattedMessage
+          id="xpack.ml.anomaliesTable.entityCell.removeFilterTooltip"
+          defaultMessage="Remove filter"
+        />
+      }
     >
       <EuiButtonIcon
         size="xs"
@@ -54,7 +50,7 @@ function getRemoveFilter({ entityName, entityValue, filter }) {
         onClick={() => filter(entityName, entityValue, '-')}
         iconType="minusInCircle"
         aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.removeFilterAriaLabel', {
-          defaultMessage: 'Remove filter'
+          defaultMessage: 'Remove filter',
         })}
       />
     </EuiToolTip>
@@ -70,41 +66,35 @@ export const EntityCell = function EntityCell({
   entityName,
   entityValue,
   filter,
-  wrapText = false
+  wrapText = false,
 }) {
-  const valueText = (entityName !== 'mlcategory') ? entityValue : `mlcategory ${entityValue}`;
+  const valueText = entityName !== 'mlcategory' ? entityValue : `mlcategory ${entityValue}`;
   const textStyle = { maxWidth: '100%' };
-  const textWrapperClass = (wrapText ? 'field-value-long' : 'field-value-short');
-  const shouldDisplayIcons = (filter !== undefined && entityName !== undefined && entityValue !== undefined);
+  const textWrapperClass = wrapText ? 'field-value-long' : 'field-value-short';
+  const shouldDisplayIcons =
+    filter !== undefined && entityName !== undefined && entityValue !== undefined;
 
   if (wrapText === true) {
     return (
       <div>
         <span className={textWrapperClass}>{valueText}</span>
-        {shouldDisplayIcons &&
+        {shouldDisplayIcons && (
           <React.Fragment>
             {getAddFilter({ entityName, entityValue, filter })}
             {getRemoveFilter({ entityName, entityValue, filter })}
           </React.Fragment>
-        }
+        )}
       </div>
     );
   } else {
     return (
-      <EuiFlexGroup
-        direction="row"
-        alignItems="center"
-        gutterSize="none"
-      >
+      <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false} style={textStyle}>
-          <EuiText
-            size="xs"
-            className={textWrapperClass}
-          >
+          <EuiText size="xs" className={textWrapperClass}>
             {valueText}
           </EuiText>
         </EuiFlexItem>
-        {shouldDisplayIcons &&
+        {shouldDisplayIcons && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
@@ -115,7 +105,7 @@ export const EntityCell = function EntityCell({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-        }
+        )}
       </EuiFlexGroup>
     );
   }
@@ -125,5 +115,5 @@ EntityCell.propTypes = {
   entityName: PropTypes.string,
   entityValue: PropTypes.any,
   filter: PropTypes.func,
-  wrapText: PropTypes.bool
+  wrapText: PropTypes.bool,
 };

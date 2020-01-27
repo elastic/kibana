@@ -8,15 +8,18 @@ Not to worry, we've created this guide to help you get the most out of Elastic A
 
 APM is available via the navigation sidebar in {Kib}.
 
-* <<filters,Filters>>
-* <<services,Services overview>>
-* <<traces,Traces overview>>
-* <<transactions,Transaction overview>>
-* <<spans,Span timeline visualization>>
-* <<errors,Debug errors>>
-* <<metrics,Metrics overview>>
-* <<machine-learning-integration,Machine learning integration>>
-* <<query-bar,Advanced queries>>
+* <<filters>>
+* <<services>>
+* <<traces>>
+* <<transactions>>
+* <<spans>>
+* <<errors>>
+* <<metrics>>
+* <<machine-learning-integration>>
+* <<agent-configuration>>
+* <<advanced-queries>>
+* <<apm-settings-in-kibana>>
+* <<troubleshooting>>
 
 include::filters.asciidoc[]
 
@@ -35,5 +38,7 @@ include::metrics.asciidoc[]
 include::agent-configuration.asciidoc[]
 
 include::advanced-queries.asciidoc[]
+
+include::settings.asciidoc[]
 
 include::troubleshooting.asciidoc[]

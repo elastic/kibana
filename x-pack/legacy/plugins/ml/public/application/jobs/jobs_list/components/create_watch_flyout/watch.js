@@ -9,16 +9,14 @@ import { ML_RESULTS_INDEX_PATTERN } from '../../../../../../common/constants/ind
 export const watch = {
   trigger: {
     schedule: {
-      interval: '60s'
-    }
+      interval: '60s',
+    },
   },
   input: {
     search: {
       request: {
         search_type: 'query_then_fetch',
-        indices: [
-          ML_RESULTS_INDEX_PATTERN
-        ],
+        indices: [ML_RESULTS_INDEX_PATTERN],
         body: {
           size: 0,
           query: {
@@ -26,36 +24,32 @@ export const watch = {
               filter: [
                 {
                   term: {
-                    job_id: null
-                  }
+                    job_id: null,
+                  },
                 },
                 {
                   range: {
                     timestamp: {
-                      gte: null
-                    }
-                  }
+                      gte: null,
+                    },
+                  },
                 },
                 {
                   terms: {
-                    result_type: [
-                      'bucket',
-                      'record',
-                      'influencer'
-                    ]
-                  }
-                }
-              ]
-            }
+                    result_type: ['bucket', 'record', 'influencer'],
+                  },
+                },
+              ],
+            },
           },
           aggs: {
             bucket_results: {
               filter: {
                 range: {
                   anomaly_score: {
-                    gte: null
-                  }
-                }
+                    gte: null,
+                  },
+                },
               },
               aggs: {
                 top_bucket_hits: {
@@ -63,9 +57,9 @@ export const watch = {
                     sort: [
                       {
                         anomaly_score: {
-                          order: 'desc'
-                        }
-                      }
+                          order: 'desc',
+                        },
+                      },
                     ],
                     _source: {
                       includes: [
@@ -73,8 +67,8 @@ export const watch = {
                         'result_type',
                         'timestamp',
                         'anomaly_score',
-                        'is_interim'
-                      ]
+                        'is_interim',
+                      ],
                     },
                     size: 1,
                     script_fields: {
@@ -84,9 +78,9 @@ export const watch = {
                           source: `LocalDateTime.ofEpochSecond((doc["timestamp"].value.getMillis()-((doc["bucket_span"].value * 1000)
  * params.padding)) / 1000, 0, ZoneOffset.UTC).toString()+\":00.000Z\"`,
                           params: {
-                            'padding': 10
-                          }
-                        }
+                            padding: 10,
+                          },
+                        },
                       },
                       end: {
                         script: {
@@ -94,40 +88,40 @@ export const watch = {
                           source: `LocalDateTime.ofEpochSecond((doc["timestamp"].value.getMillis()+((doc["bucket_span"].value * 1000)
  * params.padding)) / 1000, 0, ZoneOffset.UTC).toString()+\":00.000Z\"`,
                           params: {
-                            'padding': 10
-                          }
-                        }
+                            padding: 10,
+                          },
+                        },
                       },
                       timestamp_epoch: {
                         script: {
                           lang: 'painless',
-                          source: 'doc["timestamp"].value.getMillis()/1000'
-                        }
+                          source: 'doc["timestamp"].value.getMillis()/1000',
+                        },
                       },
                       timestamp_iso8601: {
                         script: {
                           lang: 'painless',
-                          source: 'doc["timestamp"].value'
-                        }
+                          source: 'doc["timestamp"].value',
+                        },
                       },
                       score: {
                         script: {
                           lang: 'painless',
-                          source: 'Math.round(doc["anomaly_score"].value)'
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+                          source: 'Math.round(doc["anomaly_score"].value)',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
             influencer_results: {
               filter: {
                 range: {
                   influencer_score: {
-                    gte: 3
-                  }
-                }
+                    gte: 3,
+                  },
+                },
               },
               aggs: {
                 top_influencer_hits: {
@@ -135,9 +129,9 @@ export const watch = {
                     sort: [
                       {
                         influencer_score: {
-                          order: 'desc'
-                        }
-                      }
+                          order: 'desc',
+                        },
+                      },
                     ],
                     _source: {
                       includes: [
@@ -146,29 +140,29 @@ export const watch = {
                         'influencer_field_name',
                         'influencer_field_value',
                         'influencer_score',
-                        'isInterim'
-                      ]
+                        'isInterim',
+                      ],
                     },
                     size: 3,
                     script_fields: {
                       score: {
                         script: {
                           lang: 'painless',
-                          source: 'Math.round(doc["influencer_score"].value)'
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+                          source: 'Math.round(doc["influencer_score"].value)',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
             record_results: {
               filter: {
                 range: {
                   record_score: {
-                    gte: 3
-                  }
-                }
+                    gte: 3,
+                  },
+                },
               },
               aggs: {
                 top_record_hits: {
@@ -176,9 +170,9 @@ export const watch = {
                     sort: [
                       {
                         record_score: {
-                          order: 'desc'
-                        }
-                      }
+                          order: 'desc',
+                        },
+                      },
                     ],
                     _source: {
                       includes: [
@@ -190,46 +184,48 @@ export const watch = {
                         'field_name',
                         'by_field_value',
                         'over_field_value',
-                        'partition_field_value'
-                      ]
+                        'partition_field_value',
+                      ],
                     },
                     size: 3,
                     script_fields: {
                       score: {
                         script: {
                           lang: 'painless',
-                          source: 'Math.round(doc["record_score"].value)'
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+                          source: 'Math.round(doc["record_score"].value)',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   },
   condition: {
     compare: {
       'ctx.payload.aggregations.bucket_results.doc_count': {
-        gt: 0
-      }
-    }
+        gt: 0,
+      },
+    },
   },
   actions: {
     log: {
       logging: {
         level: 'info',
-        text: '' // this gets populated below.
-      }
-    }
-  }
+        text: '', // this gets populated below.
+      },
+    },
+  },
 };
 
 // Add logging text. Broken over a few lines due to its length.
-let txt = 'Alert for job [{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0._source.job_id}}] at ';
-txt += '[{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.timestamp_iso8601.0}}] score ';
+let txt =
+  'Alert for job [{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0._source.job_id}}] at ';
+txt +=
+  '[{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.timestamp_iso8601.0}}] score ';
 txt += '[{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.score.0}}]';
 watch.actions.log.logging.text = txt;

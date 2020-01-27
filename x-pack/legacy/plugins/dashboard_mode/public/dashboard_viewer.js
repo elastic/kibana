@@ -30,19 +30,19 @@ import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
 import 'ui/kbn_top_nav';
-import 'plugins/kibana/dashboard';
-import 'ui/vislib';
+import 'ui/color_maps';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'leaflet';
+import 'plugins/kibana/dashboard/legacy';
 import { npStart } from 'ui/new_platform';
 import { localApplicationService } from 'plugins/kibana/local_application_service';
 
-
 import { showAppRedirectNotification } from 'ui/notify';
-import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
+import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard';
 
-uiModules.get('kibana')
+uiModules
+  .get('kibana')
   .config(dashboardConfigProvider => dashboardConfigProvider.turnHideWriteControlsOn());
 
 localApplicationService.attachToAngular(routes);
@@ -50,10 +50,9 @@ localApplicationService.attachToAngular(routes);
 routes.enable();
 routes.otherwise({ redirectTo: defaultUrl() });
 
-chrome
-  .setRootController('kibana', function () {
-    npStart.core.chrome.navLinks.showOnly('kibana:dashboard');
-  });
+chrome.setRootController('kibana', function() {
+  npStart.core.chrome.navLinks.showOnly('kibana:dashboard');
+});
 
 uiModules.get('kibana').run(showAppRedirectNotification);
 

@@ -16,15 +16,15 @@ describe('Summary Status Component', () => {
         {
           label: 'Free Disk Space',
           value: '173.9 GB',
-          'data-test-subj': 'freeDiskSpace'
+          'data-test-subj': 'freeDiskSpace',
         },
         {
           label: 'Documents',
           value: '24.8k',
-          'data-test-subj': 'documentCount'
+          'data-test-subj': 'documentCount',
         },
       ],
-      status: 'green'
+      status: 'green',
     };
 
     expect(renderWithIntl(<SummaryStatus {...props} />)).toMatchSnapshot();
@@ -35,15 +35,15 @@ describe('Summary Status Component', () => {
       metrics: [
         {
           value: '127.0.0.1:9300',
-          'data-test-subj': 'transportAddress'
+          'data-test-subj': 'transportAddress',
         },
         {
           label: 'Documents',
           value: '24.8k',
-          'data-test-subj': 'documentCount'
+          'data-test-subj': 'documentCount',
         },
       ],
-      status: 'yellow'
+      status: 'yellow',
     };
 
     expect(renderWithIntl(<SummaryStatus {...props} />)).toMatchSnapshot();
@@ -55,14 +55,14 @@ describe('Summary Status Component', () => {
         {
           label: 'Free Disk Space',
           value: '173.9 GB',
-          'data-test-subj': 'freeDiskSpace'
+          'data-test-subj': 'freeDiskSpace',
         },
         {
           label: 'Documents',
           value: '24.8k',
-          'data-test-subj': 'documentCount'
+          'data-test-subj': 'documentCount',
         },
-      ]
+      ],
     };
 
     expect(renderWithIntl(<SummaryStatus {...props} />)).toMatchSnapshot();

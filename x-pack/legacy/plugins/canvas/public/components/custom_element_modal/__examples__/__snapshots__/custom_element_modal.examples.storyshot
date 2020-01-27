@@ -55,10 +55,11 @@ Array [
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -117,6 +118,7 @@ Array [
                         <input
                           aria-describedby="generated-id-help"
                           className="euiFieldText canvasCustomElementForm__name"
+                          data-test-subj="canvasCustomElementForm-name"
                           id="generated-id"
                           onBlur={[Function]}
                           onChange={[Function]}
@@ -155,6 +157,7 @@ Array [
                     <textarea
                       aria-describedby="generated-id-help"
                       className="euiTextArea euiTextArea--resizeVertical"
+                      data-test-subj="canvasCustomElementForm-description"
                       id="generated-id"
                       onBlur={[Function]}
                       onChange={[Function]}
@@ -209,10 +212,11 @@ Array [
                           className="euiFilePicker__prompt"
                         >
                           <svg
-                            aria-hidden="true"
+                            aria-hidden={true}
                             className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
@@ -255,9 +259,11 @@ Array [
                     className="euiCard__top"
                   >
                     <svg
+                      aria-hidden={true}
                       className="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading euiCard__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -320,6 +326,7 @@ Array [
             >
               <button
                 className="euiButton euiButton--primary euiButton--fill"
+                data-test-subj="canvasCustomElementForm-submit"
                 onClick={[Function]}
                 type="button"
               >
@@ -412,10 +419,11 @@ Array [
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -474,6 +482,7 @@ Array [
                         <input
                           aria-describedby="generated-id-help"
                           className="euiFieldText canvasCustomElementForm__name"
+                          data-test-subj="canvasCustomElementForm-name"
                           id="generated-id"
                           onBlur={[Function]}
                           onChange={[Function]}
@@ -512,6 +521,7 @@ Array [
                     <textarea
                       aria-describedby="generated-id-help"
                       className="euiTextArea euiTextArea--resizeVertical"
+                      data-test-subj="canvasCustomElementForm-description"
                       id="generated-id"
                       onBlur={[Function]}
                       onChange={[Function]}
@@ -566,10 +576,11 @@ Array [
                           className="euiFilePicker__prompt"
                         >
                           <svg
-                            aria-hidden="true"
+                            aria-hidden={true}
                             className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
@@ -673,6 +684,7 @@ Array [
             >
               <button
                 className="euiButton euiButton--primary euiButton--fill"
+                data-test-subj="canvasCustomElementForm-submit"
                 onClick={[Function]}
                 type="button"
               >
@@ -766,10 +778,11 @@ Array [
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -828,6 +841,7 @@ Array [
                         <input
                           aria-describedby="generated-id-help"
                           className="euiFieldText canvasCustomElementForm__name"
+                          data-test-subj="canvasCustomElementForm-name"
                           id="generated-id"
                           onBlur={[Function]}
                           onChange={[Function]}
@@ -866,6 +880,7 @@ Array [
                     <textarea
                       aria-describedby="generated-id-help"
                       className="euiTextArea euiTextArea--resizeVertical"
+                      data-test-subj="canvasCustomElementForm-description"
                       id="generated-id"
                       onBlur={[Function]}
                       onChange={[Function]}
@@ -920,10 +935,11 @@ Array [
                           className="euiFilePicker__prompt"
                         >
                           <svg
-                            aria-hidden="true"
+                            aria-hidden={true}
                             className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
@@ -966,9 +982,11 @@ Array [
                     className="euiCard__top"
                   >
                     <svg
+                      aria-hidden={true}
                       className="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading euiCard__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -1031,6 +1049,7 @@ Array [
             >
               <button
                 className="euiButton euiButton--primary euiButton--fill"
+                data-test-subj="canvasCustomElementForm-submit"
                 onClick={[Function]}
                 type="button"
               >
@@ -1122,10 +1141,11 @@ Array [
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -1184,6 +1204,7 @@ Array [
                         <input
                           aria-describedby="generated-id-help"
                           className="euiFieldText canvasCustomElementForm__name"
+                          data-test-subj="canvasCustomElementForm-name"
                           id="generated-id"
                           onBlur={[Function]}
                           onChange={[Function]}
@@ -1222,6 +1243,7 @@ Array [
                     <textarea
                       aria-describedby="generated-id-help"
                       className="euiTextArea euiTextArea--resizeVertical"
+                      data-test-subj="canvasCustomElementForm-description"
                       id="generated-id"
                       onBlur={[Function]}
                       onChange={[Function]}
@@ -1276,10 +1298,11 @@ Array [
                           className="euiFilePicker__prompt"
                         >
                           <svg
-                            aria-hidden="true"
+                            aria-hidden={true}
                             className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
@@ -1322,9 +1345,11 @@ Array [
                     className="euiCard__top"
                   >
                     <svg
+                      aria-hidden={true}
                       className="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading euiCard__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -1387,6 +1412,7 @@ Array [
             >
               <button
                 className="euiButton euiButton--primary euiButton--fill"
+                data-test-subj="canvasCustomElementForm-submit"
                 onClick={[Function]}
                 type="button"
               >

@@ -9,6 +9,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
           "field": "calendar_id",
           "name": "ID",
           "render": [Function],
+          "scope": "row",
           "sortable": true,
           "truncateText": true,
         },
@@ -27,7 +28,6 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
       ]
     }
     data-test-subj="mlCalendarTable"
-    executeQueryOptions={Object {}}
     isSelectable={true}
     itemId="calendar_id"
     items={
@@ -109,6 +109,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         },
       }
     }
+    tableLayout="fixed"
   />
 </Fragment>
 `;

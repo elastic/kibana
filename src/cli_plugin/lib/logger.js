@@ -21,7 +21,6 @@
  * Logs messages and errors
  */
 export default class Logger {
-
   constructor(settings = {}) {
     this.previousLineEnded = true;
     this.silent = !!settings.silent;
@@ -61,5 +60,4 @@ export default class Logger {
     process.stderr.write(`${data}\n`);
     this.previousLineEnded = true;
   }
-
 }

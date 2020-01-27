@@ -6,8 +6,8 @@
 
 jest.mock('./layer_toc', () => ({
   LayerTOC: () => {
-    return (<div>mockLayerTOC</div>);
-  }
+    return <div>mockLayerTOC</div>;
+  },
 }));
 
 import React from 'react';
@@ -25,43 +25,32 @@ const defaultProps = {
 
 describe('LayerControl', () => {
   test('is rendered', () => {
-    const component = shallow(
-      <LayerControl
-        {...defaultProps}
-      />
-    );
+    const component = shallow(<LayerControl {...defaultProps} />);
 
     expect(component).toMatchSnapshot();
   });
 
   test('isReadOnly', () => {
-    const component = shallow(
-      <LayerControl
-        {...defaultProps}
-        isReadOnly={true}
-      />
-    );
+    const component = shallow(<LayerControl {...defaultProps} isReadOnly={true} />);
 
     expect(component).toMatchSnapshot();
   });
 
   describe('isLayerTOCOpen', () => {
-
     test('Should render expand button', () => {
-      const component = shallow(
-        <LayerControl
-          {...defaultProps}
-          isLayerTOCOpen={false}
-        />
-      );
+      const component = shallow(<LayerControl {...defaultProps} isLayerTOCOpen={false} />);
 
       expect(component).toMatchSnapshot();
     });
 
     test('Should render expand button with loading icon when layer is loading', () => {
       const mockLayerThatIsLoading = {
-        hasErrors: () => { return false; },
-        isLayerLoading: () => { return true; }
+        hasErrors: () => {
+          return false;
+        },
+        isLayerLoading: () => {
+          return true;
+        },
       };
       const component = shallow(
         <LayerControl
@@ -76,8 +65,12 @@ describe('LayerControl', () => {
 
     test('Should render expand button with error icon when layer has error', () => {
       const mockLayerThatHasError = {
-        hasErrors: () => { return true; },
-        isLayerLoading: () => { return false; }
+        hasErrors: () => {
+          return true;
+        },
+        isLayerLoading: () => {
+          return false;
+        },
       };
       const component = shallow(
         <LayerControl
@@ -90,5 +83,4 @@ describe('LayerControl', () => {
       expect(component).toMatchSnapshot();
     });
   });
-
 });

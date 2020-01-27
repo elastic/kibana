@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';

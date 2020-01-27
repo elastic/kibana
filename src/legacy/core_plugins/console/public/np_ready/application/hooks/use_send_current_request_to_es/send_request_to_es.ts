@@ -39,7 +39,8 @@ export interface ESRequestResult {
 }
 
 let CURRENT_REQ_ID = 0;
-export function sendRequestToES({ requests }: EsRequestArgs): Promise<ESRequestResult[]> {
+export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]> {
+  const requests = args.requests.slice();
   return new Promise((resolve, reject) => {
     const reqId = ++CURRENT_REQ_ID;
     const results: ESRequestResult[] = [];

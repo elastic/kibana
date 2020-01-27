@@ -17,22 +17,18 @@ export const decryptJobHeaders = async <
   JobParamsType,
   JobDocPayloadType extends HasEncryptedHeaders
 >({
-  job,
   server,
+  job,
   logger,
 }: {
-  job: JobDocPayloadType;
   server: ServerFacade;
+  job: JobDocPayloadType;
   logger: Logger;
-}): Promise<{
-  job: JobDocPayloadType;
-  server: ServerFacade;
-  decryptedHeaders: Record<string, string>;
-}> => {
+}): Promise<Record<string, string>> => {
   const crypto: CryptoFactory = cryptoFactory(server);
   try {
     const decryptedHeaders: Record<string, string> = await crypto.decrypt(job.headers);
-    return { job, decryptedHeaders, server };
+    return decryptedHeaders;
   } catch (err) {
     logger.error(err);
 

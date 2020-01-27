@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunction } from 'src/plugins/expressions/common/types';
-import { SearchInput } from 'src/legacy/core_plugins/kibana/public/discover/embeddable';
+import { SearchInput } from 'src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,

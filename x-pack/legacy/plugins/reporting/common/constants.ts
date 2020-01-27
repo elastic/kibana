@@ -56,3 +56,4 @@ export const LICENSE_TYPE_BASIC = 'basic';
 export const LICENSE_TYPE_STANDARD = 'standard';
 export const LICENSE_TYPE_GOLD = 'gold';
 export const LICENSE_TYPE_PLATINUM = 'platinum';
+export const LICENSE_TYPE_ENTERPRISE = 'enterprise';

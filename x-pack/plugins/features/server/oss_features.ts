@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { Feature } from './feature';
+import { Feature } from '../common/feature';
 
 export interface BuildOSSFeaturesParams {
   savedObjectTypes: string[];

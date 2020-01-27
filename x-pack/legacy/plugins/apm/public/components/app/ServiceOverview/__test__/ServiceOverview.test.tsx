@@ -17,6 +17,8 @@ import {
 } from '../../../../utils/testHelpers';
 import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
 
+jest.mock('ui/new_platform');
+
 function wrapper({ children }: { children: ReactChild }) {
   return (
     <MockApmPluginContextWrapper

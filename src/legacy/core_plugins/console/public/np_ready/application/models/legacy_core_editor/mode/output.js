@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import  ace from 'brace';
+import ace from 'brace';
 require('./output_highlight_rules');
-
 
 const oop = ace.acequire('ace/lib/oop');
 const JSONMode = ace.acequire('ace/mode/json').Mode;
@@ -38,10 +37,10 @@ export function Mode() {
 }
 oop.inherits(Mode, JSONMode);
 
-(function () {
-  this.createWorker = function () {
+(function() {
+  this.createWorker = function() {
     return null;
   };
 
   this.$id = 'sense/mode/input';
-}).call(Mode.prototype);
+}.call(Mode.prototype));

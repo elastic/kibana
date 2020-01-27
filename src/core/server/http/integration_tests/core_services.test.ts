@@ -32,17 +32,132 @@ interface StorageData {
   expires: number;
 }
 
+const cookieOptions = {
+  name: 'sid',
+  encryptionKey: 'something_at_least_32_characters',
+  validate: () => ({ isValid: true }),
+  isSecure: false,
+};
+
 describe('http service', () => {
+  describe('auth', () => {
+    let root: ReturnType<typeof kbnTestServer.createRoot>;
+    beforeEach(async () => {
+      root = kbnTestServer.createRoot();
+    }, 30000);
+
+    afterEach(async () => {
+      await root.shutdown();
+    });
+    describe('#isAuthenticated()', () => {
+      it('returns true if has been authorized', async () => {
+        const { http } = await root.setup();
+        const { registerAuth, createRouter, auth } = http;
+
+        await registerAuth((req, res, toolkit) => toolkit.authenticated());
+
+        const router = createRouter('');
+        router.get({ path: '/is-auth', validate: false }, (context, req, res) =>
+          res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
+        );
+
+        await root.start();
+        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: true });
+      });
+
+      it('returns false if has not been authorized', async () => {
+        const { http } = await root.setup();
+        const { registerAuth, createRouter, auth } = http;
+
+        await registerAuth((req, res, toolkit) => toolkit.authenticated());
+
+        const router = createRouter('');
+        router.get(
+          { path: '/is-auth', validate: false, options: { authRequired: false } },
+          (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
+        );
+
+        await root.start();
+        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
+      });
+
+      it('returns false if no authorization mechanism has been registered', async () => {
+        const { http } = await root.setup();
+        const { createRouter, auth } = http;
+
+        const router = createRouter('');
+        router.get(
+          { path: '/is-auth', validate: false, options: { authRequired: false } },
+          (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
+        );
+
+        await root.start();
+        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
+      });
+    });
+    describe('#get()', () => {
+      it('returns authenticated status and allow associate auth state with request', async () => {
+        const user = { id: '42' };
+
+        const { http } = await root.setup();
+        const { createCookieSessionStorageFactory, createRouter, registerAuth, auth } = http;
+        const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
+        registerAuth((req, res, toolkit) => {
+          sessionStorageFactory.asScoped(req).set({ value: user });
+          return toolkit.authenticated({ state: user });
+        });
+
+        const router = createRouter('');
+        router.get({ path: '/get-auth', validate: false }, (context, req, res) =>
+          res.ok({ body: auth.get<{ id: string }>(req) })
+        );
+
+        await root.start();
+
+        await kbnTestServer.request
+          .get(root, '/get-auth')
+          .expect(200, { state: user, status: 'authenticated' });
+      });
+
+      it('returns correct authentication unknown status', async () => {
+        const { http } = await root.setup();
+        const { createRouter, auth } = http;
+
+        const router = createRouter('');
+        router.get({ path: '/get-auth', validate: false }, (context, req, res) =>
+          res.ok({ body: auth.get(req) })
+        );
+
+        await root.start();
+        await kbnTestServer.request.get(root, '/get-auth').expect(200, { status: 'unknown' });
+      });
+
+      it('returns correct unauthenticated status', async () => {
+        const authenticate = jest.fn();
+
+        const { http } = await root.setup();
+        const { createRouter, registerAuth, auth } = http;
+        await registerAuth(authenticate);
+        const router = createRouter('');
+        router.get(
+          { path: '/get-auth', validate: false, options: { authRequired: false } },
+          (context, req, res) => res.ok({ body: auth.get(req) })
+        );
+
+        await root.start();
+
+        await kbnTestServer.request
+          .get(root, '/get-auth')
+          .expect(200, { status: 'unauthenticated' });
+
+        expect(authenticate).not.toHaveBeenCalled();
+      });
+    });
+  });
+
   describe('legacy server', () => {
     describe('#registerAuth()', () => {
       const sessionDurationMs = 1000;
-      const cookieOptions = {
-        name: 'sid',
-        encryptionKey: 'something_at_least_32_characters',
-        validate: () => ({ isValid: true }),
-        isSecure: false,
-        path: '/',
-      };
 
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
@@ -133,7 +248,7 @@ describe('http service', () => {
         const { http } = await root.setup();
         const { registerAuth } = http;
 
-        await registerAuth((req, res, toolkit) => {
+        registerAuth((req, res, toolkit) => {
           return toolkit.authenticated({ responseHeaders: authResponseHeader });
         });
 
@@ -157,7 +272,7 @@ describe('http service', () => {
         const { http } = await root.setup();
         const { registerAuth } = http;
 
-        await registerAuth((req, res, toolkit) => {
+        registerAuth((req, res, toolkit) => {
           return toolkit.authenticated({ responseHeaders: authResponseHeader });
         });
 
@@ -222,12 +337,15 @@ describe('http service', () => {
       const { http } = await root.setup();
       const { registerAuth, createRouter } = http;
 
-      await registerAuth((req, res, toolkit) =>
-        toolkit.authenticated({ requestHeaders: authHeaders })
-      );
+      registerAuth((req, res, toolkit) => toolkit.authenticated({ requestHeaders: authHeaders }));
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        // it forces client initialization since the core creates them lazily.
+        await context.core.elasticsearch.adminClient.callAsCurrentUser('ping');
+        await context.core.elasticsearch.dataClient.callAsCurrentUser('ping');
+        return res.ok();
+      });
 
       await root.start();
 
@@ -247,7 +365,12 @@ describe('http service', () => {
       const { createRouter } = http;
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        // it forces client initialization since the core creates them lazily.
+        await context.core.elasticsearch.adminClient.callAsCurrentUser('ping');
+        await context.core.elasticsearch.dataClient.callAsCurrentUser('ping');
+        return res.ok();
+      });
 
       await root.start();
 

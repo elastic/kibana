@@ -12,13 +12,13 @@ import { registerRouter } from '../../../public/app/services/routing';
 const testBedConfig = {
   store: createRemoteClustersStore,
   memoryRouter: {
-    onRouter: (router) => registerRouter(router)
-  }
+    onRouter: router => registerRouter(router),
+  },
 };
 
 const initTestBed = registerTestBed(RemoteClusterList, testBedConfig);
 
-export const setup = (props) => {
+export const setup = props => {
   const testBed = initTestBed(props);
   const EUI_TABLE = 'remoteClusterListTable';
 
@@ -60,7 +60,10 @@ export const setup = (props) => {
 
   const clickRemoteClusterAt = (index = 0) => {
     const { rows } = testBed.table.getMetaData(EUI_TABLE);
-    const remoteClusterLink = findTestSubject(rows[index].reactWrapper, 'remoteClustersTableListClusterLink');
+    const remoteClusterLink = findTestSubject(
+      rows[index].reactWrapper,
+      'remoteClustersTableListClusterLink'
+    );
     remoteClusterLink.simulate('click');
   };
 
@@ -72,6 +75,6 @@ export const setup = (props) => {
       clickRowActionButtonAt,
       clickConfirmModalDeleteRemoteCluster,
       clickRemoteClusterAt,
-    }
+    },
   };
 };

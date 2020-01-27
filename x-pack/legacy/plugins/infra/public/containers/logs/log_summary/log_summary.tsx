@@ -6,14 +6,12 @@
 
 import { useState } from 'react';
 
-import { LogSummary as LogSummaryQuery } from '../../../graphql/types';
-import { useApolloClient } from '../../../utils/apollo_context';
 import { useCancellableEffect } from '../../../utils/cancellable_effect';
-import { logSummaryQuery } from './log_summary.gql_query';
 import { useLogSummaryBufferInterval } from './use_log_summary_buffer_interval';
+import { fetchLogSummary } from './api/fetch_log_summary';
+import { LogEntriesSummaryResponse } from '../../../../common/http_api';
 
-export type LogSummaryBetween = LogSummaryQuery.Query['source']['logSummaryBetween'];
-export type LogSummaryBuckets = LogSummaryBetween['buckets'];
+export type LogSummaryBuckets = LogEntriesSummaryResponse['data']['buckets'];
 
 export const useLogSummary = (
   sourceId: string,
@@ -21,9 +19,7 @@ export const useLogSummary = (
   intervalSize: number,
   filterQuery: string | null
 ) => {
-  const [logSummaryBetween, setLogSummaryBetween] = useState<LogSummaryBetween>({ buckets: [] });
-  const apolloClient = useApolloClient();
-
+  const [logSummaryBuckets, setLogSummaryBuckets] = useState<LogSummaryBuckets>([]);
   const { start: bufferStart, end: bufferEnd, bucketSize } = useLogSummaryBufferInterval(
     midpointTime,
     intervalSize
@@ -31,33 +27,27 @@ export const useLogSummary = (
 
   useCancellableEffect(
     getIsCancelled => {
-      if (!apolloClient || bufferStart === null || bufferEnd === null) {
+      if (bufferStart === null || bufferEnd === null) {
         return;
       }
 
-      apolloClient
-        .query<LogSummaryQuery.Query, LogSummaryQuery.Variables>({
-          fetchPolicy: 'no-cache',
-          query: logSummaryQuery,
-          variables: {
-            filterQuery,
-            sourceId,
-            start: bufferStart,
-            end: bufferEnd,
-            bucketSize,
-          },
-        })
-        .then(response => {
-          if (!getIsCancelled()) {
-            setLogSummaryBetween(response.data.source.logSummaryBetween);
-          }
-        });
+      fetchLogSummary({
+        sourceId,
+        startDate: bufferStart,
+        endDate: bufferEnd,
+        bucketSize,
+        query: filterQuery,
+      }).then(response => {
+        if (!getIsCancelled()) {
+          setLogSummaryBuckets(response.data.buckets);
+        }
+      });
     },
-    [apolloClient, sourceId, filterQuery, bufferStart, bufferEnd, bucketSize]
+    [sourceId, filterQuery, bufferStart, bufferEnd, bucketSize]
   );
 
   return {
-    buckets: logSummaryBetween.buckets,
+    buckets: logSummaryBuckets,
     start: bufferStart,
     end: bufferEnd,
   };

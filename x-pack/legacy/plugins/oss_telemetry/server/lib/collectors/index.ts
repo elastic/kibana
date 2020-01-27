@@ -5,8 +5,8 @@
  */
 
 import { registerVisualizationsCollector } from './visualizations/register_usage_collector';
-import { OssTelemetrySetupDependencies } from '../../plugin';
+import { OssTelemetryStartDependencies } from '../../plugin';
 
-export function registerCollectors(deps: OssTelemetrySetupDependencies) {
+export function registerCollectors(deps: OssTelemetryStartDependencies) {
   registerVisualizationsCollector(deps.usageCollection, deps.taskManager);
 }

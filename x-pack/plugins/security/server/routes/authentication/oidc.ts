@@ -17,19 +17,13 @@ import { RouteDefinitionParams } from '..';
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineOIDCRoutes({
-  router,
-  logger,
-  authc,
-  getLegacyAPI,
-  basePath,
-}: RouteDefinitionParams) {
+export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
   for (const path of ['/api/security/oidc/implicit', '/api/security/v1/oidc/implicit']) {
     /**
      * The route should be configured as a redirect URI in OP when OpenID Connect implicit flow
      * is used, so that we can extract authentication response from URL fragment and send it to
-     * the `/api/security/oidc` route.
+     * the `/api/security/oidc/callback` route.
      */
     router.get(
       {
@@ -54,7 +48,7 @@ export function defineOIDCRoutes({
           <script src="${serverBasePath}/internal/security/oidc/implicit.js"></script>
         `,
             'text/html',
-            getLegacyAPI().cspRules
+            csp.header
           )
         );
       }
@@ -63,7 +57,7 @@ export function defineOIDCRoutes({
 
   /**
    * The route that accompanies `/api/security/oidc/implicit` and renders a JavaScript snippet
-   * that extracts fragment part from the URL and send it to the `/api/security/oidc` route.
+   * that extracts fragment part from the URL and send it to the `/api/security/oidc/callback` route.
    * We need this separate endpoint because of default CSP policy that forbids inline scripts.
    */
   router.get(
@@ -78,18 +72,18 @@ export function defineOIDCRoutes({
         createCustomResourceResponse(
           `
           window.location.replace(
-            '${serverBasePath}/api/security/oidc?authenticationResponseURI=' + encodeURIComponent(window.location.href)
+            '${serverBasePath}/api/security/oidc/callback?authenticationResponseURI=' + encodeURIComponent(window.location.href)
           );
         `,
           'text/javascript',
-          getLegacyAPI().cspRules
+          csp.header
         )
       );
     }
   );
 
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
-  for (const path of ['/api/security/oidc', '/api/security/v1/oidc']) {
+  for (const path of ['/api/security/oidc/callback', '/api/security/v1/oidc']) {
     router.get(
       {
         path,
@@ -130,7 +124,7 @@ export function defineOIDCRoutes({
         } else if (request.query.code || request.query.error) {
           if (path === '/api/security/v1/oidc') {
             logger.warn(
-              `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/oidc" URL instead.`,
+              `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/oidc/callback" URL instead.`,
               { tags: ['deprecation'] }
             );
           }

@@ -7,12 +7,16 @@
 import { i18n } from '@kbn/i18n';
 import { flatten, get } from 'lodash';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { InfraMetric, InfraMetricData } from '../../../graphql/types';
+import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
 import { metrics, findInventoryFields } from '../../../../common/inventory_models';
-import { TSVBMetricModelCreator } from '../../../../common/inventory_models/types';
+import {
+  TSVBMetricModelCreator,
+  InventoryMetric,
+  InventoryMetricRT,
+} from '../../../../common/inventory_models/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
@@ -25,8 +29,8 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   public async getMetrics(
     requestContext: RequestHandlerContext,
     options: InfraMetricsRequestOptions,
-    rawRequest: KibanaRequest // NP_TODO: Temporarily needed until metrics getVisData no longer needs full request
-  ): Promise<InfraMetricData[]> {
+    rawRequest: KibanaRequest
+  ): Promise<NodeDetailsMetricData[]> {
     const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
     const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
     const nodeField = fields.id;
@@ -47,7 +51,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     }
 
     const requests = options.metrics.map(metricId =>
-      this.makeTSVBRequest(metricId, options, rawRequest, nodeField, requestContext)
+      this.makeTSVBRequest(metricId, options, nodeField, requestContext)
     );
 
     return Promise.all(requests)
@@ -58,8 +62,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
           );
 
           return metricIds.map((id: string) => {
-            const infraMetricId: InfraMetric = (InfraMetric as any)[id];
-            if (!infraMetricId) {
+            if (!InventoryMetricRT.is(id)) {
               throw new Error(
                 i18n.translate('xpack.infra.kibanaMetrics.invalidInfraMetricErrorMessage', {
                   defaultMessage: '{id} is not a valid InfraMetric',
@@ -69,9 +72,9 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
                 })
               );
             }
-            const panel = result[infraMetricId];
+            const panel = result[id];
             return {
-              id: infraMetricId,
+              id,
               series: panel.series.map(series => {
                 return {
                   id: series.id,
@@ -87,9 +90,8 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   }
 
   async makeTSVBRequest(
-    metricId: InfraMetric,
+    metricId: InventoryMetric,
     options: InfraMetricsRequestOptions,
-    req: KibanaRequest,
     nodeField: string,
     requestContext: RequestHandlerContext
   ) {
@@ -150,6 +152,6 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       ? [{ match: { [model.map_field_to]: id } }]
       : [{ match: { [nodeField]: id } }];
 
-    return this.framework.makeTSVBRequest(req, model, timerange, filters, requestContext);
+    return this.framework.makeTSVBRequest(requestContext, model, timerange, filters);
   }
 }

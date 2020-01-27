@@ -42,11 +42,15 @@ const getOtherBucketFilterTerms = (table, columnIndex, rowIndex) => {
   });
   const terms = rows.map(row => row[table.columns[columnIndex].id]);
 
-  return [...new Set(terms.filter(term => {
-    const notOther = term !== '__other__';
-    const notMissing = term !== '__missing__';
-    return notOther && notMissing;
-  }))];
+  return [
+    ...new Set(
+      terms.filter(term => {
+        const notOther = term !== '__other__';
+        const notMissing = term !== '__missing__';
+        return notOther && notMissing;
+      })
+    ),
+  ];
 };
 
 /**
@@ -81,23 +85,24 @@ const createFilter = (aggConfigs, table, columnIndex, rowIndex, cellValue) => {
   return filter;
 };
 
-
-const createFiltersFromEvent = (event) => {
+const createFiltersFromEvent = event => {
   const filters = [];
   const dataPoints = event.data || [event];
 
-  dataPoints.filter(point => point).forEach(val => {
-    const { table, column, row, value } = val;
-    const filter = createFilter(event.aggConfigs, table, column, row, value);
-    if (filter) {
-      filter.forEach(f => {
-        if (event.negate) {
-          f = esFilters.toggleFilterNegated(f);
-        }
-        filters.push(f);
-      });
-    }
-  });
+  dataPoints
+    .filter(point => point)
+    .forEach(val => {
+      const { table, column, row, value } = val;
+      const filter = createFilter(event.aggConfigs, table, column, row, value);
+      if (filter) {
+        filter.forEach(f => {
+          if (event.negate) {
+            f = esFilters.toggleFilterNegated(f);
+          }
+          filters.push(f);
+        });
+      }
+    });
 
   return filters;
 };

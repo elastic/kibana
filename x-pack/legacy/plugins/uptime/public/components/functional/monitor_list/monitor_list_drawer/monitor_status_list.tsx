@@ -5,12 +5,13 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
+import { get, capitalize } from 'lodash';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Check } from '../../../../../common/graphql/types';
 import { LocationLink } from './location_link';
 import { MonitorStatusRow } from './monitor_status_row';
+import { UNNAMED_LOCATION } from '../../../../../common/constants';
 
 interface MonitorStatusListProps {
   /**
@@ -21,7 +22,6 @@ interface MonitorStatusListProps {
 
 export const UP = 'up';
 export const DOWN = 'down';
-export const UNNAMED_LOCATION = 'unnamed-location';
 
 export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
   const upChecks: Set<string> = new Set();
@@ -32,9 +32,9 @@ export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
     const location = get<string | null>(check, 'observer.geo.name', null) || UNNAMED_LOCATION;
 
     if (check.monitor.status === UP) {
-      upChecks.add(location);
+      upChecks.add(capitalize(location));
     } else if (check.monitor.status === DOWN) {
-      downChecks.add(location);
+      downChecks.add(capitalize(location));
     }
   });
 
@@ -55,7 +55,7 @@ export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
               values={{ link: <LocationLink /> }}
             />
           </EuiCallOut>
-          <EuiSpacer />
+          <EuiSpacer size="s" />
         </>
       )}
     </>

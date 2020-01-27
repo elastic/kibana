@@ -112,10 +112,10 @@ const allSavedObjects = [
   },
 ];
 
-const $http = () => { };
+const $http = () => {};
 $http.post = jest.fn().mockImplementation(() => []);
 const defaultProps = {
-  goInspectObject: () => { },
+  goInspectObject: () => {},
   confirmModalPromise: jest.fn(),
   savedObjectsClient: {
     find: jest.fn(),

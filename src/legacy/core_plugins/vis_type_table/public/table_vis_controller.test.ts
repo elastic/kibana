@@ -27,12 +27,7 @@ import './table_vis.mock';
 import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
-import {
-  npStart,
-  legacyResponseHandlerProvider,
-  AggConfig,
-  tabifyAggResponse,
-} from './legacy_imports';
+import { npStart, AggConfig, tabifyAggResponse } from './legacy_imports';
 import { tableVisTypeDefinition } from './table_vis_type';
 import { Vis } from '../../visualizations/public';
 import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
@@ -40,6 +35,7 @@ import { setup as visualizationsSetup } from '../../visualizations/public/np_rea
 import { stubFields } from '../../../../plugins/data/public/stubs';
 // eslint-disable-next-line
 import { setFieldFormats } from '../../../../plugins/data/public/services';
+import { tableVisResponseHandler } from './table_vis_response_handler';
 
 interface TableVisScope extends IScope {
   [key: string]: any;
@@ -97,7 +93,7 @@ describe('Table Vis - Controller', () => {
     angular.mock.inject((_$rootScope_: IRootScopeService, _$compile_: ICompileService) => {
       $rootScope = _$rootScope_;
       $compile = _$compile_;
-      tableAggResponse = legacyResponseHandlerProvider().handler;
+      tableAggResponse = tableVisResponseHandler;
     })
   );
 
@@ -110,7 +106,7 @@ describe('Table Vis - Controller', () => {
       (cfg: any) => cfg,
       'time',
       stubFields,
-      npStart.core.uiSettings
+      npStart.core
     );
   });
 

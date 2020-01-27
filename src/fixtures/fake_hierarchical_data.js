@@ -17,13 +17,13 @@
  * under the License.
  */
 
-const data = {  };
+const data = {};
 
 data.metricOnly = {
   hits: { total: 1000, hits: [], max_score: 0 },
   aggregations: {
     agg_1: { value: 412032 },
-  }
+  },
 };
 
 data.threeTermBuckets = {
@@ -44,9 +44,9 @@ data.threeTermBuckets = {
                 agg_4: {
                   buckets: [
                     { key: 'win', doc_count: 4, agg_1: { value: 0 } },
-                    { key: 'mac', doc_count: 6, agg_1: { value: 9299 } }
-                  ]
-                }
+                    { key: 'mac', doc_count: 6, agg_1: { value: 9299 } },
+                  ],
+                },
               },
               {
                 key: 'US',
@@ -55,12 +55,12 @@ data.threeTermBuckets = {
                 agg_4: {
                   buckets: [
                     { key: 'linux', doc_count: 12, agg_1: { value: 3992 } },
-                    { key: 'mac', doc_count: 8, agg_1: { value: 3029 } }
-                  ]
-                }
-              }
-            ]
-          }
+                    { key: 'mac', doc_count: 8, agg_1: { value: 3029 } },
+                  ],
+                },
+              },
+            ],
+          },
         },
         {
           key: 'css',
@@ -75,9 +75,9 @@ data.threeTermBuckets = {
                 agg_4: {
                   buckets: [
                     { key: 'win', doc_count: 3, agg_1: { value: 4992 } },
-                    { key: 'mac', doc_count: 4, agg_1: { value: 5892 } }
-                  ]
-                }
+                    { key: 'mac', doc_count: 4, agg_1: { value: 5892 } },
+                  ],
+                },
               },
               {
                 key: 'US',
@@ -86,12 +86,12 @@ data.threeTermBuckets = {
                 agg_4: {
                   buckets: [
                     { key: 'linux', doc_count: 12, agg_1: { value: 3992 } },
-                    { key: 'mac', doc_count: 1, agg_1: { value: 3029 } }
-                  ]
-                }
-              }
-            ]
-          }
+                    { key: 'mac', doc_count: 1, agg_1: { value: 3029 } },
+                  ],
+                },
+              },
+            ],
+          },
         },
         {
           key: 'html',
@@ -106,9 +106,9 @@ data.threeTermBuckets = {
                 agg_4: {
                   buckets: [
                     { key: 'win', doc_count: 46, agg_1: { value: 4992 } },
-                    { key: 'mac', doc_count: 39, agg_1: { value: 5892 } }
-                  ]
-                }
+                    { key: 'mac', doc_count: 39, agg_1: { value: 5892 } },
+                  ],
+                },
               },
               {
                 key: 'FR',
@@ -117,16 +117,16 @@ data.threeTermBuckets = {
                 agg_4: {
                   buckets: [
                     { key: 'win', doc_count: 3, agg_1: { value: 3992 } },
-                    { key: 'mac', doc_count: 12, agg_1: { value: 3029 } }
-                  ]
-                }
-              }
-            ]
-          }
-        }
-      ]
-    }
-  }
+                    { key: 'mac', doc_count: 12, agg_1: { value: 3029 } },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
 };
 
 data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
@@ -148,13 +148,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 23
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 23,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-09-29T00:00:00.000Z',
@@ -166,13 +168,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 39
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 39,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-09-30T00:00:00.000Z',
@@ -184,13 +188,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 329
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 329,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-10-01T00:00:00.000Z',
@@ -202,13 +208,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 22
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 22,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-10-02T00:00:00.000Z',
@@ -220,13 +228,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 93
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 93,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-10-03T00:00:00.000Z',
@@ -238,16 +248,18 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 72
-                      }
-                    }]
-                  }
-                }
-              }
-            ]
-          }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 72,
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
         },
         {
           key: 'css',
@@ -263,13 +275,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 75
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 75,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-09-29T00:00:00.000Z',
@@ -281,13 +295,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 11
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 11,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-09-30T00:00:00.000Z',
@@ -299,13 +315,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 238
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 238,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-10-01T00:00:00.000Z',
@@ -317,13 +335,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 343
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 343,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-10-02T00:00:00.000Z',
@@ -335,13 +355,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 837
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 837,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-10-03T00:00:00.000Z',
@@ -353,16 +375,18 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 302
-                      }
-                    }]
-                  }
-                }
-              }
-            ]
-          }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 302,
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
         },
         {
           key: 'html',
@@ -378,13 +402,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 30
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 30,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-09-29T00:00:00.000Z',
@@ -396,13 +422,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 43
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 43,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-09-30T00:00:00.000Z',
@@ -414,13 +442,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 88
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 88,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-10-01T00:00:00.000Z',
@@ -432,13 +462,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 91
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 91,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-10-02T00:00:00.000Z',
@@ -450,13 +482,15 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 534
-                      }
-                    }]
-                  }
-                }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 534,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key_as_string: '2014-10-03T00:00:00.000Z',
@@ -468,133 +502,135 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
                 agg_6: {
                   hits: {
                     total: 2,
-                    hits: [{
-                      fields: {
-                        bytes: 553
-                      }
-                    }]
-                  }
-                }
-              }
-            ]
-          }
-        }
-      ]
-    }
-  }
+                    hits: [
+                      {
+                        fields: {
+                          bytes: 553,
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
 };
 
 data.oneRangeBucket = {
-  'took': 35,
-  'timed_out': false,
-  '_shards': {
-    'total': 1,
-    'successful': 1,
-    'failed': 0
+  took: 35,
+  timed_out: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    failed: 0,
   },
-  'hits': {
-    'total': 6039,
-    'max_score': 0,
-    'hits': []
+  hits: {
+    total: 6039,
+    max_score: 0,
+    hits: [],
   },
-  'aggregations': {
-    'agg_2': {
-      'buckets': {
+  aggregations: {
+    agg_2: {
+      buckets: {
         '0.0-1000.0': {
-          'from': 0,
-          'from_as_string': '0.0',
-          'to': 1000,
-          'to_as_string': '1000.0',
-          'doc_count': 606
+          from: 0,
+          from_as_string: '0.0',
+          to: 1000,
+          to_as_string: '1000.0',
+          doc_count: 606,
         },
         '1000.0-2000.0': {
-          'from': 1000,
-          'from_as_string': '1000.0',
-          'to': 2000,
-          'to_as_string': '2000.0',
-          'doc_count': 298
-        }
-      }
-    }
-  }
+          from: 1000,
+          from_as_string: '1000.0',
+          to: 2000,
+          to_as_string: '2000.0',
+          doc_count: 298,
+        },
+      },
+    },
+  },
 };
 
 data.oneFilterBucket = {
-  'took': 11,
-  'timed_out': false,
-  '_shards': {
-    'total': 1,
-    'successful': 1,
-    'failed': 0
+  took: 11,
+  timed_out: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    failed: 0,
   },
-  'hits': {
-    'total': 6005,
-    'max_score': 0,
-    'hits': []
+  hits: {
+    total: 6005,
+    max_score: 0,
+    hits: [],
   },
-  'aggregations': {
-    'agg_2': {
-      'buckets': {
+  aggregations: {
+    agg_2: {
+      buckets: {
         'type:apache': {
-          'doc_count': 4844
+          doc_count: 4844,
         },
         'type:nginx': {
-          'doc_count': 1161
-        }
-      }
-    }
-  }
+          doc_count: 1161,
+        },
+      },
+    },
+  },
 };
 
 data.oneHistogramBucket = {
-  'took': 37,
-  'timed_out': false,
-  '_shards': {
-    'total': 6,
-    'successful': 6,
-    'failed': 0
+  took: 37,
+  timed_out: false,
+  _shards: {
+    total: 6,
+    successful: 6,
+    failed: 0,
   },
-  'hits': {
-    'total': 49208,
-    'max_score': 0,
-    'hits': []
+  hits: {
+    total: 49208,
+    max_score: 0,
+    hits: [],
   },
-  'aggregations': {
-    'agg_2': {
-      'buckets': [
+  aggregations: {
+    agg_2: {
+      buckets: [
         {
-          'key_as_string': '2014-09-28T00:00:00.000Z',
-          'key': 1411862400000,
-          'doc_count': 8247
+          key_as_string: '2014-09-28T00:00:00.000Z',
+          key: 1411862400000,
+          doc_count: 8247,
         },
         {
-          'key_as_string': '2014-09-29T00:00:00.000Z',
-          'key': 1411948800000,
-          'doc_count': 8184
+          key_as_string: '2014-09-29T00:00:00.000Z',
+          key: 1411948800000,
+          doc_count: 8184,
         },
         {
-          'key_as_string': '2014-09-30T00:00:00.000Z',
-          'key': 1412035200000,
-          'doc_count': 8269
+          key_as_string: '2014-09-30T00:00:00.000Z',
+          key: 1412035200000,
+          doc_count: 8269,
         },
         {
-          'key_as_string': '2014-10-01T00:00:00.000Z',
-          'key': 1412121600000,
-          'doc_count': 8141
+          key_as_string: '2014-10-01T00:00:00.000Z',
+          key: 1412121600000,
+          doc_count: 8141,
         },
         {
-          'key_as_string': '2014-10-02T00:00:00.000Z',
-          'key': 1412208000000,
-          'doc_count': 8148
+          key_as_string: '2014-10-02T00:00:00.000Z',
+          key: 1412208000000,
+          doc_count: 8148,
         },
         {
-          'key_as_string': '2014-10-03T00:00:00.000Z',
-          'key': 1412294400000,
-          'doc_count': 8219
-        }
-      ]
-    }
-  }
+          key_as_string: '2014-10-03T00:00:00.000Z',
+          key: 1412294400000,
+          doc_count: 8219,
+        },
+      ],
+    },
+  },
 };
 
 export default data;

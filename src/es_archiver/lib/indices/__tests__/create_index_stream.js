@@ -24,18 +24,16 @@ import Chance from 'chance';
 import {
   createPromiseFromStreams,
   createConcatStream,
-  createListStream
+  createListStream,
 } from '../../../../legacy/utils';
 
-import {
-  createCreateIndexStream
-} from '../create_index_stream';
+import { createCreateIndexStream } from '../create_index_stream';
 
 import {
   createStubStats,
   createStubIndexRecord,
   createStubDocRecord,
-  createStubClient
+  createStubClient,
 } from './stubs';
 
 const chance = new Chance();
@@ -48,14 +46,14 @@ describe('esArchiver: createCreateIndexStream()', () => {
       await createPromiseFromStreams([
         createListStream([
           createStubIndexRecord('existing-index'),
-          createStubIndexRecord('new-index')
+          createStubIndexRecord('new-index'),
         ]),
-        createCreateIndexStream({ client, stats })
+        createCreateIndexStream({ client, stats }),
       ]);
 
       expect(stats.getTestSummary()).to.eql({
         deletedIndex: 1,
-        createdIndex: 2
+        createdIndex: 2,
       });
       sinon.assert.callCount(client.indices.delete, 1);
       sinon.assert.callCount(client.indices.create, 3); // one failed create because of existing
@@ -67,9 +65,9 @@ describe('esArchiver: createCreateIndexStream()', () => {
       await createPromiseFromStreams([
         createListStream([
           createStubIndexRecord('existing-index'),
-          createStubIndexRecord('new-index')
+          createStubIndexRecord('new-index'),
         ]),
-        createCreateIndexStream({ client, stats, log: { debug: () => {} } })
+        createCreateIndexStream({ client, stats, log: { debug: () => {} } }),
       ]);
 
       expect(client.indices.getAlias.calledOnce).to.be.ok();
@@ -89,13 +87,10 @@ describe('esArchiver: createCreateIndexStream()', () => {
           createStubDocRecord('index', 2),
         ]),
         createCreateIndexStream({ client, stats }),
-        createConcatStream([])
+        createConcatStream([]),
       ]);
 
-      expect(output).to.eql([
-        createStubDocRecord('index', 1),
-        createStubDocRecord('index', 2),
-      ]);
+      expect(output).to.eql([createStubDocRecord('index', 1), createStubDocRecord('index', 2)]);
     });
 
     it('creates aliases', async () => {
@@ -103,11 +98,11 @@ describe('esArchiver: createCreateIndexStream()', () => {
       const stats = createStubStats();
       await createPromiseFromStreams([
         createListStream([
-          createStubIndexRecord('index', { foo: { } }),
+          createStubIndexRecord('index', { foo: {} }),
           createStubDocRecord('index', 1),
         ]),
         createCreateIndexStream({ client, stats }),
-        createConcatStream([])
+        createConcatStream([]),
       ]);
 
       sinon.assert.calledWith(client.indices.create, {
@@ -130,12 +125,9 @@ describe('esArchiver: createCreateIndexStream()', () => {
       ];
 
       const output = await createPromiseFromStreams([
-        createListStream([
-          createStubIndexRecord('index'),
-          ...randoms
-        ]),
+        createListStream([createStubIndexRecord('index'), ...randoms]),
         createCreateIndexStream({ client, stats }),
-        createConcatStream([])
+        createConcatStream([]),
       ]);
 
       expect(output).to.eql(randoms);
@@ -144,19 +136,12 @@ describe('esArchiver: createCreateIndexStream()', () => {
     it('passes through non-record values', async () => {
       const client = createStubClient();
       const stats = createStubStats();
-      const nonRecordValues = [
-        undefined,
-        chance.email(),
-        12345,
-        Infinity,
-        /abc/,
-        new Date()
-      ];
+      const nonRecordValues = [undefined, chance.email(), 12345, Infinity, /abc/, new Date()];
 
       const output = await createPromiseFromStreams([
         createListStream(nonRecordValues),
         createCreateIndexStream({ client, stats }),
-        createConcatStream([])
+        createConcatStream([]),
       ]);
 
       expect(output).to.eql(nonRecordValues);
@@ -176,8 +161,8 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createCreateIndexStream({
           client,
           stats,
-          skipExisting: true
-        })
+          skipExisting: true,
+        }),
       ]);
 
       expect(stats.getTestSummary()).to.eql({
@@ -205,14 +190,14 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createCreateIndexStream({
           client,
           stats,
-          skipExisting: true
+          skipExisting: true,
         }),
-        createConcatStream([])
+        createConcatStream([]),
       ]);
 
       expect(stats.getTestSummary()).to.eql({
         skippedIndex: 1,
-        createdIndex: 1
+        createdIndex: 1,
       });
       sinon.assert.callCount(client.indices.delete, 0);
       sinon.assert.callCount(client.indices.create, 2); // one failed create because of existing
@@ -220,7 +205,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
       expect(output).to.have.length(2);
       expect(output).to.eql([
         createStubDocRecord('new-index', 1),
-        createStubDocRecord('new-index', 2)
+        createStubDocRecord('new-index', 2),
       ]);
     });
   });

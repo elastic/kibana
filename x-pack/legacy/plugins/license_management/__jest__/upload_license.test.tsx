@@ -9,6 +9,8 @@ import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import React from 'react';
 import { Provider } from 'react-redux';
 
+jest.mock('ui/new_platform');
+
 // @ts-ignore
 import { uploadLicense } from '../public/np_ready/application/store/actions/upload_license';
 

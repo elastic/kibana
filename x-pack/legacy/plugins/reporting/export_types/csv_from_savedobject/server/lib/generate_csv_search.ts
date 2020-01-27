@@ -4,25 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore no module definition TODO
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaRequest } from '../../../../../../../../src/core/server';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import { ServerFacade, RequestFacade, Logger } from '../../../../types';
-import { SavedSearchObjectAttributes, SearchPanel, SearchRequest, SearchSource } from '../../types';
 import {
+  JobParamsDiscoverCsv,
   CsvResultFromSearch,
+  SearchRequest,
   GenerateCsvParams,
+} from '../../../csv/types';
+import {
   IndexPatternField,
   QueryFilter,
+  SavedSearchObjectAttributes,
+  SearchPanel,
+  SearchSource,
 } from '../../types';
 import { getDataSource } from './get_data_source';
 import { getFilters } from './get_filters';
-import { JobParamsDiscoverCsv } from '../../../csv/types';
+
 import {
   esQuery,
   esFilters,
   IIndexPattern,
   Query,
+  // Reporting uses an unconventional directory structure so the linter marks this as a violation, server files should
+  // be moved under reporting/server/
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../../src/plugins/data/server';
 
 const getEsQueryConfig = async (config: any) => {
@@ -53,7 +63,9 @@ export async function generateCsvSearch(
   jobParams: JobParamsDiscoverCsv
 ): Promise<CsvResultFromSearch> {
   const { savedObjects, uiSettingsServiceFactory } = server;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(req);
+  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+    KibanaRequest.from(req.getRawRequest())
+  );
   const { indexPatternSavedObjectId, timerange } = searchPanel;
   const savedSearchObjectAttr = searchPanel.attributes as SavedSearchObjectAttributes;
   const { indexPatternSavedObject } = await getDataSource(
@@ -80,10 +92,11 @@ export async function generateCsvSearch(
 
   let payloadQuery: QueryFilter | undefined;
   let payloadSort: any[] = [];
+  let docValueFields: any[] | undefined;
   if (jobParams.post && jobParams.post.state) {
     ({
       post: {
-        state: { query: payloadQuery, sort: payloadSort = [] },
+        state: { query: payloadQuery, sort: payloadSort = [], docvalue_fields: docValueFields },
       },
     } = jobParams);
   }
@@ -115,7 +128,15 @@ export async function generateCsvSearch(
         },
       };
     }, {});
-  const docValueFields = indexPatternTimeField ? [indexPatternTimeField] : undefined;
+
+  if (indexPatternTimeField) {
+    if (docValueFields) {
+      docValueFields = [indexPatternTimeField].concat(docValueFields);
+    } else {
+      docValueFields = [indexPatternTimeField];
+    }
+  }
+
   const searchRequest: SearchRequest = {
     index: esIndex,
     body: {

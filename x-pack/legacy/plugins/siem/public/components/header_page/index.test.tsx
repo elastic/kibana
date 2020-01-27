@@ -5,17 +5,16 @@
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
-import '../../mock/ui_settings';
 import { HeaderPage } from './index';
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('HeaderPage', () => {
+  const mount = useMountAppended();
+
   test('it renders', () => {
     const wrapper = shallow(
       <HeaderPage
@@ -29,7 +28,7 @@ describe('HeaderPage', () => {
       </HeaderPage>
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders the title', () => {

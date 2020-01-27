@@ -1,8 +1,4 @@
 .visEditor--default {
-  // Prevent the default editor from overflowing. Without that you can cause
-  // a weird issue where the complete page can be scrolled out of view if
-  // the editor within the sidebar is too height.
-  overflow-y: hidden;
   flex: 1 1 auto;
   display: flex;
 
@@ -16,12 +12,11 @@
  */
 
 .visEditor__collapsibleSidebar {
-  @include flex-parent(0, 0, auto);
-  margin-right: $euiSizeL;
-  flex-direction: row;
+  background: $euiColorLightestShade;
   min-width: $vis-editor-sidebar-min-width;
-  width: $vis-editor-sidebar-min-width;
   max-width: 100%;
+  position: relative;
+  flex-shrink: 0;
 
   @include euiBreakpoint('xs', 's', 'm') {
     // If we are on a small screen we force the editor to take 100% width.
@@ -33,35 +28,25 @@
   }
 }
 
-.visEditor__collapsibleSidebar.closed {
+// !importants on width are required to override resizable panel inline widths
+.visEditor__collapsibleSidebar-isClosed {
   min-width: 0;
-}
+  width: $euiSizeXL !important; // Just enough room for the collapse button
 
-.visEditor__collapsibleSidebar--small {
-  width: 15%;
-}
-
-.visEditor__collapsibleSidebar--medium {
-  width: 30%;
-}
-
-.visEditor__collapsibleSidebar--large {
-  width: 50%;
-}
-
-
-/**
- * Actual sidebar
- */
-
-.visEditor__sidebar {
-  @include flex-parent(1, 0, auto);
-
-  // overridden for tablet and desktop
-  @include euiBreakpoint('l', 'xl') {
-    flex-basis: $vis-editor-sidebar-basis;
-    max-width: calc(100% - #{$vis-editor-resizer-width});
+  .visEditorSidebar {
+    display: none;
   }
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    height: $euiSizeXXL; // Just enough room for the collapse button
+    width: 100% !important;
+  }
+}
+
+.visEditor__collapsibleSidebarButton {
+  position: absolute;
+  right: $euiSizeXS;
+  top: $euiSizeS;
 }
 
 /**
@@ -69,16 +54,29 @@
  */
 
 .visEditor__resizer {
-  @include kbnResizer($vis-editor-resizer-width);
-
+  @include kbnResizer($euiSizeM);
   @include euiBreakpoint('xs', 's', 'm') {
     display: none;
   }
 }
 
+.visEditor__resizer-isHidden {
+  display: none;
+}
+
 /**
  * Canvas area
  */
+
+.visEditor__visualization {
+  display: flex;
+  flex-basis: 100%;
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    // If we are on a small screen we force the visualization to take 100% width.
+    width: 100% !important;
+  }
+}
 
 .visEditor__canvas {
   background-color: $euiColorEmptyShade;

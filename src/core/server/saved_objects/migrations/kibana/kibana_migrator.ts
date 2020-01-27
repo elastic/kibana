@@ -36,7 +36,7 @@ import {
 } from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsConfigType } from '../../saved_objects_config';
-import { LegacyConfig } from '../../../legacy/config';
+import { LegacyConfig } from '../../../legacy';
 
 export interface KibanaMigratorOptions {
   callCluster: CallCluster;

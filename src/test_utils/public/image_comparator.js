@@ -24,9 +24,7 @@ import pixelmatch from 'pixelmatch';
  * Adds the snapshots and comparison to the corners of the HTML-body to help with human inspection.
  */
 export class ImageComparator {
-
   constructor() {
-
     this._expectCanvas = document.createElement('canvas');
     this._expectCanvas.style.position = 'fixed';
     this._expectCanvas.style.right = 0;
@@ -47,12 +45,15 @@ export class ImageComparator {
     this._actualCanvas.style.bottom = 0;
     this._actualCanvas.style.border = '1px solid yellow';
     document.body.appendChild(this._actualCanvas);
-
   }
 
-
-  async compareDOMContents(domContentsText, sourceWidth, sourceHeight, expectedImageSourcePng, threshold) {
-
+  async compareDOMContents(
+    domContentsText,
+    sourceWidth,
+    sourceHeight,
+    expectedImageSourcePng,
+    threshold
+  ) {
     const sourceCanvas = document.createElement('canvas');
     sourceCanvas.width = sourceWidth;
     sourceCanvas.height = sourceHeight;
@@ -63,8 +64,7 @@ export class ImageComparator {
     const sourceContext2d = sourceCanvas.getContext('2d');
     document.body.appendChild(sourceCanvas);
 
-    const sourceData =
-      `<svg xmlns="http://www.w3.org/2000/svg" width="${sourceWidth}" height="${sourceHeight}">
+    const sourceData = `<svg xmlns="http://www.w3.org/2000/svg" width="${sourceWidth}" height="${sourceHeight}">
         <foreignObject width="100%" height="100%">
         ${domContentsText}
         </foreignObject>
@@ -78,7 +78,7 @@ export class ImageComparator {
         document.body.removeChild(sourceCanvas);
         resolve(mismatch);
       };
-      sourceImage.onerror = (e) => {
+      sourceImage.onerror = e => {
         reject(e.message);
       };
       sourceImage.src = 'data:image/svg+xml;base64,' + btoa(sourceData);
@@ -93,13 +93,15 @@ export class ImageComparator {
    * @return number
    */
   async compareImage(actualCanvasFromUser, expectedImageSourcePng, threshold) {
-
     return new Promise((resolve, reject) => {
-
       window.setTimeout(() => {
-
         const actualContextFromUser = actualCanvasFromUser.getContext('2d');
-        const actualImageDataFromUser = actualContextFromUser.getImageData(0, 0, actualCanvasFromUser.width, actualCanvasFromUser.height);
+        const actualImageDataFromUser = actualContextFromUser.getImageData(
+          0,
+          0,
+          actualCanvasFromUser.width,
+          actualCanvasFromUser.height
+        );
         const actualContext = this._actualCanvas.getContext('2d');
         this._actualCanvas.width = actualCanvasFromUser.width;
         this._actualCanvas.height = actualCanvasFromUser.height;
@@ -111,22 +113,35 @@ export class ImageComparator {
 
         const expectedImage = new Image();
         expectedImage.onload = () => {
-
           const expectCtx = this._expectCanvas.getContext('2d');
-          expectCtx.drawImage(expectedImage, 0, 0, this._actualCanvas.width, this._actualCanvas.height);  // draw reference image to size of generated image
+          expectCtx.drawImage(
+            expectedImage,
+            0,
+            0,
+            this._actualCanvas.width,
+            this._actualCanvas.height
+          ); // draw reference image to size of generated image
 
-          const expectImageData = expectCtx.getImageData(0, 0, this._actualCanvas.width, this._actualCanvas.height);
+          const expectImageData = expectCtx.getImageData(
+            0,
+            0,
+            this._actualCanvas.width,
+            this._actualCanvas.height
+          );
 
           // compare live map vs expected pixel data
-          const diffImage = expectCtx.createImageData(this._actualCanvas.width, this._actualCanvas.height);
+          const diffImage = expectCtx.createImageData(
+            this._actualCanvas.width,
+            this._actualCanvas.height
+          );
           const mismatchedPixels = pixelmatch(
             actualImageDataFromUser.data,
             expectImageData.data,
             diffImage.data,
             this._actualCanvas.width,
             this._actualCanvas.height,
-            { threshold: threshold });
-
+            { threshold: threshold }
+          );
 
           const diffContext = this._diffCanvas.getContext('2d');
           this._diffCanvas.width = this._actualCanvas.width;
@@ -136,23 +151,18 @@ export class ImageComparator {
           resolve(mismatchedPixels);
         };
 
-        expectedImage.onerror = (e) => {
+        expectedImage.onerror = e => {
           reject(e.message);
         };
 
         expectedImage.src = expectedImageSourcePng;
       });
     });
-
-
   }
-
 
   destroy() {
     document.body.removeChild(this._expectCanvas);
     document.body.removeChild(this._diffCanvas);
     document.body.removeChild(this._actualCanvas);
   }
-
-
 }

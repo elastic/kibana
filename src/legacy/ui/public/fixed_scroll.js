@@ -29,7 +29,7 @@ export function FixedScrollProvider(Private) {
 
   return {
     restrict: 'A',
-    link: function ($scope, $el) {
+    link: function($scope, $el) {
       let $window = $(window);
       let $scroller = $('<div class="fixed-scroll-scroller">').height(SCROLLER_HEIGHT);
 
@@ -65,18 +65,14 @@ export function FixedScrollProvider(Private) {
           }
 
           $from.on('scroll', handler);
-          return function () {
+          return function() {
             $from.off('scroll', handler);
           };
         }
 
-        unlisten = _.flow(
-          bind($el, $scroller),
-          bind($scroller, $el),
-          function () {
-            unlisten = _.noop;
-          }
-        );
+        unlisten = _.flow(bind($el, $scroller), bind($scroller, $el), function() {
+          unlisten = _.noop;
+        });
       }
 
       /**
@@ -141,7 +137,7 @@ export function FixedScrollProvider(Private) {
       $scope.$watch(debouncedCheckWidth);
 
       // cleanup when the scope is destroyed
-      $scope.$on('$destroy', function () {
+      $scope.$on('$destroy', function() {
         cleanUp();
         debouncedCheckWidth.cancel();
         $scroller = $window = null;

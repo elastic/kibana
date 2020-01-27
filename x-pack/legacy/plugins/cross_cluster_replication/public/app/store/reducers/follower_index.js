@@ -15,17 +15,23 @@ const initialState = {
 
 const success = action => `${action}_SUCCESS`;
 
-const parseFollowerIndex = (followerIndex) => {
+const parseFollowerIndex = followerIndex => {
   // Extract status into boolean
   return { ...followerIndex, isPaused: followerIndex.status === 'paused' };
 };
 export const reducer = (state = initialState, action) => {
   switch (action.type) {
     case success(t.FOLLOWER_INDEX_LOAD): {
-      return { ...state, byId: arrayToObject(action.payload.indices.map(parseFollowerIndex), 'name') };
+      return {
+        ...state,
+        byId: arrayToObject(action.payload.indices.map(parseFollowerIndex), 'name'),
+      };
     }
     case success(t.FOLLOWER_INDEX_GET): {
-      return { ...state, byId: { ...state.byId, [action.payload.name]: parseFollowerIndex(action.payload) } };
+      return {
+        ...state,
+        byId: { ...state.byId, [action.payload.name]: parseFollowerIndex(action.payload) },
+      };
     }
     case t.FOLLOWER_INDEX_SELECT_DETAIL: {
       return { ...state, selectedDetailId: action.payload };

@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Marker renders agent marker 1`] = `
+<styled.div
+  style={
+    Object {
+      "left": "4.5px",
+    }
+  }
+>
+  <AgentMarker
+    mark={
+      Object {
+        "id": "agent",
+        "offset": 1000,
+        "type": "agentMark",
+        "verticalLine": true,
+      }
+    }
+  />
+</styled.div>
+`;
+
+exports[`Marker renders error marker 1`] = `
+<styled.div
+  style={
+    Object {
+      "left": "4.5px",
+    }
+  }
+>
+  <ErrorMarker
+    mark={
+      Object {
+        "error": Object {
+          "error": Object {
+            "grouping_key": "123",
+          },
+          "service": Object {
+            "name": "bar",
+          },
+          "trace": Object {
+            "id": "123",
+          },
+          "transaction": Object {
+            "id": "456",
+          },
+        },
+        "id": "agent",
+        "offset": 1000,
+        "serviceColor": "#fff",
+        "type": "errorMark",
+        "verticalLine": true,
+      }
+    }
+  />
+</styled.div>
+`;

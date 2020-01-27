@@ -18,13 +18,25 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { createSearchBar, StatetfulSearchBarProps } from './search';
-import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
+import { SearchService, SearchStart } from './search';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
-import { initLegacyModule } from './shim/legacy_module';
+import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setFieldFormats } from '../../../../plugins/data/public/services';
+import {
+  setFieldFormats,
+  setNotifications,
+  setIndexPatterns,
+  setQueryService,
+  setSearchService,
+  setUiSettings,
+  setInjectedMetadata,
+  setHttp,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/data/public/services';
+
+export interface DataPluginSetupDependencies {
+  expressions: ExpressionsSetup;
+}
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -36,9 +48,7 @@ export interface DataPluginStartDependencies {
  * @public
  */
 export interface DataStart {
-  ui: {
-    SearchBar: React.ComponentType<StatetfulSearchBarProps>;
-  };
+  search: SearchStart;
 }
 
 /**
@@ -53,30 +63,31 @@ export interface DataStart {
  * or static code.
  */
 
-export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDependencies> {
-  private storage!: IStorageWrapper;
+export class DataPlugin
+  implements Plugin<void, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
+  private readonly search = new SearchService();
 
   public setup(core: CoreSetup) {
-    this.storage = new Storage(window.localStorage);
+    setInjectedMetadata(core.injectedMetadata);
   }
 
   public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
     // This is required for when Angular code uses Field and FieldList.
     setFieldFormats(data.fieldFormats);
-    initLegacyModule(data.indexPatterns);
-
-    const SearchBar = createSearchBar({
-      core,
-      data,
-      storage: this.storage,
-    });
+    setQueryService(data.query);
+    setSearchService(data.search);
+    setIndexPatterns(data.indexPatterns);
+    setFieldFormats(data.fieldFormats);
+    setNotifications(core.notifications);
+    setUiSettings(core.uiSettings);
+    setHttp(core.http);
 
     return {
-      ui: {
-        SearchBar,
-      },
+      search: this.search.start(core),
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.search.stop();
+  }
 }

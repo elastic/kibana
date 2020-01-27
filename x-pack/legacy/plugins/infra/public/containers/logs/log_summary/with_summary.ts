@@ -5,41 +5,34 @@
  */
 
 import { useContext } from 'react';
-import { connect } from 'react-redux';
 
-import { logFilterSelectors, logPositionSelectors, State } from '../../../store';
 import { RendererFunction } from '../../../utils/typed_react';
 import { Source } from '../../source';
 import { LogViewConfiguration } from '../log_view_configuration';
 import { LogSummaryBuckets, useLogSummary } from './log_summary';
+import { LogFilterState } from '../log_filter';
+import { LogPositionState } from '../log_position';
 
-export const WithSummary = connect((state: State) => ({
-  visibleMidpointTime: logPositionSelectors.selectVisibleMidpointOrTargetTime(state),
-  filterQuery: logFilterSelectors.selectLogFilterQueryAsJson(state),
-}))(
-  ({
-    children,
-    filterQuery,
+export const WithSummary = ({
+  children,
+}: {
+  children: RendererFunction<{
+    buckets: LogSummaryBuckets;
+    start: number | null;
+    end: number | null;
+  }>;
+}) => {
+  const { intervalSize } = useContext(LogViewConfiguration.Context);
+  const { sourceId } = useContext(Source.Context);
+  const { filterQuery } = useContext(LogFilterState.Context);
+  const { visibleMidpointTime } = useContext(LogPositionState.Context);
+
+  const { buckets, start, end } = useLogSummary(
+    sourceId,
     visibleMidpointTime,
-  }: {
-    children: RendererFunction<{
-      buckets: LogSummaryBuckets;
-      start: number | null;
-      end: number | null;
-    }>;
-    filterQuery: string | null;
-    visibleMidpointTime: number | null;
-  }) => {
-    const { intervalSize } = useContext(LogViewConfiguration.Context);
-    const { sourceId } = useContext(Source.Context);
+    intervalSize,
+    filterQuery
+  );
 
-    const { buckets, start, end } = useLogSummary(
-      sourceId,
-      visibleMidpointTime,
-      intervalSize,
-      filterQuery
-    );
-
-    return children({ buckets, start, end });
-  }
-);
+  return children({ buckets, start, end });
+};

@@ -13,12 +13,12 @@ import { isEqual } from 'lodash';
  * @returns {boolean}
  */
 export function areJobsCompatible(jobs = []) {
-  if(!jobs || !Array.isArray(jobs)) return false;
-  if(jobs.length <= 1) return true;
+  if (!jobs || !Array.isArray(jobs)) return false;
+  if (jobs.length <= 1) return true;
 
   try {
     mergeJobConfigurations(jobs);
-  } catch(e) {
+  } catch (e) {
     return false;
   }
 
@@ -33,7 +33,7 @@ export function areJobsCompatible(jobs = []) {
  * @returns {{}}
  */
 export function mergeJobConfigurations(jobs = []) {
-  if(!jobs || !Array.isArray(jobs) || !jobs.length) {
+  if (!jobs || !Array.isArray(jobs) || !jobs.length) {
     throw new Error('No capabilities available');
   }
 
@@ -58,7 +58,7 @@ export function mergeJobConfigurations(jobs = []) {
         // If we currently don't have this aggregation, add it.
         // Special case for date histogram, since there can only be one
         // date histogram field.
-        if(aggDoesntExist || (fieldDoesntExist && !isDateHistogramAgg)) {
+        if (aggDoesntExist || (fieldDoesntExist && !isDateHistogramAgg)) {
           allAggs[aggName] = allAggs[aggName] || {};
           allAggs[aggName][fieldName] = { ...agg };
         }
@@ -73,13 +73,13 @@ export function mergeJobConfigurations(jobs = []) {
               // TODO: Fix this with LCD algorithm
               const intervals = [fieldAgg.interval, agg.interval].sort((a, b) => a - b);
               const isMultiple = intervals[1] % intervals[0] === 0;
-              fieldAgg.interval = isMultiple ? intervals[1] : (intervals[0] * intervals[1]);
+              fieldAgg.interval = isMultiple ? intervals[1] : intervals[0] * intervals[1];
               break;
 
             // For date histograms, if it is on the same field, check that the configuration is identical,
             // otherwise reject. If not the same field, reject;
             case 'date_histogram':
-              if(fieldDoesntExist || !isEqual(fieldAgg, agg)) {
+              if (fieldDoesntExist || !isEqual(fieldAgg, agg)) {
                 throw new Error('Multiple date histograms configured');
               }
               break;
@@ -94,6 +94,6 @@ export function mergeJobConfigurations(jobs = []) {
   });
 
   return {
-    aggs: allAggs
+    aggs: allAggs,
   };
 }

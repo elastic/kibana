@@ -10,7 +10,7 @@ import { DataMissing } from '../data_missing';
 
 describe('DataMissing component', () => {
   it('renders basePath and headingMessage', () => {
-    const component = shallowWithIntl(<DataMissing basePath="foo" headingMessage="bar" />);
+    const component = shallowWithIntl(<DataMissing headingMessage="bar" />);
     expect(component).toMatchSnapshot();
   });
 });

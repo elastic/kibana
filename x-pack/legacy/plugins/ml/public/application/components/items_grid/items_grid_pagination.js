@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for the pagination controls of the items grid.
  */
 
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -26,19 +23,16 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-
 function getContextMenuItemIcon(menuItemSetting, itemsPerPage) {
-  return (menuItemSetting === itemsPerPage) ? 'check' : 'empty';
+  return menuItemSetting === itemsPerPage ? 'check' : 'empty';
 }
 
-
 export class ItemsGridPagination extends Component {
-
   constructor(props) {
     super(props);
 
     this.state = {
-      isPopoverOpen: false
+      isPopoverOpen: false,
     };
   }
 
@@ -46,30 +40,25 @@ export class ItemsGridPagination extends Component {
     this.setState({
       isPopoverOpen: !this.state.isPopoverOpen,
     });
-  }
+  };
 
   closePopover = () => {
     this.setState({
       isPopoverOpen: false,
     });
-  }
+  };
 
-  onPageClick = (pageNumber) => {
+  onPageClick = pageNumber => {
     this.props.setActivePage(pageNumber);
-  }
+  };
 
-  onChangeItemsPerPage = (pageSize) => {
+  onChangeItemsPerPage = pageSize => {
     this.closePopover();
     this.props.setItemsPerPage(pageSize);
-  }
+  };
 
   render() {
-
-    const {
-      itemCount,
-      itemsPerPage,
-      itemsPerPageOptions,
-      activePage } = this.props;
+    const { itemCount, itemsPerPage, itemsPerPageOptions, activePage } = this.props;
 
     const button = (
       <EuiButtonEmpty
@@ -89,12 +78,14 @@ export class ItemsGridPagination extends Component {
 
     const pageCount = Math.ceil(itemCount / itemsPerPage);
 
-    const items = itemsPerPageOptions.map((pageSize) => {
+    const items = itemsPerPageOptions.map(pageSize => {
       return (
         <EuiContextMenuItem
           key={`${pageSize} items`}
           icon={getContextMenuItemIcon(pageSize, itemsPerPage)}
-          onClick={() => {this.onChangeItemsPerPage(pageSize);}}
+          onClick={() => {
+            this.onChangeItemsPerPage(pageSize);
+          }}
         >
           <FormattedMessage
             id="xpack.ml.itemsGrid.itemsCountLabel"
@@ -115,10 +106,7 @@ export class ItemsGridPagination extends Component {
             closePopover={this.closePopover}
             panelPaddingSize="none"
           >
-            <EuiContextMenuPanel
-              items={items}
-              className="ml-items-grid-page-size-menu"
-            />
+            <EuiContextMenuPanel items={items} className="ml-items-grid-page-size-menu" />
           </EuiPopover>
         </EuiFlexItem>
 
@@ -132,7 +120,6 @@ export class ItemsGridPagination extends Component {
       </EuiFlexGroup>
     );
   }
-
 }
 ItemsGridPagination.propTypes = {
   itemCount: PropTypes.number.isRequired,
@@ -142,4 +129,3 @@ ItemsGridPagination.propTypes = {
   activePage: PropTypes.number.isRequired,
   setActivePage: PropTypes.func.isRequired,
 };
-

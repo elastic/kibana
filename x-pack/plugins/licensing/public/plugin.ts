@@ -7,7 +7,8 @@ import { Subject, Subscription } from 'rxjs';
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 
-import { ILicense, LicensingPluginSetup } from '../common/types';
+import { ILicense } from '../common/types';
+import { LicensingPluginSetup } from './types';
 import { createLicenseUpdate } from '../common/license_update';
 import { License } from '../common/license';
 import { mountExpiredBanner } from './expired_banner';
@@ -131,10 +132,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
 
   private fetchLicense = async (core: CoreSetup): Promise<ILicense> => {
     try {
-      const response = await core.http.get(this.infoEndpoint, {
-        headers: {
-          'kbn-system-api': 'true',
-        },
+      const response = await core.http.get({
+        path: this.infoEndpoint,
+        asSystemRequest: true,
       });
       return new License({
         license: response.license,

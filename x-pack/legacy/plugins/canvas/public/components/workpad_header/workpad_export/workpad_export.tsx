@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useState, MouseEvent } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiContextMenu, EuiIcon } from '@elastic/eui';
 // @ts-ignore Untyped local
@@ -13,7 +13,7 @@ import { DisabledPanel } from './disabled_panel';
 import { PDFPanel } from './pdf_panel';
 import { ShareWebsiteFlyout } from './flyout';
 
-import { ComponentStrings } from '../../../../i18n';
+import { ComponentStrings } from '../../../../i18n/components';
 const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 
 type ClosePopoverFn = () => void;
@@ -129,7 +129,7 @@ export const WorkpadExport: FunctionComponent<Props> = ({
     ],
   });
 
-  const exportControl = (togglePopover: (ev: MouseEvent) => void) => (
+  const exportControl = (togglePopover: React.MouseEventHandler<any>) => (
     <EuiButtonIcon
       iconType="share"
       aria-label={strings.getShareWorkpadMessage()}

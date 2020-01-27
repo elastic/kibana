@@ -148,7 +148,9 @@ export class ServiceIntegrations extends React.Component<Props, State> {
                 panels={[
                   {
                     id: 0,
-                    items: this.getPanelItems(license.features.ml?.is_available)
+                    items: this.getPanelItems(
+                      license?.getFeature('ml').isAvailable
+                    )
                   }
                 ]}
               />

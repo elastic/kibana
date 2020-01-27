@@ -19,15 +19,20 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'discover', 'visualize', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'visualize',
+    'header',
+    'timePicker',
+    'visChart',
+  ]);
 
   describe('visualize app', function describeIndexTests() {
-
     describe('linked saved searched', () => {
-
       const savedSearchName = 'vis_saved_search';
 
       before(async () => {
@@ -45,15 +50,18 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickSavedSearch(savedSearchName);
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await retry.waitFor('wait for count to equal 9,109', async () => {
-          const data = await PageObjects.visualize.getTableVisData();
+          const data = await PageObjects.visChart.getTableVisData();
           return data.trim() === '9,109';
         });
       });
 
       it('should respect the time filter when linked to a saved search', async () => {
-        await PageObjects.timePicker.setAbsoluteRange('Sep 19, 2015 @ 06:31:44.000', 'Sep 21, 2015 @ 10:00:00.000');
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 19, 2015 @ 06:31:44.000',
+          'Sep 21, 2015 @ 10:00:00.000'
+        );
         await retry.waitFor('wait for count to equal 3,950', async () => {
-          const data = await PageObjects.visualize.getTableVisData();
+          const data = await PageObjects.visChart.getTableVisData();
           return data.trim() === '3,950';
         });
       });
@@ -62,7 +70,7 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.addFilter('bytes', 'is between', '100', '3000');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 707', async () => {
-          const data = await PageObjects.visualize.getTableVisData();
+          const data = await PageObjects.visChart.getTableVisData();
           return data.trim() === '707';
         });
       });
@@ -70,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
       it('should allow unlinking from a linked search', async () => {
         await PageObjects.visualize.clickUnlinkSavedSearch();
         await retry.waitFor('wait for count to equal 707', async () => {
-          const data = await PageObjects.visualize.getTableVisData();
+          const data = await PageObjects.visChart.getTableVisData();
           return data.trim() === '707';
         });
         // The filter on the saved search should now be in the editor
@@ -81,7 +89,7 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.toggleFilterEnabled('extension.raw');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 1,293', async () => {
-          const unfilteredData = await PageObjects.visualize.getTableVisData();
+          const unfilteredData = await PageObjects.visChart.getTableVisData();
           return unfilteredData.trim() === '1,293';
         });
       });
@@ -90,7 +98,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.saveVisualizationExpectSuccess('Unlinked before saved');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 1,293', async () => {
-          const data = await PageObjects.visualize.getTableVisData();
+          const data = await PageObjects.visChart.getTableVisData();
           return data.trim() === '1,293';
         });
       });

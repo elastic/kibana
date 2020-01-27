@@ -7,12 +7,10 @@ exports[`NewCalendar Renders new calendar form 1`] = `
   />
   <EuiPage
     className="mlCalendarEditForm"
-    restrictWidth={false}
   >
     <EuiPageContent
       className="mlCalendarEditForm__content"
       horizontalPosition="center"
-      panelPaddingSize="l"
       verticalPosition="center"
     >
       <InjectIntl(CalendarForm)

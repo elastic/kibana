@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { calculateInterval, calculateName } from './update_rules';
+import { calculateInterval, calculateName, calculateVersion } from './update_rules';
+import { UpdateRuleParams } from './types';
 
 describe('update_rules', () => {
   describe('#calculateInterval', () => {
@@ -21,6 +22,30 @@ describe('update_rules', () => {
     test('given both an undefined ruleInterval and a undefined interval, it returns 5m', () => {
       const interval = calculateInterval(undefined, undefined);
       expect(interval).toEqual('5m');
+    });
+  });
+
+  describe('#calculateVersion', () => {
+    test('returning the same version number if given an immutable but no updated version number', () => {
+      expect(calculateVersion(true, 1, { description: 'some description change' })).toEqual(1);
+    });
+
+    test('returning an updated version number if given an immutable and an updated version number', () => {
+      expect(calculateVersion(true, 2, { description: 'some description change' })).toEqual(2);
+    });
+
+    test('returning an updated version number if not given an immutable but but an updated description', () => {
+      expect(calculateVersion(false, 1, { description: 'some description change' })).toEqual(2);
+    });
+
+    test('returning the same version number but a undefined description', () => {
+      expect(calculateVersion(false, 1, { description: undefined })).toEqual(1);
+    });
+
+    test('returning an updated version number if not given an immutable but an updated falsy value', () => {
+      expect(
+        calculateVersion(false, 1, ({ description: false } as unknown) as UpdateRuleParams)
+      ).toEqual(2);
     });
   });
 

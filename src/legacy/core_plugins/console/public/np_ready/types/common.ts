@@ -17,6 +17,11 @@
  * under the License.
  */
 
+export interface MetricsTracker {
+  count: (eventName: string) => void;
+  load: (eventName: string) => void;
+}
+
 export type BaseResponseType =
   | 'application/json'
   | 'text/csv'

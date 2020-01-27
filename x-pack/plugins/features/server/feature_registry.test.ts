@@ -5,7 +5,7 @@
  */
 
 import { FeatureRegistry } from './feature_registry';
-import { Feature } from './feature';
+import { Feature } from '../common/feature';
 
 describe('FeatureRegistry', () => {
   it('allows a minimal feature to be registered', () => {

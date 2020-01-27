@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { SharedComponent } from './shared_component';
-export class  IdAutocompleteComponent extends SharedComponent {
+export class IdAutocompleteComponent extends SharedComponent {
   constructor(name, parent, multi) {
     super(name, parent);
     this.multi_match = multi;
@@ -32,9 +32,11 @@ export class  IdAutocompleteComponent extends SharedComponent {
       return null;
     }
     token = Array.isArray(token) ? token : [token];
-    if (_.find(token, function (t) {
-      return t.match(/[\/,]/);
-    })) {
+    if (
+      _.find(token, function(t) {
+        return t.match(/[\/,]/);
+      })
+    ) {
       return null;
     }
     const r = super.match(token, context, editor);

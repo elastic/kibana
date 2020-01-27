@@ -29,16 +29,17 @@ export function staticAlertForCluster(cluster) {
       metadata: {
         severity: 0,
         cluster_uuid: cluster.cluster_uuid,
-        link: `https://www.elastic.co/guide/en/x-pack/${version}/ssl-tls.html`
+        link: `https://www.elastic.co/guide/en/x-pack/${version}/ssl-tls.html`,
       },
       update_timestamp: cluster.timestamp,
       timestamp: get(cluster, 'license.issue_date', cluster.timestamp),
       prefix: i18n.translate('xpack.monitoring.clusterAlerts.clusterNeedsTSLEnabledDescription', {
-        defaultMessage: 'Configuring TLS will be required to apply a Gold or Platinum license when security is enabled.'
+        defaultMessage:
+          'Configuring TLS will be required to apply a Gold or Platinum license when security is enabled.',
       }),
       message: i18n.translate('xpack.monitoring.clusterAlerts.seeDocumentationDescription', {
-        defaultMessage: 'See documentation for details.'
-      })
+        defaultMessage: 'See documentation for details.',
+      }),
     };
   }
 
@@ -59,7 +60,9 @@ export function appendStaticAlerts(cluster, alerts, size) {
   if (staticAlert) {
     // we can put it over any resolved alert, or anything with a lower severity (which is currently none)
     // the alerts array is pre-sorted from highest severity to lowest; unresolved alerts are at the bottom
-    const alertIndex = alerts.findIndex(alert => alert.resolved_timestamp || alert.metadata.severity < staticAlert.metadata.severity);
+    const alertIndex = alerts.findIndex(
+      alert => alert.resolved_timestamp || alert.metadata.severity < staticAlert.metadata.severity
+    );
 
     if (alertIndex !== -1) {
       // we can put it in the place of this alert
@@ -86,10 +89,10 @@ export function createFilterForUnresolvedAlerts() {
     bool: {
       must_not: {
         exists: {
-          field: 'resolved_timestamp'
-        }
-      }
-    }
+          field: 'resolved_timestamp',
+        },
+      },
+    },
   };
 }
 
@@ -103,7 +106,7 @@ export function createFilterForUnresolvedAlerts() {
  * @return {Object} Query to restrict to un-resolved cluster alerts or cluster alerts resolved within the time range.
  */
 export function createFilterForTime(options) {
-  const timeFilter = { };
+  const timeFilter = {};
 
   if (options.start) {
     timeFilter.gte = moment.utc(options.start).valueOf();
@@ -120,21 +123,21 @@ export function createFilterForTime(options) {
           range: {
             resolved_timestamp: {
               format: 'epoch_millis',
-              ...timeFilter
-            }
-          }
+              ...timeFilter,
+            },
+          },
         },
         {
           bool: {
             must_not: {
               exists: {
-                field: 'resolved_timestamp'
-              }
-            }
-          }
-        }
-      ]
-    }
+                field: 'resolved_timestamp',
+              },
+            },
+          },
+        },
+      ],
+    },
   };
 }
 
@@ -177,31 +180,31 @@ export function alertsClusterSearch(req, alertsIndex, cluster, checkLicense, opt
                           must_not: [
                             {
                               exists: {
-                                field: 'resolved_timestamp'
-                              }
-                            }
-                          ]
-                        }
+                                field: 'resolved_timestamp',
+                              },
+                            },
+                          ],
+                        },
                       },
-                      weight: 2
-                    }
-                  ]
-                }
-              }
+                      weight: 2,
+                    },
+                  ],
+                },
+              },
             ],
             filter: [
               {
-                term: { 'metadata.cluster_uuid': cluster.cluster_uuid }
-              }
-            ]
-          }
+                term: { 'metadata.cluster_uuid': cluster.cluster_uuid },
+              },
+            ],
+          },
         },
         sort: [
           '_score',
           { 'metadata.severity': { order: 'desc' } },
-          { 'timestamp': { order: 'asc' } }
-        ]
-      }
+          { timestamp: { order: 'asc' } },
+        ],
+      },
     };
 
     if (options.start || options.end) {
@@ -211,13 +214,12 @@ export function alertsClusterSearch(req, alertsIndex, cluster, checkLicense, opt
     }
 
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-    return callWithRequest(req, 'search', params)
-      .then(result => {
-        const hits = get(result, 'hits.hits', []);
-        const alerts = hits.map(alert => alert._source);
+    return callWithRequest(req, 'search', params).then(result => {
+      const hits = get(result, 'hits.hits', []);
+      const alerts = hits.map(alert => alert._source);
 
-        return appendStaticAlerts(cluster, alerts, size);
-      });
+      return appendStaticAlerts(cluster, alerts, size);
+    });
   }
 
   return Promise.resolve({ message: prodLicenseInfo.message });

@@ -8,6 +8,8 @@ require('../../../../../src/setup_node_env');
 
 const fs = require('fs');
 const path = require('path');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const uuid = require('uuid');
 
 /*
  * This script is used to parse a set of saved searches on a file system
@@ -36,8 +38,6 @@ const TO = 'now';
 const IMMUTABLE = true;
 const RISK_SCORE = 50;
 const ENABLED = false;
-let allRules = '';
-const allRulesNdJson = 'all_rules.ndjson';
 
 // For converting, if you want to use these instead of rely on the defaults then
 // comment these in and use them for the script. Otherwise this is commented out
@@ -50,7 +50,7 @@ const allRulesNdJson = 'all_rules.ndjson';
 const walk = dir => {
   const list = fs.readdirSync(dir);
   return list.reduce((accum, file) => {
-    const fileWithDir = dir + '/' + file;
+    const fileWithDir = `${dir}/${file}`;
     const stat = fs.statSync(fileWithDir);
     if (stat && stat.isDirectory()) {
       return [...accum, ...walk(fileWithDir)];
@@ -62,14 +62,26 @@ const walk = dir => {
 
 //clean up the file system characters
 const cleanupFileName = file => {
-  return path
-    .basename(file, path.extname(file))
+  const fileWithoutSpecialChars = file
+    .trim()
+    .replace(/\./g, '')
+    .replace(/\//g, '')
     .replace(/\s+/g, '_')
     .replace(/,/g, '')
+    .replace(/\[/g, '')
+    .replace(/\]/g, '')
+    .replace(/\(/g, '')
+    .replace(/\)/g, '')
+    .replace(/\@/g, '')
+    .replace(/\:/g, '')
     .replace(/\+s/g, '')
     .replace(/-/g, '')
     .replace(/__/g, '_')
     .toLowerCase();
+  return path.basename(
+    fileWithoutSpecialChars.trim(),
+    path.extname(fileWithoutSpecialChars.trim())
+  );
 };
 
 async function main() {
@@ -89,22 +101,19 @@ async function main() {
   const savedSearchesParsed = savedSearchesJson.reduce((accum, json) => {
     const jsonFile = fs.readFileSync(json, 'utf8');
     const jsonLines = jsonFile.split(/\r{0,1}\n/);
-    const parsedLines = jsonLines.reduce((accum, line, index) => {
+    const parsedLines = jsonLines.reduce((accum, line) => {
       try {
         const parsedLine = JSON.parse(line);
-        if (index !== 0) {
-          parsedLine._file = `${json.substring(0, json.length - '.ndjson'.length)}_${String(
-            index
-          )}.ndjson`;
-        } else {
-          parsedLine._file = json;
+        // don't try to parse out any exported count records
+        if (parsedLine.exportedCount != null) {
+          return accum;
         }
+        parsedLine._file = parsedLine.attributes.title;
         parsedLine.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.parse(
           parsedLine.attributes.kibanaSavedObjectMeta.searchSourceJSON
         );
         return [...accum, parsedLine];
       } catch (err) {
-        console.log('error parsing a line in this file:', json);
         return accum;
       }
     }, []);
@@ -127,37 +136,39 @@ async function main() {
     }) => {
       const fileToWrite = cleanupFileName(_file);
 
-      if (query != null && query.trim() !== '') {
-        const outputMessage = {
-          rule_id: fileToWrite,
-          risk_score: RISK_SCORE,
-          description: description || title,
-          immutable: IMMUTABLE,
-          interval: INTERVAL,
-          name: title,
-          severity: SEVERITY,
-          type: TYPE,
-          from: FROM,
-          to: TO,
-          query,
-          language,
-          filters: filter,
-          enabled: ENABLED,
-          // comment these in if you want to use these for input output, otherwise
-          // with these two commented out, we will use the default saved objects from spaces.
-          // index: INDEX,
-          // output_index: OUTPUT_INDEX,
-        };
+      // remove meta value from the filter
+      const filterWithoutMeta = filter.map(filterValue => {
+        filterValue.$state;
+        return filterValue;
+      });
+      const outputMessage = {
+        description: description || title,
+        enabled: ENABLED,
+        filters: filterWithoutMeta,
+        from: FROM,
+        immutable: IMMUTABLE,
+        interval: INTERVAL,
+        language,
+        name: title,
+        query,
+        risk_score: RISK_SCORE,
+        rule_id: uuid.v4(),
+        severity: SEVERITY,
+        to: TO,
+        type: TYPE,
+        version: 1,
+        // comment these in if you want to use these for input output, otherwise
+        // with these two commented out, we will use the default saved objects from spaces.
+        // index: INDEX,
+        // output_index: OUTPUT_INDEX,
+      };
 
-        fs.writeFileSync(
-          `${outputDir}/${fileToWrite}.json`,
-          JSON.stringify(outputMessage, null, 2)
-        );
-        allRules += `${JSON.stringify(outputMessage)}\n`;
-      }
+      fs.writeFileSync(
+        `${outputDir}/${fileToWrite}.json`,
+        `${JSON.stringify(outputMessage, null, 2)}\n`
+      );
     }
   );
-  fs.writeFileSync(`${outputDir}/${allRulesNdJson}`, allRules);
 }
 
 if (require.main === module) {

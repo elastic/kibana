@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -19,7 +19,7 @@ import { MlNetworkConditionalContainer } from '../../components/ml/conditional_l
 import { StatefulTimeline } from '../../components/timeline';
 import { AutoSaveWarningMsg } from '../../components/timeline/auto_save_warning';
 import { UseUrlState } from '../../components/url_state';
-import { WithSource } from '../../containers/source';
+import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { NotFoundPage } from '../404';
 import { DetectionEngineContainer } from '../detection_engine';
@@ -63,28 +63,32 @@ export const HomePage: React.FC = () => (
 
         <main data-test-subj="pageContainer">
           <WithSource sourceId="default">
-            {({ browserFields, indexPattern }) => (
+            {({ browserFields, indexPattern, indicesExist }) => (
               <DragDropContextWrapper browserFields={browserFields}>
                 <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-                <AutoSaveWarningMsg />
-                <Flyout
-                  flyoutHeight={calculateFlyoutHeight({
-                    globalHeaderSize: globalHeaderHeightPx,
-                    windowHeight,
-                  })}
-                  headerHeight={flyoutHeaderHeight}
-                  timelineId="timeline-1"
-                  usersViewing={usersViewing}
-                >
-                  <StatefulTimeline
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    flyoutHeight={calculateFlyoutHeight({
-                      globalHeaderSize: globalHeaderHeightPx,
-                      windowHeight,
-                    })}
-                    id="timeline-1"
-                  />
-                </Flyout>
+                {indicesExistOrDataTemporarilyUnavailable(indicesExist) && (
+                  <>
+                    <AutoSaveWarningMsg />
+                    <Flyout
+                      flyoutHeight={calculateFlyoutHeight({
+                        globalHeaderSize: globalHeaderHeightPx,
+                        windowHeight,
+                      })}
+                      headerHeight={flyoutHeaderHeight}
+                      timelineId="timeline-1"
+                      usersViewing={usersViewing}
+                    >
+                      <StatefulTimeline
+                        flyoutHeaderHeight={flyoutHeaderHeight}
+                        flyoutHeight={calculateFlyoutHeight({
+                          globalHeaderSize: globalHeaderHeightPx,
+                          windowHeight,
+                        })}
+                        id="timeline-1"
+                      />
+                    </Flyout>
+                  </>
+                )}
 
                 <Switch>
                   <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
@@ -105,7 +109,7 @@ export const HomePage: React.FC = () => (
                     )}
                   />
                   <Route
-                    path={`/:pageName(${SiemPageName.detectionEngine})`}
+                    path={`/:pageName(${SiemPageName.detections})`}
                     render={({ location, match }) => (
                       <DetectionEngineContainer location={location} url={match.url} />
                     )}

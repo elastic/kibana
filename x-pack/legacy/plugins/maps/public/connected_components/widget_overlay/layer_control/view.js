@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 function renderExpandButton({ hasErrors, isLoading, onClick }) {
   const expandLabel = i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
-    defaultMessage: 'Expand layers panel'
+    defaultMessage: 'Expand layers panel',
   });
 
   if (isLoading) {
@@ -34,7 +34,7 @@ function renderExpandButton({ hasErrors, isLoading, onClick }) {
         onClick={onClick}
         aria-label={expandLabel}
       >
-        <EuiLoadingSpinner size="m"/>
+        <EuiLoadingSpinner size="m" />
       </button>
     );
   }
@@ -50,7 +50,15 @@ function renderExpandButton({ hasErrors, isLoading, onClick }) {
   );
 }
 
-export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, closeLayerTOC, openLayerTOC, layerList }) {
+export function LayerControl({
+  isReadOnly,
+  isLayerTOCOpen,
+  showAddLayerWizard,
+  closeLayerTOC,
+  openLayerTOC,
+  layerList,
+  isAddButtonActive,
+}) {
   if (!isLayerTOCOpen) {
     const hasErrors = layerList.some(layer => {
       return layer.hasErrors();
@@ -63,7 +71,7 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, c
       <EuiToolTip
         delay="long"
         content={i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
-          defaultMessage: 'Expand layers panel'
+          defaultMessage: 'Expand layers panel',
         })}
         position="left"
       >
@@ -78,6 +86,7 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, c
       <Fragment>
         <EuiSpacer size="s" />
         <EuiButton
+          isDisabled={!isAddButtonActive}
           className="mapLayerControl__addLayerButton"
           fill
           fullWidth
@@ -95,7 +104,11 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, c
 
   return (
     <Fragment>
-      <EuiPanel className="mapWidgetControl mapWidgetControl-hasShadow" paddingSize="none" grow={false}>
+      <EuiPanel
+        className="mapWidgetControl mapWidgetControl-hasShadow"
+        paddingSize="none"
+        grow={false}
+      >
         <EuiFlexItem className="mapWidgetControl__headerFlexItem" grow={false}>
           <EuiFlexGroup
             justifyContent="spaceBetween"
@@ -117,7 +130,7 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, c
               <EuiToolTip
                 delay="long"
                 content={i18n.translate('xpack.maps.layerControl.closeLayerTOCButtonAriaLabel', {
-                  defaultMessage: 'Collapse layers panel'
+                  defaultMessage: 'Collapse layers panel',
                 })}
               >
                 <EuiButtonIcon
@@ -125,9 +138,12 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, c
                   onClick={closeLayerTOC}
                   iconType="menuRight"
                   color="text"
-                  aria-label={i18n.translate('xpack.maps.layerControl.closeLayerTOCButtonAriaLabel', {
-                    defaultMessage: 'Collapse layers panel'
-                  })}
+                  aria-label={i18n.translate(
+                    'xpack.maps.layerControl.closeLayerTOCButtonAriaLabel',
+                    {
+                      defaultMessage: 'Collapse layers panel',
+                    }
+                  )}
                   data-test-subj="mapToggleLegendButton"
                 />
               </EuiToolTip>
@@ -141,7 +157,6 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, c
       </EuiPanel>
 
       {addLayer}
-
     </Fragment>
   );
 }

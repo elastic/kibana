@@ -23,21 +23,21 @@ export function handleResponse(resp, min, max, shardStats) {
       hitTimestamp: get(hit, '_source.timestamp'),
       earliestHitTimestamp: get(hit, 'inner_hits.earliest.hits.hits[0]._source.timestamp'),
       timeWindowMin: min,
-      timeWindowMax: max
+      timeWindowMax: max,
     };
 
     const earliestIndexingHit = get(earliestStats, 'primaries.indexing');
     const { rate: indexRate } = calculateRate({
       latestTotal: get(stats, 'primaries.indexing.index_total'),
       earliestTotal: get(earliestIndexingHit, 'index_total'),
-      ...rateOptions
+      ...rateOptions,
     });
 
     const earliestSearchHit = get(earliestStats, 'total.search');
     const { rate: searchRate } = calculateRate({
       latestTotal: get(stats, 'total.search.query_total'),
       earliestTotal: get(earliestSearchHit, 'query_total'),
-      ...rateOptions
+      ...rateOptions,
     });
 
     const shardStatsForIndex = get(shardStats, ['indices', stats.index]);
@@ -59,7 +59,8 @@ export function handleResponse(resp, min, max, shardStats) {
       }
     } else {
       status = i18n.translate('xpack.monitoring.es.indices.deletedClosedStatusLabel', {
-        defaultMessage: 'Deleted / Closed' });
+        defaultMessage: 'Deleted / Closed',
+      });
       statusSort = 0;
     }
 
@@ -71,7 +72,7 @@ export function handleResponse(resp, min, max, shardStats) {
       index_rate: indexRate,
       search_rate: searchRate,
       unassigned_shards: unassignedShards,
-      status_sort: statusSort
+      status_sort: statusSort,
     };
   });
 }
@@ -85,10 +86,8 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
   if (!showSystemIndices) {
     filters.push({
       bool: {
-        must_not: [
-          { prefix: { 'index_stats.index': '.' } }
-        ]
-      }
+        must_not: [{ prefix: { 'index_stats.index': '.' } }],
+      },
     });
   }
 
@@ -100,7 +99,8 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
     // TODO: composite aggregation
     size: config.get('xpack.monitoring.max_bucket_size'),
     ignoreUnavailable: true,
-    filterPath: [ // only filter path can filter for inner_hits
+    filterPath: [
+      // only filter path can filter for inner_hits
       'hits.hits._source.index_stats.index',
       'hits.hits._source.index_stats.primaries.docs.count',
       'hits.hits._source.index_stats.total.store.size_in_bytes',
@@ -122,21 +122,22 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
         end: max,
         clusterUuid,
         metric: metricFields,
-        filters
+        filters,
       }),
       collapse: {
         field: 'index_stats.index',
         inner_hits: {
           name: 'earliest',
           size: 1,
-          sort: [ { timestamp: 'asc' } ]
-        }
+          sort: [{ timestamp: 'asc' }],
+        },
       },
-      sort: [ { timestamp: { order: 'desc' } } ]
-    }
+      sort: [{ timestamp: { order: 'desc' } }],
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params)
-    .then(resp => handleResponse(resp, min, max, shardStats));
+  return callWithRequest(req, 'search', params).then(resp =>
+    handleResponse(resp, min, max, shardStats)
+  );
 }

@@ -27,8 +27,8 @@ import { DroppedSpansWarning } from './DroppedSpansWarning';
 interface Props {
   onClose: () => void;
   transaction?: Transaction;
-  errorCount: number;
-  traceRootDuration?: number;
+  errorCount?: number;
+  rootTransactionDuration?: number;
 }
 
 function TransactionPropertiesTable({
@@ -49,8 +49,8 @@ function TransactionPropertiesTable({
 export function TransactionFlyout({
   transaction: transactionDoc,
   onClose,
-  errorCount,
-  traceRootDuration
+  errorCount = 0,
+  rootTransactionDuration
 }: Props) {
   if (!transactionDoc) {
     return null;
@@ -84,7 +84,7 @@ export function TransactionFlyout({
           <EuiSpacer size="m" />
           <TransactionSummary
             transaction={transactionDoc}
-            totalDuration={traceRootDuration}
+            totalDuration={rootTransactionDuration}
             errorCount={errorCount}
           />
           <EuiHorizontalRule margin="m" />

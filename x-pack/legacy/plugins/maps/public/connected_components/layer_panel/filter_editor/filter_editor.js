@@ -25,10 +25,8 @@ import { i18n } from '@kbn/i18n';
 import { indexPatternService } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 
-import { start as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
-const { SearchBar } = data.ui;
-
 import { npStart } from 'ui/new_platform';
+const { SearchBar } = npStart.plugins.data.ui;
 
 export class FilterEditor extends Component {
   state = {
@@ -83,7 +81,11 @@ export class FilterEditor extends Component {
   };
 
   _onFilterByMapBoundsChange = event => {
-    this.props.updateSourceProp(this.props.layer.getId(), 'filterByMapBounds', event.target.checked);
+    this.props.updateSourceProp(
+      this.props.layer.getId(),
+      'filterByMapBounds',
+      event.target.checked
+    );
   };
 
   _onApplyGlobalQueryChange = applyGlobalQuery => {
@@ -160,11 +162,11 @@ export class FilterEditor extends Component {
     const openButtonLabel =
       query && query.query
         ? i18n.translate('xpack.maps.layerPanel.filterEditor.editFilterButtonLabel', {
-          defaultMessage: 'Edit filter',
-        })
+            defaultMessage: 'Edit filter',
+          })
         : i18n.translate('xpack.maps.layerPanel.filterEditor.addFilterButtonLabel', {
-          defaultMessage: 'Add filter',
-        });
+            defaultMessage: 'Add filter',
+          });
     const openButtonIcon = query && query.query ? 'pencil' : 'plusInCircleFilled';
 
     return (

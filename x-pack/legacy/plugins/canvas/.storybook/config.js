@@ -10,7 +10,6 @@ import { withKnobs } from '@storybook/addon-knobs/react';
 import { withInfo } from '@storybook/addon-info';
 import { create } from '@storybook/theming';
 
-import { coreMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 // If we're running Storyshots, be sure to register the require context hook.
@@ -38,9 +37,12 @@ if (process.env.NODE_ENV === 'test') {
 }
 
 // Add New Platform Context for any stories that need it
-addDecorator(fn => (
-  <KibanaContextProvider services={coreMock.createStart()}>{fn()}</KibanaContextProvider>
-));
+const settings = new Map();
+settings.set('darkMode', true);
+const platform = {
+  uiSettings: settings,
+};
+addDecorator(fn => <KibanaContextProvider services={platform}>{fn()}</KibanaContextProvider>);
 
 function loadStories() {
   require('./dll_contexts');
@@ -55,7 +57,7 @@ function loadStories() {
   css.keys().forEach(filename => css(filename));
 
   // Find all files ending in *.examples.ts
-  const req = require.context('./..', true, /.examples.tsx$/);
+  const req = require.context('./..', true, /.(stories|examples).tsx$/);
   req.keys().forEach(filename => req(filename));
 }
 

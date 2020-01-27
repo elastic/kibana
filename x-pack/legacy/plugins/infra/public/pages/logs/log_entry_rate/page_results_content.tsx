@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPanel,
+  EuiSpacer,
   EuiSuperDatePicker,
   EuiText,
 } from '@elastic/eui';
@@ -26,7 +27,6 @@ import { LoadingOverlayWrapper } from '../../../components/loading_overlay_wrapp
 import { useInterval } from '../../../hooks/use_interval';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
-import { FirstUseCallout } from './first_use';
 import { AnomaliesResults } from './sections/anomalies';
 import { LogRateResults } from './sections/log_rate';
 import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
@@ -35,20 +35,25 @@ import {
   StringTimeRange,
   useLogAnalysisResultsUrlState,
 } from './use_log_entry_rate_results_url_state';
+import { FirstUseCallout } from '../../../components/logging/log_analysis_results';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
-export const LogEntryRateResultsContent = ({
-  sourceId,
-  isFirstUse,
-}: {
-  sourceId: string;
-  isFirstUse: boolean;
-}) => {
+export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
 
   const [dateFormat] = useKibanaUiSetting('dateFormat', 'MMMM D, YYYY h:mm A');
+
+  const {
+    fetchJobStatus,
+    jobStatus,
+    setupStatus,
+    viewSetupForReconfiguration,
+    viewSetupForUpdate,
+    jobIds,
+    sourceConfiguration: { sourceId },
+  } = useLogEntryRateModuleContext();
 
   const {
     timeRange: selectedTimeRange,
@@ -126,14 +131,7 @@ export const LogEntryRateResultsContent = ({
     [setAutoRefresh]
   );
 
-  const {
-    fetchJobStatus,
-    jobStatus,
-    setupStatus,
-    viewSetupForReconfiguration,
-    viewSetupForUpdate,
-    jobIds,
-  } = useLogEntryRateModuleContext();
+  const isFirstUse = useMemo(() => setupStatus === 'hiddenAfterSuccess', [setupStatus]);
 
   useEffect(() => {
     getLogEntryRate();
@@ -157,7 +155,7 @@ export const LogEntryRateResultsContent = ({
     <ResultsContentPage>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="l">
+          <EuiPanel paddingSize="m">
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
                 {logEntryRate ? (
@@ -198,8 +196,13 @@ export const LogEntryRateResultsContent = ({
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="l">
-            {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
+          <EuiPanel paddingSize="m">
+            {isFirstUse && !hasResults ? (
+              <>
+                <FirstUseCallout />
+                <EuiSpacer />
+              </>
+            ) : null}
             <LogRateResults
               isLoading={isLoading}
               results={logEntryRate}
@@ -209,7 +212,7 @@ export const LogEntryRateResultsContent = ({
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="l">
+          <EuiPanel paddingSize="m">
             <AnomaliesResults
               isLoading={isLoading}
               jobStatus={jobStatus['log-entry-rate']}
@@ -262,6 +265,8 @@ const getBucketDuration = (startTime: number, endTime: number) => {
 // This is needed due to the flex-basis: 100% !important; rule that
 // kicks in on small screens via media queries breaking when using direction="column"
 export const ResultsContentPage = euiStyled(EuiPage)`
+  flex: 1 0 0%;
+
   .euiFlexGroup--responsive > .euiFlexItem {
     flex-basis: auto !important;
   }

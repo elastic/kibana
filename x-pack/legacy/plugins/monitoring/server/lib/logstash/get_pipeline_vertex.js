@@ -11,8 +11,12 @@ import { getPipelineStateDocument } from './get_pipeline_state_document';
 import { getPipelineVertexStatsAggregation } from './get_pipeline_vertex_stats_aggregation';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 
-export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds) {
-
+export function _vertexStats(
+  vertex,
+  vertexStatsBucket,
+  totalProcessorsDurationInMillis,
+  timeseriesIntervalInSeconds
+) {
   const isInput = vertex.plugin_type === 'input';
   const isProcessor = vertex.plugin_type === 'filter' || vertex.plugin_type === 'output';
 
@@ -26,20 +30,23 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
   const inputStats = {};
   const processorStats = {};
   const eventsProcessedStats = {
-    events_out_per_millisecond: eventsOutTotal / timeseriesIntervalInMillis
+    events_out_per_millisecond: eventsOutTotal / timeseriesIntervalInMillis,
   };
 
   let eventsTotal;
 
   if (isInput) {
     eventsTotal = eventsOutTotal;
-    inputStats.queue_push_duration_in_millis = vertexStatsBucket.queue_push_duration_in_millis_total.value;
-    inputStats.queue_push_duration_in_millis_per_event = inputStats.queue_push_duration_in_millis / eventsTotal;
+    inputStats.queue_push_duration_in_millis =
+      vertexStatsBucket.queue_push_duration_in_millis_total.value;
+    inputStats.queue_push_duration_in_millis_per_event =
+      inputStats.queue_push_duration_in_millis / eventsTotal;
   }
 
   if (isProcessor) {
     eventsTotal = eventsInTotal;
-    processorStats.percent_of_total_processor_duration = durationInMillis / totalProcessorsDurationInMillis;
+    processorStats.percent_of_total_processor_duration =
+      durationInMillis / totalProcessorsDurationInMillis;
     eventsProcessedStats.events_in_per_millisecond = eventsInTotal / timeseriesIntervalInMillis;
   }
 
@@ -50,7 +57,7 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
     millis_per_event: durationInMillis / eventsTotal,
     ...inputStats,
     ...processorStats,
-    ...eventsProcessedStats
+    ...eventsProcessedStats,
   };
 }
 
@@ -64,7 +71,12 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
  * @param {Object} First and last seen timestamps for pipeline version we're getting data for
  * @param {Integer} timeseriesIntervalInSeconds The size of each timeseries bucket, in seconds
  */
-export function _enrichVertexStateWithStatsAggregation(stateDocument, vertexStatsAggregation, vertexId, timeseriesIntervalInSeconds) {
+export function _enrichVertexStateWithStatsAggregation(
+  stateDocument,
+  vertexStatsAggregation,
+  vertexId,
+  timeseriesIntervalInSeconds
+) {
   const logstashState = stateDocument.logstash_state;
   const vertices = logstashState.pipeline.representation.graph.vertices;
 
@@ -82,40 +94,64 @@ export function _enrichVertexStateWithStatsAggregation(stateDocument, vertexStat
     const timestamp = timeSeriesBucket.key;
 
     const vertexStatsBucket = timeSeriesBucket.pipelines.scoped.vertices.vertex_id;
-    const vertexStats = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
+    const vertexStats = _vertexStats(
+      vertex,
+      vertexStatsBucket,
+      totalProcessorsDurationInMillis,
+      timeseriesIntervalInSeconds
+    );
     Object.keys(vertexStats).forEach(stat => {
       if (!vertex.stats.hasOwnProperty(stat)) {
         vertex.stats[stat] = { data: [] };
       }
-      vertex.stats[stat].data.push([ timestamp, vertexStats[stat] ]);
+      vertex.stats[stat].data.push([timestamp, vertexStats[stat]]);
     });
   });
 
   return vertex;
 }
 
-export async function getPipelineVertex(req, config, lsIndexPattern, clusterUuid, pipelineId, version, vertexId) {
+export async function getPipelineVertex(
+  req,
+  config,
+  lsIndexPattern,
+  clusterUuid,
+  pipelineId,
+  version,
+  vertexId
+) {
   checkParam(lsIndexPattern, 'lsIndexPattern in getPipeline');
 
   const options = {
     clusterUuid,
     pipelineId,
     version,
-    vertexId
+    vertexId,
   };
 
   // Determine metrics' timeseries interval based on version's timespan
   const minIntervalSeconds = config.get('xpack.monitoring.min_interval_seconds');
-  const timeseriesInterval = calculateTimeseriesInterval(version.firstSeen, version.lastSeen, minIntervalSeconds);
+  const timeseriesInterval = calculateTimeseriesInterval(
+    version.firstSeen,
+    version.lastSeen,
+    minIntervalSeconds
+  );
 
-  const [ stateDocument, statsAggregation ] = await Promise.all([
+  const [stateDocument, statsAggregation] = await Promise.all([
     getPipelineStateDocument(req, lsIndexPattern, options),
     getPipelineVertexStatsAggregation(req, lsIndexPattern, timeseriesInterval, options),
   ]);
 
   if (stateDocument === null) {
-    return boom.notFound(`Pipeline [${pipelineId} @ ${version.hash}] not found in the selected time range for cluster [${clusterUuid}].`);
+    return boom.notFound(
+      `Pipeline [${pipelineId} @ ${version.hash}] not found in the selected time range for cluster [${clusterUuid}].`
+    );
   }
 
-  return _enrichVertexStateWithStatsAggregation(stateDocument, statsAggregation, vertexId, timeseriesInterval);
+  return _enrichVertexStateWithStatsAggregation(
+    stateDocument,
+    statsAggregation,
+    vertexId,
+    timeseriesInterval
+  );
 }

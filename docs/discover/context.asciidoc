@@ -1,90 +1,66 @@
 [[document-context]]
-== Viewing Document Context
+== Viewing a document in context
 
-For certain applications it can be useful to inspect a window of documents
-surrounding a specific event. The context view enables you to do just that for
-<<index-patterns, index patterns>> that are configured to contain time-based events.
+Once you've narrowed your search to a specific event,
+you might want to inspect the documents that occurred
+immediately before and after the event. With the Context view,
+you can do just that for index patterns that contain time-based events.
 
-To show the context surrounding an anchor document, click the *Expand* button
-image:images/ExpandButton.jpg[Expand Button] to the left of the document's
-table entry and then click the *View surrounding documents* link.
+To open the Context view, click the expand icon (<) in the document table, and then click
+*View surrounding documents.*
 
-image::images/Expanded-Document.png[Expanded Document]
-{nbsp}
+The documents are sorted
+by the time field specified in the index pattern and displayed using the
+same set of columns as the *Discover* view from which the context was opened.
+The anchor document is highlighted in blue.
 
-The context view displays a number of documents before and after the anchor
-document. The anchor document itself is highlighted in blue. The view is sorted
-by the time field specified in the index pattern configuration and uses the
-same set of columns as the Discover view the context was opened from. If there
-are multiple documents with the same time field value, the internal document
-order is used as a secondary sorting criterion by default.
 
-[NOTE]
---
-The field used for tiebreaking in case of equal time field values can be
-configured using the advanced setting `context:tieBreakerFields` in
-<<advanced-options, *Management > Advanced Settings*>>, which defaults to the
-`_doc` field. The value of this setting can be a comma-separated list of field
-names, which will be checked in sequence for suitability when a context is
-about to be displayed. The first suitable field is then used as the tiebreaking
-field. A field is suitable if the field exists and is sortable in the index
-pattern the context is based on.
-
-While not required, it is recommended to only
-use fields which have {ref}/doc-values.html[doc values] enabled to achieve
-good performance and avoid unnecessary {ref}/modules-fielddata.html[field
-data] usage. Common examples for suitable fields include log line numbers,
-monotonically increasing counters and high-precision timestamps.
---
-
+[role="screenshot"]
 image::images/Discover-ContextView.png[Context View]
-
-NOTE: The number of documents displayed by default can be configured
-via the `context:defaultSize` setting in <<advanced-options, *Management >
-Advanced Settings*>>.
-
-[float]
-[[change-context-size]]
-=== Changing the Context Size
-
-You can change the number documents displayed before and after the anchor
-document independently.
-
-To increase the number of displayed documents that are newer than the anchor
-document, click the *Load 5 more* button above the document list or enter the
-desired number into the input box right of the button.
-
-image::images/Discover-ContextView-SizePicker-Newer.png[]
-{nbsp}
-
-To increase the number of displayed documents that are older than the anchor
-document, click the *Load 5 more* button below the document list or enter the
-desired number into the input box right of the button.
-
-image::images/Discover-ContextView-SizePicker-Older.png[]
-{nbsp}
-
-NOTE: The default number of documents loaded with each button click can be
-configured via the `context:step` setting in <<advanced-options, *Management >
-Advanced Settings*>>.
 
 [float]
 [[filter-context]]
-=== Filtering the Context
+=== Filter the context
 
-Depending on how the documents are partitioned into index patterns, the context
-view might contain a large number of documents not related to the event under
-investigation. In order to adapt the focus of the context view to the task at
-hand, you can use filters to restrict the documents considered by Kibana for
-display in the context view.
-
-When switching from the discover view to the context view, the previously
-applied filters are carried over. Pinned filters remain active while normal
-filters are copied in a disabled state. You can selectively re-enabled them to
+The
+filters you applied in *Discover* are carried over to the Context view. Pinned filters remain active, while normal
+filters are copied in a disabled state. You can re-enable these filters to
 refine your context view.
 
-New filters can be added via the *Add a filter* link in the filter bar, by
-clicking the filter icons appearing when hovering a field, or by expanding
-documents and clicking the filter icons in the table.
+If the Context view contains a large number of documents not related to the event under
+investigation, you can use filters to restrict the documents to
+display.
 
-image::images/Discover-ContextView-FilterMontage.png[]
+[float]
+[[change-context-size]]
+=== Change the number of surrounding documents
+
+By default, the five newest and oldest
+documents are listed. To increase the number of documents that surround the anchor document,
+click *Load*.  Five documents are added with each click.
+
+[float]
+[[configure-context-ContextView]]
+=== Configure the context view
+
+To configure the Context view, use these settings in <<advanced-options,
+Advanced Settings>>.
+
+[horizontal]
+`context:defaultSize`:: The number of documents to display by default.
+`context:step`:: The default number of documents to load with each button click.
+`context:tieBreakerFields`:: The field to use for tiebreaking in case of equal time field values.
+The default is the
+`_doc` field.
++
+You can enter a comma-separated list of field
+names, which is checked in sequence for suitability when a context is
+displayed. The first suitable field is used as the tiebreaking
+field. A field is suitable if the field exists and is sortable in the index
+pattern the context is based on.
++
+Although not required, it is recommended to only
+use fields that have {ref}/doc-values.html[doc values] enabled to achieve
+good performance and avoid unnecessary {ref}/modules-fielddata.html[field
+data] usage. Common examples for suitable fields include log line numbers,
+monotonically increasing counters and high-precision timestamps.

@@ -8,7 +8,6 @@ import { ESAggMetricField } from './es_agg_field';
 import { METRIC_TYPE } from '../../../common/constants';
 
 describe('supportsFieldMeta', () => {
-
   test('Non-counting aggregations should support field meta', () => {
     const avgMetric = new ESAggMetricField({ aggType: METRIC_TYPE.AVG });
     expect(avgMetric.supportsFieldMeta()).toBe(true);

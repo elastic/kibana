@@ -27,9 +27,7 @@
  *  @return {String}
  */
 export function formatListAsProse(list, options = {}) {
-  const {
-    inclusive = true
-  } = options;
+  const { inclusive = true } = options;
 
   if (!Array.isArray(list)) {
     throw new TypeError('formatListAsProse() requires an array');

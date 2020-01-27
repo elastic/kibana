@@ -26,9 +26,7 @@ import {
   createConcatStream,
 } from '../../../../legacy/utils';
 
-import {
-  createFilterRecordsStream,
-} from '../filter_records_stream';
+import { createFilterRecordsStream } from '../filter_records_stream';
 
 const chance = new Chance();
 
@@ -42,7 +40,7 @@ describe('esArchiver: createFilterRecordsStream()', () => {
           birthday: chance.birthday(),
           ssn: chance.ssn(),
         },
-        chance.bool()
+        chance.bool(),
       ]),
       createFilterRecordsStream('type'),
       createConcatStream([]),
@@ -68,10 +66,6 @@ describe('esArchiver: createFilterRecordsStream()', () => {
     ]);
 
     expect(output).to.have.length(3);
-    expect(output.map(o => o.type)).to.eql([
-      type1,
-      type1,
-      type1,
-    ]);
+    expect(output.map(o => o.type)).to.eql([type1, type1, type1]);
   });
 });

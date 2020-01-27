@@ -13,7 +13,8 @@ import { transformError } from '../utils';
 import { readRules } from '../../rules/read_rules';
 import { ServerFacade } from '../../../../types';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { QueryRequest } from './types';
+import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const createReadRulesRoute: Hapi.ServerRoute = {
   method: 'GET',
@@ -30,9 +31,10 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
   async handler(request: QueryRequest, headers) {
     const { id, rule_id: ruleId } = request.query;
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-    const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
-
-    if (!alertsClient || !actionsClient) {
+    const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+      ? request.getSavedObjectsClient()
+      : null;
+    if (!alertsClient || !savedObjectsClient) {
       return headers.response().code(404);
     }
     try {
@@ -42,7 +44,17 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
         ruleId,
       });
       if (rule != null) {
-        return transformOrError(rule);
+        const ruleStatuses = await savedObjectsClient.find<
+          IRuleSavedAttributesSavedObjectAttributes
+        >({
+          type: ruleStatusSavedObjectType,
+          perPage: 1,
+          sortField: 'statusDate',
+          sortOrder: 'desc',
+          search: rule.id,
+          searchFields: ['alertId'],
+        });
+        return transformOrError(rule, ruleStatuses.saved_objects[0]);
       } else {
         return getIdError({ id, ruleId });
       }

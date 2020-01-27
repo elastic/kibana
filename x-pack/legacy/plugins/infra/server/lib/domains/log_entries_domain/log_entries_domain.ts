@@ -11,12 +11,14 @@ import { RequestHandlerContext } from 'src/core/server';
 import { TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
 import {
-  InfraLogEntry,
-  InfraLogItem,
-  InfraLogMessageSegment,
-  InfraLogSummaryBucket,
-  InfraLogSummaryHighlightBucket,
-} from '../../../graphql/types';
+  LogEntriesSummaryBucket,
+  LogEntriesSummaryHighlightsBucket,
+  LogEntry,
+  LogEntriesItem,
+  LogEntriesCursor,
+  LogColumn,
+} from '../../../../common/http_api';
+import { InfraLogEntry, InfraLogMessageSegment } from '../../../graphql/types';
 import {
   InfraSourceConfiguration,
   InfraSources,
@@ -33,12 +35,84 @@ import {
   compileFormattingRules,
 } from './message';
 
+export interface LogEntriesParams {
+  startDate: number;
+  endDate: number;
+  size?: number;
+  query?: JsonObject;
+  cursor?: { before: LogEntriesCursor | 'last' } | { after: LogEntriesCursor | 'first' };
+  highlightTerm?: string;
+}
+export interface LogEntriesAroundParams {
+  startDate: number;
+  endDate: number;
+  size?: number;
+  center: LogEntriesCursor;
+  query?: JsonObject;
+  highlightTerm?: string;
+}
+
+export const LOG_ENTRIES_PAGE_SIZE = 200;
+
 export class InfraLogEntriesDomain {
   constructor(
     private readonly adapter: LogEntriesAdapter,
     private readonly libs: { sources: InfraSources }
   ) {}
 
+  /* Name is temporary until we can clean up the GraphQL implementation */
+  /* eslint-disable-next-line @typescript-eslint/camelcase */
+  public async getLogEntriesAround__new(
+    requestContext: RequestHandlerContext,
+    sourceId: string,
+    params: LogEntriesAroundParams
+  ) {
+    const { startDate, endDate, center, query, size, highlightTerm } = params;
+
+    /*
+     * For odd sizes we will round this value down for the first half, and up
+     * for the second. This keeps the center cursor right in the center.
+     *
+     * For even sizes the half before is one entry bigger than the half after.
+     * [1, 2, 3, 4, 5, *6*, 7, 8, 9, 10]
+     *  | 5 entries |       |4 entries|
+     */
+    const halfSize = (size || LOG_ENTRIES_PAGE_SIZE) / 2;
+
+    const entriesBefore = await this.getLogEntries(requestContext, sourceId, {
+      startDate,
+      endDate,
+      query,
+      cursor: { before: center },
+      size: Math.floor(halfSize),
+      highlightTerm,
+    });
+
+    /*
+     * Elasticsearch's `search_after` returns documents after the specified cursor.
+     * - If we have documents before the center, we search after the last of
+     *   those. The first document of the new group is the center.
+     * - If there were no documents, we search one milisecond before the
+     *   center. It then becomes the first document.
+     */
+    const cursorAfter =
+      entriesBefore.length > 0
+        ? entriesBefore[entriesBefore.length - 1].cursor
+        : { time: center.time - 1, tiebreaker: 0 };
+
+    const entriesAfter = await this.getLogEntries(requestContext, sourceId, {
+      startDate,
+      endDate,
+      query,
+      cursor: { after: cursorAfter },
+      size: Math.ceil(halfSize),
+      highlightTerm,
+    });
+
+    return [...entriesBefore, ...entriesAfter];
+  }
+
+  /** @deprecated */
   public async getLogEntriesAround(
     requestContext: RequestHandlerContext,
     sourceId: string,
@@ -103,6 +177,62 @@ export class InfraLogEntriesDomain {
     };
   }
 
+  public async getLogEntries(
+    requestContext: RequestHandlerContext,
+    sourceId: string,
+    params: LogEntriesParams
+  ): Promise<LogEntry[]> {
+    const { configuration } = await this.libs.sources.getSourceConfiguration(
+      requestContext,
+      sourceId
+    );
+
+    const messageFormattingRules = compileFormattingRules(
+      getBuiltinRules(configuration.fields.message)
+    );
+
+    const requiredFields = getRequiredFields(configuration, messageFormattingRules);
+
+    const documents = await this.adapter.getLogEntries(
+      requestContext,
+      configuration,
+      requiredFields,
+      params
+    );
+
+    const entries = documents.map(doc => {
+      return {
+        id: doc.gid,
+        cursor: doc.key,
+        columns: configuration.logColumns.map(
+          (column): LogColumn => {
+            if ('timestampColumn' in column) {
+              return {
+                columnId: column.timestampColumn.id,
+                timestamp: doc.key.time,
+              };
+            } else if ('messageColumn' in column) {
+              return {
+                columnId: column.messageColumn.id,
+                message: messageFormattingRules.format(doc.fields, doc.highlights),
+              };
+            } else {
+              return {
+                columnId: column.fieldColumn.id,
+                field: column.fieldColumn.field,
+                value: stringify(doc.fields[column.fieldColumn.field]),
+                highlights: doc.highlights[column.fieldColumn.field] || [],
+              };
+            }
+          }
+        ),
+      };
+    });
+
+    return entries;
+  }
+
+  /** @deprecated */
   public async getLogEntriesBetween(
     requestContext: RequestHandlerContext,
     sourceId: string,
@@ -134,6 +264,7 @@ export class InfraLogEntriesDomain {
     return entries;
   }
 
+  /** @deprecated */
   public async getLogEntryHighlights(
     requestContext: RequestHandlerContext,
     sourceId: string,
@@ -218,7 +349,7 @@ export class InfraLogEntriesDomain {
     end: number,
     bucketSize: number,
     filterQuery?: LogEntryQuery
-  ): Promise<InfraLogSummaryBucket[]> {
+  ): Promise<LogEntriesSummaryBucket[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
       requestContext,
       sourceId
@@ -242,7 +373,7 @@ export class InfraLogEntriesDomain {
     bucketSize: number,
     highlightQueries: string[],
     filterQuery?: LogEntryQuery
-  ): Promise<InfraLogSummaryHighlightBucket[][]> {
+  ): Promise<LogEntriesSummaryHighlightsBucket[][]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
       requestContext,
       sourceId
@@ -284,7 +415,7 @@ export class InfraLogEntriesDomain {
     requestContext: RequestHandlerContext,
     id: string,
     sourceConfiguration: InfraSourceConfiguration
-  ): Promise<InfraLogItem> {
+  ): Promise<LogEntriesItem> {
     const document = await this.adapter.getLogItem(requestContext, id, sourceConfiguration);
     const defaultFields = [
       { field: '_index', value: document._index },
@@ -323,6 +454,13 @@ export interface LogEntriesAdapter {
     maxCount: number,
     filterQuery?: LogEntryQuery,
     highlightQuery?: LogEntryQuery
+  ): Promise<LogEntryDocument[]>;
+
+  getLogEntries(
+    requestContext: RequestHandlerContext,
+    sourceConfiguration: InfraSourceConfiguration,
+    fields: string[],
+    params: LogEntriesParams
   ): Promise<LogEntryDocument[]>;
 
   getContainedLogEntryDocuments(
@@ -367,6 +505,7 @@ export interface LogSummaryBucket {
   topEntryKeys: TimeKey[];
 }
 
+/** @deprecated */
 const convertLogDocumentToEntry = (
   sourceId: string,
   logColumns: InfraSourceConfiguration['logColumns'],
@@ -402,7 +541,7 @@ const logSummaryBucketHasEntries = (bucket: LogSummaryBucket) =>
 
 const convertLogSummaryBucketToSummaryHighlightBucket = (
   bucket: LogSummaryBucket
-): InfraLogSummaryHighlightBucket => ({
+): LogEntriesSummaryHighlightsBucket => ({
   entriesCount: bucket.entriesCount,
   start: bucket.start,
   end: bucket.end,

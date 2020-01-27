@@ -12,13 +12,7 @@ import { RouteDefinitionParams } from '..';
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineSAMLRoutes({
-  router,
-  logger,
-  authc,
-  getLegacyAPI,
-  basePath,
-}: RouteDefinitionParams) {
+export function defineSAMLRoutes({ router, logger, authc, csp, basePath }: RouteDefinitionParams) {
   router.get(
     {
       path: '/api/security/saml/capture-url-fragment',
@@ -36,7 +30,7 @@ export function defineSAMLRoutes({
           <script src="${basePath.serverBasePath}/api/security/saml/capture-url-fragment.js"></script>
         `,
           'text/html',
-          getLegacyAPI().cspRules
+          csp.header
         )
       );
     }
@@ -57,7 +51,7 @@ export function defineSAMLRoutes({
           );
         `,
           'text/javascript',
-          getLegacyAPI().cspRules
+          csp.header
         )
       );
     }
@@ -66,7 +60,9 @@ export function defineSAMLRoutes({
   router.get(
     {
       path: '/api/security/saml/start',
-      validate: { query: schema.object({ redirectURLFragment: schema.string() }) },
+      validate: {
+        query: schema.object({ redirectURLFragment: schema.string() }),
+      },
       options: { authRequired: false },
     },
     async (context, request, response) => {

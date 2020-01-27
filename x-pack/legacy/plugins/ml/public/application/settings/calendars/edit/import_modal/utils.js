@@ -4,23 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 const icalendar = require('icalendar');
 import moment from 'moment';
 import { generateTempId } from '../utils';
-
 
 function createEvents(ical) {
   const events = ical.events();
   const mlEvents = [];
 
-  events.forEach((e) => {
+  events.forEach(e => {
     if (e.element === 'VEVENT') {
       const description = e.properties.SUMMARY;
       const start = e.properties.DTSTART;
       const end = e.properties.DTEND;
-      const recurring = (e.properties.RRULE !== undefined);
+      const recurring = e.properties.RRULE !== undefined;
 
       if (description && start && end && description.length && start.length && end.length) {
         // Temp reference to unsaved events to allow removal from table
@@ -31,7 +28,7 @@ function createEvents(ical) {
           description: description[0].value,
           start_time: start[0].value.valueOf(),
           end_time: end[0].value.valueOf(),
-          asterisk: recurring
+          asterisk: recurring,
         });
       }
     }

@@ -32,14 +32,18 @@ import {
   ServicesContextProvider,
   EditorContextProvider,
   RequestContextProvider,
+  ContextValue,
 } from '../../../../contexts';
 
+// Mocked functions
 import { sendRequestToES } from '../../../../hooks/use_send_current_request_to_es/send_request_to_es';
+import { getEndpointFromPosition } from '../../../../../lib/autocomplete/get_endpoint_from_position';
+
 import * as consoleMenuActions from '../console_menu_actions';
 import { Editor } from './editor';
 
 describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
-  let mockedAppContextValue: any;
+  let mockedAppContextValue: ContextValue;
   const sandbox = sinon.createSandbox();
 
   const doMount = () =>
@@ -48,7 +52,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
         <ServicesContextProvider value={mockedAppContextValue}>
           <RequestContextProvider>
             <EditorContextProvider settings={{} as any}>
-              <Editor />
+              <Editor initialTextValue="" />
             </EditorContextProvider>
           </RequestContextProvider>
         </ServicesContextProvider>
@@ -58,22 +62,29 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
   beforeEach(() => {
     document.queryCommandSupported = sinon.fake(() => true);
     mockedAppContextValue = {
+      elasticsearchUrl: 'test',
       services: {
+        trackUiMetric: { count: () => {}, load: () => {} },
+        settings: {} as any,
+        storage: {} as any,
         history: {
-          getSavedEditorState: () => null,
+          getSavedEditorState: () => ({} as any),
           updateCurrentState: jest.fn(),
-        },
+        } as any,
         notifications: notificationServiceMock.createSetupContract(),
+        objectStorageClient: {} as any,
       },
       docLinkVersion: 'NA',
     };
   });
 
   afterEach(() => {
+    jest.clearAllMocks();
     sandbox.restore();
   });
 
   it('calls send current request to ES', async () => {
+    (getEndpointFromPosition as jest.Mock).mockReturnValue({ patterns: [] });
     (sendRequestToES as jest.Mock).mockRejectedValue({});
     const editor = doMount();
     act(() => {

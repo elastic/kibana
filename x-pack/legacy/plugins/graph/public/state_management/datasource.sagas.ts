@@ -6,7 +6,6 @@
 
 import { takeLatest, put, call, select } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { Action } from 'typescript-fsa';
 import { GraphStoreDependencies } from './store';
 import { loadFields } from './fields';
@@ -18,6 +17,7 @@ import {
   setDatasource,
   requestDatasource,
 } from './datasource';
+import { IndexPattern } from '../../../../../../src/plugins/data/public';
 
 /**
  * Saga loading field information when the datasource is switched. This will overwrite current settings

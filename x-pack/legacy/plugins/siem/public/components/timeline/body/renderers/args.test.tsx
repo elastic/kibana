@@ -5,14 +5,15 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import React from 'react';
 
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { TestProviders } from '../../../../mock';
 import { ArgsComponent } from './args';
 
 describe('Args', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
@@ -23,11 +24,11 @@ describe('Args', () => {
           processTitle="process-title-1"
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it returns an empty string when both args and process title are undefined', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ArgsComponent
             contextId="context-123"
@@ -41,7 +42,7 @@ describe('Args', () => {
     });
 
     test('it returns an empty string when both args and process title are null', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ArgsComponent
             contextId="context-123"
@@ -55,7 +56,7 @@ describe('Args', () => {
     });
 
     test('it returns an empty string when args is an empty array, and title is an empty string', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ArgsComponent contextId="context-123" eventId="event-123" args={[]} processTitle="" />
         </TestProviders>
@@ -64,7 +65,7 @@ describe('Args', () => {
     });
 
     test('it returns args when args are provided, and process title is NOT provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ArgsComponent
             contextId="context-123"
@@ -78,7 +79,7 @@ describe('Args', () => {
     });
 
     test('it returns process title when process title is provided, and args is NOT provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ArgsComponent
             contextId="context-123"
@@ -92,7 +93,7 @@ describe('Args', () => {
     });
 
     test('it returns both args and process title, when both are provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ArgsComponent
             contextId="context-123"

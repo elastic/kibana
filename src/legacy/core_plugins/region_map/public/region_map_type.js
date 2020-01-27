@@ -19,7 +19,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
+import { truncatedColorSchemas as colorSchemas } from 'ui/color_maps';
 import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { Status } from '../../visualizations/public';
@@ -58,11 +58,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.DATA, Status.UI_STATE],
     visualization,
     editorConfig: {
-      optionsTemplate: props => (
-        <RegionMapOptions
-          {...props}
-          serviceSettings={serviceSettings}
-        />),
+      optionsTemplate: props => <RegionMapOptions {...props} serviceSettings={serviceSettings} />,
       collections: {
         colorSchemas,
         vectorLayers: [],
@@ -104,7 +100,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
         },
       ]),
     },
-    setup: async (savedVis) => {
+    setup: async savedVis => {
       const vis = savedVis.vis;
 
       const tmsLayers = await serviceSettings.getTMSServices();
@@ -123,12 +119,11 @@ provided base maps, or add your own. Darker colors represent higher values.',
         const newLayers = layers
           .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
           .filter(
-            (layer) =>
-              !vectorLayers.some(vectorLayer => vectorLayer.layerId === layer.layerId)
+            layer => !vectorLayers.some(vectorLayer => vectorLayer.layerId === layer.layerId)
           );
 
         // backfill v1 manifest for now
-        newLayers.forEach((layer) => {
+        newLayers.forEach(layer => {
           if (layer.format === 'geojson') {
             layer.format = {
               type: 'geojson',

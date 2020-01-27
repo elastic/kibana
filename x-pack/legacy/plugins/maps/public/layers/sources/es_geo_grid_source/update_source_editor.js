@@ -66,9 +66,9 @@ export class UpdateSourceEditor extends Component {
     const metricsFilter =
       this.props.renderAs === RENDER_AS.HEATMAP
         ? metric => {
-          //these are countable metrics, where blending heatmap color blobs make sense
-          return isMetricCountable(metric.value);
-        }
+            //these are countable metrics, where blending heatmap color blobs make sense
+            return isMetricCountable(metric.value);
+          }
         : null;
     const allowMultipleMetrics = this.props.renderAs !== RENDER_AS.HEATMAP;
     return (
@@ -99,14 +99,19 @@ export class UpdateSourceEditor extends Component {
         <EuiPanel>
           <EuiTitle size="xs">
             <h6>
-              <FormattedMessage id="xpack.maps.source.esGrid.geoTileGridLabel" defaultMessage="Grid parameters" />
+              <FormattedMessage
+                id="xpack.maps.source.esGrid.geoTileGridLabel"
+                defaultMessage="Grid parameters"
+              />
             </h6>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <ResolutionEditor resolution={this.props.resolution} onChange={this._onResolutionChange} />
+          <ResolutionEditor
+            resolution={this.props.resolution}
+            onChange={this._onResolutionChange}
+          />
         </EuiPanel>
         <EuiSpacer size="s" />
-
       </Fragment>
     );
   }

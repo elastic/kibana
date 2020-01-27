@@ -11,6 +11,7 @@ import {
   LICENSE_TYPE_STANDARD,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
+  LICENSE_TYPE_ENTERPRISE,
 } from '../../common/constants';
 import { ExportTypeDefinition, ImmediateCreateJobFn, ImmediateExecuteFn } from '../../types';
 import { createJobFactory } from './server/create_job';
@@ -42,5 +43,6 @@ export const getExportType = (): ExportTypeDefinition<
     LICENSE_TYPE_STANDARD,
     LICENSE_TYPE_GOLD,
     LICENSE_TYPE_PLATINUM,
+    LICENSE_TYPE_ENTERPRISE,
   ],
 });

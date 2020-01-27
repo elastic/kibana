@@ -16,15 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { first } from 'rxjs/operators';
+import healthCheck from './server/lib/health_check';
+import { Cluster } from './server/lib/cluster';
+import { createProxy } from './server/lib/create_proxy';
+import { handleESError } from './server/lib/handle_es_error';
 
-import { combineLatest } from 'rxjs';
-import { first, map } from 'rxjs/operators';
-import healthCheck from './lib/health_check';
-import { Cluster } from './lib/cluster';
-import { createProxy } from './lib/create_proxy';
-import { handleESError } from './lib/handle_es_error';
-
-export default function (kibana) {
+export default function(kibana) {
   let defaultVars;
 
   return new kibana.Plugin({
@@ -36,18 +34,13 @@ export default function (kibana) {
       // All methods that ES plugin exposes are synchronous so we should get the first
       // value from all observables here to be able to synchronously return and create
       // cluster clients afterwards.
-      const [esConfig, adminCluster, dataCluster] = await combineLatest(
-        server.newPlatform.__internals.elasticsearch.legacy.config$,
-        server.newPlatform.setup.core.elasticsearch.adminClient$,
-        server.newPlatform.setup.core.elasticsearch.dataClient$
-      ).pipe(
-        first(),
-        map(([config, adminClusterClient, dataClusterClient]) => [
-          config,
-          new Cluster(adminClusterClient),
-          new Cluster(dataClusterClient)
-        ])
-      ).toPromise();
+      const { adminClient, dataClient } = server.newPlatform.setup.core.elasticsearch;
+      const adminCluster = new Cluster(adminClient);
+      const dataCluster = new Cluster(dataClient);
+
+      const esConfig = await server.newPlatform.__internals.elasticsearch.legacy.config$
+        .pipe(first())
+        .toPromise();
 
       defaultVars = {
         esRequestTimeout: esConfig.requestTimeout.asMilliseconds(),
@@ -56,7 +49,7 @@ export default function (kibana) {
       };
 
       const clusters = new Map();
-      server.expose('getCluster', (name) => {
+      server.expose('getCluster', name => {
         if (name === 'admin') {
           return adminCluster;
         }
@@ -78,7 +71,9 @@ export default function (kibana) {
           throw new Error(`cluster '${name}' already exists`);
         }
 
-        const cluster = new Cluster(server.newPlatform.setup.core.elasticsearch.createClient(name, clientConfig));
+        const cluster = new Cluster(
+          server.newPlatform.setup.core.elasticsearch.createClient(name, clientConfig)
+        );
 
         clusters.set(name, cluster);
 

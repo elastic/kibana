@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { searchSourceMock } from '../../../../../ui/public/courier/search_source/mocks';
+import { searchSourceMock } from 'ui/courier/search_source/mocks';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 
 export function getSavedDashboardMock(

@@ -22,13 +22,7 @@ import React from 'react';
 
 import { renderToHtml } from '../../services';
 
-import {
-  GuideDemo,
-  GuidePage,
-  GuideSection,
-  GuideSectionTypes,
-  GuideText,
-} from '../../components';
+import { GuideDemo, GuidePage, GuideSection, GuideSectionTypes, GuideText } from '../../components';
 
 import { SimpleLocalNav } from './local_nav_simple';
 import simpleLocalNavSource from '!!raw-loader!./local_nav_simple';
@@ -80,7 +74,8 @@ export default props => (
       ]}
     >
       <GuideText>
-        Here&rsquo;s a simple LocalNav with a Title in the top left corner and Menu in the top right.
+        Here&rsquo;s a simple LocalNav with a Title in the top left corner and Menu in the top
+        right.
       </GuideText>
 
       <GuideDemo>
@@ -101,9 +96,7 @@ export default props => (
         },
       ]}
     >
-      <GuideText>
-        You can replace the Title with Breadcrumbs.
-      </GuideText>
+      <GuideText>You can replace the Title with Breadcrumbs.</GuideText>
 
       <GuideDemo>
         <LocalNavWithBreadcrumbs />
@@ -123,14 +116,11 @@ export default props => (
         },
       ]}
     >
-      <GuideText>
-        You can add a Search component for filtering results.
-      </GuideText>
+      <GuideText>You can add a Search component for filtering results.</GuideText>
 
       <GuideDemo>
         <LocalNavWithSearch />
       </GuideDemo>
-
     </GuideSection>
 
     <GuideSection
@@ -190,9 +180,7 @@ export default props => (
         },
       ]}
     >
-      <GuideText>
-        Selecting a Menu Item will commonly result in an open Dropdown.
-      </GuideText>
+      <GuideText>Selecting a Menu Item will commonly result in an open Dropdown.</GuideText>
 
       <GuideDemo>
         <LocalNavWithDropdown />
@@ -212,9 +200,7 @@ export default props => (
         },
       ]}
     >
-      <GuideText>
-        You can split the Dropdown into side-by-side Panels.
-      </GuideText>
+      <GuideText>You can split the Dropdown into side-by-side Panels.</GuideText>
 
       <GuideDemo>
         <LocalNavWithDropdownPanels />
@@ -234,9 +220,7 @@ export default props => (
         },
       ]}
     >
-      <GuideText>
-        You can display Tabs for navigating local content.
-      </GuideText>
+      <GuideText>You can display Tabs for navigating local content.</GuideText>
 
       <GuideDemo>
         <LocalNavWithTabs />
@@ -245,15 +229,14 @@ export default props => (
 
     <GuideSection
       title="DatePicker"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: datePickerHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: datePickerHtml,
+        },
+      ]}
     >
-      <GuideDemo
-        html={datePickerHtml}
-      />
+      <GuideDemo html={datePickerHtml} />
     </GuideSection>
   </GuidePage>
 );
-

@@ -18,10 +18,12 @@
  */
 
 import React from 'react';
-import { NotificationsSetup } from 'kibana/public';
+import { NotificationsSetup } from 'src/core/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';
+import * as localStorageObjectClient from '../lib/local_storage_object_client';
+import { createUsageTracker } from '../services/tracker';
 
 let settingsRef: Settings;
 export function legacyBackDoorToSettings() {
@@ -36,12 +38,16 @@ export function boot(deps: {
 }) {
   const { I18nContext, notifications, docLinkVersion, elasticsearchUrl } = deps;
 
+  const trackUiMetric = createUsageTracker();
+  trackUiMetric.load('opened_app');
+
   const storage = createStorage({
     engine: window.localStorage,
     prefix: 'sense:',
   });
   const history = createHistory({ storage });
   const settings = createSettings({ storage });
+  const objectStorageClient = localStorageObjectClient.create(storage);
   settingsRef = settings;
 
   return (
@@ -50,7 +56,14 @@ export function boot(deps: {
         value={{
           elasticsearchUrl,
           docLinkVersion,
-          services: { storage, history, settings, notifications },
+          services: {
+            storage,
+            history,
+            settings,
+            notifications,
+            trackUiMetric,
+            objectStorageClient,
+          },
         }}
       >
         <RequestContextProvider>

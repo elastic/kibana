@@ -21,10 +21,7 @@ import moment from 'moment';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { attachMetaData } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 
-import {
-  createListStream,
-  createPromiseFromStreams,
-} from '../../utils';
+import { createListStream, createPromiseFromStreams } from '../../utils';
 
 import KbnLoggerStringFormat from './log_format_string';
 
@@ -35,34 +32,26 @@ const makeEvent = () => ({
   timestamp: time,
   tags: ['tag'],
   pid: 1,
-  data: 'my log message'
+  data: 'my log message',
 });
 
 describe('KbnLoggerStringFormat', () => {
   it('logs in UTC', async () => {
     const format = new KbnLoggerStringFormat({
-      timezone: 'UTC'
+      timezone: 'UTC',
     });
 
-    const result = await createPromiseFromStreams([
-      createListStream([makeEvent()]),
-      format
-    ]);
+    const result = await createPromiseFromStreams([createListStream([makeEvent()]), format]);
 
-    expect(String(result))
-      .toContain(moment.utc(time).format('HH:mm:ss.SSS'));
+    expect(String(result)).toContain(moment.utc(time).format('HH:mm:ss.SSS'));
   });
 
   it('logs in local timezone when timezone is undefined', async () => {
     const format = new KbnLoggerStringFormat({});
 
-    const result = await createPromiseFromStreams([
-      createListStream([makeEvent()]),
-      format
-    ]);
+    const result = await createPromiseFromStreams([createListStream([makeEvent()]), format]);
 
-    expect(String(result))
-      .toContain(moment(time).format('HH:mm:ss.SSS'));
+    expect(String(result)).toContain(moment(time).format('HH:mm:ss.SSS'));
   });
   describe('with metadata', () => {
     it('does not log meta data', async () => {

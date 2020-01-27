@@ -71,11 +71,13 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
   }
 
   if (series) {
-    const seriesArray = series.length ? series : [ series ];
-    point.series = seriesArray.map(s => {
-      const fieldFormatter = getFormat(s.format);
-      return fieldFormatter.convert(row[s.accessor]);
-    }).join(' - ');
+    const seriesArray = series.length ? series : [series];
+    point.series = seriesArray
+      .map(s => {
+        const fieldFormatter = getFormat(s.format);
+        return fieldFormatter.convert(row[s.accessor]);
+      })
+      .join(' - ');
   } else if (y) {
     // If the data is not split up with a series aspect, then
     // each point's "series" becomes the y-agg that produced it

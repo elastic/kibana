@@ -5,10 +5,9 @@
  */
 
 import { addFieldMetaOptions } from './add_field_meta_options';
-import {  LAYER_TYPE, STYLE_TYPE } from '../constants';
+import { LAYER_TYPE, STYLE_TYPE } from '../constants';
 
 describe('addFieldMetaOptions', () => {
-
   test('Should handle missing layerListJSON attribute', () => {
     const attributes = {
       title: 'my map',
@@ -24,17 +23,17 @@ describe('addFieldMetaOptions', () => {
         type: LAYER_TYPE.HEATMAP,
         style: {
           type: 'HEATMAP',
-          colorRampName: 'Greens'
-        }
-      }
+          colorRampName: 'Greens',
+        },
+      },
     ]);
     const attributes = {
       title: 'my map',
-      layerListJSON
+      layerListJSON,
     };
     expect(addFieldMetaOptions({ attributes })).toEqual({
       title: 'my map',
-      layerListJSON
+      layerListJSON,
     });
   });
 
@@ -48,20 +47,20 @@ describe('addFieldMetaOptions', () => {
             lineColor: {
               type: STYLE_TYPE.STATIC,
               options: {
-                color: '#FFFFFF'
-              }
-            }
-          }
-        }
-      }
+                color: '#FFFFFF',
+              },
+            },
+          },
+        },
+      },
     ]);
     const attributes = {
       title: 'my map',
-      layerListJSON
+      layerListJSON,
     };
     expect(addFieldMetaOptions({ attributes })).toEqual({
       title: 'my map',
-      layerListJSON
+      layerListJSON,
     });
   });
 
@@ -77,18 +76,18 @@ describe('addFieldMetaOptions', () => {
               options: {
                 field: {
                   name: 'my_field',
-                  origin: 'source'
+                  origin: 'source',
                 },
-                color: 'Greys'
-              }
-            }
-          }
-        }
-      }
+                color: 'Greys',
+              },
+            },
+          },
+        },
+      },
     ]);
     const attributes = {
       title: 'my map',
-      layerListJSON
+      layerListJSON,
     };
     expect(addFieldMetaOptions({ attributes })).toEqual({
       title: 'my map',
@@ -103,19 +102,19 @@ describe('addFieldMetaOptions', () => {
                 options: {
                   field: {
                     name: 'my_field',
-                    origin: 'source'
+                    origin: 'source',
                   },
                   color: 'Greys',
                   fieldMetaOptions: {
                     isEnabled: false,
                     sigma: 3,
-                  }
-                }
-              }
-            }
-          }
-        }
-      ])
+                  },
+                },
+              },
+            },
+          },
+        },
+      ]),
     });
   });
 });

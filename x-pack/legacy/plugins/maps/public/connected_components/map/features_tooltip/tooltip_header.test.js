@@ -23,29 +23,23 @@ class MockLayer {
 const defaultProps = {
   onClose: () => {},
   isLocked: false,
-  findLayerById: (id) => {
+  findLayerById: id => {
     return new MockLayer(id);
   },
-  setCurrentFeature: () =>{},
+  setCurrentFeature: () => {},
 };
 
 describe('TooltipHeader', () => {
-
   describe('single feature:', () => {
     const SINGLE_FEATURE = [
       {
         id: 'feature1',
         layerId: 'layer1',
-      }
+      },
     ];
     describe('mouseover (unlocked)', () => {
       test('should not render header', async () => {
-        const component = shallow(
-          <TooltipHeader
-            {...defaultProps}
-            features={SINGLE_FEATURE}
-          />
-        );
+        const component = shallow(<TooltipHeader {...defaultProps} features={SINGLE_FEATURE} />);
 
         // Ensure all promises resolve
         await new Promise(resolve => process.nextTick(resolve));
@@ -58,11 +52,7 @@ describe('TooltipHeader', () => {
     describe('locked', () => {
       test('should show close button when locked', async () => {
         const component = shallow(
-          <TooltipHeader
-            {...defaultProps}
-            isLocked={true}
-            features={SINGLE_FEATURE}
-          />
+          <TooltipHeader {...defaultProps} isLocked={true} features={SINGLE_FEATURE} />
         );
 
         // Ensure all promises resolve
@@ -89,10 +79,7 @@ describe('TooltipHeader', () => {
     describe('mouseover (unlocked)', () => {
       test('should only show features count', async () => {
         const component = shallow(
-          <TooltipHeader
-            {...defaultProps}
-            features={MULTI_FEATURES_SINGE_LAYER}
-          />
+          <TooltipHeader {...defaultProps} features={MULTI_FEATURES_SINGE_LAYER} />
         );
 
         // Ensure all promises resolve
@@ -106,11 +93,7 @@ describe('TooltipHeader', () => {
     describe('locked', () => {
       test('should show pagination controls, features count, and close button', async () => {
         const component = shallow(
-          <TooltipHeader
-            {...defaultProps}
-            isLocked={true}
-            features={MULTI_FEATURES_SINGE_LAYER}
-          />
+          <TooltipHeader {...defaultProps} isLocked={true} features={MULTI_FEATURES_SINGE_LAYER} />
         );
 
         // Ensure all promises resolve
@@ -136,15 +119,12 @@ describe('TooltipHeader', () => {
       {
         id: 'feature1',
         layerId: 'layer2',
-      }
+      },
     ];
     describe('mouseover (unlocked)', () => {
       test('should only show features count', async () => {
         const component = shallow(
-          <TooltipHeader
-            {...defaultProps}
-            features={MULTI_FEATURES_MULTI_LAYERS}
-          />
+          <TooltipHeader {...defaultProps} features={MULTI_FEATURES_MULTI_LAYERS} />
         );
 
         // Ensure all promises resolve
@@ -158,11 +138,7 @@ describe('TooltipHeader', () => {
     describe('locked', () => {
       test('should show pagination controls, features count, layer select, and close button', async () => {
         const component = shallow(
-          <TooltipHeader
-            {...defaultProps}
-            isLocked={true}
-            features={MULTI_FEATURES_MULTI_LAYERS}
-          />
+          <TooltipHeader {...defaultProps} isLocked={true} features={MULTI_FEATURES_MULTI_LAYERS} />
         );
 
         // Ensure all promises resolve
@@ -174,5 +150,4 @@ describe('TooltipHeader', () => {
       });
     });
   });
-
 });

@@ -43,6 +43,6 @@ export function createDeleteIndexStream(client, stats, log, kibanaPluginIds) {
       } catch (err) {
         callback(err);
       }
-    }
+    },
   });
 }

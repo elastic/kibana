@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { EmptyPage } from './index';
@@ -18,5 +17,5 @@ test('renders correctly', () => {
       title="My Super Title"
     />
   );
-  expect(toJson(EmptyComponent)).toMatchSnapshot();
+  expect(EmptyComponent).toMatchSnapshot();
 });

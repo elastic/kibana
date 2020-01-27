@@ -5,7 +5,7 @@
  */
 
 import { map, take } from 'rxjs/operators';
-import { Observable, Subscription, combineLatest } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Legacy } from 'kibana';
 import { Logger, KibanaRequest, CoreSetup } from '../../../../../src/core/server';
 import { PluginSetupContract as SecurityPluginSetup } from '../../../security/server';
@@ -69,15 +69,15 @@ export class SpacesService {
     };
 
     const getScopedClient = async (request: KibanaRequest) => {
-      return combineLatest(elasticsearch.adminClient$, config$)
+      return config$
         .pipe(
-          map(([clusterClient, config]) => {
+          map(config => {
             const internalRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
-              clusterClient.callAsInternalUser,
+              elasticsearch.adminClient.callAsInternalUser,
               ['space']
             );
 
-            const callCluster = clusterClient.asScoped(request).callAsCurrentUser;
+            const callCluster = elasticsearch.adminClient.asScoped(request).callAsCurrentUser;
 
             const callWithRequestRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
               callCluster,

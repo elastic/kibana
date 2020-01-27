@@ -10,7 +10,7 @@ import { inRange } from 'lodash';
 import { Sticky } from 'react-sticky';
 import { XYPlot, XAxis } from 'react-vis';
 import LastTickValue from './LastTickValue';
-import AgentMarker from './AgentMarker';
+import { Marker } from './Marker';
 import { px } from '../../../../style/variables';
 import { getDurationFormatter } from '../../../../utils/formatters';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
@@ -31,7 +31,7 @@ const getXAxisTickValues = (tickValues, topTraceDuration) => {
   });
 };
 
-function TimelineAxis({ plotValues, agentMarks, topTraceDuration }) {
+function TimelineAxis({ plotValues, marks, topTraceDuration }) {
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
   const xAxisTickValues = getXAxisTickValues(tickValues, topTraceDuration);
@@ -82,12 +82,8 @@ function TimelineAxis({ plotValues, agentMarks, topTraceDuration }) {
                 />
               )}
 
-              {agentMarks.map(agentMark => (
-                <AgentMarker
-                  key={agentMark.name}
-                  agentMark={agentMark}
-                  x={xScale(agentMark.us)}
-                />
+              {marks.map(mark => (
+                <Marker key={mark.id} mark={mark} x={xScale(mark.offset)} />
               ))}
             </XYPlot>
           </div>
@@ -100,11 +96,11 @@ function TimelineAxis({ plotValues, agentMarks, topTraceDuration }) {
 TimelineAxis.propTypes = {
   header: PropTypes.node,
   plotValues: PropTypes.object.isRequired,
-  agentMarks: PropTypes.array
+  marks: PropTypes.array
 };
 
 TimelineAxis.defaultProps = {
-  agentMarks: []
+  marks: []
 };
 
 export default TimelineAxis;

@@ -18,14 +18,21 @@
  */
 
 import { NotificationsStart } from 'src/core/public';
-import { CoreStart } from 'kibana/public';
+import { CoreSetup, CoreStart } from 'kibana/public';
 import { FieldFormatsStart } from '.';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { IndexPatternsContract } from './index_patterns';
+import { DataPublicPluginStart } from './types';
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
 );
+
+export const [getUiSettings, setUiSettings] = createGetterSetter<CoreStart['uiSettings']>(
+  'UiSettings'
+);
+
+export const [getHttp, setHttp] = createGetterSetter<CoreStart['http']>('Http');
 
 export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
   'FieldFormats'
@@ -36,3 +43,15 @@ export const [getOverlays, setOverlays] = createGetterSetter<CoreStart['overlays
 export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
   'IndexPatterns'
 );
+
+export const [getQueryService, setQueryService] = createGetterSetter<
+  DataPublicPluginStart['query']
+>('Query');
+
+export const [getInjectedMetadata, setInjectedMetadata] = createGetterSetter<
+  CoreSetup['injectedMetadata']
+>('InjectedMetadata');
+
+export const [getSearchService, setSearchService] = createGetterSetter<
+  DataPublicPluginStart['search']
+>('Search');

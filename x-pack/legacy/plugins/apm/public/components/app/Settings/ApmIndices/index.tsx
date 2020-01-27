@@ -85,6 +85,9 @@ async function saveApmIndices({
   clearCache();
 }
 
+// avoid infinite loop by initializing the state outside the component
+const INITIAL_STATE = [] as [];
+
 export function ApmIndices() {
   const { toasts } = useApmPluginContext().core.notifications;
 
@@ -93,7 +96,7 @@ export function ApmIndices() {
 
   const callApmApiFromHook = useCallApmApi();
 
-  const { data = [], status, refetch } = useFetcher(
+  const { data = INITIAL_STATE, status, refetch } = useFetcher(
     callApmApi =>
       callApmApi({ pathname: `/api/apm/settings/apm-index-settings` }),
     []

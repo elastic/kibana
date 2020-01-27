@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { TagFactory } from '../../../public/lib/tag';
 import { TagStrings as strings } from '../../../i18n';
 
+const euiVisPalette = euiPaletteColorBlind();
+
 export const filter: TagFactory = () => ({
   name: strings.filter(),
-  color: '#3185FC',
+  color: euiVisPalette[1],
 });

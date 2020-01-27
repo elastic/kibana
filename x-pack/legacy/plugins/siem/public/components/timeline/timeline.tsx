@@ -6,14 +6,14 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
-import { KqlMode } from '../../store/timeline/model';
+import { useKibana } from '../../lib/kibana';
+import { KqlMode, EventType } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
 import { ColumnHeader } from './body/column_headers/column_header';
 import { defaultHeaders } from './body/column_headers/default_headers';
@@ -60,16 +60,19 @@ interface Props {
   columns: ColumnHeader[];
   dataProviders: DataProvider[];
   end: number;
+  eventType: EventType;
   filters: esFilters.Filter[];
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;
   indexPattern: IIndexPattern;
+  indexToAdd: string[];
   isLive: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
   kqlQueryExpression: string;
+  loadingIndexName: boolean;
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onChangeItemsPerPage: OnChangeItemsPerPage;
@@ -90,16 +93,19 @@ export const TimelineComponent = ({
   columns,
   dataProviders,
   end,
+  eventType,
   filters,
   flyoutHeaderHeight,
   flyoutHeight,
   id,
   indexPattern,
+  indexToAdd,
   isLive,
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
   kqlQueryExpression,
+  loadingIndexName,
   onChangeDataProviderKqlQuery,
   onChangeDroppableAndProvider,
   onChangeItemsPerPage,
@@ -113,9 +119,9 @@ export const TimelineComponent = ({
   sort,
   toggleColumn,
 }: Props) => {
-  const core = useKibanaCore();
+  const kibana = useKibana();
   const combinedQueries = combineQueries({
-    config: esQuery.getEsQueryConfig(core.uiSettings),
+    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     dataProviders,
     indexPattern,
     browserFields,
@@ -155,7 +161,9 @@ export const TimelineComponent = ({
           <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
           {combinedQueries != null ? (
             <TimelineQuery
+              eventType={eventType}
               id={id}
+              indexToAdd={indexToAdd}
               fields={columnsHeader.map(c => c.id)}
               sourceId="default"
               limit={itemsPerPage}
@@ -175,7 +183,7 @@ export const TimelineComponent = ({
                 getUpdatedAt,
                 refetch,
               }) => (
-                <ManageTimelineContext loading={loading} width={width}>
+                <ManageTimelineContext loading={loading || loadingIndexName} width={width}>
                   <TimelineRefetch
                     id={id}
                     inputId="timeline"
@@ -201,7 +209,7 @@ export const TimelineComponent = ({
                     hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                     height={footerHeight}
                     isLive={isLive}
-                    isLoading={loading}
+                    isLoading={loading || loadingIndexName}
                     itemsCount={events.length}
                     itemsPerPage={itemsPerPage}
                     itemsPerPageOptions={itemsPerPageOptions}

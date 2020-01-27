@@ -6,24 +6,25 @@
 
 import { SearchResponse, GenericParams } from 'elasticsearch';
 import { Lifecycle } from 'hapi';
-import { ObjectType } from '@kbn/config-schema';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/server';
-import { APMPluginContract } from '../../../../../../../plugins/apm/server/plugin';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
+import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
+import { VisTypeTimeseriesSetup } from '../../../../../../../../src/plugins/vis_type_timeseries/server';
+import { APMPluginContract } from '../../../../../../../plugins/apm/server';
+import { HomeServerPluginSetup } from '../../../../../../../../src/plugins/home/server';
 
 // NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
+  home: HomeServerPluginSetup;
+  spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
-  spaces: any;
-  metrics: {
-    getVisData: any;
-  };
+  metrics: VisTypeTimeseriesSetup;
   indexPatterns: {
     indexPatternsServiceFactory: any;
   };
-  features: any;
+  features: FeaturesPluginSetup;
   apm: APMPluginContract;
-  ___legacy: any;
 }
 
 export interface CallWithRequestParams extends GenericParams {
@@ -166,11 +167,6 @@ export interface InfraTSVBSeries {
 
 export type InfraTSVBDataPoint = [number, number];
 
-export type InfraRouteConfig<
-  params extends ObjectType,
-  query extends ObjectType,
-  body extends ObjectType,
-  method extends RouteMethod
-> = {
+export type InfraRouteConfig<params, query, body, method extends RouteMethod> = {
   method: RouteMethod;
 } & RouteConfig<params, query, body, method>;

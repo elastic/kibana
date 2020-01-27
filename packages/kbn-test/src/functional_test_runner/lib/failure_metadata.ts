@@ -29,7 +29,7 @@ interface Metadata {
 
 export class FailureMetadata {
   // mocha's global types mean we can't import Mocha or it will override the global jest types..............
-  private currentTest?: any;
+  private currentRunnable?: any;
   private readonly allMetadata = new Map<any, Metadata>();
 
   constructor(lifecycle: Lifecycle) {
@@ -39,18 +39,18 @@ export class FailureMetadata {
       );
     }
 
-    lifecycle.beforeEachTest.add(test => {
-      this.currentTest = test;
+    lifecycle.beforeEachRunnable.add(runnable => {
+      this.currentRunnable = runnable;
     });
   }
 
   add(metadata: Metadata | ((current: Metadata) => Metadata)) {
-    if (!this.currentTest) {
-      throw new Error('no current test to associate metadata with');
+    if (!this.currentRunnable) {
+      throw new Error('no current runnable to associate metadata with');
     }
 
-    const current = this.allMetadata.get(this.currentTest);
-    this.allMetadata.set(this.currentTest, {
+    const current = this.allMetadata.get(this.currentRunnable);
+    this.allMetadata.set(this.currentRunnable, {
       ...current,
       ...(typeof metadata === 'function' ? metadata(current || {}) : metadata),
     });
@@ -98,7 +98,7 @@ export class FailureMetadata {
     return screenshot;
   }
 
-  get(test: any) {
-    return this.allMetadata.get(test);
+  get(runnable: any) {
+    return this.allMetadata.get(runnable);
   }
 }

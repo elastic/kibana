@@ -64,11 +64,10 @@ export async function handleOldSettings(config, telemetryOptInProvider) {
   return true;
 }
 
-
 export async function isOptInHandleOldSettings(config, telemetryOptInProvider) {
   const currentOptInSettting = telemetryOptInProvider.getOptIn();
 
-  if (typeof currentOptInSettting === 'boolean')  {
+  if (typeof currentOptInSettting === 'boolean') {
     return currentOptInSettting;
   }
 

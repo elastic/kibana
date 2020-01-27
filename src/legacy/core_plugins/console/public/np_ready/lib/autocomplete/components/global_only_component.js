@@ -25,7 +25,7 @@ export class GlobalOnlyComponent extends SharedComponent {
 
   match(token, context) {
     const result = {
-      next: []
+      next: [],
     };
 
     // try to link to GLOBAL rules
@@ -41,6 +41,5 @@ export class GlobalOnlyComponent extends SharedComponent {
     result.next = [this];
 
     return result;
-
   }
 }

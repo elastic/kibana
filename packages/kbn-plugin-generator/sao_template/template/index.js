@@ -41,7 +41,8 @@ export default function (kibana) {
     },
     <%_ if (generateApi || generateApp) { -%>
 
-    init(server, options) { // eslint-disable-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars
+    init(server, options) {
       <%_ if (generateApp) { -%>
       const xpackMainPlugin = server.plugins.xpack_main;
       if (xpackMainPlugin) {

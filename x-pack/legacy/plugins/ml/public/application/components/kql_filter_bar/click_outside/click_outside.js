@@ -38,5 +38,5 @@ export class ClickOutside extends Component {
 }
 
 ClickOutside.propTypes = {
-  onClickOutside: PropTypes.func.isRequired
+  onClickOutside: PropTypes.func.isRequired,
 };

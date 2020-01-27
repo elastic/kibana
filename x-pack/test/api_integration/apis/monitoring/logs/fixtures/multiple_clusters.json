@@ -5,6 +5,7 @@
     "indexPatternExists": true,
     "indexPatternInTimeRangeExists": true,
     "typeExistsAtAnyTime": true,
+    "usingStructuredLogs": true,
     "typeExists": true,
     "clusterExists": false,
     "nodeExists": null,

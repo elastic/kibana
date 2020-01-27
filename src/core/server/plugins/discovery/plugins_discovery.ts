@@ -46,9 +46,9 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
-  if (config.additionalPluginPaths.length) {
+  if (config.additionalPluginPaths.length && coreContext.env.mode.dev) {
     log.warn(
-      `Explicit plugin paths [${config.additionalPluginPaths}] are only supported in development. Relative imports will not work in production.`
+      `Explicit plugin paths [${config.additionalPluginPaths}] should only be used in development. Relative imports may not work properly in production.`
     );
   }
 
@@ -112,7 +112,7 @@ function processPluginSearchPaths$(pluginDirs: readonly string[], log: Logger) {
  * @param coreContext Kibana core context.
  */
 function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
-  return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
+  return from(parseManifest(path, coreContext.env.packageInfo, log)).pipe(
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
       const opaqueId = Symbol(manifest.id);

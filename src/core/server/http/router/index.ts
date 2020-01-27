@@ -21,6 +21,7 @@ export { Headers, filterHeaders, ResponseHeaders, KnownHeaders } from './headers
 export { Router, RequestHandler, IRouter, RouteRegistrar } from './router';
 export {
   KibanaRequest,
+  KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   isRealRequest,
@@ -31,7 +32,6 @@ export {
   RouteMethod,
   RouteConfig,
   RouteConfigOptions,
-  RouteSchemas,
   RouteContentType,
   RouteConfigOptionsBody,
   validBodyOutput,
@@ -55,3 +55,13 @@ export {
 } from './response';
 
 export { IKibanaSocket } from './socket';
+
+export {
+  RouteValidatorConfig,
+  RouteValidationSpec,
+  RouteValidationFunction,
+  RouteValidatorOptions,
+  RouteValidationError,
+  RouteValidatorFullConfig,
+  RouteValidationResultFactory,
+} from './validator';

@@ -32,7 +32,6 @@ import { FeedbackMessage } from './feedback_message';
 const MAX_TAG_COUNT = 200;
 
 export class TagCloudVisualization {
-
   constructor(node, vis) {
     this._containerNode = node;
 
@@ -49,12 +48,14 @@ export class TagCloudVisualization {
     this._vis = vis;
     this._truncated = false;
     this._tagCloud = new TagCloud(cloudContainer);
-    this._tagCloud.on('select', (event) => {
+    this._tagCloud.on('select', event => {
       if (!this._visParams.bucket) {
         return;
       }
       this._vis.API.events.filter({
-        table: event.meta.data, column: 0, row: event.meta.rowIndex
+        table: event.meta.data,
+        column: 0,
+        row: event.meta.rowIndex,
       });
     });
     this._renderComplete$ = Rx.fromEvent(this._tagCloud, 'renderComplete');
@@ -62,13 +63,17 @@ export class TagCloudVisualization {
     this._feedbackNode = document.createElement('div');
     this._containerNode.appendChild(this._feedbackNode);
     this._feedbackMessage = React.createRef();
-    render(<I18nContext><FeedbackMessage ref={this._feedbackMessage} /></I18nContext>, this._feedbackNode);
+    render(
+      <I18nContext>
+        <FeedbackMessage ref={this._feedbackMessage} />
+      </I18nContext>,
+      this._feedbackNode
+    );
 
     this._labelNode = document.createElement('div');
     this._containerNode.appendChild(this._labelNode);
     this._label = React.createRef();
     render(<Label ref={this._label} />, this._labelNode);
-
   }
 
   async render(data, visParams, status) {
@@ -88,18 +93,18 @@ export class TagCloudVisualization {
     if (data.columns.length !== 2) {
       this._feedbackMessage.current.setState({
         shouldShowTruncate: false,
-        shouldShowIncomplete: false
+        shouldShowIncomplete: false,
       });
       return;
     }
 
     this._label.current.setState({
       label: `${data.columns[0].name} - ${data.columns[1].name}`,
-      shouldShowLabel: visParams.showLabel
+      shouldShowLabel: visParams.showLabel,
     });
     this._feedbackMessage.current.setState({
       shouldShowTruncate: this._truncated,
-      shouldShowIncomplete: this._tagCloud.getStatus() === TagCloud.STATUS.INCOMPLETE
+      shouldShowIncomplete: this._tagCloud.getStatus() === TagCloud.STATUS.INCOMPLETE,
     });
   }
 
@@ -130,7 +135,7 @@ export class TagCloudVisualization {
         meta: {
           data: data,
           rowIndex: rowIndex,
-        }
+        },
       };
     });
 

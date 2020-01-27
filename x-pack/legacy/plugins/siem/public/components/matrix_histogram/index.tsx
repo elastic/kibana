@@ -4,89 +4,186 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ScaleType } from '@elastic/charts';
 
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect } from '@elastic/eui';
+import { noop } from 'lodash/fp';
+import * as i18n from './translations';
 import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
-import { ChartSeriesData } from '../charts/common';
-import { DEFAULT_DARK_MODE } from '../../../common/constants';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
-import { Loader } from '../loader';
+import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from './utils';
-import { MatrixHistogramProps, MatrixHistogramDataTypes } from './types';
+import { useQuery } from '../../containers/matrix_histogram/utils';
+import {
+  MatrixHistogramProps,
+  MatrixHistogramOption,
+  HistogramAggregation,
+  MatrixHistogramQueryProps,
+} from './types';
+import { ChartSeriesData } from '../charts/common';
+import { InspectButtonContainer } from '../inspect';
 
-export const MatrixHistogram = ({
-  data,
+export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
+  MatrixHistogramQueryProps> = ({
   dataKey,
+  defaultStackByOption,
   endDate,
+  errorMessage,
+  filterQuery,
+  headerChildren,
+  hideHistogramIfEmpty = false,
   id,
-  loading,
+  isAlertsHistogram,
+  isAnomaliesHistogram,
+  isAuthenticationsHistogram,
+  isDnsHistogram,
+  isEventsHistogram,
+  isInspected,
+  legendPosition = 'right',
   mapping,
+  query,
   scaleType = ScaleType.Time,
+  setQuery,
+  showLegend = true,
+  skip,
+  stackByOptions,
   startDate,
   subtitle,
   title,
-  totalCount,
   updateDateRange,
   yTickFormatter,
-  showLegend,
-}: MatrixHistogramProps<MatrixHistogramDataTypes>) => {
+}) => {
   const barchartConfigs = getBarchartConfigs({
     from: startDate,
+    legendPosition,
     to: endDate,
     onBrushEnd: updateDateRange,
     scaleType,
     yTickFormatter,
     showLegend,
   });
-  const [showInspect, setShowInspect] = useState(false);
-  const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
-  const [loadingInitial, setLoadingInitial] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
+    defaultStackByOption
+  );
 
-  const barChartData: ChartSeriesData[] = getCustomChartData(data, mapping);
+  const [titleWithStackByField, setTitle] = useState<string>('');
+  const [subtitleWithCounts, setSubtitle] = useState<string>('');
+  const [hideHistogram, setHideHistogram] = useState<boolean>(hideHistogramIfEmpty);
+  const [barChartData, setBarChartData] = useState<ChartSeriesData[] | null>(null);
+  const setSelectedChartOptionCallback = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setSelectedStackByOption(
+        stackByOptions?.find(co => co.value === event.target.value) ?? defaultStackByOption
+      );
+    },
+    []
+  );
+
+  const { data, loading, inspect, totalCount, refetch = noop } = useQuery<{}, HistogramAggregation>(
+    {
+      dataKey,
+      endDate,
+      errorMessage,
+      filterQuery,
+      query,
+      skip,
+      startDate,
+      title,
+      isAlertsHistogram,
+      isAnomaliesHistogram,
+      isAuthenticationsHistogram,
+      isDnsHistogram,
+      isEventsHistogram,
+      isInspected,
+      stackByField: selectedStackByOption.value,
+    }
+  );
 
   useEffect(() => {
-    if (totalCount >= 0 && loadingInitial) {
-      setLoadingInitial(false);
+    if (title != null) setTitle(typeof title === 'function' ? title(selectedStackByOption) : title);
+
+    if (subtitle != null)
+      setSubtitle(typeof subtitle === 'function' ? subtitle(totalCount) : subtitle);
+
+    if (totalCount <= 0 && hideHistogramIfEmpty) {
+      setHideHistogram(true);
+    } else {
+      setHideHistogram(false);
     }
-  }, [loading]);
+
+    setBarChartData(getCustomChartData(data, mapping));
+
+    setQuery({ id, inspect, loading, refetch });
+
+    if (isInitialLoading && !!barChartData && data) {
+      setIsInitialLoading(false);
+    }
+  }, [
+    subtitle,
+    setSubtitle,
+    setHideHistogram,
+    setBarChartData,
+    setQuery,
+    hideHistogramIfEmpty,
+    totalCount,
+    isInspected,
+    loading,
+    data,
+    refetch,
+    isInitialLoading,
+  ]);
+
+  if (hideHistogram) {
+    return null;
+  }
 
   return (
-    <Panel
-      data-test-subj={`${dataKey}Panel`}
-      loading={loading}
-      onMouseEnter={() => setShowInspect(true)}
-      onMouseLeave={() => setShowInspect(false)}
-    >
-      <HeaderSection
-        id={id}
-        title={title}
-        showInspect={!loadingInitial && showInspect}
-        subtitle={!loadingInitial && subtitle}
-      />
+    <InspectButtonContainer show={!isInitialLoading}>
+      <Panel data-test-subj={`${id}Panel`}>
+        {loading && !isInitialLoading && (
+          <EuiProgress
+            data-test-subj="initialLoadingPanelMatrixOverTime"
+            size="xs"
+            position="absolute"
+            color="accent"
+          />
+        )}
 
-      {loadingInitial ? (
-        <EuiLoadingContent data-test-subj="initialLoadingPanelMatrixOverTime" lines={10} />
-      ) : (
-        <>
-          <BarChart barChart={barChartData} configs={barchartConfigs} />
-
-          {loading && (
-            <Loader
-              overlay
-              overlayBackground={
-                darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
-              }
-              size="xl"
-            />
-          )}
-        </>
-      )}
-    </Panel>
+        {isInitialLoading ? (
+          <>
+            <HeaderSection id={id} title={titleWithStackByField} />
+            <MatrixLoader />
+          </>
+        ) : (
+          <>
+            <HeaderSection
+              id={id}
+              title={titleWithStackByField}
+              subtitle={!loading && (totalCount >= 0 ? subtitleWithCounts : null)}
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  {stackByOptions?.length > 1 && (
+                    <EuiSelect
+                      onChange={setSelectedChartOptionCallback}
+                      options={stackByOptions}
+                      prepend={i18n.STACK_BY}
+                      value={selectedStackByOption?.value}
+                    />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{headerChildren}</EuiFlexItem>
+              </EuiFlexGroup>
+            </HeaderSection>
+            <BarChart barChart={barChartData} configs={barchartConfigs} />
+          </>
+        )}
+      </Panel>
+    </InspectButtonContainer>
   );
 };
+
+export const MatrixHistogram = React.memo(MatrixHistogramComponent);

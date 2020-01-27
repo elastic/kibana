@@ -37,12 +37,9 @@ export class LoggingService implements LoggerFactory {
 
   public get(...contextParts: string[]): Logger {
     const context = LoggingConfig.getLoggerContext(contextParts);
-    if (this.loggers.has(context)) {
-      return this.loggers.get(context)!;
+    if (!this.loggers.has(context)) {
+      this.loggers.set(context, new LoggerAdapter(this.createLogger(context, this.config)));
     }
-
-    this.loggers.set(context, new LoggerAdapter(this.createLogger(context, this.config)));
-
     return this.loggers.get(context)!;
   }
 
@@ -55,7 +52,7 @@ export class LoggingService implements LoggerFactory {
 
   /**
    * Updates all current active loggers with the new config values.
-   * @param config New config instance.
+   * @param rawConfig New config instance.
    */
   public upgrade(rawConfig: LoggingConfigType) {
     const config = new LoggingConfig(rawConfig);
@@ -106,14 +103,14 @@ export class LoggingService implements LoggerFactory {
     if (config === undefined) {
       // If we don't have config yet, use `buffered` appender that will store all logged messages in the memory
       // until the config is ready.
-      return new BaseLogger(context, LogLevel.All, [this.bufferAppender]);
+      return new BaseLogger(context, LogLevel.All, [this.bufferAppender], this.asLoggerFactory());
     }
 
     const { level, appenders } = this.getLoggerConfigByContext(config, context);
     const loggerLevel = LogLevel.fromId(level);
     const loggerAppenders = appenders.map(appenderKey => this.appenders.get(appenderKey)!);
 
-    return new BaseLogger(context, loggerLevel, loggerAppenders);
+    return new BaseLogger(context, loggerLevel, loggerAppenders, this.asLoggerFactory());
   }
 
   private getLoggerConfigByContext(config: LoggingConfig, context: string): LoggerConfigType {

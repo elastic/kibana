@@ -6,7 +6,6 @@
 
 import { ActionCreator } from 'typescript-fsa';
 import { Query, IIndexPattern, esFilters } from 'src/plugins/data/public';
-
 import { InputsModelId } from '../../../store/inputs/constants';
 import { HostComponentProps } from '../../../components/link_to/redirect_to_hosts';
 import { HostsTableType } from '../../../store/hosts/model';
@@ -59,9 +58,10 @@ export type HostDetailsNavTab = Record<KeyHostDetailsNavTab, NavTab>;
 
 export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
   HostsQueryProps & {
+    pageFilters?: esFilters.Filter[];
+    filterQuery: string;
     indexPattern: IIndexPattern;
     type: hostsModel.HostsType;
-    filterQuery: string;
   };
 
 export type SetAbsoluteRangeDatePicker = ActionCreator<{

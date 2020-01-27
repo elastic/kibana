@@ -21,8 +21,8 @@ export { SuggestionsComponent } from './typeahead/suggestions_component';
 export { IndexPatternSelect } from './index_pattern_select';
 export { FilterBar } from './filter_bar';
 export { QueryStringInput } from './query_string_input/query_string_input';
+export { SearchBar, SearchBarProps } from './search_bar';
 
 // temp export - will be removed as final components are migrated to NP
-export { QueryBarTopRow } from './query_string_input/query_bar_top_row';
 export { SavedQueryManagementComponent } from './saved_query_management';
 export { SaveQueryForm, SavedQueryMeta } from './saved_query_form';

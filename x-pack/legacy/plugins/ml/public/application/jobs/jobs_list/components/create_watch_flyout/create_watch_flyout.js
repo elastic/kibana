@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
 import {
   EuiButton,
@@ -28,33 +25,29 @@ import { mlCreateWatchService } from './create_watch_service';
 import { CreateWatch } from './create_watch_view';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-
 function getSuccessToast(id, url, intl) {
   return {
-    title: intl.formatMessage({
-      id: 'xpack.ml.jobsList.createWatchFlyout.watchCreatedSuccessfullyNotificationMessage',
-      defaultMessage: 'Watch {id} created successfully' },
-    { id }
+    title: intl.formatMessage(
+      {
+        id: 'xpack.ml.jobsList.createWatchFlyout.watchCreatedSuccessfullyNotificationMessage',
+        defaultMessage: 'Watch {id} created successfully',
+      },
+      { id }
     ),
     text: (
       <React.Fragment>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              href={url}
-              target="_blank"
-              iconType="link"
-            >
+            <EuiButton size="s" href={url} target="_blank" iconType="link">
               {intl.formatMessage({
                 id: 'xpack.ml.jobsList.createWatchFlyout.editWatchButtonLabel',
-                defaultMessage: 'Edit watch' }
-              )}
+                defaultMessage: 'Edit watch',
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </React.Fragment>
-    )
+    ),
   };
 }
 
@@ -81,18 +74,18 @@ class CreateWatchFlyoutUI extends Component {
   }
 
   closeFlyout = (watchCreated = false) => {
-    this.setState({ isFlyoutVisible: false }, ()=>{
+    this.setState({ isFlyoutVisible: false }, () => {
       if (typeof this.props.flyoutHidden === 'function') {
         this.props.flyoutHidden(watchCreated);
       }
     });
-  }
+  };
 
-  showFlyout = (jobId) => {
+  showFlyout = jobId => {
     loadFullJob(jobId)
-    	.then((job) => {
+      .then(job => {
         const bucketSpan = job.analysis_config.bucket_span;
-        mlCreateWatchService.config.includeInfluencers = (job.analysis_config.influencers.length > 0);
+        mlCreateWatchService.config.includeInfluencers = job.analysis_config.influencers.length > 0;
 
         this.setState({
           job,
@@ -101,33 +94,32 @@ class CreateWatchFlyoutUI extends Component {
           isFlyoutVisible: true,
         });
       })
-      .catch((error) => {
+      .catch(error => {
         console.error(error);
       });
-  }
+  };
 
   save = () => {
     const { intl } = this.props;
-    mlCreateWatchService.createNewWatch(this.state.jobId)
-    	.then((resp) => {
+    mlCreateWatchService
+      .createNewWatch(this.state.jobId)
+      .then(resp => {
         toastNotifications.addSuccess(getSuccessToast(resp.id, resp.url, intl));
         this.closeFlyout(true);
       })
-      .catch((error) => {
-        toastNotifications.addDanger(intl.formatMessage({
-          id: 'xpack.ml.jobsList.createWatchFlyout.watchNotSavedErrorNotificationMessage',
-          defaultMessage: 'Could not save watch'
-        }));
+      .catch(error => {
+        toastNotifications.addDanger(
+          intl.formatMessage({
+            id: 'xpack.ml.jobsList.createWatchFlyout.watchNotSavedErrorNotificationMessage',
+            defaultMessage: 'Could not save watch',
+          })
+        );
         console.error(error);
       });
-  }
-
+  };
 
   render() {
-    const {
-      jobId,
-      bucketSpan
-    } = this.state;
+    const { jobId, bucketSpan } = this.state;
 
     let flyout;
 
@@ -150,21 +142,12 @@ class CreateWatchFlyoutUI extends Component {
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-
-            <CreateWatch
-              jobId={jobId}
-              bucketSpan={bucketSpan}
-            />
-
+            <CreateWatch jobId={jobId} bucketSpan={bucketSpan} />
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="cross"
-                  onClick={this.closeFlyout}
-                  flush="left"
-                >
+                <EuiButtonEmpty iconType="cross" onClick={this.closeFlyout} flush="left">
                   <FormattedMessage
                     id="xpack.ml.jobsList.createWatchFlyout.closeButtonLabel"
                     defaultMessage="Close"
@@ -172,10 +155,7 @@ class CreateWatchFlyoutUI extends Component {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={this.save}
-                  fill
-                >
+                <EuiButton onClick={this.save} fill>
                   <FormattedMessage
                     id="xpack.ml.jobsList.createWatchFlyout.saveButtonLabel"
                     defaultMessage="Save"
@@ -187,12 +167,7 @@ class CreateWatchFlyoutUI extends Component {
         </EuiFlyout>
       );
     }
-    return (
-      <div>
-        {flyout}
-      </div>
-    );
-
+    return <div>{flyout}</div>;
   }
 }
 CreateWatchFlyoutUI.propTypes = {
