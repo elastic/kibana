@@ -16,10 +16,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     const MONITOR_ID = 'location-testing-id';
     before(async () => {
-      const numIps = 2;
-      const checksPerMonitor = 5;
-      const scheduleEvery = 10000; // fake monitor checks every 10s
-
       /**
        * This mogrify function will strip the documents of their location
        * data (but preserve their locaion name), which is necessary for
@@ -35,17 +31,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await makeChecksWithStatus(
         getService('legacyEs'),
         MONITOR_ID,
-        checksPerMonitor,
-        numIps,
-        scheduleEvery,
-        {
-          geo: { location: 'g' },
-          summary: {
-            state: {
-              monitor: { monitor_id: MONITOR_ID },
-            },
-          },
-        },
+        5,
+        2,
+        10000,
+        {},
         'up',
         mogrifyNoLocation
       );
