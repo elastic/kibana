@@ -107,7 +107,7 @@ export const getLicenseExpiration = (
               break;
             }
 
-            const $fromNow = moment().add(EXPIRES_DAYS[i], 'days');
+            const $fromNow = moment.utc().add(EXPIRES_DAYS[i], 'days');
             if ($fromNow.isAfter($expiry)) {
               isExpired = true;
               severity = 1000 * i;
