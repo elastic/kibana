@@ -1623,8 +1623,20 @@ const TimeseriesChartIntl = injectI18n(
         });
       }
 
+      let xOffset = LINE_CHART_ANOMALY_RADIUS * 2;
+
+      // When the annotation area is hovered
+      if (circle.tagName.toLowerCase() === 'rect') {
+        const x = Number(circle.getAttribute('x'));
+        if (x < 0) {
+          // The beginning of the annotation area is outside of the focus chart,
+          // hence we need to adjust the x offset of a tooltip.
+          xOffset = Math.abs(x);
+        }
+      }
+
       mlChartTooltipService.show(tooltipData, circle, {
-        x: LINE_CHART_ANOMALY_RADIUS * 2,
+        x: xOffset,
         y: 0,
       });
     }
