@@ -492,7 +492,7 @@ export class IndexPattern implements IIndexPattern {
 
         toasts.addError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-            defaultMessage: `Error fetching fields for index pattern {title} (ID: {id})`,
+            defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
             values: {
               id: this.id,
               title: this.title,
