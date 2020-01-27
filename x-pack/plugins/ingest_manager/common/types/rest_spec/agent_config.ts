@@ -5,7 +5,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { NewAgentConfigSchema } from '../models';
-import { ListWithKuerySchema } from '..';
+import { ListWithKuerySchema } from './common';
 
 export const GetAgentConfigsRequestSchema = {
   query: ListWithKuerySchema,

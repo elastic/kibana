@@ -5,7 +5,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { NewDataStreamSchema } from '../models';
-import { ListWithKuerySchema } from '../';
+import { ListWithKuerySchema } from './common';
 
 export const GetDataStreamsRequestSchema = {
   query: ListWithKuerySchema,
