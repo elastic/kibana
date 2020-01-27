@@ -166,7 +166,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     updateItemsPerPage,
     upsertColumn,
   }) => {
-    const [loading, signalIndexExists, signalIndexName] = useSignalIndex();
+    const { loading, signalIndexExists, signalIndexName } = useSignalIndex();
 
     const indexToAdd = useMemo<string[]>(() => {
       if (signalIndexExists && signalIndexName != null && ['signal', 'all'].includes(eventType)) {

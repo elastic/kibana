@@ -583,13 +583,13 @@ export interface CoreStart {
 // @public
 export class CspConfig implements ICspConfig {
     // @internal
-    constructor(env: Env, rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
+    constructor(rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
+    // (undocumented)
+    static readonly DEFAULT: CspConfig;
     // (undocumented)
     readonly header: string;
     // (undocumented)
     readonly rules: string[];
-    // (undocumented)
-    readonly rulesChangedFromDefault: boolean;
     // (undocumented)
     readonly strict: boolean;
     // (undocumented)
@@ -779,7 +779,6 @@ export type IContextProvider<THandler extends HandlerFunction<any>, TContextName
 export interface ICspConfig {
     readonly header: string;
     readonly rules: string[];
-    readonly rulesChangedFromDefault: boolean;
     readonly strict: boolean;
     readonly warnLegacyBrowsers: boolean;
 }
@@ -808,8 +807,6 @@ export interface IKibanaSocket {
     getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
 }
 
-// Warning: (ae-missing-release-tag) "ImageValidation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public (undocumented)
 export interface ImageValidation {
     // (undocumented)
@@ -891,6 +888,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     // @internal
     static from<P, Q, B>(req: Request, routeSchemas?: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P, Q, B, any>;
     readonly headers: Headers;
+    readonly isSystemRequest: boolean;
     // (undocumented)
     readonly params: Params;
     // (undocumented)
@@ -1962,10 +1960,19 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
 }>;
 
-// Warning: (ae-missing-release-tag) "StringValidation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface StringValidation {
+// @public
+export type StringValidation = StringValidationRegex | StringValidationRegexString;
+
+// @public
+export interface StringValidationRegex {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    regex: RegExp;
+}
+
+// @public
+export interface StringValidationRegexString {
     // (undocumented)
     message: string;
     // (undocumented)
@@ -1999,7 +2006,7 @@ export interface UiSettingsServiceStart {
 }
 
 // @public
-export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
+export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image';
 
 // @public
 export interface UserProvidedValues<T = any> {

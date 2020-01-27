@@ -144,7 +144,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SessionStorage](./kibana-plugin-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
 |  [SessionStorageCookieOptions](./kibana-plugin-server.sessionstoragecookieoptions.md) | Configuration used to create HTTP session storage based on top of cookie mechanism. |
 |  [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
-|  [StringValidation](./kibana-plugin-server.stringvalidation.md) |  |
+|  [StringValidationRegex](./kibana-plugin-server.stringvalidationregex.md) | StringValidation with regex object |
+|  [StringValidationRegexString](./kibana-plugin-server.stringvalidationregexstring.md) | StringValidation as regex string |
 |  [UiSettingsParams](./kibana-plugin-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |  |
 |  [UiSettingsServiceStart](./kibana-plugin-server.uisettingsservicestart.md) |  |
@@ -222,5 +223,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClientWrapperFactory](./kibana-plugin-server.savedobjectsclientwrapperfactory.md) | Describes the factory used to create instances of Saved Objects Client Wrappers. |
 |  [ScopeableRequest](./kibana-plugin-server.scopeablerequest.md) | A user credentials container. It accommodates the necessary auth credentials to impersonate the current user.<!-- -->See [KibanaRequest](./kibana-plugin-server.kibanarequest.md)<!-- -->. |
 |  [SharedGlobalConfig](./kibana-plugin-server.sharedglobalconfig.md) |  |
+|  [StringValidation](./kibana-plugin-server.stringvalidation.md) | Allows regex objects or a regex string |
 |  [UiSettingsType](./kibana-plugin-server.uisettingstype.md) | UI element type to represent the settings. |
 

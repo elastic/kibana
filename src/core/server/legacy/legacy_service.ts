@@ -86,7 +86,7 @@ export class LegacyService implements CoreService {
   public legacyInternals?: ILegacyInternals;
 
   constructor(private readonly coreContext: CoreContext) {
-    const { logger, configService, env } = coreContext;
+    const { logger, configService } = coreContext;
 
     this.log = logger.get('legacy-service');
     this.devConfig$ = configService
@@ -95,7 +95,7 @@ export class LegacyService implements CoreService {
     this.httpConfig$ = combineLatest(
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path)
-    ).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
+    ).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
   }
 
   public async discoverPlugins(): Promise<LegacyServiceDiscoverPlugins> {

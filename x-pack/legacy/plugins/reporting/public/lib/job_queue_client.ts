@@ -5,8 +5,6 @@
  */
 
 import { kfetch } from 'ui/kfetch';
-// @ts-ignore
-import { addSystemApiHeader } from 'ui/system_api';
 
 const API_BASE_URL = '/api/reporting/jobs';
 
@@ -64,7 +62,7 @@ class JobQueueClient {
       method: 'GET',
       pathname: `${API_BASE_URL}/list`,
       query,
-      headers: addSystemApiHeader({}),
+      asSystemRequest: true,
     });
   };
 
@@ -72,7 +70,7 @@ class JobQueueClient {
     return kfetch({
       method: 'GET',
       pathname: `${API_BASE_URL}/count`,
-      headers: addSystemApiHeader({}),
+      asSystemRequest: true,
     });
   }
 
@@ -80,7 +78,7 @@ class JobQueueClient {
     return kfetch({
       method: 'GET',
       pathname: `${API_BASE_URL}/output/${jobId}`,
-      headers: addSystemApiHeader({}),
+      asSystemRequest: true,
     });
   }
 
@@ -88,7 +86,7 @@ class JobQueueClient {
     return kfetch({
       method: 'GET',
       pathname: `${API_BASE_URL}/info/${jobId}`,
-      headers: addSystemApiHeader({}),
+      asSystemRequest: true,
     });
   }
 }
