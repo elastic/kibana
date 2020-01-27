@@ -23,7 +23,9 @@ import { AlertsContextProvider } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_add';
-import { BulkActionPopover } from './bulk_action_popover';
+import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
+import { withBulkAlertOperations } from '../../common/components/with_bulk_alert_operations';
+import { AlertQuickEditButtons } from '../../common/components/alert_quick_edit_buttons';
 import { CollapsedItemActions } from './collapsed_item_actions';
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
@@ -33,6 +35,8 @@ import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib
 import { routeToAlertDetails } from '../../../constants';
 
 const ENTER_KEY = 13;
+
+const AlertQuickEditButtonsWithBulkApi = withBulkAlertOperations(AlertQuickEditButtons);
 
 export const AlertsList: React.FunctionComponent = () => {
   const {
@@ -256,14 +260,16 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiFlexGroup>
             {selectedIds.length > 0 && canDelete && (
               <EuiFlexItem grow={false}>
-                <BulkActionPopover
-                  selectedItems={pickFromData(data, selectedIds)}
-                  onPerformingAction={() => setIsPerformingAction(true)}
-                  onActionPerformed={() => {
-                    loadAlertsData();
-                    setIsPerformingAction(false);
-                  }}
-                />
+                <BulkOperationPopover>
+                  <AlertQuickEditButtonsWithBulkApi
+                    selectedItems={pickFromData(data, selectedIds)}
+                    onPerformingAction={() => setIsPerformingAction(true)}
+                    onActionPerformed={() => {
+                      loadAlertsData();
+                      setIsPerformingAction(false);
+                    }}
+                  />
+                </BulkOperationPopover>
               </EuiFlexItem>
             )}
             <EuiFlexItem>
