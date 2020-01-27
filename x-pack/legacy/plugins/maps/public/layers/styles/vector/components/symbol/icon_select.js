@@ -4,49 +4,135 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiComboBox } from '@elastic/eui';
+import React, { Component } from 'react';
+import {
+  EuiFormControlLayout,
+  EuiFieldText,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiFocusTrap,
+  keyCodes,
+  EuiSelectable,
+} from '@elastic/eui';
 import { SymbolIcon } from '../legend/symbol_icon';
 
-export function IconSelect({ isDarkMode, onChange, symbolOptions, value }) {
-  const selectedOption = symbolOptions.find(symbolOption => {
-    return symbolOption.value === value;
-  });
+function isKeyboardEvent(event) {
+  return typeof event === 'object' && 'keyCode' in event;
+}
 
-  const onSymbolChange = selectedOptions => {
-    if (!selectedOptions || selectedOptions.length === 0) {
-      // do not allow select to be cleared
-      return;
-    }
-
-    onChange(selectedOptions[0].value);
+export class IconSelect extends Component {
+  state = {
+    isPopoverOpen: false,
   };
 
-  const renderOption = symbolOption => {
+  _closePopover = () => {
+    this.setState({ isPopoverOpen: false });
+  };
+
+  _openPopover = () => {
+    this.setState({ isPopoverOpen: true });
+  };
+
+  _togglePopover = () => {
+    this.setState(prevState => ({
+      isPopoverOpen: !prevState.isPopoverOpen,
+    }));
+  };
+
+  _handleKeyboardActivity = e => {
+    if (isKeyboardEvent(e)) {
+      if (e.keyCode === keyCodes.ENTER) {
+        e.preventDefault();
+        this._togglePopover();
+      } else if (e.keyCode === keyCodes.DOWN) {
+        this._openPopover();
+      }
+    }
+  };
+
+  _onIconSelect = options => {
+    const selectedOption = options.find(option => {
+      return option.checked === 'on';
+    });
+
+    if (selectedOption) {
+      this.props.onChange(selectedOption.value);
+    }
+    this._closePopover();
+  };
+
+  _renderPopoverButton() {
+    const { isDarkMode, value } = this.props;
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false} style={{ width: '15px' }}>
+      <EuiFormControlLayout
+        icon={{ type: 'arrowDown', side: 'right' }}
+        readOnly
+        fullWidth
+        compressed
+        onKeyDown={this._handleKeyboardActivity}
+      >
+        <EuiFieldText
+          onClick={this._togglePopover}
+          onKeyDown={this._handleKeyboardActivity}
+          value={value}
+          compressed
+          readOnly
+          fullWidth
+          prepend={
+            <SymbolIcon
+              className="mapIconSelectSymbol__inputButton"
+              symbolId={value}
+              fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+              stroke={isDarkMode ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
+              strokeWidth={'1px'}
+            />
+          }
+        />
+      </EuiFormControlLayout>
+    );
+  }
+
+  _renderIconSelectable() {
+    const { isDarkMode } = this.props;
+    const options = this.props.symbolOptions.map(({ value, label }) => {
+      return {
+        value,
+        label,
+        prepend: (
           <SymbolIcon
-            symbolId={symbolOption.value}
+            symbolId={value}
             fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
             stroke={isDarkMode ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
             strokeWidth={'1px'}
           />
-        </EuiFlexItem>
-        <EuiFlexItem>{symbolOption.label}</EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
+        ),
+      };
+    });
 
-  return (
-    <EuiComboBox
-      options={symbolOptions}
-      onChange={onSymbolChange}
-      selectedOptions={selectedOption ? [selectedOption] : undefined}
-      singleSelection={true}
-      isClearable={false}
-      renderOption={renderOption}
-      compressed
-    />
-  );
+    return (
+      <EuiSelectable searchable options={options} onChange={this._onIconSelect}>
+        {(list, search) => (
+          <div style={{ width: '300px' }}>
+            <EuiPopoverTitle>{search}</EuiPopoverTitle>
+            {list}
+          </div>
+        )}
+      </EuiSelectable>
+    );
+  }
+
+  render() {
+    return (
+      <EuiPopover
+        ownFocus
+        button={this._renderPopoverButton()}
+        isOpen={this.state.isPopoverOpen}
+        closePopover={this._closePopover}
+        anchorPosition="downLeft"
+        panelPaddingSize="s"
+      >
+        <EuiFocusTrap clickOutsideDisables={true}>{this._renderIconSelectable()}</EuiFocusTrap>
+      </EuiPopover>
+    );
+  }
 }
