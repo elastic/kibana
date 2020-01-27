@@ -97,7 +97,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
               defaultMessage="Please ensure your account has all privileges granted by the
               {kibanaAdmin} role, and try again."
               values={{
-                kibanaUser: (
+                kibanaAdmin: (
                   <strong>
                     <FormattedMessage
                       id="xpack.security.management.editRole.spaceAwarePrivilegeForm.kibanaAdminTitle"
