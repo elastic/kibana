@@ -234,7 +234,8 @@ export async function syncExistingFields({
         query.timeFieldName = pattern.timeFieldName;
       }
 
-      return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
+      return fetchJson({
+        path: `${BASE_API_URL}/existing_fields/${pattern.id}`,
         query,
       }) as Promise<ExistingFields>;
     })

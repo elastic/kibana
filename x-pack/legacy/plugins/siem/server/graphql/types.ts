@@ -1017,7 +1017,7 @@ export interface RuleField {
 
   tags?: Maybe<string[] | string>;
 
-  threats?: Maybe<ToAny>;
+  threat?: Maybe<ToAny>;
 
   type?: Maybe<string[] | string>;
 
@@ -4994,7 +4994,7 @@ export namespace RuleFieldResolvers {
 
     tags?: TagsResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    threats?: ThreatsResolver<Maybe<ToAny>, TypeParent, TContext>;
+    threat?: ThreatResolver<Maybe<ToAny>, TypeParent, TContext>;
 
     type?: TypeResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
@@ -5112,7 +5112,7 @@ export namespace RuleFieldResolvers {
     Parent = RuleField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ThreatsResolver<
+  export type ThreatResolver<
     R = Maybe<ToAny>,
     Parent = RuleField,
     TContext = SiemContext
