@@ -34,7 +34,7 @@ interface Aggregation {
       field: string;
       fixed_interval: string;
     };
-    aggregations?: Record<string, any>;
-    aggs?: Record<string, any>;
+    aggregations?: { [key: string]: any };
+    aggs?: { [key: string]: any };
   };
 }
