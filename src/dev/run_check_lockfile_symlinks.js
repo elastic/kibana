@@ -211,12 +211,8 @@ async function checkIncorrectSymlinks(log, files) {
 }
 
 function getCorrectSymlink(path) {
-  const count = path.split('/').length;
-  let result = 'yarn.lock';
-  for (let i = 0; i < count - 1; i++) {
-    result = `../${result}`;
-  }
-  return result;
+  const count = path.split('/').length - 1;
+  return `${'../'.repeat(count)}yarn.lock`;
 }
 
 function listPaths(paths) {
