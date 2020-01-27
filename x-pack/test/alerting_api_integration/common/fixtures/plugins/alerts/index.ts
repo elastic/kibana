@@ -6,12 +6,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions, AlertType } from '../../../../../../legacy/plugins/alerting';
-import { ActionTypeExecutorOptions, ActionType } from '../../../../../../legacy/plugins/actions';
+import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins/actions/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    require: ['actions', 'alerting', 'elasticsearch'],
+    require: ['xpack_main', 'actions', 'alerting', 'elasticsearch'],
     name: 'alerts',
     init(server: any) {
       server.plugins.xpack_main.registerFeature({
@@ -191,11 +191,11 @@ export default function(kibana: any) {
           };
         },
       };
-      server.plugins.actions.setup.registerType(noopActionType);
-      server.plugins.actions.setup.registerType(indexRecordActionType);
-      server.plugins.actions.setup.registerType(failingActionType);
-      server.plugins.actions.setup.registerType(rateLimitedActionType);
-      server.plugins.actions.setup.registerType(authorizationActionType);
+      server.newPlatform.setup.plugins.actions.registerType(noopActionType);
+      server.newPlatform.setup.plugins.actions.registerType(indexRecordActionType);
+      server.newPlatform.setup.plugins.actions.registerType(failingActionType);
+      server.newPlatform.setup.plugins.actions.registerType(rateLimitedActionType);
+      server.newPlatform.setup.plugins.actions.registerType(authorizationActionType);
 
       // Alert types
       const alwaysFiringAlertType: AlertType = {

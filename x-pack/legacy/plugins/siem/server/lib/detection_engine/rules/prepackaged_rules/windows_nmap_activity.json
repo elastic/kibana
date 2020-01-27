@@ -1,16 +1,20 @@
 {
   "description": "Windows nmap activity",
-  "enabled": false,
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows nmap activity",
   "query": "process.name:nmap.exe and event.code:1",
   "risk_score": 50,
   "rule_id": "5a4b2a98-31a6-4852-b224-d63aeb9e172d",
   "severity": "low",
-  "to": "now",
+  "tags": ["Elastic"],
   "type": "query",
   "version": 1
 }

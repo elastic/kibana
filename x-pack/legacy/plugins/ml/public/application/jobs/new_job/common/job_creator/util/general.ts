@@ -325,7 +325,7 @@ export function collectAggs(o: any, aggFields: Field[]) {
     if (o[i] !== null && typeof o[i] === 'object') {
       if (i === 'aggregations' || i === 'aggs') {
         Object.keys(o[i]).forEach(k => {
-          if (k !== 'aggregations' && i !== 'aggs') {
+          if (k !== 'aggregations' && k !== 'aggs') {
             aggFields.push({
               id: k,
               name: k,

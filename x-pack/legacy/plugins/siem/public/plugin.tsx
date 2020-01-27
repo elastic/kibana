@@ -16,11 +16,14 @@ import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 import { IUiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
+import { initTelemetry } from './lib/telemetry';
 
 export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
 
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 export interface StartPlugins {
   data: DataPublicPluginStart;
@@ -43,6 +46,8 @@ export class Plugin implements IPlugin<Setup, Start> {
   ) {}
 
   public setup(core: CoreSetup, plugins: SetupPlugins) {
+    initTelemetry(plugins.usageCollection, this.id);
+
     core.application.register({
       id: this.id,
       title: this.name,
