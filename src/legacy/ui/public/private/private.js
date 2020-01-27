@@ -86,10 +86,6 @@ import { uiModules } from '../modules';
  * ```js
  * beforeEach(module('kibana', function (PrivateProvider) {
  *   PrivateProvider.swap(
- *     // since the courier is required automatically before the tests are loaded,
- *     // we can't stub it's internal components unless we do so before the
- *     // application starts. This is why angular has config functions
- *     require('ui/courier/_redirect_when_missing'),
  *     function StubbedRedirectProvider($decorate) {
  *       // $decorate is a function that will instantiate the original module when called
  *       return sinon.spy($decorate());

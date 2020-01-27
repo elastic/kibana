@@ -27,7 +27,7 @@ export interface BuildQueryBarDescription {
   indexPatterns?: IIndexPattern;
 }
 
-export interface BuildThreatsDescription {
+export interface BuildThreatDescription {
   label: string;
-  threats: IMitreEnterpriseAttack[];
+  threat: IMitreEnterpriseAttack[];
 }
