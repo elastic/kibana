@@ -133,7 +133,7 @@ image:images/time_range_per_panel.gif[Time range per dashboard panel]
 
 [float]
 [[save-dashboards]]
-=== Save a dashboard
+=== Save the dashboard
 
 When you're finished adding and arranging the panels, save the dashboard.
 
@@ -142,10 +142,10 @@ When you're finished adding and arranging the panels, save the dashboard.
 . Enter the dashboard *Title* and optional *Description*, then *Save* the dashboard.
 
 [[sharing-dashboards]]
-=== Share a dashboard
+=== Share the dashboard
 
 [[embedding-dashboards]]
-Share the finished dashboard with your teammates.
+Share your dashboard outside of {kib}.
 
 From the *Share* menu, you can:
 
@@ -164,7 +164,7 @@ tools. To create a short URL, you must have write access to {kib}.
 
 [float]
 [[import-dashboards]]
-=== Import and export dashboards
+=== Export the dashboard
 
-To import and export dashboards, go to *Management > Saved Objects*. For details,
+To export the dashboard, go to *Management > Saved Objects*. For more information,
 see <<managing-saved-objects, Managing saved objects>>.
