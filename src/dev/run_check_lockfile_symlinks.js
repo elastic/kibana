@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { existsSync, lstatSync, readFileSync } from 'fs';
+import { existsSync, lstatSync, readFileSync, readlinkSync } from 'fs';
 import globby from 'globby';
 import { dirname } from 'path';
 
@@ -63,6 +63,7 @@ async function checkLockfileSymlinks(log, files) {
   await checkOnlyLockfileAtProjectRoot(filtered);
   await checkSuperfluousSymlinks(log, filtered);
   await checkMissingSymlinks(log, filtered);
+  await checkIncorrectSymlinks(log, filtered);
 }
 
 async function checkOnlyLockfileAtProjectRoot(files) {
@@ -157,8 +158,9 @@ async function checkMissingSymlinks(log, files) {
         try {
           const json = JSON.parse(manifest);
           if (json.dependencies && Object.keys(json.dependencies).length) {
+            const correctSymlink = getCorrectSymlink(lockfilePath);
             log.warning(
-              `Manifest at '${path}' has dependencies, but did not find an adjacent 'yarn.lock' symlink.`
+              `Manifest at '${path}' has dependencies, but did not find an adjacent 'yarn.lock' symlink to '${correctSymlink}'.`
             );
             errorPaths.push(`${parent}/yarn.lock`);
           }
@@ -175,6 +177,46 @@ async function checkMissingSymlinks(log, files) {
       `These directories MUST have a 'yarn.lock' symlink:\n${listPaths(errorPaths)}`
     );
   }
+}
+
+async function checkIncorrectSymlinks(log, files) {
+  const errorPaths = [];
+
+  files
+    .filter(file => matchesAnyGlob(file.getRelativePath(), LOCKFILE_GLOBS))
+    .forEach(file => {
+      const path = file.getRelativePath();
+      const stats = lstatSync(path);
+      if (!stats.isSymbolicLink()) {
+        return;
+      }
+
+      const symlink = readlinkSync(path);
+      const correctSymlink = getCorrectSymlink(path);
+      if (symlink !== correctSymlink) {
+        log.warning(
+          `Symlink at '${path}' points to '${symlink}', but it should point to '${correctSymlink}'.`
+        );
+        errorPaths.push(path);
+      }
+    });
+
+  if (errorPaths.length) {
+    throw createFailError(
+      `These symlinks do NOT point to the 'yarn.lock' file in the project root:\n${listPaths(
+        errorPaths
+      )}`
+    );
+  }
+}
+
+function getCorrectSymlink(path) {
+  const count = path.split('/').length;
+  let result = 'yarn.lock';
+  for (let i = 0; i < count - 1; i++) {
+    result = `../${result}`;
+  }
+  return result;
 }
 
 function listPaths(paths) {
