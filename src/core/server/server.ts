@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { take, map } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
 import {

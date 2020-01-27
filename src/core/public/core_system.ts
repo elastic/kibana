@@ -221,7 +221,7 @@ export class CoreSystem {
       const i18n = await this.i18n.start();
       const application = await this.application.start({ http, injectedMetadata });
       await this.integrations.start({ uiSettings });
-      const pulse = await this.pulse.start();
+      // const pulse = await this.pulse.start();
 
       const coreUiTargetDomElement = document.createElement('div');
       coreUiTargetDomElement.id = 'kibana-body';
