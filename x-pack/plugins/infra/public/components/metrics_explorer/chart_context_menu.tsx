@@ -62,7 +62,7 @@ export const createNodeDetailLink = (
   nodeId: string,
   from: string,
   to: string,
-  prefixPathWithBasePath: (path?: string) => string
+  prefixPathWithBasePath: (path?: string | undefined) => string | undefined
 ) => {
   return getNodeDetailUrl({
     nodeType,
