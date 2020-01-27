@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/*************************************************************
+/** ***********************************************************
  *
  *  Run `node scripts/es_archiver --help` for usage information
  *
@@ -27,17 +27,17 @@ import { resolve } from 'path';
 import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
 import readline from 'readline';
-
 import { Command } from 'commander';
 import * as legacyElasticsearch from 'elasticsearch';
 
-import { EsArchiver } from './es_archiver';
 import { ToolingLog } from '@kbn/dev-utils';
 import { readConfigFile } from '@kbn/test';
 
+import { EsArchiver } from './es_archiver';
+
 const cmd = new Command('node scripts/es_archiver');
 
-const resolveConfigPath = v => resolve(process.cwd(), v);
+const resolveConfigPath = (v: string) => resolve(process.cwd(), v);
 const defaultConfigPath = resolveConfigPath('test/functional/config.js');
 
 cmd
@@ -56,6 +56,7 @@ cmd
     defaultConfigPath
   )
   .on('--help', () => {
+    // eslint-disable-next-line no-console
     console.log(readFileSync(resolve(__dirname, './cli_help.txt'), 'utf8'));
   });
 
@@ -95,10 +96,10 @@ cmd
           output: process.stdout,
         });
 
-        await new Promise(resolve => {
+        await new Promise(resolveInput => {
           rl.question(`Press enter when you're done`, () => {
             rl.close();
-            resolve();
+            resolveInput();
           });
         });
       })
@@ -112,12 +113,12 @@ cmd
 
 cmd.parse(process.argv);
 
-const missingCommand = cmd.args.every(a => !(a instanceof Command));
+const missingCommand = cmd.args.every(a => !((a as any) instanceof Command));
 if (missingCommand) {
   execute();
 }
 
-async function execute(fn) {
+async function execute(fn?: (esArchiver: EsArchiver, command: Command) => void): Promise<void> {
   try {
     const log = new ToolingLog({
       level: cmd.verbose ? 'debug' : 'info',
@@ -134,7 +135,7 @@ async function execute(fn) {
 
     // log and count all validation errors
     let errorCount = 0;
-    const error = msg => {
+    const error = (msg: string) => {
       errorCount++;
       log.error(msg);
     };
@@ -170,11 +171,12 @@ async function execute(fn) {
         dataDir: resolve(cmd.dir),
         kibanaUrl: cmd.kibanaUrl,
       });
-      await fn(esArchiver, cmd);
+      await fn!(esArchiver, cmd);
     } finally {
       await client.close();
     }
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.log('FATAL ERROR', err.stack);
   }
 }
