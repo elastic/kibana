@@ -27,7 +27,7 @@ function getMockServerFromConnectionUrl(monitoringClusterUrl) {
   };
 
   return {
-    elasticsearchConfig: server.xpack.monitoring.elasticsearch,
+    elasticsearchConfig: server.monitoring.ui.elasticsearch,
     elasticsearchPlugin: {
       getCluster: sinon
         .stub()
