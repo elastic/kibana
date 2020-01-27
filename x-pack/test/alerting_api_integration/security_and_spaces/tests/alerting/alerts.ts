@@ -754,8 +754,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           }
         });
 
-        // Flaky: https://github.com/elastic/kibana/issues/54125
-        it.skip(`should unmute all instances when unmuting an alert`, async () => {
+        it(`should unmute all instances when unmuting an alert`, async () => {
           const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({
