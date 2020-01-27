@@ -6,8 +6,7 @@
 
 import { EuiCheckbox, EuiSuperSelect } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import { getEventsSelectOptions } from './helpers';
@@ -50,7 +49,7 @@ interface Props {
   timelineId: string;
 }
 
-export const EventsSelect = pure<Props>(({ checkState, timelineId }) => {
+export const EventsSelect = React.memo<Props>(({ checkState, timelineId }) => {
   return (
     <div data-test-subj="events-select">
       <EuiSuperSelect

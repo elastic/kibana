@@ -16,6 +16,6 @@ export const ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS = `${ALL_HOSTS_WIDGET} ${ALL_HOSTS
 /** Clicking this button displays the `Events` tab */
 export const EVENTS_TAB_BUTTON = '[data-test-subj="navigation-events"]';
 
-export const NAVIGATION_HOSTS_ALL_HOSTS = '[data-test-subj="navigation-link-allHosts"]';
+export const NAVIGATION_HOSTS_ALL_HOSTS = '[data-test-subj="navigation-allHosts"]';
 
-export const NAVIGATION_HOSTS_ANOMALIES = '[data-test-subj="navigation-link-anomalies"]';
+export const NAVIGATION_HOSTS_ANOMALIES = '[data-test-subj="navigation-anomalies"]';

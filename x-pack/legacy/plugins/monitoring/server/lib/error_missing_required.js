@@ -23,7 +23,7 @@ export function checkParam(param, context) {
 export function MissingRequiredError(param) {
   this.name = 'MissingRequiredError';
   this.message = `Missing required parameter or field: ${param}`;
-  this.stack = (new Error()).stack;
+  this.stack = new Error().stack;
 }
 MissingRequiredError.prototype = Object.create(Error.prototype);
 MissingRequiredError.prototype.constructor = MissingRequiredError;

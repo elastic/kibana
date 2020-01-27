@@ -5,10 +5,7 @@
  */
 
 import { last } from 'lodash';
-import {
-  MetricsExplorerAggregation,
-  MetricsExplorerMetric,
-} from '../../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerMetric } from '../../../../server/routes/metrics_explorer/types';
 import { InfraFormatterType } from '../../../lib/lib';
 export const metricToFormat = (metric?: MetricsExplorerMetric) => {
   if (metric && metric.field) {
@@ -16,7 +13,7 @@ export const metricToFormat = (metric?: MetricsExplorerMetric) => {
     if (suffix === 'pct') {
       return InfraFormatterType.percent;
     }
-    if (suffix === 'bytes' && metric.aggregation === MetricsExplorerAggregation.rate) {
+    if (suffix === 'bytes' && metric.aggregation === 'rate') {
       return InfraFormatterType.bits;
     }
     if (suffix === 'bytes') {

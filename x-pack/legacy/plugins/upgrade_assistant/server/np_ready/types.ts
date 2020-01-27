@@ -6,17 +6,12 @@
 import { Legacy } from 'kibana';
 import { IRouter } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
-import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 
 export interface ServerShim {
   plugins: {
     elasticsearch: ElasticsearchPlugin;
     xpack_main: XPackMainPlugin;
-    cloud: {
-      config: {
-        isCloudEnabled: boolean;
-      };
-    };
   };
   log: any;
   events: any;

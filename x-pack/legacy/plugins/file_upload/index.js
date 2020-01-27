@@ -16,8 +16,8 @@ export const fileUpload = kibana => {
     },
     savedObjectSchemas: {
       'file-upload-telemetry': {
-        isNamespaceAgnostic: true
-      }
+        isNamespaceAgnostic: true,
+      },
     },
 
     init(server) {
@@ -34,11 +34,11 @@ export const fileUpload = kibana => {
           elasticsearch: server.plugins.elasticsearch,
         },
         savedObjects: {
-          getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository
+          getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository,
         },
       };
 
       new FileUploadPlugin().setup(coreSetup, pluginsSetup, __LEGACY);
-    }
+    },
   });
 };

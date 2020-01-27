@@ -397,6 +397,7 @@
           "min": "min"
         },
         "fieldIds": [
+          "airline",
           "responsetime"
         ]
       },
@@ -411,6 +412,7 @@
           "min": "min"
         },
         "fieldIds": [
+          "airline",
           "responsetime"
         ]
       },
@@ -425,6 +427,7 @@
           "min": "min"
         },
         "fieldIds": [
+          "airline",
           "responsetime"
         ]
       },
@@ -479,7 +482,10 @@
         "aggIds": [
           "distinct_count",
           "high_distinct_count",
-          "low_distinct_count"
+          "low_distinct_count",
+          "info_content",
+          "high_info_content",
+          "low_info_content"
         ]
       },
       {

@@ -28,8 +28,8 @@ function createBufferedLog() {
   const log = new ToolingLog({
     level: 'debug',
     writeTo: {
-      write: (chunk) => log.buffer += chunk
-    }
+      write: chunk => (log.buffer += chunk),
+    },
   });
   log.buffer = '';
   return log;
@@ -52,12 +52,12 @@ function assertDeepClones(a, b) {
         recurse(one[k], two[k]);
         path.pop();
       });
-    }(a, b));
+    })(a, b);
   } catch (err) {
     throw new Error(
       `Expected a and b to be deep clones of each other, error at:\n\n` +
-      `  "${path.join('.') || '-'}"\n\n` +
-      err.stack
+        `  "${path.join('.') || '-'}"\n\n` +
+        err.stack
     );
   }
 }
@@ -112,7 +112,7 @@ describe('esArchiver: Stats', () => {
         const log = createBufferedLog();
         const stats = createStats('name', log);
         stats.createdIndex('index-name', {
-          foo: 'bar'
+          foo: 'bar',
         });
         expect(log.buffer).to.contain('debg');
         expect(log.buffer).to.contain('foo "bar"');
@@ -146,7 +146,7 @@ describe('esArchiver: Stats', () => {
         const log = createBufferedLog();
         const stats = createStats('name', log);
         stats.archivedIndex('index-name', {
-          foo: 'bar'
+          foo: 'bar',
         });
         expect(log.buffer).to.contain('debg');
         expect(log.buffer).to.contain('foo "bar"');

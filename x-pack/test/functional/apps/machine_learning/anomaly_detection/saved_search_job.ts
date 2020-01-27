@@ -53,8 +53,8 @@ export default function({ getService }: FtrProviderContext) {
         },
         modelSizeStats: {
           result_type: 'model_size_stats',
-          model_bytes_exceeded: '0',
-          model_bytes_memory_limit: '20971520',
+          model_bytes_exceeded: '0.0 B',
+          model_bytes_memory_limit: '20.0 MB',
           total_by_field_count: '3',
           total_over_field_count: '0',
           total_partition_field_count: '2',
@@ -104,8 +104,8 @@ export default function({ getService }: FtrProviderContext) {
         },
         modelSizeStats: {
           result_type: 'model_size_stats',
-          model_bytes_exceeded: '0',
-          model_bytes_memory_limit: '20971520',
+          model_bytes_exceeded: '0.0 B',
+          model_bytes_memory_limit: '20.0 MB',
           total_by_field_count: '7',
           total_over_field_count: '0',
           total_partition_field_count: '6',
@@ -155,8 +155,8 @@ export default function({ getService }: FtrProviderContext) {
         },
         modelSizeStats: {
           result_type: 'model_size_stats',
-          model_bytes_exceeded: '0',
-          model_bytes_memory_limit: '20971520',
+          model_bytes_exceeded: '0.0 B',
+          model_bytes_memory_limit: '20.0 MB',
           total_by_field_count: '7',
           total_over_field_count: '0',
           total_partition_field_count: '6',
@@ -207,8 +207,8 @@ export default function({ getService }: FtrProviderContext) {
         },
         modelSizeStats: {
           result_type: 'model_size_stats',
-          model_bytes_exceeded: '0',
-          model_bytes_memory_limit: '20971520',
+          model_bytes_exceeded: '0.0 B',
+          model_bytes_memory_limit: '20.0 MB',
           total_by_field_count: '3',
           total_over_field_count: '0',
           total_partition_field_count: '2',
@@ -258,8 +258,8 @@ export default function({ getService }: FtrProviderContext) {
         },
         modelSizeStats: {
           result_type: 'model_size_stats',
-          model_bytes_exceeded: '0',
-          model_bytes_memory_limit: '20971520',
+          model_bytes_exceeded: '0.0 B',
+          model_bytes_memory_limit: '20.0 MB',
           total_by_field_count: '3',
           total_over_field_count: '0',
           total_partition_field_count: '2',
@@ -294,7 +294,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('job creation loads the job type selection page', async () => {
-          await ml.jobSourceSelection.selectSource(testData.jobSource);
+          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(testData.jobSource);
         });
 
         it('job creation loads the multi metric job wizard page', async () => {

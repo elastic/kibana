@@ -1,0 +1,20 @@
+{
+  "description": "Windows Process Discovery via Tasklist Command",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "name": "Windows Process Discovery via Tasklist Command",
+  "query": "event.code:1 and process.name:tasklist.exe",
+  "risk_score": 50,
+  "rule_id": "cc16f774-59f9-462d-8b98-d27ccd4519ec",
+  "severity": "low",
+  "tags": ["Elastic"],
+  "type": "query",
+  "version": 1
+}

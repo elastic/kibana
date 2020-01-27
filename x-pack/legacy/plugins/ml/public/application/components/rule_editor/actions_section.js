@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for rendering the form fields for editing the actions section of a rule.
  */
@@ -24,11 +23,7 @@ import {
 import { ACTION } from '../../../../common/constants/detector_rule';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function ActionsSection({
-  actions,
-  onSkipResultChange,
-  onSkipModelUpdateChange }) {
-
+export function ActionsSection({ actions, onSkipResultChange, onSkipModelUpdateChange }) {
   return (
     <React.Fragment>
       <EuiText>
@@ -44,10 +39,12 @@ export function ActionsSection({
         <EuiFlexItem grow={false}>
           <EuiCheckbox
             id="skip_result_cb"
-            label={<FormattedMessage
-              id="xpack.ml.ruleEditor.actionsSection.skipResultLabel"
-              defaultMessage="Skip result (recommended)"
-            />}
+            label={
+              <FormattedMessage
+                id="xpack.ml.ruleEditor.actionsSection.skipResultLabel"
+                defaultMessage="Skip result (recommended)"
+              />
+            }
             checked={actions.indexOf(ACTION.SKIP_RESULT) > -1}
             onChange={onSkipResultChange}
           />
@@ -55,10 +52,12 @@ export function ActionsSection({
 
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            content={<FormattedMessage
-              id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
-              defaultMessage="The result will not be created."
-            />}
+            content={
+              <FormattedMessage
+                id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
+                defaultMessage="The result will not be created."
+              />
+            }
             size="s"
             position="right"
           />
@@ -71,10 +70,12 @@ export function ActionsSection({
         <EuiFlexItem grow={false}>
           <EuiCheckbox
             id="skip_model_update_cb"
-            label={<FormattedMessage
-              id="xpack.ml.ruleEditor.actionsSection.skipModelUpdateLabel"
-              defaultMessage="Skip model update"
-            />}
+            label={
+              <FormattedMessage
+                id="xpack.ml.ruleEditor.actionsSection.skipModelUpdateLabel"
+                defaultMessage="Skip model update"
+              />
+            }
             checked={actions.indexOf(ACTION.SKIP_MODEL_UPDATE) > -1}
             onChange={onSkipModelUpdateChange}
           />
@@ -82,10 +83,12 @@ export function ActionsSection({
 
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            content={<FormattedMessage
-              id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
-              defaultMessage="The value for that series will not be used to update the model."
-            />}
+            content={
+              <FormattedMessage
+                id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
+                defaultMessage="The value for that series will not be used to update the model."
+              />
+            }
             size="s"
             position="right"
           />
@@ -93,10 +96,9 @@ export function ActionsSection({
       </EuiFlexGroup>
     </React.Fragment>
   );
-
 }
 ActionsSection.propTypes = {
   actions: PropTypes.array.isRequired,
   onSkipResultChange: PropTypes.func.isRequired,
-  onSkipModelUpdateChange: PropTypes.func.isRequired
+  onSkipModelUpdateChange: PropTypes.func.isRequired,
 };

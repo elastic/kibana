@@ -27,5 +27,5 @@ import { mapSpec } from './map_spec';
 export const debug = mapSpec((spec, type, pluginSpec) => ({
   spec,
   type,
-  pluginSpec
+  pluginSpec,
 }));

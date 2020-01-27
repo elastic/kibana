@@ -42,7 +42,7 @@ export default function({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action',
+          name: 'My action',
           actionTypeId: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -88,12 +88,44 @@ export default function({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should handle failed executions', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'failing action',
+          actionTypeId: 'test.failing',
+        })
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+
+      const reference = `actions-failure-1:${Spaces.space1.id}`;
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action/${createdAction.id}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            reference,
+            index: ES_TEST_INDEX_NAME,
+          },
+        });
+
+      expect(response.statusCode).to.eql(200);
+      expect(response.body).to.eql({
+        actionId: createdAction.id,
+        status: 'error',
+        message: 'an error occurred while running the action executor',
+        serviceMessage: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
+        retry: false,
+      });
+    });
+
     it(`shouldn't execute an action from another space`, async () => {
       const { body: createdAction } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action',
+          name: 'My action',
           actionTypeId: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -129,7 +161,7 @@ export default function({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action',
+          name: 'My action',
           actionTypeId: 'test.authorization',
         })
         .expect(200);

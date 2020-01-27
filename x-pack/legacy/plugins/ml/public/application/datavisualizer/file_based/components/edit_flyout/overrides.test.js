@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
@@ -12,23 +11,20 @@ import { Overrides } from './overrides';
 
 function getProps() {
   return {
-    setOverrides: () => { },
+    setOverrides: () => {},
     overrides: {},
     originalSettings: {},
     defaultSettings: {},
-    setApplyOverrides: () => { },
+    setApplyOverrides: () => {},
     fields: [],
   };
 }
 
 describe('Overrides', () => {
-
   test('render overrides', () => {
     const props = getProps();
 
-    const component = shallowWithIntl(
-      <Overrides {...props} />
-    );
+    const component = shallowWithIntl(<Overrides {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -40,15 +36,12 @@ describe('Overrides', () => {
     const props = getProps();
     props.overrides.format = FORMAT_1;
 
-    const component = mountWithIntl(
-      <Overrides {...props} />
-    );
+    const component = mountWithIntl(<Overrides {...props} />);
 
     expect(component.state('overrides').format).toEqual(FORMAT_1);
 
     component.instance().onFormatChange([{ label: FORMAT_2 }]);
 
     expect(component.state('overrides').format).toEqual(FORMAT_2);
-
   });
 });

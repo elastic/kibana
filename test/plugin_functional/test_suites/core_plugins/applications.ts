@@ -27,11 +27,17 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   const loadingScreenNotShown = async () =>
     expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
 
   const loadingScreenShown = () => testSubjects.existOrFail('kbnLoadingMessage');
+
+  const getAppWrapperWidth = async () => {
+    const wrapper = await find.byClassName('app-wrapper');
+    return (await wrapper.getSize()).width;
+  };
 
   const getKibanaUrl = (pathname?: string, search?: string) =>
     url.format({
@@ -99,21 +105,29 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       await PageObjects.common.navigateToApp('chromeless');
       await loadingScreenNotShown();
       expect(await testSubjects.exists('headerGlobalNav')).to.be(false);
+
+      const wrapperWidth = await getAppWrapperWidth();
+      const windowWidth = (await browser.getWindowSize()).width;
+      expect(wrapperWidth).to.eql(windowWidth);
     });
 
     it('navigating away from chromeless application shows chrome', async () => {
       await PageObjects.common.navigateToApp('foo');
       await loadingScreenNotShown();
       expect(await testSubjects.exists('headerGlobalNav')).to.be(true);
+
+      const wrapperWidth = await getAppWrapperWidth();
+      const windowWidth = (await browser.getWindowSize()).width;
+      expect(wrapperWidth).to.be.below(windowWidth);
     });
 
-    it.skip('can navigate from NP apps to legacy apps', async () => {
-      await appsMenu.clickLink('Management');
+    it('can navigate from NP apps to legacy apps', async () => {
+      await appsMenu.clickLink('Stack Management');
       await loadingScreenShown();
       await testSubjects.existOrFail('managementNav');
     });
 
-    it.skip('can navigate from legacy apps to NP apps', async () => {
+    it('can navigate from legacy apps to NP apps', async () => {
       await appsMenu.clickLink('Foo');
       await loadingScreenShown();
       await testSubjects.existOrFail('fooAppHome');

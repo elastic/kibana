@@ -99,7 +99,7 @@ export const setup = async (): Promise<HomeTestBed> => {
     const tabs = ['snapshots', 'repositories'];
 
     testBed
-      .find('tab')
+      .find(`${tab}_tab`)
       .at(tabs.indexOf(tab))
       .simulate('click');
   };
@@ -360,7 +360,10 @@ export type TestSubjects =
   | 'state'
   | 'state.title'
   | 'state.value'
-  | 'tab'
+  | 'repositories_tab'
+  | 'snapshots_tab'
+  | 'policies_tab'
+  | 'restore_status_tab'
   | 'tableHeaderCell_durationInMillis_3'
   | 'tableHeaderCell_durationInMillis_3.tableHeaderSortButton'
   | 'tableHeaderCell_indices_4'

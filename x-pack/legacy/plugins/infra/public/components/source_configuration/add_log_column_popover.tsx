@@ -94,7 +94,7 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
 
       addLogColumn(selectedOption.columnConfiguration);
     },
-    [addLogColumn, availableColumnOptions]
+    [addLogColumn, availableColumnOptions, closePopover]
   );
 
   return (

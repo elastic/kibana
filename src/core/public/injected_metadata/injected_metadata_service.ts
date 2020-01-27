@@ -26,11 +26,12 @@ import {
   UserProvidedValues,
 } from '../../server/types';
 import { deepFreeze } from '../../utils/';
-import { Capabilities } from '..';
+import { AppCategory } from '../';
 
 /** @public */
 export interface LegacyNavLink {
   id: string;
+  category?: AppCategory;
   title: string;
   order: number;
   url: string;
@@ -53,6 +54,7 @@ export interface InjectedMetadataParams {
     buildNumber: number;
     branch: string;
     basePath: string;
+    category?: AppCategory;
     csp: {
       warnLegacyBrowsers: boolean;
     };
@@ -64,10 +66,12 @@ export interface InjectedMetadataParams {
       packageInfo: Readonly<PackageInfo>;
     };
     uiPlugins: InjectedPluginMetadata[];
-    capabilities: Capabilities;
     legacyMode: boolean;
     legacyMetadata: {
-      app: unknown;
+      app: {
+        id: string;
+        title: string;
+      };
       bundleId: string;
       nav: LegacyNavLink[];
       version: string;
@@ -77,6 +81,7 @@ export interface InjectedMetadataParams {
       basePath: string;
       serverName: string;
       devMode: boolean;
+      category?: AppCategory;
       uiSettings: {
         defaults: Record<string, UiSettingsParams>;
         user?: Record<string, UserProvidedValues>;
@@ -112,10 +117,6 @@ export class InjectedMetadataService {
 
       getKibanaVersion: () => {
         return this.state.version;
-      },
-
-      getCapabilities: () => {
-        return this.state.capabilities;
       },
 
       getCspConfig: () => {
@@ -163,7 +164,6 @@ export interface InjectedMetadataSetup {
   getKibanaBuildNumber: () => number;
   getKibanaBranch: () => string;
   getKibanaVersion: () => string;
-  getCapabilities: () => Capabilities;
   getCspConfig: () => {
     warnLegacyBrowsers: boolean;
   };
@@ -174,7 +174,10 @@ export interface InjectedMetadataSetup {
   /** Indicates whether or not we are rendering a known legacy app. */
   getLegacyMode: () => boolean;
   getLegacyMetadata: () => {
-    app: unknown;
+    app: {
+      id: string;
+      title: string;
+    };
     bundleId: string;
     nav: LegacyNavLink[];
     version: string;

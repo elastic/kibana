@@ -5,12 +5,12 @@
  */
 
 import { isUndefined } from 'lodash';
-import { get, keyBy, pick, set } from 'lodash/fp';
+import { get, keyBy, pick, set, isEmpty } from 'lodash/fp';
 import { Query } from 'react-apollo';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import memoizeOne from 'memoize-one';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import chrome from 'ui/chrome';
+import { IIndexPattern } from 'src/plugins/data/public';
+import { useUiSetting$ } from '../../lib/kibana';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { IndexField, SourceQuery } from '../../graphql/types';
@@ -52,16 +52,17 @@ export const getAllFieldsByName = (
 interface WithSourceArgs {
   indicesExist: boolean;
   browserFields: BrowserFields;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
 }
 
 interface WithSourceProps {
   children: (args: WithSourceArgs) => React.ReactNode;
+  indexToAdd?: string[] | null;
   sourceId: string;
 }
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]): StaticIndexPattern =>
+  (title: string, fields: IndexField[]): IIndexPattern =>
     fields && fields.length > 0
       ? {
           fields: fields.map(field => pick(['name', 'searchable', 'type', 'aggregatable'], field)),
@@ -70,8 +71,8 @@ export const getIndexFields = memoizeOne(
       : { fields: [], title }
 );
 
-const getBrowserFields = memoizeOne(
-  (fields: IndexField[]): BrowserFields =>
+export const getBrowserFields = memoizeOne(
+  (title: string, fields: IndexField[]): BrowserFields =>
     fields && fields.length > 0
       ? fields.reduce<BrowserFields>(
           (accumulator: BrowserFields, field: IndexField) =>
@@ -81,7 +82,15 @@ const getBrowserFields = memoizeOne(
       : {}
 );
 
-export const WithSource = React.memo<WithSourceProps>(({ children, sourceId }) => {
+export const WithSource = React.memo<WithSourceProps>(({ children, indexToAdd, sourceId }) => {
+  const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const defaultIndex = useMemo<string[]>(() => {
+    if (indexToAdd != null && !isEmpty(indexToAdd)) {
+      return [...configIndex, ...indexToAdd];
+    }
+    return configIndex;
+  }, [configIndex, indexToAdd]);
+
   return (
     <Query<SourceQuery.Query, SourceQuery.Variables>
       query={sourceQuery}
@@ -89,20 +98,17 @@ export const WithSource = React.memo<WithSourceProps>(({ children, sourceId }) =
       notifyOnNetworkStatusChange
       variables={{
         sourceId,
-        defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        defaultIndex,
       }}
     >
       {({ data }) =>
         children({
           indicesExist: get('source.status.indicesExist', data),
-          browserFields: getBrowserFields(get('source.status.indexFields', data)),
-          indexPattern: getIndexFields(
-            chrome
-              .getUiSettingsClient()
-              .get(DEFAULT_INDEX_KEY)
-              .join(),
+          browserFields: getBrowserFields(
+            defaultIndex.join(),
             get('source.status.indexFields', data)
           ),
+          indexPattern: getIndexFields(defaultIndex.join(), get('source.status.indexFields', data)),
         })
       }
     </Query>
@@ -118,7 +124,7 @@ export const useWithSource = (sourceId: string, indices: string[]) => {
   const [loading, updateLoading] = useState(false);
   const [indicesExist, setIndicesExist] = useState<boolean | undefined | null>(undefined);
   const [browserFields, setBrowserFields] = useState<BrowserFields | null>(null);
-  const [indexPattern, setIndexPattern] = useState<StaticIndexPattern | null>(null);
+  const [indexPattern, setIndexPattern] = useState<IIndexPattern | null>(null);
   const [errorMessage, updateErrorMessage] = useState<string | null>(null);
 
   const apolloClient = useApolloClient();
@@ -144,7 +150,9 @@ export const useWithSource = (sourceId: string, indices: string[]) => {
             updateLoading(false);
             updateErrorMessage(null);
             setIndicesExist(get('data.source.status.indicesExist', result));
-            setBrowserFields(getBrowserFields(get('data.source.status.indexFields', result)));
+            setBrowserFields(
+              getBrowserFields(indices.join(), get('data.source.status.indexFields', result))
+            );
             setIndexPattern(
               getIndexFields(indices.join(), get('data.source.status.indexFields', result))
             );

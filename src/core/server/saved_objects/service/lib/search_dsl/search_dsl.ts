@@ -23,6 +23,7 @@ import { IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { esKuery } from '../../../../../../plugins/data/server';
 
 interface GetSearchDslOptions {

@@ -13,7 +13,12 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { getAnalysisType } from '../../../../common/analytics';
+import {
+  getAnalysisType,
+  isRegressionAnalysis,
+  isOutlierAnalysis,
+  isClassificationAnalysis,
+} from '../../../../common/analytics';
 
 import { getResultsUrl, isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
 import { stopAnalytics } from '../../services/analytics_service';
@@ -26,10 +31,15 @@ export const AnalyticsViewAction = {
   render: (item: DataFrameAnalyticsListRow) => {
     const analysisType = getAnalysisType(item.config.analysis);
     const jobStatus = item.stats.state;
+    const isDisabled =
+      !isRegressionAnalysis(item.config.analysis) &&
+      !isOutlierAnalysis(item.config.analysis) &&
+      !isClassificationAnalysis(item.config.analysis);
 
     const url = getResultsUrl(item.id, analysisType, jobStatus);
     return (
       <EuiButtonEmpty
+        isDisabled={isDisabled}
         onClick={() => (window.location.href = url)}
         size="xs"
         color="text"
@@ -37,6 +47,7 @@ export const AnalyticsViewAction = {
         aria-label={i18n.translate('xpack.ml.dataframe.analyticsList.viewAriaLabel', {
           defaultMessage: 'View',
         })}
+        data-test-sub="mlAnalyticsJobViewButton"
       >
         {i18n.translate('xpack.ml.dataframe.analyticsList.viewActionName', {
           defaultMessage: 'View',
@@ -69,6 +80,7 @@ export const getActions = () => {
             iconType="stop"
             onClick={() => stopAnalytics(item)}
             aria-label={buttonStopText}
+            data-test-sub="mlAnalyticsJobStopButton"
           >
             {buttonStopText}
           </EuiButtonEmpty>

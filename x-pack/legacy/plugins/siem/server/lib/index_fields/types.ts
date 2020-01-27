@@ -6,20 +6,9 @@
 
 import { IndexField } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
-import { RequestFacade } from '../../types';
-
-type IndexFieldsRequest = RequestFacade & {
-  payload: {
-    variables: {
-      defaultIndex: string[];
-    };
-  };
-};
-
-export type FrameworkFieldsRequest = FrameworkRequest<IndexFieldsRequest>;
 
 export interface FieldsAdapter {
-  getIndexFields(req: FrameworkFieldsRequest, indices: string[]): Promise<IndexField[]>;
+  getIndexFields(req: FrameworkRequest, indices: string[]): Promise<IndexField[]>;
 }
 
 export interface IndexFieldDescriptor {

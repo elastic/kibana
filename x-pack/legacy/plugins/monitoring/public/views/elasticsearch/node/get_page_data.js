@@ -16,17 +16,18 @@ export function getPageData($injector) {
   const showSystemIndices = features.isEnabled('showSystemIndices', false);
   const timeBounds = timefilter.getBounds();
 
-  return $http.post(url, {
-    showSystemIndices,
-    ccs: globalState.ccs,
-    timeRange: {
-      min: timeBounds.min.toISOString(),
-      max: timeBounds.max.toISOString()
-    },
-    is_advanced: false,
-  })
+  return $http
+    .post(url, {
+      showSystemIndices,
+      ccs: globalState.ccs,
+      timeRange: {
+        min: timeBounds.min.toISOString(),
+        max: timeBounds.max.toISOString(),
+      },
+      is_advanced: false,
+    })
     .then(response => response.data)
-    .catch((err) => {
+    .catch(err => {
       const Private = $injector.get('Private');
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);

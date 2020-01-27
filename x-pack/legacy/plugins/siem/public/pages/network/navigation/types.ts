@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/';
 
 import { NavTab } from '../../../components/navigation/types';
 import { FlowTargetSourceDest } from '../../../graphql/types';
@@ -29,7 +29,7 @@ interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQue
 export type NetworkComponentQueryProps = QueryTabBodyProps;
 
 export type IPsQueryTabBodyProps = QueryTabBodyProps & {
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   flowTarget: FlowTargetSourceDest;
 };
 
@@ -46,13 +46,15 @@ export type NetworkRoutesProps = GlobalTimeArgs & {
   networkPagePath: string;
   type: networkModel.NetworkType;
   filterQuery?: string | ESTermQuery;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
 };
 
 export type KeyNetworkNavTabWithoutMlPermission = NetworkRouteType.dns &
   NetworkRouteType.flows &
-  NetworkRouteType.tls;
+  NetworkRouteType.http &
+  NetworkRouteType.tls &
+  NetworkRouteType.alerts;
 
 type KeyNetworkNavTabWithMlPermission = KeyNetworkNavTabWithoutMlPermission &
   NetworkRouteType.anomalies;
@@ -67,6 +69,7 @@ export enum NetworkRouteType {
   anomalies = 'anomalies',
   tls = 'tls',
   http = 'http',
+  alerts = 'alerts',
 }
 
 export type GetNetworkRoutePath = (

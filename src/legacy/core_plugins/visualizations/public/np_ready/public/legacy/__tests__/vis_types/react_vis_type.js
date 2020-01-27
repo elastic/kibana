@@ -21,15 +21,14 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { ReactVisType } from '../../../types/react_vis_type';
 
-describe('React Vis Type', function () {
-
+describe('React Vis Type', function() {
   const visConfig = {
     name: 'test',
     title: 'test',
     description: 'test',
     icon: 'test',
     visConfig: { component: 'test' },
-    type: { visConfig: { component: 'test' } }
+    type: { visConfig: { component: 'test' } },
   };
 
   beforeEach(ngMock.module('kibana'));
@@ -57,9 +56,12 @@ describe('React Vis Type', function () {
     });
 
     it('rejects if data is not provided', () => {
-      vis.render().then(() => {
-        expect('promise was not rejected').to.equal(false);
-      }).catch(() => {});
+      vis
+        .render()
+        .then(() => {
+          expect('promise was not rejected').to.equal(false);
+        })
+        .catch(() => {});
     });
 
     it('renders the component', () => {
@@ -67,6 +69,5 @@ describe('React Vis Type', function () {
         vis.render({});
       }).to.not.throwError();
     });
-
   });
 });

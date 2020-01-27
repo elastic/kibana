@@ -29,7 +29,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'An index action',
+          name: 'An index action',
           actionTypeId: '.index',
           config: {},
           secrets: {},
@@ -38,7 +38,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
-        description: 'An index action',
+        name: 'An index action',
         actionTypeId: '.index',
         config: {
           index: null,
@@ -53,7 +53,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        description: 'An index action',
+        name: 'An index action',
         actionTypeId: '.index',
         config: { index: null },
       });
@@ -63,7 +63,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'An index action with index config',
+          name: 'An index action with index config',
           actionTypeId: '.index',
           config: {
             index: ES_TEST_INDEX_NAME,
@@ -73,7 +73,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
       expect(createdActionWithIndex).to.eql({
         id: createdActionWithIndex.id,
-        description: 'An index action with index config',
+        name: 'An index action with index config',
         actionTypeId: '.index',
         config: {
           index: ES_TEST_INDEX_NAME,
@@ -88,7 +88,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
       expect(fetchedActionWithIndex).to.eql({
         id: fetchedActionWithIndex.id,
-        description: 'An index action with index config',
+        name: 'An index action with index config',
         actionTypeId: '.index',
         config: {
           index: ES_TEST_INDEX_NAME,

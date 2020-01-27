@@ -23,53 +23,56 @@ export const defaultTableState = {
   showSystemIndices: false,
 };
 
-export const tableState = handleActions({
-  [filterChanged](state, action) {
-    const { filter } = action.payload;
-    return {
-      ...state,
-      filter,
-      currentPage: 0
-    };
-  },
-  [showSystemIndicesChanged](state, action) {
-    const { showSystemIndices } = action.payload;
+export const tableState = handleActions(
+  {
+    [filterChanged](state, action) {
+      const { filter } = action.payload;
+      return {
+        ...state,
+        filter,
+        currentPage: 0,
+      };
+    },
+    [showSystemIndicesChanged](state, action) {
+      const { showSystemIndices } = action.payload;
 
-    return {
-      ...state,
-      showSystemIndices,
-    };
-  },
-  [toggleChanged](state, action) {
-    const { toggleName, toggleValue } = action.payload;
-    const toggleNameToVisibleMap = { ...state.toggleNameToVisibleMap };
-    toggleNameToVisibleMap[toggleName] = toggleValue;
-    return {
-      ...state,
-      toggleNameToVisibleMap
-    };
-  },
-  [sortChanged](state, action) {
-    const { sortField, isSortAscending } = action.payload;
+      return {
+        ...state,
+        showSystemIndices,
+      };
+    },
+    [toggleChanged](state, action) {
+      const { toggleName, toggleValue } = action.payload;
+      const toggleNameToVisibleMap = { ...state.toggleNameToVisibleMap };
+      toggleNameToVisibleMap[toggleName] = toggleValue;
+      return {
+        ...state,
+        toggleNameToVisibleMap,
+      };
+    },
+    [sortChanged](state, action) {
+      const { sortField, isSortAscending } = action.payload;
 
-    return {
-      ...state,
-      sortField,
-      isSortAscending,
-    };
+      return {
+        ...state,
+        sortField,
+        isSortAscending,
+      };
+    },
+    [pageChanged](state, action) {
+      const { pageNumber } = action.payload;
+      return {
+        ...state,
+        currentPage: pageNumber,
+      };
+    },
+    [pageSizeChanged](state, action) {
+      const { pageSize } = action.payload;
+      return {
+        ...state,
+        pageSize,
+      };
+    },
   },
-  [pageChanged](state, action) {
-    const { pageNumber } = action.payload;
-    return {
-      ...state,
-      currentPage: pageNumber,
-    };
-  },
-  [pageSizeChanged](state, action) {
-    const { pageSize } = action.payload;
-    return {
-      ...state,
-      pageSize
-    };
-  }
-}, defaultTableState);
+  defaultTableState
+);

@@ -26,14 +26,9 @@ import {
   createConcatStream,
 } from '../../../../legacy/utils';
 
-import {
-  createStubClient,
-  createStubStats,
-} from './stubs';
+import { createStubClient, createStubStats } from './stubs';
 
-import {
-  createGenerateIndexRecordsStream,
-} from '../generate_index_records_stream';
+import { createGenerateIndexRecordsStream } from '../generate_index_records_stream';
 
 describe('esArchiver: createGenerateIndexRecordsStream()', () => {
   it('consumes index names and queries for the mapping of each', async () => {
@@ -43,11 +38,11 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
     await createPromiseFromStreams([
       createListStream(indices),
-      createGenerateIndexRecordsStream(client, stats)
+      createGenerateIndexRecordsStream(client, stats),
     ]);
 
     expect(stats.getTestSummary()).to.eql({
-      archivedIndex: 4
+      archivedIndex: 4,
     });
 
     sinon.assert.callCount(client.indices.get, 4);
@@ -62,7 +57,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
     await createPromiseFromStreams([
       createListStream(['index1']),
-      createGenerateIndexRecordsStream(client, stats)
+      createGenerateIndexRecordsStream(client, stats),
     ]);
 
     const params = client.indices.get.args[0][0];
@@ -109,14 +104,16 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
       createConcatStream([]),
     ]);
 
-    expect(indexRecords).to.eql([{
-      type: 'index',
-      value: {
-        index: 'index1',
-        settings: {},
-        mappings: {},
-        aliases: { foo: {} },
-      }
-    }]);
+    expect(indexRecords).to.eql([
+      {
+        type: 'index',
+        value: {
+          index: 'index1',
+          settings: {},
+          mappings: {},
+          aliases: { foo: {} },
+        },
+      },
+    ]);
   });
 });

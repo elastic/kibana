@@ -19,24 +19,26 @@ describe('Get Kibana Stats', () => {
         it('for a single unused instance', () => {
           const rawStats = {
             hits: {
-              hits: [{
-                _source: {
-                  cluster_uuid: 'clusterone',
-                  kibana_stats: {
-                    kibana: { version: '7.0.0-alpha1-test01' },
-                    usage: {
-                      dashboard: { total: 0 },
-                      visualization: { total: 0 },
-                      search: { total: 0 },
-                      index_pattern: { total: 0 },
-                      graph_workspace: { total: 1 },
-                      timelion_sheet: { total: 1 },
-                      index: '.kibana-test-01'
-                    }
-                  }
-                }
-              }]
-            }
+              hits: [
+                {
+                  _source: {
+                    cluster_uuid: 'clusterone',
+                    kibana_stats: {
+                      kibana: { version: '7.0.0-alpha1-test01' },
+                      usage: {
+                        dashboard: { total: 0 },
+                        visualization: { total: 0 },
+                        search: { total: 0 },
+                        index_pattern: { total: 0 },
+                        graph_workspace: { total: 1 },
+                        timelion_sheet: { total: 1 },
+                        index: '.kibana-test-01',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
           };
           const expected = {
             clusterone: {
@@ -47,8 +49,8 @@ describe('Get Kibana Stats', () => {
               graph_workspace: { total: 1 },
               timelion_sheet: { total: 1 },
               indices: 1,
-              plugins: {}
-            }
+              plugins: {},
+            },
           };
 
           expect(getUsageStats(rawStats)).to.eql(expected);
@@ -57,24 +59,26 @@ describe('Get Kibana Stats', () => {
         it('for a single instance of active usage', () => {
           const rawStats = {
             hits: {
-              hits: [{
-                _source: {
-                  cluster_uuid: 'clusterone',
-                  kibana_stats: {
-                    kibana: { version: '7.0.0-alpha1-test02' },
-                    usage: {
-                      dashboard: { total: 1 },
-                      visualization: { total: 3 },
-                      search: { total: 1 },
-                      index_pattern: { total: 1 },
-                      graph_workspace: { total: 1 },
-                      timelion_sheet: { total: 1 },
-                      index: '.kibana-test-01'
-                    }
-                  }
-                }
-              }]
-            }
+              hits: [
+                {
+                  _source: {
+                    cluster_uuid: 'clusterone',
+                    kibana_stats: {
+                      kibana: { version: '7.0.0-alpha1-test02' },
+                      usage: {
+                        dashboard: { total: 1 },
+                        visualization: { total: 3 },
+                        search: { total: 1 },
+                        index_pattern: { total: 1 },
+                        graph_workspace: { total: 1 },
+                        timelion_sheet: { total: 1 },
+                        index: '.kibana-test-01',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
           };
           const expected = {
             clusterone: {
@@ -85,8 +89,8 @@ describe('Get Kibana Stats', () => {
               graph_workspace: { total: 1 },
               timelion_sheet: { total: 1 },
               indices: 1,
-              plugins: {}
-            }
+              plugins: {},
+            },
           };
 
           expect(getUsageStats(rawStats)).to.eql(expected);
@@ -95,31 +99,33 @@ describe('Get Kibana Stats', () => {
         it('flattens x-pack stats', () => {
           const rawStats = {
             hits: {
-              hits: [{
-                _source: {
-                  cluster_uuid: 'clusterone',
-                  kibana_stats: {
-                    kibana: { version: '7.0.0-alpha1-test02' },
-                    usage: {
-                      dashboard: { total: 1 },
-                      visualization: { total: 3 },
-                      search: { total: 1 },
-                      index_pattern: { total: 1 },
-                      graph_workspace: { total: 1 },
-                      timelion_sheet: { total: 1 },
-                      index: '.kibana-test-01',
-                      foo: { total: 5 },
-                      xpack: {
-                        fancy: {
-                          available: true,
-                          total: 15
-                        }
-                      }
-                    }
-                  }
-                }
-              }]
-            }
+              hits: [
+                {
+                  _source: {
+                    cluster_uuid: 'clusterone',
+                    kibana_stats: {
+                      kibana: { version: '7.0.0-alpha1-test02' },
+                      usage: {
+                        dashboard: { total: 1 },
+                        visualization: { total: 3 },
+                        search: { total: 1 },
+                        index_pattern: { total: 1 },
+                        graph_workspace: { total: 1 },
+                        timelion_sheet: { total: 1 },
+                        index: '.kibana-test-01',
+                        foo: { total: 5 },
+                        xpack: {
+                          fancy: {
+                            available: true,
+                            total: 15,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
           };
           expect(getUsageStats(rawStats)).to.eql({
             clusterone: {
@@ -130,67 +136,70 @@ describe('Get Kibana Stats', () => {
               graph_workspace: { total: 1 },
               timelion_sheet: { total: 1 },
               indices: 1,
-              plugins: { foo: { total: 5 }, fancy: { available: true, total: 15 } }
-            }
+              plugins: { foo: { total: 5 }, fancy: { available: true, total: 15 } },
+            },
           });
         });
-
       });
 
       describe('separate indices', () => {
         it('with one unused instance', () => {
           const rawStats = {
             hits: {
-              hits: [{
-                _source: {
-                  cluster_uuid: 'clusterone',
-                  kibana_stats: {
-                    kibana: { version: '7.0.0-alpha1-test03' },
-                    usage: {
-                      dashboard: { total: 1 },
-                      visualization: { total: 3 },
-                      search: { total: 1 },
-                      index_pattern: { total: 1 },
-                      graph_workspace: { total: 1 },
-                      timelion_sheet: { total: 1 },
-                      index: '.kibana-test-01'
-                    }
-                  }
-                }
-              }, {
-                _source: {
-                  cluster_uuid: 'clusterone',
-                  kibana_stats: {
-                    kibana: { version: '7.0.0-alpha1-test04' },
-                    usage: {
-                      dashboard: { total: 1 },
-                      visualization: { total: 3 },
-                      search: { total: 1 },
-                      index_pattern: { total: 1 },
-                      graph_workspace: { total: 1 },
-                      timelion_sheet: { total: 1 },
-                      index: '.kibana-test-01'
-                    }
-                  }
-                }
-              }, {
-                _source: {
-                  cluster_uuid: 'clusterone',
-                  kibana_stats: {
-                    kibana: { version: '7.0.0-alpha1-test05' },
-                    usage: {
-                      dashboard: { total: 0 },
-                      visualization: { total: 0 },
-                      search: { total: 0 },
-                      index_pattern: { total: 0 },
-                      graph_workspace: { total: 1 },
-                      timelion_sheet: { total: 1 },
-                      index: '.kibana-test-02'
-                    }
-                  }
-                }
-              }]
-            }
+              hits: [
+                {
+                  _source: {
+                    cluster_uuid: 'clusterone',
+                    kibana_stats: {
+                      kibana: { version: '7.0.0-alpha1-test03' },
+                      usage: {
+                        dashboard: { total: 1 },
+                        visualization: { total: 3 },
+                        search: { total: 1 },
+                        index_pattern: { total: 1 },
+                        graph_workspace: { total: 1 },
+                        timelion_sheet: { total: 1 },
+                        index: '.kibana-test-01',
+                      },
+                    },
+                  },
+                },
+                {
+                  _source: {
+                    cluster_uuid: 'clusterone',
+                    kibana_stats: {
+                      kibana: { version: '7.0.0-alpha1-test04' },
+                      usage: {
+                        dashboard: { total: 1 },
+                        visualization: { total: 3 },
+                        search: { total: 1 },
+                        index_pattern: { total: 1 },
+                        graph_workspace: { total: 1 },
+                        timelion_sheet: { total: 1 },
+                        index: '.kibana-test-01',
+                      },
+                    },
+                  },
+                },
+                {
+                  _source: {
+                    cluster_uuid: 'clusterone',
+                    kibana_stats: {
+                      kibana: { version: '7.0.0-alpha1-test05' },
+                      usage: {
+                        dashboard: { total: 0 },
+                        visualization: { total: 0 },
+                        search: { total: 0 },
+                        index_pattern: { total: 0 },
+                        graph_workspace: { total: 1 },
+                        timelion_sheet: { total: 1 },
+                        index: '.kibana-test-02',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
           };
           const expected = {
             clusterone: {
@@ -201,8 +210,8 @@ describe('Get Kibana Stats', () => {
               graph_workspace: { total: 2 },
               timelion_sheet: { total: 2 },
               indices: 2,
-              plugins: {}
-            }
+              plugins: {},
+            },
           };
 
           expect(getUsageStats(rawStats)).to.eql(expected);
@@ -211,56 +220,60 @@ describe('Get Kibana Stats', () => {
         it('with all actively used instances', () => {
           const rawStats = {
             hits: {
-              hits: [{
-                _source: {
-                  cluster_uuid: 'clusterone',
-                  kibana_stats: {
-                    kibana: { version: '7.0.0-alpha1-test05' },
-                    usage: {
-                      dashboard: { total: 1 },
-                      visualization: { total: 3 },
-                      search: { total: 1 },
-                      index_pattern: { total: 1 },
-                      graph_workspace: { total: 1 },
-                      timelion_sheet: { total: 1 },
-                      index: '.kibana-test-01'
-                    }
-                  }
-                }
-              }, {
-                _source: {
-                  cluster_uuid: 'clusterone',
-                  kibana_stats: {
-                    kibana: { version: '7.0.0-alpha1-test06' },
-                    usage: {
-                      dashboard: { total: 1 },
-                      visualization: { total: 3 },
-                      search: { total: 1 },
-                      index_pattern: { total: 1 },
-                      graph_workspace: { total: 1 },
-                      timelion_sheet: { total: 1 },
-                      index: '.kibana-test-01'
-                    }
-                  }
-                }
-              }, {
-                _source: {
-                  cluster_uuid: 'clusterone',
-                  kibana_stats: {
-                    kibana: { version: '7.0.0-alpha1-test07' },
-                    usage: {
-                      dashboard: { total: 3 },
-                      visualization: { total: 5 },
-                      search: { total: 3 },
-                      index_pattern: { total: 3 },
-                      graph_workspace: { total: 1 },
-                      timelion_sheet: { total: 1 },
-                      index: '.kibana-test-02'
-                    }
-                  }
-                }
-              }]
-            }
+              hits: [
+                {
+                  _source: {
+                    cluster_uuid: 'clusterone',
+                    kibana_stats: {
+                      kibana: { version: '7.0.0-alpha1-test05' },
+                      usage: {
+                        dashboard: { total: 1 },
+                        visualization: { total: 3 },
+                        search: { total: 1 },
+                        index_pattern: { total: 1 },
+                        graph_workspace: { total: 1 },
+                        timelion_sheet: { total: 1 },
+                        index: '.kibana-test-01',
+                      },
+                    },
+                  },
+                },
+                {
+                  _source: {
+                    cluster_uuid: 'clusterone',
+                    kibana_stats: {
+                      kibana: { version: '7.0.0-alpha1-test06' },
+                      usage: {
+                        dashboard: { total: 1 },
+                        visualization: { total: 3 },
+                        search: { total: 1 },
+                        index_pattern: { total: 1 },
+                        graph_workspace: { total: 1 },
+                        timelion_sheet: { total: 1 },
+                        index: '.kibana-test-01',
+                      },
+                    },
+                  },
+                },
+                {
+                  _source: {
+                    cluster_uuid: 'clusterone',
+                    kibana_stats: {
+                      kibana: { version: '7.0.0-alpha1-test07' },
+                      usage: {
+                        dashboard: { total: 3 },
+                        visualization: { total: 5 },
+                        search: { total: 3 },
+                        index_pattern: { total: 3 },
+                        graph_workspace: { total: 1 },
+                        timelion_sheet: { total: 1 },
+                        index: '.kibana-test-02',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
           };
           const expected = {
             clusterone: {
@@ -271,8 +284,8 @@ describe('Get Kibana Stats', () => {
               graph_workspace: { total: 2 },
               timelion_sheet: { total: 2 },
               indices: 2,
-              plugins: {}
-            }
+              plugins: {},
+            },
           };
 
           expect(getUsageStats(rawStats)).to.eql(expected);
@@ -285,72 +298,77 @@ describe('Get Kibana Stats', () => {
         it('with all actively used instances', () => {
           const rawStats = {
             hits: {
-              hits: [{
-                _source: {
-                  cluster_uuid: 'clusterone',
-                  kibana_stats: {
-                    kibana: { version: '7.0.0-alpha1-test08' },
-                    usage: {
-                      dashboard: { total: 1 },
-                      visualization: { total: 3 },
-                      search: { total: 1 },
-                      index_pattern: { total: 1 },
-                      graph_workspace: { total: 3 },
-                      timelion_sheet: { total: 4 },
-                      index: '.kibana-test-01'
-                    }
-                  }
-                }
-              }, {
-                _source: {
-                  cluster_uuid: 'clusterone',
-                  kibana_stats: {
-                    kibana: { version: '7.0.0-alpha1-test09' },
-                    usage: {
-                      dashboard: { total: 1 },
-                      visualization: { total: 3 },
-                      search: { total: 1 },
-                      index_pattern: { total: 1 },
-                      graph_workspace: { total: 3 },
-                      timelion_sheet: { total: 4 },
-                      index: '.kibana-test-01'
-                    }
-                  }
-                }
-              }, {
-                _source: {
-                  cluster_uuid: 'clusterone',
-                  kibana_stats: {
-                    kibana: { version: '7.0.0-alpha1-test10' },
-                    usage: {
-                      dashboard: { total: 3 },
-                      visualization: { total: 5 },
-                      search: { total: 3 },
-                      index_pattern: { total: 3 },
-                      graph_workspace: { total: 3 },
-                      timelion_sheet: { total: 4 },
-                      index: '.kibana-test-02'
-                    }
-                  }
-                }
-              }, {
-                _source: {
-                  cluster_uuid: 'clustertwo',
-                  kibana_stats: {
-                    kibana: { version: '7.0.0-alpha1-test11' },
-                    usage: {
-                      dashboard: { total: 300 },
-                      visualization: { total: 500 },
-                      search: { total: 300 },
-                      index_pattern: { total: 300 },
-                      graph_workspace: { total: 3 },
-                      timelion_sheet: { total: 4 },
-                      index: '.kibana-test-03'
-                    }
-                  }
-                }
-              }]
-            }
+              hits: [
+                {
+                  _source: {
+                    cluster_uuid: 'clusterone',
+                    kibana_stats: {
+                      kibana: { version: '7.0.0-alpha1-test08' },
+                      usage: {
+                        dashboard: { total: 1 },
+                        visualization: { total: 3 },
+                        search: { total: 1 },
+                        index_pattern: { total: 1 },
+                        graph_workspace: { total: 3 },
+                        timelion_sheet: { total: 4 },
+                        index: '.kibana-test-01',
+                      },
+                    },
+                  },
+                },
+                {
+                  _source: {
+                    cluster_uuid: 'clusterone',
+                    kibana_stats: {
+                      kibana: { version: '7.0.0-alpha1-test09' },
+                      usage: {
+                        dashboard: { total: 1 },
+                        visualization: { total: 3 },
+                        search: { total: 1 },
+                        index_pattern: { total: 1 },
+                        graph_workspace: { total: 3 },
+                        timelion_sheet: { total: 4 },
+                        index: '.kibana-test-01',
+                      },
+                    },
+                  },
+                },
+                {
+                  _source: {
+                    cluster_uuid: 'clusterone',
+                    kibana_stats: {
+                      kibana: { version: '7.0.0-alpha1-test10' },
+                      usage: {
+                        dashboard: { total: 3 },
+                        visualization: { total: 5 },
+                        search: { total: 3 },
+                        index_pattern: { total: 3 },
+                        graph_workspace: { total: 3 },
+                        timelion_sheet: { total: 4 },
+                        index: '.kibana-test-02',
+                      },
+                    },
+                  },
+                },
+                {
+                  _source: {
+                    cluster_uuid: 'clustertwo',
+                    kibana_stats: {
+                      kibana: { version: '7.0.0-alpha1-test11' },
+                      usage: {
+                        dashboard: { total: 300 },
+                        visualization: { total: 500 },
+                        search: { total: 300 },
+                        index_pattern: { total: 300 },
+                        graph_workspace: { total: 3 },
+                        timelion_sheet: { total: 4 },
+                        index: '.kibana-test-03',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
           };
           const expected = {
             clusterone: {
@@ -361,7 +379,7 @@ describe('Get Kibana Stats', () => {
               graph_workspace: { total: 6 },
               timelion_sheet: { total: 8 },
               indices: 2,
-              plugins: {}
+              plugins: {},
             },
             clustertwo: {
               dashboard: { total: 300 },
@@ -371,8 +389,8 @@ describe('Get Kibana Stats', () => {
               graph_workspace: { total: 3 },
               timelion_sheet: { total: 4 },
               indices: 1,
-              plugins: {}
-            }
+              plugins: {},
+            },
           };
 
           expect(getUsageStats(rawStats)).to.eql(expected);
@@ -394,8 +412,8 @@ describe('Get Kibana Stats', () => {
         const highLevelStats = {
           clusterone: {
             count: 2,
-            versions: [ { count: 2, version: '7.0.0-alpha1-test12' } ]
-          }
+            versions: [{ count: 2, version: '7.0.0-alpha1-test12' }],
+          },
         };
         const usageStats = {
           clusterone: {
@@ -405,9 +423,9 @@ describe('Get Kibana Stats', () => {
             search: { total: 1 },
             visualization: { total: 7 },
             plugins: {
-              foo: { available: true }
-            }
-          }
+              foo: { available: true },
+            },
+          },
         };
 
         expect(combineStats(highLevelStats, usageStats)).to.eql({
@@ -417,12 +435,12 @@ describe('Get Kibana Stats', () => {
             index_pattern: { total: 3 },
             indices: 2,
             search: { total: 1 },
-            versions: [ { count: 2, version: '7.0.0-alpha1-test12' } ],
+            versions: [{ count: 2, version: '7.0.0-alpha1-test12' }],
             visualization: { total: 7 },
             plugins: {
-              foo: { available: true }
-            }
-          }
+              foo: { available: true },
+            },
+          },
         });
       });
 
@@ -430,12 +448,12 @@ describe('Get Kibana Stats', () => {
         const highLevelStats = {
           clusterone: {
             count: 2,
-            versions: [ { count: 2, version: '7.0.0-alpha1-test13' } ]
+            versions: [{ count: 2, version: '7.0.0-alpha1-test13' }],
           },
           clustertwo: {
             count: 1,
-            versions: [ { count: 1, version: '7.0.0-alpha1-test14' } ]
-          }
+            versions: [{ count: 1, version: '7.0.0-alpha1-test14' }],
+          },
         };
         const usageStats = {
           clusterone: {
@@ -445,8 +463,8 @@ describe('Get Kibana Stats', () => {
             search: { total: 1 },
             visualization: { total: 7 },
             plugins: {
-              bar: { available: false }
-            }
+              bar: { available: false },
+            },
           },
           clustertwo: {
             dashboard: { total: 3 },
@@ -455,9 +473,9 @@ describe('Get Kibana Stats', () => {
             search: { total: 3 },
             visualization: { total: 15 },
             plugins: {
-              bear: { enabled: true }
-            }
-          }
+              bear: { enabled: true },
+            },
+          },
         };
 
         expect(combineStats(highLevelStats, usageStats)).to.eql({
@@ -467,11 +485,11 @@ describe('Get Kibana Stats', () => {
             index_pattern: { total: 3 },
             indices: 2,
             search: { total: 1 },
-            versions: [ { count: 2, version: '7.0.0-alpha1-test13' } ],
+            versions: [{ count: 2, version: '7.0.0-alpha1-test13' }],
             visualization: { total: 7 },
             plugins: {
-              bar: { available: false }
-            }
+              bar: { available: false },
+            },
           },
           clustertwo: {
             count: 1,
@@ -479,12 +497,12 @@ describe('Get Kibana Stats', () => {
             index_pattern: { total: 5 },
             indices: 1,
             search: { total: 3 },
-            versions: [ { count: 1, version: '7.0.0-alpha1-test14' } ],
+            versions: [{ count: 1, version: '7.0.0-alpha1-test14' }],
             visualization: { total: 15 },
             plugins: {
-              bear: { enabled: true }
-            }
-          }
+              bear: { enabled: true },
+            },
+          },
         });
       });
     });
@@ -494,16 +512,16 @@ describe('Get Kibana Stats', () => {
         const highLevelStats = {
           clusterone: {
             count: 2,
-            versions: [ { count: 2, version: '7.0.0-alpha1-test12' } ]
-          }
+            versions: [{ count: 2, version: '7.0.0-alpha1-test12' }],
+          },
         };
         const usageStats = undefined;
 
         expect(combineStats(highLevelStats, usageStats)).to.eql({
           clusterone: {
             count: 2,
-            versions: [ { count: 2, version: '7.0.0-alpha1-test12' } ]
-          }
+            versions: [{ count: 2, version: '7.0.0-alpha1-test12' }],
+          },
         });
       });
     });
@@ -522,7 +540,6 @@ describe('Get Kibana Stats', () => {
       const addOn = { my_field: { total: 3 } };
 
       expect(rollUpTotals(rollUp, addOn, 'my_field')).to.eql({ total: 4 });
-
     });
   });
 });

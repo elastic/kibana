@@ -8,28 +8,25 @@ import { Legacy } from 'kibana';
 
 export interface ServerFacade {
   config: Legacy.Server['config'];
-  getInjectedUiAppVars: Legacy.Server['getInjectedUiAppVars'];
-  indexPatternsServiceFactory: Legacy.Server['indexPatternsServiceFactory'];
-  injectUiAppVars: Legacy.Server['injectUiAppVars'];
   plugins: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    actions: any; // We have to do this at the moment because the types are not compatible
     alerting?: Legacy.Server['plugins']['alerting'];
-    xpack_main: Legacy.Server['plugins']['xpack_main'];
+    elasticsearch: Legacy.Server['plugins']['elasticsearch'];
+    spaces: Legacy.Server['plugins']['spaces'];
+    savedObjects: Legacy.Server['savedObjects']['SavedObjectsClient'];
   };
   route: Legacy.Server['route'];
-  savedObjects: Legacy.Server['savedObjects'];
 }
 
 export interface RequestFacade {
   auth: Legacy.Request['auth'];
   getAlertsClient?: Legacy.Request['getAlertsClient'];
   getActionsClient?: Legacy.Request['getActionsClient'];
-  getUiSettingsService: Legacy.Request['getUiSettingsService'];
+  getSavedObjectsClient?: Legacy.Request['getSavedObjectsClient'];
   headers: Legacy.Request['headers'];
   method: Legacy.Request['method'];
   params: Legacy.Request['params'];
   payload: unknown;
   query: Legacy.Request['query'];
-  server: {
-    plugins: { elasticsearch: Legacy.Request['server']['plugins']['elasticsearch'] };
-  };
 }

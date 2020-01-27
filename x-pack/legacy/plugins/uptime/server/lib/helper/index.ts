@@ -9,3 +9,4 @@ export { getHistogramInterval } from './get_histogram_interval';
 export { getHistogramIntervalFormatted } from './get_histogram_interval_formatted';
 export { parseFilterQuery } from './parse_filter_query';
 export { assertCloseTo } from './assert_close_to';
+export { objectValuesToArrays } from './object_to_array';

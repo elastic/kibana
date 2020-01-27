@@ -16,14 +16,17 @@ const mockedResponse = {
   id: '1',
   alertTypeId: '1',
   tags: ['foo'],
-  interval: '12s',
+  schedule: { interval: '12s' },
   params: {
     otherField: false,
   },
+  createdAt: new Date(),
+  updatedAt: new Date(),
   actions: [
     {
       group: 'default',
       id: '2',
+      actionTypeId: 'test',
       params: {
         baz: true,
       },
@@ -39,7 +42,7 @@ test('calls the update function with proper parameters', async () => {
       throttle: null,
       name: 'abc',
       tags: ['bar'],
-      interval: '12s',
+      schedule: { interval: '12s' },
       params: {
         otherField: false,
       },
@@ -58,8 +61,10 @@ test('calls the update function with proper parameters', async () => {
   alertsClient.update.mockResolvedValueOnce(mockedResponse);
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
-  const response = JSON.parse(payload);
-  expect(response).toEqual(mockedResponse);
+  const { createdAt, updatedAt, ...response } = JSON.parse(payload);
+  expect({ createdAt: new Date(createdAt), updatedAt: new Date(updatedAt), ...response }).toEqual(
+    mockedResponse
+  );
   expect(alertsClient.update).toHaveBeenCalledTimes(1);
   expect(alertsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
@@ -74,10 +79,12 @@ test('calls the update function with proper parameters', async () => {
               },
             },
           ],
-          "interval": "12s",
           "name": "abc",
           "params": Object {
             "otherField": false,
+          },
+          "schedule": Object {
+            "interval": "12s",
           },
           "tags": Array [
             "bar",

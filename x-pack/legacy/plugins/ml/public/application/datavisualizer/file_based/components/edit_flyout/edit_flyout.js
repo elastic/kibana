@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
 import {
   EuiFlyout,
@@ -30,24 +27,24 @@ export class EditFlyout extends Component {
 
     this.applyOverrides = () => {};
     this.state = {
-      overridesValid: true
+      overridesValid: true,
     };
   }
 
   applyAndClose = () => {
     this.applyOverrides();
     this.props.closeEditFlyout();
-  }
+  };
 
-  setApplyOverrides = (applyOverrides) => {
+  setApplyOverrides = applyOverrides => {
     this.applyOverrides = applyOverrides;
-  }
+  };
   unsetApplyOverrides = () => {
     this.applyOverrides = () => {};
-  }
-  setOverridesValid = (overridesValid) => {
+  };
+  setOverridesValid = overridesValid => {
     this.setState({ overridesValid });
-  }
+  };
 
   render() {
     const {
@@ -61,8 +58,7 @@ export class EditFlyout extends Component {
 
     return (
       <React.Fragment>
-        { isFlyoutVisible &&
-
+        {isFlyoutVisible && (
           <EuiFlyout
             // ownFocus
             onClose={closeEditFlyout}
@@ -79,7 +75,6 @@ export class EditFlyout extends Component {
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
-
               <Overrides
                 setOverrides={setOverrides}
                 overrides={overrides}
@@ -94,16 +89,11 @@ export class EditFlyout extends Component {
                 initialSelectedTab={tabs[0]}
                 onTabClick={() => { }}
               /> */}
-
             </EuiFlyoutBody>
             <EuiFlyoutFooter>
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    iconType="cross"
-                    onClick={closeEditFlyout}
-                    flush="left"
-                  >
+                  <EuiButtonEmpty iconType="cross" onClick={closeEditFlyout} flush="left">
                     <FormattedMessage
                       id="xpack.ml.fileDatavisualizer.editFlyout.closeOverrideSettingsButtonLabel"
                       defaultMessage="Close"
@@ -113,7 +103,7 @@ export class EditFlyout extends Component {
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     onClick={this.applyAndClose}
-                    isDisabled={(this.state.overridesValid === false)}
+                    isDisabled={this.state.overridesValid === false}
                     fill
                   >
                     <FormattedMessage
@@ -125,7 +115,7 @@ export class EditFlyout extends Component {
               </EuiFlexGroup>
             </EuiFlyoutFooter>
           </EuiFlyout>
-        }
+        )}
       </React.Fragment>
     );
   }

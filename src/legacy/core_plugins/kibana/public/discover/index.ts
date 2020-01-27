@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
-import { DiscoverPlugin, DiscoverSetup, DiscoverStart } from './plugin';
+
+import { PluginInitializerContext } from 'kibana/public';
+import { DiscoverPlugin } from './plugin';
+
+export { createSavedSearchesService } from './saved_searches/saved_searches';
 
 // Core will be looking for this when loading our plugin in the new platform
-export const plugin: PluginInitializer<DiscoverSetup, DiscoverStart> = (
-  initializerContext: PluginInitializerContext
-) => {
-  return new DiscoverPlugin(initializerContext);
+export const plugin = (context: PluginInitializerContext) => {
+  return new DiscoverPlugin();
 };
-
-const pluginInstance = plugin({} as PluginInitializerContext);
-export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins);
-export const start = pluginInstance.start(npStart.core, npStart.plugins);

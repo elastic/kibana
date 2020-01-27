@@ -7,7 +7,7 @@ import Joi from 'joi';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import indexBy from 'lodash/collection/indexBy';
 import { getCapabilitiesForRollupIndices } from '../../lib/map_capabilities';
 import { mergeCapabilitiesWithFields } from '../../lib/merge_capabilities_with_fields';
@@ -24,23 +24,25 @@ export function registerFieldsForWildcardRoute(server) {
     path: '/api/index_patterns/rollup/_fields_for_wildcard',
     method: 'GET',
     config: {
-      pre: [ licensePreRouting ],
+      pre: [licensePreRouting],
       validate: {
-        query: Joi.object().keys({
-          pattern: Joi.string().required(),
-          meta_fields: Joi.array().items(Joi.string()).default([]),
-          params: Joi.object().keys({
-            rollup_index: Joi.string().required(),
-          }).required()
-        }).default()
-      }
+        query: Joi.object()
+          .keys({
+            pattern: Joi.string().required(),
+            meta_fields: Joi.array()
+              .items(Joi.string())
+              .default([]),
+            params: Joi.object()
+              .keys({
+                rollup_index: Joi.string().required(),
+              })
+              .required(),
+          })
+          .default(),
+      },
     },
-    handler: async (request) => {
-      const {
-        pattern,
-        meta_fields: metaFields,
-        params,
-      } = request.query;
+    handler: async request => {
+      const { pattern, meta_fields: metaFields, params } = request.query;
 
       // Format call to standard index pattern `fields for wildcard`
       const standardRequestQuery = querystring.stringify({ pattern, meta_fields: metaFields });
@@ -60,24 +62,32 @@ export function registerFieldsForWildcardRoute(server) {
 
         const rollupFields = [];
         const fieldsFromFieldCapsApi = indexBy(fields, 'name');
-        const rollupIndexCapabilities = getCapabilitiesForRollupIndices(await callWithRequest('rollup.rollupIndexCapabilities', {
-          indexPattern: rollupIndex
-        }))[rollupIndex].aggs;
+        const rollupIndexCapabilities = getCapabilitiesForRollupIndices(
+          await callWithRequest('rollup.rollupIndexCapabilities', {
+            indexPattern: rollupIndex,
+          })
+        )[rollupIndex].aggs;
 
         // Keep meta fields
-        metaFields.forEach(field => fieldsFromFieldCapsApi[field] && rollupFields.push(fieldsFromFieldCapsApi[field]));
+        metaFields.forEach(
+          field => fieldsFromFieldCapsApi[field] && rollupFields.push(fieldsFromFieldCapsApi[field])
+        );
 
-        const mergedRollupFields = mergeCapabilitiesWithFields(rollupIndexCapabilities, fieldsFromFieldCapsApi, rollupFields);
+        const mergedRollupFields = mergeCapabilitiesWithFields(
+          rollupIndexCapabilities,
+          fieldsFromFieldCapsApi,
+          rollupFields
+        );
 
         return {
-          fields: mergedRollupFields
+          fields: mergedRollupFields,
         };
-      } catch(err) {
+      } catch (err) {
         if (isEsError(err)) {
           return wrapEsError(err);
         }
         return wrapUnknownError(err);
       }
-    }
+    },
   });
 }

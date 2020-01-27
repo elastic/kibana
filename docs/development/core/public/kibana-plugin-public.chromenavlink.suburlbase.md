@@ -8,7 +8,7 @@
 > 
 > 
 
-A url base that legacy apps can set to match deep URLs to an applcation.
+A url base that legacy apps can set to match deep URLs to an application.
 
 <b>Signature:</b>
 

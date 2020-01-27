@@ -20,10 +20,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  KuiButton,
-  KuiButtonIcon,
-} from '../../';
+import { KuiButton, KuiButtonIcon } from '../../';
 
 export function KuiListingTableDeleteButton({ onDelete, ...props }) {
   return (
@@ -37,5 +34,5 @@ export function KuiListingTableDeleteButton({ onDelete, ...props }) {
 }
 
 KuiListingTableDeleteButton.propTypes = {
-  onDelete: PropTypes.func
+  onDelete: PropTypes.func,
 };

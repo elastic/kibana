@@ -9,38 +9,50 @@ import { DateHistogramIndexPatternColumn } from './date_histogram';
 import { dateHistogramOperation } from '.';
 import { shallow } from 'enzyme';
 import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import {
-  UiSettingsClientContract,
-  SavedObjectsClientContract,
-  HttpServiceBase,
-} from 'src/core/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { createMockedIndexPattern } from '../../mocks';
 import { IndexPatternPrivateState } from '../../types';
 
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      uiSettings: {
-        get: (path: string) => {
-          if (path === 'histogram:maxBars') {
-            return 10;
-          }
+jest.mock('ui/new_platform', () => {
+  // Due to the way we are handling shims in the NP migration, we need
+  // to mock core here so that upstream services don't cause these
+  // tests to fail. Ordinarly `jest.mock('ui/new_platform')` would be
+  // sufficient, however we need to mock one of the `uiSettings` return
+  // values for this suite, so we must manually assemble the mock.
+  // Because babel hoists `jest` we must use an inline `require`
+  // to ensure the core mocks are available (`jest.doMock` doesn't
+  // work in this case). This mock should be able to be replaced
+  // altogether once Lens has migrated to the new platform.
+  const { coreMock } = require('src/core/public/mocks'); // eslint-disable-line @typescript-eslint/no-var-requires
+  return {
+    npSetup: {
+      core: coreMock.createSetup(),
+    },
+    npStart: {
+      core: {
+        ...coreMock.createStart(),
+        uiSettings: {
+          get: (path: string) => {
+            if (path === 'histogram:maxBars') {
+              return 10;
+            }
+          },
         },
       },
     },
-  },
-}));
+  };
+});
 
 const defaultOptions = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as UiSettingsClientContract,
+  uiSettings: {} as IUiSettingsClient,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: {
     fromDate: 'now-1y',
     toDate: 'now',
   },
-  http: {} as HttpServiceBase,
+  http: {} as HttpSetup,
 };
 
 describe('date_histogram', () => {

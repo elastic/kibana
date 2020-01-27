@@ -5,21 +5,20 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { esFilters, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
-import { KqlMode } from '../../../store/timeline/model';
+import { KqlMode, EventType } from '../../../store/timeline/model';
+import { DispatchUpdateReduxTime } from '../../super_date_picker';
 import { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
 
 import { options } from './helpers';
 import * as i18n from './translations';
-import { DispatchUpdateReduxTime } from '../../super_date_picker';
+import { PickEventType } from './pick_events';
 
 const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
 const searchOrFilterPopoverClassName = 'searchOrFilterPopover';
@@ -44,11 +43,12 @@ interface Props {
   applyKqlFilterQuery: (expression: string, kind: KueryFilterQueryKind) => void;
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
+  eventType: EventType;
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
   from: number;
   fromStr: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isRefreshPaused: boolean;
   kqlMode: KqlMode;
   timelineId: string;
@@ -61,6 +61,7 @@ interface Props {
   savedQueryId: string | null;
   to: number;
   toStr: string;
+  updateEventType: (eventType: EventType) => void;
   updateReduxTime: DispatchUpdateReduxTime;
 }
 
@@ -85,11 +86,12 @@ const ModeFlexItem = styled(EuiFlexItem)`
 
 ModeFlexItem.displayName = 'ModeFlexItem';
 
-export const SearchOrFilter = pure<Props>(
+export const SearchOrFilter = React.memo<Props>(
   ({
     applyKqlFilterQuery,
     browserFields,
     dataProviders,
+    eventType,
     indexPattern,
     isRefreshPaused,
     filters,
@@ -106,6 +108,7 @@ export const SearchOrFilter = pure<Props>(
     setSavedQueryId,
     to,
     toStr,
+    updateEventType,
     updateKqlMode,
     updateReduxTime,
   }) => (
@@ -149,6 +152,9 @@ export const SearchOrFilter = pure<Props>(
               toStr={toStr}
               updateReduxTime={updateReduxTime}
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <PickEventType eventType={eventType} onChangeEventType={updateEventType} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </SearchOrFilterContainer>

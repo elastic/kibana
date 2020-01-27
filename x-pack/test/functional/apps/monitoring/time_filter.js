@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from './_get_lifecycle_methods';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['header', 'timePicker']);
   const testSubjects = getService('testSubjects');
   const clusterList = getService('monitoringClusterList');
@@ -35,7 +35,10 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should send another request when changing the time picker', async () => {
-      await PageObjects.timePicker.setAbsoluteRange('Aug 15, 2016 @ 21:00:00.000', 'Aug 16, 2016 @ 00:00:00.000');
+      await PageObjects.timePicker.setAbsoluteRange(
+        'Aug 15, 2016 @ 21:00:00.000',
+        'Aug 16, 2016 @ 00:00:00.000'
+      );
       await clusterList.assertNoData();
     });
   });

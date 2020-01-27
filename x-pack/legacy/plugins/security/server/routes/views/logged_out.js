@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function initLoggedOutView({ __legacyCompat: { config: { cookieName } } }, server) {
+export function initLoggedOutView(
+  {
+    __legacyCompat: {
+      config: { cookieName },
+    },
+  },
+  server
+) {
   const config = server.config();
   const loggedOut = server.getHiddenUiAppById('logged_out');
 
@@ -20,7 +27,7 @@ export function initLoggedOutView({ __legacyCompat: { config: { cookieName } } }
       return h.renderAppWithDefaultConfig(loggedOut);
     },
     config: {
-      auth: false
-    }
+      auth: false,
+    },
   });
 }

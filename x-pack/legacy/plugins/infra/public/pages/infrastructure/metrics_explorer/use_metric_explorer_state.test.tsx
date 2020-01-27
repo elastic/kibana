@@ -15,7 +15,6 @@ import {
   resp,
   createSeries,
 } from '../../../utils/fixtures/metrics_explorer';
-import { MetricsExplorerAggregation } from '../../../../server/routes/metrics_explorer/types';
 
 const renderUseMetricsExplorerStateHook = () =>
   renderHook(props => useMetricsExplorerState(props.source, props.derivedIndexPattern), {
@@ -89,11 +88,9 @@ describe('useMetricsExplorerState', () => {
     it('should change the metric', async () => {
       const { result } = renderUseMetricsExplorerStateHook();
       const { handleMetricsChange } = result.current;
-      handleMetricsChange([
-        { aggregation: MetricsExplorerAggregation.max, field: 'system.load.1' },
-      ]);
+      handleMetricsChange([{ aggregation: 'max', field: 'system.load.1' }]);
       expect(result.current.options.metrics).toEqual([
-        { aggregation: MetricsExplorerAggregation.max, field: 'system.load.1' },
+        { aggregation: 'max', field: 'system.load.1' },
       ]);
     });
   });
@@ -134,38 +131,32 @@ describe('useMetricsExplorerState', () => {
     it('should set the metrics to only count when selecting count', async () => {
       const { result, waitForNextUpdate } = renderUseMetricsExplorerStateHook();
       const { handleMetricsChange } = result.current;
-      handleMetricsChange([
-        { aggregation: MetricsExplorerAggregation.avg, field: 'system.load.1' },
-      ]);
+      handleMetricsChange([{ aggregation: 'avg', field: 'system.load.1' }]);
       expect(result.current.options.metrics).toEqual([
-        { aggregation: MetricsExplorerAggregation.avg, field: 'system.load.1' },
+        { aggregation: 'avg', field: 'system.load.1' },
       ]);
       await waitForNextUpdate();
       const { handleAggregationChange } = result.current;
-      handleAggregationChange(MetricsExplorerAggregation.count);
+      handleAggregationChange('count');
       await waitForNextUpdate();
-      expect(result.current.options.aggregation).toBe(MetricsExplorerAggregation.count);
-      expect(result.current.options.metrics).toEqual([
-        { aggregation: MetricsExplorerAggregation.count },
-      ]);
+      expect(result.current.options.aggregation).toBe('count');
+      expect(result.current.options.metrics).toEqual([{ aggregation: 'count' }]);
     });
 
     it('should change aggregation for metrics', async () => {
       const { result, waitForNextUpdate } = renderUseMetricsExplorerStateHook();
       const { handleMetricsChange } = result.current;
-      handleMetricsChange([
-        { aggregation: MetricsExplorerAggregation.avg, field: 'system.load.1' },
-      ]);
+      handleMetricsChange([{ aggregation: 'avg', field: 'system.load.1' }]);
       expect(result.current.options.metrics).toEqual([
-        { aggregation: MetricsExplorerAggregation.avg, field: 'system.load.1' },
+        { aggregation: 'avg', field: 'system.load.1' },
       ]);
       await waitForNextUpdate();
       const { handleAggregationChange } = result.current;
-      handleAggregationChange(MetricsExplorerAggregation.max);
+      handleAggregationChange('max');
       await waitForNextUpdate();
-      expect(result.current.options.aggregation).toBe(MetricsExplorerAggregation.max);
+      expect(result.current.options.aggregation).toBe('max');
       expect(result.current.options.metrics).toEqual([
-        { aggregation: MetricsExplorerAggregation.max, field: 'system.load.1' },
+        { aggregation: 'max', field: 'system.load.1' },
       ]);
     });
   });

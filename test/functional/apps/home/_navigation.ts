@@ -64,8 +64,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/33468
-    it.skip('detect navigate back issues', async () => {
+    it('detect navigate back issues', async () => {
       let currUrl;
       // Detects bug described in issue #31238 - where back navigation would get stuck to URL encoding handling in Angular.
       // Navigate to home app
@@ -105,7 +104,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await browser.get(`${basePath}/app/kibana#/home`, false);
       await retry.waitFor(
         'navigation to home app',
-        async () => (await browser.getCurrentUrl()) === `${basePath}/app/kibana#/home?_g=()`
+        async () => (await browser.getCurrentUrl()) === `${basePath}/app/kibana#/home`
       );
 
       await browser.get(`${basePath}/app/kibana#/home?_g=()&a=b/c`, false);

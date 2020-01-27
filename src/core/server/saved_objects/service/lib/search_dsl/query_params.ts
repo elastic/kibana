@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { esKuery } from '../../../../../../plugins/data/server';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';

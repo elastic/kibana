@@ -1,20 +1,22 @@
-@import '@elastic/eui/src/components/form/variables';
-
 //
 // LAYOUT
 //
 
-.visEditorSidebar__container {
-  @include flex-parent(1, 1, auto);
-  background-color: $euiColorLightestShade;
+.visEditorSidebar {
+  min-width: $vis-editor-sidebar-min-width;
 }
 
 .visEditorSidebar__form {
   @include flex-parent(1, 1, auto);
+  max-width: 100%;
 }
 
 .visEditorSidebar__config {
   padding: $euiSizeS;
+
+  > * {
+    flex-grow: 0;
+  }
 
   @include euiBreakpoint('l', 'xl') {
     @include flex-parent(1, 1, 1px);
@@ -23,65 +25,26 @@
   }
 }
 
+.visEditorSidebar__config-isHidden {
+  display: none;
+}
+
 //
 // NAVIGATION
 //
 
 .visEditorSidebar__indexPattern {
-  font-weight: $euiFontWeightBold;
-  padding: $euiSizeXS $euiSizeS;
-  background-color: shadeOrTint($euiColorPrimary, 60%, 60%);
-  color: $euiColorEmptyShade;
-  line-height: $euiSizeL;
+  @include euiTextTruncate;
+  padding: $euiSizeS $euiSizeXL $euiSizeS $euiSizeS; // Extra padding on the right for the collapse button
+}
+
+.visEditorSidebar__indexPatternPlaceholder {
+  min-height: $euiSizeXXL;
+  border-bottom: $euiBorderThin;
 }
 
 .visEditorSidebar__nav {
-  min-height: 0;
-
-  .navbar-right {
-    // Match correct bootstrap container spacing to pull buttons fully right
-    margin-right: -15px;
-  }
-}
-
-
-/**
- * 1. TODO: Override bootstrap styles. Remove !important once we're rid of bootstrap.
- */
-.visEditorSidebar__navLink {
-  padding: 2px $euiSizeS !important; /* 1 */
-  color: $euiColorDarkShade !important; /* 1 */
-
-  &.visEditorSidebar__navLink-isSelected {
-    border-bottom: 2px solid $euiColorPrimary;
-    border-color: $euiColorPrimary !important;
-    color: $euiColorPrimary !important;
-
-    &:before {
-      display: none;
-    }
-
-    &:hover {
-      background-color: transparent;
-    }
-  }
-}
-
-/**
- * 1. TODO: Override bootstrap styles. Remove !important once we're rid of bootstrap.
- */
-.visEditorSidebar__navLink--danger {
-  color: $euiColorEmptyShade !important; /* 1 */
-  background-color: $euiColorDanger;
-
-  &:hover {
-    background-color: shadeOrTint($euiColorDanger, 12%, 0%) !important; /* 1 */
-  }
-}
-
-.visEditorSidebar__navButtonLink {
-  // Make the line-height the same size as the icon for better alignment
-  line-height: $euiSize;
+  flex-grow: 0;
 }
 
 //
@@ -97,7 +60,7 @@
     margin-top: $euiSizeS;
   }
 
-  label:not([class^="eui"]) {
+  label:not([class^='eui']) {
     @include __legacyLabelStyles__bad;
     display: block;
   }
@@ -105,15 +68,6 @@
   .form-group label {
     margin-bottom: $euiSizeS;
   }
-}
-
-.visEditorSidebar__sectionTitle {
-  @include euiFontSizeL;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: $euiSizeM;
-  text-transform: capitalize;
 }
 
 // Collapsible section
@@ -129,15 +83,6 @@
 //
 // FORMS
 //
-
-.visEditorSidebar__input,
-.visEditorSidebar__select {
-  @include __legacyInputStyles__bad;
-}
-
-.visEditorSidebar__select {
-  @include __legacySelectStyles__bad;
-}
 
 .visEditorSidebar__formRow {
   display: flex;
@@ -158,18 +103,22 @@
   flex: 1 1 60%;
 }
 
-.visEditorSidebar__formRow--expand {
-  .visEditorSidebar__formLabel,
-  .visEditorSidebar__formControl {
-    flex-basis: auto;
-    flex-grow: 0;
-  }
-}
-
 .visEditorSidebar__aggGroupAccordionButtonContent {
   font-size: $euiFontSizeS;
 
-   span {
+  span {
     color: $euiColorDarkShade;
+  }
+}
+
+.visEditorSidebar__controls {
+  border-top: $euiBorderThin;
+  padding: $euiSizeS;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  .visEditorSidebar__autoApplyButton {
+    margin-left: $euiSizeM;
   }
 }

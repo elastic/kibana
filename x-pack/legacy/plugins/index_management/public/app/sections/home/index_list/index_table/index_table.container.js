@@ -17,7 +17,7 @@ import {
   getIndicesAsArray,
   indicesLoading,
   indicesError,
-  getTableState
+  getTableState,
 } from '../../../../store/selectors';
 import {
   filterChanged,
@@ -29,12 +29,12 @@ import {
   showSystemIndicesChanged,
   loadIndices,
   reloadIndices,
-  toggleChanged
+  toggleChanged,
 } from '../../../../store/actions';
 
 import { IndexTable as PresentationComponent } from './index_table';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     allIndices: getIndicesAsArray(state),
     isDetailPanelOpen: isDetailPanelOpen(state),
@@ -47,31 +47,31 @@ const mapStateToProps = (state) => {
     isSortAscending: isSortAscending(state),
     indicesLoading: indicesLoading(state),
     indicesError: indicesError(state),
-    toggleNameToVisibleMap: getTableState(state).toggleNameToVisibleMap
+    toggleNameToVisibleMap: getTableState(state).toggleNameToVisibleMap,
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
   return {
-    filterChanged: (filter) => {
+    filterChanged: filter => {
       dispatch(filterChanged({ filter }));
     },
-    pageChanged: (pageNumber) => {
+    pageChanged: pageNumber => {
       dispatch(pageChanged({ pageNumber }));
     },
-    pageSizeChanged: (pageSize) => {
+    pageSizeChanged: pageSize => {
       dispatch(pageSizeChanged({ pageSize }));
     },
     sortChanged: (sortField, isSortAscending) => {
       dispatch(sortChanged({ sortField, isSortAscending }));
     },
-    showSystemIndicesChanged: (showSystemIndices) => {
+    showSystemIndicesChanged: showSystemIndices => {
       dispatch(showSystemIndicesChanged({ showSystemIndices }));
     },
     toggleChanged: (toggleName, toggleValue) => {
       dispatch(toggleChanged({ toggleName, toggleValue }));
     },
-    openDetailPanel: (indexName) => {
+    openDetailPanel: indexName => {
       dispatch(openDetailPanel({ indexName }));
     },
     closeDetailPanel: () => {
@@ -82,11 +82,8 @@ const mapDispatchToProps = (dispatch) => {
     },
     reloadIndices: () => {
       dispatch(reloadIndices());
-    }
+    },
   };
 };
 
-export const IndexTable = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(PresentationComponent);
+export const IndexTable = connect(mapStateToProps, mapDispatchToProps)(PresentationComponent);

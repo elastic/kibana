@@ -18,7 +18,7 @@
  */
 
 import { createFilterAction } from './apply_filter_action';
-import { expectError } from '../../tests/helpers';
+import { expectErrorAsync } from '../../tests/helpers';
 
 test('has APPLY_FILTER_ACTION type and id', () => {
   const action = createFilterAction();
@@ -95,12 +95,13 @@ describe('execute()', () => {
   describe('when no filters are given', () => {
     test('throws an error', async () => {
       const action = createFilterAction();
-      const error = expectError(() =>
+      const error = await expectErrorAsync(() =>
         action.execute({
           embeddable: getEmbeddable(),
         } as any)
       );
       expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe('Applying a filter requires a filter and embeddable as context');
     });
 
     test('updates filter input on success', async () => {

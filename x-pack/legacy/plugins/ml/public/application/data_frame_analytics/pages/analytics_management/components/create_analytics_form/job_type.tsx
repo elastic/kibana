@@ -13,7 +13,7 @@ import { AnalyticsJobType, JOB_TYPES } from '../../hooks/use_create_analytics_fo
 
 interface Props {
   type: AnalyticsJobType;
-  setFormState: any; // TODO update type
+  setFormState: React.Dispatch<React.SetStateAction<any>>;
 }
 
 export const JobType: FC<Props> = ({ type, setFormState }) => {
@@ -21,7 +21,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
     'xpack.ml.dataframe.analytics.create.outlierDetectionHelpText',
     {
       defaultMessage:
-        'Outlier detection jobs require a source index that is mapped as a table-like data structure and will only analyze numeric and boolean fields. Please use the advanced editor to apply custom options such as the model memory limit and analysis type.',
+        'Outlier detection jobs require a source index that is mapped as a table-like data structure and will only analyze numeric and boolean fields. Please use the advanced editor to add custom options to the configuration.',
     }
   );
 
@@ -29,13 +29,22 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
     'xpack.ml.dataframe.analytics.create.outlierRegressionHelpText',
     {
       defaultMessage:
-        'Regression jobs will only analyze numeric fields. Please use the advanced editor to apply custom options such as the model memory limit and prediction field name.',
+        'Regression jobs will only analyze numeric fields. Please use the advanced editor to apply custom options such as the prediction field name.',
+    }
+  );
+
+  const classificationHelpText = i18n.translate(
+    'xpack.ml.dataframe.analytics.create.classificationHelpText',
+    {
+      defaultMessage:
+        'Classification jobs require a source index that is mapped as a table-like data structure and supports fields that are numeric, boolean, text, keyword or ip. Please use the advanced editor to apply custom options such as the prediction field name.',
     }
   );
 
   const helpText = {
     outlier_detection: outlierHelpText,
     regression: regressionHelpText,
+    classification: classificationHelpText,
   };
 
   return (
@@ -55,8 +64,13 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
           hasNoInitialSelection={true}
           onChange={e => {
             const value = e.target.value as AnalyticsJobType;
-            setFormState({ jobType: value });
+            setFormState({
+              previousJobType: type,
+              jobType: value,
+              excludes: [],
+            });
           }}
+          data-test-subj="mlAnalyticsCreateJobFlyoutJobTypeSelect"
         />
       </EuiFormRow>
     </Fragment>

@@ -20,8 +20,7 @@
 import { template, escape, keys } from 'lodash';
 // @ts-ignore
 import { noWhiteSpace } from '../../../../../legacy/core_plugins/kibana/common/utils/no_white_space';
-// @ts-ignore
-import { shortenDottedString } from '../../../../../legacy/core_plugins/kibana/common/utils/shorten_dotted_string';
+import { shortenDottedString } from '../../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
@@ -43,7 +42,9 @@ export class SourceFormat extends FieldFormat {
 
   textConvert: TextContextTypeConvert = value => JSON.stringify(value);
 
-  htmlConvert: HtmlContextTypeConvert = (value, field, hit) => {
+  htmlConvert: HtmlContextTypeConvert = (value, options = {}) => {
+    const { field, hit } = options;
+
     if (!field) {
       const converter = this.getConverterFor('text') as Function;
 

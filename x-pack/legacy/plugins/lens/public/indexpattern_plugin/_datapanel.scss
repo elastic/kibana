@@ -1,5 +1,3 @@
-@import '@elastic/eui/src/components/form/form_control_layout/mixins';
-
 .lnsInnerIndexPatternDataPanel {
   width: 100%;
   height: 100%;
@@ -54,4 +52,3 @@
   @include euiFormControlLayoutPadding(1, 'right');
   @include euiFormControlLayoutPadding(1, 'left');
 }
-

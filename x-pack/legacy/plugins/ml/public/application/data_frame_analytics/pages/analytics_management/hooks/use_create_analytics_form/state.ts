@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiComboBoxOptionProps } from '@elastic/eui';
 import { DeepPartial } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check/check_ml_nodes';
@@ -14,6 +15,7 @@ export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
   // eslint-disable-next-line @typescript-eslint/camelcase
   outlier_detection = '50mb',
+  classification = '100mb',
 }
 
 export type EsIndexName = string;
@@ -34,6 +36,7 @@ export interface FormMessage {
 export enum JOB_TYPES {
   OUTLIER_DETECTION = 'outlier_detection',
   REGRESSION = 'regression',
+  CLASSIFICATION = 'classification',
 }
 
 export interface State {
@@ -43,21 +46,29 @@ export interface State {
     createIndexPattern: boolean;
     dependentVariable: DependentVariable;
     dependentVariableFetchFail: boolean;
-    dependentVariableOptions: Array<{ label: DependentVariable }> | [];
+    dependentVariableOptions: EuiComboBoxOptionProps[] | [];
+    description: string;
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
     destinationIndexNameEmpty: boolean;
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
+    excludes: string[];
+    excludesOptions: EuiComboBoxOptionProps[];
+    fieldOptionsFetchFail: boolean;
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
     jobIdEmpty: boolean;
     jobIdInvalidMaxLength: boolean;
     jobIdValid: boolean;
     jobType: AnalyticsJobType;
-    loadingDepFieldOptions: boolean;
+    loadingDepVarOptions: boolean;
+    loadingFieldOptions: boolean;
+    maxDistinctValuesError: string | undefined;
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
+    previousJobType: null | AnalyticsJobType;
+    previousSourceIndex: EsIndexName | undefined;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
@@ -87,20 +98,28 @@ export const getInitialState = (): State => ({
     dependentVariable: '',
     dependentVariableFetchFail: false,
     dependentVariableOptions: [],
+    description: '',
     destinationIndex: '',
     destinationIndexNameExists: false,
     destinationIndexNameEmpty: true,
     destinationIndexNameValid: false,
     destinationIndexPatternTitleExists: false,
+    excludes: [],
+    fieldOptionsFetchFail: false,
+    excludesOptions: [],
     jobId: '',
     jobIdExists: false,
     jobIdEmpty: true,
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
     jobType: undefined,
-    loadingDepFieldOptions: false,
+    loadingDepVarOptions: false,
+    loadingFieldOptions: false,
+    maxDistinctValuesError: undefined,
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
+    previousJobType: null,
+    previousSourceIndex: undefined,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
@@ -129,6 +148,7 @@ export const getJobConfigFromFormState = (
   formState: State['form']
 ): DeepPartial<DataFrameAnalyticsConfig> => {
   const jobConfig: DeepPartial<DataFrameAnalyticsConfig> = {
+    description: formState.description,
     source: {
       // If a Kibana index patterns includes commas, we need to split
       // the into an array of indices to be in the correct format for
@@ -141,7 +161,7 @@ export const getJobConfigFromFormState = (
       index: formState.destinationIndex,
     },
     analyzed_fields: {
-      excludes: [],
+      excludes: formState.excludes,
     },
     analysis: {
       outlier_detection: {},
@@ -149,9 +169,12 @@ export const getJobConfigFromFormState = (
     model_memory_limit: formState.modelMemoryLimit,
   };
 
-  if (formState.jobType === JOB_TYPES.REGRESSION) {
+  if (
+    formState.jobType === JOB_TYPES.REGRESSION ||
+    formState.jobType === JOB_TYPES.CLASSIFICATION
+  ) {
     jobConfig.analysis = {
-      regression: {
+      [formState.jobType]: {
         dependent_variable: formState.dependentVariable,
         training_percent: formState.trainingPercent,
       },

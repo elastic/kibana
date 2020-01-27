@@ -23,19 +23,13 @@ import { EuiIconTip, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns';
-import { VisOptionsProps } from 'ui/vis/editors/default';
-import {
-  NumberInputOption,
-  SwitchOption,
-  SelectOption,
-} from '../../../kbn_vislib_vis_types/public/components/common';
+import { tabifyGetColumns, VisOptionsProps } from '../legacy_imports';
+import { NumberInputOption, SwitchOption, SelectOption } from '../../../vis_type_vislib/public';
 import { TableVisParams } from '../types';
 import { totalAggregations, isAggConfigNumeric } from './utils';
 
 function TableOptions({
   aggs,
-  aggsLabels,
   stateParams,
   setValidity,
   setValue,
@@ -52,7 +46,7 @@ function TableOptions({
         .filter(col => isAggConfigNumeric(get(col, 'aggConfig.type.name'), stateParams.dimensions))
         .map(({ name }) => ({ value: name, text: name })),
     ],
-    [aggs, aggsLabels, stateParams.percentageCol, stateParams.dimensions]
+    [aggs, stateParams.percentageCol, stateParams.dimensions]
   );
 
   const isPerPageValid = stateParams.perPage === '' || stateParams.perPage > 0;

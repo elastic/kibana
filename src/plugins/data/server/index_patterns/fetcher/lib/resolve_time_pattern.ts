@@ -20,7 +20,7 @@
 import { chain } from 'lodash';
 import moment from 'moment';
 
-import { APICaller } from 'src/core/server';
+import { APICaller } from 'kibana/server';
 
 import { timePatternToWildcard } from './time_pattern_to_wildcard';
 import { callIndexAliasApi, IndicesAliasResponse } from './es_api';

@@ -10,7 +10,6 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import {
   Visualization,
   Datasource,
-  FramePublicAPI,
   TableChangeType,
   TableSuggestion,
   DatasourceSuggestion,
@@ -130,7 +129,6 @@ function getVisualizationSuggestions(
 }
 
 export function switchToSuggestion(
-  frame: FramePublicAPI,
   dispatch: (action: Action) => void,
   suggestion: Pick<
     Suggestion,
@@ -145,5 +143,6 @@ export function switchToSuggestion(
     datasourceState: suggestion.datasourceState,
     datasourceId: suggestion.datasourceId!,
   };
+
   dispatch(action);
 }

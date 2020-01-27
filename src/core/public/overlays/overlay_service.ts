@@ -18,7 +18,7 @@
  */
 
 import { I18nStart } from '../i18n';
-import { UiSettingsClientContract } from '../ui_settings';
+import { IUiSettingsClient } from '../ui_settings';
 import { OverlayBannersStart, OverlayBannersService } from './banners';
 import { FlyoutService, OverlayFlyoutStart } from './flyout';
 import { ModalService, OverlayModalStart } from './modal';
@@ -26,7 +26,7 @@ import { ModalService, OverlayModalStart } from './modal';
 interface StartDeps {
   i18n: I18nStart;
   targetDomElement: HTMLElement;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */
@@ -50,6 +50,7 @@ export class OverlayService {
       banners,
       openFlyout: flyouts.open.bind(flyouts),
       openModal: modals.open.bind(modals),
+      openConfirm: modals.openConfirm.bind(modals),
     };
   }
 }
@@ -62,4 +63,6 @@ export interface OverlayStart {
   openFlyout: OverlayFlyoutStart['open'];
   /** {@link OverlayModalStart#open} */
   openModal: OverlayModalStart['open'];
+  /** {@link OverlayModalStart#openConfirm} */
+  openConfirm: OverlayModalStart['openConfirm'];
 }

@@ -22,7 +22,8 @@ import {
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useCallApmApi } from '../../../../hooks/useCallApmApi';
 import { APMClient } from '../../../../services/rest/createCallApmApi';
-import { useKibanaCore } from '../../../../../../observability/public';
+import { clearCache } from '../../../../services/rest/callApi';
+import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 
 const APM_INDEX_LABELS = [
   {
@@ -80,19 +81,22 @@ async function saveApmIndices({
       body: apmIndices
     }
   });
+
+  clearCache();
 }
 
+// avoid infinite loop by initializing the state outside the component
+const INITIAL_STATE = [] as [];
+
 export function ApmIndices() {
-  const {
-    notifications: { toasts }
-  } = useKibanaCore();
+  const { toasts } = useApmPluginContext().core.notifications;
 
   const [apmIndices, setApmIndices] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
   const callApmApiFromHook = useCallApmApi();
 
-  const { data = [], status, refetch } = useFetcher(
+  const { data = INITIAL_STATE, status, refetch } = useFetcher(
     callApmApi =>
       callApmApi({ pathname: `/api/apm/settings/apm-index-settings` }),
     []

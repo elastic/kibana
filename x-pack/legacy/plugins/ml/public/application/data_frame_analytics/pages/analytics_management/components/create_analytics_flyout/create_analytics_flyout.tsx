@@ -29,7 +29,7 @@ export const CreateAnalyticsFlyout: FC<CreateAnalyticsFormProps> = ({
   const { isJobCreated, isJobStarted, isModalButtonDisabled, isValid } = state;
 
   return (
-    <EuiFlyout size="s" onClose={closeModal}>
+    <EuiFlyout size="s" onClose={closeModal} data-test-subj="mlAnalyticsCreateJobFlyout">
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2 data-test-subj="mlDataFrameAnalyticsFlyoutHeaderTitle">
@@ -59,6 +59,7 @@ export const CreateAnalyticsFlyout: FC<CreateAnalyticsFormProps> = ({
             disabled={!isValid || isModalButtonDisabled}
             onClick={createAnalyticsJob}
             fill
+            data-test-subj="mlAnalyticsCreateJobFlyoutCreateButton"
           >
             {i18n.translate('xpack.ml.dataframe.analytics.create.flyoutCreateButton', {
               defaultMessage: 'Create',
@@ -71,6 +72,7 @@ export const CreateAnalyticsFlyout: FC<CreateAnalyticsFormProps> = ({
             disabled={isModalButtonDisabled}
             onClick={startAnalyticsJob}
             fill
+            data-test-subj="mlAnalyticsCreateJobFlyoutStartButton"
           >
             {i18n.translate('xpack.ml.dataframe.analytics.create.flyoutStartButton', {
               defaultMessage: 'Start',
@@ -78,7 +80,11 @@ export const CreateAnalyticsFlyout: FC<CreateAnalyticsFormProps> = ({
           </EuiButton>
         )}
         {isJobCreated && isJobStarted && (
-          <EuiButton onClick={closeModal} fill>
+          <EuiButton
+            onClick={closeModal}
+            fill
+            data-test-subj="mlAnalyticsCreateJobFlyoutCloseButton"
+          >
             {i18n.translate('xpack.ml.dataframe.analytics.create.flyoutCloseButton', {
               defaultMessage: 'Close',
             })}

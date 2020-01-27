@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { esKuery } from '../../../../../../src/plugins/data/public';
+import { esKuery, IIndexPattern } from '../../../../../../src/plugins/data/public';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern: StaticIndexPattern
+  indexPattern: IIndexPattern
 ) => {
   try {
     return kueryExpression

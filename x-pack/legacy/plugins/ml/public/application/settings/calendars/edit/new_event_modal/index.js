@@ -5,4 +5,3 @@
  */
 
 export { NewEventModal } from './new_event_modal';
-

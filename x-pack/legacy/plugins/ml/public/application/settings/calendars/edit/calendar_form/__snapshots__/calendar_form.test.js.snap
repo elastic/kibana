@@ -56,10 +56,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       disabled={false}
-      fullWidth={false}
-      isLoading={false}
       name="calendarId"
       onChange={[MockFunction]}
       value=""
@@ -81,10 +78,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       disabled={false}
-      fullWidth={false}
-      isLoading={false}
       name="description"
       onChange={[MockFunction]}
       value=""
@@ -181,7 +175,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
       grow={false}
     >
       <EuiButton
-        href="undefined/app/ml#/settings/calendars_list"
+        href="#/settings/calendars_list"
         isDisabled={false}
       >
         <FormattedMessage

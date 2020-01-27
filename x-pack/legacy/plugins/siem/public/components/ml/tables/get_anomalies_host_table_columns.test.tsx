@@ -10,8 +10,8 @@ import * as i18n from './translations';
 import { AnomaliesByHost, Anomaly } from '../types';
 import { Columns } from '../../paginated_table';
 import { TestProviders } from '../../../mock';
-import { mount } from 'enzyme';
 import React from 'react';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 const startDate = new Date(2001).valueOf();
 const endDate = new Date(3000).valueOf();
@@ -19,6 +19,8 @@ const interval = 'days';
 const narrowDateRange = jest.fn();
 
 describe('get_anomalies_host_table_columns', () => {
+  const mount = useMountAppended();
+
   test('on hosts page, we expect to get all columns', () => {
     expect(
       getAnomaliesHostTableColumnsCurated(

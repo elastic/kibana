@@ -17,27 +17,51 @@
  * under the License.
  */
 
+import { Type } from '@kbn/config-schema';
+
+import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import { ConfigDeprecationProvider } from './config';
+import { ContextSetup } from './context';
 import { InternalElasticsearchServiceSetup } from './elasticsearch';
 import { InternalHttpServiceSetup } from './http';
-import { InternalUiSettingsServiceSetup } from './ui_settings';
-import { ContextSetup } from './context';
 import {
-  InternalSavedObjectsServiceStart,
   InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart,
 } from './saved_objects';
+import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
+import { UuidServiceSetup } from './uuid';
 
 /** @internal */
 export interface InternalCoreSetup {
+  capabilities: CapabilitiesSetup;
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
+  uuid: UuidServiceSetup;
 }
 
 /**
  * @internal
  */
 export interface InternalCoreStart {
+  capabilities: CapabilitiesStart;
   savedObjects: InternalSavedObjectsServiceStart;
+  uiSettings: InternalUiSettingsServiceStart;
+}
+
+/**
+ * @internal
+ */
+export interface ServiceConfigDescriptor<T = any> {
+  path: string;
+  /**
+   * Schema to use to validate the configuration.
+   */
+  schema: Type<T>;
+  /**
+   * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
+   */
+  deprecations?: ConfigDeprecationProvider;
 }

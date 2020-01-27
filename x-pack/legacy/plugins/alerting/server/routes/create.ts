@@ -6,8 +6,8 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { AlertAction } from '../types';
 import { getDurationSchema } from '../lib';
+import { IntervalSchedule } from '../types';
 
 interface ScheduleRequest extends Hapi.Request {
   payload: {
@@ -15,8 +15,13 @@ interface ScheduleRequest extends Hapi.Request {
     name: string;
     tags: string[];
     alertTypeId: string;
-    interval: string;
-    actions: AlertAction[];
+    consumer: string;
+    schedule: IntervalSchedule;
+    actions: Array<{
+      group: string;
+      id: string;
+      params: Record<string, any>;
+    }>;
     params: Record<string, any>;
     throttle: string | null;
   };
@@ -39,8 +44,13 @@ export const createAlertRoute = {
             .items(Joi.string())
             .default([]),
           alertTypeId: Joi.string().required(),
+          consumer: Joi.string().required(),
           throttle: getDurationSchema().default(null),
-          interval: getDurationSchema().required(),
+          schedule: Joi.object()
+            .keys({
+              interval: getDurationSchema().required(),
+            })
+            .required(),
           params: Joi.object().required(),
           actions: Joi.array()
             .items(

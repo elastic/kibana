@@ -21,8 +21,6 @@ import { VisualizationsSetup } from '../../visualizations/public';
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 
-import { LegacyDependenciesPlugin } from './shim';
-
 import { createTableVisFn } from './table_vis_fn';
 import { tableVisTypeDefinition } from './table_vis_type';
 
@@ -30,7 +28,6 @@ import { tableVisTypeDefinition } from './table_vis_type';
 export interface TablePluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  __LEGACY: LegacyDependenciesPlugin;
 }
 
 /** @internal */
@@ -43,9 +40,8 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations, __LEGACY }: TablePluginSetupDependencies
+    { expressions, visualizations }: TablePluginSetupDependencies
   ) {
-    __LEGACY.setup();
     expressions.registerFunction(createTableVisFn);
 
     visualizations.types.createBaseVisualization(tableVisTypeDefinition);

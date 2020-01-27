@@ -7,14 +7,13 @@
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Sticky } from 'react-sticky';
-import { pure } from 'recompose';
 import styled, { css } from 'styled-components';
 
 import { gutterTimeline } from '../../lib/helpers';
 
 const offsetChrome = 49;
 
-const disableSticky = 'screen and (max-width: ' + euiLightVars.euiBreakpoints.s + ')';
+const disableSticky = `screen and (max-width: ${euiLightVars.euiBreakpoints.s})`;
 const disableStickyMq = window.matchMedia(disableSticky);
 
 const Wrapper = styled.aside<{ isSticky?: boolean }>`
@@ -42,7 +41,7 @@ export interface FiltersGlobalProps {
   children: React.ReactNode;
 }
 
-export const FiltersGlobal = pure<FiltersGlobalProps>(({ children }) => (
+export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => (
   <Sticky disableCompensation={disableStickyMq.matches} topOffset={-offsetChrome}>
     {({ style, isSticky }) => (
       <Wrapper className="siemFiltersGlobal" isSticky={isSticky} style={style}>

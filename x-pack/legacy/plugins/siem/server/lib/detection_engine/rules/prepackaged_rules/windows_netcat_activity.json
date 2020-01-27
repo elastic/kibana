@@ -1,0 +1,20 @@
+{
+  "description": "Windows Netcat activity",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "name": "Windows Netcat activity",
+  "query": "process.name:ncat.exe and event.code:1",
+  "risk_score": 50,
+  "rule_id": "e2437364-0c89-4e65-a34b-782cfbb7690b",
+  "severity": "low",
+  "tags": ["Elastic"],
+  "type": "query",
+  "version": 1
+}

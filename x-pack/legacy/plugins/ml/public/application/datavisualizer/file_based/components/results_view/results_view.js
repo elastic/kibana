@@ -7,19 +7,13 @@
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import {
-  EuiTabbedContent,
-  EuiButton,
-  EuiSpacer,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiTabbedContent, EuiButton, EuiSpacer, EuiPanel } from '@elastic/eui';
 
 import { FileContents } from '../file_contents';
 import { AnalysisSummary } from '../analysis_summary';
 import { FieldsStats } from '../fields_stats';
 
-export const ResultsView = injectI18n(function ({ data, results, showEditFlyout, intl }) {
-
+export const ResultsView = injectI18n(function({ data, results, showEditFlyout, intl }) {
   console.log(results);
 
   const tabs = [
@@ -27,10 +21,10 @@ export const ResultsView = injectI18n(function ({ data, results, showEditFlyout,
       id: 'file-stats',
       name: intl.formatMessage({
         id: 'xpack.ml.fileDatavisualizer.resultsView.fileStatsTabName',
-        defaultMessage: 'File stats'
+        defaultMessage: 'File stats',
       }),
       content: <FieldsStats results={results} />,
-    }
+    },
   ];
 
   return (
@@ -46,9 +40,7 @@ export const ResultsView = injectI18n(function ({ data, results, showEditFlyout,
       <EuiSpacer size="m" />
 
       <EuiPanel>
-        <AnalysisSummary
-          results={results}
-        />
+        <AnalysisSummary results={results} />
 
         <EuiSpacer size="m" />
 
@@ -63,13 +55,8 @@ export const ResultsView = injectI18n(function ({ data, results, showEditFlyout,
       <EuiSpacer size="m" />
 
       <EuiPanel>
-        <EuiTabbedContent
-          tabs={tabs}
-          initialSelectedTab={tabs[0]}
-          onTabClick={() => { }}
-        />
+        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} onTabClick={() => {}} />
       </EuiPanel>
-
     </div>
   );
 });

@@ -34,23 +34,23 @@ export const createPingsResolvers: CreateUMGraphQLResolvers = (
 } => ({
   Query: {
     async allPings(
-      resolver,
+      _resolver,
       { monitorId, sort, size, status, dateRangeStart, dateRangeEnd, location },
-      { req }
+      { APICaller }
     ): Promise<PingResults> {
-      return await libs.pings.getAll(
-        req,
+      return await libs.pings.getAll({
+        callES: APICaller,
         dateRangeStart,
         dateRangeEnd,
         monitorId,
         status,
         sort,
         size,
-        location
-      );
+        location,
+      });
     },
-    async getDocCount(resolver, args, { req }): Promise<DocCount> {
-      return libs.pings.getDocCount(req);
+    async getDocCount(_resolver, _args, { APICaller }): Promise<DocCount> {
+      return libs.pings.getDocCount({ callES: APICaller });
     },
   },
 });

@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiChromeMock } from './mocks';
+import { uiChromeMock } from './mocks_jest';
 
 export const useUiChromeContext = () => uiChromeMock;

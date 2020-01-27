@@ -6,10 +6,10 @@
 
 import { isEqual, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { Subscription } from 'rxjs';
 
 import {
+  IIndexPattern,
   Query,
   esFilters,
   FilterManager,
@@ -19,7 +19,7 @@ import {
 
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
+import { useKibana } from '../../../lib/kibana';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
 import { KqlMode } from '../../../store/timeline/model';
 import { useSavedQueryServices } from '../../../utils/saved_query_services';
@@ -38,7 +38,7 @@ export interface QueryBarTimelineComponentProps {
   from: number;
   fromStr: string;
   kqlMode: KqlMode;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isRefreshPaused: boolean;
   refreshInterval: number;
   savedQueryId: string | null;
@@ -92,8 +92,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
     );
-    const core = useKibanaCore();
-    const [filterManager] = useState<FilterManager>(new FilterManager(core.uiSettings));
+    const kibana = useKibana();
+    const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
 
     const savedQueryServices = useSavedQueryServices();
 

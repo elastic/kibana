@@ -1,0 +1,20 @@
+{
+  "description": "Windows Execution via .NET COM Assemblies",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "name": "Windows Execution via .NET COM Assemblies",
+  "query": "event.code:1 and (process.name:regasm.exe or process.name:regsvcs.exe)",
+  "risk_score": 50,
+  "rule_id": "5c12412f-602c-4120-8c4f-69d723dbba04",
+  "severity": "low",
+  "tags": ["Elastic"],
+  "type": "query",
+  "version": 1
+}

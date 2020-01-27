@@ -39,12 +39,12 @@ export const MonitorChartsComponent = ({
   dateRangeEnd,
   loading,
 }: Props) => {
+  const [getUrlParams] = useUrlParams();
   if (data && data.monitorChartsData) {
     const {
       monitorChartsData: { locationDurationLines },
     } = data;
 
-    const [getUrlParams] = useUrlParams();
     const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
 
     return (

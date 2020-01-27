@@ -7,14 +7,8 @@
 import uuid from 'uuid';
 import React from 'react';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
-import { PluginsStart } from 'ui/new_platform/new_platform';
-
-import { ActionToaster, AppToast } from '../toasters';
-import {
-  CONTEXT_MENU_TRIGGER,
-  PANEL_BADGE_TRIGGER,
-  ViewMode,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import minimatch from 'minimatch';
+import { ViewMode } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import {
   IndexPatternMapping,
   MapEmbeddable,
@@ -27,48 +21,7 @@ import { getLayerList } from './map_config';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import * as i18n from './translations';
 import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
-
-/**
- * Displays an error toast for the provided title and message
- *
- * @param errorTitle Title of error to display in toaster and modal
- * @param errorMessage Message to display in error modal when clicked
- * @param dispatchToaster provided by useStateToaster()
- */
-export const displayErrorToast = (
-  errorTitle: string,
-  errorMessage: string,
-  dispatchToaster: React.Dispatch<ActionToaster>
-) => {
-  const toast: AppToast = {
-    id: uuid.v4(),
-    title: errorTitle,
-    color: 'danger',
-    iconType: 'alert',
-    errors: [errorMessage],
-  };
-  dispatchToaster({
-    type: 'addToaster',
-    toast,
-  });
-};
-
-/**
- * Temporary Embeddables API configuration override until ability to edit actions is addressed:
- * https://github.com/elastic/kibana/issues/43643
- *
- * @param plugins new platform plugins
- *
- * @throws Error if trigger/action doesn't exist
- */
-export const setupEmbeddablesAPI = (plugins: PluginsStart) => {
-  try {
-    plugins.uiActions.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
-    plugins.uiActions.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
-  } catch (e) {
-    throw e;
-  }
-};
+import { IndexPatternSavedObject } from '../ml_popover/types';
 
 /**
  * Creates MapEmbeddable with provided initial configuration
@@ -115,6 +68,7 @@ export const createEmbeddable = async (
     openTOCDetails: [],
     hideFilterActions: false,
     mapCenter: { lon: -1.05469, lat: 15.96133, zoom: 1 },
+    disabledActions: ['CUSTOM_TIME_RANGE', 'CUSTOM_TIME_RANGE_BADGE'],
   };
 
   const renderTooltipContent = ({
@@ -155,4 +109,26 @@ export const createEmbeddable = async (
   });
 
   return embeddableObject;
+};
+
+/**
+ * Returns kibanaIndexPatterns that wildcard match at least one of siemDefaultIndices
+ *
+ * @param kibanaIndexPatterns
+ * @param siemDefaultIndices
+ */
+export const findMatchingIndexPatterns = ({
+  kibanaIndexPatterns,
+  siemDefaultIndices,
+}: {
+  kibanaIndexPatterns: IndexPatternSavedObject[];
+  siemDefaultIndices: string[];
+}): IndexPatternSavedObject[] => {
+  try {
+    return kibanaIndexPatterns.filter(kip =>
+      siemDefaultIndices.some(sdi => minimatch(sdi, kip.attributes.title))
+    );
+  } catch {
+    return [];
+  }
 };

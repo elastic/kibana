@@ -6,9 +6,15 @@
 
 import { notFound, notImplemented } from 'boom';
 import { get } from 'lodash';
-import { PLUGIN_ID, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
-import { cryptoFactory, LevelLogger } from '../../../../server/lib';
-import { ImmediateCreateJobFn, ServerFacade, RequestFacade } from '../../../../types';
+import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
+import { cryptoFactory } from '../../../../server/lib';
+import {
+  CreateJobFactory,
+  ImmediateCreateJobFn,
+  ServerFacade,
+  RequestFacade,
+  Logger,
+} from '../../../../types';
 import {
   SavedObject,
   SavedObjectServiceError,
@@ -27,13 +33,11 @@ interface VisData {
   panel: SearchPanel;
 }
 
-export function createJobFactory(server: ServerFacade): ImmediateCreateJobFn {
+export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
+  JobParamsPanelCsv
+>> = function createJobFactoryFn(server: ServerFacade, parentLogger: Logger) {
   const crypto = cryptoFactory(server);
-  const logger = LevelLogger.createForServer(server, [
-    PLUGIN_ID,
-    CSV_FROM_SAVEDOBJECT_JOB_TYPE,
-    'create-job',
-  ]);
+  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
   return async function createJob(
     jobParams: JobParamsPanelCsv,
@@ -88,9 +92,8 @@ export function createJobFactory(server: ServerFacade): ImmediateCreateJobFn {
     return {
       headers: serializedEncryptedHeaders,
       jobParams: { ...jobParams, panel, visType },
-      type: null, // resolved in executeJob
-      objects: null, // resolved in executeJob
+      type: null,
       title,
     };
   };
-}
+};

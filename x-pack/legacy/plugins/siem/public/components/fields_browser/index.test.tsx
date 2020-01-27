@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
@@ -13,6 +13,19 @@ import { TestProviders } from '../../mock';
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
 
 import { StatefulFieldsBrowserComponent } from '.';
+
+// Suppress warnings about "react-beautiful-dnd" until we migrate to @testing-library/react
+/* eslint-disable no-console */
+const originalError = console.error;
+const originalWarn = console.warn;
+beforeAll(() => {
+  console.warn = jest.fn();
+  console.error = jest.fn();
+});
+afterAll(() => {
+  console.error = originalError;
+  console.warn = originalWarn;
+});
 
 describe('StatefulFieldsBrowser', () => {
   const timelineId = 'test';

@@ -7,7 +7,6 @@
 import { copyPersistentState } from '../../reducers/util';
 
 export class AbstractSource {
-
   static isIndexingSource = false;
 
   static renderEditor() {
@@ -123,7 +122,7 @@ export class AbstractSource {
     return AbstractSource.isIndexingSource;
   }
 
-  supportsElasticsearchFilters() {
+  isESSource() {
     return false;
   }
 
@@ -136,6 +135,8 @@ export class AbstractSource {
   async getFieldFormatter(/* fieldName */) {
     return null;
   }
+
+  async loadStylePropsMeta() {
+    throw new Error(`Source#loadStylePropsMeta not implemented`);
+  }
 }
-
-

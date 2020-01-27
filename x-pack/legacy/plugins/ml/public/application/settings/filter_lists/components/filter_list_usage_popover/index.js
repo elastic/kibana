@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 export { FilterListUsagePopover } from './filter_list_usage_popover';

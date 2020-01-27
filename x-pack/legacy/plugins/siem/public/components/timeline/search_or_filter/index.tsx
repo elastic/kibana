@@ -8,9 +8,8 @@ import { getOr, isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { esFilters, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
 import {
@@ -22,19 +21,20 @@ import {
   inputsSelectors,
 } from '../../../store';
 import { timelineActions } from '../../../store/actions';
-import { KqlMode, TimelineModel } from '../../../store/timeline/model';
+import { KqlMode, timelineDefaults, TimelineModel, EventType } from '../../../store/timeline/model';
 import { DispatchUpdateReduxTime, dispatchUpdateReduxTime } from '../../super_date_picker';
 import { DataProvider } from '../data_providers/data_provider';
 import { SearchOrFilter } from './search_or_filter';
 
 interface OwnProps {
   browserFields: BrowserFields;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   timelineId: string;
 }
 
 interface StateReduxProps {
   dataProviders: DataProvider[];
+  eventType: EventType;
   filters: esFilters.Filter[];
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
@@ -56,6 +56,7 @@ interface DispatchProps {
     id: string;
     filterQuery: SerializedFilterQuery;
   }) => void;
+  updateEventType: ({ id, eventType }: { id: string; eventType: EventType }) => void;
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) => void;
   setKqlFilterQueryDraft: ({
     id,
@@ -76,6 +77,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     applyKqlFilterQuery,
     browserFields,
     dataProviders,
+    eventType,
     filters,
     filterQuery,
     filterQueryDraft,
@@ -92,6 +94,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     timelineId,
     to,
     toStr,
+    updateEventType,
     updateKqlMode,
     updateReduxTime,
   }) => {
@@ -140,11 +143,21 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       [timelineId]
     );
 
+    const handleUpdateEventType = useCallback(
+      (newEventType: EventType) =>
+        updateEventType({
+          id: timelineId,
+          eventType: newEventType,
+        }),
+      [timelineId]
+    );
+
     return (
       <SearchOrFilter
         applyKqlFilterQuery={applyFilterQueryFromKueryExpression}
         browserFields={browserFields}
         dataProviders={dataProviders}
+        eventType={eventType}
         filters={filters}
         filterQuery={filterQuery}
         filterQueryDraft={filterQueryDraft}
@@ -161,6 +174,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         timelineId={timelineId}
         to={to}
         toStr={toStr}
+        updateEventType={handleUpdateEventType}
         updateKqlMode={updateKqlMode!}
         updateReduxTime={updateReduxTime}
       />
@@ -168,6 +182,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
   },
   (prevProps, nextProps) => {
     return (
+      prevProps.eventType === nextProps.eventType &&
       prevProps.from === nextProps.from &&
       prevProps.fromStr === nextProps.fromStr &&
       prevProps.to === nextProps.to &&
@@ -196,11 +211,12 @@ const makeMapStateToProps = () => {
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const getInputsPolicy = inputsSelectors.getTimelinePolicySelector();
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, timelineId);
+    const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const policy: inputsModel.Policy = getInputsPolicy(state);
     return {
       dataProviders: timeline.dataProviders,
+      eventType: timeline.eventType ?? 'raw',
       filterQuery: getKqlFilterQuery(state, timelineId),
       filterQueryDraft: getKqlFilterQueryDraft(state, timelineId),
       filters: timeline.filters,
@@ -225,6 +241,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
         filterQuery,
       })
     ),
+  updateEventType: ({ id, eventType }: { id: string; eventType: EventType }) =>
+    dispatch(timelineActions.updateEventType({ id, eventType })),
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) =>
     dispatch(timelineActions.updateKqlMode({ id, kqlMode })),
   setKqlFilterQueryDraft: ({

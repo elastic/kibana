@@ -10,4 +10,4 @@ import { ApmPlugin, ApmPluginSetup, ApmPluginStart } from './plugin';
 export const plugin: PluginInitializer<
   ApmPluginSetup,
   ApmPluginStart
-> = _core => new ApmPlugin();
+> = pluginInitializerContext => new ApmPlugin(pluginInitializerContext);

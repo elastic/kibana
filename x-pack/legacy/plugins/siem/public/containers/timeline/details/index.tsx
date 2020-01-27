@@ -8,10 +8,10 @@ import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
-import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { DetailItem, GetTimelineDetailsQuery } from '../../../graphql/types';
+import { useUiSetting } from '../../../lib/kibana';
 
 import { timelineDetailsQuery } from './index.gql_query';
 
@@ -32,33 +32,39 @@ const getDetailsEvent = memoizeOne(
   (variables: string, detail: DetailItem[]): DetailItem[] => detail
 );
 
-export const TimelineDetailsComponentQuery = React.memo<TimelineDetailsProps>(
-  ({ children, indexName, eventId, executeQuery, sourceId }) => {
-    const variables: GetTimelineDetailsQuery.Variables = {
-      sourceId,
-      indexName,
-      eventId,
-      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-    };
-    return executeQuery ? (
-      <Query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>
-        query={timelineDetailsQuery}
-        fetchPolicy="network-only"
-        notifyOnNetworkStatusChange
-        variables={variables}
-      >
-        {({ data, loading, refetch }) => {
-          return children!({
-            loading,
-            detailsData: getDetailsEvent(
-              JSON.stringify(variables),
-              getOr([], 'source.TimelineDetails.data', data)
-            ),
-          });
-        }}
-      </Query>
-    ) : (
-      children!({ loading: false, detailsData: null })
-    );
-  }
-);
+const TimelineDetailsQueryComponent: React.FC<TimelineDetailsProps> = ({
+  children,
+  indexName,
+  eventId,
+  executeQuery,
+  sourceId,
+}) => {
+  const variables: GetTimelineDetailsQuery.Variables = {
+    sourceId,
+    indexName,
+    eventId,
+    defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+  };
+  return executeQuery ? (
+    <Query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>
+      query={timelineDetailsQuery}
+      fetchPolicy="network-only"
+      notifyOnNetworkStatusChange
+      variables={variables}
+    >
+      {({ data, loading, refetch }) =>
+        children!({
+          loading,
+          detailsData: getDetailsEvent(
+            JSON.stringify(variables),
+            getOr([], 'source.TimelineDetails.data', data)
+          ),
+        })
+      }
+    </Query>
+  ) : (
+    children!({ loading: false, detailsData: null })
+  );
+};
+
+export const TimelineDetailsQuery = React.memo(TimelineDetailsQueryComponent);

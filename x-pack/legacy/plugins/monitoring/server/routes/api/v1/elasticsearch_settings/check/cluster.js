@@ -15,7 +15,7 @@ export function clusterSettingsCheckRoute(server) {
     method: 'GET',
     path: '/api/monitoring/v1/elasticsearch_settings/check/cluster',
     config: {
-      validate: {}
+      validate: {},
     },
     async handler(req) {
       try {
@@ -24,6 +24,6 @@ export function clusterSettingsCheckRoute(server) {
       } catch (err) {
         throw handleSettingsError(err);
       }
-    }
+    },
   });
 }

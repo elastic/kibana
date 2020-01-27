@@ -17,6 +17,9 @@
  * under the License.
  */
 import { IContextProvider, IContextContainer } from '../context';
+import { ICspConfig } from '../csp';
+import { GetAuthState, IsAuthenticated } from './auth_state_storage';
+import { GetAuthHeaders } from './auth_headers_storage';
 import { RequestHandler, IRouter } from './router';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
@@ -24,6 +27,7 @@ import { SessionStorageFactory } from './session_storage';
 import { AuthenticationHandler } from './lifecycle/auth';
 import { OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
+import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
 import { PluginOpaqueId, RequestHandlerContext } from '..';
 
@@ -164,10 +168,40 @@ export interface HttpServiceSetup {
   registerOnPostAuth: (handler: OnPostAuthHandler) => void;
 
   /**
+   * To define custom logic to perform for the server response.
+   *
+   * @remarks
+   * Doesn't provide the whole response object.
+   * Supports extending response with custom headers.
+   * See {@link OnPreResponseHandler}.
+   *
+   * @param handler {@link OnPreResponseHandler} - function to call.
+   */
+  registerOnPreResponse: (handler: OnPreResponseHandler) => void;
+
+  /**
    * Access or manipulate the Kibana base path
    * See {@link IBasePath}.
    */
   basePath: IBasePath;
+
+  auth: {
+    /**
+     * Gets authentication state for a request. Returned by `auth` interceptor.
+     * {@link GetAuthState}
+     */
+    get: GetAuthState;
+    /**
+     * Returns authentication status for a request.
+     * {@link IsAuthenticated}
+     */
+    isAuthenticated: IsAuthenticated;
+  };
+
+  /**
+   * The CSP config used for Kibana.
+   */
+  csp: ICspConfig;
 
   /**
    * Flag showing whether a server was configured to use TLS connection.
@@ -226,21 +260,12 @@ export interface InternalHttpServiceSetup
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
   createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+  getAuthHeaders: GetAuthHeaders;
   registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
     provider: RequestHandlerContextProvider<T>
   ) => RequestHandlerContextContainer;
-  config: {
-    /**
-     * @internalRemarks
-     * Deprecated part of the server config, provided until
-     * https://github.com/elastic/kibana/issues/40255
-     *
-     * @deprecated
-     * */
-    defaultRoute?: string;
-  };
 }
 
 /** @public */

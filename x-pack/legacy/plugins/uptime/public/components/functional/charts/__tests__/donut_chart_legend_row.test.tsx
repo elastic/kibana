@@ -11,7 +11,7 @@ import React from 'react';
 describe('DonutChartLegendRow', () => {
   it('passes appropriate props', () => {
     const wrapper = shallowWithIntl(
-      <DonutChartLegendRow color="green" message="Foo" content={23} />
+      <DonutChartLegendRow color="green" message="Foo" content={23} data-test-subj="foo" />
     );
     expect(wrapper).toMatchSnapshot();
   });

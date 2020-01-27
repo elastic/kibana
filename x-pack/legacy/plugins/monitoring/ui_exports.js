@@ -5,8 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { resolve } from 'path';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 /**
  * Configuration of dependency objects for the UI, which are needed for the
@@ -16,7 +16,9 @@ import { resolve } from 'path';
  */
 export const getUiExports = () => ({
   app: {
-    title: i18n.translate('xpack.monitoring.stackMonitoringTitle', { defaultMessage: 'Stack Monitoring' }),
+    title: i18n.translate('xpack.monitoring.stackMonitoringTitle', {
+      defaultMessage: 'Stack Monitoring',
+    }),
     order: 9002,
     description: i18n.translate('xpack.monitoring.uiExportsDescription', {
       defaultMessage: 'Monitoring for Elastic Stack',
@@ -25,15 +27,15 @@ export const getUiExports = () => ({
     euiIconType: 'monitoringApp',
     linkToLastSubUrl: false,
     main: 'plugins/monitoring/monitoring',
+    category: DEFAULT_APP_CATEGORIES.management,
   },
   injectDefaultVars(server) {
     const config = server.config();
     return {
       monitoringUiEnabled: config.get('xpack.monitoring.ui.enabled'),
-      isOnCloud: get(server.plugins, 'cloud.config.isCloudEnabled', false)
     };
   },
-  hacks: [ 'plugins/monitoring/hacks/toggle_app_link_in_nav' ],
-  home: [ 'plugins/monitoring/register_feature' ],
+  hacks: ['plugins/monitoring/hacks/toggle_app_link_in_nav'],
+  home: ['plugins/monitoring/register_feature'],
   styleSheetPaths: resolve(__dirname, 'public/index.scss'),
 });

@@ -25,7 +25,7 @@ export function parse(command, options) {
     silent: options.silent || false,
     config: options.config || '',
     pluginDir: options.pluginDir || '',
-    plugin: command
+    plugin: command,
   };
 
   settings.pluginPath = resolve(settings.pluginDir, settings.plugin);

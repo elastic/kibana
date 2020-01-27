@@ -19,13 +19,13 @@
 
 import { Subscription } from 'rxjs';
 
-import { UiSettingsClientContract } from '../../ui_settings';
+import { IUiSettingsClient } from '../../ui_settings';
 import { CoreService } from '../../../types';
 // @ts-ignore
 import disableAnimationsCss from '!!raw-loader!./disable_animations.css';
 
 interface StartDeps {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */

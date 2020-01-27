@@ -6,17 +6,28 @@
 
 import { Observable } from 'rxjs';
 import { Annotation } from '../../../../common/types/annotations';
+import { Dictionary } from '../../../../common/types/common';
 import { AggFieldNamePair } from '../../../../common/types/fields';
+import { Category } from '../../../../common/types/categories';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../../common/types/privileges';
-import { MlSummaryJobs } from '../../../../common/types/jobs';
+import { MlJobWithTimeRange, MlSummaryJobs } from '../../../../common/types/jobs';
 import { MlServerDefaults, MlServerLimits } from '../ml_server_info';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { JobMessage } from '../../../../common/types/audit_message';
 import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common/analytics';
 import { DeepPartial } from '../../../../common/types/common';
+import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 import { annotations } from './annotations';
+import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
+import { CombinedJob, JobId } from '../../jobs/new_job/common/job_creator/configs';
+import {
+  CategorizationAnalyzer,
+  CategoryFieldExample,
+  FieldExampleCheck,
+} from '../../../../common/types/categories';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/new_job';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -63,6 +74,18 @@ export interface MlInfoResponse {
   cloudId?: string;
 }
 
+export interface SuccessCardinality {
+  id: 'success_cardinality';
+}
+
+export interface CardinalityModelPlotHigh {
+  id: 'cardinality_model_plot_high';
+  modelPlotCardinality: number;
+}
+
+export type CardinalityValidationResult = SuccessCardinality | CardinalityModelPlotHigh;
+export type CardinalityValidationResults = CardinalityValidationResult[];
+
 declare interface Ml {
   annotations: {
     deleteAnnotation(id: string | undefined): Promise<any>;
@@ -75,9 +98,7 @@ declare interface Ml {
     getDataFrameAnalyticsStats(analyticsId?: string): Promise<GetDataFrameAnalyticsStatsResponse>;
     createDataFrameAnalytics(analyticsId: string, analyticsConfig: any): Promise<any>;
     evaluateDataFrameAnalytics(evaluateConfig: any): Promise<any>;
-    estimateDataFrameAnalyticsMemoryUsage(
-      jobConfig: DeepPartial<DataFrameAnalyticsConfig>
-    ): Promise<any>;
+    explainDataFrameAnalytics(jobConfig: DeepPartial<DataFrameAnalyticsConfig>): Promise<any>;
     deleteDataFrameAnalytics(analyticsId: string): Promise<any>;
     startDataFrameAnalytics(analyticsId: string): Promise<any>;
     stopDataFrameAnalytics(
@@ -94,7 +115,7 @@ declare interface Ml {
   checkManageMLPrivileges(): Promise<PrivilegesResponse>;
   getJobStats(obj: object): Promise<any>;
   getDatafeedStats(obj: object): Promise<any>;
-  esSearch(obj: object): any;
+  esSearch(obj: object): Promise<any>;
   esSearch$(obj: object): Observable<any>;
   getIndices(): Promise<EsIndex[]>;
   dataRecognizerModuleJobsExist(obj: { moduleId: string }): Promise<any>;
@@ -102,24 +123,28 @@ declare interface Ml {
   setupDataRecognizerConfig(obj: object): Promise<any>;
   getTimeFieldRange(obj: object): Promise<GetTimeFieldRangeResponse>;
   calculateModelMemoryLimit(obj: object): Promise<{ modelMemoryLimit: string }>;
-  calendars(): Promise<
-    Array<{
-      calendar_id: string;
-      description: string;
-      events: any[];
-      job_ids: string[];
-    }>
-  >;
+  calendars(obj?: { calendarId?: CalendarId; calendarIds?: CalendarId[] }): Promise<Calendar[]>;
+  updateCalendar(obj: UpdateCalendar): Promise<any>;
 
   getVisualizerFieldStats(obj: object): Promise<any>;
   getVisualizerOverallStats(obj: object): Promise<any>;
 
   results: {
     getMaxAnomalyScore: (jobIds: string[], earliestMs: number, latestMs: number) => Promise<any>;
+    fetchPartitionFieldsValues: (
+      jobId: JobId,
+      searchTerm: Record<string, string>,
+      criteriaFields: Array<{ fieldName: string; fieldValue: any }>,
+      earliestMs: number,
+      latestMs: number
+    ) => Observable<PartitionFieldsDefinition>;
   };
 
   jobs: {
     jobsSummary(jobIds: string[]): Promise<MlSummaryJobs>;
+    jobsWithTimerange(
+      dateFormatTz: string
+    ): Promise<{ jobs: MlJobWithTimeRange[]; jobsMap: Dictionary<MlJobWithTimeRange> }>;
     jobs(jobIds: string[]): Promise<object>;
     groups(): Promise<object>;
     updateGroups(updatedJobs: string[]): Promise<object>;
@@ -157,6 +182,25 @@ declare interface Ml {
       start: number,
       end: number
     ): Promise<{ progress: number; isRunning: boolean; isJobClosed: boolean }>;
+    categorizationFieldExamples(
+      indexPatternTitle: string,
+      query: object,
+      size: number,
+      field: string,
+      timeField: string | undefined,
+      start: number,
+      end: number,
+      analyzer: CategorizationAnalyzer
+    ): Promise<{
+      examples: CategoryFieldExample[];
+      sampleSize: number;
+      overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
+      validationChecks: FieldExampleCheck[];
+    }>;
+    topCategories(
+      jobId: string,
+      count: number
+    ): Promise<{ total: number; categories: Array<{ count?: number; category: Category }> }>;
   };
 
   estimateBucketSpan(data: BucketSpanEstimatorData): Promise<BucketSpanEstimatorResponse>;
@@ -164,6 +208,7 @@ declare interface Ml {
   mlNodeCount(): Promise<{ count: number }>;
   mlInfo(): Promise<MlInfoResponse>;
   getCardinalityOfFields(obj: Record<string, any>): any;
+  validateCardinality$(job: CombinedJob): Observable<CardinalityValidationResults>;
 }
 
 declare const ml: Ml;

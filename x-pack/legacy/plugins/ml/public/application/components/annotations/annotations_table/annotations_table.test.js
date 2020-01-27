@@ -14,14 +14,14 @@ import React from 'react';
 import { AnnotationsTable } from './annotations_table';
 
 jest.mock('ui/chrome', () => ({
-  getBasePath: (path) => path,
-  addBasePath: () => {}
+  getBasePath: path => path,
+  addBasePath: () => {},
 }));
 
 jest.mock('../../../services/job_service', () => ({
   mlJobService: {
-    getJob: jest.fn()
-  }
+    getJob: jest.fn(),
+  },
 }));
 
 jest.mock('../../../services/ml_api_service', () => {
@@ -30,11 +30,11 @@ jest.mock('../../../services/ml_api_service', () => {
   return {
     ml: {
       annotations: {
-        getAnnotations: jest.fn().mockReturnValue(mockAnnotations$)
-      }
-    }
-  };}
-);
+        getAnnotations: jest.fn().mockReturnValue(mockAnnotations$),
+      },
+    },
+  };
+});
 
 describe('AnnotationsTable', () => {
   test('Minimal initialization without props.', () => {
@@ -48,8 +48,9 @@ describe('AnnotationsTable', () => {
   });
 
   test('Initialization with annotations prop.', () => {
-    const wrapper = shallowWithIntl(<AnnotationsTable.WrappedComponent annotations={mockAnnotations.slice(0, 1)} />);
+    const wrapper = shallowWithIntl(
+      <AnnotationsTable.WrappedComponent annotations={mockAnnotations.slice(0, 1)} />
+    );
     expect(wrapper).toMatchSnapshot();
   });
-
 });

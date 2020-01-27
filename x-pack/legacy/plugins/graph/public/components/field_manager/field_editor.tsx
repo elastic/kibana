@@ -12,7 +12,6 @@ import {
   EuiComboBox,
   EuiColorPicker,
   EuiFieldNumber,
-  // @ts-ignore
   EuiHighlight,
   EuiContextMenu,
   EuiIcon,
@@ -67,6 +66,9 @@ export function FieldEditor({
     if (currentField !== initialField) {
       setCurrentField(initialField);
     }
+    // this hook only updates on change of the prop
+    // it's meant to reset the internal state on changes outside of the component.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialField]);
 
   function updateField() {

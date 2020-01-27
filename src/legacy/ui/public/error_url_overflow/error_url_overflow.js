@@ -26,26 +26,33 @@ import { UrlOverflowService } from './url_overflow_service';
 
 export * from './url_overflow_service';
 
-uiRoutes
-  .when('/error/url-overflow', {
-    template,
-    k7Breadcrumbs: () => [{ text: i18n.translate('common.ui.errorUrlOverflow.breadcrumbs.errorText', { defaultMessage: 'Error' }) }],
-    controllerAs: 'controller',
-    controller: class OverflowController {
-      constructor(Private, $scope) {
-        const kbnUrl = Private(KbnUrlProvider);
-        const urlOverflow = new UrlOverflowService();
+uiRoutes.when('/error/url-overflow', {
+  template,
+  k7Breadcrumbs: () => [
+    {
+      text: i18n.translate('common.ui.errorUrlOverflow.breadcrumbs.errorText', {
+        defaultMessage: 'Error',
+      }),
+    },
+  ],
+  controllerAs: 'controller',
+  controller: class OverflowController {
+    constructor(Private, $scope) {
+      const kbnUrl = Private(KbnUrlProvider);
+      const urlOverflow = new UrlOverflowService();
 
-        if (!urlOverflow.get()) {
-          kbnUrl.redirectPath('/');
-          return;
-        }
-
-        this.url = urlOverflow.get();
-        this.limit = urlOverflow.failLength();
-        this.advancedSettingsLabel = i18n.translate('common.ui.errorUrlOverflow.howTofixError.enableOptionText.advancedSettingsLinkText',
-          { defaultMessage: 'advanced settings' });
-        $scope.$on('$destroy', () => urlOverflow.clear());
+      if (!urlOverflow.get()) {
+        kbnUrl.redirectPath('/');
+        return;
       }
+
+      this.url = urlOverflow.get();
+      this.limit = urlOverflow.failLength();
+      this.advancedSettingsLabel = i18n.translate(
+        'common.ui.errorUrlOverflow.howTofixError.enableOptionText.advancedSettingsLinkText',
+        { defaultMessage: 'advanced settings' }
+      );
+      $scope.$on('$destroy', () => urlOverflow.clear());
     }
-  });
+  },
+});

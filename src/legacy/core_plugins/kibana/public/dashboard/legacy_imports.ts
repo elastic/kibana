@@ -27,12 +27,8 @@
 import chrome from 'ui/chrome';
 
 export const legacyChrome = chrome;
-export { State } from 'ui/state_management/state';
-export { AppState } from 'ui/state_management/app_state';
-export { AppStateClass } from 'ui/state_management/app_state';
-export { SaveOptions } from 'ui/saved_objects/saved_object';
+export { SavedObjectSaveOpts } from 'ui/saved_objects/types';
 export { npSetup, npStart } from 'ui/new_platform';
-export { SavedObjectRegistryProvider } from 'ui/saved_objects';
 export { IPrivate } from 'ui/private';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
@@ -46,8 +42,6 @@ export { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
 export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 // @ts-ignore
-export { AppStateProvider } from 'ui/state_management/app_state';
-// @ts-ignore
 export { PrivateProvider } from 'ui/private/private';
 // @ts-ignore
 export { EventsProvider } from 'ui/events';
@@ -57,12 +51,13 @@ export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_to
 // @ts-ignore
 export { PromiseServiceCreator } from 'ui/promises/promises';
 // @ts-ignore
-export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
+export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url/index';
 // @ts-ignore
 export { confirmModalFactory } from 'ui/modals/confirm_modal';
 export { configureAppAngularModule } from 'ui/legacy_compat';
-export { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_monitor_factory';
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
-export { unhashUrl } from 'ui/state_management/state_hashing';
 export { IInjector } from 'ui/chrome';
-export { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+export { SavedObjectLoader } from 'ui/saved_objects';
+export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
+export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
+export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';

@@ -3,41 +3,38 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
 
 import React, { useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
+import { cloneDeep } from 'lodash';
 
 import { SortDirection, SORT_DIRECTION } from '../../../../../components/ml_in_memory_table';
 
 import { ml } from '../../../../../services/ml_api_service';
 import { getNestedProperty } from '../../../../../util/object_utils';
-import { SavedSearchQuery } from '../../../../../contexts/kibana';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 
 import {
-  getDefaultRegressionFields,
+  getDefaultFieldsFromJobCaps,
   getFlattenedFields,
   DataFrameAnalyticsConfig,
   EsFieldName,
-  getPredictedFieldName,
   INDEX_STATUS,
   SEARCH_SIZE,
-  defaultSearchQuery,
   SearchQuery,
 } from '../../../../common';
+import { Field } from '../../../../../../../common/types/fields';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../../src/plugins/data/public';
+import {
+  LoadExploreDataArg,
+  defaultSearchQuery,
+  ResultsSearchQuery,
+  isResultsSearchBoolQuery,
+} from '../../../../common/analytics';
 
 export type TableItem = Record<string, any>;
 
-interface LoadExploreDataArg {
-  field: string;
-  direction: SortDirection;
-  searchQuery: SavedSearchQuery;
-}
 export interface UseExploreDataReturnType {
   errorMessage: string;
   loadExploreData: (arg: LoadExploreDataArg) => void;
@@ -49,8 +46,10 @@ export interface UseExploreDataReturnType {
 
 export const useExploreData = (
   jobConfig: DataFrameAnalyticsConfig | undefined,
-  selectedFields: EsFieldName[],
-  setSelectedFields: React.Dispatch<React.SetStateAction<EsFieldName[]>>
+  selectedFields: Field[],
+  setSelectedFields: React.Dispatch<React.SetStateAction<Field[]>>,
+  setDocFields: React.Dispatch<React.SetStateAction<Field[]>>,
+  setDepVarType: React.Dispatch<React.SetStateAction<ES_FIELD_TYPES | undefined>>
 ): UseExploreDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
@@ -58,21 +57,66 @@ export const useExploreData = (
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
-  const loadExploreData = async ({ field, direction, searchQuery }: LoadExploreDataArg) => {
+  const getDefaultSelectedFields = () => {
+    const { fields } = newJobCapsService;
+
+    if (selectedFields.length === 0 && jobConfig !== undefined) {
+      const {
+        selectedFields: defaultSelected,
+        docFields,
+        depVarType,
+      } = getDefaultFieldsFromJobCaps(fields, jobConfig);
+
+      setDepVarType(depVarType);
+      setSelectedFields(defaultSelected);
+      setDocFields(docFields);
+    }
+  };
+
+  const loadExploreData = async ({
+    field,
+    direction,
+    searchQuery,
+    requiresKeyword,
+  }: LoadExploreDataArg) => {
     if (jobConfig !== undefined) {
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
 
       try {
         const resultsField = jobConfig.dest.results_field;
+        const searchQueryClone: ResultsSearchQuery = cloneDeep(searchQuery);
+        let query: ResultsSearchQuery;
+
+        if (JSON.stringify(searchQuery) === JSON.stringify(defaultSearchQuery)) {
+          query = {
+            exists: {
+              field: resultsField,
+            },
+          };
+        } else if (isResultsSearchBoolQuery(searchQueryClone)) {
+          if (searchQueryClone.bool.must === undefined) {
+            searchQueryClone.bool.must = [];
+          }
+
+          searchQueryClone.bool.must.push({
+            exists: {
+              field: resultsField,
+            },
+          });
+
+          query = searchQueryClone;
+        } else {
+          query = searchQueryClone;
+        }
         const body: SearchQuery = {
-          query: searchQuery,
+          query,
         };
 
         if (field !== undefined) {
           body.sort = [
             {
-              [field]: {
+              [`${field}${requiresKeyword ? '.keyword' : ''}`]: {
                 order: direction,
               },
             },
@@ -94,11 +138,6 @@ export const useExploreData = (
           setTableItems([]);
           setStatus(INDEX_STATUS.LOADED);
           return;
-        }
-
-        if (selectedFields.length === 0) {
-          const newSelectedFields = getDefaultRegressionFields(docs, jobConfig);
-          setSelectedFields(newSelectedFields);
         }
 
         // Create a version of the doc's source with flattened field names.
@@ -144,11 +183,7 @@ export const useExploreData = (
 
   useEffect(() => {
     if (jobConfig !== undefined) {
-      loadExploreData({
-        field: getPredictedFieldName(jobConfig.dest.results_field, jobConfig.analysis),
-        direction: SORT_DIRECTION.DESC,
-        searchQuery: defaultSearchQuery,
-      });
+      getDefaultSelectedFields();
     }
   }, [jobConfig && jobConfig.id]);
 

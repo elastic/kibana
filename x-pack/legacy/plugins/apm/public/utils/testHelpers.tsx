@@ -11,14 +11,24 @@ import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { render, waitForElement } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { MemoryRouter } from 'react-router-dom';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../../../../plugins/apm/server';
 import { LocationProvider } from '../context/LocationContext';
 import { PromiseReturnType } from '../../typings/common';
-import { ESFilter } from '../../typings/elasticsearch';
+import {
+  ESFilter,
+  ESSearchResponse,
+  ESSearchRequest
+} from '../../typings/elasticsearch';
+import {
+  ApmPluginContext,
+  ApmPluginContextValue
+} from '../context/ApmPluginContext';
+import { ConfigSchema } from '../new-platform/plugin';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -46,14 +56,15 @@ export function mockMoment() {
 // Useful for getting the rendered href from any kind of link component
 export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
-    <MemoryRouter initialEntries={[location]}>
-      <LocationProvider>
-        <Component />
-      </LocationProvider>
-    </MemoryRouter>
+    <MockApmPluginContextWrapper>
+      <MemoryRouter initialEntries={[location]}>
+        <LocationProvider>
+          <Component />
+        </LocationProvider>
+      </MemoryRouter>
+    </MockApmPluginContextWrapper>
   );
 
-  await tick();
   await waitForElement(() => el.container.querySelector('a'));
 
   const a = el.container.querySelector('a');
@@ -68,9 +79,6 @@ export function mockNow(date: string | number | Date) {
 export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-// Await this when you need to "flush" promises to immediately resolve or throw in tests
-export const tick = () => new Promise(resolve => setImmediate(resolve, 0));
 
 export function expectTextsNotInDocument(output: any, texts: string[]) {
   texts.forEach(text => {
@@ -113,29 +121,41 @@ interface MockSetup {
   };
 }
 
+interface Options {
+  mockResponse?: (
+    request: ESSearchRequest
+  ) => ESSearchResponse<unknown, ESSearchRequest>;
+}
+
 export async function inspectSearchParams(
-  fn: (mockSetup: MockSetup) => Promise<any>
+  fn: (mockSetup: MockSetup) => Promise<any>,
+  options: Options = {}
 ) {
-  const clientSpy = jest.fn().mockReturnValueOnce({
-    hits: {
-      total: 0
-    }
+  const spy = jest.fn().mockImplementation(async request => {
+    return options.mockResponse
+      ? options.mockResponse(request)
+      : {
+          hits: {
+            hits: {
+              total: {
+                value: 0
+              }
+            }
+          }
+        };
   });
 
-  const internalClientSpy = jest.fn().mockReturnValueOnce({
-    hits: {
-      total: 0
-    }
-  });
+  let response;
+  let error;
 
   const mockSetup = {
     start: 1528113600000,
     end: 1528977600000,
     client: {
-      search: clientSpy
+      search: spy
     } as any,
     internalClient: {
-      search: internalClientSpy
+      search: spy
     } as any,
     config: new Proxy(
       {},
@@ -160,22 +180,69 @@ export async function inspectSearchParams(
     dynamicIndexPattern: null as any
   };
   try {
-    await fn(mockSetup);
-  } catch {
+    response = await fn(mockSetup);
+  } catch (err) {
+    error = err;
     // we're only extracting the search params
   }
 
-  let params;
-  if (clientSpy.mock.calls.length) {
-    params = clientSpy.mock.calls[0][0];
-  } else {
-    params = internalClientSpy.mock.calls[0][0];
-  }
-
   return {
-    params,
-    teardown: () => clientSpy.mockClear()
+    params: spy.mock.calls[0][0],
+    response,
+    error,
+    spy,
+    teardown: () => spy.mockClear()
   };
 }
 
 export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
+
+const mockCore = {
+  chrome: {
+    setBreadcrumbs: () => {}
+  },
+  http: {
+    basePath: {
+      prepend: (path: string) => `/basepath${path}`
+    }
+  },
+  notifications: {
+    toasts: {
+      addWarning: () => {}
+    }
+  }
+};
+
+const mockConfig: ConfigSchema = {
+  indexPatternTitle: 'apm-*',
+  serviceMapEnabled: false,
+  ui: {
+    enabled: false
+  }
+};
+
+export const mockApmPluginContextValue = {
+  config: mockConfig,
+  core: mockCore,
+  packageInfo: { version: '0' },
+  plugins: {}
+};
+
+export function MockApmPluginContextWrapper({
+  children,
+  value = {} as ApmPluginContextValue
+}: {
+  children?: ReactNode;
+  value?: ApmPluginContextValue;
+}) {
+  return (
+    <ApmPluginContext.Provider
+      value={{
+        ...mockApmPluginContextValue,
+        ...value
+      }}
+    >
+      {children}
+    </ApmPluginContext.Provider>
+  );
+}

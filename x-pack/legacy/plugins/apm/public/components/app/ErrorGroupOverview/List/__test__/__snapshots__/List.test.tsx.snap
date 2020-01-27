@@ -74,7 +74,6 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               >
                 <div
                   className="euiPopover euiPopover--anchorDownRight"
-                  id="sortPopover"
                   onKeyDown={[Function]}
                   onMouseDown={[Function]}
                   onMouseUp={[Function]}
@@ -93,10 +92,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                         className="euiButtonEmpty__content"
                       >
                         <svg
-                          aria-hidden="true"
+                          aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
                           focusable="false"
                           height={16}
+                          role="img"
                           style={null}
                           viewBox="0 0 16 16"
                           width={16}
@@ -251,10 +251,12 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                     Latest occurrence
                   </span>
                   <svg
+                    aria-hidden={true}
                     aria-label="Sorted in descending order"
                     className="euiIcon euiIcon--medium euiIcon-isLoading euiTableSortIcon"
                     focusable="false"
                     height={16}
+                    role="img"
                     style={null}
                     viewBox="0 0 16 16"
                     width={16}
@@ -296,29 +298,6 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
           </tr>
         </tbody>
       </table>
-    </div>
-    <div>
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        responsive={false}
-      >
-        <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          />
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <span />
-          </div>
-        </div>
-      </EuiFlexGroup>
     </div>
   </div>
 </Memo(UnoptimizedManagedTable)>
@@ -453,7 +432,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <div
                   className="euiPopover euiPopover--anchorDownRight"
-                  id="sortPopover"
                   onKeyDown={[Function]}
                   onMouseDown={[Function]}
                   onMouseUp={[Function]}
@@ -472,10 +450,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                         className="euiButtonEmpty__content"
                       >
                         <svg
-                          aria-hidden="true"
+                          aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
                           focusable="false"
                           height={16}
+                          role="img"
                           style={null}
                           viewBox="0 0 16 16"
                           width={16}
@@ -630,10 +609,12 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     Latest occurrence
                   </span>
                   <svg
+                    aria-hidden={true}
                     aria-label="Sorted in descending order"
                     className="euiIcon euiIcon--medium euiIcon-isLoading euiTableSortIcon"
                     focusable="false"
                     height={16}
+                    role="img"
                     style={null}
                     viewBox="0 0 16 16"
                     width={16}
@@ -1351,7 +1332,68 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <span />
+            <div
+              className="euiPagination"
+              role="group"
+            >
+              <button
+                aria-label="Previous page"
+                className="euiButtonIcon euiButtonIcon--text"
+                data-test-subj="pagination-button-previous"
+                disabled={true}
+                onClick={[Function]}
+                type="button"
+              >
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </button>
+              <button
+                aria-label="Page 1 of 1"
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                data-test-subj="pagination-button-0"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiButtonEmpty__content"
+                >
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    1
+                  </span>
+                </span>
+              </button>
+              <button
+                aria-label="Next page"
+                className="euiButtonIcon euiButtonIcon--text"
+                data-test-subj="pagination-button-next"
+                disabled={true}
+                onClick={[Function]}
+                type="button"
+              >
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </button>
+            </div>
           </div>
         </div>
       </EuiFlexGroup>

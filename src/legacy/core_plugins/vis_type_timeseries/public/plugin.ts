@@ -22,7 +22,7 @@ import {
   CoreStart,
   Plugin,
   SavedObjectsClientContract,
-  UiSettingsClientContract,
+  IUiSettingsClient,
 } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
@@ -37,7 +37,7 @@ export interface MetricsPluginSetupDependencies {
   visualizations: VisualizationsSetup;
 }
 export interface MetricsVisualizationDependencies {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   savedObjectsClient: SavedObjectsClientContract;
 }
 

@@ -10,7 +10,7 @@ export const getRemoteClusterMock = ({
   isConnected = true,
   connectedNodesCount = 1,
   seeds = ['localhost:9400'],
-  isConfiguredByNode = false
+  isConfiguredByNode = false,
 } = {}) => ({
   name,
   seeds,

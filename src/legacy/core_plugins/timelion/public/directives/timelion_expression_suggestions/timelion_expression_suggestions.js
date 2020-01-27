@@ -31,9 +31,9 @@ export function TimelionExpressionSuggestions() {
     },
     replace: true,
     template,
-    link: function (scope) {
+    link: function(scope) {
       // This will prevent the expression input from losing focus.
       scope.onMouseDown = e => e.preventDefault();
-    }
+    },
   };
 }

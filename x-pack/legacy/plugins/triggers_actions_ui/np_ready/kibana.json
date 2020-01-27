@@ -1,0 +1,6 @@
+{
+    "id": "triggers_actions_ui",
+    "version": "kibana",
+    "server": false,
+    "ui": true
+  }

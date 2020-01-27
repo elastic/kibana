@@ -8,12 +8,9 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { ClickOutside } from './click_outside';
 
-
 describe('ClickOutside', () => {
-
   test('snapshot', () => {
     const wrapper = shallow(<ClickOutside onClickOutside={() => {}} />);
     expect(wrapper).toMatchSnapshot();
   });
-
 });

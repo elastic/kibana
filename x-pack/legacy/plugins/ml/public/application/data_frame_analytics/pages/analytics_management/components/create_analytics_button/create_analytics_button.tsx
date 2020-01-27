@@ -27,7 +27,7 @@ export const CreateAnalyticsButton: FC<CreateAnalyticsFormProps> = props => {
       onClick={openModal}
       iconType="plusInCircle"
       size="s"
-      data-test-subj="mlDataFrameAnalyticsButtonCreate"
+      data-test-subj="mlAnalyticsButtonCreate"
     >
       {i18n.translate('xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton', {
         defaultMessage: 'Create analytics job',

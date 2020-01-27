@@ -6,17 +6,13 @@
 
 import _ from 'lodash';
 import React from 'react';
-import {
-  FEATURE_ID_PROPERTY_NAME,
-  LAT_INDEX,
-  LON_INDEX,
-} from '../../../../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME, LAT_INDEX, LON_INDEX } from '../../../../../common/constants';
 import { FeaturesTooltip } from '../../features_tooltip/features_tooltip';
 import { EuiPopover, EuiText } from '@elastic/eui';
 
 export const TOOLTIP_TYPE = {
   HOVER: 'HOVER',
-  LOCKED: 'LOCKED'
+  LOCKED: 'LOCKED',
 };
 
 const noop = () => {};
@@ -39,7 +35,6 @@ function justifyAnchorLocation(mbLngLat, targetFeature) {
 }
 
 export class TooltipControl extends React.Component {
-
   state = {
     x: undefined,
     y: undefined,
@@ -89,7 +84,7 @@ export class TooltipControl extends React.Component {
     if (this.props.tooltipState && this.props.tooltipState.type !== TOOLTIP_TYPE.LOCKED) {
       this.props.clearTooltipState();
     }
-  }
+  };
 
   _updatePopoverPosition = () => {
     if (!this.props.tooltipState) {
@@ -99,10 +94,12 @@ export class TooltipControl extends React.Component {
     const lat = this.props.tooltipState.location[LAT_INDEX];
     const lon = this.props.tooltipState.location[LON_INDEX];
     const bounds = this.props.mbMap.getBounds();
-    if (lat > bounds.getNorth()
-      || lat < bounds.getSouth()
-      || lon < bounds.getWest()
-      || lon > bounds.getEast()) {
+    if (
+      lat > bounds.getNorth() ||
+      lat < bounds.getSouth() ||
+      lon < bounds.getWest() ||
+      lon > bounds.getEast()
+    ) {
       this.props.clearTooltipState();
       return;
     }
@@ -110,12 +107,12 @@ export class TooltipControl extends React.Component {
     const nextPoint = this.props.mbMap.project(this.props.tooltipState.location);
     this.setState({
       x: nextPoint.x,
-      y: nextPoint.y
+      y: nextPoint.y,
     });
-  }
+  };
 
   _getLayerByMbLayerId(mbLayerId) {
-    return this.props.layerList.find((layer) => {
+    return this.props.layerList.find(layer => {
       const mbLayerIds = layer.getMbLayerIds();
       return mbLayerIds.indexOf(mbLayerId) > -1;
     });
@@ -149,13 +146,13 @@ export class TooltipControl extends React.Component {
     return uniqueFeatures;
   }
 
-  _lockTooltip =  (e) => {
+  _lockTooltip = e => {
     if (this.props.isDrawingFilter) {
       //ignore click events when in draw mode
       return;
     }
 
-    this._updateHoverTooltipState.cancel();//ignore any possible moves
+    this._updateHoverTooltipState.cancel(); //ignore any possible moves
 
     const mbFeatures = this._getFeaturesUnderPointer(e.point);
     if (!mbFeatures.length) {
@@ -170,11 +167,11 @@ export class TooltipControl extends React.Component {
     this.props.setTooltipState({
       type: TOOLTIP_TYPE.LOCKED,
       features: features,
-      location: popupAnchorLocation
+      location: popupAnchorLocation,
     });
   };
 
-  _updateHoverTooltipState = _.debounce((e) => {
+  _updateHoverTooltipState = _.debounce(e => {
     if (this.props.isDrawingFilter) {
       //ignore hover events when in draw mode
       return;
@@ -204,9 +201,8 @@ export class TooltipControl extends React.Component {
     this.props.setTooltipState({
       type: TOOLTIP_TYPE.HOVER,
       features: features,
-      location: popupAnchorLocation
+      location: popupAnchorLocation,
     });
-
   }, 100);
 
   _getMbLayerIdsForTooltips() {
@@ -219,7 +215,7 @@ export class TooltipControl extends React.Component {
     //For example:
     //a vector or heatmap layer will not add a source and layer to the mapbox-map, until that data is available.
     //during that data-fetch window, the app should not query for layers that do not exist.
-    return mbLayerIds.filter((mbLayerId) => {
+    return mbLayerIds.filter(mbLayerId => {
       return !!this.props.mbMap.getLayer(mbLayerId);
     });
   }
@@ -230,16 +226,16 @@ export class TooltipControl extends React.Component {
     }
 
     const mbLayerIds = this._getMbLayerIdsForTooltips();
-    const PADDING = 2;//in pixels
+    const PADDING = 2; //in pixels
     const mbBbox = [
       {
         x: mbLngLatPoint.x - PADDING,
-        y: mbLngLatPoint.y - PADDING
+        y: mbLngLatPoint.y - PADDING,
       },
       {
         x: mbLngLatPoint.x + PADDING,
-        y: mbLngLatPoint.y + PADDING
-      }
+        y: mbLngLatPoint.y + PADDING,
+      },
     ];
     return this.props.mbMap.queryRenderedFeatures(mbBbox, { layers: mbLayerIds });
   }
@@ -287,20 +283,20 @@ export class TooltipControl extends React.Component {
     return await tooltipLayer.getSource().getPreIndexedShape(targetFeature.properties);
   };
 
-  _findLayerById = (layerId) => {
+  _findLayerById = layerId => {
     return this.props.layerList.find(layer => {
       return layer.getId() === layerId;
     });
   };
 
-  _getLayerName = async (layerId) => {
+  _getLayerName = async layerId => {
     const layer = this._findLayerById(layerId);
     if (!layer) {
       return null;
     }
 
     return layer.getDisplayName();
-  }
+  };
 
   _renderTooltipContent = () => {
     const publicProps = {
@@ -327,14 +323,16 @@ export class TooltipControl extends React.Component {
         />
       </EuiText>
     );
-  }
+  };
 
   render() {
     if (!this.props.tooltipState) {
       return null;
     }
 
-    const tooltipAnchor = <div style={{ height: '26px', width: '26px', background: 'transparent' }}/>;
+    const tooltipAnchor = (
+      <div style={{ height: '26px', width: '26px', background: 'transparent' }} />
+    );
     return (
       <EuiPopover
         id="mapTooltip"
@@ -345,7 +343,7 @@ export class TooltipControl extends React.Component {
         ref={this._popoverRef}
         style={{
           pointerEvents: 'none',
-          transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`
+          transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`,
         }}
       >
         {this._renderTooltipContent()}

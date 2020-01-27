@@ -95,9 +95,11 @@ describe('Histogram', () => {
     it('should update state with "hoveredBucket"', () => {
       expect(wrapper.state()).toEqual({
         hoveredBucket: {
-          sample: {
-            transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
-          },
+          samples: [
+            {
+              transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
+            }
+          ],
           style: { cursor: 'pointer' },
           xCenter: 869010,
           x0: 811076,
@@ -123,9 +125,11 @@ describe('Histogram', () => {
 
     it('should call onClick with bucket', () => {
       expect(onClick).toHaveBeenCalledWith({
-        sample: {
-          transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
-        },
+        samples: [
+          {
+            transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
+          }
+        ],
         style: { cursor: 'pointer' },
         xCenter: 869010,
         x0: 811076,

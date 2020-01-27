@@ -17,12 +17,11 @@ export function fetchAllFromScroll(response, callWithRequest, hits = []) {
     return callWithRequest('scroll', {
       body: {
         scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
-        scroll_id: scrollId
-      }
-    })
-      .then(innerResponse => {
-        return fetchAllFromScroll(innerResponse, callWithRequest, hits);
-      });
+        scroll_id: scrollId,
+      },
+    }).then(innerResponse => {
+      return fetchAllFromScroll(innerResponse, callWithRequest, hits);
+    });
   }
 
   return Promise.resolve(hits);

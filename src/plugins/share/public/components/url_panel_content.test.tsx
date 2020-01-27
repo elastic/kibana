@@ -28,7 +28,7 @@ const defaultProps = {
   allowShortUrl: true,
   objectType: 'dashboard',
   basePath: '',
-  post: () => Promise.resolve(),
+  post: () => Promise.resolve({} as any),
 };
 
 test('render', () => {

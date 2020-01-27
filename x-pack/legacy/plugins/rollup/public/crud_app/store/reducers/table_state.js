@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  FILTER_CHANGED,
-  PAGE_CHANGED,
-  PAGE_SIZE_CHANGED,
-  SORT_CHANGED,
-} from '../action_types';
+import { FILTER_CHANGED, PAGE_CHANGED, PAGE_SIZE_CHANGED, SORT_CHANGED } from '../action_types';
 
 const initialState = {
   filter: '',

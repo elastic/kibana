@@ -6,6 +6,38 @@ The Kibana alerting plugin provides a common place to set up alerts. You can:
 - List the types of registered alerts
 - Perform CRUD actions on alerts
 
+----
+
+Table of Contents
+
+- [Kibana alerting](#kibana-alerting)
+	- [Terminology](#terminology)
+	- [Usage](#usage)
+	- [Limitations](#limitations)
+	- [Alert types](#alert-types)
+		- [Methods](#methods)
+		- [Executor](#executor)
+		- [Example](#example)
+	- [RESTful API](#restful-api)
+		- [`POST /api/alert`: Create alert](#post-apialert-create-alert)
+		- [`DELETE /api/alert/{id}`: Delete alert](#delete-apialertid-delete-alert)
+		- [`GET /api/alert/_find`: Find alerts](#get-apialertfind-find-alerts)
+		- [`GET /api/alert/{id}`: Get alert](#get-apialertid-get-alert)
+		- [`GET /api/alert/types`: List alert types](#get-apialerttypes-list-alert-types)
+		- [`PUT /api/alert/{id}`: Update alert](#put-apialertid-update-alert)
+		- [`POST /api/alert/{id}/_enable`: Enable an alert](#post-apialertidenable-enable-an-alert)
+		- [`POST /api/alert/{id}/_disable`: Disable an alert](#post-apialertiddisable-disable-an-alert)
+		- [`POST /api/alert/{id}/_mute_all`: Mute all alert instances](#post-apialertidmuteall-mute-all-alert-instances)
+		- [`POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`: Mute alert instance](#post-apialertalertidalertinstancealertinstanceidmute-mute-alert-instance)
+		- [`POST /api/alert/{id}/_unmute_all`: Unmute all alert instances](#post-apialertidunmuteall-unmute-all-alert-instances)
+		- [`POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`: Unmute an alert instance](#post-apialertalertidalertinstancealertinstanceidunmute-unmute-an-alert-instance)
+		- [`POST /api/alert/{id}/_update_api_key`: Update alert API key](#post-apialertidupdateapikey-update-alert-api-key)
+	- [Schedule Formats](#schedule-formats)
+	- [Alert instance factory](#alert-instance-factory)
+	- [Templating actions](#templating-actions)
+	- [Examples](#examples)
+
+
 ## Terminology
 
 **Alert Type**: A function that takes parameters and executes actions to alert instances.
@@ -23,15 +55,22 @@ A Kibana alert detects a condition and executes one or more actions when that co
 
 ## Usage
 
-1. Enable the alerting plugin in the `kibana.yml` by setting `xpack.alerting.enabled: true`.
-2. Develop and register an alert type (see alert types -> example).
-3. Create an alert using the RESTful API (see alerts -> create).
+1. Develop and register an alert type (see alert types -> example).
+2. Create an alert using the RESTful API (see alerts -> create).
 
 ## Limitations
 
 When security is enabled, an SSL connection to Elasticsearch is required in order to use alerting.
 
 When security is enabled, users who create alerts will need the `manage_api_key` cluster privilege. There is currently work in progress to remove this requirement.
+
+Note that the `manage_own_api_key` cluster privilege is not enough - it can be used to create API keys, but not invalidate them, and the alerting plugin currently both creates and invalidates APIs keys as part of it's processing.  When using only the `manage_own_api_key` privilege, you will see the following message logged in the server when the alerting plugin attempts to invalidate an API key:
+
+```
+[error][alerting][plugins] Failed to invalidate API Key: [security_exception] \
+    action [cluster:admin/xpack/security/api_key/invalidate] \
+    is unauthorized for user [user-name-here]
+```
 
 ## Alert types
 
@@ -64,6 +103,13 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 |previousStartedAt|The previous date and time the alert type started a successful execution.|
 |params|Parameters for the execution. This is where the parameters you require will be passed in. (example threshold). Use alert type validation to ensure values are set before execution.|
 |state|State returned from previous execution. This is the alert level state. What the executor returns will be serialized and provided here at the next execution.|
+|alertId|The id of this alert.|
+|spaceId|The id of the space of this alert.|
+|namespace|The namespace of the space of this alert; same as spaceId, unless spaceId === 'default', then namespace = undefined.|
+|name|The name of this alert.|
+|tags|The tags associated with this alert.|
+|createdBy|The userid that created this alert.|
+|updatedBy|The userid that last updated this alert.|
 
 ### Example
 
@@ -191,7 +237,7 @@ server.plugins.alerting.setup.registerType({
 
 Using an alert type requires you to create an alert that will contain parameters and actions for a given alert type. See below for CRUD operations using the API.
 
-#### `POST /api/alert`: Create alert
+### `POST /api/alert`: Create alert
 
 Payload:
 
@@ -201,11 +247,11 @@ Payload:
 |name|A name to reference and search in the future.|string|
 |tags|A list of keywords to reference and search in the future.|string[]|
 |alertTypeId|The id value of the alert type you want to call when the alert is scheduled to execute.|string|
-|interval|The interval in seconds, minutes, hours or days the alert should execute. Example: `10s`, `5m`, `1h`, `1d`.|string|
+|schedule|The schedule specifying when this alert should be run, using one of the available schedule formats specified under _Schedule Formats_ below|object|
 |params|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
 |actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
-#### `DELETE /api/alert/{id}`: Delete alert
+### `DELETE /api/alert/{id}`: Delete alert
 
 Params:
 
@@ -213,13 +259,13 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to delete.|string|
 
-#### `GET /api/alert/_find`: Find alerts
+### `GET /api/alert/_find`: Find alerts
 
 Params:
 
 See the saved objects API documentation for find. All the properties are the same except you cannot pass in `type`.
 
-#### `GET /api/alert/{id}`: Get alert
+### `GET /api/alert/{id}`: Get alert
 
 Params:
 
@@ -227,11 +273,11 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to get.|string|
 
-#### `GET /api/alert/types`: List alert types
+### `GET /api/alert/types`: List alert types
 
 No parameters.
 
-#### `PUT /api/alert/{id}`: Update alert
+### `PUT /api/alert/{id}`: Update alert
 
 Params:
 
@@ -243,13 +289,13 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|interval|The interval in seconds, minutes, hours or days the alert should execute. Example: `10s`, `5m`, `1h`, `1d`.|string|
+|schedule|The schedule specifying when this alert should be run, using one of the available schedule formats specified under _Schedule Formats_ below|object|
 |name|A name to reference and search in the future.|string|
 |tags|A list of keywords to reference and search in the future.|string[]|
 |params|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
 |actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): There map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
-#### `POST /api/alert/{id}/_enable`: Enable an alert
+### `POST /api/alert/{id}/_enable`: Enable an alert
 
 Params:
 
@@ -257,7 +303,7 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to enable.|string|
 
-#### `POST /api/alert/{id}/_disable`: Disable an alert
+### `POST /api/alert/{id}/_disable`: Disable an alert
 
 Params:
 
@@ -265,7 +311,7 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to disable.|string|
 
-#### `POST /api/alert/{id}/_mute_all`: Mute all alert instances
+### `POST /api/alert/{id}/_mute_all`: Mute all alert instances
 
 Params:
 
@@ -273,7 +319,7 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to mute all alert instances for.|string|
 
-#### `POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`: Mute alert instance
+### `POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`: Mute alert instance
 
 Params:
 
@@ -282,7 +328,7 @@ Params:
 |alertId|The id of the alert you're trying to mute an instance for.|string|
 |alertInstanceId|The instance id of the alert instance you're trying to mute.|string|
 
-#### `POST /api/alert/{id}/_unmute_all`: Unmute all alert instances
+### `POST /api/alert/{id}/_unmute_all`: Unmute all alert instances
 
 Params:
 
@@ -290,7 +336,7 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to unmute all alert instances for.|string|
 
-#### `POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`: Unmute an alert instance
+### `POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`: Unmute an alert instance
 
 Params:
 
@@ -299,11 +345,19 @@ Params:
 |alertId|The id of the alert you're trying to unmute an instance for.|string|
 |alertInstanceId|The instance id of the alert instance you're trying to unmute.|string|
 
-#### `POST /api/alert/{id}/_update_api_key`: Update alert API key
+### `POST /api/alert/{id}/_update_api_key`: Update alert API key
 
 |Property|Description|Type|
 |---|---|---|
 |id|The id of the alert you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
+
+## Schedule Formats
+A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.
+
+We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the alert should execute.
+Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ interval: "1d" }`.
+
+There are plans to support multiple other schedule formats in the near fuiture.
 
 ## Alert instance factory
 
@@ -325,7 +379,7 @@ There needs to be a way to map alert context into action parameters. For this, w
 
 When an alert instance executes, the first argument is the `group` of actions to execute and the second is the context the alert exposes to templates. We iterate through each action params attributes recursively and render templates if they are a string. Templates have access to the `context` (provided by second argument of `.scheduleActions(...)` on an alert instance) and the alert instance's `state` (provided by the most recent `replaceState` call on an alert instance) as well as `alertId` and `alertInstanceId`.
 
-### Examples
+## Examples
 
 The following code would be within an alert type. As you can see `cpuUsage ` will replace the state of the alert instance and `server` is the context for the alert instance to execute. The difference between the two is `cpuUsage ` will be accessible at the next execution.
 

@@ -14,7 +14,7 @@ describe('handleClusterStats', () => {
     status: 'status',
     uid: '1234',
     type: 'basic',
-    expiry_date_in_millis: '1468601237000'
+    expiry_date_in_millis: '1468601237000',
   };
 
   it('handles no response by returning an empty array', () => {
@@ -24,8 +24,8 @@ describe('handleClusterStats', () => {
     expect(handleClusterStats({ hits: { total: 0 } })).to.eql([]);
     expect(handleClusterStats({ hits: { hits: [] } })).to.eql([]);
     // no _source means we can't use it:
-    expect(handleClusterStats({ hits: { hits: [ { } ] } })).to.eql([]);
-    expect(handleClusterStats({ hits: { hits: [ { '_index': '.monitoring' } ] } })).to.eql([]);
+    expect(handleClusterStats({ hits: { hits: [{}] } })).to.eql([]);
+    expect(handleClusterStats({ hits: { hits: [{ _index: '.monitoring' }] } })).to.eql([]);
   });
 
   it('handles ccs response by adding it to the cluster detail', () => {
@@ -36,11 +36,11 @@ describe('handleClusterStats', () => {
             _index: 'cluster_one:.monitoring-es-2017.07.26',
             _source: {
               // missing license
-              cluster_uuid: 'xyz'
-            }
-          }
-        ]
-      }
+              cluster_uuid: 'xyz',
+            },
+          },
+        ],
+      },
     };
 
     const clusters = handleClusterStats(response, { log: () => undefined });
@@ -60,11 +60,11 @@ describe('handleClusterStats', () => {
             _source: {
               // the cluster UUID is not valid with the license
               cluster_uuid: 'xyz',
-              license: validLicense
-            }
-          }
-        ]
-      }
+              license: validLicense,
+            },
+          },
+        ],
+      },
     };
 
     const clusters = handleClusterStats(response);
@@ -83,11 +83,11 @@ describe('handleClusterStats', () => {
             _index: '.monitoring-es-2017.07.26',
             _source: {
               cluster_uuid: validLicenseClusterUuid,
-              license: validLicense
-            }
-          }
-        ]
-      }
+              license: validLicense,
+            },
+          },
+        ],
+      },
     };
 
     const clusters = handleClusterStats(response);
@@ -106,32 +106,32 @@ describe('handleClusterStats', () => {
             _index: '.monitoring-es-2017.07.26',
             _source: {
               cluster_uuid: validLicenseClusterUuid,
-              license: validLicense
-            }
+              license: validLicense,
+            },
           },
           // fake hit with no _source; should be filtered out
           {},
           // fake hit with no _source, but an index; should be filtered out
           {
-            _index: 'bogus'
+            _index: 'bogus',
           },
           {
             _index: 'abc:.monitoring-es-2017.07.26',
             _source: {
               // the cluster UUID is not valid with the license
               cluster_uuid: 'xyz',
-              license: validLicense
-            }
+              license: validLicense,
+            },
           },
           {
             _index: 'local_cluster:.monitoring-es-2017.07.26',
             _source: {
               cluster_uuid: validLicenseClusterUuid,
-              license: validLicense
-            }
-          }
-        ]
-      }
+              license: validLicense,
+            },
+          },
+        ],
+      },
     };
 
     const clusters = handleClusterStats(response);

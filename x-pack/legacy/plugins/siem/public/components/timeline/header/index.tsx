@@ -5,9 +5,9 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 import { Sort } from '../body/sort';
 import { DataProviders } from '../data_providers';
@@ -29,7 +29,7 @@ interface Props {
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
   id: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onDataProviderEdited: OnDataProviderEdited;

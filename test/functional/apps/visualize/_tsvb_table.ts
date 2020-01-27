@@ -20,9 +20,12 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function({ getPageObjects }: FtrProviderContext) {
-  const { visualBuilder, visualize } = getPageObjects(['visualBuilder', 'visualize']);
+  const { visualBuilder, visualize, visChart } = getPageObjects([
+    'visualBuilder',
+    'visualize',
+    'visChart',
+  ]);
 
   describe('visual builder', function describeIndexTests() {
     describe('table', () => {
@@ -33,7 +36,7 @@ export default function({ getPageObjects }: FtrProviderContext) {
         await visualBuilder.checkTableTabIsPresent();
         await visualBuilder.selectGroupByField('machine.os.raw');
         await visualBuilder.setColumnLabelValue('OS');
-        await visualize.waitForVisualizationRenderingStabilized();
+        await visChart.waitForVisualizationRenderingStabilized();
       });
 
       it('should display correct values on changing group by field and column name', async () => {
@@ -52,6 +55,15 @@ export default function({ getPageObjects }: FtrProviderContext) {
         const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
         const tableData = await visualBuilder.getViewTable();
         expect(isFieldForAggregationValid).to.be(true);
+        expect(tableData).to.be(EXPECTED);
+      });
+
+      it('should render correctly after saving', async () => {
+        const EXPECTED = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
+
+        await visualize.saveVisualizationExpectSuccessAndBreadcrumb('TSVB table saving test');
+
+        const tableData = await visualBuilder.getViewTable();
         expect(tableData).to.be(EXPECTED);
       });
     });

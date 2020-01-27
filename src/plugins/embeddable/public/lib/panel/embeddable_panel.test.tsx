@@ -25,7 +25,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { IAction, ITrigger } from 'src/plugins/ui_actions/public';
+import { IAction, ITrigger, IUiActionsApi } from 'src/plugins/ui_actions/public';
 import { Trigger, GetEmbeddableFactory, ViewMode } from '../types';
 import { EmbeddableFactory, isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
@@ -42,6 +42,7 @@ import {
 } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
 // eslint-disable-next-line
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
+import { EuiBadge } from '@elastic/eui';
 
 const actionRegistry = new Map<string, IAction>();
 const triggerRegistry = new Map<string, ITrigger>();
@@ -172,6 +173,105 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
   await nextTick();
   component.update();
   expect(findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`).length).toBe(0);
+});
+
+const renderInEditModeAndOpenContextMenu = async (
+  embeddableInputs: any,
+  getActions: IUiActionsApi['getTriggerCompatibleActions'] = () => Promise.resolve([])
+) => {
+  const inspector = inspectorPluginMock.createStartContract();
+
+  const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
+    getEmbeddableFactory,
+  } as any);
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, embeddableInputs);
+
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={getActions}
+        getAllEmbeddableFactories={(() => []) as any}
+        getEmbeddableFactory={(() => undefined) as any}
+        notifications={{} as any}
+        overlays={{} as any}
+        inspector={inspector}
+        SavedObjectFinder={() => null}
+      />
+    </I18nProvider>
+  );
+
+  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  await nextTick();
+  component.update();
+
+  return { component };
+};
+
+test('HelloWorldContainer in edit mode hides disabledActions', async () => {
+  const action = {
+    id: 'FOO',
+    type: 'FOO',
+    getIconType: () => undefined,
+    getDisplayName: () => 'foo',
+    isCompatible: async () => true,
+    execute: async () => {},
+  };
+  const getActions = () => Promise.resolve([action]);
+
+  const { component: component1 } = await renderInEditModeAndOpenContextMenu(
+    {
+      firstName: 'Bob',
+    },
+    getActions
+  );
+  const { component: component2 } = await renderInEditModeAndOpenContextMenu(
+    {
+      firstName: 'Bob',
+      disabledActions: ['FOO'],
+    },
+    getActions
+  );
+
+  const fooContextMenuActionItem1 = findTestSubject(component1, 'embeddablePanelAction-FOO');
+  const fooContextMenuActionItem2 = findTestSubject(component2, 'embeddablePanelAction-FOO');
+
+  expect(fooContextMenuActionItem1.length).toBe(1);
+  expect(fooContextMenuActionItem2.length).toBe(0);
+});
+
+test('HelloWorldContainer hides disabled badges', async () => {
+  const action = {
+    id: 'BAR',
+    type: 'BAR',
+    getIconType: () => undefined,
+    getDisplayName: () => 'bar',
+    isCompatible: async () => true,
+    execute: async () => {},
+  };
+  const getActions = () => Promise.resolve([action]);
+
+  const { component: component1 } = await renderInEditModeAndOpenContextMenu(
+    {
+      firstName: 'Bob',
+    },
+    getActions
+  );
+  const { component: component2 } = await renderInEditModeAndOpenContextMenu(
+    {
+      firstName: 'Bob',
+      disabledActions: ['BAR'],
+    },
+    getActions
+  );
+
+  expect(component1.find(EuiBadge).length).toBe(1);
+  expect(component2.find(EuiBadge).length).toBe(0);
 });
 
 test('HelloWorldContainer in edit mode shows edit mode actions', async () => {

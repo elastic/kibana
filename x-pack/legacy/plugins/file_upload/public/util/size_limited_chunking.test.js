@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  sizeLimitedChunking
-} from './size_limited_chunking';
+import { sizeLimitedChunking } from './size_limited_chunking';
 
 describe('size_limited_chunking', () => {
-
   // 1000 elements where element value === index
   const testArr = Array.from(Array(1000), (_, x) => x);
 
@@ -18,9 +15,7 @@ describe('size_limited_chunking', () => {
     const chunkLimit = 100;
     const chunkedArr = sizeLimitedChunking(testArr, chunkLimit);
     chunkedArr.forEach(sizeLimitedArr => {
-      const arrByteSize = (
-        new Blob(sizeLimitedArr, { type: 'application/json' })
-      ).size;
+      const arrByteSize = new Blob(sizeLimitedArr, { type: 'application/json' }).size;
 
       // Chunk size should be less than chunk limit
       expect(arrByteSize).toBeLessThan(chunkLimit);

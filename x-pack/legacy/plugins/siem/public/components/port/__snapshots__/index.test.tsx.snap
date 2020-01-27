@@ -1,12 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Port renders correctly against snapshot 1`] = `
-<Component>
-  <Port
-    contextId="test"
-    eventId="abcd"
-    fieldName="destination.port"
-    value="443"
+<DefaultDraggable
+  data-test-subj="port"
+  field="destination.port"
+  id="port-default-draggable-test-abcd-destination.port-443"
+  tooltipContent="destination.port"
+  value="443"
+>
+  <PortOrServiceNameLink
+    portOrServiceName="443"
   />
-</Component>
+  <ExternalLinkIcon />
+</DefaultDraggable>
 `;

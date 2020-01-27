@@ -5,11 +5,11 @@ exports[`ExplorerNoInfluencersFound snapshot 1`] = `
   title={
     <h2>
       <FormattedMessage
-        defaultMessage="No {swimlaneViewByFieldName} influencers found"
+        defaultMessage="No {viewBySwimlaneFieldName} influencers found"
         id="xpack.ml.explorer.noInfluencersFoundTitle"
         values={
           Object {
-            "swimlaneViewByFieldName": "field_name",
+            "viewBySwimlaneFieldName": "field_name",
           }
         }
       />

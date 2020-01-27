@@ -8,8 +8,6 @@ import { Statement } from './statement';
 
 export class Queue extends Statement {
   static fromPipelineGraphVertex(queueVertex) {
-    return new Queue(
-      queueVertex
-    );
+    return new Queue(queueVertex);
   }
 }

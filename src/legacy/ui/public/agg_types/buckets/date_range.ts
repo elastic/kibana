@@ -25,8 +25,6 @@ import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { DateRangesParamEditor } from '../../vis/editors/default/controls/date_ranges';
 
-// @ts-ignore
-import { dateRange } from '../../utils/date_range';
 import {
   KBN_FIELD_TYPES,
   TEXT_CONTEXT_TYPE,
@@ -57,7 +55,7 @@ export const dateRangeBucketAgg = new BucketAggType({
       fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE)
     );
     const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {
-      return dateRange.toString(range, formatter);
+      return convertDateRangeToString(range, formatter);
     });
     return new DateRangeFormat();
   },
@@ -88,7 +86,7 @@ export const dateRangeBucketAgg = new BucketAggType({
       default: undefined,
       // Implimentation method is the same as that of date_histogram
       serialize: () => undefined,
-      write: (agg: IBucketAggConfig, output: Record<string, any>) => {
+      write: (agg, output) => {
         const field = agg.getParam('field');
         let tz = agg.getParam('time_zone');
 
@@ -114,3 +112,16 @@ export const dateRangeBucketAgg = new BucketAggType({
     },
   ],
 });
+
+export const convertDateRangeToString = (
+  { from, to }: DateRangeKey,
+  format: (val: any) => string
+) => {
+  if (!from) {
+    return 'Before ' + format(to);
+  } else if (!to) {
+    return 'After ' + format(from);
+  } else {
+    return format(from) + ' to ' + format(to);
+  }
+};

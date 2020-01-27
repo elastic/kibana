@@ -10,25 +10,25 @@ import {
   KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,
   APM_SYSTEM_ID,
-  LOGSTASH_SYSTEM_ID
+  LOGSTASH_SYSTEM_ID,
 } from '../../../common/constants';
 
 const PRODUCTS = [
   {
-    name: ELASTICSEARCH_SYSTEM_ID
+    name: ELASTICSEARCH_SYSTEM_ID,
   },
   {
-    name: KIBANA_SYSTEM_ID
+    name: KIBANA_SYSTEM_ID,
   },
   {
-    name: LOGSTASH_SYSTEM_ID
+    name: LOGSTASH_SYSTEM_ID,
   },
   {
-    name: BEATS_SYSTEM_ID
+    name: BEATS_SYSTEM_ID,
   },
   {
-    name: APM_SYSTEM_ID
-  }
+    name: APM_SYSTEM_ID,
+  },
 ];
 
 describe('setupMode formatting', () => {

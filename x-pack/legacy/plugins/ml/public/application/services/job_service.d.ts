@@ -6,6 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { CombinedJob } from '../jobs/new_job/common/job_creator/configs';
+import { Calendar } from '../../../common/types/calendars';
 
 export interface ExistingJobsAndGroups {
   jobIds: string[];
@@ -13,12 +14,14 @@ export interface ExistingJobsAndGroups {
 }
 
 declare interface JobService {
+  jobs: CombinedJob[];
   createResultsUrlForJobs: (jobs: any[], target: string) => string;
   tempJobCloningObjects: {
     job: any;
     skipTimeRangeStep: boolean;
     start?: number;
     end?: number;
+    calendars: Calendar[] | undefined;
   };
   skipTimeRangeStep: boolean;
   saveNewJob(job: any): Promise<any>;
@@ -32,9 +35,10 @@ declare interface JobService {
     end: number | undefined
   ): Promise<any>;
   createResultsUrl(jobId: string[], start: number, end: number, location: string): string;
-  getJobAndGroupIds(): ExistingJobsAndGroups;
+  getJobAndGroupIds(): Promise<ExistingJobsAndGroups>;
   searchPreview(job: CombinedJob): Promise<SearchResponse<any>>;
   getJob(jobId: string): CombinedJob;
+  loadJobsWrapper(): Promise<CombinedJob[]>;
 }
 
 export const mlJobService: JobService;

@@ -11,25 +11,23 @@ import { bucketFetcher } from './fetcher';
 type DistributionBucketResponse = PromiseReturnType<typeof bucketFetcher>;
 
 export type IBucket = ReturnType<typeof getBucket>;
+
 function getBucket(
   bucket: Required<
     DistributionBucketResponse
   >['aggregations']['distribution']['buckets'][0]
 ) {
-  const sampleSource = bucket.sample.hits.hits[0]?._source as
-    | Transaction
-    | undefined;
-
-  const isSampled = sampleSource?.transaction.sampled;
-  const sample = {
-    traceId: sampleSource?.trace.id,
-    transactionId: sampleSource?.transaction.id
-  };
+  const samples = bucket.samples.items.hits.hits.map(
+    ({ _source }: { _source: Transaction }) => ({
+      traceId: _source.trace.id,
+      transactionId: _source.transaction.id
+    })
+  );
 
   return {
     key: bucket.key,
     count: bucket.doc_count,
-    sample: isSampled ? sample : undefined
+    samples
   };
 }
 

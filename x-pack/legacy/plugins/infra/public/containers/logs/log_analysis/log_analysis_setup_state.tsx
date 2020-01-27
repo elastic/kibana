@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { isExampleDataIndex } from '../../../../common/log_analysis';
 import {
-  ValidationIndicesError,
-  ValidationIndicesResponsePayload,
-} from '../../../../common/http_api';
+  ValidatedIndex,
+  ValidationIndicesUIError,
+} from '../../../components/logging/log_analysis_setup/initial_configuration_step';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { callIndexPatternsValidate } from './api/index_patterns_validate';
+import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
 
 type SetupHandler = (
   indices: string[],
@@ -20,58 +20,55 @@ type SetupHandler = (
   endTime: number | undefined
 ) => void;
 
-export type ValidationIndicesUIError =
-  | ValidationIndicesError
-  | { error: 'NETWORK_ERROR' }
-  | { error: 'TOO_FEW_SELECTED_INDICES' };
-
-export interface ValidatedIndex {
-  index: string;
-  errors: ValidationIndicesError[];
-  isSelected: boolean;
-}
-
-interface AnalysisSetupStateArguments {
-  availableIndices: string[];
-  cleanupAndSetupModule: SetupHandler;
-  setupModule: SetupHandler;
-  timestampField: string;
+interface AnalysisSetupStateArguments<JobType extends string> {
+  cleanUpAndSetUpModule: SetupHandler;
+  moduleDescriptor: ModuleDescriptor<JobType>;
+  setUpModule: SetupHandler;
+  sourceConfiguration: ModuleSourceConfiguration;
 }
 
 const fourWeeksInMs = 86400000 * 7 * 4;
 
-export const useAnalysisSetupState = ({
-  availableIndices,
-  cleanupAndSetupModule,
-  setupModule,
-  timestampField,
-}: AnalysisSetupStateArguments) => {
+export const useAnalysisSetupState = <JobType extends string>({
+  cleanUpAndSetUpModule,
+  moduleDescriptor: { validateSetupIndices },
+  setUpModule,
+  sourceConfiguration,
+}: AnalysisSetupStateArguments<JobType>) => {
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
 
-  // Prepare the validation
-  const [validatedIndices, setValidatedIndices] = useState<ValidatedIndex[]>(
-    availableIndices.map(index => ({
-      index,
-      errors: [],
-      isSelected: false,
-    }))
-  );
+  const [validatedIndices, setValidatedIndices] = useState<ValidatedIndex[]>([]);
+
   const [validateIndicesRequest, validateIndices] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await callIndexPatternsValidate(timestampField, availableIndices);
+        return await validateSetupIndices(sourceConfiguration);
       },
-      onResolve: ({ data }: ValidationIndicesResponsePayload) => {
-        setValidatedIndices(
-          availableIndices.map(index => {
-            const errors = data.errors.filter(error => error.index === index);
-            return {
-              index,
-              errors,
-              isSelected: errors.length === 0 && !isExampleDataIndex(index),
-            };
+      onResolve: ({ data: { errors } }) => {
+        setValidatedIndices(previousValidatedIndices =>
+          sourceConfiguration.indices.map(indexName => {
+            const previousValidatedIndex = previousValidatedIndices.filter(
+              ({ name }) => name === indexName
+            )[0];
+            const indexValiationErrors = errors.filter(({ index }) => index === indexName);
+            if (indexValiationErrors.length > 0) {
+              return {
+                validity: 'invalid',
+                name: indexName,
+                errors: indexValiationErrors,
+              };
+            } else {
+              return {
+                validity: 'valid',
+                name: indexName,
+                isSelected:
+                  previousValidatedIndex?.validity === 'valid'
+                    ? previousValidatedIndex?.isSelected
+                    : !isExampleDataIndex(indexName),
+              };
+            }
           })
         );
       },
@@ -79,7 +76,7 @@ export const useAnalysisSetupState = ({
         setValidatedIndices([]);
       },
     },
-    [availableIndices, timestampField]
+    [sourceConfiguration.indices]
   );
 
   useEffect(() => {
@@ -87,17 +84,20 @@ export const useAnalysisSetupState = ({
   }, [validateIndices]);
 
   const selectedIndexNames = useMemo(
-    () => validatedIndices.filter(i => i.isSelected).map(i => i.index),
+    () =>
+      validatedIndices
+        .filter(index => index.validity === 'valid' && index.isSelected)
+        .map(i => i.name),
     [validatedIndices]
   );
 
-  const setup = useCallback(() => {
-    return setupModule(selectedIndexNames, startTime, endTime);
-  }, [setupModule, selectedIndexNames, startTime, endTime]);
+  const setUp = useCallback(() => {
+    return setUpModule(selectedIndexNames, startTime, endTime);
+  }, [setUpModule, selectedIndexNames, startTime, endTime]);
 
-  const cleanupAndSetup = useCallback(() => {
-    return cleanupAndSetupModule(selectedIndexNames, startTime, endTime);
-  }, [cleanupAndSetupModule, selectedIndexNames, startTime, endTime]);
+  const cleanUpAndSetUp = useCallback(() => {
+    return cleanUpAndSetUpModule(selectedIndexNames, startTime, endTime);
+  }, [cleanUpAndSetUpModule, selectedIndexNames, startTime, endTime]);
 
   const isValidating = useMemo(
     () =>
@@ -120,18 +120,20 @@ export const useAnalysisSetupState = ({
     }
 
     return validatedIndices.reduce<ValidationIndicesUIError[]>((errors, index) => {
-      return selectedIndexNames.includes(index.index) ? errors.concat(index.errors) : errors;
+      return index.validity === 'invalid' && selectedIndexNames.includes(index.name)
+        ? [...errors, ...index.errors]
+        : errors;
     }, []);
-  }, [selectedIndexNames, validatedIndices, validateIndicesRequest.state]);
+  }, [isValidating, validateIndicesRequest.state, selectedIndexNames, validatedIndices]);
 
   return {
-    cleanupAndSetup,
+    cleanUpAndSetUp,
     endTime,
     isValidating,
     selectedIndexNames,
     setEndTime,
     setStartTime,
-    setup,
+    setUp,
     startTime,
     validatedIndices,
     setValidatedIndices,

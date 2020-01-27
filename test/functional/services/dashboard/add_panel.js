@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
@@ -25,10 +24,12 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
 
-  return new class DashboardAddPanel {
+  return new (class DashboardAddPanel {
     async clickOpenAddPanel() {
       log.debug('DashboardAddPanel.clickOpenAddPanel');
       await testSubjects.click('dashboardAddPanelButton');
+      // Give some time for the animation to complete
+      await PageObjects.common.sleep(500);
     }
 
     async clickAddNewEmbeddableLink(type) {
@@ -97,8 +98,8 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       if (!isOpen) {
         await retry.try(async () => {
           await this.clickOpenAddPanel();
-          const isOpen = await this.isAddPanelOpen();
-          if (!isOpen) {
+          const isNowOpen = await this.isAddPanelOpen();
+          if (!isNowOpen) {
             throw new Error('Add panel still not open, trying again.');
           }
         });
@@ -172,7 +173,9 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async addEmbeddable(embeddableName, embeddableType) {
-      log.debug(`DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`);
+      log.debug(
+        `DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
+      );
       await this.ensureAddPanelIsShowing();
       await this.toggleFilter(embeddableType);
       await this.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
@@ -195,5 +198,5 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await this.filterEmbeddableNames(`"${name}"`);
       return await testSubjects.exists(`savedObjectTitle${name.split(' ').join('-')}`);
     }
-  };
+  })();
 }

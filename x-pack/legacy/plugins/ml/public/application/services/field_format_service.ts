@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { getIndexPatternById, getIndexPatternIdFromName } from '../util/index_utils';
 import { mlJobService } from './job_service';
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
 type FormatsByJobId = Record<string, any>;
 type IndexPatternIdsByJob = Record<string, any>;
@@ -24,7 +24,7 @@ class FieldFormatService {
   // configured in the datafeed of each job.
   // Builds a map of Kibana FieldFormats (plugins/data/common/field_formats)
   // against detector index by job ID.
-  populateFormats(jobIds: string[]) {
+  populateFormats(jobIds: string[]): Promise<FormatsByJobId> {
     return new Promise((resolve, reject) => {
       // Populate a map of index pattern IDs against job ID, by finding the ID of the index
       // pattern with a title attribute which matches the index configured in the datafeed.

@@ -15,10 +15,31 @@ const isStringEmpty = (str: string | null): boolean => {
   return str ? !Boolean(str.trim()) : true;
 };
 
-export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
+// strExcludeDate is the concat results of the SnapshotName ...{...}>... without the date
+// This way we can check only the SnapshotName portion for lowercasing
+// For example: <logstash-{now/d}> would give strExcludeDate = <logstash->
+
+const isSnapshotNameNotLowerCase = (str: string): boolean => {
+  const strExcludeDate =
+    str.substring(0, str.search('{')) + str.substring(str.search('}>') + 1, str.length);
+  return strExcludeDate !== strExcludeDate.toLowerCase() ? true : false;
+};
+
+export const validatePolicy = (
+  policy: SlmPolicyPayload,
+  validationHelperData: {
+    managedRepository?: {
+      name: string;
+      policy: string;
+    };
+    isEditing?: boolean;
+    policyName?: string;
+  }
+): PolicyValidation => {
   const i18n = textService.i18n;
 
   const { name, snapshotName, schedule, repository, config, retention } = policy;
+  const { managedRepository, isEditing, policyName } = validationHelperData;
 
   const validation: PolicyValidation = {
     isValid: true,
@@ -46,6 +67,14 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
     validation.errors.snapshotName.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.snapshotNameRequiredErrorMessage', {
         defaultMessage: 'Snapshot name is required.',
+      })
+    );
+  }
+
+  if (isSnapshotNameNotLowerCase(snapshotName)) {
+    validation.errors.snapshotName.push(
+      i18n.translate('xpack.snapshotRestore.policyValidation.snapshotNameLowerCaseErrorMessage', {
+        defaultMessage: 'Snapshot name needs to be lowercase.',
       })
     );
   }
@@ -91,6 +120,22 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
     validation.errors.minCount.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.invalidMinCountErrorMessage', {
         defaultMessage: 'Minimum count cannot be greater than maximum count.',
+      })
+    );
+  }
+
+  if (
+    managedRepository &&
+    managedRepository.name === repository &&
+    managedRepository.policy &&
+    !(isEditing && managedRepository.policy === policyName)
+  ) {
+    validation.errors.repository.push(
+      i18n.translate('xpack.snapshotRestore.policyValidation.invalidRepoErrorMessage', {
+        defaultMessage: 'Policy "{policyName}" is already associated with this repository.',
+        values: {
+          policyName: managedRepository.policy,
+        },
       })
     );
   }

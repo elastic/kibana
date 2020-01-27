@@ -44,7 +44,6 @@ const APP_NAME = 'VisEditor';
 export class VisEditor extends Component {
   constructor(props) {
     super(props);
-    this.appState = props.appState;
     this.localStorage = new Storage(window.localStorage);
     this.state = {
       model: props.visParams,
@@ -82,6 +81,12 @@ export class VisEditor extends Component {
   updateVisState = debounce(() => {
     this.props.vis.params = this.state.model;
     this.props.vis.updateState();
+    // This check should be redundant, since this method should only be called when we're in editor
+    // mode where there's also an appState passed into us.
+    if (this.props.appState) {
+      this.props.appState.vis = this.props.vis.getState();
+      this.props.appState.save();
+    }
   }, VIS_STATE_DEBOUNCE_DELAY);
 
   isValidKueryQuery = filterQuery => {

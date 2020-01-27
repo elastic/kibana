@@ -88,14 +88,20 @@ function TableSeriesUI(props) {
       <div className="tvbSeries__body">
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'metrics'} onClick={() => props.switchTab('metrics')}>
-            <FormattedMessage id="visTypeTimeseries.table.tab.metricsLabel" defaultMessage="Metrics" />
+            <FormattedMessage
+              id="visTypeTimeseries.table.tab.metricsLabel"
+              defaultMessage="Metrics"
+            />
           </EuiTab>
           <EuiTab
             data-test-subj="seriesOptions"
             isSelected={selectedTab === 'options'}
             onClick={() => props.switchTab('options')}
           >
-            <FormattedMessage id="visTypeTimeseries.table.tab.optionsLabel" defaultMessage="Options" />
+            <FormattedMessage
+              id="visTypeTimeseries.table.tab.optionsLabel"
+              defaultMessage="Options"
+            />
           </EuiTab>
         </EuiTabs>
         {seriesBody}
