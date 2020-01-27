@@ -7,10 +7,7 @@
 import React from 'react';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector/vector_style';
-import {
-  SOURCE_DATA_ID_ORIGIN,
-  LAYER_TYPE
-} from '../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { DataRequestAbortError } from './util/data_request';
@@ -24,8 +21,7 @@ import {
 import { VectorLayer } from './vector_layer';
 
 export class TiledVectorLayer extends AbstractLayer {
-
-  static type = LAYER_TYPE.VECTOR_TILE;
+  static type = LAYER_TYPE.TILED_VECTOR;
 
   static createDescriptor(options, mapColors) {
     const layerDescriptor = super.createDescriptor(options);
@@ -42,9 +38,6 @@ export class TiledVectorLayer extends AbstractLayer {
     if (this._source) {
       this._source.destroy();
     }
-    this._joins.forEach(joinSource => {
-      joinSource.destroy();
-    });
   }
 
   getLayerTypeIconName() {
@@ -57,71 +50,27 @@ export class TiledVectorLayer extends AbstractLayer {
     return new VectorLayer({
       layerDescriptor: layerDescriptor,
       source: this,
-      style
+      style,
     });
   }
 
-  async getSourceName() {
-    return this._source.getDisplayName();
-  }
-
-  async getDateFields() {
-    return await this._source.getDateFields();
-  }
-
-  async _syncSource({
-    startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters
-  }) {
-
+  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
+    if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
+      return;
+    }
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (sourceDataRequest) {
+      //data is immmutable
+      return;
+    }
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
-    // const searchFilters = this._getSearchFilters(dataFilters);
-    const prevDataRequest = this.getSourceDataRequest();
-
-    if (prevDataRequest) {
-      console.log('already has a data request');
-      return;
-    }
-
-    // const canSkipFetch = await canSkipSourceUpdate({
-    //   source: this._source,
-    //   prevDataRequest,
-    //   nextMeta: searchFilters,
-    // });
-    // if (canSkipFetch) {
-    //   return {
-    //     refreshed: false,
-    //     featureCollection: prevDataRequest.getData()
-    //   };
-    // }
-
-
-
+    startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
-      // startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
-      // const layerName = await this.getDisplayName();
-      // await this._source.getGeoJsonWithMeta(layerName, searchFilters,
-      //   registerCancelCallback.bind(null, requestToken)
-      // );
-
-
-      // stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, layerFeatureCollection, meta);
+      const url = await this._source.getUrlTemplate();
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, url, {});
     } catch (error) {
-      if (!(error instanceof DataRequestAbortError)) {
-        onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
-      }
-      return {
-        refreshed: false
-      };
+      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
     }
-  }
-
-  async syncData(syncContext) {
-    if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
-      return;
-    }
-
-    await this._syncSource(syncContext);
-
   }
 
   // _setMbPointsProperties(mbMap) {
@@ -261,40 +210,83 @@ export class TiledVectorLayer extends AbstractLayer {
   }
 
   syncLayerWithMB(mbMap) {
-    this._syncSourceBindingWithMb(mbMap);
-    this._syncStylePropertiesWithMb(mbMap);
+    const source = mbMap.getSource(this.getId());
+    const mbLayerId = this._getMbLineLayerId();
+
+    if (!source) {
+      const sourceDataRequest = this.getSourceDataRequest();
+      console.log('sdr', sourceDataRequest);
+      if (!sourceDataRequest) {
+        //this is possible if the layer was invisible at startup.
+        //the actions will not perform any data=syncing as an optimization when a layer is invisible
+        //when turning the layer back into visible, it's possible the url has not been resovled yet.
+        return;
+      }
+      const url = sourceDataRequest.getData();
+      console.log('url', url);
+      if (!url) {
+        return;
+      }
+
+      const sourceId = this.getId();
+      mbMap.addSource(sourceId, {
+        type: 'vector',
+        tiles: [url],
+      });
+
+      console.log('source added');
+
+      console.log('going to add layer', mbLayerId, sourceId)
+      mbMap.addLayer({
+        id: mbLayerId,
+        type: 'line',
+        source: sourceId,
+        'source-layer': 'geojsonLayer',
+        "layout": {
+          "line-cap": "round",
+          "line-join": "round"
+        },
+        "paint": {
+          "line-opacity": 0.6,
+          "line-color": "rgb(53, 175, 109)",
+          "line-width": 2
+        }
+      });
+
+      console.log('layer added');
+    }
+
+    this._setTiledVectorLayerProperties(mbMap, mbLayerId);
   }
 
-  _getMbPointLayerId() {
-    return this.makeMbLayerId('circle');
+  _setTiledVectorLayerProperties(mbMap, mbLayerId) {
+    this.syncVisibilityWithMb(mbMap, mbLayerId);
+    mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    mbMap.setPaintProperty(mbLayerId, 'line-opacity', this.getAlpha());
   }
 
-  _getMbSymbolLayerId() {
-    return this.makeMbLayerId('symbol');
+  ownsMbLayerId(mbLayerId) {
+    return this.getMbLayerIds().includes(mbLayerId);
   }
+
+  // _getMbSymbolLayerId() {
+  //   return this.makeMbLayerId('symbol');
+  // }
 
   _getMbLineLayerId() {
     return this.makeMbLayerId('line');
   }
 
-  _getMbPolygonLayerId() {
-    return this.makeMbLayerId('fill');
-  }
+  // _getMbPolygonLayerId() {
+  //   return this.makeMbLayerId('fill');
+  // }
 
   getMbLayerIds() {
     // return [this._getMbPointLayerId(), this._getMbSymbolLayerId(), this._getMbLineLayerId(), this._getMbPolygonLayerId()];
     return [this._getMbLineLayerId()];
   }
 
-  ownsMbLayerId(mbLayerId) {
-    return this._getMbPointLayerId() === mbLayerId ||
-      this._getMbLineLayerId() === mbLayerId ||
-      this._getMbPolygonLayerId() === mbLayerId ||
-      this._getMbSymbolLayerId() === mbLayerId;
-  }
-
   ownsMbSourceId(mbSourceId) {
     return this.getId() === mbSourceId;
   }
-
 }
