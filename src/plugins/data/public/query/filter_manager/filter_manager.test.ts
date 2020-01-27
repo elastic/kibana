@@ -196,6 +196,34 @@ describe('filter_manager', () => {
         }).length
       ).toBe(3);
     });
+
+    test('should set app filters and remove any duplicated global filters', async function() {
+      filterManager.addFilters(readyFilters, true);
+      const appFilter1 = _.cloneDeep(readyFilters[1]);
+      const appFilter2 = _.cloneDeep(readyFilters[2]);
+
+      filterManager.setAppFilters([appFilter1, appFilter2]);
+
+      const newGlobalFilters = filterManager.getGlobalFilters();
+      const newAppFilters = filterManager.getAppFilters();
+
+      expect(newGlobalFilters).toHaveLength(1);
+      expect(newAppFilters).toHaveLength(2);
+    });
+
+    test('should set global filters and remove any duplicated app filters', async function() {
+      filterManager.addFilters(readyFilters, false);
+      const globalFilter1 = _.cloneDeep(readyFilters[1]);
+      const globalFilter2 = _.cloneDeep(readyFilters[2]);
+
+      filterManager.setGlobalFilters([globalFilter1, globalFilter2]);
+
+      const newGlobalFilters = filterManager.getGlobalFilters();
+      const newAppFilters = filterManager.getAppFilters();
+
+      expect(newGlobalFilters).toHaveLength(2);
+      expect(newAppFilters).toHaveLength(1);
+    });
   });
 
   describe('add filters', () => {
