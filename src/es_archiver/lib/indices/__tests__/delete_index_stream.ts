@@ -23,7 +23,14 @@ import { createListStream, createPromiseFromStreams } from '../../../../legacy/u
 
 import { createDeleteIndexStream } from '../delete_index_stream';
 
-import { createStubStats, createStubClient, createStubIndexRecord } from './stubs';
+import {
+  createStubStats,
+  createStubClient,
+  createStubIndexRecord,
+  createStubLogger,
+} from './stubs';
+
+const log = createStubLogger();
 
 describe('esArchiver: createDeleteIndexStream()', () => {
   it('deletes the index without checking if it exists', async () => {
@@ -32,7 +39,7 @@ describe('esArchiver: createDeleteIndexStream()', () => {
 
     await createPromiseFromStreams([
       createListStream([createStubIndexRecord('index1')]),
-      createDeleteIndexStream(client, stats, {} as any, []),
+      createDeleteIndexStream(client, stats, log, []),
     ]);
 
     sinon.assert.notCalled(stats.deletedIndex as sinon.SinonSpy);
@@ -47,7 +54,7 @@ describe('esArchiver: createDeleteIndexStream()', () => {
 
     await createPromiseFromStreams([
       createListStream([createStubIndexRecord('index1')]),
-      createDeleteIndexStream(client, stats, {} as any, []),
+      createDeleteIndexStream(client, stats, log, []),
     ]);
 
     sinon.assert.calledOnce(stats.deletedIndex as sinon.SinonSpy);
