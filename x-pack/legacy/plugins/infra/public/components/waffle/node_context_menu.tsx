@@ -135,12 +135,12 @@ export const NodeContextMenu = ({
       button={children}
       anchorPosition={popoverPosition}
     >
-      <div style={{ maxWidth: 300 }}>
+      <div style={{ maxWidth: 300 }} data-test-subj="nodeContextMenu">
         <Section>
           <SectionTitle>
             <FormattedMessage
-              id={'xpack.infra.nodeContextMenu.title'}
-              defaultMessage={'{inventoryName} details'}
+              id="xpack.infra.nodeContextMenu.title"
+              defaultMessage="{inventoryName} details"
               values={{ inventoryName: inventoryModel.singularDisplayName }}
             />
           </SectionTitle>
@@ -148,8 +148,8 @@ export const NodeContextMenu = ({
             <SectionSubtitle>
               <div style={{ wordBreak: 'break-all' }}>
                 <FormattedMessage
-                  id={'xpack.infra.nodeContextMenu.description'}
-                  defaultMessage={'View details for {label} {value}'}
+                  id="xpack.infra.nodeContextMenu.description"
+                  defaultMessage="View details for {label} {value}"
                   values={inventoryId}
                 />
               </div>
