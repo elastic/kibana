@@ -106,23 +106,24 @@ def getTestFailuresMessage() {
   }
 
   def messages = []
+  messages << "### [Test Failures](${env.BUILD_URL}testReport)"
 
-  failures.take(5).each { failure ->
+  failures.take(3).each { failure ->
     messages << """
----
-
-### [Test Failures](${env.BUILD_URL}testReport)
 <details><summary>${failure.fullDisplayName}</summary>
 
 [Link to Jenkins](${failure.url})
+"""
 
-```
-${failure.stdOut}
-```
-</details>
+    if (failure.stdOut) {
+      messages << "\n#### Standard Out\n```\n${failure.stdOut}\n```"
+    }
 
----
-    """
+    if (failure.stdErr) {
+      messages << "\n#### Standard Error\n```\n${failure.stdErr}\n```"
+    }
+
+    messages << "</details>\n\n---"
   }
 
   if (failures.size() > 3) {
