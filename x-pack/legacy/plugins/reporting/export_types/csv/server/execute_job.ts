@@ -7,25 +7,26 @@
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaRequest } from '../../../../../../../src/core/server';
+import { CSV_JOB_TYPE } from '../../../common/constants';
+import { cryptoFactory } from '../../../server/lib';
 import {
-  ExecuteJobFactory,
   ESQueueWorkerExecuteFn,
+  ExecuteJobFactory,
   FieldFormats,
+  Logger,
   ServerFacade,
 } from '../../../types';
-import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
-import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import { JobDocPayloadDiscoverCsv } from '../types';
-import { createGenerateCsv } from './lib/generate_csv';
 import { fieldFormatMapFactory } from './lib/field_format_map';
+import { createGenerateCsv } from './lib/generate_csv';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
->> = function executeJobFactoryFn(server: ServerFacade) {
+>> = function executeJobFactoryFn(server: ServerFacade, parentLogger: Logger) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const crypto = cryptoFactory(server);
   const config = server.config();
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, CSV_JOB_TYPE, 'execute-job']);
+  const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job']);
   const serverBasePath = config.get('server.basePath');
 
   return async function executeJob(
