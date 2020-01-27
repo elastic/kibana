@@ -56,11 +56,24 @@ export class PulseService {
   }
 
   public async setup(): Promise<PulseServiceSetup> {
+    return {
+      getChannel: (id: string) => {
+        const channel = this.channels.get(id);
+        if (!channel) {
+          throw new Error(`Unknown channel: ${id}`);
+        }
+        return channel;
+      },
+    };
+  }
+
+  public async start(): Promise<PulseServiceStart> {
     // poll for instructions every second for this deployment
     setInterval(() => {
       // eslint-disable-next-line no-console
       this.loadInstructions().catch(err => console.error(err.stack));
     }, 10000);
+
     if (sendUsageFrom === 'browser') {
       // eslint-disable-next-line no-console
       console.log('Will attempt first telemetry collection in 5 seconds...');
