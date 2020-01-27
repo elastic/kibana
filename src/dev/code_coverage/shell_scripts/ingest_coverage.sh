@@ -11,8 +11,8 @@ export BUILD_ID
 ES_HOST=https://super:changeme@87883974a2984732b6cb134e5c7e240f.us-east-1.aws.staging.foundit.no:9243
 export ES_HOST
 
-TIME_STAMP=$(date -u +%Y%m%d_%H%M%SZ)
-export TIME_STAMP
+#TIME_STAMP=$(date -u +%Y%m%d_%H%M%SZ)
+#export TIME_STAMP
 
 for x in jest functional mocha; do
   echo "### Ingesting coverage for ${x}"
