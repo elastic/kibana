@@ -270,7 +270,7 @@ Customize and format the visualization using functions:
   .multiply(-1)
   .divide(1048576)
   .lines(fill=2, width=1)           <3>
-  .color(blue)                    <4>
+  .color(blue)                      <4>
     .label("Outbound traffic")
     .legend(columns=2, position=nw) <5>
 ----------------------------------
