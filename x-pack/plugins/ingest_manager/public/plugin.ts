@@ -45,7 +45,7 @@ export class IngestManagerPlugin implements Plugin {
 
     // Register main Ingest Manager app
     core.application.register({
-      id: 'ingest_manager',
+      id: 'ingestManager',
       title: 'Ingest Manager',
       appRoute: BASE_PATH,
       euiIconType: 'savedObjectsApp',

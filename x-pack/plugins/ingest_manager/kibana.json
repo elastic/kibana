@@ -1,8 +1,8 @@
 {
-  "id": "ingest_manager",
+  "id": "ingestManager",
   "version": "kibana",
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "ingest_manager"],
+  "configPath": ["xpack", "ingestManager"],
   "requiredPlugins": ["licensing", "encryptedSavedObjects"]
 }
