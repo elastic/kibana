@@ -140,7 +140,7 @@ describe('SavedObjectsService', () => {
 
       await soService.setup(createSetupDeps());
       await soService.start({});
-      expect(migratorInstanceMock.runMigrations).toHaveBeenCalledWith(true);
+      expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
     });
 
     it('skips KibanaMigrator migrations when migrations.skip=true', async () => {
@@ -149,11 +149,11 @@ describe('SavedObjectsService', () => {
       const soService = new SavedObjectsService(coreContext);
       await soService.setup(createSetupDeps());
       await soService.start({});
-      expect(migratorInstanceMock.runMigrations).toHaveBeenCalledWith(true);
+      expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
     });
 
     it('waits for all es nodes to be compatible before running migrations', async done => {
-      expect.assertions(3);
+      expect.assertions(2);
       const configService = configServiceMock.create({ atPath: { skip: false } });
       const coreContext = mockCoreContext.create({ configService });
       const soService = new SavedObjectsService(coreContext);
@@ -178,7 +178,6 @@ describe('SavedObjectsService', () => {
         kibanaVersion: '8.0.0',
       });
       setImmediate(() => {
-        expect(migratorInstanceMock.runMigrations).toHaveBeenCalledWith(false);
         expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
         done();
       });
@@ -193,7 +192,6 @@ describe('SavedObjectsService', () => {
 
       const startContract = await soService.start({});
       expect(startContract.migrator).toBe(migratorInstanceMock);
-      expect(migratorInstanceMock.runMigrations).toHaveBeenCalledWith(false);
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
     });
   });
