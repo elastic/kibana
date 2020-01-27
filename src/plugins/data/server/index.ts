@@ -49,6 +49,7 @@ export {
   TimeRange,
   // utils
   parseInterval,
+  isNestedField,
 } from '../common';
 
 /**

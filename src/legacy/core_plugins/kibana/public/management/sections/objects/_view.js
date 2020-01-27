@@ -28,9 +28,9 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from './lib/numeric';
 import { canViewInApp } from './lib/in_app_url';
+import { npStart } from 'ui/new_platform';
 
 import { castEsToKbnFieldTypeName } from '../../../../../../../plugins/data/public';
 
@@ -56,12 +56,11 @@ uiModules
         $location,
         $window,
         $rootScope,
-        Private,
         uiCapabilities
       ) {
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
         const service = $injector.get(serviceObj.service);
-        const savedObjectsClient = Private(SavedObjectsClientProvider);
+        const savedObjectsClient = npStart.core.savedObjects.client;
 
         /**
          * Creates a field definition and pushes it to the memo stack. This function
@@ -177,11 +176,13 @@ uiModules
             // sorts twice since we want numerical sort to prioritize over name,
             // and sortBy will do string comparison if trying to match against strings
             const nameSortedFields = _.sortBy(fields, 'name');
-            $scope.fields = _.sortBy(nameSortedFields, field => {
-              const orderIndex = service.Class.fieldOrder
-                ? service.Class.fieldOrder.indexOf(field.name)
-                : -1;
-              return orderIndex > -1 ? orderIndex : Infinity;
+            $scope.$evalAsync(() => {
+              $scope.fields = _.sortBy(nameSortedFields, field => {
+                const orderIndex = service.Class.fieldOrder
+                  ? service.Class.fieldOrder.indexOf(field.name)
+                  : -1;
+                return orderIndex > -1 ? orderIndex : Infinity;
+              });
             });
           })
           .catch(error => fatalError(error, location));

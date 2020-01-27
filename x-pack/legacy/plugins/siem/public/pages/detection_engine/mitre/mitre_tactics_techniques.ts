@@ -187,7 +187,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
   },
 ];
 
-export const techniques = [
+export const technique = [
   {
     name: '.bash_profile and .bashrc',
     id: 'T1156',
