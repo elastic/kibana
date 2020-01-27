@@ -72,7 +72,7 @@ function validateBaseProperties(alertObject: Alert) {
       })
     );
   }
-  if (!alertObject.interval) {
+  if (!(alertObject.schedule && alertObject.schedule.interval)) {
     errors.interval.push(
       i18n.translate('xpack.triggersActionsUI.sections.alertAdd.error.requiredIntervalText', {
         defaultMessage: 'Check interval is required.',
@@ -94,7 +94,9 @@ export const AlertAdd = ({ refreshList }: Props) => {
   const initialAlert = {
     params: {},
     alertTypeId: null,
-    interval: '1m',
+    schedule: {
+      interval: '1m',
+    },
     actions: [],
     tags: [],
   };
@@ -148,7 +150,9 @@ export const AlertAdd = ({ refreshList }: Props) => {
         value: {
           params: {},
           alertTypeId: null,
-          interval: '1m',
+          schedule: {
+            interval: '1m',
+          },
           actions: [],
           tags: [],
         },
@@ -674,7 +678,9 @@ export const AlertAdd = ({ refreshList }: Props) => {
                           const interval =
                             e.target.value !== '' ? parseInt(e.target.value, 10) : null;
                           setAlertInterval(interval);
-                          setAlertProperty('interval', `${e.target.value}${alertIntervalUnit}`);
+                          setAlertProperty('schedule', {
+                            interval: `${e.target.value}${alertIntervalUnit}`,
+                          });
                         }}
                       />
                     </EuiFlexItem>
@@ -686,7 +692,9 @@ export const AlertAdd = ({ refreshList }: Props) => {
                         options={getTimeOptions((alertInterval ? alertInterval : 1).toString())}
                         onChange={(e: any) => {
                           setAlertIntervalUnit(e.target.value);
-                          setAlertProperty('interval', `${alertInterval}${e.target.value}`);
+                          setAlertProperty('schedule', {
+                            interval: `${alertInterval}${e.target.value}`,
+                          });
                         }}
                       />
                     </EuiFlexItem>

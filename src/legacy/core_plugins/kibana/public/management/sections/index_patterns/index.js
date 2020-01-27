@@ -26,7 +26,7 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
 import indexPatternListTemplate from './list.html';
 import { IndexPatternTable } from './index_pattern_table';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { npStart } from 'ui/new_platform';
 import {
   FeatureCatalogueRegistryProvider,
   FeatureCatalogueCategory,
@@ -67,8 +67,8 @@ export const destroyIndexPatternList = () => {
 };
 
 const indexPatternsResolutions = {
-  indexPatterns: function(Private) {
-    const savedObjectsClient = Private(SavedObjectsClientProvider);
+  indexPatterns: function() {
+    const savedObjectsClient = npStart.core.savedObjects.client;
 
     return savedObjectsClient
       .find({

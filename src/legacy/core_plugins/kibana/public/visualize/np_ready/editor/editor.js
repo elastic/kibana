@@ -58,7 +58,7 @@ export function initEditorDirective(app, deps) {
     };
   });
 
-  initVisEditorDirective(app, deps);
+  initVisEditorDirective(app);
   initVisualizationDirective(app, deps);
 }
 
@@ -501,7 +501,7 @@ function VisualizeAppController(
       language:
         localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
     };
-    queryFilter.removeAll();
+    queryFilter.setFilters(queryFilter.getGlobalFilters());
     $state.save();
     $scope.fetch();
   };
@@ -510,7 +510,9 @@ function VisualizeAppController(
     $state.query = savedQuery.attributes.query;
     $state.save();
 
-    queryFilter.setFilters(savedQuery.attributes.filters || []);
+    const savedQueryFilters = savedQuery.attributes.filters || [];
+    const globalFilters = queryFilter.getGlobalFilters();
+    queryFilter.setFilters([...globalFilters, ...savedQueryFilters]);
 
     if (savedQuery.attributes.timefilter) {
       timefilter.setTime({

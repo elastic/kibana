@@ -30,7 +30,13 @@ interface I18nScope extends IScope {
 const HTML_KEY_PREFIX = 'html_';
 const PLACEHOLDER_SEPARATOR = '@I18N@';
 
-export function i18nDirective(
+export const i18nDirective: [string, string, typeof i18nDirectiveFn] = [
+  'i18n',
+  '$sanitize',
+  i18nDirectiveFn,
+];
+
+function i18nDirectiveFn(
   i18n: I18nServiceType,
   $sanitize: (html: string) => string
 ): IDirective<I18nScope> {

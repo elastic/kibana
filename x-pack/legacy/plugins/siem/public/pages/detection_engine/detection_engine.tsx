@@ -18,7 +18,6 @@ import { GlobalTime } from '../../containers/global_time';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { AlertsTable } from '../../components/alerts_viewer/alerts_table';
 import { FiltersGlobal } from '../../components/filters_global';
-import { HeaderPage } from '../../components/header_page';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../components/search_bar';
 import { WrapperPage } from '../../components/wrapper_page';
@@ -37,6 +36,7 @@ import { signalsHistogramOptions } from './components/signals_histogram_panel/co
 import { useUserInfo } from './components/user_info';
 import { DetectionEngineEmptyPage } from './detection_engine_empty_page';
 import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
+import { DetectionEngineHeaderPage } from './components/detection_engine_header_page';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
 import { DetectionEngineTab } from './types';
@@ -54,7 +54,7 @@ export interface DispatchProps {
   }>;
 }
 
-type DetectionEngineComponentProps = ReduxProps & DispatchProps;
+type DetectionEnginePageComponentProps = ReduxProps & DispatchProps;
 
 const detectionsTabs = [
   {
@@ -69,153 +69,161 @@ const detectionsTabs = [
   },
 ];
 
-const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
-  ({ filters, query, setAbsoluteRangeDatePicker }) => {
-    const { tabName = DetectionEngineTab.signals } = useParams();
-    const {
-      loading,
-      isSignalIndexExists,
-      isAuthenticated: isUserAuthenticated,
-      canUserCRUD,
-      signalIndexName,
-      hasIndexWrite,
-    } = useUserInfo();
+const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> = ({
+  filters,
+  query,
+  setAbsoluteRangeDatePicker,
+}) => {
+  const { tabName = DetectionEngineTab.signals } = useParams();
+  const {
+    loading,
+    isSignalIndexExists,
+    isAuthenticated: isUserAuthenticated,
+    canUserCRUD,
+    signalIndexName,
+    hasIndexWrite,
+  } = useUserInfo();
 
-    const [lastSignals] = useSignalInfo({});
+  const [lastSignals] = useSignalInfo({});
 
-    const updateDateRangeCallback = useCallback(
-      (min: number, max: number) => {
-        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
+  const updateDateRangeCallback = useCallback(
+    (min: number, max: number) => {
+      setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+    },
+    [setAbsoluteRangeDatePicker]
+  );
 
-    if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
-      return (
-        <WrapperPage>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
-          <DetectionEngineUserUnauthenticated />
-        </WrapperPage>
-      );
-    }
-    if (isSignalIndexExists != null && !isSignalIndexExists && !loading) {
-      return (
-        <WrapperPage>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
-          <DetectionEngineNoIndex />
-        </WrapperPage>
-      );
-    }
+  const tabs = useMemo(
+    () => (
+      <EuiTabs>
+        {detectionsTabs.map(tab => (
+          <EuiTab
+            isSelected={tab.id === tabName}
+            disabled={tab.disabled}
+            key={tab.id}
+            href={`#/${DETECTION_ENGINE_PAGE_NAME}/${tab.id}`}
+          >
+            {tab.name}
+          </EuiTab>
+        ))}
+      </EuiTabs>
+    ),
+    [detectionsTabs, tabName]
+  );
 
-    const tabs = useMemo(
-      () => (
-        <EuiTabs>
-          {detectionsTabs.map(tab => (
-            <EuiTab
-              isSelected={tab.id === tabName}
-              disabled={tab.disabled}
-              key={tab.id}
-              href={`#/${DETECTION_ENGINE_PAGE_NAME}/${tab.id}`}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-      ),
-      [detectionsTabs, tabName]
-    );
+  const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
+    signalIndexName,
+  ]);
 
+  if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
-      <>
-        {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
-        <WithSource sourceId="default">
-          {({ indicesExist, indexPattern }) => {
-            return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-              <StickyContainer>
-                <FiltersGlobal>
-                  <SiemSearchBar id="global" indexPattern={indexPattern} />
-                </FiltersGlobal>
-                <WrapperPage>
-                  <HeaderPage
-                    subtitle={
-                      lastSignals != null && (
-                        <>
-                          {i18n.LAST_SIGNAL}
-                          {': '}
-                          {lastSignals}
-                        </>
-                      )
-                    }
-                    title={i18n.PAGE_TITLE}
-                  >
-                    <EuiButton fill href="#/detections/rules" iconType="gear">
-                      {i18n.BUTTON_MANAGE_RULES}
-                    </EuiButton>
-                  </HeaderPage>
-
-                  <GlobalTime>
-                    {({ to, from, deleteQuery, setQuery }) => (
-                      <>
-                        {tabs}
-                        <EuiSpacer />
-                        {tabName === DetectionEngineTab.signals && (
-                          <>
-                            <SignalsHistogramPanel
-                              filters={filters}
-                              from={from}
-                              loadingInitial={loading}
-                              query={query}
-                              stackByOptions={signalsHistogramOptions}
-                              to={to}
-                              updateDateRange={updateDateRangeCallback}
-                            />
-                            <EuiSpacer size="l" />
-                            <SignalsTable
-                              loading={loading}
-                              hasIndexWrite={hasIndexWrite ?? false}
-                              canUserCRUD={canUserCRUD ?? false}
-                              from={from}
-                              signalsIndex={signalIndexName ?? ''}
-                              to={to}
-                            />
-                          </>
-                        )}
-                        {tabName === DetectionEngineTab.alerts && (
-                          <>
-                            <AlertsByCategory
-                              deleteQuery={deleteQuery}
-                              filters={filters}
-                              from={from}
-                              hideHeaderChildren={true}
-                              indexPattern={indexPattern}
-                              query={query}
-                              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
-                              setQuery={setQuery}
-                              to={to}
-                            />
-                            <EuiSpacer size="l" />
-                            <AlertsTable endDate={to} startDate={from} />
-                          </>
-                        )}
-                      </>
-                    )}
-                  </GlobalTime>
-                </WrapperPage>
-              </StickyContainer>
-            ) : (
-              <WrapperPage>
-                <HeaderPage border title={i18n.PAGE_TITLE} />
-                <DetectionEngineEmptyPage />
-              </WrapperPage>
-            );
-          }}
-        </WithSource>
-        <SpyRoute />
-      </>
+      <WrapperPage>
+        <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
+        <DetectionEngineUserUnauthenticated />
+      </WrapperPage>
     );
   }
-);
-DetectionEngineComponent.displayName = 'DetectionEngineComponent';
+  if (isSignalIndexExists != null && !isSignalIndexExists && !loading) {
+    return (
+      <WrapperPage>
+        <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
+        <DetectionEngineNoIndex />
+      </WrapperPage>
+    );
+  }
+
+  return (
+    <>
+      {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
+      <WithSource sourceId="default" indexToAdd={indexToAdd}>
+        {({ indicesExist, indexPattern }) => {
+          return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+            <StickyContainer>
+              <FiltersGlobal>
+                <SiemSearchBar id="global" indexPattern={indexPattern} />
+              </FiltersGlobal>
+              <WrapperPage>
+                <DetectionEngineHeaderPage
+                  subtitle={
+                    lastSignals != null && (
+                      <>
+                        {i18n.LAST_SIGNAL}
+                        {': '}
+                        {lastSignals}
+                      </>
+                    )
+                  }
+                  title={i18n.PAGE_TITLE}
+                >
+                  <EuiButton fill href="#/detections/rules" iconType="gear">
+                    {i18n.BUTTON_MANAGE_RULES}
+                  </EuiButton>
+                </DetectionEngineHeaderPage>
+
+                <GlobalTime>
+                  {({ to, from, deleteQuery, setQuery }) => (
+                    <>
+                      {tabs}
+                      <EuiSpacer />
+                      {tabName === DetectionEngineTab.signals && (
+                        <>
+                          <SignalsHistogramPanel
+                            deleteQuery={deleteQuery}
+                            filters={filters}
+                            from={from}
+                            loadingInitial={loading}
+                            query={query}
+                            signalIndexName={signalIndexName}
+                            setQuery={setQuery}
+                            stackByOptions={signalsHistogramOptions}
+                            to={to}
+                            updateDateRange={updateDateRangeCallback}
+                          />
+                          <EuiSpacer size="l" />
+                          <SignalsTable
+                            loading={loading}
+                            hasIndexWrite={hasIndexWrite ?? false}
+                            canUserCRUD={canUserCRUD ?? false}
+                            from={from}
+                            signalsIndex={signalIndexName ?? ''}
+                            to={to}
+                          />
+                        </>
+                      )}
+                      {tabName === DetectionEngineTab.alerts && (
+                        <>
+                          <AlertsByCategory
+                            deleteQuery={deleteQuery}
+                            filters={filters}
+                            from={from}
+                            hideHeaderChildren={true}
+                            indexPattern={indexPattern}
+                            query={query}
+                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
+                            setQuery={setQuery}
+                            to={to}
+                          />
+                          <EuiSpacer size="l" />
+                          <AlertsTable endDate={to} startDate={from} />
+                        </>
+                      )}
+                    </>
+                  )}
+                </GlobalTime>
+              </WrapperPage>
+            </StickyContainer>
+          ) : (
+            <WrapperPage>
+              <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
+              <DetectionEngineEmptyPage />
+            </WrapperPage>
+          );
+        }}
+      </WithSource>
+      <SpyRoute />
+    </>
+  );
+};
 
 const makeMapStateToProps = () => {
   const getGlobalInputs = inputsSelectors.globalSelector();
@@ -230,8 +238,11 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const DetectionEngine = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-})(DetectionEngineComponent);
+};
 
-DetectionEngine.displayName = 'DetectionEngine';
+export const DetectionEnginePage = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(React.memo(DetectionEnginePageComponent));
