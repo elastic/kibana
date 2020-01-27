@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { JOB_STATE, DATAFEED_STATE } from '../../../../legacy/plugins/ml/common/constants/states';
 import { DATA_FRAME_TASK_STATE } from '../../../../legacy/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+
+export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
@@ -244,6 +247,26 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           return true;
         } else {
           throw new Error(`indices '${indices}' should not be empty`);
+        }
+      });
+    },
+
+    async getCalendar(calendarId: string) {
+      return await esSupertest.get(`/_ml/calendars/${calendarId}`).expect(200);
+    },
+
+    async createCalendar(calendarId: string, body = { description: '', job_ids: [] }) {
+      log.debug(`Creating calendar with id '${calendarId}'...`);
+      await esSupertest
+        .put(`/_ml/calendars/${calendarId}`)
+        .send(body)
+        .expect(200);
+
+      await retry.waitForWithTimeout(`'${calendarId}' to be created`, 30 * 1000, async () => {
+        if (await this.getCalendar(calendarId)) {
+          return true;
+        } else {
+          throw new Error(`expected calendar '${calendarId}' to be created`);
         }
       });
     },

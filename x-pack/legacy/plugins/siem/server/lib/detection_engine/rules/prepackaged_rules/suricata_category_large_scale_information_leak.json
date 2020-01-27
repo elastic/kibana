@@ -1,0 +1,17 @@
+{
+  "rule_id": "ca98de30-c703-4170-97ae-ab2b340f6080",
+  "risk_score": 50,
+  "description": "Suricata Category - Large Scale Information Leak",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Large Scale Information Leak",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Large Scale Information Leak\" or rule.category: \"Large Scale Information Leak\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

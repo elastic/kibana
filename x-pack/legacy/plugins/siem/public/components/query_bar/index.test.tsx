@@ -7,8 +7,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { SearchBar } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { FilterManager } from '../../../../../../../src/plugins/data/public';
+import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
 import { uiSettingsServiceMock } from '../../../../../../../src/core/public/ui_settings/ui_settings_service.mock';
 import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { TestProviders, mockIndexPattern } from '../../mock';

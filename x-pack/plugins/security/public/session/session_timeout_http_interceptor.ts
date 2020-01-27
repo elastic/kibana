@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpInterceptor, HttpErrorResponse, HttpResponse, IAnonymousPaths } from 'src/core/public';
+import {
+  HttpInterceptor,
+  HttpErrorResponse,
+  IHttpResponse,
+  IAnonymousPaths,
+} from 'src/core/public';
 
 import { ISessionTimeout } from './session_timeout';
 
@@ -15,7 +20,7 @@ const isSystemAPIRequest = (request: Request) => {
 export class SessionTimeoutHttpInterceptor implements HttpInterceptor {
   constructor(private sessionTimeout: ISessionTimeout, private anonymousPaths: IAnonymousPaths) {}
 
-  response(httpResponse: HttpResponse) {
+  response(httpResponse: IHttpResponse) {
     if (this.anonymousPaths.isAnonymous(window.location.pathname)) {
       return;
     }

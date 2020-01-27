@@ -24,7 +24,7 @@ import { StringFormatEditor } from './string';
 
 const fieldType = 'string';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => (input) => input.toUpperCase()),
+  getConverterFor: jest.fn().mockImplementation(() => input => input.toUpperCase()),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { transform: 'upper' };
   }),

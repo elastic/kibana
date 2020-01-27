@@ -1,0 +1,17 @@
+{
+  "rule_id": "a624863f-a70d-417f-a7d2-7a404638d47f",
+  "risk_score": 50,
+  "description": "EQL - Suspicious MS Office Child Process",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Suspicious MS Office Child Process",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": " event.action:\"Process Create (rule: ProcessCreate)\" and    process.parent.name:(\"winword.exe\" or \"excel.exe\" or \"powerpnt.exe\" or \"eqnedt32.exe\" or \"fltldr.exe\" or \"mspub.exe\" or \"msaccess.exe\") and process.name:(\"arp.exe\" or \"dsquery.exe\" or \"dsget.exe\" or \"gpresult.exe\" or \"hostname.exe\" or \"ipconfig.exe\" or \"nbtstat.exe\" or \"net.exe\" or \"net1.exe\" or \"netsh.exe\" or \"netstat.exe\" or \"nltest.exe\" or \"ping.exe\" or \"qprocess.exe\" or \"quser.exe\" or \"qwinsta.exe\" or \"reg.exe\" or \"sc.exe\" or \"systeminfo.exe\" or \"tasklist.exe\" or \"tracert.exe\" or \"whoami.exe\" or \"bginfo.exe\" or \"cdb.exe\" or \"cmstp.exe\" or \"csi.exe\" or \"dnx.exe\" or \"fsi.exe\" or \"ieexec.exe\" or \"iexpress.exe\" or \"installutil.exe\" or \"Microsoft.Workflow.Compiler.exe\" or \"msbuild.exe\" or \"mshta.exe\" or \"msxsl.exe\" or \"odbcconf.exe\" or \"rcsi.exe\" or \"regsvr32.exe\" or \"xwizard.exe\" or \"atbroker.exe\" or \"forfiles.exe\" or \"schtasks.exe\" or \"regasm.exe\" or \"regsvcs.exe\" or \"cmd.exe\" or \"cscript.exe\" or \"powershell.exe\" or \"pwsh.exe\" or \"wmic.exe\" or \"wscript.exe\" or \"bitsadmin.exe\" or \"certutil.exe\" or \"ftp.exe\") ",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

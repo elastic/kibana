@@ -38,14 +38,14 @@ export function createGenerateDocRecordsStream(client, stats, progress) {
               scroll: SCROLL_TIMEOUT,
               size: SCROLL_SIZE,
               _source: true,
-              rest_total_hits_as_int: true
+              rest_total_hits_as_int: true,
             });
             remainingHits = resp.hits.total;
             progress.addToTotal(remainingHits);
           } else {
             resp = await client.scroll({
               scrollId: resp._scroll_id,
-              scroll: SCROLL_TIMEOUT
+              scroll: SCROLL_TIMEOUT,
             });
           }
 
@@ -61,7 +61,7 @@ export function createGenerateDocRecordsStream(client, stats, progress) {
                 type: hit._type,
                 id: hit._id,
                 source: hit._source,
-              }
+              },
             });
           }
 
@@ -72,6 +72,6 @@ export function createGenerateDocRecordsStream(client, stats, progress) {
       } catch (err) {
         callback(err);
       }
-    }
+    },
   });
 }

@@ -10,6 +10,20 @@ import { SpacesDescription } from './spaces_description';
 
 describe('SpacesDescription', () => {
   it('renders without crashing', () => {
-    expect(shallow(<SpacesDescription onManageSpacesClick={jest.fn()} />)).toMatchSnapshot();
+    expect(
+      shallow(
+        <SpacesDescription
+          capabilities={{
+            navLinks: {},
+            management: {},
+            catalogue: {},
+            spaces: {
+              manage: true,
+            },
+          }}
+          onManageSpacesClick={jest.fn()}
+        />
+      )
+    ).toMatchSnapshot();
   });
 });

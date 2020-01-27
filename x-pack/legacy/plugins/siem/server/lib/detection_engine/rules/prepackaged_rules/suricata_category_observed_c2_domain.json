@@ -1,0 +1,17 @@
+{
+  "rule_id": "8adfa89f-aa90-4d26-9d7a-7da652cae902",
+  "risk_score": 50,
+  "description": "Suricata Category - Observed C2 Domain",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Observed C2 Domain",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Domain Observed Used for C2 Detected\" or rule.category: \"Domain Observed Used for C2 Detected\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

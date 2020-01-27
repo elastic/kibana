@@ -66,7 +66,8 @@ export default new Datasource('es', {
         defaultMessage:
           'Index to query, wildcards accepted. Provide Index Pattern name for scripted fields and ' +
           'field name type ahead suggestions for metrics, split, and timefield arguments.',
-        description: '"metrics", "split" and "timefield" are referring to parameter names and should not be translated.',
+        description:
+          '"metrics", "split" and "timefield" are referring to parameter names and should not be translated.',
       }),
     },
     {
@@ -89,17 +90,15 @@ export default new Datasource('es', {
       name: 'interval', // You really shouldn't use this, use the interval picker instead
       types: ['string', 'null'],
       help: i18n.translate('timelion.help.functions.es.args.intervalHelpText', {
-        defaultMessage:
-          `**DO NOT USE THIS**. It's fun for debugging fit functions, but you really should use the interval picker`,
+        defaultMessage: `**DO NOT USE THIS**. It's fun for debugging fit functions, but you really should use the interval picker`,
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.esHelpText', {
     defaultMessage: 'Pull data from an elasticsearch instance',
   }),
   aliases: ['elasticsearch'],
   fn: async function esFn(args, tlConfig) {
-
     const config = _.defaults(_.clone(args.byName), {
       q: '*',
       metric: ['count'],
@@ -107,14 +106,14 @@ export default new Datasource('es', {
       timefield: tlConfig.settings['timelion:es.timefield'],
       interval: tlConfig.time.interval,
       kibana: true,
-      fit: 'nearest'
+      fit: 'nearest',
     });
 
     const findResp = await tlConfig.request.getSavedObjectsClient().find({
       type: 'index-pattern',
       fields: ['title', 'fields'],
       search: `"${config.index}"`,
-      search_fields: ['title']
+      search_fields: ['title'],
     });
     const indexPatternSavedObject = findResp.saved_objects.find(savedObject => {
       return savedObject.attributes.title === config.index;
@@ -127,10 +126,12 @@ export default new Datasource('es', {
       });
     }
 
-    const esShardTimeout = await tlConfig.server.newPlatform.__internals.elasticsearch.legacy.config$.pipe(
-      first(),
-      map(config => config.shardTimeout.asMilliseconds())
-    ).toPromise();
+    const esShardTimeout = await tlConfig.server.newPlatform.__internals.elasticsearch.legacy.config$
+      .pipe(
+        first(),
+        map(config => config.shardTimeout.asMilliseconds())
+      )
+      .toPromise();
 
     const body = buildRequest(config, tlConfig, scriptedFields, esShardTimeout);
 
@@ -143,12 +144,12 @@ export default new Datasource('es', {
           values: {
             index: config.index,
           },
-        }),
+        })
       );
     }
     return {
       type: 'seriesList',
-      list: toSeriesList(resp.aggregations, config)
+      list: toSeriesList(resp.aggregations, config),
     };
-  }
+  },
 });

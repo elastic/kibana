@@ -35,24 +35,26 @@ export async function getFilesForCommit() {
 
   const output = await fcb(cb => simpleGit.diff(['--name-status', '--cached'], cb));
 
-  return output
-    .split('\n')
-    // Ignore blank lines
-    .filter(line => line.trim().length > 0)
-    // git diff --name-status outputs lines with two OR three parts
-    // separated by a tab character
-    .map(line => line.trim().split('\t'))
-    .map(([status, ...paths]) => {
-      // ignore deleted files
-      if (status === 'D') {
-        return undefined;
-      }
+  return (
+    output
+      .split('\n')
+      // Ignore blank lines
+      .filter(line => line.trim().length > 0)
+      // git diff --name-status outputs lines with two OR three parts
+      // separated by a tab character
+      .map(line => line.trim().split('\t'))
+      .map(([status, ...paths]) => {
+        // ignore deleted files
+        if (status === 'D') {
+          return undefined;
+        }
 
-      // the status is always in the first column
-      // .. If the file is edited the line will only have two columns
-      // .. If the file is renamed it will have three columns
-      // .. In any case, the last column is the CURRENT path to the file
-      return new File(paths[paths.length - 1]);
-    })
-    .filter(Boolean);
+        // the status is always in the first column
+        // .. If the file is edited the line will only have two columns
+        // .. If the file is renamed it will have three columns
+        // .. In any case, the last column is the CURRENT path to the file
+        return new File(paths[paths.length - 1]);
+      })
+      .filter(Boolean)
+  );
 }

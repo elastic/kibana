@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { MonitorLocations } from '../../../common/runtime_types';
+import { QueryParams } from './types';
+
 export const FETCH_MONITOR_DETAILS = 'FETCH_MONITOR_DETAILS';
 export const FETCH_MONITOR_DETAILS_SUCCESS = 'FETCH_MONITOR_DETAILS_SUCCESS';
 export const FETCH_MONITOR_DETAILS_FAIL = 'FETCH_MONITOR_DETAILS_FAIL';
+
+export const FETCH_MONITOR_LOCATIONS = 'FETCH_MONITOR_LOCATIONS';
+export const FETCH_MONITOR_LOCATIONS_SUCCESS = 'FETCH_MONITOR_LOCATIONS_SUCCESS';
+export const FETCH_MONITOR_LOCATIONS_FAIL = 'FETCH_MONITOR_LOCATIONS_FAIL';
 
 export interface MonitorDetailsState {
   monitorId: string;
@@ -25,6 +32,25 @@ interface GetMonitorDetailsSuccessAction {
 
 interface GetMonitorDetailsFailAction {
   type: typeof FETCH_MONITOR_DETAILS_FAIL;
+  payload: any;
+}
+
+export interface MonitorLocationsPayload extends QueryParams {
+  monitorId: string;
+}
+
+interface GetMonitorLocationsAction {
+  type: typeof FETCH_MONITOR_LOCATIONS;
+  payload: MonitorLocationsPayload;
+}
+
+interface GetMonitorLocationsSuccessAction {
+  type: typeof FETCH_MONITOR_LOCATIONS_SUCCESS;
+  payload: MonitorLocations;
+}
+
+interface GetMonitorLocationsFailAction {
+  type: typeof FETCH_MONITOR_LOCATIONS_FAIL;
   payload: any;
 }
 
@@ -51,7 +77,33 @@ export function fetchMonitorDetailsFail(error: any): GetMonitorDetailsFailAction
   };
 }
 
+export function fetchMonitorLocations(payload: MonitorLocationsPayload): GetMonitorLocationsAction {
+  return {
+    type: FETCH_MONITOR_LOCATIONS,
+    payload,
+  };
+}
+
+export function fetchMonitorLocationsSuccess(
+  monitorLocationsState: MonitorLocations
+): GetMonitorLocationsSuccessAction {
+  return {
+    type: FETCH_MONITOR_LOCATIONS_SUCCESS,
+    payload: monitorLocationsState,
+  };
+}
+
+export function fetchMonitorLocationsFail(error: any): GetMonitorLocationsFailAction {
+  return {
+    type: FETCH_MONITOR_LOCATIONS_FAIL,
+    payload: error,
+  };
+}
+
 export type MonitorActionTypes =
   | GetMonitorDetailsAction
   | GetMonitorDetailsSuccessAction
-  | GetMonitorDetailsFailAction;
+  | GetMonitorDetailsFailAction
+  | GetMonitorLocationsAction
+  | GetMonitorLocationsSuccessAction
+  | GetMonitorLocationsFailAction;

@@ -61,7 +61,7 @@ export class JiraAction extends BaseAction {
           },
           summary: this.summary,
         },
-      }
+      },
     };
 
     return result;
@@ -88,48 +88,60 @@ export class JiraAction extends BaseAction {
     if (!json.jira) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonJira} property',
-          values: {
-            actionJsonJira: 'actionJson.jira'
+        message: i18n.translate(
+          'xpack.watcher.models.jiraAction.actionJsonJiraPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJsonJira} property',
+            values: {
+              actionJsonJira: 'actionJson.jira',
+            },
           }
-        }),
+        ),
       });
     }
 
     if (!get(json, 'jira.fields.project.key')) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraProjectKeyPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonJiraProjectKey} property',
-          values: {
-            actionJsonJiraProjectKey: 'actionJson.jira.fields.project.key'
+        message: i18n.translate(
+          'xpack.watcher.models.jiraAction.actionJsonJiraProjectKeyPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJsonJiraProjectKey} property',
+            values: {
+              actionJsonJiraProjectKey: 'actionJson.jira.fields.project.key',
+            },
           }
-        }),
+        ),
       });
     }
 
     if (!get(json, 'jira.fields.issuetype.name')) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraIssueTypePropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonJiraIssueType} property',
-          values: {
-            actionJsonJiraIssueType: 'actionJson.jira.fields.issuetype.name'
+        message: i18n.translate(
+          'xpack.watcher.models.jiraAction.actionJsonJiraIssueTypePropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJsonJiraIssueType} property',
+            values: {
+              actionJsonJiraIssueType: 'actionJson.jira.fields.issuetype.name',
+            },
           }
-        }),
+        ),
       });
     }
 
     if (!get(json, 'jira.fields.summary')) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraSummaryPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonJiraSummary} property',
-          values: {
-            actionJsonJiraSummary: 'actionJson.jira.fields.summary'
+        message: i18n.translate(
+          'xpack.watcher.models.jiraAction.actionJsonJiraSummaryPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJsonJiraSummary} property',
+            values: {
+              actionJsonJiraSummary: 'actionJson.jira.fields.summary',
+            },
           }
-        }),
+        ),
       });
     }
 

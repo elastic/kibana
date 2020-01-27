@@ -19,15 +19,13 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'discover', 'visualize', 'header', 'timePicker']);
 
   describe('visualize app', function describeIndexTests() {
-
     describe('linked saved searched', () => {
-
       const savedSearchName = 'vis_saved_search';
 
       before(async () => {
@@ -51,7 +49,10 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should respect the time filter when linked to a saved search', async () => {
-        await PageObjects.timePicker.setAbsoluteRange('Sep 19, 2015 @ 06:31:44.000', 'Sep 21, 2015 @ 10:00:00.000');
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 19, 2015 @ 06:31:44.000',
+          'Sep 21, 2015 @ 10:00:00.000'
+        );
         await retry.waitFor('wait for count to equal 3,950', async () => {
           const data = await PageObjects.visualize.getTableVisData();
           return data.trim() === '3,950';

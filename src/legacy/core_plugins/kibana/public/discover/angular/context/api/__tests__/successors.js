@@ -28,47 +28,58 @@ import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs
 import { fetchContextProvider } from '../context';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const ANCHOR_TIMESTAMP = (new Date(MS_PER_DAY)).toJSON();
-const ANCHOR_TIMESTAMP_3 = (new Date(MS_PER_DAY * 3)).toJSON();
-const ANCHOR_TIMESTAMP_3000 = (new Date(MS_PER_DAY * 3000)).toJSON();
+const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
+const ANCHOR_TIMESTAMP_3 = new Date(MS_PER_DAY * 3).toJSON();
+const ANCHOR_TIMESTAMP_3000 = new Date(MS_PER_DAY * 3000).toJSON();
 
-describe('context app', function () {
+describe('context app', function() {
   beforeEach(() => pluginInstance.initializeInnerAngular());
   beforeEach(ngMock.module('app/discover'));
 
-  describe('function fetchSuccessors', function () {
+  describe('function fetchSuccessors', function() {
     let fetchSuccessors;
     let searchSourceStub;
 
-    beforeEach(ngMock.inject(function createPrivateStubs() {
-      searchSourceStub = createContextSearchSourceStub([], '@timestamp');
+    beforeEach(
+      ngMock.inject(function createPrivateStubs() {
+        searchSourceStub = createContextSearchSourceStub([], '@timestamp');
 
-      fetchSuccessors = (indexPatternId, timeField, sortDir, timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
-        const anchor = {
-          _source: {
-            [timeField]: timeValIso
-          },
-          sort: [timeValNr, tieBreakerValue]
-        };
-
-        return fetchContextProvider(createIndexPatternsStub()).fetchSurroundingDocs(
-          'successors',
+        fetchSuccessors = (
           indexPatternId,
-          anchor,
           timeField,
-          tieBreakerField,
           sortDir,
-          size,
-          []
-        );
-      };
-    }));
+          timeValIso,
+          timeValNr,
+          tieBreakerField,
+          tieBreakerValue,
+          size
+        ) => {
+          const anchor = {
+            _source: {
+              [timeField]: timeValIso,
+            },
+            sort: [timeValNr, tieBreakerValue],
+          };
+
+          return fetchContextProvider(createIndexPatternsStub()).fetchSurroundingDocs(
+            'successors',
+            indexPatternId,
+            anchor,
+            timeField,
+            tieBreakerField,
+            sortDir,
+            size,
+            []
+          );
+        };
+      })
+    );
 
     afterEach(() => {
       searchSourceStub._restore();
     });
 
-    it('should perform exactly one query when enough hits are returned', function () {
+    it('should perform exactly one query when enough hits are returned', function() {
       searchSourceStub._stubHits = [
         searchSourceStub._createStubHit(MS_PER_DAY * 5000),
         searchSourceStub._createStubHit(MS_PER_DAY * 4000),
@@ -87,14 +98,13 @@ describe('context app', function () {
         0,
         3,
         []
-      )
-        .then((hits) => {
-          expect(searchSourceStub.fetch.calledOnce).to.be(true);
-          expect(hits).to.eql(searchSourceStub._stubHits.slice(-3));
-        });
+      ).then(hits => {
+        expect(searchSourceStub.fetch.calledOnce).to.be(true);
+        expect(hits).to.eql(searchSourceStub._stubHits.slice(-3));
+      });
     });
 
-    it('should perform multiple queries with the last being unrestricted when too few hits are returned', function () {
+    it('should perform multiple queries with the last being unrestricted when too few hits are returned', function() {
       searchSourceStub._stubHits = [
         searchSourceStub._createStubHit(MS_PER_DAY * 3010),
         searchSourceStub._createStubHit(MS_PER_DAY * 3002),
@@ -113,24 +123,27 @@ describe('context app', function () {
         0,
         6,
         []
-      )
-        .then((hits) => {
-          const intervals = searchSourceStub.setField.args
-            .filter(([property]) => property === 'query')
-            .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
+      ).then(hits => {
+        const intervals = searchSourceStub.setField.args
+          .filter(([property]) => property === 'query')
+          .map(([, { query }]) =>
+            _.get(query, ['constant_score', 'filter', 'range', '@timestamp'])
+          );
 
-          expect(intervals.every(({ gte, lte }) => (gte && lte) ? moment(gte).isBefore(lte) : true)).to.be(true);
-          // should have started at the given time
-          expect(intervals[0].lte).to.eql(moment(MS_PER_DAY * 3000).toISOString());
-          // should have ended with a half-open interval
-          expect(_.last(intervals)).to.only.have.keys('lte', 'format');
-          expect(intervals.length).to.be.greaterThan(1);
+        expect(
+          intervals.every(({ gte, lte }) => (gte && lte ? moment(gte).isBefore(lte) : true))
+        ).to.be(true);
+        // should have started at the given time
+        expect(intervals[0].lte).to.eql(moment(MS_PER_DAY * 3000).toISOString());
+        // should have ended with a half-open interval
+        expect(_.last(intervals)).to.only.have.keys('lte', 'format');
+        expect(intervals.length).to.be.greaterThan(1);
 
-          expect(hits).to.eql(searchSourceStub._stubHits.slice(-3));
-        });
+        expect(hits).to.eql(searchSourceStub._stubHits.slice(-3));
+      });
     });
 
-    it('should perform multiple queries until the expected hit count is returned', function () {
+    it('should perform multiple queries until the expected hit count is returned', function() {
       searchSourceStub._stubHits = [
         searchSourceStub._createStubHit(MS_PER_DAY * 3000),
         searchSourceStub._createStubHit(MS_PER_DAY * 3000 - 1),
@@ -150,23 +163,24 @@ describe('context app', function () {
         0,
         4,
         []
-      )
-        .then((hits) => {
-          const intervals = searchSourceStub.setField.args
-            .filter(([property]) => property === 'query')
-            .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
+      ).then(hits => {
+        const intervals = searchSourceStub.setField.args
+          .filter(([property]) => property === 'query')
+          .map(([, { query }]) =>
+            _.get(query, ['constant_score', 'filter', 'range', '@timestamp'])
+          );
 
-          // should have started at the given time
-          expect(intervals[0].lte).to.eql(moment(MS_PER_DAY * 3000).toISOString());
-          // should have stopped before reaching MS_PER_DAY * 2200
-          expect(moment(_.last(intervals).gte).valueOf()).to.be.greaterThan(MS_PER_DAY * 2200);
-          expect(intervals.length).to.be.greaterThan(1);
+        // should have started at the given time
+        expect(intervals[0].lte).to.eql(moment(MS_PER_DAY * 3000).toISOString());
+        // should have stopped before reaching MS_PER_DAY * 2200
+        expect(moment(_.last(intervals).gte).valueOf()).to.be.greaterThan(MS_PER_DAY * 2200);
+        expect(intervals.length).to.be.greaterThan(1);
 
-          expect(hits).to.eql(searchSourceStub._stubHits.slice(0, 4));
-        });
+        expect(hits).to.eql(searchSourceStub._stubHits.slice(0, 4));
+      });
     });
 
-    it('should return an empty array when no hits were found', function () {
+    it('should return an empty array when no hits were found', function() {
       return fetchSuccessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
@@ -177,13 +191,12 @@ describe('context app', function () {
         0,
         3,
         []
-      )
-        .then((hits) => {
-          expect(hits).to.eql([]);
-        });
+      ).then(hits => {
+        expect(hits).to.eql([]);
+      });
     });
 
-    it('should configure the SearchSource to not inherit from the implicit root', function () {
+    it('should configure the SearchSource to not inherit from the implicit root', function() {
       return fetchSuccessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
@@ -194,15 +207,14 @@ describe('context app', function () {
         0,
         3,
         []
-      )
-        .then(() => {
-          const setParentSpy = searchSourceStub.setParent;
-          expect(setParentSpy.alwaysCalledWith(undefined)).to.be(true);
-          expect(setParentSpy.called).to.be(true);
-        });
+      ).then(() => {
+        const setParentSpy = searchSourceStub.setParent;
+        expect(setParentSpy.alwaysCalledWith(undefined)).to.be(true);
+        expect(setParentSpy.called).to.be(true);
+      });
     });
 
-    it('should set the tiebreaker sort order to the same as the time field', function () {
+    it('should set the tiebreaker sort order to the same as the time field', function() {
       return fetchSuccessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
@@ -213,13 +225,11 @@ describe('context app', function () {
         0,
         3,
         []
-      )
-        .then(() => {
-          expect(searchSourceStub.setField.calledWith('sort', [
-            { '@timestamp': 'desc' },
-            { '_doc': 'desc' },
-          ])).to.be(true);
-        });
+      ).then(() => {
+        expect(
+          searchSourceStub.setField.calledWith('sort', [{ '@timestamp': 'desc' }, { _doc: 'desc' }])
+        ).to.be(true);
+      });
     });
   });
 });

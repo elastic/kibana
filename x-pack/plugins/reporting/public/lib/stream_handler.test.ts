@@ -5,7 +5,7 @@
  */
 
 import sinon, { stub } from 'sinon';
-import { HttpServiceBase, NotificationsStart } from '../../../../../src/core/public';
+import { HttpSetup, NotificationsStart } from '../../../../../src/core/public';
 import { SourceJob, JobSummary, HttpService } from '../../index.d';
 import { JobQueue } from './job_queue';
 import { ReportingNotifierStreamHandler } from './stream_handler';
@@ -57,7 +57,7 @@ const httpMock: HttpService = ({
   basePath: {
     prepend: stub(),
   },
-} as unknown) as HttpServiceBase;
+} as unknown) as HttpSetup;
 
 const mockShowDanger = stub();
 const mockShowSuccess = stub();

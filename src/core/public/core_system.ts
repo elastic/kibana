@@ -65,7 +65,7 @@ export interface CoreContext {
 }
 
 /** @internal */
-export interface InternalCoreSetup extends Omit<CoreSetup, 'application'> {
+export interface InternalCoreSetup extends Omit<CoreSetup, 'application' | 'getStartServices'> {
   application: InternalApplicationSetup;
   injectedMetadata: InjectedMetadataSetup;
 }
@@ -216,7 +216,7 @@ export class CoreSystem {
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
       const docLinks = await this.docLinks.start({ injectedMetadata });
-      const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+      const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup! });
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
       const application = await this.application.start({ http, injectedMetadata });
@@ -259,10 +259,11 @@ export class CoreSystem {
         docLinks,
         http,
         i18n,
+        injectedMetadata: pick(injectedMetadata, ['getInjectedVar']),
         notifications,
         overlays,
+        savedObjects,
         uiSettings,
-        injectedMetadata: pick(injectedMetadata, ['getInjectedVar']),
       }));
 
       const core: InternalCoreStart = {

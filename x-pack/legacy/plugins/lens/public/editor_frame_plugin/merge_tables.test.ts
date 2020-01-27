@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { mergeTables } from './merge_tables';
 import { KibanaDatatable } from 'src/plugins/expressions/public';
 
@@ -68,5 +69,39 @@ describe('lens_merge_tables', () => {
         "type": "lens_multitable",
       }
     `);
+  });
+
+  it('should handle this week now/w', () => {
+    const { dateRange } = mergeTables.fn(
+      {
+        type: 'kibana_context',
+        timeRange: {
+          from: 'now/w',
+          to: 'now/w',
+        },
+      },
+      { layerIds: ['first', 'second'], tables: [] },
+      {}
+    );
+
+    expect(
+      moment
+        .duration(
+          moment()
+            .startOf('week')
+            .diff(dateRange!.fromDate)
+        )
+        .asDays()
+    ).toEqual(0);
+
+    expect(
+      moment
+        .duration(
+          moment()
+            .endOf('week')
+            .diff(dateRange!.toDate)
+        )
+        .asDays()
+    ).toEqual(0);
   });
 });

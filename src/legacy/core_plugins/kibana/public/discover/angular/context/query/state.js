@@ -19,7 +19,6 @@
 
 import { LOADING_STATUS } from './constants';
 
-
 export function createInitialLoadingStatusState() {
   return {
     anchor: LOADING_STATUS.UNINITIALIZED,

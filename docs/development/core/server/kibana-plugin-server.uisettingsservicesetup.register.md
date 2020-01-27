@@ -24,5 +24,17 @@ register(settings: Record<string, UiSettingsParams>): void;
 
 ## Example
 
-setup(core: CoreSetup)<!-- -->{ core.uiSettings.register(\[{ foo: { name: i18n.translate('my foo settings'), value: true, description: 'add some awesomeness', }<!-- -->, }<!-- -->\]); }
+
+```ts
+setup(core: CoreSetup){
+ core.uiSettings.register([{
+  foo: {
+   name: i18n.translate('my foo settings'),
+   value: true,
+   description: 'add some awesomeness',
+  },
+ }]);
+}
+
+```
 

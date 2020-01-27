@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
@@ -26,6 +26,7 @@ import {
 import { TimelineComponent } from './timeline';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 const testFlyoutHeight = 980;
 
@@ -49,6 +50,8 @@ describe('Timeline', () => {
   const mocks = [
     { request: { query: timelineQuery }, result: { data: { events: mockTimelineData } } },
   ];
+
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {

@@ -43,11 +43,7 @@ export class DiscoverNoResults extends Component {
   };
 
   render() {
-    const {
-      shardFailures,
-      timeFieldName,
-      queryLanguage,
-    } = this.props;
+    const { shardFailures, timeFieldName, queryLanguage } = this.props;
 
     let shardFailuresMessage;
 
@@ -77,9 +73,7 @@ export class DiscoverNoResults extends Component {
 
           <EuiSpacer size="s" />
 
-          <EuiCodeBlock paddingSize="s">
-            {JSON.stringify(failure.reason)}
-          </EuiCodeBlock>
+          <EuiCodeBlock paddingSize="s">{JSON.stringify(failure.reason)}</EuiCodeBlock>
 
           {index < shardFailures.length - 1 ? <EuiSpacer size="l" /> : undefined}
         </div>
@@ -133,7 +127,6 @@ export class DiscoverNoResults extends Component {
                   the currently selected time range. You can try changing the time range to one which contains data."
               />
             </p>
-
           </EuiText>
         </Fragment>
       );
@@ -142,67 +135,73 @@ export class DiscoverNoResults extends Component {
     let luceneQueryMessage;
 
     if (queryLanguage === 'lucene') {
-      const searchExamples = [{
-        description: <EuiCode>200</EuiCode>,
-        title: (
-          <EuiText>
-            <strong>
-              <FormattedMessage
-                id="kbn.discover.noResults.searchExamples.anyField200StatusCodeExampleTitle"
-                defaultMessage="Find requests that contain the number 200, in any field"
-              />
-            </strong>
-          </EuiText>
-        ),
-      }, {
-        description: <EuiCode>status:200</EuiCode>,
-        title: (
-          <EuiText>
-            <strong>
-              <FormattedMessage
-                id="kbn.discover.noResults.searchExamples.statusField200StatusCodeExampleTitle"
-                defaultMessage="Find 200 in the status field"
-              />
-            </strong>
-          </EuiText>
-        ),
-      }, {
-        description: <EuiCode>status:[400 TO 499]</EuiCode>,
-        title: (
-          <EuiText>
-            <strong>
-              <FormattedMessage
-                id="kbn.discover.noResults.searchExamples.400to499StatusCodeExampleTitle"
-                defaultMessage="Find all status codes between 400-499"
-              />
-            </strong>
-          </EuiText>
-        ),
-      }, {
-        description: <EuiCode>status:[400 TO 499] AND extension:PHP</EuiCode>,
-        title: (
-          <EuiText>
-            <strong>
-              <FormattedMessage
-                id="kbn.discover.noResults.searchExamples.400to499StatusCodeWithPhpExtensionExampleTitle"
-                defaultMessage="Find status codes 400-499 with the extension php"
-              />
-            </strong>
-          </EuiText>
-        ),
-      }, {
-        description: <EuiCode>status:[400 TO 499] AND (extension:php OR extension:html)</EuiCode>,
-        title: (
-          <EuiText>
-            <strong>
-              <FormattedMessage
-                id="kbn.discover.noResults.searchExamples.400to499StatusCodeWithPhpOrHtmlExtensionExampleTitle"
-                defaultMessage="Find status codes 400-499 with the extension php or html"
-              />
-            </strong>
-          </EuiText>
-        ),
-      }];
+      const searchExamples = [
+        {
+          description: <EuiCode>200</EuiCode>,
+          title: (
+            <EuiText>
+              <strong>
+                <FormattedMessage
+                  id="kbn.discover.noResults.searchExamples.anyField200StatusCodeExampleTitle"
+                  defaultMessage="Find requests that contain the number 200, in any field"
+                />
+              </strong>
+            </EuiText>
+          ),
+        },
+        {
+          description: <EuiCode>status:200</EuiCode>,
+          title: (
+            <EuiText>
+              <strong>
+                <FormattedMessage
+                  id="kbn.discover.noResults.searchExamples.statusField200StatusCodeExampleTitle"
+                  defaultMessage="Find 200 in the status field"
+                />
+              </strong>
+            </EuiText>
+          ),
+        },
+        {
+          description: <EuiCode>status:[400 TO 499]</EuiCode>,
+          title: (
+            <EuiText>
+              <strong>
+                <FormattedMessage
+                  id="kbn.discover.noResults.searchExamples.400to499StatusCodeExampleTitle"
+                  defaultMessage="Find all status codes between 400-499"
+                />
+              </strong>
+            </EuiText>
+          ),
+        },
+        {
+          description: <EuiCode>status:[400 TO 499] AND extension:PHP</EuiCode>,
+          title: (
+            <EuiText>
+              <strong>
+                <FormattedMessage
+                  id="kbn.discover.noResults.searchExamples.400to499StatusCodeWithPhpExtensionExampleTitle"
+                  defaultMessage="Find status codes 400-499 with the extension php"
+                />
+              </strong>
+            </EuiText>
+          ),
+        },
+        {
+          description: <EuiCode>status:[400 TO 499] AND (extension:php OR extension:html)</EuiCode>,
+          title: (
+            <EuiText>
+              <strong>
+                <FormattedMessage
+                  id="kbn.discover.noResults.searchExamples.400to499StatusCodeWithPhpOrHtmlExtensionExampleTitle"
+                  defaultMessage="Find status codes 400-499 with the extension php or html"
+                />
+              </strong>
+            </EuiText>
+          ),
+        },
+      ];
 
       luceneQueryMessage = (
         <Fragment>
@@ -232,7 +231,7 @@ export class DiscoverNoResults extends Component {
                         defaultMessage="Query String syntax"
                       />
                     </EuiLink>
-                  )
+                  ),
                 }}
               />
             </p>
@@ -240,10 +239,7 @@ export class DiscoverNoResults extends Component {
 
           <EuiSpacer size="m" />
 
-          <EuiDescriptionList
-            type="column"
-            listItems={searchExamples}
-          />
+          <EuiDescriptionList type="column" listItems={searchExamples} />
 
           <EuiSpacer size="xl" />
         </Fragment>
@@ -257,10 +253,12 @@ export class DiscoverNoResults extends Component {
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false} className="dscNoResults">
             <EuiCallOut
-              title={<FormattedMessage
-                id="kbn.discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
-                defaultMessage="No results match your search criteria"
-              />}
+              title={
+                <FormattedMessage
+                  id="kbn.discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
+                  defaultMessage="No results match your search criteria"
+                />
+              }
               color="warning"
               iconType="help"
               data-test-subj="discoverNoResults"

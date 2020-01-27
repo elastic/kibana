@@ -15,7 +15,7 @@ import {
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 
-import { Feature } from '../../../../../../../../../../../plugins/features/server';
+import { Feature } from '../../../../../../../../../../../plugins/features/public';
 import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';

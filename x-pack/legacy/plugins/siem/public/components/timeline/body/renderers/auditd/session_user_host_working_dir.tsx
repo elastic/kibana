@@ -5,7 +5,6 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { DraggableBadge } from '../../../../draggables';
 
@@ -25,7 +24,7 @@ interface Props {
   session: string | null | undefined;
 }
 
-export const SessionUserHostWorkingDir = pure<Props>(
+export const SessionUserHostWorkingDir = React.memo<Props>(
   ({ eventId, contextId, hostName, userName, primary, secondary, workingDirectory, session }) => (
     <>
       <TokensFlexItem grow={false} component="span">

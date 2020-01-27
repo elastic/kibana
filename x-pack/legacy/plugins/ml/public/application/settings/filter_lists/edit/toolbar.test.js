@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { EditFilterListToolbar } from './toolbar';
 
 describe('EditFilterListToolbar', () => {
-
   const onSearchChange = jest.fn(() => {});
   const addItems = jest.fn(() => {});
   const deleteSelectedItems = jest.fn(() => {});
@@ -21,7 +19,7 @@ describe('EditFilterListToolbar', () => {
     addItems,
     deleteSelectedItems,
     canCreateFilter: true,
-    canDeleteFilter: true
+    canDeleteFilter: true,
   };
 
   test('renders the toolbar with no items selected', () => {
@@ -30,12 +28,9 @@ describe('EditFilterListToolbar', () => {
       selectedItemCount: 0,
     };
 
-    const component = shallowWithIntl(
-      <EditFilterListToolbar {...props} />
-    );
+    const component = shallowWithIntl(<EditFilterListToolbar {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
 
   test('renders the toolbar with one item selected', () => {
@@ -44,12 +39,8 @@ describe('EditFilterListToolbar', () => {
       selectedItemCount: 1,
     };
 
-    const component = shallowWithIntl(
-      <EditFilterListToolbar {...props} />
-    );
+    const component = shallowWithIntl(<EditFilterListToolbar {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
-
 });

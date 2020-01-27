@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import * as React from 'react';
 
 import { TestProviders } from '../../mock';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { Ja3Fingerprint } from '.';
 
 describe('Ja3Fingerprint', () => {
+  const mount = useMountAppended();
+
   test('renders the expected label', () => {
     const wrapper = mount(
       <TestProviders>

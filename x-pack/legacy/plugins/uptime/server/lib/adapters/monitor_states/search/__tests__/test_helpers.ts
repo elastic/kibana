@@ -24,12 +24,12 @@ export const nextPagination = (key: any): CursorPagination => {
 };
 export const simpleQueryContext = (): QueryContext => {
   return {
-    database: undefined,
+    count: _query => new Promise(r => ({})),
+    search: _query => new Promise(r => ({})),
     dateRangeEnd: '',
     dateRangeStart: '',
     filterClause: undefined,
     pagination: nextPagination('something'),
-    request: undefined,
     size: 0,
     statusFilter: '',
   };

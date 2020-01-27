@@ -137,7 +137,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreSetup {
   return {
-    pulse: deps.pulse,
     capabilities: {
       registerProvider: deps.capabilities.registerProvider,
       registerSwitcher: deps.capabilities.registerSwitcher,

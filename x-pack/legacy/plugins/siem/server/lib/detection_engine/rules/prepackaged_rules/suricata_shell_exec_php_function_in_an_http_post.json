@@ -1,0 +1,17 @@
+{
+  "rule_id": "082fca48-4707-485a-aedb-340ee77e0687",
+  "risk_score": 50,
+  "description": "Suricata shell_exec PHP Function in an HTTP POST",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata shell_exec PHP Function in an HTTP POST",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610087 and (event.module:suricata and event.kind:alert)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

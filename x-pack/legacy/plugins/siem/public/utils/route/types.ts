@@ -9,14 +9,24 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { HostsTableType } from '../../store/hosts/model';
+import { NetworkRouteType } from '../../pages/network/navigation/types';
 
+export type SiemRouteType = HostsTableType | NetworkRouteType;
 export interface RouteSpyState {
   pageName: string;
   detailName: string | undefined;
-  tabName: HostsTableType | undefined;
+  tabName: SiemRouteType | undefined;
   search: string;
   pathName: string;
   history?: H.History;
+}
+
+export interface HostRouteSpyState extends RouteSpyState {
+  tabName: HostsTableType | undefined;
+}
+
+export interface NetworkRouteSpyState extends RouteSpyState {
+  tabName: NetworkRouteType | undefined;
 }
 
 export type RouteSpyAction =

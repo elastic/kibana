@@ -17,20 +17,14 @@
  * under the License.
  */
 
-import moment from 'moment';
-import { of } from 'rxjs';
 import { expect } from 'chai';
 import { getEsShardTimeout } from '../../helpers/get_es_shard_timeout';
 
 describe('getEsShardTimeout', () => {
   it('should return the elasticsearch.shardTimeout', async () => {
     const req = {
-      server: {
-        newPlatform: {
-          __internals: {
-            elasticsearch: { legacy: { config$: of({ shardTimeout: moment.duration(12345) }) } },
-          },
-        },
+      getEsShardTimeout: async () => {
+        return 12345;
       },
     };
 

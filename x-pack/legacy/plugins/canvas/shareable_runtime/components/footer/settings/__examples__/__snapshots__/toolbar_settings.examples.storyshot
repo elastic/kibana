@@ -24,6 +24,7 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: off 1`
   >
     <div
       className="euiFormRow"
+      id="generated-id-row"
     >
       <div
         className="euiFormRow__fieldWrapper"
@@ -55,18 +56,22 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: off 1`
                 className="euiSwitch__track"
               >
                 <svg
+                  aria-hidden={true}
                   className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
                   focusable="false"
                   height={16}
+                  role="img"
                   style={null}
                   viewBox="0 0 16 16"
                   width={16}
                   xmlns="http://www.w3.org/2000/svg"
                 />
                 <svg
+                  aria-hidden={true}
                   className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
                   focusable="false"
                   height={16}
+                  role="img"
                   style={null}
                   viewBox="0 0 16 16"
                   width={16}
@@ -75,13 +80,13 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: off 1`
               </span>
             </span>
           </button>
-          <p
+          <span
             className="euiSwitch__label"
             id="generated-id"
             onClick={[Function]}
           >
             Hide Toolbar
-          </p>
+          </span>
         </div>
         <div
           className="euiFormHelpText euiFormRow__text"
@@ -119,6 +124,7 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: on 1`]
   >
     <div
       className="euiFormRow"
+      id="generated-id-row"
     >
       <div
         className="euiFormRow__fieldWrapper"
@@ -150,18 +156,22 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: on 1`]
                 className="euiSwitch__track"
               >
                 <svg
+                  aria-hidden={true}
                   className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
                   focusable="false"
                   height={16}
+                  role="img"
                   style={null}
                   viewBox="0 0 16 16"
                   width={16}
                   xmlns="http://www.w3.org/2000/svg"
                 />
                 <svg
+                  aria-hidden={true}
                   className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
                   focusable="false"
                   height={16}
+                  role="img"
                   style={null}
                   viewBox="0 0 16 16"
                   width={16}
@@ -170,13 +180,13 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: on 1`]
               </span>
             </span>
           </button>
-          <p
+          <span
             className="euiSwitch__label"
             id="generated-id"
             onClick={[Function]}
           >
             Hide Toolbar
-          </p>
+          </span>
         </div>
         <div
           className="euiFormHelpText euiFormRow__text"
@@ -214,6 +224,7 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings contextual 1`] = 
   >
     <div
       className="euiFormRow"
+      id="generated-id-row"
     >
       <div
         className="euiFormRow__fieldWrapper"
@@ -245,18 +256,22 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings contextual 1`] = 
                 className="euiSwitch__track"
               >
                 <svg
+                  aria-hidden={true}
                   className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
                   focusable="false"
                   height={16}
+                  role="img"
                   style={null}
                   viewBox="0 0 16 16"
                   width={16}
                   xmlns="http://www.w3.org/2000/svg"
                 />
                 <svg
+                  aria-hidden={true}
                   className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
                   focusable="false"
                   height={16}
+                  role="img"
                   style={null}
                   viewBox="0 0 16 16"
                   width={16}
@@ -265,13 +280,13 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings contextual 1`] = 
               </span>
             </span>
           </button>
-          <p
+          <span
             className="euiSwitch__label"
             id="generated-id"
             onClick={[Function]}
           >
             Hide Toolbar
-          </p>
+          </span>
         </div>
         <div
           className="euiFormHelpText euiFormRow__text"

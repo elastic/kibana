@@ -22,11 +22,11 @@ import { resolve } from 'path';
 import { Subject } from 'rxjs';
 // @ts-ignore
 import fetch from 'node-fetch';
+
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { ElasticsearchServiceSetup } from '../elasticsearch';
 import { PulseChannel, PulseInstruction } from './channel';
-import { sendPulse, Fetcher } from './send_pulse';
 
 export interface InternalPulseService {
   getChannel: (id: string) => PulseChannel;
@@ -36,10 +36,7 @@ export interface PulseSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
 }
 
-export type PulseServiceSetup = InternalPulseService;
-export interface PulseServiceStart {};
-
-export interface ChannelResponse {
+interface ChannelResponse {
   id: string;
   instructions: PulseInstruction[];
 }
@@ -55,18 +52,17 @@ const channelNames = readdirSync(resolve(__dirname, 'collectors'))
   });
 
 export class PulseService {
-  private retriableErrors = 0;
   private readonly log: Logger;
   private readonly channels: Map<string, PulseChannel>;
-  private readonly instructions$: Map<string, Subject<any>> = new Map();
+  private readonly instructions: Map<string, Subject<any>> = new Map();
 
   constructor(coreContext: CoreContext) {
     this.log = coreContext.logger.get('pulse-service');
     this.channels = new Map(
       channelNames.map((id): [string, PulseChannel] => {
-        const instructions$ = new Subject<PulseInstruction>();
-        this.instructions$.set(id, instructions$);
-        const channel = new PulseChannel({ id, instructions$ });
+        const instructions$ = new Subject<PulseInstruction[]>();
+        this.instructions.set(id, instructions$);
+        const channel = new PulseChannel({ id, instructions$, logger: this.log });
         return [channel.id, channel];
       })
     );
@@ -101,6 +97,7 @@ export class PulseService {
     };
   }
 
+  private retriableErrors = 0;
   private async loadInstructions() {
     const url = 'http://localhost:5601/api/pulse_poc/instructions/123';
     let response: any;
@@ -126,7 +123,7 @@ export class PulseService {
     const responseBody: InstructionsResponse = await response.json();
 
     responseBody.channels.forEach(channel => {
-      const instructions$ = this.instructions$.get(channel.id);
+      const instructions$ = this.instructions.get(channel.id);
       if (!instructions$) {
         throw new Error(
           `Channel (${channel.id}) from service has no corresponding channel handler in client`
@@ -150,10 +147,21 @@ export class PulseService {
   }
 
   private async sendTelemetry() {
-    const fetcher: Fetcher<any> = async (url, channels) => {
-      return await fetch(url, {
-        method: 'post',
+    const url = 'http://localhost:5601/api/pulse_poc/intake/123';
 
+    const channels = [];
+    for (const channel of this.channels.values()) {
+      const records = await channel.getRecords();
+      channels.push({
+        records,
+        channel_id: channel.id,
+      });
+    }
+
+    let response: any;
+    try {
+      response = await fetch(url, {
+        method: 'post',
         headers: {
           'content-type': 'application/json',
           'kbn-xsrf': 'true',
@@ -161,9 +169,22 @@ export class PulseService {
         body: JSON.stringify({
           channels,
         }),
-      })
+      });
+    } catch (err) {
+      if (!err.message.includes('ECONNREFUSED')) {
+        throw err;
+      }
+      // the instructions polling should handle logging for this case, yay for POCs
+      return;
+    }
+    if (response.status === 503) {
+      // the instructions polling should handle logging for this case, yay for POCs
+      return;
     }
 
-    return await sendPulse(this.channels, fetcher);
+    if (response.status !== 200) {
+      const responseBody = await response.text();
+      throw new Error(`${response.status}: ${responseBody}`);
+    }
   }
 }

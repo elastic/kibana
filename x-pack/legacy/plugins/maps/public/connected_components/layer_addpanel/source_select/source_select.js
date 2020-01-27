@@ -6,23 +6,13 @@
 
 import React, { Fragment } from 'react';
 import { ALL_SOURCES } from '../../../layers/sources/all_sources';
-import {
-  EuiTitle,
-  EuiSpacer,
-  EuiCard,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiCard, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 
-export function SourceSelect({
-  updateSourceSelection
-}) {
-
+export function SourceSelect({ updateSourceSelection }) {
   const sourceCards = ALL_SOURCES.map(Source => {
-    const icon = Source.icon
-      ? <EuiIcon type={Source.icon} size="l" />
-      : null;
+    const icon = Source.icon ? <EuiIcon type={Source.icon} size="l" /> : null;
 
     const sourceTitle = Source.title;
 
@@ -33,8 +23,8 @@ export function SourceSelect({
           className="mapLayerAddpanel__card"
           title={sourceTitle}
           icon={icon}
-          onClick={() => updateSourceSelection(
-            { type: Source.type, isIndexingSource: Source.isIndexingSource })
+          onClick={() =>
+            updateSourceSelection({ type: Source.type, isIndexingSource: Source.isIndexingSource })
           }
           description={Source.description}
           layout="horizontal"

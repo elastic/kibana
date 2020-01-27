@@ -19,19 +19,9 @@
 
 import Joi from 'joi';
 import { sampleDataSchema } from './data_set_schema';
-import {
-  createListRoute,
-  createInstallRoute,
-  createUninstallRoute,
-} from './routes';
-import {
-  flightsSpecProvider,
-  logsSpecProvider,
-  ecommerceSpecProvider
-} from './data_sets';
-import {
-  makeSampleDataUsageCollector
-} from './usage';
+import { createListRoute, createInstallRoute, createUninstallRoute } from './routes';
+import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
+import { makeSampleDataUsageCollector } from './usage';
 
 export function sampleDataMixin(kbnServer, server) {
   server.route(createListRoute());
@@ -44,7 +34,7 @@ export function sampleDataMixin(kbnServer, server) {
     return sampleDatasets;
   });
 
-  server.decorate('server', 'registerSampleDataset', (specProvider) => {
+  server.decorate('server', 'registerSampleDataset', specProvider => {
     const { error, value } = Joi.validate(specProvider(server), sampleDataSchema);
 
     if (error) {
@@ -56,7 +46,8 @@ export function sampleDataMixin(kbnServer, server) {
     });
     if (!defaultIndexSavedObjectJson) {
       throw new Error(
-        `Unable to register sample dataset spec, defaultIndex: "${value.defaultIndex}" does not exist in savedObjects list.`);
+        `Unable to register sample dataset spec, defaultIndex: "${value.defaultIndex}" does not exist in savedObjects list.`
+      );
     }
 
     const dashboardSavedObjectJson = value.savedObjects.find(savedObjectJson => {
@@ -64,7 +55,8 @@ export function sampleDataMixin(kbnServer, server) {
     });
     if (!dashboardSavedObjectJson) {
       throw new Error(
-        `Unable to register sample dataset spec, overviewDashboard: "${value.overviewDashboard}" does not exist in savedObjects list.`);
+        `Unable to register sample dataset spec, overviewDashboard: "${value.overviewDashboard}" does not exist in savedObjects list.`
+      );
     }
 
     sampleDatasets.push(value);
@@ -97,7 +89,14 @@ export function sampleDataMixin(kbnServer, server) {
   server.decorate(
     'server',
     'replacePanelInSampleDatasetDashboard',
-    ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig = {} }) => {
+    ({
+      sampleDataId,
+      dashboardId,
+      oldEmbeddableId,
+      embeddableId,
+      embeddableType,
+      embeddableConfig = {},
+    }) => {
       const sampleDataset = sampleDatasets.find(sampleDataset => {
         return sampleDataset.id === sampleDataId;
       });
@@ -132,7 +131,9 @@ export function sampleDataMixin(kbnServer, server) {
         panel.embeddableConfig = embeddableConfig;
         dashboard.attributes.panelsJSON = JSON.stringify(panels);
       } catch (error) {
-        throw new Error(`Unable to replace panel with embeddable ${oldEmbeddableId}, error: ${error}`);
+        throw new Error(
+          `Unable to replace panel with embeddable ${oldEmbeddableId}, error: ${error}`
+        );
       }
     }
   );

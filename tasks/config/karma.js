@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import { resolve, dirname } from 'path';
+import { dirname } from 'path';
 import { times } from 'lodash';
+import { makeJunitReportPath } from '@kbn/test';
 
 const TOTAL_CI_SHARDS = 4;
 const ROOT = dirname(require.resolve('../../package.json'));
 
-module.exports = function (grunt) {
+module.exports = function(grunt) {
   function pickBrowser() {
     if (grunt.option('browser')) {
       return grunt.option('browser');
@@ -79,7 +80,7 @@ module.exports = function (grunt) {
       reporters: pickReporters(),
 
       junitReporter: {
-        outputFile: resolve(ROOT, 'target/junit', process.env.JOB || '.', `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}karma.xml`),
+        outputFile: makeJunitReportPath(ROOT, 'karma'),
         useBrowserName: false,
         nameFormatter: (_, result) => [...result.suite, result.description].join(' '),
         classNameFormatter: (_, result) => {

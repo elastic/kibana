@@ -27,8 +27,8 @@ import { LearnMoreLink } from '../../../components/learn_more_link';
 
 export class AddPolicyToTemplateConfirmModal extends Component {
   state = {
-    templates: []
-  }
+    templates: [],
+  };
   async componentDidMount() {
     const templates = await loadIndexTemplates();
     this.setState({ templates });
@@ -38,22 +38,25 @@ export class AddPolicyToTemplateConfirmModal extends Component {
     const { templateName, aliasName } = this.state;
     const policyName = policy.name;
     if (!templateName) {
-      this.setState({ templateError: i18n.translate(
-        'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.noTemplateSelectedErrorMessage',
-        { defaultMessage: 'You must select an index template.' }) });
+      this.setState({
+        templateError: i18n.translate(
+          'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.noTemplateSelectedErrorMessage',
+          { defaultMessage: 'You must select an index template.' }
+        ),
+      });
       return;
     }
     try {
       await addLifecyclePolicyToTemplate({
         policyName,
         templateName,
-        aliasName
+        aliasName,
       });
       const message = i18n.translate(
         'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.successMessage',
         {
           defaultMessage: 'Added policy {policyName} to index template {templateName}',
-          values: { policyName, templateName }
+          values: { policyName, templateName },
         }
       );
       toastNotifications.addSuccess(message);
@@ -63,7 +66,7 @@ export class AddPolicyToTemplateConfirmModal extends Component {
         'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.errorMessage',
         {
           defaultMessage: 'Error adding policy "{policyName}" to index template {templateName}',
-          values: { policyName, templateName }
+          values: { policyName, templateName },
         }
       );
       showApiError(e, title);
@@ -95,7 +98,7 @@ export class AddPolicyToTemplateConfirmModal extends Component {
             defaultMessage="This index template already has the policy {existingPolicyName} attached to it.
             Adding this policy will overwrite that configuration."
             values={{
-              existingPolicyName
+              existingPolicyName,
             }}
           />
         </EuiCallOut>
@@ -152,8 +155,7 @@ export class AddPolicyToTemplateConfirmModal extends Component {
   renderAliasFormElement = () => {
     const { aliasName } = this.state;
     const { policy } = this.props;
-    const showAliasTextInput =
-      policy && get(policy, 'policy.phases.hot.actions.rollover');
+    const showAliasTextInput = policy && get(policy, 'policy.phases.hot.actions.rollover');
     if (!showAliasTextInput) {
       return null;
     }
@@ -181,7 +183,7 @@ export class AddPolicyToTemplateConfirmModal extends Component {
       'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.title',
       {
         defaultMessage: 'Add policy "{name}" to index template',
-        values: { name: policy.name }
+        values: { name: policy.name },
       }
     );
     return (
@@ -193,13 +195,13 @@ export class AddPolicyToTemplateConfirmModal extends Component {
           cancelButtonText={i18n.translate(
             'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.cancelButton',
             {
-              defaultMessage: 'Cancel'
+              defaultMessage: 'Cancel',
             }
           )}
           confirmButtonText={i18n.translate(
             'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.confirmButton',
             {
-              defaultMessage: 'Add policy'
+              defaultMessage: 'Add policy',
             }
           )}
           onClose={onCancel}
@@ -210,7 +212,8 @@ export class AddPolicyToTemplateConfirmModal extends Component {
                 id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.explanationText"
                 defaultMessage="This will apply the lifecycle policy to
                   all indices which match the index template."
-              />{' '}<LearnMoreLink
+              />{' '}
+              <LearnMoreLink
                 docPath="indices-templates.html"
                 text={
                   <FormattedMessage

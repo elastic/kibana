@@ -1,23 +1,45 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`HeaderPage it renders 1`] = `
-<Component>
-  <HeaderPage
-    badgeOptions={
-      Object {
-        "beta": true,
-        "text": "Beta",
-        "tooltip": "Test tooltip",
-      }
-    }
-    border={true}
-    subtitle="Test subtitle"
-    subtitle2="Test subtitle 2"
-    title="Test title"
+<Header
+  border={true}
+>
+  <EuiFlexGroup
+    alignItems="center"
   >
-    <p>
-      Test supplement
-    </p>
-  </HeaderPage>
-</Component>
+    <FlexItem>
+      <EuiTitle
+        size="l"
+      >
+        <h1
+          data-test-subj="header-page-title"
+        >
+          Test title
+           
+          <EuiBetaBadge
+            label="Beta"
+            tooltipContent="Test tooltip"
+            tooltipPosition="bottom"
+          />
+        </h1>
+      </EuiTitle>
+      <Subtitle
+        data-test-subj="header-page-subtitle"
+        items="Test subtitle"
+      />
+      <Subtitle
+        data-test-subj="header-page-subtitle-2"
+        items="Test subtitle 2"
+      />
+    </FlexItem>
+    <FlexItem
+      data-test-subj="header-page-supplements"
+      grow={false}
+    >
+      <p>
+        Test supplement
+      </p>
+    </FlexItem>
+  </EuiFlexGroup>
+</Header>
 `;

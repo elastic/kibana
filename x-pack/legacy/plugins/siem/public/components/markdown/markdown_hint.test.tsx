@@ -10,7 +10,7 @@ import * as React from 'react';
 
 import { MarkdownHintComponent } from './markdown_hint';
 
-describe.skip('MarkdownHintComponent ', () => {
+describe('MarkdownHintComponent ', () => {
   test('it has inline visibility when show is true', () => {
     const wrapper = mount(<MarkdownHintComponent show={true} />);
 

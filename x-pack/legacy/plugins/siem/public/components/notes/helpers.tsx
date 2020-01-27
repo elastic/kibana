@@ -7,7 +7,6 @@
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import moment from 'moment';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Note } from '../../lib/note';
@@ -36,11 +35,9 @@ export const search = {
     incremental: true,
     placeholder: i18n.SEARCH_PLACEHOLDER,
     schema: {
-      user: {
-        type: 'string',
-      },
-      note: {
-        type: 'string',
+      fields: {
+        user: 'string',
+        note: 'string',
       },
     },
   },
@@ -55,7 +52,7 @@ const TitleText = styled.h3`
 TitleText.displayName = 'TitleText';
 
 /** Displays a count of the existing notes */
-export const NotesCount = pure<{
+export const NotesCount = React.memo<{
   noteIds: string[];
 }>(({ noteIds }) => (
   <EuiFlexGroup alignItems="center" gutterSize="none">

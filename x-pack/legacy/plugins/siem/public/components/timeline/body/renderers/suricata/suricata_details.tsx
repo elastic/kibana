@@ -7,7 +7,6 @@
 import { EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../../../containers/source';
@@ -23,13 +22,14 @@ const Details = styled.div`
 
 Details.displayName = 'Details';
 
-export const SuricataDetails = pure<{
+export const SuricataDetails = React.memo<{
   browserFields: BrowserFields;
   data: Ecs;
   timelineId: string;
 }>(({ data, timelineId }) => {
   const signature: string | null | undefined = get('suricata.eve.alert.signature[0]', data);
   const signatureId: number | null | undefined = get('suricata.eve.alert.signature_id[0]', data);
+
   if (signatureId != null && signature != null) {
     return (
       <Details>

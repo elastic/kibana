@@ -144,7 +144,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
       : [];
 
     return (
-      <EuiFlexGroup key={`url_${index}`}>
+      <EuiFlexGroup key={`url_${index}`} data-test-subj={`mlJobEditCustomUrlItem_${index}`}>
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={
@@ -160,6 +160,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
               value={label}
               isInvalid={isInvalidLabel}
               onChange={e => onLabelChange(e, index)}
+              data-test-subj={`mlJobEditCustomUrlLabelInput_${index}`}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -266,5 +267,5 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
     );
   });
 
-  return <>{customUrlRows}</>;
+  return <div data-test-subj="mlJobEditCustomUrlsList">{customUrlRows}</div>;
 };

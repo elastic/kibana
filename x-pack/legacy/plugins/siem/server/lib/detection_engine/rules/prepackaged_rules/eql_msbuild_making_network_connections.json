@@ -1,0 +1,17 @@
+{
+  "rule_id": "0e79980b-4250-4a50-a509-69294c14e84b",
+  "risk_score": 50,
+  "description": "EQL -  MsBuild Making Network Connections",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL -  MsBuild Making Network Connections",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": " event.action:\"Network connection detected (rule: NetworkConnect)\" and process.name:msbuild.exe and not destination.ip:(\"127.0.0.1\" or \"::1\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

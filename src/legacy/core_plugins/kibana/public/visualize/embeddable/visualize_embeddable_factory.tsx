@@ -17,36 +17,48 @@
  * under the License.
  */
 
+import 'uiExports/contextMenuActions';
+import 'uiExports/devTools';
+import 'uiExports/docViews';
+import 'uiExports/embeddableActions';
+import 'uiExports/fieldFormatEditors';
+import 'uiExports/fieldFormats';
+import 'uiExports/home';
+import 'uiExports/indexManagement';
+import 'uiExports/inspectorViews';
+import 'uiExports/savedObjectTypes';
+import 'uiExports/search';
+import 'uiExports/shareContextMenuExtensions';
+import 'uiExports/visTypes';
+import 'uiExports/visualize';
+
 import { i18n } from '@kbn/i18n';
+
+import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
 
 import { Legacy } from 'kibana';
 
 import { SavedObjectAttributes } from 'kibana/server';
+import {
+  EmbeddableFactory,
+  ErrorEmbeddable,
+  Container,
+  EmbeddableOutput,
+} from '../../../../../../plugins/embeddable/public';
+import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
-import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
+import {
+  VisualizeEmbeddable,
+  VisualizeInput,
+  VisualizeOutput,
+  VisSavedObject,
+} from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
-
-import {
-  getServices,
-  Container,
-  EmbeddableFactory,
-  EmbeddableOutput,
-  ErrorEmbeddable,
-  VisSavedObject,
-} from '../kibana_services';
-
-const {
-  addBasePath,
-  capabilities,
-  embeddable,
-  getInjector,
-  uiSettings,
-  visualizations,
-} = getServices();
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -96,7 +108,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
           if (!visType) {
             return false;
           }
-          if (uiSettings.get('visualize:enableLabs')) {
+          if (npStart.core.uiSettings.get('visualize:enableLabs')) {
             return true;
           }
           return visType.stage !== 'experimental';
@@ -108,7 +120,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   }
 
   public isEditable() {
-    return capabilities.visualize.save as boolean;
+    return npStart.core.application.capabilities.visualize.save as boolean;
   }
 
   public getDisplayName() {
@@ -122,14 +134,16 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const $injector = await getInjector();
+    const $injector = await chrome.dangerouslyGetActiveInjector();
     const config = $injector.get<Legacy.KibanaConfig>('config');
     const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
 
     try {
       const visId = savedObject.id as string;
 
-      const editUrl = visId ? addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`) : '';
+      const editUrl = visId
+        ? npStart.core.http.basePath.prepend(`/app/kibana${savedVisualizations.urlFor(visId)}`)
+        : '';
       const isLabsEnabled = config.get<boolean>('visualize:enableLabs');
 
       if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
@@ -161,7 +175,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const $injector = await getInjector();
+    const $injector = await chrome.dangerouslyGetActiveInjector();
     const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
 
     try {
@@ -179,14 +193,16 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     if (this.visTypes) {
-      showNewVisModal(this.visTypes, {
-        editorParams: ['addToDashboard'],
-      });
+      showNewVisModal(
+        this.visTypes,
+        {
+          editorParams: ['addToDashboard'],
+        },
+        npStart.core.http.basePath.prepend,
+        npStart.core.uiSettings,
+        npStart.core.savedObjects
+      );
     }
     return undefined;
   }
 }
-
-VisualizeEmbeddableFactory.createVisualizeEmbeddableFactory().then(embeddableFactory => {
-  embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
-});

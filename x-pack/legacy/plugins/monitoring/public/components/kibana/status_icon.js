@@ -24,8 +24,8 @@ export function KibanaStatusIcon({ status, availability = true }) {
       label={i18n.translate('xpack.monitoring.kibana.statusIconLabel', {
         defaultMessage: 'Health: {status}',
         values: {
-          status
-        }
+          status,
+        },
       })}
     />
   );

@@ -26,13 +26,7 @@
  * ESC: Deselect the current selection and hide the list.
  */
 
-import {
-  DOWN,
-  ENTER,
-  ESCAPE,
-  TAB,
-  UP,
-} from '../key_codes';
+import { DOWN, ENTER, ESCAPE, TAB, UP } from '../key_codes';
 
 export const comboBoxKeyCodes = {
   DOWN,

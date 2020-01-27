@@ -1,0 +1,17 @@
+{
+  "rule_id": "2a3d91c1-5065-46ab-bed0-93f80835b1d5",
+  "risk_score": 50,
+  "description": "Suricata Category - A suspicious string was detected",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - A suspicious string was detected",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"A suspicious string was detected\" or rule.category: \"A suspicious string was detected\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

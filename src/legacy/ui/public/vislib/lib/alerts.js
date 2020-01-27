@@ -48,11 +48,17 @@ export class Alerts {
     const msg = alertDef.msg;
     // alert container
     const $icon = $('<i>').addClass('visAlerts__icon fa fa-' + icon);
-    const $text = $('<p>').addClass('visAlerts__text').text(msg);
-    const $closeIcon =  $('<i>').addClass('fa fa-close');
-    const $closeDiv = $('<div>').addClass('visAlerts__close').append($closeIcon);
+    const $text = $('<p>')
+      .addClass('visAlerts__text')
+      .text(msg);
+    const $closeIcon = $('<i>').addClass('fa fa-close');
+    const $closeDiv = $('<div>')
+      .addClass('visAlerts__close')
+      .append($closeIcon);
 
-    const $alert = $('<div>').addClass('visAlert visAlert--' + type).append([$icon, $text, $closeDiv]);
+    const $alert = $('<div>')
+      .addClass('visAlert visAlert--' + type)
+      .append([$icon, $text, $closeDiv]);
     $closeDiv.on('click', () => {
       $alert.remove();
     });
@@ -65,9 +71,13 @@ export class Alerts {
     const alerts = this.alerts;
     const vis = this.vis;
 
-    $(vis.el).find('.visWrapper__alerts').append($('<div>').addClass('visAlerts__tray'));
+    $(vis.el)
+      .find('.visWrapper__alerts')
+      .append($('<div>').addClass('visAlerts__tray'));
     if (!alerts.size()) return;
-    $(vis.el).find('.visAlerts__tray').append(alerts.value());
+    $(vis.el)
+      .find('.visAlerts__tray')
+      .append(alerts.value());
   }
 
   // shows new alert
@@ -75,16 +85,18 @@ export class Alerts {
     const vis = this.vis;
     const alert = {
       msg: msg,
-      type: type
+      type: type,
     };
     if (this.alertDefs.find(alertDef => alertDef.msg === alert.msg)) return;
     this.alertDefs.push(alert);
-    $(vis.el).find('.visAlerts__tray').append(
-      this._addAlert(alert)
-    );
+    $(vis.el)
+      .find('.visAlerts__tray')
+      .append(this._addAlert(alert));
   }
 
   destroy() {
-    $(this.vis.el).find('.visWrapper__alerts').remove();
+    $(this.vis.el)
+      .find('.visWrapper__alerts')
+      .remove();
   }
 }

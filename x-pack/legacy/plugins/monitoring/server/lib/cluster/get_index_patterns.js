@@ -10,7 +10,7 @@ import {
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_LOGSTASH,
   INDEX_PATTERN_BEATS,
-  INDEX_ALERTS
+  INDEX_ALERTS,
 } from '../../../common/constants';
 
 export function getIndexPatterns(server, additionalPatterns = {}) {
@@ -35,7 +35,7 @@ export function getIndexPatterns(server, additionalPatterns = {}) {
         ...accum,
         [varName]: prefixIndexPattern(config, additionalPatterns[varName], ccs),
       };
-    }, {})
+    }, {}),
   };
 
   return indexPatterns;

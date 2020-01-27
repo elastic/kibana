@@ -21,6 +21,10 @@ jest.mock('../../lib/settings/use_kibana_ui_setting', () => ({
 describe('formatted_bytes', () => {
   describe('PreferenceFormattedBytes', () => {
     describe('rendering', () => {
+      beforeEach(() => {
+        mockUseKibanaUiSetting.mockClear();
+      });
+
       const bytes = '2806422';
 
       test('renders correctly against snapshot', () => {

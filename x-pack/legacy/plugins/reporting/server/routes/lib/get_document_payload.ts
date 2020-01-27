@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 import contentDisposition from 'content-disposition';
 import {
   ServerFacade,
+  ExportTypesRegistry,
   ExportTypeDefinition,
   JobDocExecuted,
   JobDocOutputExecuted,
@@ -40,9 +41,10 @@ const getReportingHeaders = (output: JobDocOutputExecuted, exportType: ExportTyp
   return metaDataHeaders;
 };
 
-export function getDocumentPayloadFactory(server: ServerFacade) {
-  const exportTypesRegistry = server.plugins.reporting!.exportTypesRegistry;
-
+export function getDocumentPayloadFactory(
+  server: ServerFacade,
+  exportTypesRegistry: ExportTypesRegistry
+) {
   function encodeContent(content: string | null, exportType: ExportTypeType) {
     switch (exportType.jobContentEncoding) {
       case 'base64':

@@ -28,10 +28,15 @@ import { useObservable } from './use_observable';
 export const useKibanaUiSetting = (key: string, defaultValue?: any) => {
   const uiSettingsClient = npSetup.core.uiSettings;
 
-  const uiSetting$ = useMemo(() => uiSettingsClient.get$(key, defaultValue), [uiSettingsClient]);
+  const uiSetting$ = useMemo(() => uiSettingsClient.get$(key, defaultValue), [
+    defaultValue,
+    key,
+    uiSettingsClient,
+  ]);
   const uiSetting = useObservable(uiSetting$);
 
   const setUiSetting = useCallback((value: any) => uiSettingsClient.set(key, value), [
+    key,
     uiSettingsClient,
   ]);
 

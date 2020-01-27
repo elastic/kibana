@@ -17,11 +17,13 @@
  * under the License.
  */
 
-
 import $ from 'jquery';
 import React from 'react';
 
-import { CUSTOM_LEGEND_VIS_TYPES, VisLegend } from '../../../ui/public/vis/vis_types/vislib_vis_legend';
+import {
+  CUSTOM_LEGEND_VIS_TYPES,
+  VisLegend,
+} from '../../../ui/public/vis/vis_types/vislib_vis_legend';
 import { VislibVisProvider } from '../../../ui/public/vislib/vis';
 import chrome from '../../../ui/public/chrome';
 import { mountReactNode } from '../../../../core/public/utils';
@@ -60,7 +62,7 @@ export class vislibVisController {
       this.destroy();
     }
 
-    return new Promise(async (resolve) => {
+    return new Promise(async resolve => {
       if (!this.vislib) {
         const $injector = await chrome.dangerouslyGetActiveInjector();
         const Private = $injector.get('Private');
@@ -79,9 +81,11 @@ export class vislibVisController {
       this.vislibVis.initVisConfig(esResponse, this.vis.getUiState());
 
       if (visParams.addLegend) {
-        $(this.container).attr('class', (i, cls) => {
-          return cls.replace(/visLib--legend-\S+/g, '');
-        }).addClass(legendClassName[visParams.legendPosition]);
+        $(this.container)
+          .attr('class', (i, cls) => {
+            return cls.replace(/visLib--legend-\S+/g, '');
+          })
+          .addClass(legendClassName[visParams.legendPosition]);
 
         this.mountLegend(esResponse, visParams.legendPosition);
       }
@@ -91,7 +95,10 @@ export class vislibVisController {
       // refreshing the legend after the chart is rendered.
       // this is necessary because some visualizations
       // provide data necessary for the legend only after a render cycle.
-      if (visParams.addLegend && CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)) {
+      if (
+        visParams.addLegend &&
+        CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)
+      ) {
         this.unmountLegend();
         this.mountLegend(esResponse, visParams.legendPosition);
         this.vislibVis.render(esResponse, this.vis.getUiState());

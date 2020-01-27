@@ -16,7 +16,7 @@ import {
   JOB_TYPE,
   DEFAULT_MODEL_MEMORY_LIMIT,
   DEFAULT_BUCKET_SPAN,
-} from '../../common/job_creator/util/constants';
+} from '../../../../../../common/constants/new_job';
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
@@ -104,7 +104,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       jobCreator.modelPlot = true;
     }
 
-    if (kibanaContext.currentSavedSearch.id !== undefined) {
+    if (kibanaContext.currentSavedSearch !== null) {
       // Jobs created from saved searches cannot be cloned in the wizard as the
       // ML job config holds no reference to the saved search ID.
       jobCreator.createdBy = null;

@@ -9,18 +9,16 @@ import { wrapError } from '../client/errors';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 
 export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
-
   route({
     method: 'GET',
     path: '/api/ml/data_frame/analytics',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('ml.getDataFrameAnalytics')
-        .catch(resp => wrapError(resp));
+      return callWithRequest('ml.getDataFrameAnalytics').catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -29,12 +27,13 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { analyticsId } = request.params;
-      return callWithRequest('ml.getDataFrameAnalytics', { analyticsId })
-        .catch(resp => wrapError(resp));
+      return callWithRequest('ml.getDataFrameAnalytics', { analyticsId }).catch(resp =>
+        wrapError(resp)
+      );
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -42,12 +41,11 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
     path: '/api/ml/data_frame/analytics/_stats',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('ml.getDataFrameAnalyticsStats')
-        .catch(resp => wrapError(resp));
+      return callWithRequest('ml.getDataFrameAnalyticsStats').catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -56,12 +54,13 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { analyticsId } = request.params;
-      return callWithRequest('ml.getDataFrameAnalyticsStats', { analyticsId })
-        .catch(resp => wrapError(resp));
+      return callWithRequest('ml.getDataFrameAnalyticsStats', { analyticsId }).catch(resp =>
+        wrapError(resp)
+      );
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -70,12 +69,14 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { analyticsId } = request.params;
-      return callWithRequest('ml.createDataFrameAnalytics', { body: request.payload, analyticsId })
-        .catch(resp => wrapError(resp));
+      return callWithRequest('ml.createDataFrameAnalytics', {
+        body: request.payload,
+        analyticsId,
+      }).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -83,12 +84,13 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
     path: '/api/ml/data_frame/_evaluate',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('ml.evaluateDataFrameAnalytics', { body: request.payload })
-        .catch(resp => wrapError(resp));
+      return callWithRequest('ml.evaluateDataFrameAnalytics', {
+        body: request.payload,
+      }).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -96,12 +98,13 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
     path: '/api/ml/data_frame/analytics/_explain',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('ml.estimateDataFrameAnalyticsMemoryUsage', { body: request.payload })
-        .catch(resp => wrapError(resp));
+      return callWithRequest('ml.estimateDataFrameAnalyticsMemoryUsage', {
+        body: request.payload,
+      }).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -110,12 +113,13 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { analyticsId } = request.params;
-      return callWithRequest('ml.deleteDataFrameAnalytics', { analyticsId })
-        .catch(resp => wrapError(resp));
+      return callWithRequest('ml.deleteDataFrameAnalytics', { analyticsId }).catch(resp =>
+        wrapError(resp)
+      );
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -124,15 +128,14 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const options = {
-        analyticsId: request.params.analyticsId
+        analyticsId: request.params.analyticsId,
       };
 
-      return callWithRequest('ml.startDataFrameAnalytics', options)
-        .catch(resp => wrapError(resp));
+      return callWithRequest('ml.startDataFrameAnalytics', options).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -141,19 +144,18 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const options = {
-        analyticsId: request.params.analyticsId
+        analyticsId: request.params.analyticsId,
       };
 
       if (request.query.force !== undefined) {
         options.force = request.query.force;
       }
 
-      return callWithRequest('ml.stopDataFrameAnalytics', options)
-        .catch(resp => wrapError(resp));
+      return callWithRequest('ml.stopDataFrameAnalytics', options).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -163,12 +165,10 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { getAnalyticsAuditMessages } = analyticsAuditMessagesProvider(callWithRequest);
       const { analyticsId } = request.params;
-      return getAnalyticsAuditMessages(analyticsId)
-        .catch(resp => wrapError(resp));
+      return getAnalyticsAuditMessages(analyticsId).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
-
 }

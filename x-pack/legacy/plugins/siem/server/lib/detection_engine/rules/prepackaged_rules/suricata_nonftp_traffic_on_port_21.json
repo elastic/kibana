@@ -1,0 +1,17 @@
+{
+  "rule_id": "ee2b07ec-94dd-48b2-b46b-7bef47cc43fc",
+  "risk_score": 50,
+  "description": "Suricata non-FTP Traffic on Port 21",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata non-FTP Traffic on Port 21",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610006 and (event.module:suricata and event.kind:alert)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

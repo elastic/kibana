@@ -26,7 +26,9 @@ import { ICON_TYPES_MAP } from '../../visualizations/constants/icons';
 export const ICONS = [
   {
     value: 'fa-asterisk',
-    label: i18n.translate('visTypeTimeseries.iconSelect.asteriskLabel', { defaultMessage: 'Asterisk' }),
+    label: i18n.translate('visTypeTimeseries.iconSelect.asteriskLabel', {
+      defaultMessage: 'Asterisk',
+    }),
   },
   {
     value: 'fa-bell',
@@ -38,15 +40,21 @@ export const ICONS = [
   },
   {
     value: 'fa-comment',
-    label: i18n.translate('visTypeTimeseries.iconSelect.commentLabel', { defaultMessage: 'Comment' }),
+    label: i18n.translate('visTypeTimeseries.iconSelect.commentLabel', {
+      defaultMessage: 'Comment',
+    }),
   },
   {
     value: 'fa-map-marker',
-    label: i18n.translate('visTypeTimeseries.iconSelect.mapMarkerLabel', { defaultMessage: 'Map Marker' }),
+    label: i18n.translate('visTypeTimeseries.iconSelect.mapMarkerLabel', {
+      defaultMessage: 'Map Marker',
+    }),
   },
   {
     value: 'fa-map-pin',
-    label: i18n.translate('visTypeTimeseries.iconSelect.mapPinLabel', { defaultMessage: 'Map Pin' }),
+    label: i18n.translate('visTypeTimeseries.iconSelect.mapPinLabel', {
+      defaultMessage: 'Map Pin',
+    }),
   },
   {
     value: 'fa-star',

@@ -22,6 +22,8 @@ import {
   changeMetric,
   changeNodeType,
   changeView,
+  changeAccount,
+  changeRegion,
 } from './actions';
 
 export interface WaffleOptionsState {
@@ -32,6 +34,8 @@ export interface WaffleOptionsState {
   customOptions: InfraGroupByOptions[];
   boundsOverride: InfraWaffleMapBounds;
   autoBounds: boolean;
+  accountId: string;
+  region: string;
 }
 
 export const initialWaffleOptionsState: WaffleOptionsState = {
@@ -42,6 +46,8 @@ export const initialWaffleOptionsState: WaffleOptionsState = {
   customOptions: [],
   boundsOverride: { max: 1, min: 0 },
   autoBounds: true,
+  accountId: '',
+  region: '',
 };
 
 const currentMetricReducer = reducerWithInitialState(initialWaffleOptionsState.metric).case(
@@ -77,6 +83,16 @@ const currentAutoBoundsReducer = reducerWithInitialState(initialWaffleOptionsSta
   (current, target) => target
 );
 
+const currentAccountIdReducer = reducerWithInitialState(initialWaffleOptionsState.accountId).case(
+  changeAccount,
+  (current, target) => target
+);
+
+const currentRegionReducer = reducerWithInitialState(initialWaffleOptionsState.region).case(
+  changeRegion,
+  (current, target) => target
+);
+
 export const waffleOptionsReducer = combineReducers<WaffleOptionsState>({
   metric: currentMetricReducer,
   groupBy: currentGroupByReducer,
@@ -85,4 +101,6 @@ export const waffleOptionsReducer = combineReducers<WaffleOptionsState>({
   customOptions: currentCustomOptionsReducer,
   boundsOverride: currentBoundsOverrideReducer,
   autoBounds: currentAutoBoundsReducer,
+  accountId: currentAccountIdReducer,
+  region: currentRegionReducer,
 });

@@ -44,8 +44,10 @@ export async function uninstallSampleDataSet(id, sampleDataDefaultIndex) {
 
   const uiSettings = getServices().uiSettings;
 
-  if (!uiSettings.isDefault('defaultIndex')
-    && uiSettings.get('defaultIndex') === sampleDataDefaultIndex) {
+  if (
+    !uiSettings.isDefault('defaultIndex') &&
+    uiSettings.get('defaultIndex') === sampleDataDefaultIndex
+  ) {
     uiSettings.set('defaultIndex', null);
   }
 

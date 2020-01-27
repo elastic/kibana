@@ -5,7 +5,6 @@
  */
 
 import { EuiInMemoryTable } from '@elastic/eui';
-import { pure } from 'recompose';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -33,7 +32,7 @@ interface Props {
   width: number;
 }
 
-export const Category = pure<Props>(
+export const Category = React.memo<Props>(
   ({ categoryId, filteredBrowserFields, fieldItems, timelineId, width }) => (
     <>
       <CategoryTitle

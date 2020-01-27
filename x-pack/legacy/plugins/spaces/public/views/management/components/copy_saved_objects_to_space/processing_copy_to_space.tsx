@@ -6,10 +6,6 @@
 
 import React, { Fragment } from 'react';
 import {
-  ProcessedImportResponse,
-  SavedObjectsManagementRecord,
-} from 'ui/management/saved_objects_management';
-import {
   EuiSpacer,
   EuiText,
   EuiListGroup,
@@ -17,6 +13,8 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { SavedObjectsManagementRecord } from '../../../../../../../../../src/legacy/core_plugins/management/public';
+import { ProcessedImportResponse } from '../../../../../../../../../src/legacy/core_plugins/management/public';
 import { summarizeCopyResult } from '../../../../lib/copy_saved_objects_to_space';
 import { Space } from '../../../../../common/model/space';
 import { CopyOptions, ImportRetry } from '../../../../lib/copy_saved_objects_to_space/types';

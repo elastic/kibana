@@ -1,0 +1,17 @@
+{
+  "rule_id": "f675872f-6d85-40a3-b502-c0d2ef101e92",
+  "risk_score": 50,
+  "description": "EQL - Delete Volume USN Journal with fsutil",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Delete Volume USN Journal with fsutil",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\"  and   process.name:\"fsutil.exe\" and    process.args:(\"usn\" and \"deletejournal\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

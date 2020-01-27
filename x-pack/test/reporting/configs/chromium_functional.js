@@ -6,8 +6,7 @@
 
 import { getFunctionalConfig } from './functional';
 
-export default async function ({ readConfigFile }) {
-
+export default async function({ readConfigFile }) {
   const functionalConfig = await getFunctionalConfig({ readConfigFile });
 
   return {

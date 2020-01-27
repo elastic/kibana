@@ -8,6 +8,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
     <EventsThGroupActions
       actionsColumnWidth={115}
       data-test-subj="actions-container"
+      justifyContent="space-between"
     >
       <EventsTh>
         <EventsThContent

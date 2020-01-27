@@ -35,7 +35,7 @@ import { IconType } from '@elastic/eui';
 import { shallow } from 'enzyme';
 import React from 'react';
 import * as sinon from 'sinon';
-import { SavedObjectFinder } from './saved_object_finder';
+import { SavedObjectFinderUi as SavedObjectFinder } from './saved_object_finder';
 // eslint-disable-next-line
 import { coreMock } from '../../../../core/public/mocks';
 

@@ -25,12 +25,10 @@ export const kibanaPie = () => ({
   name: 'kibana_pie',
   type: 'render',
   context: {
-    types: [
-      'kibana_datatable'
-    ],
+    types: ['kibana_datatable'],
   },
   help: i18n.translate('kbnVislibVisTypes.functions.pie.help', {
-    defaultMessage: 'Pie visualization'
+    defaultMessage: 'Pie visualization',
   }),
   args: {
     visConfig: {
@@ -53,7 +51,7 @@ export const kibanaPie = () => ({
         visConfig,
         params: {
           listenOnChange: true,
-        }
+        },
       },
     };
   },

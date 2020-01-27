@@ -35,5 +35,5 @@ export function Content({ text }) {
 }
 
 Content.propTypes = {
-  text: PropTypes.string.isRequired
+  text: PropTypes.string.isRequired,
 };

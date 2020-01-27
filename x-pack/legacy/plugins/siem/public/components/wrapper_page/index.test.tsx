@@ -24,7 +24,7 @@ describe('WrapperPage', () => {
       </TestProviders>
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(toJson(wrapper.find('WrapperPage'))).toMatchSnapshot();
   });
 
   describe('restrict width', () => {
@@ -37,7 +37,7 @@ describe('WrapperPage', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('WrapperPage'))).toMatchSnapshot();
     });
 
     test('custom max width when restrictWidth is number', () => {
@@ -49,7 +49,7 @@ describe('WrapperPage', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('WrapperPage'))).toMatchSnapshot();
     });
 
     test('custom max width when restrictWidth is string', () => {
@@ -61,7 +61,7 @@ describe('WrapperPage', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('WrapperPage'))).toMatchSnapshot();
     });
   });
 });

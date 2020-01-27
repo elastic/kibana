@@ -5,13 +5,13 @@
  */
 
 import { KibanaTelemetryAdapter } from '../../lib/adapters/telemetry';
-import { UMRestApiRouteCreator } from '../types';
+import { UMRestApiRouteFactory } from '../types';
 
-export const createLogMonitorPageRoute: UMRestApiRouteCreator = () => ({
+export const createLogMonitorPageRoute: UMRestApiRouteFactory = () => ({
   method: 'POST',
   path: '/api/uptime/logMonitor',
   validate: false,
-  handler: async (_context, _request, response): Promise<any> => {
+  handler: async (_customParams, _context, _request, response): Promise<any> => {
     await KibanaTelemetryAdapter.countMonitor();
     return response.ok();
   },

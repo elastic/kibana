@@ -6,7 +6,7 @@
 
 import mappings from './mappings.json';
 
-export default function (kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     name: 'namespace_agnostic_type_plugin',
@@ -18,8 +18,8 @@ export default function (kibana) {
       },
       savedObjectSchemas: {
         globaltype: {
-          isNamespaceAgnostic: true
-        }
+          isNamespaceAgnostic: true,
+        },
       },
       mappings,
     },
@@ -47,9 +47,9 @@ export default function (kibana) {
               read: ['globaltype'],
             },
             ui: [],
-          }
-        }
+          },
+        },
       });
-    }
+    },
   });
 }

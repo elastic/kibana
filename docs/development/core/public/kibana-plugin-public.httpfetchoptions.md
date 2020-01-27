@@ -16,6 +16,7 @@ export interface HttpFetchOptions extends HttpRequestInit
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [asResponse](./kibana-plugin-public.httpfetchoptions.asresponse.md) | <code>boolean</code> | When <code>true</code> the return type of [HttpHandler](./kibana-plugin-public.httphandler.md) will be an [IHttpResponse](./kibana-plugin-public.ihttpresponse.md) with detailed request and response information. When <code>false</code>, the return type will just be the parsed response body. Defaults to <code>false</code>. |
 |  [headers](./kibana-plugin-public.httpfetchoptions.headers.md) | <code>HttpHeadersInit</code> | Headers to send with the request. See [HttpHeadersInit](./kibana-plugin-public.httpheadersinit.md)<!-- -->. |
 |  [prependBasePath](./kibana-plugin-public.httpfetchoptions.prependbasepath.md) | <code>boolean</code> | Whether or not the request should automatically prepend the basePath. Defaults to <code>true</code>. |
 |  [query](./kibana-plugin-public.httpfetchoptions.query.md) | <code>HttpFetchQuery</code> | The query string for an HTTP request. See [HttpFetchQuery](./kibana-plugin-public.httpfetchquery.md)<!-- -->. |

@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButtonIcon, EuiCheckbox, EuiToolTip } from '@elastic/eui';
-import { noop } from 'lodash/fp';
+import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 
 import { Note } from '../../../../lib/note';
@@ -14,17 +13,33 @@ import { NotesButton } from '../../properties/helpers';
 import { EventsLoading, EventsTd, EventsTdContent, EventsTdGroupActions } from '../../styles';
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import * as i18n from '../translations';
+import { OnRowSelected } from '../../events';
+import { TimelineNonEcsData } from '../../../../graphql/types';
+
+export interface TimelineActionProps {
+  eventId: string;
+  data: TimelineNonEcsData[];
+}
+
+export interface TimelineAction {
+  getAction: ({ eventId, data }: TimelineActionProps) => JSX.Element;
+  width: number;
+  id: string;
+}
 
 interface Props {
   actionsColumnWidth: number;
+  additionalActions?: JSX.Element[];
   associateNote: AssociateNote;
   checked: boolean;
+  onRowSelected: OnRowSelected;
   expanded: boolean;
   eventId: string;
   eventIsPinned: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
   isEventViewer?: boolean;
   loading: boolean;
+  loadingEventIds: Readonly<string[]>;
   noteIds: string[];
   onEventToggled: () => void;
   onPinClicked: () => void;
@@ -39,6 +54,7 @@ const emptyNotes: string[] = [];
 export const Actions = React.memo<Props>(
   ({
     actionsColumnWidth,
+    additionalActions,
     associateNote,
     checked,
     expanded,
@@ -47,9 +63,11 @@ export const Actions = React.memo<Props>(
     getNotesByIds,
     isEventViewer = false,
     loading = false,
+    loadingEventIds,
     noteIds,
     onEventToggled,
     onPinClicked,
+    onRowSelected,
     showCheckboxes,
     showNotes,
     toggleShowNotes,
@@ -62,15 +80,26 @@ export const Actions = React.memo<Props>(
       {showCheckboxes && (
         <EventsTd data-test-subj="select-event-container">
           <EventsTdContent textAlign="center">
-            <EuiCheckbox
-              data-test-subj="select-event"
-              id={eventId}
-              checked={checked}
-              onChange={noop}
-            />
+            {loadingEventIds.includes(eventId) ? (
+              <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
+            ) : (
+              <EuiCheckbox
+                data-test-subj="select-event"
+                id={eventId}
+                checked={checked}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  onRowSelected({
+                    eventIds: [eventId],
+                    isSelected: event.currentTarget.checked,
+                  });
+                }}
+              />
+            )}
           </EventsTdContent>
         </EventsTd>
       )}
+
+      <>{additionalActions}</>
 
       <EventsTd>
         <EventsTdContent textAlign="center">
@@ -137,7 +166,9 @@ export const Actions = React.memo<Props>(
       prevProps.eventId === nextProps.eventId &&
       prevProps.eventIsPinned === nextProps.eventIsPinned &&
       prevProps.loading === nextProps.loading &&
+      prevProps.loadingEventIds === nextProps.loadingEventIds &&
       prevProps.noteIds === nextProps.noteIds &&
+      prevProps.onRowSelected === nextProps.onRowSelected &&
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.showNotes === nextProps.showNotes
     );

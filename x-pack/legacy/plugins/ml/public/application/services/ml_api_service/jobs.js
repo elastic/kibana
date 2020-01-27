@@ -11,14 +11,13 @@ import { http } from '../http_service';
 const basePath = chrome.addBasePath('/api/ml');
 
 export const jobs = {
-
   jobsSummary(jobIds) {
     return http({
       url: `${basePath}/jobs/jobs_summary`,
       method: 'POST',
       data: {
         jobIds,
-      }
+      },
     });
   },
 
@@ -27,8 +26,8 @@ export const jobs = {
       url: `${basePath}/jobs/jobs_with_timerange`,
       method: 'POST',
       data: {
-        dateFormatTz
-      }
+        dateFormatTz,
+      },
     });
   },
 
@@ -38,7 +37,7 @@ export const jobs = {
       method: 'POST',
       data: {
         jobIds,
-      }
+      },
     });
   },
 
@@ -55,7 +54,7 @@ export const jobs = {
       method: 'POST',
       data: {
         jobs: updatedJobs,
-      }
+      },
     });
   },
 
@@ -66,8 +65,8 @@ export const jobs = {
       data: {
         datafeedIds,
         start,
-        end
-      }
+        end,
+      },
     });
   },
 
@@ -77,7 +76,7 @@ export const jobs = {
       method: 'POST',
       data: {
         datafeedIds,
-      }
+      },
     });
   },
 
@@ -87,7 +86,7 @@ export const jobs = {
       method: 'POST',
       data: {
         jobIds,
-      }
+      },
     });
   },
 
@@ -97,13 +96,13 @@ export const jobs = {
       method: 'POST',
       data: {
         jobIds,
-      }
+      },
     });
   },
 
   jobAuditMessages(jobId, from) {
-    const jobIdString = (jobId !== undefined) ? `/${jobId}` : '';
-    const fromString = (from !== undefined) ? `?from=${from}` : '';
+    const jobIdString = jobId !== undefined ? `/${jobId}` : '';
+    const fromString = from !== undefined ? `?from=${from}` : '';
     return http({
       url: `${basePath}/job_audit_messages/messages${jobIdString}${fromString}`,
       method: 'GET',
@@ -123,12 +122,12 @@ export const jobs = {
       method: 'POST',
       data: {
         jobIds,
-      }
+      },
     });
   },
 
   newJobCaps(indexPatternTitle, isRollup = false) {
-    const isRollupString = (isRollup ===  true) ? `?rollup=true` : '';
+    const isRollupString = isRollup === true ? `?rollup=true` : '';
     return http({
       url: `${basePath}/jobs/new_job_caps/${indexPatternTitle}${isRollupString}`,
       method: 'GET',
@@ -158,8 +157,8 @@ export const jobs = {
         query,
         aggFieldNamePairs,
         splitFieldName,
-        splitFieldValue
-      }
+        splitFieldValue,
+      },
     });
   },
 
@@ -171,7 +170,7 @@ export const jobs = {
     intervalMs,
     query,
     aggFieldNamePairs,
-    splitFieldName,
+    splitFieldName
   ) {
     return http({
       url: `${basePath}/jobs/new_job_population_chart`,
@@ -185,7 +184,7 @@ export const jobs = {
         query,
         aggFieldNamePairs,
         splitFieldName,
-      }
+      },
     });
   },
 
@@ -204,7 +203,7 @@ export const jobs = {
         jobId,
         start,
         end,
-      }
+      },
     });
   },
 };

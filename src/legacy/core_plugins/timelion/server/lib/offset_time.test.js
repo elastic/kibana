@@ -22,7 +22,6 @@ import moment from 'moment';
 import { preprocessOffset } from './offset_time';
 
 describe('offset', () => {
-
   describe('preprocessOffset', () => {
     const from = moment('2018-01-01T00:00:00.000Z').valueOf();
     const to = moment('2018-01-01T00:15:00.000Z').valueOf();

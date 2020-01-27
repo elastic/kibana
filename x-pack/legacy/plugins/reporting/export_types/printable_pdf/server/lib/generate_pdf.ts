@@ -8,7 +8,7 @@ import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
 import { groupBy } from 'lodash';
 import { LevelLogger } from '../../../../server/lib';
-import { ServerFacade, ConditionalHeaders } from '../../../../types';
+import { ServerFacade, HeadlessChromiumDriverFactory, ConditionalHeaders } from '../../../../types';
 // @ts-ignore untyped module
 import { pdf } from './pdf';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
@@ -26,8 +26,11 @@ const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
   return null;
 };
 
-export function generatePdfObservableFactory(server: ServerFacade) {
-  const screenshotsObservable = screenshotsObservableFactory(server);
+export function generatePdfObservableFactory(
+  server: ServerFacade,
+  browserDriverFactory: HeadlessChromiumDriverFactory
+) {
+  const screenshotsObservable = screenshotsObservableFactory(server, browserDriverFactory);
   const captureConcurrency = 1;
 
   return function generatePdfObservable(

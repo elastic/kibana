@@ -29,10 +29,12 @@ import { createUncommonProcessesResolvers } from './graphql/uncommon_processes';
 import { createWhoAmIResolvers } from './graphql/who_am_i';
 import { AppBackendLibs } from './lib/types';
 import { createTlsResolvers } from './graphql/tls';
+import { createAlertsResolvers } from './graphql/alerts';
 
 export const initServer = (libs: AppBackendLibs) => {
   const schema = makeExecutableSchema({
     resolvers: [
+      createAlertsResolvers(libs) as IResolvers,
       createAnomaliesResolvers(libs) as IResolvers,
       createAuthenticationsResolvers(libs) as IResolvers,
       createEsValueResolvers() as IResolvers,

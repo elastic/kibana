@@ -93,7 +93,6 @@ exports[`Table should render normally 1`] = `
       },
     ]
   }
-  executeQueryOptions={Object {}}
   items={
     Array [
       Object {
@@ -136,9 +135,11 @@ exports[`Table should render the boolean template (false) 1`] = `<span />`;
 
 exports[`Table should render the boolean template (true) 1`] = `
 <EuiIconEmpty
+  aria-hidden={true}
   aria-label="Is searchable"
   className="euiIcon euiIcon--medium euiIcon--secondary euiIcon-isLoading"
   focusable="false"
+  role="img"
   style={null}
 />
 `;

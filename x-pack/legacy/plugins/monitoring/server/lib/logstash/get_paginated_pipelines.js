@@ -28,18 +28,41 @@ import { getMetrics } from '../details/get_metrics';
  * @param {*} sort - ({ field, direction })
  * @param {*} queryText - Text that will be used to filter out pipelines
  */
-export async function getPaginatedPipelines(req, lsIndexPattern, { clusterUuid, logstashUuid }, metricSet, pagination, sort, queryText) {
+export async function getPaginatedPipelines(
+  req,
+  lsIndexPattern,
+  { clusterUuid, logstashUuid },
+  metricSet,
+  pagination,
+  sort,
+  queryText
+) {
   const config = req.server.config();
   const size = config.get('xpack.monitoring.max_bucket_size');
-  const pipelines = await getLogstashPipelineIds(req, lsIndexPattern, { clusterUuid, logstashUuid }, size);
+  const pipelines = await getLogstashPipelineIds(
+    req,
+    lsIndexPattern,
+    { clusterUuid, logstashUuid },
+    size
+  );
 
   // `metricSet` defines a list of metrics that are sortable in the UI
   // but we don't need to fetch all the data for these metrics to perform
   // the necessary sort - we only need the last bucket of data so we
   // fetch the last two buckets of data (to ensure we have a single full bucekt),
   // then return the value from that last bucket
-  const metricSeriesData = await getMetrics(req, lsIndexPattern, metricSet, [], { pageOfPipelines: pipelines }, 2);
-  const pipelineAggregationsData = handleGetPipelinesResponse(metricSeriesData, pipelines.map(p => p.id));
+  const metricSeriesData = await getMetrics(
+    req,
+    lsIndexPattern,
+    metricSet,
+    [],
+    { pageOfPipelines: pipelines },
+    2
+  );
+  const pipelineAggregationsData = handleGetPipelinesResponse(
+    metricSeriesData,
+    pipelines.map(p => p.id)
+  );
   for (const pipelineAggregationData of pipelineAggregationsData) {
     for (const pipeline of pipelines) {
       if (pipelineAggregationData.id === pipeline.id) {
@@ -64,6 +87,6 @@ export async function getPaginatedPipelines(req, lsIndexPattern, { clusterUuid, 
 
   return {
     pageOfPipelines,
-    totalPipelineCount: filteredPipelines.length
+    totalPipelineCount: filteredPipelines.length,
   };
 }

@@ -6,8 +6,12 @@
 
 import * as Rx from 'rxjs';
 import { first, mergeMap } from 'rxjs/operators';
-import { ServerFacade, CaptureConfig } from '../../../../types';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
+import {
+  ServerFacade,
+  CaptureConfig,
+  HeadlessChromiumDriverFactory,
+  HeadlessChromiumDriver as HeadlessBrowser,
+} from '../../../../types';
 import {
   ElementsPositionAndAttribute,
   ScreenshotResults,
@@ -26,10 +30,12 @@ import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getScreenshots } from './get_screenshots';
 import { skipTelemetry } from './skip_telemetry';
 
-export function screenshotsObservableFactory(server: ServerFacade) {
+export function screenshotsObservableFactory(
+  server: ServerFacade,
+  browserDriverFactory: HeadlessChromiumDriverFactory
+) {
   const config = server.config();
   const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
-  const { browserDriverFactory } = server.plugins.reporting!;
 
   return function screenshotsObservable({
     logger,

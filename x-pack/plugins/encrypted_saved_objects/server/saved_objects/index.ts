@@ -5,19 +5,17 @@
  */
 
 import {
-  IClusterClient,
+  CoreSetup,
   SavedObject,
   SavedObjectAttributes,
   SavedObjectsBaseOptions,
 } from 'src/core/server';
-import { LegacyAPI } from '../plugin';
 import { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
 interface SetupSavedObjectsParams {
-  adminClusterClient: IClusterClient;
   service: PublicMethodsOf<EncryptedSavedObjectsService>;
-  savedObjects: LegacyAPI['savedObjects'];
+  savedObjects: CoreSetup['savedObjects'];
 }
 
 export interface SavedObjectsSetup {
@@ -29,7 +27,6 @@ export interface SavedObjectsSetup {
 }
 
 export function setupSavedObjects({
-  adminClusterClient,
   service,
   savedObjects,
 }: SetupSavedObjectsParams): SavedObjectsSetup {
@@ -38,16 +35,13 @@ export function setupSavedObjects({
   // priority for this wrapper to allow all other wrappers to set proper `namespace` for the Saved
   // Object (e.g. wrapper registered by the Spaces plugin) before we encrypt attributes since
   // `namespace` is included into AAD.
-  savedObjects.addScopedSavedObjectsClientWrapperFactory(
+  savedObjects.addClientWrapper(
     Number.MAX_SAFE_INTEGER,
     'encryptedSavedObjects',
     ({ client: baseClient }) => new EncryptedSavedObjectsClientWrapper({ baseClient, service })
   );
 
-  const internalRepository = savedObjects.getSavedObjectsRepository(
-    adminClusterClient.callAsInternalUser
-  );
-
+  const internalRepository = savedObjects.createInternalRepository();
   return {
     getDecryptedAsInternalUser: async <T extends SavedObjectAttributes = any>(
       type: string,

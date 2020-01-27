@@ -19,7 +19,7 @@
 
 export function DomLocationProvider($window) {
   return {
-    reload: function (forceFetch) {
+    reload: function(forceFetch) {
       $window.location.reload(forceFetch);
     },
 
@@ -29,6 +29,6 @@ export function DomLocationProvider($window) {
 
     set href(val) {
       return ($window.location.href = val);
-    }
+    },
   };
 }

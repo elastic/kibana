@@ -5,7 +5,6 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { DraggableBadge } from '../../../../draggables';
 import { TokensFlexItem } from '../helpers';
@@ -17,7 +16,7 @@ interface Props {
   sshMethod: string | null | undefined;
 }
 
-export const AuthSsh = pure<Props>(({ contextId, eventId, sshSignature, sshMethod }) => (
+export const AuthSsh = React.memo<Props>(({ contextId, eventId, sshSignature, sshMethod }) => (
   <>
     {sshSignature != null && (
       <TokensFlexItem grow={false} component="span">

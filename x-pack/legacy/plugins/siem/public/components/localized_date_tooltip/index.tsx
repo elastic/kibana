@@ -8,9 +8,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import moment from 'moment';
 import * as React from 'react';
-import { pure } from 'recompose';
 
-export const LocalizedDateTooltip = pure<{
+export const LocalizedDateTooltip = React.memo<{
   children: React.ReactNode;
   date: Date;
   fieldName?: string;

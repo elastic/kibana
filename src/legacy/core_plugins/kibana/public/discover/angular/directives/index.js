@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import '../../../../../../ui/public/render_complete/directive';
 import { DiscoverNoResults } from './no_results';
 import { DiscoverUninitialized } from './uninitialized';

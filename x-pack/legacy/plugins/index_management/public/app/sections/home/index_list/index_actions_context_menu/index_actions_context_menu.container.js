@@ -6,12 +6,7 @@
 
 import { connect } from 'react-redux';
 import { IndexActionsContextMenu as PresentationComponent } from './index_actions_context_menu';
-import {
-  TAB_SETTINGS,
-  TAB_MAPPING,
-  TAB_STATS,
-  TAB_EDIT_SETTINGS,
-} from '../../../../constants';
+import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS, TAB_EDIT_SETTINGS } from '../../../../constants';
 import {
   clearCacheIndices,
   closeIndices,
@@ -39,7 +34,7 @@ const mapStateToProps = (state, ownProps) => {
   const indexStatusByName = {};
   const { indexNames } = ownProps;
 
-  indexNames.forEach((indexName) => {
+  indexNames.forEach(indexName => {
     indexStatusByName[indexName] = getIndexStatusByIndexName(state, indexName);
   });
 
@@ -77,7 +72,7 @@ const mapDispatchToProps = (dispatch, { indexNames }) => {
     unfreezeIndices: () => {
       dispatch(unfreezeIndices({ indexNames }));
     },
-    forcemergeIndices: (maxNumSegments) => {
+    forcemergeIndices: maxNumSegments => {
       dispatch(forcemergeIndices({ indexNames, maxNumSegments }));
     },
     showSettings: () => {
@@ -103,8 +98,11 @@ const mapDispatchToProps = (dispatch, { indexNames }) => {
     },
     performExtensionAction: (requestMethod, successMessage) => {
       dispatch(performExtensionAction({ requestMethod, successMessage, indexNames }));
-    }
+    },
   };
 };
 
-export const IndexActionsContextMenu = connect(mapStateToProps, mapDispatchToProps)(PresentationComponent);
+export const IndexActionsContextMenu = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(PresentationComponent);

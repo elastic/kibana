@@ -48,11 +48,11 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadPage={newActivePage => loadPage(newActivePage)}
+            loadPage={loadPage}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
             totalCount={10}
-            updateActivePage={activePage => updateActivePage(activePage)}
+            updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
@@ -75,11 +75,11 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={true}
-            loadPage={newActivePage => loadPage(newActivePage)}
+            loadPage={loadPage}
             pageOfItems={[]}
             showMorePagesIndicator={true}
             totalCount={10}
-            updateActivePage={activePage => updateActivePage(activePage)}
+            updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
@@ -104,11 +104,11 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={true}
-            loadPage={newActivePage => loadPage(newActivePage)}
+            loadPage={loadPage}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
             totalCount={10}
-            updateActivePage={activePage => updateActivePage(activePage)}
+            updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
@@ -131,7 +131,7 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadPage={newActivePage => loadPage(newActivePage)}
+            loadPage={loadPage}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
             totalCount={10}
@@ -168,11 +168,11 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadPage={newActivePage => loadPage(newActivePage)}
+            loadPage={loadPage}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
             totalCount={10}
-            updateActivePage={activePage => updateActivePage(activePage)}
+            updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
@@ -199,11 +199,11 @@ describe('Paginated Table Component', () => {
             itemsPerRow={[]}
             limit={2}
             loading={false}
-            loadPage={newActivePage => loadPage(newActivePage)}
+            loadPage={loadPage}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
             totalCount={10}
-            updateActivePage={activePage => updateActivePage(activePage)}
+            updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
@@ -233,7 +233,7 @@ describe('Paginated Table Component', () => {
             showMorePagesIndicator={true}
             sorting={{ direction: Direction.asc, field: 'node.host.name' }}
             totalCount={10}
-            updateActivePage={activePage => updateActivePage(activePage)}
+            updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
@@ -256,11 +256,11 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
             loading={false}
-            loadPage={newActivePage => loadPage(newActivePage)}
+            loadPage={loadPage}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
             totalCount={DEFAULT_MAX_TABLE_QUERY_SIZE * 3}
-            updateActivePage={activePage => updateActivePage(activePage)}
+            updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
@@ -286,11 +286,11 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
             loading={false}
-            loadPage={newActivePage => loadPage(newActivePage)}
+            loadPage={loadPage}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
             totalCount={30}
-            updateActivePage={activePage => updateActivePage(activePage)}
+            updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
@@ -312,11 +312,11 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
             loading={false}
-            loadPage={newActivePage => loadPage(newActivePage)}
+            loadPage={loadPage}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
             totalCount={1}
-            updateActivePage={activePage => updateActivePage(activePage)}
+            updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
@@ -340,11 +340,11 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadPage={newActivePage => loadPage(newActivePage)}
+            loadPage={loadPage}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
             totalCount={10}
-            updateActivePage={activePage => updateActivePage(activePage)}
+            updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
@@ -370,11 +370,11 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadPage={newActivePage => loadPage(newActivePage)}
+            loadPage={loadPage}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
             totalCount={10}
-            updateActivePage={activePage => updateActivePage(activePage)}
+            updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
@@ -408,11 +408,11 @@ describe('Paginated Table Component', () => {
         itemsPerRow: rowItems,
         limit: 1,
         loading: false,
-        loadPage: newActivePage => loadPage(newActivePage),
+        loadPage,
         pageOfItems: mockData.Hosts.edges,
         showMorePagesIndicator: true,
         totalCount: 10,
-        updateActivePage: activePage => updateActivePage(activePage),
+        updateActivePage,
         updateLimitPagination: limit => updateLimitPagination({ limit }),
       };
 
@@ -460,11 +460,11 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadPage={newActivePage => loadPage(newActivePage)}
+            loadPage={loadPage}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
             totalCount={10}
-            updateActivePage={activePage => updateActivePage(activePage)}
+            updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
@@ -503,7 +503,7 @@ describe('Paginated Table Component', () => {
             showMorePagesIndicator={true}
             sorting={{ direction: Direction.asc, field: 'node.host.name' }}
             totalCount={10}
-            updateActivePage={activePage => updateActivePage(activePage)}
+            updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
           />
         </ThemeProvider>

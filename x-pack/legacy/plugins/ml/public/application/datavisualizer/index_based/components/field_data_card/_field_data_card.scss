@@ -2,7 +2,6 @@
   height: 420px;
   width: 360px;
 
-
   // Note the names of these styles need to match the type of the field they are displaying.
   .boolean {
     background-color: $euiColorVis5;
@@ -36,13 +35,13 @@
     background-color: $euiColorVis9;
   }
 
-  .type-other, .unknown {
+  .type-other,
+  .unknown {
     background-color: $euiColorVis6;
   }
 
-
   // Use euiPanel styling
-  @include euiPanel($selector: 'mlFieldDataCard__content');
+  @include euiPanel($selector: '.mlFieldDataCard__content');
 
   .mlFieldDataCard__content {
     @include euiFontSizeS;

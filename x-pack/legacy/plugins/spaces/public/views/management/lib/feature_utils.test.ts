@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../../../../../plugins/features/server';
+import { Feature } from '../../../../../../../plugins/features/public';
 import { getEnabledFeatures } from './feature_utils';
 
 const buildFeatures = () =>

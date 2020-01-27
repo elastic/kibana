@@ -79,6 +79,9 @@ describe('timeShift(resp, panel, series)', () => {
     expect(results[0]).to.have.property('stack');
     expect(results[0]).to.have.property('bars');
     expect(results[0]).to.have.property('points');
-    expect(results[0].data).to.eql([[1483225200000 + 3600000, 1], [1483225210000 + 3600000, 2]]);
+    expect(results[0].data).to.eql([
+      [1483225200000 + 3600000, 1],
+      [1483225210000 + 3600000, 2],
+    ]);
   });
 });

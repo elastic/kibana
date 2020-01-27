@@ -23,40 +23,38 @@ import { RecentlyAccessed, NUM_LONG_LINKS } from './recently_accessed';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-const createRecentlyAccessed = (length) => {
+const createRecentlyAccessed = length => {
   const recentlyAccessed = [];
   let i = 0;
-  while(recentlyAccessed.length < length) {
+  while (recentlyAccessed.length < length) {
     recentlyAccessed.push({
       label: `label${recentlyAccessed.length}`,
       link: `link${recentlyAccessed.length}`,
-      id: `${i++}`
+      id: `${i++}`,
     });
   }
   return recentlyAccessed;
 };
 
 test('render', () => {
-  const component = shallow(<RecentlyAccessed
-    recentlyAccessed={createRecentlyAccessed(2)}
-  />);
+  const component = shallow(<RecentlyAccessed recentlyAccessed={createRecentlyAccessed(2)} />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 describe('more popover', () => {
   test('should not be rendered when recently accessed list size is less than NUM_LONG_LINKS', () => {
-    const component = mountWithIntl(<RecentlyAccessed
-      recentlyAccessed={createRecentlyAccessed(NUM_LONG_LINKS - 1)}
-    />);
+    const component = mountWithIntl(
+      <RecentlyAccessed recentlyAccessed={createRecentlyAccessed(NUM_LONG_LINKS - 1)} />
+    );
 
     const moreRecentlyAccessed = findTestSubject(component, 'openMoreRecentlyAccessedPopover');
     expect(moreRecentlyAccessed.length).toBe(0);
   });
 
   test('should not be rendered when recently accessed list size is NUM_LONG_LINKS', () => {
-    const component = mountWithIntl(<RecentlyAccessed
-      recentlyAccessed={createRecentlyAccessed(NUM_LONG_LINKS)}
-    />);
+    const component = mountWithIntl(
+      <RecentlyAccessed recentlyAccessed={createRecentlyAccessed(NUM_LONG_LINKS)} />
+    );
 
     const moreRecentlyAccessed = findTestSubject(component, 'openMoreRecentlyAccessedPopover');
     expect(moreRecentlyAccessed.length).toBe(0);
@@ -64,9 +62,9 @@ describe('more popover', () => {
 
   describe('recently accessed list size exceeds NUM_LONG_LINKS', () => {
     test('should be rendered', () => {
-      const component = mountWithIntl(<RecentlyAccessed
-        recentlyAccessed={createRecentlyAccessed(NUM_LONG_LINKS + 1)}
-      />);
+      const component = mountWithIntl(
+        <RecentlyAccessed recentlyAccessed={createRecentlyAccessed(NUM_LONG_LINKS + 1)} />
+      );
 
       const moreRecentlyAccessed = findTestSubject(component, 'openMoreRecentlyAccessedPopover');
       expect(moreRecentlyAccessed.length).toBe(1);
@@ -74,9 +72,9 @@ describe('more popover', () => {
 
     test('should only contain overflow recently accessed items when opened', () => {
       const numberOfRecentlyAccessed = NUM_LONG_LINKS + 2;
-      const component = mountWithIntl(<RecentlyAccessed
-        recentlyAccessed={createRecentlyAccessed(numberOfRecentlyAccessed)}
-      />);
+      const component = mountWithIntl(
+        <RecentlyAccessed recentlyAccessed={createRecentlyAccessed(numberOfRecentlyAccessed)} />
+      );
 
       const moreRecentlyAccessed = findTestSubject(component, 'openMoreRecentlyAccessedPopover');
       moreRecentlyAccessed.simulate('click');
@@ -94,4 +92,3 @@ describe('more popover', () => {
     });
   });
 });
-

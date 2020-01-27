@@ -23185,6 +23185,7 @@ function getProjectPaths(rootPath, options = {}) {
 
   projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'test/plugin_functional/plugins/*'));
   projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'test/interpreter_functional/plugins/*'));
+  projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'examples/*'));
 
   if (!ossOnly) {
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack'));

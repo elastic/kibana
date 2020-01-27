@@ -16,7 +16,7 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
     <React.Fragment>
       <p>
         <FormattedMessage
-          defaultMessage="An ECS compliant Kibana index pattern must be configured to view events on the map. When using {beats}, you can run the {setup} command on your hosts to automatically create the index patterns. For example: {example}."
+          defaultMessage="To display map data, you must define SIEM indices ({defaultIndex}) and Kibana index patterns with identical names or glob patterns. When using {beats}, you can run the {setup} command on your hosts to automatically create the index patterns. For example: {example}."
           id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription1"
           values={
             Object {
@@ -26,6 +26,13 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
                 target="_blank"
               >
                 beats
+              </a>,
+              "defaultIndex": <a
+                href="/test/base/path/app/kibana#/management/kibana/settings"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                siem:defaultIndex
               </a>,
               "example": <EuiCode>
                 ./packetbeat setup
@@ -39,7 +46,7 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
       </p>
       <p>
         <FormattedMessage
-          defaultMessage="You can also configure them manually in Kibana."
+          defaultMessage="You can also configure index patterns manually in Kibana."
           id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription2"
           values={Object {}}
         />

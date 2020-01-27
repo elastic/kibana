@@ -6,7 +6,6 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { SourceDestinationArrows } from './source_destination_arrows';
 import { SourceDestinationIp } from './source_destination_ip';
@@ -19,7 +18,7 @@ import { SourceDestinationWithArrowsProps } from './types';
  * `SourceDestinationIp` ) for details on how the source and destination
  * are visually represented.
  */
-export const SourceDestinationWithArrows = pure<SourceDestinationWithArrowsProps>(
+export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrowsProps>(
   ({
     contextId,
     destinationBytes,

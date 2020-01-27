@@ -5,12 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import {
-  EuiBasicTable,
-  EuiSpacer,
-  EuiSearchBar,
-  EuiButton
-} from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer, EuiSearchBar, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIdentifier } from '../setup_mode/formatting';
 
@@ -29,7 +24,7 @@ export function EuiMonitoringSSPTable({
   const [queryText, setQueryText] = React.useState('');
   const [page, setPage] = React.useState({
     index: pagination.pageIndex,
-    size: pagination.pageSize
+    size: pagination.pageSize,
   });
   const [sort, setSort] = React.useState(props.sorting);
 
@@ -49,13 +44,13 @@ export function EuiMonitoringSSPTable({
   if (setupMode && setupMode.enabled) {
     footerContent = (
       <Fragment>
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
         <EuiButton iconType="flag" onClick={() => setupMode.openFlyout({}, true)}>
           {i18n.translate('xpack.monitoring.euiSSPTable.setupNewButtonLabel', {
             defaultMessage: 'Set up monitoring for new {identifier}',
             values: {
-              identifier: getIdentifier(productName)
-            }
+              identifier: getIdentifier(productName),
+            },
           })}
         </EuiButton>
       </Fragment>
@@ -82,8 +77,8 @@ export function EuiMonitoringSSPTable({
 
   return (
     <div data-test-subj={`${props.className}Container`}>
-      <EuiSearchBar {...search} onChange={onQueryChange}/>
-      <EuiSpacer size="l"/>
+      <EuiSearchBar {...search} onChange={onQueryChange} />
+      <EuiSpacer size="l" />
       <EuiBasicTable
         {...props}
         data-test-subj={items.length ? 'monitoringTableHasData' : 'monitoringTableNoData'}

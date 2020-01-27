@@ -21,9 +21,18 @@ export const IndexPatternsMissingPromptComponent = () => (
       <>
         <p>
           <FormattedMessage
-            defaultMessage="An ECS compliant Kibana index pattern must be configured to view events on the map. When using {beats}, you can run the {setup} command on your hosts to automatically create the index patterns. For example: {example}."
+            defaultMessage="To display map data, you must define SIEM indices ({defaultIndex}) and Kibana index patterns with identical names or glob patterns. When using {beats}, you can run the {setup} command on your hosts to automatically create the index patterns. For example: {example}."
             id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription1"
             values={{
+              defaultIndex: (
+                <a
+                  href={`${chrome.getBasePath()}/app/kibana#/management/kibana/settings`}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  {'siem:defaultIndex'}
+                </a>
+              ),
               beats: (
                 <a
                   href={`${ELASTIC_WEBSITE_URL}guide/en/beats/libbeat/${DOC_LINK_VERSION}/getting-started.html`}
@@ -41,7 +50,7 @@ export const IndexPatternsMissingPromptComponent = () => (
 
         <p>
           <FormattedMessage
-            defaultMessage="You can also configure them manually in Kibana."
+            defaultMessage="You can also configure index patterns manually in Kibana."
             id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription2"
           />
         </p>

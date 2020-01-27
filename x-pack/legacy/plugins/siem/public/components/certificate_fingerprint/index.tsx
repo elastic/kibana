@@ -6,7 +6,6 @@
 
 import { EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DraggableBadge } from '../draggables';
@@ -36,7 +35,7 @@ FingerprintLabel.displayName = 'FingerprintLabel';
  * 'tls.client_certificate.fingerprint.sha1'
  * 'tls.server_certificate.fingerprint.sha1'
  */
-export const CertificateFingerprint = pure<{
+export const CertificateFingerprint = React.memo<{
   eventId: string;
   certificateType: CertificateType;
   contextId: string;

@@ -38,50 +38,48 @@ const template = `
   </form>
 `;
 
-describe('fancy forms', function () {
+describe('fancy forms', function() {
   let setup;
   const trash = [];
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(($injector) => {
-    const $rootScope = $injector.get('$rootScope');
-    const $compile = $injector.get('$compile');
+  beforeEach(
+    ngMock.inject($injector => {
+      const $rootScope = $injector.get('$rootScope');
+      const $compile = $injector.get('$compile');
 
-    setup = function (options = {}) {
-      const {
-        name = 'person1',
-        tasks = [],
-        onSubmit = () => {},
-      } = options;
+      setup = function(options = {}) {
+        const { name = 'person1', tasks = [], onSubmit = () => {} } = options;
 
-      const $el = $(template).appendTo('body');
-      trash.push(() => $el.remove());
-      const $scope = $rootScope.$new();
+        const $el = $(template).appendTo('body');
+        trash.push(() => $el.remove());
+        const $scope = $rootScope.$new();
 
-      $scope.name = name;
-      $scope.tasks = tasks;
-      $scope.onSubmit = onSubmit;
+        $scope.name = name;
+        $scope.tasks = tasks;
+        $scope.onSubmit = onSubmit;
 
-      $compile($el)($scope);
-      $scope.$apply();
+        $compile($el)($scope);
+        $scope.$apply();
 
-      return {
-        $el,
-        $scope,
+        return {
+          $el,
+          $scope,
+        };
       };
-    };
-  }));
+    })
+  );
 
   afterEach(() => trash.splice(0).forEach(fn => fn()));
 
-  describe('nested forms', function () {
-    it('treats new fields as "soft" errors', function () {
+  describe('nested forms', function() {
+    it('treats new fields as "soft" errors', function() {
       const { $scope } = setup({ name: '' });
       expect($scope.person.errorCount()).to.be(1);
       expect($scope.person.softErrorCount()).to.be(0);
     });
 
-    it('upgrades fields to regular errors on attempted submit', function () {
+    it('upgrades fields to regular errors on attempted submit', function() {
       const { $scope, $el } = setup({ name: '' });
 
       expect($scope.person.errorCount()).to.be(1);
@@ -91,7 +89,7 @@ describe('fancy forms', function () {
       expect($scope.person.softErrorCount()).to.be(1);
     });
 
-    it('prevents submit when there are errors', function () {
+    it('prevents submit when there are errors', function() {
       const onSubmit = sinon.stub();
       const { $scope, $el } = setup({ name: '', onSubmit });
 
@@ -112,14 +110,14 @@ describe('fancy forms', function () {
       sinon.assert.calledOnce(onSubmit);
     });
 
-    it('new fields are no longer soft after blur', function () {
+    it('new fields are no longer soft after blur', function() {
       const { $scope, $el } = setup({ name: '' });
       expect($scope.person.softErrorCount()).to.be(0);
       $el.find(testSubjSelector('name')).blur();
       expect($scope.person.softErrorCount()).to.be(1);
     });
 
-    it('counts errors/softErrors in sub forms', function () {
+    it('counts errors/softErrors in sub forms', function() {
       const { $scope, $el } = setup();
 
       expect($scope.person.errorCount()).to.be(0);
@@ -128,71 +126,77 @@ describe('fancy forms', function () {
         $scope.tasks = [
           {
             name: 'foo',
-            description: ''
+            description: '',
           },
           {
             name: 'foo',
-            description: ''
-          }
+            description: '',
+          },
         ];
       });
 
       expect($scope.person.errorCount()).to.be(2);
       expect($scope.person.softErrorCount()).to.be(0);
 
-      $el.find(testSubjSelector('taskDesc')).first().blur();
+      $el
+        .find(testSubjSelector('taskDesc'))
+        .first()
+        .blur();
 
       expect($scope.person.errorCount()).to.be(2);
       expect($scope.person.softErrorCount()).to.be(1);
     });
 
-    it('only counts down', function () {
+    it('only counts down', function() {
       const { $scope, $el } = setup({
         tasks: [
           {
             name: 'foo',
-            description: ''
+            description: '',
           },
           {
             name: 'bar',
-            description: ''
+            description: '',
           },
           {
             name: 'baz',
-            description: ''
-          }
-        ]
+            description: '',
+          },
+        ],
       });
 
       // top level form sees 3 errors
       expect($scope.person.errorCount()).to.be(3);
       expect($scope.person.softErrorCount()).to.be(0);
 
-      $el.find('ng-form').toArray().forEach((el, i) => {
-        const $task = $(el);
-        const $taskScope = $task.scope();
-        const form = $task.controller('form');
+      $el
+        .find('ng-form')
+        .toArray()
+        .forEach((el, i) => {
+          const $task = $(el);
+          const $taskScope = $task.scope();
+          const form = $task.controller('form');
 
-        // sub forms only see one error
-        expect(form.errorCount()).to.be(1);
-        expect(form.softErrorCount()).to.be(0);
+          // sub forms only see one error
+          expect(form.errorCount()).to.be(1);
+          expect(form.softErrorCount()).to.be(0);
 
-        // blurs only count locally
-        $task.find(testSubjSelector('taskDesc')).blur();
-        expect(form.softErrorCount()).to.be(1);
+          // blurs only count locally
+          $task.find(testSubjSelector('taskDesc')).blur();
+          expect(form.softErrorCount()).to.be(1);
 
-        // but parent form see them
-        expect($scope.person.softErrorCount()).to.be(1);
+          // but parent form see them
+          expect($scope.person.softErrorCount()).to.be(1);
 
-        $taskScope.$apply(() => {
-          $taskScope.task.description = 'valid';
+          $taskScope.$apply(() => {
+            $taskScope.task.description = 'valid';
+          });
+
+          expect(form.errorCount()).to.be(0);
+          expect(form.softErrorCount()).to.be(0);
+          expect($scope.person.errorCount()).to.be(2 - i);
+          expect($scope.person.softErrorCount()).to.be(0);
         });
-
-        expect(form.errorCount()).to.be(0);
-        expect(form.softErrorCount()).to.be(0);
-        expect($scope.person.errorCount()).to.be(2 - i);
-        expect($scope.person.softErrorCount()).to.be(0);
-      });
     });
   });
 });

@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { exportTypesRegistryFactory } from './export_types_registry';
+export { getExportTypesRegistry } from './export_types_registry';
 // @ts-ignore untyped module
 export { checkLicenseFactory } from './check_license';
 export { LevelLogger } from './level_logger';
-export { createQueueFactory } from './create_queue';
 export { cryptoFactory } from './crypto';
 export { oncePerServer } from './once_per_server';
 export { runValidations } from './validate';
+export { createQueueFactory } from './create_queue';
+export { enqueueJobFactory } from './enqueue_job';

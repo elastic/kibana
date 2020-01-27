@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiLink, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { get } from 'lodash';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
@@ -16,6 +16,7 @@ import { MostRecentError } from './most_recent_error';
 import { getMonitorDetails } from '../../../../state/selectors';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails } from '../../../../../common/runtime_types';
+import { MonitorListActionsPopover } from '../monitor_list_actions_popover';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -61,13 +62,18 @@ export function MonitorListDrawerComponent({
     <ContainerDiv>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
-          <EuiLink href={monitorUrl} target="_blank">
-            {monitorUrl}
-            <EuiIcon size="s" type="popout" color="subbdued" />
-          </EuiLink>
+          <EuiText>
+            <EuiLink href={monitorUrl} target="_blank">
+              {monitorUrl}
+              <EuiIcon size="s" type="popout" color="subbdued" />
+            </EuiLink>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <MonitorListActionsPopover summary={summary} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <MonitorStatusList checks={summary.state.checks} />
       {monitorDetails && monitorDetails.error && (
         <MostRecentError

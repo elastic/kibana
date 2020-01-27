@@ -8,23 +8,11 @@ import React, { useEffect, useContext } from 'react';
 
 import { TimeKey } from '../../../../common/time';
 import { withLogFilter } from '../with_log_filter';
-import { withStreamItems } from '../with_stream_items';
 import { withLogPosition } from '../with_log_position';
 import { LogHighlightsState } from './log_highlights';
 
 // Bridges Redux container state with Hooks state. Once state is moved fully from
 // Redux to Hooks this can be removed.
-export const LogHighlightsStreamItemsBridge = withStreamItems(
-  ({ entriesStart, entriesEnd }: { entriesStart: TimeKey | null; entriesEnd: TimeKey | null }) => {
-    const { setStartKey, setEndKey } = useContext(LogHighlightsState.Context);
-    useEffect(() => {
-      setStartKey(entriesStart);
-      setEndKey(entriesEnd);
-    }, [entriesStart, entriesEnd]);
-
-    return null;
-  }
-);
 
 export const LogHighlightsPositionBridge = withLogPosition(
   ({
@@ -37,11 +25,11 @@ export const LogHighlightsPositionBridge = withLogPosition(
     const { setJumpToTarget, setVisibleMidpoint } = useContext(LogHighlightsState.Context);
     useEffect(() => {
       setVisibleMidpoint(visibleMidpoint);
-    }, [visibleMidpoint]);
+    }, [setVisibleMidpoint, visibleMidpoint]);
 
     useEffect(() => {
       setJumpToTarget(() => jumpToTargetPosition);
-    }, [jumpToTargetPosition]);
+    }, [jumpToTargetPosition, setJumpToTarget]);
 
     return null;
   }
@@ -53,7 +41,7 @@ export const LogHighlightsFilterQueryBridge = withLogFilter(
 
     useEffect(() => {
       setFilterQuery(serializedFilterQuery);
-    }, [serializedFilterQuery]);
+    }, [serializedFilterQuery, setFilterQuery]);
 
     return null;
   }
@@ -61,7 +49,6 @@ export const LogHighlightsFilterQueryBridge = withLogFilter(
 
 export const LogHighlightsBridge = ({ indexPattern }: { indexPattern: any }) => (
   <>
-    <LogHighlightsStreamItemsBridge />
     <LogHighlightsPositionBridge />
     <LogHighlightsFilterQueryBridge indexPattern={indexPattern} />
   </>

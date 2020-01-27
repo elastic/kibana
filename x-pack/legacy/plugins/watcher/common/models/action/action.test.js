@@ -13,7 +13,7 @@ jest.mock('./logging_action', () => ({
       errors: null,
       action: { id, type: 'logging' },
     })),
-  }
+  },
 }));
 
 describe('action', () => {
@@ -24,10 +24,10 @@ describe('action', () => {
         upstreamJson = {
           id: 'my-action',
           actionJson: {
-            'logging': {
-              'text': 'foo'
-            }
-          }
+            logging: {
+              text: 'foo',
+            },
+          },
         };
       });
 
@@ -60,9 +60,9 @@ describe('action', () => {
           id: 'my-action',
           actionJson: {
             unknown_action_type: {
-              'foo': 'bar'
-            }
-          }
+              foo: 'bar',
+            },
+          },
         };
         const action = Action.fromUpstreamJson(upstreamJson);
 
@@ -76,10 +76,10 @@ describe('action', () => {
         upstreamJson = {
           id: 'my-action',
           actionJson: {
-            'email': {
-              'to': 'elastic@elastic.co'
-            }
-          }
+            email: {
+              to: 'elastic@elastic.co',
+            },
+          },
         };
       });
 

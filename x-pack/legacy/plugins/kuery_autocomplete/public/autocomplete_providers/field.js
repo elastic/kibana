@@ -10,7 +10,6 @@ import { sortPrefixFirst } from 'ui/utils/sort_prefix_first';
 import { isFilterable } from '../../../../../../src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-
 const type = 'field';
 
 function getDescription(fieldName) {
@@ -26,30 +25,41 @@ function getDescription(fieldName) {
 }
 
 export function getSuggestionsProvider({ indexPatterns }) {
-  const allFields = flatten(indexPatterns.map(indexPattern => {
-    return indexPattern.fields.filter(isFilterable);
-  }));
+  const allFields = flatten(
+    indexPatterns.map(indexPattern => {
+      return indexPattern.fields.filter(isFilterable);
+    })
+  );
   return function getFieldSuggestions({ start, end, prefix, suffix, nestedPath = '' }) {
     const search = `${prefix}${suffix}`.trim().toLowerCase();
     const matchingFields = allFields.filter(field => {
       return (
-        !nestedPath
-        || (nestedPath && (field.subType && field.subType.nested && field.subType.nested.path.includes(nestedPath)))
-      )
-      && field.name.toLowerCase().includes(search) && field.name !== search;
+        (!nestedPath ||
+          (nestedPath &&
+            field.subType &&
+            field.subType.nested &&
+            field.subType.nested.path.includes(nestedPath))) &&
+        field.name.toLowerCase().includes(search) &&
+        field.name !== search
+      );
     });
     const sortedFields = sortPrefixFirst(matchingFields.sort(keywordComparator), search, 'name');
     const suggestions = sortedFields.map(field => {
-      const remainingPath = field.subType && field.subType.nested
-        ? field.subType.nested.path.slice(nestedPath ? nestedPath.length + 1 : 0)
-        : '';
-      const text = field.subType && field.subType.nested && remainingPath.length > 0
-        ? `${escapeKuery(remainingPath)}:{ ${escapeKuery(field.name.slice(field.subType.nested.path.length + 1))}  }`
-        : `${escapeKuery(field.name.slice(nestedPath ? nestedPath.length + 1 : 0))} `;
+      const remainingPath =
+        field.subType && field.subType.nested
+          ? field.subType.nested.path.slice(nestedPath ? nestedPath.length + 1 : 0)
+          : '';
+      const text =
+        field.subType && field.subType.nested && remainingPath.length > 0
+          ? `${escapeKuery(remainingPath)}:{ ${escapeKuery(
+              field.name.slice(field.subType.nested.path.length + 1)
+            )}  }`
+          : `${escapeKuery(field.name.slice(nestedPath ? nestedPath.length + 1 : 0))} `;
       const description = getDescription(field.name);
-      const cursorIndex = field.subType && field.subType.nested && remainingPath.length > 0
-        ? text.length - 2
-        : text.length;
+      const cursorIndex =
+        field.subType && field.subType.nested && remainingPath.length > 0
+          ? text.length - 2
+          : text.length;
       return { type, text, description, start, end, cursorIndex, field };
     });
     return suggestions;

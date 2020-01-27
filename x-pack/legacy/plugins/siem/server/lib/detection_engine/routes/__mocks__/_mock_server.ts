@@ -6,9 +6,10 @@
 
 import Hapi from 'hapi';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
+
 import { alertsClientMock } from '../../../../../../alerting/server/alerts_client.mock';
 import { actionsClientMock } from '../../../../../../actions/server/actions_client.mock';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 
 const defaultConfig = {
   'kibana.index': '.kibana',

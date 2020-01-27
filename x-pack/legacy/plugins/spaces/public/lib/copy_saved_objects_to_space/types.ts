@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsImportRetry, SavedObjectsImportResponse } from 'src/core/server';
+import { SavedObjectsImportRetry, SavedObjectsImportResponse } from 'src/core/public';
 
 export interface CopyOptions {
   includeRelated: boolean;

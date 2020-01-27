@@ -17,8 +17,11 @@
  * under the License.
  */
 
-import { tryRegisterSettingsComponent, registerSettingsComponent, getSettingsComponent } from './component_registry';
-
+import {
+  tryRegisterSettingsComponent,
+  registerSettingsComponent,
+  getSettingsComponent,
+} from './component_registry';
 
 describe('tryRegisterSettingsComponent', () => {
   it('should allow a component to be registered', () => {
@@ -45,14 +48,16 @@ describe('registerSettingsComponent', () => {
   it('should disallow registering a component with a duplicate id', () => {
     const component = {};
     registerSettingsComponent('test2', component);
-    expect(() => registerSettingsComponent('test2', 'some other component')).toThrowErrorMatchingSnapshot();
+    expect(() =>
+      registerSettingsComponent('test2', 'some other component')
+    ).toThrowErrorMatchingSnapshot();
   });
 
   it('should allow a component to be overriden', () => {
     const component = {};
     registerSettingsComponent('test3', component);
 
-    const anotherComponent = { 'anotherComponent': 'ok' };
+    const anotherComponent = { anotherComponent: 'ok' };
     registerSettingsComponent('test3', anotherComponent, true);
 
     expect(getSettingsComponent('test3')).toBe(anotherComponent);
@@ -67,7 +72,7 @@ describe('registerSettingsComponent', () => {
 
   it('should not set a displayName for the component if one already exists', () => {
     const component = {
-      displayName: '<AwesomeComponent>'
+      displayName: '<AwesomeComponent>',
     };
 
     registerSettingsComponent('another_display_name_component', component);

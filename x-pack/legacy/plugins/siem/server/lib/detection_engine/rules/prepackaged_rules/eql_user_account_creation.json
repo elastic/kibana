@@ -1,0 +1,17 @@
+{
+  "rule_id": "1aa9181a-492b-4c01-8b16-fa0735786b2b",
+  "risk_score": 50,
+  "description": "EQL - User Account Creation",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - User Account Creation",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": " event.action:\"Process Create (rule: ProcessCreate)\" and process.name:(\"net.exe\" or \"net1.exe\") and not process.parent.name:\"net.exe\" and process.args:(\"user\" and (\"/add\" or \"/ad\")) ",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

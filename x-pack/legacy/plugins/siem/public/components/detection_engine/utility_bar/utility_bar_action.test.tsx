@@ -22,7 +22,7 @@ describe('UtilityBarAction', () => {
       </TestProviders>
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(toJson(wrapper.find('UtilityBarAction'))).toMatchSnapshot();
   });
 
   test('it renders a popover', () => {

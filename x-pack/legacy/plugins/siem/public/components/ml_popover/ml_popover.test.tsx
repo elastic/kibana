@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+
 import { MlPopover } from './ml_popover';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
@@ -16,7 +17,7 @@ jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
 
 describe('MlPopover', () => {
   test('shows upgrade popover on mouse click', () => {
-    const wrapper = mount(<MlPopover />);
+    const wrapper = mountWithIntl(<MlPopover />);
 
     // TODO: Update to use act() https://fb.me/react-wrap-tests-with-act
     wrapper

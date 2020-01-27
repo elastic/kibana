@@ -52,17 +52,15 @@ async function executor(
     logger[params.level](params.message);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.serverLog.errorLoggingErrorMessage', {
-      defaultMessage: 'error in action "{actionId}" logging message: {errorMessage}',
-      values: {
-        actionId,
-        errorMessage: err.message,
-      },
+      defaultMessage: 'error logging message',
     });
     return {
       status: 'error',
       message,
+      serviceMessage: err.message,
+      actionId,
     };
   }
 
-  return { status: 'ok' };
+  return { status: 'ok', actionId };
 }

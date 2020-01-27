@@ -33,14 +33,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('logstash_functional');
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     after(async () => {
       await esArchiver.unload('discover/feature_controls/security');
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     describe('global discover all privileges', () => {

@@ -1,0 +1,390 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PingList component renders sorted list without errors 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h4>
+        <FormattedMessage
+          defaultMessage="History"
+          id="xpack.uptime.pingList.checkHistoryTitle"
+          values={Object {}}
+        />
+      </h4>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFlexGroup>
+          <EuiFlexItem
+            style={
+              Object {
+                "minWidth": 200,
+              }
+            }
+          >
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFormRow
+                  aria-label="Status"
+                  describedByIds={Array []}
+                  display="row"
+                  fullWidth={false}
+                  hasChildLabel={true}
+                  hasEmptyLabelSpace={false}
+                  label="Status"
+                  labelType="label"
+                >
+                  <EuiSelect
+                    aria-label="Status"
+                    compressed={false}
+                    fullWidth={false}
+                    hasNoInitialSelection={false}
+                    isLoading={false}
+                    onChange={[Function]}
+                    options={
+                      Array [
+                        Object {
+                          "text": "All",
+                          "value": "",
+                        },
+                        Object {
+                          "text": "Up",
+                          "value": "up",
+                        },
+                        Object {
+                          "text": "Down",
+                          "value": "down",
+                        },
+                      ]
+                    }
+                    value="down"
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  aria-label="Location"
+                  describedByIds={Array []}
+                  display="row"
+                  fullWidth={false}
+                  hasChildLabel={true}
+                  hasEmptyLabelSpace={false}
+                  label="Location"
+                  labelType="label"
+                >
+                  <EuiSelect
+                    aria-label="Location"
+                    compressed={false}
+                    fullWidth={false}
+                    hasNoInitialSelection={false}
+                    isLoading={false}
+                    onChange={[Function]}
+                    options={
+                      Array [
+                        Object {
+                          "text": "All",
+                          "value": "",
+                        },
+                        Object {
+                          "text": "nyc",
+                          "value": "nyc",
+                        },
+                      ]
+                    }
+                    value=""
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiBasicTable
+      columns={
+        Array [
+          Object {
+            "field": "monitor.status",
+            "name": "Status",
+            "render": [Function],
+          },
+          Object {
+            "align": "center",
+            "field": "observer.geo.name",
+            "name": "Location",
+            "render": [Function],
+          },
+          Object {
+            "align": "right",
+            "dataType": "number",
+            "field": "monitor.ip",
+            "name": "IP",
+          },
+          Object {
+            "align": "right",
+            "field": "monitor.duration.us",
+            "name": "Duration",
+            "render": [Function],
+          },
+          Object {
+            "align": "right",
+            "field": "error.type",
+            "name": "Error type",
+            "render": [Function],
+          },
+          Object {
+            "align": "center",
+            "field": "http.response.status_code",
+            "name": "Response code",
+            "render": [Function],
+          },
+          Object {
+            "align": "right",
+            "isExpander": true,
+            "render": [Function],
+            "width": "24px",
+          },
+        ]
+      }
+      hasActions={true}
+      isExpandable={true}
+      itemId="id"
+      itemIdToExpandedRowMap={Object {}}
+      items={
+        Array [
+          Object {
+            "error": Object {
+              "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+              "type": "io",
+            },
+            "http": null,
+            "id": "id1",
+            "monitor": Object {
+              "duration": Object {
+                "us": 1430,
+              },
+              "id": "auto-tcp-0X81440A68E839814C",
+              "ip": "127.0.0.1",
+              "name": "",
+              "scheme": null,
+              "status": "down",
+              "type": "tcp",
+            },
+            "timestamp": "2019-01-28T17:47:08.078Z",
+          },
+          Object {
+            "error": Object {
+              "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+              "type": "io",
+            },
+            "http": null,
+            "id": "id2",
+            "monitor": Object {
+              "duration": Object {
+                "us": 1370,
+              },
+              "id": "auto-tcp-0X81440A68E839814C",
+              "ip": "127.0.0.1",
+              "name": "",
+              "scheme": null,
+              "status": "down",
+              "type": "tcp",
+            },
+            "timestamp": "2019-01-28T17:47:09.075Z",
+          },
+          Object {
+            "error": null,
+            "http": null,
+            "id": "id3",
+            "monitor": Object {
+              "duration": Object {
+                "us": 1452,
+              },
+              "id": "auto-tcp-0X81440A68E839814C",
+              "ip": "127.0.0.1",
+              "name": "",
+              "scheme": null,
+              "status": "up",
+              "type": "tcp",
+            },
+            "timestamp": "2019-01-28T17:47:06.077Z",
+          },
+          Object {
+            "error": Object {
+              "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+              "type": "io",
+            },
+            "http": null,
+            "id": "id4",
+            "monitor": Object {
+              "duration": Object {
+                "us": 1094,
+              },
+              "id": "auto-tcp-0X81440A68E839814C",
+              "ip": "127.0.0.1",
+              "name": "",
+              "scheme": null,
+              "status": "down",
+              "type": "tcp",
+            },
+            "timestamp": "2019-01-28T17:47:07.075Z",
+          },
+          Object {
+            "error": Object {
+              "message": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
+              "type": "io",
+            },
+            "http": null,
+            "id": "id5",
+            "monitor": Object {
+              "duration": Object {
+                "us": 1597,
+              },
+              "id": "auto-http-0X3675F89EF0612091",
+              "ip": "127.0.0.1",
+              "name": "",
+              "scheme": null,
+              "status": "down",
+              "type": "http",
+            },
+            "timestamp": "2019-01-28T17:47:07.074Z",
+          },
+          Object {
+            "error": Object {
+              "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+              "type": "io",
+            },
+            "http": null,
+            "id": "id6",
+            "monitor": Object {
+              "duration": Object {
+                "us": 1699,
+              },
+              "id": "auto-tcp-0X81440A68E839814C",
+              "ip": "127.0.0.1",
+              "name": "",
+              "scheme": null,
+              "status": "down",
+              "type": "tcp",
+            },
+            "timestamp": "2019-01-28T17:47:18.080Z",
+          },
+          Object {
+            "error": Object {
+              "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+              "type": "io",
+            },
+            "http": null,
+            "id": "id7",
+            "monitor": Object {
+              "duration": Object {
+                "us": 5384,
+              },
+              "id": "auto-tcp-0X81440A68E839814C",
+              "ip": "127.0.0.1",
+              "name": "",
+              "scheme": null,
+              "status": "down",
+              "type": "tcp",
+            },
+            "timestamp": "2019-01-28T17:47:19.076Z",
+          },
+          Object {
+            "error": Object {
+              "message": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
+              "type": "io",
+            },
+            "http": null,
+            "id": "id8",
+            "monitor": Object {
+              "duration": Object {
+                "us": 5397,
+              },
+              "id": "auto-http-0X3675F89EF0612091",
+              "ip": "127.0.0.1",
+              "name": "",
+              "scheme": null,
+              "status": "down",
+              "type": "http",
+            },
+            "timestamp": "2019-01-28T17:47:19.076Z",
+          },
+          Object {
+            "error": null,
+            "http": Object {
+              "response": Object {
+                "status_code": 200,
+              },
+            },
+            "id": "id9",
+            "monitor": Object {
+              "duration": Object {
+                "us": 127511,
+              },
+              "id": "auto-http-0X131221E73F825974",
+              "ip": "172.217.7.4",
+              "name": "",
+              "scheme": null,
+              "status": "up",
+              "type": "http",
+            },
+            "timestamp": "2019-01-28T17:47:19.077Z",
+          },
+          Object {
+            "error": null,
+            "http": Object {
+              "response": Object {
+                "status_code": 200,
+              },
+            },
+            "id": "id10",
+            "monitor": Object {
+              "duration": Object {
+                "us": 287543,
+              },
+              "id": "auto-http-0X9CB71300ABD5A2A8",
+              "ip": "192.30.253.112",
+              "name": "",
+              "scheme": null,
+              "status": "up",
+              "type": "http",
+            },
+            "timestamp": "2019-01-28T17:47:19.077Z",
+          },
+        ]
+      }
+      loading={false}
+      noItemsMessage="No items found"
+      onChange={[Function]}
+      pagination={
+        Object {
+          "initialPageSize": 20,
+          "pageIndex": 0,
+          "pageSize": 30,
+          "pageSizeOptions": Array [
+            5,
+            10,
+            20,
+            50,
+            100,
+          ],
+          "totalItemCount": 30,
+        }
+      }
+      responsive={true}
+    />
+  </EuiPanel>
+</Fragment>
+`;

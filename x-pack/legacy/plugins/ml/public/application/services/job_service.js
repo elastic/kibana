@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
@@ -46,24 +44,48 @@ class JobService {
     this.detectorsByJob = {};
     this.customUrlsByJob = {};
     this.jobStats = {
-      activeNodes: { label: i18n.translate('xpack.ml.jobService.activeMLNodesLabel', {
-        defaultMessage: 'Active ML Nodes'
-      }), value: 0, show: true },
-      total: { label: i18n.translate('xpack.ml.jobService.totalJobsLabel', {
-        defaultMessage: 'Total jobs'
-      }), value: 0, show: true },
-      open: { label: i18n.translate('xpack.ml.jobService.openJobsLabel', {
-        defaultMessage: 'Open jobs'
-      }), value: 0, show: true },
-      closed: { label: i18n.translate('xpack.ml.jobService.closedJobsLabel', {
-        defaultMessage: 'Closed jobs'
-      }), value: 0, show: true },
-      failed: { label: i18n.translate('xpack.ml.jobService.failedJobsLabel', {
-        defaultMessage: 'Failed jobs'
-      }), value: 0, show: false },
-      activeDatafeeds: { label: i18n.translate('xpack.ml.jobService.activeDatafeedsLabel', {
-        defaultMessage: 'Active datafeeds'
-      }), value: 0, show: true }
+      activeNodes: {
+        label: i18n.translate('xpack.ml.jobService.activeMLNodesLabel', {
+          defaultMessage: 'Active ML Nodes',
+        }),
+        value: 0,
+        show: true,
+      },
+      total: {
+        label: i18n.translate('xpack.ml.jobService.totalJobsLabel', {
+          defaultMessage: 'Total jobs',
+        }),
+        value: 0,
+        show: true,
+      },
+      open: {
+        label: i18n.translate('xpack.ml.jobService.openJobsLabel', {
+          defaultMessage: 'Open jobs',
+        }),
+        value: 0,
+        show: true,
+      },
+      closed: {
+        label: i18n.translate('xpack.ml.jobService.closedJobsLabel', {
+          defaultMessage: 'Closed jobs',
+        }),
+        value: 0,
+        show: true,
+      },
+      failed: {
+        label: i18n.translate('xpack.ml.jobService.failedJobsLabel', {
+          defaultMessage: 'Failed jobs',
+        }),
+        value: 0,
+        show: false,
+      },
+      activeDatafeeds: {
+        label: i18n.translate('xpack.ml.jobService.activeDatafeedsLabel', {
+          defaultMessage: 'Active datafeeds',
+        }),
+        value: 0,
+        show: true,
+      },
     };
   }
 
@@ -75,15 +97,15 @@ class JobService {
       analysis_config: {
         bucket_span: '15m',
         influencers: [],
-        detectors: []
+        detectors: [],
       },
       data_description: {
         time_field: '',
         time_format: '', // 'epoch',
         field_delimiter: '',
         quote_character: '"',
-        format: 'delimited'
-      }
+        format: 'delimited',
+      },
     };
   }
 
@@ -93,13 +115,13 @@ class JobService {
       datafeedIds = {};
 
       ml.getJobs()
-        .then((resp) => {
+        .then(resp => {
           // make deep copy of jobs
           angular.copy(resp.jobs, jobs);
 
           // load jobs stats
           ml.getJobStats()
-            .then((statsResp) => {
+            .then(statsResp => {
               // merge jobs stats into jobs
               for (let i = 0; i < jobs.length; i++) {
                 const job = jobs[i];
@@ -124,35 +146,37 @@ class JobService {
                   }
                 }
               }
-              this.loadDatafeeds()
-                .then((datafeedsResp) => {
-                  for (let i = 0; i < jobs.length; i++) {
-                    for (let j = 0; j < datafeedsResp.datafeeds.length; j++) {
-                      if (jobs[i].job_id === datafeedsResp.datafeeds[j].job_id) {
-                        jobs[i].datafeed_config = datafeedsResp.datafeeds[j];
+              this.loadDatafeeds().then(datafeedsResp => {
+                for (let i = 0; i < jobs.length; i++) {
+                  for (let j = 0; j < datafeedsResp.datafeeds.length; j++) {
+                    if (jobs[i].job_id === datafeedsResp.datafeeds[j].job_id) {
+                      jobs[i].datafeed_config = datafeedsResp.datafeeds[j];
 
-                        datafeedIds[jobs[i].job_id] = datafeedsResp.datafeeds[j].datafeed_id;
-                      }
+                      datafeedIds[jobs[i].job_id] = datafeedsResp.datafeeds[j].datafeed_id;
                     }
                   }
-                  processBasicJobInfo(this, jobs);
-                  this.jobs = jobs;
-                  createJobStats(this.jobs, this.jobStats);
-                  resolve({ jobs: this.jobs });
-                });
+                }
+                processBasicJobInfo(this, jobs);
+                this.jobs = jobs;
+                createJobStats(this.jobs, this.jobStats);
+                resolve({ jobs: this.jobs });
+              });
             })
-            .catch((err) => {
+            .catch(err => {
               error(err);
             });
-        }).catch((err) => {
+        })
+        .catch(err => {
           error(err);
         });
 
       function error(err) {
         console.log('jobService error getting list of jobs:', err);
-        msgs.error(i18n.translate('xpack.ml.jobService.jobsListCouldNotBeRetrievedErrorMessage', {
-          defaultMessage: 'Jobs list could not be retrieved'
-        }));
+        msgs.error(
+          i18n.translate('xpack.ml.jobService.jobsListCouldNotBeRetrievedErrorMessage', {
+            defaultMessage: 'Jobs list could not be retrieved',
+          })
+        );
         msgs.error('', err);
         reject({ jobs, err });
       }
@@ -161,27 +185,27 @@ class JobService {
 
   loadJobsWrapper = () => {
     return this.loadJobs()
-      .then(function (resp) {
+      .then(function(resp) {
         return resp;
       })
-      .catch(function (error) {
+      .catch(function(error) {
         console.log('Error loading jobs in route resolve.', error);
         // Always resolve to ensure tab still works.
         Promise.resolve([]);
       });
-  }
+  };
 
   refreshJob(jobId) {
     return new Promise((resolve, reject) => {
       ml.getJobs({ jobId })
-        .then((resp) => {
+        .then(resp => {
           const newJob = {};
           if (resp.jobs && resp.jobs.length) {
             angular.copy(resp.jobs[0], newJob);
 
             // load jobs stats
             ml.getJobStats({ jobId })
-              .then((statsResp) => {
+              .then(statsResp => {
                 // merge jobs stats into jobs
                 for (let j = 0; j < statsResp.jobs.length; j++) {
                   if (newJob.job_id === statsResp.jobs[j].job_id) {
@@ -210,35 +234,37 @@ class JobService {
 
                 const datafeedId = this.getDatafeedId(jobId);
 
-                this.loadDatafeeds(datafeedId)
-                  .then((datafeedsResp) => {
-                    for (let i = 0; i < jobs.length; i++) {
-                      for (let j = 0; j < datafeedsResp.datafeeds.length; j++) {
-                        if (jobs[i].job_id === datafeedsResp.datafeeds[j].job_id) {
-                          jobs[i].datafeed_config = datafeedsResp.datafeeds[j];
+                this.loadDatafeeds(datafeedId).then(datafeedsResp => {
+                  for (let i = 0; i < jobs.length; i++) {
+                    for (let j = 0; j < datafeedsResp.datafeeds.length; j++) {
+                      if (jobs[i].job_id === datafeedsResp.datafeeds[j].job_id) {
+                        jobs[i].datafeed_config = datafeedsResp.datafeeds[j];
 
-                          datafeedIds[jobs[i].job_id] = datafeedsResp.datafeeds[j].datafeed_id;
-                        }
+                        datafeedIds[jobs[i].job_id] = datafeedsResp.datafeeds[j].datafeed_id;
                       }
                     }
-                    this.jobs = jobs;
-                    createJobStats(this.jobs, this.jobStats);
-                    resolve({ jobs: this.jobs });
-                  });
+                  }
+                  this.jobs = jobs;
+                  createJobStats(this.jobs, this.jobStats);
+                  resolve({ jobs: this.jobs });
+                });
               })
-              .catch((err) => {
+              .catch(err => {
                 error(err);
               });
           }
-        }).catch((err) => {
+        })
+        .catch(err => {
           error(err);
         });
 
       function error(err) {
         console.log('JobService error getting list of jobs:', err);
-        msgs.error(i18n.translate('xpack.ml.jobService.jobsListCouldNotBeRetrievedErrorMessage', {
-          defaultMessage: 'Jobs list could not be retrieved'
-        }));
+        msgs.error(
+          i18n.translate('xpack.ml.jobService.jobsListCouldNotBeRetrievedErrorMessage', {
+            defaultMessage: 'Jobs list could not be retrieved',
+          })
+        );
         msgs.error('', err);
         reject({ jobs, err });
       }
@@ -248,10 +274,10 @@ class JobService {
   loadDatafeeds(datafeedId) {
     return new Promise((resolve, reject) => {
       const datafeeds = [];
-      const sId = (datafeedId !== undefined) ? { datafeed_id: datafeedId } : undefined;
+      const sId = datafeedId !== undefined ? { datafeed_id: datafeedId } : undefined;
 
       ml.getDatafeeds(sId)
-        .then((resp) => {
+        .then(resp => {
           // console.log('loadDatafeeds query response:', resp);
 
           // make deep copy of datafeeds
@@ -259,7 +285,7 @@ class JobService {
 
           // load datafeeds stats
           ml.getDatafeedStats()
-            .then((statsResp) => {
+            .then(statsResp => {
               // merge datafeeds stats into datafeeds
               for (let i = 0; i < datafeeds.length; i++) {
                 const datafeed = datafeeds[i];
@@ -271,18 +297,21 @@ class JobService {
               }
               resolve({ datafeeds });
             })
-            .catch((err) => {
+            .catch(err => {
               error(err);
             });
-        }).catch((err) => {
+        })
+        .catch(err => {
           error(err);
         });
 
       function error(err) {
         console.log('loadDatafeeds error getting list of datafeeds:', err);
-        msgs.error(i18n.translate('xpack.ml.jobService.datafeedsListCouldNotBeRetrievedErrorMessage', {
-          defaultMessage: 'datafeeds list could not be retrieved'
-        }));
+        msgs.error(
+          i18n.translate('xpack.ml.jobService.datafeedsListCouldNotBeRetrievedErrorMessage', {
+            defaultMessage: 'datafeeds list could not be retrieved',
+          })
+        );
         msgs.error('', err);
         reject({ jobs, err });
       }
@@ -291,12 +320,11 @@ class JobService {
 
   updateSingleJobDatafeedState(jobId) {
     return new Promise((resolve, reject) => {
-
       const datafeedId = this.getDatafeedId(jobId);
 
       ml.getDatafeedStats({ datafeedId })
-        .then((resp) => {
-        // console.log('updateSingleJobCounts controller query response:', resp);
+        .then(resp => {
+          // console.log('updateSingleJobCounts controller query response:', resp);
           const datafeeds = resp.datafeeds;
           let state = 'UNKNOWN';
           if (datafeeds && datafeeds.length) {
@@ -304,10 +332,9 @@ class JobService {
           }
           resolve(state);
         })
-        .catch((resp) => {
+        .catch(resp => {
           reject(resp);
         });
-
     });
   }
 
@@ -320,8 +347,10 @@ class JobService {
     }
 
     // return the promise chain
-    return ml.addJob({ jobId: job.job_id, job })
-      .then(func).catch(func);
+    return ml
+      .addJob({ jobId: job.job_id, job })
+      .then(func)
+      .catch(func);
   }
 
   cloneJob(job) {
@@ -348,7 +377,7 @@ class JobService {
 
     delete tempJob.analysis_config.use_per_partition_normalization;
 
-    _.each(tempJob.analysis_config.detectors, (d) => {
+    _.each(tempJob.analysis_config.detectors, d => {
       delete d.detector_index;
     });
 
@@ -385,15 +414,19 @@ class JobService {
 
   updateJob(jobId, job) {
     // return the promise chain
-    return ml.updateJob({ jobId, job })
-      .then((resp) => {
+    return ml
+      .updateJob({ jobId, job })
+      .then(resp => {
         console.log('update job', resp);
         return { success: true };
-      }).catch((err) => {
-        msgs.error(i18n.translate('xpack.ml.jobService.couldNotUpdateJobErrorMessage', {
-          defaultMessage: 'Could not update job: {jobId}',
-          values: { jobId },
-        }));
+      })
+      .catch(err => {
+        msgs.error(
+          i18n.translate('xpack.ml.jobService.couldNotUpdateJobErrorMessage', {
+            defaultMessage: 'Could not update job: {jobId}',
+            values: { jobId },
+          })
+        );
         console.log('update job', err);
         return { success: false, message: err.message };
       });
@@ -401,28 +434,34 @@ class JobService {
 
   validateJob(obj) {
     // return the promise chain
-    return ml.validateJob(obj)
-      .then((messages) => {
+    return ml
+      .validateJob(obj)
+      .then(messages => {
         return { success: true, messages };
-      }).catch((err) => {
-        msgs.error(i18n.translate('xpack.ml.jobService.jobValidationErrorMessage', {
-          defaultMessage: 'Job Validation Error: {errorMessage}',
-          values: { errorMessage: err.message },
-        }));
+      })
+      .catch(err => {
+        msgs.error(
+          i18n.translate('xpack.ml.jobService.jobValidationErrorMessage', {
+            defaultMessage: 'Job Validation Error: {errorMessage}',
+            values: { errorMessage: err.message },
+          })
+        );
         console.log('validate job', err);
         return {
           success: false,
-          messages: [{
-            status: 'error',
-            text: err.message
-          }]
+          messages: [
+            {
+              status: 'error',
+              text: err.message,
+            },
+          ],
         };
       });
   }
 
   // find a job based on the id
   getJob(jobId) {
-    const job = _.find(jobs, (j) => {
+    const job = _.find(jobs, j => {
       return j.job_id === jobId;
     });
 
@@ -431,15 +470,12 @@ class JobService {
 
   searchPreview(job) {
     return new Promise((resolve, reject) => {
-
       if (job.datafeed_config) {
-
         // if query is set, add it to the search, otherwise use match_all
-        let query = { 'match_all': {} };
+        let query = { match_all: {} };
         if (job.datafeed_config.query) {
           query = job.datafeed_config.query;
         }
-
 
         // Get bucket span
         // Get first doc time for datafeed
@@ -455,12 +491,12 @@ class JobService {
         ml.getTimeFieldRange({
           index: job.datafeed_config.indices,
           timeFieldName: job.data_description.time_field,
-          query
+          query,
         })
-          .then((timeRange) => {
+          .then(timeRange => {
             const bucketSpan = parseInterval(job.analysis_config.bucket_span);
             const earliestMs = timeRange.start.epoch;
-            const latestMs = +timeRange.start.epoch + (10 * bucketSpan.asMilliseconds());
+            const latestMs = +timeRange.start.epoch + 10 * bucketSpan.asMilliseconds();
 
             const body = {
               query: {
@@ -471,14 +507,14 @@ class JobService {
                         [job.data_description.time_field]: {
                           gte: earliestMs,
                           lt: latestMs,
-                          format: 'epoch_millis'
-                        }
-                      }
+                          format: 'epoch_millis',
+                        },
+                      },
                     },
-                    query
-                  ]
-                }
-              }
+                    query,
+                  ],
+                },
+              },
             };
 
             // if aggs or aggregations is set, add it to the search
@@ -492,7 +528,6 @@ class JobService {
               if (scriptFields && Object.keys(scriptFields).length) {
                 body.script_fields = scriptFields;
               }
-
             } else {
               // if aggregations is not set and retrieveWholeSource is not set, add all of the fields from the job
               body.size = ML_DATA_PREVIEW_COUNT;
@@ -507,7 +542,7 @@ class JobService {
 
               // get fields from detectors
               if (job.analysis_config.detectors) {
-                _.each(job.analysis_config.detectors, (dtr) => {
+                _.each(job.analysis_config.detectors, dtr => {
                   if (dtr.by_field_name) {
                     fields[dtr.by_field_name] = {};
                   }
@@ -525,7 +560,7 @@ class JobService {
 
               // get fields from influencers
               if (job.analysis_config.influencers) {
-                _.each(job.analysis_config.influencers, (inf) => {
+                _.each(job.analysis_config.influencers, inf => {
                   fields[inf] = {};
                 });
               }
@@ -554,26 +589,21 @@ class JobService {
 
             const data = {
               index: job.datafeed_config.indices,
-              body
+              body,
             };
 
             ml.esSearch(data)
-              .then((resp) => {
+              .then(resp => {
                 resolve(resp);
               })
-              .catch((resp) => {
+              .catch(resp => {
                 reject(resp);
               });
-
-
           })
-          .catch((resp) => {
+          .catch(resp => {
             reject(resp);
           });
-
-
       }
-
     });
   }
 
@@ -591,21 +621,24 @@ class JobService {
 
     return ml.addDatafeed({
       datafeedId,
-      datafeedConfig
+      datafeedConfig,
     });
   }
 
   updateDatafeed(datafeedId, datafeedConfig) {
-    return ml.updateDatafeed({ datafeedId, datafeedConfig })
-      .then((resp) => {
+    return ml
+      .updateDatafeed({ datafeedId, datafeedConfig })
+      .then(resp => {
         console.log('update datafeed', resp);
         return { success: true };
       })
-      .catch((err) => {
-        msgs.error(i18n.translate('xpack.ml.jobService.couldNotUpdateDatafeedErrorMessage', {
-          defaultMessage: 'Could not update datafeed: {datafeedId}',
-          values: { datafeedId },
-        }));
+      .catch(err => {
+        msgs.error(
+          i18n.translate('xpack.ml.jobService.couldNotUpdateDatafeedErrorMessage', {
+            defaultMessage: 'Could not update datafeed: {datafeedId}',
+            values: { datafeedId },
+          })
+        );
         console.log('update datafeed', err);
         return { success: false, message: err.message };
       });
@@ -615,7 +648,6 @@ class JobService {
   // refresh the job state on start success
   startDatafeed(datafeedId, jobId, start, end) {
     return new Promise((resolve, reject) => {
-
       // if the end timestamp is a number, add one ms to it to make it
       // inclusive of the end of the data
       if (_.isNumber(end)) {
@@ -625,17 +657,20 @@ class JobService {
       ml.startDatafeed({
         datafeedId,
         start,
-        end
+        end,
       })
-        .then((resp) => {
+        .then(resp => {
           resolve(resp);
         })
-        .catch((err) => {
+        .catch(err => {
           console.log('jobService error starting datafeed:', err);
-          msgs.error(i18n.translate('xpack.ml.jobService.couldNotStartDatafeedErrorMessage', {
-            defaultMessage: 'Could not start datafeed for {jobId}',
-            values: { jobId },
-          }), err);
+          msgs.error(
+            i18n.translate('xpack.ml.jobService.couldNotStartDatafeedErrorMessage', {
+              defaultMessage: 'Could not start datafeed for {jobId}',
+              values: { jobId },
+            }),
+            err
+          );
           reject(err);
         });
     });
@@ -646,23 +681,29 @@ class JobService {
   stopDatafeed(datafeedId, jobId) {
     return new Promise((resolve, reject) => {
       ml.stopDatafeed({
-        datafeedId
+        datafeedId,
       })
-        .then((resp) => {
+        .then(resp => {
           resolve(resp);
         })
-        .catch((err) => {
+        .catch(err => {
           console.log('jobService error stopping datafeed:', err);
-          const couldNotStopDatafeedErrorMessage = i18n.translate('xpack.ml.jobService.couldNotStopDatafeedErrorMessage', {
-            defaultMessage: 'Could not stop datafeed for {jobId}',
-            values: { jobId },
-          });
+          const couldNotStopDatafeedErrorMessage = i18n.translate(
+            'xpack.ml.jobService.couldNotStopDatafeedErrorMessage',
+            {
+              defaultMessage: 'Could not stop datafeed for {jobId}',
+              values: { jobId },
+            }
+          );
 
           if (err.statusCode === 500) {
             msgs.error(couldNotStopDatafeedErrorMessage);
-            msgs.error(i18n.translate('xpack.ml.jobService.requestMayHaveTimedOutErrorMessage', {
-              defaultMessage: 'Request may have timed out and may still be running in the background.',
-            }));
+            msgs.error(
+              i18n.translate('xpack.ml.jobService.requestMayHaveTimedOutErrorMessage', {
+                defaultMessage:
+                  'Request may have timed out and may still be running in the background.',
+              })
+            );
           } else {
             msgs.error(couldNotStopDatafeedErrorMessage, err);
           }
@@ -691,10 +732,10 @@ class JobService {
     return new Promise((resolve, reject) => {
       if (detector) {
         ml.validateDetector({ detector })
-          .then((resp) => {
+          .then(resp => {
             resolve(resp);
           })
-          .catch((resp) => {
+          .catch(resp => {
             reject(resp);
           });
       } else {
@@ -745,7 +786,6 @@ class JobService {
     return createResultsUrl(jobIds, from, to, resultsPage);
   }
 
-
   async getJobAndGroupIds() {
     try {
       return await ml.jobs.getAllJobAndGroupIds();
@@ -791,13 +831,13 @@ function processBasicJobInfo(localJobService, jobsList) {
   // use cloned copy of jobs list so not to alter the original
   const jobsListCopy = _.cloneDeep(jobsList);
 
-  _.each(jobsListCopy, (jobObj) => {
+  _.each(jobsListCopy, jobObj => {
     const analysisConfig = jobObj.analysis_config;
     const bucketSpan = parseInterval(analysisConfig.bucket_span);
 
     const job = {
       id: jobObj.job_id,
-      bucketSpanSeconds: bucketSpan.asSeconds()
+      bucketSpanSeconds: bucketSpan.asSeconds(),
     };
 
     if (_.has(jobObj, 'description') && /^\s*$/.test(jobObj.description) === false) {
@@ -810,10 +850,9 @@ function processBasicJobInfo(localJobService, jobsList) {
     job.detectors = _.get(analysisConfig, 'detectors', []);
     detectorsByJob[job.id] = job.detectors;
 
-
     if (_.has(jobObj, 'custom_settings.custom_urls')) {
       job.customUrls = [];
-      _.each(jobObj.custom_settings.custom_urls, (url) => {
+      _.each(jobObj.custom_settings.custom_urls, url => {
         if (_.has(url, 'url_name') && _.has(url, 'url_value') && isWebUrl(url.url_value)) {
           // Only make web URLs (i.e. http or https) available in dashboard drilldowns.
           job.customUrls.push(url);
@@ -839,7 +878,6 @@ function processBasicJobInfo(localJobService, jobsList) {
 // Loop through the jobs list and create basic stats
 // stats are displayed along the top of the Jobs Management page
 function createJobStats(jobsList, jobStats) {
-
   jobStats.activeNodes.value = 0;
   jobStats.total.value = 0;
   jobStats.open.value = 0;
@@ -851,7 +889,7 @@ function createJobStats(jobsList, jobStats) {
   const mlNodes = {};
   let failedJobs = 0;
 
-  _.each(jobsList, (job) => {
+  _.each(jobsList, job => {
     if (job.state === 'opened') {
       jobStats.open.value++;
     } else if (job.state === 'closed') {
@@ -889,7 +927,7 @@ function createResultsUrlForJobs(jobsList, resultsPage) {
     from = jobsList[0].earliestTimestampMs;
     to = jobsList[0].latestResultsTimestampMs; // Will be max(latest source data, latest bucket results)
   } else {
-    const jobsWithData = jobsList.filter(j => (j.earliestTimestampMs !== undefined));
+    const jobsWithData = jobsList.filter(j => j.earliestTimestampMs !== undefined);
     if (jobsWithData.length > 0) {
       from = Math.min(...jobsWithData.map(j => j.earliestTimestampMs));
       to = Math.max(...jobsWithData.map(j => j.latestResultsTimestampMs));
@@ -898,8 +936,8 @@ function createResultsUrlForJobs(jobsList, resultsPage) {
 
   const timeFormat = 'YYYY-MM-DD HH:mm:ss';
 
-  const fromString = moment(from).format(timeFormat);  // Defaults to 'now' if 'from' is undefined
-  const toString = moment(to).format(timeFormat);      // Defaults to 'now' if 'to' is undefined
+  const fromString = moment(from).format(timeFormat); // Defaults to 'now' if 'from' is undefined
+  const toString = moment(to).format(timeFormat); // Defaults to 'now' if 'to' is undefined
 
   const jobIds = jobsList.map(j => j.id);
   return createResultsUrl(jobIds, fromString, toString, resultsPage);
@@ -912,14 +950,14 @@ function createResultsUrl(jobIds, start, end, resultsPage) {
   let path = '';
 
   if (resultsPage !== undefined) {
-    path += 'ml#/';
+    path += '#/';
     path += resultsPage;
   }
 
   path += `?_g=(ml:(jobIds:!(${idString}))`;
   path += `,refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${from}'`;
   path += `,mode:absolute,to:'${to}'`;
-  path += '))&_a=(query:(query_string:(analyze_wildcard:!t,query:\'*\')))';
+  path += "))&_a=(query:(query_string:(analyze_wildcard:!t,query:'*')))";
 
   return path;
 }

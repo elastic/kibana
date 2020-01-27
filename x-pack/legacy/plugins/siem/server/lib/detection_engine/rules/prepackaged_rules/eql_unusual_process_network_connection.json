@@ -1,0 +1,17 @@
+{
+  "rule_id": "610949a1-312f-4e04-bb55-3a79b8c95267",
+  "risk_score": 50,
+  "description": "EQL -  Unusual Process Network Connection",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL -  Unusual Process Network Connection",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": " event.action:\"Network connection detected (rule: NetworkConnect)\" and process.name:(bginfo.exe or cdb.exe or cmstp.exe or csi.exe or dnx.exe or fsi.exe or ieexec.exe or iexpress.exe or Microsoft.Workflow.Compiler.exe or odbcconf.exe or rcsi.exe or xwizard.exe)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -15,7 +15,7 @@ const mockTestFilter = {
   items: ['ABA', 'AEL'],
   used_by: {
     detectors: ['mean response time'],
-    jobs: ['farequote']
+    jobs: ['farequote'],
   },
 };
 jest.mock('../../../services/ml_api_service', () => ({
@@ -23,9 +23,9 @@ jest.mock('../../../services/ml_api_service', () => ({
     filters: {
       filters: () => {
         return Promise.resolve(mockTestFilter);
-      }
-    }
-  }
+      },
+    },
+  },
 }));
 
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
@@ -35,7 +35,6 @@ import { RuleActionPanel } from './rule_action_panel';
 import { ACTION } from '../../../../../common/constants/detector_rule';
 
 describe('RuleActionPanel', () => {
-
   const job = {
     job_id: 'farequote',
     analysis_config: {
@@ -44,50 +43,44 @@ describe('RuleActionPanel', () => {
           detector_description: 'mean response time',
           custom_rules: [
             {
-              actions: [
-                ACTION.SKIP_RESULT
-              ],
+              actions: [ACTION.SKIP_RESULT],
               conditions: [
                 {
                   applies_to: 'actual',
                   operator: 'lt',
-                  value: 1
-                }
-              ]
+                  value: 1,
+                },
+              ],
             },
             {
-              actions: [
-                ACTION.SKIP_MODEL_UPDATE
-              ],
+              actions: [ACTION.SKIP_MODEL_UPDATE],
               scope: {
                 airline: {
                   filter_id: 'eu-airlines',
-                  filter_type: 'exclude'
-                }
-              }
+                  filter_type: 'exclude',
+                },
+              },
             },
             {
-              actions: [
-                ACTION.SKIP_MODEL_UPDATE
-              ],
+              actions: [ACTION.SKIP_MODEL_UPDATE],
               scope: {
                 airline: {
                   filter_id: 'eu-airlines',
-                  filter_type: 'exclude'
-                }
+                  filter_type: 'exclude',
+                },
               },
               conditions: [
                 {
                   applies_to: 'actual',
                   operator: 'gt',
-                  value: 500
-                }
-              ]
+                  value: 500,
+                },
+              ],
             },
           ],
-          detector_index: 0
-        }
-      ]
+          detector_index: 0,
+        },
+      ],
     },
   };
 
@@ -122,12 +115,9 @@ describe('RuleActionPanel', () => {
       ruleIndex: 0,
     };
 
-    const component = shallowWithIntl(
-      <RuleActionPanel {...props} />
-    );
+    const component = shallowWithIntl(<RuleActionPanel {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
 
   test('renders panel for rule with scope, value in filter list', () => {
@@ -136,12 +126,9 @@ describe('RuleActionPanel', () => {
       ruleIndex: 1,
     };
 
-    const component = shallowWithIntl(
-      <RuleActionPanel {...props} />
-    );
+    const component = shallowWithIntl(<RuleActionPanel {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
 
   test('renders panel for rule with a condition and scope, value not in filter list', () => {
@@ -150,12 +137,8 @@ describe('RuleActionPanel', () => {
       ruleIndex: 1,
     };
 
-    const wrapper = shallowWithIntl(
-      <RuleActionPanel {...props} />
-    );
+    const wrapper = shallowWithIntl(<RuleActionPanel {...props} />);
     wrapper.setState({ showAddToFilterListLink: true });
     expect(wrapper).toMatchSnapshot();
-
   });
-
 });

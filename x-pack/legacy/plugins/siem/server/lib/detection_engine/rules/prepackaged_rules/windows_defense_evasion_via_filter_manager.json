@@ -1,0 +1,17 @@
+{
+  "rule_id": "06dceabf-adca-48af-ac79-ffdf4c3b1e9a",
+  "risk_score": 50,
+  "description": "Windows Defense evasion via Filter Manager",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Defense evasion via Filter Manager",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code:1 and process.name:fltmc.exe",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

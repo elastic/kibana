@@ -5,10 +5,11 @@
  */
 
 import { IScopedClusterClient } from 'src/core/server';
+import { CheckContext } from '../../types';
 
 export async function check(
   es: IScopedClusterClient,
-  { deploymentId, indexName }: { deploymentId: string; indexName: string }
+  { deploymentId, indexName }: CheckContext
 ) {
   const response = await es.callAsInternalUser('search', {
     index: indexName,

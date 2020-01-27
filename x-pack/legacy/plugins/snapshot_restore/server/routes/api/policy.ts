@@ -10,7 +10,7 @@ import {
 } from '../../../../../server/lib/create_router/error_wrappers';
 import { SlmPolicyEs, SlmPolicy, SlmPolicyPayload } from '../../../common/types';
 import { deserializePolicy, serializePolicy } from '../../../common/lib';
-import { Plugins } from '../../../shim';
+import { Plugins } from '../../shim';
 import { getManagedPolicyNames } from '../../lib';
 
 let callWithInternalUser: any;

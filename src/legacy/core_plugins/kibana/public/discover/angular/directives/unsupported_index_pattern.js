@@ -18,12 +18,7 @@
  */
 
 import React, { Fragment } from 'react';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const DiscoverUnsupportedIndexPattern = ({ unsupportedType }) => {
@@ -46,11 +41,7 @@ export const DiscoverUnsupportedIndexPattern = ({ unsupportedType }) => {
 
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false} className="dscNoResults">
-          <EuiCallOut
-            title={message}
-            color="danger"
-            iconType="alert"
-          />
+          <EuiCallOut title={message} color="danger" iconType="alert" />
         </EuiFlexItem>
       </EuiFlexGroup>
     </Fragment>

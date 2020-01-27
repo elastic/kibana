@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-
 import {
   Chart,
   BarSeries,
@@ -63,6 +62,7 @@ export const BarChartBaseComponent = ({
     ...chartDefaultSettings,
     ...get('configs.settings', chartConfigs),
   };
+
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
       <Settings {...settings} />
@@ -116,6 +116,7 @@ export const BarChartComponent = ({
 }) => {
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
+
   return checkIfAnyValidSeriesExist(barChart) ? (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (

@@ -5,12 +5,11 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { getFormattedDurationString } from './helpers';
 import { FormattedDurationTooltip } from './tooltip';
 
-export const FormattedDuration = pure<{
+export const FormattedDuration = React.memo<{
   maybeDurationNanoseconds: string | number | object | undefined | null;
   tooltipTitle?: string;
 }>(({ maybeDurationNanoseconds, tooltipTitle }) => (

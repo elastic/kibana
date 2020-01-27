@@ -7,7 +7,7 @@
 // import { GraphQLFormattedError } from 'graphql';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { KFetchError } from 'ui/kfetch/kfetch_error';
+import { IHttpFetchError } from 'src/core/public';
 import { InvalidNodeError } from './invalid_node';
 // import { InfraMetricsErrorCodes } from '../../../../common/errors';
 import { DocumentTitle } from '../../../components/document_title';
@@ -15,7 +15,7 @@ import { ErrorPageBody } from '../../error';
 
 interface Props {
   name: string;
-  error: KFetchError;
+  error: IHttpFetchError;
 }
 
 export const PageError = ({ error, name }: Props) => {

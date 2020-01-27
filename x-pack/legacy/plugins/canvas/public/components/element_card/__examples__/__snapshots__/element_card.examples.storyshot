@@ -16,9 +16,11 @@ exports[`Storyshots components/Elements/ElementCard with click handler 1`] = `
       className="euiCard__top"
     >
       <svg
+        aria-hidden={true}
         className="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading euiCard__icon"
         focusable="false"
         height={16}
+        role="img"
         style={null}
         viewBox="0 0 16 16"
         width={16}
@@ -118,9 +120,11 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
       className="euiCard__top"
     >
       <svg
+        aria-hidden={true}
         className="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading euiCard__icon"
         focusable="false"
         height={16}
+        role="img"
         style={null}
         viewBox="0 0 16 16"
         width={16}
@@ -289,9 +293,11 @@ exports[`Storyshots components/Elements/ElementCard with title and description 1
       className="euiCard__top"
     >
       <svg
+        aria-hidden={true}
         className="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading euiCard__icon"
         focusable="false"
         height={16}
+        role="img"
         style={null}
         viewBox="0 0 16 16"
         width={16}

@@ -30,7 +30,7 @@ function getRequestHeaders(auth) {
   return {
     'kbn-version': pkg.version,
     'Content-Type': 'application/json',
-    'Authorization': auth,
+    Authorization: auth,
   };
 }
 

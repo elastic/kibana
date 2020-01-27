@@ -17,16 +17,65 @@
  * under the License.
  */
 
+// getRecords should return an array of one or more telemetry
+// records for the errors channel. Each record will ultimately
+// be stored as an individual document in the errors channel index
+// by the service
+import moment from 'moment';
+import { PulseCollector, CollectorSetupContext } from '../types';
+
 export interface Payload {
   errorId: string;
 }
 
-const payloads: Payload[] = [];
+export class Collector extends PulseCollector<Payload> {
+  private readonly channelName = 'errors';
 
-export async function putRecord(payload: Payload) {
-  payloads.push(payload);
-}
+  public async setup(deps: CollectorSetupContext) {
+    await super.setup(deps);
+    if (this.elasticsearch?.createIndexIfNotExist) {
+      const mappings = {
+        properties: {
+          timestamp: {
+            type: 'date',
+          },
+          errorId: {
+            type: 'keyword',
+          },
+          message: {
+            type: 'text',
+            fields: {
+              keyword: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      };
+      await this.elasticsearch!.createIndexIfNotExist(this.channelName, mappings);
+    }
+  }
+  public async putRecord(originalPayload: Payload) {
+    const payload = { timestamp: moment.utc().toISOString(), ...originalPayload };
+    if (this.elasticsearch) await this.elasticsearch.index(this.channelName, payload);
+  }
 
-export async function getRecords() {
-  return payloads;
+  public async getRecords() {
+    if (this.elasticsearch) {
+      const results = await this.elasticsearch.search(this.channelName, {
+        bool: {
+          filter: {
+            range: {
+              timestamp: {
+                gte: 'now-10s',
+                lte: 'now',
+              },
+            },
+          },
+        },
+      });
+      return results;
+    }
+    return [];
+  }
 }

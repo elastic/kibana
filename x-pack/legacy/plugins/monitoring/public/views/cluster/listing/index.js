@@ -20,13 +20,13 @@ const getPageData = $injector => {
   return monitoringClusters(undefined, undefined, CODE_PATHS);
 };
 
-uiRoutes.when('/home', {
-  template,
-  resolve: {
-    clusters: (Private, kbnUrl) => {
-      const routeInit = Private(routeInitProvider);
-      return routeInit({ codePaths: CODE_PATHS, fetchAllClusters: true })
-        .then(clusters => {
+uiRoutes
+  .when('/home', {
+    template,
+    resolve: {
+      clusters: (Private, kbnUrl) => {
+        const routeInit = Private(routeInitProvider);
+        return routeInit({ codePaths: CODE_PATHS, fetchAllClusters: true }).then(clusters => {
           if (!clusters || !clusters.length) {
             kbnUrl.changePath('/no-data');
             return Promise.reject();
@@ -38,48 +38,49 @@ uiRoutes.when('/home', {
           }
           return clusters;
         });
-    }
-  },
-  controllerAs: 'clusters',
-  controller: class ClustersList extends MonitoringViewBaseEuiTableController {
+      },
+    },
+    controllerAs: 'clusters',
+    controller: class ClustersList extends MonitoringViewBaseEuiTableController {
+      constructor($injector, $scope) {
+        super({
+          storageKey: 'clusters',
+          getPageData,
+          $scope,
+          $injector,
+          reactNodeId: 'monitoringClusterListingApp',
+        });
 
-    constructor($injector, $scope) {
-      super({
-        storageKey: 'clusters',
-        getPageData,
-        $scope,
-        $injector,
-        reactNodeId: 'monitoringClusterListingApp'
-      });
+        const $route = $injector.get('$route');
+        const kbnUrl = $injector.get('kbnUrl');
+        const globalState = $injector.get('globalState');
+        const storage = $injector.get('localStorage');
+        const showLicenseExpiration = $injector.get('showLicenseExpiration');
+        this.data = $route.current.locals.clusters;
 
-      const $route = $injector.get('$route');
-      const kbnUrl = $injector.get('kbnUrl');
-      const globalState = $injector.get('globalState');
-      const storage = $injector.get('localStorage');
-      const showLicenseExpiration = $injector.get('showLicenseExpiration');
-      this.data = $route.current.locals.clusters;
-
-
-      $scope.$watch(() => this.data, data => {
-        this.renderReact(
-          <I18nContext>
-            <Listing
-              clusters={data}
-              angular={{
-                scope: $scope,
-                globalState,
-                kbnUrl,
-                storage,
-                showLicenseExpiration
-              }}
-              sorting={this.sorting}
-              pagination={this.pagination}
-              onTableChange={this.onTableChange}
-            />
-          </I18nContext>
+        $scope.$watch(
+          () => this.data,
+          data => {
+            this.renderReact(
+              <I18nContext>
+                <Listing
+                  clusters={data}
+                  angular={{
+                    scope: $scope,
+                    globalState,
+                    kbnUrl,
+                    storage,
+                    showLicenseExpiration,
+                  }}
+                  sorting={this.sorting}
+                  pagination={this.pagination}
+                  onTableChange={this.onTableChange}
+                />
+              </I18nContext>
+            );
+          }
         );
-      });
-    }
-  }
-})
+      }
+    },
+  })
   .otherwise({ redirectTo: '/no-data' });

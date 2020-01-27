@@ -1,4 +1,3 @@
-
 @include euiBreakpoint('xs', 's') {
   .prfDevTool__shardDetailsWrapper {
     flex-direction: column;
@@ -34,7 +33,8 @@
       font-size: $euiSize;
       color: $euiColorMediumShade;
     }
-    h1, p {
+    h1,
+    p {
       cursor: default;
       user-select: none;
     }
@@ -44,7 +44,7 @@
   }
 }
 
-@include euiPanel('prfDevTool__main');
+@include euiPanel('.prfDevTool__main');
 
 @include euiBreakpoint('xs', 's') {
   .prfDevTool__container {
@@ -59,4 +59,3 @@
     margin: $euiSize 0;
   }
 }
-

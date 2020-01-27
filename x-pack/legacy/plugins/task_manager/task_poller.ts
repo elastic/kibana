@@ -9,107 +9,150 @@
  */
 
 import { performance } from 'perf_hooks';
-import { Logger } from './types';
+import { after } from 'lodash';
+import { Subject, merge, interval, of, Observable } from 'rxjs';
+import { mapTo, filter, scan, concatMap, tap, catchError } from 'rxjs/operators';
 
-type WorkFn<T> = () => Promise<T>;
+import { pipe } from 'fp-ts/lib/pipeable';
+import { Option, none, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
+import { pullFromSet } from './lib/pull_from_set';
+import {
+  Result,
+  Err,
+  isErr,
+  map as mapResult,
+  asOk,
+  asErr,
+  promiseResult,
+} from './lib/result_type';
 
-interface Opts<T> {
+type WorkFn<T, H> = (...params: T[]) => Promise<H>;
+
+interface Opts<T, H> {
   pollInterval: number;
-  logger: Logger;
-  work: WorkFn<T>;
+  bufferCapacity: number;
+  getCapacity: () => number;
+  pollRequests$: Observable<Option<T>>;
+  work: WorkFn<T, H>;
 }
 
 /**
- * Performs work on a scheduled interval, logging any errors. This waits for work to complete
- * (or error) prior to attempting another run.
+ * constructs a new TaskPoller stream, which emits events on demand and on a scheduled interval, waiting for capacity to be available before emitting more events.
+ *
+ * @param opts
+ * @prop {number} pollInterval - How often, in milliseconds, we will an event be emnitted, assuming there's capacity to do so
+ * @prop {() => number} getCapacity - A function specifying whether there is capacity to emit new events
+ * @prop {Observable<Option<T>>} pollRequests$ - A stream of requests for polling which can provide an optional argument for the polling phase
+ * @prop {number} bufferCapacity - How many requests are do we allow our buffer to accumulate before rejecting requests?
+ * @prop {(...params: T[]) => Promise<H>} work - The work we wish to execute in order to `poll`, this is the operation we're actually executing on request
+ *
+ * @returns {Observable<Set<T>>} - An observable which emits an event whenever a polling event is due to take place, providing access to a singleton Set representing a queue
+ *  of unique request argumets of type T. The queue holds all the buffered request arguments streamed in via pollRequests$
  */
-export class TaskPoller<T> {
-  private isStarted = false;
-  private isWorking = false;
-  private timeout: any;
-  private pollInterval: number;
-  private logger: Logger;
-  private work: WorkFn<T>;
+export function createTaskPoller<T, H>({
+  pollInterval,
+  getCapacity,
+  pollRequests$,
+  bufferCapacity,
+  work,
+}: Opts<T, H>): Observable<Result<H, PollingError<T>>> {
+  const hasCapacity = () => getCapacity() > 0;
 
-  /**
-   * Constructs a new TaskPoller.
-   *
-   * @param opts
-   * @prop {number} pollInterval - How often, in milliseconds, we will run the work function
-   * @prop {Logger} logger - The task manager logger
-   * @prop {WorkFn} work - An empty, asynchronous function that performs the desired work
-   */
-  constructor(opts: Opts<T>) {
-    this.pollInterval = opts.pollInterval;
-    this.logger = opts.logger;
-    this.work = opts.work;
-  }
+  const errors$ = new Subject<Err<PollingError<T>>>();
 
-  /**
-   * Starts the poller. If the poller is already running, this has no effect.
-   */
-  public async start() {
-    if (this.isStarted) {
-      return;
-    }
-
-    this.isStarted = true;
-
-    const poll = async () => {
-      await this.attemptWork();
-
-      performance.mark('TaskPoller.sleep');
-      if (this.isStarted) {
-        this.timeout = setTimeout(
-          tryAndLogOnError(() => {
-            performance.mark('TaskPoller.poll');
-            performance.measure('TaskPoller.sleepDuration', 'TaskPoller.sleep', 'TaskPoller.poll');
-            poll();
-          }, this.logger),
-          this.pollInterval
+  const requestWorkProcessing$ = merge(
+    // emit a polling event on demand
+    pollRequests$,
+    // emit a polling event on a fixed interval
+    interval(pollInterval).pipe(mapTo(none))
+  ).pipe(
+    // buffer all requests in a single set (to remove duplicates) as we don't want
+    // work to take place in parallel (it could cause Task Manager to pull in the same
+    // task twice)
+    scan<Option<T>, Set<T>>((queue, request) => {
+      if (isErr(pushOptionalIntoSet(queue, bufferCapacity, request))) {
+        // value wasnt pushed into buffer, we must be at capacity
+        errors$.next(
+          asPollingError<T>(
+            `request capacity reached`,
+            PollingErrorType.RequestCapacityReached,
+            request
+          )
         );
       }
-    };
+      return queue;
+    }, new Set<T>()),
+    // only emit polling events when there's capacity to handle them
+    filter(hasCapacity),
+    // take as many argumented calls as we have capacity for and call `work` with
+    // those arguments. If the queue is empty this will still trigger work to be done
+    concatMap(async (set: Set<T>) => {
+      closeSleepPerf();
+      return mapResult<H, Error, Result<H, PollingError<T>>>(
+        await promiseResult<H, Error>(work(...pullFromSet(set, getCapacity()))),
+        workResult => asOk(workResult),
+        (err: Error) => {
+          return asPollingError<T>(err, PollingErrorType.WorkError);
+        }
+      );
+    }),
+    tap(openSleepPerf),
+    // catch errors during polling for work
+    catchError((err: Error) => of(asPollingError<T>(err, PollingErrorType.WorkError)))
+  );
 
-    poll();
-  }
+  return merge(requestWorkProcessing$, errors$);
+}
+/**
+ * Unwraps optional values and pushes them into a set
+ * @param set A Set of generic type T
+ * @param maxCapacity How many values are we allowed to push into the set
+ * @param value An optional T to push into the set if it is there
+ */
+function pushOptionalIntoSet<T>(
+  set: Set<T>,
+  maxCapacity: number,
+  value: Option<T>
+): Result<Set<T>, Set<T>> {
+  return pipe(
+    value,
+    mapOptional<T, Result<Set<T>, Set<T>>>(req => {
+      if (set.size >= maxCapacity) {
+        return asErr(set);
+      }
+      set.add(req);
+      return asOk(set);
+    }),
+    getOrElse(() => asOk(set) as Result<Set<T>, Set<T>>)
+  );
+}
 
-  /**
-   * Stops the poller.
-   */
-  public stop() {
-    this.isStarted = false;
-    clearTimeout(this.timeout);
-    this.timeout = undefined;
-  }
+export enum PollingErrorType {
+  WorkError,
+  RequestCapacityReached,
+}
 
-  /**
-   * Runs the work function. If the work function is currently running,
-   * this has no effect.
-   */
-  public async attemptWork() {
-    if (!this.isStarted || this.isWorking) {
-      return;
-    }
+function asPollingError<T>(err: string | Error, type: PollingErrorType, data: Option<T> = none) {
+  return asErr(new PollingError<T>(`Failed to poll for work: ${err}`, type, data));
+}
 
-    this.isWorking = true;
-
-    try {
-      await this.work();
-    } catch (err) {
-      this.logger.error(`Failed to poll for work: ${err}`);
-    } finally {
-      this.isWorking = false;
-    }
+export class PollingError<T> extends Error {
+  public readonly type: PollingErrorType;
+  public readonly data: Option<T>;
+  constructor(message: string, type: PollingErrorType, data: Option<T>) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.type = type;
+    this.data = data;
   }
 }
 
-function tryAndLogOnError(fn: Function, logger: Logger): Function {
-  return () => {
-    try {
-      fn();
-    } catch (err) {
-      logger.error(`Task Poller polling phase failed: ${err}`);
-    }
-  };
-}
+const openSleepPerf = () => {
+  performance.mark('TaskPoller.sleep');
+};
+// we only want to close after an open has been called, as we're counting the time *between* work cycles
+// so we'll ignore the first call to `closeSleepPerf` but we will run every subsequent call
+const closeSleepPerf = after(2, () => {
+  performance.mark('TaskPoller.poll');
+  performance.measure('TaskPoller.sleepDuration', 'TaskPoller.sleep', 'TaskPoller.poll');
+});

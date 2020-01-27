@@ -63,21 +63,9 @@ exports[`it renders without crashing 1`] = `
       <EuiSpacer
         size="xl"
       />
-      <SpaceCards
-        onSpaceSelect={[Function]}
-        spaces={Array []}
+      <EuiLoadingSpinner
+        size="xl"
       />
-      <EuiSpacer />
-      <EuiText
-        color="subdued"
-        textAlign="center"
-      >
-        <FormattedMessage
-          defaultMessage="No spaces match search criteria"
-          id="xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription"
-          values={Object {}}
-        />
-      </EuiText>
     </EuiPageContent>
   </EuiPageBody>
 </EuiPage>

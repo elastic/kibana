@@ -1,0 +1,17 @@
+{
+  "rule_id": "87e77fb6-b555-43be-adc5-f57c6aaf7cd0",
+  "risk_score": 50,
+  "description": "Suricata RPC Traffic on HTTP Ports",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata RPC Traffic on HTTP Ports",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610012 and (event.module:suricata and event.kind:alert)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

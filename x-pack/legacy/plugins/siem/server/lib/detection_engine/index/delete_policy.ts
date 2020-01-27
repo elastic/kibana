@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallWithRequest } from './types';
+import { CallWithRequest } from '../types';
 
 export const deletePolicy = async (
   callWithRequest: CallWithRequest<{ path: string; method: 'DELETE' }, {}, unknown>,

@@ -24,7 +24,6 @@ import moment from 'moment';
 import { InvalidLogScaleValues } from '../../errors';
 import { timeTicks } from './time_ticks';
 
-
 export class AxisScale {
   constructor(axisConfig, visConfig) {
     this.axisConfig = axisConfig;
@@ -42,7 +41,7 @@ export class AxisScale {
 
   validateUserExtents(domain) {
     const config = this.axisConfig;
-    return domain.map((val) => {
+    return domain.map(val => {
       val = parseFloat(val);
       if (isNaN(val)) throw new Error(val + ' is not a valid number');
       if (config.isPercentage() && config.isUserDefined()) return val / 100;
@@ -72,11 +71,13 @@ export class AxisScale {
     }
     opts.push(point);
 
-    return d3[extent](opts.reduce(function (opts, v) {
-      if (!_.isNumber(v)) v = +v;
-      if (!isNaN(v)) opts.push(v);
-      return opts;
-    }, []));
+    return d3[extent](
+      opts.reduce(function(opts, v) {
+        if (!_.isNumber(v)) v = +v;
+        if (!isNaN(v)) opts.push(v);
+        return opts;
+      }, [])
+    );
   }
 
   addInterval(x) {
@@ -94,13 +95,13 @@ export class AxisScale {
     if (!interval) return x;
 
     if (!ordered.date) {
-      return x += (ordered.interval * n);
+      return (x += ordered.interval * n);
     }
 
     const y = moment(x);
     const method = n > 0 ? 'add' : 'subtract';
 
-    _.times(Math.abs(n), function () {
+    _.times(Math.abs(n), function() {
       y[method](interval);
     });
 
@@ -110,25 +111,30 @@ export class AxisScale {
   getAllPoints() {
     const config = this.axisConfig;
     const data = this.visConfig.data.chartData();
-    const chartPoints = _.reduce(data, (chartPoints, chart, chartIndex) => {
-      const points = chart.series.reduce((points, seri, seriIndex) => {
-        const seriConfig = this.visConfig.get(`charts[${chartIndex}].series[${seriIndex}]`);
-        const matchingValueAxis = !!seriConfig.valueAxis && seriConfig.valueAxis === config.get('id');
-        const isFirstAxis = config.get('id') === this.visConfig.get('valueAxes[0].id');
+    const chartPoints = _.reduce(
+      data,
+      (chartPoints, chart, chartIndex) => {
+        const points = chart.series.reduce((points, seri, seriIndex) => {
+          const seriConfig = this.visConfig.get(`charts[${chartIndex}].series[${seriIndex}]`);
+          const matchingValueAxis =
+            !!seriConfig.valueAxis && seriConfig.valueAxis === config.get('id');
+          const isFirstAxis = config.get('id') === this.visConfig.get('valueAxes[0].id');
 
-        if (matchingValueAxis || (!seriConfig.valueAxis && isFirstAxis)) {
-          const axisPoints = seri.values.map(val => {
-            if (val.y0) {
-              return val.y0 + val.y;
-            }
-            return val.y;
-          });
-          return points.concat(axisPoints);
-        }
-        return points;
-      }, []);
-      return chartPoints.concat(points);
-    }, []);
+          if (matchingValueAxis || (!seriConfig.valueAxis && isFirstAxis)) {
+            const axisPoints = seri.values.map(val => {
+              if (val.y0) {
+                return val.y0 + val.y;
+              }
+              return val.y;
+            });
+            return points.concat(axisPoints);
+          }
+          return points;
+        }, []);
+        return chartPoints.concat(points);
+      },
+      []
+    );
 
     return chartPoints;
   }
@@ -222,7 +228,12 @@ export class AxisScale {
 
   canApplyNice() {
     const config = this.axisConfig;
-    return (!config.isUserDefined() && !config.isYExtents() && !config.isOrdinal() && !config.isTimeDomain());
+    return (
+      !config.isUserDefined() &&
+      !config.isYExtents() &&
+      !config.isOrdinal() &&
+      !config.isTimeDomain()
+    );
   }
 
   getScale(length) {

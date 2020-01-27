@@ -128,8 +128,8 @@ export const serializeAdvancedSettings = ({
   read_poll_timeout: readPollTimeout,
 });
 
-export const serializeFollowerIndex = (followerIndex) => ({
+export const serializeFollowerIndex = followerIndex => ({
   remote_cluster: followerIndex.remoteCluster,
   leader_index: followerIndex.leaderIndex,
-  ...serializeAdvancedSettings(followerIndex)
+  ...serializeAdvancedSettings(followerIndex),
 });

@@ -20,13 +20,14 @@
 import { InternalElasticsearchServiceSetup } from './elasticsearch';
 import { InternalPulseService } from './pulse';
 import { InternalHttpServiceSetup } from './http';
-import { InternalUiSettingsServiceSetup } from './ui_settings';
+import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
 import { ContextSetup } from './context';
 import {
   InternalSavedObjectsServiceStart,
   InternalSavedObjectsServiceSetup,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import { UuidServiceSetup } from './uuid';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -37,6 +38,7 @@ export interface InternalCoreSetup {
   pulse: InternalPulseService;
   uiSettings: InternalUiSettingsServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
+  uuid: UuidServiceSetup;
 }
 
 /**
@@ -45,4 +47,5 @@ export interface InternalCoreSetup {
 export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
   savedObjects: InternalSavedObjectsServiceStart;
+  uiSettings: InternalUiSettingsServiceStart;
 }

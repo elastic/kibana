@@ -21,14 +21,10 @@ import { Subject } from 'rxjs';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { InstructionsResponse } from '../../server/pulse';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { PulseChannel, PulseInstruction } from './channel';
+import { channelNames } from './config';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Fetcher, sendPulse } from '../../server/pulse/send_pulse';
-
-import * as defaultCollector from './collectors/default';
-import * as notificationsCollector from './collectors/notifications';
-import * as errorsCollector from './collectors/errors';
+import { Fetcher, sendPulse, sendUsageFrom } from '../../server/pulse/send_pulse';
 
 export interface PulseServiceSetup {
   getChannel: (id: string) => PulseChannel;
@@ -37,43 +33,46 @@ export interface PulseServiceSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PulseServiceStart {}
 
-const regChannels = [
-  { id: 'default', collector: defaultCollector },
-  { id: 'notifications', collector: notificationsCollector },
-  { id: 'errors', collector: errorsCollector },
-];
+const logger = {
+  ...console,
+  // eslint-disable-next-line no-console
+  fatal: (...args: any[]) => console.error(...args),
+  get: () => logger,
+};
 
 export class PulseService {
   private retriableErrors = 0;
   private readonly channels: Map<string, PulseChannel>;
-  private readonly instructions: Map<string, Subject<any>> = new Map();
+  private readonly instructions$: Map<string, Subject<any>> = new Map();
 
   constructor() {
     this.channels = new Map(
-      regChannels.map(({ id, collector }) => {
-        const instructions$ = new Subject<PulseInstruction>();
-        this.instructions.set(id, instructions$);
-        const channel = new PulseChannel({ id, instructions$ }, collector);
+      channelNames.map((id): [string, PulseChannel] => {
+        const instructions$ = new Subject<PulseInstruction[]>();
+        this.instructions$.set(id, instructions$);
+        const channel = new PulseChannel({ id, instructions$, logger });
         return [channel.id, channel];
       })
     );
   }
 
   public async setup(): Promise<PulseServiceSetup> {
-    // poll for instructions every second for this deployment
-    setInterval(() => {
-      // eslint-disable-next-line no-console
-      this.loadInstructions().catch(err => console.error(err.stack));
-    }, 10000);
-
-    // eslint-disable-next-line no-console
-    console.log('Will attempt first telemetry collection in 5 seconds...');
-    setTimeout(() => {
+    if (sendUsageFrom === 'browser') {
+      // poll for instructions every second for this deployment
       setInterval(() => {
         // eslint-disable-next-line no-console
-        this.sendTelemetry().catch(err => console.error(err.stack));
-      }, 5000);
-    }, 5000);
+        this.loadInstructions().catch(err => console.error(err.stack));
+      }, 10000);
+
+      // eslint-disable-next-line no-console
+      console.log('Will attempt first telemetry collection in 5 seconds...');
+      setTimeout(() => {
+        setInterval(() => {
+          // eslint-disable-next-line no-console
+          this.sendTelemetry().catch(err => console.error(err.stack));
+        }, 5000);
+      }, 1000);
+    }
 
     return {
       getChannel: (id: string) => {
@@ -129,7 +128,7 @@ export class PulseService {
     const responseBody: InstructionsResponse = await response.json();
 
     responseBody.channels.forEach(channel => {
-      const instructions$ = this.instructions.get(channel.id);
+      const instructions$ = this.instructions$.get(channel.id);
       if (!instructions$) {
         throw new Error(
           `Channel (${channel.id}) from service has no corresponding channel handler in client`

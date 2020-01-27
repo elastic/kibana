@@ -29,7 +29,19 @@ const selectOptionsUrlState = createSelector(
   waffleOptionsSelectors.selectCustomOptions,
   waffleOptionsSelectors.selectBoundsOverride,
   waffleOptionsSelectors.selectAutoBounds,
-  (metric, view, groupBy, nodeType, customOptions, boundsOverride, autoBounds) => ({
+  waffleOptionsSelectors.selectAccountId,
+  waffleOptionsSelectors.selectRegion,
+  (
+    metric,
+    view,
+    groupBy,
+    nodeType,
+    customOptions,
+    boundsOverride,
+    autoBounds,
+    accountId,
+    region
+  ) => ({
     metric,
     groupBy,
     nodeType,
@@ -37,6 +49,8 @@ const selectOptionsUrlState = createSelector(
     customOptions,
     boundsOverride,
     autoBounds,
+    accountId,
+    region,
   })
 );
 
@@ -49,6 +63,8 @@ export const withWaffleOptions = connect(
     customOptions: waffleOptionsSelectors.selectCustomOptions(state),
     boundsOverride: waffleOptionsSelectors.selectBoundsOverride(state),
     autoBounds: waffleOptionsSelectors.selectAutoBounds(state),
+    accountId: waffleOptionsSelectors.selectAccountId(state),
+    region: waffleOptionsSelectors.selectRegion(state),
     urlState: selectOptionsUrlState(state),
   }),
   bindPlainActionCreators({
@@ -59,6 +75,8 @@ export const withWaffleOptions = connect(
     changeCustomOptions: waffleOptionsActions.changeCustomOptions,
     changeBoundsOverride: waffleOptionsActions.changeBoundsOverride,
     changeAutoBounds: waffleOptionsActions.changeAutoBounds,
+    changeAccount: waffleOptionsActions.changeAccount,
+    changeRegion: waffleOptionsActions.changeRegion,
   })
 );
 
@@ -76,6 +94,8 @@ interface WaffleOptionsUrlState {
   customOptions?: ReturnType<typeof waffleOptionsSelectors.selectCustomOptions>;
   bounds?: ReturnType<typeof waffleOptionsSelectors.selectBoundsOverride>;
   auto?: ReturnType<typeof waffleOptionsSelectors.selectAutoBounds>;
+  accountId?: ReturnType<typeof waffleOptionsSelectors.selectAccountId>;
+  region?: ReturnType<typeof waffleOptionsSelectors.selectRegion>;
 }
 
 export const WithWaffleOptionsUrlState = () => (
@@ -89,6 +109,8 @@ export const WithWaffleOptionsUrlState = () => (
       changeCustomOptions,
       changeAutoBounds,
       changeBoundsOverride,
+      changeAccount,
+      changeRegion,
     }) => (
       <UrlStateContainer<WaffleOptionsUrlState>
         urlState={urlState}
@@ -116,6 +138,12 @@ export const WithWaffleOptionsUrlState = () => (
           if (newUrlState && newUrlState.auto) {
             changeAutoBounds(newUrlState.auto);
           }
+          if (newUrlState && newUrlState.accountId) {
+            changeAccount(newUrlState.accountId);
+          }
+          if (newUrlState && newUrlState.region) {
+            changeRegion(newUrlState.region);
+          }
         }}
         onInitialize={initialUrlState => {
           if (initialUrlState && initialUrlState.metric) {
@@ -139,6 +167,12 @@ export const WithWaffleOptionsUrlState = () => (
           if (initialUrlState && initialUrlState.auto) {
             changeAutoBounds(initialUrlState.auto);
           }
+          if (initialUrlState && initialUrlState.accountId) {
+            changeAccount(initialUrlState.accountId);
+          }
+          if (initialUrlState && initialUrlState.region) {
+            changeRegion(initialUrlState.region);
+          }
         }}
       />
     )}
@@ -155,6 +189,8 @@ const mapToUrlState = (value: any): WaffleOptionsUrlState | undefined =>
         customOptions: mapToCustomOptionsUrlState(value.customOptions),
         bounds: mapToBoundsOverideUrlState(value.boundsOverride),
         auto: mapToAutoBoundsUrlState(value.autoBounds),
+        accountId: value.accountId,
+        region: value.region,
       }
     : undefined;
 

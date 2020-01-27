@@ -17,11 +17,7 @@ import {
 import { NodeDetailStatus } from '../node_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
 
-export const AdvancedNode = ({
-  nodeSummary,
-  metrics,
-  ...props
-}) => {
+export const AdvancedNode = ({ nodeSummary, metrics, ...props }) => {
   const metricsToShow = [
     metrics.node_gc,
     metrics.node_gc_time,
@@ -51,10 +47,7 @@ export const AdvancedNode = ({
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
               <EuiFlexItem key={index}>
-                <MonitoringTimeseriesContainer
-                  series={metric}
-                  {...props}
-                />
+                <MonitoringTimeseriesContainer series={metric} {...props} />
                 <EuiSpacer />
               </EuiFlexItem>
             ))}

@@ -45,6 +45,22 @@ describe('#get', () => {
     expect(configAdapter.get('container')).toEqual({ value: 'some' });
   });
 
+  test('correctly handles csp config.', () => {
+    const configAdapter = new LegacyObjectToConfigAdapter({
+      csp: {
+        rules: ['strict'],
+      },
+    });
+
+    expect(configAdapter.get('csp')).toMatchInlineSnapshot(`
+      Object {
+        "rules": Array [
+          "strict",
+        ],
+      }
+    `);
+  });
+
   test('correctly handles silent logging config.', () => {
     const configAdapter = new LegacyObjectToConfigAdapter({
       logging: { silent: true },

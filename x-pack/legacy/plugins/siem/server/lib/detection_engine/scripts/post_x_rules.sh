@@ -32,6 +32,7 @@ do {
     \"type\": \"query\",
     \"from\": \"now-6m\",
     \"to\": \"now\",
+    \"enabled\": \"false\",
     \"query\": \"user.name: root or user.name: admin\",
     \"language\": \"kuery\"
   }" \

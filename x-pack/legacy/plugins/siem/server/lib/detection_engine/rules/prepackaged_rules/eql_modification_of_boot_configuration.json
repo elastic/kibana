@@ -1,0 +1,17 @@
+{
+  "rule_id": "b9ab2f7f-f719-4417-9599-e0252fffe2d8",
+  "risk_score": 50,
+  "description": "EQL - Modification of Boot Configuration",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Modification of Boot Configuration",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and   process.name:\"bcdedit.exe\" and    process.args:\"set\" and    process.args:(     (\"bootstatuspolicy\" and \"ignoreallfailures\") or      (\"recoveryenabled\" and \"no\")   ) ",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -14,7 +14,7 @@ export class BaseAction {
   get downstreamJson() {
     const result = {
       id: this.id,
-      type: this.type
+      type: this.type,
     };
 
     return result;
@@ -27,13 +27,13 @@ export class BaseAction {
 
   static getPropsFromDownstreamJson(json) {
     return {
-      id: json.id
+      id: json.id,
     };
   }
 
   static getPropsFromUpstreamJson(json) {
     return {
-      id: json.id
+      id: json.id,
     };
   }
 }

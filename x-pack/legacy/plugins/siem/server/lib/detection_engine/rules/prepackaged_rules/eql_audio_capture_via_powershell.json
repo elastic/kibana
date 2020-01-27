@@ -1,0 +1,17 @@
+{
+  "rule_id": "b27b9f47-0a20-4807-8377-7f899b4fbada",
+  "risk_score": 50,
+  "description": "EQL - Audio Capture via PowerShell",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Audio Capture via PowerShell",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"SoundRecorder.exe\" and process.args:\"/FILE\"",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

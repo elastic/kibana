@@ -23,19 +23,18 @@ import uiRoutes from 'ui/routes';
 import { fatalError } from 'ui/notify';
 
 uiRoutes.enable();
-uiRoutes
-  .when('/', {
-    resolve: {
-      url: function (AppState, globalState, $window) {
-        const redirectUrl = chrome.getInjected('redirectUrl');
-        try {
-          const hashedUrl = hashUrl(redirectUrl);
-          const url = chrome.addBasePath(hashedUrl);
+uiRoutes.when('/', {
+  resolve: {
+    url: function(AppState, globalState, $window) {
+      const redirectUrl = chrome.getInjected('redirectUrl');
+      try {
+        const hashedUrl = hashUrl(redirectUrl);
+        const url = chrome.addBasePath(hashedUrl);
 
-          $window.location = url;
-        } catch (e) {
-          fatalError(e);
-        }
+        $window.location = url;
+      } catch (e) {
+        fatalError(e);
       }
-    }
-  });
+    },
+  },
+});

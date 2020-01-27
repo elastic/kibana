@@ -5,7 +5,6 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Clipboard } from './clipboard';
@@ -23,7 +22,7 @@ WithCopyToClipboardContainer.displayName = 'WithCopyToClipboardContainer';
  * Renders `children` with an adjacent icon that when clicked, copies `text` to
  * the clipboard and displays a confirmation toast
  */
-export const WithCopyToClipboard = pure<{ text: string; titleSummary?: string }>(
+export const WithCopyToClipboard = React.memo<{ text: string; titleSummary?: string }>(
   ({ text, titleSummary, children }) => (
     <WithCopyToClipboardContainer>
       <>{children}</>

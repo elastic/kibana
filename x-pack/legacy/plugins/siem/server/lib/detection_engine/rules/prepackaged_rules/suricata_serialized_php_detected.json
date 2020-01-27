@@ -1,0 +1,17 @@
+{
+  "rule_id": "3baa5b65-d11e-40fb-a9b4-6b2a6a062d48",
+  "risk_score": 50,
+  "description": "Suricata Serialized PHP Detected",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Serialized PHP Detected",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610091 and (event.module:suricata and event.kind:alert)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

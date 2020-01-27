@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiIcon,
-  EuiToolTip
-} from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 /*
@@ -23,15 +19,14 @@ export function DetectorCell({ detectorDescription, numberOfRules }) {
   if (numberOfRules !== undefined && numberOfRules > 0) {
     rulesIcon = (
       <EuiToolTip
-        content={<FormattedMessage
-          id="xpack.ml.anomaliesTable.detectorCell.rulesConfiguredTooltip"
-          defaultMessage="rules have been configured for this detector"
-        />}
+        content={
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.detectorCell.rulesConfiguredTooltip"
+            defaultMessage="rules have been configured for this detector"
+          />
+        }
       >
-        <EuiIcon
-          type="controlsHorizontal"
-          className="detector-rules-icon"
-        />
+        <EuiIcon type="controlsHorizontal" className="detector-rules-icon" />
       </EuiToolTip>
     );
   }
@@ -44,5 +39,5 @@ export function DetectorCell({ detectorDescription, numberOfRules }) {
 }
 DetectorCell.propTypes = {
   detectorDescription: PropTypes.string.isRequired,
-  numberOfRules: PropTypes.number
+  numberOfRules: PropTypes.number,
 };

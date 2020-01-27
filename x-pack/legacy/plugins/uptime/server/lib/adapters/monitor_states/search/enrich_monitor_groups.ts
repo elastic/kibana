@@ -243,7 +243,7 @@ export const enrichMonitorGroups: MonitorEnricher = async (
     },
   };
 
-  const items = await queryContext.database.search(queryContext.request, params);
+  const items = await queryContext.search(params);
 
   const monitorBuckets = get(items, 'aggregations.monitors.buckets', []);
 
@@ -345,7 +345,7 @@ const getHistogramForMonitors = async (
       },
     },
   };
-  const result = await queryContext.database.search(queryContext.request, params);
+  const result = await queryContext.search(params);
 
   const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
   return buckets.reduce((map: { [key: string]: any }, item: any) => {

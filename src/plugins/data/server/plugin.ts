@@ -21,18 +21,25 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { IndexPatternsService } from './index_patterns';
 import { ISearchSetup } from './search';
 import { SearchService } from './search/search_service';
+import { AutocompleteService } from './autocomplete';
 
 export interface DataPluginSetup {
   search: ISearchSetup;
 }
+
 export class DataServerPlugin implements Plugin<DataPluginSetup> {
   private readonly searchService: SearchService;
+  private readonly autocompleteService = new AutocompleteService();
   private readonly indexPatterns = new IndexPatternsService();
+
   constructor(initializerContext: PluginInitializerContext) {
     this.searchService = new SearchService(initializerContext);
   }
+
   public setup(core: CoreSetup) {
     this.indexPatterns.setup(core);
+    this.autocompleteService.setup(core);
+
     return {
       search: this.searchService.setup(core),
     };

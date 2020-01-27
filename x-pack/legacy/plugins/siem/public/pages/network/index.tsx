@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
@@ -24,6 +24,14 @@ const ipDetailsPagePath = `${networkPagePath}/ip/:detailName`;
 
 export const NetworkContainer = React.memo<Props>(() => {
   const capabilities = useContext(MlCapabilitiesContext);
+  const capabilitiesFetched = capabilities.capabilitiesFetched;
+  const userHasMlUserPermissions = useMemo(() => hasMlUserPermissions(capabilities), [
+    capabilities,
+  ]);
+  const networkRoutePath = useMemo(
+    () => getNetworkRoutePath(networkPagePath, capabilitiesFetched, userHasMlUserPermissions),
+    [capabilitiesFetched, userHasMlUserPermissions]
+  );
 
   return (
     <GlobalTime>
@@ -31,11 +39,7 @@ export const NetworkContainer = React.memo<Props>(() => {
         <Switch>
           <Route
             strict
-            path={getNetworkRoutePath(
-              networkPagePath,
-              capabilities.capabilitiesFetched,
-              hasMlUserPermissions(capabilities)
-            )}
+            path={networkRoutePath}
             render={() => (
               <Network
                 networkPagePath={networkPagePath}
@@ -45,7 +49,7 @@ export const NetworkContainer = React.memo<Props>(() => {
                 deleteQuery={deleteQuery}
                 isInitializing={isInitializing}
                 capabilitiesFetched={capabilities.capabilitiesFetched}
-                hasMlUserPermissions={hasMlUserPermissions(capabilities)}
+                hasMlUserPermissions={userHasMlUserPermissions}
               />
             )}
           />

@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { uniq } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DefaultDraggable } from '../../draggables';
@@ -32,7 +31,7 @@ TimeIcon.displayName = 'TimeIcon';
  * - `event.start`
  * - `event.end`
  */
-export const DurationEventStartEnd = pure<{
+export const DurationEventStartEnd = React.memo<{
   contextId: string;
   eventDuration?: string[] | null;
   eventId: string;

@@ -27,7 +27,7 @@ export const createReadIndexRoute = (server: ServerFacade): Hapi.ServerRoute => 
     async handler(request: RequestFacade, headers) {
       try {
         const index = getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request);
+        const callWithRequest = callWithRequestFactory(request, server);
         const indexExists = await getIndexExists(callWithRequest, index);
         if (indexExists) {
           // head request is used for if you want to get if the index exists
@@ -42,7 +42,7 @@ export const createReadIndexRoute = (server: ServerFacade): Hapi.ServerRoute => 
           if (request.method.toLowerCase() === 'head') {
             return headers.response().code(404);
           } else {
-            return new Boom('An index for this space does not exist', { statusCode: 404 });
+            return new Boom('index for this space does not exist', { statusCode: 404 });
           }
         }
       } catch (err) {

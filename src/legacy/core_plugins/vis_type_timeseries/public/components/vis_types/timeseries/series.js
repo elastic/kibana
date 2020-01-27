@@ -37,7 +37,7 @@ import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { PANEL_TYPES } from '../../../../common/panel_types';
 
-const TimeseriesSeriesUI = injectI18n(function (props) {
+const TimeseriesSeriesUI = injectI18n(function(props) {
   const {
     panel,
     fields,
@@ -108,14 +108,20 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
       <div className="tvbSeries__body">
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'metrics'} onClick={() => props.switchTab('metrics')}>
-            <FormattedMessage id="visTypeTimeseries.timeSeries.tab.metricsLabel" defaultMessage="Metrics" />
+            <FormattedMessage
+              id="visTypeTimeseries.timeSeries.tab.metricsLabel"
+              defaultMessage="Metrics"
+            />
           </EuiTab>
           <EuiTab
             data-test-subj="seriesOptions"
             isSelected={selectedTab === 'options'}
             onClick={() => props.switchTab('options')}
           >
-            <FormattedMessage id="visTypeTimeseries.timeSeries.tab.optionsLabel" defaultMessage="Options" />
+            <FormattedMessage
+              id="visTypeTimeseries.timeSeries.tab.optionsLabel"
+              defaultMessage="Options"
+            />
           </EuiTab>
         </EuiTabs>
         {seriesBody}

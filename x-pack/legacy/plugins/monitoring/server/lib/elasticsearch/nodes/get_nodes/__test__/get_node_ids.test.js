@@ -15,39 +15,42 @@ describe('getNodeIds', () => {
             {
               key: {
                 name: 'foobar',
-                uuid: 1
-              }
+                uuid: 1,
+              },
             },
             {
               key: {
                 name: 'barfoo',
-                uuid: 2
-              }
-            }
-          ]
-        }
-      }
+                uuid: 2,
+              },
+            },
+          ],
+        },
+      },
     });
     const req = {
       payload: {
         timeRange: {
           min: 1,
-          max: 2
-        }
+          max: 2,
+        },
       },
       server: {
         plugins: {
           elasticsearch: {
             getCluster: () => ({
               callWithRequest,
-            })
-          }
-        }
-      }
+            }),
+          },
+        },
+      },
     };
     const clusterUuid = '1cb';
 
     const result = await getNodeIds(req, '.monitoring-es-*', { clusterUuid }, 10);
-    expect(result).toEqual([ { name: 'foobar', uuid: 1 }, { name: 'barfoo', uuid: 2 } ]);
+    expect(result).toEqual([
+      { name: 'foobar', uuid: 1 },
+      { name: 'barfoo', uuid: 2 },
+    ]);
   });
 });

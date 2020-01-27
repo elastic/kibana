@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { uniq } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DirectionBadge } from '../direction';
@@ -39,7 +38,7 @@ Stats.displayName = 'Stats';
  * Renders a row of draggable badges containing fields from the
  * `Network` category of fields
  */
-export const Network = pure<{
+export const Network = React.memo<{
   bytes?: string[] | null;
   communityId?: string[] | null;
   contextId: string;

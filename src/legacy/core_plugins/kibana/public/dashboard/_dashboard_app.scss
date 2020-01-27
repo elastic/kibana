@@ -6,9 +6,5 @@
 
 .dshStartScreen {
   text-align: center;
-  padding: $euiSize;
-
-  > * {
-    max-width: 36em !important;
-  }
+  padding: $euiSizeS;
 }

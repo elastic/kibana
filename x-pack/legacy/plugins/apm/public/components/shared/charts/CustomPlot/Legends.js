@@ -16,6 +16,8 @@ import {
   truncate
 } from '../../../../style/variables';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
+import { EuiIcon } from '@elastic/eui';
 
 const Container = styled.div`
   display: flex;
@@ -73,9 +75,12 @@ export default function Legends({
   noHits,
   series,
   seriesEnabledState,
-  truncateLegends
+  truncateLegends,
+  hasAnnotations,
+  showAnnotations,
+  onAnnotationsToggle
 }) {
-  if (noHits) {
+  if (noHits && !hasAnnotations) {
     return null;
   }
 
@@ -107,6 +112,30 @@ export default function Legends({
           />
         );
       })}
+      {hasAnnotations && (
+        <Legend
+          key="annotations"
+          onClick={() => {
+            if (onAnnotationsToggle) {
+              onAnnotationsToggle();
+            }
+          }}
+          text={
+            <LegendContent>
+              {i18n.translate('xpack.apm.serviceVersion', {
+                defaultMessage: 'Service version'
+              })}
+            </LegendContent>
+          }
+          indicator={() => (
+            <div style={{ marginRight: px(units.quarter) }}>
+              <EuiIcon type="tag" color={theme.euiColorSecondary} />
+            </div>
+          )}
+          disabled={!showAnnotations}
+          color={theme.euiColorSecondary}
+        />
+      )}
       <MoreSeries hiddenSeriesCount={hiddenSeriesCount} />
     </Container>
   );
@@ -118,5 +147,8 @@ Legends.propTypes = {
   noHits: PropTypes.bool.isRequired,
   series: PropTypes.array.isRequired,
   seriesEnabledState: PropTypes.array.isRequired,
-  truncateLegends: PropTypes.bool.isRequired
+  truncateLegends: PropTypes.bool.isRequired,
+  hasAnnotations: PropTypes.bool,
+  showAnnotations: PropTypes.bool,
+  onAnnotationsToggle: PropTypes.func
 };

@@ -27,7 +27,8 @@ export function takePercySnapshot(show, hide) {
 
   // add percy styles to hide/show specific elements
   const styleElement = document.createElement('style');
-  styleElement.appendChild(document.createTextNode(`
+  styleElement.appendChild(
+    document.createTextNode(`
     .hideInPercy {
       visibility: hidden;
 
@@ -43,7 +44,8 @@ export function takePercySnapshot(show, hide) {
         visibility: hidden;
       }
     }
-  `));
+  `)
+  );
   document.head.appendChild(styleElement);
 
   const add = (selectors, className) => {
@@ -83,12 +85,12 @@ export function takePercySnapshot(show, hide) {
 
   try {
     const agent = new window.PercyAgent({
-      handleAgentCommunication: false
+      handleAgentCommunication: false,
     });
 
     // cache the dom snapshot containing the images
     return agent.snapshot(document, {
-      widths: [document.documentElement.clientWidth]
+      widths: [document.documentElement.clientWidth],
     });
   } finally {
     // restore replaced canvases

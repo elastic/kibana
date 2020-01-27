@@ -32,10 +32,10 @@ export const convertSampleInput = (converter, inputs) => {
         output: converter(input),
       };
     });
-  } catch(e) {
+  } catch (e) {
     error = i18n.translate('common.ui.fieldEditor.defaultErrorMessage', {
       defaultMessage: 'An error occurred while trying to use this format configuration: {message}',
-      values: { message: e.message }
+      values: { message: e.message },
     });
   }
 
@@ -80,7 +80,7 @@ export class DefaultFormatEditor extends PureComponent {
     const { onChange, formatParams } = this.props;
     onChange({
       ...formatParams,
-      ...newParams
+      ...newParams,
     });
   };
 

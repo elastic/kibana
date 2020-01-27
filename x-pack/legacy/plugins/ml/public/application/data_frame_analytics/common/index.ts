@@ -20,6 +20,7 @@ export {
   RegressionEvaluateResponse,
   getValuesFromResponse,
   loadEvalData,
+  loadDocsCount,
   Eval,
   getPredictedFieldName,
   INDEX_STATUS,
@@ -31,6 +32,7 @@ export {
 export {
   getDefaultSelectableFields,
   getDefaultRegressionFields,
+  getDefaultClassificationFields,
   getFlattenedFields,
   sortColumns,
   sortRegressionResultsColumns,

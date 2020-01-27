@@ -1,5 +1,4 @@
 @import '@elastic/eui/src/components/header/variables';
-@import '@elastic/eui/src/components/panel/mixins';
 
 @import 'mixins';
 
@@ -15,7 +14,6 @@
     max-width: 1000px;
   }
 }
-
 
 .prfDevTool__page {
   height: 100%;

@@ -10,15 +10,17 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
 
 import { EndgameSecurityEventDetailsLine } from './endgame_security_event_details_line';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('EndgameSecurityEventDetailsLine', () => {
+  const mount = useMountAppended();
+
   test('it renders the expected text when all properties are provided and event action is admin_logon', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -48,7 +50,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when all properties are provided and event action is explicit_user_logon', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -78,7 +80,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when endgameLogonType is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -108,7 +110,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when endgameSubjectDomainName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -138,7 +140,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when endgameSubjectLogonId is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -168,7 +170,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when when endgameSubjectUserName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -198,7 +200,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when endgameTargetDomainName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -228,7 +230,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when endgameTargetLogonId is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -258,7 +260,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when endgameTargetUserName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -288,7 +290,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when eventAction is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -318,7 +320,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when eventCode is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -348,7 +350,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when hostName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -378,7 +380,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when processExecutable is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -408,7 +410,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when processName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -438,7 +440,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when processPid is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -468,7 +470,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when userDomain is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -498,7 +500,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when userName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -528,7 +530,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when winlogEventId is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -558,7 +560,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when BOTH eventCode and winlogEventId are NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"

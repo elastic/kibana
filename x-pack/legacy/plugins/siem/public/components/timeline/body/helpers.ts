@@ -6,7 +6,7 @@
 import { get, isEmpty, noop } from 'lodash/fp';
 
 import { BrowserFields } from '../../../containers/source';
-import { Ecs } from '../../../graphql/types';
+import { Ecs, TimelineItem, TimelineNonEcsData } from '../../../graphql/types';
 import { OnPinEvent, OnUnPinEvent } from '../events';
 import { ColumnHeader } from './column_headers/column_header';
 import * as i18n from './translations';
@@ -95,6 +95,34 @@ export const getColumnHeaders = (
 };
 
 /** Returns the (fixed) width of the Actions column */
-export const getActionsColumnWidth = (isEventViewer: boolean, showCheckboxes = false): number =>
+export const getActionsColumnWidth = (
+  isEventViewer: boolean,
+  showCheckboxes = false,
+  additionalActionWidth = 0
+): number =>
   (showCheckboxes ? SHOW_CHECK_BOXES_COLUMN_WIDTH : 0) +
-  (isEventViewer ? EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH : DEFAULT_ACTIONS_COLUMN_WIDTH);
+  (isEventViewer ? EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH : DEFAULT_ACTIONS_COLUMN_WIDTH) +
+  additionalActionWidth;
+
+/**
+ * Creates mapping of eventID -> fieldData for given fieldsToKeep. Used to store additional field
+ * data necessary for custom timeline actions in conjunction with selection state
+ * @param timelineData
+ * @param eventIds
+ * @param fieldsToKeep
+ */
+export const getEventIdToDataMapping = (
+  timelineData: TimelineItem[],
+  eventIds: string[],
+  fieldsToKeep: string[]
+): Record<string, TimelineNonEcsData[]> => {
+  return timelineData.reduce((acc, v) => {
+    const fvm = eventIds.includes(v._id)
+      ? { [v._id]: v.data.filter(ti => fieldsToKeep.includes(ti.field)) }
+      : {};
+    return {
+      ...acc,
+      ...fvm,
+    };
+  }, {});
+};

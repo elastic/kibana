@@ -40,19 +40,18 @@ import * as StatusCheckStates from './status_check_states';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 class InstructionSetUi extends React.Component {
-
   constructor(props) {
     super(props);
 
-    this.tabs = props.instructionVariants.map((variant) => {
+    this.tabs = props.instructionVariants.map(variant => {
       return {
         id: variant.id,
-        name: getDisplayText(variant.id)
+        name: getDisplayText(variant.id),
       };
     });
 
     this.state = {
-      isParamFormVisible: false
+      isParamFormVisible: false,
     };
 
     if (this.tabs.length > 0) {
@@ -61,10 +60,8 @@ class InstructionSetUi extends React.Component {
   }
 
   handleToggleVisibility = () => {
-    this.setState(prevState => (
-      {  isParamFormVisible: !prevState.isParamFormVisible }
-    ));
-  }
+    this.setState(prevState => ({ isParamFormVisible: !prevState.isParamFormVisible }));
+  };
 
   onSelectedTabChanged = id => {
     this.setState({
@@ -94,25 +91,24 @@ class InstructionSetUi extends React.Component {
       case StatusCheckStates.HAS_DATA:
         message = this.props.statusCheckConfig.success
           ? this.props.statusCheckConfig.success
-          : this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instructionSet.successLabel',
-            defaultMessage: 'Success' });
+          : this.props.intl.formatMessage({
+              id: 'kbn.home.tutorial.instructionSet.successLabel',
+              defaultMessage: 'Success',
+            });
         color = 'success';
         break;
       case StatusCheckStates.ERROR:
       case StatusCheckStates.NO_DATA:
         message = this.props.statusCheckConfig.error
           ? this.props.statusCheckConfig.error
-          : this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instructionSet.noDataLabel',
-            defaultMessage: 'No data found' });
+          : this.props.intl.formatMessage({
+              id: 'kbn.home.tutorial.instructionSet.noDataLabel',
+              defaultMessage: 'No data found',
+            });
         color = 'warning';
         break;
     }
-    return (
-      <EuiCallOut
-        title={message}
-        color={color}
-      />
-    );
+    return <EuiCallOut title={message} color={color} />;
   }
 
   getStepStatus(statusCheckState) {
@@ -128,12 +124,17 @@ class InstructionSetUi extends React.Component {
       case StatusCheckStates.ERROR:
         return 'danger';
       default:
-        throw new Error(this.props.intl.formatMessage({
-          id: 'kbn.home.tutorial.unexpectedStatusCheckStateErrorDescription',
-          defaultMessage: 'Unexpected status check state {statusCheckState}'
-        }, {
-          statusCheckState
-        }));
+        throw new Error(
+          this.props.intl.formatMessage(
+            {
+              id: 'kbn.home.tutorial.unexpectedStatusCheckStateErrorDescription',
+              defaultMessage: 'Unexpected status check state {statusCheckState}',
+            },
+            {
+              statusCheckState,
+            }
+          )
+        );
     }
   }
 
@@ -143,22 +144,20 @@ class InstructionSetUi extends React.Component {
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
-            <Content
-              text={statusCheckConfig.text}
-            />
+            <Content text={statusCheckConfig.text} />
           </EuiFlexItem>
 
-          <EuiFlexItem
-            grow={false}
-          >
+          <EuiFlexItem grow={false}>
             <EuiButton
               onClick={onStatusCheck}
               isLoading={statusCheckState === StatusCheckStates.FETCHING}
             >
-              {statusCheckConfig.btnLabel || <FormattedMessage
-                id="kbn.home.tutorial.instructionSet.checkStatusButtonLabel"
-                defaultMessage="Check status"
-              />}
+              {statusCheckConfig.btnLabel || (
+                <FormattedMessage
+                  id="kbn.home.tutorial.instructionSet.checkStatusButtonLabel"
+                  defaultMessage="Check status"
+                />
+              )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -170,12 +169,15 @@ class InstructionSetUi extends React.Component {
     );
 
     return {
-      title: statusCheckConfig.title || this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instructionSet.statusCheckTitle',
-        defaultMessage: 'Status Check'
-      }),
+      title:
+        statusCheckConfig.title ||
+        this.props.intl.formatMessage({
+          id: 'kbn.home.tutorial.instructionSet.statusCheckTitle',
+          defaultMessage: 'Status Check',
+        }),
       status: this.getStepStatus(statusCheckState),
       children: checkStatusStep,
-      key: 'checkStatusStep'
+      key: 'checkStatusStep',
     };
   }
 
@@ -200,7 +202,7 @@ class InstructionSetUi extends React.Component {
       return {
         title: instruction.title,
         children: step,
-        key: index
+        key: index,
       };
     });
 
@@ -208,19 +210,15 @@ class InstructionSetUi extends React.Component {
       steps.push(this.renderStatusCheck());
     }
 
-    return (
-      <EuiSteps
-        steps={steps}
-        firstStepNumber={this.props.offset}
-      />
-    );
+    return <EuiSteps steps={steps} firstStepNumber={this.props.offset} />;
   };
 
   renderHeader = () => {
     let paramsVisibilityToggle;
     if (this.props.params) {
-      const ariaLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instructionSet.toggleAriaLabel',
-        defaultMessage: 'toggle command parameters visibility'
+      const ariaLabel = this.props.intl.formatMessage({
+        id: 'kbn.home.tutorial.instructionSet.toggleAriaLabel',
+        defaultMessage: 'toggle command parameters visibility',
       });
       paramsVisibilityToggle = (
         <EuiButtonEmpty
@@ -240,26 +238,28 @@ class InstructionSetUi extends React.Component {
       <EuiFlexGroup responsive={false} wrap justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
-            <h2>
-              {this.props.title}
-            </h2>
+            <h2>{this.props.title}</h2>
           </EuiTitle>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          {paramsVisibilityToggle}
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{paramsVisibilityToggle}</EuiFlexItem>
       </EuiFlexGroup>
     );
   };
 
   renderCallOut = () => {
-    if(!this.props.callOut) {
+    if (!this.props.callOut) {
       return null;
     }
 
-    return <EuiCallOut title={this.props.callOut.title} children={this.props.callOut.message} iconType={this.props.callOut.iconType} />;
-  }
+    return (
+      <EuiCallOut
+        title={this.props.callOut.title}
+        children={this.props.callOut.message}
+        iconType={this.props.callOut.iconType}
+      />
+    );
+  };
 
   render() {
     let paramsForm;
@@ -275,21 +275,17 @@ class InstructionSetUi extends React.Component {
 
     return (
       <div>
-
         {this.renderHeader()}
 
         {this.renderCallOut()}
 
         {paramsForm}
 
-        <EuiTabs>
-          {this.renderTabs()}
-        </EuiTabs>
+        <EuiTabs>{this.renderTabs()}</EuiTabs>
 
         <EuiSpacer size="m" />
 
         {this.renderInstructions()}
-
       </div>
     );
   }
@@ -299,7 +295,7 @@ const instructionShape = PropTypes.shape({
   title: PropTypes.string,
   textPre: PropTypes.string,
   commands: PropTypes.arrayOf(PropTypes.string),
-  textPost: PropTypes.string
+  textPost: PropTypes.string,
 });
 
 const instructionVariantShape = PropTypes.shape({

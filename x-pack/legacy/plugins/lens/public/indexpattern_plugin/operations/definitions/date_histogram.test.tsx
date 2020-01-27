@@ -9,7 +9,7 @@ import { DateHistogramIndexPatternColumn } from './date_histogram';
 import { dateHistogramOperation } from '.';
 import { shallow } from 'enzyme';
 import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpServiceBase } from 'src/core/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { createMockedIndexPattern } from '../../mocks';
 import { IndexPatternPrivateState } from '../../types';
@@ -36,7 +36,7 @@ const defaultOptions = {
     fromDate: 'now-1y',
     toDate: 'now',
   },
-  http: {} as HttpServiceBase,
+  http: {} as HttpSetup,
 };
 
 describe('date_histogram', () => {

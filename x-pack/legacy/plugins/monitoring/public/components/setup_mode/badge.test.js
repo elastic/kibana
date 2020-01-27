@@ -12,56 +12,56 @@ import {
   KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,
   APM_SYSTEM_ID,
-  LOGSTASH_SYSTEM_ID
+  LOGSTASH_SYSTEM_ID,
 } from '../../../common/constants';
 
 const STATUSES = [
   {
     name: 'internal collection',
     status: {
-      isInternalCollector: true
-    }
+      isInternalCollector: true,
+    },
   },
   {
     name: 'partially migrated',
     status: {
-      isPartiallyMigrated: true
-    }
+      isPartiallyMigrated: true,
+    },
   },
   {
     name: 'metricbeat collection',
     status: {
-      isFullyMigrated: true
-    }
+      isFullyMigrated: true,
+    },
   },
   {
     name: 'net new user',
     status: {
-      isNetNewUser: true
-    }
+      isNetNewUser: true,
+    },
   },
   {
     name: 'unknown',
-    status: {}
-  }
+    status: {},
+  },
 ];
 
 const PRODUCTS = [
   {
-    name: ELASTICSEARCH_SYSTEM_ID
+    name: ELASTICSEARCH_SYSTEM_ID,
   },
   {
-    name: KIBANA_SYSTEM_ID
+    name: KIBANA_SYSTEM_ID,
   },
   {
-    name: LOGSTASH_SYSTEM_ID
+    name: LOGSTASH_SYSTEM_ID,
   },
   {
-    name: BEATS_SYSTEM_ID
+    name: BEATS_SYSTEM_ID,
   },
   {
-    name: APM_SYSTEM_ID
-  }
+    name: APM_SYSTEM_ID,
+  },
 ];
 
 describe('setupMode SetupModeBadge', () => {
@@ -74,7 +74,7 @@ describe('setupMode SetupModeBadge', () => {
             <SetupModeBadge
               setupMode={{
                 data: {},
-                meta: {}
+                meta: {},
               }}
               status={status.status}
               productName={name}
@@ -95,17 +95,17 @@ describe('setupMode SetupModeBadge', () => {
   it('should call openFlyout when clicked', () => {
     const openFlyout = jest.fn();
     const instance = {
-      id: 1
+      id: 1,
     };
     const component = shallow(
       <SetupModeBadge
         setupMode={{
           openFlyout,
           data: {},
-          meta: {}
+          meta: {},
         }}
         status={{
-          isPartiallyMigrated: true
+          isPartiallyMigrated: true,
         }}
         productName={ELASTICSEARCH_SYSTEM_ID}
         instance={instance}
@@ -124,15 +124,15 @@ describe('setupMode SetupModeBadge', () => {
           shortcutToFinishMigration,
           data: {
             totalUniquePartiallyMigratedCount: 1,
-            totalUniqueInstanceCount: 1
+            totalUniqueInstanceCount: 1,
           },
           meta: {
-            liveClusterUuid: 1
-          }
+            liveClusterUuid: 1,
+          },
         }}
         clusterUuid={1}
         status={{
-          isPartiallyMigrated: true
+          isPartiallyMigrated: true,
         }}
         productName={ELASTICSEARCH_SYSTEM_ID}
         instance={null}
@@ -148,15 +148,15 @@ describe('setupMode SetupModeBadge', () => {
         setupMode={{
           data: {
             totalUniquePartiallyMigratedCount: 1,
-            totalUniqueInstanceCount: 2
+            totalUniqueInstanceCount: 2,
           },
           meta: {
-            liveClusterUuid: 1
-          }
+            liveClusterUuid: 1,
+          },
         }}
         clusterUuid={1}
         status={{
-          isPartiallyMigrated: true
+          isPartiallyMigrated: true,
         }}
         productName={ELASTICSEARCH_SYSTEM_ID}
         instance={null}

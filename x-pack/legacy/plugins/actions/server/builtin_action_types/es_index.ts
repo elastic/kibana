@@ -60,13 +60,11 @@ async function executor(
 
   if (config.index == null && params.index == null) {
     const message = i18n.translate('xpack.actions.builtin.esIndex.indexParamRequiredErrorMessage', {
-      defaultMessage: 'index param needs to be set because not set in config for action {actionId}',
-      values: {
-        actionId,
-      },
+      defaultMessage: 'index param needs to be set because not set in config for action',
     });
     return {
       status: 'error',
+      actionId,
       message,
     };
   }
@@ -101,17 +99,15 @@ async function executor(
     result = await services.callCluster('bulk', bulkParams);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.esIndex.errorIndexingErrorMessage', {
-      defaultMessage: 'error in action "{actionId}" indexing data: {errorMessage}',
-      values: {
-        actionId,
-        errorMessage: err.message,
-      },
+      defaultMessage: 'error indexing documents',
     });
     return {
       status: 'error',
+      actionId,
       message,
+      serviceMessage: err.message,
     };
   }
 
-  return { status: 'ok', data: result };
+  return { status: 'ok', data: result, actionId };
 }

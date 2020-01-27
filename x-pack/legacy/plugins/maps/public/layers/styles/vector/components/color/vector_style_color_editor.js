@@ -13,7 +13,7 @@ import { StaticColorSelection } from './static_color_selection';
 export function VectorStyleColorEditor(props) {
   return (
     <StaticDynamicStyleRow
-      ordinalFields={props.ordinalFields}
+      fields={props.fields}
       styleProperty={props.styleProperty}
       handlePropertyChange={props.handlePropertyChange}
       swatches={props.swatches}

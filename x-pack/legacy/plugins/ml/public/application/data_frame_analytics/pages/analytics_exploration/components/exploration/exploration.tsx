@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
-
-import d3 from 'd3';
 
 import {
   EuiBadge,
@@ -18,7 +16,6 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
@@ -30,9 +27,12 @@ import {
   Query,
 } from '@elastic/eui';
 
-import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
-import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
-
+import {
+  useColorRange,
+  ColorRangeLegend,
+  COLOR_RANGE,
+  COLOR_RANGE_SCALE,
+} from '../../../../../components/color_range_legend';
 import {
   ColumnType,
   mlInMemoryTableBasicFactory,
@@ -40,8 +40,6 @@ import {
   SortingPropType,
   SORT_DIRECTION,
 } from '../../../../../components/ml_in_memory_table';
-
-import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_context';
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 import { ml } from '../../../../../services/ml_api_service';
@@ -66,16 +64,6 @@ import {
 } from '../../../analytics_management/components/analytics_list/common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { SavedSearchQuery } from '../../../../../contexts/kibana';
-
-const customColorScaleFactory = (n: number) => (t: number) => {
-  if (t < 1 / n) {
-    return 0;
-  }
-  if (t < 3 / n) {
-    return (n / 4) * (t - 1 / n);
-  }
-  return 0.5 + (t - 3 / n);
-};
 
 const FEATURE_INFLUENCE = 'feature_influence';
 
@@ -102,6 +90,16 @@ interface Props {
   jobStatus: DATA_FRAME_TASK_STATE;
 }
 
+const getFeatureCount = (jobConfig?: DataFrameAnalyticsConfig, tableItems: TableItem[] = []) => {
+  if (jobConfig === undefined || tableItems.length === 0) {
+    return 0;
+  }
+
+  return Object.keys(tableItems[0]).filter(key =>
+    key.includes(`${jobConfig.dest.results_field}.${FEATURE_INFLUENCE}.`)
+  ).length;
+};
+
 export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
 
@@ -125,12 +123,6 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
       }
     })();
   }, []);
-
-  const euiTheme = useUiChromeContext()
-    .getUiSettingsClient()
-    .get('theme:darkMode')
-    ? euiThemeDark
-    : euiThemeLight;
 
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
@@ -169,23 +161,13 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
 
   const columns: Array<ColumnType<TableItem>> = [];
 
-  if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
-    // table cell color coding takes into account:
-    // - whether the theme is dark/light
-    // - the number of analysis features
-    // based on that
-    const cellBgColorScale = d3.scale
-      .linear()
-      .domain([0, 1])
-      // typings for .range() incorrectly don't allow passing in a color extent.
-      // @ts-ignore
-      .range([d3.rgb(euiTheme.euiColorEmptyShade), d3.rgb(euiTheme.euiColorVis1)]);
-    const featureCount = Object.keys(tableItems[0]).filter(key =>
-      key.includes(`${jobConfig.dest.results_field}.${FEATURE_INFLUENCE}.`)
-    ).length;
-    const customScale = customColorScaleFactory(featureCount);
-    const cellBgColor = (n: number) => cellBgColorScale(customScale(n));
+  const cellBgColor = useColorRange(
+    COLOR_RANGE.BLUE,
+    COLOR_RANGE_SCALE.INFLUENCER,
+    getFeatureCount(jobConfig, tableItems)
+  );
 
+  if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
     columns.push(
       ...selectedFields.sort(sortColumns(tableItems[0], jobConfig.dest.results_field)).map(k => {
         const column: ColumnType<TableItem> = {
@@ -504,21 +486,34 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
       {(columns.length > 0 || searchQuery !== defaultSearchQuery) && sortField !== '' && (
-        <Fragment>
-          {tableItems.length === SEARCH_SIZE && (
-            <EuiFormRow
-              helpText={i18n.translate(
-                'xpack.ml.dataframe.analytics.exploration.documentsShownHelpText',
-                {
-                  defaultMessage: 'Showing first {searchSize} documents',
-                  values: { searchSize: SEARCH_SIZE },
-                }
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              {tableItems.length === SEARCH_SIZE && (
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate(
+                    'xpack.ml.dataframe.analytics.exploration.documentsShownHelpText',
+                    {
+                      defaultMessage: 'Showing first {searchSize} documents',
+                      values: { searchSize: SEARCH_SIZE },
+                    }
+                  )}
+                </EuiText>
               )}
-            >
-              <Fragment />
-            </EuiFormRow>
-          )}
-          <EuiSpacer />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ColorRangeLegend
+                colorRange={cellBgColor}
+                title={i18n.translate(
+                  'xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle',
+                  {
+                    defaultMessage: 'Feature influence score',
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <MlInMemoryTableBasic
             allowNeutralSort={false}
             className="mlDataFrameAnalyticsExploration"
@@ -534,7 +529,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
             search={search}
             error={tableError}
           />
-        </Fragment>
+        </>
       )}
     </EuiPanel>
   );

@@ -7,8 +7,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
-import { UICapabilities } from 'ui/capabilities';
-import { Feature } from '../../../../../../../../plugins/features/server';
+import { Capabilities } from 'src/core/public';
+import { Feature } from '../../../../../../../../plugins/features/public';
 import { Space } from '../../../../../common/model/space';
 import { getEnabledFeatures } from '../../lib/feature_utils';
 import { SectionPanel } from '../section_panel';
@@ -17,7 +17,7 @@ import { FeatureTable } from './feature_table';
 interface Props {
   space: Partial<Space>;
   features: Feature[];
-  uiCapabilities: UICapabilities;
+  capabilities: Capabilities;
   intl: InjectedIntl;
   onChange: (space: Partial<Space>) => void;
 }
@@ -130,7 +130,7 @@ export class EnabledFeatures extends Component<Props, {}> {
               defaultMessage="The feature is hidden in the UI, but is not disabled."
             />
           </p>
-          {this.props.uiCapabilities.spaces.manage && (
+          {this.props.capabilities.spaces.manage && (
             <p>
               <FormattedMessage
                 id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"

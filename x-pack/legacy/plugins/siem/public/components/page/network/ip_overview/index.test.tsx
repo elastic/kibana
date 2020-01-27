@@ -52,7 +52,7 @@ describe('IP Overview Component', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('IpOverview'))).toMatchSnapshot();
     });
   });
 });

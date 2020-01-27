@@ -31,6 +31,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -70,6 +71,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -137,10 +139,11 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                     className="euiFormControlLayoutCustomIcon"
                   >
                     <svg
-                      aria-hidden="true"
+                      aria-hidden={true}
                       className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -158,6 +161,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -205,10 +209,11 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                     className="euiFormControlLayoutCustomIcon"
                   >
                     <svg
-                      aria-hidden="true"
+                      aria-hidden={true}
                       className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -244,6 +249,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -283,6 +289,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -362,10 +369,11 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                         className="euiFormControlLayoutCustomIcon"
                       >
                         <svg
-                          aria-hidden="true"
+                          aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                           focusable="false"
                           height={16}
+                          role="img"
                           style={null}
                           viewBox="0 0 16 16"
                           width={16}
@@ -385,6 +393,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -424,6 +433,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
           style={
             Object {
               "fontSize": 0,
@@ -511,6 +521,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -550,6 +561,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -617,10 +629,11 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                   className="euiFormControlLayoutCustomIcon"
                 >
                   <svg
-                    aria-hidden="true"
+                    aria-hidden={true}
                     className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                     focusable="false"
                     height={16}
+                    role="img"
                     style={null}
                     viewBox="0 0 16 16"
                     width={16}
@@ -638,6 +651,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -685,10 +699,11 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                   className="euiFormControlLayoutCustomIcon"
                 >
                   <svg
-                    aria-hidden="true"
+                    aria-hidden={true}
                     className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                     focusable="false"
                     height={16}
+                    role="img"
                     style={null}
                     viewBox="0 0 16 16"
                     width={16}
@@ -723,6 +738,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -762,6 +778,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -841,10 +858,11 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
                       className="euiFormControlLayoutCustomIcon"
                     >
                       <svg
-                        aria-hidden="true"
+                        aria-hidden={true}
                         className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                         focusable="false"
                         height={16}
+                        role="img"
                         style={null}
                         viewBox="0 0 16 16"
                         width={16}
@@ -864,6 +882,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -903,6 +922,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
         style={
           Object {
             "fontSize": 0,
@@ -1001,6 +1021,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1040,6 +1061,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1107,10 +1129,11 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                     className="euiFormControlLayoutCustomIcon"
                   >
                     <svg
-                      aria-hidden="true"
+                      aria-hidden={true}
                       className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -1128,6 +1151,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1175,10 +1199,11 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                     className="euiFormControlLayoutCustomIcon"
                   >
                     <svg
-                      aria-hidden="true"
+                      aria-hidden={true}
                       className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -1214,6 +1239,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1253,6 +1279,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1332,10 +1359,11 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                         className="euiFormControlLayoutCustomIcon"
                       >
                         <svg
-                          aria-hidden="true"
+                          aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                           focusable="false"
                           height={16}
+                          role="img"
                           style={null}
                           viewBox="0 0 16 16"
                           width={16}
@@ -1355,6 +1383,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1394,6 +1423,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
           style={
             Object {
               "fontSize": 0,

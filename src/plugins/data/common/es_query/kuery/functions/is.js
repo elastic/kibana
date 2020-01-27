@@ -20,7 +20,7 @@
 import { get, isUndefined } from 'lodash';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
-import { getTimeZoneFromSettings } from '../../utils/get_time_zone_from_settings';
+import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 
 import * as ast from '../ast';
@@ -35,8 +35,12 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
   if (isUndefined(value)) {
     throw new Error('value is a required argument');
   }
-  const fieldNode = typeof fieldName === 'string' ? ast.fromLiteralExpression(fieldName) : literal.buildNode(fieldName);
-  const valueNode = typeof value === 'string' ? ast.fromLiteralExpression(value) : literal.buildNode(value);
+  const fieldNode =
+    typeof fieldName === 'string'
+      ? ast.fromLiteralExpression(fieldName)
+      : literal.buildNode(fieldName);
+  const valueNode =
+    typeof value === 'string' ? ast.fromLiteralExpression(value) : literal.buildNode(value);
   const isPhraseNode = literal.buildNode(isPhrase);
   return {
     arguments: [fieldNode, valueNode, isPhraseNode],
@@ -44,8 +48,14 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
 }
 
 export function toElasticsearchQuery(node, indexPattern = null, config = {}, context = {}) {
-  const { arguments: [fieldNameArg, valueArg, isPhraseArg] } = node;
-  const fullFieldNameArg = getFullFieldNameNode(fieldNameArg, indexPattern, context.nested ? context.nested.path : undefined);
+  const {
+    arguments: [fieldNameArg, valueArg, isPhraseArg],
+  } = node;
+  const fullFieldNameArg = getFullFieldNameNode(
+    fieldNameArg,
+    indexPattern,
+    context.nested ? context.nested.path : undefined
+  );
   const fieldName = ast.toElasticsearchQuery(fullFieldNameArg);
   const value = !isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
@@ -63,7 +73,7 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
         type,
         query: value,
         lenient: true,
-      }
+      },
     };
   }
 
@@ -82,8 +92,8 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
 
   const isExistsQuery = valueArg.type === 'wildcard' && value === '*';
   const isAllFieldsQuery =
-    (fullFieldNameArg.type === 'wildcard' && fieldName === '*')
-    || (fields && indexPattern && fields.length === indexPattern.fields.length);
+    (fullFieldNameArg.type === 'wildcard' && fieldName === '*') ||
+    (fields && indexPattern && fields.length === indexPattern.fields.length);
   const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
 
   if (isMatchAllQuery) {
@@ -91,23 +101,22 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
   }
 
   const queries = fields.reduce((accumulator, field) => {
-    const wrapWithNestedQuery = (query) => {
+    const wrapWithNestedQuery = query => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
       if (
-        !(fullFieldNameArg.type === 'wildcard')
-        || !get(field, 'subType.nested')
-        || context.nested
+        !(fullFieldNameArg.type === 'wildcard') ||
+        !get(field, 'subType.nested') ||
+        context.nested
       ) {
         return query;
-      }
-      else {
+      } else {
         return {
           nested: {
             path: field.subType.nested.path,
             query,
-            score_mode: 'none'
-          }
+            score_mode: 'none',
+          },
         };
       }
     };
@@ -115,59 +124,71 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
     if (field.scripted) {
       // Exists queries don't make sense for scripted fields
       if (!isExistsQuery) {
-        return [...accumulator, {
-          script: {
-            ...getPhraseScript(field, value)
-          }
-        }];
+        return [
+          ...accumulator,
+          {
+            script: {
+              ...getPhraseScript(field, value),
+            },
+          },
+        ];
       }
-    }
-    else if (isExistsQuery) {
-      return [...accumulator, wrapWithNestedQuery({
-        exists: {
-          field: field.name
-        }
-      })];
-    }
-    else if (valueArg.type === 'wildcard') {
-      return [...accumulator, wrapWithNestedQuery({
-        query_string: {
-          fields: [field.name],
-          query: wildcard.toQueryStringQuery(valueArg),
-        }
-      })];
-    }
-    /*
+    } else if (isExistsQuery) {
+      return [
+        ...accumulator,
+        wrapWithNestedQuery({
+          exists: {
+            field: field.name,
+          },
+        }),
+      ];
+    } else if (valueArg.type === 'wildcard') {
+      return [
+        ...accumulator,
+        wrapWithNestedQuery({
+          query_string: {
+            fields: [field.name],
+            query: wildcard.toQueryStringQuery(valueArg),
+          },
+        }),
+      ];
+    } else if (field.type === 'date') {
+      /*
       If we detect that it's a date field and the user wants an exact date, we need to convert the query to both >= and <= the value provided to force a range query. This is because match and match_phrase queries do not accept a timezone parameter.
       dateFormatTZ can have the value of 'Browser', in which case we guess the timezone using moment.tz.guess.
     */
-    else if (field.type === 'date') {
-      const timeZoneParam = config.dateFormatTZ ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) } : {};
-      return [...accumulator, wrapWithNestedQuery({
-        range: {
-          [field.name]: {
-            gte: value,
-            lte: value,
-            ...timeZoneParam,
+      const timeZoneParam = config.dateFormatTZ
+        ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) }
+        : {};
+      return [
+        ...accumulator,
+        wrapWithNestedQuery({
+          range: {
+            [field.name]: {
+              gte: value,
+              lte: value,
+              ...timeZoneParam,
+            },
           },
-        }
-      })];
-    }
-    else {
+        }),
+      ];
+    } else {
       const queryType = type === 'phrase' ? 'match_phrase' : 'match';
-      return [...accumulator, wrapWithNestedQuery({
-        [queryType]: {
-          [field.name]: value
-        }
-      })];
+      return [
+        ...accumulator,
+        wrapWithNestedQuery({
+          [queryType]: {
+            [field.name]: value,
+          },
+        }),
+      ];
     }
   }, []);
 
   return {
     bool: {
       should: queries,
-      minimum_should_match: 1
-    }
+      minimum_should_match: 1,
+    },
   };
 }
-

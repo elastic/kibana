@@ -31,7 +31,7 @@ describe('Host Summary Component', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('HostOverview'))).toMatchSnapshot();
     });
   });
 });

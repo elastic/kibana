@@ -157,6 +157,7 @@ test('throws an error when config is invalid', async () => {
 
   const result = await actionExecutor.execute(executeParams);
   expect(result).toEqual({
+    actionId: '1',
     status: 'error',
     retry: false,
     message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
@@ -188,6 +189,7 @@ test('throws an error when params is invalid', async () => {
 
   const result = await actionExecutor.execute(executeParams);
   expect(result).toEqual({
+    actionId: '1',
     status: 'error',
     retry: false,
     message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
@@ -199,4 +201,37 @@ test('throws an error when failing to load action through savedObjectsClient', a
   await expect(actionExecutor.execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"No access"`
   );
+});
+
+test('returns an error if actionType is not enabled', async () => {
+  const actionType = {
+    id: 'test',
+    name: 'Test',
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      actionTypeId: 'test',
+    },
+    references: [],
+  };
+  savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
+  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
+    throw new Error('not enabled for test');
+  });
+  const result = await actionExecutor.execute(executeParams);
+
+  expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledWith('test');
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "actionId": "1",
+      "message": "not enabled for test",
+      "retry": false,
+      "status": "error",
+    }
+  `);
 });

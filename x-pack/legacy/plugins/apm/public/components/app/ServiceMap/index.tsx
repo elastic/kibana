@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import React from 'react';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { Cytoscape } from './Cytoscape';
+import { useLicense } from '../../../hooks/useLicense';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 import { Controls } from './Controls';
+import { Cytoscape } from './Cytoscape';
+import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -53,8 +55,11 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   );
 
   const elements = Array.isArray(data) ? data : [];
+  const license = useLicense();
+  const isValidPlatinumLicense =
+    license?.isActive && license?.type === 'platinum';
 
-  return (
+  return isValidPlatinumLicense ? (
     <Cytoscape
       elements={elements}
       serviceName={serviceName}
@@ -62,5 +67,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     >
       <Controls />
     </Cytoscape>
+  ) : (
+    <PlatinumLicensePrompt />
   );
 }

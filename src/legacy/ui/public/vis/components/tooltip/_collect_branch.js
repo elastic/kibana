@@ -41,7 +41,7 @@ export function collectBranch(leaf) {
       field: getFieldName(item),
       bucket: item.name,
       metric: item.size,
-      item: item
+      item: item,
     });
 
     // If the item has a parent and it's also a child then continue walking

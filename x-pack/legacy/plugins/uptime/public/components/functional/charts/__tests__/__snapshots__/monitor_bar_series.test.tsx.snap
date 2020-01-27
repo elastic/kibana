@@ -5,6 +5,7 @@ exports[`MonitorBarSeries component renders a series when there are down items 1
   style={
     Object {
       "height": 50,
+      "maxWidth": "1200px",
       "width": "100%",
     }
   }

@@ -23,7 +23,6 @@ import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
 
 export default function buildRequest(config, tlConfig, scriptedFields, timeout) {
-
   const bool = { must: [] };
 
   const timeFilter = {
@@ -31,9 +30,9 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
       [config.timefield]: {
         gte: moment(tlConfig.time.from).toISOString(),
         lte: moment(tlConfig.time.to).toISOString(),
-        format: 'strict_date_optional_time'
-      }
-    }
+        format: 'strict_date_optional_time',
+      },
+    },
   };
   bool.must.push(timeFilter);
 
@@ -43,20 +42,23 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
   }
 
   const aggs = {
-    'q': {
+    q: {
       meta: { type: 'split' },
       filters: {
-        filters: _.chain(config.q).map(function (q) {
-          return [q, { query_string: { query: q } }];
-        }).zipObject().value(),
+        filters: _.chain(config.q)
+          .map(function(q) {
+            return [q, { query_string: { query: q } }];
+          })
+          .zipObject()
+          .value(),
       },
-      aggs: {}
-    }
+      aggs: {},
+    },
   };
 
   let aggCursor = aggs.q.aggs;
 
-  _.each(config.split, function (clause) {
+  _.each(config.split, function(clause) {
     clause = clause.split(':');
     if (clause[0] && clause[1]) {
       const termsAgg = buildAggBody(clause[0], scriptedFields);
@@ -64,11 +66,11 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
       aggCursor[clause[0]] = {
         meta: { type: 'split' },
         terms: termsAgg,
-        aggs: {}
+        aggs: {},
       };
       aggCursor = aggCursor[clause[0]].aggs;
     } else {
-      throw new Error ('`split` requires field:limit');
+      throw new Error('`split` requires field:limit');
     }
   });
 
@@ -79,11 +81,11 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
     ignore_throttled: !tlConfig.settings['search:includeFrozen'],
     body: {
       query: {
-        bool: bool
+        bool: bool,
       },
       aggs: aggs,
-      size: 0
-    }
+      size: 0,
+    },
   };
 
   if (timeout) {

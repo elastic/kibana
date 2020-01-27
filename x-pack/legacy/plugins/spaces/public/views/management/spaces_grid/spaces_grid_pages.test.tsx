@@ -6,14 +6,12 @@
 jest.mock('ui/kfetch', () => ({
   kfetch: () => Promise.resolve([]),
 }));
-import '../../../__mocks__/ui_capabilities';
 import '../../../__mocks__/xpack_info';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { SpaceAvatar } from '../../../components';
 import { spacesManagerMock } from '../../../lib/mocks';
 import { SpacesManager } from '../../../lib';
-import { SpacesNavState } from '../../nav_control';
 import { SpacesGridPage } from './spaces_grid_page';
 
 const spaces = [
@@ -38,11 +36,6 @@ const spaces = [
   },
 ];
 
-const spacesNavState: SpacesNavState = {
-  getActiveSpace: () => spaces[0],
-  refreshSpacesList: jest.fn(),
-};
-
 const spacesManager = spacesManagerMock.create();
 spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
 
@@ -52,8 +45,13 @@ describe('SpacesGridPage', () => {
       shallowWithIntl(
         <SpacesGridPage.WrappedComponent
           spacesManager={(spacesManager as unknown) as SpacesManager}
-          spacesNavState={spacesNavState}
           intl={null as any}
+          capabilities={{
+            navLinks: {},
+            management: {},
+            catalogue: {},
+            spaces: { manage: true },
+          }}
         />
       )
     ).toMatchSnapshot();
@@ -63,8 +61,13 @@ describe('SpacesGridPage', () => {
     const wrapper = mountWithIntl(
       <SpacesGridPage.WrappedComponent
         spacesManager={(spacesManager as unknown) as SpacesManager}
-        spacesNavState={spacesNavState}
         intl={null as any}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
       />
     );
 

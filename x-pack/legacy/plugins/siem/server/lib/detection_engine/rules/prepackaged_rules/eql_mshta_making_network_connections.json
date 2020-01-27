@@ -1,0 +1,17 @@
+{
+  "rule_id": "a4ec1382-4557-452b-89ba-e413b22ed4b8",
+  "risk_score": 50,
+  "description": "EQL - Mshta Making Network Connections",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Mshta Making Network Connections",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "  event.action:\"Network connection detected (rule: NetworkConnect)\" and process.name:\"mshta.exe\" and not process.name:\"mshta.exe\" and not parent.process.name:\"Microsoft.ConfigurationManagement.exe\"",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

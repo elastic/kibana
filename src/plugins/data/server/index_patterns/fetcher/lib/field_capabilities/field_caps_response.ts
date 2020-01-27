@@ -182,6 +182,14 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
 
       if (Object.keys(subType).length > 0) {
         field.subType = subType;
+
+        // We don't support aggregating on nested fields, trying to do so in the UI will return
+        // blank results. For now we will stop showing nested fields as an option for aggregation.
+        // Once we add support for nested fields this condition should be removed and old index
+        // patterns should be migrated.
+        if (field.subType.nested) {
+          field.aggregatable = false;
+        }
       }
     }
   });

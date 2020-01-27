@@ -15,8 +15,11 @@ import {
   FIELDS_BROWSER_CATEGORIES_COUNT,
   FIELDS_BROWSER_CONTAINER,
   FIELDS_BROWSER_FIELDS_COUNT,
+  FIELDS_BROWSER_FILTER_INPUT,
+  FIELDS_BROWSER_HOST_CATEGORIES_COUNT,
   FIELDS_BROWSER_SELECTED_CATEGORY_COUNT,
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
+  FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT,
   FIELDS_BROWSER_TITLE,
 } from '../../lib/fields_browser/selectors';
 import { logout } from '../../lib/logout';
@@ -138,9 +141,22 @@ describe('Fields Browser', () => {
 
     filterFieldsBrowser(filterInput);
 
-    cy.get(FIELDS_BROWSER_FIELDS_COUNT)
+    cy.get(FIELDS_BROWSER_FILTER_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
+      'not.have.class',
+      'euiFieldSearch-isLoading'
+    );
+
+    cy.get(FIELDS_BROWSER_HOST_CATEGORIES_COUNT)
       .invoke('text')
-      .should('eq', '2 fields');
+      .then(hostCategoriesCount => {
+        cy.get(FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT)
+          .invoke('text')
+          .then(systemCategoriesCount => {
+            cy.get(FIELDS_BROWSER_FIELDS_COUNT)
+              .invoke('text')
+              .should('eq', `${+hostCategoriesCount + +systemCategoriesCount} fields`);
+          });
+      });
   });
 
   it('selects a search results label with the expected count of categories matching the filter input', () => {

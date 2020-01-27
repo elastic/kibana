@@ -18,6 +18,11 @@
  */
 
 import { Subject } from 'rxjs';
+import { PulseCollectorConstructor } from './types';
+// import { SavedObjectsServiceSetup } from '../saved_objects';
+import { Logger } from '../logging';
+
+import { IPulseElasticsearchClient } from './client_wrappers/types';
 
 export interface PulseInstruction {
   owner: string;
@@ -25,34 +30,49 @@ export interface PulseInstruction {
   value: unknown;
 }
 
-interface ChannelConfig<I = PulseInstruction> {
+export interface ChannelConfig<I = PulseInstruction> {
   id: string;
   instructions$: Subject<I[]>;
+  logger: Logger;
+}
+
+export interface ChannelSetupContext {
+  elasticsearch: IPulseElasticsearchClient;
+  // savedObjects: SavedObjectsServiceSetup;
 }
 
 export class PulseChannel<I = PulseInstruction> {
-  public readonly getRecords: () => Promise<Record<string, any>>;
   private readonly collector: any;
-  constructor(private readonly config: ChannelConfig<I>, collector?: any) {
-    this.collector = collector || require(`${__dirname}/collectors/${this.id}`);
-    this.getRecords = this.collector.getRecords;
+  constructor(private readonly config: ChannelConfig<I>) {
+    const Collector: PulseCollectorConstructor = require(`${__dirname}/collectors/${this.id}`)
+      .Collector;
+    this.collector = new Collector(this.config.logger);
+  }
+
+  public async setup(setupContext: ChannelSetupContext) {
+    return this.collector.setup(setupContext);
+  }
+
+  public async getRecords(): Promise<Record<string, any>> {
+    return this.collector.getRecords();
   }
 
   public get id() {
     return this.config.id;
   }
 
-  public sendPulse<T = any>(payload: T) {
-    if (!this.collector.putRecord) {
-      throw Error(`this.collector.putRecord not implemented for ${this.id}.`);
-    }
-    this.collector.putRecord(payload);
-  }
-
   public clearRecords(ids: string[]) {
     if (this.collector.clearRecords) {
       this.collector.clearRecords(ids);
     }
+  }
+
+
+  public async sendPulse<T = any>(payload: T) {
+    if (!this.collector.putRecord) {
+      throw Error(`this.collector.putRecords not implemented for ${this.id}.`);
+    }
+    await this.collector.putRecord(payload);
   }
 
   public instructions$() {

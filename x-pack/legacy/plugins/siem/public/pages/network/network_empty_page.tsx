@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 import { documentationLinks } from 'ui/documentation_links';
 
@@ -15,7 +14,7 @@ import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
 
-export const NetworkEmptyPage = pure(() => (
+export const NetworkEmptyPage = React.memo(() => (
   <EmptyPage
     actionPrimaryIcon="gear"
     actionPrimaryLabel={i18n.EMPTY_ACTION_PRIMARY}

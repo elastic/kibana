@@ -15,13 +15,13 @@ export const AutoFollowPatternIndicesPreview = ({ prefix, suffix, leaderIndexPat
   const { indicesPreview } = getPreviewIndicesFromAutoFollowPattern({
     prefix,
     suffix,
-    leaderIndexPatterns
+    leaderIndexPatterns,
   });
 
   const title = i18n.translate(
     'xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewTitle',
     {
-      defaultMessage: 'Index name examples'
+      defaultMessage: 'Index name examples',
     }
   );
 
@@ -38,7 +38,9 @@ export const AutoFollowPatternIndicesPreview = ({ prefix, suffix, leaderIndexPat
       <ul>
         {indicesPreview.map(({ followPattern: { prefix, suffix, template } }, i) => (
           <li key={i} data-test-subj="indexPreview">
-            {prefix}<strong>{template}</strong>{suffix}
+            {prefix}
+            <strong>{template}</strong>
+            {suffix}
           </li>
         ))}
       </ul>

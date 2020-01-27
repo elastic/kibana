@@ -7,13 +7,10 @@
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import React, { useCallback, useState, useEffect } from 'react';
-import { FieldType } from 'ui/index_patterns';
+import React, { useCallback, useState } from 'react';
+import { IFieldType } from 'src/plugins/data/public';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
-import {
-  MetricsExplorerMetric,
-  MetricsExplorerAggregation,
-} from '../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerMetric } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { isDisplayable } from '../../utils/is_displayable';
 
@@ -21,7 +18,7 @@ interface Props {
   autoFocus?: boolean;
   options: MetricsExplorerOptions;
   onChange: (metrics: MetricsExplorerMetric[]) => void;
-  fields: FieldType[];
+  fields: IFieldType[];
 }
 
 interface SelectedOption {
@@ -31,24 +28,19 @@ interface SelectedOption {
 
 export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = false }: Props) => {
   const colors = Object.keys(MetricsExplorerColor) as MetricsExplorerColor[];
-  const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
-  const [focusOnce, setFocusState] = useState<boolean>(false);
+  const [shouldFocus, setShouldFocus] = useState(autoFocus);
 
-  useEffect(() => {
-    if (inputRef && autoFocus && !focusOnce) {
-      inputRef.focus();
-      setFocusState(true);
-    }
-  }, [inputRef]);
+  // the EuiCombobox forwards the ref to an input element
+  const autoFocusInputElement = useCallback(
+    (inputElement: HTMLInputElement | null) => {
+      if (inputElement && shouldFocus) {
+        inputElement.focus();
+        setShouldFocus(false);
+      }
+    },
+    [shouldFocus]
+  );
 
-  // I tried to use useRef originally but the EUIComboBox component's type definition
-  // would only accept an actual input element or a callback function (with the same type).
-  // This effectivly does the same thing but is compatible with EuiComboBox.
-  const handleInputRef = (ref: HTMLInputElement) => {
-    if (ref) {
-      setInputRef(ref);
-    }
-  };
   const handleChange = useCallback(
     selectedOptions => {
       onChange(
@@ -59,14 +51,14 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
         }))
       );
     },
-    [options, onChange]
+    [onChange, options.aggregation, colors]
   );
 
   const comboOptions = fields
     .filter(field => isDisplayable(field))
     .map(field => ({ label: field.name, value: field.name }));
   const selectedOptions = options.metrics
-    .filter(m => m.aggregation !== MetricsExplorerAggregation.count)
+    .filter(m => m.aggregation !== 'count')
     .map(metric => ({
       label: metric.field || '',
       value: metric.field || '',
@@ -79,14 +71,14 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
 
   return (
     <EuiComboBox
-      isDisabled={options.aggregation === MetricsExplorerAggregation.count}
+      isDisabled={options.aggregation === 'count'}
       placeholder={placeholderText}
       fullWidth
       options={comboOptions}
       selectedOptions={selectedOptions}
       onChange={handleChange}
       isClearable={true}
-      inputRef={handleInputRef}
+      inputRef={autoFocusInputElement}
     />
   );
 };

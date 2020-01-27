@@ -5,7 +5,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { pure } from 'recompose';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -59,7 +58,7 @@ type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'onUpdateColumns' | 'ti
    */
   toggleColumn: (column: ColumnHeader) => void;
 };
-export const FieldsPane = pure<Props>(
+export const FieldsPane = React.memo<Props>(
   ({
     columnHeaders,
     filteredBrowserFields,

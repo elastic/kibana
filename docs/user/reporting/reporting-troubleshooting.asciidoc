@@ -17,6 +17,7 @@ dependencies for Chromium.
 Make sure Kibana server OS has the appropriate packages installed for the distribution.
 
 If you are using CentOS/RHEL systems, install the following packages:
+
 * `ipa-gothic-fonts`
 * `xorg-x11-fonts-100dpi`
 * `xorg-x11-fonts-75dpi`
@@ -28,6 +29,7 @@ If you are using CentOS/RHEL systems, install the following packages:
 * `freetype`
 
 If you are using Ubuntu/Debian systems, install the following packages:
+
 * `fonts-liberation`
 * `libfontconfig1`
 
@@ -105,9 +107,10 @@ has its own command-line method to generate its own debug logs, which can someti
 caused by Kibana or Chromium. See more at https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/README.md#debugging-tips
 
 Using Puppeteer's debug method when launching Kibana would look like:
-> Enable verbose logging - internal DevTools protocol traffic will be logged via the debug module under the puppeteer namespace.
->     ```
->     env DEBUG="puppeteer:*" ./bin/kibana
->     ```
+```
+env DEBUG="puppeteer:*" ./bin/kibana
+```
+The internal DevTools protocol traffic will be logged via the `debug` module under the `puppeteer` namespace.
+
 
 The Puppeteer logs are very verbose and could possibly contain sensitive information. Handle the generated output with care.

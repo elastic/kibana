@@ -19,11 +19,11 @@ function escapeSpecialCharacters(string) {
 
 // See the Keyword rule in kuery.peg
 function escapeAndOr(string) {
-  return string.replace(/(\s+)(and|or)(\s+)/ig, '$1\\$2$3');
+  return string.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2$3');
 }
 
 function escapeNot(string) {
-  return string.replace(/not(\s+)/ig, '\\$&');
+  return string.replace(/not(\s+)/gi, '\\$&');
 }
 
 // See the Space rule in kuery.peg

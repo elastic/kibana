@@ -15,12 +15,12 @@ const taskManagerQuery = {
           {
             term: {
               'task.scope': scope,
-            }
-          }
-        ]
-      }
-    }
-  }
+            },
+          },
+        ],
+      },
+    },
+  },
 };
 
 export function initRoutes(server, taskTestingEvents) {
@@ -34,11 +34,14 @@ export function initRoutes(server, taskTestingEvents) {
         payload: Joi.object({
           task: Joi.object({
             taskType: Joi.string().required(),
+            schedule: Joi.object({
+              interval: Joi.string(),
+            }).optional(),
             interval: Joi.string().optional(),
             params: Joi.object().required(),
             state: Joi.object().optional(),
-            id: Joi.string().optional()
-          })
+            id: Joi.string().optional(),
+          }),
         }),
       },
     },
@@ -50,11 +53,35 @@ export function initRoutes(server, taskTestingEvents) {
           scope: [scope],
         };
 
-        const taskResult = await (taskManager.schedule(task, { request }));
+        const taskResult = await taskManager.schedule(task, { request });
 
         return taskResult;
       } catch (err) {
         return err;
+      }
+    },
+  });
+
+  server.route({
+    path: '/api/sample_tasks/run_now',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: Joi.object({
+          task: Joi.object({
+            id: Joi.string().optional(),
+          }),
+        }),
+      },
+    },
+    async handler(request) {
+      const {
+        task: { id },
+      } = request.payload;
+      try {
+        return await taskManager.runNow(id);
+      } catch (err) {
+        return { id, error: `${err}` };
       }
     },
   });
@@ -67,11 +94,10 @@ export function initRoutes(server, taskTestingEvents) {
         payload: Joi.object({
           task: Joi.object({
             taskType: Joi.string().required(),
-            interval: Joi.string().optional(),
             params: Joi.object().required(),
             state: Joi.object().optional(),
-            id: Joi.string().optional()
-          })
+            id: Joi.string().optional(),
+          }),
         }),
       },
     },
@@ -83,7 +109,7 @@ export function initRoutes(server, taskTestingEvents) {
           scope: [scope],
         };
 
-        const taskResult = await (taskManager.ensureScheduled(task, { request }));
+        const taskResult = await taskManager.ensureScheduled(task, { request });
 
         return taskResult;
       } catch (err) {
@@ -98,14 +124,17 @@ export function initRoutes(server, taskTestingEvents) {
     config: {
       validate: {
         payload: Joi.object({
-          event: Joi.string().required()
+          event: Joi.string().required(),
+          data: Joi.object()
+            .optional()
+            .default({}),
         }),
       },
     },
     async handler(request) {
       try {
-        const { event } = request.payload;
-        taskTestingEvents.emit(event);
+        const { event, data } = request.payload;
+        taskTestingEvents.emit(event, data);
         return { event };
       } catch (err) {
         return err;
@@ -124,7 +153,7 @@ export function initRoutes(server, taskTestingEvents) {
       } catch (err) {
         return err;
       }
-    }
+    },
   });
 
   server.route({
@@ -135,7 +164,7 @@ export function initRoutes(server, taskTestingEvents) {
         const { docs: tasks } = await taskManager.fetch({
           query: taskManagerQuery,
         });
-        return Promise.all(tasks.map((task) => taskManager.remove(task.id)));
+        return Promise.all(tasks.map(task => taskManager.remove(task.id)));
       } catch (err) {
         return err;
       }

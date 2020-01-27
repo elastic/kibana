@@ -29,7 +29,7 @@ const defaults = {
   interpolate: 'linear',
   lineWidth: 2,
   color: undefined,
-  fillColor: undefined
+  fillColor: undefined,
 };
 /**
  * Line Chart Visualization
@@ -59,25 +59,23 @@ export class LineChart extends PointSeries {
     const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
     const lineWidth = this.seriesConfig.lineWidth;
 
-    const radii =  this.baseChart.radii;
+    const radii = this.baseChart.radii;
 
-    const radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this.seriesConfig.radiusRatio, 2);
+    const radiusStep =
+      (radii.max - radii.min || radii.max * 100) / Math.pow(this.seriesConfig.radiusRatio, 2);
 
-    const layer = svg.append('g')
+    const layer = svg
+      .append('g')
       .attr('class', 'points line')
       .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
-    const circles = layer
-      .selectAll('circle')
-      .data(function appendData() {
-        return data.values.filter(function (d) {
-          return !_.isNull(d.y) && (d.y || !d.y0);
-        });
+    const circles = layer.selectAll('circle').data(function appendData() {
+      return data.values.filter(function(d) {
+        return !_.isNull(d.y) && (d.y || !d.y0);
       });
+    });
 
-    circles
-      .exit()
-      .remove();
+    circles.exit().remove();
 
     function cx(d) {
       if (ordered && ordered.date) {
@@ -99,7 +97,7 @@ export class LineChart extends PointSeries {
     function colorCircle() {
       const parent = d3.select(this).node().parentNode;
       const lengthOfParent = d3.select(parent).data()[0].length;
-      const isVisible = (lengthOfParent === 1);
+      const isVisible = lengthOfParent === 1;
 
       // If only 1 point exists, show circle
       if (!showCircles && !isVisible) return 'none';
@@ -113,7 +111,9 @@ export class LineChart extends PointSeries {
         const circleRadius = (d.z - radii.min) / radiusStep;
         const baseMagicNumber = 2;
 
-        const base = circleRadius ? Math.sqrt(circleRadius + baseMagicNumber) + lineWidth : lineWidth;
+        const base = circleRadius
+          ? Math.sqrt(circleRadius + baseMagicNumber) + lineWidth
+          : lineWidth;
         return _.min([base, width, height]) + (modifier || 0);
       };
     }
@@ -122,7 +122,7 @@ export class LineChart extends PointSeries {
       .enter()
       .append('circle')
       .attr('r', getCircleRadiusFn())
-      .attr('fill-opacity', (this.seriesConfig.drawLinesBetweenPoints ? 1 : 0.7))
+      .attr('fill-opacity', this.seriesConfig.drawLinesBetweenPoints ? 1 : 0.7)
       .attr('cx', isHorizontal ? cx : cy)
       .attr('cy', isHorizontal ? cy : cx)
       .attr('class', 'circle-decoration')
@@ -165,7 +165,8 @@ export class LineChart extends PointSeries {
     const interpolate = this.seriesConfig.interpolate;
     const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
 
-    const line = svg.append('g')
+    const line = svg
+      .append('g')
       .attr('class', 'pathgroup lines')
       .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
@@ -182,11 +183,13 @@ export class LineChart extends PointSeries {
       return yScale(y0 + y);
     }
 
-    line.append('path')
+    line
+      .append('path')
       .attr('data-label', data.label)
       .attr('d', () => {
-        const d3Line = d3.svg.line()
-          .defined(function (d) {
+        const d3Line = d3.svg
+          .line()
+          .defined(function(d) {
             return !_.isNull(d.y);
           })
           .interpolate(interpolate)
@@ -212,9 +215,8 @@ export class LineChart extends PointSeries {
   draw() {
     const self = this;
 
-    return function (selection) {
-      selection.each(function () {
-
+    return function(selection) {
+      selection.each(function() {
         const svg = self.chartEl.append('g');
         svg.data([self.chartData]);
 
@@ -229,7 +231,7 @@ export class LineChart extends PointSeries {
         }
 
         self.events.emit('rendered', {
-          chart: self.chartData
+          chart: self.chartData,
         });
 
         return svg;

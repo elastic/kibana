@@ -6,13 +6,9 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 export function LayerErrors({ layer }) {
-
   if (!layer.hasErrors()) {
     return null;
   }
@@ -21,17 +17,13 @@ export function LayerErrors({ layer }) {
     <Fragment>
       <EuiCallOut
         color="warning"
-        title={
-          i18n.translate('xpack.maps.layerPanel.settingsPanel.unableToLoadTitle', {
-            defaultMessage: 'Unable to load layer'
-          })
-        }
+        title={i18n.translate('xpack.maps.layerPanel.settingsPanel.unableToLoadTitle', {
+          defaultMessage: 'Unable to load layer',
+        })}
       >
-        <p data-test-subj="layerErrorMessage">
-          {layer.getErrors()}
-        </p>
+        <p data-test-subj="layerErrorMessage">{layer.getErrors()}</p>
       </EuiCallOut>
-      <EuiSpacer size="m"/>
+      <EuiSpacer size="m" />
     </Fragment>
   );
 }

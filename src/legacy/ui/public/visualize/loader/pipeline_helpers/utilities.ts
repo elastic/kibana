@@ -23,13 +23,11 @@ import { AggConfig, Vis } from 'ui/vis';
 import { npStart } from 'ui/new_platform';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 
-import { IFieldFormatId, FieldFormat } from '../../../../../../plugins/data/public';
+import { IFieldFormatId, FieldFormat, ContentType } from '../../../../../../plugins/data/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
-import { dateRange } from '../../../utils/date_range';
-import { ipRange } from '../../../utils/ip_range';
-import { DateRangeKey } from '../../../agg_types/buckets/date_range';
-import { IpRangeKey } from '../../../agg_types/buckets/ip_range';
+import { DateRangeKey, convertDateRangeToString } from '../../../agg_types/buckets/date_range';
+import { IpRangeKey, convertIPRangeToString } from '../../../agg_types/buckets/ip_range';
 
 interface TermsFieldFormatParams {
   otherBucketLabel: string;
@@ -120,53 +118,34 @@ export const getFormat: FormatFactory = mapping => {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
     const DateRangeFormat = FieldFormat.from((range: DateRangeKey) => {
       const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
-      return dateRange.toString(range, format.convert.bind(format));
+      return convertDateRangeToString(range, format.convert.bind(format));
     });
     return new DateRangeFormat();
   } else if (id === 'ip_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
     const IpRangeFormat = FieldFormat.from((range: IpRangeKey) => {
       const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
-      return ipRange.toString(range, format.convert.bind(format));
+      return convertIPRangeToString(range, format.convert.bind(format));
     });
     return new IpRangeFormat();
   } else if (isTermsFieldFormat(mapping) && mapping.params) {
-    const params = mapping.params;
+    const { params } = mapping;
+    const convert = (val: string, type: ContentType) => {
+      const format = getFieldFormat(params.id, mapping.params);
+
+      if (val === '__other__') {
+        return params.otherBucketLabel;
+      }
+      if (val === '__missing__') {
+        return params.missingBucketLabel;
+      }
+
+      return format.convert(val, type);
+    };
+
     return {
-      getConverterFor: (type: string) => {
-        const format = getFieldFormat(params.id, mapping.params);
-        return (val: string) => {
-          if (val === '__other__') {
-            return params.otherBucketLabel;
-          }
-          if (val === '__missing__') {
-            return params.missingBucketLabel;
-          }
-          const parsedUrl = {
-            origin: window.location.origin,
-            pathname: window.location.pathname,
-            basePath: npStart.core.http.basePath,
-          };
-          // @ts-ignore
-          return format.convert(val, undefined, undefined, parsedUrl);
-        };
-      },
-      convert: (val: string, type: string) => {
-        const format = getFieldFormat(params.id, mapping.params);
-        if (val === '__other__') {
-          return params.otherBucketLabel;
-        }
-        if (val === '__missing__') {
-          return params.missingBucketLabel;
-        }
-        const parsedUrl = {
-          origin: window.location.origin,
-          pathname: window.location.pathname,
-          basePath: npStart.core.http.basePath,
-        };
-        // @ts-ignore
-        return format.convert(val, type, undefined, parsedUrl);
-      },
+      convert,
+      getConverterFor: (type: ContentType) => (val: string) => convert(val, type),
     } as FieldFormat;
   } else {
     return getFieldFormat(id, mapping.params);

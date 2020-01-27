@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`formatted_date PreferenceFormattedDate rendering renders correctly against snapshot 1`] = `
-<Component
+<PreferenceFormattedDate
   value={2019-02-25T22:27:05.000Z}
-/>
+>
+  2019-02-25T22:27:05.000Z
+</PreferenceFormattedDate>
 `;

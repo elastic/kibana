@@ -7,7 +7,7 @@
 import { monitorStatusBarQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 import { expectFixtureEql } from './helpers/expect_fixture_eql';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   describe('monitorStatusBar query', () => {
     before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
     after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
@@ -32,7 +32,9 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
 
-      expectFixtureEql(responseData, 'monitor_status_all', res => res.forEach(i => delete i.millisFromNow));
+      expectFixtureEql(responseData, 'monitor_status_all', res =>
+        res.forEach(i => delete i.millisFromNow)
+      );
     });
 
     it('returns the status for only the given monitor', async () => {
@@ -49,7 +51,6 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
-
 
       expectFixtureEql(res.body.data.monitorStatus, 'monitor_status_by_id');
     });

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import moment from 'moment';
 
@@ -12,7 +11,6 @@ const SIZE = 1000;
 const LEVEL = { system_info: -1, info: 0, warning: 1, error: 2 };
 
 export function jobAuditMessagesProvider(callWithRequest) {
-
   // search for audit messages,
   // jobId is optional. without it, all jobs will be listed.
   // from is optional and should be a string formatted in ES time units. e.g. 12h, 1d, 7d
@@ -33,9 +31,9 @@ export function jobAuditMessagesProvider(callWithRequest) {
         range: {
           timestamp: {
             gte,
-            lte: 'now'
-          }
-        }
+            lte: 'now',
+          },
+        },
       };
     }
 
@@ -46,19 +44,19 @@ export function jobAuditMessagesProvider(callWithRequest) {
             bool: {
               must_not: {
                 term: {
-                  level: 'activity'
-                }
+                  level: 'activity',
+                },
               },
               must: {
                 term: {
-                  job_type: 'anomaly_detector'
-                }
-              }
-            }
+                  job_type: 'anomaly_detector',
+                },
+              },
+            },
           },
-          timeFilter
-        ]
-      }
+          timeFilter,
+        ],
+      },
     };
 
     // if no jobId specified, load all of the messages
@@ -68,16 +66,16 @@ export function jobAuditMessagesProvider(callWithRequest) {
           should: [
             {
               term: {
-                job_id: '' // catch system messages
-              }
+                job_id: '', // catch system messages
+              },
             },
             {
               term: {
-                job_id: jobId // messages for specified jobId
-              }
-            }
-          ]
-        }
+                job_id: jobId, // messages for specified jobId
+              },
+            },
+          ],
+        },
       });
     }
 
@@ -87,14 +85,10 @@ export function jobAuditMessagesProvider(callWithRequest) {
         ignore_unavailable: true,
         rest_total_hits_as_int: true,
         size: SIZE,
-        body:
-        {
-          sort: [
-            { timestamp: { order: 'asc' } },
-            { job_id: { order: 'asc' } }
-          ],
-          query
-        }
+        body: {
+          sort: [{ timestamp: { order: 'desc' } }, { job_id: { order: 'asc' } }],
+          query,
+        },
       });
 
       let messages = [];
@@ -121,12 +115,12 @@ export function jobAuditMessagesProvider(callWithRequest) {
             {
               range: {
                 timestamp: {
-                  gte: 'now-1d'
-                }
-              }
-            }
-          ]
-        }
+                  gte: 'now-1d',
+                },
+              },
+            },
+          ],
+        },
       };
 
       // If the jobIds arg is supplied, add a query filter
@@ -134,8 +128,8 @@ export function jobAuditMessagesProvider(callWithRequest) {
       if (Array.isArray(jobIds) && jobIds.length > 0) {
         query.bool.filter.push({
           terms: {
-            job_id: jobIds
-          }
+            job_id: jobIds,
+          },
         });
         levelsPerJobAggSize = jobIds.length;
       }
@@ -151,7 +145,7 @@ export function jobAuditMessagesProvider(callWithRequest) {
             levelsPerJob: {
               terms: {
                 field: 'job_id',
-                size: levelsPerJobAggSize
+                size: levelsPerJobAggSize,
               },
               aggs: {
                 levels: {
@@ -164,51 +158,55 @@ export function jobAuditMessagesProvider(callWithRequest) {
                         field: 'message.raw',
                         size: 1,
                         order: {
-                          latestMessage: 'desc'
-                        }
+                          latestMessage: 'desc',
+                        },
                       },
                       aggs: {
                         latestMessage: {
                           max: {
-                            field: 'timestamp'
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+                            field: 'timestamp',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       });
 
       let messagesPerJob = [];
       const jobMessages = [];
-      if (resp.hits.total !== 0 &&
+      if (
+        resp.hits.total !== 0 &&
         resp.aggregations &&
         resp.aggregations.levelsPerJob &&
         resp.aggregations.levelsPerJob.buckets &&
-        resp.aggregations.levelsPerJob.buckets.length) {
+        resp.aggregations.levelsPerJob.buckets.length
+      ) {
         messagesPerJob = resp.aggregations.levelsPerJob.buckets;
       }
 
-      messagesPerJob.forEach((job) => {
+      messagesPerJob.forEach(job => {
         // ignore system messages (id==='')
-        if (job.key !== '' &&
-          job.levels && job.levels.buckets && job.levels.buckets.length) {
-
+        if (job.key !== '' && job.levels && job.levels.buckets && job.levels.buckets.length) {
           let highestLevel = 0;
           let highestLevelText = '';
           let msgTime = 0;
 
-          job.levels.buckets.forEach((level) => {
+          job.levels.buckets.forEach(level => {
             const label = level.key;
             // note the highest message level
             if (LEVEL[label] > highestLevel) {
               highestLevel = LEVEL[label];
-              if (level.latestMessage && level.latestMessage.buckets && level.latestMessage.buckets.length) {
-                level.latestMessage.buckets.forEach((msg) => {
+              if (
+                level.latestMessage &&
+                level.latestMessage.buckets &&
+                level.latestMessage.buckets.length
+              ) {
+                level.latestMessage.buckets.forEach(msg => {
                   // there should only be one result here.
                   highestLevelText = msg.key;
 
@@ -219,7 +217,6 @@ export function jobAuditMessagesProvider(callWithRequest) {
                     const time = moment(msg.latestMessage.value_as_string);
                     msgTime = time.valueOf();
                   }
-
                 });
               }
             }
@@ -230,7 +227,7 @@ export function jobAuditMessagesProvider(callWithRequest) {
               job_id: job.key,
               highestLevelText,
               highestLevel: levelToText(highestLevel),
-              msgTime
+              msgTime,
             });
           }
         }
@@ -247,6 +244,6 @@ export function jobAuditMessagesProvider(callWithRequest) {
 
   return {
     getJobAuditMessages,
-    getAuditMessagesSummary
+    getAuditMessagesSummary,
   };
 }

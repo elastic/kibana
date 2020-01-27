@@ -9,7 +9,7 @@ Define an interceptor to be executed if a response interceptor throws an error o
 <b>Signature:</b>
 
 ```typescript
-responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
+responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
 ```
 
 ## Parameters
@@ -21,5 +21,5 @@ responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptC
 
 <b>Returns:</b>
 
-`Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void`
+`Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void`
 

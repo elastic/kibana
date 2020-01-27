@@ -13,8 +13,8 @@ export const getStandaloneClusterDefinition = () => {
     cluster_stats: {
       nodes: {
         jvm: {},
-        count: {}
-      }
-    }
+        count: {},
+      },
+    },
   };
 };

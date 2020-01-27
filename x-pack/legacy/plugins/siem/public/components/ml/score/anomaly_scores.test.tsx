@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
@@ -13,6 +13,7 @@ import { mockAnomalies } from '../mock';
 import { TestProviders } from '../../../mock/test_providers';
 import { getEmptyValue } from '../../empty_value';
 import { Anomalies } from '../types';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 const endDate: number = new Date('3000-01-01T00:00:00.000Z').valueOf();
 const narrowDateRange = jest.fn();
@@ -21,6 +22,7 @@ jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
 describe('anomaly_scores', () => {
   let anomalies: Anomalies = cloneDeep(mockAnomalies);
+  const mount = useMountAppended();
 
   beforeEach(() => {
     anomalies = cloneDeep(mockAnomalies);

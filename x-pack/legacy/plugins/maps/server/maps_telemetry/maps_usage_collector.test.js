@@ -5,11 +5,7 @@
  */
 
 import sinon from 'sinon';
-import {
-  getMockCallWithInternal,
-  getMockKbnServer,
-  getMockTaskFetch,
-} from '../test_utils';
+import { getMockCallWithInternal, getMockKbnServer, getMockTaskFetch } from '../test_utils';
 import { buildCollectorObj } from './maps_usage_collector';
 
 describe('buildCollectorObj#fetch', () => {
@@ -40,9 +36,7 @@ describe('buildCollectorObj#fetch', () => {
     const { type, fetch } = buildCollectorObj(mockKbnServer);
     expect(type).toBe('maps');
     const fetchResult = await fetch();
-    expect(fetchResult).toEqual(
-      { wombat_sightings: { total: 712, max: 84, min: 7, avg: 63 } },
-    );
+    expect(fetchResult).toEqual({ wombat_sightings: { total: 712, max: 84, min: 7, avg: 63 } });
   });
 
   describe('Error handling', () => {

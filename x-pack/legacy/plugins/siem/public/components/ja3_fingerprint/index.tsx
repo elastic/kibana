@@ -5,7 +5,6 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DraggableBadge } from '../draggables';
@@ -27,7 +26,7 @@ Ja3FingerprintLabel.displayName = 'Ja3FingerprintLabel';
  * using TLS traffic to be identified, which is possible because SSL
  * negotiations happen in the clear
  */
-export const Ja3Fingerprint = pure<{
+export const Ja3Fingerprint = React.memo<{
   eventId: string;
   contextId: string;
   fieldName: string;

@@ -22,7 +22,7 @@ import { noop } from 'lodash';
 import { MetricAggParamEditor } from '../../../vis/editors/default/controls/metric_agg';
 import { SubAggParamEditor } from '../../../vis/editors/default/controls/sub_agg';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
-import { IMetricAggConfig } from '../metric_agg_type';
+import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 
 // @ts-ignore
@@ -74,7 +74,7 @@ export const parentPipelineAggHelper = {
         name: 'customMetric',
         editorComponent: SubAggParamEditor,
         type: 'agg',
-        makeAgg(termsAgg: IMetricAggConfig, state: any) {
+        makeAgg(termsAgg, state: any) {
           state = state || { type: 'count' };
           state.schema = metricAggSchema;
 
@@ -93,7 +93,7 @@ export const parentPipelineAggHelper = {
         name: 'buckets_path',
         write: noop,
       },
-    ];
+    ] as Array<MetricAggParam<IMetricAggConfig>>;
   },
 
   getFormat(agg: IMetricAggConfig) {

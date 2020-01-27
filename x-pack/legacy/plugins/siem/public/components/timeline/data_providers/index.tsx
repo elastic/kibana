@@ -6,7 +6,6 @@
 
 import { rgba } from 'polished';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
@@ -91,7 +90,7 @@ const getDroppableId = (id: string): string => `${droppableTimelineProvidersPref
  * the user to drop anything with a facet count into
  * the data pro section.
  */
-export const DataProviders = pure<Props>(
+export const DataProviders = React.memo<Props>(
   ({
     browserFields,
     id,

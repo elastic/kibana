@@ -56,6 +56,6 @@ describe('Data Frame Analytics: <CreateAnalyticsForm />', () => {
     expect(options.at(2).props().value).toBe('regression');
 
     const row2 = euiFormRows.at(1);
-    expect(row2.find('p').text()).toBe('Enable advanced editor');
+    expect(row2.find('EuiSwitch').text()).toBe('Enable advanced editor');
   });
 });

@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import loadFunctions from '../load_functions.js';
-const fitFunctions  = loadFunctions('fit_functions');
+const fitFunctions = loadFunctions('fit_functions');
 
 export default class TimelionFunction {
   constructor(name, config) {
@@ -31,15 +31,19 @@ export default class TimelionFunction {
     this.extended = config.extended || false;
 
     // WTF is this? How could you not have a fn? Wtf would the thing be used for?
-    const originalFunction = config.fn || function (input) { return input; };
+    const originalFunction =
+      config.fn ||
+      function(input) {
+        return input;
+      };
 
     // Currently only re-fits the series.
     this.originalFn = originalFunction;
 
-    this.fn = function (args, tlConfig) {
+    this.fn = function(args, tlConfig) {
       const config = _.clone(tlConfig);
-      return Promise.resolve(originalFunction(args, config)).then(function (seriesList) {
-        seriesList.list = _.map(seriesList.list, function (series) {
+      return Promise.resolve(originalFunction(args, config)).then(function(seriesList) {
+        seriesList.list = _.map(seriesList.list, function(series) {
           const target = tlConfig.getTargetSeries();
 
           // Don't fit if the series are already the same

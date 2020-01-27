@@ -27,9 +27,7 @@ import { ContainerTooSmall } from '../errors';
  * @constructor
  */
 export class ErrorHandler {
-  constructor() {
-
-  }
+  constructor() {}
 
   /**
    * Validates the height and width are > 0

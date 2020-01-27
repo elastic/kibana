@@ -1,0 +1,17 @@
+{
+  "rule_id": "dc9c1f74-dac3-48e3-b47f-eb79db358f57",
+  "risk_score": 50,
+  "description": "EQL - Volume Shadow Copy Deletion via WMIC",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Volume Shadow Copy Deletion via WMIC",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "  event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"wmic.exe\" and process.args:(\"shadowcopy\" and \"delete\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

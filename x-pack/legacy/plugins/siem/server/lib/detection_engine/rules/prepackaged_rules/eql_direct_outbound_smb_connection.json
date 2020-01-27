@@ -1,0 +1,17 @@
+{
+  "rule_id": "c82c7d8f-fb9e-4874-a4bd-fd9e3f9becf1",
+  "risk_score": 50,
+  "description": "EQL - Direct Outbound SMB Connection",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Direct Outbound SMB Connection",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": " event.action:\"Network connection detected (rule: NetworkConnect)\" and destination.port:445 and   not process.pid:4 and not destination.ip:(\"127.0.0.1\" or \"::1\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

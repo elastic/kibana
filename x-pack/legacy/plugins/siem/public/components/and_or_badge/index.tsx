@@ -6,7 +6,6 @@
 
 import { EuiBadge } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
@@ -39,7 +38,7 @@ export type AndOr = 'and' | 'or';
 
 /** Displays AND / OR in a round badge */
 // Ref: https://github.com/elastic/eui/issues/1655
-export const AndOrBadge = pure<{ type: AndOr }>(({ type }) => {
+export const AndOrBadge = React.memo<{ type: AndOr }>(({ type }) => {
   return (
     <RoundedBadge data-test-subj="and-or-badge" color="hollow">
       {type === 'and' ? i18n.AND : i18n.OR}

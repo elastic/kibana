@@ -1,0 +1,17 @@
+{
+  "rule_id": "70f9bd9f-accc-4da8-8674-38992096ddba",
+  "risk_score": 50,
+  "description": "Suricata non-HTTP Traffic on TCP Port 80",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata non-HTTP Traffic on TCP Port 80",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610002 and (event.module:suricata and event.kind:alert) and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

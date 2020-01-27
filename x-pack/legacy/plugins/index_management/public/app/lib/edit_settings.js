@@ -28,5 +28,5 @@ export const settingsToDisplay = [
   'index.priority',
   'index.query.default_field',
   'index.refresh_interval',
-  'index.write.wait_for_active_shards'
+  'index.write.wait_for_active_shards',
 ];

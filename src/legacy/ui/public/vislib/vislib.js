@@ -41,6 +41,6 @@ export function VislibProvider(Private, $rootScope) {
 
   return {
     version: '0.0.0',
-    Vis: Private(VislibVisProvider)
+    Vis: Private(VislibVisProvider),
   };
 }

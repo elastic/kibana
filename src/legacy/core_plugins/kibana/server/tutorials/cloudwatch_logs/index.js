@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/functionbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/functionbeat_instructions';
 
 export function cloudwatchLogsSpecProvider(context) {
   return {
@@ -32,7 +36,8 @@ export function cloudwatchLogsSpecProvider(context) {
       defaultMessage: 'Collect Cloudwatch logs with Functionbeat.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.cloudwatchLogs.longDescription', {
-      defaultMessage: 'Collect Cloudwatch logs by deploying Functionbeat to run as \
+      defaultMessage:
+        'Collect Cloudwatch logs by deploying Functionbeat to run as \
         an AWS Lambda function. \
         [Learn more]({learnMoreLink}).',
       values: {
@@ -45,13 +50,13 @@ export function cloudwatchLogsSpecProvider(context) {
         // TODO
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.functionbeat}/exported-fields.html'
-      }
+        documentationUrl: '{config.docs.beats.functionbeat}/exported-fields.html',
+      },
     },
     completionTimeMinutes: 10,
     //previewImagePath: '/plugins/kibana/home/tutorial_resources/uptime_monitors/screenshot.png',
     onPrem: onPremInstructions(null, null, null, context),
     elasticCloud: cloudInstructions(),
-    onPremElasticCloud: onPremCloudInstructions()
+    onPremElasticCloud: onPremCloudInstructions(),
   };
 }

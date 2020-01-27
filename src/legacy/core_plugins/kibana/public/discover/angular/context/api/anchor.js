@@ -21,11 +21,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 export function fetchAnchorProvider(indexPatterns, searchSource) {
-  return async function fetchAnchor(
-    indexPatternId,
-    anchorId,
-    sort
-  ) {
+  return async function fetchAnchor(indexPatternId, anchorId, sort) {
     const indexPattern = await indexPatterns.get(indexPatternId);
     searchSource
       .setParent(undefined)
@@ -49,9 +45,11 @@ export function fetchAnchorProvider(indexPatterns, searchSource) {
     const response = await searchSource.fetch();
 
     if (_.get(response, ['hits', 'total'], 0) < 1) {
-      throw new Error(i18n.translate('kbn.context.failedToLoadAnchorDocumentErrorDescription', {
-        defaultMessage: 'Failed to load anchor document.'
-      }));
+      throw new Error(
+        i18n.translate('kbn.context.failedToLoadAnchorDocumentErrorDescription', {
+          defaultMessage: 'Failed to load anchor document.',
+        })
+      );
     }
 
     return {

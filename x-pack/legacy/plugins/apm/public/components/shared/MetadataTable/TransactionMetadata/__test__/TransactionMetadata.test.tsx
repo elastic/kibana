@@ -11,11 +11,11 @@ import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
-  MockPluginContextWrapper
+  MockApmPluginContextWrapper
 } from '../../../../../utils/testHelpers';
 
 const renderOptions = {
-  wrapper: MockPluginContextWrapper
+  wrapper: MockApmPluginContextWrapper
 };
 
 function getTransaction() {

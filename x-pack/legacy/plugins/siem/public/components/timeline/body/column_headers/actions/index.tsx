@@ -6,7 +6,6 @@
 
 import { EuiButtonIcon } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { OnColumnRemoved } from '../../../events';
 import { EventsHeadingExtra, EventsLoading } from '../../../styles';
@@ -23,7 +22,7 @@ interface Props {
 
 /** Given a `header`, returns the `SortDirection` applicable to it */
 
-export const CloseButton = pure<{
+export const CloseButton = React.memo<{
   columnId: string;
   onColumnRemoved: OnColumnRemoved;
 }>(({ columnId, onColumnRemoved }) => (
@@ -40,6 +39,7 @@ export const CloseButton = pure<{
     }}
   />
 ));
+
 CloseButton.displayName = 'CloseButton';
 
 export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort }) => {
@@ -58,4 +58,5 @@ export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort }) => 
     </>
   );
 });
+
 Actions.displayName = 'Actions';

@@ -43,6 +43,9 @@ export const UrlStateRedux = compose<React.ComponentClass<UrlStateProps & RouteS
 
 export const UseUrlState = React.memo<UrlStateProps>(props => {
   const [routeProps] = useRouteSpy();
-  const urlStateReduxProps: RouteSpyState & UrlStateProps = { ...routeProps, ...props };
+  const urlStateReduxProps: RouteSpyState & UrlStateProps = {
+    ...routeProps,
+    ...props,
+  };
   return <UrlStateRedux {...urlStateReduxProps} />;
 });

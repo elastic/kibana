@@ -10,7 +10,9 @@ export function isRefreshOnlyQuery(prevQuery, newQuery) {
   if (!prevQuery || !newQuery) {
     return false;
   }
-  return prevQuery.queryLastTriggeredAt !== newQuery.queryLastTriggeredAt
-    && prevQuery.language === newQuery.language
-    && prevQuery.query === newQuery.query;
+  return (
+    prevQuery.queryLastTriggeredAt !== newQuery.queryLastTriggeredAt &&
+    prevQuery.language === newQuery.language &&
+    prevQuery.query === newQuery.query
+  );
 }

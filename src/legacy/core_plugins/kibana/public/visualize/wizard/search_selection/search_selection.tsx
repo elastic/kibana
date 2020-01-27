@@ -21,14 +21,16 @@ import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import { IUiSettingsClient, SavedObjectsStart } from 'kibana/public';
 
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-
-import { VisType } from '../../kibana_services';
+import { SavedObjectFinderUi } from '../../../../../../../plugins/kibana_react/public';
+import { VisType } from '../../legacy_imports';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
   visType: VisType;
+  uiSettings: IUiSettingsClient;
+  savedObjects: SavedObjectsStart;
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps> {
@@ -52,7 +54,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <SavedObjectFinder
+          <SavedObjectFinderUi
             key="searchSavedObjectFinder"
             onChoose={this.props.onSearchSelected}
             showFilter
@@ -85,6 +87,8 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
               },
             ]}
             fixedPageSize={this.fixedPageSize}
+            uiSettings={this.props.uiSettings}
+            savedObjects={this.props.savedObjects}
           />
         </EuiModalBody>
       </React.Fragment>

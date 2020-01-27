@@ -17,15 +17,8 @@
  * under the License.
  */
 
-import { getServices, VisEditorTypesRegistryProvider } from '../kibana_services';
-
-const { uiModules } = getServices();
-
-uiModules
-  .get('kibana/directive', ['ngSanitize'])
-  .directive('visualizationEditor', function (Private, $timeout, getAppState) {
-    const editorTypes = Private(VisEditorTypesRegistryProvider);
-
+export function initVisEditorDirective(app, deps) {
+  app.directive('visualizationEditor', function($timeout, getAppState) {
     return {
       restrict: 'E',
       scope: {
@@ -35,10 +28,13 @@ uiModules
         filters: '=',
         query: '=',
       },
-      link: function ($scope, element) {
+      link: function($scope, element) {
         const editorType = $scope.savedObj.vis.type.editor;
-        const Editor = typeof editorType === 'function' ? editorType :
-          editorTypes.find(editor => editor.key === editorType);
+        const Editor =
+          typeof editorType === 'function'
+            ? editorType
+            : deps.editorTypes.find(editor => editor.key === editorType);
+
         const editor = new Editor(element[0], $scope.savedObj);
 
         $scope.renderFunction = () => {
@@ -51,14 +47,17 @@ uiModules
           });
         };
 
-        $scope.$on('render', (event) => {
+        $scope.$on('render', event => {
           event.preventDefault();
-          $timeout(() => { $scope.renderFunction(); });
+          $timeout(() => {
+            $scope.renderFunction();
+          });
         });
 
         $scope.$on('$destroy', () => {
           editor.destroy();
         });
-      }
+      },
     };
   });
+}

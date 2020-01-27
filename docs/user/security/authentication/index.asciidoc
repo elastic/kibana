@@ -163,7 +163,7 @@ required by {kib}. If you want to use Third Party initiated SSO , then you must 
 +
 [source,yaml]
 --------------------------------------------------------------------------------
-server.xsrf.whitelist: [/api/security/v1/oidc]
+server.xsrf.whitelist: [/api/security/oidc/initiate_login]
 --------------------------------------------------------------------------------
 
 [float]

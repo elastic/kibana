@@ -174,19 +174,17 @@ async function executor(
     result = await sendEmail(logger, sendEmailOptions);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.email.errorSendingErrorMessage', {
-      defaultMessage: 'error in action "{actionId}" sending email: {errorMessage}',
-      values: {
-        actionId,
-        errorMessage: err.message,
-      },
+      defaultMessage: 'error sending email',
     });
     return {
       status: 'error',
+      actionId,
       message,
+      serviceMessage: err.message,
     };
   }
 
-  return { status: 'ok', data: result };
+  return { status: 'ok', data: result, actionId };
 }
 
 // utilities

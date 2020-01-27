@@ -389,10 +389,11 @@ exports[`Storyshots components/Color/ColorManager interactive 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -407,10 +408,11 @@ exports[`Storyshots components/Color/ColorManager interactive 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -807,10 +809,11 @@ Array [
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -825,10 +828,11 @@ Array [
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -894,10 +898,11 @@ Array [
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -912,10 +917,11 @@ Array [
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -981,10 +987,11 @@ Array [
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -999,10 +1006,11 @@ Array [
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}

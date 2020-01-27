@@ -1,0 +1,17 @@
+{
+  "rule_id": "7d2d5a5f-f590-407d-933a-42adb1a7bcef",
+  "risk_score": 50,
+  "description": "Suricata Category - Possible Social Engineering Attempted",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Possible Social Engineering Attempted",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Possible Social Engineering Attempted\" or rule.category: \"Possible Social Engineering Attempted\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

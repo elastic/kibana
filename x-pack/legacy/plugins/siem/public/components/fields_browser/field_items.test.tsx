@@ -5,7 +5,6 @@
  */
 
 import { omit } from 'lodash/fp';
-import { mount } from 'enzyme';
 import * as React from 'react';
 
 import { mockBrowserFields } from '../../containers/source/mock';
@@ -17,6 +16,7 @@ import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
 import { Category } from './category';
 import { getFieldColumns, getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH } from './helpers';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 const selectedCategoryId = 'base';
 const selectedCategoryFields = mockBrowserFields[selectedCategoryId].fields;
@@ -37,6 +37,7 @@ const columnHeaders: ColumnHeader[] = [
 
 describe('field_items', () => {
   const timelineId = 'test';
+  const mount = useMountAppended();
 
   describe('getFieldItems', () => {
     Object.keys(selectedCategoryFields!).forEach(fieldId => {

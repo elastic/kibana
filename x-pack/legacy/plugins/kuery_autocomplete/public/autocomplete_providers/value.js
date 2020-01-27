@@ -20,29 +20,27 @@ export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
     })
   );
 
-  return function getValueSuggestions({
-    start,
-    end,
-    prefix,
-    suffix,
-    fieldName,
-    nestedPath,
-  }) {
+  return function getValueSuggestions(
+    { start, end, prefix, suffix, fieldName, nestedPath },
+    signal
+  ) {
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
     const fields = allFields.filter(field => field.name === fullFieldName);
     const query = `${prefix}${suffix}`.trim();
     const { getSuggestions } = npStart.plugins.data;
 
     const suggestionsByField = fields.map(field => {
-      return getSuggestions(field.indexPatternTitle, field, query, boolFilter).then(data => {
-        const quotedValues = data.map(value => typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`);
-        return wrapAsSuggestions(start, end, query, quotedValues);
-      });
+      return getSuggestions(field.indexPatternTitle, field, query, boolFilter, signal).then(
+        data => {
+          const quotedValues = data.map(value =>
+            typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`
+          );
+          return wrapAsSuggestions(start, end, query, quotedValues);
+        }
+      );
     });
 
-    return Promise.all(suggestionsByField).then(suggestions =>
-      flatten(suggestions)
-    );
+    return Promise.all(suggestionsByField).then(suggestions => flatten(suggestions));
   };
 }
 

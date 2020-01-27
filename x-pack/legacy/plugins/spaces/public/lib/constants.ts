@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
+import { npSetup } from 'ui/new_platform';
 
 let spacesFeatureDescription: string;
 
@@ -20,4 +20,5 @@ export const getSpacesFeatureDescription = () => {
   return spacesFeatureDescription;
 };
 
-export const MANAGE_SPACES_URL = chrome.addBasePath(`/app/kibana#/management/spaces/list`);
+export const getManageSpacesUrl = () =>
+  npSetup.core.http.basePath.prepend(`/app/kibana#/management/spaces/list`);

@@ -8,29 +8,21 @@ import { Legacy } from 'kibana';
 
 export interface ServerFacade {
   config: Legacy.Server['config'];
-  getInjectedUiAppVars: Legacy.Server['getInjectedUiAppVars'];
-  indexPatternsServiceFactory: Legacy.Server['indexPatternsServiceFactory'];
-  injectUiAppVars: Legacy.Server['injectUiAppVars'];
   plugins: {
     alerting?: Legacy.Server['plugins']['alerting'];
+    elasticsearch: Legacy.Server['plugins']['elasticsearch'];
     spaces: Legacy.Server['plugins']['spaces'];
-    xpack_main: Legacy.Server['plugins']['xpack_main'];
   };
   route: Legacy.Server['route'];
-  savedObjects: Legacy.Server['savedObjects'];
 }
 
 export interface RequestFacade {
   auth: Legacy.Request['auth'];
   getAlertsClient?: Legacy.Request['getAlertsClient'];
   getActionsClient?: Legacy.Request['getActionsClient'];
-  getUiSettingsService: Legacy.Request['getUiSettingsService'];
   headers: Legacy.Request['headers'];
   method: Legacy.Request['method'];
   params: Legacy.Request['params'];
   payload: unknown;
   query: Legacy.Request['query'];
-  server: {
-    plugins: { elasticsearch: Legacy.Request['server']['plugins']['elasticsearch'] };
-  };
 }

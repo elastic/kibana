@@ -29,7 +29,16 @@ export function checkLicense(
     });
   }
 
-  if (xpackLicenseInfo.license.isOneOf(['trial', 'basic', 'standard', 'gold', 'platinum'])) {
+  if (
+    xpackLicenseInfo.license.isOneOf([
+      'trial',
+      'basic',
+      'standard',
+      'gold',
+      'platinum',
+      'enterprise',
+    ])
+  ) {
     return {
       showAppLink: true,
       enableAppLink: isLicenseActive,

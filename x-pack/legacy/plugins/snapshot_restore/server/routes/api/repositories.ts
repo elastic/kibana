@@ -17,7 +17,7 @@ import {
   SlmPolicyEs,
 } from '../../../common/types';
 
-import { Plugins } from '../../../shim';
+import { Plugins } from '../../shim';
 import {
   deserializeRepositorySettings,
   serializeRepositorySettings,

@@ -125,6 +125,7 @@ export interface UiSettingsServiceSetup {
    * @param settings
    *
    * @example
+   * ```ts
    * setup(core: CoreSetup){
    *  core.uiSettings.register([{
    *   foo: {
@@ -134,6 +135,29 @@ export interface UiSettingsServiceSetup {
    *   },
    *  }]);
    * }
+   * ```
    */
   register(settings: Record<string, UiSettingsParams>): void;
 }
+
+/** @public */
+export interface UiSettingsServiceStart {
+  /**
+   * Creates a {@link IUiSettingsClient} with provided *scoped* saved objects client.
+   *
+   * This should only be used in the specific case where the client needs to be accessed
+   * from outside of the scope of a {@link RequestHandler}.
+   *
+   * @example
+   * ```ts
+   * start(core: CoreStart) {
+   *  const soClient = core.savedObjects.getScopedClient(arbitraryRequest);
+   *  const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
+   * }
+   * ```
+   */
+  asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+}
+
+/** @internal */
+export type InternalUiSettingsServiceStart = UiSettingsServiceStart;

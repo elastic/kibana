@@ -4,16 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { once } from 'lodash';
 
-const _callWithInternalUser = once((elasticsearchPlugin) => {
+const _callWithInternalUser = once(elasticsearchPlugin => {
   const { callWithInternalUser } = elasticsearchPlugin.getCluster('admin');
   return callWithInternalUser;
 });
 
-export const callWithInternalUserFactory = (elasticsearchPlugin) => {
+export const callWithInternalUserFactory = elasticsearchPlugin => {
   return (...args) => {
     return _callWithInternalUser(elasticsearchPlugin)(...args);
   };

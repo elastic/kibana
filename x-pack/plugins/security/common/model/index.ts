@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { ApiKey, ApiKeyToInvalidate } from './api_key';
 export { User, EditUser, getUserDisplayName } from './user';
 export { AuthenticatedUser, canUserChangePassword } from './authenticated_user';
 export { BuiltinESPrivileges } from './builtin_es_privileges';

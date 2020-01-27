@@ -10,7 +10,7 @@ import {
 } from '../../../../../server/lib/create_router/error_wrappers';
 import { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
 import { deserializeSnapshotDetails } from '../../../common/lib';
-import { Plugins } from '../../../shim';
+import { Plugins } from '../../shim';
 import { getManagedRepositoryName } from '../../lib';
 
 let callWithInternalUser: any;

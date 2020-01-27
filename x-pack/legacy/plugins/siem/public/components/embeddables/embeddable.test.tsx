@@ -9,7 +9,6 @@ import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import '../../mock/ui_settings';
-import { TestProviders } from '../../mock';
 import { Embeddable } from './embeddable';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
@@ -17,11 +16,9 @@ jest.mock('../../lib/settings/use_kibana_ui_setting');
 describe('Embeddable', () => {
   test('it renders', () => {
     const wrapper = shallow(
-      <TestProviders>
-        <Embeddable>
-          <p>{'Test content'}</p>
-        </Embeddable>
-      </TestProviders>
+      <Embeddable>
+        <p>{'Test content'}</p>
+      </Embeddable>
     );
 
     expect(toJson(wrapper)).toMatchSnapshot();

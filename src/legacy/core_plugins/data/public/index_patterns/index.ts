@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IFieldType, IIndexPattern, indexPatterns } from '../../../../../plugins/data/public';
+import { IFieldType, indexPatterns } from '../../../../../plugins/data/public';
 
 const getFromSavedObject = indexPatterns.getFromSavedObject;
 const getRoutes = indexPatterns.getRoutes;
@@ -25,13 +25,9 @@ const flattenHitWrapper = indexPatterns.flattenHitWrapper;
 
 export { getFromSavedObject, getRoutes, flattenHitWrapper };
 export { IFieldType as FieldType };
-export { IIndexPattern as StaticIndexPattern };
 export {
   Field,
-  FieldListInterface,
+  IFieldList,
   IndexPattern,
-  IndexPatterns,
-  IndexPatternsStart,
-  IndexPatternsSetup,
-  IndexPatternsService,
+  IndexPatternsContract,
 } from '../../../../../plugins/data/public';

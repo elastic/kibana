@@ -16,7 +16,7 @@ const mockedResponse = {
   id: '1',
   alertTypeId: '1',
   tags: ['foo'],
-  interval: '12s',
+  schedule: { interval: '12s' },
   params: {
     otherField: false,
   },
@@ -24,6 +24,7 @@ const mockedResponse = {
     {
       group: 'default',
       id: '2',
+      actionTypeId: 'test',
       params: {
         baz: true,
       },
@@ -39,7 +40,7 @@ test('calls the update function with proper parameters', async () => {
       throttle: null,
       name: 'abc',
       tags: ['bar'],
-      interval: '12s',
+      schedule: { interval: '12s' },
       params: {
         otherField: false,
       },
@@ -74,10 +75,12 @@ test('calls the update function with proper parameters', async () => {
               },
             },
           ],
-          "interval": "12s",
           "name": "abc",
           "params": Object {
             "otherField": false,
+          },
+          "schedule": Object {
+            "interval": "12s",
           },
           "tags": Array [
             "bar",

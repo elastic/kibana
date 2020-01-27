@@ -34,8 +34,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { VisType } from '../../legacy_imports';
 import { memoizeLast } from '../../../../../visualizations/public/np_ready/public/legacy/memoize';
-import { VisType } from '../../kibana_services';
 import { VisTypeAlias } from '../../../../../visualizations/public';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
@@ -51,6 +51,7 @@ export interface VisTypeAliasListEntry extends VisTypeAlias {
 }
 
 interface TypeSelectionProps {
+  addBasePath: (path: string) => string;
   onVisTypeSelected: (visType: VisType | VisTypeAlias) => void;
   visTypesRegistry: TypesStart;
   showExperimental: boolean;
@@ -153,6 +154,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                   <EuiSpacer size="m" />
                   <NewVisHelp
                     promotedTypes={(visTypes as VisTypeAliasListEntry[]).filter(t => t.promotion)}
+                    addBasePath={this.props.addBasePath}
                   />
                 </React.Fragment>
               )}

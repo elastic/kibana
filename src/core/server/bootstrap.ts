@@ -20,7 +20,6 @@
 import chalk from 'chalk';
 import { isMaster } from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
-import { LegacyObjectToConfigAdapter } from './legacy';
 import { Root } from './root';
 import { CriticalError } from './errors';
 
@@ -62,16 +61,25 @@ export async function bootstrap({
     isDevClusterMaster: isMaster && cliArgs.dev && features.isClusterModeSupported,
   });
 
-  const rawConfigService = new RawConfigService(
-    env.configs,
-    rawConfig => new LegacyObjectToConfigAdapter(applyConfigOverrides(rawConfig))
-  );
-
+  const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
   rawConfigService.loadConfig();
 
-  const root = new Root(rawConfigService.getConfig$(), env, onRootShutdown);
+  const root = new Root(rawConfigService, env, onRootShutdown);
 
-  process.on('SIGHUP', () => {
+  process.on('SIGHUP', () => reloadLoggingConfig());
+
+  // This is only used by the LogRotator service
+  // in order to be able to reload the log configuration
+  // under the cluster mode
+  process.on('message', msg => {
+    if (!msg || msg.reloadLoggingConfig !== true) {
+      return;
+    }
+
+    reloadLoggingConfig();
+  });
+
+  function reloadLoggingConfig() {
     const cliLogger = root.logger.get('cli');
     cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
 
@@ -82,7 +90,7 @@ export async function bootstrap({
     }
 
     cliLogger.info('Reloaded logging configuration due to SIGHUP.', { tags: ['config'] });
-  });
+  }
 
   process.on('SIGINT', () => shutdown());
   process.on('SIGTERM', () => shutdown());

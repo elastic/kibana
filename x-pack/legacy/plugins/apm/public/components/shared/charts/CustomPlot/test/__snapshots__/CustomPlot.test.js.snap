@@ -46,6 +46,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -2094,6 +2095,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -2126,6 +2128,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -2818,6 +2821,7 @@ Object {
   "selectionEnd": null,
   "selectionStart": null,
   "seriesEnabledState": Array [],
+  "showAnnotations": true,
 }
 `;
 
@@ -2969,6 +2973,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -5017,6 +5022,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -5283,6 +5289,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -5975,6 +5982,7 @@ Object {
   "selectionEnd": null,
   "selectionStart": null,
   "seriesEnabledState": Array [],
+  "showAnnotations": true,
 }
 `;
 
@@ -5992,6 +6000,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -6355,6 +6364,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -6394,5 +6404,6 @@ Object {
   "selectionEnd": null,
   "selectionStart": null,
   "seriesEnabledState": Array [],
+  "showAnnotations": true,
 }
 `;

@@ -1,11 +1,7 @@
 .visEditor {
   @include flex-parent();
 
-  @include euiBreakpoint('l', 'xl') {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-  }
+  height: 100%;
 
   @include euiBreakpoint('xs', 's', 'm') {
     .visualization {

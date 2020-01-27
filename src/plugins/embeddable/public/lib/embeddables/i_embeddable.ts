@@ -28,7 +28,7 @@ export interface EmbeddableInput {
   id: string;
   lastReloadRequestTime?: number;
   hidePanelTitles?: boolean;
-
+  isEmptyState?: boolean;
   /**
    * List of action IDs that this embeddable should not render.
    */

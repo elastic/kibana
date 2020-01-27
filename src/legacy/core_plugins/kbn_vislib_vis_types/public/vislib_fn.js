@@ -25,12 +25,10 @@ export const vislib = () => ({
   name: 'vislib',
   type: 'render',
   context: {
-    types: [
-      'kibana_datatable'
-    ],
+    types: ['kibana_datatable'],
   },
   help: i18n.translate('kbnVislibVisTypes.functions.vislib.help', {
-    defaultMessage: 'Vislib visualization'
+    defaultMessage: 'Vislib visualization',
   }),
   args: {
     type: {
@@ -57,7 +55,7 @@ export const vislib = () => ({
         visConfig: visConfigParams,
         params: {
           listenOnChange: true,
-        }
+        },
       },
     };
   },

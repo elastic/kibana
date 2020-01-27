@@ -45,6 +45,8 @@ export const DOCKER_ALLOWED_LIST = [
   'docker.container.labels',
 ];
 
+export const AWS_S3_ALLOWED_LIST = ['aws.s3'];
+
 export const getAllowedListForPrefix = (prefix: string) => {
   const firstPart = first(prefix.split(/\./));
   const defaultAllowedList = prefix ? [...ECS_ALLOWED_LIST, prefix] : ECS_ALLOWED_LIST;
@@ -55,6 +57,10 @@ export const getAllowedListForPrefix = (prefix: string) => {
       return [...defaultAllowedList, ...PROMETHEUS_ALLOWED_LIST];
     case 'kubernetes':
       return [...defaultAllowedList, ...K8S_ALLOWED_LIST];
+    case 'aws':
+      if (prefix === 'aws.s3_daily_storage') {
+        return [...defaultAllowedList, ...AWS_S3_ALLOWED_LIST];
+      }
     default:
       return defaultAllowedList;
   }

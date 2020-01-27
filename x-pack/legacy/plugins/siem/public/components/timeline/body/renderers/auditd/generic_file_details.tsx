@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiSpacer, IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
@@ -40,7 +39,7 @@ interface Props {
   session: string | null | undefined;
 }
 
-export const AuditdGenericFileLine = pure<Props>(
+export const AuditdGenericFileLine = React.memo<Props>(
   ({
     id,
     contextId,
@@ -131,7 +130,7 @@ interface GenericDetailsProps {
   timelineId: string;
 }
 
-export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
+export const AuditdGenericFileDetails = React.memo<GenericDetailsProps>(
   ({ data, contextId, text, fileIcon = 'document', timelineId }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session[0]', data);

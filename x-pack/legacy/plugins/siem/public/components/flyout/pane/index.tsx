@@ -182,3 +182,5 @@ FlyoutPaneComponent.displayName = 'FlyoutPaneComponent';
 export const Pane = connect(null, {
   applyDeltaToWidth: timelineActions.applyDeltaToWidth,
 })(FlyoutPaneComponent);
+
+Pane.displayName = 'Pane';

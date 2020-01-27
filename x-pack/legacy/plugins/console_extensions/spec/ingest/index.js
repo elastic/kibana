@@ -8,10 +8,10 @@
 const commonPipelineParams = {
   on_failure: [],
   ignore_failure: {
-    __one_of: [ false, true ]
+    __one_of: [false, true],
   },
   if: '',
-  tag: ''
+  tag: '',
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/enrich-processor.html
@@ -26,17 +26,15 @@ const enrichProcessorDefinition = {
     field: '',
     target_field: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true],
     },
     override: {
-      __one_of: [ true, false ]
+      __one_of: [true, false],
     },
     max_matches: 1,
     shape_relation: 'INTERSECTS',
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
-export const processors = [
-  enrichProcessorDefinition,
-];
+export const processors = [enrichProcessorDefinition];

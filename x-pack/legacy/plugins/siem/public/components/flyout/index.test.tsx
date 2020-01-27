@@ -37,7 +37,7 @@ describe('Flyout', () => {
           />
         </TestProviders>
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('Flyout'))).toMatchSnapshot();
     });
 
     test('it renders the default flyout state as a button', () => {

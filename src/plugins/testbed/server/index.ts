@@ -41,6 +41,11 @@ export const config: PluginConfigDescriptor = {
     uiProp: true,
   },
   schema: configSchema,
+  deprecations: ({ rename, unused, renameFromRoot }) => [
+    rename('securityKey', 'secret'),
+    renameFromRoot('oldtestbed.uiProp', 'testbed.uiProp'),
+    unused('deprecatedProperty'),
+  ],
 };
 
 class Plugin {

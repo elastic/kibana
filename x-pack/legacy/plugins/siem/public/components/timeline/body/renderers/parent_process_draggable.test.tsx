@@ -5,15 +5,17 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../mock';
 
 import { ParentProcessDraggable } from './parent_process_draggable';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 describe('ParentProcessDraggable', () => {
+  const mount = useMountAppended();
+
   test('displays the text, endgameParentProcessName, and processPpid when they are all provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ParentProcessDraggable
           contextId="test"
@@ -28,7 +30,7 @@ describe('ParentProcessDraggable', () => {
   });
 
   test('displays nothing when the text is provided, but endgameParentProcessName and processPpid are both undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ParentProcessDraggable
           contextId="test"
@@ -43,7 +45,7 @@ describe('ParentProcessDraggable', () => {
   });
 
   test('displays the text and processPpid when endgameParentProcessName is undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ParentProcessDraggable
           contextId="test"
@@ -58,7 +60,7 @@ describe('ParentProcessDraggable', () => {
   });
 
   test('displays the processPpid when both endgameParentProcessName and text are undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ParentProcessDraggable
           contextId="test"
@@ -73,7 +75,7 @@ describe('ParentProcessDraggable', () => {
   });
 
   test('displays the text and endgameParentProcessName when processPpid is undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ParentProcessDraggable
           contextId="test"
@@ -88,7 +90,7 @@ describe('ParentProcessDraggable', () => {
   });
 
   test('displays the endgameParentProcessName when both processPpid and text are undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ParentProcessDraggable
           contextId="test"

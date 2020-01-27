@@ -7,7 +7,7 @@
 import React from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
-import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
+import { InfraNodeType } from '../../graphql/types';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfNodes,
@@ -24,7 +24,7 @@ interface Props {
   isChild: boolean;
   bounds: InfraWaffleMapBounds;
   nodeType: InfraNodeType;
-  timeRange: InfraTimerangeInput;
+  currentTime: number;
 }
 
 export const GroupOfNodes: React.FC<Props> = ({
@@ -35,7 +35,7 @@ export const GroupOfNodes: React.FC<Props> = ({
   isChild = false,
   bounds,
   nodeType,
-  timeRange,
+  currentTime,
 }) => {
   const width = group.width > 200 ? group.width : 200;
   return (
@@ -51,7 +51,7 @@ export const GroupOfNodes: React.FC<Props> = ({
             formatter={formatter}
             bounds={bounds}
             nodeType={nodeType}
-            timeRange={timeRange}
+            currentTime={currentTime}
           />
         ))}
       </Nodes>

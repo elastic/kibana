@@ -6,7 +6,6 @@
 
 import { EuiModalBody, EuiModalHeader } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { OpenTimelineProps } from '../types';
@@ -20,7 +19,7 @@ export const HeaderContainer = styled.div`
 
 HeaderContainer.displayName = 'HeaderContainer';
 
-export const OpenTimelineModalBody = pure<OpenTimelineProps>(
+export const OpenTimelineModalBody = React.memo<OpenTimelineProps>(
   ({
     deleteTimelines,
     defaultPageSize,

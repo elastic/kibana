@@ -5,7 +5,6 @@
  */
 
 import * as rt from 'io-ts';
-import { InfraWrappableRequest } from '../../server/lib/adapters/framework';
 import { SnapshotMetricTypeRT, ItemTypeRT } from '../inventory_models/types';
 
 export const SnapshotNodePathRT = rt.intersection([
@@ -35,6 +34,7 @@ export const SnapshotNodeRT = rt.type({
 
 export const SnapshotNodeResponseRT = rt.type({
   nodes: rt.array(SnapshotNodeRT),
+  interval: rt.string,
 });
 
 export const InfraTimerangeInputRT = rt.type({
@@ -59,11 +59,12 @@ export const SnapshotRequestRT = rt.intersection([
     sourceId: rt.string,
   }),
   rt.partial({
+    accountId: rt.string,
+    region: rt.string,
     filterQuery: rt.union([rt.string, rt.null]),
   }),
 ]);
 
 export type SnapshotRequest = rt.TypeOf<typeof SnapshotRequestRT>;
-export type SnapshotWrappedRequest = InfraWrappableRequest<SnapshotRequest>;
 export type SnapshotNode = rt.TypeOf<typeof SnapshotNodeRT>;
 export type SnapshotNodeResponse = rt.TypeOf<typeof SnapshotNodeResponseRT>;

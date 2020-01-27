@@ -76,3 +76,9 @@ export const visualizeAppLinkTest: string = i18n.translate(
     defaultMessage: 'visit the Visualize app',
   }
 );
+export const createNewVisualizationButton: string = i18n.translate(
+  'kbn.dashboard.createNewVisualizationButton',
+  {
+    defaultMessage: 'Create new',
+  }
+);

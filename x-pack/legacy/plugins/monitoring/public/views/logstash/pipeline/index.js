@@ -8,7 +8,7 @@
  * Logstash Node Pipeline View
  */
 import React from 'react';
-import uiRoutes from'ui/routes';
+import uiRoutes from 'ui/routes';
 import moment from 'moment';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
@@ -23,11 +23,7 @@ import { Pipeline } from 'plugins/monitoring/components/logstash/pipeline_viewer
 import { vertexFactory } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/graph/vertex_factory';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { I18nContext } from 'ui/i18n';
-import {
-  EuiPageBody,
-  EuiPage,
-  EuiPageContent,
-} from '@elastic/eui';
+import { EuiPageBody, EuiPage, EuiPageContent } from '@elastic/eui';
 
 let previousPipelineHash = undefined;
 let detailVertexId = undefined;
@@ -53,37 +49,49 @@ function getPageData($injector) {
   const url = pipelineHash
     ? `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}/${pipelineHash}`
     : `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}`;
-  return $http.post(url, {
-    ccs,
-    detailVertexId
-  })
+  return $http
+    .post(url, {
+      ccs,
+      detailVertexId,
+    })
     .then(response => response.data)
     .then(data => {
       data.versions = data.versions.map(version => {
-        const relativeFirstSeen = formatTimestampToDuration(version.firstSeen, CALCULATE_DURATION_SINCE);
-        const relativeLastSeen = formatTimestampToDuration(version.lastSeen, CALCULATE_DURATION_SINCE);
+        const relativeFirstSeen = formatTimestampToDuration(
+          version.firstSeen,
+          CALCULATE_DURATION_SINCE
+        );
+        const relativeLastSeen = formatTimestampToDuration(
+          version.lastSeen,
+          CALCULATE_DURATION_SINCE
+        );
 
         const fudgeFactorSeconds = 2 * minIntervalSeconds;
-        const isLastSeenCloseToNow = (Date.now() - version.lastSeen) <= fudgeFactorSeconds * 1000;
+        const isLastSeenCloseToNow = Date.now() - version.lastSeen <= fudgeFactorSeconds * 1000;
 
         return {
           ...version,
-          relativeFirstSeen: i18n.translate('xpack.monitoring.logstash.pipeline.relativeFirstSeenAgoLabel', {
-            defaultMessage: '{relativeFirstSeen} ago', values: { relativeFirstSeen }
-          }),
-          relativeLastSeen: isLastSeenCloseToNow ?
-            i18n.translate('xpack.monitoring.logstash.pipeline.relativeLastSeenNowLabel', {
-              defaultMessage: 'now'
-            })
+          relativeFirstSeen: i18n.translate(
+            'xpack.monitoring.logstash.pipeline.relativeFirstSeenAgoLabel',
+            {
+              defaultMessage: '{relativeFirstSeen} ago',
+              values: { relativeFirstSeen },
+            }
+          ),
+          relativeLastSeen: isLastSeenCloseToNow
+            ? i18n.translate('xpack.monitoring.logstash.pipeline.relativeLastSeenNowLabel', {
+                defaultMessage: 'now',
+              })
             : i18n.translate('xpack.monitoring.logstash.pipeline.relativeLastSeenAgoLabel', {
-              defaultMessage: 'until {relativeLastSeen} ago', values: { relativeLastSeen }
-            })
+                defaultMessage: 'until {relativeLastSeen} ago',
+                values: { relativeLastSeen },
+              }),
         };
       });
 
       return data;
     })
-    .catch((err) => {
+    .catch(err => {
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
     });
@@ -96,7 +104,7 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
     },
-    pageData: getPageData
+    pageData: getPageData,
   },
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
@@ -105,7 +113,7 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
 
       super({
         title: i18n.translate('xpack.monitoring.logstash.pipeline.routeTitle', {
-          defaultMessage: 'Logstash - Pipeline'
+          defaultMessage: 'Logstash - Pipeline',
         }),
         storageKey: 'logstash.pipelines',
         getPageData,
@@ -114,11 +122,10 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
         options: {
           enableTimeFilter: false,
         },
-        $injector
+        $injector,
       });
 
-      const timeseriesTooltipXValueFormatter = xValue =>
-        moment(xValue).format(dateFormat);
+      const timeseriesTooltipXValueFormatter = xValue => moment(xValue).format(dateFormat);
 
       const setDetailVertexId = vertex => {
         if (!vertex) {
@@ -130,36 +137,39 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
         return this.updateData();
       };
 
-      $scope.$watch(() => this.data, data => {
-        if (!data || !data.pipeline) {
-          return;
+      $scope.$watch(
+        () => this.data,
+        data => {
+          if (!data || !data.pipeline) {
+            return;
+          }
+          this.pipelineState = new PipelineState(data.pipeline);
+          this.detailVertex = data.vertex ? vertexFactory(null, data.vertex) : null;
+          this.renderReact(
+            <I18nContext>
+              <EuiPage>
+                <EuiPageBody>
+                  <EuiPageContent>
+                    <PipelineViewer
+                      pipeline={List.fromPipeline(
+                        Pipeline.fromPipelineGraph(this.pipelineState.config.graph)
+                      )}
+                      timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
+                      setDetailVertexId={setDetailVertexId}
+                      detailVertex={this.detailVertex}
+                    />
+                  </EuiPageContent>
+                </EuiPageBody>
+              </EuiPage>
+            </I18nContext>
+          );
         }
-        this.pipelineState = new PipelineState(data.pipeline);
-        this.detailVertex = data.vertex ? vertexFactory(null, data.vertex) : null;
-        this.renderReact(
-          <I18nContext>
-            <EuiPage>
-              <EuiPageBody>
-                <EuiPageContent>
-                  <PipelineViewer
-                    pipeline={List.fromPipeline(
-                      Pipeline.fromPipelineGraph(this.pipelineState.config.graph)
-                    )}
-                    timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
-                    setDetailVertexId={setDetailVertexId}
-                    detailVertex={this.detailVertex}
-                  />
-                </EuiPageContent>
-              </EuiPageBody>
-            </EuiPage>
-          </I18nContext>
-        );
-      });
+      );
 
       $scope.$on('$destroy', () => {
         previousPipelineHash = undefined;
         detailVertexId = undefined;
       });
     }
-  }
+  },
 });

@@ -1,0 +1,17 @@
+{
+  "rule_id": "f840129e-9089-4f46-8af1-0745e8f54713",
+  "risk_score": 50,
+  "description": "Suricata Category - Attempted Administrator Privilege Gain",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Attempted Administrator Privilege Gain",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Attempted Administrator Privilege Gain\" or rule.category: \"Attempted Administrator Privilege Gain\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

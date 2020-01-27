@@ -6,7 +6,6 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 
@@ -18,7 +17,7 @@ const P = styled.p`
 
 P.displayName = 'P';
 
-export const FormattedDurationTooltipContent = pure<{
+export const FormattedDurationTooltipContent = React.memo<{
   maybeDurationNanoseconds: string | number | object | undefined | null;
   tooltipTitle?: string;
 }>(({ maybeDurationNanoseconds, tooltipTitle }) => (
@@ -35,7 +34,7 @@ export const FormattedDurationTooltipContent = pure<{
 
 FormattedDurationTooltipContent.displayName = 'FormattedDurationTooltipContent';
 
-export const FormattedDurationTooltip = pure<{
+export const FormattedDurationTooltip = React.memo<{
   children: JSX.Element;
   maybeDurationNanoseconds: string | number | object | undefined | null;
   tooltipTitle?: string;

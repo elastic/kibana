@@ -5,15 +5,17 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../mock';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { ExitCodeDraggable } from './exit_code_draggable';
 
 describe('ExitCodeDraggable', () => {
+  const mount = useMountAppended();
+
   test('it renders the expected text and exit code, when both text and an endgameExitCode are provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable contextId="test" endgameExitCode="0" eventId="1" text="with exit code" />
       </TestProviders>
@@ -22,7 +24,7 @@ describe('ExitCodeDraggable', () => {
   });
 
   test('it returns an empty string when text is provided, but endgameExitCode is undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable
           contextId="test"
@@ -36,7 +38,7 @@ describe('ExitCodeDraggable', () => {
   });
 
   test('it returns an empty string when text is provided, but endgameExitCode is null', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable
           contextId="test"
@@ -50,7 +52,7 @@ describe('ExitCodeDraggable', () => {
   });
 
   test('it returns an empty string when text is provided, but endgameExitCode is an empty string', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable contextId="test" endgameExitCode="" eventId="1" text="with exit code" />
       </TestProviders>
@@ -59,7 +61,7 @@ describe('ExitCodeDraggable', () => {
   });
 
   test('it renders just the exit code when text is undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable contextId="test" endgameExitCode="1" eventId="1" text={undefined} />
       </TestProviders>
@@ -68,7 +70,7 @@ describe('ExitCodeDraggable', () => {
   });
 
   test('it renders just the exit code when text is null', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable contextId="test" endgameExitCode="1" eventId="1" text={null} />
       </TestProviders>
@@ -77,7 +79,7 @@ describe('ExitCodeDraggable', () => {
   });
 
   test('it renders just the exit code when text is an empty string', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable contextId="test" endgameExitCode="1" eventId="1" text="" />
       </TestProviders>

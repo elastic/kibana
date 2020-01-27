@@ -46,7 +46,7 @@ VisPickerItem.propTypes = {
   selected: PropTypes.bool,
 };
 
-export const VisPicker = injectI18n(function (props) {
+export const VisPicker = injectI18n(function(props) {
   const handleChange = type => {
     props.onChange({ type });
   };
@@ -62,20 +62,32 @@ export const VisPicker = injectI18n(function (props) {
     },
     {
       type: PANEL_TYPES.METRIC,
-      label: intl.formatMessage({ id: 'visTypeTimeseries.visPicker.metricLabel', defaultMessage: 'Metric' }),
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.visPicker.metricLabel',
+        defaultMessage: 'Metric',
+      }),
     },
     {
       type: PANEL_TYPES.TOP_N,
-      label: intl.formatMessage({ id: 'visTypeTimeseries.visPicker.topNLabel', defaultMessage: 'Top N' }),
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.visPicker.topNLabel',
+        defaultMessage: 'Top N',
+      }),
     },
     {
       type: PANEL_TYPES.GAUGE,
-      label: intl.formatMessage({ id: 'visTypeTimeseries.visPicker.gaugeLabel', defaultMessage: 'Gauge' }),
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.visPicker.gaugeLabel',
+        defaultMessage: 'Gauge',
+      }),
     },
     { type: PANEL_TYPES.MARKDOWN, label: 'Markdown' },
     {
       type: PANEL_TYPES.TABLE,
-      label: intl.formatMessage({ id: 'visTypeTimeseries.visPicker.tableLabel', defaultMessage: 'Table' }),
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.visPicker.tableLabel',
+        defaultMessage: 'Table',
+      }),
     },
   ].map(item => {
     return (

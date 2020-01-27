@@ -1,11 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DiscoverIndexPattern A single index pattern is just displayed 1`] = `
-<DiscoverIndexPatternTitle
-  isChangeable={false}
-  onChange={[Function]}
-  title="test1"
-/>
-`;
-
 exports[`DiscoverIndexPattern Invalid props dont cause an exception: "" 1`] = `""`;

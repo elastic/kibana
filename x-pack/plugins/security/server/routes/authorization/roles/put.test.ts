@@ -62,7 +62,7 @@ const putRoleTest = (
 ) => {
   test(description, async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-    mockRouteDefinitionParams.authz.getApplicationName.mockReturnValue(application);
+    mockRouteDefinitionParams.authz.applicationName = application;
     mockRouteDefinitionParams.authz.privileges.get.mockReturnValue(privilegeMap);
 
     const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -138,7 +138,7 @@ describe('PUT role', () => {
   });
 
   describe('failure', () => {
-    putRoleTest(`returns result of license checker`, {
+    putRoleTest('returns result of license checker', {
       name: 'foo-role',
       licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },

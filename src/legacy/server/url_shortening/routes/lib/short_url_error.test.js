@@ -45,26 +45,22 @@ describe('handleShortUrlError()', () => {
     createErrorWithStatusCode(404),
   ];
 
-  const uncaughtErrors = [
-    new Error(),
-    createErrorWithStatus(500),
-    createErrorWithStatusCode(500)
-  ];
+  const uncaughtErrors = [new Error(), createErrorWithStatus(500), createErrorWithStatusCode(500)];
 
-  caughtErrorsWithStatus.forEach((err) => {
-    it(`should handle errors with status of ${err.status}`, function () {
+  caughtErrorsWithStatus.forEach(err => {
+    it(`should handle errors with status of ${err.status}`, function() {
       expect(_.get(handleShortUrlError(err), 'output.statusCode')).toBe(err.status);
     });
   });
 
-  caughtErrorsWithStatusCode.forEach((err) => {
-    it(`should handle errors with statusCode of ${err.statusCode}`, function () {
+  caughtErrorsWithStatusCode.forEach(err => {
+    it(`should handle errors with statusCode of ${err.statusCode}`, function() {
       expect(_.get(handleShortUrlError(err), 'output.statusCode')).toBe(err.statusCode);
     });
   });
 
-  uncaughtErrors.forEach((err) => {
-    it(`should not handle unknown errors`, function () {
+  uncaughtErrors.forEach(err => {
+    it(`should not handle unknown errors`, function() {
       expect(_.get(handleShortUrlError(err), 'output.statusCode')).toBe(500);
     });
   });

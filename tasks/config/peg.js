@@ -22,7 +22,7 @@ module.exports = {
     src: 'src/plugins/data/common/es_query/kuery/ast/kuery.peg',
     dest: 'src/plugins/data/common/es_query/kuery/ast/_generated_/kuery.js',
     options: {
-      allowedStartRules: ['start', 'Literal']
-    }
-  }
+      allowedStartRules: ['start', 'Literal'],
+    },
+  },
 };

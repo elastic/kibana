@@ -58,19 +58,18 @@ export const MetricsExplorerToolbar = ({
   defaultViewState,
   onViewStateChange,
 }: Props) => {
-  const isDefaultOptions =
-    options.aggregation === MetricsExplorerAggregation.avg && options.metrics.length === 0;
+  const isDefaultOptions = options.aggregation === 'avg' && options.metrics.length === 0;
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={options.aggregation === MetricsExplorerAggregation.count ? 2 : false}>
+        <EuiFlexItem grow={options.aggregation === 'count' ? 2 : false}>
           <MetricsExplorerAggregationPicker
             fullWidth
             options={options}
             onChange={onAggregationChange}
           />
         </EuiFlexItem>
-        {options.aggregation !== MetricsExplorerAggregation.count && (
+        {options.aggregation !== 'count' && (
           <EuiText size="s" color="subdued">
             <FormattedMessage
               id="xpack.infra.metricsExplorer.aggregationLabel"
@@ -78,7 +77,7 @@ export const MetricsExplorerToolbar = ({
             />
           </EuiText>
         )}
-        {options.aggregation !== MetricsExplorerAggregation.count && (
+        {options.aggregation !== 'count' && (
           <EuiFlexItem grow={2}>
             <MetricsExplorerMetrics
               autoFocus={isDefaultOptions}

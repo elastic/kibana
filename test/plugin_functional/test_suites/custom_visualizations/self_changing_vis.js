@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'visualize']);
@@ -33,7 +33,6 @@ export default function ({ getService, getPageObjects }) {
   }
 
   describe.skip('self changing vis', function describeIndexTests() {
-
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('self_changing_vis');
@@ -61,7 +60,5 @@ export default function ({ getService, getPageObjects }) {
       const isApplyEnabled = await PageObjects.visualize.isApplyEnabled();
       expect(isApplyEnabled).to.be(false);
     });
-
   });
-
 }

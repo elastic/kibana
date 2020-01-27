@@ -100,80 +100,68 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                             show={false}
                             title="KPI HOSTS"
                           >
-                            <Component
-                              id=""
-                              inspect={null}
-                              inspectIndex={0}
-                              isInspected={false}
-                              loading={false}
-                              queryId="statItems"
-                              refetch={null}
-                              selectedInspectIndex={0}
-                              setIsInspected={[Function]}
-                              show={false}
-                              title="KPI HOSTS"
+                            <InspectContainer
+                              data-test-subj="transparent-inspect-container"
+                              showInspect={false}
                             >
-                              <InspectContainer
+                              <div
+                                className="sc-AykKF cUIXEb"
                                 data-test-subj="transparent-inspect-container"
-                                showInspect={false}
                               >
-                                <div
-                                  className="sc-AykKF cUIXEb"
-                                  data-test-subj="transparent-inspect-container"
+                                <EuiButtonIcon
+                                  aria-label="Inspect"
+                                  data-test-subj="inspect-icon-button"
+                                  iconSize="m"
+                                  iconType="inspect"
+                                  onClick={[Function]}
+                                  title="Inspect"
                                 >
-                                  <EuiButtonIcon
+                                  <button
                                     aria-label="Inspect"
+                                    className="euiButtonIcon euiButtonIcon--primary"
                                     data-test-subj="inspect-icon-button"
-                                    iconSize="m"
-                                    iconType="inspect"
                                     onClick={[Function]}
                                     title="Inspect"
+                                    type="button"
                                   >
-                                    <button
-                                      aria-label="Inspect"
-                                      className="euiButtonIcon euiButtonIcon--primary"
-                                      data-test-subj="inspect-icon-button"
-                                      onClick={[Function]}
-                                      title="Inspect"
-                                      type="button"
+                                    <EuiIcon
+                                      aria-hidden="true"
+                                      className="euiButtonIcon__icon"
+                                      size="m"
+                                      type="inspect"
                                     >
-                                      <EuiIcon
-                                        aria-hidden="true"
-                                        className="euiButtonIcon__icon"
-                                        size="m"
-                                        type="inspect"
+                                      <EuiIconEmpty
+                                        aria-hidden={true}
+                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                        focusable="false"
+                                        role="img"
+                                        style={null}
                                       >
-                                        <EuiIconEmpty
-                                          aria-hidden="true"
+                                        <svg
+                                          aria-hidden={true}
                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                                           focusable="false"
+                                          height={16}
+                                          role="img"
                                           style={null}
-                                        >
-                                          <svg
-                                            aria-hidden="true"
-                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                                            focusable="false"
-                                            height={16}
-                                            style={null}
-                                            viewBox="0 0 16 16"
-                                            width={16}
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
-                                      </EuiIcon>
-                                    </button>
-                                  </EuiButtonIcon>
-                                  <ModalInspectQuery
-                                    closeModal={[Function]}
-                                    data-test-subj="inspect-modal"
-                                    isShowing={false}
-                                    request={null}
-                                    response={null}
-                                    title="KPI HOSTS"
-                                  />
-                                </div>
-                              </InspectContainer>
-                            </Component>
+                                          viewBox="0 0 16 16"
+                                          width={16}
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        />
+                                      </EuiIconEmpty>
+                                    </EuiIcon>
+                                  </button>
+                                </EuiButtonIcon>
+                                <ModalInspectQuery
+                                  closeModal={[Function]}
+                                  data-test-subj="inspect-modal"
+                                  isShowing={false}
+                                  request={null}
+                                  response={null}
+                                  title="KPI HOSTS"
+                                />
+                              </div>
+                            </InspectContainer>
                           </InspectButtonComponent>
                         </Connect(InspectButtonComponent)>
                       </div>
@@ -354,80 +342,68 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                             show={false}
                             title="KPI HOSTS"
                           >
-                            <Component
-                              id=""
-                              inspect={null}
-                              inspectIndex={0}
-                              isInspected={false}
-                              loading={false}
-                              queryId="statItems"
-                              refetch={null}
-                              selectedInspectIndex={0}
-                              setIsInspected={[Function]}
-                              show={false}
-                              title="KPI HOSTS"
+                            <InspectContainer
+                              data-test-subj="transparent-inspect-container"
+                              showInspect={false}
                             >
-                              <InspectContainer
+                              <div
+                                className="sc-AykKF cUIXEb"
                                 data-test-subj="transparent-inspect-container"
-                                showInspect={false}
                               >
-                                <div
-                                  className="sc-AykKF cUIXEb"
-                                  data-test-subj="transparent-inspect-container"
+                                <EuiButtonIcon
+                                  aria-label="Inspect"
+                                  data-test-subj="inspect-icon-button"
+                                  iconSize="m"
+                                  iconType="inspect"
+                                  onClick={[Function]}
+                                  title="Inspect"
                                 >
-                                  <EuiButtonIcon
+                                  <button
                                     aria-label="Inspect"
+                                    className="euiButtonIcon euiButtonIcon--primary"
                                     data-test-subj="inspect-icon-button"
-                                    iconSize="m"
-                                    iconType="inspect"
                                     onClick={[Function]}
                                     title="Inspect"
+                                    type="button"
                                   >
-                                    <button
-                                      aria-label="Inspect"
-                                      className="euiButtonIcon euiButtonIcon--primary"
-                                      data-test-subj="inspect-icon-button"
-                                      onClick={[Function]}
-                                      title="Inspect"
-                                      type="button"
+                                    <EuiIcon
+                                      aria-hidden="true"
+                                      className="euiButtonIcon__icon"
+                                      size="m"
+                                      type="inspect"
                                     >
-                                      <EuiIcon
-                                        aria-hidden="true"
-                                        className="euiButtonIcon__icon"
-                                        size="m"
-                                        type="inspect"
+                                      <EuiIconEmpty
+                                        aria-hidden={true}
+                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                        focusable="false"
+                                        role="img"
+                                        style={null}
                                       >
-                                        <EuiIconEmpty
-                                          aria-hidden="true"
+                                        <svg
+                                          aria-hidden={true}
                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                                           focusable="false"
+                                          height={16}
+                                          role="img"
                                           style={null}
-                                        >
-                                          <svg
-                                            aria-hidden="true"
-                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                                            focusable="false"
-                                            height={16}
-                                            style={null}
-                                            viewBox="0 0 16 16"
-                                            width={16}
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
-                                      </EuiIcon>
-                                    </button>
-                                  </EuiButtonIcon>
-                                  <ModalInspectQuery
-                                    closeModal={[Function]}
-                                    data-test-subj="inspect-modal"
-                                    isShowing={false}
-                                    request={null}
-                                    response={null}
-                                    title="KPI HOSTS"
-                                  />
-                                </div>
-                              </InspectContainer>
-                            </Component>
+                                          viewBox="0 0 16 16"
+                                          width={16}
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        />
+                                      </EuiIconEmpty>
+                                    </EuiIcon>
+                                  </button>
+                                </EuiButtonIcon>
+                                <ModalInspectQuery
+                                  closeModal={[Function]}
+                                  data-test-subj="inspect-modal"
+                                  isShowing={false}
+                                  request={null}
+                                  response={null}
+                                  title="KPI HOSTS"
+                                />
+                              </div>
+                            </InspectContainer>
                           </InspectButtonComponent>
                         </Connect(InspectButtonComponent)>
                       </div>
@@ -678,80 +654,68 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                           show={false}
                           title="KPI UNIQUE_PRIVATE_IPS"
                         >
-                          <Component
-                            id=""
-                            inspect={null}
-                            inspectIndex={0}
-                            isInspected={false}
-                            loading={false}
-                            queryId="statItems"
-                            refetch={null}
-                            selectedInspectIndex={0}
-                            setIsInspected={[Function]}
-                            show={false}
-                            title="KPI UNIQUE_PRIVATE_IPS"
+                          <InspectContainer
+                            data-test-subj="transparent-inspect-container"
+                            showInspect={false}
                           >
-                            <InspectContainer
+                            <div
+                              className="sc-AykKF gGhbbL"
                               data-test-subj="transparent-inspect-container"
-                              showInspect={false}
                             >
-                              <div
-                                className="sc-AykKF gGhbbL"
-                                data-test-subj="transparent-inspect-container"
+                              <EuiButtonIcon
+                                aria-label="Inspect"
+                                data-test-subj="inspect-icon-button"
+                                iconSize="m"
+                                iconType="inspect"
+                                onClick={[Function]}
+                                title="Inspect"
                               >
-                                <EuiButtonIcon
+                                <button
                                   aria-label="Inspect"
+                                  className="euiButtonIcon euiButtonIcon--primary"
                                   data-test-subj="inspect-icon-button"
-                                  iconSize="m"
-                                  iconType="inspect"
                                   onClick={[Function]}
                                   title="Inspect"
+                                  type="button"
                                 >
-                                  <button
-                                    aria-label="Inspect"
-                                    className="euiButtonIcon euiButtonIcon--primary"
-                                    data-test-subj="inspect-icon-button"
-                                    onClick={[Function]}
-                                    title="Inspect"
-                                    type="button"
+                                  <EuiIcon
+                                    aria-hidden="true"
+                                    className="euiButtonIcon__icon"
+                                    size="m"
+                                    type="inspect"
                                   >
-                                    <EuiIcon
-                                      aria-hidden="true"
-                                      className="euiButtonIcon__icon"
-                                      size="m"
-                                      type="inspect"
+                                    <EuiIconEmpty
+                                      aria-hidden={true}
+                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                      focusable="false"
+                                      role="img"
+                                      style={null}
                                     >
-                                      <EuiIconEmpty
-                                        aria-hidden="true"
+                                      <svg
+                                        aria-hidden={true}
                                         className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                                         focusable="false"
+                                        height={16}
+                                        role="img"
                                         style={null}
-                                      >
-                                        <svg
-                                          aria-hidden="true"
-                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                                          focusable="false"
-                                          height={16}
-                                          style={null}
-                                          viewBox="0 0 16 16"
-                                          width={16}
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        />
-                                      </EuiIconEmpty>
-                                    </EuiIcon>
-                                  </button>
-                                </EuiButtonIcon>
-                                <ModalInspectQuery
-                                  closeModal={[Function]}
-                                  data-test-subj="inspect-modal"
-                                  isShowing={false}
-                                  request={null}
-                                  response={null}
-                                  title="KPI UNIQUE_PRIVATE_IPS"
-                                />
-                              </div>
-                            </InspectContainer>
-                          </Component>
+                                        viewBox="0 0 16 16"
+                                        width={16}
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      />
+                                    </EuiIconEmpty>
+                                  </EuiIcon>
+                                </button>
+                              </EuiButtonIcon>
+                              <ModalInspectQuery
+                                closeModal={[Function]}
+                                data-test-subj="inspect-modal"
+                                isShowing={false}
+                                request={null}
+                                response={null}
+                                title="KPI UNIQUE_PRIVATE_IPS"
+                              />
+                            </div>
+                          </InspectContainer>
                         </InspectButtonComponent>
                       </Connect(InspectButtonComponent)>
                     </div>
@@ -796,9 +760,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                     type="cross"
                                   >
                                     <EuiIconEmpty
+                                      aria-hidden={true}
                                       className="euiIcon euiIcon--large euiIcon-isLoading"
                                       data-test-subj="stat-icon"
                                       focusable="false"
+                                      role="img"
                                       style={
                                         Object {
                                           "fill": "#DB1374",
@@ -806,10 +772,12 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                       }
                                     >
                                       <svg
+                                        aria-hidden={true}
                                         className="euiIcon euiIcon--large euiIcon-isLoading"
                                         data-test-subj="stat-icon"
                                         focusable="false"
                                         height={16}
+                                        role="img"
                                         style={
                                           Object {
                                             "fill": "#DB1374",
@@ -887,9 +855,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                     type="cross"
                                   >
                                     <EuiIconEmpty
+                                      aria-hidden={true}
                                       className="euiIcon euiIcon--large euiIcon-isLoading"
                                       data-test-subj="stat-icon"
                                       focusable="false"
+                                      role="img"
                                       style={
                                         Object {
                                           "fill": "#490092",
@@ -897,10 +867,12 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                       }
                                     >
                                       <svg
+                                        aria-hidden={true}
                                         className="euiIcon euiIcon--large euiIcon-isLoading"
                                         data-test-subj="stat-icon"
                                         focusable="false"
                                         height={16}
+                                        role="img"
                                         style={
                                           Object {
                                             "fill": "#490092",

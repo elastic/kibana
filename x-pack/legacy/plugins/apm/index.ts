@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
-import { APMPluginContract } from '../../../plugins/apm/server/plugin';
+import { APMPluginContract } from '../../../plugins/apm/server';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 import mappings from './mappings.json';
 import { makeApmUsageCollector } from './server/lib/apm_telemetry';

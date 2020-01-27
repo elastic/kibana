@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../mock';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { getEmptyValue } from '../../../empty_value';
 import { deleteItemIdx, findItem } from './helpers';
 import { emptyColumnRenderer } from './empty_column_renderer';
@@ -18,6 +19,8 @@ import { emptyColumnRenderer } from './empty_column_renderer';
 describe('empty_column_renderer', () => {
   let mockDatum: TimelineNonEcsData[];
   const _id = mockTimelineData[0]._id;
+  const mount = useMountAppended();
+
   beforeEach(() => {
     mockDatum = cloneDeep(mockTimelineData[0].data);
   });

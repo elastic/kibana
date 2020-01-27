@@ -26,19 +26,21 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 const defaultSort = [{ time: 'desc' }];
 let indexPattern;
 
-describe('docTable', function () {
+describe('docTable', function() {
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject(function (Private) {
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-  }));
+  beforeEach(
+    ngMock.inject(function(Private) {
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    })
+  );
 
-  describe('getSort function', function () {
-    it('should be a function', function () {
+  describe('getSort function', function() {
+    it('should be a function', function() {
       expect(getSort).to.be.a(Function);
     });
 
-    it('should return an array of objects', function () {
+    it('should return an array of objects', function() {
       expect(getSort([['bytes', 'desc']], indexPattern)).to.eql([{ bytes: 'desc' }]);
 
       delete indexPattern.timeFieldName;
@@ -49,7 +51,7 @@ describe('docTable', function () {
       expect(getSort([{ bytes: 'desc' }], indexPattern)).to.eql([{ bytes: 'desc' }]);
     });
 
-    it('should sort by the default when passed an unsortable field', function () {
+    it('should sort by the default when passed an unsortable field', function() {
       expect(getSort(['non-sortable', 'asc'], indexPattern)).to.eql(defaultSort);
       expect(getSort(['lol_nope', 'asc'], indexPattern)).to.eql(defaultSort);
 
@@ -57,13 +59,13 @@ describe('docTable', function () {
       expect(getSort(['non-sortable', 'asc'], indexPattern)).to.eql([{ _score: 'desc' }]);
     });
 
-    it('should sort in reverse chrono order otherwise on time based patterns', function () {
+    it('should sort in reverse chrono order otherwise on time based patterns', function() {
       expect(getSort([], indexPattern)).to.eql(defaultSort);
       expect(getSort(['foo'], indexPattern)).to.eql(defaultSort);
       expect(getSort({ foo: 'bar' }, indexPattern)).to.eql(defaultSort);
     });
 
-    it('should sort by score on non-time patterns', function () {
+    it('should sort by score on non-time patterns', function() {
       delete indexPattern.timeFieldName;
 
       expect(getSort([], indexPattern)).to.eql([{ _score: 'desc' }]);
@@ -72,32 +74,32 @@ describe('docTable', function () {
     });
   });
 
-  describe('getSort.array function', function () {
-    it('should have an array method', function () {
+  describe('getSort.array function', function() {
+    it('should have an array method', function() {
       expect(getSort.array).to.be.a(Function);
     });
 
-    it('should return an array of arrays for sortable fields', function () {
-      expect(getSort.array([['bytes', 'desc']], indexPattern)).to.eql([[ 'bytes', 'desc' ]]);
+    it('should return an array of arrays for sortable fields', function() {
+      expect(getSort.array([['bytes', 'desc']], indexPattern)).to.eql([['bytes', 'desc']]);
     });
 
-    it('should return an array of arrays from an array of elasticsearch sort objects', function () {
-      expect(getSort.array([{ bytes: 'desc' }], indexPattern)).to.eql([[ 'bytes', 'desc' ]]);
+    it('should return an array of arrays from an array of elasticsearch sort objects', function() {
+      expect(getSort.array([{ bytes: 'desc' }], indexPattern)).to.eql([['bytes', 'desc']]);
     });
 
-    it('should sort by the default when passed an unsortable field', function () {
+    it('should sort by the default when passed an unsortable field', function() {
       expect(getSort.array([{ 'non-sortable': 'asc' }], indexPattern)).to.eql([['time', 'desc']]);
       expect(getSort.array([{ lol_nope: 'asc' }], indexPattern)).to.eql([['time', 'desc']]);
 
       delete indexPattern.timeFieldName;
-      expect(getSort.array([{ 'non-sortable': 'asc' }], indexPattern)).to.eql([[ '_score', 'desc' ]]);
+      expect(getSort.array([{ 'non-sortable': 'asc' }], indexPattern)).to.eql([['_score', 'desc']]);
     });
 
     it('should sort by the default when passed an empty sort', () => {
       expect(getSort.array([], indexPattern)).to.eql([['time', 'desc']]);
 
       delete indexPattern.timeFieldName;
-      expect(getSort.array([], indexPattern)).to.eql([[ '_score', 'desc' ]]);
+      expect(getSort.array([], indexPattern)).to.eql([['_score', 'desc']]);
     });
   });
 });

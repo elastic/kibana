@@ -17,8 +17,6 @@ import {
   unlockAutoReloadScroll,
 } from './actions';
 
-import { loadEntriesActionCreators } from '../../remote/log_entries/operations/load';
-
 interface ManualTargetPositionUpdatePolicy {
   policy: 'manual';
 }
@@ -38,9 +36,10 @@ export interface LogPositionState {
     startKey: TimeKey | null;
     middleKey: TimeKey | null;
     endKey: TimeKey | null;
+    pagesAfterEnd: number;
+    pagesBeforeStart: number;
   };
   controlsShouldDisplayTargetPosition: boolean;
-  autoReloadJustAborted: boolean;
   autoReloadScrollLock: boolean;
 }
 
@@ -53,9 +52,10 @@ export const initialLogPositionState: LogPositionState = {
     endKey: null,
     middleKey: null,
     startKey: null,
+    pagesBeforeStart: Infinity,
+    pagesAfterEnd: Infinity,
   },
   controlsShouldDisplayTargetPosition: false,
-  autoReloadJustAborted: false,
   autoReloadScrollLock: false,
 };
 
@@ -76,11 +76,16 @@ const targetPositionUpdatePolicyReducer = reducerWithInitialState(
 
 const visiblePositionReducer = reducerWithInitialState(
   initialLogPositionState.visiblePositions
-).case(reportVisiblePositions, (state, { startKey, middleKey, endKey }) => ({
-  endKey,
-  middleKey,
-  startKey,
-}));
+).case(
+  reportVisiblePositions,
+  (state, { startKey, middleKey, endKey, pagesBeforeStart, pagesAfterEnd }) => ({
+    endKey,
+    middleKey,
+    startKey,
+    pagesBeforeStart,
+    pagesAfterEnd,
+  })
+);
 
 // Determines whether to use the target position or the visible midpoint when
 // displaying a timestamp or time range in the toolbar and log minimap. When the
@@ -98,17 +103,6 @@ const controlsShouldDisplayTargetPositionReducer = reducerWithInitialState(
     return state;
   });
 
-// If auto reload is aborted before a pending request finishes, this flag will
-// prevent the UI from displaying the Loading Entries screen
-const autoReloadJustAbortedReducer = reducerWithInitialState(
-  initialLogPositionState.autoReloadJustAborted
-)
-  .case(stopAutoReload, () => true)
-  .case(startAutoReload, () => false)
-  .case(loadEntriesActionCreators.resolveDone, () => false)
-  .case(loadEntriesActionCreators.resolveFailed, () => false)
-  .case(loadEntriesActionCreators.resolve, () => false);
-
 const autoReloadScrollLockReducer = reducerWithInitialState(
   initialLogPositionState.autoReloadScrollLock
 )
@@ -122,6 +116,5 @@ export const logPositionReducer = combineReducers<LogPositionState>({
   updatePolicy: targetPositionUpdatePolicyReducer,
   visiblePositions: visiblePositionReducer,
   controlsShouldDisplayTargetPosition: controlsShouldDisplayTargetPositionReducer,
-  autoReloadJustAborted: autoReloadJustAbortedReducer,
   autoReloadScrollLock: autoReloadScrollLockReducer,
 });

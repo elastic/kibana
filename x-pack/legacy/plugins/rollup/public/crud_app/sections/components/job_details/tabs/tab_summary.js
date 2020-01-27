@@ -34,13 +34,7 @@ export class TabSummary extends Component {
       return null;
     }
 
-    const {
-      documentsProcessed,
-      pagesProcessed,
-      rollupsIndexed,
-      triggerCount,
-      status,
-    } = stats;
+    const { documentsProcessed, pagesProcessed, rollupsIndexed, triggerCount, status } = stats;
 
     return (
       <section
@@ -50,10 +44,7 @@ export class TabSummary extends Component {
         <EuiSpacer size="l" />
 
         <EuiTitle size="s">
-          <h3
-            id="rollupJobDetailStatsTitle"
-            data-test-subj="rollupJobDetailStatsTitle"
-          >
+          <h3 id="rollupJobDetailStatsTitle" data-test-subj="rollupJobDetailStatsTitle">
             <FormattedMessage
               id="xpack.rollupJobs.jobDetails.tabSummary.sectionStatsTitle"
               defaultMessage="Stats"
@@ -147,10 +138,7 @@ export class TabSummary extends Component {
           data-test-subj="rollupJobDetailSummaryLogisticsSection"
         >
           <EuiTitle size="s">
-            <h3
-              id="rollupJobDetailLogisticsTitle"
-              data-test-subj="rollupJobDetailLogisticsTitle"
-            >
+            <h3 id="rollupJobDetailLogisticsTitle" data-test-subj="rollupJobDetailLogisticsTitle">
               <FormattedMessage
                 id="xpack.rollupJobs.jobDetails.tabSummary.sectionLogisticsLabel"
                 defaultMessage="Logistics"
@@ -185,12 +173,12 @@ export class TabSummary extends Component {
                     defaultMessage="Cron"
                   />{' '}
                   <EuiIconTip
-                    content={(
+                    content={
                       <FormattedMessage
                         id="xpack.rollupJobs.jobDetails.tabSummary.itemCronTip"
                         defaultMessage="The frequency with which data is rolled up"
                       />
-                    )}
+                    }
                   />
                 </EuiDescriptionListTitle>
 
@@ -208,7 +196,6 @@ export class TabSummary extends Component {
                     defaultMessage="Rollup index"
                   />
                 </EuiDescriptionListTitle>
-
 
                 <EuiDescriptionListDescription
                   className="eui-textBreakWord"
@@ -282,12 +269,12 @@ export class TabSummary extends Component {
                     defaultMessage="Interval"
                   />{' '}
                   <EuiIconTip
-                    content={(
+                    content={
                       <FormattedMessage
                         id="xpack.rollupJobs.jobDetails.tabSummary.itemIntervalTip"
                         defaultMessage="The time bucket interval into which data is rolled up"
                       />
-                    )}
+                    }
                   />
                 </EuiDescriptionListTitle>
 

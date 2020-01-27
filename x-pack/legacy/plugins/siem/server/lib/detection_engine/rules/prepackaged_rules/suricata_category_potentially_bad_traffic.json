@@ -1,0 +1,17 @@
+{
+  "rule_id": "197cdd5a-9880-4780-a87c-594d0ed2b7b4",
+  "risk_score": 50,
+  "description": "Suricata Category - Potentially Bad Traffic",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Potentially Bad Traffic",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Potentially Bad Traffic\" or rule.category: \"Potentially Bad Traffic\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function golangMetricsSpecProvider(context) {
   const moduleName = 'golang';
@@ -34,7 +38,8 @@ export function golangMetricsSpecProvider(context) {
       defaultMessage: 'Fetch internal metrics from a Golang app.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.golangMetrics.longDescription', {
-      defaultMessage: 'The `{moduleName}` Metricbeat module fetches internal metrics from a Golang app. \
+      defaultMessage:
+        'The `{moduleName}` Metricbeat module fetches internal metrics from a Golang app. \
 [Learn more]({learnMoreLink}).',
       values: {
         moduleName,
@@ -46,19 +51,22 @@ export function golangMetricsSpecProvider(context) {
       dashboards: [
         {
           id: 'f2dc7320-f519-11e6-a3c9-9d1f7c42b045-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.golangMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Golang metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.golangMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Golang metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-' + moduleName + '.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-' + moduleName + '.html',
+      },
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

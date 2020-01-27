@@ -8,6 +8,8 @@ require('../../../../../src/setup_node_env');
 
 const fs = require('fs');
 const path = require('path');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const uuid = require('uuid');
 
 /*
  * This script is used to parse a set of saved searches on a file system
@@ -36,8 +38,17 @@ const TO = 'now';
 const IMMUTABLE = true;
 const RISK_SCORE = 50;
 const ENABLED = false;
-let allRules = '';
-const allRulesNdJson = 'all_rules.ndjson';
+let allRules = `/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+// Auto generated file from scripts/convert_saved_search_rules.js
+// Do not hand edit. Run the script against a set of saved searches instead
+
+`;
+const allRulesNdJson = 'index.ts';
 
 // For converting, if you want to use these instead of rely on the defaults then
 // comment these in and use them for the script. Otherwise this is commented out
@@ -62,14 +73,26 @@ const walk = dir => {
 
 //clean up the file system characters
 const cleanupFileName = file => {
-  return path
-    .basename(file, path.extname(file))
+  const fileWithoutSpecialChars = file
+    .trim()
+    .replace(/\./g, '')
+    .replace(/\//g, '')
     .replace(/\s+/g, '_')
     .replace(/,/g, '')
+    .replace(/\[/g, '')
+    .replace(/\]/g, '')
+    .replace(/\(/g, '')
+    .replace(/\)/g, '')
+    .replace(/\@/g, '')
+    .replace(/\:/g, '')
     .replace(/\+s/g, '')
     .replace(/-/g, '')
     .replace(/__/g, '_')
     .toLowerCase();
+  return path.basename(
+    fileWithoutSpecialChars.trim(),
+    path.extname(fileWithoutSpecialChars.trim())
+  );
 };
 
 async function main() {
@@ -89,22 +112,20 @@ async function main() {
   const savedSearchesParsed = savedSearchesJson.reduce((accum, json) => {
     const jsonFile = fs.readFileSync(json, 'utf8');
     const jsonLines = jsonFile.split(/\r{0,1}\n/);
-    const parsedLines = jsonLines.reduce((accum, line, index) => {
+    const parsedLines = jsonLines.reduce((accum, line) => {
       try {
         const parsedLine = JSON.parse(line);
-        if (index !== 0) {
-          parsedLine._file = `${json.substring(0, json.length - '.ndjson'.length)}_${String(
-            index
-          )}.ndjson`;
-        } else {
-          parsedLine._file = json;
+        // don't try to parse out any exported count records
+        if (parsedLine.exportedCount != null) {
+          return accum;
         }
+        parsedLine._file = parsedLine.attributes.title;
         parsedLine.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.parse(
           parsedLine.attributes.kibanaSavedObjectMeta.searchSourceJSON
         );
         return [...accum, parsedLine];
       } catch (err) {
-        console.log('error parsing a line in this file:', json);
+        console.log('error parsing a line in this file:', json, line);
         return accum;
       }
     }, []);
@@ -112,51 +133,64 @@ async function main() {
   }, []);
 
   savedSearchesParsed.forEach(
-    ({
-      _file,
-      attributes: {
-        description,
-        title,
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: {
-            query: { query, language },
-            filter,
+    (
+      {
+        _file,
+        attributes: {
+          description,
+          title,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: {
+              query: { query, language },
+              filter,
+            },
           },
         },
       },
-    }) => {
+      index
+    ) => {
       const fileToWrite = cleanupFileName(_file);
 
-      if (query != null && query.trim() !== '') {
-        const outputMessage = {
-          rule_id: fileToWrite,
-          risk_score: RISK_SCORE,
-          description: description || title,
-          immutable: IMMUTABLE,
-          interval: INTERVAL,
-          name: title,
-          severity: SEVERITY,
-          type: TYPE,
-          from: FROM,
-          to: TO,
-          query,
-          language,
-          filters: filter,
-          enabled: ENABLED,
-          // comment these in if you want to use these for input output, otherwise
-          // with these two commented out, we will use the default saved objects from spaces.
-          // index: INDEX,
-          // output_index: OUTPUT_INDEX,
-        };
+      // remove meta value from the filter
+      const filterWithoutMeta = filter.map(filterValue => {
+        filterValue.$state;
+        return filterValue;
+      });
+      const outputMessage = {
+        rule_id: uuid.v4(),
+        risk_score: RISK_SCORE,
+        description: description || title,
+        immutable: IMMUTABLE,
+        interval: INTERVAL,
+        name: title,
+        severity: SEVERITY,
+        type: TYPE,
+        from: FROM,
+        to: TO,
+        query,
+        language,
+        filters: filterWithoutMeta,
+        enabled: ENABLED,
+        version: 1,
+        // comment these in if you want to use these for input output, otherwise
+        // with these two commented out, we will use the default saved objects from spaces.
+        // index: INDEX,
+        // output_index: OUTPUT_INDEX,
+      };
 
-        fs.writeFileSync(
-          `${outputDir}/${fileToWrite}.json`,
-          JSON.stringify(outputMessage, null, 2)
-        );
-        allRules += `${JSON.stringify(outputMessage)}\n`;
-      }
+      fs.writeFileSync(
+        `${outputDir}/${fileToWrite}.json`,
+        `${JSON.stringify(outputMessage, null, 2)}\n`
+      );
+      allRules += `import rule${index + 1} from './${fileToWrite}.json';\n`;
     }
   );
+  allRules += '\n';
+  allRules += 'export const rawRules = [\n';
+  savedSearchesParsed.forEach((_, index) => {
+    allRules += `  rule${index + 1},\n`;
+  });
+  allRules += '];\n';
   fs.writeFileSync(`${outputDir}/${allRulesNdJson}`, allRules);
 }
 

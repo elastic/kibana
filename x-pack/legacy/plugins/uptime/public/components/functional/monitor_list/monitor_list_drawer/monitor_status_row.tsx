@@ -57,7 +57,7 @@ export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProp
           />
         )}
       </EuiHealth>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="xs" />
     </>
   );
 };

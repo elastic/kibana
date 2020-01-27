@@ -51,8 +51,7 @@ export class Home extends Component {
       getServices().getInjected('disableWelcomeScreen') ||
       props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
     );
-    const showTelemetryDisclaimer = getServices().getInjected('telemetryNotifyUserAboutOptInDefault');
-
+    const currentOptInStatus = this.props.getOptInStatus();
     this.state = {
       // If welcome is enabled, we wait for loading to complete
       // before rendering. This prevents an annoying flickering
@@ -61,7 +60,7 @@ export class Home extends Component {
       isLoading: isWelcomeEnabled,
       isNewKibanaInstance: false,
       isWelcomeEnabled,
-      showTelemetryDisclaimer,
+      currentOptInStatus,
     };
   }
 
@@ -140,13 +139,9 @@ export class Home extends Component {
     return (
       <EuiPage restrictWidth={1200} data-test-subj="homeApp">
         <EuiPageBody className="eui-displayBlock">
-
           <EuiScreenReaderOnly>
             <h1>
-              <FormattedMessage
-                id="kbn.home.welcomeHomePageHeader"
-                defaultMessage="Kibana home"
-              />
+              <FormattedMessage id="kbn.home.welcomeHomePageHeader" defaultMessage="Kibana home" />
             </h1>
           </EuiScreenReaderOnly>
 
@@ -224,14 +219,13 @@ export class Home extends Component {
   renderLoading() {
     return '';
   }
-
   renderWelcome() {
     return (
       <Welcome
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
-        showTelemetryDisclaimer={this.state.showTelemetryDisclaimer}
         onOptInSeen={this.props.onOptInSeen}
+        currentOptInStatus={this.state.currentOptInStatus}
       />
     );
   }
@@ -271,4 +265,5 @@ Home.propTypes = {
   urlBasePath: PropTypes.string.isRequired,
   mlEnabled: PropTypes.bool.isRequired,
   onOptInSeen: PropTypes.func.isRequired,
+  getOptInStatus: PropTypes.func.isRequired,
 };

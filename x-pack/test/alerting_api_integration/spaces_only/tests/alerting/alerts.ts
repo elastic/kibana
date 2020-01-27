@@ -123,7 +123,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            interval: '1m',
+            schedule: { interval: '1m' },
             alertTypeId: 'test.always-firing',
             params: {
               index: ES_TEST_INDEX_NAME,

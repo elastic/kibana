@@ -10,7 +10,7 @@ import {
   CANVAS_TYPE,
   API_ROUTE_WORKPAD,
 } from '../../../../../legacy/plugins/canvas/common/lib/constants';
-import { okResponse } from './ok_response';
+import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
 
 export function initializeDeleteWorkpadRoute(deps: RouteInitializerDeps) {

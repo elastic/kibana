@@ -19,6 +19,7 @@
 
 import { PulseChannel } from './channel';
 
+export const sendUsageFrom: 'browser' | 'server' = 'browser';
 export const CLUSTER_UUID = '123';
 export const BASE_URL = 'http://localhost:5601/api/pulse_poc';
 export interface ChannelsToSend {
@@ -32,7 +33,7 @@ export type Fetcher<Response> = (
 ) => Promise<Response>;
 
 export async function sendPulse<Response>(
-  channels: Map<string, PulseChannel>,
+  channels: Map<string, Pick<PulseChannel, 'getRecords' | 'id' | 'clearRecords'>>,
   fetcher: Fetcher<Response>
 ) {
   const url = `${BASE_URL}/intake/${CLUSTER_UUID}`;

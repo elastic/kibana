@@ -38,7 +38,7 @@ export function createApi({
       }
       // Give providers access to other search strategies by injecting this function
       const strategy = await strategyProvider(caller, api.search);
-      return strategy.search(request);
+      return strategy.search(request, options);
     },
   };
   return api;

@@ -26,7 +26,7 @@ export default function spaceSelectorFunctonalTests({
       after(async () => await esArchiver.unload('spaces/selector'));
 
       afterEach(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
       });
 
       it('allows user to navigate to different spaces', async () => {
@@ -87,7 +87,7 @@ export default function spaceSelectorFunctonalTests({
           hash: sampleDataHash,
         });
         await PageObjects.home.removeSampleDataSet('logs');
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await esArchiver.unload('spaces/selector');
       });
 

@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Observable } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
-import { ConfigService, Env, Config, ConfigPath } from './config';
+import {
+  ConfigService,
+  Env,
+  ConfigPath,
+  RawConfigurationProvider,
+  coreDeprecationProvider,
+} from './config';
 import { ElasticsearchService } from './elasticsearch';
 import { PulseService } from './pulse';
 import { HttpService, InternalHttpServiceSetup } from './http';
@@ -30,6 +35,7 @@ import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
 
+import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
@@ -43,8 +49,10 @@ import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup } from './internal_types';
 import { CapabilitiesService } from './capabilities';
+import { UuidService } from './uuid';
 
 const coreId = Symbol('core');
+const rootConfigPath = '';
 
 export class Server {
   public readonly configService: ConfigService;
@@ -58,14 +66,15 @@ export class Server {
   private readonly plugins: PluginsService;
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
+  private readonly uuid: UuidService;
 
   constructor(
-    public readonly config$: Observable<Config>,
+    rawConfigProvider: RawConfigurationProvider,
     public readonly env: Env,
     private readonly logger: LoggerFactory
   ) {
     this.log = this.logger.get('server');
-    this.configService = new ConfigService(config$, env, logger);
+    this.configService = new ConfigService(rawConfigProvider, env, logger);
 
     const core = { coreId, configService: this.configService, env, logger };
     this.context = new ContextService(core);
@@ -77,6 +86,7 @@ export class Server {
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
     this.capabilities = new CapabilitiesService(core);
+    this.uuid = new UuidService(core);
   }
 
   public async setup() {
@@ -87,6 +97,7 @@ export class Server {
     const legacyPlugins = await this.legacy.discoverPlugins();
 
     // Immediately terminate in case of invalid configuration
+    await this.configService.validate();
     await ensureValidConfiguration(this.configService, legacyPlugins);
 
     const contextServiceSetup = this.context.setup({
@@ -99,6 +110,8 @@ export class Server {
         [this.legacy.legacyId, [...pluginDependencies.keys()]],
       ]),
     });
+
+    const uuidSetup = await this.uuid.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
@@ -116,31 +129,6 @@ export class Server {
       elasticsearch: elasticsearchServiceSetup,
     });
 
-    // example of retrieving instructions for a specific channel
-    const defaultChannelInstructions$ = pulseSetup.getChannel('default').instructions$();
-
-    // example of retrieving only instructions that you "own"
-    // use this to only pay attention to pulse instructions you care about
-    const coreInstructions$ = defaultChannelInstructions$.pipe(
-      filter(instruction => instruction.owner === 'core')
-    );
-
-    // example of retrieving only instructions of a specific type
-    // use this to only pay attention to specific instructions
-    const pulseTelemetryInstructions$ = coreInstructions$.pipe(
-      filter(instruction => instruction.id === 'pulse_telemetry')
-    );
-
-    // example of retrieving only instructions with a specific value
-    // use this when you want to handle a specific scenario/use case for some type of instruction
-    const retryTelemetryInstructions$ = pulseTelemetryInstructions$.pipe(
-      filter(instruction => instruction.value === 'try_again')
-    );
-
-    retryTelemetryInstructions$.subscribe(() => {
-      this.log.info(`Received instructions to retry telemetry collection`);
-    });
-
     const uiSettingsSetup = await this.uiSettings.setup({
       http: httpSetup,
     });
@@ -154,10 +142,11 @@ export class Server {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
-      pulse: pulseSetup,
       http: httpSetup,
       uiSettings: uiSettingsSetup,
       savedObjects: savedObjectsSetup,
+      uuid: uuidSetup,
+      pulse: pulseSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -176,14 +165,18 @@ export class Server {
     this.log.debug('starting server');
     const savedObjectsStart = await this.savedObjects.start({});
     const capabilitiesStart = this.capabilities.start();
+    const uiSettingsStart = await this.uiSettings.start();
+
     const pluginsStart = await this.plugins.start({
       capabilities: capabilitiesStart,
-      savedObjects: savedObjectsStart
+      savedObjects: savedObjectsStart,
+      uiSettings: uiSettingsStart,
     });
 
     const coreStart = {
       capabilities: capabilitiesStart,
       savedObjects: savedObjectsStart,
+      uiSettings: uiSettingsStart,
       plugins: pluginsStart,
     };
     await this.legacy.start({
@@ -193,17 +186,22 @@ export class Server {
 
     await this.http.start();
 
+    // Starting it after http because it relies on the the HTTP service
+    // await this.pulse.start();
+
     return coreStart;
   }
 
   public async stop() {
     this.log.debug('stopping server');
 
+    // await this.pulse.stop();
     await this.legacy.stop();
     await this.plugins.stop();
     await this.savedObjects.stop();
     await this.elasticsearch.stop();
     await this.http.stop();
+    await this.uiSettings.stop();
   }
 
   private registerDefaultRoute(httpSetup: InternalHttpServiceSetup) {
@@ -240,9 +238,10 @@ export class Server {
     );
   }
 
-  public async setupConfigSchemas() {
+  public async setupCoreConfig() {
     const schemas: Array<[ConfigPath, Type<unknown>]> = [
       [pathConfig.path, pathConfig.schema],
+      [cspConfig.path, cspConfig.schema],
       [elasticsearchConfig.path, elasticsearchConfig.schema],
       [loggingConfig.path, loggingConfig.schema],
       [httpConfig.path, httpConfig.schema],
@@ -252,6 +251,8 @@ export class Server {
       [savedObjectsConfig.path, savedObjectsConfig.schema],
       [uiSettingsConfig.path, uiSettingsConfig.schema],
     ];
+
+    this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
 
     for (const [path, schema] of schemas) {
       await this.configService.setSchema(path, schema);

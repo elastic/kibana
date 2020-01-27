@@ -41,12 +41,13 @@
     background-color: #920000;
   }
 
-  .type-other, .unknown {
+  .type-other,
+  .unknown {
     background-color: #bfa180;
   }
 
   // Use euiPanel styling
-  @include euiPanel($selector: 'card-contents');
+  @include euiPanel($selector: '.card-contents');
 
   .card-contents {
     height: 378px;
@@ -68,12 +69,16 @@
     padding-bottom: 0px;
   }
 
-  .stat.min, .stat.max, .stat.median {
+  .stat.min,
+  .stat.max,
+  .stat.median {
     width: 30%;
     display: inline-block;
   }
 
-  .stat.min.value, .stat.max.value, .stat.median.value {
+  .stat.min.value,
+  .stat.max.value,
+  .stat.median.value {
     font-size: $euiFontSizeS;
     @include euiTextTruncate;
   }

@@ -42,7 +42,7 @@ describe('OIDCAuthenticationProvider', () => {
 
   describe('`login` method', () => {
     it('redirects third party initiated login attempts to the OpenId Connect Provider.', async () => {
-      const request = httpServerMock.createKibanaRequest({ path: '/api/security/v1/oidc' });
+      const request = httpServerMock.createKibanaRequest({ path: '/api/security/oidc' });
 
       mockOptions.client.callAsInternalUser.withArgs('shield.oidcPrepare').resolves({
         state: 'statevalue',
@@ -205,13 +205,13 @@ describe('OIDCAuthenticationProvider', () => {
     describe('authorization code flow', () => {
       defineAuthenticationFlowTests(() => ({
         request: httpServerMock.createKibanaRequest({
-          path: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
+          path: '/api/security/oidc?code=somecodehere&state=somestatehere',
         }),
         attempt: {
           flow: OIDCAuthenticationFlow.AuthorizationCode,
-          authenticationResponseURI: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
+          authenticationResponseURI: '/api/security/oidc?code=somecodehere&state=somestatehere',
         },
-        expectedRedirectURI: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
+        expectedRedirectURI: '/api/security/oidc?code=somecodehere&state=somestatehere',
       }));
     });
 
@@ -219,14 +219,13 @@ describe('OIDCAuthenticationProvider', () => {
       defineAuthenticationFlowTests(() => ({
         request: httpServerMock.createKibanaRequest({
           path:
-            '/api/security/v1/oidc?authenticationResponseURI=http://kibana/api/security/v1/oidc/implicit#id_token=sometoken',
+            '/api/security/oidc?authenticationResponseURI=http://kibana/api/security/oidc/implicit#id_token=sometoken',
         }),
         attempt: {
           flow: OIDCAuthenticationFlow.Implicit,
-          authenticationResponseURI:
-            'http://kibana/api/security/v1/oidc/implicit#id_token=sometoken',
+          authenticationResponseURI: 'http://kibana/api/security/oidc/implicit#id_token=sometoken',
         },
-        expectedRedirectURI: 'http://kibana/api/security/v1/oidc/implicit#id_token=sometoken',
+        expectedRedirectURI: 'http://kibana/api/security/oidc/implicit#id_token=sometoken',
       }));
     });
   });

@@ -32,19 +32,19 @@ async function fetch(server) {
         bool: {
           filter: {
             term: {
-              _id: `task:${TASK_ID}`
-            }
-          }
-        }
-      }
+              _id: `task:${TASK_ID}`,
+            },
+          },
+        },
+      },
     }));
   } catch (err) {
     const errMessage = err && err.message ? err.message : err.toString();
     /*
-    * The usage service WILL to try to fetch from this collector before the task manager has been initialized, because the task manager
-    * has to wait for all plugins to initialize first.
-    * It's fine to ignore it as next time around it will be initialized (or it will throw a different type of error)
-    */
+     * The usage service WILL to try to fetch from this collector before the task manager has been initialized, because the task manager
+     * has to wait for all plugins to initialize first.
+     * It's fine to ignore it as next time around it will be initialized (or it will throw a different type of error)
+     */
     if (errMessage.indexOf('NotInitialized') >= 0) {
       return null;
     } else {

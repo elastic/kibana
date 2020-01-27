@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { DataRecognizer } from '../models/data_recognizer';
-
 
 function recognize(callWithRequest, indexPatternTitle) {
   const dr = new DataRecognizer(callWithRequest);
@@ -53,7 +50,8 @@ function saveModuleItems(
     end,
     jobOverrides,
     datafeedOverrides,
-    request);
+    request
+  );
 }
 
 function dataRecognizerJobsExist(callWithRequest, moduleId) {
@@ -62,19 +60,17 @@ function dataRecognizerJobsExist(callWithRequest, moduleId) {
 }
 
 export function dataRecognizer({ commonRouteConfig, elasticsearchPlugin, route }) {
-
   route({
     method: 'GET',
     path: '/api/ml/modules/recognize/{indexPatternTitle}',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const indexPatternTitle = request.params.indexPatternTitle;
-      return recognize(callWithRequest, indexPatternTitle)
-        .catch(resp => wrapError(resp));
+      return recognize(callWithRequest, indexPatternTitle).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -88,12 +84,11 @@ export function dataRecognizer({ commonRouteConfig, elasticsearchPlugin, route }
         // the moduleId will be an empty string.
         moduleId = undefined;
       }
-      return getModule(callWithRequest, moduleId)
-        .catch(resp => wrapError(resp));
+      return getModule(callWithRequest, moduleId).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -130,12 +125,11 @@ export function dataRecognizer({ commonRouteConfig, elasticsearchPlugin, route }
         jobOverrides,
         datafeedOverrides,
         request
-      )
-        .catch(resp => wrapError(resp));
+      ).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -144,11 +138,10 @@ export function dataRecognizer({ commonRouteConfig, elasticsearchPlugin, route }
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const moduleId = request.params.moduleId;
-      return dataRecognizerJobsExist(callWithRequest, moduleId)
-        .catch(resp => wrapError(resp));
+      return dataRecognizerJobsExist(callWithRequest, moduleId).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 }

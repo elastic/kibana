@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
@@ -12,9 +12,11 @@ import * as React from 'react';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import { zeekRowRenderer } from './zeek_row_renderer';
 
 describe('zeek_row_renderer', () => {
+  const mount = useMountAppended();
   let nonZeek: Ecs;
   let zeek: Ecs;
 

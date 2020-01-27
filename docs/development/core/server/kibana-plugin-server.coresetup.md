@@ -22,4 +22,5 @@ export interface CoreSetup
 |  [http](./kibana-plugin-server.coresetup.http.md) | <code>HttpServiceSetup</code> | [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |
 |  [savedObjects](./kibana-plugin-server.coresetup.savedobjects.md) | <code>SavedObjectsServiceSetup</code> | [SavedObjectsServiceSetup](./kibana-plugin-server.savedobjectsservicesetup.md) |
 |  [uiSettings](./kibana-plugin-server.coresetup.uisettings.md) | <code>UiSettingsServiceSetup</code> | [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |
+|  [uuid](./kibana-plugin-server.coresetup.uuid.md) | <code>UuidServiceSetup</code> | [UuidServiceSetup](./kibana-plugin-server.uuidservicesetup.md) |
 

@@ -7,9 +7,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiBadge
-} from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 
 export function ExplorerChartLabelBadge({ entity }) {
   return (
@@ -23,6 +21,6 @@ export function ExplorerChartLabelBadge({ entity }) {
 ExplorerChartLabelBadge.propTypes = {
   entity: PropTypes.shape({
     fieldName: PropTypes.string.isRequired,
-    fieldValue: PropTypes.string.isRequired
-  })
+    fieldValue: PropTypes.string.isRequired,
+  }),
 };

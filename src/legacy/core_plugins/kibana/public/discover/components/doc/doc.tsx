@@ -19,9 +19,10 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
+import { IndexPatternsContract } from 'src/plugins/data/public';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { ElasticRequestState, useEsDocSearch } from './use_es_doc_search';
-import { IndexPatterns, ElasticSearchHit, getServices } from '../../kibana_services';
+import { ElasticSearchHit, getServices } from '../../kibana_services';
 
 export interface ElasticSearchResult {
   hits: {
@@ -50,7 +51,7 @@ export interface DocProps {
   /**
    * IndexPatternService to get a given index pattern by ID
    */
-  indexPatternService: IndexPatterns;
+  indexPatternService: IndexPatternsContract;
   /**
    * Client of ElasticSearch to use for the query
    */

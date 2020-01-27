@@ -106,6 +106,7 @@ export class QueryStringInputUI extends Component<Props, State> {
   public inputRef: HTMLInputElement | null = null;
 
   private persistedLog: PersistedLog | undefined;
+  private abortController: AbortController | undefined;
   private services = this.props.kibana.services;
   private componentIsUnmounting = false;
 
@@ -163,12 +164,22 @@ export class QueryStringInputUI extends Component<Props, State> {
       return;
     }
 
-    const suggestions: AutocompleteSuggestion[] = await getAutocompleteSuggestions({
-      query: queryString,
-      selectionStart,
-      selectionEnd,
-    });
-    return [...suggestions, ...recentSearchSuggestions];
+    try {
+      if (this.abortController) this.abortController.abort();
+      this.abortController = new AbortController();
+      const suggestions: AutocompleteSuggestion[] = await getAutocompleteSuggestions({
+        query: queryString,
+        selectionStart,
+        selectionEnd,
+        signal: this.abortController.signal,
+      });
+      return [...suggestions, ...recentSearchSuggestions];
+    } catch (e) {
+      // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
+      // Ignore aborted requests
+      if (e.message === 'The user aborted a request.') return;
+      throw e;
+    }
   };
 
   private getRecentSearchSuggestions = (query: string) => {

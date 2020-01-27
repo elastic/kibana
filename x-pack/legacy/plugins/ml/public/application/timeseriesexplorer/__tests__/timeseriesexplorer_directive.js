@@ -14,7 +14,7 @@ describe('ML - Time Series Explorer Directive', () => {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(() => {
-    ngMock.inject(function ($injector) {
+    ngMock.inject(function($injector) {
       $compile = $injector.get('$compile');
       const $rootScope = $injector.get('$rootScope');
       $scope = $rootScope.$new();
@@ -25,8 +25,8 @@ describe('ML - Time Series Explorer Directive', () => {
     $scope.$destroy();
   });
 
-  it('Initialize Time Series Explorer Directive', (done) => {
-    ngMock.inject(function () {
+  it('Initialize Time Series Explorer Directive', done => {
+    ngMock.inject(function() {
       expect(() => {
         $element = $compile('<ml-timeseries-explorer />')($scope);
       }).to.not.throwError();

@@ -20,7 +20,7 @@ type SourceIndex = DataFrameAnalyticsConfig['source']['index'];
 
 const getMockState = ({
   index,
-  modelMemoryLimit,
+  modelMemoryLimit = '100mb',
 }: {
   index: SourceIndex;
   modelMemoryLimit?: string;

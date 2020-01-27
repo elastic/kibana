@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function apacheMetricsSpecProvider(context) {
   const moduleName = 'apache';
@@ -33,7 +37,8 @@ export function apacheMetricsSpecProvider(context) {
       defaultMessage: 'Fetch internal metrics from the Apache 2 HTTP server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.apacheMetrics.longDescription', {
-      defaultMessage: 'The `apache` Metricbeat module fetches internal metrics from the Apache 2 HTTP server. \
+      defaultMessage:
+        'The `apache` Metricbeat module fetches internal metrics from the Apache 2 HTTP server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-apache.html',
@@ -44,20 +49,23 @@ export function apacheMetricsSpecProvider(context) {
       dashboards: [
         {
           id: 'Metricbeat-Apache-HTTPD-server-status-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.apacheMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Apache metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.apacheMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Apache metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-apache.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-apache.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apache_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

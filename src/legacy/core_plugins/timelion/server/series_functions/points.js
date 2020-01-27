@@ -29,7 +29,7 @@ export default new Chainable('points', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'radius',
@@ -74,7 +74,7 @@ export default new Chainable('points', {
           suggestion.help = 'default';
         }
         return suggestion;
-      })
+      }),
     },
     {
       name: 'show',
@@ -82,13 +82,13 @@ export default new Chainable('points', {
       help: i18n.translate('timelion.help.functions.points.args.showHelpText', {
         defaultMessage: 'Show points or not',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.pointsHelpText', {
     defaultMessage: 'Show the series as points',
   }),
   fn: function pointsFn(args) {
-    return alter(args, function (eachSeries, radius, weight, fill, fillColor, symbol, show) {
+    return alter(args, function(eachSeries, radius, weight, fill, fillColor, symbol, show) {
       eachSeries.points = eachSeries.points || {};
       eachSeries.points.radius = radius == null ? undefined : radius;
 
@@ -97,7 +97,7 @@ export default new Chainable('points', {
       }
 
       if (fill != null) {
-        eachSeries.points.fill =  fill / 10;
+        eachSeries.points.fill = fill / 10;
       }
 
       if (weight != null) {
@@ -120,9 +120,7 @@ export default new Chainable('points', {
 
       eachSeries.points.show = show == null ? true : show;
 
-
-
       return eachSeries;
     });
-  }
+  },
 });

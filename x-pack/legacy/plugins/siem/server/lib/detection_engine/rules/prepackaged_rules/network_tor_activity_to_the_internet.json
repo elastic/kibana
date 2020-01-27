@@ -1,0 +1,17 @@
+{
+  "rule_id": "7d2c38d7-ede7-4bdf-b140-445906e6c540",
+  "risk_score": 50,
+  "description": "Network - Tor Activity to the Internet\t",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Network - Tor Activity to the Internet\t",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "(destination.port:9001 or destination.port:9030) and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

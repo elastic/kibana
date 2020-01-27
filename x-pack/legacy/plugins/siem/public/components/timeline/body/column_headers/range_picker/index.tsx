@@ -6,7 +6,6 @@
 
 import { EuiSelect } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { OnRangeSelected } from '../../../events';
@@ -29,7 +28,7 @@ const SelectContainer = styled.div`
 SelectContainer.displayName = 'SelectContainer';
 
 /** Renders a time range picker for the MiniMap (e.g. 1 Day, 1 Week...) */
-export const RangePicker = pure<Props>(({ selected, onRangeSelected }) => {
+export const RangePicker = React.memo<Props>(({ selected, onRangeSelected }) => {
   const onChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
     onRangeSelected(event.target.value);
   };

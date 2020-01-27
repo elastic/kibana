@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
@@ -18,6 +18,7 @@ import { mocksSource } from '../../../containers/source/mock';
 import { FlowTarget } from '../../../graphql/types';
 import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../mock';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 import { mockUiSettings } from '../../../mock/ui_settings';
 import { createStore, State } from '../../../store';
 import { InputsModelId } from '../../../store/inputs/constants';
@@ -112,6 +113,8 @@ jest.mock('ui/documentation_links', () => ({
 }));
 
 describe('Ip Details', () => {
+  const mount = useMountAppended();
+
   beforeAll(() => {
     (global as GlobalWithFetch).fetch = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
@@ -126,14 +129,15 @@ describe('Ip Details', () => {
   afterAll(() => {
     delete (global as GlobalWithFetch).fetch;
   });
-  const state: State = mockGlobalState;
 
+  const state: State = mockGlobalState;
   let store = createStore(state, apolloClientObservable);
 
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
     localSource = cloneDeep(mocksSource);
   });
+
   test('it renders', () => {
     const wrapper = shallow(<IPDetailsComponent {...getMockProps('123.456.78.90')} />);
     expect(wrapper.find('[data-test-subj="ip-details-page"]').exists()).toBe(true);

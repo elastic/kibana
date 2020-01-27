@@ -99,7 +99,6 @@ exports[`SpacesGridPage renders as expected 1`] = `
           },
         ]
       }
-      executeQueryOptions={Object {}}
       hasActions={true}
       itemId="id"
       items={Array []}

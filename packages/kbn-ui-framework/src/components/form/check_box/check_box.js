@@ -21,13 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-export const KuiCheckBox = ({
-  className,
-  isChecked,
-  isDisabled,
-  onChange,
-  ...rest
-}) => {
+export const KuiCheckBox = ({ className, isChecked, isDisabled, onChange, ...rest }) => {
   const classes = classNames('kuiCheckBox', className);
 
   return (

@@ -20,19 +20,19 @@ export function esIndicesRoute(server) {
     config: {
       validate: {
         params: Joi.object({
-          clusterUuid: Joi.string().required()
+          clusterUuid: Joi.string().required(),
         }),
         query: Joi.object({
-          show_system_indices: Joi.boolean()
+          show_system_indices: Joi.boolean(),
         }),
         payload: Joi.object({
           ccs: Joi.string().optional(),
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+            max: Joi.date().required(),
+          }).required(),
+        }),
+      },
     },
     async handler(req) {
       const config = server.config();
@@ -43,16 +43,18 @@ export function esIndicesRoute(server) {
 
       try {
         const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);
-        const shardStats = await getShardStats(req, esIndexPattern, clusterStats, { includeIndices: true });
+        const shardStats = await getShardStats(req, esIndexPattern, clusterStats, {
+          includeIndices: true,
+        });
         const indices = await getIndices(req, esIndexPattern, showSystemIndices, shardStats);
 
         return {
           clusterStatus: getClusterStatus(clusterStats, shardStats),
           indices,
         };
-      } catch(err) {
+      } catch (err) {
         throw handleError(err, req);
       }
-    }
+    },
   });
 }

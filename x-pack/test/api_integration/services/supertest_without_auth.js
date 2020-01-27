@@ -16,8 +16,10 @@ export function SupertestWithoutAuthProvider({ getService }) {
   const config = getService('config');
   const kibanaServerConfig = config.get('servers.kibana');
 
-  return supertestAsPromised(formatUrl({
-    ...kibanaServerConfig,
-    auth: false
-  }));
+  return supertestAsPromised(
+    formatUrl({
+      ...kibanaServerConfig,
+      auth: false,
+    })
+  );
 }
