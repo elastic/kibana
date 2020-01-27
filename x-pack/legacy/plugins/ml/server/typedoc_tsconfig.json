@@ -1,0 +1,15 @@
+{
+  "typedocOptions": {
+    "name": "ML Kibana API",
+    "mode": "modules",
+    "plugin": "typedoc-plugin-markdown",
+    "includeDeclarations": true,
+    "excludeExternals": true,
+    "out": "./x-pack/legacy/plugins/ml/server/routes/typedoc",
+    "ignoreCompilerErrors": true,
+    "readme": "none"
+  },
+  "include": [
+    "./routes"
+  ]
+}
