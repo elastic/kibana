@@ -106,7 +106,7 @@ def getTestFailuresMessage() {
   }
 
   def messages = []
-  messages << "### [Test Failures](${env.BUILD_URL}testReport)"
+  messages << "---\n\n### [Test Failures](${env.BUILD_URL}testReport)"
 
   failures.take(3).each { failure ->
     messages << """
@@ -121,6 +121,10 @@ def getTestFailuresMessage() {
 
     if (failure.stdErr) {
       messages << "\n#### Standard Error\n```\n${failure.stdErr}\n```"
+    }
+
+    if (failure.stacktrace) {
+      messages << "\n#### Stack Trace\n```\n${failure.stacktrace}\n```"
     }
 
     messages << "</details>\n\n---"
