@@ -92,7 +92,8 @@
     "**/react": "^16.12.0",
     "**/react-test-renderer": "^16.12.0",
     "**/deepmerge": "^4.2.2",
-    "**/serialize-javascript": "^2.1.1"
+    "**/serialize-javascript": "^2.1.1",
+    "**/fast-deep-equal": "^3.1.1"
   },
   "workspaces": {
     "packages": [
@@ -347,6 +348,7 @@
     "@types/moment-timezone": "^0.5.12",
     "@types/mustache": "^0.8.31",
     "@types/node": "^10.12.27",
+    "@types/numeral": "^0.0.26",
     "@types/opn": "^5.1.0",
     "@types/pegjs": "^0.10.1",
     "@types/pngjs": "^3.3.2",

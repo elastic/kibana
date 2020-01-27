@@ -6,3 +6,4 @@
 
 export { getFocusData } from './get_focus_data';
 export * from './timeseriesexplorer_utils';
+export { validateJobSelection } from './validate_job_selection';

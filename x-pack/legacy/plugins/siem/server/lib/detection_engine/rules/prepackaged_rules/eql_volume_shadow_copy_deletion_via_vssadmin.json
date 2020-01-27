@@ -1,17 +1,37 @@
 {
-  "description": "EQL - Volume Shadow Copy Deletion via VssAdmin",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "Identifies use of vssadmin.exe for shadow copy deletion on endpoints.  This commonly occurs in tandem with ransomware or other destructive attacks.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
-  "name": "EQL - Volume Shadow Copy Deletion via VssAdmin",
-  "query": "  event.action:\"Process Create (rule: ProcessCreate)\"  and process.name:\"vssadmin.exe\" and process.args:(\"delete\" and \"shadows\") ",
-  "risk_score": 50,
+  "name": "Volume Shadow Copy Deletion via VssAdmin",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\"  and process.name:\"vssadmin.exe\" and process.args:(\"delete\" and \"shadows\") ",
+  "risk_score": 75,
   "rule_id": "b5ea4bfe-a1b2-421f-9d47-22a75a6f2921",
-  "severity": "low",
-  "to": "now",
+  "severity": "high",
+  "tags": ["Elastic"],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1490",
+          "name": "Inhibit System Recovery",
+          "reference": "https://attack.mitre.org/techniques/T1490/"
+        }
+      ]
+    }
+  ],
   "type": "query",
   "version": 1
 }

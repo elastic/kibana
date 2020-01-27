@@ -16,5 +16,7 @@ export interface SavedObjectsServiceStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [createInternalRepository](./kibana-plugin-server.savedobjectsservicestart.createinternalrepository.md) | <code>(extraTypes?: string[]) =&gt; ISavedObjectsRepository</code> | Creates a [Saved Objects repository](./kibana-plugin-server.isavedobjectsrepository.md) that uses the internal Kibana user for authenticating with Elasticsearch. |
+|  [createScopedRepository](./kibana-plugin-server.savedobjectsservicestart.createscopedrepository.md) | <code>(req: KibanaRequest, extraTypes?: string[]) =&gt; ISavedObjectsRepository</code> | Creates a [Saved Objects repository](./kibana-plugin-server.isavedobjectsrepository.md) that uses the credentials from the passed in request to authenticate with Elasticsearch. |
 |  [getScopedClient](./kibana-plugin-server.savedobjectsservicestart.getscopedclient.md) | <code>(req: KibanaRequest, options?: SavedObjectsClientProviderOptions) =&gt; SavedObjectsClientContract</code> | Creates a [Saved Objects client](./kibana-plugin-server.savedobjectsclientcontract.md) that uses the credentials from the passed in request to authenticate with Elasticsearch. If other plugins have registered Saved Objects client wrappers, these will be applied to extend the functionality of the client.<!-- -->A client that is already scoped to the incoming request is also exposed from the route handler context see [RequestHandlerContext](./kibana-plugin-server.requesthandlercontext.md)<!-- -->. |
 
