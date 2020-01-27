@@ -27,6 +27,7 @@ import {
 } from '../../../../../test_utils/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
+import { httpServerMock } from '../../../http/http_server.mocks';
 
 const logger = loggingServiceMock.create().get();
 describe('createOrUpgradeSavedConfig()', () => {
@@ -48,7 +49,9 @@ describe('createOrUpgradeSavedConfig()', () => {
     kbnServer = kbn.kbnServer;
 
     const savedObjects = kbnServer.server.savedObjects;
-    savedObjectsClient = savedObjects.getScopedSavedObjectsClient({});
+    savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+      httpServerMock.createKibanaRequest()
+    );
 
     await savedObjectsClient.bulkCreate([
       {
