@@ -62,25 +62,25 @@ class JobQueueClient {
 
     return core.http.get(`${API_LIST_URL}/list`, {
       query,
-      headers: { 'kbn-system-api': true },
+      asSystemRequest: true,
     });
   };
 
   public total(): Promise<number> {
     return core.http.get(`${API_LIST_URL}/count`, {
-      headers: { 'kbn-system-api': true },
+      asSystemRequest: true,
     });
   }
 
   public getContent(jobId: string): Promise<JobContent> {
     return core.http.get(`${API_LIST_URL}/output/${jobId}`, {
-      headers: { 'kbn-system-api': true },
+      asSystemRequest: true,
     });
   }
 
   public getInfo(jobId: string): Promise<JobInfo> {
     return core.http.get(`${API_LIST_URL}/info/${jobId}`, {
-      headers: { 'kbn-system-api': true },
+      asSystemRequest: true,
     });
   }
 }

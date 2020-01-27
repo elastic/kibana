@@ -236,7 +236,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
         }
 
         const defaultMessage =
-          error.res.status === 403 ? (
+          error?.res?.status === 403 ? (
             <FormattedMessage
               id="xpack.reporting.panelContent.noPermissionToGenerateReportDescription"
               defaultMessage="You don't have permission to generate this report."

@@ -11,7 +11,7 @@ const { core } = npStart;
 
 // @ts-ignore
 import rison from 'rison-node';
-import { jobCompletionNotifications } from './job_completion_notifications';
+import { add } from './job_completion_notifications';
 
 const API_BASE_URL = '/api/reporting/generate';
 
@@ -33,6 +33,8 @@ export const createReportingJob = async (exportType: string, jobParams: any) => 
       jobParams: jobParamsRison,
     }),
   });
-  jobCompletionNotifications.add(resp.job.id);
+
+  add(resp.job.id);
+
   return resp;
 };
