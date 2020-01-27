@@ -141,7 +141,7 @@ const validateAlertType = (alert: Alert): ValidationResult => {
   return validationResult;
 };
 
-export function getActionType(): AlertTypeModel {
+export function getAlertType(): AlertTypeModel {
   return {
     id: 'threshold',
     name: 'Index Threshold',
