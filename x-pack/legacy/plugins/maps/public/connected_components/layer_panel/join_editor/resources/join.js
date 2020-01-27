@@ -89,7 +89,7 @@ export class Join extends Component {
     }
 
     this.setState({
-      rightFields: indexPattern.fields.filter(field => !isNestedField(field)),
+      rightFields: indexPattern.fields.filter(field => field.aggregatable && !isNestedField(field)),
       indexPattern,
     });
   }
