@@ -32,6 +32,7 @@ import {
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
 import { initServerWithKibana } from './server/kibana.index';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {
@@ -62,6 +63,7 @@ export const siem = (kibana: any) => {
           order: 9000,
           title: APP_NAME,
           url: `/app/${APP_ID}`,
+          category: DEFAULT_APP_CATEGORIES.security,
         },
       ],
       uiSettingDefaults: {
@@ -151,11 +153,11 @@ export const siem = (kibana: any) => {
       const { config, newPlatform, plugins, route } = server;
       const { coreContext, env, setup } = newPlatform;
       const initializerContext = { ...coreContext, env } as PluginInitializerContext;
-
       const serverFacade = {
         config,
         plugins: {
           alerting: plugins.alerting,
+          actions: newPlatform.start.plugins.actions,
           elasticsearch: plugins.elasticsearch,
           spaces: plugins.spaces,
           savedObjects: server.savedObjects.SavedObjectsClient,

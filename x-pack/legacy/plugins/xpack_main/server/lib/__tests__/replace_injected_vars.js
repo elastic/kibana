@@ -16,6 +16,7 @@ const buildRequest = (path = '/app/kibana') => {
   return {
     path,
     route: { settings: {} },
+    headers: {},
     raw: {
       req: {
         socket: {},

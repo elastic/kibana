@@ -19,11 +19,8 @@
 
 import d3 from 'd3';
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
 import $ from 'jquery';
 import _ from 'lodash';
-
-import 'ui/persisted_state';
 
 // Data
 import seriesPos from '../lib/fixtures/mock_data/date_histogram/_series';
@@ -32,7 +29,8 @@ import seriesNeg from '../lib/fixtures/mock_data/date_histogram/_series_neg';
 import histogramColumns from '../lib/fixtures/mock_data/histogram/_columns';
 import rangeRows from '../lib/fixtures/mock_data/range/_rows';
 import termSeries from '../lib/fixtures/mock_data/terms/_series';
-import getFixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+
+import { getVis, getMockUiState } from '../lib/fixtures/_vis_fixture';
 
 const dataTypes = [
   ['series pos', seriesPos],
@@ -50,25 +48,21 @@ describe('Vislib Line Chart', function() {
 
     describe(name + ' Data', function() {
       let vis;
-      let persistedState;
+      let mockUiState;
 
-      beforeEach(ngMock.module('kibana'));
-      beforeEach(
-        ngMock.inject(function(Private, $injector) {
-          const getVis = getFixturesVislibVisFixtureProvider(Private);
-          const visLibParams = {
-            type: 'line',
-            addLegend: true,
-            addTooltip: true,
-            drawLinesBetweenPoints: true,
-          };
+      beforeEach(() => {
+        const visLibParams = {
+          type: 'line',
+          addLegend: true,
+          addTooltip: true,
+          drawLinesBetweenPoints: true,
+        };
 
-          vis = getVis(visLibParams);
-          persistedState = new ($injector.get('PersistedState'))();
-          vis.render(data, persistedState);
-          vis.on('brush', _.noop);
-        })
-      );
+        vis = getVis(visLibParams);
+        mockUiState = getMockUiState();
+        vis.render(data, mockUiState);
+        vis.on('brush', _.noop);
+      });
 
       afterEach(function() {
         vis.destroy();
@@ -82,20 +76,18 @@ describe('Vislib Line Chart', function() {
         let onClick;
         let onMouseOver;
 
-        beforeEach(
-          ngMock.inject(function() {
-            vis.handler.charts.forEach(function(chart) {
-              circle = $(chart.chartEl).find('.circle')[0];
-              brush = $(chart.chartEl).find('.brush');
-              d3selectedCircle = d3.select(circle)[0][0];
+        beforeEach(function() {
+          vis.handler.charts.forEach(function(chart) {
+            circle = $(chart.chartEl).find('.circle')[0];
+            brush = $(chart.chartEl).find('.brush');
+            d3selectedCircle = d3.select(circle)[0][0];
 
-              // d3 instance of click and hover
-              onBrush = !!brush;
-              onClick = !!d3selectedCircle.__onclick;
-              onMouseOver = !!d3selectedCircle.__onmouseover;
-            });
-          })
-        );
+            // d3 instance of click and hover
+            onBrush = !!brush;
+            onClick = !!d3selectedCircle.__onclick;
+            onMouseOver = !!d3selectedCircle.__onmouseover;
+          });
+        });
 
         // D3 brushing requires that a g element is appended that
         // listens for mousedown events. This g element includes
@@ -177,7 +169,7 @@ describe('Vislib Line Chart', function() {
       describe('defaultYExtents is true', function() {
         beforeEach(function() {
           vis.visConfigArgs.defaultYExtents = true;
-          vis.render(data, persistedState);
+          vis.render(data, mockUiState);
         });
 
         it('should return yAxis extents equal to data extents', function() {
@@ -196,7 +188,7 @@ describe('Vislib Line Chart', function() {
           beforeEach(function() {
             vis.visConfigArgs.defaultYExtents = true;
             vis.visConfigArgs.boundsMargin = boundsMarginValue;
-            vis.render(data, persistedState);
+            vis.render(data, mockUiState);
           });
 
           it('should return yAxis extents equal to data extents with boundsMargin', function() {

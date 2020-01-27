@@ -17,10 +17,10 @@
  * under the License.
  */
 import { first } from 'rxjs/operators';
-import healthCheck from './lib/health_check';
-import { Cluster } from './lib/cluster';
-import { createProxy } from './lib/create_proxy';
-import { handleESError } from './lib/handle_es_error';
+import healthCheck from './server/lib/health_check';
+import { Cluster } from './server/lib/cluster';
+import { createProxy } from './server/lib/create_proxy';
+import { handleESError } from './server/lib/handle_es_error';
 
 export default function(kibana) {
   let defaultVars;

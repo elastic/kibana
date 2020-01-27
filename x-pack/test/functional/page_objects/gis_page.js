@@ -388,6 +388,27 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async closeOrCancelLayer(layerName) {
+      log.debug(`Close or cancel layer add`);
+      const cancelExists = await testSubjects.exists('layerAddCancelButton');
+      const closeExists = await testSubjects.exists('layerPanelCancelButton');
+      if (cancelExists) {
+        log.debug(`Cancel layer add.`);
+        await testSubjects.click('layerAddCancelButton');
+      } else if (closeExists) {
+        log.debug(`Close layer add.`);
+        await testSubjects.click('layerPanelCancelButton');
+      } else {
+        log.debug(`No need to close or cancel.`);
+        return;
+      }
+
+      await this.waitForLayerAddPanelClosed();
+      if (layerName) {
+        await this.waitForLayerDeleted(layerName);
+      }
+    }
+
     async importFileButtonEnabled() {
       log.debug(`Check "Import file" button enabled`);
       const importFileButton = await testSubjects.find('importFileButton');

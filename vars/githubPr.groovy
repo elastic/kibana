@@ -88,6 +88,8 @@ def getHistoryText(builds) {
     .collect { build ->
       if (build.status == "SUCCESS") {
         return "* :green_heart: [Build #${build.number}](${build.url}) succeeded ${build.commit}"
+      } else if(build.status == "UNSTABLE") {
+        return "* :yellow_heart: [Build #${build.number}](${build.url}) was flaky ${build.commit}"
       } else {
         return "* :broken_heart: [Build #${build.number}](${build.url}) failed ${build.commit}"
       }
@@ -97,18 +99,66 @@ def getHistoryText(builds) {
   return "### History\n${list}"
 }
 
-def getNextCommentMessage(previousCommentInfo = [:]) {
-  info = previousCommentInfo ?: [:]
-  info.builds = previousCommentInfo.builds ?: []
+def getTestFailuresMessage() {
+  def failures = testUtils.getFailures()
+  if (!failures) {
+    return ""
+  }
 
   def messages = []
 
-  if (buildUtils.getBuildStatus() == 'SUCCESS') {
+  failures.take(5).each { failure ->
+    messages << """
+---
+
+### [Test Failures](${env.BUILD_URL}testReport)
+<details><summary>${failure.fullDisplayName}</summary>
+
+[Link to Jenkins](${failure.url})
+
+```
+${failure.stdOut}
+```
+</details>
+
+---
+    """
+  }
+
+  if (failures.size() > 3) {
+    messages << "and ${failures.size() - 3} more failures, only showing the first 3."
+  }
+
+  return messages.join("\n")
+}
+
+def getNextCommentMessage(previousCommentInfo = [:]) {
+  def info = previousCommentInfo ?: [:]
+  info.builds = previousCommentInfo.builds ?: []
+
+  def messages = []
+  def status = buildUtils.getBuildStatus()
+
+  if (status == 'SUCCESS') {
     messages << """
       ## :green_heart: Build Succeeded
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
     """
+  } else if(status == 'UNSTABLE') {
+    def message = """
+      ## :yellow_heart: Build succeeded, but was flaky
+      * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
+      * Commit: ${getCommitHash()}
+    """.stripIndent()
+
+    def failures = retryable.getFlakyFailures()
+    if (failures && failures.size() > 0) {
+      def list = failures.collect { "  * ${it.label}" }.join("\n")
+      message += "* Flaky suites:\n${list}"
+    }
+
+    messages << message
   } else {
     messages << """
       ## :broken_heart: Build Failed
@@ -116,6 +166,8 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
       * Commit: ${getCommitHash()}
     """
   }
+
+  messages << getTestFailuresMessage()
 
   if (info.builds && info.builds.size() > 0) {
     messages << getHistoryText(info.builds)
@@ -133,7 +185,7 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
 
   return messages
     .findAll { !!it } // No blank strings
-    .collect { it.stripIndent().trim() }
+    .collect { it.stripIndent().trim() } // This just allows us to indent various strings above, but leaves them un-indented in the comment
     .join("\n\n")
 }
 

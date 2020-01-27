@@ -5,6 +5,9 @@
         "properties": {
           "parent": {
             "properties": {
+              "rule": {
+                "type": "keyword"
+              },
               "index": {
                 "type": "keyword"
               },
@@ -18,6 +21,9 @@
                 "type": "long"
               }
             }
+          },
+          "ancestors": {
+            "type": "object"
           },
           "rule": {
             "properties": {
@@ -81,8 +87,38 @@
               "tags": {
                 "type": "keyword"
               },
-              "threats": {
-                "type": "object"
+              "threat": {
+                "properties": {
+                  "framework": {
+                    "type": "keyword"
+                  },
+                  "tactic": {
+                    "properties": {
+                      "id": {
+                        "type": "keyword"
+                      },
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "reference": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "technique": {
+                    "properties": {
+                      "id": {
+                        "type": "keyword"
+                      },
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "reference": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
               },
               "type": {
                 "type": "keyword"

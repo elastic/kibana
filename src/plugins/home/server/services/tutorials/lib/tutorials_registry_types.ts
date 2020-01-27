@@ -26,17 +26,30 @@ export enum TutorialsCategory {
   METRICS = 'metrics',
   OTHER = 'other',
 }
+export type Platform = 'WINDOWS' | 'OSX' | 'DEB' | 'RPM';
+
 export interface ParamTypes {
   NUMBER: string;
   STRING: string;
 }
+export interface Instruction {
+  title?: string;
+  textPre?: string;
+  commands?: string[];
+  textPost?: string;
+}
+export interface InstructionVariant {
+  id: string;
+  instructions: Instruction[];
+}
 export interface InstructionSetSchema {
-  readonly title: string;
-  readonly callOut: {
+  readonly title?: string;
+  readonly callOut?: {
     title: string;
-    message: string;
-    iconType: IconType;
+    message?: string;
+    iconType?: IconType;
   };
+  instructionVariants: InstructionVariant[];
 }
 export interface ParamsSchema {
   defaultValue: any;
@@ -46,22 +59,19 @@ export interface ParamsSchema {
 }
 export interface InstructionsSchema {
   readonly instructionSets: InstructionSetSchema[];
-  readonly params: ParamsSchema[];
+  readonly params?: ParamsSchema[];
 }
 export interface DashboardSchema {
   id: string;
-  linkLabel?: {
-    is: boolean;
-    then: any;
-  };
+  linkLabel?: string;
   isOverview: boolean;
 }
 export interface ArtifactsSchema {
-  readonly exportedFields: {
+  exportedFields?: {
     documentationUrl: string;
   };
-  readonly dashboards: DashboardSchema[];
-  readonly application: {
+  dashboards: DashboardSchema[];
+  application?: {
     path: string;
     label: string;
   };
@@ -70,29 +80,32 @@ export interface TutorialSchema {
   id: string;
   category: TutorialsCategory;
   name: string;
-  isBeta: boolean;
+  isBeta?: boolean;
   shortDescription: string;
-  euiIconType: IconType; // EUI icon type string, one of https://elastic.github.io/eui/#/icon;
+  euiIconType?: IconType; // EUI icon type string, one of https://elastic.github.io/eui/#/icon;
   longDescription: string;
-  completionTimeMinutes: number;
-  previewImagePath: string;
+  completionTimeMinutes?: number;
+  previewImagePath?: string;
 
   // kibana and elastic cluster running on prem
   onPrem: InstructionsSchema;
 
   // kibana and elastic cluster running in elastic's cloud
-  elasticCloud: InstructionsSchema;
+  elasticCloud?: InstructionsSchema;
 
   // kibana running on prem and elastic cluster running in elastic's cloud
-  onPremElasticCloud: InstructionsSchema;
+  onPremElasticCloud?: InstructionsSchema;
 
   // Elastic stack artifacts produced by product when it is setup and run.
-  artifacts: ArtifactsSchema;
+  artifacts?: ArtifactsSchema;
 
   // saved objects used by data module.
-  savedObjects: any[];
-  savedObjectsInstallMsg: string;
+  savedObjects?: any[];
+  savedObjectsInstallMsg?: string;
 }
-export type TutorialProvider = (context: { [key: string]: unknown }) => TutorialSchema;
+export interface TutorialContext {
+  [key: string]: unknown;
+}
+export type TutorialProvider = (context: TutorialContext) => TutorialSchema;
 export type TutorialContextFactory = (req: KibanaRequest) => { [key: string]: unknown };
 export type ScopedTutorialContextFactory = (...args: any[]) => any;
