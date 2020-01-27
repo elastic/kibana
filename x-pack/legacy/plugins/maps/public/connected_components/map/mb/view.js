@@ -120,6 +120,7 @@ export class MBMapContainer extends React.Component {
       }
 
       const options = {
+        maxBounds: [-359, -89, 359, 89],
         attributionControl: false,
         container: this.refs.mapContainer,
         style: mbStyle,
