@@ -8,7 +8,6 @@ import Puid from 'puid';
 import sinon from 'sinon';
 import nodeCrypto from '@elastic/node-crypto';
 import { CancellationToken } from '../../../common/cancellation_token';
-import { FieldFormatsService } from '../../../../../../../src/legacy/ui/field_formats/mixin/field_formats_service';
 import { fieldFormats } from '../../../../../../../src/plugins/data/server';
 import { LevelLogger } from '../../../server/lib/level_logger';
 import { executeJobFactory } from './execute_job';
