@@ -36,7 +36,7 @@ export const getDriftTolerance = ({
   interval: moment.Duration;
 }): moment.Duration | null => {
   if (to.trim() !== 'now') {
-    // we only support 'now' for drift detection
+    // TODO: use Elastic date math
     return null;
   }
   if (!from.trim().startsWith('now-')) {
