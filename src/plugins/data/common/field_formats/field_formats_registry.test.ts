@@ -16,72 +16,67 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, IUiSettingsClient } from 'kibana/public';
-
-import { FieldFormatRegisty } from './field_formats';
-import {
-  BoolFormat,
-  IFieldFormatType,
-  PercentFormat,
-  StringFormat,
-} from '../../common/field_formats';
-import { coreMock } from '../../../../core/public/mocks';
+import { FieldFormatsRegistry } from './field_formats_registry';
+import { BoolFormat, PercentFormat, StringFormat } from './converters';
+import { GetConfigFn, IFieldFormatType } from './types';
 import { KBN_FIELD_TYPES } from '../../common';
 
 const getValueOfPrivateField = (instance: any, field: string) => instance[field];
-const getUiSettingsMock = (data: any): IUiSettingsClient['get'] => () => data;
 
-describe('FieldFormatRegisty', () => {
-  let mockCoreSetup: CoreSetup;
-  let fieldFormatRegisty: FieldFormatRegisty;
+describe('FieldFormatsRegistry', () => {
+  let fieldFormatsRegistry: FieldFormatsRegistry;
+  let defaultMap = {};
+  const getConfig = (() => defaultMap) as GetConfigFn;
 
   beforeEach(() => {
-    mockCoreSetup = coreMock.createSetup();
-    fieldFormatRegisty = new FieldFormatRegisty();
+    fieldFormatsRegistry = new FieldFormatsRegistry();
+    fieldFormatsRegistry.init(
+      getConfig,
+      {
+        parsedUrl: {
+          origin: '',
+          pathname: '',
+          basePath: '',
+        },
+      },
+      []
+    );
   });
 
-  test('should allows to create an instance of "FieldFormatRegisty"', () => {
-    expect(fieldFormatRegisty).toBeDefined();
-    expect(getValueOfPrivateField(fieldFormatRegisty, 'fieldFormats')).toBeDefined();
-    expect(getValueOfPrivateField(fieldFormatRegisty, 'defaultMap')).toEqual({});
+  test('should allows to create an instance of "FieldFormatsRegistry"', () => {
+    expect(fieldFormatsRegistry).toBeDefined();
+
+    expect(getValueOfPrivateField(fieldFormatsRegistry, 'fieldFormats')).toBeDefined();
+    expect(getValueOfPrivateField(fieldFormatsRegistry, 'defaultMap')).toEqual({});
   });
 
   describe('init', () => {
     test('should provide an public "init" method', () => {
-      expect(fieldFormatRegisty.init).toBeDefined();
-      expect(typeof fieldFormatRegisty.init).toBe('function');
-    });
-
-    test('should set basePath value from "init" method', () => {
-      fieldFormatRegisty.init(mockCoreSetup);
-
-      expect(getValueOfPrivateField(fieldFormatRegisty, 'basePath')).toBe(
-        mockCoreSetup.http.basePath.get()
-      );
+      expect(fieldFormatsRegistry.init).toBeDefined();
+      expect(typeof fieldFormatsRegistry.init).toBe('function');
     });
 
     test('should populate the "defaultMap" object', () => {
-      const defaultMap = {
+      defaultMap = {
         number: { id: 'number', params: {} },
       };
 
-      mockCoreSetup.uiSettings.get = getUiSettingsMock(defaultMap);
-      fieldFormatRegisty.init(mockCoreSetup);
-      expect(getValueOfPrivateField(fieldFormatRegisty, 'defaultMap')).toEqual(defaultMap);
+      fieldFormatsRegistry.init(getConfig, {}, []);
+      expect(getValueOfPrivateField(fieldFormatsRegistry, 'defaultMap')).toEqual(defaultMap);
     });
   });
 
   describe('register', () => {
     test('should provide an public "register" method', () => {
-      expect(fieldFormatRegisty.register).toBeDefined();
-      expect(typeof fieldFormatRegisty.register).toBe('function');
+      expect(fieldFormatsRegistry.register).toBeDefined();
+      expect(typeof fieldFormatsRegistry.register).toBe('function');
     });
 
     test('should register field formats', () => {
-      fieldFormatRegisty.register([StringFormat, BoolFormat]);
+      fieldFormatsRegistry.register([StringFormat, BoolFormat]);
 
       const registeredFieldFormatters: Map<string, IFieldFormatType> = getValueOfPrivateField(
-        fieldFormatRegisty,
+        fieldFormatsRegistry,
         'fieldFormats'
       );
 
@@ -95,28 +90,28 @@ describe('FieldFormatRegisty', () => {
 
   describe('getType', () => {
     test('should provide an public "getType" method', () => {
-      expect(fieldFormatRegisty.getType).toBeDefined();
-      expect(typeof fieldFormatRegisty.getType).toBe('function');
+      expect(fieldFormatsRegistry.getType).toBeDefined();
+      expect(typeof fieldFormatsRegistry.getType).toBe('function');
     });
 
     test('should return the registered type of the field format by identifier', () => {
-      fieldFormatRegisty.register([StringFormat]);
+      fieldFormatsRegistry.register([StringFormat]);
 
-      expect(fieldFormatRegisty.getType(StringFormat.id)).toBeDefined();
+      expect(fieldFormatsRegistry.getType(StringFormat.id)).toBeDefined();
     });
 
     test('should return void if the field format type has not been registered', () => {
-      fieldFormatRegisty.register([BoolFormat]);
+      fieldFormatsRegistry.register([BoolFormat]);
 
-      expect(fieldFormatRegisty.getType(StringFormat.id)).toBeUndefined();
+      expect(fieldFormatsRegistry.getType(StringFormat.id)).toBeUndefined();
     });
   });
 
   describe('fieldFormatMetaParamsDecorator', () => {
     test('should set meta params for all instances of FieldFormats', () => {
-      fieldFormatRegisty.register([StringFormat]);
+      fieldFormatsRegistry.register([StringFormat]);
 
-      const DecoratedStingFormat = fieldFormatRegisty.getType(StringFormat.id);
+      const DecoratedStingFormat = fieldFormatsRegistry.getType(StringFormat.id);
 
       expect(DecoratedStingFormat).toBeDefined();
 
@@ -135,9 +130,9 @@ describe('FieldFormatRegisty', () => {
     });
 
     test('should decorate static fields', () => {
-      fieldFormatRegisty.register([BoolFormat]);
+      fieldFormatsRegistry.register([BoolFormat]);
 
-      const DecoratedBoolFormat = fieldFormatRegisty.getType(BoolFormat.id);
+      const DecoratedBoolFormat = fieldFormatsRegistry.getType(BoolFormat.id);
 
       expect(DecoratedBoolFormat).toBeDefined();
 
@@ -150,14 +145,14 @@ describe('FieldFormatRegisty', () => {
 
   describe('getByFieldType', () => {
     test('should provide an public "getByFieldType" method', () => {
-      expect(fieldFormatRegisty.getByFieldType).toBeDefined();
-      expect(typeof fieldFormatRegisty.getByFieldType).toBe('function');
+      expect(fieldFormatsRegistry.getByFieldType).toBeDefined();
+      expect(typeof fieldFormatsRegistry.getByFieldType).toBe('function');
     });
 
     test('should decorate returns types', () => {
-      fieldFormatRegisty.register([StringFormat, BoolFormat]);
+      fieldFormatsRegistry.register([StringFormat, BoolFormat]);
 
-      const [DecoratedStringFormat] = fieldFormatRegisty.getByFieldType(KBN_FIELD_TYPES.STRING);
+      const [DecoratedStringFormat] = fieldFormatsRegistry.getByFieldType(KBN_FIELD_TYPES.STRING);
 
       expect(DecoratedStringFormat).toBeDefined();
 

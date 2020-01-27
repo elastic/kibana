@@ -17,10 +17,5 @@
  * under the License.
  */
 
-import { IFieldFormatId } from '../../common';
-
-export interface FieldType {
-  id: IFieldFormatId;
-  params: Record<string, any>;
-  es?: boolean;
-}
+require('../src/setup_node_env');
+require('../src/dev/run_check_lockfile_symlinks');
