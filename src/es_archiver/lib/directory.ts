@@ -18,10 +18,9 @@
  */
 
 import { readdir } from 'fs';
-
 import { fromNode } from 'bluebird';
 
-export async function readDirectory(path) {
-  const allNames = await fromNode(cb => readdir(path, cb));
+export async function readDirectory(path: string) {
+  const allNames = await fromNode<string[]>(cb => readdir(path, cb));
   return allNames.filter(name => !name.startsWith('.'));
 }

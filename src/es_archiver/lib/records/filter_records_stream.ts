@@ -19,14 +19,14 @@
 
 import { Transform } from 'stream';
 
-export function createFilterRecordsStream(type) {
+export function createFilterRecordsStream(type: string) {
   return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,
 
     transform(record, enc, callback) {
       if (record && record.type === type) {
-        callback(null, record);
+        callback(undefined, record);
       } else {
         callback();
       }
