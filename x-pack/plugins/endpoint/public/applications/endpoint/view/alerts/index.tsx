@@ -40,7 +40,7 @@ export const AlertIndex = memo(() => {
       const row = json[rowIndex];
 
       if (columnId === 'alert_type') {
-        return row.value.source.endgame.metadata.key;
+        return <a>row.value.source.endgame.metadata.key</a>;
       } else if (columnId === 'event_type') {
         return row.value.source.endgame.data.file_operation;
       } else if (columnId === 'os') {
