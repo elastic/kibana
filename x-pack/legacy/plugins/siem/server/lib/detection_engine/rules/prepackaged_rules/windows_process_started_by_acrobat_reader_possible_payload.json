@@ -1,16 +1,20 @@
 {
   "description": "Process started by Acrobat reader - possible payload",
-  "enabled": false,
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Process started by Acrobat reader - possible payload",
   "query": "process.parent.name:AcroRd32.exe and event.code:1",
   "risk_score": 50,
   "rule_id": "b6422896-b6e3-45c3-9d9e-4eccb2a25270",
   "severity": "low",
-  "to": "now",
+  "tags": ["Elastic"],
   "type": "query",
   "version": 1
 }

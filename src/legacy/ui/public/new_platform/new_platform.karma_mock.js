@@ -102,6 +102,12 @@ export const npSetup = {
           getSavedQueryCount: sinon.fake(),
         },
       },
+      __LEGACY: {
+        esClient: {
+          search: sinon.fake(),
+          msearch: sinon.fake(),
+        },
+      },
       fieldFormats: getFieldFormatRegistry(mockCore),
     },
     share: {

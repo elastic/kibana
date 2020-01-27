@@ -103,6 +103,7 @@ const OverviewComponent: React.FC<OverviewComponentReduxProps> = ({
                         <EuiSpacer size="l" />
 
                         <SignalsByCategory
+                          deleteQuery={deleteQuery}
                           filters={filters}
                           from={from}
                           indexPattern={indexPattern}
