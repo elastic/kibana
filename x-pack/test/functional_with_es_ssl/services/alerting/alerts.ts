@@ -22,13 +22,13 @@ export class Alerts {
     });
   }
 
-  public async createAlwaysFiringWithAction(
+  public async createAlwaysFiringWithActions(
     name: string,
-    action: {
+    actions: Array<{
       id: string;
       group: string;
       params: Record<string, any>;
-    }
+    }>
   ) {
     this.log.debug(`creating alert ${name}`);
 
@@ -40,7 +40,7 @@ export class Alerts {
       consumer: 'bar',
       schedule: { interval: '1m' },
       throttle: '1m',
-      actions: [action],
+      actions,
       params: {},
     });
     if (status !== 200) {
@@ -52,6 +52,17 @@ export class Alerts {
     this.log.debug(`created alert ${alert.id}`);
 
     return alert;
+  }
+
+  public async createAlwaysFiringWithAction(
+    name: string,
+    action: {
+      id: string;
+      group: string;
+      params: Record<string, any>;
+    }
+  ) {
+    return this.createAlwaysFiringWithActions(name, [action]);
   }
 
   public async deleteAlert(id: string) {

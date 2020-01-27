@@ -57,7 +57,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle size="m">
-                <h1>{alert.name}</h1>
+                <h1 data-test-subj="alertDetailsTitle">{alert.name}</h1>
               </EuiTitle>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
@@ -94,18 +94,18 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup wrap responsive={false} gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <EuiBadge>{alertType.name}</EuiBadge>
+                    <EuiBadge data-test-subj="alertTypeLabel">{alertType.name}</EuiBadge>
                   </EuiFlexItem>
                   {firstAction && (
                     <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">
+                      <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
                         {actionTypesByTypeId[firstAction.actionTypeId].name ??
                           firstAction.actionTypeId}
                       </EuiBadge>
                     </EuiFlexItem>
                   )}
                   {otherActions.length ? (
-                    <EuiFlexItem grow={false}>
+                    <EuiFlexItem grow={false} data-test-subj="actionCountLabel">
                       <EuiBadge color="hollow">+{otherActions.length}</EuiBadge>
                     </EuiFlexItem>
                   ) : null}
