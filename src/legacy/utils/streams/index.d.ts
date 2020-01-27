@@ -25,7 +25,7 @@ export function concatStreamProviders(
 ): Transform;
 export function createIntersperseStream(intersperseChunk: string | Buffer): Transform;
 export function createSplitStream<T>(splitChunk: T): Transform;
-export function createListStream(items: any[]): Readable;
+export function createListStream(items: any | any[]): Readable;
 export function createReduceStream<T>(reducer: (value: any, chunk: T, enc: string) => T): Transform;
 export function createPromiseFromStreams<T>([first, ...rest]: [Readable, ...Writable[]]): Promise<
   T

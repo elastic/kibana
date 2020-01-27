@@ -44,7 +44,7 @@ export async function rebuildAllAction({
 }: {
   dataDir: string;
   log: ToolingLog;
-  rootDir: string;
+  rootDir?: string;
 }) {
   const childNames = prioritizeMappings(await readDirectory(dataDir));
   for (const childName of childNames) {

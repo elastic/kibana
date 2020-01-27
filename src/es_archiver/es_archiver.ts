@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { KbnClient } from '@kbn/dev-utils';
+import { Client } from 'elasticsearch';
+import { ToolingLog, KbnClient } from '@kbn/dev-utils';
 
 import {
   saveAction,
@@ -29,7 +30,22 @@ import {
 } from './actions';
 
 export class EsArchiver {
-  constructor({ client, dataDir, log, kibanaUrl }) {
+  private readonly client: Client;
+  private readonly dataDir: string;
+  private readonly log: ToolingLog;
+  private readonly kbnClient: KbnClient;
+
+  constructor({
+    client,
+    dataDir,
+    log,
+    kibanaUrl,
+  }: {
+    client: Client;
+    dataDir: string;
+    log: ToolingLog;
+    kibanaUrl: string;
+  }) {
     this.client = client;
     this.dataDir = dataDir;
     this.log = log;
@@ -46,7 +62,7 @@ export class EsArchiver {
    *  @property {Boolean} options.raw - should the archive be raw (unzipped) or not
    *  @return Promise<Stats>
    */
-  async save(name, indices, { raw = false } = {}) {
+  async save(name: string, indices: string | string[], { raw = false }: { raw?: boolean } = {}) {
     return await saveAction({
       name,
       indices,
@@ -66,9 +82,7 @@ export class EsArchiver {
    *                                           be ignored or overwritten
    *  @return Promise<Stats>
    */
-  async load(name, options = {}) {
-    const { skipExisting } = options;
-
+  async load(name: string, { skipExisting = false }: { skipExisting?: boolean } = {}) {
     return await loadAction({
       name,
       skipExisting: !!skipExisting,
@@ -85,7 +99,7 @@ export class EsArchiver {
    *  @param {String} name
    *  @return Promise<Stats>
    */
-  async unload(name) {
+  async unload(name: string) {
     return await unloadAction({
       name,
       client: this.client,
@@ -103,7 +117,6 @@ export class EsArchiver {
    */
   async rebuildAll() {
     return await rebuildAllAction({
-      client: this.client,
       dataDir: this.dataDir,
       log: this.log,
     });
@@ -117,7 +130,7 @@ export class EsArchiver {
    *  @param {() => Promise<any>} handler
    *  @return Promise<void>
    */
-  async edit(prefix, handler) {
+  async edit(prefix: string, handler: () => Promise<void>) {
     return await editAction({
       prefix,
       log: this.log,
@@ -132,7 +145,7 @@ export class EsArchiver {
    *  @param {String} name
    *  @return Promise<Stats>
    */
-  async loadIfNeeded(name) {
+  async loadIfNeeded(name: string) {
     return await this.load(name, { skipExisting: true });
   }
 

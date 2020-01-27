@@ -41,7 +41,7 @@ export async function saveAction({
   raw,
 }: {
   name: string;
-  indices: string[];
+  indices: string | string[];
   client: Client;
   dataDir: string;
   log: ToolingLog;
