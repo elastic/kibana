@@ -24,7 +24,7 @@ import {
   buildQueryBarDescription,
   buildSeverityDescription,
   buildStringArrayDescription,
-  buildThreatsDescription,
+  buildThreatDescription,
   buildUnorderedListArrayDescription,
   buildUrlsDescription,
 } from './helpers';
@@ -116,11 +116,11 @@ const getDescriptionItem = (
       savedId,
       indexPatterns,
     });
-  } else if (field === 'threats') {
-    const threats: IMitreEnterpriseAttack[] = get(field, value).filter(
-      (threat: IMitreEnterpriseAttack) => threat.tactic.name !== 'none'
+  } else if (field === 'threat') {
+    const threat: IMitreEnterpriseAttack[] = get(field, value).filter(
+      (singleThreat: IMitreEnterpriseAttack) => singleThreat.tactic.name !== 'none'
     );
-    return buildThreatsDescription({ label, threats });
+    return buildThreatDescription({ label, threat });
   } else if (field === 'description') {
     return [
       {

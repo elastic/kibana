@@ -4,7 +4,7 @@
 
 ## HttpFetchOptions.asResponse property
 
-When `true` the return type of [HttpHandler](./kibana-plugin-public.httphandler.md) will be an [IHttpResponse](./kibana-plugin-public.ihttpresponse.md) with detailed request and response information. When `false`<!-- -->, the return type will just be the parsed response body. Defaults to `false`<!-- -->.
+When `true` the return type of [HttpHandler](./kibana-plugin-public.httphandler.md) will be an [HttpResponse](./kibana-plugin-public.httpresponse.md) with detailed request and response information. When `false`<!-- -->, the return type will just be the parsed response body. Defaults to `false`<!-- -->.
 
 <b>Signature:</b>
 
