@@ -114,19 +114,19 @@ async function checkSuperfluousSymlinks(log, files) {
           const json = JSON.parse(manifest);
           if (!json.dependencies || !Object.keys(json.dependencies).length) {
             log.warning(
-              `Manifest at '${manifestPath}' has no dependencies, but found an adjacent 'yarn.lock' symlink.`
+              `Manifest at '${manifestPath}' has an adjacent 'yarn.lock' symlink, but manifest has no dependencies.`
             );
             errorPaths.push(path);
           }
         } catch (err) {
           log.warning(
-            `Could not parse JSON at '${manifestPath}', but found an adjacent 'yarn.lock' symlink.`
+            `Manifest at '${manifestPath}' has an adjacent 'yarn.lock' symlink, but could not parse manifest JSON (${err.message}).`
           );
           errorPaths.push(path);
         }
       } catch (err) {
         log.warning(
-          `Could not read manifest at '${manifestPath}', but found an adjacent 'yarn.lock' symlink.`
+          `Manifest at '${manifestPath}', has an adjacent 'yarn.lock' symlink, but could not read manifest (${err.message}).`
         );
         errorPaths.push(path);
       }
@@ -163,10 +163,10 @@ async function checkMissingSymlinks(log, files) {
             errorPaths.push(`${parent}/yarn.lock`);
           }
         } catch (err) {
-          log.warning(`Could not parse JSON at '${path}'.`);
+          log.warning(`Could not parse manifest JSON at '${path}' (${err.message}).`);
         }
       } catch (err) {
-        log.warning(`Could not read manifest at '${path}'.`);
+        log.warning(`Could not read manifest at '${path}' (${err.message}).`);
       }
     });
 
