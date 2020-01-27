@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Stream, { PassThrough, Transform } from 'stream';
+import Stream, { PassThrough, Readable, Writable, Transform } from 'stream';
 import { createGzip } from 'zlib';
 
 import expect from '@kbn/expect';
@@ -66,13 +66,13 @@ describe('esArchiver createParseArchiveStreams', () => {
           ]),
           ...createParseArchiveStreams({ gzip: false }),
           createConcatStream([]),
-        ]);
+        ] as [Readable, ...Writable[]]);
 
         expect(output).to.eql([{ a: 1 }, 1]);
       });
 
       it('provides each JSON object as soon as it is parsed', async () => {
-        let onReceived;
+        let onReceived: (resolved: any) => void;
         const receivedPromise = new Promise(resolve => (onReceived = resolve));
         const input = new PassThrough();
         const check = new Transform({
@@ -80,16 +80,16 @@ describe('esArchiver createParseArchiveStreams', () => {
           readableObjectMode: true,
           transform(chunk, env, callback) {
             onReceived(chunk);
-            callback(null, chunk);
+            callback(undefined, chunk);
           },
         });
 
         const finalPromise = createPromiseFromStreams([
-          input,
+          input as Readable,
           ...createParseArchiveStreams(),
           check,
           createConcatStream([]),
-        ]);
+        ] as [Readable, ...Writable[]]);
 
         input.write(Buffer.from('{"a": 1}\n\n{"a":'));
         expect(await receivedPromise).to.eql({ a: 1 });
@@ -110,7 +110,7 @@ describe('esArchiver createParseArchiveStreams', () => {
             ]),
             ...createParseArchiveStreams({ gzip: false }),
             createConcatStream(),
-          ]);
+          ] as [Readable, ...Writable[]]);
           throw new Error('should have failed');
         } catch (err) {
           expect(err.message).to.contain('Unexpected number');
@@ -149,7 +149,7 @@ describe('esArchiver createParseArchiveStreams', () => {
           createGzip(),
           ...createParseArchiveStreams({ gzip: true }),
           createConcatStream([]),
-        ]);
+        ] as [Readable, ...Writable[]]);
 
         expect(output).to.eql([{ a: 1 }, { a: 2 }]);
       });
@@ -161,7 +161,7 @@ describe('esArchiver createParseArchiveStreams', () => {
         createGzip(),
         ...createParseArchiveStreams({ gzip: true }),
         createConcatStream([]),
-      ]);
+      ] as [Readable, ...Writable[]]);
 
       expect(output).to.eql([]);
     });
@@ -173,7 +173,7 @@ describe('esArchiver createParseArchiveStreams', () => {
             createListStream([Buffer.from('{"a": 1}')]),
             ...createParseArchiveStreams({ gzip: true }),
             createConcatStream(),
-          ]);
+          ] as [Readable, ...Writable[]]);
           throw new Error('should have failed');
         } catch (err) {
           expect(err.message).to.contain('incorrect header check');

@@ -26,12 +26,12 @@ import { Progress } from '../../progress';
 import { createIndexDocRecordsStream } from '../index_doc_records_stream';
 import { createStubStats, createStubClient, createPersonDocRecords } from './stubs';
 
-const recordsToBulkBody = records => {
+const recordsToBulkBody = (records: any[]) => {
   return records.reduce((acc, record) => {
     const { index, id, source } = record.value;
 
     return [...acc, { index: { _index: index, _id: id } }, source];
-  }, []);
+  }, [] as any[]);
 };
 
 describe('esArchiver: createIndexDocRecordsStream()', () => {

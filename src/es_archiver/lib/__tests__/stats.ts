@@ -17,26 +17,26 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import { uniq } from 'lodash';
 import sinon from 'sinon';
-
-import { createStats } from '../';
+import expect from '@kbn/expect';
 import { ToolingLog } from '@kbn/dev-utils';
 
-function createBufferedLog() {
-  const log = new ToolingLog({
+import { createStats } from '../';
+
+function createBufferedLog(): ToolingLog & { buffer: string } {
+  const log: ToolingLog = new ToolingLog({
     level: 'debug',
     writeTo: {
-      write: chunk => (log.buffer += chunk),
+      write: chunk => ((log as any).buffer += chunk),
     },
   });
-  log.buffer = '';
-  return log;
+  (log as any).buffer = '';
+  return log as ToolingLog & { buffer: string };
 }
 
-function assertDeepClones(a, b) {
-  const path = [];
+function assertDeepClones(a: any, b: any) {
+  const path: string[] = [];
   try {
     (function recurse(one, two) {
       if (typeof one !== 'object' || typeof two !== 'object') {

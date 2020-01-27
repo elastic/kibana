@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Stream from 'stream';
+import Stream, { Readable, Writable } from 'stream';
 import { createGunzip } from 'zlib';
 
 import expect from '@kbn/expect';
@@ -43,11 +43,11 @@ describe('esArchiver createFormatArchiveStreams', () => {
     });
 
     it('streams consume js values and produces buffers', async () => {
-      const output = await createPromiseFromStreams([
+      const output = await createPromiseFromStreams<Buffer[]>([
         createListStream(INPUTS),
         ...createFormatArchiveStreams({ gzip: false }),
         createConcatStream([]),
-      ]);
+      ] as [Readable, ...Writable[]]);
 
       expect(output.length).to.be.greaterThan(0);
       output.forEach(b => expect(b).to.be.a(Buffer));
@@ -58,7 +58,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
         createListStream(INPUTS),
         ...createFormatArchiveStreams({ gzip: false }),
         createConcatStream(''),
-      ]);
+      ] as [Readable, ...Writable[]]);
 
       expect(json).to.be(INPUT_JSON);
     });
@@ -73,11 +73,11 @@ describe('esArchiver createFormatArchiveStreams', () => {
     });
 
     it('streams consume js values and produces buffers', async () => {
-      const output = await createPromiseFromStreams([
+      const output = await createPromiseFromStreams<Buffer[]>([
         createListStream([1, 2, { foo: 'bar' }, [1, 2]]),
         ...createFormatArchiveStreams({ gzip: true }),
         createConcatStream([]),
-      ]);
+      ] as [Readable, ...Writable[]]);
 
       expect(output.length).to.be.greaterThan(0);
       output.forEach(b => expect(b).to.be.a(Buffer));
@@ -89,7 +89,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
         ...createFormatArchiveStreams({ gzip: true }),
         createGunzip(),
         createConcatStream(''),
-      ]);
+      ] as [Readable, ...Writable[]]);
       expect(output).to.be(INPUT_JSON);
     });
   });
@@ -100,7 +100,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
         createListStream(INPUTS),
         ...createFormatArchiveStreams(),
         createConcatStream(''),
-      ]);
+      ] as [Readable, ...Writable[]]);
 
       expect(json).to.be(INPUT_JSON);
     });

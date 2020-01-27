@@ -17,17 +17,22 @@
  * under the License.
  */
 
+import { Client } from 'elasticsearch';
 import sinon from 'sinon';
 import Chance from 'chance';
 import { times } from 'lodash';
+
+import { Stats } from '../../stats';
+
 const chance = new Chance();
 
-export const createStubStats = () => ({
-  indexedDoc: sinon.stub(),
-  archivedDoc: sinon.stub(),
-});
+export const createStubStats = (): Stats =>
+  ({
+    indexedDoc: sinon.stub(),
+    archivedDoc: sinon.stub(),
+  } as any);
 
-export const createPersonDocRecords = n =>
+export const createPersonDocRecords = (n: number) =>
   times(n, () => ({
     type: 'doc',
     value: {
@@ -42,15 +47,21 @@ export const createPersonDocRecords = n =>
     },
   }));
 
-export const createStubClient = (responses = []) => {
-  const createStubClientMethod = name =>
+type MockClient = Client & {
+  assertNoPendingResponses: () => void;
+};
+
+export const createStubClient = (
+  responses: Array<(name: string, params: any) => any | Promise<any>> = []
+): MockClient => {
+  const createStubClientMethod = (name: string) =>
     sinon.spy(async params => {
       if (responses.length === 0) {
         throw new Error(`unexpected client.${name} call`);
       }
 
       const response = responses.shift();
-      return await response(name, params);
+      return await response!(name, params);
     });
 
   return {
@@ -63,5 +74,5 @@ export const createStubClient = (responses = []) => {
         throw new Error(`There are ${responses.length} unsent responses.`);
       }
     },
-  };
+  } as any;
 };

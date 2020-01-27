@@ -143,7 +143,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
         },
       },
     ]);
-    sinon.assert.calledTwice(stats.archivedDoc);
+    sinon.assert.calledTwice(stats.archivedDoc as any);
     expect(progress.getTotal()).to.be(2);
     expect(progress.getComplete()).to.be(2);
   });

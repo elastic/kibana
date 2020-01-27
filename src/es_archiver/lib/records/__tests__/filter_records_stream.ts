@@ -51,7 +51,7 @@ describe('esArchiver: createFilterRecordsStream()', () => {
 
   it('produces record values that have a matching type', async () => {
     const type1 = chance.word({ length: 5 });
-    const output = await createPromiseFromStreams([
+    const output = await createPromiseFromStreams<any[]>([
       createListStream([
         { type: type1, value: {} },
         { type: type1, value: {} },

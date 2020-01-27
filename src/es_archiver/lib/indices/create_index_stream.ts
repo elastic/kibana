@@ -20,6 +20,7 @@
 import { Transform, Readable } from 'stream';
 import { get, once } from 'lodash';
 import { Client } from 'elasticsearch';
+import { ToolingLog } from '@kbn/dev-utils';
 
 import { Stats } from '../stats';
 import { deleteKibanaIndices } from './kibana_index';
@@ -28,13 +29,13 @@ import { deleteIndex } from './delete_index';
 export function createCreateIndexStream({
   client,
   stats,
-  skipExisting,
+  skipExisting = false,
   log,
 }: {
   client: Client;
   stats: Stats;
-  skipExisting: boolean;
-  log: any;
+  skipExisting?: boolean;
+  log: ToolingLog;
 }) {
   const skipDocsFromIndices = new Set();
 

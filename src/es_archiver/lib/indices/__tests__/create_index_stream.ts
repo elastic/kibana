@@ -34,9 +34,12 @@ import {
   createStubIndexRecord,
   createStubDocRecord,
   createStubClient,
+  createStubLogger,
 } from './stubs';
 
 const chance = new Chance();
+
+const log = createStubLogger();
 
 describe('esArchiver: createCreateIndexStream()', () => {
   describe('defaults', () => {
@@ -48,15 +51,15 @@ describe('esArchiver: createCreateIndexStream()', () => {
           createStubIndexRecord('existing-index'),
           createStubIndexRecord('new-index'),
         ]),
-        createCreateIndexStream({ client, stats }),
+        createCreateIndexStream({ client, stats, log }),
       ]);
 
       expect(stats.getTestSummary()).to.eql({
         deletedIndex: 1,
         createdIndex: 2,
       });
-      sinon.assert.callCount(client.indices.delete, 1);
-      sinon.assert.callCount(client.indices.create, 3); // one failed create because of existing
+      sinon.assert.callCount(client.indices.delete as sinon.SinonSpy, 1);
+      sinon.assert.callCount(client.indices.create as sinon.SinonSpy, 3); // one failed create because of existing
     });
 
     it('deletes existing aliases, creates all', async () => {
@@ -67,14 +70,19 @@ describe('esArchiver: createCreateIndexStream()', () => {
           createStubIndexRecord('existing-index'),
           createStubIndexRecord('new-index'),
         ]),
-        createCreateIndexStream({ client, stats, log: { debug: () => {} } }),
+        createCreateIndexStream({ client, stats, log }),
       ]);
 
-      expect(client.indices.getAlias.calledOnce).to.be.ok();
-      expect(client.indices.getAlias.args[0][0]).to.eql({ name: 'existing-index', ignore: [404] });
-      expect(client.indices.delete.calledOnce).to.be.ok();
-      expect(client.indices.delete.args[0][0]).to.eql({ index: ['actual-index'] });
-      sinon.assert.callCount(client.indices.create, 3); // one failed create because of existing
+      expect((client.indices.getAlias as sinon.SinonSpy).calledOnce).to.be.ok();
+      expect((client.indices.getAlias as sinon.SinonSpy).args[0][0]).to.eql({
+        name: 'existing-index',
+        ignore: [404],
+      });
+      expect((client.indices.delete as sinon.SinonSpy).calledOnce).to.be.ok();
+      expect((client.indices.delete as sinon.SinonSpy).args[0][0]).to.eql({
+        index: ['actual-index'],
+      });
+      sinon.assert.callCount(client.indices.create as sinon.SinonSpy, 3); // one failed create because of existing
     });
 
     it('passes through "hit" records', async () => {
@@ -86,7 +94,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
           createStubDocRecord('index', 1),
           createStubDocRecord('index', 2),
         ]),
-        createCreateIndexStream({ client, stats }),
+        createCreateIndexStream({ client, stats, log }),
         createConcatStream([]),
       ]);
 
@@ -101,11 +109,11 @@ describe('esArchiver: createCreateIndexStream()', () => {
           createStubIndexRecord('index', { foo: {} }),
           createStubDocRecord('index', 1),
         ]),
-        createCreateIndexStream({ client, stats }),
+        createCreateIndexStream({ client, stats, log }),
         createConcatStream([]),
       ]);
 
-      sinon.assert.calledWith(client.indices.create, {
+      sinon.assert.calledWith(client.indices.create as sinon.SinonSpy, {
         method: 'PUT',
         index: 'index',
         body: {
@@ -126,7 +134,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
 
       const output = await createPromiseFromStreams([
         createListStream([createStubIndexRecord('index'), ...randoms]),
-        createCreateIndexStream({ client, stats }),
+        createCreateIndexStream({ client, stats, log }),
         createConcatStream([]),
       ]);
 
@@ -140,7 +148,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
 
       const output = await createPromiseFromStreams([
         createListStream(nonRecordValues),
-        createCreateIndexStream({ client, stats }),
+        createCreateIndexStream({ client, stats, log }),
         createConcatStream([]),
       ]);
 
@@ -161,6 +169,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createCreateIndexStream({
           client,
           stats,
+          log,
           skipExisting: true,
         }),
       ]);
@@ -169,9 +178,12 @@ describe('esArchiver: createCreateIndexStream()', () => {
         skippedIndex: 1,
         createdIndex: 1,
       });
-      sinon.assert.callCount(client.indices.delete, 0);
-      sinon.assert.callCount(client.indices.create, 2); // one failed create because of existing
-      expect(client.indices.create.args[0][0]).to.have.property('index', 'new-index');
+      sinon.assert.callCount(client.indices.delete as sinon.SinonSpy, 0);
+      sinon.assert.callCount(client.indices.create as sinon.SinonSpy, 2); // one failed create because of existing
+      expect((client.indices.create as sinon.SinonSpy).args[0][0]).to.have.property(
+        'index',
+        'new-index'
+      );
     });
 
     it('filters documents for skipped indices', async () => {
@@ -190,6 +202,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createCreateIndexStream({
           client,
           stats,
+          log,
           skipExisting: true,
         }),
         createConcatStream([]),
@@ -199,8 +212,8 @@ describe('esArchiver: createCreateIndexStream()', () => {
         skippedIndex: 1,
         createdIndex: 1,
       });
-      sinon.assert.callCount(client.indices.delete, 0);
-      sinon.assert.callCount(client.indices.create, 2); // one failed create because of existing
+      sinon.assert.callCount(client.indices.delete as sinon.SinonSpy, 0);
+      sinon.assert.callCount(client.indices.create as sinon.SinonSpy, 2); // one failed create because of existing
 
       expect(output).to.have.length(2);
       expect(output).to.eql([

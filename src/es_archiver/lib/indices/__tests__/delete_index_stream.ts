@@ -32,13 +32,13 @@ describe('esArchiver: createDeleteIndexStream()', () => {
 
     await createPromiseFromStreams([
       createListStream([createStubIndexRecord('index1')]),
-      createDeleteIndexStream(client, stats),
+      createDeleteIndexStream(client, stats, {} as any, []),
     ]);
 
-    sinon.assert.notCalled(stats.deletedIndex);
-    sinon.assert.notCalled(client.indices.create);
-    sinon.assert.calledOnce(client.indices.delete);
-    sinon.assert.notCalled(client.indices.exists);
+    sinon.assert.notCalled(stats.deletedIndex as sinon.SinonSpy);
+    sinon.assert.notCalled(client.indices.create as sinon.SinonSpy);
+    sinon.assert.calledOnce(client.indices.delete as sinon.SinonSpy);
+    sinon.assert.notCalled(client.indices.exists as sinon.SinonSpy);
   });
 
   it('reports the delete when the index existed', async () => {
@@ -47,12 +47,12 @@ describe('esArchiver: createDeleteIndexStream()', () => {
 
     await createPromiseFromStreams([
       createListStream([createStubIndexRecord('index1')]),
-      createDeleteIndexStream(client, stats),
+      createDeleteIndexStream(client, stats, {} as any, []),
     ]);
 
-    sinon.assert.calledOnce(stats.deletedIndex);
-    sinon.assert.notCalled(client.indices.create);
-    sinon.assert.calledOnce(client.indices.delete);
-    sinon.assert.notCalled(client.indices.exists);
+    sinon.assert.calledOnce(stats.deletedIndex as sinon.SinonSpy);
+    sinon.assert.notCalled(client.indices.create as sinon.SinonSpy);
+    sinon.assert.calledOnce(client.indices.delete as sinon.SinonSpy);
+    sinon.assert.notCalled(client.indices.exists as sinon.SinonSpy);
   });
 });

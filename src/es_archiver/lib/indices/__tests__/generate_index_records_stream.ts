@@ -45,10 +45,10 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
       archivedIndex: 4,
     });
 
-    sinon.assert.callCount(client.indices.get, 4);
-    sinon.assert.notCalled(client.indices.create);
-    sinon.assert.notCalled(client.indices.delete);
-    sinon.assert.notCalled(client.indices.exists);
+    sinon.assert.callCount(client.indices.get as sinon.SinonSpy, 4);
+    sinon.assert.notCalled(client.indices.create as sinon.SinonSpy);
+    sinon.assert.notCalled(client.indices.delete as sinon.SinonSpy);
+    sinon.assert.notCalled(client.indices.exists as sinon.SinonSpy);
   });
 
   it('filters index metadata from settings', async () => {
@@ -60,9 +60,9 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
       createGenerateIndexRecordsStream(client, stats),
     ]);
 
-    const params = client.indices.get.args[0][0];
+    const params = (client.indices.get as sinon.SinonSpy).args[0][0];
     expect(params).to.have.property('filterPath');
-    const filters = params.filterPath;
+    const filters: string[] = params.filterPath;
     expect(filters.some(path => path.includes('index.creation_date'))).to.be(true);
     expect(filters.some(path => path.includes('index.uuid'))).to.be(true);
     expect(filters.some(path => path.includes('index.version'))).to.be(true);
@@ -73,7 +73,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
     const stats = createStubStats();
     const client = createStubClient(['index1', 'index2', 'index3']);
 
-    const indexRecords = await createPromiseFromStreams([
+    const indexRecords = await createPromiseFromStreams<any[]>([
       createListStream(['index1', 'index2', 'index3']),
       createGenerateIndexRecordsStream(client, stats),
       createConcatStream([]),

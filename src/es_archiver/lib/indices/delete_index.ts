@@ -41,9 +41,9 @@ export async function deleteIndex(options: {
 
   try {
     const indicesToDelete = await getIndicesToDelete();
+    await client.indices.delete({ index: indicesToDelete });
     for (let i = 0; i < indicesToDelete.length; i++) {
       const indexToDelete = indicesToDelete[i];
-      await client.indices.delete({ index: indexToDelete });
       stats.deletedIndex(indexToDelete);
     }
   } catch (error) {
