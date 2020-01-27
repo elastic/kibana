@@ -5,7 +5,7 @@
  */
 
 import { Reducer } from 'redux';
-import { unitsPerNudge } from './scaling_constants';
+import { unitsPerNudge, nudgeAnimationDuration } from './scaling_constants';
 import { animatePanning } from './methods';
 import * as vector2 from '../../lib/vector2';
 import * as selectors from './selectors';
@@ -157,8 +157,6 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
       direction
     );
 
-    const animationDuration = 300;
-
     return animatePanning(
       state,
       time,
@@ -168,7 +166,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
         state.translationNotCountingCurrentPanning,
         nudge
       ),
-      animationDuration
+      nudgeAnimationDuration
     );
   } else if (action.type === 'userSetRasterSize') {
     /**

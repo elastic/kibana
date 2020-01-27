@@ -23,3 +23,10 @@ export const zoomCurveRate = 4;
  * The size, in world units, of a 'nudge' as caused by clicking the up, right, down, or left panning buttons.
  */
 export const unitsPerNudge = 50;
+
+/**
+ * The duration a nudge animation lasts.
+ */
+export const nudgeAnimationDuration = 300;
+
+// TODO, rename file maybe?

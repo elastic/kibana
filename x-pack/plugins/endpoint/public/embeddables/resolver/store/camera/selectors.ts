@@ -45,31 +45,95 @@ function animationIsActive(animation: CameraAnimationState, time: Date): boolean
 export const scale: (state: CameraState) => (time: Date) => Vector2 = createSelector(
   state => state.scalingFactor,
   state => state.animation,
-  (scalingFactor, animation) => time => {
+  state => state.rasterSize,
+  (scalingFactor, animation, rasterSize) => time => {
     const scaleNotCountingAnimation = scaleFromScalingFactor(scalingFactor);
     if (animation !== undefined && animationIsActive(animation, time)) {
       /**
-       * `t` goes from 0 -> 1 -> 0 at a linear rate as `animationProgress` goes from 0 -> 1
+       *  Since the camera should zoom out, then back in, adjust the animation progress.
+       *
+       *  gnuplot> plot [x=-0:1][x=0:1.2] eased(t)=t<.5? 4*t**3 : (t-1)*(2*t-2)**2+1, progress(t)=-abs(2*t-1)+1, eased(progress(x))
+       *
+       *
+       *   1.2 +--------------------------------------------------------------------------------------+
+       *       |                +                 +                +                 +                |
+       *       |          e(t)=t<.5? 4*t**3 : (t-1)*(2*t-2)**2+1, t(x)=-abs(2*x-1)+1, e(t(x)) ******* |
+       *       |                                                                                      |
+       *       |                                                                                      |
+       *       |                                                                                      |
+       *     1 |-+                                 ****************                                 +-|
+       *       |                                ***                ***                                |
+       *       |                               **                    **                               |
+       *       |                             **                        **                             |
+       *       |                            *                            *                            |
+       *       |                           *                              *                           |
+       *   0.8 |-+                        *                                *                        +-|
+       *       |                         *                                  *                         |
+       *       |                        *                                    *                        |
+       *       |                        *                                    *                        |
+       *       |                        *                                     *                       |
+       *   0.6 |-+                     *                                      *                     +-|
+       *       |                      *                                        *                      |
+       *       |                      *                                         *                     |
+       *       |                     *                                          *                     |
+       *       |                     *                                           *                    |
+       *       |                    *                                            *                    |
+       *   0.4 |-+                 *                                              *                 +-|
+       *       |                   *                                               *                  |
+       *       |                  *                                                *                  |
+       *       |                 *                                                  *                 |
+       *       |                 *                                                  *                 |
+       *       |                *                                                    *                |
+       *   0.2 |-+             *                                                      *             +-|
+       *       |              *                                                        *              |
+       *       |             *                                                          *             |
+       *       |           **                                                            **           |
+       *       |          *                                                                *          |
+       *       |       ***      +                 +                +                 +      ***       |
+       *     0 +--------------------------------------------------------------------------------------+
+       *       0               0.2               0.4              0.6               0.8               1
+       *                                         animation progress
+       *
        */
-      const t = -Math.abs(2 * animationProgress(animation, time) - 1) + 1;
-
-      const easedValue = easing.inOutCubic(t);
+      const x = animationProgress(animation, time);
+      const easedInOutAnimationProgress = easing.inOutCubic(-Math.abs(2 * x - 1) + 1);
 
       /**
-       * If nudge is around 1, we don't want any real effect here.
-       * Let's assume 10 nudges is a couple screens worth.
+       * The distance (in world coordinates) that the camera will move.
        */
-
-      /*
-      console.log(
-        'nudgeFactor',
-        nudgeFactor(animation, scaleNotCountingAnimation),
-        'scale',
-        scaleNotCountingAnimation,
-        'scaling Factor',
-        scalingFactor
+      const panningDistance = vector2.distance(
+        animation.targetTranslation,
+        animation.initialTranslation
       );
-      */
+
+      /**
+       * When deciding how much to scale out when animating the translation of the camera:
+       *   1. Must take into account the magnitude of change in translation. For example, if the user clicks a button to nudge the camera, there should be no scaling animation. However if the user clicks a button
+       *   that focuses a node which is very far away, the camera should move out a lot. (why? we should impose a max speed to camera animation, and after that max speed is reached, the scale should be changed?)
+       *   Why tho? things on the screen should never appear to move faster than a given speed. Beyond that speed, it becomes confusing or even dizzying. The speed that things move across the screen is defined as:
+       *
+       *   speed in screen units = distance * scale / animation duration
+       *
+       *   We should decrease scale in order to keep the speed in screen units below a value.
+       *
+       *   maxSpeed = distance * adjustedScale / animationDuration
+       *   therefore
+       *   maxSpeed * animationDuration / distance = adjustedScale
+       */
+      const distance = vector2.distance(animation.initialTranslation, animation.targetTranslation);
+
+      const nudgeSpeed =
+        (scalingConstants.unitsPerNudge * scaleNotCountingAnimation[0]) /
+        scalingConstants.nudgeAnimationDuration;
+
+      const speed = (distance * scaleNotCountingAnimation[0]) / animation.duration;
+
+      const maxTargetSpeed = 0.4;
+
+      const adjustedScale = Math.min(
+        scaleNotCountingAnimation[0],
+        (maxTargetSpeed * animation.duration) / distance
+      );
 
       // Totally made up value???
       const nudgesToMaxZoomOut = 40;
@@ -85,10 +149,31 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
         clamp(scalingFactor - changeToScalingFactorDueToAnimation, 0, 1)
       );
 
+      console.log(
+        'speed',
+        speed,
+        'new adjustedScale',
+        adjustedScale,
+        'actual zoomedOutScale',
+        zoomedOutScale,
+        'nudgeSpeed',
+        nudgeSpeed,
+        'distance',
+        distance,
+        'scaleNotCountingAnimation',
+        scaleNotCountingAnimation,
+        'animation.duration',
+        animation.duration
+      );
+
       /**
        * Linearly interpolate between these, using the bell-shaped easing value
        */
-      return vector2.lerp(scaleNotCountingAnimation, zoomedOutScale, easedValue);
+      return vector2.lerp(
+        scaleNotCountingAnimation,
+        [adjustedScale, adjustedScale],
+        easedInOutAnimationProgress
+      );
     } else {
       return scaleNotCountingAnimation;
     }
