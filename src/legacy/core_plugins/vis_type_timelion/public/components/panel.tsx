@@ -24,7 +24,7 @@ import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
 
 import { useKibana } from '../../../../../plugins/kibana_react/public';
 import '../flot';
-import { DEFAULT_TIME_FORMAT } from '../../common/lib';
+import { DEFAULT_TIME_FORMAT } from '../../../../../plugins/timelion/common/lib';
 
 import {
   buildSeriesData,
