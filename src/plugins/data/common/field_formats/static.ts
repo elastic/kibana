@@ -17,10 +17,19 @@
  * under the License.
  */
 
-import { CoreSetup } from 'src/core/public';
-import { FieldFormatRegisty } from './field_formats';
+/**
+ * Everything the file exports is public
+ */
 
-import {
+export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
+export { FieldFormat } from './field_format';
+export { FieldFormatsRegistry } from './field_formats_registry';
+export { getHighlightRequest, asPrettyString, getHighlightHtml } from './utils';
+
+export { baseFormatters } from './constants/base_formatters';
+export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
+
+export {
   BoolFormat,
   BytesFormat,
   ColorFormat,
@@ -33,47 +42,17 @@ import {
   RelativeDateFormat,
   SourceFormat,
   StaticLookupFormat,
+  UrlFormat,
   StringFormat,
   TruncateFormat,
-  UrlFormat,
-} from '../../common/';
+} from './converters';
 
-export class FieldFormatsService {
-  private readonly fieldFormats: FieldFormatRegisty = new FieldFormatRegisty();
-
-  public setup(core: CoreSetup) {
-    this.fieldFormats.init(core);
-
-    this.fieldFormats.register([
-      BoolFormat,
-      BytesFormat,
-      ColorFormat,
-      DateFormat,
-      DateNanosFormat,
-      DurationFormat,
-      IpFormat,
-      NumberFormat,
-      PercentFormat,
-      RelativeDateFormat,
-      SourceFormat,
-      StaticLookupFormat,
-      StringFormat,
-      TruncateFormat,
-      UrlFormat,
-    ]);
-
-    return this.fieldFormats as FieldFormatsSetup;
-  }
-
-  public start() {
-    return this.fieldFormats as FieldFormatsStart;
-  }
-
-  public stop() {
-    // nothing to do here yet
-  }
-}
-
-/** @public */
-export type FieldFormatsSetup = Omit<FieldFormatRegisty, 'init'>;
-export type FieldFormatsStart = Omit<FieldFormatRegisty, 'init' & 'register'>;
+export {
+  GetConfigFn,
+  FIELD_FORMAT_IDS,
+  ContentType,
+  IFieldFormatConfig,
+  IFieldFormatType,
+  IFieldFormat,
+  IFieldFormatId,
+} from './types';
