@@ -11,8 +11,8 @@
     "build": "gulp build",
     "testonly": "echo 'Deprecated, use `yarn test`' && gulp test",
     "test": "gulp test",
-    "test:browser:dev": "gulp testbrowser-dev",
-    "test:browser": "gulp testbrowser",
+    "test:karma:debug": "gulp test:karma:debug",
+    "test:karma": "gulp test:karma",
     "test:jest": "node scripts/jest",
     "test:mocha": "node scripts/mocha"
   },

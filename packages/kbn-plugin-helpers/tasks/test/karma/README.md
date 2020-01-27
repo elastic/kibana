@@ -21,12 +21,12 @@ Browser tests are written just like server tests, they are just executed differe
 starting the test runner
 ========================
 
-Under the covers this command uses the `test:browser` task from kibana. This will execute
+Under the covers this command uses the `test:karma` task from kibana. This will execute
 your tasks once and exit when complete.
 
-When run with the `--dev` option, the command uses the `test:dev` task from kibana. 
-This task sets-up a test runner that will watch your code for changes and rebuild your 
-tests when necessary. You access the test runner through a browser that it starts itself 
+When run with the `--dev` option, the command uses the `test:karma:debug` task from kibana.
+This task sets-up a test runner that will watch your code for changes and rebuild your
+tests when necessary. You access the test runner through a browser that it starts itself
 (via Karma).
 
 If your plugin consists of a number of internal plugins, you may wish to keep the tests

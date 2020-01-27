@@ -20,15 +20,15 @@
 const buildTask = require('../tasks/build');
 const startTask = require('../tasks/start');
 const testAllTask = require('../tasks/test/all');
-const testBrowserTask = require('../tasks/test/browser');
-const testServerTask = require('../tasks/test/server');
+const testKarmaTask = require('../tasks/test/karma');
+const testMochaTask = require('../tasks/test/mocha');
 const postinstallTask = require('../tasks/postinstall');
 
 module.exports = {
   build: buildTask,
   start: startTask,
   testAll: testAllTask,
-  testBrowser: testBrowserTask,
-  testServer: testServerTask,
+  testKarma: testKarmaTask,
+  testMocha: testMochaTask,
   postinstall: postinstallTask,
 };

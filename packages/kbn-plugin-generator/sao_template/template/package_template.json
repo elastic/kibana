@@ -13,8 +13,8 @@
     "es": "node ../../scripts/es",
     "lint": "eslint .",
     "start": "plugin-helpers start",
-    "test:server": "plugin-helpers test:server",
-    "test:browser": "plugin-helpers test:browser",
+    "test:mocha": "plugin-helpers test:mocha",
+    "test:karma": "plugin-helpers test:karma",
     "build": "plugin-helpers build"
   },
   <%_ if (generateTranslations) { _%>

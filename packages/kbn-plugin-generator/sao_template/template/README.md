@@ -28,7 +28,7 @@ See the [kibana contributing guide](https://github.com/elastic/kibana/blob/maste
 
     Build a distributable archive of your plugin.
 
-  - `yarn test:browser`
+  - `yarn test:karma`
 
     Run the browser tests in a real web browser.
 
