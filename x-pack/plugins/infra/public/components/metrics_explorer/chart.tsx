@@ -118,7 +118,7 @@ export const MetricsExplorerChart = ({
         </EuiFlexGroup>
       )}
       <div className="infrastructureChart" style={{ height, width }}>
-        {series.rows.length > 0 ? (
+        {metrics.length && series.rows.length > 0 ? (
           <Chart>
             {metrics.map((metric, id) => (
               <MetricExplorerSeriesChart

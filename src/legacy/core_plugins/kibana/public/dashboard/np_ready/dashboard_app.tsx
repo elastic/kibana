@@ -96,14 +96,12 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
         $route: any,
         $routeParams: {
           id?: string;
-        },
-        globalState: any
+        }
       ) =>
         new DashboardAppController({
           $route,
           $scope,
           $routeParams,
-          globalState,
           config,
           confirmModal,
           indexPatterns: deps.npDataStart.indexPatterns,
