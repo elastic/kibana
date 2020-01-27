@@ -42,11 +42,13 @@ export {
   RelativeDateFormat,
   SourceFormat,
   StaticLookupFormat,
+  UrlFormat,
   StringFormat,
   TruncateFormat,
 } from './converters';
 
 export {
+  GetConfigFn,
   FIELD_FORMAT_IDS,
   ContentType,
   IFieldFormatConfig,
