@@ -1,19 +1,42 @@
 {
-  "description": "Detect ssh processes with the `-R` flag which can be used to forward a port on a local system to the local system so that someone on the remote system can connect to the local system. This is often used by attackers to create encrypted tunnels through firewalls for pivoting and persistence.",
-  "enabled": false,
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
-  "language": "kuery",
-  "name": "Linux: SSH Port Forwarding",
-  "query": "process.name:ssh and process.args:\"-R\" and event.action:executed",
-  "references": [
-    "  - https://www.ssh.com/ssh/tunneling,https://www.ssh.com/ssh/tunneling/example,https://attack.mitre.org/techniques/T1184/"
+  "description": "An SSH processes ran with the `-R` flag which can be used to forward a port to a remote destination for purposes of pivoting and persistence. This technique often used to create encrypted tunnels and circumvent firewalls, security groups or network access lists.",
+  "false_positives": [
+    "Some normal use of this command may originate from usage by engineers as an alternative or ad-hoc remote access solution. Use of this command by non-administrative users is uncommon."
   ],
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 33,
+  "name": "Potential Lateral Movement via SSH Port Forwarding",
+  "query": "process.name:ssh and process.args:\"-R\" and event.action:executed",
+  "references": ["https://www.ssh.com/ssh/tunneling", "https://www.ssh.com/ssh/tunneling/example"],
   "risk_score": 50,
   "rule_id": "45d256ab-e665-445b-8306-2f83a8db59f8",
-  "severity": "low",
-  "to": "now",
+  "severity": "medium",
+  "tags": ["Elastic", "linux"],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": [
+        {
+          "id": "T1184",
+          "name": "SSH Hijacking",
+          "reference": "https://attack.mitre.org/techniques/T1184/"
+        }
+      ]
+    }
+  ],
   "type": "query",
   "version": 1
 }
