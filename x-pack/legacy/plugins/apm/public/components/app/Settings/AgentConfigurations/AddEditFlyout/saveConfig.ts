@@ -30,7 +30,7 @@ export async function saveConfig({
   configurationId,
   agentName,
   toasts,
-  trackEvent
+  trackApmEvent
 }: {
   callApmApi: APMClient;
   serviceName: string;
@@ -41,9 +41,9 @@ export async function saveConfig({
   configurationId?: string;
   agentName?: string;
   toasts: NotificationsStart['toasts'];
-  trackEvent: UiTracker;
+  trackApmEvent: UiTracker;
 }) {
-  trackEvent({ metric: 'save_agent_configuration' });
+  trackApmEvent({ metric: 'save_agent_configuration' });
 
   try {
     const settings: Settings = {
