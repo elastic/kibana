@@ -53,7 +53,7 @@ describe('loadAlert', () => {
       tags: [],
       enabled: true,
       alertTypeId: '.noop',
-      interval: '1s',
+      schedule: { interval: '1s' },
       actions: [],
       params: {},
       createdBy: null,
@@ -61,10 +61,10 @@ describe('loadAlert', () => {
       throttle: null,
       muteAll: false,
       mutedInstanceIds: [],
-    } as Alert;
+    };
     http.get.mockResolvedValueOnce(resolvedValue);
 
-    expect(await loadAlert(http, alertId)).toEqual(resolvedValue);
+    expect(await loadAlert({ http, alertId })).toEqual(resolvedValue);
     expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}`);
   });
 });

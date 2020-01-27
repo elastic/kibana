@@ -12,7 +12,13 @@ export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<Ale
   return await http.get(`${BASE_ALERT_API_PATH}/types`);
 }
 
-export async function loadAlert(http: HttpSetup, alertId: string): Promise<Alert> {
+export async function loadAlert({
+  http,
+  alertId,
+}: {
+  http: HttpSetup;
+  alertId: string;
+}): Promise<Alert> {
   return await http.get(`${BASE_ALERT_API_PATH}/${alertId}`);
 }
 

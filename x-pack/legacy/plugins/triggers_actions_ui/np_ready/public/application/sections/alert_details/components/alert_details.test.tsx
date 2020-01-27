@@ -7,8 +7,9 @@ import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
-import { Alert, AlertType, ActionType } from '../../../../types';
-import { EuiTitle, EuiBadge, EuiFlexItem } from '@elastic/eui';
+import { Alert, ActionType } from '../../../../types';
+import { EuiTitle, EuiBadge, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { times, random } from 'lodash';
 
 describe('alert_details', () => {
   it('renders the alert name as a title', () => {
@@ -63,6 +64,7 @@ describe('alert_details', () => {
         {
           id: '.server-log',
           name: 'Server log',
+          enabled: true,
         },
       ];
 
@@ -70,7 +72,7 @@ describe('alert_details', () => {
         shallow(
           <AlertDetails alert={alert} alertType={alertType} actionTypes={actionTypes} />
         ).contains(
-          <EuiFlexItem key={alert.actions[0].id}>
+          <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">{actionTypes[0].name}</EuiBadge>
           </EuiFlexItem>
         )
@@ -86,12 +88,12 @@ describe('alert_details', () => {
             params: {},
             actionTypeId: '.server-log',
           },
-          {
+          ...times(random(1, 10), () => ({
             group: 'default',
             id: uuid.v4(),
             params: {},
             actionTypeId: '.email',
-          },
+          })),
         ],
       });
       const alertType = {
@@ -102,10 +104,12 @@ describe('alert_details', () => {
         {
           id: '.server-log',
           name: 'Server log',
+          enabled: true,
         },
         {
           id: '.email',
           name: 'Send email',
+          enabled: true,
         },
       ];
 
@@ -115,7 +119,7 @@ describe('alert_details', () => {
 
       expect(
         details.contains(
-          <EuiFlexItem key={alert.actions[0].id}>
+          <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">{actionTypes[0].name}</EuiBadge>
           </EuiFlexItem>
         )
@@ -123,8 +127,61 @@ describe('alert_details', () => {
 
       expect(
         details.contains(
-          <EuiFlexItem key={alert.actions[1].id}>
-            <EuiBadge color="hollow">{actionTypes[1].name}</EuiBadge>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{`+${alert.actions.length - 1}`}</EuiBadge>
+          </EuiFlexItem>
+        )
+      ).toBeTruthy();
+    });
+  });
+
+  describe('links', () => {
+    it('links to the Edit flyout', () => {
+      const alert = mockAlert();
+
+      const alertType = {
+        id: '.noop',
+        name: 'No Op',
+      };
+
+      expect(
+        shallow(<AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />).contains(
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty disabled={true}>Edit</EuiButtonEmpty>
+          </EuiFlexItem>
+        )
+      ).toBeTruthy();
+    });
+
+    it('links to the app that created the alert', () => {
+      const alert = mockAlert();
+
+      const alertType = {
+        id: '.noop',
+        name: 'No Op',
+      };
+
+      expect(
+        shallow(<AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />).contains(
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty disabled={true}>View in app</EuiButtonEmpty>
+          </EuiFlexItem>
+        )
+      ).toBeTruthy();
+    });
+
+    it('links to the activity log', () => {
+      const alert = mockAlert();
+
+      const alertType = {
+        id: '.noop',
+        name: 'No Op',
+      };
+
+      expect(
+        shallow(<AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />).contains(
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty disabled={true}>Activity Log</EuiButtonEmpty>
           </EuiFlexItem>
         )
       ).toBeTruthy();
@@ -147,7 +204,6 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     updatedBy: null,
     createdAt: new Date(),
     updatedAt: new Date(),
-    apiKey: null,
     apiKeyOwner: null,
     throttle: null,
     muteAll: false,

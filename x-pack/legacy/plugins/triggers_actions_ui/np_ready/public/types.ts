@@ -5,8 +5,12 @@
  */
 import { capabilities } from 'ui/capabilities';
 import { TypeRegistry } from './application/type_registry';
+
 import { SanitizedAlert as Alert } from '../../../alerting/common';
 export { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
+
+import { ActionType } from '../../../../../plugins/actions/common';
+export { ActionType } from '../../../../../plugins/actions/common';
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Record<string, AlertType>;
@@ -46,11 +50,6 @@ export interface ActionTypeModel {
 
 export interface ValidationResult {
   errors: Record<string, any>;
-}
-
-export interface ActionType {
-  id: string;
-  name: string;
 }
 
 export interface ActionConnector {

@@ -12,11 +12,14 @@ import {
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiTitle,
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  EuiPage,
+  EuiPageContentBody,
+  EuiButtonEmpty,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Alert, AlertType, ActionType } from '../../../../types';
 
 interface AlertDetailsProps {
@@ -31,33 +34,67 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   actionTypes,
 }) => {
   const actionTypesByTypeId = indexBy(actionTypes, 'id');
+  const [firstAction, ...otherActions] = alert.actions;
   return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle size="m">
-              <h1>{alert.name}</h1>
-            </EuiTitle>
-          </EuiPageContentHeaderSection>
-          <EuiPageContentHeaderSection>
-            <EuiPanel paddingSize="none">
-              <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-                <EuiFlexItem>
-                  <EuiBadge>{alertType.name}</EuiBadge>
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageContent>
+          <EuiPageContentHeader>
+            <EuiPageContentHeaderSection>
+              <EuiTitle size="m">
+                <h1>{alert.name}</h1>
+              </EuiTitle>
+            </EuiPageContentHeaderSection>
+            <EuiPageContentHeaderSection>
+              <EuiFlexGroup responsive={false} gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty disabled={true} iconType="pencil">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+                      defaultMessage="Edit"
+                    />
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
-                {alert.actions.map(action => (
-                  <EuiFlexItem key={action.id}>
-                    <EuiBadge color="hollow">
-                      {actionTypesByTypeId[action.actionTypeId].name ?? action.actionTypeId}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                ))}
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty disabled={true} iconType="popout">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
+                      defaultMessage="View in app"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty disabled={true} iconType="menuLeft">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.alertDetails.activityLogButtonLabel"
+                      defaultMessage="Activity Log"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiPanel>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
-      </EuiPageContent>
-    </EuiPageBody>
+            </EuiPageContentHeaderSection>
+          </EuiPageContentHeader>
+          <EuiPageContentBody>
+            <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <EuiBadge>{alertType.name}</EuiBadge>
+              </EuiFlexItem>
+              {firstAction && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">
+                    {actionTypesByTypeId[firstAction.actionTypeId].name ?? firstAction.actionTypeId}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+              {otherActions.length ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">+{otherActions.length}</EuiBadge>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiPageContentBody>
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
 };
