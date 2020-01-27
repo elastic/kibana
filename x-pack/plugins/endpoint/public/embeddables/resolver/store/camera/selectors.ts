@@ -45,12 +45,60 @@ function animationIsActive(animation: CameraAnimationState, time: Date): boolean
 export const scale: (state: CameraState) => (time: Date) => Vector2 = createSelector(
   state => state.scalingFactor,
   state => state.animation,
-  state => state.rasterSize,
-  (scalingFactor, animation, rasterSize) => time => {
+  (scalingFactor, animation) => time => {
+    // TODO, move most of this out of the `time` function, and refactor it so that `time` is the dependent variable.
     const scaleNotCountingAnimation = scaleFromScalingFactor(scalingFactor);
+
     if (animation !== undefined && animationIsActive(animation, time)) {
       /**
-       *  Since the camera should zoom out, then back in, adjust the animation progress.
+       *   When the camera position (translation) is changed programatically, it may be animated.
+       *   The duration of the animation is generally fixed for a given type of interaction. This way
+       *   the user won't have to wait for a variable amount of time to complete their interaction.
+       *
+       *   Since the duration is fixed and the amount of camera change is variable, the speed of the
+       *   camera is variable. If the distance the camera moves is very far, the camera will move
+       *   very fast.
+       *
+       *   When the camera moves fast, elements of Resolver move across the camera fast as well. These
+       *   quick moving elements can be distracting to the user. They may hinder the quality of
+       *   animation as well.
+       *
+       *   The speed with which objects move across the screen is dependent on the speed of the camera
+       *   as well as the scale. If the scale is high, the camera is zoomed in, objects look closer,
+       *   and so they move across the screen faster at a given camera speed. If the scale is low, the camera is
+       *   zoomed out, objects look further away, and so they move across the screen slower at a given camera
+       *   speed. Therefore we can control the speed at which objects move across the screen without changing
+       *   the camera speed. We do this by changing scale.
+       *
+       *   Changing the scale abruptly isn't acceptable because it would be visually jarring. Also, the
+       *   change in scale should be temporary, and the original scale should be resumed after the animation.
+       *
+       *   In order to change the scale to lower value, and then back, without being jarring to the user,
+       *   we calculate a temporary target scale and animate to it.
+       *
+       *   Animation is defined by a starting time, duration, starting position, and ending position. The amount of time
+       *   which has passed since the start time, compared to the duration, defines the progress of the animation.
+       *   We represent this process with a number between 0 and 1. As the animation progresses, the value changes from 0
+       *   to 1, linearly.
+       */
+      const x = animationProgress(animation, time);
+
+      /**
+       * The distance the camera will move during the animation is used to determine the camera speed.
+       */
+      const panningDistance = vector2.distance(
+        animation.targetTranslation,
+        animation.initialTranslation
+      );
+
+      // TODO, make scale a number
+      const speed = (panningDistance * scaleNotCountingAnimation[0]) / animation.duration;
+
+      /**
+       * The change in scale over the duration of the animation should not be linear. It should grow to the target value,
+       * then shrink back down to the original value. We adjust the animation progress so that it reaches its peak
+       * halfway through the animation. Then we ease the value, so that the change from not-animating-at-all to animating
+       * at full speed isn't abrupt, and so that the change from growing-to-changing isn't abrupt. See the graph:
        *
        *  gnuplot> plot [x=-0:1][x=0:1.2] eased(t)=t<.5? 4*t**3 : (t-1)*(2*t-2)**2+1, progress(t)=-abs(2*t-1)+1, eased(progress(x))
        *
@@ -95,78 +143,83 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
        *                                         animation progress
        *
        */
-      const x = animationProgress(animation, time);
       const easedInOutAnimationProgress = easing.inOutCubic(-Math.abs(2 * x - 1) + 1);
 
       /**
-       * The distance (in world coordinates) that the camera will move.
+       * If the camera isn't moving very fast, no change in scale is necessary. The speed at which an animation is triggered
+       * is a constant:
        */
-      const panningDistance = vector2.distance(
-        animation.targetTranslation,
-        animation.initialTranslation
+      const speedThreshold = 0.4;
+
+      /**
+       * Growth in speed beyond the threshold is controlled by a constant.
+       */
+      const speedGrowthFactor = 0.4;
+
+      /*
+       * When the camera is moving faster than the threshold, additional growth is taken to the power of the `speedGrowthFactor`.
+       *
+       *      gnuplot> plot [x=0:10][y=0:3] threshold=0.4, growthFactor=0.4, x < threshold ? x : x ** growthFactor - (threshold ** growthFactor - threshold)
+       *
+       *
+       *     3 +----------------------------------------------------------------------------+
+       *       |         target speed         +              +               +              |
+       *       |                                                                            |
+       *       |                                                                    ******* |
+       *       |                                                                            |
+       *       |                                                                            |
+       *   2.5 |-+                                                                        +-|
+       *       |                                                                            |
+       *       |                                                                            |
+       *       |                                                                          **|
+       *       |                                                                   *******  |
+       *       |                                                              ******        |
+       *     2 |-+                                                      ******            +-|
+       *       |                                                   *****                    |
+       *       |                                              *****                         |
+       *       |                                         *****                              |
+       *       |                                    *****                                   |
+       *   1.5 |-+                              *****                                     +-|
+       *       |                             ****                                           |
+       *       |                         ****                                               |
+       *       |                      ****                                                  |
+       *       |                   ***                                                      |
+       *       |                ***                                                         |
+       *     1 |-+            **                                                          +-|
+       *       |           ***                                                              |
+       *       |         ***                                                                |
+       *       |        *                                                                   |
+       *       |      **                                                                    |
+       *       |    **                                                                      |
+       *   0.5 |-+  *                                                                     +-|
+       *       |  **                                                                        |
+       *       | *                                                                          |
+       *       | *                                                                          |
+       *       | *                                                                          |
+       *       |*             +               +              +               +              |
+       *     0 +----------------------------------------------------------------------------+
+       *       0              2               4              6               8              10
+       *                                     camera speed (pixels per ms)
+       *
+       **/
+      const targetSpeed =
+        speed < speedThreshold
+          ? speed
+          : speed ** speedGrowthFactor - (speedThreshold ** speedGrowthFactor - speedThreshold);
+
+      /**
+       * The scale, adjusted to match the target speed if possible, is clamped within an upper
+       * and lower bound. Without these, the visualization would have to support an unbounded
+       * range of scale.
+       */
+      const adjustedScale = clamp(
+        (targetSpeed * animation.duration) / panningDistance,
+        scalingConstants.minimum,
+        scalingConstants.maximum
       );
 
       /**
-       * When deciding how much to scale out when animating the translation of the camera:
-       *   1. Must take into account the magnitude of change in translation. For example, if the user clicks a button to nudge the camera, there should be no scaling animation. However if the user clicks a button
-       *   that focuses a node which is very far away, the camera should move out a lot. (why? we should impose a max speed to camera animation, and after that max speed is reached, the scale should be changed?)
-       *   Why tho? things on the screen should never appear to move faster than a given speed. Beyond that speed, it becomes confusing or even dizzying. The speed that things move across the screen is defined as:
-       *
-       *   speed in screen units = distance * scale / animation duration
-       *
-       *   We should decrease scale in order to keep the speed in screen units below a value.
-       *
-       *   maxSpeed = distance * adjustedScale / animationDuration
-       *   therefore
-       *   maxSpeed * animationDuration / distance = adjustedScale
-       */
-      const distance = vector2.distance(animation.initialTranslation, animation.targetTranslation);
-
-      const nudgeSpeed =
-        (scalingConstants.unitsPerNudge * scaleNotCountingAnimation[0]) /
-        scalingConstants.nudgeAnimationDuration;
-
-      const speed = (distance * scaleNotCountingAnimation[0]) / animation.duration;
-
-      const maxTargetSpeed = 0.4;
-
-      const adjustedScale = Math.min(
-        scaleNotCountingAnimation[0],
-        (maxTargetSpeed * animation.duration) / distance
-      );
-
-      // Totally made up value???
-      const nudgesToMaxZoomOut = 40;
-
-      const changeToScalingFactorDueToAnimation = clamp(
-        // Totally made up equation
-        Math.max(0, nudgeFactor(animation, scaleNotCountingAnimation) - 1) / nudgesToMaxZoomOut,
-        0,
-        0.2
-      );
-
-      const zoomedOutScale = scaleFromScalingFactor(
-        clamp(scalingFactor - changeToScalingFactorDueToAnimation, 0, 1)
-      );
-
-      console.log(
-        'speed',
-        speed,
-        'new adjustedScale',
-        adjustedScale,
-        'actual zoomedOutScale',
-        zoomedOutScale,
-        'nudgeSpeed',
-        nudgeSpeed,
-        'distance',
-        distance,
-        'scaleNotCountingAnimation',
-        scaleNotCountingAnimation,
-        'animation.duration',
-        animation.duration
-      );
-
-      /**
+       * TODO, explain
        * Linearly interpolate between these, using the bell-shaped easing value
        */
       return vector2.lerp(
