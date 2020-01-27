@@ -115,18 +115,22 @@ provides an HTTPS endpoint for {es}.
 
 . Obtain the certificate authority (CA) certificate chain for {es}.
 +
---
 {kib} needs the appropriate CA certificate chain to properly establish trust when connecting to {es}.
 
-If you followed the {es} documentation for {ref}/configuring-tls.html#node-certificates[generating node certificates], then you likely have
-a PKCS#12 file for each your {es} nodes. You can extract the CA certificate chain from one of these files. For example:
+.. If you followed the {es} documentation for {ref}/configuring-tls.html#node-certificates[generating node certificates] and used the
+`elasticsearch-certutil http` command, check the `kibana` directory in its output. Depending on what options you chose, the output may
+include the CA certificate chain in PEM format.
 
+.. Otherwise, you likely have a PKCS#12 file for each your {es} nodes. You can extract the CA certificate chain from one of these files. For
+example:
++
+--
 [source,sh]
 --------------------------------------------------------------------------------
-openssl pkcs12 -in elastic-certificates.p12 -cacerts -nokeys -out elasticsearch-ca.crt
+openssl pkcs12 -in elastic-certificates.p12 -cacerts -nokeys -out elasticsearch-ca.pem
 --------------------------------------------------------------------------------
 
-This will produce a PEM-formatted file named `elasticsearch-ca.crt` that contains all CA certificates from the PKCS#12 file.
+This will produce a PEM-formatted file named `elasticsearch-ca.pem` that contains all CA certificates from the PKCS#12 file.
 --
 
 . Configure {kib} to trust the {es} CA certificate chain for the HTTP layer.
@@ -138,11 +142,11 @@ Specify one or more CA certificates in `kibana.yml`:
 
 [source,yaml]
 --------------------------------------------------------------------------------
-elasticsearch.ssl.certificateAuthorities: ["/path/to/elasticsearch-ca.crt"]
+elasticsearch.ssl.certificateAuthorities: ["/path/to/elasticsearch-ca.pem"]
 --------------------------------------------------------------------------------
 --
 
-.. If your CA certificate chain is contained in a PKCS#12 file:
+.. Otherwise, if your CA certificate chain is contained in a PKCS#12 file:
 +
 --
 WARNING: You should not use a PKCS#12 file that contains a private key. This is an unnecessary security risk. If you only have a PKCS#12
