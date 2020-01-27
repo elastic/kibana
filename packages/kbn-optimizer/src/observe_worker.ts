@@ -25,6 +25,7 @@ import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
 import { isWorkerMessage, WorkerMessage, WorkerConfig } from './common';
+import { OptimizerConfig } from './optimizer_config';
 
 export interface WorkerStdio {
   type: 'worker stdio';
@@ -57,15 +58,20 @@ if (inspectFlagIndex !== -1) {
   }
 }
 
-function usingWorkerProc<T>(config: WorkerConfig, user: (proc: ChildProcess) => Rx.Observable<T>) {
+function usingWorkerProc<T>(
+  config: OptimizerConfig,
+  worker: WorkerConfig,
+  fn: (proc: ChildProcess) => Rx.Observable<T>
+) {
   return Rx.using(
     (): ProcResource => {
-      const proc = fork(require.resolve('./worker/run_worker'), [JSON.stringify(config)], {
+      const proc = fork(require.resolve('./worker/run_worker'), [JSON.stringify(worker)], {
         stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
-        execArgv: inspectFlag ? [`${inspectFlag}=${inspectPortCounter++}`] : [],
+        execArgv:
+          inspectFlag && config.inspectWorkers ? [`${inspectFlag}=${inspectPortCounter++}`] : [],
         env: {
           ...process.env,
-          BROWSERSLIST_ENV: config.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
+          BROWSERSLIST_ENV: worker.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
         },
       });
 
@@ -79,7 +85,7 @@ function usingWorkerProc<T>(config: WorkerConfig, user: (proc: ChildProcess) => 
 
     resource => {
       const { proc } = resource as ProcResource;
-      return user(proc);
+      return fn(proc);
     }
   );
 }
@@ -106,8 +112,11 @@ function observeStdio$(stream: Readable, name: WorkerStdio['stream']) {
   );
 }
 
-export function observeWorker(config: WorkerConfig): Rx.Observable<WorkerMessage | WorkerStdio> {
-  return usingWorkerProc(config, proc => {
+export function observeWorker(
+  config: OptimizerConfig,
+  worker: WorkerConfig
+): Rx.Observable<WorkerMessage | WorkerStdio> {
+  return usingWorkerProc(config, worker, proc => {
     let lastMessage: WorkerMessage;
 
     return Rx.merge(
@@ -143,7 +152,7 @@ export function observeWorker(config: WorkerConfig): Rx.Observable<WorkerMessage
                     'worker error',
                   ];
 
-                  if (!config.watch) {
+                  if (!worker.watch) {
                     terminalMsgTypes.push('compiler issue', 'compiler success');
                   }
 

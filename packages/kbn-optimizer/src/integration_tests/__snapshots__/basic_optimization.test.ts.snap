@@ -27,6 +27,7 @@ OptimizerConfig {
       "moduleCounts": Object {},
     },
   },
+  "inspectWorkers": false,
   "watch": false,
   "workers": Array [
     Object {

@@ -98,6 +98,7 @@ describe('OptimizerConfig::parseOptions()', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "dist": false,
+        "inspectWorkers": false,
         "maxWorkerCount": 2,
         "optimizerCachePath": <absolute path>/data/.kbn-optimizer-cache.json,
         "pluginPaths": Array [],
@@ -120,6 +121,7 @@ describe('OptimizerConfig::parseOptions()', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "dist": false,
+        "inspectWorkers": false,
         "maxWorkerCount": 2,
         "optimizerCachePath": false,
         "pluginPaths": Array [],
@@ -142,6 +144,7 @@ describe('OptimizerConfig::parseOptions()', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "dist": false,
+        "inspectWorkers": false,
         "maxWorkerCount": 2,
         "optimizerCachePath": <absolute path>/data/.kbn-optimizer-cache.json,
         "pluginPaths": Array [],
@@ -165,6 +168,7 @@ describe('OptimizerConfig::parseOptions()', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "dist": false,
+        "inspectWorkers": false,
         "maxWorkerCount": 2,
         "optimizerCachePath": <absolute path>/data/.kbn-optimizer-cache.json,
         "pluginPaths": Array [],
@@ -186,6 +190,7 @@ describe('OptimizerConfig::parseOptions()', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "dist": false,
+        "inspectWorkers": false,
         "maxWorkerCount": 2,
         "optimizerCachePath": <absolute path>/data/.kbn-optimizer-cache.json,
         "pluginPaths": Array [],
@@ -236,6 +241,7 @@ describe('OptimizerConfig::create()', () => {
       pluginScanDirs: Symbol('parsed plugin scan dirs'),
       repoRoot: Symbol('parsed repo root'),
       watch: Symbol('parsed watch'),
+      inspectWorkers: Symbol('parsed inspect workers'),
     }));
   });
 
@@ -253,6 +259,7 @@ describe('OptimizerConfig::create()', () => {
           "saveBundleModuleCount": [MockFunction],
           "setState": [MockFunction],
         },
+        "inspectWorkers": Symbol(parsed inspect workers),
         "watch": Symbol(parsed watch),
         "workers": Array [
           Symbol(worker config 1),

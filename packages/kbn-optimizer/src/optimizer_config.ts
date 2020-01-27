@@ -39,6 +39,8 @@ interface Options {
   dist?: boolean;
   /** enable webpack profiling, writes stats.json files to the root of each plugin's output dir */
   profileWebpack?: boolean;
+  /** set to true to inspecting workers when the parent process is being inspected */
+  inspectWorkers?: boolean;
 
   /** include only oss plugins in default scan dirs */
   oss?: boolean;
@@ -61,6 +63,7 @@ interface ParsedOptions {
   dist: boolean;
   pluginPaths: string[];
   pluginScanDirs: string[];
+  inspectWorkers: boolean;
 }
 
 export class OptimizerConfig {
@@ -70,6 +73,7 @@ export class OptimizerConfig {
     const dist = !!options.dist;
     const examples = !!options.examples;
     const profileWebpack = !!options.profileWebpack;
+    const inspectWorkers = !!options.inspectWorkers;
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
@@ -122,6 +126,7 @@ export class OptimizerConfig {
       optimizerCachePath,
       pluginScanDirs,
       pluginPaths,
+      inspectWorkers,
     };
   }
 
@@ -148,7 +153,8 @@ export class OptimizerConfig {
       cache,
       bundles,
       workers.map(w => w.config),
-      options.watch
+      options.watch,
+      options.inspectWorkers
     );
   }
 
@@ -156,6 +162,7 @@ export class OptimizerConfig {
     public readonly cache: OptimizerCache,
     public readonly bundles: BundleDefinition[],
     public readonly workers: WorkerConfig[],
-    public readonly watch: boolean
+    public readonly watch: boolean,
+    public readonly inspectWorkers: boolean
   ) {}
 }

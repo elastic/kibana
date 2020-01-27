@@ -57,7 +57,7 @@ export class Optimizer {
 
   run() {
     return Rx.from(this.config.workers).pipe(
-      mergeMap(config => observeWorker(config)),
+      mergeMap(worker => observeWorker(this.config, worker)),
       closure(msg$ => {
         let prevSummaryType: OptimizerStateSummary['type'] | undefined;
         let startTime = Date.now();

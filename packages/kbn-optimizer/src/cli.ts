@@ -54,6 +54,11 @@ run(
       throw createFlagError('expected --profile to have no value');
     }
 
+    const inspectWorkers = flags['inspect-workers'] ?? false;
+    if (typeof inspectWorkers !== 'boolean') {
+      throw createFlagError('expected --no-inspect-workers to have no value');
+    }
+
     const maxWorkerCount = flags.workers ? Number.parseInt(String(flags.workers), 10) : undefined;
     if (maxWorkerCount !== undefined && (!Number.isFinite(maxWorkerCount) || maxWorkerCount < 1)) {
       throw createFlagError('expected --workers to be a number greater than 0');
@@ -75,6 +80,7 @@ run(
       examples,
       profileWebpack,
       extraPluginScanDirs,
+      inspectWorkers,
     });
 
     await new Optimizer(config)
@@ -84,10 +90,11 @@ run(
   },
   {
     flags: {
-      boolean: ['watch', 'oss', 'examples', 'dist', 'profile'],
+      boolean: ['watch', 'oss', 'examples', 'dist', 'profile', 'inspect-workers'],
       string: ['workers', 'scan-dir'],
       default: {
         examples: true,
+        'inspect-workers': true,
       },
       help: `
         --watch            run the optimizer in watch mode
@@ -97,6 +104,7 @@ run(
         --no-examples      don't build the example plugins
         --dist             build new platform plugins in a way that is suitable for inclusion in the Kibana distributable
         --scan-dir         add a directory to the list of directories scanned for plugins (specify as many times as necessary)
+        --no-inspect-workers  when inspecting the parent process, don't inspect the workers
       `,
     },
   }
