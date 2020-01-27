@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { DEFAULT_CONVERTER_COLOR } from './color_default';
+export { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats_service';
