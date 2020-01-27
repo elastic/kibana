@@ -50,7 +50,6 @@ import { RequestHandlerContext } from '.';
 import { InternalCoreSetup } from './internal_types';
 import { CapabilitiesService } from './capabilities';
 import { UuidService } from './uuid';
-import { PulseErrorInstructionValue } from './pulse/channel';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -223,9 +222,9 @@ export class Server {
   public async stop() {
     this.log.debug('stopping server');
 
-    // await this.pulse.stop();
     await this.legacy.stop();
     await this.plugins.stop();
+    await this.pulse.stop();
     await this.savedObjects.stop();
     await this.elasticsearch.stop();
     await this.http.stop();

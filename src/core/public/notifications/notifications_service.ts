@@ -19,18 +19,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Subscription, Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { I18nStart } from '../i18n';
 import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
 import { IUiSettingsClient } from '../ui_settings';
 import { OverlayStart } from '../overlays';
-import { PulseServiceSetup, PulseService } from '../pulse';
-import { errorChannelPayloads } from '../pulse/mock_data/errors';
-import { PulseErrorInstructionValue, PulseInstruction } from '../pulse/channel';
 
 interface SetupDeps {
   uiSettings: IUiSettingsClient;
-  pulse: PulseServiceSetup;
 }
 
 interface StartDeps {
@@ -45,19 +41,12 @@ export class NotificationsService {
   private uiSettingsErrorSubscription?: Subscription;
   private targetDomElement?: HTMLElement;
 
-  private pulse: PulseService;
-  private instructionsSubscription?: Subscription;
-
   constructor() {
     this.toasts = new ToastsService();
-    this.pulse = new PulseService();
   }
 
-  public setup({ uiSettings, pulse }: SetupDeps): NotificationsSetup {
-    const notificationSetup = {
-      toasts: this.toasts.setup({ uiSettings }),
-      pulse: this.pulse.setup(),
-    };
+  public setup({ uiSettings }: SetupDeps): NotificationsSetup {
+    const notificationSetup = { toasts: this.toasts.setup({ uiSettings }) };
     this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error: Error) => {
       notificationSetup.toasts.addDanger({
         title: i18n.translate('core.notifications.unableUpdateUISettingNotificationMessageTitle', {
@@ -66,24 +55,6 @@ export class NotificationsService {
         text: error.message,
       });
     });
-
-    errorChannelPayloads.forEach((element: PulseErrorInstructionValue) => {
-      pulse.getChannel('errors').sendPulse(element);
-    });
-    this.instructionsSubscription = pulse
-      .getChannel('errors')
-      .instructions$()
-      .subscribe(instructions => {
-        if (instructions && instructions.length) {
-          instructions.forEach(instruction => {
-            notificationSetup.toasts.addError(new Error(JSON.stringify(instruction)), {
-              // @ts-ignore-next-line
-              title: `Error:${instruction.hash}`,
-              toastMessage: 'The error has been reported to Pulse',
-            });
-          });
-        }
-      });
 
     return notificationSetup;
   }
@@ -100,7 +71,6 @@ export class NotificationsService {
 
   public stop() {
     this.toasts.stop();
-    this.pulse.stop();
 
     if (this.targetDomElement) {
       this.targetDomElement.textContent = '';
@@ -109,10 +79,6 @@ export class NotificationsService {
     if (this.uiSettingsErrorSubscription) {
       this.uiSettingsErrorSubscription.unsubscribe();
     }
-
-    if (this.instructionsSubscription) {
-      this.instructionsSubscription.unsubscribe();
-    }
   }
 }
 
@@ -120,7 +86,6 @@ export class NotificationsService {
 export interface NotificationsSetup {
   /** {@link ToastsSetup} */
   toasts: ToastsSetup;
-  pulse: Promise<PulseServiceSetup>;
 }
 
 /** @public */

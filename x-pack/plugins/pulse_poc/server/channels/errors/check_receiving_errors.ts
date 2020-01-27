@@ -46,6 +46,7 @@ export async function check(es: IScopedClusterClient, { deploymentId, indexName 
       };
       return source;
     });
+    // TODO: Set all the hits as 'seen' so we stop resending the same instructions over and over.
     return sources;
   } else {
     return undefined;

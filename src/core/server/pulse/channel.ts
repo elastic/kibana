@@ -18,6 +18,7 @@
  */
 
 import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { PulseCollectorConstructor } from './types';
 // import { SavedObjectsServiceSetup } from '../saved_objects';
 import { Logger } from '../logging';
@@ -51,6 +52,7 @@ export interface ChannelSetupContext {
 }
 
 export class PulseChannel<I = PulseInstruction> {
+  private readonly stop$ = new Subject();
   private readonly collector: any;
 
   constructor(private readonly config: ChannelConfig<I>) {
@@ -78,6 +80,11 @@ export class PulseChannel<I = PulseInstruction> {
   }
 
   public instructions$() {
-    return this.config.instructions$.asObservable();
+    return this.config.instructions$.pipe(takeUntil(this.stop$));
+  }
+
+  public stop() {
+    this.stop$.next();
+    this.config.instructions$.complete();
   }
 }
