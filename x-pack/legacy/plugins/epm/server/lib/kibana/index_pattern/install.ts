@@ -23,6 +23,7 @@ interface FieldFormatParams {
   outputFormat?: string;
   outputPrecision?: number;
   labelTemplate?: string;
+  urlTemplate?: string;
   openLinkInCurrentTab?: boolean;
 }
 /* this should match https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/kibana/fields_transformer.go */
@@ -299,6 +300,7 @@ const getFieldFormatParams = (field: Field): FieldFormatParams => {
   if (field.output_format) params.outputFormat = field.output_format;
   if (field.output_precision) params.outputPrecision = field.output_precision;
   if (field.label_template) params.labelTemplate = field.label_template;
+  if (field.url_template) params.urlTemplate = field.url_template;
   if (field.open_link_in_current_tab) params.openLinkInCurrentTab = field.open_link_in_current_tab;
   return params;
 };

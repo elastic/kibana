@@ -36,6 +36,7 @@ export interface Field {
   output_format?: string;
   output_precision?: number;
   label_template?: string;
+  url_template?: string;
   open_link_in_current_tab?: boolean;
 }
 

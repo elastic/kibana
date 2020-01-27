@@ -29,7 +29,8 @@ exports[`creating index patterns from yaml fields createFieldFormatMap creates c
       "inputFormat": "inputFormatVal",
       "outputFormat": "outputFormalVal",
       "outputPrecision": 3,
-      "labelTemplate": "labelTemplateVal"
+      "labelTemplate": "labelTemplateVal",
+      "urlTemplate": "urlTemplateVal"
     }
   }
 }

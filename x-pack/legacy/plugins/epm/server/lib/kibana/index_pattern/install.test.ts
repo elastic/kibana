@@ -288,6 +288,7 @@ describe('creating index patterns from yaml fields', () => {
           output_format: 'outputFormalVal',
           output_precision: 3,
           label_template: 'labelTemplateVal',
+          url_template: 'urlTemplateVal',
           openLinkInCurrentTab: true,
         },
       ];
