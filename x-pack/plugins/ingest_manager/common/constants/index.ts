@@ -6,4 +6,4 @@
 export * from './plugin';
 export * from './routes';
 
-export const DEFAULT_AGENT_CONFIG_ID = 'default';
+export * from './agent_config';

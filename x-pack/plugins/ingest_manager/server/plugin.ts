@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable } from 'rxjs';
-import { CoreSetup, Plugin, PluginInitializerContext, ICustomClusterClient } from 'kibana/server';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  ICustomClusterClient,
+  SavedObjectsClient,
+} from 'kibana/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
 import { PLUGIN_ID } from './constants';
-import { licenseService, configService, appContextService } from './services';
+import { licenseService, configService, appContextService, agentConfigService } from './services';
 import { registerEPMRoutes, registerDataStreamRoutes, registerAgentConfigRoutes } from './routes';
 import { IngestManagerConfigType } from './';
 
@@ -49,10 +56,14 @@ export class IngestManagerPlugin implements Plugin {
     registerEPMRoutes(router);
   }
 
-  public async start() {
+  public async start(core: CoreStart) {
+    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     appContextService.start(this.appContext!);
     licenseService.start(this.licensing$);
     configService.start(this.config$);
+
+    // Create default saved objects
+    agentConfigService.ensureDefaultAgentConfig(internalSoClient);
   }
 
   public async stop() {

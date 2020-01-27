@@ -5,7 +5,7 @@
  */
 import { SavedObjectsClientContract } from 'kibana/server';
 import { AuthenticatedUser } from '../../../security/server';
-import { DEFAULT_AGENT_CONFIG_ID } from '../constants';
+import { DEFAULT_AGENT_CONFIG_ID, DEFAULT_AGENT_CONFIG } from '../constants';
 import {
   NewAgentConfig,
   AgentConfig,
@@ -24,7 +24,10 @@ class AgentConfigService {
     this.eventsHandler.push(handler);
   }
 
-  public triggerPolicyUpdatedEvent: AgentConfigUpdateHandler = async (action, agentConfigId) => {
+  public triggerAgentConfigUpdatedEvent: AgentConfigUpdateHandler = async (
+    action,
+    agentConfigId
+  ) => {
     for (const handler of this.eventsHandler) {
       await handler(action, agentConfigId);
     }
@@ -42,13 +45,33 @@ class AgentConfigService {
       updated_by: user ? user.username : 'system',
     });
 
-    await this.triggerPolicyUpdatedEvent('updated', id);
+    await this.triggerAgentConfigUpdatedEvent('updated', id);
 
     return (await this.get(soClient, id)) as AgentConfig;
   }
 
-  public async ensureDefaultPolicy() {
-    // TODO: Check with platform about using saved object client as an internal user
+  public async ensureDefaultAgentConfig(soClient: SavedObjectsClientContract) {
+    let defaultAgentConfig;
+
+    try {
+      defaultAgentConfig = await this.get(soClient, DEFAULT_AGENT_CONFIG_ID);
+    } catch (err) {
+      if (!err.isBoom || err.output.statusCode !== 404) {
+        throw err;
+      }
+    }
+
+    if (!defaultAgentConfig) {
+      const newDefaultAgentConfig: NewAgentConfig = {
+        ...DEFAULT_AGENT_CONFIG,
+      };
+
+      await this.create(soClient, newDefaultAgentConfig, {
+        id: DEFAULT_AGENT_CONFIG_ID,
+      });
+
+      await this.triggerAgentConfigUpdatedEvent('created', DEFAULT_AGENT_CONFIG_ID);
+    }
   }
 
   public async create(
@@ -66,7 +89,7 @@ class AgentConfigService {
       options
     );
 
-    await this.triggerPolicyUpdatedEvent('created', newSo.id);
+    await this.triggerAgentConfigUpdatedEvent('created', newSo.id);
 
     return {
       id: newSo.id,
@@ -206,7 +229,7 @@ class AgentConfigService {
 
     for (const id of ids) {
       await soClient.delete(SAVED_OBJECT_TYPE, id);
-      await this.triggerPolicyUpdatedEvent('deleted', id);
+      await this.triggerAgentConfigUpdatedEvent('deleted', id);
     }
   }
 }
