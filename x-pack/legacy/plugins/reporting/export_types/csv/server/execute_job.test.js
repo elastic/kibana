@@ -9,8 +9,7 @@ import sinon from 'sinon';
 import nodeCrypto from '@elastic/node-crypto';
 import { CancellationToken } from '../../../common/cancellation_token';
 import { FieldFormatsService } from '../../../../../../../src/legacy/ui/field_formats/mixin/field_formats_service';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { StringFormat } from '../../../../../../../src/plugins/data/server';
+import { fieldFormats } from '../../../../../../../src/plugins/data/server';
 import { LevelLogger } from '../../../server/lib/level_logger';
 import { executeJobFactory } from './execute_job';
 
@@ -76,8 +75,12 @@ describe('CSV Execute Job', function() {
         uiConfigMock['format:defaultTypeMap'] = {
           _default_: { id: 'string', params: {} },
         };
-        const getConfig = key => uiConfigMock[key];
-        return new FieldFormatsService([StringFormat], getConfig);
+
+        const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+
+        fieldFormatsRegistry.init(key => uiConfigMock[key], {}, [fieldFormats.StringFormat]);
+
+        return fieldFormatsRegistry;
       },
       plugins: {
         elasticsearch: {

@@ -7,10 +7,7 @@
 import { ResponseObject } from 'hapi';
 import { EventEmitter } from 'events';
 import { Legacy } from 'kibana';
-import {
-  ElasticsearchPlugin,
-  CallCluster,
-} from '../../../../src/legacy/core_plugins/elasticsearch';
+import { CallCluster } from '../../../../src/legacy/core_plugins/elasticsearch';
 import { CancellationToken } from './common/cancellation_token';
 import { LevelLogger } from './server/lib/level_logger';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
@@ -332,10 +329,4 @@ export interface InterceptedRequest {
   };
   frameId: string;
   resourceType: string;
-}
-
-export interface FieldFormats {
-  getConfig: number;
-  getInstance: (config: any) => any;
-  getDefaultInstance: (key: string) => any;
 }

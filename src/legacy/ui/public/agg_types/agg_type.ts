@@ -27,7 +27,7 @@ import { AggConfigs } from './agg_configs';
 import { Adapters } from '../inspector';
 import { BaseParamType } from './param_types/base';
 import { AggParamType } from '../agg_types/param_types/agg';
-import { KBN_FIELD_TYPES, FieldFormat, ISearchSource } from '../../../../plugins/data/public';
+import { KBN_FIELD_TYPES, fieldFormats, ISearchSource } from '../../../../plugins/data/public';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
@@ -54,16 +54,16 @@ export interface AggTypeConfig<
     inspectorAdapters: Adapters,
     abortSignal?: AbortSignal
   ) => Promise<any>;
-  getFormat?: (agg: TAggConfig) => FieldFormat;
+  getFormat?: (agg: TAggConfig) => fieldFormats.FieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 }
 
 const getFormat = (agg: AggConfig) => {
   const field = agg.getField();
-  const fieldFormats = npStart.plugins.data.fieldFormats;
+  const fieldFormatsService = npStart.plugins.data.fieldFormats;
 
-  return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
+  return field ? field.format : fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.STRING);
 };
 
 export class AggType<
@@ -191,7 +191,7 @@ export class AggType<
    * @param  {agg} agg - the agg to pick a format for
    * @return {FieldFormat}
    */
-  getFormat: (agg: TAggConfig) => FieldFormat;
+  getFormat: (agg: TAggConfig) => fieldFormats.FieldFormat;
 
   getValue: (agg: TAggConfig, bucket: any) => any;
 
