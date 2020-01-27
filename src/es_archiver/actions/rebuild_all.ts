@@ -18,13 +18,12 @@
  */
 
 import { resolve, dirname, relative } from 'path';
-
 import { stat, rename, createReadStream, createWriteStream } from 'fs';
-
+import { Readable, Writable } from 'stream';
 import { fromNode } from 'bluebird';
+import { ToolingLog } from '@kbn/dev-utils';
 
 import { createPromiseFromStreams } from '../../legacy/utils';
-
 import {
   prioritizeMappings,
   readDirectory,
@@ -33,12 +32,20 @@ import {
   createFormatArchiveStreams,
 } from '../lib';
 
-async function isDirectory(path) {
+async function isDirectory(path: string): Promise<boolean> {
   const stats = await fromNode(cb => stat(path, cb));
   return stats.isDirectory();
 }
 
-export async function rebuildAllAction({ dataDir, log, rootDir = dataDir }) {
+export async function rebuildAllAction({
+  dataDir,
+  log,
+  rootDir = dataDir,
+}: {
+  dataDir: string;
+  log: ToolingLog;
+  rootDir: string;
+}) {
   const childNames = prioritizeMappings(await readDirectory(dataDir));
   for (const childName of childNames) {
     const childPath = resolve(dataDir, childName);
@@ -58,11 +65,11 @@ export async function rebuildAllAction({ dataDir, log, rootDir = dataDir }) {
     const tempFile = childPath + (gzip ? '.rebuilding.gz' : '.rebuilding');
 
     await createPromiseFromStreams([
-      createReadStream(childPath),
+      createReadStream(childPath) as Readable,
       ...createParseArchiveStreams({ gzip }),
       ...createFormatArchiveStreams({ gzip }),
       createWriteStream(tempFile),
-    ]);
+    ] as [Readable, ...Writable[]]);
 
     await fromNode(cb => rename(tempFile, childPath, cb));
     log.info(`${archiveName} Rebuilt ${childName}`);

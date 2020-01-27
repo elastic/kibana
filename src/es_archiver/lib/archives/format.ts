@@ -24,7 +24,7 @@ import stringify from 'json-stable-stringify';
 import { createMapStream, createIntersperseStream } from '../../../legacy/utils';
 import { RECORD_SEPARATOR } from './constants';
 
-export function createFormatArchiveStreams({ gzip = false }: { gzip: boolean }) {
+export function createFormatArchiveStreams({ gzip = false }: { gzip?: boolean } = {}) {
   return [
     createMapStream(record => stringify(record, { space: '  ' })),
     createIntersperseStream(RECORD_SEPARATOR),

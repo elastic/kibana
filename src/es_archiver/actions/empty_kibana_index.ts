@@ -16,13 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { Client } from 'elasticsearch';
+import { ToolingLog, KbnClient } from '@kbn/dev-utils';
+
 import { migrateKibanaIndex, deleteKibanaIndices, createStats } from '../lib';
 
-export async function emptyKibanaIndexAction({ client, log, kbnClient }) {
+export async function emptyKibanaIndexAction({
+  client,
+  log,
+  kbnClient,
+}: {
+  client: Client;
+  log: ToolingLog;
+  kbnClient: KbnClient;
+}) {
   const stats = createStats('emptyKibanaIndex', log);
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
 
-  await deleteKibanaIndices({ client, stats });
-  await migrateKibanaIndex({ client, log, stats, kibanaPluginIds });
+  await deleteKibanaIndices({ client, stats, log });
+  await migrateKibanaIndex({ client, log, kibanaPluginIds });
   return stats;
 }

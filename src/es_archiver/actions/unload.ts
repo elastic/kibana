@@ -19,9 +19,11 @@
 
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
+import { Readable, Writable } from 'stream';
+import { Client } from 'elasticsearch';
+import { ToolingLog, KbnClient } from '@kbn/dev-utils';
 
 import { createPromiseFromStreams } from '../../legacy/utils';
-
 import {
   isGzip,
   createStats,
@@ -32,7 +34,19 @@ import {
   createDeleteIndexStream,
 } from '../lib';
 
-export async function unloadAction({ name, client, dataDir, log, kbnClient }) {
+export async function unloadAction({
+  name,
+  client,
+  dataDir,
+  log,
+  kbnClient,
+}: {
+  name: string;
+  client: Client;
+  dataDir: string;
+  log: ToolingLog;
+  kbnClient: KbnClient;
+}) {
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
@@ -42,11 +56,11 @@ export async function unloadAction({ name, client, dataDir, log, kbnClient }) {
     log.info('[%s] Unloading indices from %j', name, filename);
 
     await createPromiseFromStreams([
-      createReadStream(resolve(inputDir, filename)),
+      createReadStream(resolve(inputDir, filename)) as Readable,
       ...createParseArchiveStreams({ gzip: isGzip(filename) }),
       createFilterRecordsStream('index'),
       createDeleteIndexStream(client, stats, log, kibanaPluginIds),
-    ]);
+    ] as [Readable, ...Writable[]]);
   }
 
   return stats.toJSON();

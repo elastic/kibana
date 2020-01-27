@@ -22,12 +22,23 @@ import Fs from 'fs';
 import { createGunzip, createGzip, Z_BEST_COMPRESSION } from 'zlib';
 import { promisify } from 'util';
 import globby from 'globby';
+import { ToolingLog } from '@kbn/dev-utils';
 
 import { createPromiseFromStreams } from '../../legacy/utils';
 
 const unlinkAsync = promisify(Fs.unlink);
 
-export async function editAction({ prefix, dataDir, log, handler }) {
+export async function editAction({
+  prefix,
+  dataDir,
+  log,
+  handler,
+}: {
+  prefix: string;
+  dataDir: string;
+  log: ToolingLog;
+  handler: () => Promise<any>;
+}) {
   const archives = (
     await globby('**/*.gz', {
       cwd: prefix ? resolve(dataDir, prefix) : dataDir,

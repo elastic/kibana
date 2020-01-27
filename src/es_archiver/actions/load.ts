@@ -19,6 +19,9 @@
 
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
+import { Readable } from 'stream';
+import { ToolingLog, KbnClient } from '@kbn/dev-utils';
+import { Client } from 'elasticsearch';
 
 import { createPromiseFromStreams, concatStreamProviders } from '../../legacy/utils';
 
@@ -38,12 +41,26 @@ import {
 // pipe a series of streams into each other so that data and errors
 // flow from the first stream to the last. Errors from the last stream
 // are not listened for
-const pipeline = (...streams) =>
+const pipeline = (...streams: Readable[]) =>
   streams.reduce((source, dest) =>
-    source.once('error', error => dest.emit('error', error)).pipe(dest)
+    source.once('error', error => dest.emit('error', error)).pipe(dest as any)
   );
 
-export async function loadAction({ name, skipExisting, client, dataDir, log, kbnClient }) {
+export async function loadAction({
+  name,
+  skipExisting,
+  client,
+  dataDir,
+  log,
+  kbnClient,
+}: {
+  name: string;
+  skipExisting: boolean;
+  client: Client;
+  dataDir: string;
+  log: ToolingLog;
+  kbnClient: KbnClient;
+}) {
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
@@ -64,12 +81,12 @@ export async function loadAction({ name, skipExisting, client, dataDir, log, kbn
     { objectMode: true }
   );
 
-  const progress = new Progress('load progress');
+  const progress = new Progress();
   progress.activate(log);
 
   await createPromiseFromStreams([
     recordStream,
-    createCreateIndexStream({ client, stats, skipExisting, log, kibanaPluginIds }),
+    createCreateIndexStream({ client, stats, skipExisting, log }),
     createIndexDocRecordsStream(client, stats, progress),
   ]);
 
@@ -77,7 +94,7 @@ export async function loadAction({ name, skipExisting, client, dataDir, log, kbn
   const result = stats.toJSON();
 
   for (const [index, { docs }] of Object.entries(result)) {
-    if (!docs && docs.indexed > 0) {
+    if (docs && docs.indexed > 0) {
       log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
     }
   }

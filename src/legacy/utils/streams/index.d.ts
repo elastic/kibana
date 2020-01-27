@@ -20,7 +20,7 @@
 import { Readable, Transform, Writable, TransformOptions } from 'stream';
 
 export function concatStreamProviders(
-  sourceProviders: Readable[],
+  sourceProviders: Array<() => Readable>,
   options: TransformOptions
 ): Transform;
 export function createIntersperseStream(intersperseChunk: string | Buffer): Transform;

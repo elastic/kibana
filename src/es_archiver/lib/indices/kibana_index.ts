@@ -62,7 +62,7 @@ export async function deleteKibanaIndices({
 }: {
   client: Client;
   stats: Stats;
-  log: any;
+  log: ToolingLog;
 }) {
   const indexNames = await fetchKibanaIndices(client);
   if (!indexNames.length) {
