@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import styled from 'styled-components';
 import { EuiHealth } from '@elastic/eui';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
@@ -16,22 +17,30 @@ interface SeverityOptionItem {
   inputDisplay: React.ReactElement;
 }
 
+const StyledEuiHealth = styled(EuiHealth)`
+  line-height: inherit;
+`;
+
 export const severityOptions: SeverityOptionItem[] = [
   {
     value: 'low',
-    inputDisplay: <EuiHealth color={euiLightVars.euiColorVis0}>{I18n.LOW}</EuiHealth>,
+    inputDisplay: <StyledEuiHealth color={euiLightVars.euiColorVis0}>{I18n.LOW}</StyledEuiHealth>,
   },
   {
     value: 'medium',
-    inputDisplay: <EuiHealth color={euiLightVars.euiColorVis5}>{I18n.MEDIUM} </EuiHealth>,
+    inputDisplay: (
+      <StyledEuiHealth color={euiLightVars.euiColorVis5}>{I18n.MEDIUM}</StyledEuiHealth>
+    ),
   },
   {
     value: 'high',
-    inputDisplay: <EuiHealth color={euiLightVars.euiColorVis7}>{I18n.HIGH} </EuiHealth>,
+    inputDisplay: <StyledEuiHealth color={euiLightVars.euiColorVis7}>{I18n.HIGH}</StyledEuiHealth>,
   },
   {
     value: 'critical',
-    inputDisplay: <EuiHealth color={euiLightVars.euiColorVis9}>{I18n.CRITICAL} </EuiHealth>,
+    inputDisplay: (
+      <StyledEuiHealth color={euiLightVars.euiColorVis9}>{I18n.CRITICAL}</StyledEuiHealth>
+    ),
   },
 ];
 

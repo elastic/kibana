@@ -18,3 +18,4 @@
  */
 
 export * from './feature_catalogue';
+export * from './environment';

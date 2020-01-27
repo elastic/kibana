@@ -37,7 +37,7 @@ describe('create_rules_bulk_schema', () => {
           from: 'now-5m',
           to: 'now',
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           type: 'query',
           query: 'some query',
           index: ['index-1'],
@@ -57,7 +57,7 @@ describe('create_rules_bulk_schema', () => {
           from: 'now-5m',
           to: 'now',
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           type: 'query',
           query: 'some query',
           index: ['index-1'],
@@ -70,7 +70,7 @@ describe('create_rules_bulk_schema', () => {
           from: 'now-5m',
           to: 'now',
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           type: 'query',
           query: 'some query',
           index: ['index-1'],
@@ -78,5 +78,67 @@ describe('create_rules_bulk_schema', () => {
         },
       ]).error
     ).toBeFalsy();
+  });
+
+  test('The default for "from" will be "now-6m"', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<UpdateRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          version: 1,
+        },
+      ]).value[0].from
+    ).toEqual('now-6m');
+  });
+
+  test('The default for "to" will be "now"', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<UpdateRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          version: 1,
+        },
+      ]).value[0].to
+    ).toEqual('now');
+  });
+
+  test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<UpdateRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'junk',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          version: 1,
+        },
+      ]).error.message
+    ).toEqual(
+      '"value" at position 0 fails because [child "severity" fails because ["severity" must be one of [low, medium, high, critical]]]'
+    );
   });
 });

@@ -1,68 +1,25 @@
 {
-  "rule_id": "0d69150b-96f8-467c-a86d-a67a3378ce77",
-  "risk_score": 50,
-  "description": "Linux: Nping Activity",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Linux: Nping Activity",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.name: nmap",
-  "language": "kuery",
-  "filters": [
-    {
-      "meta": {
-        "negate": false,
-        "type": "phrase",
-        "key": "event.dataset",
-        "value": "process",
-        "params": {
-          "query": "process"
-        },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
-      },
-      "query": {
-        "match": {
-          "event.dataset": {
-            "query": "process",
-            "type": "phrase"
-          }
-        }
-      },
-      "$state": {
-        "store": "appState"
-      }
-    },
-    {
-      "meta": {
-        "negate": false,
-        "type": "phrase",
-        "key": "event.action",
-        "value": "process_started",
-        "params": {
-          "query": "process_started"
-        },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
-      },
-      "query": {
-        "match": {
-          "event.action": {
-            "query": "process_started",
-            "type": "phrase"
-          }
-        }
-      },
-      "$state": {
-        "store": "appState"
-      }
-    }
+  "description": "Nping ran on a Linux host. Nping is part of the Nmap tool suite and has the ability to construct raw packets for a wide variety of security testing applications including denial of service testing.",
+  "false_positives": [
+    "Some normal use of this command may originate from security engineers and network or server administrators but this is usually not routine or unannounced. Use of nping by non-engineers or ordinary users is uncommon."
   ],
-  "enabled": false,
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 33,
+  "name": "Nping Process Activity",
+  "query": "process.name: nping and event.action:executed",
+  "references": ["https://en.wikipedia.org/wiki/Nmap"],
+  "risk_score": 50,
+  "rule_id": "0d69150b-96f8-467c-a86d-a67a3378ce77",
+  "severity": "medium",
+  "tags": ["Elastic", "linux"],
+  "type": "query",
   "version": 1
 }

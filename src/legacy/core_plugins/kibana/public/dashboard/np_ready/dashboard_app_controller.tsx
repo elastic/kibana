@@ -17,58 +17,56 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _, { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import angular from 'angular';
-import { uniq } from 'lodash';
 
 import { Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
-  subscribeWithScope,
   ConfirmationButtonTypes,
-  showSaveModal,
-  SaveResult,
   migrateLegacyQuery,
-  State,
-  AppStateClass as TAppStateClass,
-  KbnUrl,
   SavedObjectSaveOpts,
-  unhashUrl,
-  VISUALIZE_EMBEDDABLE_TYPE,
+  SaveResult,
+  showSaveModal,
+  subscribeWithScope,
 } from '../legacy_imports';
-import { FilterStateManager } from '../../../../data/public';
 import {
+  COMPARE_ALL_OPTIONS,
+  compareFilters,
   IndexPattern,
+  IndexPatternsContract,
   Query,
   SavedQuery,
-  IndexPatternsContract,
+  syncAppFilters,
+  syncQuery,
 } from '../../../../../../plugins/data/public';
 
 import {
-  DashboardContainer,
   DASHBOARD_CONTAINER_TYPE,
+  DashboardContainer,
   DashboardContainerFactory,
   DashboardContainerInput,
   DashboardPanelState,
 } from '../../../../dashboard_embeddable_container/public/np_ready/public';
 import {
-  isErrorEmbeddable,
-  ErrorEmbeddable,
-  ViewMode,
-  openAddPanelFlyout,
   EmbeddableFactoryNotFoundError,
+  ErrorEmbeddable,
+  isErrorEmbeddable,
+  openAddPanelFlyout,
+  ViewMode,
 } from '../../../../embeddable_api/public/np_ready/public';
-import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
+import { ConfirmModalFn, NavAction, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { saveDashboard } from './lib';
 import { DashboardStateManager } from './dashboard_state_manager';
-import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
+import { createDashboardEditUrl, DashboardConstants } from './dashboard_constants';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { getDashboardTitle } from './dashboard_strings';
@@ -79,17 +77,14 @@ import {
   SavedObjectFinderProps,
   SavedObjectFinderUi,
 } from '../../../../../../plugins/kibana_react/public';
+import { removeQueryParam, unhashUrl } from '../../../../../../plugins/kibana_utils/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
   $route: any;
   $routeParams: any;
-  getAppState: any;
-  globalState: State;
   indexPatterns: IndexPatternsContract;
   dashboardConfig: any;
-  kbnUrl: KbnUrl;
-  AppStateClass: TAppStateClass<DashboardAppState>;
   config: any;
   confirmModal: ConfirmModalFn;
 }
@@ -104,12 +99,8 @@ export class DashboardAppController {
     $scope,
     $route,
     $routeParams,
-    getAppState,
-    globalState,
     dashboardConfig,
     localStorage,
-    kbnUrl,
-    AppStateClass,
     indexPatterns,
     config,
     confirmModal,
@@ -117,16 +108,21 @@ export class DashboardAppController {
     embeddables,
     share,
     dashboardCapabilities,
-    npDataStart: {
-      query: {
-        filterManager,
-        timefilter: { timefilter },
-      },
-    },
+    npDataStart: { query: queryService },
     core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects, http },
+    history,
+    kbnUrlStateStorage,
   }: DashboardAppControllerDependencies) {
-    new FilterStateManager(globalState, getAppState, filterManager);
+    const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
+    const timefilter = queryService.timefilter.timefilter;
+
+    // starts syncing `_g` portion of url with query services
+    // note: dashboard_state_manager.ts syncs `_a` portion of url
+    const {
+      stop: stopSyncingGlobalStateWithUrl,
+      hasInheritedQueryFromUrl: hasInheritedGlobalStateFromUrl,
+    } = syncQuery(queryService, kbnUrlStateStorage);
 
     let lastReloadRequestTime = 0;
 
@@ -137,16 +133,21 @@ export class DashboardAppController {
 
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
-      AppStateClass,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
       kibanaVersion: injectedMetadata.getKibanaVersion(),
+      kbnUrlStateStorage,
+      history,
     });
 
-    $scope.appState = dashboardStateManager.getAppState();
+    const stopSyncingAppFilters = syncAppFilters(filterManager, {
+      set: filters => dashboardStateManager.setFilters(filters),
+      get: () => dashboardStateManager.appState.filters,
+      state$: dashboardStateManager.appState$.pipe(map(state => state.filters)),
+    });
 
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
-    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !globalState.$inheritedGlobalState) {
+    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !hasInheritedGlobalStateFromUrl) {
       dashboardStateManager.syncTimefilterWithDashboard(timefilter);
     }
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
@@ -309,16 +310,22 @@ export class DashboardAppController {
             // This has to be first because handleDashboardContainerChanges causes
             // appState.save which will cause refreshDashboardContainer to be called.
 
-            // Add filters modifies the object passed to it, hence the clone deep.
-            if (!_.isEqual(container.getInput().filters, queryFilter.getFilters())) {
+            if (
+              !compareFilters(
+                container.getInput().filters,
+                queryFilter.getFilters(),
+                COMPARE_ALL_OPTIONS
+              )
+            ) {
+              // Add filters modifies the object passed to it, hence the clone deep.
               queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
 
               dashboardStateManager.applyFilters($scope.model.query, container.getInput().filters);
               dirty = true;
             }
 
+            dashboardStateManager.handleDashboardContainerChanges(container);
             $scope.$evalAsync(() => {
-              dashboardStateManager.handleDashboardContainerChanges(container);
               if (dirty) {
                 updateState();
               }
@@ -334,13 +341,12 @@ export class DashboardAppController {
           // This code needs to be replaced with a better mechanism for adding new embeddables of
           // any type from the add panel. Likely this will happen via creating a visualization "inline",
           // without navigating away from the UX.
-          if ($routeParams[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
-            container.addSavedObjectEmbeddable(
-              VISUALIZE_EMBEDDABLE_TYPE,
-              $routeParams[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]
-            );
-            kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
-            kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
+          if ($routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE]) {
+            const type = $routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE];
+            const id = $routeParams[DashboardConstants.ADD_EMBEDDABLE_ID];
+            container.addSavedObjectEmbeddable(type, id);
+            removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_TYPE);
+            removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_ID);
           }
         }
 
@@ -405,7 +411,15 @@ export class DashboardAppController {
 
       const containerInput = dashboardContainer.getInput();
       const differences: Partial<DashboardContainerInput> = {};
-      Object.keys(containerInput).forEach(key => {
+
+      // Filters shouldn't  be compared using regular isEqual
+      if (
+        !compareFilters(containerInput.filters, appStateDashboardInput.filters, COMPARE_ALL_OPTIONS)
+      ) {
+        differences.filters = appStateDashboardInput.filters;
+      }
+
+      Object.keys(_.omit(containerInput, 'filters')).forEach(key => {
         const containerValue = (containerInput as { [key: string]: unknown })[key];
         const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[
           key
@@ -415,7 +429,9 @@ export class DashboardAppController {
         }
       });
 
-      return Object.values(differences).length === 0 ? undefined : differences;
+      // cloneDeep hack is needed, as there are multiple place, where container's input mutated,
+      // but values from appStateValue are deeply frozen, as they can't be mutated directly
+      return Object.values(differences).length === 0 ? undefined : _.cloneDeep(differences);
     };
 
     const refreshDashboardContainer = () => {
@@ -472,18 +488,21 @@ export class DashboardAppController {
           language:
             localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
         },
-        []
+        queryFilter.getGlobalFilters()
       );
       // Making this method sync broke the updates.
       // Temporary fix, until we fix the complex state in this file.
-      setTimeout(queryFilter.removeAll, 0);
+      setTimeout(() => {
+        queryFilter.setFilters(queryFilter.getGlobalFilters());
+      }, 0);
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
-      dashboardStateManager.applyFilters(
-        savedQuery.attributes.query,
-        savedQuery.attributes.filters || []
-      );
+      const savedQueryFilters = savedQuery.attributes.filters || [];
+      const globalFilters = queryFilter.getGlobalFilters();
+      const allFilters = [...globalFilters, ...savedQueryFilters];
+
+      dashboardStateManager.applyFilters(savedQuery.attributes.query, allFilters);
       if (savedQuery.attributes.timefilter) {
         timefilter.setTime({
           from: savedQuery.attributes.timefilter.from,
@@ -496,7 +515,7 @@ export class DashboardAppController {
       // Making this method sync broke the updates.
       // Temporary fix, until we fix the complex state in this file.
       setTimeout(() => {
-        queryFilter.setFilters(savedQuery.attributes.filters || []);
+        queryFilter.setFilters(allFilters);
       }, 0);
     };
 
@@ -562,11 +581,6 @@ export class DashboardAppController {
     );
 
     function updateViewMode(newMode: ViewMode) {
-      $scope.topNavMenu = getTopNavConfig(
-        newMode,
-        navActions,
-        dashboardConfig.getHideWriteControls()
-      ); // eslint-disable-line no-use-before-define
       dashboardStateManager.switchViewMode(newMode);
     }
 
@@ -582,17 +596,28 @@ export class DashboardAppController {
 
       function revertChangesAndExitEditMode() {
         dashboardStateManager.resetState();
-        kbnUrl.change(
-          dash.id ? createDashboardEditUrl(dash.id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL
-        );
         // This is only necessary for new dashboards, which will default to Edit mode.
         updateViewMode(ViewMode.VIEW);
+
+        // Angular's $location skips this update because of history updates from syncState which happen simultaneously
+        // when calling kbnUrl.change() angular schedules url update and when angular finally starts to process it,
+        // the update is considered outdated and angular skips it
+        // so have to use implementation of dashboardStateManager.changeDashboardUrl, which workarounds those issues
+        dashboardStateManager.changeDashboardUrl(
+          dash.id ? createDashboardEditUrl(dash.id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL
+        );
 
         // We need to do a hard reset of the timepicker. appState will not reload like
         // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
         // reload will cause it not to sync.
         if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-          dashboardStateManager.syncTimefilterWithDashboard(timefilter);
+          // have to use $evalAsync here until '_g' is migrated from $location to state sync utility ('history')
+          // When state sync utility changes url, angular's $location is missing it's own updates which happen during the same digest cycle
+          // temporary solution is to delay $location updates to next digest cycle
+          // unfortunately, these causes 2 browser history entries, but this is temporary and will be fixed after migrating '_g' to state_sync utilities
+          $scope.$evalAsync(() => {
+            dashboardStateManager.syncTimefilterWithDashboard(timefilter);
+          });
         }
       }
 
@@ -644,7 +669,11 @@ export class DashboardAppController {
             });
 
             if (dash.id !== $routeParams.id) {
-              kbnUrl.change(createDashboardEditUrl(dash.id));
+              // Angular's $location skips this update because of history updates from syncState which happen simultaneously
+              // when calling kbnUrl.change() angular schedules url update and when angular finally starts to process it,
+              // the update is considered outdated and angular skips it
+              // so have to use implementation of dashboardStateManager.changeDashboardUrl, which workarounds those issues
+              dashboardStateManager.changeDashboardUrl(createDashboardEditUrl(dash.id));
             } else {
               chrome.docTitle.change(dash.lastSavedTitle);
               updateViewMode(ViewMode.VIEW);
@@ -846,8 +875,19 @@ export class DashboardAppController {
       });
     });
 
+    dashboardStateManager.registerChangeListener(() => {
+      // view mode could have changed, so trigger top nav update
+      $scope.topNavMenu = getTopNavConfig(
+        dashboardStateManager.getViewMode(),
+        navActions,
+        dashboardConfig.getHideWriteControls()
+      );
+    });
+
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
+      stopSyncingGlobalStateWithUrl();
+      stopSyncingAppFilters();
       visibleSubscription.unsubscribe();
       $scope.timefilterSubscriptions$.unsubscribe();
 

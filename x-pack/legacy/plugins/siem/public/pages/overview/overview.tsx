@@ -4,76 +4,145 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import moment from 'moment';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import chrome from 'ui/chrome';
+import { connect } from 'react-redux';
+import { StickyContainer } from 'react-sticky';
+import { compose } from 'redux';
+import { Query, esFilters } from 'src/plugins/data/public';
+import styled from 'styled-components';
 
-import { useKibana } from '../../lib/kibana';
-import { EmptyPage } from '../../components/empty_page';
-import { HeaderPage } from '../../components/header_page';
-import { OverviewHost } from '../../components/page/overview/overview_host';
-import { OverviewNetwork } from '../../components/page/overview/overview_network';
+import { AlertsByCategory } from './alerts_by_category';
+import { FiltersGlobal } from '../../components/filters_global';
+import { SiemSearchBar } from '../../components/search_bar';
 import { WrapperPage } from '../../components/wrapper_page';
 import { GlobalTime } from '../../containers/global_time';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
+import { EventsByDataset } from './events_by_dataset';
+import { EventCounts } from './event_counts';
+import { SetAbsoluteRangeDatePicker } from '../network/types';
+import { OverviewEmpty } from './overview_empty';
+import { StatefulSidebar } from './sidebar';
+import { SignalsByCategory } from './signals_by_category';
+import { inputsSelectors, State } from '../../store';
+import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { SpyRoute } from '../../utils/route/spy_routes';
-import { Summary } from './summary';
-import * as i18n from './translations';
 
-const basePath = chrome.getBasePath();
+const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
+const NO_FILTERS: esFilters.Filter[] = [];
 
-export const OverviewComponent = React.memo(() => {
-  const docLinks = useKibana().services.docLinks;
-  const dateEnd = Date.now();
-  const dateRange = moment.duration(24, 'hours').asMilliseconds();
-  const dateStart = dateEnd - dateRange;
+const SidebarFlexItem = styled(EuiFlexItem)`
+  margin-right: 24px;
+`;
 
-  return (
-    <>
-      <WrapperPage>
-        <HeaderPage
-          badgeOptions={{
-            beta: true,
-            text: i18n.PAGE_BADGE_LABEL,
-            tooltip: i18n.PAGE_BADGE_TOOLTIP,
-          }}
-          border
-          subtitle={i18n.PAGE_SUBTITLE}
-          title={i18n.PAGE_TITLE}
-        />
+interface OverviewComponentReduxProps {
+  query?: Query;
+  filters?: esFilters.Filter[];
+  setAbsoluteRangeDatePicker?: SetAbsoluteRangeDatePicker;
+}
 
-        <WithSource sourceId="default">
-          {({ indicesExist }) =>
-            indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-              <GlobalTime>
-                {({ setQuery }) => (
-                  <EuiFlexGroup>
-                    <Summary />
-                    <OverviewHost endDate={dateEnd} startDate={dateStart} setQuery={setQuery} />
-                    <OverviewNetwork endDate={dateEnd} startDate={dateStart} setQuery={setQuery} />
-                  </EuiFlexGroup>
-                )}
-              </GlobalTime>
-            ) : (
-              <EmptyPage
-                actionPrimaryIcon="gear"
-                actionPrimaryLabel={i18n.EMPTY_ACTION_PRIMARY}
-                actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/siem`}
-                actionSecondaryIcon="popout"
-                actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
-                actionSecondaryTarget="_blank"
-                actionSecondaryUrl={docLinks.links.siem}
-                data-test-subj="empty-page"
-                title={i18n.EMPTY_TITLE}
-              />
-            )
-          }
-        </WithSource>
-      </WrapperPage>
+const OverviewComponent: React.FC<OverviewComponentReduxProps> = ({
+  filters = NO_FILTERS,
+  query = DEFAULT_QUERY,
+  setAbsoluteRangeDatePicker,
+}) => (
+  <>
+    <WithSource sourceId="default">
+      {({ indicesExist, indexPattern }) =>
+        indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+          <StickyContainer>
+            <FiltersGlobal>
+              <SiemSearchBar id="global" indexPattern={indexPattern} />
+            </FiltersGlobal>
 
-      <SpyRoute />
-    </>
-  );
-});
-OverviewComponent.displayName = 'OverviewComponent';
+            <WrapperPage>
+              <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+                <SidebarFlexItem grow={false}>
+                  <StatefulSidebar />
+                </SidebarFlexItem>
+
+                <EuiFlexItem grow={true}>
+                  <GlobalTime>
+                    {({ from, deleteQuery, setQuery, to }) => (
+                      <>
+                        <EventsByDataset
+                          deleteQuery={deleteQuery}
+                          filters={filters}
+                          from={from}
+                          indexPattern={indexPattern}
+                          query={query}
+                          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+
+                        <EuiSpacer size="l" />
+
+                        <EventCounts
+                          filters={filters}
+                          from={from}
+                          indexPattern={indexPattern}
+                          query={query}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+
+                        <EuiSpacer size="l" />
+
+                        <AlertsByCategory
+                          deleteQuery={deleteQuery}
+                          filters={filters}
+                          from={from}
+                          indexPattern={indexPattern}
+                          query={query}
+                          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+
+                        <EuiSpacer size="l" />
+
+                        <SignalsByCategory
+                          deleteQuery={deleteQuery}
+                          filters={filters}
+                          from={from}
+                          indexPattern={indexPattern}
+                          query={query}
+                          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+                      </>
+                    )}
+                  </GlobalTime>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </WrapperPage>
+          </StickyContainer>
+        ) : (
+          <OverviewEmpty />
+        )
+      }
+    </WithSource>
+
+    <SpyRoute />
+  </>
+);
+
+const makeMapStateToProps = () => {
+  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
+  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
+
+  const mapStateToProps = (state: State): OverviewComponentReduxProps => ({
+    query: getGlobalQuerySelector(state),
+    filters: getGlobalFiltersQuerySelector(state),
+  });
+
+  return mapStateToProps;
+};
+
+const mapDispatchToProps = { setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker };
+
+export const StatefulOverview = compose<React.ComponentClass<OverviewComponentReduxProps>>(
+  connect(makeMapStateToProps, mapDispatchToProps)
+)(React.memo(OverviewComponent));

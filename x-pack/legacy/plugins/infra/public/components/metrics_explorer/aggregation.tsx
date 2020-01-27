@@ -52,11 +52,14 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
     [onChange]
   );
 
+  const placeholder = i18n.translate('xpack.infra.metricsExplorer.aggregationSelectLabel', {
+    defaultMessage: 'Select an aggregation',
+  });
+
   return (
     <EuiSelect
-      placeholder={i18n.translate('xpack.infra.metricsExplorer.aggregationSelectLabel', {
-        defaultMessage: 'Select an aggregation',
-      })}
+      aria-label={placeholder}
+      placeholder={placeholder}
       fullWidth
       value={options.aggregation}
       options={METRIC_EXPLORER_AGGREGATIONS.map(k => ({

@@ -18,24 +18,27 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import { EuiFormRow, EuiSuperSelect, EuiSuperSelectProps } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;
-  euiFieldProps?: Record<string, any>;
+  euiFieldProps: {
+    options: EuiSuperSelectProps<any>['options'];
+    [key: string]: any;
+  };
   idAria?: string;
   [key: string]: any;
 }
 
-export const SuperSelectField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
+export const SuperSelectField = ({ field, euiFieldProps = { options: [] }, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
     <EuiFormRow
       label={field.label}
-      helpText={field.helpText}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
@@ -48,7 +51,6 @@ export const SuperSelectField = ({ field, euiFieldProps = {}, ...rest }: Props) 
         onChange={value => {
           field.setValue(value);
         }}
-        options={[]}
         isInvalid={isInvalid}
         data-test-subj="select"
         {...euiFieldProps}

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash';
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -22,21 +23,13 @@ export interface Entity {
   fieldValues: any;
 }
 
-function getEntityControlOptions(entity: Entity): EuiComboBoxOptionProps[] {
-  if (!Array.isArray(entity.fieldValues)) {
-    return [];
-  }
-
-  return entity.fieldValues.map(value => {
-    return { label: value };
-  });
-}
-
 interface EntityControlProps {
   entity: Entity;
   entityFieldValueChanged: (entity: Entity, fieldValue: any) => void;
+  isLoading: boolean;
   onSearchChange: (entity: Entity, queryTerm: string) => void;
   forceSelection: boolean;
+  options: EuiComboBoxOptionProps[];
 }
 
 interface EntityControlState {
@@ -55,16 +48,10 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
   };
 
   componentDidUpdate(prevProps: EntityControlProps) {
-    const { entity, forceSelection } = this.props;
-    const { selectedOptions } = this.state;
-
-    if (prevProps.entity === entity) {
-      return;
-    }
+    const { entity, forceSelection, isLoading, options: propOptions } = this.props;
+    const { options: stateOptions, selectedOptions } = this.state;
 
     const { fieldValue } = entity;
-
-    const options = getEntityControlOptions(entity);
 
     let selectedOptionsUpdate: EuiComboBoxOptionProps[] | undefined = selectedOptions;
     if (
@@ -79,11 +66,18 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
       selectedOptionsUpdate = undefined;
     }
 
-    this.setState({
-      options,
-      isLoading: false,
-      selectedOptions: selectedOptionsUpdate,
-    });
+    if (prevProps.isLoading === true && isLoading === false) {
+      this.setState({
+        isLoading: false,
+        selectedOptions: selectedOptionsUpdate,
+      });
+    }
+
+    if (!isEqual(propOptions, stateOptions)) {
+      this.setState({
+        options: propOptions,
+      });
+    }
 
     if (forceSelection && this.inputRef) {
       this.inputRef.focus();
@@ -111,7 +105,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
 
   render() {
     const { entity, forceSelection } = this.props;
-    const { selectedOptions, isLoading, options } = this.state;
+    const { isLoading, options, selectedOptions } = this.state;
 
     const control = (
       <EuiComboBox

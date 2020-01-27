@@ -9,12 +9,10 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiLink,
-  EuiText,
-  EuiListGroup,
+  EuiButtonEmpty,
+  EuiSpacer,
 } from '@elastic/eui';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
@@ -26,7 +24,12 @@ import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_
 
 import { FilterLabel } from './filter_label';
 import * as i18n from './translations';
-import { BuildQueryBarDescription, BuildThreatsDescription, ListItems } from './types';
+import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
+import { SeverityBadge } from '../severity_badge';
+import ListTreeIcon from './assets/list_tree_icon.svg';
+
+const isNotEmptyArray = (values: string[]) =>
+  !isEmpty(values) && values.filter(val => !isEmpty(val)).length > 0;
 
 const EuiBadgeWrap = styled(EuiBadge)`
   .euiBadge__text {
@@ -91,56 +94,85 @@ export const buildQueryBarDescription = ({
   return items;
 };
 
-const ThreatsEuiFlexGroup = styled(EuiFlexGroup)`
+const ThreatEuiFlexGroup = styled(EuiFlexGroup)`
   .euiFlexItem {
     margin-bottom: 0px;
   }
 `;
 
-const MyEuiListGroup = styled(EuiListGroup)`
-  padding: 0px;
-  .euiListGroupItem__button {
-    padding: 0px;
+const TechniqueLinkItem = styled(EuiButtonEmpty)`
+  .euiIcon {
+    width: 8px;
+    height: 8px;
   }
 `;
 
-export const buildThreatsDescription = ({
-  label,
-  threats,
-}: BuildThreatsDescription): ListItems[] => {
-  if (threats.length > 0) {
+const ReferenceLinkItem = styled(EuiButtonEmpty)`
+  .euiIcon {
+    width: 12px;
+    height: 12px;
+  }
+`;
+
+export const buildThreatDescription = ({ label, threat }: BuildThreatDescription): ListItems[] => {
+  if (threat.length > 0) {
     return [
       {
         title: label,
         description: (
-          <ThreatsEuiFlexGroup direction="column">
-            {threats.map((threat, index) => {
-              const tactic = tacticsOptions.find(t => t.name === threat.tactic.name);
+          <ThreatEuiFlexGroup direction="column">
+            {threat.map((singleThreat, index) => {
+              const tactic = tacticsOptions.find(t => t.id === singleThreat.tactic.id);
               return (
-                <EuiFlexItem key={`${threat.tactic.name}-${index}`}>
-                  <EuiText grow={false} size="s">
-                    <h5>
-                      <EuiLink href={threat.tactic.reference} target="_blank">
-                        {tactic != null ? tactic.text : ''}
-                      </EuiLink>
-                    </h5>
-                    <MyEuiListGroup
-                      flush={false}
-                      bordered={false}
-                      listItems={threat.techniques.map(technique => {
-                        const myTechnique = techniquesOptions.find(t => t.name === technique.name);
-                        return {
-                          label: myTechnique != null ? myTechnique.label : '',
-                          href: technique.reference,
-                          target: '_blank',
-                        };
-                      })}
-                    />
-                  </EuiText>
+                <EuiFlexItem key={`${singleThreat.tactic.name}-${index}`}>
+                  <EuiLink href={singleThreat.tactic.reference} target="_blank">
+                    {tactic != null ? tactic.text : ''}
+                  </EuiLink>
+                  <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
+                    {singleThreat.technique.map(technique => {
+                      const myTechnique = techniquesOptions.find(t => t.id === technique.id);
+                      return (
+                        <EuiFlexItem>
+                          <TechniqueLinkItem
+                            href={technique.reference}
+                            target="_blank"
+                            iconType={ListTreeIcon}
+                            size="xs"
+                            flush="left"
+                          >
+                            {myTechnique != null ? myTechnique.label : ''}
+                          </TechniqueLinkItem>
+                        </EuiFlexItem>
+                      );
+                    })}
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               );
             })}
-          </ThreatsEuiFlexGroup>
+            <EuiSpacer />
+          </ThreatEuiFlexGroup>
+        ),
+      },
+    ];
+  }
+  return [];
+};
+
+export const buildUnorderedListArrayDescription = (
+  label: string,
+  field: string,
+  values: string[]
+): ListItems[] => {
+  if (isNotEmptyArray(values)) {
+    return [
+      {
+        title: label,
+        description: (
+          <ul>
+            {values.map((val: string) =>
+              isEmpty(val) ? null : <li key={`${field}-${val}`}>{val}</li>
+            )}
+          </ul>
         ),
       },
     ];
@@ -153,7 +185,7 @@ export const buildStringArrayDescription = (
   field: string,
   values: string[]
 ): ListItems[] => {
-  if (!isEmpty(values) && values.filter(val => !isEmpty(val)).length > 0) {
+  if (isNotEmptyArray(values)) {
     return [
       {
         title: label,
@@ -174,46 +206,34 @@ export const buildStringArrayDescription = (
   return [];
 };
 
-export const buildSeverityDescription = (label: string, value: string): ListItems[] => {
-  return [
-    {
-      title: label,
-      description: (
-        <EuiHealth
-          color={
-            value === 'low'
-              ? euiLightVars.euiColorVis0
-              : value === 'medium'
-              ? euiLightVars.euiColorVis5
-              : value === 'high'
-              ? euiLightVars.euiColorVis7
-              : euiLightVars.euiColorVis9
-          }
-        >
-          {value}
-        </EuiHealth>
-      ),
-    },
-  ];
-};
+export const buildSeverityDescription = (label: string, value: string): ListItems[] => [
+  {
+    title: label,
+    description: <SeverityBadge value={value} />,
+  },
+];
 
 export const buildUrlsDescription = (label: string, values: string[]): ListItems[] => {
-  if (!isEmpty(values) && values.filter(val => !isEmpty(val)).length > 0) {
+  if (isNotEmptyArray(values)) {
     return [
       {
         title: label,
         description: (
-          <EuiListGroup
-            flush={true}
-            bordered={false}
-            listItems={values.map((val: string) => ({
-              label: val,
-              href: val,
-              iconType: 'link',
-              size: 'xs',
-              target: '_blank',
-            }))}
-          />
+          <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
+            {values.map((val: string) => (
+              <EuiFlexItem>
+                <ReferenceLinkItem
+                  href={val}
+                  target="_blank"
+                  iconType="link"
+                  size="xs"
+                  flush="left"
+                >
+                  {val}
+                </ReferenceLinkItem>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         ),
       },
     ];

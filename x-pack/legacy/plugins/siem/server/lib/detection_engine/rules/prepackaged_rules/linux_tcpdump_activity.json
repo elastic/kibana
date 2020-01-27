@@ -1,43 +1,56 @@
 {
-  "rule_id": "7a137d76-ce3d-48e2-947d-2747796a78c0",
-  "risk_score": 50,
-  "description": "Linux: Tcpdump Activity",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Linux: Tcpdump Activity",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.name: tcpdump",
+  "description": "The Tcpdump program ran on a Linux host. Tcpdump is a network monitoring or packet 'sniffing' tool that can be used to capture insecure credentials or data in motion. Sniffing can also be used to discover details of network services as a prelude to lateral movement or defense evasion.",
+  "false_positives": [
+    "Some normal use of this command may originate from server or network administrators engaged in network troubleshooting."
+  ],
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
-  "filters": [
+  "max_signals": 33,
+  "name": "Network Sniffing via Tcpdump",
+  "query": "process.name: tcpdump and event.action:executed",
+  "risk_score": 25,
+  "rule_id": "7a137d76-ce3d-48e2-947d-2747796a78c0",
+  "severity": "low",
+  "tags": ["Elastic", "linux"],
+  "threat": [
     {
-      "meta": {
-        "negate": false,
-        "type": "phrase",
-        "key": "event.action",
-        "value": "process_started",
-        "params": {
-          "query": "process_started"
-        },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0006",
+        "name": "Credential Access",
+        "reference": "https://attack.mitre.org/tactics/TA0006/"
       },
-      "query": {
-        "match": {
-          "event.action": {
-            "query": "process_started",
-            "type": "phrase"
-          }
+      "technique": [
+        {
+          "id": "T1040",
+          "name": "Network Sniffing",
+          "reference": "https://attack.mitre.org/techniques/T1040/"
         }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
       },
-      "$state": {
-        "store": "appState"
-      }
+      "technique": [
+        {
+          "id": "T1040",
+          "name": "Network Sniffing",
+          "reference": "https://attack.mitre.org/techniques/T1040/"
+        }
+      ]
     }
   ],
-  "enabled": false,
+  "type": "query",
   "version": 1
 }

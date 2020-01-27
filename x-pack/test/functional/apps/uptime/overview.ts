@@ -54,8 +54,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
       await pageObjects.uptime.changePage('next');
       // there should now be pagination data in the URL
-      const contains = await pageObjects.uptime.pageUrlContains('pagination');
-      expect(contains).to.be(true);
+      await pageObjects.uptime.pageUrlContains('pagination');
       await pageObjects.uptime.pageHasExpectedIds([
         '0010-down',
         '0011-up',
@@ -70,8 +69,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       ]);
       await pageObjects.uptime.setStatusFilter('up');
       // ensure that pagination is removed from the URL
-      const doesNotContain = await pageObjects.uptime.pageUrlContains('pagination');
-      expect(doesNotContain).to.be(false);
+      await pageObjects.uptime.pageUrlContains('pagination', false);
       await pageObjects.uptime.pageHasExpectedIds([
         '0000-intermittent',
         '0001-up',
@@ -86,7 +84,8 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       ]);
     });
 
-    describe('snapshot counts', () => {
+    // Flakey, see https://github.com/elastic/kibana/issues/54541
+    describe.skip('snapshot counts', () => {
       it('updates the snapshot count when status filter is set to down', async () => {
         await pageObjects.uptime.goToUptimePageAndSetDateRange(
           DEFAULT_DATE_START,

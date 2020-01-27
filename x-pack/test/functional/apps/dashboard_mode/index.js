@@ -9,5 +9,6 @@ export default function({ loadTestFile }) {
     this.tags('ciGroup7');
 
     loadTestFile(require.resolve('./dashboard_view_mode'));
+    loadTestFile(require.resolve('./dashboard_empty_screen'));
   });
 }

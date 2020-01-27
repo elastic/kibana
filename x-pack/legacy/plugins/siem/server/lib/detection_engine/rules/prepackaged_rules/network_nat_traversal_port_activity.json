@@ -1,17 +1,37 @@
 {
-  "rule_id": "a9cb3641-ff4b-4cdc-a063-b4b8d02a67c7",
-  "risk_score": 50,
-  "description": "Network - NAT Traversal Port Activity\t",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Network - NAT Traversal Port Activity\t",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "destination.port:4500",
+  "description": "This signal detects events that could be describing IPSEC NAT Traversal traffic.\nIPSEC is a VPN technology that allows one system to talk to another using\nencrypted tunnels. NAT Traversal enables these tunnels to communicate over\nthe Internet where one of the sides is behind a NAT router gateway. This may\nbe common on your network, but this technique is also used by threat actors\nto avoid detection.\n",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
-  "filters": [],
-  "enabled": false,
+  "name": "IPSEC NAT Traversal Port Activity",
+  "query": "network.transport: udp and destination.port: 4500",
+  "risk_score": 25,
+  "rule_id": "a9cb3641-ff4b-4cdc-a063-b4b8d02a67c7",
+  "severity": "low",
+  "tags": ["Elastic", "network"],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
   "version": 1
 }

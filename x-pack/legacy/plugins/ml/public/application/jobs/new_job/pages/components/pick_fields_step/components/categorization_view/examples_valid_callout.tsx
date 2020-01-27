@@ -9,24 +9,24 @@ import { EuiCallOut, EuiSpacer, EuiCallOutProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { CategorizationAnalyzer } from '../../../../../../../services/ml_server_info';
-import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
 import {
-  NUMBER_OF_CATEGORY_EXAMPLES,
-  CATEGORY_EXAMPLES_MULTIPLIER,
-  CATEGORY_EXAMPLES_ERROR_LIMIT,
-  CATEGORY_EXAMPLES_WARNING_LIMIT,
-} from '../../../../../../../../../common/constants/new_job';
-
-type CategorizationAnalyzerType = CategorizationAnalyzer | null;
+  CategorizationAnalyzer,
+  FieldExampleCheck,
+} from '../../../../../../../../../common/types/categories';
+import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../../../../common/constants/new_job';
 
 interface Props {
-  examplesValid: number;
-  categorizationAnalyzer: CategorizationAnalyzerType;
+  validationChecks: FieldExampleCheck[];
+  overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
+  categorizationAnalyzer: CategorizationAnalyzer;
 }
 
-export const ExamplesValidCallout: FC<Props> = ({ examplesValid, categorizationAnalyzer }) => {
-  const percentageText = <PercentageText examplesValid={examplesValid} />;
+export const ExamplesValidCallout: FC<Props> = ({
+  overallValidStatus,
+  validationChecks,
+  categorizationAnalyzer,
+}) => {
   const analyzerUsed = <AnalyzerUsed categorizationAnalyzer={categorizationAnalyzer} />;
 
   let color: EuiCallOutProps['color'] = 'success';
@@ -37,7 +37,7 @@ export const ExamplesValidCallout: FC<Props> = ({ examplesValid, categorizationA
     }
   );
 
-  if (examplesValid < CATEGORY_EXAMPLES_ERROR_LIMIT) {
+  if (overallValidStatus === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID) {
     color = 'danger';
     title = i18n.translate(
       'xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldCalloutTitle.invalid',
@@ -45,7 +45,7 @@ export const ExamplesValidCallout: FC<Props> = ({ examplesValid, categorizationA
         defaultMessage: 'Selected category field is invalid',
       }
     );
-  } else if (examplesValid < CATEGORY_EXAMPLES_WARNING_LIMIT) {
+  } else if (overallValidStatus === CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID) {
     color = 'warning';
     title = i18n.translate(
       'xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldCalloutTitle.possiblyInvalid',
@@ -57,42 +57,24 @@ export const ExamplesValidCallout: FC<Props> = ({ examplesValid, categorizationA
 
   return (
     <EuiCallOut color={color} title={title}>
-      {percentageText}
+      {validationChecks.map((v, i) => (
+        <div key={i}>{v.message}</div>
+      ))}
       <EuiSpacer size="s" />
       {analyzerUsed}
     </EuiCallOut>
   );
 };
 
-const PercentageText: FC<{ examplesValid: number }> = ({ examplesValid }) => (
-  <div>
-    <FormattedMessage
-      id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldPercentage"
-      defaultMessage="{number} field values analyzed, {percentage}% contain valid tokens."
-      values={{
-        number: NUMBER_OF_CATEGORY_EXAMPLES * CATEGORY_EXAMPLES_MULTIPLIER,
-        percentage: Math.floor(examplesValid * 100),
-      }}
-    />
-  </div>
-);
-
-const AnalyzerUsed: FC<{ categorizationAnalyzer: CategorizationAnalyzerType }> = ({
+const AnalyzerUsed: FC<{ categorizationAnalyzer: CategorizationAnalyzer }> = ({
   categorizationAnalyzer,
 }) => {
   let analyzer = '';
-  if (typeof categorizationAnalyzer === null) {
-    return null;
-  }
 
-  if (typeof categorizationAnalyzer === 'string') {
-    analyzer = categorizationAnalyzer;
-  } else {
-    if (categorizationAnalyzer?.tokenizer !== undefined) {
-      analyzer = categorizationAnalyzer?.tokenizer!;
-    } else if (categorizationAnalyzer?.analyzer !== undefined) {
-      analyzer = categorizationAnalyzer?.analyzer!;
-    }
+  if (categorizationAnalyzer?.tokenizer !== undefined) {
+    analyzer = categorizationAnalyzer.tokenizer;
+  } else if (categorizationAnalyzer?.analyzer !== undefined) {
+    analyzer = categorizationAnalyzer.analyzer;
   }
 
   return (

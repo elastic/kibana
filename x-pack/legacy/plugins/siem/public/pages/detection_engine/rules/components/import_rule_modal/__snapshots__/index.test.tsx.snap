@@ -28,9 +28,8 @@ exports[`ImportRuleModal renders correctly against snapshot 1`] = `
           display="large"
           fullWidth={true}
           id="rule-file-picker"
-          initialPromptText="Select or drag and drop files"
+          initialPromptText="Select or drag and drop a valid rules_export.ndjson file"
           isLoading={false}
-          multiple={true}
           onChange={[Function]}
         />
         <EuiSpacer
@@ -39,10 +38,10 @@ exports[`ImportRuleModal renders correctly against snapshot 1`] = `
         <EuiCheckbox
           checked={false}
           compressed={false}
-          disabled={true}
+          disabled={false}
           id="rule-overwrite-saved-object"
           indeterminate={false}
-          label="Automatically overwrite saved objects with the same name"
+          label="Automatically overwrite saved objects with the same rule ID"
           onChange={[Function]}
         />
       </EuiModalBody>

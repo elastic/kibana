@@ -26,7 +26,7 @@ export const visualizations: LegacyPluginInitializer = kibana =>
     publicDir: resolve(__dirname, 'public'),
     require: [],
     uiExports: {
-      interpreter: ['plugins/visualizations/expressions/boot'],
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
   });
 

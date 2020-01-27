@@ -38,6 +38,7 @@ import { StaticOrientationProperty } from './properties/static_orientation_prope
 import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
 import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
+import { LabelBorderSizeProperty } from './properties/label_border_size_property';
 import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
@@ -100,6 +101,15 @@ export class VectorStyle extends AbstractStyle {
       this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR],
       VECTOR_STYLES.LABEL_COLOR
     );
+    this._labelBorderColorStyleProperty = this._makeColorProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_COLOR],
+      VECTOR_STYLES.LABEL_BORDER_COLOR
+    );
+    this._labelBorderSizeStyleProperty = new LabelBorderSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE].options,
+      VECTOR_STYLES.LABEL_BORDER_SIZE,
+      this._labelSizeStyleProperty
+    );
   }
 
   _getAllStyleProperties() {
@@ -112,6 +122,8 @@ export class VectorStyle extends AbstractStyle {
       this._labelStyleProperty,
       this._labelSizeStyleProperty,
       this._labelColorStyleProperty,
+      this._labelBorderColorStyleProperty,
+      this._labelBorderSizeStyleProperty,
     ];
   }
 
@@ -163,7 +175,7 @@ export class VectorStyle extends AbstractStyle {
    * This method does not update its descriptor. It just returns a new descriptor that the caller
    * can then use to update store state via dispatch.
    */
-  getDescriptorWithMissingStylePropsRemoved(nextOrdinalFields) {
+  getDescriptorWithMissingStylePropsRemoved(nextFields) {
     const originalProperties = this.getRawProperties();
     const updatedProperties = {};
 
@@ -180,7 +192,7 @@ export class VectorStyle extends AbstractStyle {
         return;
       }
 
-      const matchingOrdinalField = nextOrdinalFields.find(ordinalField => {
+      const matchingOrdinalField = nextFields.find(ordinalField => {
         return fieldName === ordinalField.getName();
       });
 
@@ -537,6 +549,8 @@ export class VectorStyle extends AbstractStyle {
     this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
     this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
     this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
+    this._labelBorderSizeStyleProperty.syncLabelBorderSizeWithMb(textLayerId, mbMap);
+    this._labelBorderColorStyleProperty.syncLabelBorderColorWithMb(textLayerId, mbMap);
   }
 
   setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
@@ -565,9 +579,7 @@ export class VectorStyle extends AbstractStyle {
     //fieldDescriptor.label is ignored. This is essentially cruft duplicating label-info from the metric-selection
     //Ignore this custom label
     if (fieldDescriptor.origin === FIELD_ORIGIN.SOURCE) {
-      return this._source.createField({
-        fieldName: fieldDescriptor.name,
-      });
+      return this._source.getFieldByName(fieldDescriptor.name);
     } else if (fieldDescriptor.origin === FIELD_ORIGIN.JOIN) {
       const join = this._layer.getValidJoins().find(join => {
         return join.getRightJoinSource().hasMatchingMetricField(fieldDescriptor.name);

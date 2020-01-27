@@ -44,7 +44,7 @@ export async function getServicesItems(
               terms: { field: SERVICE_AGENT_NAME, size: 1 }
             },
             events: {
-              terms: { field: PROCESSOR_EVENT, size: 2 }
+              terms: { field: PROCESSOR_EVENT }
             },
             environments: {
               terms: { field: SERVICE_ENVIRONMENT }

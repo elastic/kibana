@@ -76,6 +76,7 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
               colors={workpad.colors}
               onChange={val => handleChange('color', val)}
               value={color}
+              ariaLabel={strings.getColorLabel()}
             />
           </EuiFlexItem>
           <EuiFlexItem>

@@ -19,6 +19,9 @@
 
 import { CoreStart, Plugin } from 'src/core/public';
 import {
+  EnvironmentService,
+  EnvironmentServiceSetup,
+  EnvironmentServiceStart,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
   FeatureCatalogueRegistryStart,
@@ -26,10 +29,12 @@ import {
 
 export class HomePublicPlugin implements Plugin<HomePublicPluginSetup, HomePublicPluginStart> {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
+  private readonly environmentService = new EnvironmentService();
 
   public async setup() {
     return {
       featureCatalogue: { ...this.featuresCatalogueRegistry.setup() },
+      environment: { ...this.environmentService.setup() },
     };
   }
 
@@ -40,6 +45,7 @@ export class HomePublicPlugin implements Plugin<HomePublicPluginSetup, HomePubli
           capabilities: core.application.capabilities,
         }),
       },
+      environment: { ...this.environmentService.start() },
     };
   }
 }
@@ -51,11 +57,24 @@ export type FeatureCatalogueSetup = FeatureCatalogueRegistrySetup;
 export type FeatureCatalogueStart = FeatureCatalogueRegistryStart;
 
 /** @public */
+export type EnvironmentSetup = EnvironmentServiceSetup;
+
+/** @public */
+export type EnvironmentStart = EnvironmentServiceStart;
+
+/** @public */
 export interface HomePublicPluginSetup {
   featureCatalogue: FeatureCatalogueSetup;
+  /**
+   * The environment service is only available for a transition period and will
+   * be replaced by display specific extension points.
+   * @deprecated
+   */
+  environment: EnvironmentSetup;
 }
 
 /** @public */
 export interface HomePublicPluginStart {
   featureCatalogue: FeatureCatalogueStart;
+  environment: EnvironmentStart;
 }

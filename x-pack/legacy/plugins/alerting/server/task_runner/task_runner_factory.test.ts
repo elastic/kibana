@@ -5,7 +5,7 @@
  */
 
 import sinon from 'sinon';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager';
+import { ConcreteTaskInstance, TaskStatus } from '../../../../../plugins/task_manager/server';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
 import {

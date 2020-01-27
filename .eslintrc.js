@@ -77,7 +77,7 @@ module.exports = {
       },
     },
     {
-      files: ['src/legacy/core_plugins/kbn_vislib_vis_types/**/*.{js,ts,tsx}'],
+      files: ['src/legacy/core_plugins/vis_type_vislib/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -262,6 +262,8 @@ module.exports = {
                   'src/core/server/**/*',
                   '(src|x-pack)/plugins/*/server/**/*',
                   'examples/**/server/**/*',
+                  // TODO: Remove the 'joi' eslint rule once IE11 support is dropped
+                  'joi',
                 ],
                 errorMessage:
                   'Server modules cannot be imported into client modules or shared modules.',

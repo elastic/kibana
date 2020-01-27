@@ -30,7 +30,7 @@ export const NewRuleSchema = t.intersection([
     rule_id: t.string,
     saved_id: t.string,
     tags: t.array(t.string),
-    threats: t.array(t.unknown),
+    threat: t.array(t.unknown),
     to: t.string,
     updated_by: t.string,
   }),
@@ -73,14 +73,20 @@ export const RuleSchema = t.intersection([
     tags: t.array(t.string),
     type: t.string,
     to: t.string,
-    threats: t.array(t.unknown),
+    threat: t.array(t.unknown),
     updated_at: t.string,
     updated_by: t.string,
   }),
   t.partial({
+    last_failure_at: t.string,
+    last_failure_message: t.string,
+    output_index: t.string,
     saved_id: t.string,
+    status: t.string,
+    status_date: t.string,
     timeline_id: t.string,
     timeline_title: t.string,
+    version: t.number,
   }),
 ]);
 
@@ -88,6 +94,16 @@ export const RulesSchema = t.array(RuleSchema);
 
 export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
+
+export interface RuleError {
+  rule_id: string;
+  error: { status_code: number; message: string };
+}
+
+export interface RuleResponseBuckets {
+  rules: Rule[];
+  errors: RuleError[];
+}
 
 export interface PaginationOptions {
   page: number;
@@ -98,7 +114,6 @@ export interface PaginationOptions {
 export interface FetchRulesProps {
   pagination?: PaginationOptions;
   filterOptions?: FilterOptions;
-  id?: string;
   signal: AbortSignal;
 }
 
@@ -106,6 +121,9 @@ export interface FilterOptions {
   filter: string;
   sortField: string;
   sortOrder: 'asc' | 'desc';
+  showCustomRules?: boolean;
+  showElasticRules?: boolean;
+  tags?: string[];
 }
 
 export interface FetchRulesResponse {
@@ -130,9 +148,52 @@ export interface DeleteRulesProps {
 }
 
 export interface DuplicateRulesProps {
-  rules: Rules;
+  rules: Rule[];
 }
 
 export interface BasicFetchProps {
   signal: AbortSignal;
+}
+
+export interface ImportRulesProps {
+  fileToImport: File;
+  overwrite?: boolean;
+  signal: AbortSignal;
+}
+
+export interface ImportRulesResponseError {
+  rule_id: string;
+  error: {
+    status_code: number;
+    message: string;
+  };
+}
+
+export interface ImportRulesResponse {
+  success: boolean;
+  success_count: number;
+  errors: ImportRulesResponseError[];
+}
+
+export interface ExportRulesProps {
+  ruleIds?: string[];
+  filename?: string;
+  excludeExportDetails?: boolean;
+  signal: AbortSignal;
+}
+
+export interface RuleStatus {
+  current_status: RuleInfoStatus;
+  failures: RuleInfoStatus[];
+}
+
+export type RuleStatusType = 'executing' | 'failed' | 'going to run' | 'succeeded';
+export interface RuleInfoStatus {
+  alert_id: string;
+  status_date: string;
+  status: RuleStatusType | null;
+  last_failure_at: string | null;
+  last_success_at: string | null;
+  last_failure_message: string | null;
+  last_success_message: string | null;
 }

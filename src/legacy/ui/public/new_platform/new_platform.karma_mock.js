@@ -102,6 +102,12 @@ export const npSetup = {
           getSavedQueryCount: sinon.fake(),
         },
       },
+      __LEGACY: {
+        esClient: {
+          search: sinon.fake(),
+          msearch: sinon.fake(),
+        },
+      },
       fieldFormats: getFieldFormatsRegistry(mockCore),
     },
     share: {
@@ -130,6 +136,9 @@ export const npSetup = {
     home: {
       featureCatalogue: {
         register: sinon.fake(),
+      },
+      environment: {
+        update: sinon.fake(),
       },
     },
   },
@@ -231,6 +240,14 @@ export const npStart = {
             createFilter: sinon.fake(),
           },
           history: sinon.fake(),
+        },
+      },
+      search: {
+        __LEGACY: {
+          esClient: {
+            search: sinon.fake(),
+            msearch: sinon.fake(),
+          },
         },
       },
       fieldFormats: getFieldFormatsRegistry(mockCore),

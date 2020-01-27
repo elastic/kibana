@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Port renders correctly against snapshot 1`] = `
-<FormattedFieldValue
+<Memo(FormattedFieldValueComponent)
   contextId="test"
   data-test-subj="formatted-ip"
   eventId="abcd"

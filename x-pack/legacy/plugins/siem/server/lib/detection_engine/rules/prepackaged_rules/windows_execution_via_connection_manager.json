@@ -1,17 +1,20 @@
 {
-  "rule_id": "f2728299-167a-489c-913c-2e0955ac3c40",
-  "risk_score": 50,
   "description": "Windows Execution via Connection Manager",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Windows Execution via Connection Manager",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "event.code:1 and process.parent.name:pcalua.exe or (process.name:bash.exe or process.name:forfiles.exe or process.name:pcalua.exe)",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
-  "filters": [],
-  "enabled": false,
+  "name": "Windows Execution via Connection Manager",
+  "query": "event.code:1 and process.parent.name:pcalua.exe or (process.name:bash.exe or process.name:forfiles.exe or process.name:pcalua.exe)",
+  "risk_score": 50,
+  "rule_id": "f2728299-167a-489c-913c-2e0955ac3c40",
+  "severity": "low",
+  "tags": ["Elastic"],
+  "type": "query",
   "version": 1
 }

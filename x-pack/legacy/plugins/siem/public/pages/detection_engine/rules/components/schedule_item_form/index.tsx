@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFieldNumber, EuiFormRow, EuiSelect } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldNumber,
+  EuiFormRow,
+  EuiSelect,
+  EuiFormControlLayout,
+} from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -18,6 +25,7 @@ interface ScheduleItemProps {
   dataTestSubj: string;
   idAria: string;
   isDisabled: boolean;
+  minimumValue?: number;
 }
 
 const timeTypeOptions = [
@@ -26,9 +34,27 @@ const timeTypeOptions = [
   { value: 'h', text: I18n.HOURS },
 ];
 
+// move optional label to the end of input
+const StyledLabelAppend = styled(EuiFlexItem)`
+  &.euiFlexItem.euiFlexItem--flexGrowZero {
+    margin-left: 31px;
+  }
+`;
+
 const StyledEuiFormRow = styled(EuiFormRow)`
+  max-width: none;
+
   .euiFormControlLayout {
     max-width: 200px !important;
+  }
+
+  .euiFormControlLayout__childrenWrapper > *:first-child {
+    box-shadow: none;
+    height: 38px;
+  }
+
+  .euiFormControlLayout:not(:first-child) {
+    border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   }
 `;
 
@@ -36,7 +62,13 @@ const MyEuiSelect = styled(EuiSelect)`
   width: auto;
 `;
 
-export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: ScheduleItemProps) => {
+export const ScheduleItem = ({
+  dataTestSubj,
+  field,
+  idAria,
+  isDisabled,
+  minimumValue = 0,
+}: ScheduleItemProps) => {
   const [timeType, setTimeType] = useState('s');
   const [timeVal, setTimeVal] = useState<number>(0);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
@@ -89,9 +121,9 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
         <EuiFlexItem grow={false} component="span">
           {field.label}
         </EuiFlexItem>
-        <EuiFlexItem grow={false} component="span">
+        <StyledLabelAppend grow={false} component="span">
           {field.labelAppend}
-        </EuiFlexItem>
+        </StyledLabelAppend>
       </EuiFlexGroup>
     ),
     [field.label, field.labelAppend]
@@ -107,7 +139,7 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >
-      <EuiFieldNumber
+      <EuiFormControlLayout
         append={
           <MyEuiSelect
             fullWidth={false}
@@ -117,12 +149,15 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
             {...rest}
           />
         }
-        fullWidth
-        min={0}
-        onChange={onChangeTimeVal}
-        value={timeVal}
-        {...rest}
-      />
+      >
+        <EuiFieldNumber
+          fullWidth
+          min={minimumValue}
+          onChange={onChangeTimeVal}
+          value={timeVal}
+          {...rest}
+        />
+      </EuiFormControlLayout>
     </StyledEuiFormRow>
   );
 };

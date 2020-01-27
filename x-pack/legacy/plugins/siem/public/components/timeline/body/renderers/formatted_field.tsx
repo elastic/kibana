@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiLink } from '@elastic/eui';
 import { isNumber, isString, isEmpty } from 'lodash/fp';
 import React from 'react';
 
@@ -15,6 +15,7 @@ import { getOrEmptyTagFromValue, getEmptyTagValue } from '../../../empty_value';
 import { FormattedDate } from '../../../formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
 import { HostDetailsLink } from '../../../links';
+import { getRuleDetailsUrl } from '../../../link_to/redirect_to_detection_engine';
 import { Port, PORT_NAMES } from '../../../port';
 import { TruncatableText } from '../../../truncatable_text';
 import {
@@ -22,12 +23,13 @@ import {
   HOST_NAME_FIELD_NAME,
   IP_FIELD_TYPE,
   MESSAGE_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
 } from './constants';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
 
-export const FormattedFieldValue = React.memo<{
+const FormattedFieldValueComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldFormat?: string;
@@ -35,7 +37,8 @@ export const FormattedFieldValue = React.memo<{
   fieldType: string;
   truncate?: boolean;
   value: string | number | undefined | null;
-}>(({ contextId, eventId, fieldFormat, fieldName, fieldType, truncate, value }) => {
+  linkValue?: string | null | undefined;
+}> = ({ contextId, eventId, fieldFormat, fieldName, fieldType, truncate, value, linkValue }) => {
   if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp
@@ -107,6 +110,24 @@ export const FormattedFieldValue = React.memo<{
     ) : (
       <>{value}</>
     );
+  } else if (fieldName === SIGNAL_RULE_NAME_FIELD_NAME) {
+    const ruleName = `${value}`;
+    const ruleId = linkValue;
+
+    return isString(value) && ruleName.length > 0 && ruleId != null ? (
+      <DefaultDraggable
+        field={fieldName}
+        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`}
+        tooltipContent={value}
+        value={value}
+      >
+        <EuiLink href={getRuleDetailsUrl(ruleId)}>
+          <TruncatableText data-test-subj="draggable-truncatable-content">{value}</TruncatableText>
+        </EuiLink>
+      </DefaultDraggable>
+    ) : (
+      getEmptyTagValue()
+    );
   } else {
     const contentValue = getOrEmptyTagFromValue(value);
     const content = truncate ? <TruncatableText>{contentValue}</TruncatableText> : contentValue;
@@ -126,6 +147,6 @@ export const FormattedFieldValue = React.memo<{
       </DefaultDraggable>
     );
   }
-});
+};
 
-FormattedFieldValue.displayName = 'FormattedFieldValue';
+export const FormattedFieldValue = React.memo(FormattedFieldValueComponent);
