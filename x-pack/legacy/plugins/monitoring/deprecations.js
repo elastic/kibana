@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
+import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY, KIBANA_ALERTING_ENABLED } from './common/constants';
 
 /**
  * Re-writes deprecated user-defined config settings and logs warnings as a
@@ -18,13 +18,23 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
 export const deprecations = () => {
   return [
     (settings, log) => {
-      const clusterAlertsEnabled = get(settings, 'cluster_alerts.enabled');
+      const clusterAlertsEnabled = get(settings, 'cluster_alerts.enabled', true);
       const emailNotificationsEnabled =
-        clusterAlertsEnabled && get(settings, 'cluster_alerts.email_notifications.enabled');
-      if (emailNotificationsEnabled && !get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
-        log(
-          `Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`
-        );
+        clusterAlertsEnabled && get(settings, 'cluster_alerts.email_notifications.enabled', true);
+      if (emailNotificationsEnabled) {
+        if (KIBANA_ALERTING_ENABLED) {
+          if (get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
+            log(
+              `Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" is deprecated. Please configure the email adddress through the Stack Monitoring UI instead."`
+            );
+          }
+        } else {
+          if (!get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
+            log(
+              `Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`
+            );
+          }
+        }
       }
     },
     (settings, log) => {
