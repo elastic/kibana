@@ -17,10 +17,5 @@
  * under the License.
  */
 
-export { FilterManager } from './filter_manager';
-
-export { uniqFilters } from './lib/uniq_filters';
-export { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
-export { onlyDisabledFiltersChanged } from './lib/only_disabled';
-export { generateFilters } from './lib/generate_filters';
-export { compareFilters, COMPARE_ALL_OPTIONS } from './lib/compare_filters';
+export { syncQuery } from './sync_query';
+export { syncAppFilters } from './sync_app_filters';
