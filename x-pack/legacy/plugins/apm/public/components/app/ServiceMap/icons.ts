@@ -34,14 +34,14 @@ const icons: { [key: string]: string } = {
   resource: globeIcon
 };
 
-const serviceIcons: { [key: string]: string } = {
-  dotnet: getAvatarIcon('.N', '#8562AD'),
-  go: getAvatarIcon('Go', '#00A9D6'),
-  java: getAvatarIcon('Jv', '#41717E'),
-  'js-base': getAvatarIcon('JS', '#F0DB4E', theme.euiTextColor),
-  nodejs: getAvatarIcon('No', '#689E62'),
-  python: getAvatarIcon('Py', '#376994'),
-  ruby: getAvatarIcon('Rb', '#CC362E')
+const serviceAbbreviations: { [key: string]: string } = {
+  dotnet: '.N',
+  go: 'Go',
+  java: 'Jv',
+  'js-base': 'JS',
+  nodejs: 'No',
+  python: 'Py',
+  ruby: 'Rb'
 };
 
 export const defaultIcon = getAvatarIcon();
@@ -59,8 +59,14 @@ const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 export function iconForNode(node: cytoscape.NodeSingular) {
   const type = node.data('type');
+
   if (type === 'service') {
-    return serviceIcons[node.data('agentName') as string];
+    return getAvatarIcon(
+      serviceAbbreviations[node.data('agentName') as string],
+      node.selected() || node.hasClass('primary')
+        ? theme.euiColorPrimary
+        : theme.euiColorDarkestShade
+    );
   } else if (isIE11) {
     return defaultIcon;
   } else {
