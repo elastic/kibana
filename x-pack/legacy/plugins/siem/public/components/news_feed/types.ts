@@ -26,7 +26,7 @@ export interface RawNewsApiItem {
   description?: { [lang: string]: string | null } | null;
   expire_on?: Date | null;
   hash?: string | null;
-  image_url?: string | null;
+  image_url?: { [lang: string]: string | null } | null;
   languages?: string[] | null;
   link_text?: { [lang: string]: string | null } | null;
   link_url?: { [lang: string]: string | null } | null;
@@ -38,5 +38,5 @@ export interface RawNewsApiItem {
  * Defines the shape of a raw response from the News API
  */
 export interface RawNewsApiResponse {
-  items?: RawNewsApiItem[];
+  items?: RawNewsApiItem[] | null;
 }
