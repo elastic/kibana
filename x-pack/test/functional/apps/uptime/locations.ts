@@ -18,7 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       /**
        * This mogrify function will strip the documents of their location
-       * data (but preserve their locaion name), which is necessary for
+       * data (but preserve their location name), which is necessary for
        * this test to work as desired.
        * @param d current document
        */
