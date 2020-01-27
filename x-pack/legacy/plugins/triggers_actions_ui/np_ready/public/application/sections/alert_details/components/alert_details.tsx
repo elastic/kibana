@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { indexBy } from 'lodash';
 import {
   EuiPageBody,
@@ -18,9 +18,13 @@ import {
   EuiPage,
   EuiPageContentBody,
   EuiButtonEmpty,
+  EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useAppDependencies } from '../../../app_context';
+import { hasSaveAlertsCapability } from '../../../lib/capabilities';
 import { Alert, AlertType, ActionType } from '../../../../types';
+import { disableAlert, enableAlert, unmuteAlert, muteAlert } from '../../../lib/alert_api';
 
 interface AlertDetailsProps {
   alert: Alert;
@@ -33,8 +37,19 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   alertType,
   actionTypes,
 }) => {
+  const {
+    http,
+    legacy: { capabilities },
+  } = useAppDependencies();
+
+  const canSave = hasSaveAlertsCapability(capabilities.get());
+
   const actionTypesByTypeId = indexBy(actionTypes, 'id');
   const [firstAction, ...otherActions] = alert.actions;
+
+  const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
+  const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
+
   return (
     <EuiPage>
       <EuiPageBody>
@@ -75,22 +90,77 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiPageContentBody>
-            <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+            <EuiFlexGroup wrap responsive={false} gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiBadge>{alertType.name}</EuiBadge>
+                <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge>{alertType.name}</EuiBadge>
+                  </EuiFlexItem>
+                  {firstAction && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow">
+                        {actionTypesByTypeId[firstAction.actionTypeId].name ??
+                          firstAction.actionTypeId}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                  {otherActions.length ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow">+{otherActions.length}</EuiBadge>
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
               </EuiFlexItem>
-              {firstAction && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">
-                    {actionTypesByTypeId[firstAction.actionTypeId].name ?? firstAction.actionTypeId}
-                  </EuiBadge>
-                </EuiFlexItem>
-              )}
-              {otherActions.length ? (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">+{otherActions.length}</EuiBadge>
-                </EuiFlexItem>
-              ) : null}
+              <EuiFlexItem grow={true}>
+                <EuiFlexGroup wrap responsive={false} gutterSize="m">
+                  <EuiFlexItem grow={false}>
+                    <EuiSwitch
+                      name="enable"
+                      disabled={!canSave}
+                      checked={isEnabled}
+                      data-test-subj="enableSwitch"
+                      onChange={async () => {
+                        if (isEnabled) {
+                          setIsEnabled(false);
+                          await disableAlert({ http, id: alert.id });
+                        } else {
+                          setIsEnabled(true);
+                          await enableAlert({ http, id: alert.id });
+                        }
+                      }}
+                      label={
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.enableTitle"
+                          defaultMessage="Enable"
+                        />
+                      }
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiSwitch
+                      name="mute"
+                      checked={isMuted}
+                      disabled={!canSave || !isEnabled}
+                      data-test-subj="muteSwitch"
+                      onChange={async () => {
+                        if (isMuted) {
+                          setIsMuted(false);
+                          await unmuteAlert({ http, id: alert.id });
+                        } else {
+                          setIsMuted(true);
+                          await muteAlert({ http, id: alert.id });
+                        }
+                      }}
+                      label={
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.muteTitle"
+                          defaultMessage="Mute"
+                        />
+                      }
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageContentBody>
         </EuiPageContent>

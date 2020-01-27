@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { AlertTableItem } from '../../../../types';
+import { Alert } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import {
   deleteAlerts,
@@ -17,11 +17,11 @@ import {
 } from '../../../lib/alert_api';
 
 export interface ComponentOpts {
-  onMuteAlerts: (alerts: AlertTableItem[]) => Promise<void>;
-  onUnmuteAlerts: (alerts: AlertTableItem[]) => Promise<void>;
-  onEnableAlerts: (alerts: AlertTableItem[]) => Promise<void>;
-  onDisableAlerts: (alerts: AlertTableItem[]) => Promise<void>;
-  onDeleteAlerts: (alerts: AlertTableItem[]) => Promise<void>;
+  onMuteAlerts: (alerts: Alert[]) => Promise<void>;
+  onUnmuteAlerts: (alerts: Alert[]) => Promise<void>;
+  onEnableAlerts: (alerts: Alert[]) => Promise<void>;
+  onDisableAlerts: (alerts: Alert[]) => Promise<void>;
+  onDeleteAlerts: (alerts: Alert[]) => Promise<void>;
 }
 
 type PropsWithoutBulkOperationHandlers<T> = Omit<
@@ -37,33 +37,31 @@ export function withBulkAlertOperations<T>(
     return (
       <WrappedComponent
         {...(props as T)}
-        onMuteAlerts={(items: AlertTableItem[]) =>
+        onMuteAlerts={(items: Alert[]) =>
           muteAlerts({ http, ids: items.filter(item => !isAlertMuted(item)).map(item => item.id) })
         }
-        onUnmuteAlerts={(items: AlertTableItem[]) =>
+        onUnmuteAlerts={(items: Alert[]) =>
           unmuteAlerts({ http, ids: items.filter(isAlertMuted).map(item => item.id) })
         }
-        onEnableAlerts={(items: AlertTableItem[]) =>
+        onEnableAlerts={(items: Alert[]) =>
           enableAlerts({ http, ids: items.filter(isAlertDisabled).map(item => item.id) })
         }
-        onDisableAlerts={(items: AlertTableItem[]) =>
+        onDisableAlerts={(items: Alert[]) =>
           disableAlerts({
             http,
             ids: items.filter(item => !isAlertDisabled(item)).map(item => item.id),
           })
         }
-        onDeleteAlerts={(items: AlertTableItem[]) =>
-          deleteAlerts({ http, ids: items.map(item => item.id) })
-        }
+        onDeleteAlerts={(items: Alert[]) => deleteAlerts({ http, ids: items.map(item => item.id) })}
       />
     );
   };
 }
 
-function isAlertDisabled(alert: AlertTableItem) {
+function isAlertDisabled(alert: Alert) {
   return alert.enabled === false;
 }
 
-function isAlertMuted(alert: AlertTableItem) {
+function isAlertMuted(alert: Alert) {
   return alert.muteAll === true;
 }

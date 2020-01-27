@@ -11,11 +11,15 @@ import {
   deleteAlerts,
   disableAlerts,
   enableAlerts,
+  disableAlert,
+  enableAlert,
   loadAlert,
   loadAlerts,
   loadAlertTypes,
   muteAlerts,
   unmuteAlerts,
+  muteAlert,
+  unmuteAlert,
   updateAlert,
 } from './alert_api';
 import uuid from 'uuid';
@@ -357,6 +361,62 @@ describe('updateAlert', () => {
         Object {
           "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"consumer\\":\\"\\",\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
         },
+      ]
+    `);
+  });
+});
+
+describe('enableAlert', () => {
+  test('should call enable alert API', async () => {
+    const result = await enableAlert({ http, id: '1' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/_enable",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('disableAlert', () => {
+  test('should call disable alert API', async () => {
+    const result = await disableAlert({ http, id: '1' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/_disable",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('muteAlert', () => {
+  test('should call mute alert API', async () => {
+    const result = await muteAlert({ http, id: '1' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/_mute_all",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('unmuteAlert', () => {
+  test('should call unmute alert API', async () => {
+    const result = await unmuteAlert({ http, id: '1' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/_unmute_all",
+        ],
       ]
     `);
   });

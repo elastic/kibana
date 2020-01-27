@@ -9,24 +9,20 @@ import React, { useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
-import { AlertTableItem } from '../../../../types';
+import { Alert } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
+import { ComponentOpts as BulkOperationsComponentOpts } from './with_bulk_alert_operations';
 
-export interface ComponentOpts {
-  selectedItems: AlertTableItem[];
-  onPerformingAction: () => void;
-  onActionPerformed: () => void;
-  onMuteAlerts: (alerts: AlertTableItem[]) => Promise<void>;
-  onUnmuteAlerts: (alerts: AlertTableItem[]) => Promise<void>;
-  onEnableAlerts: (alerts: AlertTableItem[]) => Promise<void>;
-  onDisableAlerts: (alerts: AlertTableItem[]) => Promise<void>;
-  onDeleteAlerts: (alerts: AlertTableItem[]) => Promise<void>;
-}
+export type ComponentOpts = {
+  selectedItems: Alert[];
+  onPerformingAction?: () => void;
+  onActionPerformed?: () => void;
+} & BulkOperationsComponentOpts;
 
 export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   selectedItems,
-  onPerformingAction,
-  onActionPerformed,
+  onPerformingAction = noop,
+  onActionPerformed = noop,
   onMuteAlerts,
   onUnmuteAlerts,
   onEnableAlerts,
@@ -216,10 +212,12 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   );
 };
 
-function isAlertDisabled(alert: AlertTableItem) {
+function isAlertDisabled(alert: Alert) {
   return alert.enabled === false;
 }
 
-function isAlertMuted(alert: AlertTableItem) {
+function isAlertMuted(alert: Alert) {
   return alert.muteAll === true;
 }
+
+function noop() {}

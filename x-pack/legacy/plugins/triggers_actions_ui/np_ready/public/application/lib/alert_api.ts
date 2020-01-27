@@ -101,6 +101,10 @@ export async function updateAlert({
   });
 }
 
+export async function enableAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/_enable`);
+}
+
 export async function enableAlerts({
   ids,
   http,
@@ -108,7 +112,11 @@ export async function enableAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_enable`)));
+  await Promise.all(ids.map(id => enableAlert({ id, http })));
+}
+
+export async function disableAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/_disable`);
 }
 
 export async function disableAlerts({
@@ -118,11 +126,19 @@ export async function disableAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_disable`)));
+  await Promise.all(ids.map(id => disableAlert({ id, http })));
+}
+
+export async function muteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/_mute_all`);
 }
 
 export async function muteAlerts({ ids, http }: { ids: string[]; http: HttpSetup }): Promise<void> {
-  await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_mute_all`)));
+  await Promise.all(ids.map(id => muteAlert({ http, id })));
+}
+
+export async function unmuteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/_unmute_all`);
 }
 
 export async function unmuteAlerts({
@@ -132,5 +148,5 @@ export async function unmuteAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_unmute_all`)));
+  await Promise.all(ids.map(id => unmuteAlert({ id, http })));
 }
