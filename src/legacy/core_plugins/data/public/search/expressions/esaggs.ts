@@ -46,6 +46,7 @@ import { Adapters } from '../../../../../../plugins/inspector/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getQueryService, getIndexPatterns } from '../../../../../../plugins/data/public/services';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../..';
+import { serializeAggConfig } from './utils';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
@@ -289,11 +290,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
         const cleanedColumn: KibanaDatatableColumn = {
           id: column.id,
           name: column.name,
-          _meta: {
-            type: column.aggConfig.type,
-            indexPattern: column.aggConfig.getIndexPattern(),
-            params: column.aggConfig.params,
-          },
+          meta: serializeAggConfig(column.aggConfig),
         };
         if (args.includeFormatHints) {
           cleanedColumn.formatHint = createFormat(column.aggConfig);

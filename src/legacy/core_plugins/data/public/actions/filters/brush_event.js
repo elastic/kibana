@@ -19,9 +19,10 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { esFilters } from '../..';
+import { esFilters } from '../../../../../../plugins/data/public';
+import { unserializeAggConfig } from '../../search/expressions/utils';
 
-export function onBrushEvent(event) {
+export async function onBrushEvent(event, getIndexPatterns) {
   const isNumber = event.data.ordered;
   const isDate = isNumber && event.data.ordered.date;
 
@@ -29,16 +30,12 @@ export function onBrushEvent(event) {
   if (!xRaw) return [];
   const column = xRaw.table.columns[xRaw.column];
   if (!column) return [];
-  if (!column._meta) return [];
-
-  // hack until AggConfigs are migrated to the new platform
-  const { AggConfigs } = require('../../../../../legacy/ui/public/agg_types/agg_configs');
-  const aggConfigs = new AggConfigs(column._meta.indexPattern);
-  const aggConfig = aggConfigs.createAggConfig({
-    type: column._meta.type,
-    params: column._meta.params,
+  if (!column.meta) return [];
+  const indexPattern = await getIndexPatterns().get(column.meta.indexPattern);
+  const aggConfig = unserializeAggConfig({
+    ...column.meta,
+    indexPattern,
   });
-  const indexPattern = aggConfig.getIndexPattern();
   const field = aggConfig.params.field;
   if (!field) return [];
 

@@ -17,4 +17,24 @@
  * under the License.
  */
 
-export { GLOBAL_APPLY_FILTER_ACTION, createFilterAction } from './apply_filter_action';
+import { AggConfig } from 'ui/agg_types/agg_config';
+import { AggConfigs } from '../../../../../ui/public/agg_types/agg_configs';
+import { KibanaDatatableColumnMeta } from '../../../../../../plugins/expressions/common/expression_types';
+
+export const serializeAggConfig = (aggConfig: AggConfig): KibanaDatatableColumnMeta => {
+  return {
+    type: aggConfig.type.name,
+    indexPattern: aggConfig.getIndexPattern().id as string,
+    params: aggConfig.toJSON().params,
+  };
+};
+
+export const unserializeAggConfig = ({ type, params, indexPattern }: any) => {
+  const aggConfigs = new AggConfigs(indexPattern);
+  const aggConfig = aggConfigs.createAggConfig({
+    enabled: true,
+    type,
+    params,
+  });
+  return aggConfig;
+};

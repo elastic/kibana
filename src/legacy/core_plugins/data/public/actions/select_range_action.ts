@@ -18,12 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '../../../kibana_react/public';
-import { IAction, createAction, IncompatibleActionError } from '../../../ui_actions/public';
-import { getOverlays, getIndexPatterns } from '../services';
-import { applyFiltersPopover } from '../ui/apply_filters';
+import {
+  IAction,
+  createAction,
+  IncompatibleActionError,
+} from '../../../../../plugins/ui_actions/public';
 // @ts-ignore
-import { createFiltersFromEvent } from './filters/create_filters_from_event';
+import { onBrushEvent } from './filters/brush_event';
 import {
   esFilters,
   FilterManager,
@@ -31,9 +32,11 @@ import {
   changeTimeFilter,
   extractTimeFilter,
   mapAndFlattenFilters,
-} from '..';
+} from '../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getIndexPatterns } from '../../../../../plugins/data/public/services';
 
-export const VALUE_CLICK_ACTION = 'VALUE_CLICK_ACTION';
+export const SELECT_RANGE_ACTION = 'SELECT_RANGE_ACTION';
 
 interface ActionContext {
   data: any;
@@ -42,20 +45,19 @@ interface ActionContext {
 
 async function isCompatible(context: ActionContext) {
   try {
-    const filters: esFilters.Filter[] = createFiltersFromEvent(context.data) || [];
-    return filters.length > 0;
+    return context.data;
   } catch {
     return false;
   }
 }
 
-export function valueClickAction(
+export function selectRangeAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
 ): IAction<ActionContext> {
   return createAction<ActionContext>({
-    type: VALUE_CLICK_ACTION,
-    id: VALUE_CLICK_ACTION,
+    type: SELECT_RANGE_ACTION,
+    id: SELECT_RANGE_ACTION,
     getDisplayName: () => {
       return i18n.translate('data.filter.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',
@@ -67,41 +69,9 @@ export function valueClickAction(
         throw new IncompatibleActionError();
       }
 
-      const filters: esFilters.Filter[] = createFiltersFromEvent(data) || [];
+      const filters: esFilters.Filter[] = (await onBrushEvent(data, getIndexPatterns)) || [];
 
-      let selectedFilters: esFilters.Filter[] = mapAndFlattenFilters(filters);
-
-      if (selectedFilters.length > 1) {
-        const indexPatterns = await Promise.all(
-          filters.map(filter => {
-            return getIndexPatterns().get(filter.meta.index!);
-          })
-        );
-
-        const filterSelectionPromise: Promise<esFilters.Filter[]> = new Promise(resolve => {
-          const overlay = getOverlays().openModal(
-            toMountPoint(
-              applyFiltersPopover(
-                filters,
-                indexPatterns,
-                () => {
-                  overlay.close();
-                  resolve([]);
-                },
-                (filterSelection: esFilters.Filter[]) => {
-                  overlay.close();
-                  resolve(filterSelection);
-                }
-              )
-            ),
-            {
-              'data-test-subj': 'test',
-            }
-          );
-        });
-
-        selectedFilters = await filterSelectionPromise;
-      }
+      const selectedFilters: esFilters.Filter[] = mapAndFlattenFilters(filters);
 
       if (timeFieldName) {
         const { timeRangeFilter, restOfFilters } = extractTimeFilter(

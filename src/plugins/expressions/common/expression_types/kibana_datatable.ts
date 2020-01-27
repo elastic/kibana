@@ -23,10 +23,16 @@ import { Datatable, PointSeries } from '.';
 
 const name = 'kibana_datatable';
 
+export interface KibanaDatatableColumnMeta {
+  type: string;
+  indexPattern: string;
+  params: Record<string, any>;
+}
+
 export interface KibanaDatatableColumn {
   id: string;
   name: string;
-  _meta?: Record<string, string>;
+  meta?: KibanaDatatableColumnMeta;
   formatHint?: SerializedFieldFormat;
 }
 

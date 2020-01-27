@@ -25,7 +25,7 @@ import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eu
 
 // @ts-ignore
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createFiltersFromEvent } from '../../../../../../../plugins/data/public/actions/filters/create_filters_from_event';
+import { createFiltersFromEvent } from '../../../../../data/public/actions/filters/create_filters_from_event';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
 import { getPieNames } from './pie_utils';
@@ -99,7 +99,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     if (CUSTOM_LEGEND_VIS_TYPES.includes(this.props.vislibVis.visConfigArgs.type)) {
       return false;
     }
-    const filters = createFiltersFromEvent({ aggConfigs: this.state.tableAggs, data: item.values });
+    const filters = createFiltersFromEvent({ data: item.values });
     return Boolean(filters.length);
   };
 

@@ -18,9 +18,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IAction, createAction, IncompatibleActionError } from '../../../ui_actions/public';
+import { toMountPoint } from '../../../../../plugins/kibana_react/public';
+import {
+  IAction,
+  createAction,
+  IncompatibleActionError,
+} from '../../../../../plugins/ui_actions/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getOverlays, getIndexPatterns } from '../../../../../plugins/data/public/services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { applyFiltersPopover } from '../../../../../plugins/data/public/ui/apply_filters';
 // @ts-ignore
-import { onBrushEvent } from './filters/brush_event';
+import { createFiltersFromEvent } from './filters/create_filters_from_event';
 import {
   esFilters,
   FilterManager,
@@ -28,9 +37,9 @@ import {
   changeTimeFilter,
   extractTimeFilter,
   mapAndFlattenFilters,
-} from '..';
+} from '../../../../../plugins/data/public';
 
-export const SELECT_RANGE_ACTION = 'SELECT_RANGE_ACTION';
+export const VALUE_CLICK_ACTION = 'VALUE_CLICK_ACTION';
 
 interface ActionContext {
   data: any;
@@ -39,20 +48,21 @@ interface ActionContext {
 
 async function isCompatible(context: ActionContext) {
   try {
-    const filters: esFilters.Filter[] = onBrushEvent(context.data) || [];
+    return true;
+    const filters: esFilters.Filter[] = (await createFiltersFromEvent(context.data)) || [];
     return filters.length > 0;
   } catch {
     return false;
   }
 }
 
-export function selectRangeAction(
+export function valueClickAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
 ): IAction<ActionContext> {
   return createAction<ActionContext>({
-    type: SELECT_RANGE_ACTION,
-    id: SELECT_RANGE_ACTION,
+    type: VALUE_CLICK_ACTION,
+    id: VALUE_CLICK_ACTION,
     getDisplayName: () => {
       return i18n.translate('data.filter.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',
@@ -64,9 +74,41 @@ export function selectRangeAction(
         throw new IncompatibleActionError();
       }
 
-      const filters: esFilters.Filter[] = onBrushEvent(data) || [];
+      const filters: esFilters.Filter[] = (await createFiltersFromEvent(data)) || [];
 
-      const selectedFilters: esFilters.Filter[] = mapAndFlattenFilters(filters);
+      let selectedFilters: esFilters.Filter[] = mapAndFlattenFilters(filters);
+
+      if (selectedFilters.length > 1) {
+        const indexPatterns = await Promise.all(
+          filters.map(filter => {
+            return getIndexPatterns().get(filter.meta.index!);
+          })
+        );
+
+        const filterSelectionPromise: Promise<esFilters.Filter[]> = new Promise(resolve => {
+          const overlay = getOverlays().openModal(
+            toMountPoint(
+              applyFiltersPopover(
+                filters,
+                indexPatterns,
+                () => {
+                  overlay.close();
+                  resolve([]);
+                },
+                (filterSelection: esFilters.Filter[]) => {
+                  overlay.close();
+                  resolve(filterSelection);
+                }
+              )
+            ),
+            {
+              'data-test-subj': 'test',
+            }
+          );
+        });
+
+        selectedFilters = await filterSelectionPromise;
+      }
 
       if (timeFieldName) {
         const { timeRangeFilter, restOfFilters } = extractTimeFilter(

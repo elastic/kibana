@@ -20,6 +20,20 @@
 import _ from 'lodash';
 import moment from 'moment';
 import expect from '@kbn/expect';
+
+jest.mock('../../../../../ui/public/agg_types/agg_configs', () => ({
+  AggConfigs: function AggConfigs() {
+    return {
+      createAggConfig: ({ params }) => ({
+        params,
+        getIndexPattern: () => ({
+          timeFieldName: 'time',
+        }),
+      }),
+    };
+  },
+}));
+
 import { onBrushEvent } from './brush_event';
 
 describe('brushEvent', () => {
@@ -35,19 +49,6 @@ describe('brushEvent', () => {
     },
   ];
 
-  jest.mock('../../../../../legacy/ui/public/agg_types/agg_configs', () => ({
-    AggConfigs: function AggConfigs() {
-      return {
-        createAggConfig: ({ params }) => ({
-          params,
-          getIndexPattern: () => ({
-            timeFieldName: 'time',
-          }),
-        }),
-      };
-    },
-  }));
-
   const baseEvent = {
     data: {
       fieldFormatter: _.constant({}),
@@ -61,9 +62,9 @@ describe('brushEvent', () => {
                   columns: [
                     {
                       id: '1',
-                      _meta: {
+                      meta: {
                         type: 'histogram',
-                        indexPattern: aggConfigs[0].getIndexPattern(),
+                        indexPattern: 'indexPatternId',
                         params: aggConfigs[0].params,
                       },
                     },
@@ -88,9 +89,11 @@ describe('brushEvent', () => {
     expect(onBrushEvent).to.be.a(Function);
   });
 
-  test('ignores event when data.xAxisField not provided', () => {
+  test('ignores event when data.xAxisField not provided', async () => {
     const event = _.cloneDeep(baseEvent);
-    const filters = onBrushEvent(event);
+    const filters = await onBrushEvent(event, () => ({
+      get: () => baseEvent.data.indexPattern,
+    }));
     expect(filters.length).to.equal(0);
   });
 
@@ -108,17 +111,21 @@ describe('brushEvent', () => {
         dateEvent.data.ordered = { date: true };
       });
 
-      test('by ignoring the event when range spans zero time', () => {
+      test('by ignoring the event when range spans zero time', async () => {
         const event = _.cloneDeep(dateEvent);
         event.range = [JAN_01_2014, JAN_01_2014];
-        const filters = onBrushEvent(event);
+        const filters = await onBrushEvent(event, () => ({
+          get: () => dateEvent.data.indexPattern,
+        }));
         expect(filters.length).to.equal(0);
       });
 
-      test('by updating the timefilter', () => {
+      test('by updating the timefilter', async () => {
         const event = _.cloneDeep(dateEvent);
         event.range = [JAN_01_2014, JAN_01_2014 + DAY_IN_MS];
-        const filters = onBrushEvent(event);
+        const filters = await onBrushEvent(event, () => ({
+          get: async () => dateEvent.data.indexPattern,
+        }));
         expect(filters[0].range.time.gte).to.be(new Date(JAN_01_2014).toISOString());
         // Set to a baseline timezone for comparison.
         expect(filters[0].range.time.lt).to.be(new Date(JAN_01_2014 + DAY_IN_MS).toISOString());
@@ -138,12 +145,14 @@ describe('brushEvent', () => {
         dateEvent.data.ordered = { date: true };
       });
 
-      test('creates a new range filter', () => {
+      test('creates a new range filter', async () => {
         const event = _.cloneDeep(dateEvent);
         const rangeBegin = JAN_01_2014;
         const rangeEnd = rangeBegin + DAY_IN_MS;
         event.range = [rangeBegin, rangeEnd];
-        const filters = onBrushEvent(event);
+        const filters = await onBrushEvent(event, () => ({
+          get: () => dateEvent.data.indexPattern,
+        }));
         expect(filters.length).to.equal(1);
         expect(filters[0].range.anotherTimeField.gte).to.equal(moment(rangeBegin).toISOString());
         expect(filters[0].range.anotherTimeField.lt).to.equal(moment(rangeEnd).toISOString());
@@ -166,17 +175,21 @@ describe('brushEvent', () => {
       numberEvent.data.ordered = { date: false };
     });
 
-    test('by ignoring the event when range does not span at least 2 values', () => {
+    test('by ignoring the event when range does not span at least 2 values', async () => {
       const event = _.cloneDeep(numberEvent);
       event.range = [1];
-      const filters = onBrushEvent(event);
+      const filters = await onBrushEvent(event, () => ({
+        get: () => numberEvent.data.indexPattern,
+      }));
       expect(filters.length).to.equal(0);
     });
 
-    test('by creating a new filter', () => {
+    test('by creating a new filter', async () => {
       const event = _.cloneDeep(numberEvent);
       event.range = [1, 2, 3, 4];
-      const filters = onBrushEvent(event);
+      const filters = await onBrushEvent(event, () => ({
+        get: () => numberEvent.data.indexPattern,
+      }));
       expect(filters.length).to.equal(1);
       expect(filters[0].range.numberField.gte).to.equal(1);
       expect(filters[0].range.numberField.lt).to.equal(4);

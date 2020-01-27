@@ -63,7 +63,7 @@ const unknownSchema: Schema = {
 const getTypeFromRegistry = (type: string): AggType => {
   // We need to inline require here, since we're having a cyclic dependency
   // from somewhere inside agg_types back to AggConfig.
-  const aggTypes = require('../agg_types').aggTypes;
+  const aggTypes = require('./agg_types').aggTypes;
   const registeredType =
     aggTypes.metrics.find((agg: AggType) => agg.name === type) ||
     aggTypes.buckets.find((agg: AggType) => agg.name === type);

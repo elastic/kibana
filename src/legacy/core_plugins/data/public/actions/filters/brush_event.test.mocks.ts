@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { chromeServiceMock } from '../../../../../core/public/mocks';
+import { chromeServiceMock } from '../../../../../../core/public/mocks';
 
 jest.doMock('ui/new_platform', () => ({
   npStart: {
