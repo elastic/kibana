@@ -7,8 +7,9 @@
 import Boom from 'boom';
 import { Legacy } from 'kibana';
 import { AuthenticatedUser } from '../../../../../../plugins/security/server';
+import { Logger, ServerFacade } from '../../../types';
 import { getUserFactory } from '../../lib/get_user';
-import { ServerFacade, Logger } from '../../../types';
+import { ReportingSetupDeps } from '../../plugin';
 
 const superuserRole = 'superuser';
 
@@ -18,9 +19,10 @@ export type PreRoutingFunction = (
 
 export const authorizedUserPreRoutingFactory = function authorizedUserPreRoutingFn(
   server: ServerFacade,
+  plugins: ReportingSetupDeps,
   logger: Logger
 ) {
-  const getUser = getUserFactory(server, logger);
+  const getUser = getUserFactory(server, plugins, logger);
   const config = server.config();
 
   return async function authorizedUserPreRouting(request: Legacy.Request) {
