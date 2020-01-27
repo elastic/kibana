@@ -87,11 +87,13 @@ specified explicitly.
 [float]
 ==== `kibana_user` role renamed to `kibana_admin`
 
-*Details:* The `kibana_user` role has been renamed to `kibana_admin` to better reflect its intended use. This role
-continues to grant all access to every Kibana feature. If you wish to restrict access to specific features,
-then you should create custom roles with <<kibana-privileges>>.
+*Details:* The `kibana_user` role has been renamed to `kibana_admin` to better
+reflect its intended use. This role continues to grant all access to every
+{kib} feature. If you wish to restrict access to specific features, create
+custom roles with {kibana-ref}/kibana-privileges.html[{kib} privileges].
 
-*Impact:* Any users currently assigned the `kibana_user` role will need to instead be assigned the `kibana_admin`
-role in order to maintain their current access level.
+*Impact:* Any users currently assigned the `kibana_user` role will need to
+instead be assigned the `kibana_admin` role in order to maintain their current
+access level.
 
 // end::notable-breaking-changes[]
