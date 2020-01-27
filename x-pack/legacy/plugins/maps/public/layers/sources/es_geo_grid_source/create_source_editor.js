@@ -116,7 +116,9 @@ export class CreateSourceEditor extends Component {
     });
 
     //make default selection
-    const geoFields = indexPattern.fields.filter(filterGeoField);
+    const geoFields = indexPattern.fields
+      .filter(field => !isNestedField(field))
+      .filter(filterGeoField);
     if (geoFields[0]) {
       this._onGeoFieldSelect(geoFields[0].name);
     }

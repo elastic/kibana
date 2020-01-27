@@ -92,7 +92,9 @@ export class CreateSourceEditor extends Component {
       return;
     }
 
-    const geoFields = indexPattern.fields.filter(filterGeoField);
+    const geoFields = indexPattern.fields
+      .filter(field => !isNestedField(field))
+      .filter(filterGeoField);
 
     this.setState({
       isLoadingIndexPattern: false,
