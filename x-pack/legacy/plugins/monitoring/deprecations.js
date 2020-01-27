@@ -18,9 +18,9 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY, KIBANA_ALERTING_ENABLED } from './co
 export const deprecations = () => {
   return [
     (settings, log) => {
-      const clusterAlertsEnabled = get(settings, 'cluster_alerts.enabled', true);
+      const clusterAlertsEnabled = get(settings, 'cluster_alerts.enabled');
       const emailNotificationsEnabled =
-        clusterAlertsEnabled && get(settings, 'cluster_alerts.email_notifications.enabled', true);
+        clusterAlertsEnabled && get(settings, 'cluster_alerts.email_notifications.enabled');
       if (emailNotificationsEnabled) {
         if (KIBANA_ALERTING_ENABLED) {
           if (get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
