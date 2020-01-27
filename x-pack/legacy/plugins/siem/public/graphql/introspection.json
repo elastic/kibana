@@ -4940,7 +4940,7 @@
             "deprecationReason": null
           },
           {
-            "name": "threats",
+            "name": "threat",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "ToAny", "ofType": null },
