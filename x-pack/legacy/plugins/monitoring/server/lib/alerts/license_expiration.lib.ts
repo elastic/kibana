@@ -3,13 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import moment, { Moment } from 'moment-timezone';
+import { Moment } from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { AlertInstance } from '../../../../alerting/server/alert_instance';
 import { AlertLicense } from '../../alerts/types';
-// @ts-ignore
-import { formatTimestampToDuration } from '../../../common';
-import { CALCULATE_DURATION_UNTIL } from '../../../common/constants';
 
 const RESOLVED_SUBJECT = i18n.translate(
   'xpack.monitoring.alerts.licenseExpiration.resolvedSubject',
@@ -56,12 +53,6 @@ export function getUiMessage(license: AlertLicense, timezone: string, resolved: 
     });
   }
   return i18n.translate('xpack.monitoring.alerts.licenseExpiration.ui.firingMessage', {
-    defaultMessage: `This cluster's license is going to expire in {relative} at {absolute}.`,
-    values: {
-      relative: formatTimestampToDuration(license.expiryDateMS, CALCULATE_DURATION_UNTIL, null),
-      absolute: moment
-        .tz(license.expiryDateMS, timezone !== 'Browser' ? timezone : moment.tz.guess())
-        .format('LLL z'),
-    },
+    defaultMessage: `This cluster's license is going to expire in #relative at #absolute.`,
   });
 }

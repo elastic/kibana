@@ -172,8 +172,7 @@ describe('getLicenseExpiration', () => {
 
     expect((logger.warn as jest.Mock).mock.calls.length).toBe(1);
     expect(logger.warn).toHaveBeenCalledWith(
-      `Unable to send email for ${ALERT_TYPE_LICENSE_EXPIRATION} because there is no email configured.` +
-        ` Please configure 'xpack.monitoring.cluster_alerts.email_notifications.email_address'.`
+      `Unable to send email for ${ALERT_TYPE_LICENSE_EXPIRATION} because there is no email configured.`
     );
   });
 
@@ -304,7 +303,7 @@ describe('getLicenseExpiration', () => {
         expiredCheckDateMS: moment()
           .subtract(1, 'day')
           .valueOf(),
-        ui: { isFiring: true, severity: 0, message: null, resolvedMS: 0 },
+        ui: { isFiring: true, severity: 0, message: null, resolvedMS: 0, expirationTime: 0 },
       },
     };
 

@@ -28,6 +28,7 @@ export interface AlertClusterUiState {
   severity: number;
   message: string | null;
   resolvedMS: number;
+  expirationTime: number;
 }
 
 export interface AlertCluster {

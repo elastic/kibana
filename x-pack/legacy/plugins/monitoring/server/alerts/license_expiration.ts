@@ -121,6 +121,7 @@ export const getLicenseExpiration = (
           message: null,
           severity: 0,
           resolvedMS: 0,
+          expirationTime: 0,
         });
         let resolved = ui.resolvedMS;
         let message = ui.message;
@@ -140,13 +141,14 @@ export const getLicenseExpiration = (
           executeActions(instance, license, $expiry, dateFormat, emailAddress, true);
           expiredCheckDate = 0;
           message = getUiMessage(license, timezone, true);
-          resolved = +new Date();
+          resolved = moment().valueOf();
         }
 
         result[license.clusterUuid] = {
           expiredCheckDateMS: expiredCheckDate,
           ui: {
             message,
+            expirationTime: license.expiryDateMS,
             isFiring: expiredCheckDate > 0,
             severity,
             resolvedMS: resolved,

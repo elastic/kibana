@@ -3,12 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { executeActions, getUiMessage } from './license_expiration.lib';
-
-jest.mock('../../../common', () => ({
-  formatTimestampToDuration: () => '{TIME}',
-}));
 
 describe('licenseExpiration lib', () => {
   describe('executeActions', () => {
@@ -48,9 +44,7 @@ describe('licenseExpiration lib', () => {
 
     it('should return a message when firing', () => {
       const message = getUiMessage(license, timezone, false);
-      expect(message).toBe(
-        `This cluster's license is going to expire in {TIME} at January 20, 2020 8:00 AM GMT.`
-      );
+      expect(message).toBe(`This cluster's license is going to expire in #relative at #absolute.`);
     });
 
     it('should return a message when resolved', () => {

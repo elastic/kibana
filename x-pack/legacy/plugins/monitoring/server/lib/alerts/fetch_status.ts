@@ -50,7 +50,13 @@ export async function fetchStatus(
               `alertTypeState.${clusterUuid}`,
               {
                 expiredCheckDateMS: 0,
-                ui: { isFiring: false, message: null, severity: 0, resolvedMS: 0 },
+                ui: {
+                  isFiring: false,
+                  message: null,
+                  severity: 0,
+                  resolvedMS: 0,
+                  expirationTime: 0,
+                },
               }
             );
             const isInBetween = moment(clusterState.ui.resolvedMS).isBetween(start, end);

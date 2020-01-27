@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import moment from 'moment-timezone';
 import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
@@ -12,6 +13,7 @@ import {
   CALCULATE_DURATION_SINCE,
   KIBANA_ALERTING_ENABLED,
   ALERT_TYPE_LICENSE_EXPIRATION,
+  CALCULATE_DURATION_UNTIL,
 } from '../../../../common/constants';
 import { formatDateTimeLocal } from '../../../../common/formatting';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -90,7 +92,14 @@ export function AlertsPanel({ alerts, changeUrl }) {
   const alertsList = KIBANA_ALERTING_ENABLED
     ? alerts.map((alert, idx) => {
         const callOutProps = mapSeverity(alert.severity);
-        let message = alert.message;
+        let message = alert.message
+          // scan message prefix and replace relative times
+          // \w: Matches any alphanumeric character from the basic Latin alphabet, including the underscore. Equivalent to [A-Za-z0-9_].
+          .replace(
+            '#relative',
+            formatTimestampToDuration(alert.expirationTime, CALCULATE_DURATION_UNTIL)
+          )
+          .replace('#absolute', moment.tz(alert.expirationTime, moment.tz.guess()).format('LLL z'));
 
         if (!alert.isFiring) {
           callOutProps.title = i18n.translate(
