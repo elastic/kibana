@@ -7,6 +7,7 @@
 import { CoreStart } from 'kibana/public';
 import { SagaContext } from '../../lib';
 import { EndpointListAction } from './action';
+import { endpointListPageIndex, endpointListPageSize } from './selectors';
 
 export const endpointListSaga = async (
   { actionsAndState, dispatch }: SagaContext<EndpointListAction>,
@@ -14,10 +15,17 @@ export const endpointListSaga = async (
 ) => {
   const { post: httpPost } = coreStart.http;
 
-  for await (const { action } of actionsAndState()) {
-    if (action.type === 'userEnteredEndpointListPage') {
+  for await (const { action, state } of actionsAndState()) {
+    if (
+      action.type === 'userEnteredEndpointListPage' ||
+      action.type === 'userPaginatedEndpointListTable'
+    ) {
+      const pageIndex = endpointListPageIndex(state.endpointList);
+      const pageSize = endpointListPageSize(state.endpointList);
       const response = await httpPost('/api/endpoint/endpoints', {
-        body: JSON.stringify({ paging_properties: [{ page_index: 1 }, { page_size: 2 }] }),
+        body: JSON.stringify({
+          paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
+        }),
       });
       dispatch({
         type: 'serverReturnedEndpointList',

@@ -52,3 +52,8 @@ export interface EndpointListData {
 }
 
 export type EndpointListState = EndpointListData;
+
+export interface EndpointListPagination {
+  pageIndex: number;
+  pageSize: number;
+}

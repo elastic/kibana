@@ -17,17 +17,44 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
   EuiBasicTable,
+  EuiTableCriteria,
 } from '@elastic/eui';
-import { endpointListData } from '../store/endpoint_list/selectors';
 import { useEndpointListSelector } from '../store/hooks';
+import {
+  endpointListData,
+  endpointListPageIndex,
+  endpointListPageSize,
+  endpointTotalHits,
+} from '../store/endpoint_list/selectors';
+import { EndpointListAction } from '../store/endpoint_list/action';
 
 export const EndpointList = () => {
+  const dispatch = useDispatch<(a: EndpointListAction) => void>();
   const endpointListResults = useEndpointListSelector(endpointListData);
+  const pageIndex = useEndpointListSelector(endpointListPageIndex);
+  const pageSize = useEndpointListSelector(endpointListPageSize);
+  const totalItemCount = useEndpointListSelector(endpointTotalHits);
+
+  const paginationSetup = {
+    pageIndex,
+    pageSize,
+    totalItemCount,
+    pageSizeOptions: [1, 2, 3],
+    hidePerPageOptions: false,
+  };
+
+  const onTableChange = ({ page }: { page: EuiTableCriteria }) => {
+    const { index, size } = page;
+    dispatch({
+      type: 'userPaginatedEndpointListTable',
+      payload: { pageIndex: index, pageSize: size },
+    });
+  };
 
   const columns = [
     {
       field: 'host.hostname',
-      name: 'Endpoint',
+      name: 'Host',
     },
     {
       field: 'host.os.name',
@@ -89,11 +116,16 @@ export const EndpointList = () => {
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle>
-                <h2>Endpoints</h2>
+                <h2>Hosts</h2>
               </EuiTitle>
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
-          <EuiBasicTable items={endpointListResults} columns={columns} />
+          <EuiBasicTable
+            items={endpointListResults}
+            columns={columns}
+            pagination={paginationSetup}
+            onChange={onTableChange}
+          />
           <EuiPageContentBody />
         </EuiPageContent>
       </EuiPageBody>
