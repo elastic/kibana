@@ -16,3 +16,4 @@ export enum ML_JOB_FIELD_TYPES {
 }
 
 export const MLCATEGORY = 'mlcategory';
+export const DOC_COUNT = 'doc_count';

@@ -161,14 +161,15 @@ export class ManagementSidebarNav extends React.Component<
   }
 
   public render() {
-    const HEADER_ID = 'management-nav-header';
+    const HEADER_ID = 'stack-management-nav-header';
 
     return (
       <>
         <EuiScreenReaderOnly>
           <h2 id={HEADER_ID}>
             {i18n.translate('management.nav.label', {
-              defaultMessage: 'Management',
+              // todo
+              defaultMessage: 'Stack Management',
             })}
           </h2>
         </EuiScreenReaderOnly>

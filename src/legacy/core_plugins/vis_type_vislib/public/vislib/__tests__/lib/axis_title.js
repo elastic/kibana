@@ -20,18 +20,15 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import ngMock from 'ng_mock';
-
 import expect from '@kbn/expect';
-import 'ui/persisted_state';
 
 import { AxisTitle } from '../../lib/axis/axis_title';
 import { AxisConfig } from '../../lib/axis/axis_config';
 import { VisConfig } from '../../lib/vis_config';
 import { Data } from '../../lib/data';
+import { getMockUiState } from './fixtures/_vis_fixture';
 
 describe('Vislib AxisTitle Class Test Suite', function() {
-  let PersistedState;
   let el;
   let dataObj;
   let xTitle;
@@ -96,56 +93,53 @@ describe('Vislib AxisTitle Class Test Suite', function() {
     yAxisLabel: 'Count',
   };
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function($injector) {
-      PersistedState = $injector.get('PersistedState');
+  beforeEach(() => {
+    el = d3
+      .select('body')
+      .append('div')
+      .attr('class', 'visWrapper');
 
-      el = d3
-        .select('body')
-        .append('div')
-        .attr('class', 'visWrapper');
+    el.append('div')
+      .attr('class', 'visAxis__column--bottom')
+      .append('div')
+      .attr('class', 'axis-title y-axis-title')
+      .style('height', '20px')
+      .style('width', '20px');
 
-      el.append('div')
-        .attr('class', 'visAxis__column--bottom')
-        .append('div')
-        .attr('class', 'axis-title y-axis-title')
-        .style('height', '20px')
-        .style('width', '20px');
+    el.append('div')
+      .attr('class', 'visAxis__column--left')
+      .append('div')
+      .attr('class', 'axis-title x-axis-title')
+      .style('height', '20px')
+      .style('width', '20px');
 
-      el.append('div')
-        .attr('class', 'visAxis__column--left')
-        .append('div')
-        .attr('class', 'axis-title x-axis-title')
-        .style('height', '20px')
-        .style('width', '20px');
-
-      dataObj = new Data(data, new PersistedState(), () => undefined);
-      visConfig = new VisConfig(
-        {
-          type: 'histogram',
-        },
-        data,
-        new PersistedState(),
-        el.node(),
-        () => undefined
-      );
-      const xAxisConfig = new AxisConfig(visConfig, {
-        position: 'bottom',
-        title: {
-          text: dataObj.get('xAxisLabel'),
-        },
-      });
-      const yAxisConfig = new AxisConfig(visConfig, {
-        position: 'left',
-        title: {
-          text: dataObj.get('yAxisLabel'),
-        },
-      });
-      xTitle = new AxisTitle(xAxisConfig);
-      yTitle = new AxisTitle(yAxisConfig);
-    })
-  );
+    const uiState = getMockUiState();
+    uiState.set('vis.colors', []);
+    dataObj = new Data(data, getMockUiState(), () => undefined);
+    visConfig = new VisConfig(
+      {
+        type: 'histogram',
+      },
+      data,
+      getMockUiState(),
+      el.node(),
+      () => undefined
+    );
+    const xAxisConfig = new AxisConfig(visConfig, {
+      position: 'bottom',
+      title: {
+        text: dataObj.get('xAxisLabel'),
+      },
+    });
+    const yAxisConfig = new AxisConfig(visConfig, {
+      position: 'left',
+      title: {
+        text: dataObj.get('yAxisLabel'),
+      },
+    });
+    xTitle = new AxisTitle(xAxisConfig);
+    yTitle = new AxisTitle(yAxisConfig);
+  });
 
   afterEach(function() {
     el.remove();

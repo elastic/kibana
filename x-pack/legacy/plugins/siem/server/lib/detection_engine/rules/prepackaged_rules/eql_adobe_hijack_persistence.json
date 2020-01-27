@@ -1,17 +1,37 @@
 {
-  "description": "EQL - Adobe Hijack Persistence",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "Detects writing executable files that will be automatically launched by Adobe on launch.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
-  "name": "EQL - Adobe Hijack Persistence",
+  "name": "Adobe Hijack Persistence",
   "query": "file.path:(\"C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroCEF\\RdrCEF.exe\" or \"C:\\Program Files\\Adobe\\Acrobat Reader DC\\Reader\\AcroCEF\\RdrCEF.exe\") and event.action:\"File created (rule: FileCreate)\" and not process.name:msiexeec.exe",
-  "risk_score": 50,
+  "risk_score": 25,
   "rule_id": "2bf78aa2-9c56-48de-b139-f169bf99cf86",
   "severity": "low",
-  "to": "now",
+  "tags": ["Elastic"],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1044",
+          "name": "File System Permissions Weakness",
+          "reference": "https://attack.mitre.org/techniques/T1044/"
+        }
+      ]
+    }
+  ],
   "type": "query",
   "version": 1
 }

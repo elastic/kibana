@@ -31,8 +31,7 @@ import { TimeRange } from 'src/plugins/data/public';
 import { Schema } from '../vis/editors/default/schemas';
 import { AggConfig, AggConfigOptions } from './agg_config';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
-import { IndexPattern } from '../../../../plugins/data/public';
-import { ISearchSource, FetchOptions } from '../courier/types';
+import { IndexPattern, ISearchSource, FetchOptions } from '../../../../plugins/data/public';
 
 type Schemas = Record<string, any>;
 
@@ -126,10 +125,10 @@ export class AggConfigs {
     return aggConfigs;
   }
 
-  createAggConfig<T extends AggConfig = AggConfig>(
+  createAggConfig = <T extends AggConfig = AggConfig>(
     params: AggConfig | AggConfigOptions,
     { addToAggConfigs = true } = {}
-  ) {
+  ) => {
     let aggConfig;
     if (params instanceof AggConfig) {
       aggConfig = params;
@@ -141,7 +140,7 @@ export class AggConfigs {
       this.aggs.push(aggConfig);
     }
     return aggConfig as T;
-  }
+  };
 
   /**
    * Data-by-data comparison of this Aggregation

@@ -21,7 +21,7 @@ import React, { useCallback } from 'react';
 import { debounce } from 'lodash';
 
 import { EditorContentSpinner } from '../../components';
-import { Panel, PanelsContainer } from '../../components/split_panel';
+import { Panel, PanelsContainer } from '../../../../../../../../plugins/kibana_react/public';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { StorageKeys } from '../../../services';
 import { useEditorReadContext, useServicesContext } from '../../contexts';
@@ -55,10 +55,10 @@ export const Editor = ({ loading }: Props) => {
   if (!currentTextObject) return null;
 
   return (
-    <PanelsContainer onPanelWidthChange={onPanelWidthChange}>
+    <PanelsContainer onPanelWidthChange={onPanelWidthChange} resizerClassName="conApp__resizer">
       <Panel
         style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
-        initialWidth={firstPanelWidth + '%'}
+        initialWidth={firstPanelWidth}
       >
         {loading ? (
           <EditorContentSpinner />
@@ -68,7 +68,7 @@ export const Editor = ({ loading }: Props) => {
       </Panel>
       <Panel
         style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
-        initialWidth={secondPanelWidth + '%'}
+        initialWidth={secondPanelWidth}
       >
         {loading ? <EditorContentSpinner /> : <EditorOutput />}
       </Panel>

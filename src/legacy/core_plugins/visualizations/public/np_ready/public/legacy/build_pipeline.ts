@@ -21,14 +21,13 @@ import { cloneDeep, get } from 'lodash';
 // @ts-ignore
 import moment from 'moment';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
+import { ISearchSource } from 'src/plugins/data/public';
 import {
   AggConfig,
   setBounds,
   isDateHistogramBucketAggConfig,
   createFormat,
 } from '../../../legacy_imports';
-// eslint-disable-next-line
-import { ISearchSource } from '../../../../../../ui/public/courier/search_source/search_source';
 import { Vis, VisParams, VisState } from '..';
 
 interface SchemaConfigParams {
@@ -305,8 +304,8 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     }
 
     let expr = `metricvis `;
-    expr += prepareValue('percentage', percentageMode);
-    expr += prepareValue('colorScheme', colorSchema);
+    expr += prepareValue('percentageMode', percentageMode);
+    expr += prepareValue('colorSchema', colorSchema);
     expr += prepareValue('colorMode', metricColorMode);
     expr += prepareValue('useRanges', useRanges);
     expr += prepareValue('invertColors', invertColors);

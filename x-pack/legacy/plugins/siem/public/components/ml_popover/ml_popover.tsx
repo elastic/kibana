@@ -11,7 +11,7 @@ import React, { useContext, useReducer, useState } from 'react';
 import styled from 'styled-components';
 
 import { useKibana } from '../../lib/kibana';
-import { METRIC_TYPE, TELEMETRY_EVENT, trackUiAction as track } from '../../lib/track_usage';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
 import { errorToToaster } from '../ml/api/error_to_toaster';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
 import { MlCapabilitiesContext } from '../ml/permissions/ml_capabilities_provider';

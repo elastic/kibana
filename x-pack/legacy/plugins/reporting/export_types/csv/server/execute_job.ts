@@ -5,22 +5,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExecuteJobFactory, ESQueueWorkerExecuteFn, ServerFacade } from '../../../types';
-import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
-import { cryptoFactory, LevelLogger } from '../../../server/lib';
+import { KibanaRequest } from '../../../../../../../src/core/server';
+import { CSV_JOB_TYPE } from '../../../common/constants';
+import { cryptoFactory } from '../../../server/lib';
+import { ESQueueWorkerExecuteFn, ExecuteJobFactory, Logger, ServerFacade } from '../../../types';
 import { JobDocPayloadDiscoverCsv } from '../types';
-// @ts-ignore untyped module TODO
-import { createGenerateCsv } from './lib/generate_csv';
-// @ts-ignore untyped module TODO
 import { fieldFormatMapFactory } from './lib/field_format_map';
+import { createGenerateCsv } from './lib/generate_csv';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
->> = function executeJobFactoryFn(server: ServerFacade) {
+>> = function executeJobFactoryFn(server: ServerFacade, parentLogger: Logger) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const crypto = cryptoFactory(server);
   const config = server.config();
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, CSV_JOB_TYPE, 'execute-job']);
+  const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job']);
   const serverBasePath = config.get('server.basePath');
 
   return async function executeJob(
@@ -79,14 +78,15 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
       return callWithRequest(fakeRequest, endpoint, clientParams, options);
     };
     const savedObjects = server.savedObjects;
-    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
+    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+      (fakeRequest as unknown) as KibanaRequest
+    );
     const uiConfig = server.uiSettingsServiceFactory({
       savedObjectsClient,
     });
 
     const [formatsMap, uiSettings] = await Promise.all([
       (async () => {
-        // @ts-ignore fieldFormatServiceFactory' does not exist on type 'ServerFacade TODO
         const fieldFormats = await server.fieldFormatServiceFactory(uiConfig);
         return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
       })(),

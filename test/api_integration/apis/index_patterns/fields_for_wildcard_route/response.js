@@ -72,15 +72,7 @@ export default function({ getService }) {
               readFromDocValues: true,
             },
             {
-              aggregatable: false,
-              esTypes: ['nested'],
-              name: 'nestedField',
-              readFromDocValues: false,
-              searchable: false,
-              type: 'nested',
-            },
-            {
-              aggregatable: false,
+              aggregatable: true,
               esTypes: ['keyword'],
               name: 'nestedField.child',
               readFromDocValues: true,
@@ -162,15 +154,7 @@ export default function({ getService }) {
               readFromDocValues: true,
             },
             {
-              aggregatable: false,
-              esTypes: ['nested'],
-              name: 'nestedField',
-              readFromDocValues: false,
-              searchable: false,
-              type: 'nested',
-            },
-            {
-              aggregatable: false,
+              aggregatable: true,
               esTypes: ['keyword'],
               name: 'nestedField.child',
               readFromDocValues: true,
