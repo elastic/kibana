@@ -25,6 +25,7 @@ import {
   IndexPatternMissingIndices,
   validateIndexPattern,
   getFromSavedObject,
+  isDefault,
 } from './lib';
 import { getRoutes } from './utils';
 import { flattenHitWrapper, formatHitProvider } from './index_patterns';
@@ -40,6 +41,7 @@ export const indexPatterns = {
   getFromSavedObject,
   flattenHitWrapper,
   formatHitProvider,
+  isDefault,
 };
 
 export { Field, FieldList, IFieldList } from './fields';
