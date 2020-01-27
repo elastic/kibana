@@ -1,20 +1,21 @@
 {
   "description": "Identifies use of the wbadmin command to delete the backup catalog. Ransomware and other malware may do this to prevent system recovery.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Deleting Backup Catalogs with wbadmin",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\"  and process.name:\"wbadmin.exe\" and  process.args:(\"delete\" and \"catalog\")",
   "risk_score": 25,
   "rule_id": "581add16-df76-42bb-af8e-c979bfb39a59",
   "severity": "low",
-  "tags": [
-    "EIA"
-  ],
-  "threats": [
+  "tags": ["Elastic"],
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -22,7 +23,7 @@
         "name": "Defense Evasion",
         "reference": "https://attack.mitre.org/tactics/TA0005/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1107",
           "name": "File Deletion",
@@ -31,7 +32,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }
