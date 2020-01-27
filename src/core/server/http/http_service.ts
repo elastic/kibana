@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { Server } from 'hapi';
 
@@ -28,9 +28,10 @@ import { Logger } from '../logging';
 import { ContextSetup } from '../context';
 import { CoreContext } from '../core_context';
 import { PluginOpaqueId } from '../plugins';
+import { CspConfigType, config as cspConfig } from '../csp';
 
 import { Router } from './router';
-import { HttpConfig, HttpConfigType } from './http_config';
+import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
@@ -60,16 +61,16 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
   private requestHandlerContext?: RequestHandlerContextContainer;
 
   constructor(private readonly coreContext: CoreContext) {
-    this.logger = coreContext.logger;
-    this.log = coreContext.logger.get('http');
-    this.config$ = coreContext.configService
-      .atPath<HttpConfigType>('server')
-      .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
+    const { logger, configService, env } = coreContext;
 
-    this.httpServer = new HttpServer(coreContext.logger, 'Kibana');
-    this.httpsRedirectServer = new HttpsRedirectServer(
-      coreContext.logger.get('http', 'redirect', 'server')
-    );
+    this.logger = logger;
+    this.log = logger.get('http');
+    this.config$ = combineLatest(
+      configService.atPath<HttpConfigType>(httpConfig.path),
+      configService.atPath<CspConfigType>(cspConfig.path)
+    ).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
+    this.httpServer = new HttpServer(logger, 'Kibana');
+    this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
   public async setup(deps: SetupDeps) {
@@ -79,7 +80,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
         // If the server is already running we can't make any config changes
         // to it, so we warn and don't allow the config to pass through.
         this.log.warn(
-          'Received new HTTP config after server was started. ' + 'Config will **not** be applied.'
+          'Received new HTTP config after server was started. Config will **not** be applied.'
         );
       }
     });

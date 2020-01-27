@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { Request, Server } from 'hapi';
+import { Server } from 'hapi';
 import url from 'url';
 
 import { Logger, LoggerFactory } from '../logging';
@@ -26,8 +25,9 @@ import { createServer, getListenerOptions, getServerOptions } from './http_tools
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
+import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
 
-import { ResponseHeaders, IRouter } from './router';
+import { IRouter } from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
@@ -46,10 +46,12 @@ export interface HttpServerSetup {
    */
   registerRouter: (router: IRouter) => void;
   basePath: HttpServiceSetup['basePath'];
+  csp: HttpServiceSetup['csp'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
   registerAuth: HttpServiceSetup['registerAuth'];
   registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
   registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
+  registerOnPreResponse: HttpServiceSetup['registerOnPreResponse'];
   isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
   auth: {
     get: GetAuthState;
@@ -103,10 +105,12 @@ export class HttpServer {
       registerRouter: this.registerRouter.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
+      registerOnPreResponse: this.registerOnPreResponse.bind(this),
       createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) =>
         this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
       registerAuth: this.registerAuth.bind(this),
       basePath: basePathService,
+      csp: config.csp,
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
@@ -232,6 +236,14 @@ export class HttpServer {
     this.server.ext('onRequest', adoptToHapiOnPreAuthFormat(fn, this.log));
   }
 
+  private registerOnPreResponse(fn: OnPreResponseHandler) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+
+    this.server.ext('onPreResponse', adoptToHapiOnPreResponseFormat(fn, this.log));
+  }
+
   private async createCookieSessionStorageFactory<T>(
     cookieOptions: SessionStorageCookieOptions<T>,
     basePath?: string
@@ -289,39 +301,9 @@ export class HttpServer {
     // https://github.com/hapijs/hapi/blob/master/API.md#-serverauthdefaultoptions
     this.server.auth.default('session');
 
-    this.server.ext('onPreResponse', (request, t) => {
+    this.registerOnPreResponse((request, preResponseInfo, t) => {
       const authResponseHeaders = this.authResponseHeaders.get(request);
-      this.extendResponseWithHeaders(request, authResponseHeaders);
-      return t.continue;
-    });
-  }
-
-  private extendResponseWithHeaders(request: Request, headers?: ResponseHeaders) {
-    const response = request.response;
-    if (!headers || !response) return;
-
-    if (response instanceof Error) {
-      this.findHeadersIntersection(response.output.headers, headers);
-      // hapi wraps all error response in Boom object internally
-      response.output.headers = {
-        ...response.output.headers,
-        ...(headers as any), // hapi types don't specify string[] as valid value
-      };
-    } else {
-      for (const [headerName, headerValue] of Object.entries(headers)) {
-        this.findHeadersIntersection(response.headers, headers);
-        response.header(headerName, headerValue as any); // hapi types don't specify string[] as valid value
-      }
-    }
-  }
-
-  // NOTE: responseHeaders contains not a full list of response headers, but only explicitly set on a response object.
-  // any headers added by hapi internally, like `content-type`, `content-length`, etc. do not present here.
-  private findHeadersIntersection(responseHeaders: ResponseHeaders, headers: ResponseHeaders) {
-    Object.keys(headers).forEach(headerName => {
-      if (responseHeaders[headerName] !== undefined) {
-        this.log.warn(`Server rewrites a response header [${headerName}].`);
-      }
+      return t.next({ headers: authResponseHeaders });
     });
   }
 }
