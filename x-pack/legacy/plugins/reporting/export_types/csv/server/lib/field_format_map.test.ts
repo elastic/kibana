@@ -32,10 +32,10 @@ describe('field format map', function() {
   const getConfig = ((key: string) => configMock[key]) as fieldFormats.GetConfigFn;
   const testValue = '4000';
 
-  const fieldFormatRegistry = new fieldFormats.FieldFormatRegistry();
-  fieldFormatRegistry.init(getConfig, {}, [fieldFormats.BytesFormat, fieldFormats.NumberFormat]);
+  const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+  fieldFormatsRegistry.init(getConfig, {}, [fieldFormats.BytesFormat, fieldFormats.NumberFormat]);
 
-  const formatMap = fieldFormatMapFactory(indexPatternSavedObject, fieldFormatRegistry);
+  const formatMap = fieldFormatMapFactory(indexPatternSavedObject, fieldFormatsRegistry);
 
   it('should build field format map with entry per index pattern field', function() {
     expect(formatMap.has('field1')).to.be(true);

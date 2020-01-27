@@ -35,7 +35,7 @@ const autocompleteMock: any = {
   hasQuerySuggestions: jest.fn(),
 };
 
-const fieldFormatsMock: PublicMethodsOf<fieldFormats.FieldFormatRegistry> = {
+const fieldFormatsMock: PublicMethodsOf<fieldFormats.FieldFormatsRegistry> = {
   getByFieldType: jest.fn(),
   getDefaultConfig: jest.fn(),
   getDefaultInstance: jest.fn() as any,

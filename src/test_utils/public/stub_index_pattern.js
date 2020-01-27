@@ -33,10 +33,10 @@ setFieldFormats({
   }),
 });
 
-import { getFieldFormatRegistry } from './stub_field_formats';
+import { getFieldFormatsRegistry } from './stub_field_formats';
 
 export default function StubIndexPattern(pattern, getConfig, timeField, fields, core) {
-  const registeredFieldFormats = getFieldFormatRegistry(core);
+  const registeredFieldFormats = getFieldFormatsRegistry(core);
 
   this.id = pattern;
   this.title = pattern;

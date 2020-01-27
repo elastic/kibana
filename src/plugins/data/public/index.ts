@@ -56,7 +56,6 @@ export {
   esKuery,
   esQuery,
   fieldFormats,
-  // field formats
   // index patterns
   isFilterable,
   // kbn field types

@@ -34,7 +34,7 @@ export class FieldFormatsService {
   public start() {
     return {
       fieldFormatServiceFactory: async (uiSettings: IUiSettingsClient) => {
-        const fieldFormatRegistry = new fieldFormats.FieldFormatRegistry();
+        const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
         const uiConfigs = await uiSettings.getAll();
         const registeredUiSettings = uiSettings.getRegistered();
 
@@ -44,9 +44,9 @@ export class FieldFormatsService {
           }
         });
 
-        fieldFormatRegistry.init((key: string) => uiConfigs[key], {}, this.fieldFormatClasses);
+        fieldFormatsRegistry.init((key: string) => uiConfigs[key], {}, this.fieldFormatClasses);
 
-        return fieldFormatRegistry;
+        return fieldFormatsRegistry;
       },
     };
   }

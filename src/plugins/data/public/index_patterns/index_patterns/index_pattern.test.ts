@@ -125,7 +125,7 @@ describe('IndexPattern', () => {
     setNotifications(notifications);
     setFieldFormats(({
       getDefaultInstance: jest.fn(),
-    } as unknown) as fieldFormats.FieldFormatRegistry);
+    } as unknown) as fieldFormats.FieldFormatsRegistry);
 
     return create(indexPatternId).then((pattern: IndexPattern) => {
       indexPattern = pattern;

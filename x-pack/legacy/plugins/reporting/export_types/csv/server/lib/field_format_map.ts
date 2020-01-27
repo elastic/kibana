@@ -25,7 +25,7 @@ interface IndexPatternSavedObject {
  */
 export function fieldFormatMapFactory(
   indexPatternSavedObject: IndexPatternSavedObject,
-  fieldFormatRegistry: fieldFormats.FieldFormatRegistry
+  fieldFormatsRegistry: fieldFormats.FieldFormatsRegistry
 ) {
   const formatsMap = new Map();
 
@@ -38,7 +38,7 @@ export function fieldFormatMapFactory(
       if (!_.isEmpty(formatConfig)) {
         formatsMap.set(
           fieldName,
-          fieldFormatRegistry.getInstance(formatConfig.id, formatConfig.params)
+          fieldFormatsRegistry.getInstance(formatConfig.id, formatConfig.params)
         );
       }
     });
@@ -48,7 +48,7 @@ export function fieldFormatMapFactory(
   const indexFields = JSON.parse(_.get(indexPatternSavedObject, 'attributes.fields', '[]'));
   indexFields.forEach((field: any) => {
     if (!formatsMap.has(field.name)) {
-      formatsMap.set(field.name, fieldFormatRegistry.getDefaultInstance(field.type));
+      formatsMap.set(field.name, fieldFormatsRegistry.getDefaultInstance(field.type));
     }
   });
 

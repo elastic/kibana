@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import { getFieldFormatRegistry } from '../../../../test_utils/public/stub_field_formats';
+import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 const mockObservable = () => {
@@ -108,7 +108,7 @@ export const npSetup = {
           msearch: sinon.fake(),
         },
       },
-      fieldFormats: getFieldFormatRegistry(mockCore),
+      fieldFormats: getFieldFormatsRegistry(mockCore),
     },
     share: {
       register: () => {},
@@ -250,7 +250,7 @@ export const npStart = {
           },
         },
       },
-      fieldFormats: getFieldFormatRegistry(mockCore),
+      fieldFormats: getFieldFormatsRegistry(mockCore),
     },
     share: {
       toggleShareContextMenu: () => {},

@@ -75,11 +75,11 @@ describe('CSV Execute Job', function() {
           _default_: { id: 'string', params: {} },
         };
 
-        const fieldFormatRegistry = new fieldFormats.FieldFormatRegistry();
+        const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
 
-        fieldFormatRegistry.init(key => uiConfigMock[key], {}, [fieldFormats.StringFormat]);
+        fieldFormatsRegistry.init(key => uiConfigMock[key], {}, [fieldFormats.StringFormat]);
 
-        return fieldFormatRegistry;
+        return fieldFormatsRegistry;
       },
       plugins: {
         elasticsearch: {

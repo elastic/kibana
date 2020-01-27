@@ -17,13 +17,40 @@
  * under the License.
  */
 
+/**
+ * Everything the file exports is public
+ */
+
 export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
 export { FieldFormat } from './field_format';
-export { FieldFormatRegistry } from './field_formats_registry';
+export { FieldFormatsRegistry } from './field_formats_registry';
 export { getHighlightRequest, asPrettyString, getHighlightHtml } from './utils';
 
 export { baseFormatters } from './constants/base_formatters';
 export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
 
-export * from './converters';
-export * from './types';
+export {
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  StringFormat,
+  TruncateFormat,
+} from './converters';
+
+export {
+  FIELD_FORMAT_IDS,
+  ContentType,
+  IFieldFormatConfig,
+  IFieldFormatType,
+  IFieldFormat,
+  IFieldFormatId,
+} from './types';

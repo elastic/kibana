@@ -33,7 +33,7 @@ import {
 import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
 
-export class FieldFormatRegistry {
+export class FieldFormatsRegistry {
   protected fieldFormats: Map<IFieldFormatId, IFieldFormatType> = new Map();
   protected defaultMap: Record<string, IFieldFormatConfig> = {};
   protected metaParamsOptions: Record<string, any> = {};
