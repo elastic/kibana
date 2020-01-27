@@ -89,7 +89,8 @@ export const WithSource = React.memo<WithSourceProps>(({ children, indexToAdd, s
       return [...configIndex, ...indexToAdd];
     }
     return configIndex;
-  }, [configIndex, DEFAULT_INDEX_KEY, indexToAdd]);
+  }, [configIndex, indexToAdd]);
+
   return (
     <Query<SourceQuery.Query, SourceQuery.Variables>
       query={sourceQuery}

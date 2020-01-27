@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HistogramData, SignalsAggregation, SignalsBucket, SignalsGroupBucket } from '../types';
-import { SignalSearchResponse } from '../../../../../containers/detection_engine/signals/types';
-import * as i18n from '../translations';
+import { HistogramData, SignalsAggregation, SignalsBucket, SignalsGroupBucket } from './types';
+import { SignalSearchResponse } from '../../../../containers/detection_engine/signals/types';
+import * as i18n from './translations';
 
 export const formatSignalsData = (
   signalsData: SignalSearchResponse<{}, SignalsAggregation> | null
