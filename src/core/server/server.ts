@@ -50,7 +50,6 @@ import { RequestHandlerContext } from '.';
 import { InternalCoreSetup } from './internal_types';
 import { CapabilitiesService } from './capabilities';
 import { UuidService } from './uuid';
-import { PulseErrorInstructionValue } from './pulse/channel';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';

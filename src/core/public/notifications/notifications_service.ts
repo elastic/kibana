@@ -19,14 +19,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Subscription, Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { I18nStart } from '../i18n';
 import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
 import { IUiSettingsClient } from '../ui_settings';
 import { OverlayStart } from '../overlays';
 import { PulseServiceSetup, PulseService } from '../pulse';
 import { errorChannelPayloads } from '../pulse/mock_data/errors';
-import { PulseErrorInstructionValue, PulseInstruction } from '../pulse/channel';
+import { PulseErrorInstructionValue } from '../pulse/channel';
 
 interface SetupDeps {
   uiSettings: IUiSettingsClient;
