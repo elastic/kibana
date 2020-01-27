@@ -22,7 +22,7 @@ import { format as formatUrl } from 'url';
 import { OPTIMIZE_BUNDLE_DIR, esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { services } from './services';
 
-export default function () {
+export default function() {
   const servers = {
     kibana: kbnTestConfig.getUrlParts(),
     elasticsearch: esTestConfig.getUrlParts(),
@@ -34,12 +34,11 @@ export default function () {
     esTestCluster: {
       license: 'oss',
       from: 'snapshot',
-      serverArgs: [
-      ],
+      serverArgs: [],
     },
 
     kbnTestServer: {
-      buildArgs: [ '--optimize.useBundleCache=true' ],
+      buildArgs: ['--optimize.useBundleCache=true'],
       sourceArgs: [
         '--no-base-path',
         '--env.name=development',
@@ -64,6 +63,6 @@ export default function () {
         `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
       ],
     },
-    services
+    services,
   };
 }

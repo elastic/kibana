@@ -6,8 +6,12 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommon } from './common';
 
-export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProviderContext) {
+export function MachineLearningJobWizardAdvancedProvider(
+  { getService }: FtrProviderContext,
+  mlCommon: MlCommon
+) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -44,7 +48,7 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     },
 
     async setQueryDelay(queryDelay: string) {
-      await testSubjects.setValue('mlJobWizardInputQueryDelay', queryDelay, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputQueryDelay', queryDelay, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -61,7 +65,7 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     },
 
     async setFrequency(frequency: string) {
-      await testSubjects.setValue('mlJobWizardInputFrequency', frequency, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputFrequency', frequency, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -78,7 +82,7 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     },
 
     async setScrollSize(scrollSize: string) {
-      await testSubjects.setValue('mlJobWizardInputScrollSize', scrollSize, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputScrollSize', scrollSize, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -257,7 +261,7 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     },
 
     async setDetectorDescription(description: string) {
-      await testSubjects.setValue('mlAdvancedDetectorDescriptionInput', description, {
+      await mlCommon.setValueWithChecks('mlAdvancedDetectorDescriptionInput', description, {
         clearWithKeyboard: true,
       });
       await this.assertDetectorDescriptionValue(description);

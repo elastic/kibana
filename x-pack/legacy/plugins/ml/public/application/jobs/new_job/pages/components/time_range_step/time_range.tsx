@@ -5,6 +5,8 @@
  */
 
 import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { timefilter } from 'ui/timefilter';
@@ -16,7 +18,7 @@ import { useKibanaContext } from '../../../../../contexts/kibana';
 import { FullTimeRangeSelector } from '../../../../../components/full_time_range_selector';
 import { EventRateChart } from '../charts/event_rate_chart';
 import { LineChartPoint } from '../../../common/chart_loader';
-import { JOB_TYPE } from '../../../common/job_creator/util/constants';
+import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { GetTimeFieldRangeResponse } from '../../../../../services/ml_api_service';
 import { TimeRangePicker, TimeRange } from '../../../common/components';
 
@@ -78,10 +80,18 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
   }, [jobCreatorUpdated]);
 
   function fullTimeRangeCallback(range: GetTimeFieldRangeResponse) {
-    setTimeRange({
-      start: range.start.epoch,
-      end: range.end.epoch,
-    });
+    if (range.start.epoch !== null && range.end.epoch !== null) {
+      setTimeRange({
+        start: range.start.epoch,
+        end: range.end.epoch,
+      });
+    } else {
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.newJob.wizard.timeRangeStep.fullTimeRangeError', {
+          defaultMessage: 'An error occurred obtaining the time range for the index',
+        })
+      );
+    }
   }
 
   return (

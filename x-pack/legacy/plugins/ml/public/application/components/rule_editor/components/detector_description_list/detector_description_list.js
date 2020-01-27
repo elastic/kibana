@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for listing pairs of information about the detector for which
  * rules are being edited.
@@ -13,19 +12,13 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiDescriptionList,
-} from '@elastic/eui';
+import { EuiDescriptionList } from '@elastic/eui';
 
 import { formatValue } from '../../../../formatters/format_value';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function DetectorDescriptionList({
-  job,
-  detector,
-  anomaly, }) {
-
+export function DetectorDescriptionList({ job, detector, anomaly }) {
   const listItems = [
     {
       title: (
@@ -44,7 +37,7 @@ export function DetectorDescriptionList({
         />
       ),
       description: detector.detector_description,
-    }
+    },
   ];
 
   if (anomaly.actual !== undefined) {
@@ -54,23 +47,21 @@ export function DetectorDescriptionList({
     const actual = formatValue(anomaly.actual, anomaly.source.function);
     const typical = formatValue(anomaly.typical, anomaly.source.function);
 
-    listItems.push(
-      {
-        title: (
-          <FormattedMessage
-            id="xpack.ml.ruleEditor.detectorDescriptionList.selectedAnomalyTitle"
-            defaultMessage="Selected anomaly"
-          />
-        ),
-        description: (
-          <FormattedMessage
-            id="xpack.ml.ruleEditor.detectorDescriptionList.selectedAnomalyDescription"
-            defaultMessage="actual {actual}, typical {typical}"
-            values={{ actual, typical }}
-          />
-        ),
-      }
-    );
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.ml.ruleEditor.detectorDescriptionList.selectedAnomalyTitle"
+          defaultMessage="Selected anomaly"
+        />
+      ),
+      description: (
+        <FormattedMessage
+          id="xpack.ml.ruleEditor.detectorDescriptionList.selectedAnomalyDescription"
+          defaultMessage="actual {actual}, typical {typical}"
+          values={{ actual, typical }}
+        />
+      ),
+    });
   }
 
   return (
@@ -86,4 +77,3 @@ DetectorDescriptionList.propTypes = {
   detector: PropTypes.object.isRequired,
   anomaly: PropTypes.object.isRequired,
 };
-

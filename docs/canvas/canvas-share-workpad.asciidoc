@@ -23,9 +23,9 @@ Want to export multiple workpads? Go to the *Canvas workpads* view, select the w
 [[create-workpad-pdf]]
 === Create a PDF
 
-Create a PDF copy of your workpad that you can save and share outside of {kib}.
+If you have a license that supports the {report-features}, you can create a PDF copy of your workpad that you can save and share outside {kib}.
 
-. If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
+For more information, refer to <<reporting-getting-started, Reporting from Kibana>>.
 
 . From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
 
@@ -38,11 +38,9 @@ image::images/canvas-generate-pdf.gif[Generate PDF]
 [[create-workpad-URL]]
 === Create a POST URL
 
-Create a POST URL that you can use to automatically generate PDF reports using Watcher or a script.
+If you have a license that supports the {report-features}, you can create a POST URL that you can use to automatically generate PDF reports using Watcher or a script.
 
 For more information, refer to <<automating-report-generation, Automating report generation>>.
-
-. If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
 . From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
 
@@ -56,8 +54,6 @@ image::images/canvas-create-URL.gif[Create POST URL]
 === Share the workpad on a website
 
 beta[] Canvas allows you to create _shareables_, which are workpads that you download and securely share on any website. To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
-
-. If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
 . From your workpad, click the *Share this workpad* icon in the upper left corner, then select *Share on a website*.
 

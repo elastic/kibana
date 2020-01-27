@@ -6,73 +6,72 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { identity } from 'fp-ts/lib/function';
 import React from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
-import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
 import {
   ViewSourceConfigurationButton,
   ViewSourceConfigurationButtonHrefBase,
 } from '../../../components/source_configuration';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface InvalidNodeErrorProps {
   nodeName: string;
 }
 
 export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = ({ nodeName }) => {
+  const prependBasePath = useKibana().services.http?.basePath.prepend ?? identity;
+
   return (
-    <WithKibanaChrome>
-      {({ basePath }) => (
-        <CenteredEmptyPrompt
-          title={
-            <h2>
+    <CenteredEmptyPrompt
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.infra.metrics.invalidNodeErrorTitle"
+            defaultMessage="Looks like {nodeName} isn't collecting any metrics data"
+            values={{
+              nodeName,
+            }}
+          />
+        </h2>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.infra.metrics.invalidNodeErrorDescription"
+            defaultMessage="Double check your configuration"
+          />
+        </p>
+      }
+      actions={
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiButton
+              href={prependBasePath('/app/kibana#/home/tutorial_directory/metrics')}
+              color="primary"
+              fill
+            >
               <FormattedMessage
-                id="xpack.infra.metrics.invalidNodeErrorTitle"
-                defaultMessage="Looks like {nodeName} isn't collecting any metrics data"
-                values={{
-                  nodeName,
-                }}
+                id="xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel"
+                defaultMessage="View setup instructions"
               />
-            </h2>
-          }
-          body={
-            <p>
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ViewSourceConfigurationButton
+              data-test-subj="configureSourceButton"
+              hrefBase={ViewSourceConfigurationButtonHrefBase.infrastructure}
+            >
               <FormattedMessage
-                id="xpack.infra.metrics.invalidNodeErrorDescription"
-                defaultMessage="Double check your configuration"
+                id="xpack.infra.configureSourceActionLabel"
+                defaultMessage="Change source configuration"
               />
-            </p>
-          }
-          actions={
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiButton
-                  href={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
-                  color="primary"
-                  fill
-                >
-                  <FormattedMessage
-                    id="xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel"
-                    defaultMessage="View setup instructions"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ViewSourceConfigurationButton
-                  data-test-subj="configureSourceButton"
-                  hrefBase={ViewSourceConfigurationButtonHrefBase.infrastructure}
-                >
-                  <FormattedMessage
-                    id="xpack.infra.configureSourceActionLabel"
-                    defaultMessage="Change source configuration"
-                  />
-                </ViewSourceConfigurationButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        />
-      )}
-    </WithKibanaChrome>
+            </ViewSourceConfigurationButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    />
   );
 };
 

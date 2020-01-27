@@ -1,14 +1,14 @@
 [[viewing-field-stats]]
 == Viewing Field Data Statistics
 
-From the Fields list, you can see how many of the documents in the Documents
+From the fields list, you can see how many of the documents in the documents
 table contain a particular field, what the top 5 values are, and what
 percentage of documents contain each value.
 
-Data can be visualized in various ways. The quick visualize can only be 
-applied to aggregatable fields. The keyword fields can be visualized and 
-they are available in the side bar if we uncheck "Hide missing fields".
+You can visualize data in various ways. You can only apply the quick visualize
+to aggregatable fields. You can visualize the keyword fields, and
+they are available in the side bar if you uncheck "Hide missing fields".
 
-To view field data statistics, click the name of a field in the Fields list.
+To view field data statistics, click the name of a field in the fields list.
 
 image:images/filter-field.png[Field Statistics,height=317]

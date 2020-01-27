@@ -9,16 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  ILLEGAL_CHARACTERS,
-  CONTAINS_SPACES,
-  validateIndexPattern as getIndexPatternErrors,
-} from 'ui/index_patterns';
-
-import {
   indexNameBeginsWithPeriod,
   findIllegalCharactersInIndexName,
   indexNameContainsSpaces,
 } from 'ui/indices';
+
+import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 
 export const validateName = (name = '') => {
   let errorMsg = null;
@@ -30,9 +26,12 @@ export const validateName = (name = '') => {
     );
   } else {
     if (name.includes(' ')) {
-      errorMsg = i18n.translate('xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorSpace', {
-        defaultMessage: 'Spaces are not allowed in the name.'
-      });
+      errorMsg = i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorSpace',
+        {
+          defaultMessage: 'Spaces are not allowed in the name.',
+        }
+      );
     }
 
     if (name[0] === '_') {
@@ -52,60 +51,72 @@ export const validateName = (name = '') => {
   return errorMsg;
 };
 
-export const validateLeaderIndexPattern = (indexPattern) => {
+export const validateLeaderIndexPattern = indexPattern => {
   if (indexPattern) {
-    const errors = getIndexPatternErrors(indexPattern);
+    const errors = indexPatterns.validate(indexPattern);
 
-    if (errors[ILLEGAL_CHARACTERS]) {
-      return ({
-        message: <FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.illegalCharacters"
-          defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+    if (errors[indexPatterns.ILLEGAL_CHARACTERS_KEY]) {
+      return {
+        message: (
+          <FormattedMessage
+            id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.illegalCharacters"
+            defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
           {characterList} from the index pattern."
-          values={{
-            characterList: <strong>{errors[ILLEGAL_CHARACTERS].join(' ')}</strong>,
-            characterListLength: errors[ILLEGAL_CHARACTERS].length,
-          }}
-        />
-      });
+            values={{
+              characterList: (
+                <strong>{errors[indexPatterns.ILLEGAL_CHARACTERS_KEY].join(' ')}</strong>
+              ),
+              characterListLength: errors[indexPatterns.ILLEGAL_CHARACTERS_KEY].length,
+            }}
+          />
+        ),
+      };
     }
 
-    if (errors[CONTAINS_SPACES]) {
-      return ({
-        message: <FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.noEmptySpace"
-          defaultMessage="Spaces are not allowed in the index pattern."
-        />
-      });
+    if (errors[indexPatterns.CONTAINS_SPACES_KEY]) {
+      return {
+        message: (
+          <FormattedMessage
+            id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.noEmptySpace"
+            defaultMessage="Spaces are not allowed in the index pattern."
+          />
+        ),
+      };
     }
   }
 
   if (!indexPattern || !indexPattern.trim()) {
     return {
-      message: i18n.translate('xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.isEmpty', {
-        defaultMessage: 'At least one leader index pattern is required.',
-      })
+      message: i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.isEmpty',
+        {
+          defaultMessage: 'At least one leader index pattern is required.',
+        }
+      ),
     };
   }
 
   return null;
 };
 
-export const validateLeaderIndexPatterns = (indexPatterns) => {
+export const validateLeaderIndexPatterns = indexPatterns => {
   // We only need to check if a value has been provided, because validation for this field
   // has already been executed as the user has entered input into it.
   if (!indexPatterns.length) {
     return {
-      message: i18n.translate('xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.isEmpty', {
-        defaultMessage: 'At least one leader index pattern is required.',
-      })
+      message: i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.isEmpty',
+        {
+          defaultMessage: 'At least one leader index pattern is required.',
+        }
+      ),
     };
   }
 
   return null;
 };
 
-export const validatePrefix = (prefix) => {
+export const validatePrefix = prefix => {
   // If it's empty, it is valid
   if (!prefix || !prefix.trim()) {
     return null;
@@ -149,7 +160,7 @@ export const validatePrefix = (prefix) => {
   return null;
 };
 
-export const validateSuffix = (suffix) => {
+export const validateSuffix = suffix => {
   // If it's empty, it is valid
   if (!suffix || !suffix.trim()) {
     return null;
@@ -188,11 +199,11 @@ export const validateAutoFollowPattern = (autoFollowPattern = {}) => {
   let error = null;
   let fieldValue;
 
-  Object.keys(autoFollowPattern).forEach((fieldName) => {
+  Object.keys(autoFollowPattern).forEach(fieldName => {
     fieldValue = autoFollowPattern[fieldName];
     error = null;
 
-    switch(fieldName) {
+    switch (fieldName) {
       case 'name':
         error = validateName(fieldValue);
         break;

@@ -1,10 +1,42 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SuricataSignature rendering it renders the default SuricataSignature 1`] = `
-<Component
-  contextId="test"
-  id="doc-id-123"
-  signature="ET SCAN ATTACK Hello"
-  signatureId={123}
-/>
+<EuiFlexGroup
+  gutterSize="none"
+  justifyContent="center"
+  wrap={true}
+>
+  <DraggableSignatureId
+    id="draggable-signature-id-test-doc-id-123"
+    signatureId={123}
+  />
+  <Tokens
+    tokens={
+      Array [
+        "ET",
+        "SCAN",
+        "ATTACK",
+      ]
+    }
+  />
+  <LinkFlexItem
+    grow={false}
+  >
+    <DefaultDraggable
+      data-test-subj="draggable-signature-link"
+      field="suricata.eve.alert.signature"
+      id="suricata-signature-default-draggable-test-doc-id-123-suricata.eve.alert.signature"
+      value="ET SCAN ATTACK Hello"
+    >
+      <div>
+        <GoogleLink
+          link="ET SCAN ATTACK Hello"
+        >
+          Hello
+        </GoogleLink>
+        <ExternalLinkIcon />
+      </div>
+    </DefaultDraggable>
+  </LinkFlexItem>
+</EuiFlexGroup>
 `;

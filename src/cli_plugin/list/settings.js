@@ -19,7 +19,7 @@
 
 export function parse(command) {
   const settings = {
-    pluginDir: command.pluginDir || ''
+    pluginDir: command.pluginDir || '',
   };
 
   return settings;

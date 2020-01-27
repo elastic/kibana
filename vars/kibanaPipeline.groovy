@@ -1,47 +1,45 @@
-def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
+def withWorkers(machineName, preWorkerClosure = {}, workerClosures = [:]) {
   return {
     jobRunner('tests-xl', true) {
-      try {
-        doSetup()
-        preWorkerClosure()
+      withGcsArtifactUpload(machineName, {
+        try {
+          doSetup()
+          preWorkerClosure()
 
-        def nextWorker = 1
-        def worker = { workerClosure ->
-          def workerNumber = nextWorker
-          nextWorker++
+          def nextWorker = 1
+          def worker = { workerClosure ->
+            def workerNumber = nextWorker
+            nextWorker++
 
-          return {
-            // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
-            def delay = (workerNumber-1)*20
-            sleep(delay)
+            return {
+              // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
+              def delay = (workerNumber-1)*20
+              sleep(delay)
 
-            workerClosure(workerNumber)
+              workerClosure(workerNumber)
+            }
+          }
+
+          def workers = [:]
+          workerClosures.each { workerName, workerClosure ->
+            workers[workerName] = worker(workerClosure)
+          }
+
+          parallel(workers)
+        } finally {
+          catchError {
+            runErrorReporter()
+          }
+
+          catchError {
+            runbld.junit()
+          }
+
+          catchError {
+            publishJunit()
           }
         }
-
-        def workers = [:]
-        workerClosures.each { workerName, workerClosure ->
-          workers[workerName] = worker(workerClosure)
-        }
-
-        parallel(workers)
-      } finally {
-        catchError {
-          uploadAllGcsArtifacts(name)
-        }
-
-        catchError {
-          runbld.junit()
-        }
-
-        catchError {
-          publishJunit()
-        }
-
-        catchError {
-          runErrorReporter()
-        }
-      }
+      })
     }
   }
 }
@@ -96,19 +94,19 @@ def legacyJobRunner(name) {
           "JOB=${name}",
         ]) {
           jobRunner('linux && immutable', false) {
-            try {
-              runbld('.ci/run.sh', "Execute ${name}", true)
-            } finally {
-              catchError {
-                uploadAllGcsArtifacts(name)
+            withGcsArtifactUpload(name, {
+              try {
+                runbld('.ci/run.sh', "Execute ${name}", true)
+              } finally {
+                catchError {
+                  runErrorReporter()
+                }
+
+                catchError {
+                  publishJunit()
+                }
               }
-              catchError {
-                publishJunit()
-              }
-              catchError {
-                runErrorReporter()
-              }
-            }
+            })
           }
         }
       }
@@ -118,6 +116,8 @@ def legacyJobRunner(name) {
 
 def jobRunner(label, useRamDisk, closure) {
   node(label) {
+    agentInfo.print()
+
     if (useRamDisk) {
       // Move to a temporary workspace, so that we can symlink the real workspace into /dev/shm
       def originalWorkspace = env.WORKSPACE
@@ -137,13 +137,8 @@ def jobRunner(label, useRamDisk, closure) {
     def scmVars
 
     // Try to clone from Github up to 8 times, waiting 15 secs between attempts
-    retry(8) {
-      try {
-        scmVars = checkout scm
-      } catch (ex) {
-        sleep 15
-        throw ex
-      }
+    retryWithDelay(8, 15) {
+      scmVars = checkout scm
     }
 
     withEnv([
@@ -171,19 +166,30 @@ def jobRunner(label, useRamDisk, closure) {
 
 // TODO what should happen if GCS, Junit, or email publishing fails? Unstable build? Failed build?
 
-def uploadGcsArtifact(workerName, pattern) {
-  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}" // TODO
-
+def uploadGcsArtifact(uploadPrefix, pattern) {
   googleStorageUpload(
     credentialsId: 'kibana-ci-gcs-plugin',
-    bucket: storageLocation,
+    bucket: "gs://${uploadPrefix}",
     pattern: pattern,
     sharedPublicly: true,
     showInline: true,
   )
 }
 
-def uploadAllGcsArtifacts(workerName) {
+def downloadCoverageArtifacts() {
+  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/"
+  def targetLocation = "/tmp/downloaded_coverage"
+
+  sh "mkdir -p '${targetLocation}' && gsutil -m cp -r '${storageLocation}' '${targetLocation}'"
+}
+
+def uploadCoverageArtifacts(prefix, pattern) {
+  def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${prefix}"
+  uploadGcsArtifact(uploadPrefix, pattern)
+}
+
+def withGcsArtifactUpload(workerName, closure) {
+  def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
     'target/junit/**/*',
@@ -194,8 +200,23 @@ def uploadAllGcsArtifacts(workerName) {
     'x-pack/test/functional/apps/reporting/reports/session/*.pdf',
   ]
 
-  ARTIFACT_PATTERNS.each { pattern ->
-    uploadGcsArtifact(workerName, pattern)
+  withEnv([
+    "GCS_UPLOAD_PREFIX=${uploadPrefix}"
+  ], {
+    try {
+      closure()
+    } finally {
+      catchError {
+        ARTIFACT_PATTERNS.each { pattern ->
+          uploadGcsArtifact(uploadPrefix, pattern)
+        }
+      }
+    }
+  })
+
+  if (env.CODE_COVERAGE) {
+    sh 'tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*'
+    uploadGcsArtifact("kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${workerName}", 'kibana-coverage.tar.gz')
   }
 }
 
@@ -262,10 +283,13 @@ def buildXpack() {
 }
 
 def runErrorReporter() {
+  def status = buildUtils.getBuildStatus()
+  def dryRun = status != "ABORTED" ? "" : "--no-github-update"
+
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests
+      node scripts/report_failed_tests ${dryRun}
     """,
     "Report failed tests, if necessary"
   )

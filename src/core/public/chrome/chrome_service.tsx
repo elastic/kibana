@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Observable, ReplaySubject, combineLatest, of, merge } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
 
 import { i18n } from '@kbn/i18n';
@@ -37,7 +37,8 @@ import { DocTitleService, ChromeDocTitle } from './doc_title';
 import { LoadingIndicator, HeaderWrapper as Header } from './ui';
 import { DocLinksStart } from '../doc_links';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
-
+import { KIBANA_ASK_ELASTIC_LINK } from './constants';
+import { IUiSettingsClient } from '../ui_settings';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
@@ -84,6 +85,7 @@ interface StartDeps {
   http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
   notifications: NotificationsStart;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */
@@ -117,16 +119,17 @@ export class ChromeService {
       // combineLatest below regardless of having an application value yet.
       of(isEmbedded),
       application.currentAppId$.pipe(
-        map(
-          appId =>
-            !!appId &&
-            application.availableApps.has(appId) &&
-            !!application.availableApps.get(appId)!.chromeless
+        flatMap(appId =>
+          application.applications$.pipe(
+            map(applications => {
+              return !!appId && applications.has(appId) && !!applications.get(appId)!.chromeless;
+            })
+          )
         )
       )
     );
-    this.isVisible$ = combineLatest(this.appHidden$, this.toggleHidden$).pipe(
-      map(([appHidden, chromeHidden]) => !(appHidden || chromeHidden)),
+    this.isVisible$ = combineLatest([this.appHidden$, this.toggleHidden$]).pipe(
+      map(([appHidden, toggleHidden]) => !(appHidden || toggleHidden)),
       takeUntil(this.stop$)
     );
   }
@@ -137,6 +140,7 @@ export class ChromeService {
     http,
     injectedMetadata,
     notifications,
+    uiSettings,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
@@ -147,6 +151,7 @@ export class ChromeService {
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
+    const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
@@ -170,9 +175,7 @@ export class ChromeService {
       getHeaderComponent: () => (
         <React.Fragment>
           <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
-
           <Header
-            isCloudEnabled={injectedMetadata.getInjectedVar('isCloudEnabled') as boolean}
             application={application}
             appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
             badge$={badge$.pipe(takeUntil(this.stop$))}
@@ -181,6 +184,7 @@ export class ChromeService {
             kibanaDocLink={docLinks.links.kibana}
             forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
             helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+            helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
             homeHref={http.basePath.prepend('/app/kibana#/home')}
             isVisible$={this.isVisible$}
             kibanaVersion={injectedMetadata.getKibanaVersion()}
@@ -189,6 +193,7 @@ export class ChromeService {
             recentlyAccessed$={recentlyAccessed.get$()}
             navControlsLeft$={navControls.getLeft$()}
             navControlsRight$={navControls.getRight$()}
+            navSetting$={uiSettings.get$('pageNavigation')}
           />
         </React.Fragment>
       ),
@@ -256,6 +261,8 @@ export class ChromeService {
       setHelpExtension: (helpExtension?: ChromeHelpExtension) => {
         helpExtension$.next(helpExtension);
       },
+
+      setHelpSupportUrl: (url: string) => helpSupportUrl$.next(url),
     };
   }
 
@@ -401,6 +408,12 @@ export interface ChromeStart {
    * Override the current set of custom help content
    */
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
+
+  /**
+   * Override the default support URL shown in the help menu
+   * @param url The updated support URL
+   */
+  setHelpSupportUrl(url: string): void;
 }
 
 /** @internal */

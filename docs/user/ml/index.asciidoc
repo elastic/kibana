@@ -50,8 +50,8 @@ pane:
 image::user/ml/images/ml-job-management.jpg[Job Management]
 
 You can use the *Settings* pane to create and edit 
-{stack-ov}/ml-calendars.html[calendars] and the filters that are used in 
-{stack-ov}/ml-rules.html[custom rules]:
+{ml-docs}/ml-calendars.html[calendars] and the filters that are used in 
+{ml-docs}/ml-rules.html[custom rules]:
 
 [role="screenshot"]
 image::user/ml/images/ml-settings.jpg[Calendar Management]
@@ -73,7 +73,7 @@ image::user/ml/images/ml-annotations-list.jpg[Single Metric Viewer with annotati
 In some circumstances, annotations are also added automatically. For example, if
 the {anomaly-job} detects that there is missing data, it annotates the affected 
 time period. For more information, see 
-{stack-ov}/ml-delayed-data-detection.html[Handling delayed data]. The 
+{ml-docs}/ml-delayed-data-detection.html[Handling delayed data]. The 
 *Job Management* pane shows the full list of annotations for each job.
 
 NOTE: The {kib} {ml-features} use pop-ups. You must configure your web 
@@ -82,7 +82,7 @@ browser so that it does not block pop-up windows or create an exception for your
 
 For more information about the {anomaly-detect} feature, see
 https://www.elastic.co/what-is/elastic-stack-machine-learning[{ml-cap} in the {stack}]
-and {stack-ov}/xpack-ml.html[{ml-cap} {anomaly-detect}].
+and {ml-docs}/xpack-ml.html[{ml-cap} {anomaly-detect}].
 
 [[xpack-ml-dfanalytics]]
 == {dfanalytics-cap}
@@ -99,4 +99,4 @@ in {kib}. For example:
 image::user/ml/images/outliers.jpg[{oldetection-cap} results in {kib}]
 
 For more information about the {dfanalytics} feature, see 
-{stack-ov}/ml-dfanalytics.html[{ml-cap} {dfanalytics}].
+{ml-docs}/ml-dfanalytics.html[{ml-cap} {dfanalytics}].

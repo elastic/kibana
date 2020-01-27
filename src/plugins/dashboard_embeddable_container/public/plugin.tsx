@@ -27,7 +27,7 @@ import { ExpandPanelAction, ReplacePanelAction } from '.';
 import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
 import {
-  SavedObjectFinder as SavedObjectFinderUi,
+  SavedObjectFinderUi,
   SavedObjectFinderProps,
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,

@@ -1,0 +1,17 @@
+{
+  "description": "Network - DNS Directly to the Internet\t",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Network - DNS Directly to the Internet\t",
+  "query": "destination.port:53 and not destination.ip: 169.254.169.254/32 and not destination.ip:127.0.0.53/32 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "risk_score": 50,
+  "rule_id": "6ea71ff0-9e95-475b-9506-2580d1ce6154",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

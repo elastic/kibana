@@ -9,21 +9,21 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export function validateRollupPageSize(rollupPageSize) {
   if (!rollupPageSize || !rollupPageSize.toString().trim()) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.rollupPageSizeMissing"
         defaultMessage="Page size is required."
-      />
-    )];
+      />,
+    ];
   }
 
   if (rollupPageSize <= 0) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.rollupPageSizeGreaterThanZero"
         defaultMessage="Page size must be greater than zero."
-      />
-    )];
+      />,
+    ];
   }
 
   return undefined;

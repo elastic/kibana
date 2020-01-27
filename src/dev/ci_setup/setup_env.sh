@@ -14,7 +14,7 @@ cacheDir="$HOME/.kibana"
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
 
-export NODE_OPTIONS="$NODE_OPTIONS --throw-deprecation"
+export NODE_OPTIONS="$NODE_OPTIONS --throw-deprecation --max-old-space-size=4096"
 
 ###
 ### Since the Jenkins logging output collector doesn't look like a TTY

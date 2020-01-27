@@ -6,12 +6,11 @@
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-import { pure } from 'recompose';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
 import { inputsActions } from '../../store/inputs';
@@ -19,14 +18,31 @@ import { inputsActions } from '../../store/inputs';
 import { ModalInspectQuery } from './modal';
 import * as i18n from './translations';
 
-const InspectContainer = styled.div<{ showInspect: boolean }>`
-  .euiButtonIcon {
-    ${props => (props.showInspect ? 'opacity: 1;' : 'opacity: 0')}
+export const BUTTON_CLASS = 'inspectButtonComponent';
+
+export const InspectButtonContainer = styled.div<{ show?: boolean }>`
+  display: flex;
+  flex-grow: 1;
+
+  .${BUTTON_CLASS} {
+    opacity: 0;
     transition: opacity ${props => getOr(250, 'theme.eui.euiAnimSpeedNormal', props)} ease;
   }
+
+  ${({ show }) =>
+    show &&
+    css`
+      &:hover .${BUTTON_CLASS} {
+        opacity: 1;
+      }
+    `}
 `;
 
-InspectContainer.displayName = 'InspectContainer';
+InspectButtonContainer.displayName = 'InspectButtonContainer';
+
+InspectButtonContainer.defaultProps = {
+  show: true,
+};
 
 interface OwnProps {
   compact?: boolean;
@@ -35,7 +51,6 @@ interface OwnProps {
   inspectIndex?: number;
   isDisabled?: boolean;
   onCloseInspect?: () => void;
-  show: boolean;
   title: string | React.ReactElement | React.ReactNode;
 }
 
@@ -58,28 +73,47 @@ interface InspectButtonDispatch {
 
 type InspectButtonProps = OwnProps & InspectButtonReducer & InspectButtonDispatch;
 
-const InspectButtonComponent = pure<InspectButtonProps>(
-  ({
-    compact = false,
-    inputId = 'global',
-    inspect,
-    isDisabled,
-    isInspected,
-    loading,
-    inspectIndex = 0,
-    onCloseInspect,
-    queryId = '',
-    selectedInspectIndex,
-    setIsInspected,
-    show,
-    title = '',
-  }: InspectButtonProps) => (
-    <InspectContainer
-      data-test-subj={`${show ? 'opaque' : 'transparent'}-inspect-container`}
-      showInspect={show}
-    >
+const InspectButtonComponent: React.FC<InspectButtonProps> = ({
+  compact = false,
+  inputId = 'global',
+  inspect,
+  isDisabled,
+  isInspected,
+  loading,
+  inspectIndex = 0,
+  onCloseInspect,
+  queryId = '',
+  selectedInspectIndex,
+  setIsInspected,
+  title = '',
+}) => {
+  const isShowingModal = !loading && selectedInspectIndex === inspectIndex && isInspected;
+  const handleClick = useCallback(() => {
+    setIsInspected({
+      id: queryId,
+      inputId,
+      isInspected: true,
+      selectedInspectIndex: inspectIndex,
+    });
+  }, [setIsInspected, queryId, inputId, inspectIndex]);
+
+  const handleCloseModal = useCallback(() => {
+    if (onCloseInspect != null) {
+      onCloseInspect();
+    }
+    setIsInspected({
+      id: queryId,
+      inputId,
+      isInspected: false,
+      selectedInspectIndex: inspectIndex,
+    });
+  }, [onCloseInspect, setIsInspected, queryId, inputId, inspectIndex]);
+
+  return (
+    <>
       {inputId === 'timeline' && !compact && (
         <EuiButtonEmpty
+          className={BUTTON_CLASS}
           aria-label={i18n.INSPECT}
           data-test-subj="inspect-empty-button"
           color="text"
@@ -87,49 +121,26 @@ const InspectButtonComponent = pure<InspectButtonProps>(
           iconType="inspect"
           isDisabled={loading || isDisabled}
           isLoading={loading}
-          onClick={() => {
-            setIsInspected({
-              id: queryId,
-              inputId,
-              isInspected: true,
-              selectedInspectIndex: inspectIndex,
-            });
-          }}
+          onClick={handleClick}
         >
           {i18n.INSPECT}
         </EuiButtonEmpty>
       )}
       {(inputId === 'global' || compact) && (
         <EuiButtonIcon
+          className={BUTTON_CLASS}
           aria-label={i18n.INSPECT}
           data-test-subj="inspect-icon-button"
           iconSize="m"
           iconType="inspect"
           isDisabled={loading || isDisabled}
           title={i18n.INSPECT}
-          onClick={() => {
-            setIsInspected({
-              id: queryId,
-              inputId,
-              isInspected: true,
-              selectedInspectIndex: inspectIndex,
-            });
-          }}
+          onClick={handleClick}
         />
       )}
       <ModalInspectQuery
-        closeModal={() => {
-          if (onCloseInspect != null) {
-            onCloseInspect();
-          }
-          setIsInspected({
-            id: queryId,
-            inputId,
-            isInspected: false,
-            selectedInspectIndex: inspectIndex,
-          });
-        }}
-        isShowing={!loading && selectedInspectIndex === inspectIndex && isInspected}
+        closeModal={handleCloseModal}
+        isShowing={isShowingModal}
         request={inspect != null && inspect.dsl.length > 0 ? inspect.dsl[inspectIndex] : null}
         response={
           inspect != null && inspect.response.length > 0 ? inspect.response[inspectIndex] : null
@@ -137,11 +148,9 @@ const InspectButtonComponent = pure<InspectButtonProps>(
         title={title}
         data-test-subj="inspect-modal"
       />
-    </InspectContainer>
-  )
-);
-
-InspectButtonComponent.displayName = 'InspectButtonComponent';
+    </>
+  );
+};
 
 const makeMapStateToProps = () => {
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
@@ -152,6 +161,11 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const InspectButton = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   setIsInspected: inputsActions.setInspectionParameter,
-})(InspectButtonComponent);
+};
+
+export const InspectButton = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(React.memo(InspectButtonComponent));

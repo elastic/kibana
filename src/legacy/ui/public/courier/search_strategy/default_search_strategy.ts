@@ -17,65 +17,8 @@
  * under the License.
  */
 
-import { SearchStrategyProvider, SearchStrategySearchParams } from './types';
-import { addSearchStrategy } from './search_strategy_registry';
-import { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
-import {
-  getSearchParams,
-  getMSearchParams,
-  getPreference,
-  getTimeout,
-} from '../fetch/get_search_params';
-
-export const defaultSearchStrategy: SearchStrategyProvider = {
-  id: 'default',
-
-  search: params => {
-    return params.config.get('courier:batchSearches') ? msearch(params) : search(params);
-  },
-
-  isViable: indexPattern => {
-    return indexPattern && isDefaultTypeIndexPattern(indexPattern);
-  },
-};
-
-function msearch({ searchRequests, es, config, esShardTimeout }: SearchStrategySearchParams) {
-  const inlineRequests = searchRequests.map(({ index, body, search_type: searchType }) => {
-    const inlineHeader = {
-      index: index.title || index,
-      search_type: searchType,
-      ignore_unavailable: true,
-      preference: getPreference(config),
-    };
-    const inlineBody = {
-      ...body,
-      timeout: getTimeout(esShardTimeout),
-    };
-    return `${JSON.stringify(inlineHeader)}\n${JSON.stringify(inlineBody)}`;
-  });
-
-  const searching = es.msearch({
-    ...getMSearchParams(config),
-    body: `${inlineRequests.join('\n')}\n`,
-  });
-  return {
-    searching: searching.then(({ responses }) => responses),
-    abort: searching.abort,
-  };
-}
-
-function search({ searchRequests, es, config, esShardTimeout }: SearchStrategySearchParams) {
-  const abortController = new AbortController();
-  const searchParams = getSearchParams(config, esShardTimeout);
-  const promises = searchRequests.map(({ index, body }) => {
-    const searching = es.search({ index: index.title || index, body, ...searchParams });
-    abortController.signal.addEventListener('abort', searching.abort);
-    return searching.catch(({ response }) => JSON.parse(response));
-  });
-  return {
-    searching: Promise.all(promises),
-    abort: () => abortController.abort(),
-  };
-}
+import { addSearchStrategy, defaultSearchStrategy } from '../index';
 
 addSearchStrategy(defaultSearchStrategy);
+
+export { defaultSearchStrategy };

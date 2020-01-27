@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { encodeIpv6 } from '../../lib/helpers';
@@ -50,7 +50,7 @@ describe('Custom Links', () => {
     test('should render valid link to IP Details with ipv4 as the display text', () => {
       const wrapper = mount(<IPDetailsLink ip={ipv4} />);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(
-        `#/link-to/network/ip/${encodeURIComponent(ipv4)}`
+        `#/link-to/network/ip/${encodeURIComponent(ipv4)}/source`
       );
       expect(wrapper.text()).toEqual(ipv4);
     });
@@ -58,7 +58,7 @@ describe('Custom Links', () => {
     test('should render valid link to IP Details with child text as the display text', () => {
       const wrapper = mount(<IPDetailsLink ip={ipv4}>{hostName}</IPDetailsLink>);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(
-        `#/link-to/network/ip/${encodeURIComponent(ipv4)}`
+        `#/link-to/network/ip/${encodeURIComponent(ipv4)}/source`
       );
       expect(wrapper.text()).toEqual(hostName);
     });
@@ -66,7 +66,7 @@ describe('Custom Links', () => {
     test('should render valid link to IP Details with ipv6 as the display text', () => {
       const wrapper = mount(<IPDetailsLink ip={ipv6} />);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(
-        `#/link-to/network/ip/${encodeURIComponent(ipv6Encoded)}`
+        `#/link-to/network/ip/${encodeURIComponent(ipv6Encoded)}/source`
       );
       expect(wrapper.text()).toEqual(ipv6);
     });

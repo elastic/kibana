@@ -5,14 +5,57 @@
  */
 
 import { ServerInjectOptions } from 'hapi';
-import { ActionResult } from '../../../../../../actions/server/types';
-import { RuleAlertParamsRest, RuleAlertType } from '../../alerts/types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { SavedObjectsFindResponse } from 'kibana/server';
+import { ActionResult } from '../../../../../../../../plugins/actions/server';
+import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  DETECTION_ENGINE_PRIVILEGES_URL,
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  INTERNAL_RULE_ID_KEY,
+  INTERNAL_IMMUTABLE_KEY,
+  DETECTION_ENGINE_PREPACKAGED_URL,
+} from '../../../../../common/constants';
+import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
 
-// The Omit of filter is because of a Hapi Server Typing issue that I am unclear
-// where it comes from. I would hope to remove the "filter" as an omit at some point
-// when we upgrade and Hapi Server is ok with the filter.
-export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> => ({
+export const mockPrepackagedRule = (): PrepackagedRules => ({
+  rule_id: 'rule-1',
+  description: 'Detecting root and admin users',
+  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  interval: '5m',
+  name: 'Detect Root/Admin Users',
+  output_index: '.siem-signals',
+  risk_score: 50,
+  type: 'query',
+  from: 'now-6m',
+  to: 'now',
+  severity: 'high',
+  query: 'user.name: root or user.name: admin',
+  language: 'kuery',
+  threats: [
+    {
+      framework: 'fake',
+      tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
+      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
+    },
+  ],
+  enabled: true,
+  filters: [],
+  immutable: false,
+  references: [],
+  meta: {},
+  tags: [],
+  version: 1,
+  false_positives: [],
+  saved_id: 'some-id',
+  max_signals: 100,
+  timeline_id: 'timeline-id',
+  timeline_title: 'timeline-title',
+});
+
+export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
   rule_id: 'rule-1',
   description: 'Detecting root and admin users',
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -35,18 +78,26 @@ export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> =
   ],
 });
 
-export const typicalFilterPayload = (): Partial<RuleAlertParamsRest> => ({
-  rule_id: 'rule-1',
-  description: 'Detecting root and admin users',
-  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  interval: '5m',
-  name: 'Detect Root/Admin Users',
-  risk_score: 50,
-  type: 'filter',
-  from: 'now-6m',
-  to: 'now',
-  severity: 'high',
-  filter: {},
+export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestParams> => ({
+  signal_ids: ['somefakeid1', 'somefakeid2'],
+  status: 'closed',
+});
+
+export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
+  query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
+  status: 'closed',
+});
+
+export const typicalSignalsQuery = (): Partial<SignalsQueryRestParams> => ({
+  query: { match_all: {} },
+});
+
+export const typicalSignalsQueryAggs = (): Partial<SignalsQueryRestParams> => ({
+  aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
+});
+
+export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatusRestParams> => ({
+  status: 'closed',
 });
 
 export const getUpdateRequest = (): ServerInjectOptions => ({
@@ -67,7 +118,58 @@ export const getFindRequest = (): ServerInjectOptions => ({
   url: `${DETECTION_ENGINE_RULES_URL}/_find`,
 });
 
-interface FindHit {
+export const getReadBulkRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+  payload: [typicalPayload()],
+});
+
+export const getUpdateBulkRequest = (): ServerInjectOptions => ({
+  method: 'PUT',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+  payload: [typicalPayload()],
+});
+
+export const getDeleteBulkRequest = (): ServerInjectOptions => ({
+  method: 'DELETE',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+  payload: [{ rule_id: 'rule-1' }],
+});
+
+export const getDeleteBulkRequestById = (): ServerInjectOptions => ({
+  method: 'DELETE',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+  payload: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+});
+
+export const getDeleteAsPostBulkRequestById = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+  payload: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+});
+
+export const getDeleteAsPostBulkRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+  payload: [{ rule_id: 'rule-1' }],
+});
+
+export const getPrivilegeRequest = (): ServerInjectOptions => ({
+  method: 'GET',
+  url: DETECTION_ENGINE_PRIVILEGES_URL,
+});
+
+export const addPrepackagedRulesRequest = (): ServerInjectOptions => ({
+  method: 'PUT',
+  url: DETECTION_ENGINE_PREPACKAGED_URL,
+});
+
+export const getPrepackagedRulesStatusRequest = (): ServerInjectOptions => ({
+  method: 'GET',
+  url: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
+});
+
+export interface FindHit {
   page: number;
   perPage: number;
   total: number;
@@ -84,16 +186,28 @@ export const getFindResult = (): FindHit => ({
 export const getFindResultWithSingleHit = (): FindHit => ({
   page: 1,
   perPage: 1,
-  total: 0,
+  total: 1,
   data: [getResult()],
 });
 
-export const getFindResultWithMultiHits = (data: RuleAlertType[]): FindHit => ({
-  page: 1,
-  perPage: 1,
-  total: 2,
+export const getFindResultWithMultiHits = ({
   data,
-});
+  page = 1,
+  perPage = 1,
+  total,
+}: {
+  data: RuleAlertType[];
+  page?: number;
+  perPage?: number;
+  total?: number;
+}) => {
+  return {
+    page,
+    perPage,
+    total: total != null ? total : data.length,
+    data,
+  };
+};
 
 export const getDeleteRequest = (): ServerInjectOptions => ({
   method: 'DELETE',
@@ -113,6 +227,34 @@ export const getCreateRequest = (): ServerInjectOptions => ({
   },
 });
 
+export const getSetSignalStatusByIdsRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  payload: {
+    ...typicalSetStatusSignalByIdsPayload(),
+  },
+});
+
+export const getSetSignalStatusByQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  payload: {
+    ...typicalSetStatusSignalByQueryPayload(),
+  },
+});
+
+export const getSignalsQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  payload: { ...typicalSignalsQuery() },
+});
+
+export const getSignalsAggsQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  payload: { ...typicalSignalsQueryAggs() },
+});
+
 export const createActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',
@@ -123,27 +265,37 @@ export const createActionResult = (): ActionResult => ({
 export const getResult = (): RuleAlertType => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
-  tags: [],
+  tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
   alertTypeId: 'siem.signals',
+  consumer: 'siem',
   params: {
+    createdAt: '2019-12-13T16:40:33.400Z',
+    updatedAt: '2019-12-13T16:40:33.400Z',
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     falsePositives: [],
     from: 'now-6m',
-    filter: null,
     immutable: false,
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
     outputIndex: '.siem-signals',
-    savedId: null,
-    meta: null,
-    filters: null,
+    savedId: 'some-id',
+    timelineId: 'some-timeline-id',
+    timelineTitle: 'some-timeline-title',
+    meta: { someMeta: 'someField' },
+    filters: [
+      {
+        query: {
+          match_phrase: {
+            'host.name': 'some-host',
+          },
+        },
+      },
+    ],
     riskScore: 50,
     maxSignals: 100,
-    size: 1,
     severity: 'high',
-    tags: [],
     to: 'now',
     type: 'query',
     threats: [
@@ -164,13 +316,17 @@ export const getResult = (): RuleAlertType => ({
       },
     ],
     references: ['http://www.example.com', 'https://ww.example.com'],
+    version: 1,
   },
-  interval: '5m',
+  createdAt: new Date('2019-12-13T16:40:33.400Z'),
+  updatedAt: new Date('2019-12-13T16:40:33.400Z'),
+  schedule: { interval: '5m' },
   enabled: true,
   actions: [],
   throttle: null,
   createdBy: 'elastic',
   updatedBy: 'elastic',
+  apiKey: null,
   apiKeyOwner: 'elastic',
   muteAll: false,
   mutedInstanceIds: [],
@@ -182,4 +338,65 @@ export const updateActionResult = (): ActionResult => ({
   actionTypeId: 'action-id-1',
   name: '',
   config: {},
+});
+
+export const getMockPrivileges = () => ({
+  username: 'test-space',
+  has_all_requested: false,
+  cluster: {
+    monitor_ml: true,
+    manage_ccr: false,
+    manage_index_templates: true,
+    monitor_watcher: true,
+    monitor_transform: true,
+    read_ilm: true,
+    manage_api_key: false,
+    manage_security: false,
+    manage_own_api_key: false,
+    manage_saml: false,
+    all: false,
+    manage_ilm: true,
+    manage_ingest_pipelines: true,
+    read_ccr: false,
+    manage_rollup: true,
+    monitor: true,
+    manage_watcher: true,
+    manage: true,
+    manage_transform: true,
+    manage_token: false,
+    manage_ml: true,
+    manage_pipeline: true,
+    monitor_rollup: true,
+    transport_client: true,
+    create_snapshot: true,
+  },
+  index: {
+    '.siem-signals-test-space': {
+      all: false,
+      manage_ilm: true,
+      read: false,
+      create_index: true,
+      read_cross_cluster: false,
+      index: false,
+      monitor: true,
+      delete: false,
+      manage: true,
+      delete_index: true,
+      create_doc: false,
+      view_index_metadata: true,
+      create: false,
+      manage_follow_index: true,
+      manage_leader_index: true,
+      write: false,
+    },
+  },
+  application: {},
+  is_authenticated: false,
+});
+
+export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+  page: 1,
+  per_page: 1,
+  total: 0,
+  saved_objects: [],
 });

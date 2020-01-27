@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import {
   assertAtLeastOneEventMatchesSearch,
   executeKQL,
@@ -17,10 +16,6 @@ import { loginAndWaitForPage } from '../../lib/util/helpers';
 describe('timeline search or filter KQL bar', () => {
   beforeEach(() => {
     loginAndWaitForPage(HOSTS_PAGE);
-  });
-
-  afterEach(() => {
-    return logout();
   });
 
   it('executes a KQL query', () => {

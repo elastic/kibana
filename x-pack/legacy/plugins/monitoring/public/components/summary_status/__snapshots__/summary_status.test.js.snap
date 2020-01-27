@@ -30,10 +30,12 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
           Status: 
           <svg
             alt="Status: yellow"
+            aria-hidden="true"
             class="euiIcon euiIcon--large euiIcon--warning euiIcon-isLoading"
             data-test-subj="statusIcon"
             focusable="false"
             height="16"
+            role="img"
             viewBox="0 0 16 16"
             width="16"
             xmlns="http://www.w3.org/2000/svg"
@@ -207,10 +209,12 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
           Status: 
           <svg
             alt="Status: green"
+            aria-hidden="true"
             class="euiIcon euiIcon--large euiIcon--success euiIcon-isLoading"
             data-test-subj="statusIcon"
             focusable="false"
             height="16"
+            role="img"
             viewBox="0 0 16 16"
             width="16"
             xmlns="http://www.w3.org/2000/svg"

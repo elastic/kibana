@@ -11,7 +11,6 @@ const geoJSONReader = new jsts.io.GeoJSONReader();
 const geoJSONWriter = new jsts.io.GeoJSONWriter();
 
 export function geoJsonCleanAndValidate(feature) {
-
   const geometryReadResult = geoJSONReader.read(feature);
 
   const cleanedGeometry = cleanGeometry(geometryReadResult);
@@ -28,7 +27,7 @@ export function geoJsonCleanAndValidate(feature) {
 
   return {
     ...feature,
-    geometry: correctlyWindedGeometry
+    geometry: correctlyWindedGeometry,
   };
 }
 
@@ -36,6 +35,6 @@ export function cleanGeometry({ geometry }) {
   if (!geometry) {
     return null;
   }
-  const geometryToWrite = (geometry.isSimple() || geometry.isValid()) ? geometry : geometry.buffer(0);
+  const geometryToWrite = geometry.isSimple() || geometry.isValid() ? geometry : geometry.buffer(0);
   return geoJSONWriter.write(geometryToWrite);
 }

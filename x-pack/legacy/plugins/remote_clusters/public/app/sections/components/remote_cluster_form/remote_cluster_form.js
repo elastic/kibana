@@ -33,10 +33,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import {
-  skippingDisconnectedClustersUrl,
-  transportPortUrl,
-} from '../../../services/documentation';
+import { skippingDisconnectedClustersUrl, transportPortUrl } from '../../../services/documentation';
 
 import { RequestFlyout } from './request_flyout';
 
@@ -59,12 +56,12 @@ export class RemoteClusterForm extends Component {
     saveError: PropTypes.object,
     fields: PropTypes.object,
     disabledFields: PropTypes.object,
-  }
+  };
 
   static defaultProps = {
     fields: merge({}, defaultFields),
     disabledFields: {},
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -98,26 +95,22 @@ export class RemoteClusterForm extends Component {
     };
   }
 
-  onFieldsChange = (changedFields) => {
+  onFieldsChange = changedFields => {
     this.setState(({ fields: prevFields, seedInput }) => {
       const newFields = {
         ...prevFields,
         ...changedFields,
       };
-      return ({
+      return {
         fields: newFields,
         fieldsErrors: this.getFieldsErrors(newFields, seedInput),
-      });
+      };
     });
   };
 
   getAllFields() {
     const {
-      fields: {
-        name,
-        seeds,
-        skipUnavailable,
-      },
+      fields: { name, seeds, skipUnavailable },
     } = this.state;
 
     return {
@@ -141,7 +134,7 @@ export class RemoteClusterForm extends Component {
     save(cluster);
   };
 
-  onCreateSeed = (newSeed) => {
+  onCreateSeed = newSeed => {
     // If the user just hit enter without typing anything, treat it as a no-op.
     if (!newSeed) {
       return;
@@ -159,9 +152,7 @@ export class RemoteClusterForm extends Component {
     }
 
     const {
-      fields: {
-        seeds,
-      },
+      fields: { seeds },
     } = this.state;
 
     const newSeeds = seeds.slice(0);
@@ -169,7 +160,7 @@ export class RemoteClusterForm extends Component {
     this.onFieldsChange({ seeds: newSeeds });
   };
 
-  onSeedsInputChange = (seedInput) => {
+  onSeedsInputChange = seedInput => {
     if (!seedInput) {
       // If empty seedInput ("") don't do anything. This happens
       // right after a seed is created.
@@ -180,38 +171,38 @@ export class RemoteClusterForm extends Component {
       const { seeds } = fields;
 
       // Allow typing to clear the errors, but not to add new ones.
-      const errors = (!seedInput || validateSeed(seedInput).length === 0) ? [] : localSeedErrors;
+      const errors = !seedInput || validateSeed(seedInput).length === 0 ? [] : localSeedErrors;
 
       // EuiComboBox internally checks for duplicates and prevents calling onCreateOption if the
       // input is a duplicate. So we need to surface this error here instead.
       const isDuplicate = seeds.includes(seedInput);
 
       if (isDuplicate) {
-        errors.push(i18n.translate('xpack.remoteClusters.remoteClusterForm.localSeedError.duplicateMessage',
-          {
+        errors.push(
+          i18n.translate('xpack.remoteClusters.remoteClusterForm.localSeedError.duplicateMessage', {
             defaultMessage: `Duplicate seed nodes aren't allowed.`,
-          }
-        ));
+          })
+        );
       }
 
-      return ({
+      return {
         localSeedErrors: errors,
         fieldsErrors: this.getFieldsErrors(fields, seedInput),
         seedInput,
-      });
+      };
     });
   };
 
-  onSeedsChange = (seeds) => {
+  onSeedsChange = seeds => {
     this.onFieldsChange({ seeds: seeds.map(({ label }) => label) });
   };
 
-  onSkipUnavailableChange = (e) => {
+  onSkipUnavailableChange = e => {
     const skipUnavailable = e.target.checked;
     this.onFieldsChange({ skipUnavailable });
   };
 
-  resetToDefault = (fieldName) => {
+  resetToDefault = fieldName => {
     this.onFieldsChange({
       [fieldName]: defaultFields[fieldName],
     });
@@ -227,12 +218,8 @@ export class RemoteClusterForm extends Component {
   renderSeeds() {
     const {
       areErrorsVisible,
-      fields: {
-        seeds,
-      },
-      fieldsErrors: {
-        seeds: errorsSeeds,
-      },
+      fields: { seeds },
+      fieldsErrors: { seeds: errorsSeeds },
       localSeedErrors,
     } = this.state;
 
@@ -245,7 +232,7 @@ export class RemoteClusterForm extends Component {
 
     return (
       <EuiDescribedFormGroup
-        title={(
+        title={
           <EuiTitle size="s">
             <h2>
               <FormattedMessage
@@ -254,25 +241,25 @@ export class RemoteClusterForm extends Component {
               />
             </h2>
           </EuiTitle>
-        )}
-        description={(
+        }
+        description={
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterForm.sectionSeedsDescription1"
             defaultMessage="A list of remote cluster nodes to query for the cluster state.
               Specify multiple seed nodes so discovery doesn't fail if a node is unavailable."
           />
-        )}
+        }
         fullWidth
       >
         <EuiFormRow
           data-test-subj="remoteClusterFormSeedNodesFormRow"
-          label={(
+          label={
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.fieldSeedsLabel"
               defaultMessage="Seed nodes"
             />
-          )}
-          helpText={(
+          }
+          helpText={
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText"
               defaultMessage="An IP address or host name, followed by the {transportPort} of the remote cluster."
@@ -287,14 +274,15 @@ export class RemoteClusterForm extends Component {
                 ),
               }}
             />
-          )}
+          }
           isInvalid={showErrors}
           error={errors}
           fullWidth
         >
           <EuiComboBox
             noSuggestions
-            placeholder={i18n.translate('xpack.remoteClusters.remoteClusterForm.fieldSeedsPlaceholder',
+            placeholder={i18n.translate(
+              'xpack.remoteClusters.remoteClusterForm.fieldSeedsPlaceholder',
               {
                 defaultMessage: 'host:port',
               }
@@ -314,14 +302,12 @@ export class RemoteClusterForm extends Component {
 
   renderSkipUnavailable() {
     const {
-      fields: {
-        skipUnavailable,
-      },
+      fields: { skipUnavailable },
     } = this.state;
 
     return (
       <EuiDescribedFormGroup
-        title={(
+        title={
           <EuiTitle size="s">
             <h2>
               <FormattedMessage
@@ -330,8 +316,8 @@ export class RemoteClusterForm extends Component {
               />
             </h2>
           </EuiTitle>
-        )}
-        description={(
+        }
+        description={
           <Fragment>
             <p>
               <FormattedMessage
@@ -360,7 +346,7 @@ export class RemoteClusterForm extends Component {
               />
             </p>
           </Fragment>
-        )}
+        }
         fullWidth
       >
         <EuiFormRow
@@ -370,7 +356,11 @@ export class RemoteClusterForm extends Component {
           fullWidth
           helpText={
             skipUnavailable !== defaultFields.skipUnavailable ? (
-              <EuiLink onClick={() => { this.resetToDefault('skipUnavailable'); }}>
+              <EuiLink
+                onClick={() => {
+                  this.resetToDefault('skipUnavailable');
+                }}
+              >
                 <FormattedMessage
                   id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableResetLabel"
                   defaultMessage="Reset to default"
@@ -380,9 +370,12 @@ export class RemoteClusterForm extends Component {
           }
         >
           <EuiSwitch
-            label={i18n.translate('xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableLabel', {
-              defaultMessage: 'Skip if unavailable',
-            })}
+            label={i18n.translate(
+              'xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableLabel',
+              {
+                defaultMessage: 'Skip if unavailable',
+              }
+            )}
             checked={skipUnavailable}
             onChange={this.onSkipUnavailableChange}
             data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
@@ -400,7 +393,7 @@ export class RemoteClusterForm extends Component {
       return (
         <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l"/>
+            <EuiLoadingSpinner size="l" />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -420,10 +413,7 @@ export class RemoteClusterForm extends Component {
     if (cancel) {
       cancelButton = (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            color="primary"
-            onClick={cancel}
-          >
+          <EuiButtonEmpty color="primary" onClick={cancel}>
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.cancelButtonLabel"
               defaultMessage="Cancel"
@@ -447,7 +437,9 @@ export class RemoteClusterForm extends Component {
                 onClick={this.save}
                 fill
                 disabled={isSaveDisabled}
-                aria-describedby={`${this.generateId(ERROR_TITLE_ID)} ${this.generateId(ERROR_LIST_ID)}`}
+                aria-describedby={`${this.generateId(ERROR_TITLE_ID)} ${this.generateId(
+                  ERROR_LIST_ID
+                )}`}
               >
                 <FormattedMessage
                   id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
@@ -461,9 +453,7 @@ export class RemoteClusterForm extends Component {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            onClick={this.toggleRequest}
-          >
+          <EuiButtonEmpty onClick={this.toggleRequest}>
             {isRequestVisible ? (
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.hideRequestButtonLabel"
@@ -485,7 +475,7 @@ export class RemoteClusterForm extends Component {
     if (this.props.isSaving) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl"/>
+          <EuiLoadingKibana size="xl" />
         </EuiOverlayMask>
       );
     }
@@ -503,13 +493,13 @@ export class RemoteClusterForm extends Component {
 
       if (cause) {
         if (cause.length === 1) {
-          errorBody = (
-            <p>{cause[0]}</p>
-          );
+          errorBody = <p>{cause[0]}</p>;
         } else {
           errorBody = (
             <ul>
-              {cause.map(causeValue => <li key={causeValue}>{causeValue}</li>)}
+              {cause.map(causeValue => (
+                <li key={causeValue}>{causeValue}</li>
+              ))}
             </ul>
           );
         }
@@ -517,11 +507,7 @@ export class RemoteClusterForm extends Component {
 
       return (
         <Fragment>
-          <EuiCallOut
-            title={message}
-            icon="cross"
-            color="warning"
-          >
+          <EuiCallOut title={message} icon="cross" color="warning">
             {errorBody}
           </EuiCallOut>
 
@@ -536,10 +522,7 @@ export class RemoteClusterForm extends Component {
   renderErrors = () => {
     const {
       areErrorsVisible,
-      fieldsErrors: {
-        name: errorClusterName,
-        seeds: errorsSeeds,
-      },
+      fieldsErrors: { name: errorClusterName, seeds: errorsSeeds },
       localSeedErrors,
     } = this.state;
 
@@ -557,7 +540,7 @@ export class RemoteClusterForm extends Component {
         field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputNameErrorMessage', {
           defaultMessage: 'The "Name" field is invalid.',
         }),
-        error: errorClusterName
+        error: errorClusterName,
       });
     }
 
@@ -567,7 +550,7 @@ export class RemoteClusterForm extends Component {
         field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputSeedsErrorMessage', {
           defaultMessage: 'The "Seed nodes" field is invalid.',
         }),
-        error: errorsSeeds
+        error: errorsSeeds,
       });
     }
 
@@ -598,40 +581,32 @@ export class RemoteClusterForm extends Component {
       <Fragment>
         <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />
         <EuiCallOut
-          title={(
+          title={
             <h3 id={this.generateId(ERROR_TITLE_ID)}>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.errorTitle"
                 defaultMessage="Fix errors before continuing."
               />
             </h3>
-          )}
+          }
           color="danger"
           iconType="cross"
         />
-        <EuiDelayRender>
-          {messagesToBeRendered}
-        </EuiDelayRender>
+        <EuiDelayRender>{messagesToBeRendered}</EuiDelayRender>
       </Fragment>
     );
-  }
+  };
 
   render() {
     const {
-      disabledFields: {
-        name: disabledName,
-      },
+      disabledFields: { name: disabledName },
     } = this.props;
 
     const {
       isRequestVisible,
       areErrorsVisible,
-      fields: {
-        name,
-      },
-      fieldsErrors: {
-        name: errorClusterName,
-      },
+      fields: { name },
+      fieldsErrors: { name: errorClusterName },
     } = this.state;
 
     return (
@@ -640,7 +615,7 @@ export class RemoteClusterForm extends Component {
 
         <EuiForm>
           <EuiDescribedFormGroup
-            title={(
+            title={
               <EuiTitle size="s">
                 <h2>
                   <FormattedMessage
@@ -649,29 +624,29 @@ export class RemoteClusterForm extends Component {
                   />
                 </h2>
               </EuiTitle>
-            )}
-            description={(
+            }
+            description={
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionNameDescription"
                 defaultMessage="A unique name for the remote cluster."
               />
-            )}
+            }
             fullWidth
           >
             <EuiFormRow
               data-test-subj="remoteClusterFormNameFormRow"
-              label={(
+              label={
                 <FormattedMessage
                   id="xpack.remoteClusters.remoteClusterForm.fieldNameLabel"
                   defaultMessage="Name"
                 />
-              )}
-              helpText={(
+              }
+              helpText={
                 <FormattedMessage
                   id="xpack.remoteClusters.remoteClusterForm.fieldNameLabelHelpText"
                   defaultMessage="Name can only contain letters, numbers, underscores, and dashes."
                 />
-              )}
+              }
               error={errorClusterName}
               isInvalid={Boolean(areErrorsVisible && errorClusterName)}
               fullWidth

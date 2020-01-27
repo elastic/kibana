@@ -15,6 +15,6 @@ export class MLRequestFailure extends KbnError {
     super(error.message || JSON.stringify(resp), MLRequestFailure);
 
     this.origError = error;
-    this.resp = (typeof resp === 'string') ? JSON.parse(resp) : resp;
+    this.resp = typeof resp === 'string' ? JSON.parse(resp) : resp;
   }
 }

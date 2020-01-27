@@ -8,7 +8,7 @@ import { get } from 'lodash';
 
 export default {
   'graph-workspace': {
-    '7.0.0': (doc) => {
+    '7.0.0': doc => {
       // Set new "references" attribute
       doc.references = doc.references || [];
       // Migrate index pattern
@@ -36,6 +36,6 @@ export default {
         id: indexPattern,
       });
       return doc;
-    }
-  }
+    },
+  },
 };

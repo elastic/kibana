@@ -4,18 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCard,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 
 import moment from 'moment';
 import uiChrome from 'ui/chrome';
@@ -40,7 +32,7 @@ export class ResultsLinks extends Component {
   }
 
   componentDidMount() {
-    this.showCreateJobLink = (checkPermission('canCreateJob') && mlNodesAvailable());
+    this.showCreateJobLink = checkPermission('canCreateJob') && mlNodesAvailable();
     // if this data has a time field,
     // find the start and end times
     if (this.props.timeFieldName !== undefined) {
@@ -53,15 +45,12 @@ export class ResultsLinks extends Component {
   }
 
   async updateTimeValues(recheck = true) {
-    const {
-      index,
-      timeFieldName,
-    } = this.props;
+    const { index, timeFieldName } = this.props;
 
-    const { from, to, } = await getFullTimeRange(index, timeFieldName);
+    const { from, to } = await getFullTimeRange(index, timeFieldName);
     this.setState({
-      from: (from === null) ? this.state.from : from,
-      to: (to === null) ? this.state.to : to,
+      from: from === null ? this.state.from : from,
+      to: to === null ? this.state.to : to,
     });
 
     // these links may have been drawn too quickly for the index to be ready
@@ -78,23 +67,18 @@ export class ResultsLinks extends Component {
   }
 
   render() {
-    const {
-      index,
-      indexPatternId,
-      timeFieldName,
-      createIndexPattern,
-    } = this.props;
+    const { index, indexPatternId, timeFieldName, createIndexPattern } = this.props;
 
-    const {
-      from,
-      to,
-    } = this.state;
+    const { from, to } = this.state;
 
-    const _g = (this.props.timeFieldName !== undefined) ? `&_g=(time:(from:'${from}',mode:quick,to:'${to}'))` : '';
+    const _g =
+      this.props.timeFieldName !== undefined
+        ? `&_g=(time:(from:'${from}',mode:quick,to:'${to}'))`
+        : '';
 
     return (
       <EuiFlexGroup gutterSize="l">
-        {createIndexPattern &&
+        {createIndexPattern && (
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type={`discoverApp`} />}
@@ -108,25 +92,28 @@ export class ResultsLinks extends Component {
               href={`${uiChrome.getBasePath()}/app/kibana#/discover?&_a=(index:'${indexPatternId}')${_g}`}
             />
           </EuiFlexItem>
-        }
+        )}
 
-        {(isFullLicense() === true && timeFieldName !== undefined && this.showCreateJobLink && createIndexPattern) &&
-          <EuiFlexItem>
-            <EuiCard
-              icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
-              title={
-                <FormattedMessage
-                  id="xpack.ml.fileDatavisualizer.resultsLinks.createNewMLJobTitle"
-                  defaultMessage="Create new ML job"
-                />
-              }
-              description=""
-              href={`${uiChrome.getBasePath()}/app/ml#/jobs/new_job/step/job_type?index=${indexPatternId}${_g}`}
-            />
-          </EuiFlexItem>
-        }
+        {isFullLicense() === true &&
+          timeFieldName !== undefined &&
+          this.showCreateJobLink &&
+          createIndexPattern && (
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
+                title={
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.resultsLinks.createNewMLJobTitle"
+                    defaultMessage="Create new ML job"
+                  />
+                }
+                description=""
+                href={`#/jobs/new_job/step/job_type?index=${indexPatternId}${_g}`}
+              />
+            </EuiFlexItem>
+          )}
 
-        {createIndexPattern &&
+        {createIndexPattern && (
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type={`dataVisualizer`} />}
@@ -137,10 +124,10 @@ export class ResultsLinks extends Component {
                 />
               }
               description=""
-              href={`${uiChrome.getBasePath()}/app/ml#/jobs/new_job/datavisualizer?index=${indexPatternId}${_g}`}
+              href={`#/jobs/new_job/datavisualizer?index=${indexPatternId}${_g}`}
             />
           </EuiFlexItem>
-        }
+        )}
 
         <EuiFlexItem>
           <EuiCard
@@ -166,25 +153,22 @@ export class ResultsLinks extends Component {
               />
             }
             description=""
-            href={
-              `${uiChrome.getBasePath()}/app/kibana#/management/kibana/index_patterns/${(
-                createIndexPattern ? indexPatternId : '')}`
-            }
+            href={`${uiChrome.getBasePath()}/app/kibana#/management/kibana/index_patterns/${
+              createIndexPattern ? indexPatternId : ''
+            }`}
           />
         </EuiFlexItem>
-
       </EuiFlexGroup>
     );
   }
 }
-
 
 async function getFullTimeRange(index, timeFieldName) {
   const query = { bool: { must: [{ query_string: { analyze_wildcard: true, query: '*' } }] } };
   const resp = await ml.getTimeFieldRange({
     index,
     timeFieldName,
-    query
+    query,
   });
 
   return {

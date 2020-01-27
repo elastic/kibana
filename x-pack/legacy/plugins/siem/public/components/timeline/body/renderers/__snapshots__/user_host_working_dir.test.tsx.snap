@@ -1,12 +1,48 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`UserHostWorkingDir rendering it renders against shallow snapshot 1`] = `
-<Component
-  contextId="context-123"
-  eventId="event-123"
-  hostName="[hostName-123]"
-  userDomain="[userDomain-123]"
-  userName="[userName-123]"
-  workingDirectory="[working-directory-123]"
-/>
+<Fragment>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+  >
+    <DraggableBadge
+      contextId="context-123"
+      eventId="event-123"
+      field="user.name"
+      iconType="user"
+      value="[userName-123]"
+    />
+  </TokensFlexItem>
+  <TokensFlexItem
+    component="span"
+    data-test-subj="user-host-working-dir-domain-separator-text"
+    grow={false}
+  >
+    \\
+  </TokensFlexItem>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+  >
+    <DraggableBadge
+      contextId="context-123"
+      eventId="event-123"
+      field="user.domain"
+      value="[userDomain-123]"
+    />
+  </TokensFlexItem>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+  >
+    @
+  </TokensFlexItem>
+  <HostWorkingDir
+    contextId="context-123"
+    eventId="event-123"
+    hostName="[hostName-123]"
+    workingDirectory="[working-directory-123]"
+  />
+</Fragment>
 `;

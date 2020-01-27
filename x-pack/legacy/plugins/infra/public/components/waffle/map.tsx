@@ -11,20 +11,21 @@ import {
   isWaffleMapGroupWithGroups,
   isWaffleMapGroupWithNodes,
 } from '../../containers/waffle/type_guards';
-import { InfraSnapshotNode, InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../lib/lib';
 import { AutoSizer } from '../auto_sizer';
 import { GroupOfGroups } from './group_of_groups';
 import { GroupOfNodes } from './group_of_nodes';
 import { Legend } from './legend';
 import { applyWaffleMapLayout } from './lib/apply_wafflemap_layout';
+import { SnapshotNode } from '../../../common/http_api/snapshot_api';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 interface Props {
-  nodes: InfraSnapshotNode[];
-  nodeType: InfraNodeType;
+  nodes: SnapshotNode[];
+  nodeType: InventoryItemType;
   options: InfraWaffleMapOptions;
   formatter: (subject: string | number) => string;
-  timeRange: InfraTimerangeInput;
+  currentTime: number;
   onFilter: (filter: string) => void;
   bounds: InfraWaffleMapBounds;
   dataBounds: InfraWaffleMapBounds;
@@ -33,7 +34,7 @@ interface Props {
 export const Map: React.FC<Props> = ({
   nodes,
   options,
-  timeRange,
+  currentTime,
   onFilter,
   formatter,
   bounds,
@@ -59,7 +60,7 @@ export const Map: React.FC<Props> = ({
                       formatter={formatter}
                       bounds={bounds}
                       nodeType={nodeType}
-                      timeRange={timeRange}
+                      currentTime={currentTime}
                     />
                   );
                 }
@@ -74,7 +75,7 @@ export const Map: React.FC<Props> = ({
                       isChild={false}
                       bounds={bounds}
                       nodeType={nodeType}
-                      timeRange={timeRange}
+                      currentTime={currentTime}
                     />
                   );
                 }

@@ -12,12 +12,12 @@ export function TimeseriesContainer(props) {
     display: 'flex',
     rowDirection: 'column',
     flex: '1 0 auto',
-    position: 'relative'
+    position: 'relative',
   };
 
   return (
     <div style={container}>
-      <ChartTarget {...props}/>
+      <ChartTarget {...props} />
     </div>
   );
 }

@@ -6,47 +6,50 @@
 
 import React from 'react';
 import { InfraWaffleMapOptions, InfraWaffleMapBounds } from '../../lib/lib';
-import {
-  InfraNodeType,
-  InfraTimerangeInput,
-  InfraSnapshotMetricInput,
-  InfraSnapshotGroupbyInput,
-} from '../../graphql/types';
 import { KueryFilterQuery } from '../../store/local/waffle_filter';
 
 import { NodesOverview } from '../nodes_overview';
 import { Toolbar } from './toolbars/toolbar';
 import { PageContent } from '../page';
 import { useSnapshot } from '../../containers/waffle/use_snaphot';
+import { useInventoryMeta } from '../../containers/inventory_metadata/use_inventory_meta';
+import { SnapshotMetricInput, SnapshotGroupBy } from '../../../common/http_api/snapshot_api';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 export interface LayoutProps {
   options: InfraWaffleMapOptions;
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
   onDrilldown: (filter: KueryFilterQuery) => void;
-  timeRange: InfraTimerangeInput;
+  currentTime: number;
   onViewChange: (view: string) => void;
   view: string;
   boundsOverride: InfraWaffleMapBounds;
   autoBounds: boolean;
 
   filterQuery: string | null | undefined;
-  metric: InfraSnapshotMetricInput;
-  groupBy: InfraSnapshotGroupbyInput[];
+  metric: SnapshotMetricInput;
+  groupBy: SnapshotGroupBy;
   sourceId: string;
+  accountId: string;
+  region: string;
 }
 
 export const Layout = (props: LayoutProps) => {
-  const { loading, nodes, reload } = useSnapshot(
+  const { accounts, regions } = useInventoryMeta(props.sourceId, props.nodeType);
+  const { loading, nodes, reload, interval } = useSnapshot(
     props.filterQuery,
     props.metric,
     props.groupBy,
     props.nodeType,
     props.sourceId,
-    props.timeRange
+    props.currentTime,
+    props.accountId,
+    props.region
   );
+
   return (
     <>
-      <Toolbar nodeType={props.nodeType} />
+      <Toolbar accounts={accounts} regions={regions} nodeType={props.nodeType} />
       <PageContent>
         <NodesOverview
           nodes={nodes}
@@ -55,11 +58,12 @@ export const Layout = (props: LayoutProps) => {
           loading={loading}
           reload={reload}
           onDrilldown={props.onDrilldown}
-          timeRange={props.timeRange}
+          currentTime={props.currentTime}
           onViewChange={props.onViewChange}
           view={props.view}
           autoBounds={props.autoBounds}
           boundsOverride={props.boundsOverride}
+          interval={interval}
         />
       </PageContent>
     </>

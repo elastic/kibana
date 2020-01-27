@@ -4,169 +4,191 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
-import numeral from '@elastic/numeral';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { has } from 'lodash/fp';
-import React from 'react';
-import { pure } from 'recompose';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { OverviewNetworkData } from '../../../../graphql/types';
-import { getEmptyTagValue } from '../../../empty_value';
+import { FormattedStat, StatGroup } from '../types';
+import { StatValue } from '../stat_value';
 
 interface OverviewNetworkProps {
   data: OverviewNetworkData;
   loading: boolean;
 }
 
-const overviewNetworkStats = (data: OverviewNetworkData) => [
+export const getOverviewNetworkStats = (data: OverviewNetworkData): FormattedStat[] => [
   {
-    description:
-      has('auditbeatSocket', data) && data.auditbeatSocket !== null
-        ? numeral(data.auditbeatSocket).format('0,0')
-        : getEmptyTagValue(),
+    count: data.auditbeatSocket ?? 0,
     title: (
-      <FormattedMessage
-        id="xpack.siem.overview.auditBeatSocketTitle"
-        defaultMessage="Auditbeat Socket"
-      />
+      <FormattedMessage id="xpack.siem.overview.auditBeatSocketTitle" defaultMessage="Socket" />
     ),
     id: 'auditbeatSocket',
   },
   {
-    description:
-      has('filebeatCisco', data) && data.filebeatCisco !== null
-        ? numeral(data.filebeatCisco).format('0,0')
-        : getEmptyTagValue(),
-    title: (
-      <FormattedMessage
-        id="xpack.siem.overview.filebeatCiscoTitle"
-        defaultMessage="Filebeat Cisco"
-      />
-    ),
+    count: data.filebeatCisco ?? 0,
+    title: <FormattedMessage id="xpack.siem.overview.filebeatCiscoTitle" defaultMessage="Cisco" />,
     id: 'filebeatCisco',
   },
   {
-    description:
-      has('filebeatNetflow', data) && data.filebeatNetflow !== null
-        ? numeral(data.filebeatNetflow).format('0,0')
-        : getEmptyTagValue(),
+    count: data.filebeatNetflow ?? 0,
     title: (
-      <FormattedMessage
-        id="xpack.siem.overview.filebeatNetflowTitle"
-        defaultMessage="Filebeat Netflow"
-      />
+      <FormattedMessage id="xpack.siem.overview.filebeatNetflowTitle" defaultMessage="Netflow" />
     ),
     id: 'filebeatNetflow',
   },
   {
-    description:
-      has('filebeatPanw', data) && data.filebeatPanw !== null
-        ? numeral(data.filebeatPanw).format('0,0')
-        : getEmptyTagValue(),
+    count: data.filebeatPanw ?? 0,
     title: (
       <FormattedMessage
         id="xpack.siem.overview.filebeatPanwTitle"
-        defaultMessage="Filebeat Palo Alto Networks"
+        defaultMessage="Palo Alto Networks"
       />
     ),
     id: 'filebeatPanw',
   },
   {
-    description:
-      has('filebeatSuricata', data) && data.filebeatSuricata !== null
-        ? numeral(data.filebeatSuricata).format('0,0')
-        : getEmptyTagValue(),
+    count: data.filebeatSuricata ?? 0,
     title: (
-      <FormattedMessage
-        id="xpack.siem.overview.fileBeatSuricataTitle"
-        defaultMessage="Filebeat Suricata"
-      />
+      <FormattedMessage id="xpack.siem.overview.fileBeatSuricataTitle" defaultMessage="Suricata" />
     ),
     id: 'filebeatSuricata',
   },
   {
-    description:
-      has('filebeatZeek', data) && data.filebeatZeek !== null
-        ? numeral(data.filebeatZeek).format('0,0')
-        : getEmptyTagValue(),
-    title: (
-      <FormattedMessage id="xpack.siem.overview.fileBeatZeekTitle" defaultMessage="Filebeat Zeek" />
-    ),
+    count: data.filebeatZeek ?? 0,
+    title: <FormattedMessage id="xpack.siem.overview.fileBeatZeekTitle" defaultMessage="Zeek" />,
     id: 'filebeatZeek',
   },
   {
-    description:
-      has('packetbeatDNS', data) && data.packetbeatDNS !== null
-        ? numeral(data.packetbeatDNS).format('0,0')
-        : getEmptyTagValue(),
-    title: (
-      <FormattedMessage
-        id="xpack.siem.overview.packetBeatDnsTitle"
-        defaultMessage="Packetbeat DNS"
-      />
-    ),
+    count: data.packetbeatDNS ?? 0,
+    title: <FormattedMessage id="xpack.siem.overview.packetBeatDnsTitle" defaultMessage="DNS" />,
     id: 'packetbeatDNS',
   },
   {
-    description:
-      has('packetbeatFlow', data) && data.packetbeatFlow !== null
-        ? numeral(data.packetbeatFlow).format('0,0')
-        : getEmptyTagValue(),
-    title: (
-      <FormattedMessage
-        id="xpack.siem.overview.packetBeatFlowTitle"
-        defaultMessage="Packetbeat Flow"
-      />
-    ),
+    count: data.packetbeatFlow ?? 0,
+    title: <FormattedMessage id="xpack.siem.overview.packetBeatFlowTitle" defaultMessage="Flow" />,
     id: 'packetbeatFlow',
   },
   {
-    description:
-      has('packetbeatTLS', data) && data.packetbeatTLS !== null
-        ? numeral(data.packetbeatTLS).format('0,0')
-        : getEmptyTagValue(),
-    title: (
-      <FormattedMessage
-        id="xpack.siem.overview.packetbeatTLSTitle"
-        defaultMessage="Packetbeat TLS"
-      />
-    ),
+    count: data.packetbeatTLS ?? 0,
+    title: <FormattedMessage id="xpack.siem.overview.packetbeatTLSTitle" defaultMessage="TLS" />,
     id: 'packetbeatTLS',
   },
 ];
 
-export const DescriptionListDescription = styled(EuiDescriptionListDescription)`
-  text-align: right;
+const networkStatGroups: StatGroup[] = [
+  {
+    groupId: 'auditbeat',
+    name: (
+      <FormattedMessage
+        id="xpack.siem.overview.networkStatGroupAuditbeat"
+        defaultMessage="Auditbeat"
+      />
+    ),
+    statIds: ['auditbeatSocket'],
+  },
+  {
+    groupId: 'filebeat',
+    name: (
+      <FormattedMessage
+        id="xpack.siem.overview.networkStatGroupFilebeat"
+        defaultMessage="Filebeat"
+      />
+    ),
+    statIds: [
+      'filebeatCisco',
+      'filebeatNetflow',
+      'filebeatPanw',
+      'filebeatSuricata',
+      'filebeatZeek',
+    ],
+  },
+  {
+    groupId: 'packetbeat',
+    name: (
+      <FormattedMessage
+        id="xpack.siem.overview.networkStatGroupPacketbeat"
+        defaultMessage="Packetbeat"
+      />
+    ),
+    statIds: ['packetbeatDNS', 'packetbeatFlow', 'packetbeatTLS'],
+  },
+];
+
+const NetworkStatsContainer = styled.div`
+  .accordion-button {
+    width: 100%;
+  }
 `;
 
-DescriptionListDescription.displayName = 'DescriptionListDescription';
+const Title = styled.div`
+  margin-left: 24px;
+`;
 
-const StatValue = pure<{ isLoading: boolean; value: React.ReactNode | null | undefined }>(
-  ({ isLoading, value }) => (
-    <>{isLoading ? <EuiLoadingSpinner size="m" /> : value != null ? value : getEmptyTagValue()}</>
-  )
-);
+export const OverviewNetworkStats = React.memo<OverviewNetworkProps>(({ data, loading }) => {
+  const allNetworkStats = getOverviewNetworkStats(data);
+  const allNetworkStatsCount = allNetworkStats.reduce((total, stat) => total + stat.count, 0);
 
-StatValue.displayName = 'StatValue';
+  return (
+    <NetworkStatsContainer data-test-subj="overview-network-stats">
+      {networkStatGroups.map((statGroup, i) => {
+        const statsForGroup = allNetworkStats.filter(s => statGroup.statIds.includes(s.id));
+        const statsForGroupCount = statsForGroup.reduce((total, stat) => total + stat.count, 0);
 
-export const OverviewNetworkStats = pure<OverviewNetworkProps>(({ data, loading }) => (
-  <EuiDescriptionList type="column">
-    {overviewNetworkStats(data).map((item, index) => (
-      <React.Fragment key={index}>
-        <EuiDescriptionListTitle>{item.title}</EuiDescriptionListTitle>
-        <DescriptionListDescription data-test-subj={`network-stat-${item.id}`}>
-          <StatValue isLoading={loading} value={item.description} />
-        </DescriptionListDescription>
-      </React.Fragment>
-    ))}
-  </EuiDescriptionList>
-));
+        const accordionButton = useMemo(
+          () => (
+            <EuiFlexGroup
+              data-test-subj={`network-stat-group-${statGroup.groupId}`}
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiText>{statGroup.name}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <StatValue
+                  count={statsForGroupCount}
+                  isGroupStat={true}
+                  isLoading={loading}
+                  max={allNetworkStatsCount}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          [statGroup, statsForGroupCount, loading, allNetworkStatsCount]
+        );
+
+        return (
+          <React.Fragment key={statGroup.groupId}>
+            <EuiAccordion
+              id={`network-stat-accordion-group${statGroup.groupId}`}
+              buttonContent={accordionButton}
+              buttonContentClassName="accordion-button"
+            >
+              {statsForGroup.map(stat => (
+                <EuiFlexGroup key={stat.id} justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    <EuiText color="subdued" size="s">
+                      <Title>{stat.title}</Title>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem data-test-subj={`network-stat-${stat.id}`} grow={false}>
+                    <StatValue
+                      count={stat.count}
+                      isGroupStat={false}
+                      isLoading={loading}
+                      max={statsForGroupCount}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ))}
+            </EuiAccordion>
+            {i !== networkStatGroups.length - 1 && <EuiHorizontalRule margin="xs" />}
+          </React.Fragment>
+        );
+      })}
+    </NetworkStatsContainer>
+  );
+});
 
 OverviewNetworkStats.displayName = 'OverviewNetworkStats';

@@ -89,7 +89,7 @@ The most common cause for empty layers are searches for a field that exists in o
 
 You can prevent the search bar from applying search context to a layer by configuring the following:
 
-* In *Source settings*, clear the *Apply global filter to source* checkbox to turn off the global search context for the layer source.
+* In *Filtering*, clear the *Apply global filter to layer data* checkbox to turn off the global search context for the layer source.
 
 * In *Term joins*, clear the *Apply global filter to join* checkbox to turn off the global search context for the <<terms-join, term join>>.
 

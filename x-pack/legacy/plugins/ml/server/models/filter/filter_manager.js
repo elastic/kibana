@@ -4,21 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import Boom from 'boom';
 
 export class FilterManager {
-
   constructor(callWithRequest) {
     this.callWithRequest = callWithRequest;
   }
 
   async getFilter(filterId) {
     try {
-      const [ JOBS, FILTERS ] = [0, 1];
+      const [JOBS, FILTERS] = [0, 1];
       const results = await Promise.all([
         this.callWithRequest('ml.jobs'),
-        this.callWithRequest('ml.filters', { filterId })
+        this.callWithRequest('ml.filters', { filterId }),
       ]);
 
       if (results[FILTERS] && results[FILTERS].filters.length) {
@@ -49,10 +47,10 @@ export class FilterManager {
 
   async getAllFilterStats() {
     try {
-      const [ JOBS, FILTERS ] = [0, 1];
+      const [JOBS, FILTERS] = [0, 1];
       const results = await Promise.all([
         this.callWithRequest('ml.jobs'),
-        this.callWithRequest('ml.filters')
+        this.callWithRequest('ml.filters'),
       ]);
 
       // Build a map of filter_ids against jobs and detectors using that filter.
@@ -68,12 +66,12 @@ export class FilterManager {
       //  jobs using the filter
       const filterStats = [];
       if (results[FILTERS] && results[FILTERS].filters) {
-        results[FILTERS].filters.forEach((filter) => {
+        results[FILTERS].filters.forEach(filter => {
           const stats = {
             filter_id: filter.filter_id,
             description: filter.description,
             item_count: filter.items.length,
-            used_by: filtersInUse[filter.filter_id]
+            used_by: filtersInUse[filter.filter_id],
           };
           filterStats.push(stats);
         });
@@ -96,10 +94,7 @@ export class FilterManager {
     }
   }
 
-  async updateFilter(filterId,
-    description,
-    addItems,
-    removeItems) {
+  async updateFilter(filterId, description, addItems, removeItems) {
     try {
       const body = {};
       if (description !== undefined) {
@@ -115,13 +110,12 @@ export class FilterManager {
       // Returns the newly updated filter.
       return await this.callWithRequest('ml.updateFilter', {
         filterId,
-        body
+        body,
       });
     } catch (error) {
       throw Boom.badRequest(error);
     }
   }
-
 
   async deleteFilter(filterId) {
     return this.callWithRequest('ml.deleteFilter', { filterId });
@@ -130,15 +124,15 @@ export class FilterManager {
   buildFiltersInUse(jobsList) {
     // Build a map of filter_ids against jobs and detectors using that filter.
     const filtersInUse = {};
-    jobsList.forEach((job) => {
+    jobsList.forEach(job => {
       const detectors = job.analysis_config.detectors;
-      detectors.forEach((detector) => {
+      detectors.forEach(detector => {
         if (detector.custom_rules) {
           const rules = detector.custom_rules;
-          rules.forEach((rule) => {
+          rules.forEach(rule => {
             if (rule.scope) {
               const scopeFields = Object.keys(rule.scope);
-              scopeFields.forEach((scopeField) => {
+              scopeFields.forEach(scopeField => {
                 const filter = rule.scope[scopeField];
                 const filterId = filter.filter_id;
                 if (filtersInUse[filterId] === undefined) {
@@ -167,5 +161,4 @@ export class FilterManager {
 
     return filtersInUse;
   }
-
 }

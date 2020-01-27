@@ -16,12 +16,9 @@ exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/
     }
   }
   customSeriesColors={
-    Map {
-      Object {
-        "colorValues": Array [],
-        "specId": "id:61ca57f1-469d-11e7-af02-69e470af7417:Rome",
-      } => "rgb(0, 156, 224)",
-    }
+    Array [
+      "rgb(0, 156, 224)",
+    ]
   }
   data={
     Array [
@@ -36,10 +33,10 @@ exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/
     ]
   }
   enableHistogramMode={true}
-  groupId="groupId:yaxis_main_group"
+  groupId="yaxis_main_group"
   hideInLegend={false}
   histogramModeAlignment="center"
-  id="id:61ca57f1-469d-11e7-af02-69e470af7417:Rome"
+  id="61ca57f1-469d-11e7-af02-69e470af7417:Rome"
   name="Rome"
   stackAsPercentage={false}
   timeZone="local"

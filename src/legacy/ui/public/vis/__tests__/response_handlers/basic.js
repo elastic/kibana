@@ -21,7 +21,7 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import { vislibSeriesResponseHandlerProvider } from '../../response_handlers/vislib';
 
-describe('Basic Response Handler', function () {
+describe('Basic Response Handler', function() {
   const basicResponseHandler = vislibSeriesResponseHandlerProvider().handler;
 
   beforeEach(ngMock.module('kibana'));
@@ -34,10 +34,11 @@ describe('Basic Response Handler', function () {
   });
 
   it('returns empty object if no data was found', () => {
-    basicResponseHandler({ columns: [{ id: '1', title: '1', aggConfig: {} }], rows: [] }).then(data => {
-      expect(data).to.not.be.an('undefined');
-      expect(data.rows).to.equal([]);
-    });
+    basicResponseHandler({ columns: [{ id: '1', title: '1', aggConfig: {} }], rows: [] }).then(
+      data => {
+        expect(data).to.not.be.an('undefined');
+        expect(data.rows).to.equal([]);
+      }
+    );
   });
-
 });

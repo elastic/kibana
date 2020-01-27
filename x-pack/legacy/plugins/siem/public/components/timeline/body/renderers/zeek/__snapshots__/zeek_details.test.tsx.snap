@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
-<Component
+<ZeekDetails
   browserFields={
     Object {
       "agent": Object {
@@ -365,6 +365,7 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
             "example": null,
             "format": "",
             "indexes": Array [
+              "apm-*-transaction*",
               "auditbeat-*",
               "endgame-*",
               "filebeat-*",

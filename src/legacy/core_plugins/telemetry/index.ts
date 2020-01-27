@@ -23,6 +23,8 @@ import JoiNamespace from 'joi';
 import { Server } from 'hapi';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getConfigPath } from '../../../core/server/path';
 // @ts-ignore
 import mappings from './mappings.json';
 import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
@@ -47,7 +49,7 @@ const telemetry = (kibana: any) => {
           otherwise: Joi.boolean().default(true),
         }),
         // `config` is used internally and not intended to be set
-        config: Joi.string().default(Joi.ref('$defaultConfigPath')),
+        config: Joi.string().default(getConfigPath()),
         banner: Joi.boolean().default(true),
         url: Joi.when('$dev', {
           is: true,
@@ -89,8 +91,8 @@ const telemetry = (kibana: any) => {
           isNamespaceAgnostic: true,
         },
       },
-      async replaceInjectedVars(originalInjectedVars: any, request: any) {
-        const telemetryInjectedVars = await replaceTelemetryInjectedVars(request);
+      async replaceInjectedVars(originalInjectedVars: any, request: any, server: any) {
+        const telemetryInjectedVars = await replaceTelemetryInjectedVars(request, server);
         return Object.assign({}, originalInjectedVars, telemetryInjectedVars);
       },
       injectDefaultVars(server: Server) {

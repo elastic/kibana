@@ -30,7 +30,11 @@ test('renders KuiLocalNavRow', () => {
 
 describe('property isSecondary', () => {
   test('renders the secondary modifier', () => {
-    const component = <KuiLocalNavRow isSecondary {...requiredProps}>children</KuiLocalNavRow>;
+    const component = (
+      <KuiLocalNavRow isSecondary {...requiredProps}>
+        children
+      </KuiLocalNavRow>
+    );
     expect(render(component)).toMatchSnapshot();
   });
 });

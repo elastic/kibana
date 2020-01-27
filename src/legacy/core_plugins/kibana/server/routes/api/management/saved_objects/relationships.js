@@ -32,12 +32,15 @@ export function registerRelationships(server) {
         }),
         query: Joi.object().keys({
           size: Joi.number().default(10000),
-          savedObjectTypes: Joi.array().single().items(Joi.string()).required()
+          savedObjectTypes: Joi.array()
+            .single()
+            .items(Joi.string())
+            .required(),
         }),
       },
     },
 
-    handler: async (req) => {
+    handler: async req => {
       const type = req.params.type;
       const id = req.params.id;
       const size = req.query.size;

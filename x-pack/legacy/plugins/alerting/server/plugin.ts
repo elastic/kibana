@@ -5,11 +5,13 @@
  */
 
 import Hapi from 'hapi';
-import { first } from 'rxjs/operators';
+
 import { Services } from './types';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry } from './alert_type_registry';
-import { AlertsClientFactory, TaskRunnerFactory } from './lib';
+import { TaskRunnerFactory } from './task_runner';
+import { AlertsClientFactory } from './alerts_client_factory';
+import { LicenseState } from './lib/license_state';
 import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 import {
   AlertingPluginInitializerContext,
@@ -33,6 +35,7 @@ import {
   muteAlertInstanceRoute,
   unmuteAlertInstanceRoute,
 } from './routes';
+import { extendRouteWithLicenseCheck } from './extend_route_with_license_check';
 
 export interface PluginSetupContract {
   registerType: AlertTypeRegistry['register'];
@@ -48,6 +51,7 @@ export class Plugin {
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private adminClient?: IClusterClient;
   private serverBasePath?: string;
+  private licenseState: LicenseState | null = null;
 
   constructor(initializerContext: AlertingPluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
@@ -58,31 +62,9 @@ export class Plugin {
     core: AlertingCoreSetup,
     plugins: AlertingPluginsSetup
   ): Promise<PluginSetupContract> {
-    this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
+    this.adminClient = core.elasticsearch.adminClient;
 
-    plugins.xpack_main.registerFeature({
-      id: 'alerting',
-      name: 'Alerting',
-      app: ['alerting', 'kibana'],
-      privileges: {
-        all: {
-          savedObject: {
-            all: ['alert'],
-            read: [],
-          },
-          ui: [],
-          api: ['alerting-read', 'alerting-all'],
-        },
-        read: {
-          savedObject: {
-            all: [],
-            read: ['alert'],
-          },
-          ui: [],
-          api: ['alerting-read'],
-        },
-      },
-    });
+    this.licenseState = new LicenseState(plugins.licensing.license$);
 
     // Encrypted attributes
     plugins.encryptedSavedObjects.registerType({
@@ -90,33 +72,33 @@ export class Plugin {
       attributesToEncrypt: new Set(['apiKey']),
       attributesToExcludeFromAAD: new Set([
         'scheduledTaskId',
-        'muted',
+        'muteAll',
         'mutedInstanceIds',
         'updatedBy',
       ]),
     });
 
     const alertTypeRegistry = new AlertTypeRegistry({
-      taskManager: plugins.task_manager,
+      taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
     });
     this.alertTypeRegistry = alertTypeRegistry;
     this.serverBasePath = core.http.basePath.serverBasePath;
 
     // Register routes
-    core.http.route(createAlertRoute);
-    core.http.route(deleteAlertRoute);
-    core.http.route(findAlertRoute);
-    core.http.route(getAlertRoute);
-    core.http.route(listAlertTypesRoute);
-    core.http.route(updateAlertRoute);
-    core.http.route(enableAlertRoute);
-    core.http.route(disableAlertRoute);
-    core.http.route(updateApiKeyRoute);
-    core.http.route(muteAllAlertRoute);
-    core.http.route(unmuteAllAlertRoute);
-    core.http.route(muteAlertInstanceRoute);
-    core.http.route(unmuteAlertInstanceRoute);
+    core.http.route(extendRouteWithLicenseCheck(createAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(deleteAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(findAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(getAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(listAlertTypesRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(updateAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(enableAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(disableAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(updateApiKeyRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(muteAllAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(unmuteAllAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(muteAlertInstanceRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(unmuteAlertInstanceRoute, this.licenseState));
 
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
@@ -126,11 +108,18 @@ export class Plugin {
   public start(core: AlertingCoreStart, plugins: AlertingPluginsStart): PluginStartContract {
     const { adminClient, serverBasePath } = this;
 
+    function spaceIdToNamespace(spaceId?: string): string | undefined {
+      const spacesPlugin = plugins.spaces();
+      return spacesPlugin && spaceId ? spacesPlugin.spaceIdToNamespace(spaceId) : undefined;
+    }
+
     const alertsClientFactory = new AlertsClientFactory({
       alertTypeRegistry: this.alertTypeRegistry!,
       logger: this.logger,
-      taskManager: plugins.task_manager,
+      taskManager: plugins.taskManager,
       securityPluginSetup: plugins.security,
+      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
+      spaceIdToNamespace,
       getSpaceId(request: Hapi.Request) {
         const spacesPlugin = plugins.spaces();
         return spacesPlugin ? spacesPlugin.getSpaceId(request) : undefined;
@@ -139,19 +128,17 @@ export class Plugin {
 
     this.taskRunnerFactory.initialize({
       logger: this.logger,
-      getServices(request: Hapi.Request): Services {
+      getServices(rawRequest: Hapi.Request): Services {
+        const request = KibanaRequest.from(rawRequest);
         return {
-          callCluster: (...args) =>
-            adminClient!.asScoped(KibanaRequest.from(request)).callAsCurrentUser(...args),
-          savedObjectsClient: core.savedObjects.getScopedSavedObjectsClient(request),
+          callCluster: (...args) => adminClient!.asScoped(request).callAsCurrentUser(...args),
+          // rawRequest is actually a fake request, converting it to KibanaRequest causes issue in SO access
+          savedObjectsClient: core.savedObjects.getScopedSavedObjectsClient(rawRequest as any),
         };
       },
+      spaceIdToNamespace,
       executeAction: plugins.actions.execute,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
-      spaceIdToNamespace(spaceId?: string): string | undefined {
-        const spacesPlugin = plugins.spaces();
-        return spacesPlugin && spaceId ? spacesPlugin.spaceIdToNamespace(spaceId) : undefined;
-      },
       getBasePath(spaceId?: string): string {
         const spacesPlugin = plugins.spaces();
         return spacesPlugin && spaceId ? spacesPlugin.getBasePath(spaceId) : serverBasePath!;
@@ -163,5 +150,11 @@ export class Plugin {
       getAlertsClientWithRequest: (request: Hapi.Request) =>
         alertsClientFactory!.create(KibanaRequest.from(request), request),
     };
+  }
+
+  public stop() {
+    if (this.licenseState) {
+      this.licenseState.clean();
+    }
   }
 }

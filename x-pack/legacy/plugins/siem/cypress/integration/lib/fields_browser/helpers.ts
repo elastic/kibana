@@ -42,3 +42,7 @@ export const clickOutsideFieldsBrowser = () => {
 export const filterFieldsBrowser = (fieldName: string) => {
   cy.get(FIELDS_BROWSER_FILTER_INPUT).type(fieldName);
 };
+
+export const clearFieldsBrowser = () => {
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{selectall}{backspace}');
+};

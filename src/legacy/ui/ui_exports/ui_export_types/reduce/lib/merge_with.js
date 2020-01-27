@@ -17,11 +17,8 @@
  * under the License.
  */
 
-const uniqueConcat = (arrayA, arrayB) => arrayB.reduce((acc, key) => (
-  acc.includes(key)
-    ? acc
-    : acc.concat(key)
-), arrayA);
+const uniqueConcat = (arrayA, arrayB) =>
+  arrayB.reduce((acc, key) => (acc.includes(key) ? acc : acc.concat(key)), arrayA);
 
 /**
  * Assign the keys from both objA and objB to target after passing the

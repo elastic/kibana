@@ -1,13 +1,9 @@
-@import '@elastic/eui/src/components/button/variables';
-@import '@elastic/eui/src/components/form/variables';
-
 /*!
  * ui-select
  * http://github.com/angular-ui/ui-select
  * Version: 0.19.5 - 2016-10-24T23:13:59.551Z
  * License: MIT
  */
-
 
 /* Style when highlighting a search. */
 .ui-select-highlight {
@@ -43,12 +39,12 @@
   padding-left: 0;
 }
 
-.select2-locked > .select2-search-choice-close{
-  display:none;
+.select2-locked > .select2-search-choice-close {
+  display: none;
 }
 
-.select-locked > .ui-select-match-close{
-  display:none;
+.select-locked > .ui-select-match-close {
+  display: none;
 }
 
 body > .select2-container.open {
@@ -56,42 +52,42 @@ body > .select2-container.open {
 }
 
 /* Handle up direction Select2 */
-.ui-select-container[theme="select2"].direction-up .ui-select-match,
+.ui-select-container[theme='select2'].direction-up .ui-select-match,
 .ui-select-container.select2.direction-up .ui-select-match {
-    border-radius: 4px; /* FIXME hardcoded value :-/ */
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
+  border-radius: 4px; /* FIXME hardcoded value :-/ */
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
-.ui-select-container[theme="select2"].direction-up .ui-select-dropdown,
+.ui-select-container[theme='select2'].direction-up .ui-select-dropdown,
 .ui-select-container.select2.direction-up .ui-select-dropdown {
-    border-radius: 4px; /* FIXME hardcoded value :-/ */
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+  border-radius: 4px; /* FIXME hardcoded value :-/ */
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 
-    border-top-width: 1px;  /* FIXME hardcoded value :-/ */
-    border-top-style: solid;
+  border-top-width: 1px; /* FIXME hardcoded value :-/ */
+  border-top-style: solid;
 
-    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.25);
 
-    margin-top: -4px; /* FIXME hardcoded value :-/ */
+  margin-top: -4px; /* FIXME hardcoded value :-/ */
 }
-.ui-select-container[theme="select2"].direction-up .ui-select-dropdown .select2-search,
+.ui-select-container[theme='select2'].direction-up .ui-select-dropdown .select2-search,
 .ui-select-container.select2.direction-up .ui-select-dropdown .select2-search {
-    margin-top: 4px; /* FIXME hardcoded value :-/ */
+  margin-top: 4px; /* FIXME hardcoded value :-/ */
 }
-.ui-select-container[theme="select2"].direction-up.select2-dropdown-open .ui-select-match,
+.ui-select-container[theme='select2'].direction-up.select2-dropdown-open .ui-select-match,
 .ui-select-container.select2.direction-up.select2-dropdown-open .ui-select-match {
-    border-bottom-color: $euiColorPrimary;
+  border-bottom-color: $euiColorPrimary;
 }
 
-.ui-select-container[theme="select2"] .ui-select-dropdown .ui-select-search-hidden,
-.ui-select-container[theme="select2"] .ui-select-dropdown .ui-select-search-hidden input{
-    opacity: 0;
-    height: 0;
-    min-height: 0;
-    padding: 0;
-    margin: 0;
-    border:0;
+.ui-select-container[theme='select2'] .ui-select-dropdown .ui-select-search-hidden,
+.ui-select-container[theme='select2'] .ui-select-dropdown .ui-select-search-hidden input {
+  opacity: 0;
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
 }
 
 /* Bootstrap theme */
@@ -133,12 +129,12 @@ body > .select2-container.open {
 }
 
 .ui-select-bootstrap .ui-select-search-hidden {
-    opacity: 0;
-    height: 0;
-    min-height: 0;
-    padding: 0;
-    margin: 0;
-    border:0;
+  opacity: 0;
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
 }
 
 .ui-select-bootstrap > .ui-select-match > .btn {
@@ -213,7 +209,7 @@ body > .ui-select-bootstrap.open {
 }
 
 .ui-select-multiple:hover .ui-select-match-item.dropping-before:before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   right: 100%;
@@ -223,7 +219,7 @@ body > .ui-select-bootstrap.open {
 }
 
 .ui-select-multiple:hover .ui-select-match-item.dropping-after:after {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 100%;
@@ -232,7 +228,7 @@ body > .ui-select-bootstrap.open {
   border-right: 1px solid $euiColorPrimary;
 }
 
-.ui-select-bootstrap .ui-select-choices-row>span {
+.ui-select-bootstrap .ui-select-choices-row > span {
   @include euiFontSizeS;
   @include euiTextTruncate;
   font-weight: inherit;
@@ -251,45 +247,44 @@ body > .ui-select-bootstrap.open {
   }
 }
 
-
-.ui-select-bootstrap .ui-select-choices-row.active>span {
-    color: $euiTextColor;
-    text-decoration: none;
-    outline: 0;
-    background-color: $euiFocusBackgroundColor;
+.ui-select-bootstrap .ui-select-choices-row.active > span {
+  color: $euiTextColor;
+  text-decoration: none;
+  outline: 0;
+  background-color: $euiFocusBackgroundColor;
 }
 
-.ui-select-bootstrap .ui-select-choices-row.disabled>span,
-.ui-select-bootstrap .ui-select-choices-row.active.disabled>span {
-    color: $euiButtonColorDisabled;
-    cursor: not-allowed;
-    background-color: transparent;
+.ui-select-bootstrap .ui-select-choices-row.disabled > span,
+.ui-select-bootstrap .ui-select-choices-row.active.disabled > span {
+  color: $euiButtonColorDisabled;
+  cursor: not-allowed;
+  background-color: transparent;
 }
 
 /* fix hide/show angular animation */
 .ui-select-match.ng-hide-add,
 .ui-select-search.ng-hide-add {
-    display: none !important;
+  display: none !important;
 }
 
 /* Mark invalid Bootstrap */
 .ui-select-bootstrap.ng-dirty.ng-invalid > button.btn.ui-select-match {
-    border-color: $euiColorDanger;
+  border-color: $euiColorDanger;
 }
 
 /* Handle up direction Bootstrap */
-.ui-select-container[theme="bootstrap"].direction-up .ui-select-dropdown {
+.ui-select-container[theme='bootstrap'].direction-up .ui-select-dropdown {
   @include euiBottomShadowMedium;
 }
 
 .ui-select-bootstrap .ui-select-match-text {
-    width: 100%;
-    padding-right: 1em;
+  width: 100%;
+  padding-right: 1em;
 }
 .ui-select-bootstrap .ui-select-match-text span {
-    display: inline-block;
-    width: 100%;
-    overflow: hidden;
+  display: inline-block;
+  width: 100%;
+  overflow: hidden;
 }
 .ui-select-bootstrap .ui-select-toggle > a.btn {
   position: absolute;
@@ -300,17 +295,17 @@ body > .ui-select-bootstrap.open {
 
 /* Spinner */
 .ui-select-refreshing {
-    position: absolute;
-    right: 0;
-    padding: 8px 27px;
-    top: 1px;
-    display: inline-block;
-    font-family: 'Glyphicons Halflings';
-    font-style: normal;
-    font-weight: normal;
-    line-height: 1;
-    -webkit-font-smoothing:antialiased;
- }
+  position: absolute;
+  right: 0;
+  padding: 8px 27px;
+  top: 1px;
+  display: inline-block;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+}
 
 @-webkit-keyframes ui-select-spin {
   0% {
@@ -341,7 +336,6 @@ body > .ui-select-bootstrap.open {
 .ui-select-refreshing.ng-animate {
   -webkit-animation: none 0s;
 }
-
 
 // Other Custom
 

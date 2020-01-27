@@ -5,7 +5,7 @@
  */
 
 import { isEqual, last } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -88,27 +88,6 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
     type,
     updateNetworkTable,
   }) => {
-    const onChange = (criteria: Criteria, tableType: networkModel.TopCountriesTableType) => {
-      if (criteria.sort != null) {
-        const splitField = criteria.sort.field.split('.');
-        const field = last(splitField);
-        const newSortDirection = field !== sort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
-        const newTopCountriesSort: NetworkTopTablesSortField = {
-          field: field as NetworkTopTablesFields,
-          direction: newSortDirection,
-        };
-        if (!isEqual(newTopCountriesSort, sort)) {
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: {
-              sort: newTopCountriesSort,
-            },
-          });
-        }
-      }
-    };
-
     let tableType: networkModel.TopCountriesTableType;
     const headerTitle: string =
       flowTargeted === FlowTargetSourceDest.source
@@ -133,15 +112,61 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
         ? `node.network.${sort.field}`
         : `node.${flowTargeted}.${sort.field}`;
 
+    const updateLimitPagination = useCallback(
+      newLimit =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { limit: newLimit },
+        }),
+      [type, updateNetworkTable, tableType]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { activePage: newPage },
+        }),
+      [type, updateNetworkTable, tableType]
+    );
+
+    const onChange = useCallback(
+      (criteria: Criteria) => {
+        if (criteria.sort != null) {
+          const splitField = criteria.sort.field.split('.');
+          const lastField = last(splitField);
+          const newSortDirection =
+            lastField !== sort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
+          const newTopCountriesSort: NetworkTopTablesSortField = {
+            field: lastField as NetworkTopTablesFields,
+            direction: newSortDirection as Direction,
+          };
+          if (!isEqual(newTopCountriesSort, sort)) {
+            updateNetworkTable({
+              networkType: type,
+              tableType,
+              updates: {
+                sort: newTopCountriesSort,
+              },
+            });
+          }
+        }
+      },
+      [type, sort, tableType, updateNetworkTable]
+    );
+
+    const columns = useMemo(
+      () =>
+        getCountriesColumnsCurated(indexPattern, flowTargeted, type, NetworkTopCountriesTableId),
+      [indexPattern, flowTargeted, type]
+    );
+
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getCountriesColumnsCurated(
-          indexPattern,
-          flowTargeted,
-          type,
-          NetworkTopCountriesTableId
-        )}
+        columns={columns}
         dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerTitle={headerTitle}
@@ -151,26 +176,14 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadPage={newActivePage => loadPage(newActivePage)}
-        onChange={criteria => onChange(criteria, tableType)}
+        loadPage={loadPage}
+        onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         sorting={{ field, direction: sort.direction }}
         totalCount={fakeTotalCount}
-        updateActivePage={newPage =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { activePage: newPage },
-          })
-        }
-        updateLimitPagination={newLimit =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { limit: newLimit },
-          })
-        }
+        updateActivePage={updateActivePage}
+        updateLimitPagination={updateLimitPagination}
       />
     );
   }

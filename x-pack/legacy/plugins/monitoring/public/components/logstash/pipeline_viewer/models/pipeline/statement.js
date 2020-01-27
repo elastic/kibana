@@ -6,12 +6,7 @@
 
 export class Statement {
   constructor(vertex) {
-    const {
-      id,
-      hasExplicitId,
-      stats,
-      meta
-    } = vertex;
+    const { id, hasExplicitId, stats, meta } = vertex;
 
     this.id = id;
     this.hasExplicitId = hasExplicitId;

@@ -23,19 +23,21 @@ import '../config';
 import { uiModules } from '../modules';
 import cssTmpl from './style_compile.css.tmpl';
 
-const $style = $('<style>').appendTo('head').attr('id', 'style-compile');
+const $style = $('<style>')
+  .appendTo('head')
+  .attr('id', 'style-compile');
 
-uiModules
-  .get('kibana')
-  .run(function ($rootScope, config) {
-    const truncateGradientHeight = 15;
-    const template = _.template(cssTmpl);
-    const locals = {};
+uiModules.get('kibana').run(function($rootScope, config) {
+  const truncateGradientHeight = 15;
+  const template = _.template(cssTmpl);
+  const locals = {};
 
-    // watch the value of the truncate:maxHeight config param
-    $rootScope.$watch(function () {
+  // watch the value of the truncate:maxHeight config param
+  $rootScope.$watch(
+    function() {
       return config.get('truncate:maxHeight');
-    }, function (maxHeight) {
+    },
+    function(maxHeight) {
       if (maxHeight > 0) {
         locals.truncateMaxHeight = maxHeight + 'px !important';
         locals.truncateGradientTop = maxHeight - truncateGradientHeight + 'px';
@@ -45,5 +47,6 @@ uiModules
       }
 
       $style.html(template(locals));
-    });
-  });
+    }
+  );
+});

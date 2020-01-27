@@ -17,16 +17,16 @@ export function apmInstancesRoute(server) {
     config: {
       validate: {
         params: Joi.object({
-          clusterUuid: Joi.string().required()
+          clusterUuid: Joi.string().required(),
         }),
         payload: Joi.object({
           ccs: Joi.string().optional(),
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+            max: Joi.date().required(),
+          }).required(),
+        }),
+      },
     },
     async handler(req) {
       const config = server.config();
@@ -35,19 +35,18 @@ export function apmInstancesRoute(server) {
       const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 
       try {
-
-        const [ stats, apms ] = await Promise.all([
+        const [stats, apms] = await Promise.all([
           getStats(req, apmIndexPattern, clusterUuid),
           getApms(req, apmIndexPattern, clusterUuid),
         ]);
 
         return {
           stats,
-          apms
+          apms,
         };
       } catch (err) {
         return handleError(err, req);
       }
-    }
+    },
   });
 }

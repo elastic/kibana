@@ -22,6 +22,7 @@ import { createFilterDateRange } from './date_range';
 import { DateFormat } from '../../../../../../plugins/data/public';
 import { AggConfigs } from '../../agg_configs';
 import { BUCKET_TYPES } from '../bucket_agg_types';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 
 jest.mock('ui/new_platform');
 
@@ -61,7 +62,7 @@ describe('AggConfig Filters', () => {
       const aggConfigs = getAggConfigs();
       const from = new Date('1 Feb 2015');
       const to = new Date('7 Feb 2015');
-      const filter = createFilterDateRange(aggConfigs.aggs[0], {
+      const filter = createFilterDateRange(aggConfigs.aggs[0] as IBucketAggConfig, {
         from: from.valueOf(),
         to: to.valueOf(),
       });

@@ -15,10 +15,13 @@ const description = i18n.translate('xpack.maps.visTypeAlias.description', {
   defaultMessage: 'Create and style maps with multiple layers and indices.',
 });
 
-const legacyMapVisualizationWarning = i18n.translate('xpack.maps.visTypeAlias.legacyMapVizWarning', {
-  defaultMessage: `Use the Maps app instead of Coordinate Map and Region Map.
+const legacyMapVisualizationWarning = i18n.translate(
+  'xpack.maps.visTypeAlias.legacyMapVizWarning',
+  {
+    defaultMessage: `Use the Maps app instead of Coordinate Map and Region Map.
 The Maps app offers more functionality and is easier to use.`,
-});
+  }
+);
 
 visualizationsSetup.types.registerAlias({
   aliasUrl: MAP_BASE_URL,

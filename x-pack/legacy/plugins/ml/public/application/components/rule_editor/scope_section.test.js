@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 // Mock the mlJobService that is imported for saving rules.
 jest.mock('../../services/job_service.js', () => 'mlJobService');
 
@@ -13,7 +12,7 @@ jest.mock('../../services/job_service.js', () => 'mlJobService');
 // with 'mock' so it can be used lazily.
 const mockCheckPermission = jest.fn(() => true);
 jest.mock('../../privilege/check_privilege', () => ({
-  checkPermission: (privilege) => mockCheckPermission(privilege)
+  checkPermission: privilege => mockCheckPermission(privilege),
 }));
 
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
@@ -22,21 +21,15 @@ import React from 'react';
 import { ScopeSection } from './scope_section';
 import { FILTER_TYPE } from '../../../../common/constants/detector_rule';
 
-
 describe('ScopeSection', () => {
-
-  const testFilterListIds = [
-    'web_domains',
-    'safe_domains',
-    'uk_domains',
-  ];
+  const testFilterListIds = ['web_domains', 'safe_domains', 'uk_domains'];
 
   const testScope = {
     domain: {
       filter_id: 'uk_domains',
       filter_type: FILTER_TYPE.INCLUDE,
       enabled: true,
-    }
+    },
   };
 
   const onEnabledChange = jest.fn(() => {});
@@ -55,9 +48,7 @@ describe('ScopeSection', () => {
       isEnabled: false,
     };
 
-    const component = shallowWithIntl(
-      <ScopeSection {...props} />
-    );
+    const component = shallowWithIntl(<ScopeSection {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -69,9 +60,7 @@ describe('ScopeSection', () => {
       isEnabled: false,
     };
 
-    const component = shallowWithIntl(
-      <ScopeSection {...props} />
-    );
+    const component = shallowWithIntl(<ScopeSection {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -84,9 +73,7 @@ describe('ScopeSection', () => {
       isEnabled: true,
     };
 
-    const component = shallowWithIntl(
-      <ScopeSection {...props} />
-    );
+    const component = shallowWithIntl(<ScopeSection {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -98,9 +85,7 @@ describe('ScopeSection', () => {
       isEnabled: true,
     };
 
-    const component = shallowWithIntl(
-      <ScopeSection {...props} />
-    );
+    const component = shallowWithIntl(<ScopeSection {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -113,17 +98,13 @@ describe('ScopeSection', () => {
       isEnabled: true,
     };
 
-    const component = shallowWithIntl(
-      <ScopeSection {...props} />
-    );
+    const component = shallowWithIntl(<ScopeSection {...props} />);
 
     expect(component).toMatchSnapshot();
   });
-
 });
 
 describe('ScopeSection false canGetFilters privilege', () => {
-
   beforeEach(() => {
     jest.resetModules();
   });
@@ -136,9 +117,7 @@ describe('ScopeSection false canGetFilters privilege', () => {
     updateScope,
   };
 
-
   test('show NoPermissionCallOut when no filter list IDs', () => {
-
     mockCheckPermission.mockImplementationOnce(() => {
       return false;
     });
@@ -150,11 +129,8 @@ describe('ScopeSection false canGetFilters privilege', () => {
       isEnabled: true,
     };
 
-    const component = shallowWithIntl(
-      <ScopeSection {...props} />
-    );
+    const component = shallowWithIntl(<ScopeSection {...props} />);
 
     expect(component).toMatchSnapshot();
   });
-
 });

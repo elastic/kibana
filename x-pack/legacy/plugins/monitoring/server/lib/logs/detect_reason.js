@@ -7,14 +7,16 @@
 import { createTimeFilter } from '../create_query';
 import { get } from 'lodash';
 
-
-async function doesFilebeatIndexExist(req, filebeatIndexPattern, { start, end, clusterUuid, nodeUuid, indexUuid }) {
+async function doesFilebeatIndexExist(
+  req,
+  filebeatIndexPattern,
+  { start, end, clusterUuid, nodeUuid, indexUuid }
+) {
   const metric = { timestampField: '@timestamp' };
-  const filter = [
-    createTimeFilter({ start, end, metric })
-  ];
+  const filter = [createTimeFilter({ start, end, metric })];
 
   const typeFilter = { term: { 'service.type': 'elasticsearch' } };
+  const structuredLogsFilter = { exists: { field: 'elasticsearch.cluster' } };
   const clusterFilter = { term: { 'elasticsearch.cluster.uuid': clusterUuid } };
   const nodeFilter = { term: { 'elasticsearch.node.id': nodeUuid } };
   const indexFilter = { term: { 'elasticsearch.index.name': indexUuid } };
@@ -23,66 +25,55 @@ async function doesFilebeatIndexExist(req, filebeatIndexPattern, { start, end, c
     query: {
       bool: {
         filter,
-      }
+      },
     },
   };
 
   const typeExistsAtAnyTimeQuery = {
     query: {
       bool: {
-        filter: [
-          typeFilter,
-        ]
-      }
+        filter: [typeFilter],
+      },
     },
   };
 
   const typeExistsQuery = {
     query: {
       bool: {
-        filter: [
-          ...filter,
-          typeFilter,
-        ]
-      }
+        filter: [...filter, typeFilter],
+      },
+    },
+  };
+
+  const usingStructuredLogsQuery = {
+    query: {
+      bool: {
+        filter: [...filter, typeFilter, structuredLogsFilter],
+      },
     },
   };
 
   const clusterExistsQuery = {
     query: {
       bool: {
-        filter: [
-          ...filter,
-          typeFilter,
-          clusterFilter
-        ]
-      }
+        filter: [...filter, typeFilter, clusterFilter],
+      },
     },
   };
 
   const nodeExistsQuery = {
     query: {
       bool: {
-        filter: [
-          ...filter,
-          typeFilter,
-          clusterFilter,
-          nodeFilter
-        ]
-      }
+        filter: [...filter, typeFilter, clusterFilter, nodeFilter],
+      },
     },
   };
 
   const indexExistsQuery = {
     query: {
       bool: {
-        filter: [
-          ...filter,
-          typeFilter,
-          clusterFilter,
-          indexFilter
-        ]
-      }
+        filter: [...filter, typeFilter, clusterFilter, indexFilter],
+      },
     },
   };
 
@@ -99,27 +90,20 @@ async function doesFilebeatIndexExist(req, filebeatIndexPattern, { start, end, c
     { ...defaultParams, ...typeExistsAtAnyTimeQuery },
     { index: filebeatIndexPattern },
     { ...defaultParams, ...typeExistsQuery },
+    { index: filebeatIndexPattern },
+    { ...defaultParams, ...usingStructuredLogsQuery },
   ];
 
   if (clusterUuid) {
-    body.push(...[
-      { index: filebeatIndexPattern },
-      { ...defaultParams, ...clusterExistsQuery },
-    ]);
+    body.push(...[{ index: filebeatIndexPattern }, { ...defaultParams, ...clusterExistsQuery }]);
   }
 
   if (nodeUuid) {
-    body.push(...[
-      { index: filebeatIndexPattern },
-      { ...defaultParams, ...nodeExistsQuery },
-    ]);
+    body.push(...[{ index: filebeatIndexPattern }, { ...defaultParams, ...nodeExistsQuery }]);
   }
 
   if (indexUuid) {
-    body.push(...[
-      { index: filebeatIndexPattern },
-      { ...defaultParams, ...indexExistsQuery },
-    ]);
+    body.push(...[{ index: filebeatIndexPattern }, { ...defaultParams, ...indexExistsQuery }]);
   }
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
@@ -129,17 +113,20 @@ async function doesFilebeatIndexExist(req, filebeatIndexPattern, { start, end, c
       indexPatternExistsInTimeRangeResponse,
       typeExistsAtAnyTimeResponse,
       typeExistsResponse,
+      usingStructuredLogsResponse,
       clusterExistsResponse,
       nodeExistsResponse,
-      indexExistsResponse
-    ]
+      indexExistsResponse,
+    ],
   } = await callWithRequest(req, 'msearch', { body });
 
   return {
     indexPatternExists: get(indexPatternExistsResponse, 'hits.total.value', 0) > 0,
-    indexPatternInTimeRangeExists: get(indexPatternExistsInTimeRangeResponse, 'hits.total.value', 0) > 0,
+    indexPatternInTimeRangeExists:
+      get(indexPatternExistsInTimeRangeResponse, 'hits.total.value', 0) > 0,
     typeExistsAtAnyTime: get(typeExistsAtAnyTimeResponse, 'hits.total.value', 0) > 0,
     typeExists: get(typeExistsResponse, 'hits.total.value', 0) > 0,
+    usingStructuredLogs: get(usingStructuredLogsResponse, 'hits.total.value', 0) > 0,
     clusterExists: clusterUuid ? get(clusterExistsResponse, 'hits.total.value', 0) > 0 : null,
     nodeExists: nodeUuid ? get(nodeExistsResponse, 'hits.total.value', 0) > 0 : null,
     indexExists: indexUuid ? get(indexExistsResponse, 'hits.total.value', 0) > 0 : null,

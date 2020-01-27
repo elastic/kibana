@@ -60,9 +60,7 @@ export function LocalNavWithTabs() {
           <KuiLocalTab href="#" isSelected>
             Overview
           </KuiLocalTab>
-          <KuiLocalTab href="#">
-            Your Documents
-          </KuiLocalTab>
+          <KuiLocalTab href="#">Your Documents</KuiLocalTab>
           <KuiLocalTab href="#" isDisabled>
             Another Tab
           </KuiLocalTab>

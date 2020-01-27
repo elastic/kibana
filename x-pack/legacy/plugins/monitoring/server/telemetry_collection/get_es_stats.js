@@ -16,8 +16,7 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
  * @return {Promise} Array of the Elasticsearch clusters.
  */
 export function getElasticsearchStats(server, callCluster, clusterUuids) {
-  return fetchElasticsearchStats(server, callCluster, clusterUuids)
-    .then(handleElasticsearchStats);
+  return fetchElasticsearchStats(server, callCluster, clusterUuids).then(handleElasticsearchStats);
 }
 
 /**
@@ -45,7 +44,7 @@ export function fetchElasticsearchStats(server, callCluster, clusterUuids) {
       'hits.hits._source.license.expiry_date',
       'hits.hits._source.license.expiry_date_in_millis',
       'hits.hits._source.cluster_stats',
-      'hits.hits._source.stack_stats'
+      'hits.hits._source.stack_stats',
     ],
     body: {
       query: {
@@ -56,13 +55,13 @@ export function fetchElasticsearchStats(server, callCluster, clusterUuids) {
              * have the license in it (that used to be in the .monitoring-data-2 index in cluster_info)
              */
             { term: { type: 'cluster_stats' } },
-            { terms: { cluster_uuid: clusterUuids } }
-          ]
-        }
+            { terms: { cluster_uuid: clusterUuids } },
+          ],
+        },
       },
       collapse: { field: 'cluster_uuid' },
-      sort: { timestamp: { order: 'desc' } }
-    }
+      sort: { timestamp: { order: 'desc' } },
+    },
   };
 
   return callCluster('search', params);

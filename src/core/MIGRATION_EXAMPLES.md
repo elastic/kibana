@@ -15,7 +15,10 @@ APIs to their New Platform equivalents.
       - [4. New Platform plugin](#4-new-platform-plugin)
     - [Accessing Services](#accessing-services)
   - [Chrome](#chrome)
-  
+    - [Updating an application navlink](#updating-application-navlink)
+  - [Chromeless Applications](#chromeless-applications)
+  - [Render HTML Content](#render-html-content)
+
 ## Configuration
 
 ### Declaring config schema
@@ -56,6 +59,62 @@ export const config = {
 export type MyPluginConfig = TypeOf<typeof config.schema>;
 ```
 
+### Using New Platform config in a new plugin
+
+After setting the config schema for your plugin, you might want to reach the configuration in the plugin.
+It is provided as part of the [PluginInitializerContext](../../docs/development/core/server/kibana-plugin-server.plugininitializercontext.md)
+in the *constructor* of the plugin:
+
+```ts
+// myPlugin/(public|server)/index.ts
+
+import { PluginInitializerContext } from 'kibana/server';
+import { MyPlugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new MyPlugin(initializerContext);
+}
+```
+
+```ts
+// myPlugin/(public|server)/plugin.ts
+
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext, PluginName } from 'kibana/server';
+import { MyPlugin } from './plugin';
+
+export class MyPlugin implements Plugin {
+  private readonly config$: Observable<MyPluginConfig>;
+  private readonly log: Logger;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.log = initializerContext.logger.get();
+    this.config$ = initializerContext.config.create();
+  }
+
+  public async setup(core: CoreSetup, deps: Record<PluginName, unknown>) {
+    const isEnabled = await this.config$.pipe(first()).toPromise();
+    ...
+  }
+  ...
+}
+}
+```
+
+Additionally, some plugins need to read other plugins' config to act accordingly (like timing out a request, matching ElasticSearch's timeout). For those use cases, the plugin can rely on the *globalConfig* and *env* properties in the context:
+
+```ts
+export class MyPlugin implements Plugin {
+...
+  public async setup(core: CoreSetup, deps: Record<PluginName, unknown>) {
+    const { mode: { dev }, packageInfo: { version } } = this.initializerContext.env;
+    const { elasticsearch: { shardTimeout }, path: { data } } = await this.initializerContext.config.legacy.globalConfig$
+      .pipe(first()).toPromise();
+    ...
+  }
+```
+
 ### Using New Platform config from a Legacy plugin
 
 During the migration process, you'll want to migrate your schema to the new
@@ -64,6 +123,7 @@ config service due to the way that config is tied to the `kibana.json` file
 (which does not exist for legacy plugins).
 
 There is a workaround though:
+
 - Create a New Platform plugin that contains your plugin's config schema in the new format
 - Expose the config from the New Platform plugin in its setup contract
 - Read the config from the setup contract in your legacy plugin
@@ -153,6 +213,7 @@ interface, which is exposed via the
 object injected into the `setup` method of server-side plugins.
 
 This interface has a different API with slightly different behaviors.
+
 - All input (body, query parameters, and URL parameters) must be validated using
   the `@kbn/config-schema` package. If no validation schema is provided, these
   values will be empty objects.
@@ -166,6 +227,7 @@ Because of the incompatibility between the legacy and New Platform HTTP Route
 API's it might be helpful to break up your migration work into several stages.
 
 ### 1. Legacy route registration
+
 ```ts
 // legacy/plugins/myplugin/index.ts
 import Joi from 'joi';
@@ -191,6 +253,7 @@ new kibana.Plugin({
 ```
 
 ### 2. New Platform shim using legacy router
+
 Create a New Platform shim and inject the legacy `server.route` into your
 plugin's setup function.
 
@@ -214,6 +277,7 @@ export default (kibana) => {
   }
 }
 ```
+
 ```ts
 // legacy/plugins/demoplugin/server/plugin.ts
 import { CoreSetup } from 'src/core/server';
@@ -246,11 +310,13 @@ export class Plugin {
 ```
 
 ### 3. New Platform shim using New Platform router
+
 We now switch the shim to use the real New Platform HTTP API's in `coreSetup`
 instead of relying on the legacy `server.route`. Since our plugin is now using
-the New Platform API's we are guaranteed that our HTTP route handling is 100% 
+the New Platform API's we are guaranteed that our HTTP route handling is 100%
 compatible with the New Platform. As a result, we will also have to adapt our
-route registration accordingly. 
+route registration accordingly.
+
 ```ts
 // legacy/plugins/demoplugin/index.ts
 import { Plugin } from './server/plugin';
@@ -268,6 +334,7 @@ export default (kibana) => {
   }
 }
 ```
+
 ```ts
 // legacy/plugins/demoplugin/server/plugin.ts
 import { schema } from '@kbn/config-schema';
@@ -298,8 +365,10 @@ class Plugin {
   }
 }
 ```
-If your plugin still relies on throwing Boom errors from routes, you can use the `router.handleLegacyErrors` 
+
+If your plugin still relies on throwing Boom errors from routes, you can use the `router.handleLegacyErrors`
 as a temporary solution until error migration is complete:
+
 ```ts
 // legacy/plugins/demoplugin/server/plugin.ts
 import { schema } from '@kbn/config-schema';
@@ -319,7 +388,7 @@ class Plugin {
           }),
         }
       },
-      router.wrapErrors((context, req, res) => {
+      router.handleLegacyErrors((context, req, res) => {
         throw Boom.notFound('not there'); // will be converted into proper New Platform error
       })
     )
@@ -327,11 +396,12 @@ class Plugin {
 }
 ```
 
-
 #### 4. New Platform plugin
+
 As the final step we delete the shim and move all our code into a New Platform
 plugin. Since we were already consuming the New Platform API's no code changes
 are necessary inside `plugin.ts`.
+
 ```ts
 // Move legacy/plugins/demoplugin/server/plugin.ts -> plugins/demoplugin/server/plugin.ts
 ```
@@ -395,7 +465,138 @@ elsewhere.
 | `chrome.setVisible`                                   | [`core.chrome.setIsVisible`](/docs/development/core/public/kibana-plugin-public.chromestart.setisvisible.md)                        |                                                                                                                                                                                  |
 | `chrome.getInjected`                                  | [`core.injectedMetadata.getInjected`](/docs/development/core/public/kibana-plugin-public.coresetup.injectedmetadata.md) (temporary) | A temporary API is available to read injected vars provided by legacy plugins. This will be removed after [#41990](https://github.com/elastic/kibana/issues/41990) is completed. |
 | `chrome.setRootTemplate` / `chrome.setRootController` | --                                                                                                                                  | Use application mounting via `core.application.register` (not currently avaiable to legacy plugins).                                                                             |
+| `chrome.navLinks.update`                              | [`core.appbase.updater`](/docs/development/core/public/kibana-plugin-public.appbase.updater_.md)                                    | Use the `updater$` property when registering your application via `core.application.register`                                                                                    |
 
 In most cases, the most convenient way to access these APIs will be via the
 [AppMountContext](/docs/development/core/public/kibana-plugin-public.appmountcontext.md)
 object passed to your application when your app is mounted on the page.
+
+### Updating an application navlink
+
+In the legacy platform, the navlink could be updated using `chrome.navLinks.update`
+
+```ts
+uiModules.get('xpack/ml').run(() => {
+  const showAppLink = xpackInfo.get('features.ml.showLinks', false);
+  const isAvailable = xpackInfo.get('features.ml.isAvailable', false);
+
+  const navLinkUpdates = {
+    // hide by default, only show once the xpackInfo is initialized
+    hidden: !showAppLink,
+    disabled: !showAppLink || (showAppLink && !isAvailable),
+  };
+
+  npStart.core.chrome.navLinks.update('ml', navLinkUpdates);
+});
+```
+
+In the new platform, navlinks should not be updated directly. Instead, it is now possible to add an `updater` when 
+registering an application to change the application or the navlink state at runtime.
+
+```ts
+// my_plugin has a required dependencie to the `licensing` plugin
+interface MyPluginSetupDeps {
+  licensing: LicensingPluginSetup;
+}
+
+export class MyPlugin implements Plugin {
+  setup({ application }, { licensing }: MyPluginSetupDeps) {
+    const updater$ = licensing.license$.pipe(
+      map(license => {
+        const { hidden, disabled } = calcStatusFor(license);
+        if (hidden) return { navLinkStatus: AppNavLinkStatus.hidden };
+        if (disabled) return { navLinkStatus: AppNavLinkStatus.disabled };
+        return { navLinkStatus: AppNavLinkStatus.default };
+      })
+    );
+
+    application.register({
+      id: 'my-app',
+      title: 'My App',
+      updater$,
+      async mount(params) {
+        const { renderApp } = await import('./application');
+        return renderApp(params);
+      },
+    });
+  }
+```
+
+## Chromeless Applications
+
+In Kibana, a "chromeless" application is one where the primary Kibana UI components
+such as header or navigation can be hidden. In the legacy platform these were referred to
+as "hidden" applications, and were set via the `hidden` property in a Kibana plugin.
+Chromeless applications are also not displayed in the left navbar.
+
+To mark an application as chromeless, specify `chromeless: false` when registering your application
+to hide the chrome UI when the application is mounted:
+
+```ts
+application.register({
+  id: 'chromeless',
+  chromeless: true,
+  async mount(context, params) {
+    /* ... */
+  },
+});
+```
+
+If you wish to render your application at a route that does not follow the `/app/${appId}` pattern,
+this can be done via the `appRoute` property. Doing this currently requires you to register a server
+route where you can return a bootstrapped HTML page for your application bundle. Instructions on
+registering this server route is covered in the next section: [Render HTML Content](#render-html-content).
+
+```ts
+application.register({
+  id: 'chromeless',
+  appRoute: '/chromeless',
+  chromeless: true,
+  async mount(context, params) {
+    /* ... */
+  },
+});
+```
+
+## Render HTML Content
+
+You can return a blank HTML page bootstrapped with the core application bundle from an HTTP route handler
+via the `rendering` context. You may wish to do this if you are rendering a chromeless application with a
+custom application route or have other custom rendering needs.
+
+```ts
+router.get(
+  { path: '/chromeless', validate: false },
+  (context, request, response) => {
+    const { http, rendering } = context.core;
+
+    return response.ok({
+      body: await rendering.render(), // generates an HTML document
+      headers: {
+        'content-security-policy': http.csp.header,
+      },
+    });
+  }
+);
+```
+
+You can also specify to exclude user data from the bundle metadata. User data
+comprises all UI Settings that are *user provided*, then injected into the page.
+You may wish to exclude fetching this data if not authorized or to slim the page
+size.
+
+```ts
+router.get(
+  { path: '/', validate: false },
+  (context, request, response) => {
+    const { http, rendering } = context.core;
+
+    return response.ok({
+      body: await rendering.render({ includeUserSettings: false }),
+      headers: {
+        'content-security-policy': http.csp.header,
+      },
+    });
+  }
+);
+```

@@ -35,7 +35,7 @@ export function getLoggerStream({ events, config }) {
   } else {
     dest = writeStr(config.dest, {
       flags: 'a',
-      encoding: 'utf8'
+      encoding: 'utf8',
     });
 
     logInterceptor.on('end', () => {

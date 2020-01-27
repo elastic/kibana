@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-export {
-  ForecastingModal,
-  FORECAST_DURATION_MAX_DAYS,
-}from './forecasting_modal';
+export { ForecastingModal, FORECAST_DURATION_MAX_DAYS } from './forecasting_modal';

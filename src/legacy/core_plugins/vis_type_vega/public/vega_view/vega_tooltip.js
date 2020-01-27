@@ -30,8 +30,14 @@ const tooltipId = 'vega-kibana-tooltip';
  */
 function createRect(left, top, width, height) {
   return {
-    left, top, width, height,
-    x: left, y: top, right: left + width, bottom: top + height,
+    left,
+    top,
+    width,
+    height,
+    x: left,
+    y: top,
+    right: left + width,
+    bottom: top + height,
   };
 }
 
@@ -61,9 +67,11 @@ export class TooltipHandler {
 
     const el = document.createElement('div');
     el.setAttribute('id', tooltipId);
-    ['vgaVis__tooltip', 'euiToolTipPopover', 'euiToolTip', `euiToolTip--${this.position}`].forEach(className => {
-      el.classList.add(className);
-    });
+    ['vgaVis__tooltip', 'euiToolTipPopover', 'euiToolTip', `euiToolTip--${this.position}`].forEach(
+      className => {
+        el.classList.add(className);
+      }
+    );
 
     // Sanitized HTML is created by the tooltip library,
     // with a large number of tests, hence suppressing eslint here.
@@ -88,7 +96,12 @@ export class TooltipHandler {
       );
     }
 
-    const pos = calculatePopoverPosition(anchorBounds, el.getBoundingClientRect(), this.position, this.padding);
+    const pos = calculatePopoverPosition(
+      anchorBounds,
+      el.getBoundingClientRect(),
+      this.position,
+      this.padding
+    );
 
     el.setAttribute('style', `top: ${pos.top}px; left: ${pos.left}px`);
   }

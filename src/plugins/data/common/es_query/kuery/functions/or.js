@@ -30,7 +30,7 @@ export function toElasticsearchQuery(node, indexPattern, config, context) {
 
   return {
     bool: {
-      should: children.map((child) => {
+      should: children.map(child => {
         return ast.toElasticsearchQuery(child, indexPattern, config, context);
       }),
       minimum_should_match: 1,

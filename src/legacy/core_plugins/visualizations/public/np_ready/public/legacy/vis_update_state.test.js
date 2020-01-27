@@ -31,13 +31,11 @@ function watchForChanges(obj) {
 }
 
 describe('updateOldState', () => {
-
   it('needs to be a function', () => {
     expect(typeof updateOldState).toBe('function');
   });
 
   describe('gauge conversion', () => {
-
     const oldGaugeChart = {
       type: 'gauge',
       fontSize: 12,
@@ -50,9 +48,9 @@ describe('updateOldState', () => {
         type: 'gauge',
         gauge: {
           style: {
-            fontSize: 12
-          }
-        }
+            fontSize: 12,
+          },
+        },
       });
       // The method is not allowed to modify the passed in object
       expect(isUnchanged()).toBe(true);
@@ -74,23 +72,20 @@ describe('updateOldState', () => {
           type: 'gauge',
           gauge: {
             gaugeType: 'Arc',
-          }
-        }
+          },
+        },
       };
       const state = updateOldState(oldState);
       expect(state.type).toBe('gauge');
       expect(state.params.type).toBe('gauge');
       expect(state.params.gauge.gaugeType).toBe('Arc');
     });
-
   });
 
   describe('terms agg conversion', () => {
     it('should update _term to _key', () => {
       const oldState = {
-        aggs: [
-          { type: 'terms', params: { orderBy: '_term' } }
-        ]
+        aggs: [{ type: 'terms', params: { orderBy: '_term' } }],
       };
       const state = updateOldState(oldState);
       expect(state.aggs[0].params.orderBy).toBe('_key');
@@ -101,13 +96,12 @@ describe('updateOldState', () => {
     it('should update showMeticsAtAllLevels to showMetricsAtAllLevels', () => {
       const oldState = {
         params: {
-          showMeticsAtAllLevels: false
-        }
+          showMeticsAtAllLevels: false,
+        },
       };
       const state = updateOldState(oldState);
       expect(state.params.showMetricsAtAllLevels).toBe(false);
       expect(state.params.showMeticsAtAllLevels).toBe(undefined);
     });
   });
-
 });

@@ -10,6 +10,7 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['monitoring']);
+  const find = getService('find');
 
   const SUBJ_LISTING_PAGE = 'logstashPipelinesListing';
 
@@ -24,7 +25,7 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
   const SUBJ_PIPELINES_EVENTS_EMITTED_RATES = `${SUBJ_TABLE_CONTAINER} > eventsEmittedRate`;
   const SUBJ_PIPELINES_NODE_COUNTS = `${SUBJ_TABLE_CONTAINER} > nodeCount`;
 
-  return new class LogstashPipelines {
+  return new (class LogstashPipelines {
     async isOnListing() {
       const pageId = await retry.try(() => testSubjects.find(SUBJ_LISTING_PAGE));
       return pageId !== null;
@@ -34,9 +35,17 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
       return PageObjects.monitoring.tableGetRowsFromContainer(SUBJ_TABLE_CONTAINER);
     }
 
+    async waitForTableToFinishLoading() {
+      await retry.try(async () => {
+        await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 5000);
+      });
+    }
+
     async getPipelinesAll() {
       const ids = await testSubjects.getVisibleTextAll(SUBJ_PIPELINES_IDS);
-      const eventsEmittedRates = await testSubjects.getVisibleTextAll(SUBJ_PIPELINES_EVENTS_EMITTED_RATES);
+      const eventsEmittedRates = await testSubjects.getVisibleTextAll(
+        SUBJ_PIPELINES_EVENTS_EMITTED_RATES
+      );
       const nodeCounts = await testSubjects.getVisibleTextAll(SUBJ_PIPELINES_NODE_COUNTS);
 
       // tuple-ize the icons and texts together into an array of objects
@@ -48,8 +57,8 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
           {
             id: ids[current],
             eventsEmittedRate: eventsEmittedRates[current],
-            nodeCount: nodeCounts[current]
-          }
+            nodeCount: nodeCounts[current],
+          },
         ];
       }, []);
     }
@@ -57,25 +66,29 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
     async clickIdCol() {
       const headerCell = await testSubjects.find(SUBJ_TABLE_SORT_ID_COL);
       const button = await headerCell.findByTagName('button');
-      return button.click();
+      await button.click();
+      await this.waitForTableToFinishLoading();
     }
 
     async clickEventsEmittedRateCol() {
       const headerCell = await testSubjects.find(SUBJ_TABLE_SORT_EVENTS_EMITTED_RATE_COL);
       const button = await headerCell.findByTagName('button');
-      return button.click();
+      await button.click();
+      await this.waitForTableToFinishLoading();
     }
 
-    setFilter(text) {
-      return PageObjects.monitoring.tableSetFilter(SUBJ_SEARCH_BAR, text);
+    async setFilter(text) {
+      await PageObjects.monitoring.tableSetFilter(SUBJ_SEARCH_BAR, text);
+      await this.waitForTableToFinishLoading();
     }
 
-    clearFilter() {
-      return PageObjects.monitoring.tableClearFilter(SUBJ_SEARCH_BAR);
+    async clearFilter() {
+      await PageObjects.monitoring.tableClearFilter(SUBJ_SEARCH_BAR);
+      await this.waitForTableToFinishLoading();
     }
 
     assertNoData() {
       return PageObjects.monitoring.assertTableNoData(SUBJ_TABLE_NO_DATA);
     }
-  };
+  })();
 }

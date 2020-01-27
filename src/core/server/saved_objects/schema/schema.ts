@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegacyConfig } from '../../legacy/config';
+import { LegacyConfig } from '../../legacy';
 
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;

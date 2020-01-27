@@ -8,10 +8,6 @@ import { GetDataFrameAnalyticsStatsResponseOk } from '../../../../../services/ml
 import { getAnalyticsJobsStats } from './get_analytics';
 import { DATA_FRAME_TASK_STATE } from '../../components/analytics_list/common';
 
-jest.mock('ui/index_patterns', () => ({
-  validateIndexPattern: () => true,
-}));
-
 describe('get_analytics', () => {
   test('should get analytics jobs stats', () => {
     // arrange

@@ -35,48 +35,54 @@ export interface HeaderSectionProps extends HeaderProps {
   id?: string;
   split?: boolean;
   subtitle?: string | React.ReactNode;
-  showInspect?: boolean;
   title: string | React.ReactNode;
   tooltip?: string;
 }
 
-export const HeaderSection = React.memo<HeaderSectionProps>(
-  ({ border, children, id, showInspect = false, split, subtitle, title, tooltip }) => (
-    <Header border={border}>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" responsive={false}>
-            <EuiFlexItem>
-              <EuiTitle>
-                <h2 data-test-subj="header-section-title">
-                  {title}
-                  {tooltip && (
-                    <>
-                      {' '}
-                      <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
-                    </>
-                  )}
-                </h2>
-              </EuiTitle>
+const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
+  border,
+  children,
+  id,
+  split,
+  subtitle,
+  title,
+  tooltip,
+}) => (
+  <Header border={border}>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem>
+        <EuiFlexGroup alignItems="center" responsive={false}>
+          <EuiFlexItem>
+            <EuiTitle>
+              <h2 data-test-subj="header-section-title">
+                {title}
+                {tooltip && (
+                  <>
+                    {' '}
+                    <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
+                  </>
+                )}
+              </h2>
+            </EuiTitle>
 
-              {subtitle && <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />}
-            </EuiFlexItem>
-
-            {id && (
-              <EuiFlexItem grow={false}>
-                <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        {children && (
-          <EuiFlexItem data-test-subj="header-section-supplements" grow={split ? true : false}>
-            {children}
+            {subtitle && <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />}
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </Header>
-  )
+
+          {id && (
+            <EuiFlexItem grow={false}>
+              <InspectButton queryId={id} inspectIndex={0} title={title} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      {children && (
+        <EuiFlexItem data-test-subj="header-section-supplements" grow={split ? true : false}>
+          {children}
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  </Header>
 );
-HeaderSection.displayName = 'HeaderSection';
+
+export const HeaderSection = React.memo(HeaderSectionComponent);

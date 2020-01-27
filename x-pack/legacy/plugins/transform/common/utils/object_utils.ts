@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
-
 // This is similar to lodash's get() except that it's TypeScript aware and is able to infer return types.
 // It splits the attribute key string and uses reduce with an idx check to access nested attributes.
 export const getNestedProperty = (
@@ -13,5 +11,5 @@ export const getNestedProperty = (
   accessor: string,
   defaultValue?: any
 ) => {
-  return accessor.split('.').reduce((o, i) => idx(o, _ => _[i]), obj) || defaultValue;
+  return accessor.split('.').reduce((o, i) => o?.[i], obj) || defaultValue;
 };

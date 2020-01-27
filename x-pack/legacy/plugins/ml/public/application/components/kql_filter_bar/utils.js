@@ -6,31 +6,14 @@
 import { npStart } from 'ui/new_platform';
 import { esKuery } from '../../../../../../../../src/plugins/data/public';
 
-const getAutocompleteProvider = language => npStart.plugins.data.autocomplete.getProvider(language);
-
-export async function getSuggestions(
-  query,
-  selectionStart,
-  indexPattern,
-  boolFilter
-) {
-  const autocompleteProvider = getAutocompleteProvider('kuery');
-  if (!autocompleteProvider) {
-    return [];
-  }
-  const config = {
-    get: () => true
-  };
-
-  const getAutocompleteSuggestions = autocompleteProvider({
-    config,
+export function getSuggestions(query, selectionStart, indexPattern, boolFilter) {
+  return npStart.plugins.data.autocomplete.getQuerySuggestions({
+    language: 'kuery',
     indexPatterns: [indexPattern],
-    boolFilter
-  });
-  return getAutocompleteSuggestions({
+    boolFilter,
     query,
     selectionStart,
-    selectionEnd: selectionStart
+    selectionEnd: selectionStart,
   });
 }
 
@@ -54,7 +37,7 @@ export function escapeDoubleQuotes(string) {
 
 export function getKqlQueryValues(inputValue, indexPattern) {
   const ast = esKuery.fromKueryExpression(inputValue);
-  const isAndOperator = (ast.function === 'and');
+  const isAndOperator = ast.function === 'and';
   const query = convertKueryToEsQuery(inputValue, indexPattern);
   const filteredFields = [];
 
@@ -65,10 +48,9 @@ export function getKqlQueryValues(inputValue, indexPattern) {
   // if ast.type == 'function' then layout of ast.arguments:
   // [{ arguments: [ { type: 'literal', value: 'AAL' } ] },{ arguments: [ { type: 'literal', value: 'AAL' } ] }]
   if (ast && Array.isArray(ast.arguments)) {
-
-    ast.arguments.forEach((arg) => {
+    ast.arguments.forEach(arg => {
       if (arg.arguments !== undefined) {
-        arg.arguments.forEach((nestedArg) => {
+        arg.arguments.forEach(nestedArg => {
           if (typeof nestedArg.value === 'string') {
             filteredFields.push(nestedArg.value);
           }
@@ -77,7 +59,6 @@ export function getKqlQueryValues(inputValue, indexPattern) {
         filteredFields.push(arg.value);
       }
     });
-
   }
 
   return {
@@ -85,7 +66,7 @@ export function getKqlQueryValues(inputValue, indexPattern) {
     filteredFields,
     queryString: inputValue,
     isAndOperator,
-    tableQueryString: inputValue
+    tableQueryString: inputValue,
   };
 }
 
@@ -102,10 +83,10 @@ export function removeFilterFromQueryString(currentQueryString, fieldName, field
   const queryPattern = getQueryPattern(fieldName, fieldValue);
   newQueryString = currentQueryString.replace(queryPattern, '');
   // match 'and' or 'or' at the start/end of the string
-  const endPattern = /\s(and|or)\s*$/ig;
-  const startPattern = /^\s*(and|or)\s/ig;
+  const endPattern = /\s(and|or)\s*$/gi;
+  const startPattern = /^\s*(and|or)\s/gi;
   // If string has a double operator (e.g. tag:thing or or tag:other) remove and replace with the first occurring operator
-  const invalidOperatorPattern = /\s+(and|or)\s+(and|or)\s+/ig;
+  const invalidOperatorPattern = /\s+(and|or)\s+(and|or)\s+/gi;
   newQueryString = newQueryString.replace(invalidOperatorPattern, ' $1 ');
   // If string starts/ends with 'and' or 'or' remove that as that is illegal kuery syntax
   newQueryString = newQueryString.replace(endPattern, '');

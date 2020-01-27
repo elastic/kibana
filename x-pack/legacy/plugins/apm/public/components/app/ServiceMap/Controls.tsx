@@ -12,10 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { CytoscapeContext } from './Cytoscape';
 import { FullscreenPanel } from './FullscreenPanel';
 
-const Container = styled('div')`
+const ControlsContainer = styled('div')`
   left: ${theme.gutterTypes.gutterMedium};
   position: absolute;
   top: ${theme.gutterTypes.gutterSmall};
+  z-index: 1; /* The element containing the cytoscape canvas has z-index = 0. */
 `;
 
 const Button = styled(EuiButtonIcon)`
@@ -83,7 +84,7 @@ export function Controls() {
   });
 
   return (
-    <Container>
+    <ControlsContainer>
       <ZoomPanel hasShadow={true} paddingSize="none">
         <ZoomInButton
           aria-label={zoomInLabel}
@@ -103,6 +104,6 @@ export function Controls() {
         />
       </ZoomPanel>
       <FullscreenPanel element={mapDomElement} />
-    </Container>
+    </ControlsContainer>
   );
 }

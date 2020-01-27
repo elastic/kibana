@@ -42,7 +42,10 @@ describe('MultiSearchRequest', () => {
   });
 
   test('should get the response from elastic msearch', async () => {
-    const searches = [{ body: 'body1', index: 'index' }, { body: 'body2', index: 'index' }];
+    const searches = [
+      { body: 'body1', index: 'index' },
+      { body: 'body2', index: 'index' },
+    ];
 
     const responses = await searchRequest.search(searches);
 

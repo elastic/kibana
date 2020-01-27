@@ -7,7 +7,7 @@
 import uuid from 'uuid';
 import React from 'react';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
-import { ActionToaster, AppToast } from '../toasters';
+import minimatch from 'minimatch';
 import { ViewMode } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import {
   IndexPatternMapping,
@@ -21,31 +21,7 @@ import { getLayerList } from './map_config';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import * as i18n from './translations';
 import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
-
-/**
- * Displays an error toast for the provided title and message
- *
- * @param errorTitle Title of error to display in toaster and modal
- * @param errorMessage Message to display in error modal when clicked
- * @param dispatchToaster provided by useStateToaster()
- */
-export const displayErrorToast = (
-  errorTitle: string,
-  errorMessage: string,
-  dispatchToaster: React.Dispatch<ActionToaster>
-) => {
-  const toast: AppToast = {
-    id: uuid.v4(),
-    title: errorTitle,
-    color: 'danger',
-    iconType: 'alert',
-    errors: [errorMessage],
-  };
-  dispatchToaster({
-    type: 'addToaster',
-    toast,
-  });
-};
+import { IndexPatternSavedObject } from '../ml_popover/types';
 
 /**
  * Creates MapEmbeddable with provided initial configuration
@@ -133,4 +109,26 @@ export const createEmbeddable = async (
   });
 
   return embeddableObject;
+};
+
+/**
+ * Returns kibanaIndexPatterns that wildcard match at least one of siemDefaultIndices
+ *
+ * @param kibanaIndexPatterns
+ * @param siemDefaultIndices
+ */
+export const findMatchingIndexPatterns = ({
+  kibanaIndexPatterns,
+  siemDefaultIndices,
+}: {
+  kibanaIndexPatterns: IndexPatternSavedObject[];
+  siemDefaultIndices: string[];
+}): IndexPatternSavedObject[] => {
+  try {
+    return kibanaIndexPatterns.filter(kip =>
+      siemDefaultIndices.some(sdi => minimatch(sdi, kip.attributes.title))
+    );
+  } catch {
+    return [];
+  }
 };

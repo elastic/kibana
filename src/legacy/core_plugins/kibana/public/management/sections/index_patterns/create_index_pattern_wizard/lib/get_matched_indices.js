@@ -38,8 +38,8 @@ function filterSystemIndices(indices, isIncludingSystemIndices) {
 
   const acceptableIndices = isIncludingSystemIndices
     ? indices
-    // All system indices begin with a period.
-    : indices.filter(index => !isSystemIndex(index.name));
+    : // All system indices begin with a period.
+      indices.filter(index => !isSystemIndex(index.name));
 
   return acceptableIndices.slice(0, MAX_NUMBER_OF_MATCHING_INDICES);
 }
@@ -70,8 +70,14 @@ export function getMatchedIndices(
   isIncludingSystemIndices
 ) {
   const allIndices = filterSystemIndices(unfilteredAllIndices, isIncludingSystemIndices);
-  const partialMatchedIndices = filterSystemIndices(unfilteredPartialMatchedIndices, isIncludingSystemIndices);
-  const exactMatchedIndices = filterSystemIndices(unfilteredExactMatchedIndices, isIncludingSystemIndices);
+  const partialMatchedIndices = filterSystemIndices(
+    unfilteredPartialMatchedIndices,
+    isIncludingSystemIndices
+  );
+  const exactMatchedIndices = filterSystemIndices(
+    unfilteredExactMatchedIndices,
+    isIncludingSystemIndices
+  );
 
   // We need to pick one to show in the UI and there is a priority here
   // 1) If there are exact matches, show those as the query is good to go
@@ -81,11 +87,9 @@ export function getMatchedIndices(
   let visibleIndices;
   if (exactMatchedIndices.length) {
     visibleIndices = exactMatchedIndices;
-  }
-  else if (partialMatchedIndices.length) {
+  } else if (partialMatchedIndices.length) {
     visibleIndices = partialMatchedIndices;
-  }
-  else {
+  } else {
     visibleIndices = allIndices;
   }
 

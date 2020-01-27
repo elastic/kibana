@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { ConfigPath, ObjectToConfigAdapter } from '../../config';
+import { ConfigPath } from '../../config';
+import { ObjectToConfigAdapter } from '../../config/object_to_config_adapter';
+import { LegacyVars } from '../types';
 
 /**
  * Represents logging config supported by the legacy platform.
@@ -58,23 +60,27 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
 
   private static transformServer(configValue: any = {}) {
     // TODO: New platform uses just a subset of `server` config from the legacy platform,
-    // new values will be exposed once we need them (eg. customResponseHeaders or xsrf).
+    // new values will be exposed once we need them
     return {
       autoListen: configValue.autoListen,
       basePath: configValue.basePath,
       cors: configValue.cors,
+      customResponseHeaders: configValue.customResponseHeaders,
       host: configValue.host,
       maxPayload: configValue.maxPayloadBytes,
+      name: configValue.name,
       port: configValue.port,
       rewriteBasePath: configValue.rewriteBasePath,
       ssl: configValue.ssl,
       keepaliveTimeout: configValue.keepaliveTimeout,
       socketTimeout: configValue.socketTimeout,
       compression: configValue.compression,
+      uuid: configValue.uuid,
+      xsrf: configValue.xsrf,
     };
   }
 
-  private static transformPlugins(configValue: Record<string, any>) {
+  private static transformPlugins(configValue: LegacyVars) {
     // These properties are the only ones we use from the existing `plugins` config node
     // since `scanDirs` isn't respected by new platform plugin discovery.
     return {
@@ -91,7 +97,7 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
       case 'server':
         return LegacyObjectToConfigAdapter.transformServer(configValue);
       case 'plugins':
-        return LegacyObjectToConfigAdapter.transformPlugins(configValue as Record<string, any>);
+        return LegacyObjectToConfigAdapter.transformPlugins(configValue as LegacyVars);
       default:
         return configValue;
     }

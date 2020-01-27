@@ -223,7 +223,11 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
         : true;
 
     const addButton = (
-      <EuiButton onClick={this.addNewCustomUrl} isDisabled={!isValidEditorSettings}>
+      <EuiButton
+        onClick={this.addNewCustomUrl}
+        isDisabled={!isValidEditorSettings}
+        data-test-subj="mlJobAddCustomUrl"
+      >
         <FormattedMessage
           id="xpack.ml.jobsList.editJobFlyout.customUrls.addButtonLabel"
           defaultMessage="Add"
@@ -270,7 +274,12 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       </EuiPanel>
     ) : (
       <EuiOverlayMask>
-        <EuiModal onClose={this.closeEditor} initialFocus="[name=label]" style={{ width: 500 }}>
+        <EuiModal
+          onClose={this.closeEditor}
+          initialFocus="[name=label]"
+          style={{ width: 500 }}
+          data-test-subj="mlJobNewCustomUrlFormModal"
+        >
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage
@@ -299,7 +308,11 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       <>
         <EuiSpacer size="m" />
         {(!editorOpen || editMode === 'modal') && (
-          <EuiButton size="s" onClick={this.editNewCustomUrl}>
+          <EuiButton
+            size="s"
+            onClick={this.editNewCustomUrl}
+            data-test-subj="mlJobOpenCustomUrlFormButton"
+          >
             <FormattedMessage
               id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
               defaultMessage="Add custom URL"

@@ -22,14 +22,14 @@ export class GrokdebuggerResponse {
     const docs = get(upstreamGrokdebuggerResponse, 'docs');
     const error = docs[0].error;
     if (!isEmpty(error)) {
-      const opts = { 'error': i18n.translate(
-        'xpack.grokDebugger.patternsErrorMessage', {
+      const opts = {
+        error: i18n.translate('xpack.grokDebugger.patternsErrorMessage', {
           defaultMessage: 'Provided {grokLogParsingTool} patterns do not match data in the input',
           values: {
-            grokLogParsingTool: 'Grok'
-          }
-        }
-      ), };
+            grokLogParsingTool: 'Grok',
+          },
+        }),
+      };
       return new GrokdebuggerResponse(opts);
     }
     const structuredEvent = omit(get(docs, '0.doc._source'), 'rawEvent');

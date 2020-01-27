@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
@@ -13,12 +12,8 @@ import { SkeletonRow } from './index';
 
 describe('SkeletonRow', () => {
   test('it renders', () => {
-    const wrapper = shallow(
-      <TestProviders>
-        <SkeletonRow />
-      </TestProviders>
-    );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    const wrapper = shallow(<SkeletonRow />);
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders the correct number of cells if cellCount is specified', () => {

@@ -35,8 +35,7 @@ import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { debounce, compact, isEqual } from 'lodash';
 import { Toast } from 'src/core/public';
 import {
-  AutocompleteSuggestion,
-  AutocompleteSuggestionType,
+  autocomplete,
   IDataPluginServices,
   IIndexPattern,
   PersistedLog,
@@ -58,7 +57,7 @@ interface Props {
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
-  prepend?: React.ReactNode;
+  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
   placeholder?: string;
@@ -71,7 +70,7 @@ interface Props {
 interface State {
   isSuggestionsVisible: boolean;
   index: number | null;
-  suggestions: AutocompleteSuggestion[];
+  suggestions: autocomplete.QuerySuggestion[];
   suggestionLimit: number;
   selectionStart: number | null;
   selectionEnd: number | null;
@@ -90,7 +89,7 @@ const KEY_CODES = {
   END: 35,
 };
 
-const recentSearchType: AutocompleteSuggestionType = 'recentSearch';
+const recentSearchType: autocomplete.QuerySuggestionType = 'recentSearch';
 
 export class QueryStringInputUI extends Component<Props, State> {
   public state: State = {
@@ -106,6 +105,7 @@ export class QueryStringInputUI extends Component<Props, State> {
   public inputRef: HTMLInputElement | null = null;
 
   private persistedLog: PersistedLog | undefined;
+  private abortController: AbortController | undefined;
   private services = this.props.kibana.services;
   private componentIsUnmounting = false;
 
@@ -137,15 +137,14 @@ export class QueryStringInputUI extends Component<Props, State> {
       return;
     }
 
-    const uiSettings = this.services.uiSettings;
     const language = this.props.query.language;
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
-    const autocompleteProvider = this.services.data.autocomplete.getProvider(language);
+    const hasQuerySuggestions = this.services.data.autocomplete.hasQuerySuggestions(language);
 
     if (
-      !autocompleteProvider ||
+      !hasQuerySuggestions ||
       !Array.isArray(this.state.indexPatterns) ||
       compact(this.state.indexPatterns).length === 0
     ) {
@@ -153,22 +152,32 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
 
     const indexPatterns = this.state.indexPatterns;
-    const getAutocompleteSuggestions = autocompleteProvider({
-      config: uiSettings,
-      indexPatterns,
-    });
 
     const { selectionStart, selectionEnd } = this.inputRef;
     if (selectionStart === null || selectionEnd === null) {
       return;
     }
 
-    const suggestions: AutocompleteSuggestion[] = await getAutocompleteSuggestions({
-      query: queryString,
-      selectionStart,
-      selectionEnd,
-    });
-    return [...suggestions, ...recentSearchSuggestions];
+    try {
+      if (this.abortController) this.abortController.abort();
+      this.abortController = new AbortController();
+      const suggestions =
+        (await this.services.data.autocomplete.getQuerySuggestions({
+          language,
+          indexPatterns,
+          query: queryString,
+          selectionStart,
+          selectionEnd,
+          signal: this.abortController.signal,
+        })) || [];
+
+      return [...suggestions, ...recentSearchSuggestions];
+    } catch (e) {
+      // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
+      // Ignore aborted requests
+      if (e.message === 'The user aborted a request.') return;
+      throw e;
+    }
   };
 
   private getRecentSearchSuggestions = (query: string) => {
@@ -310,7 +319,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private selectSuggestion = (suggestion: AutocompleteSuggestion) => {
+  private selectSuggestion = (suggestion: autocomplete.QuerySuggestion) => {
     if (!this.inputRef) {
       return;
     }
@@ -340,7 +349,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private handleNestedFieldSyntaxNotification = (suggestion: AutocompleteSuggestion) => {
+  private handleNestedFieldSyntaxNotification = (suggestion: autocomplete.QuerySuggestion) => {
     if (
       'field' in suggestion &&
       suggestion.field.subType &&
@@ -442,7 +451,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private onClickSuggestion = (suggestion: AutocompleteSuggestion) => {
+  private onClickSuggestion = (suggestion: autocomplete.QuerySuggestion) => {
     if (!this.inputRef) {
       return;
     }

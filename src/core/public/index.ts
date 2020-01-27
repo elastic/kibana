@@ -55,7 +55,7 @@ import {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
 } from './chrome';
-import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
+import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
@@ -77,9 +77,38 @@ import {
 } from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
-export { RecursiveReadonly } from '../utils';
+export { RecursiveReadonly, DEFAULT_APP_CATEGORIES } from '../utils';
+export {
+  AppCategory,
+  UiSettingsParams,
+  UserProvidedValues,
+  UiSettingsType,
+  ImageValidation,
+  StringValidation,
+  StringValidationRegex,
+  StringValidationRegexString,
+} from '../types';
 
-export { App, AppBase, AppUnmount, AppMountContext, AppMountParameters } from './application';
+export {
+  ApplicationSetup,
+  ApplicationStart,
+  App,
+  AppBase,
+  AppMount,
+  AppMountDeprecated,
+  AppUnmount,
+  AppMountContext,
+  AppMountParameters,
+  AppLeaveHandler,
+  AppLeaveActionType,
+  AppLeaveAction,
+  AppLeaveDefaultAction,
+  AppLeaveConfirmAction,
+  AppStatus,
+  AppNavLinkStatus,
+  AppUpdatableFields,
+  AppUpdater,
+} from './application';
 
 export {
   SavedObjectsBatchResponse,
@@ -101,10 +130,16 @@ export {
   SavedObjectsClientContract,
   SavedObjectsClient,
   SimpleSavedObject,
+  SavedObjectsImportResponse,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportError,
+  SavedObjectsImportRetry,
 } from './saved_objects';
 
 export {
-  HttpServiceBase,
   HttpHeadersInit,
   HttpRequestInit,
   HttpFetchOptions,
@@ -112,14 +147,13 @@ export {
   HttpErrorResponse,
   HttpErrorRequest,
   HttpInterceptor,
-  HttpResponse,
+  IHttpResponse,
   HttpHandler,
-  HttpBody,
   IBasePath,
   IAnonymousPaths,
   IHttpInterceptController,
   IHttpFetchError,
-  InterceptedHttpResponse,
+  IHttpResponseInterceptorOverrides,
 } from './http';
 
 export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
@@ -146,10 +180,13 @@ export { MountPoint, UnmountCallback } from './types';
  * navigation in the generated docs until there's a fix for
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
-export interface CoreSetup {
+export interface CoreSetup<TPluginsStart extends object = object> {
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
-  /** {@link ContextSetup} */
+  /**
+   * {@link ContextSetup}
+   * @deprecated
+   */
   context: ContextSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
@@ -168,6 +205,13 @@ export interface CoreSetup {
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
+
+  /**
+   * Allows plugins to get access to APIs available in start inside async
+   * handlers, such as {@link App.mount}. Promise will not resolve until Core
+   * and plugin dependencies have completed `start`.
+   */
+  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
 }
 
 /**
@@ -198,6 +242,8 @@ export interface CoreStart {
   overlays: OverlayStart;
   /** {@link IUiSettingsClient} */
   uiSettings: IUiSettingsClient;
+  /** {@link FatalErrorsStart} */
+  fatalErrors: FatalErrorsStart;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -219,7 +265,7 @@ export interface CoreStart {
  * @public
  * @deprecated
  */
-export interface LegacyCoreSetup extends CoreSetup {
+export interface LegacyCoreSetup extends CoreSetup<any> {
   /** @deprecated */
   injectedMetadata: InjectedMetadataSetup;
 }
@@ -240,8 +286,6 @@ export interface LegacyCoreStart extends CoreStart {
 }
 
 export {
-  ApplicationSetup,
-  ApplicationStart,
   Capabilities,
   ChromeBadge,
   ChromeBrand,
@@ -270,6 +314,7 @@ export {
   DocLinksStart,
   FatalErrorInfo,
   FatalErrorsSetup,
+  FatalErrorsStart,
   HttpSetup,
   HttpStart,
   I18nStart,

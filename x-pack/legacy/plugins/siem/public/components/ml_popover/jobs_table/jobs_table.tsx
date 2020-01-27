@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import chrome from 'ui/chrome';
 import React, { useEffect, useState } from 'react';
 
@@ -81,7 +83,7 @@ const getJobsTableColumns = (
       ),
     align: CENTER_ALIGNMENT,
     width: '80px',
-  },
+  } as const,
 ];
 
 const getPaginatedItems = (items: SiemJob[], pageIndex: number, pageSize: number): SiemJob[] =>

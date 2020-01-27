@@ -58,6 +58,10 @@ configService.atPath.mockReturnValue(
       verificationMode: 'none',
     },
     compression: { enabled: true },
+    xsrf: {
+      disableProtection: true,
+      whitelist: [],
+    },
   } as any)
 );
 

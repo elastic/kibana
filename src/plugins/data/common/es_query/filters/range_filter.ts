@@ -88,6 +88,10 @@ export const isScriptedRangeFilter = (filter: any): filter is RangeFilter => {
   return hasRangeKeys(params);
 };
 
+export const getRangeFilterField = (filter: RangeFilter) => {
+  return filter.range && Object.keys(filter.range)[0];
+};
+
 const formatValue = (field: IFieldType, params: any[]) =>
   map(params, (val: any, key: string) => get(operators, key) + format(field, val)).join(' ');
 

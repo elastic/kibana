@@ -10,58 +10,57 @@ export function MonitoringClusterOverviewProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  const SUBJ_CLUSTER_ALERTS   = `clusterAlertsContainer`;
+  const SUBJ_CLUSTER_ALERTS = `clusterAlertsContainer`;
   const SUBJ_CLUSTER_OVERVIEW = 'clusterOverviewContainer';
-  const SUBJ_CLUSTER_NAME     = `${SUBJ_CLUSTER_OVERVIEW} > clusterName`;
+  const SUBJ_CLUSTER_NAME = `${SUBJ_CLUSTER_OVERVIEW} > clusterName`;
 
-  const SUBJ_ES_PANEL             = `clusterItemContainerElasticsearch`;
-  const SUBJ_ES_STATUS            = `${SUBJ_ES_PANEL} > statusIcon`;
-  const SUBJ_ES_VERSION           = `${SUBJ_ES_PANEL} > esVersion`;
-  const SUBJ_ES_UPTIME            = `${SUBJ_ES_PANEL} > esUptime`;
-  const SUBJ_ES_OVERVIEW          = `${SUBJ_ES_PANEL} > esOverview`;
-  const SUBJ_ES_NUMBER_OF_NODES   = `${SUBJ_ES_PANEL} > esNumberOfNodes`;
-  const SUBJ_ES_DISK_AVAILABLE    = `${SUBJ_ES_PANEL} > esDiskAvailable`;
-  const SUBJ_ES_JVM_HEAP          = `${SUBJ_ES_PANEL} > esJvmHeap`;
+  const SUBJ_ES_PANEL = `clusterItemContainerElasticsearch`;
+  const SUBJ_ES_STATUS = `${SUBJ_ES_PANEL} > statusIcon`;
+  const SUBJ_ES_VERSION = `${SUBJ_ES_PANEL} > esVersion`;
+  const SUBJ_ES_UPTIME = `${SUBJ_ES_PANEL} > esUptime`;
+  const SUBJ_ES_OVERVIEW = `${SUBJ_ES_PANEL} > esOverview`;
+  const SUBJ_ES_NUMBER_OF_NODES = `${SUBJ_ES_PANEL} > esNumberOfNodes`;
+  const SUBJ_ES_DISK_AVAILABLE = `${SUBJ_ES_PANEL} > esDiskAvailable`;
+  const SUBJ_ES_JVM_HEAP = `${SUBJ_ES_PANEL} > esJvmHeap`;
   const SUBJ_ES_NUMBER_OF_INDICES = `${SUBJ_ES_PANEL} > esNumberOfIndices`;
-  const SUBJ_ES_DOCUMENTS_COUNT   = `${SUBJ_ES_PANEL} > esDocumentsCount`;
-  const SUBJ_ES_DISK_USAGE        = `${SUBJ_ES_PANEL} > esDiskUsage`;
-  const SUBJ_ES_PRIMARY_SHARDS    = `${SUBJ_ES_PANEL} > esPrimaryShards`;
-  const SUBJ_ES_REPLICA_SHARDS    = `${SUBJ_ES_PANEL} > esReplicaShards`;
-  const SUBJ_ES_ML_JOBS           = `${SUBJ_ES_PANEL} > esMlJobs`;
+  const SUBJ_ES_DOCUMENTS_COUNT = `${SUBJ_ES_PANEL} > esDocumentsCount`;
+  const SUBJ_ES_DISK_USAGE = `${SUBJ_ES_PANEL} > esDiskUsage`;
+  const SUBJ_ES_PRIMARY_SHARDS = `${SUBJ_ES_PANEL} > esPrimaryShards`;
+  const SUBJ_ES_REPLICA_SHARDS = `${SUBJ_ES_PANEL} > esReplicaShards`;
+  const SUBJ_ES_ML_JOBS = `${SUBJ_ES_PANEL} > esMlJobs`;
 
-  const SUBJ_KBN_PANEL             = `clusterItemContainerKibana`;
-  const SUBJ_KBN_STATUS            = `${SUBJ_KBN_PANEL} > statusIcon`;
-  const SUBJ_KBN_REQUESTS          = `${SUBJ_KBN_PANEL} > kbnRequests`;
+  const SUBJ_KBN_PANEL = `clusterItemContainerKibana`;
+  const SUBJ_KBN_STATUS = `${SUBJ_KBN_PANEL} > statusIcon`;
+  const SUBJ_KBN_REQUESTS = `${SUBJ_KBN_PANEL} > kbnRequests`;
   const SUBJ_KBN_MAX_RESPONSE_TIME = `${SUBJ_KBN_PANEL} > kbnMaxResponseTime`;
-  const SUBJ_KBN_CONNECTIONS       = `${SUBJ_KBN_PANEL} > kbnConnections`;
-  const SUBJ_KBN_MEMORY_USAGE      = `${SUBJ_KBN_PANEL} > kbnMemoryUsage`;
-  const SUBJ_KBN_OVERVIEW          = `${SUBJ_KBN_PANEL} > kbnOverview`;
-  const SUBJ_KBN_INSTANCES         = `${SUBJ_KBN_PANEL} > kbnInstances`;
+  const SUBJ_KBN_CONNECTIONS = `${SUBJ_KBN_PANEL} > kbnConnections`;
+  const SUBJ_KBN_MEMORY_USAGE = `${SUBJ_KBN_PANEL} > kbnMemoryUsage`;
+  const SUBJ_KBN_OVERVIEW = `${SUBJ_KBN_PANEL} > kbnOverview`;
+  const SUBJ_KBN_INSTANCES = `${SUBJ_KBN_PANEL} > kbnInstances`;
 
-  const SUBJ_LS_PANEL           = `clusterItemContainerLogstash`;
+  const SUBJ_LS_PANEL = `clusterItemContainerLogstash`;
   const SUBJ_LS_EVENTS_RECEIVED = `${SUBJ_LS_PANEL} > lsEventsReceived`;
-  const SUBJ_LS_EVENTS_EMITTED  = `${SUBJ_LS_PANEL} > lsEventsEmitted`;
-  const SUBJ_LS_NODES           = `${SUBJ_LS_PANEL} > lsNodes`;
-  const SUBJ_LS_UPTIME          = `${SUBJ_LS_PANEL} > lsUptime`;
-  const SUBJ_LS_JVM_HEAP        = `${SUBJ_LS_PANEL} > lsJvmHeap`;
-  const SUBJ_LS_PIPELINES       = `${SUBJ_LS_PANEL} > lsPipelines`;
+  const SUBJ_LS_EVENTS_EMITTED = `${SUBJ_LS_PANEL} > lsEventsEmitted`;
+  const SUBJ_LS_NODES = `${SUBJ_LS_PANEL} > lsNodes`;
+  const SUBJ_LS_UPTIME = `${SUBJ_LS_PANEL} > lsUptime`;
+  const SUBJ_LS_JVM_HEAP = `${SUBJ_LS_PANEL} > lsJvmHeap`;
+  const SUBJ_LS_PIPELINES = `${SUBJ_LS_PANEL} > lsPipelines`;
 
-  const SUBJ_BEATS_PANEL            = `clusterItemContainerBeats`;
-  const SUBJ_BEATS_OVERVIEW         = `${SUBJ_BEATS_PANEL} > beatsOverview`;
+  const SUBJ_BEATS_PANEL = `clusterItemContainerBeats`;
+  const SUBJ_BEATS_OVERVIEW = `${SUBJ_BEATS_PANEL} > beatsOverview`;
   const SUBJ_BEATS_TOTAL_EVENTS = `${SUBJ_BEATS_PANEL} > beatsTotalEvents`;
-  const SUBJ_BEATS_BYTES_SENT       = `${SUBJ_BEATS_PANEL} > beatsBytesSent`;
-  const SUBJ_BEATS_LISTING          = `${SUBJ_BEATS_PANEL} > beatsListing`;
-  const SUBJ_BEATS_TYPES_COUNTS     = `${SUBJ_BEATS_PANEL} > beatTypeCount`;
+  const SUBJ_BEATS_BYTES_SENT = `${SUBJ_BEATS_PANEL} > beatsBytesSent`;
+  const SUBJ_BEATS_LISTING = `${SUBJ_BEATS_PANEL} > beatsListing`;
+  const SUBJ_BEATS_TYPES_COUNTS = `${SUBJ_BEATS_PANEL} > beatTypeCount`;
 
-  return new class ClusterOverview {
-
+  return new (class ClusterOverview {
     async isOnClusterOverview() {
-      await retry.try(async () =>  {
-        const clusterHeadingElement  = await testSubjects.find(SUBJ_CLUSTER_NAME);
+      await retry.try(async () => {
+        const clusterHeadingElement = await testSubjects.find(SUBJ_CLUSTER_NAME);
         expect(await clusterHeadingElement.isDisplayed()).to.be(true);
       });
-      await retry.try(async () =>  {
-        const clusterHeading  = await testSubjects.find(SUBJ_CLUSTER_NAME);
+      await retry.try(async () => {
+        const clusterHeading = await testSubjects.find(SUBJ_CLUSTER_NAME);
         expect(await clusterHeading.getVisibleText()).not.to.be.empty();
       });
       return true;
@@ -187,19 +186,22 @@ export function MonitoringClusterOverviewProvider({ getService }) {
     }
     async getBeatsListingDetail() {
       const total = await testSubjects.getVisibleText(SUBJ_BEATS_LISTING + '> beatsTotal');
-      const counts = await testSubjects.getAttributeAll(SUBJ_BEATS_TYPES_COUNTS, 'data-test-beat-type-count');
+      const counts = await testSubjects.getAttributeAll(
+        SUBJ_BEATS_TYPES_COUNTS,
+        'data-test-beat-type-count'
+      );
 
       const countsByType = counts.reduce((accum, text) => {
-        const [ type, count ] = text.split(':');
+        const [type, count] = text.split(':');
         return {
           ...accum,
-          [type.toLowerCase()]: count
+          [type.toLowerCase()]: count,
         };
       }, {});
 
       return {
         total,
-        types: countsByType
+        types: countsByType,
       };
     }
     clickBeatsOverview() {
@@ -208,6 +210,5 @@ export function MonitoringClusterOverviewProvider({ getService }) {
     clickBeatsListing() {
       return testSubjects.click(SUBJ_BEATS_LISTING);
     }
-
-  };
+  })();
 }

@@ -15,7 +15,7 @@ export const Snapshot = ({ isSnapshot, repo, snapshot }) => {
         defaultMessage="Repo: {repo} / Snapshot: {snapshot}"
         values={{
           repo,
-          snapshot
+          snapshot,
         }}
       />
     </Fragment>

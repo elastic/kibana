@@ -25,7 +25,6 @@ const getConfig = () => {
 };
 
 describe('getDefaultFormat', () => {
-
   it('should create default format', () => {
     const DefaultFormat = getDefaultFormat(NumberFormat);
     const defaultFormatObject = new DefaultFormat(null, getConfig);
@@ -34,6 +33,8 @@ describe('getDefaultFormat', () => {
     expect(DefaultFormat.id).toEqual('');
     expect(DefaultFormat.resolvedTitle).toEqual(NumberFormat.title);
     expect(DefaultFormat.title).toEqual('- Default -');
-    expect(JSON.stringify(defaultFormatObject.params())).toEqual(JSON.stringify(formatObject.params()));
+    expect(JSON.stringify(defaultFormatObject.params())).toEqual(
+      JSON.stringify(formatObject.params())
+    );
   });
 });

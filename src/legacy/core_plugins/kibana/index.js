@@ -22,51 +22,50 @@ import { resolve } from 'path';
 import { promisify } from 'util';
 
 import { migrations } from './migrations';
-import manageUuid from './server/lib/manage_uuid';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
-import { homeApi } from './server/routes/api/home';
 import { managementApi } from './server/routes/api/management';
-import { scriptsApi } from './server/routes/api/scripts';
-import { registerSuggestionsApi } from './server/routes/api/suggestions';
-import { registerKqlTelemetryApi } from './server/routes/api/kql_telemetry';
 import { registerFieldFormats } from './server/field_formats/register';
-import { registerTutorials } from './server/tutorials/register';
 import * as systemApi from './server/lib/system_api';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
-import { makeKQLUsageCollector } from './server/lib/kql_usage_collector';
 import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 const mkdirAsync = promisify(Fs.mkdir);
 
-export default function (kibana) {
+export default function(kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
-    config: function (Joi) {
+    config: function(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         defaultAppId: Joi.string().default('home'),
         index: Joi.string().default('.kibana'),
         disableWelcomeScreen: Joi.boolean().default(false),
-        autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
+        autocompleteTerminateAfter: Joi.number()
+          .integer()
+          .min(1)
+          .default(100000),
         // TODO Also allow units here like in elasticsearch config once this is moved to the new platform
-        autocompleteTimeout: Joi.number().integer().min(1).default(1000),
+        autocompleteTimeout: Joi.number()
+          .integer()
+          .min(1)
+          .default(1000),
       }).default();
     },
 
     uiExports: {
       hacks: [
-        'plugins/kibana/discover',
+        'plugins/kibana/discover/legacy',
         'plugins/kibana/dev_tools',
+        'plugins/kibana/visualize/legacy',
+        'plugins/kibana/dashboard/legacy',
       ],
-      savedObjectTypes: [
-        'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
-        'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register',
-      ],
+      savedObjectTypes: ['plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register'],
       app: {
         id: 'kibana',
         title: 'Kibana',
@@ -83,6 +82,7 @@ export default function (kibana) {
           order: -1003,
           url: `${kbnBaseUrl}#/discover`,
           euiIconType: 'discoverApp',
+          category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
           id: 'kibana:visualize',
@@ -92,6 +92,7 @@ export default function (kibana) {
           order: -1002,
           url: `${kbnBaseUrl}#/visualize`,
           euiIconType: 'visualizeApp',
+          category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
           id: 'kibana:dashboard',
@@ -107,6 +108,7 @@ export default function (kibana) {
           // to determine what url to use for the app link.
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
           euiIconType: 'dashboardApp',
+          category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
           id: 'kibana:dev_tools',
@@ -116,16 +118,18 @@ export default function (kibana) {
           order: 9001,
           url: '/app/kibana#/dev_tools',
           euiIconType: 'devToolsApp',
+          category: DEFAULT_APP_CATEGORIES.management,
         },
         {
-          id: 'kibana:management',
+          id: 'kibana:stack_management',
           title: i18n.translate('kbn.managementTitle', {
-            defaultMessage: 'Management',
+            defaultMessage: 'Stack Management',
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,
           euiIconType: 'managementApp',
           linkToLastSubUrl: false,
+          category: DEFAULT_APP_CATEGORIES.management,
         },
       ],
 
@@ -254,7 +258,7 @@ export default function (kibana) {
       migrations,
     },
 
-    uiCapabilities: async function () {
+    uiCapabilities: async function() {
       return {
         discover: {
           show: true,
@@ -309,7 +313,7 @@ export default function (kibana) {
       };
     },
 
-    preInit: async function (server) {
+    preInit: async function(server) {
       try {
         // Create the data directory (recursively, if the a parent dir doesn't exist).
         // If it already exists, does nothing.
@@ -321,21 +325,13 @@ export default function (kibana) {
       }
     },
 
-    init: async function (server) {
+    init: async function(server) {
       const { usageCollection } = server.newPlatform.setup.plugins;
-      // uuid
-      await manageUuid(server);
       // routes
-      scriptsApi(server);
       importApi(server);
       exportApi(server);
-      homeApi(server);
       managementApi(server);
-      registerSuggestionsApi(server);
-      registerKqlTelemetryApi(server);
       registerFieldFormats(server);
-      registerTutorials(server);
-      makeKQLUsageCollector(usageCollection, server);
       registerCspCollector(usageCollection, server);
       server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));

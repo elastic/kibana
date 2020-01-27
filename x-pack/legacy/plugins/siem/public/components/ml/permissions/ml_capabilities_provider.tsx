@@ -11,8 +11,6 @@ import { getMlCapabilities } from '../api/get_ml_capabilities';
 import { emptyMlCapabilities } from '../empty_ml_capabilities';
 import { errorToToaster } from '../api/error_to_toaster';
 import { useStateToaster } from '../../toasters';
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 
 import * as i18n from './translations';
 
@@ -36,7 +34,6 @@ export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ c
     emptyMlCapabilitiesProvider
   );
   const [, dispatchToaster] = useStateToaster();
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -44,7 +41,7 @@ export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ c
 
     async function fetchMlCapabilities() {
       try {
-        const mlCapabilities = await getMlCapabilities(kbnVersion, abortCtrl.signal);
+        const mlCapabilities = await getMlCapabilities(abortCtrl.signal);
         if (isSubscribed) {
           setCapabilities({ ...mlCapabilities, capabilitiesFetched: true });
         }

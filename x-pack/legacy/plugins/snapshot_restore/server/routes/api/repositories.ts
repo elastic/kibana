@@ -15,9 +15,10 @@ import {
   RepositoryType,
   RepositoryVerification,
   SlmPolicyEs,
+  RepositoryCleanup,
 } from '../../../common/types';
 
-import { Plugins } from '../../../shim';
+import { Plugins } from '../../shim';
 import {
   deserializeRepositorySettings,
   serializeRepositorySettings,
@@ -28,12 +29,13 @@ let isCloudEnabled: boolean = false;
 let callWithInternalUser: any;
 
 export function registerRepositoriesRoutes(router: Router, plugins: Plugins) {
-  isCloudEnabled = plugins.cloud.config.isCloudEnabled;
+  isCloudEnabled = plugins.cloud && plugins.cloud.isCloudEnabled;
   callWithInternalUser = plugins.elasticsearch.getCluster('data').callWithInternalUser;
   router.get('repository_types', getTypesHandler);
   router.get('repositories', getAllHandler);
   router.get('repositories/{name}', getOneHandler);
   router.get('repositories/{name}/verify', getVerificationHandler);
+  router.post('repositories/{name}/cleanup', getCleanupHandler);
   router.put('repositories', createHandler);
   router.put('repositories/{name}', updateHandler);
   router.delete('repositories/{names}', deleteHandler);
@@ -74,7 +76,7 @@ export const getAllHandler: RouterRouteHandler = async (
     try {
       const policiesByName: {
         [key: string]: SlmPolicyEs;
-      } = await callWithRequest('slm.policies', {
+      } = await callWithRequest('sr.policies', {
         human: true,
       });
       const managedRepositoryPolicy = Object.entries(policiesByName)
@@ -168,6 +170,31 @@ export const getVerificationHandler: RouterRouteHandler = async (
       : {
           valid: true,
           response: verificationResults,
+        },
+  };
+};
+
+export const getCleanupHandler: RouterRouteHandler = async (
+  req,
+  callWithRequest
+): Promise<{
+  cleanup: RepositoryCleanup | {};
+}> => {
+  const { name } = req.params;
+
+  const cleanupResults = await callWithRequest('sr.cleanupRepository', {
+    name,
+  }).catch(e => ({
+    cleaned: false,
+    error: e.response ? JSON.parse(e.response) : e,
+  }));
+
+  return {
+    cleanup: cleanupResults.error
+      ? cleanupResults
+      : {
+          cleaned: true,
+          response: cleanupResults,
         },
   };
 };

@@ -21,7 +21,7 @@ import React, { useCallback } from 'react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Range } from '../../../../../../utils/range';
+import { NumberListRange } from './range';
 
 export interface NumberRowProps {
   autoFocus: boolean;
@@ -29,7 +29,7 @@ export interface NumberRowProps {
   isInvalid: boolean;
   labelledbyId: string;
   model: NumberRowModel;
-  range: Range;
+  range: NumberListRange;
   onBlur(): void;
   onChange({ id, value }: { id: string; value: string }): void;
   onDelete(index: string): void;

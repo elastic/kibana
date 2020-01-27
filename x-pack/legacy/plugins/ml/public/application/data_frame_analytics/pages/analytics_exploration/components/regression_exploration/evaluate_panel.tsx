@@ -7,41 +7,40 @@
 import React, { FC, Fragment, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { ErrorCallout } from './error_callout';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { metadata } from 'ui/metadata';
+import { ErrorCallout } from '../error_callout';
 import {
   getValuesFromResponse,
   getDependentVar,
   getPredictionFieldName,
   loadEvalData,
+  loadDocsCount,
   Eval,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
-import { ml } from '../../../../../services/ml_api_service';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { EvaluateStat } from './evaluate_stat';
 import {
-  getEvalQueryBody,
-  isRegressionResultsSearchBoolQuery,
-  RegressionResultsSearchQuery,
-  SearchQuery,
+  isResultsSearchBoolQuery,
+  isRegressionEvaluateResponse,
+  ResultsSearchQuery,
+  ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus: DATA_FRAME_TASK_STATE;
-  searchQuery: RegressionResultsSearchQuery;
-}
-
-interface TrackTotalHitsSearchResponse {
-  hits: {
-    total: {
-      value: number;
-      relation: string;
-    };
-    hits: any[];
-  };
+  searchQuery: ResultsSearchQuery;
 }
 
 const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
@@ -60,40 +59,6 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   // default is 'ml'
   const resultsField = jobConfig.dest.results_field;
 
-  const loadDocsCount = async ({
-    ignoreDefaultQuery = true,
-    isTraining,
-  }: {
-    ignoreDefaultQuery?: boolean;
-    isTraining: boolean;
-  }): Promise<{
-    docsCount: number | null;
-    success: boolean;
-  }> => {
-    const query = getEvalQueryBody({ resultsField, isTraining, ignoreDefaultQuery, searchQuery });
-
-    try {
-      const body: SearchQuery = {
-        track_total_hits: true,
-        query,
-      };
-
-      const resp: TrackTotalHitsSearchResponse = await ml.esSearch({
-        index: jobConfig.dest.index,
-        size: 0,
-        body,
-      });
-
-      const docsCount = resp.hits.total && resp.hits.total.value;
-      return { docsCount, success: true };
-    } catch (e) {
-      return {
-        docsCount: null,
-        success: false,
-      };
-    }
-  };
-
   const loadGeneralizationData = async (ignoreDefaultQuery: boolean = true) => {
     setIsLoadingGeneralization(true);
 
@@ -105,9 +70,14 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       predictionFieldName,
       searchQuery,
       ignoreDefaultQuery,
+      jobType: ANALYSIS_CONFIG_TYPE.REGRESSION,
     });
 
-    if (genErrorEval.success === true && genErrorEval.eval) {
+    if (
+      genErrorEval.success === true &&
+      genErrorEval.eval &&
+      isRegressionEvaluateResponse(genErrorEval.eval)
+    ) {
       const { meanSquaredError, rSquared } = getValuesFromResponse(genErrorEval.eval);
       setGeneralizationEval({
         meanSquaredError,
@@ -136,9 +106,14 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       predictionFieldName,
       searchQuery,
       ignoreDefaultQuery,
+      jobType: ANALYSIS_CONFIG_TYPE.REGRESSION,
     });
 
-    if (trainingErrorEval.success === true && trainingErrorEval.eval) {
+    if (
+      trainingErrorEval.success === true &&
+      trainingErrorEval.eval &&
+      isRegressionEvaluateResponse(trainingErrorEval.eval)
+    ) {
       const { meanSquaredError, rSquared } = getValuesFromResponse(trainingErrorEval.eval);
       setTrainingEval({
         meanSquaredError,
@@ -165,7 +140,13 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     if (isTrainingClause !== undefined && isTrainingClause.query === 'false') {
       loadGeneralizationData();
 
-      const docsCountResp = await loadDocsCount({ isTraining: false });
+      const docsCountResp = await loadDocsCount({
+        isTraining: false,
+        searchQuery,
+        resultsField,
+        destIndex: jobConfig.dest.index,
+      });
+
       if (docsCountResp.success === true) {
         setGeneralizationDocsCount(docsCountResp.docsCount);
       } else {
@@ -182,7 +163,13 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       // searchBar query is filtering for training data
       loadTrainingData();
 
-      const docsCountResp = await loadDocsCount({ isTraining: true });
+      const docsCountResp = await loadDocsCount({
+        isTraining: true,
+        searchQuery,
+        resultsField,
+        destIndex: jobConfig.dest.index,
+      });
+
       if (docsCountResp.success === true) {
         setTrainingDocsCount(docsCountResp.docsCount);
       } else {
@@ -201,6 +188,9 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       const genDocsCountResp = await loadDocsCount({
         ignoreDefaultQuery: false,
         isTraining: false,
+        searchQuery,
+        resultsField,
+        destIndex: jobConfig.dest.index,
       });
       if (genDocsCountResp.success === true) {
         setGeneralizationDocsCount(genDocsCountResp.docsCount);
@@ -212,6 +202,9 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       const trainDocsCountResp = await loadDocsCount({
         ignoreDefaultQuery: false,
         isTraining: true,
+        searchQuery,
+        resultsField,
+        destIndex: jobConfig.dest.index,
       });
       if (trainDocsCountResp.success === true) {
         setTrainingDocsCount(trainDocsCountResp.docsCount);
@@ -223,7 +216,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
 
   useEffect(() => {
     const hasIsTrainingClause =
-      isRegressionResultsSearchBoolQuery(searchQuery) &&
+      isResultsSearchBoolQuery(searchQuery) &&
       searchQuery.bool.must.filter(
         (clause: any) => clause.match && clause.match[`${resultsField}.is_training`] !== undefined
       );
@@ -237,19 +230,41 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
 
   return (
     <EuiPanel>
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <span>
-              {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
-                defaultMessage: 'Regression job ID {jobId}',
-                values: { jobId: jobConfig.id },
-              })}
+              {i18n.translate(
+                'xpack.ml.dataframe.analytics.regressionExploration.evaluateJobIdTitle',
+                {
+                  defaultMessage: 'Evaluation of regression job ID {jobId}',
+                  values: { jobId: jobConfig.id },
+                }
+              )}
             </span>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <span>{getTaskStateBadge(jobStatus)}</span>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSpacer />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            target="_blank"
+            iconType="help"
+            iconSide="left"
+            color="primary"
+            href={`https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`}
+          >
+            {i18n.translate(
+              'xpack.ml.dataframe.analytics.classificationExploration.regressionDocsLink',
+              {
+                defaultMessage: 'Regression evaluation docs ',
+              }
+            )}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

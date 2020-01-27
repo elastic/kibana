@@ -1,0 +1,17 @@
+{
+  "description": "Windows Persistence via Application Shimming",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Windows Persistence via Application Shimming",
+  "query": "event.code:1 and process.name:sdbinst.exe",
+  "risk_score": 50,
+  "rule_id": "fd4a992d-6130-4802-9ff8-829b89ae801f",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

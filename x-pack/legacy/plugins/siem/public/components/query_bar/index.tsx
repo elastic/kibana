@@ -6,9 +6,7 @@
 
 import { isEqual } from 'lodash/fp';
 import React, { memo, useState, useEffect, useMemo, useCallback } from 'react';
-import { IndexPattern } from 'ui/index_patterns';
 
-import { SavedQuery, SearchBar } from '../../../../../../../src/legacy/core_plugins/data/public';
 import {
   esFilters,
   IIndexPattern,
@@ -16,6 +14,8 @@ import {
   Query,
   TimeHistory,
   TimeRange,
+  SavedQuery,
+  SearchBar,
   SavedQueryTimeFilter,
 } from '../../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
@@ -117,7 +117,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     );
 
     const CustomButton = <>{null}</>;
-    const indexPatterns = useMemo(() => [indexPattern as IndexPattern], [indexPattern]);
+    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
 
     const searchBarProps = savedQuery != null ? { savedQuery } : {};
 

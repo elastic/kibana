@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable no-console */
+
 import expect from '@kbn/expect';
-import { SecurityService, SpacesService } from '../../../common/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
-  const spaces: SpacesService = getService('spaces');
+  const security = getService('security');
+  const spaces = getService('spaces');
   const log = getService('log');
+  const es = getService('legacyEs');
 
   const start = encodeURIComponent(new Date(Date.now() - 10000).toISOString());
   const end = encodeURIComponent(new Date().toISOString());
@@ -36,6 +38,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     };
     expectForbidden: (result: any) => void;
     expectResponse: (result: any) => void;
+    onExpectationFail?: () => Promise<any>;
   }
   const endpoints: Endpoint[] = [
     {
@@ -140,10 +143,17 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       },
       expectForbidden: expect404,
       expectResponse: expect200,
+      onExpectationFail: async () => {
+        const res = await es.search({
+          index: '.apm-agent-configuration',
+        });
+
+        console.warn(JSON.stringify(res, null, 2));
+      },
     },
   ];
 
-  const elasticsearchRole = {
+  const elasticsearchPrivileges = {
     indices: [
       { names: ['apm-*'], privileges: ['read', 'view_index_metadata'] },
       { names: ['.apm-agent-configuration'], privileges: ['read', 'write', 'view_index_metadata'] },
@@ -206,8 +216,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     spaceId?: string;
   }) {
     for (const endpoint of endpoints) {
-      log.debug(`hitting ${endpoint.req.url}`);
+      console.log(`Requesting: ${endpoint.req.url}. Expecting: ${expectation}`);
       const result = await executeAsUser(endpoint.req, username, password, spaceId);
+      console.log(`Responded: ${endpoint.req.url}`);
+
       try {
         if (expectation === 'forbidden') {
           endpoint.expectForbidden(result);
@@ -215,6 +227,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           endpoint.expectResponse(result);
         }
       } catch (e) {
+        if (endpoint.onExpectationFail) {
+          await endpoint.onExpectationFail();
+        }
+
         const { statusCode, body, req } = result.response;
         throw new Error(
           `Endpoint: ${req.method} ${req.path}
@@ -230,7 +246,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   describe('apm feature controls', () => {
     let res: any;
     before(async () => {
-      log.debug('creating agent configuration');
+      console.log(`Creating agent configuration`);
       res = await executeAsAdmin({
         method: 'post',
         url: '/api/apm/settings/agent-configuration/new',
@@ -239,10 +255,11 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           settings: { transaction_sample_rate: 0.5 },
         },
       });
+      console.log(`Agent configuration created`);
     });
 
     after(async () => {
-      log.debug('deleting agent configuration');
+      console.log('deleting agent configuration');
       const configurationId = res.body._id;
       await executeAsAdmin({
         method: 'delete',
@@ -256,7 +273,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
-          elasticsearch: elasticsearchRole,
+          elasticsearch: elasticsearchPrivileges,
         });
 
         await security.user.create(username, {
@@ -278,7 +295,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
-          elasticsearch: elasticsearchRole,
+          elasticsearch: elasticsearchPrivileges,
           kibana: [{ base: ['all'], spaces: ['*'] }],
         });
 
@@ -302,7 +319,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
-          elasticsearch: elasticsearchRole,
+          elasticsearch: elasticsearchPrivileges,
           kibana: [{ feature: { dashboard: ['all'] }, spaces: ['*'] }],
         });
 
@@ -340,7 +357,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           disabledFeatures: [],
         });
         await security.role.create(roleName, {
-          elasticsearch: elasticsearchRole,
+          elasticsearch: elasticsearchPrivileges,
           kibana: [
             { feature: { apm: ['read'] }, spaces: [space1Id] },
             { feature: { dashboard: ['all'] }, spaces: [space2Id] },

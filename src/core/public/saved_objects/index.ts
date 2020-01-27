@@ -40,4 +40,11 @@ export {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
+  SavedObjectsImportResponse,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportError,
+  SavedObjectsImportRetry,
 } from '../../server/types';

@@ -278,11 +278,11 @@ describe('IndexPattern Data Panel', () => {
 
     function testProps() {
       const setState = jest.fn();
-      core.http.get = jest.fn(async (url: string) => {
+      core.http.get.mockImplementation(async (url: string) => {
         const parts = url.split('/');
         const indexPatternTitle = parts[parts.length - 1];
         return {
-          indexPatternTitle,
+          indexPatternTitle: `${indexPatternTitle}_testtitle`,
           existingFieldNames: ['field_1', 'field_2'].map(
             fieldName => `${indexPatternTitle}_${fieldName}`
           ),
@@ -352,9 +352,9 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        aaa: {
-          aaa_field_1: true,
-          aaa_field_2: true,
+        a_testtitle: {
+          a_field_1: true,
+          a_field_2: true,
         },
       });
     });
@@ -369,13 +369,13 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        aaa: {
-          aaa_field_1: true,
-          aaa_field_2: true,
+        a_testtitle: {
+          a_field_1: true,
+          a_field_2: true,
         },
-        bbb: {
-          bbb_field_1: true,
-          bbb_field_2: true,
+        b_testtitle: {
+          b_field_1: true,
+          b_field_2: true,
         },
       });
     });
@@ -397,7 +397,7 @@ describe('IndexPattern Data Panel', () => {
       expect(setState).toHaveBeenCalledTimes(2);
       expect(core.http.get).toHaveBeenCalledTimes(2);
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/aaa', {
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
@@ -405,7 +405,7 @@ describe('IndexPattern Data Panel', () => {
         },
       });
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/aaa', {
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-02',
@@ -418,9 +418,9 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        aaa: {
-          aaa_field_1: true,
-          aaa_field_2: true,
+        a_testtitle: {
+          a_field_1: true,
+          a_field_2: true,
         },
       });
     });
@@ -436,7 +436,7 @@ describe('IndexPattern Data Panel', () => {
 
       expect(setState).toHaveBeenCalledTimes(2);
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/aaa', {
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
@@ -444,7 +444,7 @@ describe('IndexPattern Data Panel', () => {
         },
       });
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/bbb', {
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/b', {
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
@@ -457,13 +457,13 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        aaa: {
-          aaa_field_1: true,
-          aaa_field_2: true,
+        a_testtitle: {
+          a_field_1: true,
+          a_field_2: true,
         },
-        bbb: {
-          bbb_field_1: true,
-          bbb_field_2: true,
+        b_testtitle: {
+          b_field_1: true,
+          b_field_2: true,
         },
       });
     });
@@ -484,7 +484,7 @@ describe('IndexPattern Data Panel', () => {
       let overlapCount = 0;
       const props = testProps();
 
-      core.http.get = jest.fn((url: string) => {
+      core.http.get.mockImplementation((url: string) => {
         if (queryCount) {
           ++overlapCount;
         }
@@ -533,11 +533,9 @@ describe('IndexPattern Data Panel', () => {
     it('shows all fields if empty state button is clicked', async () => {
       const props = testProps();
 
-      core.http.get = jest.fn((url: string) => {
-        return Promise.resolve({
-          indexPatternTitle: props.currentIndexPatternId,
-          existingFieldNames: [],
-        });
+      core.http.get.mockResolvedValue({
+        indexPatternTitle: props.currentIndexPatternId,
+        existingFieldNames: [],
       });
 
       const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);

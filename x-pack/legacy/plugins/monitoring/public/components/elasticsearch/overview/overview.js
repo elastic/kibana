@@ -8,7 +8,15 @@ import React from 'react';
 import { ClusterStatus } from '../cluster_status';
 import { ShardActivity } from '../shard_activity';
 import { MonitoringTimeseriesContainer } from '../../chart';
-import { EuiPage, EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiPageBody,
+  EuiPageContent,
+} from '@elastic/eui';
 import { Logs } from '../../logs/logs';
 
 export function ElasticsearchOverview({
@@ -37,10 +45,7 @@ export function ElasticsearchOverview({
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
               <EuiFlexItem key={index}>
-                <MonitoringTimeseriesContainer
-                  series={metric}
-                  {...props}
-                />
+                <MonitoringTimeseriesContainer series={metric} {...props} />
                 <EuiSpacer />
               </EuiFlexItem>
             ))}
@@ -48,7 +53,7 @@ export function ElasticsearchOverview({
         </EuiPageContent>
         <EuiSpacer size="m" />
         <EuiPanel>
-          <Logs logs={logs} clusterUuid={cluster.cluster_uuid}/>
+          <Logs logs={logs} clusterUuid={cluster.cluster_uuid} />
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPanel>

@@ -234,7 +234,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
       result = response.body;
       expect(result.status).to.equal('error');
       expect(result.message).to.eql(
-        `index param needs to be set because not set in config for action ${createdActionID}`
+        'index param needs to be set because not set in config for action'
       );
     });
   });
