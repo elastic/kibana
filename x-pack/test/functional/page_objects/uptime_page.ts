@@ -41,7 +41,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
       await uptimeService.navigateToMonitorWithId(monitorId);
       if (
-        !!monitorName &&
+        monitorName &&
         (await uptimeService.getMonitorNameDisplayedOnPageTitle()) !== monitorName
       ) {
         throw new Error('Expected monitor name not found');
