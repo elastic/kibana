@@ -48,13 +48,12 @@ export interface AppDeps {
   uiSettings: IUiSettingsClient;
   euiUtils: any;
   createTimeBuckets: () => any;
-  initialLicenseStatus: LicenseStatus;
   licenseStatus$: Observable<LicenseStatus>;
   MANAGEMENT_BREADCRUMB: any;
 }
 
 export const App = (deps: AppDeps) => {
-  const [{ valid, message }, setLicenseStatus] = useState(deps.initialLicenseStatus);
+  const [{ valid, message }, setLicenseStatus] = useState<LicenseStatus>({ valid: true });
 
   useEffect(() => {
     const s = deps.licenseStatus$.subscribe(setLicenseStatus);

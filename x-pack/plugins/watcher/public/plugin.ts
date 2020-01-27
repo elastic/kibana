@@ -15,9 +15,8 @@ import { ILicense, LICENSE_CHECK_STATE } from '../../licensing/public';
 import { TimeBuckets, MANAGEMENT_BREADCRUMB } from './legacy';
 import { PLUGIN } from '../common/constants';
 import { Dependencies } from './types';
-import { License } from '../../licensing/common/license';
 
-const licenseToLicenseStatus = (license: License): LicenseStatus => {
+const licenseToLicenseStatus = (license: ILicense): LicenseStatus => {
   const { state, message } = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
   return {
     valid: state === LICENSE_CHECK_STATE.Valid && license.getFeature(PLUGIN.ID).isAvailable,
@@ -26,20 +25,13 @@ const licenseToLicenseStatus = (license: License): LicenseStatus => {
 };
 
 export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
-  async setup(
+  setup(
     { application, notifications, http, uiSettings, getStartServices }: CoreSetup,
     { licensing, management, data, home }: Dependencies
   ) {
     const esSection = management.sections.getSection('elasticsearch');
-    const initialLicenseStatus = await licensing.license$
-      .pipe<ILicense>(first(), map(licenseToLicenseStatus))
-      .toPromise();
 
-    if (!initialLicenseStatus.valid) {
-      return;
-    }
-
-    esSection!.registerApp({
+    const watcherESApp = esSection!.registerApp({
       id: 'watcher',
       title: i18n.translate(
         'xpack.watcher.sections.watchList.managementSection.watcherDisplayName',
@@ -52,7 +44,8 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
         const { boot } = await import('./application/boot');
 
         return boot({
-          initialLicenseStatus,
+          // Skip the first license status, because that's already been used to determine
+          // whether to include Watcher.
           licenseStatus$: licensing.license$.pipe(skip(1), map(licenseToLicenseStatus)),
           element,
           toasts: notifications.toasts,
@@ -69,7 +62,13 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       },
     });
 
-    home.featureCatalogue.register({
+    watcherESApp.disable();
+
+    // TODO: Fix the below dependency on `home` plugin inner workings
+    // Because the home feature catalogue does not have enable/disable functionality we pass
+    // the config in but keep a reference for enabling and disabling showing on home based on
+    // license updates.
+    const watcherHome = {
       id: 'watcher',
       title: 'Watcher', // This is a product name so we don't translate it.
       category: FeatureCatalogueCategory.ADMIN,
@@ -79,6 +78,18 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       icon: 'watchesApp',
       path: '/app/kibana#/management/elasticsearch/watcher/watches',
       showOnHomePage: true,
+    };
+
+    home.featureCatalogue.register(watcherHome);
+
+    licensing.license$.pipe(first(), map(licenseToLicenseStatus)).subscribe(({ valid }) => {
+      if (valid) {
+        watcherESApp.enable();
+        watcherHome.showOnHomePage = true;
+      } else {
+        watcherESApp.disable();
+        watcherHome.showOnHomePage = false;
+      }
     });
   }
 
