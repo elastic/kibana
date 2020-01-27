@@ -32,6 +32,18 @@ export function MachineLearningDataFrameAnalyticsProvider(
       await testSubjects.existOrFail('mlAnalyticsButtonCreate');
     },
 
+    async assertRegressionEvaluatePanelElementsExists() {
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionExplorationEvaluatePanel');
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionGenMSEstat');
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionGenRSquaredStat');
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionTrainingMSEstat');
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionTrainingRSquaredStat');
+    },
+
+    async assertRegressionTablePanelExists() {
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionExplorationTablePanel');
+    },
+
     async assertAnalyticsStatsBarExists() {
       await testSubjects.existOrFail('mlAnalyticsStatsBar');
     },
