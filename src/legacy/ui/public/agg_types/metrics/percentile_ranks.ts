@@ -25,7 +25,7 @@ import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_respons
 
 import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
-import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { fieldFormats, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 // required by the values editor
 
@@ -35,10 +35,10 @@ const getFieldFormats = () => npStart.plugins.data.fieldFormats;
 
 const valueProps = {
   makeLabel(this: IPercentileRanksAggConfig) {
-    const fieldFormats = getFieldFormats();
+    const fieldFormatsService = getFieldFormats();
     const field = this.getField();
     const format =
-      (field && field.format) || fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
+      (field && field.format) || fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
     const customLabel = this.getParam('customLabel');
     const label = customLabel || this.getFieldDisplayName();
 
@@ -84,10 +84,10 @@ export const percentileRanksMetricAgg = new MetricAggType<IPercentileRanksAggCon
     return values.map((value: any) => new ValueAggConfig(value));
   },
   getFormat() {
-    const fieldFormats = getFieldFormats();
+    const fieldFormatsService = getFieldFormats();
     return (
-      fieldFormats.getInstance(FIELD_FORMAT_IDS.PERCENT) ||
-      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER)
+      fieldFormatsService.getInstance(fieldFormats.FIELD_FORMAT_IDS.PERCENT) ||
+      fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.NUMBER)
     );
   },
   getValue(agg, bucket) {
