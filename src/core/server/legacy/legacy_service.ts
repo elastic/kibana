@@ -286,6 +286,10 @@ export class LegacyService implements CoreService {
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
         registerOnPreResponse: setupDeps.core.http.registerOnPreResponse,
         basePath: setupDeps.core.http.basePath,
+        auth: {
+          get: setupDeps.core.http.auth.get,
+          isAuthenticated: setupDeps.core.http.auth.isAuthenticated,
+        },
         csp: setupDeps.core.http.csp,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
       },
