@@ -32,6 +32,8 @@ export interface InternalPulseService {
   getChannel: (id: string) => PulseChannel;
 }
 
+export type PulseServiceSetup = InternalPulseService;
+
 export interface PulseSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
 }
