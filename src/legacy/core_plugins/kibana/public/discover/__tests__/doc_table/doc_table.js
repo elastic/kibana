@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import 'ui/private';
-import { pluginInstance } from 'plugins/kibana/discover/index';
+import { pluginInstance } from 'plugins/kibana/discover/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import hits from 'fixtures/real_hits';
 

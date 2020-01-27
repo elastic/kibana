@@ -31,9 +31,13 @@ export type Action =
   | { type: 'setExportPayload'; exportPayload?: Rule[] }
   | { type: 'setSelected'; selectedItems: TableData[] }
   | { type: 'updateLoading'; ids: string[]; isLoading: boolean }
-  | { type: 'updateRules'; rules: Rule[]; appendRuleId?: string; pagination?: PaginationOptions }
-  | { type: 'updatePagination'; pagination: PaginationOptions }
-  | { type: 'updateFilterOptions'; filterOptions: FilterOptions }
+  | { type: 'updateRules'; rules: Rule[]; pagination?: PaginationOptions }
+  | { type: 'updatePagination'; pagination: Partial<PaginationOptions> }
+  | {
+      type: 'updateFilterOptions';
+      filterOptions: Partial<FilterOptions>;
+      pagination: Partial<PaginationOptions>;
+    }
   | { type: 'failure' };
 
 export const allRulesReducer = (state: State, action: Action): State => {
@@ -56,21 +60,15 @@ export const allRulesReducer = (state: State, action: Action): State => {
       }
 
       const ruleIds = state.rules.map(r => r.rule_id);
-      const appendIdx =
-        action.appendRuleId != null ? state.rules.findIndex(r => r.id === action.appendRuleId) : -1;
-      const updatedRules = action.rules.reduce(
-        (rules, updatedRule) =>
-          ruleIds.includes(updatedRule.rule_id)
-            ? rules.map(r => (updatedRule.rule_id === r.rule_id ? updatedRule : r))
-            : appendIdx !== -1
-            ? [
-                ...rules.slice(0, appendIdx + 1),
-                updatedRule,
-                ...rules.slice(appendIdx + 1, rules.length - 1),
-              ]
-            : [...rules, updatedRule],
-        [...state.rules]
-      );
+      const updatedRules = action.rules.reverse().reduce((rules, updatedRule) => {
+        let newRules = rules;
+        if (ruleIds.includes(updatedRule.rule_id)) {
+          newRules = newRules.map(r => (updatedRule.rule_id === r.rule_id ? updatedRule : r));
+        } else {
+          newRules = [...newRules, updatedRule];
+        }
+        return newRules;
+      }, state.rules);
 
       // Update enabled on selectedItems so that batch actions show correct available actions
       const updatedRuleIdToState = action.rules.reduce<Record<string, boolean>>(
@@ -93,13 +91,23 @@ export const allRulesReducer = (state: State, action: Action): State => {
     case 'updatePagination': {
       return {
         ...state,
-        pagination: action.pagination,
+        pagination: {
+          ...state.pagination,
+          ...action.pagination,
+        },
       };
     }
     case 'updateFilterOptions': {
       return {
         ...state,
-        filterOptions: action.filterOptions,
+        filterOptions: {
+          ...state.filterOptions,
+          ...action.filterOptions,
+        },
+        pagination: {
+          ...state.pagination,
+          ...action.pagination,
+        },
       };
     }
     case 'deleteRules': {
@@ -112,6 +120,7 @@ export const allRulesReducer = (state: State, action: Action): State => {
         ...state,
         rules: updatedRules,
         tableData: formatRules(updatedRules),
+        refreshToggle: !state.refreshToggle,
       };
     }
     case 'setSelected': {

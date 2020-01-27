@@ -45,11 +45,25 @@ const MyEuiFlexItem = styled(EuiFlexItem)`
   white-space: nowrap;
 `;
 
-const EuiSelectableContainer = styled.div`
+const EuiSelectableContainer = styled.div<{ loading: boolean }>`
   .euiSelectable {
     .euiFormControlLayout__childrenWrapper {
       display: flex;
     }
+    ${({ loading }) => `${
+      loading
+        ? `
+      .euiFormControlLayoutIcons {
+        display: none;
+      }
+      .euiFormControlLayoutIcons.euiFormControlLayoutIcons--right {
+        display: block;
+        left: 12px;
+        top: 12px;
+      }`
+        : ''
+    }
+    `}
   }
 `;
 
@@ -265,7 +279,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         onlyUserFavorite={onlyFavorites}
       >
         {({ timelines, loading, totalCount }) => (
-          <EuiSelectableContainer>
+          <EuiSelectableContainer loading={loading}>
             <EuiSelectable
               height={POPOVER_HEIGHT}
               isLoading={loading && timelines.length === 0}

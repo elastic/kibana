@@ -4,21 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ScaleType } from '@elastic/charts';
 
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as i18n from './translations';
 import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
-import { DEFAULT_DARK_MODE } from '../../../common/constants';
-import { useUiSetting$ } from '../../lib/kibana';
-import { Loader } from '../loader';
+import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
-import { getBarchartConfigs, getCustomChartData } from '../../components/matrix_histogram/utils';
+import { getBarchartConfigs, getCustomChartData } from './utils';
 import { useQuery } from '../../containers/matrix_histogram/utils';
 import {
   MatrixHistogramProps,
@@ -26,14 +22,11 @@ import {
   HistogramAggregation,
   MatrixHistogramQueryProps,
 } from './types';
-import { generateTablePaginationOptions } from '../paginated_table/helpers';
 import { ChartSeriesData } from '../charts/common';
 import { InspectButtonContainer } from '../inspect';
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   MatrixHistogramQueryProps> = ({
-  activePage,
-
   dataKey,
   defaultStackByOption,
   endDate,
@@ -45,17 +38,15 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   isAlertsHistogram,
   isAnomaliesHistogram,
   isAuthenticationsHistogram,
-  isDNSHistogram,
-  isEventsType,
-  isPtrIncluded,
+  isDnsHistogram,
+  isEventsHistogram,
   isInspected,
-  legendPosition,
-  limit,
+  legendPosition = 'right',
   mapping,
   query,
   scaleType = ScaleType.Time,
   setQuery,
-  showLegend,
+  showLegend = true,
   skip,
   stackByOptions,
   startDate,
@@ -63,7 +54,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   title,
   updateDateRange,
   yTickFormatter,
-  sort,
 }) => {
   const barchartConfigs = getBarchartConfigs({
     from: startDate,
@@ -74,20 +64,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     yTickFormatter,
     showLegend,
   });
-  const [showInspect, setShowInspect] = useState(false);
-  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-
-  const handleOnMouseEnter = useCallback(() => {
-    if (!showInspect) {
-      setShowInspect(true);
-    }
-  }, [showInspect, setShowInspect]);
-  const handleOnMouseLeave = useCallback(() => {
-    if (showInspect) {
-      setShowInspect(false);
-    }
-  }, [showInspect, setShowInspect]);
-
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
     defaultStackByOption
   );
@@ -104,10 +81,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     },
     []
   );
-  const getPagination = () =>
-    activePage != null && limit != null
-      ? generateTablePaginationOptions(activePage, limit)
-      : undefined;
 
   const { data, loading, inspect, totalCount, refetch = noop } = useQuery<{}, HistogramAggregation>(
     {
@@ -118,16 +91,13 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
       query,
       skip,
       startDate,
-      sort,
       title,
       isAlertsHistogram,
       isAnomaliesHistogram,
       isAuthenticationsHistogram,
-      isDNSHistogram,
-      isEventsType,
+      isDnsHistogram,
+      isEventsHistogram,
       isInspected,
-      isPtrIncluded,
-      pagination: useMemo(() => getPagination(), [activePage, limit]),
       stackByField: selectedStackByOption.value,
     }
   );
@@ -138,12 +108,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     if (subtitle != null)
       setSubtitle(typeof subtitle === 'function' ? subtitle(totalCount) : subtitle);
 
-    if (totalCount <= 0) {
-      if (hideHistogramIfEmpty) {
-        setHideHistogram(true);
-      } else {
-        setHideHistogram(false);
-      }
+    if (totalCount <= 0 && hideHistogramIfEmpty) {
+      setHideHistogram(true);
     } else {
       setHideHistogram(false);
     }
@@ -151,6 +117,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     setBarChartData(getCustomChartData(data, mapping));
 
     setQuery({ id, inspect, loading, refetch });
+
+    if (isInitialLoading && !!barChartData && data) {
+      setIsInitialLoading(false);
+    }
   }, [
     subtitle,
     setSubtitle,
@@ -162,55 +132,58 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     isInspected,
     loading,
     data,
+    refetch,
+    isInitialLoading,
   ]);
 
-  return !hideHistogram ? (
-    <InspectButtonContainer show={showInspect}>
-      <Panel
-        data-test-subj={`${id}Panel`}
-        loading={loading}
-        onMouseEnter={handleOnMouseEnter}
-        onMouseLeave={handleOnMouseLeave}
-      >
-        <HeaderSection
-          id={id}
-          title={titleWithStackByField}
-          subtitle={!loading && (totalCount >= 0 ? subtitleWithCounts : null)}
-        >
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              {stackByOptions && (
-                <EuiSelect
-                  onChange={setSelectedChartOptionCallback}
-                  options={stackByOptions}
-                  prepend={i18n.STACK_BY}
-                  value={selectedStackByOption?.value}
-                />
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{headerChildren}</EuiFlexItem>
-          </EuiFlexGroup>
-        </HeaderSection>
-        {loading ? (
-          <EuiLoadingContent data-test-subj="initialLoadingPanelMatrixOverTime" lines={10} />
+  if (hideHistogram) {
+    return null;
+  }
+
+  return (
+    <InspectButtonContainer show={!isInitialLoading}>
+      <Panel data-test-subj={`${id}Panel`}>
+        {loading && !isInitialLoading && (
+          <EuiProgress
+            data-test-subj="initialLoadingPanelMatrixOverTime"
+            size="xs"
+            position="absolute"
+            color="accent"
+          />
+        )}
+
+        {isInitialLoading ? (
+          <>
+            <HeaderSection id={id} title={titleWithStackByField} />
+            <MatrixLoader />
+          </>
         ) : (
           <>
+            <HeaderSection
+              id={id}
+              title={titleWithStackByField}
+              subtitle={!loading && (totalCount >= 0 ? subtitleWithCounts : null)}
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  {stackByOptions?.length > 1 && (
+                    <EuiSelect
+                      onChange={setSelectedChartOptionCallback}
+                      options={stackByOptions}
+                      prepend={i18n.STACK_BY}
+                      value={selectedStackByOption?.value}
+                    />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{headerChildren}</EuiFlexItem>
+              </EuiFlexGroup>
+            </HeaderSection>
             <BarChart barChart={barChartData} configs={barchartConfigs} />
-
-            {loading && (
-              <Loader
-                overlay
-                overlayBackground={
-                  darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
-                }
-                size="xl"
-              />
-            )}
           </>
         )}
       </Panel>
     </InspectButtonContainer>
-  ) : null;
+  );
 };
 
 export const MatrixHistogram = React.memo(MatrixHistogramComponent);

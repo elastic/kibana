@@ -307,7 +307,7 @@ export const signalFieldsMap: Readonly<Record<string, string>> = {
   'signal.rule.references': 'signal.rule.references',
   'signal.rule.severity': 'signal.rule.severity',
   'signal.rule.tags': 'signal.rule.tags',
-  'signal.rule.threats': 'signal.rule.threats',
+  'signal.rule.threat': 'signal.rule.threat',
   'signal.rule.type': 'signal.rule.type',
   'signal.rule.size': 'signal.rule.size',
   'signal.rule.enabled': 'signal.rule.enabled',

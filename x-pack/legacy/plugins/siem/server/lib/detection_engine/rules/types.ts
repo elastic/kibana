@@ -7,10 +7,15 @@
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
 
-import { SavedObject, SavedObjectAttributes, SavedObjectsFindResponse } from 'kibana/server';
+import {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectsFindResponse,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
-import { ActionsClient } from '../../../../../actions/server/actions_client';
+import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 import { RequestFacade } from '../../../types';
 import { Alert } from '../../../../../alerting/server/types';
@@ -41,14 +46,22 @@ export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
 }
 
-export interface IRuleStatusAttributes {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface IRuleStatusAttributes extends Record<string, any> {
   alertId: string; // created alert id.
   statusDate: string;
   lastFailureAt: string | null | undefined;
   lastFailureMessage: string | null | undefined;
   lastSuccessAt: string | null | undefined;
   lastSuccessMessage: string | null | undefined;
-  status: RuleStatusString;
+  status: RuleStatusString | null | undefined;
+}
+
+export interface RuleStatusResponse {
+  [key: string]: {
+    current_status: IRuleStatusAttributes | null | undefined;
+    failures: IRuleStatusAttributes[] | null | undefined;
+  };
 }
 
 export interface IRuleSavedAttributesSavedObjectAttributes
@@ -142,6 +155,7 @@ export interface Clients {
 
 export type UpdateRuleParams = Partial<RuleAlertParams> & {
   id: string | undefined | null;
+  savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
 
 export type DeleteRuleParams = Clients & {

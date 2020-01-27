@@ -34,11 +34,11 @@ export const getIdError = ({
   ruleId: string | undefined | null;
 }) => {
   if (id != null) {
-    return new Boom(`id: "${id}" not found`, { statusCode: 404 });
+    return Boom.notFound(`id: "${id}" not found`);
   } else if (ruleId != null) {
-    return new Boom(`rule_id: "${ruleId}" not found`, { statusCode: 404 });
+    return Boom.notFound(`rule_id: "${ruleId}" not found`);
   } else {
-    return new Boom(`id or rule_id should have been defined`, { statusCode: 404 });
+    return Boom.notFound('id or rule_id should have been defined');
   }
 };
 
@@ -110,7 +110,7 @@ export const transformAlertToRule = (
     tags: transformTags(alert.tags),
     to: alert.params.to,
     type: alert.params.type,
-    threats: alert.params.threats,
+    threat: alert.params.threat,
     version: alert.params.version,
     status: ruleStatus?.attributes.status,
     status_date: ruleStatus?.attributes.statusDate,

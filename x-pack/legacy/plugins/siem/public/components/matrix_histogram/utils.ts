@@ -3,11 +3,22 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
+import { ScaleType, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
 
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
 import { MatrixHistogramDataTypes, MatrixHistogramMappingTypes } from './types';
+import { histogramDateTimeFormatter } from '../utils';
+
+interface GetBarchartConfigsProps {
+  from: number;
+  legendPosition?: Position;
+  to: number;
+  scaleType: ScaleType;
+  onBrushEnd: UpdateDateRange;
+  yTickFormatter?: (value: number) => string;
+  showLegend?: boolean;
+}
 
 export const getBarchartConfigs = ({
   from,
@@ -17,22 +28,15 @@ export const getBarchartConfigs = ({
   onBrushEnd,
   yTickFormatter,
   showLegend,
-}: {
-  from: number;
-  legendPosition?: Position;
-  to: number;
-  scaleType: ScaleType;
-  onBrushEnd: UpdateDateRange;
-  yTickFormatter?: (value: number) => string;
-  showLegend?: boolean;
-}) => ({
+}: GetBarchartConfigsProps) => ({
   series: {
     xScaleType: scaleType || ScaleType.Time,
     yScaleType: ScaleType.Linear,
     stackAccessors: ['g'],
   },
   axis: {
-    xTickFormatter: scaleType === ScaleType.Time ? niceTimeFormatter([from, to]) : undefined,
+    xTickFormatter:
+      scaleType === ScaleType.Time ? histogramDateTimeFormatter([from, to]) : undefined,
     yTickFormatter:
       yTickFormatter != null
         ? yTickFormatter
@@ -42,7 +46,7 @@ export const getBarchartConfigs = ({
   settings: {
     legendPosition: legendPosition ?? Position.Bottom,
     onBrushEnd,
-    showLegend: showLegend || true,
+    showLegend: showLegend ?? true,
     theme: {
       scales: {
         barsPadding: 0.08,
