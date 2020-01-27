@@ -55,7 +55,9 @@ describe('connector_add_flyout', () => {
               setAddFlyoutVisibility: state => {},
               editFlyoutVisible: false,
               setEditFlyoutVisibility: state => {},
-              actionTypesIndex: { 'my-action-type': { id: 'my-action-type', name: 'test' } },
+              actionTypesIndex: {
+                'my-action-type': { id: 'my-action-type', name: 'test', enabled: true },
+              },
               reloadConnectors: () => {
                 return new Promise<void>(() => {});
               },
