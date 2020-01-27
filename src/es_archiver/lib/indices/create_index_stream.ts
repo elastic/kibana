@@ -17,13 +17,25 @@
  * under the License.
  */
 
-import { Transform } from 'stream';
-
+import { Transform, Readable } from 'stream';
 import { get, once } from 'lodash';
+import { Client } from 'elasticsearch';
+
+import { Stats } from '../stats';
 import { deleteKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
 
-export function createCreateIndexStream({ client, stats, skipExisting, log }) {
+export function createCreateIndexStream({
+  client,
+  stats,
+  skipExisting,
+  log,
+}: {
+  client: Client;
+  stats: Stats;
+  skipExisting: boolean;
+  log: any;
+}) {
   const skipDocsFromIndices = new Set();
 
   // If we're trying to import Kibana index docs, we need to ensure that
@@ -31,7 +43,7 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
   // migrations. This only needs to be done once per archive load operation.
   const deleteKibanaIndicesOnce = once(deleteKibanaIndices);
 
-  async function handleDoc(stream, record) {
+  async function handleDoc(stream: Readable, record: any) {
     if (skipDocsFromIndices.has(record.value.index)) {
       return;
     }
@@ -39,7 +51,7 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
     stream.push(record);
   }
 
-  async function handleIndex(record) {
+  async function handleIndex(record: any) {
     const { index, settings, mappings, aliases } = record.value;
     const isKibana = index.startsWith('.kibana');
 
@@ -102,7 +114,7 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
             break;
         }
 
-        callback(null);
+        callback();
       } catch (err) {
         callback(err);
       }

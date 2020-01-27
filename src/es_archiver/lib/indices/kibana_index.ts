@@ -17,29 +17,34 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
 import fs from 'fs';
-import path from 'path';
+import Path from 'path';
 import { promisify } from 'util';
 import { toArray } from 'rxjs/operators';
+import { Client, CreateDocumentParams } from 'elasticsearch';
+import { ToolingLog } from '@kbn/dev-utils';
 
+import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
-import { collectUiExports } from '../../../legacy/ui/ui_exports';
 import { KibanaMigrator } from '../../../core/server/saved_objects/migrations';
 import { SavedObjectsSchema } from '../../../core/server/saved_objects';
+// @ts-ignore
+import { collectUiExports } from '../../../legacy/ui/ui_exports';
+// @ts-ignore
 import { findPluginSpecs } from '../../../legacy/plugin_discovery';
 
 /**
  * Load the uiExports for a Kibana instance, only load uiExports from xpack if
  * it is enabled in the Kibana server.
  */
-const getUiExports = async kibanaPluginIds => {
+const getUiExports = async (kibanaPluginIds: string[]) => {
   const xpackEnabled = kibanaPluginIds.includes('xpack_main');
 
   const { spec$ } = await findPluginSpecs({
     plugins: {
-      scanDirs: [path.resolve(__dirname, '../../../legacy/core_plugins')],
-      paths: xpackEnabled ? [path.resolve(__dirname, '../../../../x-pack')] : [],
+      scanDirs: [Path.resolve(__dirname, '../../../legacy/core_plugins')],
+      paths: xpackEnabled ? [Path.resolve(__dirname, '../../../../x-pack')] : [],
     },
   });
 
@@ -50,7 +55,15 @@ const getUiExports = async kibanaPluginIds => {
 /**
  * Deletes all indices that start with `.kibana`
  */
-export async function deleteKibanaIndices({ client, stats, log }) {
+export async function deleteKibanaIndices({
+  client,
+  stats,
+  log,
+}: {
+  client: Client;
+  stats: Stats;
+  log: any;
+}) {
   const indexNames = await fetchKibanaIndices(client);
   if (!indexNames.length) {
     return;
@@ -76,37 +89,52 @@ export async function deleteKibanaIndices({ client, stats, log }) {
  * builds up an object that implements just enough of the kbnMigrations interface
  * as is required by migrations.
  */
-export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
+export async function migrateKibanaIndex({
+  client,
+  log,
+  kibanaPluginIds,
+}: {
+  client: Client;
+  log: ToolingLog;
+  kibanaPluginIds: string[];
+}) {
   const uiExports = await getUiExports(kibanaPluginIds);
   const kibanaVersion = await loadKibanaVersion();
 
-  const config = {
+  const config: Record<string, string> = {
     'xpack.task_manager.index': '.kibana_task_manager',
   };
 
+  const logger = {
+    trace: log.verbose.bind(log),
+    debug: log.debug.bind(log),
+    info: log.info.bind(log),
+    warn: log.warning.bind(log),
+    error: log.error.bind(log),
+    fatal: log.error.bind(log),
+    log: (entry: any) => log.info(entry.message),
+    get: () => logger,
+  };
+
   const migratorOptions = {
-    config: { get: path => config[path] },
+    config: { get: (path: string) => config[path] } as any,
     savedObjectsConfig: {
       scrollDuration: '5m',
       batchSize: 100,
       pollInterval: 100,
+      skip: false,
     },
     kibanaConfig: {
       index: '.kibana',
-    },
-    logger: {
-      trace: log.verbose.bind(log),
-      debug: log.debug.bind(log),
-      info: log.info.bind(log),
-      warn: log.warning.bind(log),
-      error: log.error.bind(log),
-    },
-    version: kibanaVersion,
+    } as any,
+    logger,
+    kibanaVersion,
     savedObjectSchemas: new SavedObjectsSchema(uiExports.savedObjectSchemas),
     savedObjectMappings: uiExports.savedObjectMappings,
     savedObjectMigrations: uiExports.savedObjectMigrations,
     savedObjectValidations: uiExports.savedObjectValidations,
-    callCluster: (path, ...args) => _.get(client, path).call(client, ...args),
+    callCluster: (path: string, ...args: any[]) =>
+      (get(client, path) as Function).call(client, ...args),
   };
 
   return await new KibanaMigrator(migratorOptions).runMigrations();
@@ -114,8 +142,8 @@ export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
 
 async function loadKibanaVersion() {
   const readFile = promisify(fs.readFile);
-  const packageJson = await readFile(path.join(__dirname, '../../../../package.json'));
-  return JSON.parse(packageJson).version;
+  const packageJson = await readFile(Path.join(__dirname, '../../../../package.json'));
+  return JSON.parse(packageJson.toString('utf-8')).version;
 }
 
 /**
@@ -123,16 +151,24 @@ async function loadKibanaVersion() {
  * .kibana, .kibana_1, .kibana_323, etc. This finds all indices starting
  * with .kibana, then filters out any that aren't actually Kibana's core
  * index (e.g. we don't want to remove .kibana_task_manager or the like).
- *
- * @param {string} index
  */
-async function fetchKibanaIndices(client) {
+async function fetchKibanaIndices(client: Client) {
   const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
-  const isKibanaIndex = index => /^\.kibana(:?_\d*)?$/.test(index);
-  return kibanaIndices.map(x => x.index).filter(isKibanaIndex);
+  const isKibanaIndex = (index: string) => /^\.kibana(:?_\d*)?$/.test(index);
+  return kibanaIndices.map((x: { index: string }) => x.index).filter(isKibanaIndex);
 }
 
-export async function cleanKibanaIndices({ client, stats, log, kibanaPluginIds }) {
+export async function cleanKibanaIndices({
+  client,
+  stats,
+  log,
+  kibanaPluginIds,
+}: {
+  client: Client;
+  stats: Stats;
+  log: ToolingLog;
+  kibanaPluginIds: string[];
+}) {
   if (!kibanaPluginIds.includes('spaces')) {
     return await deleteKibanaIndices({
       client,
@@ -178,7 +214,7 @@ export async function cleanKibanaIndices({ client, stats, log, kibanaPluginIds }
   stats.deletedIndex('.kibana');
 }
 
-export async function createDefaultSpace({ index, client }) {
+export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {
   await client.create({
     index,
     id: 'space:default',
@@ -193,5 +229,5 @@ export async function createDefaultSpace({ index, client }) {
         _reserved: true,
       },
     },
-  });
+  } as CreateDocumentParams);
 }

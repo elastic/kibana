@@ -18,14 +18,16 @@
  */
 
 import { Transform } from 'stream';
+import { Client } from 'elasticsearch';
+import { Stats } from '../stats';
 
-export function createGenerateIndexRecordsStream(client, stats) {
+export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
   return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,
     async transform(indexOrAlias, enc, callback) {
       try {
-        const resp = await client.indices.get({
+        const resp = (await client.indices.get({
           index: indexOrAlias,
           filterPath: [
             '*.settings',
@@ -36,7 +38,7 @@ export function createGenerateIndexRecordsStream(client, stats) {
             '-*.settings.index.version',
             '-*.settings.index.provided_name',
           ],
-        });
+        })) as Record<string, any>;
 
         for (const [index, { settings, mappings }] of Object.entries(resp)) {
           const {
