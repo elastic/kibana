@@ -42,7 +42,7 @@ import {
   setFieldFormats,
   setOverlays,
   setIndexPatterns,
-  setHttp,
+  setUiSettings,
 } from './services';
 import { createFilterAction, GLOBAL_APPLY_FILTER_ACTION } from './actions';
 import { APPLY_FILTER_TRIGGER } from '../../embeddable/public';
@@ -88,7 +88,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     setNotifications(notifications);
     setFieldFormats(fieldFormats);
     setOverlays(overlays);
-    setHttp(core.http);
+    setUiSettings(core.uiSettings);
 
     const indexPatternsService = new IndexPatterns(uiSettings, savedObjects.client, http);
     setIndexPatterns(indexPatternsService);
