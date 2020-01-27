@@ -54,7 +54,8 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    describe('visualization object replace flyout', () => {
+    // unskip when issue is fixed https://github.com/elastic/kibana/issues/55992
+    describe.skip('visualization object replace flyout', () => {
       let intialDimensions;
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
