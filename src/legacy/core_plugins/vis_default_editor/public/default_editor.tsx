@@ -22,10 +22,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EditorRenderProps } from '../../kibana/public/visualize/np_ready/types';
 import { VisualizeEmbeddable } from '../../visualizations/public/embeddable';
 import { VisualizeEmbeddableFactory } from '../../visualizations/public/embeddable/visualize_embeddable_factory';
-import {
-  PanelsContainer,
-  Panel,
-} from '../../console/public/np_ready/application/components/split_panel';
+import { PanelsContainer, Panel } from '../../../../../../plugins/kibana_react/public';
 
 import './vis_type_agg_filter';
 import { DefaultEditorSideBar } from './components/sidebar';

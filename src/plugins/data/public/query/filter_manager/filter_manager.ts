@@ -45,20 +45,23 @@ export class FilterManager {
     const appFilters = partitionedFilters.appFilters;
 
     // existing globalFilters should be mutated by appFilters
+    // ignore original appFilters which are already inside globalFilters
+    const cleanedAppFilters: esFilters.Filter[] = [];
     _.each(appFilters, function(filter, i) {
       const match = _.find(globalFilters, function(globalFilter) {
         return compareFilters(globalFilter, filter);
       });
 
-      // no match, do nothing
-      if (!match) return;
+      // no match, do continue with app filter
+      if (!match) {
+        return cleanedAppFilters.push(filter);
+      }
 
-      // matching filter in globalState, update global and remove from appState
+      // matching filter in globalState, update global and don't add from appState
       _.assign(match.meta, filter.meta);
-      appFilters.splice(i, 1);
     });
 
-    return FilterManager.mergeFilters(appFilters, globalFilters);
+    return FilterManager.mergeFilters(cleanedAppFilters, globalFilters);
   }
 
   private static mergeFilters(

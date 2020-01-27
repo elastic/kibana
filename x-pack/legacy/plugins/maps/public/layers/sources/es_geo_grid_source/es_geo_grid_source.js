@@ -23,7 +23,12 @@ import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
-import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID, COUNT_PROP_NAME } from '../../../../common/constants';
+import {
+  SOURCE_DATA_ID_ORIGIN,
+  ES_GEO_GRID,
+  COUNT_PROP_NAME,
+  COLOR_MAP_TYPE,
+} from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
@@ -250,6 +255,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
             origin: SOURCE_DATA_ID_ORIGIN,
           },
           color: COLOR_GRADIENTS[0].value,
+          type: COLOR_MAP_TYPE.ORDINAL,
         },
       },
       [VECTOR_STYLES.LINE_COLOR]: {

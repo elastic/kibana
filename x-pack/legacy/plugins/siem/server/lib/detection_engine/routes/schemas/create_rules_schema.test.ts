@@ -239,7 +239,7 @@ describe('create rules schema', () => {
     ).toBeFalsy();
   });
 
-  test('You can send in an empty array to threats', () => {
+  test('You can send in an empty array to threat', () => {
     expect(
       createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
         rule_id: 'rule-1',
@@ -257,12 +257,12 @@ describe('create rules schema', () => {
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [],
+        threat: [],
       }).error
     ).toBeFalsy();
   });
 
-  test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threats] does validate', () => {
+  test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
     expect(
       createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
         rule_id: 'rule-1',
@@ -276,7 +276,7 @@ describe('create rules schema', () => {
         severity: 'low',
         interval: '5m',
         type: 'query',
-        threats: [
+        threat: [
           {
             framework: 'someFramework',
             tactic: {
@@ -284,7 +284,7 @@ describe('create rules schema', () => {
               name: 'fakeName',
               reference: 'fakeRef',
             },
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -678,11 +678,11 @@ describe('create rules schema', () => {
     );
   });
 
-  test('You cannot send in an array of threats that are missing "framework"', () => {
+  test('You cannot send in an array of threat that are missing "framework"', () => {
     expect(
       createRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'framework'>>>;
+        Partial<Omit<RuleAlertParamsRest, 'threat'>> & {
+          threat: Array<Partial<Omit<ThreatParams, 'framework'>>>;
         }
       >({
         rule_id: 'rule-1',
@@ -700,14 +700,14 @@ describe('create rules schema', () => {
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [
+        threat: [
           {
             tactic: {
               id: 'fakeId',
               name: 'fakeName',
               reference: 'fakeRef',
             },
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -718,15 +718,15 @@ describe('create rules schema', () => {
         ],
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "framework" fails because ["framework" is required]]]'
+      'child "threat" fails because ["threat" at position 0 fails because [child "framework" fails because ["framework" is required]]]'
     );
   });
 
-  test('You cannot send in an array of threats that are missing "tactic"', () => {
+  test('You cannot send in an array of threat that are missing "tactic"', () => {
     expect(
       createRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
+        Partial<Omit<RuleAlertParamsRest, 'threat'>> & {
+          threat: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
         }
       >({
         rule_id: 'rule-1',
@@ -744,10 +744,10 @@ describe('create rules schema', () => {
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [
+        threat: [
           {
             framework: 'fake',
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -758,15 +758,15 @@ describe('create rules schema', () => {
         ],
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "tactic" fails because ["tactic" is required]]]'
+      'child "threat" fails because ["threat" at position 0 fails because [child "tactic" fails because ["tactic" is required]]]'
     );
   });
 
-  test('You cannot send in an array of threats that are missing "techniques"', () => {
+  test('You cannot send in an array of threat that are missing "technique"', () => {
     expect(
       createRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'technique'>>>;
+        Partial<Omit<RuleAlertParamsRest, 'threat'>> & {
+          threat: Array<Partial<Omit<ThreatParams, 'technique'>>>;
         }
       >({
         rule_id: 'rule-1',
@@ -784,7 +784,7 @@ describe('create rules schema', () => {
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [
+        threat: [
           {
             framework: 'fake',
             tactic: {
@@ -796,7 +796,7 @@ describe('create rules schema', () => {
         ],
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "techniques" fails because ["techniques" is required]]]'
+      'child "threat" fails because ["threat" at position 0 fails because [child "technique" fails because ["technique" is required]]]'
     );
   });
 

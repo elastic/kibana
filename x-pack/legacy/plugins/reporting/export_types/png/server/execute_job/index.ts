@@ -6,14 +6,14 @@
 
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { PLUGIN_ID, PNG_JOB_TYPE } from '../../../../common/constants';
+import { PNG_JOB_TYPE } from '../../../../common/constants';
 import {
   ServerFacade,
   ExecuteJobFactory,
   ESQueueWorkerExecuteFn,
   HeadlessChromiumDriverFactory,
+  Logger,
 } from '../../../../types';
-import { LevelLogger } from '../../../../server/lib';
 import {
   decryptJobHeaders,
   omitBlacklistedHeaders,
@@ -27,10 +27,11 @@ type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocP
 
 export const executeJobFactory: QueuedPngExecutorFactory = function executeJobFactoryFn(
   server: ServerFacade,
+  parentLogger: Logger,
   { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
 ) {
   const generatePngObservable = generatePngObservableFactory(server, browserDriverFactory);
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PNG_JOB_TYPE, 'execute']);
+  const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
 
   return function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
     const jobLogger = logger.clone([jobId]);
