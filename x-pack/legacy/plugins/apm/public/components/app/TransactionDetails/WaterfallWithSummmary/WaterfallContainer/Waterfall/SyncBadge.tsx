@@ -5,10 +5,10 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { px, units } from '../../../../../../style/variables';
-import { i18n } from '@kbn/i18n';
 
 const SpanBadge = styled(EuiBadge)`
   display: inline-block;
@@ -16,6 +16,9 @@ const SpanBadge = styled(EuiBadge)`
 `;
 
 interface SyncBadgeProps {
+  /**
+   * Is the request synchronous? True will show blocking, false will show async.
+   */
   sync?: boolean;
 }
 
@@ -27,11 +30,16 @@ export function SyncBadge({ sync }: SyncBadgeProps) {
           {i18n.translate('xpack.apm.transactionDetails.syncBadgeBlocking', {
             defaultMessage: 'blocking'
           })}
-          blocking
         </SpanBadge>
       );
     case false:
-      return <SpanBadge>async</SpanBadge>;
+      return (
+        <SpanBadge>
+          {i18n.translate('xpack.apm.transactionDetails.syncBadgeAsync', {
+            defaultMessage: 'async'
+          })}
+        </SpanBadge>
+      );
     default:
       return null;
   }
