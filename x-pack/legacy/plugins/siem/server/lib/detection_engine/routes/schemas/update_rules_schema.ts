@@ -30,7 +30,7 @@ import {
   tags,
   to,
   type,
-  threats,
+  threat,
   references,
   id,
   version,
@@ -61,7 +61,7 @@ export const updateRulesSchema = Joi.object({
   tags,
   to,
   type,
-  threats,
+  threat,
   references,
   version,
 }).xor('id', 'rule_id');
