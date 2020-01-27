@@ -39,6 +39,8 @@ describe('EditorConfigProvider', () => {
       },
     ],
   } as any;
+  const aggTypeName = 'histogram';
+  const fieldName = '@timestamp';
 
   beforeEach(() => {
     registry = new EditorConfigProviderRegistry();
@@ -48,9 +50,9 @@ describe('EditorConfigProvider', () => {
     const provider = jest.fn<any, any>(() => ({}));
     registry.register(provider);
     expect(provider).not.toHaveBeenCalled();
-    const aggConfig = {} as AggConfig;
-    registry.getConfigForAgg(indexPattern, aggConfig);
-    expect(provider).toHaveBeenCalledWith(indexPattern, aggConfig);
+
+    registry.getConfigForAgg(indexPattern, aggTypeName, fieldName);
+    expect(provider).toHaveBeenCalledWith(indexPattern, aggTypeName, fieldName);
   });
 
   it('should call all registered providers with given parameters', () => {
@@ -61,9 +63,9 @@ describe('EditorConfigProvider', () => {
     expect(provider).not.toHaveBeenCalled();
     expect(provider2).not.toHaveBeenCalled();
     const aggConfig = {} as AggConfig;
-    registry.getConfigForAgg(indexPattern, aggConfig);
-    expect(provider).toHaveBeenCalledWith(indexPattern, aggConfig);
-    expect(provider2).toHaveBeenCalledWith(indexPattern, aggConfig);
+    registry.getConfigForAgg(indexPattern, aggTypeName, fieldName);
+    expect(provider).toHaveBeenCalledWith(indexPattern, aggTypeName, fieldName);
+    expect(provider2).toHaveBeenCalledWith(indexPattern, aggTypeName, fieldName);
   });
 
   describe('merging configs', () => {
@@ -72,7 +74,7 @@ describe('EditorConfigProvider', () => {
     }
 
     function getOutputConfig(reg: EditorConfigProviderRegistry) {
-      return reg.getConfigForAgg(indexPattern, {} as AggConfig).singleParam;
+      return reg.getConfigForAgg(indexPattern, aggTypeName, fieldName).singleParam;
     }
 
     it('should have hidden true if at least one config was hidden true', () => {

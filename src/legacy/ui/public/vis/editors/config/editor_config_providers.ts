@@ -18,14 +18,17 @@
  */
 
 import { TimeIntervalParam } from 'ui/vis/editors/config/types';
-import { AggConfig } from '../..';
 import { IndexPattern } from '../../../../../../plugins/data/public';
 import { leastCommonMultiple } from '../../lib/least_common_multiple';
 import { parseEsInterval } from '../../../../../core_plugins/data/public';
 import { leastCommonInterval } from '../../lib/least_common_interval';
 import { EditorConfig, EditorParamConfig, FixedParam, NumericIntervalParam } from './types';
 
-type EditorConfigProvider = (indexPattern: IndexPattern, aggConfig: AggConfig) => EditorConfig;
+type EditorConfigProvider = (
+  indexPattern: IndexPattern,
+  aggTypeName: string,
+  fieldName: string
+) => EditorConfig;
 
 class EditorConfigProviderRegistry {
   private providers: Set<EditorConfigProvider> = new Set();
@@ -34,8 +37,14 @@ class EditorConfigProviderRegistry {
     this.providers.add(configProvider);
   }
 
-  public getConfigForAgg(indexPattern: IndexPattern, aggConfig: AggConfig): EditorConfig {
-    const configs = Array.from(this.providers).map(provider => provider(indexPattern, aggConfig));
+  public getConfigForAgg(
+    indexPattern: IndexPattern,
+    aggTypeName: string,
+    fieldName: string
+  ): EditorConfig {
+    const configs = Array.from(this.providers).map(provider =>
+      provider(indexPattern, aggTypeName, fieldName)
+    );
     return this.mergeConfigs(configs);
   }
 

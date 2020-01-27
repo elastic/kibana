@@ -9,12 +9,10 @@ import { editorConfigProviders } from 'ui/vis/editors/config/editor_config_provi
 
 export function initEditorConfig() {
   // Limit agg params based on rollup capabilities
-  editorConfigProviders.register((indexPattern, aggConfig) => {
+  editorConfigProviders.register((indexPattern, aggTypeName, fieldName) => {
     if (indexPattern.type !== 'rollup') {
       return {};
     }
-
-    const aggTypeName = aggConfig.type && aggConfig.type.name;
 
     // Exclude certain param options for terms:
     // otherBucket, missingBucket, orderBy, orderAgg
@@ -30,11 +28,10 @@ export function initEditorConfig() {
     }
 
     const rollupAggs = indexPattern.typeMeta && indexPattern.typeMeta.aggs;
-    const field = aggConfig.params && aggConfig.params.field && aggConfig.params.field.name;
     const fieldAgg =
-      rollupAggs && field && rollupAggs[aggTypeName] && rollupAggs[aggTypeName][field];
+      rollupAggs && fieldName && rollupAggs[aggTypeName] && rollupAggs[aggTypeName][fieldName];
 
-    if (!rollupAggs || !field || !fieldAgg) {
+    if (!rollupAggs || !fieldName || !fieldAgg) {
       return {};
     }
 

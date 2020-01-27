@@ -90,10 +90,12 @@ function DefaultEditorAggParams({
       })
     : '';
 
-  const editorConfig = useMemo(() => editorConfigProviders.getConfigForAgg(indexPattern, agg), [
-    indexPattern,
-    agg,
-  ]);
+  const aggTypeName = agg.type?.name;
+  const fieldName = agg.params?.field?.name;
+  const editorConfig = useMemo(
+    () => editorConfigProviders.getConfigForAgg(indexPattern, aggTypeName, fieldName),
+    [indexPattern, aggTypeName, fieldName]
+  );
   const params = useMemo(() => getAggParamsToRender({ agg, editorConfig, metricAggs, state }), [
     agg,
     editorConfig,
