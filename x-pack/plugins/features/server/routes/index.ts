@@ -23,7 +23,9 @@ export function defineRoutes({ router, featureRegistry, getLegacyAPI }: RouteDef
     {
       path: '/api/features',
       options: { tags: ['access:features'] },
-      validate: { query: schema.object({ ignoreValidLicenses: schema.maybe(schema.boolean()) }) },
+      validate: {
+        query: schema.object({ ignoreValidLicenses: schema.boolean({ defaultValue: false }) }),
+      },
     },
     (context, request, response) => {
       const allFeatures = featureRegistry.getAll();
@@ -31,7 +33,7 @@ export function defineRoutes({ router, featureRegistry, getLegacyAPI }: RouteDef
       return response.ok({
         body: allFeatures.filter(
           feature =>
-            request.query.ignoreValidLicenses === true ||
+            request.query.ignoreValidLicenses ||
             !feature.validLicenses ||
             !feature.validLicenses.length ||
             getLegacyAPI().xpackInfo.license.isOneOf(feature.validLicenses)

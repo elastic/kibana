@@ -25,7 +25,7 @@ export class FeaturesService {
   public async get({ ignoreValidLicenses } = { ignoreValidLicenses: false }): Promise<Features> {
     this.log.debug('requesting /api/features to get the features');
     const response = await this.axios.get(
-      `/api/features${ignoreValidLicenses ? '?ignoreValidLicenses=true' : ''}`
+      `/api/features?ignoreValidLicenses=${ignoreValidLicenses}`
     );
 
     if (response.status !== 200) {
