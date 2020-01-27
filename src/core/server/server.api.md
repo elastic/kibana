@@ -706,9 +706,9 @@ export interface FakeRequest {
 export type GetAuthHeaders = (request: KibanaRequest | LegacyRequest) => AuthHeaders | undefined;
 
 // @public
-export type GetAuthState = (request: KibanaRequest | LegacyRequest) => {
+export type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest) => {
     status: AuthStatus;
-    state: unknown;
+    state: T;
 };
 
 // @public
@@ -738,6 +738,11 @@ export type HttpResponsePayload = undefined | string | Record<string, any> | Buf
 
 // @public
 export interface HttpServiceSetup {
+    // (undocumented)
+    auth: {
+        get: GetAuthState;
+        isAuthenticated: IsAuthenticated;
+    };
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     createRouter: () => IRouter;
