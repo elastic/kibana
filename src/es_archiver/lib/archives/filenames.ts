@@ -19,7 +19,7 @@
 
 import { basename, extname } from 'path';
 
-export function isGzip(path) {
+export function isGzip(path: string) {
   return extname(path) === '.gz';
 }
 
@@ -28,7 +28,7 @@ export function isGzip(path) {
  *  @param  {String} path
  *  @return {Boolean}
  */
-export function isMappingFile(path) {
+export function isMappingFile(path: string) {
   return basename(path, '.gz') === 'mappings.json';
 }
 
@@ -41,7 +41,7 @@ export function isMappingFile(path) {
  *  @param {Array<String>} filenames
  *  @return {Array<String>}
  */
-export function prioritizeMappings(filenames) {
+export function prioritizeMappings(filenames: string[]) {
   return filenames.slice().sort((fa, fb) => {
     if (isMappingFile(fa) === isMappingFile(fb)) return 0;
     return isMappingFile(fb) ? 1 : -1;

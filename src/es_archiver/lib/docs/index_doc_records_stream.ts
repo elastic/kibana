@@ -17,11 +17,14 @@
  * under the License.
  */
 
+import { Client } from 'elasticsearch';
 import { Writable } from 'stream';
+import { Stats } from '../stats';
+import { Progress } from '../progress';
 
-export function createIndexDocRecordsStream(client, stats, progress) {
-  async function indexDocs(docs) {
-    const body = [];
+export function createIndexDocRecordsStream(client: Client, stats: Stats, progress: Progress) {
+  async function indexDocs(docs: any[]) {
+    const body: any[] = [];
 
     docs.forEach(doc => {
       stats.indexedDoc(doc.index);

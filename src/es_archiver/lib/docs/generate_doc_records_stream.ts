@@ -18,33 +18,36 @@
  */
 
 import { Transform } from 'stream';
+import { Client, SearchParams, SearchResponse } from 'elasticsearch';
+import { Stats } from '../stats';
+import { Progress } from '../progress';
 
 const SCROLL_SIZE = 1000;
 const SCROLL_TIMEOUT = '1m';
 
-export function createGenerateDocRecordsStream(client, stats, progress) {
+export function createGenerateDocRecordsStream(client: Client, stats: Stats, progress: Progress) {
   return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,
     async transform(index, enc, callback) {
       try {
-        let remainingHits = null;
-        let resp = null;
+        let remainingHits = 0;
+        let resp: SearchResponse<any> | null = null;
 
         while (!resp || remainingHits > 0) {
           if (!resp) {
             resp = await client.search({
-              index: index,
+              index,
               scroll: SCROLL_TIMEOUT,
               size: SCROLL_SIZE,
               _source: true,
-              rest_total_hits_as_int: true,
-            });
+              rest_total_hits_as_int: true, // not declared on SearchParams type
+            } as SearchParams);
             remainingHits = resp.hits.total;
             progress.addToTotal(remainingHits);
           } else {
             resp = await client.scroll({
-              scrollId: resp._scroll_id,
+              scrollId: resp._scroll_id!,
               scroll: SCROLL_TIMEOUT,
             });
           }
@@ -68,7 +71,7 @@ export function createGenerateDocRecordsStream(client, stats, progress) {
           progress.addToComplete(resp.hits.hits.length);
         }
 
-        callback(null);
+        callback(undefined);
       } catch (err) {
         callback(err);
       }

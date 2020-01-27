@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import { createGzip, Z_BEST_COMPRESSION } from 'zlib';
+import { createGunzip } from 'zlib';
 import { PassThrough } from 'stream';
-
-import stringify from 'json-stable-stringify';
-
-import { createMapStream, createIntersperseStream } from '../../../legacy/utils';
+import { createFilterStream } from '../../../legacy/utils/streams/filter_stream';
+import { createSplitStream, createReplaceStream, createMapStream } from '../../../legacy/utils';
 
 import { RECORD_SEPARATOR } from './constants';
 
-export function createFormatArchiveStreams({ gzip = false } = {}) {
+export function createParseArchiveStreams({ gzip = false } = {}) {
   return [
-    createMapStream(record => stringify(record, { space: '  ' })),
-    createIntersperseStream(RECORD_SEPARATOR),
-    gzip ? createGzip({ level: Z_BEST_COMPRESSION }) : new PassThrough(),
+    gzip ? createGunzip() : new PassThrough(),
+    createReplaceStream('\r\n', '\n'),
+    createSplitStream(RECORD_SEPARATOR),
+    createFilterStream<string>(l => !!l.match(/[^\s]/)),
+    createMapStream<string>(json => JSON.parse(json.trim())),
   ];
 }

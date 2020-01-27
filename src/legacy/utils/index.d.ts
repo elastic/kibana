@@ -24,3 +24,16 @@ export function formatListAsProse(list: string[], options?: { inclusive?: boolea
 export function getFlattenedObject(rootValue: Record<string, any>): { [key: string]: any };
 
 export function unset(object: object, rawPath: string): void;
+
+export {
+  concatStreamProviders,
+  createConcatStream,
+  createFilterStream,
+  createIntersperseStream,
+  createListStream,
+  createMapStream,
+  createPromiseFromStreams,
+  createReduceStream,
+  createReplaceStream,
+  createSplitStream,
+} from './streams';
