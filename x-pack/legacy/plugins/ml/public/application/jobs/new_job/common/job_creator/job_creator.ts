@@ -623,8 +623,10 @@ export class JobCreator {
     }
 
     this._aggregationFields = [];
-    if (this._datafeed_config.aggregations?.buckets !== undefined) {
-      collectAggs(this._datafeed_config.aggregations.buckets, this._aggregationFields);
+    const buckets =
+      this._datafeed_config.aggregations?.buckets || this._datafeed_config.aggs?.buckets;
+    if (buckets !== undefined) {
+      collectAggs(buckets, this._aggregationFields);
     }
   }
 }

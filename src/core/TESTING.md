@@ -247,8 +247,3 @@ _How to test against specific plugin APIs (eg. data plugin)_
 ## Plugin Contracts
 
 _How to test your plugin's exposed API_
-
-Guidelines:
-- Plugins should never interact with other plugins' REST API directly
-- Plugins should interact with other plugins via JavaScript contracts
-- Exposed contracts need to be well tested to ensure breaking changes are detected easily

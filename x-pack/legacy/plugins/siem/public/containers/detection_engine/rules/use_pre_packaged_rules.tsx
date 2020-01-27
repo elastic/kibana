@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useStateToaster, displaySuccessToast } from '../../../components/toasters';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
@@ -18,6 +18,7 @@ interface Return {
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
   refetchPrePackagedRulesStatus: Func | null;
+  rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
@@ -47,13 +48,26 @@ export const usePrePackagedRules = ({
   isAuthenticated,
   isSignalIndexExists,
 }: UsePrePackagedRuleProps): Return => {
-  const [rulesInstalled, setRulesInstalled] = useState<number | null>(null);
-  const [rulesNotInstalled, setRulesNotInstalled] = useState<number | null>(null);
-  const [rulesNotUpdated, setRulesNotUpdated] = useState<number | null>(null);
+  const [rulesStatus, setRuleStatus] = useState<
+    Pick<
+      Return,
+      | 'createPrePackagedRules'
+      | 'refetchPrePackagedRulesStatus'
+      | 'rulesCustomInstalled'
+      | 'rulesInstalled'
+      | 'rulesNotInstalled'
+      | 'rulesNotUpdated'
+    >
+  >({
+    createPrePackagedRules: null,
+    refetchPrePackagedRulesStatus: null,
+    rulesCustomInstalled: null,
+    rulesInstalled: null,
+    rulesNotInstalled: null,
+    rulesNotUpdated: null,
+  });
   const [loadingCreatePrePackagedRules, setLoadingCreatePrePackagedRules] = useState(false);
   const [loading, setLoading] = useState(true);
-  const createPrePackagedRules = useRef<null | CreatePreBuiltRules>(null);
-  const refetchPrePackagedRules = useRef<Func | null>(null);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
@@ -68,15 +82,25 @@ export const usePrePackagedRules = ({
         });
 
         if (isSubscribed) {
-          setRulesInstalled(prePackagedRuleStatusResponse.rules_installed);
-          setRulesNotInstalled(prePackagedRuleStatusResponse.rules_not_installed);
-          setRulesNotUpdated(prePackagedRuleStatusResponse.rules_not_updated);
+          setRuleStatus({
+            createPrePackagedRules: createElasticRules,
+            refetchPrePackagedRulesStatus: fetchPrePackagedRules,
+            rulesCustomInstalled: prePackagedRuleStatusResponse.rules_custom_installed,
+            rulesInstalled: prePackagedRuleStatusResponse.rules_installed,
+            rulesNotInstalled: prePackagedRuleStatusResponse.rules_not_installed,
+            rulesNotUpdated: prePackagedRuleStatusResponse.rules_not_updated,
+          });
         }
       } catch (error) {
         if (isSubscribed) {
-          setRulesInstalled(null);
-          setRulesNotInstalled(null);
-          setRulesNotUpdated(null);
+          setRuleStatus({
+            createPrePackagedRules: null,
+            refetchPrePackagedRulesStatus: null,
+            rulesCustomInstalled: null,
+            rulesInstalled: null,
+            rulesNotInstalled: null,
+            rulesNotUpdated: null,
+          });
           errorToToaster({ title: i18n.RULE_FETCH_FAILURE, error, dispatchToaster });
         }
       }
@@ -122,9 +146,14 @@ export const usePrePackagedRules = ({
                       iterationTryOfFetchingPrePackagedCount > 100)
                   ) {
                     setLoadingCreatePrePackagedRules(false);
-                    setRulesInstalled(prePackagedRuleStatusResponse.rules_installed);
-                    setRulesNotInstalled(prePackagedRuleStatusResponse.rules_not_installed);
-                    setRulesNotUpdated(prePackagedRuleStatusResponse.rules_not_updated);
+                    setRuleStatus({
+                      createPrePackagedRules: createElasticRules,
+                      refetchPrePackagedRulesStatus: fetchPrePackagedRules,
+                      rulesCustomInstalled: prePackagedRuleStatusResponse.rules_custom_installed,
+                      rulesInstalled: prePackagedRuleStatusResponse.rules_installed,
+                      rulesNotInstalled: prePackagedRuleStatusResponse.rules_not_installed,
+                      rulesNotUpdated: prePackagedRuleStatusResponse.rules_not_updated,
+                    });
                     displaySuccessToast(i18n.RULE_PREPACKAGED_SUCCESS, dispatchToaster);
                     stopTimeOut();
                     resolve(true);
@@ -146,8 +175,7 @@ export const usePrePackagedRules = ({
     };
 
     fetchPrePackagedRules();
-    createPrePackagedRules.current = createElasticRules;
-    refetchPrePackagedRules.current = fetchPrePackagedRules;
+
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
@@ -157,10 +185,6 @@ export const usePrePackagedRules = ({
   return {
     loading,
     loadingCreatePrePackagedRules,
-    refetchPrePackagedRulesStatus: refetchPrePackagedRules.current,
-    rulesInstalled,
-    rulesNotInstalled,
-    rulesNotUpdated,
-    createPrePackagedRules: createPrePackagedRules.current,
+    ...rulesStatus,
   };
 };
