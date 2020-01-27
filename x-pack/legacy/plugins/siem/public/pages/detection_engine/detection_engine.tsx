@@ -111,6 +111,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
     [detectionsTabs, tabName]
   );
 
+  const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
+    signalIndexName,
+  ]);
+
   if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
       <WrapperPage>
@@ -131,7 +135,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
   return (
     <>
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
-      <WithSource sourceId="default">
+      <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indicesExist, indexPattern }) => {
           return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <StickyContainer>
@@ -164,10 +168,13 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
                       {tabName === DetectionEngineTab.signals && (
                         <>
                           <SignalsHistogramPanel
+                            deleteQuery={deleteQuery}
                             filters={filters}
                             from={from}
                             loadingInitial={loading}
                             query={query}
+                            signalIndexName={signalIndexName}
+                            setQuery={setQuery}
                             stackByOptions={signalsHistogramOptions}
                             to={to}
                             updateDateRange={updateDateRangeCallback}

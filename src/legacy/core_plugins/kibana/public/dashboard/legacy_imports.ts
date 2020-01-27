@@ -27,7 +27,6 @@
 import chrome from 'ui/chrome';
 
 export const legacyChrome = chrome;
-export { State } from 'ui/state_management/state';
 export { SavedObjectSaveOpts } from 'ui/saved_objects/types';
 export { npSetup, npStart } from 'ui/new_platform';
 export { IPrivate } from 'ui/private';
