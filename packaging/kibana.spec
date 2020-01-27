@@ -39,7 +39,7 @@ mv plugins/kbn_network* plugins/network_vis
 rm -rf plugins/network_vis/images/
 
 %build
-#must install kibana dependencies before running build due to a yarn bug fetching new dependencies
+#must install kibana dependencies before running build due to a `yarn kbn bootstrap` bug that strips auth
 cd %{name}
 /usr/bin/yarn
 
