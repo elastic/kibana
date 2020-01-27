@@ -29,7 +29,7 @@ export interface IPulseChannel {
   getRecords: <T>() => Promise<T[]>;
 }
 
-export const sendUsageFrom: 'browser' | 'server' = 'browser';
+export const sendUsageFrom: 'browser' | 'server' = 'server';
 
 export type Fetcher<Response> = (
   url: string,

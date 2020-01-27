@@ -57,13 +57,12 @@ export class PulseService {
   }
 
   public async setup(): Promise<PulseServiceSetup> {
+    // poll for instructions every second for this deployment
+    setInterval(() => {
+      // eslint-disable-next-line no-console
+      this.loadInstructions().catch(err => console.error(err.stack));
+    }, 10000);
     if (sendUsageFrom === 'browser') {
-      // poll for instructions every second for this deployment
-      setInterval(() => {
-        // eslint-disable-next-line no-console
-        this.loadInstructions().catch(err => console.error(err.stack));
-      }, 10000);
-
       // eslint-disable-next-line no-console
       console.log('Will attempt first telemetry collection in 5 seconds...');
       setTimeout(() => {
