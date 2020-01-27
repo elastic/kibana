@@ -95,7 +95,7 @@ export default function(kibana) {
       const waitUntilHealthy = versionHealthCheck(
         this,
         server.logWithMetadata,
-        server.newPlatform.__internals.elasticsearch.esNodesCompatibilty$
+        server.newPlatform.__internals.elasticsearch.esNodesCompatibility$
       );
 
       server.expose('waitUntilReady', () => waitUntilHealthy);
