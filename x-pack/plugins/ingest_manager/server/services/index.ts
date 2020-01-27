@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { epmRouteService } from '../../common';
+export { appContextService } from './app_context';
 export { licenseService } from './license';
 export { configService } from './config';
 

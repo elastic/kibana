@@ -5,7 +5,7 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
-import { agentConfigService } from '../../services';
+import { appContextService, agentConfigService } from '../../services';
 import {
   GetAgentConfigsRequestSchema,
   GetOneAgentConfigRequestSchema,
@@ -71,8 +71,11 @@ export const createAgentConfigHandler: RequestHandler<
   TypeOf<typeof CreateAgentConfigRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
-    const agentConfig = await agentConfigService.create(soClient, request.body);
+    const agentConfig = await agentConfigService.create(soClient, request.body, {
+      user: user || undefined,
+    });
     return response.ok({
       body: { item: agentConfig, success: true },
     });
@@ -90,11 +93,15 @@ export const updateAgentConfigHandler: RequestHandler<
   TypeOf<typeof UpdateAgentConfigRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
     const agentConfig = await agentConfigService.update(
       soClient,
       request.params.agentConfigId,
-      request.body
+      request.body,
+      {
+        user: user || undefined,
+      }
     );
     return response.ok({
       body: { item: agentConfig, success: true },

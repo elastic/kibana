@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IRouter } from 'kibana/server';
-import { IngestManagerAppContext } from '../../';
 import { PLUGIN_ID, AGENT_CONFIG_API_ROUTES } from '../../constants';
 import {
   GetAgentConfigsRequestSchema,
@@ -21,7 +20,7 @@ import {
   deleteAgentConfigsHandler,
 } from './handlers';
 
-export const registerRoutes = (router: IRouter, { clusterClient }: IngestManagerAppContext) => {
+export const registerRoutes = (router: IRouter) => {
   // List
   router.get(
     {

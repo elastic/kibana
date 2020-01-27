@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract } from 'kibana/server';
+import { AuthenticatedUser } from '../../../security/server';
 import { DEFAULT_AGENT_CONFIG_ID } from '../constants';
 import {
   NewAgentConfig,
@@ -32,12 +33,13 @@ class AgentConfigService {
   private async _update(
     soClient: SavedObjectsClientContract,
     id: string,
-    agentConfig: NewAgentConfig
+    agentConfig: NewAgentConfig,
+    user?: AuthenticatedUser
   ): Promise<AgentConfig> {
     await soClient.update<AgentConfig>(SAVED_OBJECT_TYPE, id, {
       ...agentConfig,
       updated_on: new Date().toString(),
-      updated_by: 'system', // TODO: Check with Platform about how to access requesting user info
+      updated_by: user ? user.username : 'system',
     });
 
     await this.triggerPolicyUpdatedEvent('updated', id);
@@ -52,14 +54,14 @@ class AgentConfigService {
   public async create(
     soClient: SavedObjectsClientContract,
     agentConfig: NewAgentConfig,
-    options?: { id?: string; username?: string }
+    options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
     const newSo = await soClient.create<AgentConfig>(
       SAVED_OBJECT_TYPE,
       {
         ...agentConfig,
         updated_on: new Date().toISOString(),
-        updated_by: options?.username || 'system', // TODO: Check with Platform about how to access requesting user info
+        updated_by: options?.user?.username || 'system',
       } as AgentConfig,
       options
     );
@@ -128,7 +130,8 @@ class AgentConfigService {
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
-    agentConfig: NewAgentConfig
+    agentConfig: NewAgentConfig,
+    options?: { user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id);
 
@@ -145,13 +148,14 @@ class AgentConfigService {
       );
     }
 
-    return this._update(soClient, id, agentConfig);
+    return this._update(soClient, id, agentConfig, options?.user);
   }
 
   public async assignDataStreams(
     soClient: SavedObjectsClientContract,
     id: string,
-    dataStreamIds: string[]
+    dataStreamIds: string[],
+    options?: { user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id);
 
@@ -159,16 +163,22 @@ class AgentConfigService {
       throw new Error('Agent config not found');
     }
 
-    return await this._update(soClient, id, {
-      ...oldAgentConfig,
-      data_streams: [...((oldAgentConfig.data_streams || []) as string[])].concat(dataStreamIds),
-    });
+    return await this._update(
+      soClient,
+      id,
+      {
+        ...oldAgentConfig,
+        data_streams: [...((oldAgentConfig.data_streams || []) as string[])].concat(dataStreamIds),
+      },
+      options?.user
+    );
   }
 
   public async unassignDataStreams(
     soClient: SavedObjectsClientContract,
     id: string,
-    dataStreamIds: string[]
+    dataStreamIds: string[],
+    options?: { user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id);
 
@@ -176,12 +186,17 @@ class AgentConfigService {
       throw new Error('Agent config not found');
     }
 
-    return await this._update(soClient, id, {
-      ...oldAgentConfig,
-      data_streams: [...((oldAgentConfig.data_streams || []) as string[])].filter(
-        dsId => !dataStreamIds.includes(dsId)
-      ),
-    });
+    return await this._update(
+      soClient,
+      id,
+      {
+        ...oldAgentConfig,
+        data_streams: [...((oldAgentConfig.data_streams || []) as string[])].filter(
+          dsId => !dataStreamIds.includes(dsId)
+        ),
+      },
+      options?.user
+    );
   }
 
   public async delete(soClient: SavedObjectsClientContract, ids: string[]): Promise<void> {

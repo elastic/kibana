@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IRouter } from 'kibana/server';
-import { IngestManagerAppContext } from '../../';
 import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
 
-export const registerRoutes = (router: IRouter, { clusterClient }: IngestManagerAppContext) => {
+export const registerRoutes = (router: IRouter) => {
   router.get(
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,

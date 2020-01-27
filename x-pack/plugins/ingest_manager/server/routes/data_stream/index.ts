@@ -19,7 +19,7 @@ import {
   updateDataStreamHandler,
 } from './handlers';
 
-export const registerRoutes = (router: IRouter, { clusterClient }: IngestManagerAppContext) => {
+export const registerRoutes = (router: IRouter) => {
   // List
   router.get(
     {

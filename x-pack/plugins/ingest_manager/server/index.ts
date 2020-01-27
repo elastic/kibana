@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, ICustomClusterClient } from 'kibana/server';
+import { PluginInitializerContext } from 'kibana/server';
 import { DEFAULT_REGISTRY_URL } from './constants';
 import { IngestManagerPlugin } from './plugin';
 
@@ -26,10 +26,6 @@ export const config = {
 };
 
 export type IngestManagerConfigType = TypeOf<typeof config.schema>;
-
-export interface IngestManagerAppContext {
-  clusterClient: ICustomClusterClient;
-}
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);
