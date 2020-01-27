@@ -51,7 +51,7 @@ export default function({ getService }) {
           expect(body.process.uptime_ms).to.be.greaterThan(0);
           expect(body.os.uptime_ms).to.be.greaterThan(0);
           expect(body.usage.kibana.index).to.be('.kibana');
-          expect(typeof body.usage.dashboard.total).to.be('number');
+          expect(body.usage.dashboard.total).to.be.a('number');
         });
 
         it('should return 200 for extended and legacy', async () => {
@@ -60,7 +60,7 @@ export default function({ getService }) {
           expect(body.process.uptime_ms).to.be.greaterThan(0);
           expect(body.os.uptime_ms).to.be.greaterThan(0);
           expect(body.usage.index).to.be('.kibana');
-          expect(typeof body.usage.dashboard.total).to.be('number');
+          expect(body.usage.dashboard.total).to.be.a('number');
           expect(body.usage.xpack.reporting.available).to.be(true);
         });
       });
