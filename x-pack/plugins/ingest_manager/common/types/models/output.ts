@@ -11,13 +11,13 @@ export enum OutputType {
 
 const OutputBaseSchema = {
   name: schema.string(),
+  type: schema.oneOf([schema.literal(OutputType.Elasticsearch)]),
   username: schema.maybe(schema.string()),
   password: schema.maybe(schema.string()),
   index_name: schema.maybe(schema.string()),
   ingest_pipeline: schema.maybe(schema.string()),
   hosts: schema.maybe(schema.arrayOf(schema.string())),
   api_key: schema.maybe(schema.string()),
-  type: schema.oneOf([schema.literal(OutputType.Elasticsearch)]),
   config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 };
 

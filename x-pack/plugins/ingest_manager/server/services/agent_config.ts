@@ -5,7 +5,11 @@
  */
 import { SavedObjectsClientContract } from 'kibana/server';
 import { AuthenticatedUser } from '../../../security/server';
-import { DEFAULT_AGENT_CONFIG_ID, DEFAULT_AGENT_CONFIG } from '../constants';
+import {
+  DEFAULT_AGENT_CONFIG_ID,
+  DEFAULT_AGENT_CONFIG,
+  AGENT_CONFIG_SAVED_OBJECT_TYPE,
+} from '../constants';
 import {
   NewAgentConfig,
   AgentConfig,
@@ -15,7 +19,7 @@ import {
 } from '../types';
 import { dataStreamService } from './data_stream';
 
-const SAVED_OBJECT_TYPE = 'agent_configs';
+const SAVED_OBJECT_TYPE = AGENT_CONFIG_SAVED_OBJECT_TYPE;
 
 class AgentConfigService {
   private eventsHandler: AgentConfigUpdateHandler[] = [];

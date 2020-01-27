@@ -31,3 +31,5 @@ export type IngestManagerConfigType = TypeOf<typeof config.schema>;
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);
 };
+
+export { savedObjectMappings } from './saved_objects';

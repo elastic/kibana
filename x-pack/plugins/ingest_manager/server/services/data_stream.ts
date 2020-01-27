@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract } from 'kibana/server';
+import { DATA_STREAM_SAVED_OBJECT_TYPE } from '../constants';
 import { NewDataStream, DataStream, ListWithKuery } from '../types';
 
-const SAVED_OBJECT_TYPE = 'data_streams';
+const SAVED_OBJECT_TYPE = DATA_STREAM_SAVED_OBJECT_TYPE;
 
 class DataStreamService {
   public async create(

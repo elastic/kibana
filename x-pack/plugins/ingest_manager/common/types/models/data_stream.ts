@@ -14,6 +14,7 @@ export enum InputType {
 
 const DataStreamBaseSchema = {
   name: schema.string(),
+  read_alias: schema.maybe(schema.string()),
   agent_config_id: schema.string(),
   input: schema.object({
     type: schema.oneOf([
@@ -31,6 +32,18 @@ const DataStreamBaseSchema = {
   output_id: schema.string(),
   processors: schema.maybe(schema.arrayOf(schema.string())),
   config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  package: schema.maybe(
+    schema.object({
+      assets: schema.object({
+        id: schema.string(),
+        type: schema.string(),
+      }),
+      description: schema.string(),
+      name: schema.string(),
+      title: schema.string(),
+      version: schema.string(),
+    })
+  ),
 };
 
 export const NewDataStreamSchema = schema.object({

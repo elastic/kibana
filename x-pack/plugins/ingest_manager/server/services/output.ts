@@ -5,11 +5,11 @@
  */
 import { SavedObjectsClientContract } from 'kibana/server';
 import { NewOutput, Output } from '../types';
-import { DEFAULT_OUTPUT, DEFAULT_OUTPUT_ID } from '../constants';
+import { DEFAULT_OUTPUT, DEFAULT_OUTPUT_ID, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { configService } from './config';
 import { appContextService } from './app_context';
 
-const SAVED_OBJECT_TYPE = 'outputs';
+const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 class OutputService {
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {

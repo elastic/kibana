@@ -5,6 +5,8 @@
  */
 import { AgentConfigStatus } from '../types';
 
+export const AGENT_CONFIG_SAVED_OBJECT_TYPE = 'agent_configs';
+
 export const DEFAULT_AGENT_CONFIG_ID = 'default';
 
 export const DEFAULT_AGENT_CONFIG = {
