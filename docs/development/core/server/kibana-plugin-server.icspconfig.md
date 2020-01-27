@@ -18,7 +18,6 @@ export interface ICspConfig
 |  --- | --- | --- |
 |  [header](./kibana-plugin-server.icspconfig.header.md) | <code>string</code> | The CSP rules in a formatted directives string for use in a <code>Content-Security-Policy</code> header. |
 |  [rules](./kibana-plugin-server.icspconfig.rules.md) | <code>string[]</code> | The CSP rules used for Kibana. |
-|  [rulesChangedFromDefault](./kibana-plugin-server.icspconfig.ruleschangedfromdefault.md) | <code>boolean</code> | Flag indicating that the configuraion changes the csp rules from the defaults |
 |  [strict](./kibana-plugin-server.icspconfig.strict.md) | <code>boolean</code> | Specify whether browsers that do not support CSP should be able to use Kibana. Use <code>true</code> to block and <code>false</code> to allow. |
 |  [warnLegacyBrowsers](./kibana-plugin-server.icspconfig.warnlegacybrowsers.md) | <code>boolean</code> | Specify whether users with legacy browsers should be warned about their lack of Kibana security compliance. |
 
