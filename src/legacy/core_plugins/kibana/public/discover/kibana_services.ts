@@ -57,16 +57,7 @@ export { wrapInI18nContext } from 'ui/i18n';
 export { buildVislibDimensions } from '../../../visualizations/public';
 // @ts-ignore
 export { callAfterBindingsWorkaround } from 'ui/compat';
-export {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  hasSearchStategyForIndexPattern,
-  isDefaultTypeIndexPattern,
-  SearchSource,
-  EsQuerySortValue,
-  SortDirection,
-  ISearchSource,
-} from 'ui/courier';
+export { getRequestInspectorStats, getResponseInspectorStats } from '../../../data/public';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 // @ts-ignore
@@ -81,8 +72,6 @@ export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 export { timezoneProvider } from 'ui/vis/lib/timezone';
 // @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
-// @ts-ignore
-export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 // @ts-ignore
@@ -95,10 +84,17 @@ export {
   IIndexPattern,
   IndexPattern,
   indexPatterns,
+  hasSearchStategyForIndexPattern,
   IFieldType,
+  SearchSource,
+  ISearchSource,
+  EsQuerySortValue,
+  SortDirection,
 } from '../../../../../plugins/data/public';
 export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
 export { Adapters } from 'ui/inspector/types';
-export { Chrome, IInjector } from 'ui/chrome';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 export { FieldName } from 'ui/directives/field_name/field_name';
+export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+// @ts-ignore
+export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';

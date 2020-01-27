@@ -20,13 +20,9 @@
 import _ from 'lodash';
 import $ from 'jquery';
 
-import { Vis } from '../../../vis';
-
-import {
-  vislibSeriesResponseHandlerProvider,
-  vislibSlicesResponseHandlerProvider,
-} from 'ui/vis/response_handlers/vislib';
 import { vislibColor } from 'ui/vis/components/color/color';
+
+import { Vis } from '../../../vis';
 
 const $visCanvas = $('<div>')
   .attr('id', 'vislib-vis-fixtures')
@@ -64,8 +60,6 @@ const getDeps = () => {
   return {
     uiSettings,
     vislibColor,
-    vislibSeriesResponseHandlerProvider,
-    vislibSlicesResponseHandlerProvider,
   };
 };
 

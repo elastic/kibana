@@ -7,16 +7,17 @@
 import React, { useCallback } from 'react';
 import { esFilters, IIndexPattern, Query } from 'src/plugins/data/public';
 
+import { useSignalIndex } from '../../../containers/detection_engine/signals/use_signal_index';
 import { SignalsHistogramPanel } from '../../detection_engine/components/signals_histogram_panel';
 import { SetAbsoluteRangeDatePicker } from '../../network/types';
 import { inputsModel } from '../../../store';
-
 import * as i18n from '../translations';
 
 const NO_FILTERS: esFilters.Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 
 interface Props {
+  deleteQuery?: ({ id }: { id: string }) => void;
   filters?: esFilters.Filter[];
   from: number;
   indexPattern: IIndexPattern;
@@ -32,26 +33,40 @@ interface Props {
 }
 
 export const SignalsByCategory = React.memo<Props>(
-  ({ filters = NO_FILTERS, from, query = DEFAULT_QUERY, setAbsoluteRangeDatePicker, to }) => {
+  ({
+    deleteQuery,
+    filters = NO_FILTERS,
+    from,
+    query = DEFAULT_QUERY,
+    setAbsoluteRangeDatePicker,
+    setQuery,
+    to,
+  }) => {
     const updateDateRangeCallback = useCallback(
       (min: number, max: number) => {
         setAbsoluteRangeDatePicker!({ id: 'global', from: min, to: max });
       },
       [setAbsoluteRangeDatePicker]
     );
+    const defaultStackByOption = {
+      text: `${i18n.SIGNALS_BY_CATEGORY}`,
+      value: 'signal.rule.threat',
+    };
+
+    const { signalIndexName } = useSignalIndex();
 
     return (
       <SignalsHistogramPanel
+        deleteQuery={deleteQuery}
         filters={filters}
         from={from}
         query={query}
+        signalIndexName={signalIndexName}
+        setQuery={setQuery}
         showTotalSignalsCount={true}
         showLinkToSignals={true}
-        defaultStackByOption={{
-          text: `${i18n.SIGNALS_BY_CATEGORY}`,
-          value: 'signal.rule.threats',
-        }}
-        legendPosition={'right'}
+        defaultStackByOption={defaultStackByOption}
+        legendPosition="right"
         to={to}
         title={i18n.SIGNALS_BY_CATEGORY}
         updateDateRange={updateDateRangeCallback}

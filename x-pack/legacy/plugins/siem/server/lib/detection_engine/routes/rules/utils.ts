@@ -110,7 +110,7 @@ export const transformAlertToRule = (
     tags: transformTags(alert.tags),
     to: alert.params.to,
     type: alert.params.type,
-    threats: alert.params.threats,
+    threat: alert.params.threat,
     version: alert.params.version,
     status: ruleStatus?.attributes.status,
     status_date: ruleStatus?.attributes.statusDate,
