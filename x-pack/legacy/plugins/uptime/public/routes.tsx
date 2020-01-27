@@ -10,7 +10,7 @@ import { MonitorPage, OverviewPage, NotFoundPage } from './pages';
 import { AutocompleteProviderRegister } from '../../../../../src/plugins/data/public';
 import { UMUpdateBreadcrumbs } from './lib/lib';
 
-export const MONITOR_ROUTE = '/monitor/:monitorId/:location?';
+export const MONITOR_ROUTE = '/monitor/:monitorId?';
 export const OVERVIEW_ROUTE = '/';
 
 interface RouterProps {
