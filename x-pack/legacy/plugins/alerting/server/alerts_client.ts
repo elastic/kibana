@@ -21,6 +21,7 @@ import {
   AlertAction,
   AlertType,
   IntervalSchedule,
+  SanitizedAlert,
 } from './types';
 import { validateAlertTypeParams } from './lib';
 import {
@@ -74,7 +75,7 @@ export interface FindResult {
   page: number;
   perPage: number;
   total: number;
-  data: Alert[];
+  data: SanitizedAlert[];
 }
 
 interface CreateOptions {
@@ -198,7 +199,7 @@ export class AlertsClient {
     );
   }
 
-  public async get({ id }: { id: string }): Promise<Alert> {
+  public async get({ id }: { id: string }): Promise<SanitizedAlert> {
     const result = await this.savedObjectsClient.get('alert', id);
     return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
   }

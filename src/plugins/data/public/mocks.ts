@@ -59,6 +59,12 @@ const createSetupContract = (): Setup => {
     search: searchSetupMock,
     fieldFormats: fieldFormatsMock as FieldFormatsSetup,
     query: querySetupMock,
+    __LEGACY: {
+      esClient: {
+        search: jest.fn(),
+        msearch: jest.fn(),
+      },
+    },
   };
 
   return setupContract;

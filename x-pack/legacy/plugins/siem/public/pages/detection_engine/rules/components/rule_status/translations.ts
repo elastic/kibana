@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const STATUS = i18n.translate('xpack.siem.detectionEngine.ruleStatus.statusDescription', {
-  defaultMessage: 'Status',
+  defaultMessage: 'Last response',
 });
 
 export const STATUS_AT = i18n.translate(
