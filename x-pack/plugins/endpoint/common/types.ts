@@ -21,7 +21,7 @@ export interface EndpointResultList {
 
 export interface EndpointMetadata {
   event: {
-    created: string;
+    created: Date;
   };
   endpoint: {
     policy: {
