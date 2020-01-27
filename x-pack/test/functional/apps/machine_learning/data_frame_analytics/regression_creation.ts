@@ -27,6 +27,7 @@ export default function({ getService }: FtrProviderContext) {
         suiteTitle: 'electrical grid stability',
         jobType: 'regression',
         jobId: `egs_1_${Date.now()}`,
+        jobDescription: 'This is the job description',
         source: 'egs_regression',
         get destinationIndex(): string {
           return `dest_${this.jobId}`;
@@ -68,6 +69,11 @@ export default function({ getService }: FtrProviderContext) {
         it('inputs the job id', async () => {
           await ml.dataFrameAnalyticsCreation.assertJobIdInputExists();
           await ml.dataFrameAnalyticsCreation.setJobId(testData.jobId);
+        });
+
+        it('inputs the job description', async () => {
+          await ml.dataFrameAnalyticsCreation.assertJobDescriptionInputExists();
+          await ml.dataFrameAnalyticsCreation.setJobDescription(testData.jobDescription);
         });
 
         it('selects the source index', async () => {

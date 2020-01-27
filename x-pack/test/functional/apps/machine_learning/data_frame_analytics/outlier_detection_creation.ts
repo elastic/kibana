@@ -27,6 +27,7 @@ export default function({ getService }: FtrProviderContext) {
         suiteTitle: 'iowa house prices',
         jobType: 'outlier_detection',
         jobId: `ihp_1_${Date.now()}`,
+        jobDescription: 'This is the job description',
         source: 'ihp_outlier',
         get destinationIndex(): string {
           return `dest_${this.jobId}`;
@@ -74,6 +75,11 @@ export default function({ getService }: FtrProviderContext) {
         it('inputs the job id', async () => {
           await ml.dataFrameAnalyticsCreation.assertJobIdInputExists();
           await ml.dataFrameAnalyticsCreation.setJobId(testData.jobId);
+        });
+
+        it('inputs the job description', async () => {
+          await ml.dataFrameAnalyticsCreation.assertJobDescriptionInputExists();
+          await ml.dataFrameAnalyticsCreation.setJobDescription(testData.jobDescription);
         });
 
         it('selects the source index', async () => {
