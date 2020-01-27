@@ -91,7 +91,7 @@ describe('authorized_user_pre_routing', function() {
 
     const authorizedUserPreRouting = authorizedUserPreRoutingFactory(
       mockServer,
-      { security: null },
+      getMockPlugins(),
       getMockLogger()
     );
     const response = await authorizedUserPreRouting(getMockRequest());
