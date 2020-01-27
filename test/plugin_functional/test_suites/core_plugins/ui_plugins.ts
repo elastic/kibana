@@ -64,7 +64,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       });
     });
 
-    describe('have env data provided', function describeIndexTests() {
+    describe('have env data provided', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('bar');
       });
@@ -73,6 +73,28 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
         const envData: any = await browser.execute('return window.env');
         expect(envData.mode.dev).to.be(true);
         expect(envData.packageInfo.version).to.be.a('string');
+      });
+    });
+
+    describe('http fetching', () => {
+      before(async () => {
+        await PageObjects.common.navigateToApp('settings');
+      });
+
+      it('should send kbn-system-request header when asSystemRequest: true', async () => {
+        expect(
+          await browser.executeAsync(async cb => {
+            window.__coreProvider.start.plugins.core_plugin_b.sendSystemRequest(true).then(cb);
+          })
+        ).to.be('/core_plugin_b/system_request says: "System request? true"');
+      });
+
+      it('should not send kbn-system-request header when asSystemRequest: false', async () => {
+        expect(
+          await browser.executeAsync(async cb => {
+            window.__coreProvider.start.plugins.core_plugin_b.sendSystemRequest(false).then(cb);
+          })
+        ).to.be('/core_plugin_b/system_request says: "System request? false"');
       });
     });
   });

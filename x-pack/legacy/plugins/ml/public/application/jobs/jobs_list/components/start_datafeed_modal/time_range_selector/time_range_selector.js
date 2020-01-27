@@ -5,11 +5,12 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 
-import { EuiDatePicker } from '@elastic/eui';
+import { EuiDatePicker, EuiFieldText } from '@elastic/eui';
 
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
@@ -67,7 +68,7 @@ export class TimeRangeSelector extends Component {
       start: moment.isMoment(this.props.startTime) ? this.props.startTime : this.latestTimestamp,
       end: moment.isMoment(this.props.endTime) ? this.props.endTime : this.now,
     };
-    const formattedStartTime = this.latestTimestamp.format(TIME_FORMAT);
+    const formattedLatestStartTime = this.latestTimestamp.format(TIME_FORMAT);
 
     // Show different labels for the start time depending on whether
     // the job has seen any data yet
@@ -77,8 +78,8 @@ export class TimeRangeSelector extends Component {
         ? [
             <FormattedMessage
               id="xpack.ml.jobsList.startDatafeedModal.continueFromStartTimeLabel"
-              defaultMessage="Continue from {formattedStartTime}"
-              values={{ formattedStartTime }}
+              defaultMessage="Continue from {formattedLatestStartTime}"
+              values={{ formattedLatestStartTime }}
             />,
             <FormattedMessage
               id="xpack.ml.jobsList.startDatafeedModal.continueFromNowLabel"
@@ -111,12 +112,12 @@ export class TimeRangeSelector extends Component {
         index: 2,
         label: startLabels[2],
         body: (
-          <EuiDatePicker
-            selected={datePickerTimes.start}
+          <DatePickerWithInput
+            date={datePickerTimes.start}
             onChange={this.setStartTime}
             maxDate={datePickerTimes.end}
-            inline
-            showTimeSelect
+            setIsValid={this.props.setTimeRangeValid}
+            tab={this.state.startTab}
           />
         ),
       },
@@ -140,12 +141,12 @@ export class TimeRangeSelector extends Component {
           />
         ),
         body: (
-          <EuiDatePicker
-            selected={datePickerTimes.end}
+          <DatePickerWithInput
+            date={datePickerTimes.end}
             onChange={this.setEndTime}
             minDate={datePickerTimes.start}
-            inline
-            showTimeSelect
+            setIsValid={this.props.setTimeRangeValid}
+            tab={this.state.endTab}
           />
         ),
       },
@@ -216,6 +217,59 @@ function TabStack({ title, items, switchState, switchFunc }) {
     </div>
   );
 }
+
+const DatePickerWithInput = ({ date, onChange, minDate, setIsValid, tab }) => {
+  const [dateString, setDateString] = useState(date.format(TIME_FORMAT));
+  const [currentTab, setCurrentTab] = useState(tab);
+
+  useEffect(() => {
+    if (currentTab !== tab) {
+      // if the tab has changed, reset the text to be the same as the date prop
+      setDateString(date.format(TIME_FORMAT));
+      setCurrentTab(tab);
+    }
+  }, [tab]);
+
+  function onTextChange(e) {
+    const val = e.target.value;
+    setDateString(val);
+
+    const newDate = moment(val);
+    if (newDate.isValid()) {
+      setIsValid(true);
+      onChange(newDate);
+    } else {
+      setIsValid(false);
+    }
+  }
+
+  function onCalendarChange(newDate) {
+    setDateString(newDate.format(TIME_FORMAT));
+    setIsValid(true);
+    onChange(newDate);
+  }
+
+  return (
+    <>
+      <EuiFieldText
+        value={dateString}
+        onChange={onTextChange}
+        placeholder={TIME_FORMAT}
+        aria-label={i18n.translate('xpack.ml.jobsList.startDatafeedModal.enterDateText"', {
+          defaultMessage: 'Enter date',
+        })}
+      />
+      <EuiDatePicker
+        selected={date}
+        onChange={onCalendarChange}
+        minDate={minDate}
+        inline
+        showTimeSelect
+      />
+    </>
+  );
+};
+
 TimeRangeSelector.propTypes = {
   startTime: PropTypes.object.isRequired,
   endTime: PropTypes.object,

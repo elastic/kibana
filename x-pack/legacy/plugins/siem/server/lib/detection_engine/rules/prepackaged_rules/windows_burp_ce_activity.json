@@ -1,17 +1,20 @@
 {
   "description": "Windows Burp CE activity",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Burp CE activity",
   "query": "process.name:BurpSuiteCommunity.exe",
   "risk_score": 50,
   "rule_id": "0f09845b-2ec8-4770-8155-7df3d4e402cc",
   "severity": "low",
-  "to": "now",
+  "tags": ["Elastic"],
   "type": "query",
   "version": 1
 }
