@@ -4,11 +4,12 @@ library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
 stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a little bit
-  timeout(time: 120, unit: 'MINUTES') {
+  timeout(time: 135, unit: 'MINUTES') {
     timestamps {
       ansiColor('xterm') {
         githubPr.withDefaultPrComments {
           catchError {
+            retryable.enable()
             parallel([
               'kibana-intake-agent': kibanaPipeline.legacyJobRunner('kibana-intake'),
               'x-pack-intake-agent': kibanaPipeline.legacyJobRunner('x-pack-intake'),
@@ -37,6 +38,8 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
             ])
           }
         }
+
+        retryable.printFlakyFailures()
         kibanaPipeline.sendMail()
       }
     }
