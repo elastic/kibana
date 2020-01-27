@@ -227,12 +227,12 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               }}
             />
             <UseField
-              path="threats"
+              path="threat"
               component={AddMitreThreat}
               componentProps={{
-                idAria: 'detectionEngineStepAboutRuleMitreThreats',
+                idAria: 'detectionEngineStepAboutRuleMitreThreat',
                 isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepAboutRuleMitreThreats',
+                dataTestSubj: 'detectionEngineStepAboutRuleMitreThreat',
               }}
             />
           </AdvancedSettingsAccordion>

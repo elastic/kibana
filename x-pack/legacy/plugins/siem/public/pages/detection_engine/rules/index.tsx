@@ -5,14 +5,14 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
-import { DETECTION_ENGINE_PAGE_NAME } from '../../../components/link_to/redirect_to_detection_engine';
-import { FormattedRelativePreferenceDate } from '../../../components/formatted_date';
-import { getEmptyTagValue } from '../../../components/empty_value';
+import {
+  getDetectionEngineUrl,
+  getCreateRuleUrl,
+} from '../../../components/link_to/redirect_to_detection_engine';
 import { DetectionEngineHeaderPage } from '../components/detection_engine_header_page';
 import { WrapperPage } from '../../../components/wrapper_page';
 import { SpyRoute } from '../../../utils/route/spy_routes';
@@ -36,7 +36,7 @@ const RulesPageComponent: React.FC = () => {
     isSignalIndexExists,
     isAuthenticated,
     canUserCRUD,
-    hasIndexManage,
+    hasIndexWrite,
     hasManageApiKey,
   } = useUserInfo();
   const {
@@ -44,12 +44,13 @@ const RulesPageComponent: React.FC = () => {
     loading: prePackagedRuleLoading,
     loadingCreatePrePackagedRules,
     refetchPrePackagedRulesStatus,
+    rulesCustomInstalled,
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,
   } = usePrePackagedRules({
     canUserCRUD,
-    hasIndexManage,
+    hasIndexWrite,
     hasManageApiKey,
     isSignalIndexExists,
     isAuthenticated,
@@ -62,7 +63,6 @@ const RulesPageComponent: React.FC = () => {
 
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
-  const lastCompletedRun = undefined;
 
   const handleCreatePrePackagedRules = useCallback(async () => {
     if (createPrePackagedRules != null) {
@@ -88,7 +88,7 @@ const RulesPageComponent: React.FC = () => {
     isAuthenticated != null &&
     (!isSignalIndexExists || !isAuthenticated)
   ) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+    return <Redirect to={getDetectionEngineUrl()} />;
   }
 
   return (
@@ -102,22 +102,9 @@ const RulesPageComponent: React.FC = () => {
       <WrapperPage>
         <DetectionEngineHeaderPage
           backOptions={{
-            href: `#${DETECTION_ENGINE_PAGE_NAME}`,
+            href: getDetectionEngineUrl(),
             text: i18n.BACK_TO_DETECTION_ENGINE,
           }}
-          subtitle={
-            lastCompletedRun ? (
-              <FormattedMessage
-                id="xpack.siem.headerPage.rules.pageSubtitle"
-                defaultMessage="Last completed run: {lastCompletedRun}"
-                values={{
-                  lastCompletedRun: <FormattedRelativePreferenceDate value={lastCompletedRun} />,
-                }}
-              />
-            ) : (
-              getEmptyTagValue()
-            )
-          }
           title={i18n.PAGE_TITLE}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
@@ -159,7 +146,7 @@ const RulesPageComponent: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/create`}
+                href={getCreateRuleUrl()}
                 iconType="plusInCircle"
                 isDisabled={userHasNoPermissions || loading}
               >
@@ -182,6 +169,7 @@ const RulesPageComponent: React.FC = () => {
           hasNoPermissions={userHasNoPermissions}
           importCompleteToggle={importCompleteToggle}
           refetchPrePackagedRulesStatus={handleRefetchPrePackagedRulesStatus}
+          rulesCustomInstalled={rulesCustomInstalled}
           rulesInstalled={rulesInstalled}
           rulesNotInstalled={rulesNotInstalled}
           rulesNotUpdated={rulesNotUpdated}
