@@ -93,9 +93,10 @@ module.exports = async () => {
       Object.keys(suites).forEach(index => {
         const suite = {
           file: index,
-          tests: suites[index].map(t => ({ tag: t, duration: 1 })),
+          //tests: suites[index].map(t => ({ tag: t, duration: 1 })),
+          tests: suites[index],
         };
-        suite.total = suite.tests.reduce((sum, curr) => sum + curr.duration, 0);
+        suite.total = suite.tests.reduce((sum, curr) => sum + curr.count, 0);
 
         config.suites.push(suite);
       });
@@ -104,6 +105,6 @@ module.exports = async () => {
     });
   });
 
-  console.log(final);
+  // console.log(final);
   fs.writeFileSync('test-suites.json', JSON.stringify(final, null, 4));
 };

@@ -122,24 +122,39 @@ export class FunctionalTestRunner {
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
 
       const suitesByIndex = {};
+      const testsByTag = {};
 
       const findLeafSuites = (suite: any, parentFile = null) => {
-        parentFile =
-          suite.parent && suite.parent.file !== suite.file ? suite.parent.file : parentFile;
+        if (suite.parent && suite.parent.file !== suite.file) {
+          parentFile = suite.parent.file;
+        }
         parentFile = parentFile || suite.file;
+
+        if (suite.tests && suite.tests.length && suite.suiteTag) {
+          testsByTag[suite.suiteTag] = testsByTag[suite.suiteTag] || 0;
+          testsByTag[suite.suiteTag] += suite.tests.length;
+        }
 
         if (suite.suites && suite.suites.length) {
           suite.suites.forEach(s => findLeafSuites(s, parentFile));
         } else {
-          suitesByIndex[parentFile] = suitesByIndex[parentFile] || new Set();
-          suitesByIndex[parentFile].add(suite.suiteTag);
+          suitesByIndex[parentFile] = suitesByIndex[parentFile] || {};
+          suitesByIndex[parentFile][suite.suiteTag] =
+            suitesByIndex[parentFile][suite.suiteTag] || 0;
+          suitesByIndex[parentFile][suite.suiteTag]++;
         }
       };
 
       findLeafSuites(mocha.suite);
 
       Object.keys(suitesByIndex).forEach(key => {
-        suitesByIndex[key] = [...suitesByIndex[key]];
+        suitesByIndex[key] = Object.keys(suitesByIndex[key]).map(tag => {
+          return {
+            tag,
+            // count: suitesByIndex[key][tag],
+            count: testsByTag[tag],
+          };
+        });
       });
 
       return suitesByIndex;
