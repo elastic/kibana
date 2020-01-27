@@ -688,7 +688,9 @@ function discoverController(
       $scope.$watch('state.query', (newQuery, oldQuery) => {
         if (!_.isEqual(newQuery, oldQuery)) {
           const query = migrateLegacyQuery(newQuery);
-          $scope.updateQueryAndFetch({ query });
+          if (!_.isEqual(query, newQuery)) {
+            $scope.updateQueryAndFetch({ query });
+          }
         }
       });
 
