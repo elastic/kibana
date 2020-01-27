@@ -153,17 +153,11 @@ export class IndexPattern implements IIndexPattern {
     if (!this.id) {
       return;
     }
-    try {
-      if (forceFieldRefresh || this.isFieldRefreshRequired()) {
-        await this.refreshFields();
-      }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error(`Refreshing fields of index pattern ${this.id} failed`, {
-        forceFieldRefresh,
-        fields: this.fields,
-      });
+
+    if (forceFieldRefresh || this.isFieldRefreshRequired()) {
+      await this.refreshFields();
     }
+
     this.initFields();
   }
 
@@ -498,10 +492,13 @@ export class IndexPattern implements IIndexPattern {
 
         toasts.addError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields',
+            defaultMessage: `Error fetching fields for index pattern {title} (ID: {id})`,
+            values: {
+              id: this.id,
+              title: this.title,
+            },
           }),
         });
-        throw err;
       });
   }
 
