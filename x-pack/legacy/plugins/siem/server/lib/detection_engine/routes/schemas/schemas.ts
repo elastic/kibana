@@ -87,11 +87,11 @@ export const threat_technique = Joi.object({
   reference: threat_technique_reference.required(),
 });
 export const threat_techniques = Joi.array().items(threat_technique.required());
-export const threats = Joi.array().items(
+export const threat = Joi.array().items(
   Joi.object({
     framework: threat_framework.required(),
     tactic: threat_tactic.required(),
-    techniques: threat_techniques.required(),
+    technique: threat_techniques.required(),
   })
 );
 export const created_at = Joi.string()

@@ -23,7 +23,7 @@ export class AuthenticationService {
     return {
       async getCurrentUser() {
         return (await http.get('/internal/security/me', {
-          headers: { 'kbn-system-api': true },
+          asSystemRequest: true,
         })) as AuthenticatedUser;
       },
     };

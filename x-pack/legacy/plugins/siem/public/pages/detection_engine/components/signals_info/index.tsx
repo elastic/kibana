@@ -26,7 +26,7 @@ export const useSignalInfo = ({ ruleId = null }: SignalInfo): Return => {
     <EuiLoadingSpinner size="m" />
   );
 
-  const [loading, signals] = useQuerySignals<unknown, Aggs>(buildLastSignalsQuery(ruleId));
+  const { loading, data: signals } = useQuerySignals<unknown, Aggs>(buildLastSignalsQuery(ruleId));
 
   useEffect(() => {
     if (signals != null) {
