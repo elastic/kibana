@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { ActionsClient } from '../../../../../actions';
+import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { AlertsClient } from '../../../../../alerting';
 import { updateRules } from './update_rules';
 import { PrepackagedRules } from '../types';
@@ -38,7 +38,7 @@ export const updatePrepackagedRules = async (
       tags,
       to,
       type,
-      threats,
+      threat,
       references,
       version,
     } = rule;
@@ -70,7 +70,7 @@ export const updatePrepackagedRules = async (
       tags,
       to,
       type,
-      threats,
+      threat,
       references,
       version,
     });

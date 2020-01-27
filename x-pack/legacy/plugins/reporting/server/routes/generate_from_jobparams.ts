@@ -9,7 +9,7 @@ import boom from 'boom';
 import Joi from 'joi';
 import rison from 'rison-node';
 import { API_BASE_URL } from '../../common/constants';
-import { ServerFacade, ReportingResponseToolkit } from '../../types';
+import { ServerFacade, ReportingResponseToolkit, Logger } from '../../types';
 import {
   getRouteConfigFactoryReportingPre,
   GetRouteConfigFactoryFn,
@@ -23,11 +23,13 @@ const BASE_GENERATE = `${API_BASE_URL}/generate`;
 export function registerGenerateFromJobParams(
   server: ServerFacade,
   handler: HandlerFunction,
-  handleError: HandlerErrorFunction
+  handleError: HandlerErrorFunction,
+  logger: Logger
 ) {
   const getRouteConfig = () => {
     const getOriginalRouteConfig: GetRouteConfigFactoryFn = getRouteConfigFactoryReportingPre(
-      server
+      server,
+      logger
     );
     const routeConfigFactory: RouteConfigFactory = getOriginalRouteConfig(
       ({ params: { exportType } }) => exportType
