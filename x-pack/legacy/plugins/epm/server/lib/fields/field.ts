@@ -19,6 +19,7 @@ export interface Field {
   required?: boolean;
   description?: string;
   fields?: Fields;
+  multi_fields?: Fields;
   searchable?: boolean;
   aggregatable?: boolean;
   doc_values?: boolean;

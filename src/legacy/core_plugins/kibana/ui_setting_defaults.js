@@ -257,6 +257,7 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Default index',
       }),
       value: null,
+      type: 'string',
       description: i18n.translate('kbn.advancedSettings.defaultIndexText', {
         defaultMessage: 'The index to access if no index is set',
       }),
@@ -1169,6 +1170,25 @@ export function getUiSettingDefaults() {
       }),
       category: ['accessibility'],
       requiresPageReload: true,
+    },
+    pageNavigation: {
+      name: i18n.translate('kbn.advancedSettings.pageNavigationName', {
+        defaultMessage: 'Side nav style',
+      }),
+      value: 'grouped',
+      description: i18n.translate('kbn.advancedSettings.pageNavigationDesc', {
+        defaultMessage: 'Change the style of navigation',
+      }),
+      type: 'select',
+      options: ['grouped', 'individual'],
+      optionLabels: {
+        grouped: i18n.translate('kbn.advancedSettings.pageNavigationGrouped', {
+          defaultMessage: 'Grouped',
+        }),
+        individual: i18n.translate('kbn.advancedSettings.pageNavigationIndividual', {
+          defaultMessage: 'Individual',
+        }),
+      },
     },
   };
 }

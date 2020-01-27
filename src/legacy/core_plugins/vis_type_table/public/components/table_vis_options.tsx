@@ -24,17 +24,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { tabifyGetColumns, VisOptionsProps } from '../legacy_imports';
-import {
-  NumberInputOption,
-  SwitchOption,
-  SelectOption,
-} from '../../../vis_type_vislib/public/components/common';
+import { NumberInputOption, SwitchOption, SelectOption } from '../../../vis_type_vislib/public';
 import { TableVisParams } from '../types';
 import { totalAggregations, isAggConfigNumeric } from './utils';
 
 function TableOptions({
   aggs,
-  aggsLabels,
   stateParams,
   setValidity,
   setValue,
@@ -51,7 +46,7 @@ function TableOptions({
         .filter(col => isAggConfigNumeric(get(col, 'aggConfig.type.name'), stateParams.dimensions))
         .map(({ name }) => ({ value: name, text: name })),
     ],
-    [aggs, aggsLabels, stateParams.percentageCol, stateParams.dimensions]
+    [aggs, stateParams.percentageCol, stateParams.dimensions]
   );
 
   const isPerPageValid = stateParams.perPage === '' || stateParams.perPage > 0;

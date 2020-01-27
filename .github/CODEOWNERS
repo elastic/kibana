@@ -15,7 +15,11 @@
 /src/legacy/core_plugins/kibana/public/home/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
 /src/legacy/core_plugins/metrics/ @elastic/kibana-app
-/src/plugins/home/ @elastic/kibana-app
+/src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
+# Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
+/src/plugins/home/public @elastic/kibana-app
+/src/plugins/home/server/*.ts @elastic/kibana-app
+/src/plugins/home/server/services/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/timelion/ @elastic/kibana-app
 /src/plugins/dev_tools/ @elastic/kibana-app
@@ -44,8 +48,11 @@
 
 # APM
 /x-pack/legacy/plugins/apm/  @elastic/apm-ui
+/x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
 /src/legacy/core_plugins/apm_oss/  @elastic/apm-ui
+/src/plugins/apm_oss/  @elastic/apm-ui
+/src/apm.js @watson
 
 # Beats
 /x-pack/legacy/plugins/beats_management/  @elastic/beats
@@ -128,6 +135,7 @@
 # Kibana Alerting Services
 /x-pack/legacy/plugins/alerting/ @elastic/kibana-alerting-services
 /x-pack/legacy/plugins/actions/ @elastic/kibana-alerting-services
+/x-pack/plugins/event_log/ @elastic/kibana-alerting-services
 /x-pack/plugins/task_manager/ @elastic/kibana-alerting-services
 /x-pack/test/alerting_api_integration/ @elastic/kibana-alerting-services
 /x-pack/test/plugin_api_integration/plugins/task_manager/ @elastic/kibana-alerting-services
@@ -149,6 +157,6 @@
 /x-pack/legacy/plugins/license_management/  @elastic/es-ui
 /x-pack/legacy/plugins/remote_clusters/  @elastic/es-ui
 /x-pack/legacy/plugins/rollup/  @elastic/es-ui
-/x-pack/legacy/plugins/searchprofiler/  @elastic/es-ui
+/x-pack/plugins/searchprofiler/  @elastic/es-ui
 /x-pack/legacy/plugins/snapshot_restore/  @elastic/es-ui
-/x-pack/legacy/plugins/watcher/  @elastic/es-ui
+/x-pack/plugins/watcher/  @elastic/es-ui

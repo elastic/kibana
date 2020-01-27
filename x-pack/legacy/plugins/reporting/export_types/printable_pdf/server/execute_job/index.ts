@@ -11,10 +11,10 @@ import {
   ExecuteJobFactory,
   ESQueueWorkerExecuteFn,
   HeadlessChromiumDriverFactory,
+  Logger,
 } from '../../../../types';
 import { JobDocPayloadPDF } from '../../types';
-import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
-import { LevelLogger } from '../../../../server/lib';
+import { PDF_JOB_TYPE } from '../../../../common/constants';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import {
   decryptJobHeaders,
@@ -28,10 +28,11 @@ type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocP
 
 export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFactoryFn(
   server: ServerFacade,
+  parentLogger: Logger,
   { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
 ) {
   const generatePdfObservable = generatePdfObservableFactory(server, browserDriverFactory);
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'execute']);
+  const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
 
   return function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
     const jobLogger = logger.clone([jobId]);

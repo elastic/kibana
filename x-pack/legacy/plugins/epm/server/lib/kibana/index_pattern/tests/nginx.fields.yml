@@ -3,6 +3,12 @@
   description: >
     Contains fields for the Nginx access logs.
   fields:
+    - name: group_disabled
+      type: group
+      enabled: false
+      fields:
+        - name: message
+          type: text
     - name: remote_ip_list
       type: array
       description: >
@@ -103,3 +109,10 @@
       fields:
         - name: continent_name
           type: text
+- name: country
+  type: ""
+  multi_fields: 
+    - name: keyword
+      type: keyword
+    - name: text
+      type: text

@@ -883,7 +883,6 @@ describe('enable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
-        scheduledTaskId: 'task-123',
         updatedBy: 'elastic',
         apiKey: null,
         apiKeyOwner: null,
@@ -892,6 +891,9 @@ describe('enable()', () => {
         version: '123',
       }
     );
+    expect(savedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+      scheduledTaskId: 'task-123',
+    });
     expect(taskManager.schedule).toHaveBeenCalledWith({
       taskType: `alerting:2`,
       params: {
@@ -964,7 +966,6 @@ describe('enable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
-        scheduledTaskId: 'task-123',
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
@@ -973,6 +974,9 @@ describe('enable()', () => {
         version: '123',
       }
     );
+    expect(savedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+      scheduledTaskId: 'task-123',
+    });
     expect(taskManager.schedule).toHaveBeenCalledWith({
       taskType: `alerting:2`,
       params: {

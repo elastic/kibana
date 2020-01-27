@@ -96,6 +96,7 @@ export class Explorer extends React.Component {
   static propTypes = {
     explorerState: PropTypes.object.isRequired,
     setSelectedCells: PropTypes.func.isRequired,
+    severity: PropTypes.number.isRequired,
     showCharts: PropTypes.bool.isRequired,
   };
 
@@ -119,8 +120,12 @@ export class Explorer extends React.Component {
 
       this.disableDragSelectOnMouseLeave = true;
     },
-    onDragStart() {
-      if (ALLOW_CELL_RANGE_SELECTION) {
+    onDragStart(e) {
+      let target = e.target;
+      while (target && target !== document.body && !target.classList.contains('sl-cell')) {
+        target = target.parentNode;
+      }
+      if (ALLOW_CELL_RANGE_SELECTION && target !== document.body) {
         dragSelect$.next({
           action: DRAG_SELECT_ACTION.DRAG_START,
         });
@@ -260,7 +265,7 @@ export class Explorer extends React.Component {
   };
 
   render() {
-    const { showCharts } = this.props;
+    const { showCharts, severity } = this.props;
 
     const {
       annotationsData,
@@ -276,7 +281,6 @@ export class Explorer extends React.Component {
       queryString,
       selectedCells,
       selectedJobs,
-      severity,
       swimlaneContainerWidth,
       tableData,
       tableQueryString,
