@@ -150,13 +150,14 @@ export const NodeContextMenu = ({
                 <FormattedMessage
                   id="xpack.infra.nodeContextMenu.description"
                   defaultMessage="View details for {label} {value}"
-                  values={inventoryId}
+                  values={{ label: inventoryId.label, value: inventoryId.value }}
                 />
               </div>
             </SectionSubtitle>
           )}
           <SectionLinks>
             <SectionLink
+              data-test-subj="viewLogsContextMenuItem"
               label={nodeLogsMenuItem.label}
               href={nodeLogsMenuItem.href}
               isDisabled={nodeLogsMenuItem.isDisabled}
@@ -169,6 +170,7 @@ export const NodeContextMenu = ({
             <SectionLink
               label={apmTracesMenuItem.label}
               href={apmTracesMenuItem.href}
+              data-test-subj="viewApmTracesContextMenuItem"
               isDisabled={apmTracesMenuItem.isDisabled}
             />
             <SectionLink
