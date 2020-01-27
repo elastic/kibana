@@ -37,7 +37,7 @@ export const mockRule = (id: string): Rule => ({
   tags: [],
   to: 'now',
   type: 'saved_query',
-  threats: [],
+  threat: [],
   version: 1,
 });
 
@@ -87,7 +87,7 @@ export const mockTableData: TableData[] = [
       saved_id: "Garrett's IP",
       severity: 'low',
       tags: [],
-      threats: [],
+      threat: [],
       timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
       timeline_title: 'Untitled timeline',
       to: 'now',
@@ -136,7 +136,7 @@ export const mockTableData: TableData[] = [
       saved_id: "Garrett's IP",
       severity: 'low',
       tags: [],
-      threats: [],
+      threat: [],
       timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
       timeline_title: 'Untitled timeline',
       to: 'now',

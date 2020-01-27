@@ -1,17 +1,20 @@
 {
   "description": "Windows Data Compression Using Powershell",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Data Compression Using Powershell",
   "query": "event.code: 1 and process.name:powershell.exe and (process.args:*Recurse* and process.args:*Compress-Archive*)",
   "risk_score": 50,
   "rule_id": "bc913943-e1f9-4bf5-a593-caca7c2eb0c3",
   "severity": "low",
-  "to": "now",
+  "tags": ["Elastic"],
   "type": "query",
   "version": 1
 }
