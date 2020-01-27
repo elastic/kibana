@@ -72,15 +72,7 @@ const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRul
 };
 
 const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
-  const {
-    falsePositives,
-    references,
-    riskScore,
-    threats,
-    timeline,
-    isNew,
-    ...rest
-  } = aboutStepData;
+  const { falsePositives, references, riskScore, threat, timeline, isNew, ...rest } = aboutStepData;
   return {
     false_positives: falsePositives.filter(item => !isEmpty(item)),
     references: references.filter(item => !isEmpty(item)),
@@ -91,12 +83,12 @@ const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson =>
           timeline_title: timeline.title,
         }
       : {}),
-    threats: threats
-      .filter(threat => threat.tactic.name !== 'none')
-      .map(threat => ({
-        ...threat,
+    threat: threat
+      .filter(singleThreat => singleThreat.tactic.name !== 'none')
+      .map(singleThreat => ({
+        ...singleThreat,
         framework: 'MITRE ATT&CK',
-        techniques: threat.techniques.map(technique => {
+        technique: singleThreat.technique.map(technique => {
           const { id, name, reference } = technique;
           return { id, name, reference };
         }),

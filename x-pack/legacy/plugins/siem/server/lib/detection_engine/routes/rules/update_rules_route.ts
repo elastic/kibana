@@ -52,7 +52,7 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
       tags,
       to,
       type,
-      threats,
+      threat,
       references,
       version,
     } = request.payload;
@@ -94,7 +94,7 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
         tags,
         to,
         type,
-        threats,
+        threat,
         references,
         version,
       });

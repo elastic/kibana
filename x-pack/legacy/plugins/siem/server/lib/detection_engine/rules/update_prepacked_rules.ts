@@ -38,7 +38,7 @@ export const updatePrepackagedRules = async (
       tags,
       to,
       type,
-      threats,
+      threat,
       references,
       version,
     } = rule;
@@ -70,7 +70,7 @@ export const updatePrepackagedRules = async (
       tags,
       to,
       type,
-      threats,
+      threat,
       references,
       version,
     });
