@@ -21,6 +21,8 @@ import { TagsFilterPopover } from './tags_filter_popover';
 
 interface RulesTableFiltersProps {
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
+  rulesCustomInstalled: number | null;
+  rulesInstalled: number | null;
 }
 
 /**
@@ -29,7 +31,11 @@ interface RulesTableFiltersProps {
  *
  * @param onFilterChanged change listener to be notified on filter changes
  */
-const RulesTableFiltersComponent = ({ onFilterChanged }: RulesTableFiltersProps) => {
+const RulesTableFiltersComponent = ({
+  onFilterChanged,
+  rulesCustomInstalled,
+  rulesInstalled,
+}: RulesTableFiltersProps) => {
   const [filter, setFilter] = useState<string>('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showCustomRules, setShowCustomRules] = useState<boolean>(false);
@@ -84,13 +90,17 @@ const RulesTableFiltersComponent = ({ onFilterChanged }: RulesTableFiltersProps)
             withNext
           >
             {i18n.ELASTIC_RULES}
+            {rulesInstalled != null ? ` (${rulesInstalled})` : ''}
           </EuiFilterButton>
           <EuiFilterButton
             hasActiveFilters={showCustomRules}
             onClick={handleCustomRulesClick}
             data-test-subj="show-custom-rules-filter-button"
           >
-            {i18n.CUSTOM_RULES}
+            <>
+              {i18n.CUSTOM_RULES}
+              {rulesCustomInstalled != null ? ` (${rulesCustomInstalled})` : ''}
+            </>
           </EuiFilterButton>
         </EuiFilterGroup>
       </EuiFlexItem>
