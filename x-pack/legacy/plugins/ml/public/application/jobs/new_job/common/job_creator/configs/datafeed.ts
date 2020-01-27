@@ -11,6 +11,7 @@ export type DatafeedId = string;
 export interface Datafeed {
   datafeed_id: DatafeedId;
   aggregations?: Aggregation;
+  aggs?: Aggregation;
   chunking_config?: ChunkingConfig;
   frequency?: string;
   indices: IndexPatternTitle[];
@@ -33,6 +34,7 @@ interface Aggregation {
       field: string;
       fixed_interval: string;
     };
-    aggregations: Record<string, any>;
+    aggregations?: { [key: string]: any };
+    aggs?: { [key: string]: any };
   };
 }
