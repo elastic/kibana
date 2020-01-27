@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import fs from 'fs';
+import { readFileSync } from 'fs';
 import { SHAREABLE_RUNTIME_FILE } from '../../../../../legacy/plugins/canvas/shareable_runtime/constants';
 import { RouteInitializerDeps } from '../';
 import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../../../../legacy/plugins/canvas/common/lib/constants';
@@ -16,12 +16,14 @@ export function initializeDownloadShareableWorkpadRoute(deps: RouteInitializerDe
       path: API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD,
       validate: false,
     },
-    async (context, request, response) => {
+    async (_context, _request, response) => {
+      // TODO: check if this is still an issue on cloud after migrating to NP
+      //
       // The option setting is not for typical use.  We're using it here to avoid
       // problems in Cloud environments.  See elastic/kibana#47405.
       // @ts-ignore No type for inert Hapi handler
       // const file = handler.file(SHAREABLE_RUNTIME_FILE, { confine: false });
-      const file = fs.readFileSync(SHAREABLE_RUNTIME_FILE);
+      const file = readFileSync(SHAREABLE_RUNTIME_FILE);
       return response.ok({
         headers: { 'content-type': 'application/octet-stream' },
         body: file,

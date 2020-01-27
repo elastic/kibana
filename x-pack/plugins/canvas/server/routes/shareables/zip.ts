@@ -21,7 +21,7 @@ export function initializeZipShareableWorkpadRoute(deps: RouteInitializerDeps) {
       path: API_ROUTE_SHAREABLE_ZIP,
       validate: { body: RenderedWorkpadSchema },
     },
-    async (context, request, response) => {
+    async (_context, request, response) => {
       const workpad = request.body;
       const archive = archiver('zip');
       archive.append(JSON.stringify(workpad), { name: 'workpad.json' });
