@@ -27498,10 +27498,10 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
-static-fs@1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/static-fs/-/static-fs-1.2.1.tgz#93395715eb29cc35eeb61acbd312279ff37314e5"
-  integrity sha512-wccaqmstvBHy+wewTiYvFMJT73Y2rhVMHqkT/GmhmyKy6EUiamY9xQ/gWdJ3L1ycqsK656q4J6blnv69N9wZ2Q==
+static-fs@1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/static-fs/-/static-fs-1.2.2.tgz#9b1ae2f3dca932834b6e3ff0f980e73de34e87b7"
+  integrity sha512-LN6bkiTC8MqsWFfzOa3O44V3bFKunLTIlNWmJu8ZrujOC3CWB7eXKHCy/MOqDy4w5vL5Z6MqPudbfiNqPVTJjQ==
 
 static-module@^2.2.0:
   version "2.2.5"
