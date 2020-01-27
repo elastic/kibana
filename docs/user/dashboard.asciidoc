@@ -30,7 +30,7 @@ then you don't have sufficient privileges to create and save dashboards. The but
 dashboards are not visible. For more information, see <<xpack-security-authorization>>.
 
 [role="screenshot"]
-image::images/dashboard-read-only-badge.png[Example of Dashboard's read only access indicator in Kibana's header]
+image::images/dashboard-read-only-badge.png[Example of Dashboard read only access indicator in Kibana header]
 
 --
 
@@ -44,18 +44,17 @@ add them as you create the dashboard, or you can add
 <<add-sample-data, sample data sets>>,
 which include pre-built dashboards.
 
-For an end-to-end example, see <<tutorial-build-dashboard, Building your own dashboard>>.
-
 To begin, open *Dashboard*, then click *Create new dashboard.*
 
 [float]
 [[dashboard-add-elements]]
 === Add elements
 
-The visualizations, saved searches, and maps
-are stored as elements in panels that you can move and resize. The
-menu in the upper right of the panel includes customization options. You can add elements from
-multiple indices, and the same element can appear in multiple dashboards.
+The visualizations, saved searches, and maps are stored as elements in panels
+that you can move and resize.
+
+You can add elements from multiple indices, and the same element can appear in
+multiple dashboards.
 
 To create an element:
 
@@ -75,11 +74,11 @@ To add an existing element:
 
 . On the *Add panels* flyout, select the panel.
 +
-[role="screenshot"]
-image:images/Dashboard_add_visualization.png[Example add visualization to dashboard]
-+
 When a dashboard element has a stored query,
 both queries are applied.
++
+[role="screenshot"]
+image:images/Dashboard_add_visualization.png[Example add visualization to dashboard]
 
 [float]
 [[customizing-your-dashboard]]
@@ -98,6 +97,23 @@ to the new dimensions.
 
 * To delete a panel, open the panel menu and select *Delete from dashboard.* Deleting a panel from a
 dashboard does *not* delete the saved visualization or search.
+
+[float]
+[[viewing-detailed-information]]
+=== Inspect and edit elements
+
+Many dashboard elements allow you to drill down into the data and requests
+behind the element.
+
+From the panel menu, select *Inspect*.
+The data that displays depends on the element that you inspect.
+
+[role="screenshot"]
+image:images/Dashboard_inspect.png[Inspect in dashboard]
+
+To open an element for editing, put the dashboard in *Edit* mode,
+and then select *Edit visualization* from the panel menu. The changes you make appear in
+every dashboard that uses the element.
 
 [float]
 [[dashboard-customize-filter]]
@@ -125,12 +141,11 @@ When you're finished adding and arranging the panels, save the dashboard.
 
 . Enter the dashboard *Title* and optional *Description*, then *Save* the dashboard.
 
-[float]
 [[sharing-dashboards]]
 === Share a dashboard
 
 [[embedding-dashboards]]
-When you've finished your dashboard, you can share it with your teammates.
+Share the finished dashboard with your teammates.
 
 From the *Share* menu, you can:
 
@@ -153,20 +168,3 @@ tools. To create a short URL, you must have write access to {kib}.
 
 To import and export dashboards, go to *Management > Saved Objects*. For details,
 see <<managing-saved-objects, Managing saved objects>>.
-
-[float]
-[[viewing-detailed-information]]
-=== Inspect and edit elements
-
-Many dashboard elements allow you to drill down into the data and requests
-behind the element.
-
-From the panel menu, select *Inspect*.
-The data that displays depends on the element that you inspect.
-
-[role="screenshot"]
-image:images/Dashboard_inspect.png[Inspect in dashboard]
-
-To open an element for editing, put the dashboard in *Edit* mode,
-and then select *Edit visualization* from the panel menu. The changes you make appear in
-every dashboard that uses the element.
