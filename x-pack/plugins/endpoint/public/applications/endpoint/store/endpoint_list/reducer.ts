@@ -6,7 +6,6 @@
 
 import { Reducer } from 'redux';
 import { EndpointListState } from './types';
-import { EndpointListAction } from './action';
 import { AppAction } from '../action';
 
 const initialState = (): EndpointListState => {

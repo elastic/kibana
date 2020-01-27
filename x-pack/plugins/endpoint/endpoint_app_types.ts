@@ -4,7 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface AlertData {
+/**
+ * A deep readonly type that will make all children of a given object readonly recursively
+ */
+export type Immutable<T> = T extends undefined | null | boolean | string | number
+  ? T
+  : T extends Array<infer U>
+  ? ImmutableArray<U>
+  : T extends Map<infer K, infer V>
+  ? ImmutableMap<K, V>
+  : T extends Set<infer M>
+  ? ImmutableSet<M>
+  : ImmutableObject<T>;
+
+export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
+export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
+export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
+export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
+
+export type AlertData = Immutable<{
   value: {
     source: {
       endgame: {
@@ -26,11 +44,11 @@ export interface AlertData {
         hostname: string;
         ip: string;
         os: {
-          name: string; // TODO Union types?
+          name: string;
         };
       };
     };
   };
-}
+}>;
 
 export type PageId = 'alertsPage' | 'endpointListPage';

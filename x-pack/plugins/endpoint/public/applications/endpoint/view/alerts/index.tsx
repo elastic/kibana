@@ -7,8 +7,7 @@
 import { memo, useState, useMemo } from 'react';
 import React from 'react';
 import { EuiDataGrid } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
-import { AlertAction } from '../../store/alerts/action';
+import { useSelector } from 'react-redux';
 import * as selectors from '../../store/selectors';
 import { usePageId } from '../use_page_id';
 
