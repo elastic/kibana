@@ -157,6 +157,11 @@ export default function({ getService }: FtrProviderContext) {
           await ml.api.assertIndicesExist(testData.destinationIndex);
           await ml.api.assertIndicesNotEmpty(testData.destinationIndex);
         });
+
+        it('displays the results view for created job', async () => {
+          await ml.dataFrameAnalyticsTable.openResultsView();
+          await ml.dataFrameAnalytics.assertOutlierTablePanelExists();
+        });
       });
     }
   });

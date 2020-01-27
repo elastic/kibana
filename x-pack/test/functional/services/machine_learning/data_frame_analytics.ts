@@ -44,6 +44,10 @@ export function MachineLearningDataFrameAnalyticsProvider(
       await testSubjects.existOrFail('mlDFAnalyticsRegressionExplorationTablePanel');
     },
 
+    async assertOutlierTablePanelExists() {
+      await testSubjects.existOrFail('mlDFAnalyticsOutlierExplorationTablePanel');
+    },
+
     async assertAnalyticsStatsBarExists() {
       await testSubjects.existOrFail('mlAnalyticsStatsBar');
     },
