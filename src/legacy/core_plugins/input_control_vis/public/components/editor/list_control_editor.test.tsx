@@ -25,11 +25,10 @@ import { shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { getDepsMock } from './__tests__/get_deps_mock';
-import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
+import { getIndexPatternMock } from '../../test_utils/get_index_pattern_mock';
 import { ListControlEditor } from './list_control_editor';
 import { ControlParams } from '../../editor_utils';
-import { updateComponent } from './__tests__/update_component';
+import { getDepsMock, updateComponent } from '../../test_utils';
 
 const controlParamsBase: ControlParams = {
   id: '1',
@@ -48,14 +47,12 @@ const controlParamsBase: ControlParams = {
 const deps = getDepsMock();
 let handleFieldNameChange: sinon.SinonSpy;
 let handleIndexPatternChange: sinon.SinonSpy;
-let handleCheckboxOptionChange: sinon.SinonSpy;
-let handleNumberOptionChange: sinon.SinonSpy;
+let handleOptionsChange: sinon.SinonSpy;
 
 beforeEach(() => {
   handleFieldNameChange = sinon.spy();
   handleIndexPatternChange = sinon.spy();
-  handleCheckboxOptionChange = sinon.spy();
-  handleNumberOptionChange = sinon.spy();
+  handleOptionsChange = sinon.spy();
 });
 
 describe('renders', () => {
@@ -82,8 +79,7 @@ describe('renders', () => {
         controlParams={controlParams}
         handleFieldNameChange={handleFieldNameChange}
         handleIndexPatternChange={handleIndexPatternChange}
-        handleCheckboxOptionChange={handleCheckboxOptionChange}
-        handleNumberOptionChange={handleNumberOptionChange}
+        handleOptionsChange={handleOptionsChange}
         handleParentChange={() => {}}
         parentCandidates={[]}
       />
@@ -107,8 +103,7 @@ describe('renders', () => {
         controlParams={controlParamsBase}
         handleFieldNameChange={handleFieldNameChange}
         handleIndexPatternChange={handleIndexPatternChange}
-        handleCheckboxOptionChange={handleCheckboxOptionChange}
-        handleNumberOptionChange={handleNumberOptionChange}
+        handleOptionsChange={handleOptionsChange}
         handleParentChange={() => {}}
         parentCandidates={parentCandidates}
       />
@@ -143,8 +138,7 @@ describe('renders', () => {
           controlParams={controlParams}
           handleFieldNameChange={handleFieldNameChange}
           handleIndexPatternChange={handleIndexPatternChange}
-          handleCheckboxOptionChange={handleCheckboxOptionChange}
-          handleNumberOptionChange={handleNumberOptionChange}
+          handleOptionsChange={handleOptionsChange}
           handleParentChange={() => {}}
           parentCandidates={[]}
         />
@@ -178,8 +172,7 @@ describe('renders', () => {
           controlParams={controlParams}
           handleFieldNameChange={handleFieldNameChange}
           handleIndexPatternChange={handleIndexPatternChange}
-          handleCheckboxOptionChange={handleCheckboxOptionChange}
-          handleNumberOptionChange={handleNumberOptionChange}
+          handleOptionsChange={handleOptionsChange}
           handleParentChange={() => {}}
           parentCandidates={[]}
         />
@@ -213,8 +206,7 @@ describe('renders', () => {
           controlParams={controlParams}
           handleFieldNameChange={handleFieldNameChange}
           handleIndexPatternChange={handleIndexPatternChange}
-          handleCheckboxOptionChange={handleCheckboxOptionChange}
-          handleNumberOptionChange={handleNumberOptionChange}
+          handleOptionsChange={handleOptionsChange}
           handleParentChange={() => {}}
           parentCandidates={[]}
         />
@@ -227,7 +219,7 @@ describe('renders', () => {
   });
 });
 
-test('handleCheckboxOptionChange - multiselect', async () => {
+test('handleOptionsChange - multiselect', async () => {
   const component = mountWithIntl(
     <ListControlEditor
       deps={deps}
@@ -236,8 +228,7 @@ test('handleCheckboxOptionChange - multiselect', async () => {
       controlParams={controlParamsBase}
       handleFieldNameChange={handleFieldNameChange}
       handleIndexPatternChange={handleIndexPatternChange}
-      handleCheckboxOptionChange={handleCheckboxOptionChange}
-      handleNumberOptionChange={handleNumberOptionChange}
+      handleOptionsChange={handleOptionsChange}
       handleParentChange={() => {}}
       parentCandidates={[]}
     />
@@ -249,25 +240,12 @@ test('handleCheckboxOptionChange - multiselect', async () => {
   checkbox.simulate('click');
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
-  sinon.assert.notCalled(handleNumberOptionChange);
   const expectedControlIndex = 0;
   const expectedOptionName = 'multiselect';
-  sinon.assert.calledWith(
-    handleCheckboxOptionChange,
-    expectedControlIndex,
-    expectedOptionName,
-    sinon.match(event => {
-      // Synthetic `event.target.checked` does not get altered by EuiSwitch,
-      // but its aria attribute is correctly updated
-      if (event.target.getAttribute('aria-checked') === 'true') {
-        return true;
-      }
-      return false;
-    }, 'unexpected checkbox input event')
-  );
+  sinon.assert.calledWith(handleOptionsChange, expectedControlIndex, expectedOptionName);
 });
 
-test('handleNumberOptionChange - size', async () => {
+test('handleOptionsChange - size', async () => {
   const component = mountWithIntl(
     <ListControlEditor
       deps={deps}
@@ -276,8 +254,7 @@ test('handleNumberOptionChange - size', async () => {
       controlParams={controlParamsBase}
       handleFieldNameChange={handleFieldNameChange}
       handleIndexPatternChange={handleIndexPatternChange}
-      handleCheckboxOptionChange={handleCheckboxOptionChange}
-      handleNumberOptionChange={handleNumberOptionChange}
+      handleOptionsChange={handleOptionsChange}
       handleParentChange={() => {}}
       parentCandidates={[]}
     />
@@ -286,23 +263,12 @@ test('handleNumberOptionChange - size', async () => {
   await updateComponent(component);
 
   const input = findTestSubject(component, 'listControlSizeInput');
-  input.simulate('change', { target: { value: 7 } });
-  sinon.assert.notCalled(handleCheckboxOptionChange);
+  input.simulate('change', { target: { valueAsNumber: 7 } });
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
   const expectedControlIndex = 0;
   const expectedOptionName = 'size';
-  sinon.assert.calledWith(
-    handleNumberOptionChange,
-    expectedControlIndex,
-    expectedOptionName,
-    sinon.match(event => {
-      if (event.target.value === 7) {
-        return true;
-      }
-      return false;
-    }, 'unexpected input event')
-  );
+  sinon.assert.calledWith(handleOptionsChange, expectedControlIndex, expectedOptionName, 7);
 });
 
 test('field name change', async () => {
@@ -314,8 +280,7 @@ test('field name change', async () => {
       controlParams={controlParamsBase}
       handleFieldNameChange={handleFieldNameChange}
       handleIndexPatternChange={handleIndexPatternChange}
-      handleCheckboxOptionChange={handleCheckboxOptionChange}
-      handleNumberOptionChange={handleNumberOptionChange}
+      handleOptionsChange={handleOptionsChange}
       handleParentChange={() => {}}
       parentCandidates={[]}
     />

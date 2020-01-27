@@ -24,7 +24,7 @@ import { join } from 'path';
 
 import { Fetch } from './fetch';
 import { BasePath } from './base_path';
-import { IHttpResponse } from './types';
+import { HttpResponse, HttpFetchOptionsWithPath } from './types';
 
 function delay<T>(duration: number) {
   return new Promise<T>(r => setTimeout(r, duration));
@@ -40,6 +40,19 @@ describe('Fetch', () => {
   });
 
   describe('http requests', () => {
+    it('should fail with invalid arguments', async () => {
+      fetchMock.get('*', {});
+      await expect(
+        fetchInstance.fetch(
+          // @ts-ignore
+          { path: '/', headers: { hello: 'world' } },
+          { headers: { hello: 'mars' } }
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch arguments, must either be (string, object) or (object, undefined), received (object, object)"`
+      );
+    });
+
     it('should use supplied request method', async () => {
       fetchMock.post('*', {});
       await fetchInstance.fetch('/my/path', { method: 'POST' });
@@ -56,6 +69,15 @@ describe('Fetch', () => {
       });
     });
 
+    it('should not set Content-Type if undefined', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', { headers: { 'Content-Type': undefined } });
+
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+        'kbn-version': 'VERSION',
+      });
+    });
+
     it('should use supplied pathname and querystring', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', { query: { a: 'b' } });
@@ -69,11 +91,104 @@ describe('Fetch', () => {
         headers: { myHeader: 'foo' },
       });
 
-      expect(fetchMock.lastOptions()!.headers).toEqual({
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'content-type': 'application/json',
         'kbn-version': 'VERSION',
         myheader: 'foo',
       });
+    });
+
+    it('should not allow overwriting of kbn-version header', async () => {
+      fetchMock.get('*', {});
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: { myHeader: 'foo', 'kbn-version': 'CUSTOM!' },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-version]"`
+      );
+    });
+
+    it('should not set kbn-system-request header by default', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', {
+        headers: { myHeader: 'foo' },
+      });
+
+      expect(fetchMock.lastOptions()!.headers['kbn-system-request']).toBeUndefined();
+    });
+
+    it('should not set kbn-system-request header when asSystemRequest: false', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', {
+        headers: { myHeader: 'foo' },
+        asSystemRequest: false,
+      });
+
+      expect(fetchMock.lastOptions()!.headers['kbn-system-request']).toBeUndefined();
+    });
+
+    it('should set kbn-system-request header when asSystemRequest: true', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', {
+        headers: { myHeader: 'foo' },
+        asSystemRequest: true,
+      });
+
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+        'kbn-system-request': 'true',
+        myheader: 'foo',
+      });
+    });
+
+    it('should not allow overwriting of kbn-system-request when asSystemRequest: true', async () => {
+      fetchMock.get('*', {});
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: { myHeader: 'foo', 'kbn-system-request': 'ANOTHER!' },
+          asSystemRequest: true,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-request]"`
+      );
+    });
+
+    it('should not allow overwriting of kbn-system-request when asSystemRequest: false', async () => {
+      fetchMock.get('*', {});
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: { myHeader: 'foo', 'kbn-system-request': 'ANOTHER!' },
+          asSystemRequest: false,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-request]"`
+      );
+    });
+
+    // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
+    it('should not allow overwriting of kbn-system-api when asSystemRequest: true', async () => {
+      fetchMock.get('*', {});
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
+          asSystemRequest: true,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-api]"`
+      );
+    });
+
+    // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
+    it('should not allow overwriting of kbn-system-api when asSystemRequest: false', async () => {
+      fetchMock.get('*', {});
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
+          asSystemRequest: false,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-api]"`
+      );
     });
 
     it('should return response', async () => {
@@ -121,9 +236,33 @@ describe('Fetch', () => {
 
       const response = await fetchInstance.fetch('/my/path', { asResponse: true });
 
+      expect(response.fetchOptions).toMatchObject({
+        path: '/my/path',
+        asResponse: true,
+      });
       expect(response.request).toBeInstanceOf(Request);
       expect(response.response).toBeInstanceOf(Response);
       expect(response.body).toEqual({ foo: 'bar' });
+    });
+
+    it('should expose asSystemRequest: true on detailed response object when asResponse = true', async () => {
+      fetchMock.get('*', { foo: 'bar' });
+
+      const response = await fetchInstance.fetch('/my/path', {
+        asResponse: true,
+        asSystemRequest: true,
+      });
+      expect(response.fetchOptions.asSystemRequest).toBe(true);
+    });
+
+    it('should expose asSystemRequest: false on detailed response object when asResponse = true', async () => {
+      fetchMock.get('*', { foo: 'bar' });
+
+      const response = await fetchInstance.fetch('/my/path', {
+        asResponse: true,
+        asSystemRequest: false,
+      });
+      expect(response.fetchOptions.asSystemRequest).toBe(false);
     });
 
     it('should reject on network error', async () => {
@@ -245,13 +384,18 @@ describe('Fetch', () => {
 
     it('should be able to manipulate request instance', async () => {
       fetchInstance.intercept({
-        request(request) {
-          request.headers.set('Content-Type', 'CustomContentType');
+        request(options) {
+          return {
+            headers: {
+              ...options.headers,
+              'Content-Type': 'CustomContentType',
+            },
+          };
         },
       });
       fetchInstance.intercept({
-        request(request) {
-          return new Request('/my/route', request);
+        request() {
+          return { path: '/my/route' };
         },
       });
 
@@ -262,7 +406,7 @@ describe('Fetch', () => {
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'content-type': 'CustomContentType',
       });
-      expect(fetchMock.lastUrl()).toBe('/my/route');
+      expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/route');
     });
 
     it('should call interceptors in correct order', async () => {
@@ -402,8 +546,8 @@ describe('Fetch', () => {
 
       fetchInstance.intercept({
         request: unusedSpy,
-        requestError({ request }) {
-          return new Request('/my/route', request);
+        requestError() {
+          return { path: '/my/route' };
         },
         response: usedSpy,
       });
@@ -423,16 +567,16 @@ describe('Fetch', () => {
 
     it('should accumulate request information', async () => {
       const routes = ['alpha', 'beta', 'gamma'];
-      const createRequest = jest.fn(
-        (request: Request) => new Request(`/api/${routes.shift()}`, request)
-      );
+      const createRequest = jest.fn((options: HttpFetchOptionsWithPath) => ({
+        path: `/api/${routes.shift()}`,
+      }));
 
       fetchInstance.intercept({
         request: createRequest,
       });
       fetchInstance.intercept({
         requestError(httpErrorRequest) {
-          return httpErrorRequest.request;
+          return httpErrorRequest.fetchOptions;
         },
       });
       fetchInstance.intercept({
@@ -450,15 +594,15 @@ describe('Fetch', () => {
       await expect(fetchInstance.fetch('/my/route')).resolves.toEqual({ foo: 'bar' });
       expect(fetchMock.called()).toBe(true);
       expect(routes.length).toBe(0);
-      expect(createRequest.mock.calls[0][0].url).toContain('/my/route');
-      expect(createRequest.mock.calls[1][0].url).toContain('/api/alpha');
-      expect(createRequest.mock.calls[2][0].url).toContain('/api/beta');
+      expect(createRequest.mock.calls[0][0].path).toContain('/my/route');
+      expect(createRequest.mock.calls[1][0].path).toContain('/api/alpha');
+      expect(createRequest.mock.calls[2][0].path).toContain('/api/beta');
       expect(fetchMock.lastCall()!.request.url).toContain('/api/gamma');
     });
 
     it('should accumulate response information', async () => {
       const bodies = ['alpha', 'beta', 'gamma'];
-      const createResponse = jest.fn((httpResponse: IHttpResponse) => ({
+      const createResponse = jest.fn((httpResponse: HttpResponse) => ({
         body: bodies.shift(),
       }));
 
@@ -550,7 +694,7 @@ describe('Fetch', () => {
 
       fetchInstance.intercept({
         requestError(httpErrorRequest) {
-          return httpErrorRequest.request;
+          return httpErrorRequest.fetchOptions;
         },
         response: usedSpy,
       });
