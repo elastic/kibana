@@ -19,6 +19,10 @@ function mockCustomElement(...nodeExpressions: string[]): TelemetryCustomElement
 
 describe('custom_element_collector.handleResponse', () => {
   describe('invalid responses', () => {
+    it.only('fails', () => {
+      expect(false).toEqual(true);
+    });
+
     it('returns nothing if no valid hits', () => {
       expect(summarizeCustomElements([])).toEqual({});
     });
