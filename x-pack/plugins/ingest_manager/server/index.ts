@@ -33,3 +33,6 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 };
 
 export { savedObjectMappings } from './saved_objects';
+
+// TODO: Temporary exports for Fleet dependencies, remove once Fleet moved into this plugin
+export { agentConfigService, outputService } from './services';

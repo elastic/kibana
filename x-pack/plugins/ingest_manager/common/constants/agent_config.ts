@@ -14,5 +14,5 @@ export const DEFAULT_AGENT_CONFIG = {
   namespace: 'default',
   description: 'Default agent configuration created by Kibana',
   status: AgentConfigStatus.Active,
-  data_streams: [],
+  datasources: [],
 };

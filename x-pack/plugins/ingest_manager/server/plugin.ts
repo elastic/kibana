@@ -10,8 +10,8 @@ import {
   Plugin,
   PluginInitializerContext,
   ICustomClusterClient,
-  SavedObjectsClient,
 } from 'kibana/server';
+import { SavedObjectsClient } from '../../../../src/core/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
 import { PLUGIN_ID } from './constants';
@@ -22,7 +22,7 @@ import {
   agentConfigService,
   outputService,
 } from './services';
-import { registerEPMRoutes, registerDataStreamRoutes, registerAgentConfigRoutes } from './routes';
+import { registerEPMRoutes, registerDatasourceRoutes, registerAgentConfigRoutes } from './routes';
 import { IngestManagerConfigType } from './';
 
 export interface IngestManagerSetupDeps {
@@ -55,7 +55,7 @@ export class IngestManagerPlugin implements Plugin {
 
     // Register routes
     registerAgentConfigRoutes(router);
-    registerDataStreamRoutes(router);
+    registerDatasourceRoutes(router);
 
     // Optional route registration depending on Kibana config
     // TODO: Use this.config$ + if security is enabled to register conditional routing

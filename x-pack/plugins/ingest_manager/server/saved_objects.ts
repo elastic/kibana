@@ -6,7 +6,7 @@
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  DATA_STREAM_SAVED_OBJECT_TYPE,
+  DATASOURCE_SAVED_OBJECT_TYPE,
 } from './constants';
 
 /*
@@ -19,10 +19,10 @@ export const savedObjectMappings = {
     properties: {
       id: { type: 'keyword' },
       name: { type: 'text' },
-      label: { type: 'keyword' },
+      namespace: { type: 'keyword' },
       description: { type: 'text' },
       status: { type: 'keyword' },
-      data_streams: { type: 'keyword' },
+      datasources: { type: 'keyword' },
       updated_on: { type: 'keyword' },
       updated_by: { type: 'keyword' },
     },
@@ -41,24 +41,13 @@ export const savedObjectMappings = {
       config: { type: 'flattened' },
     },
   },
-  [DATA_STREAM_SAVED_OBJECT_TYPE]: {
+  [DATASOURCE_SAVED_OBJECT_TYPE]: {
     properties: {
       id: { type: 'keyword' },
       name: { type: 'keyword' },
+      namespace: { type: 'keyword' },
       read_alias: { type: 'keyword' },
-      input: {
-        properties: {
-          type: { type: 'keyword' },
-          config: { type: 'flattened' },
-          fields: { type: 'flattened' },
-          ilm_policy: { type: 'keyword' },
-          index_template: { type: 'keyword' },
-          ingest_pipelines: { type: 'keyword' },
-        },
-      },
-      output_id: { type: 'keyword' },
-      processors: { type: 'keyword' },
-      config: { type: 'flattened' },
+      agent_config_id: { type: 'keyword' },
       package: {
         properties: {
           assets: {
@@ -71,6 +60,15 @@ export const savedObjectMappings = {
           name: { type: 'keyword' },
           title: { type: 'keyword' },
           version: { type: 'keyword' },
+        },
+      },
+      streams: {
+        properties: {
+          config: { type: 'flattened' },
+          id: { type: 'keyword' },
+          input: { type: 'flattened' },
+          output_id: { type: 'keyword' },
+          processors: { type: 'keyword' },
         },
       },
     },

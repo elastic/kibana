@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema, TypeOf } from '@kbn/config-schema';
-import { DataStreamSchema } from './data_stream';
+import { DatasourceSchema } from './datasource';
 
 export enum AgentConfigStatus {
   Active = 'active',
@@ -19,7 +19,7 @@ const AgentConfigBaseSchema = {
     schema.literal(AgentConfigStatus.Active),
     schema.literal(AgentConfigStatus.Inactive),
   ]),
-  data_streams: schema.arrayOf(schema.string()),
+  datasources: schema.arrayOf(schema.string()),
 };
 
 export const NewAgentConfigSchema = schema.object({
@@ -31,7 +31,7 @@ export const AgentConfigSchema = schema.object({
   id: schema.string(),
   updated_on: schema.string(),
   updated_by: schema.string(),
-  data_streams: schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(DataStreamSchema)]),
+  datasources: schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(DatasourceSchema)]),
 });
 
 export type NewAgentConfig = TypeOf<typeof NewAgentConfigSchema>;

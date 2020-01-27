@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { NewDataStreamSchema } from '../models';
+import { NewDatasourceSchema } from '../models';
 import { ListWithKuerySchema } from './common';
 
-export const GetDataStreamsRequestSchema = {
+export const GetDatasourcesRequestSchema = {
   query: ListWithKuerySchema,
 };
 
-export const GetOneDataStreamRequestSchema = {
+export const GetOneDatasourceRequestSchema = {
   params: schema.object({
-    dataStreamId: schema.string(),
+    datasourceId: schema.string(),
   }),
 };
 
-export const CreateDataStreamRequestSchema = {
-  body: NewDataStreamSchema,
+export const CreateDatasourceRequestSchema = {
+  body: NewDatasourceSchema,
 };
 
-export const UpdateDataStreamRequestSchema = {
-  ...GetOneDataStreamRequestSchema,
-  body: NewDataStreamSchema,
+export const UpdateDatasourceRequestSchema = {
+  ...GetOneDatasourceRequestSchema,
+  body: NewDatasourceSchema,
 };

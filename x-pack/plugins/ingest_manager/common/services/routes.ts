@@ -6,7 +6,7 @@
 import {
   EPM_API_ROOT,
   EPM_API_ROUTES,
-  DATA_STREAM_API_ROUTES,
+  DATASOURCE_API_ROUTES,
   AGENT_CONFIG_API_ROUTES,
 } from '../constants';
 
@@ -36,21 +36,21 @@ export const epmRouteService = {
   },
 };
 
-export const dataStreamRouteService = {
+export const datasourceRouteService = {
   getListPath: () => {
-    return DATA_STREAM_API_ROUTES.LIST_PATTERN;
+    return DATASOURCE_API_ROUTES.LIST_PATTERN;
   },
 
-  getInfoPath: (dataStreamId: string) => {
-    return DATA_STREAM_API_ROUTES.INFO_PATTERN.replace('{dataStreamId}', dataStreamId);
+  getInfoPath: (datasourceId: string) => {
+    return DATASOURCE_API_ROUTES.INFO_PATTERN.replace('{datasourceId}', datasourceId);
   },
 
   getCreatePath: () => {
-    return DATA_STREAM_API_ROUTES.CREATE_PATTERN;
+    return DATASOURCE_API_ROUTES.CREATE_PATTERN;
   },
 
-  getUpdatePath: (dataStreamId: string) => {
-    return DATA_STREAM_API_ROUTES.UPDATE_PATTERN.replace('{dataStreamId}', dataStreamId);
+  getUpdatePath: (datasourceId: string) => {
+    return DATASOURCE_API_ROUTES.UPDATE_PATTERN.replace('{datasourceId}', datasourceId);
   },
 };
 

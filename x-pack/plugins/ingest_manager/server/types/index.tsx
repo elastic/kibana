@@ -5,8 +5,8 @@
  */
 export {
   // Object types
-  DataStream,
-  NewDataStream,
+  Datasource,
+  NewDatasource,
   AgentConfig,
   NewAgentConfig,
   AgentConfigStatus,
@@ -16,11 +16,11 @@ export {
   // Common schemas
   ListWithKuery,
   ListWithKuerySchema,
-  // Data stream schemas
-  GetDataStreamsRequestSchema,
-  GetOneDataStreamRequestSchema,
-  CreateDataStreamRequestSchema,
-  UpdateDataStreamRequestSchema,
+  // Datasource schemas
+  GetDatasourcesRequestSchema,
+  GetOneDatasourceRequestSchema,
+  CreateDatasourceRequestSchema,
+  UpdateDatasourceRequestSchema,
   // Agent config schemas
   GetAgentConfigsRequestSchema,
   GetOneAgentConfigRequestSchema,
@@ -31,5 +31,5 @@ export {
 
 export type AgentConfigUpdateHandler = (
   action: 'created' | 'updated' | 'deleted',
-  policyId: string
+  agentConfigId: string
 ) => Promise<void>;

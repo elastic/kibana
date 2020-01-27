@@ -5,21 +5,21 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
-import { dataStreamService } from '../../services';
+import { datasourceService } from '../../services';
 import {
-  GetDataStreamsRequestSchema,
-  GetOneDataStreamRequestSchema,
-  CreateDataStreamRequestSchema,
-  UpdateDataStreamRequestSchema,
+  GetDatasourcesRequestSchema,
+  GetOneDatasourceRequestSchema,
+  CreateDatasourceRequestSchema,
+  UpdateDatasourceRequestSchema,
 } from '../../types';
 
-export const getDataStreamsHandler: RequestHandler<
+export const getDatasourcesHandler: RequestHandler<
   undefined,
-  TypeOf<typeof GetDataStreamsRequestSchema.query>
+  TypeOf<typeof GetDatasourcesRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const { items, total, page, perPage } = await dataStreamService.list(soClient, request.query);
+    const { items, total, page, perPage } = await datasourceService.list(soClient, request.query);
     return response.ok({
       body: {
         items,
@@ -37,23 +37,23 @@ export const getDataStreamsHandler: RequestHandler<
   }
 };
 
-export const getOneDataStreamHandler: RequestHandler<TypeOf<
-  typeof GetOneDataStreamRequestSchema.params
+export const getOneDatasourceHandler: RequestHandler<TypeOf<
+  typeof GetOneDatasourceRequestSchema.params
 >> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const dataStream = await dataStreamService.get(soClient, request.params.dataStreamId);
-    if (dataStream) {
+    const datasource = await datasourceService.get(soClient, request.params.datasourceId);
+    if (datasource) {
       return response.ok({
         body: {
-          item: dataStream,
+          item: datasource,
           success: true,
         },
       });
     } else {
       return response.customError({
         statusCode: 404,
-        body: { message: 'Data stream not found' },
+        body: { message: 'Datasource not found' },
       });
     }
   } catch (e) {
@@ -64,16 +64,16 @@ export const getOneDataStreamHandler: RequestHandler<TypeOf<
   }
 };
 
-export const createDataStreamHandler: RequestHandler<
+export const createDatasourceHandler: RequestHandler<
   undefined,
   undefined,
-  TypeOf<typeof CreateDataStreamRequestSchema.body>
+  TypeOf<typeof CreateDatasourceRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const dataStream = await dataStreamService.create(soClient, request.body);
+    const datasource = await datasourceService.create(soClient, request.body);
     return response.ok({
-      body: { item: dataStream, success: true },
+      body: { item: datasource, success: true },
     });
   } catch (e) {
     return response.customError({
@@ -83,20 +83,20 @@ export const createDataStreamHandler: RequestHandler<
   }
 };
 
-export const updateDataStreamHandler: RequestHandler<
-  TypeOf<typeof UpdateDataStreamRequestSchema.params>,
+export const updateDatasourceHandler: RequestHandler<
+  TypeOf<typeof UpdateDatasourceRequestSchema.params>,
   unknown,
-  TypeOf<typeof UpdateDataStreamRequestSchema.body>
+  TypeOf<typeof UpdateDatasourceRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const dataStream = await dataStreamService.update(
+    const datasource = await datasourceService.update(
       soClient,
-      request.params.dataStreamId,
+      request.params.datasourceId,
       request.body
     );
     return response.ok({
-      body: { item: dataStream, success: true },
+      body: { item: datasource, success: true },
     });
   } catch (e) {
     return response.customError({

@@ -9,6 +9,6 @@ export { licenseService } from './license';
 export { configService } from './config';
 
 // Saved object services
-export { dataStreamService } from './data_stream';
+export { datasourceService } from './datasource';
 export { agentConfigService } from './agent_config';
 export { outputService } from './output';

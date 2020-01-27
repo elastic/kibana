@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { registerRoutes as registerAgentConfigRoutes } from './agent_config';
-export { registerRoutes as registerDataStreamRoutes } from './data_stream';
+export { registerRoutes as registerDatasourceRoutes } from './datasource';
 export { registerRoutes as registerEPMRoutes } from './epm';

@@ -17,7 +17,7 @@ import {
   AgentConfigUpdateHandler,
   ListWithKuery,
 } from '../types';
-import { dataStreamService } from './data_stream';
+import { datasourceService } from './datasource';
 
 const SAVED_OBJECT_TYPE = AGENT_CONFIG_SAVED_OBJECT_TYPE;
 
@@ -114,10 +114,10 @@ class AgentConfigService {
     return {
       id: agentConfigSO.id,
       ...agentConfigSO.attributes,
-      data_streams:
-        (await dataStreamService.getByIDs(
+      datasources:
+        (await datasourceService.getByIDs(
           soClient,
-          (agentConfigSO.attributes.data_streams as string[]) || []
+          (agentConfigSO.attributes.datasources as string[]) || []
         )) || [],
     };
   }
@@ -178,10 +178,10 @@ class AgentConfigService {
     return this._update(soClient, id, agentConfig, options?.user);
   }
 
-  public async assignDataStreams(
+  public async assignDatasources(
     soClient: SavedObjectsClientContract,
     id: string,
-    dataStreamIds: string[],
+    datasourceIds: string[],
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id);
@@ -195,16 +195,16 @@ class AgentConfigService {
       id,
       {
         ...oldAgentConfig,
-        data_streams: [...((oldAgentConfig.data_streams || []) as string[])].concat(dataStreamIds),
+        datasources: [...((oldAgentConfig.datasources || []) as string[])].concat(datasourceIds),
       },
       options?.user
     );
   }
 
-  public async unassignDataStreams(
+  public async unassignDatasources(
     soClient: SavedObjectsClientContract,
     id: string,
-    dataStreamIds: string[],
+    datasourceIds: string[],
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id);
@@ -218,8 +218,8 @@ class AgentConfigService {
       id,
       {
         ...oldAgentConfig,
-        data_streams: [...((oldAgentConfig.data_streams || []) as string[])].filter(
-          dsId => !dataStreamIds.includes(dsId)
+        datasources: [...((oldAgentConfig.datasources || []) as string[])].filter(
+          dsId => !datasourceIds.includes(dsId)
         ),
       },
       options?.user

@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract } from 'kibana/server';
-import { DATA_STREAM_SAVED_OBJECT_TYPE } from '../constants';
-import { NewDataStream, DataStream, ListWithKuery } from '../types';
+import { DATASOURCE_SAVED_OBJECT_TYPE } from '../constants';
+import { NewDatasource, Datasource, ListWithKuery } from '../types';
 
-const SAVED_OBJECT_TYPE = DATA_STREAM_SAVED_OBJECT_TYPE;
+const SAVED_OBJECT_TYPE = DATASOURCE_SAVED_OBJECT_TYPE;
 
-class DataStreamService {
+class DatasourceService {
   public async create(
     soClient: SavedObjectsClientContract,
-    dataStream: NewDataStream,
+    datasource: NewDatasource,
     options?: { id?: string }
-  ): Promise<DataStream> {
-    const newSo = await soClient.create<DataStream>(
+  ): Promise<Datasource> {
+    const newSo = await soClient.create<Datasource>(
       SAVED_OBJECT_TYPE,
-      dataStream as DataStream,
+      datasource as Datasource,
       options
     );
 
@@ -27,37 +27,37 @@ class DataStreamService {
     };
   }
 
-  public async get(soClient: SavedObjectsClientContract, id: string): Promise<DataStream | null> {
-    const dataStreamSO = await soClient.get<DataStream>(SAVED_OBJECT_TYPE, id);
-    if (!dataStreamSO) {
+  public async get(soClient: SavedObjectsClientContract, id: string): Promise<Datasource | null> {
+    const datasourceSO = await soClient.get<Datasource>(SAVED_OBJECT_TYPE, id);
+    if (!datasourceSO) {
       return null;
     }
 
-    if (dataStreamSO.error) {
-      throw new Error(dataStreamSO.error.message);
+    if (datasourceSO.error) {
+      throw new Error(datasourceSO.error.message);
     }
 
     return {
-      id: dataStreamSO.id,
-      ...dataStreamSO.attributes,
+      id: datasourceSO.id,
+      ...datasourceSO.attributes,
     };
   }
 
   public async getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[]
-  ): Promise<DataStream[] | null> {
-    const dataStreamSO = await soClient.bulkGet<DataStream>(
+  ): Promise<Datasource[] | null> {
+    const datasourceSO = await soClient.bulkGet<Datasource>(
       ids.map(id => ({
         id,
         type: SAVED_OBJECT_TYPE,
       }))
     );
-    if (!dataStreamSO) {
+    if (!datasourceSO) {
       return null;
     }
 
-    return dataStreamSO.saved_objects.map(so => ({
+    return datasourceSO.saved_objects.map(so => ({
       id: so.id,
       ...so.attributes,
     }));
@@ -66,10 +66,10 @@ class DataStreamService {
   public async list(
     soClient: SavedObjectsClientContract,
     options: ListWithKuery
-  ): Promise<{ items: DataStream[]; total: number; page: number; perPage: number }> {
+  ): Promise<{ items: Datasource[]; total: number; page: number; perPage: number }> {
     const { page = 1, perPage = 20, kuery } = options;
 
-    const dataStreams = await soClient.find<DataStream>({
+    const datasources = await soClient.find<Datasource>({
       type: SAVED_OBJECT_TYPE,
       page,
       perPage,
@@ -83,13 +83,13 @@ class DataStreamService {
     });
 
     return {
-      items: dataStreams.saved_objects.map<DataStream>(dataStreamSO => {
+      items: datasources.saved_objects.map<Datasource>(datasourceSO => {
         return {
-          id: dataStreamSO.id,
-          ...dataStreamSO.attributes,
+          id: datasourceSO.id,
+          ...datasourceSO.attributes,
         };
       }),
-      total: dataStreams.total,
+      total: datasources.total,
       page,
       perPage,
     };
@@ -98,10 +98,10 @@ class DataStreamService {
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
-    dataStream: NewDataStream
-  ): Promise<DataStream> {
-    await soClient.update<DataStream>(SAVED_OBJECT_TYPE, id, dataStream);
-    return (await this.get(soClient, id)) as DataStream;
+    datasource: NewDatasource
+  ): Promise<Datasource> {
+    await soClient.update<Datasource>(SAVED_OBJECT_TYPE, id, datasource);
+    return (await this.get(soClient, id)) as Datasource;
   }
 
   public async delete(soClient: SavedObjectsClientContract, id: string): Promise<void> {
@@ -109,4 +109,4 @@ class DataStreamService {
   }
 }
 
-export const dataStreamService = new DataStreamService();
+export const datasourceService = new DatasourceService();

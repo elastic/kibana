@@ -7,5 +7,5 @@ export * from './plugin';
 export * from './routes';
 
 export * from './agent_config';
-export * from './data_stream';
+export * from './datasource';
 export * from './output';

@@ -7,7 +7,7 @@ import { PLUGIN_ID } from './plugin';
 
 // Base API paths
 export const API_ROOT = `/api/${PLUGIN_ID}`;
-export const DATA_STREAM_API_ROOT = `${API_ROOT}/data_streams`;
+export const DATASOURCE_API_ROOT = `${API_ROOT}/datasources`;
 export const AGENT_CONFIG_API_ROOT = `${API_ROOT}/agent_configs`;
 export const EPM_API_ROOT = `${API_ROOT}/epm`;
 export const FLEET_API_ROOT = `${API_ROOT}/fleet`;
@@ -21,12 +21,12 @@ export const EPM_API_ROUTES = {
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
 };
 
-// Data stream API routes
-export const DATA_STREAM_API_ROUTES = {
-  LIST_PATTERN: `${DATA_STREAM_API_ROOT}`,
-  INFO_PATTERN: `${DATA_STREAM_API_ROOT}/{dataStreamId}`,
-  CREATE_PATTERN: `${DATA_STREAM_API_ROOT}`,
-  UPDATE_PATTERN: `${DATA_STREAM_API_ROOT}/{dataStreamId}`,
+// Datasource API routes
+export const DATASOURCE_API_ROUTES = {
+  LIST_PATTERN: `${DATASOURCE_API_ROOT}`,
+  INFO_PATTERN: `${DATASOURCE_API_ROOT}/{datasourceId}`,
+  CREATE_PATTERN: `${DATASOURCE_API_ROOT}`,
+  UPDATE_PATTERN: `${DATASOURCE_API_ROOT}/{datasourceId}`,
 };
 
 // Agent config API routes
