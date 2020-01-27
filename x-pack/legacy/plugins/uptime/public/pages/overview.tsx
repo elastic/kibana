@@ -18,7 +18,7 @@ import {
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { useIndexPattern, useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { useTrackPageview } from '../../../../../plugins/infra/public';
+import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
 import { store } from '../state';
 import { setEsKueryString } from '../state/actions';

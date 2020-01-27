@@ -12,7 +12,7 @@ import {
   getOptionLabel,
   omitAllOption
 } from '../../../../../../common/agent_configuration_constants';
-import { UiTracker } from '../../../../../../../../../plugins/infra/public';
+import { UiTracker } from '../../../../../../../../../plugins/observability/public';
 
 interface Settings {
   transaction_sample_rate: number;

@@ -14,7 +14,7 @@ import { TransactionLineChart } from '../../charts/TransactionCharts/Transaction
 import { asPercent } from '../../../../utils/formatters';
 import { unit } from '../../../../style/variables';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { useUiTracker } from '../../../../../../../../plugins/infra/public';
+import { useUiTracker } from '../../../../../../../../plugins/observability/public';
 
 interface Props {
   timeseries: TimeSeries[];

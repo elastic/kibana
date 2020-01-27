@@ -34,7 +34,7 @@ import { isRumAgentName } from '../../../../../../common/agent_name';
 import { ALL_OPTION_VALUE } from '../../../../../../common/agent_configuration_constants';
 import { saveConfig } from './saveConfig';
 import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
-import { useUiTracker } from '../../../../../../../../../plugins/infra/public';
+import { useUiTracker } from '../../../../../../../../../plugins/observability/public';
 
 const defaultSettings = {
   TRANSACTION_SAMPLE_RATE: '1.0',

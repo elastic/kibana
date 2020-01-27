@@ -19,7 +19,7 @@ import {
 } from '../../../components/logging/log_analysis_job_status';
 import { FirstUseCallout } from '../../../components/logging/log_analysis_results';
 import { useInterval } from '../../../hooks/use_interval';
-import { useTrackPageview } from '../../../hooks/use_track_metric';
+import { useTrackPageview } from '../../../../../observability/public';
 import { TopCategoriesSection } from './sections/top_categories';
 import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
 import { useLogEntryCategoriesResults } from './use_log_entry_categories_results';

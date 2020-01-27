@@ -10,7 +10,7 @@ import { ColumnarPage } from '../../../components/page';
 import { StreamPageContent } from './page_content';
 import { StreamPageHeader } from './page_header';
 import { LogsPageProviders } from './page_providers';
-import { useTrackPageview } from '../../../hooks/use_track_metric';
+import { useTrackPageview } from '../../../../../observability/public';
 
 export const StreamPage = () => {
   useTrackPageview({ app: 'infra_logs', path: 'stream' });
