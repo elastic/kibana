@@ -71,6 +71,7 @@ Main subjects for tests should be:
 - authenticated / unauthenticated access to an endpoint.
 - endpoint validation (params, query, body).
 - main business logic.
+- dependencies on other plugins.
 
 ##### Functional Test Runner
 If your plugin relies on the elasticsearch server to store data and supports additional configuration, you can leverage the Functional Test Runner(FTR) to implement integration tests. 
@@ -80,6 +81,7 @@ Pros:
 - tests cross-plugin integration
 - emulates a real user interaction with the stack
 - allows adjusting config values
+
 Cons:
 - slow start
 - hard to debug
@@ -198,6 +200,7 @@ Pros:
 - runs the real Kibana instance
 - tests cross-plugin integration
 - emulates a real user interaction with the HTTP resources
+
 Cons:
 - faster than FTR because it doesn't run Elasticsearch instance, but still slow
 - hard to debug
