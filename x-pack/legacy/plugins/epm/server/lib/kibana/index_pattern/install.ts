@@ -10,6 +10,44 @@ import { RegistryPackage, Dataset } from '../../../../common/types';
 import * as Registry from '../../../registry';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 
+interface FieldFormatMap {
+  [key: string]: FieldFormatMapItem;
+}
+interface FieldFormatMapItem {
+  id?: string;
+  params?: FieldFormatParams;
+}
+interface FieldFormatParams {
+  pattern?: string;
+  inputFormat?: string;
+  outputFormat?: string;
+  outputPrecision?: number;
+  labelTemplate?: string;
+  urlTemplate?: string;
+  openLinkInCurrentTab?: boolean;
+}
+/* this should match https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/kibana/fields_transformer.go */
+interface TypeMap {
+  [key: string]: string;
+}
+const typeMap: TypeMap = {
+  binary: 'binary',
+  half_float: 'number',
+  scaled_float: 'number',
+  float: 'number',
+  integer: 'number',
+  long: 'number',
+  short: 'number',
+  byte: 'number',
+  text: 'string',
+  keyword: 'string',
+  '': 'string',
+  geo_point: 'geo_point',
+  date: 'date',
+  ip: 'ip',
+  boolean: 'boolean',
+};
+
 export interface IndexPatternField {
   name: string;
   type?: string;
@@ -25,7 +63,9 @@ export interface IndexPatternField {
   lang?: string;
   readFromDocValues: boolean;
 }
-
+interface KibanaIndexPattern {
+  [key: string]: string;
+}
 enum IndexPatternType {
   logs = 'logs',
   metrics = 'metrics',
@@ -70,25 +110,22 @@ const createIndexPattern = async ({
   const nestedResults = await Promise.all(loadingFields);
   const allFields = nestedResults.flat();
 
-  const kibanaIndexPatternFields = makeKibanaIndexPatternFields(allFields);
-
-  await savedObjectsClient.create(KibanaAssetType.indexPattern, {
-    title: datasetType + '-*',
-    fields: JSON.stringify(kibanaIndexPatternFields),
-  });
+  const kibanaIndexPattern = makeKibanaIndexPattern(allFields, datasetType);
+  await savedObjectsClient.create(KibanaAssetType.indexPattern, kibanaIndexPattern);
 };
 
-/**
- * makeKibanaIndexPatternFields
- *
- * dedupes fields, flattens fields, dedupes the previously nested fields, transform with necessary
- * Kibana index pattern properties
- */
-const makeKibanaIndexPatternFields = (fields: Fields): IndexPatternField[] => {
+const makeKibanaIndexPattern = (fields: Fields, datasetType: string): KibanaIndexPattern => {
   const dedupedFields = dedupeFields(fields);
   const flattenedFields = flattenFields(dedupedFields);
+  const fieldFormatMap = createFieldFormatMap(flattenedFields);
   const transformedFields = flattenedFields.map(transformField);
-  return transformedFields;
+
+  return {
+    title: datasetType + '-*',
+    timeFieldName: '@timestamp',
+    fields: JSON.stringify(transformedFields),
+    fieldFormatMap: JSON.stringify(fieldFormatMap),
+  };
 };
 
 export const dedupeFields = (fields: Fields) => {
@@ -132,7 +169,7 @@ const getField = (fields: Fields, pathNames: string[]): Field | undefined => {
   }
   return undefined;
 };
-// check for alias type and copy contents of the aliased field
+
 export const transformField = (field: Field, i: number, fields: Fields): IndexPatternField => {
   const newField: IndexPatternField = {
     name: field.name,
@@ -216,7 +253,7 @@ export const flattenFields = (allFields: Fields): Fields => {
             field = { ...foundField, path, name };
           }
         }
-        // add field before going through multi_fields
+        // add field before going through multi_fields because we still want to add the parent field
         acc.push(field);
 
         // for each field in multi_field add new field
@@ -242,24 +279,28 @@ export const flattenFields = (allFields: Fields): Fields => {
   return flatten(allFields);
 };
 
-/* this should match https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/kibana/fields_transformer.go */
-interface TypeMap {
-  [key: string]: string;
-}
-const typeMap: TypeMap = {
-  binary: 'binary',
-  half_float: 'number',
-  scaled_float: 'number',
-  float: 'number',
-  integer: 'number',
-  long: 'number',
-  short: 'number',
-  byte: 'number',
-  text: 'string',
-  keyword: 'string',
-  '': 'string',
-  geo_point: 'geo_point',
-  date: 'date',
-  ip: 'ip',
-  boolean: 'boolean',
+export const createFieldFormatMap = (fields: Fields): FieldFormatMap =>
+  fields.reduce<FieldFormatMap>((acc, field) => {
+    if (field.format || field.pattern) {
+      const fieldFormatMapItem: FieldFormatMapItem = {};
+      if (field.format) {
+        fieldFormatMapItem.id = field.format;
+      }
+      const params = getFieldFormatParams(field);
+      if (Object.keys(params).length) fieldFormatMapItem.params = params;
+      acc[field.name] = fieldFormatMapItem;
+    }
+    return acc;
+  }, {});
+
+const getFieldFormatParams = (field: Field): FieldFormatParams => {
+  const params: FieldFormatParams = {};
+  if (field.pattern) params.pattern = field.pattern;
+  if (field.input_format) params.inputFormat = field.input_format;
+  if (field.output_format) params.outputFormat = field.output_format;
+  if (field.output_precision) params.outputPrecision = field.output_precision;
+  if (field.label_template) params.labelTemplate = field.label_template;
+  if (field.url_template) params.urlTemplate = field.url_template;
+  if (field.open_link_in_current_tab) params.openLinkInCurrentTab = field.open_link_in_current_tab;
+  return params;
 };
