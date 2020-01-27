@@ -1017,7 +1017,7 @@ export interface RuleField {
 
   tags?: Maybe<string[] | string>;
 
-  threats?: Maybe<ToAny>;
+  threat?: Maybe<ToAny>;
 
   type?: Maybe<string[] | string>;
 
@@ -1849,7 +1849,9 @@ export interface OverviewHostData {
 
   filebeatSystemModule?: Maybe<number>;
 
-  winlogbeat?: Maybe<number>;
+  winlogbeatSecurity?: Maybe<number>;
+
+  winlogbeatMWSysmonOperational?: Maybe<number>;
 
   inspect?: Maybe<Inspect>;
 }
@@ -4992,7 +4994,7 @@ export namespace RuleFieldResolvers {
 
     tags?: TagsResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    threats?: ThreatsResolver<Maybe<ToAny>, TypeParent, TContext>;
+    threat?: ThreatResolver<Maybe<ToAny>, TypeParent, TContext>;
 
     type?: TypeResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
@@ -5110,7 +5112,7 @@ export namespace RuleFieldResolvers {
     Parent = RuleField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ThreatsResolver<
+  export type ThreatResolver<
     R = Maybe<ToAny>,
     Parent = RuleField,
     TContext = SiemContext
@@ -7831,7 +7833,13 @@ export namespace OverviewHostDataResolvers {
 
     filebeatSystemModule?: FilebeatSystemModuleResolver<Maybe<number>, TypeParent, TContext>;
 
-    winlogbeat?: WinlogbeatResolver<Maybe<number>, TypeParent, TContext>;
+    winlogbeatSecurity?: WinlogbeatSecurityResolver<Maybe<number>, TypeParent, TContext>;
+
+    winlogbeatMWSysmonOperational?: WinlogbeatMwSysmonOperationalResolver<
+      Maybe<number>,
+      TypeParent,
+      TContext
+    >;
 
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
@@ -7906,7 +7914,12 @@ export namespace OverviewHostDataResolvers {
     Parent = OverviewHostData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type WinlogbeatResolver<
+  export type WinlogbeatSecurityResolver<
+    R = Maybe<number>,
+    Parent = OverviewHostData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type WinlogbeatMwSysmonOperationalResolver<
     R = Maybe<number>,
     Parent = OverviewHostData,
     TContext = SiemContext

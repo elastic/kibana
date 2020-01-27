@@ -30,11 +30,11 @@ import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 import { isNumeric } from './lib/numeric';
 import { canViewInApp } from './lib/in_app_url';
+import { npStart } from 'ui/new_platform';
 
 import { castEsToKbnFieldTypeName } from '../../../../../../../plugins/data/public';
 
 import { getViewBreadcrumbs } from './breadcrumbs';
-import { npStart } from '../../../../../../ui/public/new_platform';
 
 const location = 'SavedObject view';
 
@@ -168,11 +168,13 @@ uiModules
             // sorts twice since we want numerical sort to prioritize over name,
             // and sortBy will do string comparison if trying to match against strings
             const nameSortedFields = _.sortBy(fields, 'name');
-            $scope.fields = _.sortBy(nameSortedFields, field => {
-              const orderIndex = service.Class.fieldOrder
-                ? service.Class.fieldOrder.indexOf(field.name)
-                : -1;
-              return orderIndex > -1 ? orderIndex : Infinity;
+            $scope.$evalAsync(() => {
+              $scope.fields = _.sortBy(nameSortedFields, field => {
+                const orderIndex = service.Class.fieldOrder
+                  ? service.Class.fieldOrder.indexOf(field.name)
+                  : -1;
+                return orderIndex > -1 ? orderIndex : Infinity;
+              });
             });
             $scope.$digest();
           })

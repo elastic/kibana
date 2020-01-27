@@ -35,6 +35,10 @@ const createSetupContractMock = () => {
   setupContract.getKibanaVersion.mockReturnValue('kibanaVersion');
   setupContract.getLegacyMode.mockReturnValue(true);
   setupContract.getLegacyMetadata.mockReturnValue({
+    app: {
+      id: 'foo',
+      title: 'Foo App',
+    },
     nav: [],
     uiSettings: {
       defaults: { legacyInjectedUiSettingDefaults: true },
