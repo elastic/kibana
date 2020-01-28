@@ -46,7 +46,9 @@ export interface ChannelConfig<I = PulseInstruction> {
   instructions$: Subject<I[]>;
   logger: Logger;
 }
+
 export interface ChannelSetupContext {
+  rawElasticsearch: any;
   elasticsearch: IPulseElasticsearchClient;
   // savedObjects: SavedObjectsServiceSetup;
 }
@@ -65,11 +67,18 @@ export class PulseChannel<I = PulseInstruction> {
     return this.collector.setup(setupContext);
   }
 
-  public async getRecords() {
+  public async getRecords(): Promise<Record<string, any>> {
     return this.collector.getRecords();
   }
+
   public get id() {
     return this.config.id;
+  }
+
+  public clearRecords(ids: string[]) {
+    if (this.collector.clearRecords) {
+      this.collector.clearRecords(ids);
+    }
   }
 
   public async sendPulse<T = any>(payload: T) {

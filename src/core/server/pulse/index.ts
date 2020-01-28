@@ -93,6 +93,7 @@ export class PulseService {
 
     this.channels.forEach(channel =>
       channel.setup({
+        rawElasticsearch: this.elasticsearch,
         elasticsearch: pulseElasticsearchClient,
         // savedObjects: deps.savedObjects,
       })

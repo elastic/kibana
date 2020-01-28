@@ -56,6 +56,8 @@ export class PulseService {
   }
 
   public async setup(): Promise<PulseServiceSetup> {
+    // poll for instructions every second for this deployment
+
     return {
       getChannel: (id: string) => {
         const channel = this.channels.get(id);
@@ -150,7 +152,6 @@ export class PulseService {
           `Channel (${channel.id}) from service has no corresponding channel handler in client`
         );
       }
-
       channel.instructions.forEach(instruction => instructions$.next(instruction));
     });
   }

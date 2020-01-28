@@ -48,6 +48,9 @@ export class PulsePocPlugin {
           properties: {
             channel_id: { type: 'keyword' },
             deployment_id: { type: 'keyword' },
+            timestamp: { type: 'date' },
+            // newsfeed specific mapping
+            publishOn: { type: 'date' },
           },
         },
       },
@@ -85,30 +88,11 @@ export class PulsePocPlugin {
 
         for (const channel of channels) {
           const index = `pulse-poc-raw-${channel.channel_id}`;
-          const exists = await es.callAsInternalUser('indices.exists', { index });
-          if (!exists) {
-            const indexBody = {
-              settings: {
-                number_of_shards: 1,
-              },
-              mappings: {
-                properties: {
-                  channel_id: { type: 'keyword' },
-                  deployment_id: { type: 'keyword' },
-                  timestamp: { type: 'date' },
-                },
-              },
-            };
-
-            await es.callAsInternalUser('indices.create', {
-              index,
-              body: indexBody,
-            });
-          }
 
           for (const record of channel.records) {
             await es.callAsInternalUser('index', {
               index,
+              id: (record as any).hash,
               body: {
                 ...record,
                 timestamp: new Date(),

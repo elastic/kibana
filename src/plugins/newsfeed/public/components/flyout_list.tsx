@@ -32,35 +32,42 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  PulseChannel,
-  PulseInstruction,
-  PulseErrorInstructionValue,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from 'src/core/public/pulse/channel';
+// eslint-disable-next-line
+import { PulseChannel } from 'src/core/public/pulse/channel';
+// eslint-disable-next-line
+import { NotificationInstruction } from 'src/core/server/pulse/collectors/notifications';
 import moment from 'moment';
 import { EuiHeaderAlert } from '../../../../legacy/core_plugins/newsfeed/public/np_ready/components/header_alert/header_alert';
-import { NewsfeedContext } from './newsfeed_header_nav_button';
+import { NewsfeedContext, shouldUpdateHash, getLastItemHash } from './newsfeed_header_nav_button';
 import { NewsfeedItem } from '../../types';
 import { NewsEmptyPrompt } from './empty_news';
 import { NewsLoadingPrompt } from './loading_news';
 
 interface Props {
-  errorsChannel: PulseChannel;
-  pulseInstructions?: PulseErrorInstructionValue[] | undefined;
+  notificationsChannel: PulseChannel<NotificationInstruction>;
 }
-export const NewsfeedFlyout = ({ errorsChannel, pulseInstructions }: Props) => {
-  const currentDate = (item: any) => moment(item).format('DD MMMM YYYY');
+
+export const NewsfeedFlyout = ({ notificationsChannel }: Props) => {
   const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
-  if (errorsChannel && pulseInstructions) {
-    // I want to mark the instructions as seen when the user manually closes an error instruction card.
-    pulseInstructions.forEach((element: PulseErrorInstructionValue) => {
-      errorsChannel.sendPulse({
-        ...element,
-        status: 'seen',
-      });
-    });
+
+  if (newsFetchResult && newsFetchResult.feedItems.length) {
+    const lastNotificationHash = getLastItemHash(newsFetchResult.feedItems);
+    const hasNew = newsFetchResult.feedItems.some(item => item.status === 'new');
+    const shouldUpdateResults = hasNew || shouldUpdateHash(lastNotificationHash);
+    if (shouldUpdateResults) {
+      notificationsChannel.sendPulse(
+        newsFetchResult.feedItems.map(feedItem => {
+          return {
+            ...feedItem,
+            publishOn: feedItem.publishOn.format('x'),
+            expireOn: feedItem.expireOn.format('x'),
+            status: 'seen',
+            seenOn: moment().format('x'),
+          };
+        })
+      );
+    }
   }
 
   return (
@@ -95,37 +102,13 @@ export const NewsfeedFlyout = ({ errorsChannel, pulseInstructions }: Props) => {
                     <EuiIcon type="popout" size="s" />
                   </EuiLink>
                 }
-                date={item.publishOn.format('DD MMMM YYYY')}
+                date={moment(item.publishOn).format('DD MMMM YYYY')}
                 badge={<EuiBadge color="hollow">{item.badge}</EuiBadge>}
               />
             );
           })
         ) : (
           <NewsEmptyPrompt />
-        )}
-        <hr />
-        {!pulseInstructions ? (
-          <div>No instructions from Pulse</div>
-        ) : (
-          pulseInstructions.map((instruction: PulseErrorInstructionValue, index) => {
-            return (
-              <EuiHeaderAlert
-                action={
-                  <EuiLink target="_blank" href={'#'}>
-                    fixed version goes here
-                    <EuiIcon type="popout" size="s" />
-                  </EuiLink>
-                }
-                key={index}
-                title={instruction.hash}
-                text={JSON.stringify(instruction)}
-                date={currentDate(instruction.timestamp)}
-                badge={
-                  <EuiBadge color="accent">{instruction.fixedVersion || 'no fix yet'}</EuiBadge>
-                }
-              />
-            );
-          })
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

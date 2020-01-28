@@ -23,19 +23,28 @@ import { RegisterRoute } from './types';
 // we need the current Kibana Version to send in all of the payloads
 const validate = {
   params: schema.object({
-    channel: schema.string(),
+    channelId: schema.string(),
   }),
   body: schema.object({
     payload: schema.object(
       {
         channelId: schema.maybe(schema.string()),
         deploymentId: schema.maybe(schema.string()),
-        timestamp: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-        message: schema.string(),
-        hash: schema.string(),
-        fixedVersion: schema.maybe(schema.string()),
-        status: schema.maybe(schema.string()),
-        currentKibanaVersion: schema.maybe(schema.string()),
+        // generic records (array of objects, each channel processes the records differently)
+        records: schema.arrayOf(
+          schema.object(
+            {
+              hash: schema.string(),
+              message: schema.maybe(schema.string()),
+              status: schema.maybe(schema.string()),
+              currentKibanaVersion: schema.maybe(schema.string()),
+              timestamp: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
+              errorId: schema.maybe(schema.string()),
+              fixedVersion: schema.maybe(schema.string()),
+            },
+            { allowUnknowns: true }
+          )
+        ),
       },
       { allowUnknowns: true }
     ),
@@ -47,14 +56,17 @@ export const registerIndexRoute: RegisterRoute = (
   channels: Map<string, PulseChannel>
 ) => {
   return router.post(
-    { path: '/api/pulse_local/{channel}', validate },
+    { path: '/api/pulse_local/{channelId}', validate },
     async (context, request, response) => {
       try {
-        const { channel } = request.params;
-        const { payload } = request.body;
-        const ch = channels.get(channel);
+        const { channelId } = request.params as any;
+        const { payload } = request.body as any;
+        const channel = channels.get(channelId);
 
-        await ch?.sendPulse(payload);
+        await channel?.sendPulse({
+          channelId: channel,
+          ...payload,
+        });
         return response.ok({
           body: {
             message: `payload: ${payload} received`,

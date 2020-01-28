@@ -23,16 +23,18 @@
 // import { SavedObjectsServiceSetup, ISavedObjectsRepository } from '../saved_objects';
 import { Logger } from '../logging';
 import { IPulseElasticsearchClient } from './client_wrappers/types';
+import { IClusterClient } from '../elasticsearch';
 
 export type PulseCollectorConstructor = new (logger: Logger) => PulseCollector;
-
 export interface CollectorSetupContext {
+  rawElasticsearch: IClusterClient;
   elasticsearch: IPulseElasticsearchClient;
   // savedObjects: SavedObjectsServiceSetup;
 }
 
 export abstract class PulseCollector<Payload = unknown, PulseRecord = Payload> {
   // protected savedObjects?: ISavedObjectsRepository;
+  protected rawElasticsearch?: IClusterClient;
   protected elasticsearch?: IPulseElasticsearchClient;
 
   constructor(protected readonly logger: Logger) {}
@@ -43,5 +45,6 @@ export abstract class PulseCollector<Payload = unknown, PulseRecord = Payload> {
   public async setup(setupContext: CollectorSetupContext) {
     // this.savedObjects = setupContext.savedObjects.createInternalRepository();
     this.elasticsearch = setupContext.elasticsearch;
+    this.rawElasticsearch = setupContext.rawElasticsearch;
   }
 }

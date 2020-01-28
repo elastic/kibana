@@ -140,31 +140,6 @@ export class Server {
       http: httpSetup,
     });
 
-    // example of retrieving instructions for a specific channel
-    // const defaultChannelInstructions$ = pulseSetup.getChannel('default').instructions$();
-
-    // example of retrieving only instructions that you "own"
-    // use this to only pay attention to pulse instructions you care about
-    // const coreInstructions$ = defaultChannelInstructions$.pipe(
-    //   map(instructions => instructions.filter(instruction => instruction.owner === 'core'))
-    // );
-
-    // example of retrieving only instructions of a specific type
-    // use this to only pay attention to specific instructions
-    // const pulseTelemetryInstructions$ = coreInstructions$.pipe(
-    //   map(instructions => instructions.filter(instruction => instruction.id === 'pulse_telemetry'))
-    // );
-
-    // example of retrieving only instructions with a specific value
-    // use this when you want to handle a specific scenario/use case for some type of instruction
-    // const retryTelemetryInstructions$ = pulseTelemetryInstructions$.pipe(
-    //   map(instructions => instructions.filter(instruction => instruction.value === 'try_again'))
-    // );
-
-    // retryTelemetryInstructions$.subscribe(() => {
-    //   this.log.info(`Received instructions to retry telemetry collection`);
-    // });
-
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,

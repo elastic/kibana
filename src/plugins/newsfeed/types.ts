@@ -52,6 +52,7 @@ export interface NewsfeedItem {
   badge: string | null;
   publishOn: Moment;
   expireOn: Moment;
+  status?: string;
   hash: string;
 }
 
