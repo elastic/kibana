@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import { delay } from 'bluebird';
 
 export function ShieldPageProvider({ getService }) {
@@ -45,7 +44,6 @@ export function ShieldPageProvider({ getService }) {
   };
 
   class ShieldPage {
-
     async login(user, pwd) {
       if (provisionedEnv.REMOTE_SESSION_URL) {
         const [samlUser, samlPass] = parse(provisionedEnv.KIBANAURL);

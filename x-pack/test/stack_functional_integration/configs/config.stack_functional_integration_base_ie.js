@@ -5,6 +5,7 @@
  */
 
 import { resolve } from 'path';
+// import { resolve, normalize } from 'path';
 import buildState from './build_state';
 import { ToolingLog } from '@kbn/dev-utils';
 import chalk from 'chalk';
@@ -13,6 +14,7 @@ const reportName = 'Stack Functional Integration Tests';
 const testsFolder = '../test/functional/apps';
 const stateFilePath = '../../../../../integration-test/qa/envvars.sh';
 const prepend = testFile => require.resolve(`${testsFolder}/${testFile}`);
+// const pipe = (...fns) => fns.reduce((f, g) => (...args) => g(f(...args)));
 const log = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
@@ -31,6 +33,10 @@ export default async ({ readConfigFile }) => {
     junit: {
       reportName: `${reportName} - ${provisionedConfigs.VM}`,
     },
+    browser: {
+      type: 'ie',
+    },
+
     servers,
     apps,
     stackFunctionalIntegrationTests: {
@@ -60,8 +66,6 @@ function logTest(testPath) {
   return testPath;
 }
 function mutateProtocols(servers, provisionedConfigs) {
-  if (provisionedConfigs.TLS === 'YES') {
-    servers.kibana.protocol = provisionedConfigs.ESPROTO;
-    servers.elasticsearch.protocol = servers.kibana.protocol;
-  }
+  servers.kibana.protocol = provisionedConfigs.ESPROTO;
+  servers.elasticsearch.protocol = servers.kibana.protocol;
 }

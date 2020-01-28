@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 export default ({ getService, getPageObjects }) => {
   describe('monitoring app', () => {
     const provisionedEnv = getService('provisionedEnv');
     const browser = getService('browser');
-    const PageObjects = getPageObjects(['security', 'shield', 'monitoring', 'common']);
+    const PageObjects = getPageObjects(['security', 'monitoring', 'common']);
     const monitoringNoData = getService('monitoringNoData');
     const log = getService('log');
     const isSaml = !!provisionedEnv.VM.includes('saml');

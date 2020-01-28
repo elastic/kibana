@@ -216,11 +216,19 @@ async function attemptToCreateCommand(
           logLevel: 'TRACE',
         });
 
-        const session = await new Builder()
-          .forBrowser(browserType)
-          .withCapabilities(ieCapabilities)
-          .build();
-
+        let session;
+        if (remoteSessionUrl) {
+          session = await new Builder()
+            .forBrowser(browserType)
+            .withCapabilities(ieCapabilities)
+            .usingServer(remoteSessionUrl)
+            .build();
+        } else {
+          session = await new Builder()
+            .forBrowser(browserType)
+            .withCapabilities(ieCapabilities)
+            .build();
+        }
         return {
           session,
           consoleLog$: Rx.EMPTY,
