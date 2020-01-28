@@ -198,11 +198,7 @@ export const updateRules = async ({
   return alertsClient.update({
     id: rule.id,
     data: {
-      tags: addTags(
-        tags != null ? tags : rule.tags, // Add tags as an update if it exists, otherwise re-use the older tags
-        rule.params.ruleId,
-        immutable != null ? immutable : rule.params.immutable // Add new one if it exists, otherwise re-use old one
-      ),
+      tags: addTags(tags ?? rule.tags, rule.params.ruleId, immutable ?? rule.params.immutable),
       name: calculateName({ updatedName: name, originalName: rule.name }),
       schedule: {
         interval: calculateInterval(interval, rule.schedule.interval),
