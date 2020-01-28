@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
@@ -55,25 +54,20 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
       }),
       enableRouting: false,
       mount: async ({ core: { docLinks, i18n: i18nDep } }, { element }) => {
-        const { boot } = await import('./application');
+        const { renderApp } = await import('./application');
         const [{ injectedMetadata }] = await getStartServices();
         const elasticsearchUrl = injectedMetadata.getInjectedVar(
           'elasticsearchUrl',
           'http://localhost:9200'
         ) as string;
-        render(
-          boot({
-            docLinkVersion: docLinks.DOC_LINK_VERSION,
-            I18nContext: i18nDep.Context,
-            notifications,
-            elasticsearchUrl,
-            usageCollection,
-          }),
-          element
-        );
-        return () => {
-          unmountComponentAtNode(element);
-        };
+        return renderApp({
+          docLinkVersion: docLinks.DOC_LINK_VERSION,
+          I18nContext: i18nDep.Context,
+          notifications,
+          elasticsearchUrl,
+          usageCollection,
+          element,
+        });
       },
     });
   }

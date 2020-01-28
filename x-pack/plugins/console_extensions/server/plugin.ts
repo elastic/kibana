@@ -26,7 +26,7 @@ export class ConsoleExtensionsServerPlugin implements Plugin<void, void, SetupDe
   ) {
     addExtensionSpecFilePath(join(__dirname, 'spec/'));
     processors.forEach(processor => addProcessorDefinition(processor));
-    this.log.info('Installed console autocomplete extensions.');
+    this.log.debug('Installed console autocomplete extensions.');
   }
   start() {}
 }

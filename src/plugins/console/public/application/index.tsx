@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { NotificationsSetup } from 'src/core/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
@@ -37,14 +38,16 @@ export interface BootDependencies {
   notifications: NotificationsSetup;
   elasticsearchUrl: string;
   usageCollection?: UsageCollectionSetup;
+  element: HTMLElement;
 }
 
-export function boot({
+export function renderApp({
   I18nContext,
   notifications,
   docLinkVersion,
   elasticsearchUrl,
   usageCollection,
+  element,
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
@@ -58,7 +61,7 @@ export function boot({
   const objectStorageClient = localStorageObjectClient.create(storage);
   settingsRef = settings;
 
-  return (
+  render(
     <I18nContext>
       <ServicesContextProvider
         value={{
@@ -80,6 +83,9 @@ export function boot({
           </EditorContextProvider>
         </RequestContextProvider>
       </ServicesContextProvider>
-    </I18nContext>
+    </I18nContext>,
+    element
   );
+
+  return () => unmountComponentAtNode(element);
 }
