@@ -104,7 +104,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           timelineTitle,
           meta,
           filters,
-          ruleId: ruleId != null ? ruleId : uuid.v4(),
+          ruleId: ruleId ?? uuid.v4(),
           index,
           interval,
           maxSignals,
