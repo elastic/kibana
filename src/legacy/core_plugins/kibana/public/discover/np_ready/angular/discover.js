@@ -19,7 +19,8 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject, merge } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
@@ -62,7 +63,6 @@ import {
 const {
   core,
   chrome,
-  data,
   docTitle,
   filterManager,
   share,
@@ -78,8 +78,6 @@ import {
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { FilterStateManager } from '../../../../../data/public';
-
-const { getSavedQuery } = data.query.savedQueries;
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -205,8 +203,6 @@ function discoverController(
 
   const subscriptions = new Subscription();
 
-  timefilter.disableTimeRangeSelector();
-  timefilter.disableAutoRefreshSelector();
   $scope.timefilterUpdateHandler = ranges => {
     timefilter.setTime({
       from: moment(ranges.from).toISOString(),
@@ -218,7 +214,6 @@ function discoverController(
   $scope.showInterval = false;
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
-  $scope.refreshInterval = timefilter.getRefreshInterval();
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
 
   $scope.$watch(
@@ -436,14 +431,9 @@ function discoverController(
   let stateMonitor;
 
   const $state = ($scope.state = new AppState(getStateDefaults()));
+  const $fetchObservable = new Subject();
 
-  $scope.filters = filterManager.getFilters();
   $scope.screenTitle = savedSearch.title;
-
-  $scope.onFiltersUpdated = filters => {
-    // The filters will automatically be set when the filterManager emits an update event (see below)
-    filterManager.setFilters(filters);
-  };
 
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
@@ -571,17 +561,12 @@ function discoverController(
   };
 
   const shouldSearchOnPageLoad = () => {
-    // If a saved query is referenced in the app state, omit the initial load because the saved query will
-    // be fetched separately and trigger a reload
-    if ($scope.state.savedQuery) {
-      return false;
-    }
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     return (
       config.get('discover:searchOnPageLoad') ||
       savedSearch.id !== undefined ||
-      _.get($scope, 'refreshInterval.pause') === false
+      timefilter.getRefreshInterval().pause === false
     );
   };
 
@@ -593,25 +578,23 @@ function discoverController(
     $scope.$on('$destroy', () => stateMonitor.destroy());
 
     $scope.updateDataSource().then(function() {
-      subscriptions.add(
-        subscribeWithScope($scope, timefilter.getAutoRefreshFetch$(), {
-          next: $scope.fetch,
-        })
-      );
+      const searchBarChanges = merge(
+        timefilter.getAutoRefreshFetch$(),
+        timefilter.getFetch$(),
+        filterManager.getFetches$(),
+        $fetchObservable
+      ).pipe(debounceTime(100));
 
       subscriptions.add(
-        subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
-          next: $scope.updateRefreshInterval,
+        subscribeWithScope($scope, searchBarChanges, {
+          next: $scope.fetch,
         })
       );
       subscriptions.add(
         subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-          next: $scope.updateTime,
-        })
-      );
-      subscriptions.add(
-        subscribeWithScope($scope, timefilter.getFetch$(), {
-          next: $scope.fetch,
+          next: () => {
+            $scope.updateTime();
+          },
         })
       );
 
@@ -625,14 +608,14 @@ function discoverController(
         );
 
         // if the searchSource doesn't know, tell it so
-        if (!angular.equals(sort, currentSort)) $scope.fetch();
+        if (!angular.equals(sort, currentSort)) $fetchObservable.next();
       });
 
       // update data source when filters update
+
       subscriptions.add(
         subscribeWithScope($scope, filterManager.getUpdates$(), {
           next: () => {
-            $scope.filters = filterManager.getFilters();
             $scope.updateDataSource().then(function() {
               $state.save();
             });
@@ -640,26 +623,13 @@ function discoverController(
         })
       );
 
-      // fetch data when filters fire fetch event
-      subscriptions.add(
-        subscribeWithScope($scope, filterManager.getFetches$(), {
-          next: $scope.fetch,
-        })
-      );
-
       // update data source when hitting forward/back and the query changes
       $scope.$listen($state, 'fetch_with_changes', function(diff) {
-        if (diff.indexOf('query') >= 0) $scope.fetch();
+        if (diff.indexOf('query') >= 0) $fetchObservable.next();
       });
 
       $scope.$watch('opts.timefield', function(timefield) {
         $scope.enableTimeRangeSelector = !!timefield;
-      });
-
-      $scope.$watch('state.interval', function(newInterval, oldInterval) {
-        if (newInterval !== oldInterval) {
-          $scope.fetch();
-        }
       });
 
       $scope.$watch('vis.aggs', function() {
@@ -677,7 +647,7 @@ function discoverController(
         if (!_.isEqual(newQuery, oldQuery)) {
           const query = migrateLegacyQuery(newQuery);
           if (!_.isEqual(query, newQuery)) {
-            $scope.updateQueryAndFetch({ query });
+            $scope.updateQuery({ query });
           }
         }
       });
@@ -737,7 +707,7 @@ function discoverController(
       $state.replace();
 
       if (shouldSearchOnPageLoad()) {
-        $scope.fetch();
+        $fetchObservable.next();
       }
     });
   });
@@ -830,14 +800,12 @@ function discoverController(
       });
   };
 
-  $scope.updateQueryAndFetch = function({ query, dateRange }) {
-    const oldDateRange = timefilter.getTime();
-    timefilter.setTime(dateRange);
-    $state.query = query;
+  $scope.updateQuery = function({ query }) {
     // storing the updated timerange in the state will trigger a fetch
     // call automatically, so only trigger fetch in case this is a refresh call (no changes in parameters).
-    if (_.isEqual(oldDateRange, dateRange)) {
-      $scope.fetch();
+    if (!_.isEqual($state.query, query)) {
+      $state.query = query;
+      $fetchObservable.next();
     }
   };
 
@@ -899,30 +867,10 @@ function discoverController(
       from: dateMath.parse(timefilter.getTime().from),
       to: dateMath.parse(timefilter.getTime().to, { roundUp: true }),
     };
-    $scope.time = timefilter.getTime();
   };
 
   $scope.toMoment = function(datetime) {
     return moment(datetime).format(config.get('dateFormat'));
-  };
-
-  $scope.updateRefreshInterval = function() {
-    const newInterval = timefilter.getRefreshInterval();
-    const shouldFetch =
-      _.get($scope, 'refreshInterval.pause') === true && newInterval.pause === false;
-
-    $scope.refreshInterval = newInterval;
-
-    if (shouldFetch) {
-      $scope.fetch();
-    }
-  };
-
-  $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
-    timefilter.setRefreshInterval({
-      pause: isPaused,
-      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value,
-    });
   };
 
   $scope.resetQuery = function() {
@@ -990,70 +938,6 @@ function discoverController(
   $scope.showAllRows = function() {
     $scope.minimumVisibleRows = $scope.hits;
   };
-
-  $scope.onQuerySaved = savedQuery => {
-    $scope.savedQuery = savedQuery;
-  };
-
-  $scope.onSavedQueryUpdated = savedQuery => {
-    $scope.savedQuery = { ...savedQuery };
-  };
-
-  $scope.onClearSavedQuery = () => {
-    delete $scope.savedQuery;
-    delete $state.savedQuery;
-    $state.query = {
-      query: '',
-      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
-    };
-    filterManager.setFilters(filterManager.getGlobalFilters());
-    $state.save();
-    $scope.fetch();
-  };
-
-  const updateStateFromSavedQuery = savedQuery => {
-    $state.query = savedQuery.attributes.query;
-    $state.save();
-    const savedQueryFilters = savedQuery.attributes.filters || [];
-    const globalFilters = filterManager.getGlobalFilters();
-    filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
-
-    if (savedQuery.attributes.timefilter) {
-      timefilter.setTime({
-        from: savedQuery.attributes.timefilter.from,
-        to: savedQuery.attributes.timefilter.to,
-      });
-      if (savedQuery.attributes.timefilter.refreshInterval) {
-        timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
-      }
-    }
-
-    $scope.fetch();
-  };
-
-  $scope.$watch('savedQuery', newSavedQuery => {
-    if (!newSavedQuery) return;
-
-    $state.savedQuery = newSavedQuery.id;
-    $state.save();
-
-    updateStateFromSavedQuery(newSavedQuery);
-  });
-
-  $scope.$watch('state.savedQuery', newSavedQueryId => {
-    if (!newSavedQueryId) {
-      $scope.savedQuery = undefined;
-      return;
-    }
-    if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
-      getSavedQuery(newSavedQueryId).then(savedQuery => {
-        $scope.$evalAsync(() => {
-          $scope.savedQuery = savedQuery;
-          updateStateFromSavedQuery(savedQuery);
-        });
-      });
-    }
-  });
 
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages

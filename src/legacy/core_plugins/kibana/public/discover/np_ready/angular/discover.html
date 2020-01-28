@@ -5,24 +5,13 @@
   <kbn-top-nav
     app-name="'discover'"
     config="topNavMenu"
+    screen-title="screenTitle"
     show-search-bar="true"
     show-date-picker="enableTimeRangeSelector"
     show-save-query="showSaveQuery"
-    query="state.query"
-    saved-query="savedQuery"
-    screen-title="screenTitle"
-    on-query-submit="updateQueryAndFetch"
+    on-query-submit="updateQuery"
     index-patterns="[indexPattern]"
-    filters="filters"
-    on-filters-updated="onFiltersUpdated"
-    date-range-from="time.from"
-    date-range-to="time.to"
-    is-refresh-paused="refreshInterval.pause"
-    refresh-interval="refreshInterval.value"
-    on-refresh-change="onRefreshChange"
-    on-saved="onQuerySaved"
-    on-saved-query-updated="onSavedQueryUpdated"
-    on-clear-saved-query="onClearSavedQuery"
+    query="state.query"    
   >
   </kbn-top-nav>
 

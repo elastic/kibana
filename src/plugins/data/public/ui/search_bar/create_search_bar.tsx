@@ -22,7 +22,7 @@ import { Subscription } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
-import { DataPublicPluginStart, esFilters } from '../..';
+import { DataPublicPluginStart, esFilters, Query, TimeRange, SavedQuery } from '../..';
 import { QueryStart } from '../../query';
 import { SearchBarOwnProps, SearchBar } from './search_bar';
 
@@ -52,6 +52,89 @@ const defaultOnRefreshChange = (query: QueryStart) => {
   };
 };
 
+const defaultOnQuerySubmit = (
+  props: StatefulSearchBarProps,
+  query: QueryStart,
+  setQueryStringState: Function
+) => {
+  const { timefilter } = query.timefilter;
+
+  return (payload: { dateRange: TimeRange; query?: Query }) => {
+    timefilter.setTime(payload.dateRange);
+    setQueryStringState(payload.query);
+
+    if (props.onQuerySubmit) props.onQuerySubmit(payload);
+  };
+};
+
+const defaultOnClearSavedQuery = (
+  props: StatefulSearchBarProps,
+  uiSettings: CoreStart['uiSettings'],
+  query: QueryStart,
+  setQueryStringState: Function
+) => {
+  return () => {
+    query.filterManager.removeAll();
+    setQueryStringState({
+      query: '',
+      language: uiSettings.get('search:queryLanguage'),
+    });
+
+    if (props.onClearSavedQuery) props.onClearSavedQuery();
+  };
+};
+
+const populateStateFromSavedQuery = (
+  props: StatefulSearchBarProps,
+  query: QueryStart,
+  savedQuery: SavedQuery,
+  setQueryStringState: Function
+) => {
+  const { timefilter } = query.timefilter;
+  // timefilter
+  if (savedQuery.attributes.timefilter) {
+    timefilter.setTime({
+      from: savedQuery.attributes.timefilter.from,
+      to: savedQuery.attributes.timefilter.to,
+    });
+    if (savedQuery.attributes.timefilter.refreshInterval) {
+      timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
+    }
+  }
+
+  // query string
+  setQueryStringState(savedQuery.attributes.query);
+  if (props.onQuerySubmit)
+    props.onQuerySubmit({ dateRange: timefilter.getTime(), query: savedQuery.attributes.query });
+
+  // filters
+  const savedQueryFilters = savedQuery.attributes.filters || [];
+  const globalFilters = query.filterManager.getGlobalFilters();
+  query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
+};
+
+const defaultOnSavedQueryUpdated = (
+  props: StatefulSearchBarProps,
+  query: QueryStart,
+  setQueryStringState: Function
+) => {
+  return (savedQuery: SavedQuery) => {
+    populateStateFromSavedQuery(props, query, savedQuery, setQueryStringState);
+    if (props.onSavedQueryUpdated) props.onSavedQueryUpdated(savedQuery);
+  };
+};
+
+const defaultOnQuerySaved = (
+  props: StatefulSearchBarProps,
+  query: QueryStart,
+  setQueryStringState: Function
+) => {
+  return (savedQuery: SavedQuery) => {
+    populateStateFromSavedQuery(props, query, savedQuery, setQueryStringState);
+    if (props.onSaved) props.onSaved(savedQuery);
+  };
+};
+
 export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -61,6 +144,10 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
     const fmFilters = filterManager.getFilters();
     const [refreshInterval, setRefreshInterval] = useState(tfRefreshInterval.value);
     const [refreshPaused, setRefreshPaused] = useState(tfRefreshInterval.pause);
+    const [query, setQuery] = useState<Query>({
+      query: props.query?.query || '',
+      language: props.query?.language || core.uiSettings.get('search:queryLanguage'),
+    });
 
     const [filters, setFilters] = useState(fmFilters);
 
@@ -110,15 +197,20 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
         }}
       >
         <SearchBar
+          {...props}
           timeHistory={timefilter.history}
           dateRangeFrom={timeRange.from}
           dateRangeTo={timeRange.to}
           refreshInterval={refreshInterval}
           isRefreshPaused={refreshPaused}
           filters={filters}
+          query={query}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
-          {...props}
+          onQuerySubmit={defaultOnQuerySubmit(props, data.query, setQuery)}
+          onClearSavedQuery={defaultOnClearSavedQuery(props, core.uiSettings, data.query, setQuery)}
+          onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, data.query, setQuery)}
+          onSaved={defaultOnQuerySaved(props, data.query, setQuery)}
         />
       </KibanaContextProvider>
     );
