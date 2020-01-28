@@ -23,15 +23,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentConfig } from '../../../types';
-import { DEFAULT_AGENT_CONFIG_ID } from '../../../constants';
-import { useGetAgentConfigs, usePagination } from '../../../hooks';
+import { DEFAULT_AGENT_CONFIG_ID, AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
+import { useGetAgentConfigs, usePagination, useLink } from '../../../hooks';
+import { CreateAgentConfigFlyout } from './components';
 
 // import { ConnectedLink, SearchBar, PolicyDeleteProvider } from '../../components';
-// import { CreatePolicyFlyout } from './components';
 
 export const AgentConfigListPage: React.FC<{}> = () => {
-  // Create policy flyout state
-  // const [isCreatePolicyFlyoutOpen, setIsCreatePolicyFlyoutOpen] = useState<boolean>(false);
+  // Create agent config flyout state
+  const [isCreateAgentConfigFlyoutOpen, setIsCreateAgentConfigFlyoutOpen] = useState<boolean>(
+    false
+  );
 
   // Table and search states
   const [search, setSearch] = useState<string>('');
@@ -40,6 +42,9 @@ export const AgentConfigListPage: React.FC<{}> = () => {
 
   // Fetch agent configs
   const { isLoading, data: agentConfigData, sendRequest } = useGetAgentConfigs();
+
+  // Base path for config details
+  const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
 
   // Some policies retrieved, set up table props
   const columns = [
@@ -76,12 +81,14 @@ export const AgentConfigListPage: React.FC<{}> = () => {
       }),
       actions: [
         {
-          render: (agentConfig: AgentConfig) => {
+          render: ({ id }: AgentConfig) => {
             return (
-              <FormattedMessage
-                id="xpack.ingestManager.agentConfigList.viewActionLinkText"
-                defaultMessage="view"
-              />
+              <EuiLink href={`${DETAILS_URI}${id}`}>
+                <FormattedMessage
+                  id="xpack.ingestManager.agentConfigList.viewActionLinkText"
+                  defaultMessage="view"
+                />
+              </EuiLink>
             );
           },
         },
@@ -104,7 +111,11 @@ export const AgentConfigListPage: React.FC<{}> = () => {
         // libs.framework.capabilities.write ? (
         // <EuiButton fill iconType="plusInCircle" onClick={() => setIsCreatePolicyFlyoutOpen(true)}>
         // ) : null
-        <EuiButton fill iconType="plusInCircle" onClick={() => {}}>
+        <EuiButton
+          fill
+          iconType="plusInCircle"
+          onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
+        >
           <FormattedMessage
             id="xpack.ingestManager.agentConfigList.addButton"
             defaultMessage="Create new agent configuration"
@@ -117,14 +128,14 @@ export const AgentConfigListPage: React.FC<{}> = () => {
   return (
     <EuiPageBody>
       <EuiPageContent>
-        {/* {isCreatePolicyFlyoutOpen ? (
-          <CreatePolicyFlyout
+        {isCreateAgentConfigFlyoutOpen ? (
+          <CreateAgentConfigFlyout
             onClose={() => {
-              setIsCreatePolicyFlyoutOpen(false);
-              fetch();
+              setIsCreateAgentConfigFlyoutOpen(false);
+              sendRequest();
             }}
           />
-        ) : null} */}
+        ) : null}
 
         <EuiTitle size="l">
           <h1>
@@ -158,7 +169,7 @@ export const AgentConfigListPage: React.FC<{}> = () => {
                 color="danger"
                 onClick={() => {
                   // deletePoliciesPrompt(
-                  //   selectedAgentConfigs.map(policy => agentConfig.id),
+                  //   selectedAgentConfigs.map(agentConfig => agentConfig.id),
                   //   () => {
                   //     // Reload policies if on first page and no search query, otherwise
                   //     // reset to first page and reset search, which will trigger a reload
@@ -214,7 +225,7 @@ export const AgentConfigListPage: React.FC<{}> = () => {
             <EuiButton
               fill
               iconType="plusInCircle"
-              // onClick={() => setIsCreatePolicyFlyoutOpen(true)}
+              onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
             >
               <FormattedMessage
                 id="xpack.ingestManager.agentConfigList.addButton"

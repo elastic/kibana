@@ -11,6 +11,7 @@ import {
   GetAgentConfigsResponse,
   GetOneAgentConfigRequestSchema,
   CreateAgentConfigRequestSchema,
+  CreateAgentConfigResponse,
   UpdateAgentConfigRequestSchema,
   DeleteAgentConfigsRequestSchema,
 } from '../../types';
@@ -76,8 +77,9 @@ export const createAgentConfigHandler: RequestHandler<
     const agentConfig = await agentConfigService.create(soClient, request.body, {
       user: user || undefined,
     });
+    const body: CreateAgentConfigResponse = { item: agentConfig, success: true };
     return response.ok({
-      body: { item: agentConfig, success: true },
+      body,
     });
   } catch (e) {
     return response.customError({

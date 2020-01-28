@@ -29,6 +29,11 @@ export const CreateAgentConfigRequestSchema = {
   body: NewAgentConfigSchema,
 };
 
+export interface CreateAgentConfigResponse {
+  item: AgentConfig;
+  success: boolean;
+}
+
 export const UpdateAgentConfigRequestSchema = {
   ...GetOneAgentConfigRequestSchema,
   body: NewAgentConfigSchema,

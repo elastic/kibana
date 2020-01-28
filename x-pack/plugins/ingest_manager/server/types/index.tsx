@@ -21,6 +21,7 @@ export {
   GetAgentConfigsResponse,
   GetOneDatasourceRequestSchema,
   CreateDatasourceRequestSchema,
+  CreateAgentConfigResponse,
   UpdateDatasourceRequestSchema,
   // Agent config schemas
   GetAgentConfigsRequestSchema,

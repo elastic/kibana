@@ -15,11 +15,6 @@ const AgentConfigBaseSchema = {
   name: schema.string(),
   namespace: schema.string(),
   description: schema.maybe(schema.string()),
-  status: schema.oneOf([
-    schema.literal(AgentConfigStatus.Active),
-    schema.literal(AgentConfigStatus.Inactive),
-  ]),
-  datasources: schema.arrayOf(schema.string()),
 };
 
 export const NewAgentConfigSchema = schema.object({
@@ -29,9 +24,13 @@ export const NewAgentConfigSchema = schema.object({
 export const AgentConfigSchema = schema.object({
   ...AgentConfigBaseSchema,
   id: schema.string(),
+  status: schema.oneOf([
+    schema.literal(AgentConfigStatus.Active),
+    schema.literal(AgentConfigStatus.Inactive),
+  ]),
+  datasources: schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(DatasourceSchema)]),
   updated_on: schema.string(),
   updated_by: schema.string(),
-  datasources: schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(DatasourceSchema)]),
 });
 
 export type NewAgentConfig = TypeOf<typeof NewAgentConfigSchema>;
