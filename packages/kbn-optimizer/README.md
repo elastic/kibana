@@ -18,6 +18,8 @@ To make front-end code easier to debug the optimizer uses the `BROWSERSLIST_ENV=
 
 The `@kbn/optimizer` is automatically executed from the dev cli, the Kibana build scripts, and in CI. If you're running Kibana locally in some other way you might need to build the plugins manually, which you can do by running `node scripts/build_new_platform_plugins` (pass `--help` for options).
 
+You can limit the number of workers the optimizer uses in all of these places by setting the `KBN_OPTIMIZER_MAX_WORKERS` environment variable. You might want to do this if your system struggles to keep up while the optimizer is getting started and building all plugins as fast as possible. Setting `KBN_OPTIMIZER_MAX_WORKERS=1` will cause the optimizer to take the longest amount of time but will have the smallest impact on other components of your system.
+
 ## API
 
 To run the optimizer from code, you can import the [`Optimizer`][Optimizer] and [`OptimizerConfig`][OptimizerConfig] classes. Create an [`OptimizerConfig`][OptimizerConfig] instance by calling it's static `create()` method with some options, then pass it to the [`Optimizer`][Optimizer] constructor. Calling `Optimizer#run()` will return an observable of [`OptimizerState`][Optimizer] objects, which are either bits of stdio from the workers or [`OptimizerStateSummary`][Optimizer] objects. You can use the [`logOptimizerState()`][LogOptimizerState] helper to write the relevant bits of state to a tooling log.
