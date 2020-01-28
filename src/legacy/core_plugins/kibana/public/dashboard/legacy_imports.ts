@@ -61,4 +61,3 @@ export { SavedObjectLoader } from 'ui/saved_objects';
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
-export { searchSourceMock } from 'ui/courier/search_source/mocks';
