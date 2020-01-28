@@ -58,7 +58,7 @@ export function usePolicies() {
     try {
       const result = await policies.getAll(1, 10000);
       setState({
-        data: result.list,
+        data: result.items,
         isLoading: false,
       });
     } catch (err) {

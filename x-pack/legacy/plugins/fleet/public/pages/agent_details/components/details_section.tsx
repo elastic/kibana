@@ -55,7 +55,7 @@ export const AgentDetailSection: React.FC<Props> = ({ agent }) => {
 
   // Fetch policy information
   const { isLoading: isPolicyLoading, data: policyData } = useRequest({
-    path: `/api/ingest/policies/${agent.policy_id}`,
+    path: `/api/ingest_manager/agent_configs/${agent.policy_id}`,
     method: 'get',
   });
 
