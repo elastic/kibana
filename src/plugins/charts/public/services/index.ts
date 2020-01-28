@@ -17,8 +17,5 @@
  * under the License.
  */
 
-export * from './color_maps';
-// @ts-ignore
-export { getHeatmapColors } from './heatmap_color';
-// @ts-ignore
-export * from './truncated_color_maps';
+export { ColorsService } from './colors';
+export { ThemeService } from './theme';
