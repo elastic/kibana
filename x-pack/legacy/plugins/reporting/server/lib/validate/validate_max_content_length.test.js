@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
+
 import sinon from 'sinon';
-import { validateMaxContentLength } from '../validate_max_content_length';
+import { validateMaxContentLength } from './validate_max_content_length';
 
 const FIVE_HUNDRED_MEGABYTES = 524288000;
 const ONE_HUNDRED_MEGABYTES = 104857600;
@@ -78,7 +78,7 @@ describe('Reporting: Validate Max Content Length', () => {
 
     await expect(() =>
       validateMaxContentLength(server, elasticsearch, logger.warning)
-    ).not.to.throwError();
+    ).not.toThrow();
     sinon.assert.notCalled(logger.warning);
   });
 });
