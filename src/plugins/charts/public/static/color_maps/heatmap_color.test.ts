@@ -17,76 +17,83 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import { getHeatmapColors } from './heatmap_color';
 
-import { getHeatmapColors } from '../../../legacy_imports';
-
-describe('Vislib Heatmap Color Module Test Suite', function() {
+describe('Vislib Heatmap Color Module Test Suite', () => {
   const emptyObject = {};
   const nullValue = null;
-  let notAValue;
 
-  it('should throw an error if schema is invalid', function() {
-    expect(function() {
+  it('should throw an error if schema is invalid', () => {
+    expect(() => {
       getHeatmapColors(4, 'invalid schema');
-    }).to.throwError();
+    }).toThrowError();
   });
 
-  it('should throw an error if input is not a number', function() {
-    expect(function() {
+  it('should throw an error if input is not a number', () => {
+    expect(() => {
       getHeatmapColors([200], 'Greens');
-    }).to.throwError();
+    }).toThrowError();
 
-    expect(function() {
+    expect(() => {
       getHeatmapColors('help', 'Greens');
-    }).to.throwError();
+    }).toThrowError();
 
-    expect(function() {
+    expect(() => {
       getHeatmapColors(true, 'Greens');
-    }).to.throwError();
+    }).toThrowError();
 
-    expect(function() {
-      getHeatmapColors(notAValue, 'Greens');
-    }).to.throwError();
+    expect(() => {
+      getHeatmapColors(undefined, 'Greens');
+    }).toThrowError();
 
-    expect(function() {
+    expect(() => {
       getHeatmapColors(nullValue, 'Greens');
-    }).to.throwError();
+    }).toThrowError();
 
-    expect(function() {
+    expect(() => {
       getHeatmapColors(emptyObject, 'Greens');
-    }).to.throwError();
+    }).toThrowError();
   });
 
-  it('should throw an error if input is less than 0', function() {
-    expect(function() {
+  it('should throw an error if input is less than 0', () => {
+    expect(() => {
       getHeatmapColors(-2, 'Greens');
-    }).to.throwError();
+    }).toThrowError();
   });
 
-  it('should throw an error if input is greater than 1', function() {
-    expect(function() {
+  it('should throw an error if input is greater than 1', () => {
+    expect(() => {
       getHeatmapColors(2, 'Greens');
-    }).to.throwError();
+    }).toThrowError();
   });
 
-  it('should be a function', function() {
-    expect(typeof getHeatmapColors).to.be('function');
+  it('should be a function', () => {
+    expect(typeof getHeatmapColors).toBe('function');
   });
 
-  it('should return a color for 10 numbers from 0 to 1', function() {
+  it('should return a color for 10 numbers from 0 to 1', () => {
     const colorRegex = /^rgb\((\d{1,3}),(\d{1,3}),(\d{1,3})\)$/;
     const schema = 'Greens';
     for (let i = 0; i < 10; i++) {
-      expect(getHeatmapColors(i / 10, schema)).to.match(colorRegex);
+      expect(getHeatmapColors(i / 10, schema)).toMatch(colorRegex);
     }
   });
 
   describe('drawColormap function', () => {
+    const canvasElement = {
+      getContext: jest.fn(() => ({
+        fillStyle: null,
+        fillRect: jest.fn(),
+      })),
+    };
+    beforeEach(() => {
+      jest.spyOn(document, 'createElement').mockImplementation(() => canvasElement as any);
+    });
+
     it('should return canvas element', () => {
       const response = getHeatmapColors.prototype.drawColormap('Greens');
-      expect(typeof response).to.equal('object');
-      expect(response instanceof window.HTMLElement).to.equal(true);
+      expect(typeof response).toEqual('object');
+      expect(response).toBe(canvasElement);
     });
   });
 });

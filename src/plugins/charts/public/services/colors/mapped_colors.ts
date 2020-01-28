@@ -19,64 +19,75 @@
 
 import _ from 'lodash';
 import d3 from 'd3';
-import chrome from '../../../chrome';
+
+import { CoreSetup } from 'kibana/public';
+
 import { createColorPalette } from './color_palette';
 
-const standardizeColor = color => d3.rgb(color).toString();
+const standardizeColor = (color: string) => d3.rgb(color).toString();
 
-const config = chrome.getUiSettingsClient();
-
-function getConfigColorMapping() {
-  return _.mapValues(config.get('visualization:colorMapping'), standardizeColor);
-}
-
-/*
+/**
  * Maintains a lookup table that associates the value (key) with a hex color (value)
  * across the visualizations.
  * Provides functions to interact with the lookup table
  */
-class MappedColors {
-  constructor() {
-    this.oldMap = {};
-    this.mapping = {};
+export class MappedColors {
+  private _oldMap: any;
+  private _mapping: any;
+
+  constructor(private uiSettings: CoreSetup['uiSettings']) {
+    this._oldMap = {};
+    this._mapping = {};
   }
 
-  get(key) {
-    return getConfigColorMapping()[key] || this.mapping[key];
+  private getConfigColorMapping() {
+    return _.mapValues(this.uiSettings.get('visualization:colorMapping'), standardizeColor);
+  }
+
+  public get oldMap(): any {
+    return this._oldMap;
+  }
+
+  public get mapping(): any {
+    return this._mapping;
+  }
+
+  get(key: string | number) {
+    return this.getConfigColorMapping()[key] || this._mapping[key];
   }
 
   flush() {
-    this.oldMap = _.clone(this.mapping);
-    this.mapping = {};
+    this._oldMap = _.clone(this._mapping);
+    this._mapping = {};
   }
 
   purge() {
-    this.oldMap = {};
-    this.mapping = {};
+    this._oldMap = {};
+    this._mapping = {};
   }
 
-  mapKeys(keys) {
-    const configMapping = getConfigColorMapping();
+  mapKeys(keys: Array<string | number>) {
+    const configMapping = this.getConfigColorMapping();
     const configColors = _.values(configMapping);
-    const oldColors = _.values(this.oldMap);
+    const oldColors = _.values(this._oldMap);
 
-    const keysToMap = [];
+    const keysToMap: Array<string | number> = [];
     _.each(keys, key => {
       // If this key is mapped in the config, it's unnecessary to have it mapped here
-      if (configMapping[key]) delete this.mapping[key];
+      if (configMapping[key]) delete this._mapping[key];
 
       // If this key is mapped to a color used by the config color mapping, we need to remap it
-      if (_.contains(configColors, this.mapping[key])) keysToMap.push(key);
+      if (_.contains(configColors, this._mapping[key])) keysToMap.push(key);
 
       // if key exist in oldMap, move it to mapping
-      if (this.oldMap[key]) this.mapping[key] = this.oldMap[key];
+      if (this._oldMap[key]) this._mapping[key] = this._oldMap[key];
 
       // If this key isn't mapped, we need to map it
       if (this.get(key) == null) keysToMap.push(key);
     });
 
     // Generate a color palette big enough that all new keys can have unique color values
-    const allColors = _(this.mapping)
+    const allColors = _(this._mapping)
       .values()
       .union(configColors)
       .union(oldColors)
@@ -88,8 +99,6 @@ class MappedColors {
       newColors = newColors.concat(_.sample(allColors, keysToMap.length - newColors.length));
     }
 
-    _.merge(this.mapping, _.zipObject(keysToMap, newColors));
+    _.merge(this._mapping, _.zipObject(keysToMap, newColors));
   }
 }
-
-export const mappedColors = new MappedColors();

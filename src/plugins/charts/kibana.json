@@ -1,5 +1,5 @@
 {
-  "id": "eui_utils",
+  "id": "charts",
   "version": "kibana",
   "server": false,
   "ui": true

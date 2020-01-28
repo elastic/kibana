@@ -23,8 +23,8 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
   private hasRegisteredESManagementSection = false;
 
   setup(
-    { application, notifications, http, uiSettings, getStartServices }: CoreSetup,
-    { licensing, management, data, home }: Dependencies
+    { notifications, http, uiSettings, getStartServices }: CoreSetup,
+    { licensing, management, data, home, charts }: Dependencies
   ) {
     licensing.license$.subscribe(license => {
       const { state, message } = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
@@ -42,9 +42,8 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
               { defaultMessage: 'Watcher' }
             ),
             mount: async ({ element }) => {
-              const [core, plugins] = await getStartServices();
+              const [core] = await getStartServices();
               const { chrome, i18n: i18nDep, docLinks, savedObjects } = core;
-              const { eui_utils } = plugins as any;
               const { boot } = await import('./application/boot');
 
               return boot({
@@ -55,7 +54,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
                 uiSettings,
                 docLinks,
                 chrome,
-                euiUtils: eui_utils,
+                theme: charts.theme,
                 savedObjects: savedObjects.client,
                 I18nContext: i18nDep.Context,
                 createTimeBuckets: () => new TimeBuckets(uiSettings, data),

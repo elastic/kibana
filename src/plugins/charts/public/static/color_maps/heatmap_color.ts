@@ -18,9 +18,10 @@
  */
 
 import _ from 'lodash';
-import { vislibColorMaps } from './color_maps';
 
-function enforceBounds(x) {
+import { vislibColorMaps, RawColorSchema } from './color_maps';
+
+function enforceBounds(x: number) {
   if (x < 0) {
     return 0;
   } else if (x > 1) {
@@ -30,12 +31,12 @@ function enforceBounds(x) {
   }
 }
 
-function interpolateLinearly(x, values) {
+function interpolateLinearly(x: number, values: RawColorSchema['value']) {
   // Split values into four lists
-  const xValues = [];
-  const rValues = [];
-  const gValues = [];
-  const bValues = [];
+  const xValues: number[] = [];
+  const rValues: number[] = [];
+  const gValues: number[] = [];
+  const bValues: number[] = [];
   values.forEach(value => {
     xValues.push(value[0]);
     rValues.push(value[1][0]);
@@ -54,11 +55,12 @@ function interpolateLinearly(x, values) {
   return [enforceBounds(r), enforceBounds(g), enforceBounds(b)];
 }
 
-export function getHeatmapColors(value, colorSchemaName) {
+export function getHeatmapColors(value: any, colorSchemaName: string) {
   if (!_.isNumber(value) || value < 0 || value > 1) {
     throw new Error('heatmap_color expects a number from 0 to 1 as first parameter');
   }
 
+  // @ts-ignore
   const colorSchema = vislibColorMaps[colorSchemaName].value;
   if (!colorSchema) {
     throw new Error('invalid colorSchemaName provided');
@@ -71,11 +73,16 @@ export function getHeatmapColors(value, colorSchemaName) {
   return `rgb(${r},${g},${b})`;
 }
 
-function drawColormap(colorSchema, width = 100, height = 10) {
+function drawColormap(colorSchema: string, width = 100, height = 10) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
+
+  if (ctx === null) {
+    throw new Error('no HeatmapColors canvas context found');
+  }
+
   for (let i = 0; i <= width; i++) {
     ctx.fillStyle = getHeatmapColors(i / width, colorSchema);
     ctx.fillRect(i, 0, 1, height);
