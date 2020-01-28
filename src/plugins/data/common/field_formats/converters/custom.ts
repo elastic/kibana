@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { FieldFormat, IFieldFormatType } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { FieldFormat } from '../field_format';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS, IFieldFormatType } from '../types';
 
 export const createCustomFieldFormat = (convert: TextContextTypeConvert): IFieldFormatType =>
   class CustomFieldFormat extends FieldFormat {
