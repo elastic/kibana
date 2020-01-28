@@ -72,7 +72,7 @@ describe('endpoint list saga', () => {
     return {
       endpoints: [generateEndpoint()],
       request_page_size: 1,
-      request_index: 1,
+      request_page_index: 1,
       total: 10,
     };
   };

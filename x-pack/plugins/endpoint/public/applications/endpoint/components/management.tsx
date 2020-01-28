@@ -17,7 +17,6 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
   EuiBasicTable,
-  EuiTableCriteria,
 } from '@elastic/eui';
 import { useEndpointListSelector } from '../store/hooks';
 import {
@@ -39,11 +38,11 @@ export const EndpointList = () => {
     pageIndex,
     pageSize,
     totalItemCount,
-    pageSizeOptions: [1, 2, 3],
+    pageSizeOptions: [10, 20, 50],
     hidePerPageOptions: false,
   };
 
-  const onTableChange = ({ page }: { page: EuiTableCriteria }) => {
+  const onTableChange = ({ page }: { page: { index: number; size: number } }) => {
     const { index, size } = page;
     dispatch({
       type: 'userPaginatedEndpointListTable',

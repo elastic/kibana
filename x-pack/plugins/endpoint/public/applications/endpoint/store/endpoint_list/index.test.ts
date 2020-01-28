@@ -62,7 +62,7 @@ describe('endpoint_list store concerns', () => {
       payload: {
         endpoints: [generateEndpoint()],
         request_page_size: 1,
-        request_index: 1,
+        request_page_index: 1,
         total: 10,
       },
     });
@@ -77,7 +77,7 @@ describe('endpoint_list store concerns', () => {
       expect(store.getState()).toEqual({
         endpoints: [],
         request_page_size: 10,
-        request_index: 0,
+        request_page_index: 0,
         total: 0,
       });
     });
@@ -86,7 +86,7 @@ describe('endpoint_list store concerns', () => {
       const payload = {
         endpoints: [generateEndpoint()],
         request_page_size: 1,
-        request_index: 1,
+        request_page_index: 1,
         total: 10,
       };
       dispatch({
@@ -97,7 +97,7 @@ describe('endpoint_list store concerns', () => {
       const currentState = store.getState();
       expect(currentState.endpoints).toEqual(payload.endpoints);
       expect(currentState.request_page_size).toEqual(payload.request_page_size);
-      expect(currentState.request_index).toEqual(payload.request_index);
+      expect(currentState.request_page_index).toEqual(payload.request_page_index);
       expect(currentState.total).toEqual(payload.total);
     });
 
@@ -108,7 +108,7 @@ describe('endpoint_list store concerns', () => {
 
       dispatch({ type: 'userExitedEndpointListPage' });
       expect(store.getState().endpoints.length).toEqual(0);
-      expect(store.getState().request_index).toEqual(0);
+      expect(store.getState().request_page_index).toEqual(0);
     });
   });
 
