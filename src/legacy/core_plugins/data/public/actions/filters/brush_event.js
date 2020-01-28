@@ -31,7 +31,7 @@ export async function onBrushEvent(event, getIndexPatterns) {
   const column = xRaw.table.columns[xRaw.column];
   if (!column) return [];
   if (!column.meta) return [];
-  const indexPattern = await getIndexPatterns().get(column.meta.indexPattern);
+  const indexPattern = await getIndexPatterns().get(column.meta.indexPatternId);
   const aggConfig = unserializeAggConfig({
     ...column.meta,
     indexPattern,

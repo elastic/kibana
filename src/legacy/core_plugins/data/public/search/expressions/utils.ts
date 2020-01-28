@@ -24,7 +24,7 @@ import { KibanaDatatableColumnMeta } from '../../../../../../plugins/expressions
 export const serializeAggConfig = (aggConfig: AggConfig): KibanaDatatableColumnMeta => {
   return {
     type: aggConfig.type.name,
-    indexPattern: aggConfig.getIndexPattern().id as string,
+    indexPatternId: aggConfig.getIndexPattern().id as string,
     params: aggConfig.toJSON().params,
   };
 };

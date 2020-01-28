@@ -71,7 +71,7 @@ const createFilter = async (table, columnIndex, rowIndex) => {
   const aggConfig = unserializeAggConfig({
     type: column.meta.type,
     params: column.meta.params,
-    indexPattern: await getIndexPatterns().get(column.meta.indexPattern),
+    indexPattern: await getIndexPatterns().get(column.meta.indexPatternId),
   });
   let filter = [];
   const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
