@@ -139,7 +139,7 @@ export async function getSortedObjectsForExport({
     exportSizeLimit,
     namespace,
   });
-  let exportedObjects = [...rootObjects];
+  let exportedObjects = [];
   let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
 
   if (includeReferencesDeep) {
