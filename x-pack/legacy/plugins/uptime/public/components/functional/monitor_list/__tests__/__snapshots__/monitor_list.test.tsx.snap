@@ -37,7 +37,7 @@ exports[`MonitorList component renders a no items message when no data is provid
             "width": "30%",
           },
           Object {
-            "aligh": "left",
+            "align": "left",
             "field": "state.url.full",
             "name": "Url",
             "render": [Function],
@@ -137,7 +137,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             "width": "30%",
           },
           Object {
-            "aligh": "left",
+            "align": "left",
             "field": "state.url.full",
             "name": "Url",
             "render": [Function],
