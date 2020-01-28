@@ -22,7 +22,13 @@ describe('alert_form', () => {
 
   beforeAll(async () => {
     const mockes = coreMock.createSetup();
-    const [{ chrome, docLinks }] = await mockes.getStartServices();
+    const [
+      {
+        chrome,
+        docLinks,
+        application: { capabilities },
+      },
+    ] = await mockes.getStartServices();
     const deps = {
       chrome,
       docLinks,
@@ -30,6 +36,14 @@ describe('alert_form', () => {
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      capabilities: {
+        ...capabilities,
+        siem: {
+          'actions:show': true,
+          'actions:save': false,
+          'actions:delete': false,
+        },
+      },
       legacy: {
         capabilities: {
           get() {
