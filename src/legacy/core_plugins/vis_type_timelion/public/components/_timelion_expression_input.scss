@@ -21,6 +21,7 @@
 
 @include euiBreakpoint('xs', 's', 'm') {
   .timExpressionInput__editor {
+    flex: auto;
     height: $euiSize * 15;
     max-height: $euiSize * 15;
   }
