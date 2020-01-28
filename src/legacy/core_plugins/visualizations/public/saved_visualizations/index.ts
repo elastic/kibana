@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './saved_visualizations';
+export * from './saved_visualizations';
