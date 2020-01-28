@@ -38,7 +38,7 @@ export const createPingsResolvers: CreateUMGraphQLResolvers = (
       { monitorId, sort, size, status, dateRangeStart, dateRangeEnd, location },
       { APICaller }
     ): Promise<PingResults> {
-      return await libs.pings.getAll({
+      return await libs.db.getPings({
         callES: APICaller,
         dateRangeStart,
         dateRangeEnd,
@@ -50,7 +50,7 @@ export const createPingsResolvers: CreateUMGraphQLResolvers = (
       });
     },
     async getDocCount(_resolver, _args, { APICaller }): Promise<DocCount> {
-      return libs.pings.getDocCount({ callES: APICaller });
+      return libs.db.getDocCount({ callES: APICaller });
     },
   },
 });

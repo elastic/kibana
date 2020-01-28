@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 
-export const createGetAllRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: '/api/uptime/pings',
   validate: {
@@ -28,7 +28,7 @@ export const createGetAllRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => 
   handler: async ({ callES }, _context, request, response): Promise<any> => {
     const { dateRangeStart, dateRangeEnd, location, monitorId, size, sort, status } = request.query;
 
-    const result = await libs.pings.getAll({
+    const result = await libs.db.getPings({
       callES,
       dateRangeStart,
       dateRangeEnd,
