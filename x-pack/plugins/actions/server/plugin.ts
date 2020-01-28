@@ -191,9 +191,11 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     });
 
     taskRunnerFactory!.initialize({
+      logger,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
       spaceIdToNamespace: this.spaceIdToNamespace,
+      getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
     });
 
     return {
