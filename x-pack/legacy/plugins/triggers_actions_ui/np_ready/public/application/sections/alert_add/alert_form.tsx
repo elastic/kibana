@@ -49,6 +49,7 @@ import {
 import { ACTION_GROUPS } from '../../constants/action_groups';
 import { getTimeOptions } from '../../lib/get_time_options';
 import { SectionLoading } from '../../components/section_loading';
+import { ConnectorAddModal } from '../action_connector_form/connector_add_modal';
 
 function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
@@ -97,6 +98,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
 
   const [alertType, setAlertType] = useState<AlertTypeModel | undefined>(undefined);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [selectedTabId, setSelectedTabId] = useState<string>('alert');
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
@@ -283,7 +285,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
       // if no connectors exists or all connectors is already assigned an action under current alert
       // set actionType as id to be able to create new connector within the alert form
       alert.actions.push({
-        id: `${actionTypeModel.id}-${alert.actions.length}`,
+        id: `${actionTypeModel.id}^${alert.actions.length}`,
         group: selectedTabId,
         params: {},
       });
@@ -503,7 +505,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
   };
 
   const getAddConnectorsForm = (actionItem: AlertAction, index: number) => {
-    const actionTypeIdFrom = actionItem.id.split('-')[0];
+    const actionTypeIdFrom = actionItem.id.split('^')[0];
     const actionTypeName = actionTypesIndex
       ? actionTypesIndex[actionTypeIdFrom].name
       : actionTypeIdFrom;
@@ -573,7 +575,9 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
               color="primary"
               fill
               data-test-subj="createActionConnectorButton"
-              onClick={() => {}}
+              onClick={() => {
+                setAddModalVisibility(true);
+              }}
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.alertAdd.saveButtonLabel"
@@ -585,6 +589,14 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
             </EuiButton>,
           ]}
         />
+        {actionTypesIndex ? (
+          <ConnectorAddModal
+            key={index}
+            actionType={actionTypesIndex[actionTypeIdFrom]}
+            addModalVisible={addModalVisible}
+            setAddModalVisibility={setAddModalVisibility}
+          />
+        ) : null}
       </EuiAccordion>
     );
   };

@@ -388,7 +388,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         }}
       >
         <ConnectorAddFlyout />
-        {editedConnectorItem ? <ConnectorEditFlyout connector={editedConnectorItem} /> : null}
+        {editedConnectorItem ? (
+          <ConnectorEditFlyout initialConnector={editedConnectorItem} />
+        ) : null}
       </ActionsConnectorsContextProvider>
     </section>
   );
