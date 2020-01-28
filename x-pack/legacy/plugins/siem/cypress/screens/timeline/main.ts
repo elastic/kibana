@@ -16,3 +16,7 @@ export const TIMELINE_FIELDS_BUTTON =
 
 /** The total server-side count of the events matching the timeline's search criteria */
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
+
+export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-gear"]';
+
+export const TIMELINE_INSPECT_BUTTON = '[data-test-subj="inspect-empty-button"]';
