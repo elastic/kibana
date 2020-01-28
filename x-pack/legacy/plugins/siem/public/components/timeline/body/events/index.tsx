@@ -31,6 +31,7 @@ interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
+  containerElementRef: HTMLDivElement;
   data: TimelineItem[];
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
@@ -53,61 +54,62 @@ interface Props {
 // Passing the styles directly to the component because the width is
 // being calculated and is recommended by Styled Components for performance
 // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-export const Events = React.memo<Props>(
-  ({
-    actionsColumnWidth,
-    addNoteToEvent,
-    browserFields,
-    columnHeaders,
-    columnRenderers,
-    data,
-    eventIdToNoteIds,
-    getNotesByIds,
-    id,
-    isEventViewer = false,
-    loadingEventIds,
-    onColumnResized,
-    onPinEvent,
-    onRowSelected,
-    onUpdateColumns,
-    onUnPinEvent,
-    pinnedEventIds,
-    rowRenderers,
-    selectedEventIds,
-    showCheckboxes,
-    toggleColumn,
-    updateNote,
-  }) => (
-    <EventsTbody data-test-subj="events">
-      {data.map((event, i) => (
-        <StatefulEvent
-          actionsColumnWidth={actionsColumnWidth}
-          addNoteToEvent={addNoteToEvent}
-          browserFields={browserFields}
-          columnHeaders={columnHeaders}
-          columnRenderers={columnRenderers}
-          event={event}
-          eventIdToNoteIds={eventIdToNoteIds}
-          getNotesByIds={getNotesByIds}
-          isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
-          isEventViewer={isEventViewer}
-          key={event._id}
-          loadingEventIds={loadingEventIds}
-          maxDelay={maxDelay(i)}
-          onColumnResized={onColumnResized}
-          onPinEvent={onPinEvent}
-          onRowSelected={onRowSelected}
-          onUnPinEvent={onUnPinEvent}
-          onUpdateColumns={onUpdateColumns}
-          rowRenderers={rowRenderers}
-          selectedEventIds={selectedEventIds}
-          showCheckboxes={showCheckboxes}
-          timelineId={id}
-          toggleColumn={toggleColumn}
-          updateNote={updateNote}
-        />
-      ))}
-    </EventsTbody>
-  )
+const EventsComponent: React.FC<Props> = ({
+  actionsColumnWidth,
+  addNoteToEvent,
+  browserFields,
+  columnHeaders,
+  columnRenderers,
+  containerElementRef,
+  data,
+  eventIdToNoteIds,
+  getNotesByIds,
+  id,
+  isEventViewer = false,
+  loadingEventIds,
+  onColumnResized,
+  onPinEvent,
+  onRowSelected,
+  onUpdateColumns,
+  onUnPinEvent,
+  pinnedEventIds,
+  rowRenderers,
+  selectedEventIds,
+  showCheckboxes,
+  toggleColumn,
+  updateNote,
+}) => (
+  <EventsTbody data-test-subj="events">
+    {data.map((event, i) => (
+      <StatefulEvent
+        containerElementRef={containerElementRef}
+        actionsColumnWidth={actionsColumnWidth}
+        addNoteToEvent={addNoteToEvent}
+        browserFields={browserFields}
+        columnHeaders={columnHeaders}
+        columnRenderers={columnRenderers}
+        event={event}
+        eventIdToNoteIds={eventIdToNoteIds}
+        getNotesByIds={getNotesByIds}
+        isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
+        isEventViewer={isEventViewer}
+        key={event._id}
+        loadingEventIds={loadingEventIds}
+        maxDelay={maxDelay(i)}
+        onColumnResized={onColumnResized}
+        onPinEvent={onPinEvent}
+        onRowSelected={onRowSelected}
+        onUnPinEvent={onUnPinEvent}
+        onUpdateColumns={onUpdateColumns}
+        rowRenderers={rowRenderers}
+        selectedEventIds={selectedEventIds}
+        showCheckboxes={showCheckboxes}
+        timelineId={id}
+        toggleColumn={toggleColumn}
+        updateNote={updateNote}
+      />
+    ))}
+  </EventsTbody>
 );
-Events.displayName = 'Events';
+
+export const Events = React.memo(EventsComponent);

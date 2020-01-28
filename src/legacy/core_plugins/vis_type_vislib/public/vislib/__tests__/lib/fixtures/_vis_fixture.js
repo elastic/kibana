@@ -22,11 +22,11 @@ import $ from 'jquery';
 
 import { Vis } from '../../../vis';
 
+// TODO: Remove when converted to jest mocks
 import {
-  vislibSeriesResponseHandlerProvider,
-  vislibSlicesResponseHandlerProvider,
-} from 'ui/vis/response_handlers/vislib';
-import { vislibColor } from 'ui/vis/components/color/color';
+  ColorsService,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../../plugins/charts/public/services';
 
 const $visCanvas = $('<div>')
   .attr('id', 'vislib-vis-fixtures')
@@ -61,11 +61,14 @@ afterEach(function() {
 
 const getDeps = () => {
   const uiSettings = new Map();
+  const colors = new ColorsService();
+  colors.init(uiSettings);
+
   return {
     uiSettings,
-    vislibColor,
-    vislibSeriesResponseHandlerProvider,
-    vislibSlicesResponseHandlerProvider,
+    charts: {
+      colors,
+    },
   };
 };
 

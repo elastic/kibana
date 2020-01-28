@@ -18,7 +18,7 @@
  */
 
 import { PluginInitializerContext } from '../../../../core/public';
-import { KbnVislibVisTypesPlugin as Plugin } from './plugin';
+import { VisTypeVislibPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);

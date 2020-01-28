@@ -49,7 +49,7 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
           kibana_uuids: {
             terms: {
               field: 'kibana_stats.kibana.uuid',
-              size: config.get('xpack.monitoring.max_bucket_size'),
+              size: config.get('monitoring.ui.max_bucket_size'),
             },
             aggs: {
               latest_report: {
