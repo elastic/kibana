@@ -18,17 +18,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import chrome from 'ui/chrome';
-
-import { SavedObjectAttributes } from 'kibana/server';
+import { SavedObjectAttributes } from 'kibana/public';
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
   Container,
   EmbeddableOutput,
 } from '../../../../../plugins/embeddable/public';
-import { showNewVisModal } from '../../../kibana/public/visualize/np_ready/wizard/show_new_vis';
+import { showNewVisModal } from '../../../kibana/public/visualize';
 import { SavedVisualizations } from '../../../kibana/public/visualize/np_ready/types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
@@ -61,11 +58,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
-  static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
-    return new VisualizeEmbeddableFactory();
-  }
-
-  constructor() {
+  constructor(private getSavedVisualizationsLoader: () => SavedVisualizations) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
@@ -111,8 +104,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
+    const savedVisualizations = this.getSavedVisualizationsLoader();
 
     try {
       const visId = savedObject.id as string;
@@ -151,13 +143,10 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
+    const savedVisualizations = this.getSavedVisualizationsLoader();
 
     try {
-      const visId = savedObjectId;
-
-      const savedObject = await savedVisualizations.get(visId);
+      const savedObject = await savedVisualizations.get(savedObjectId);
       return this.createFromObject(savedObject, input, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
