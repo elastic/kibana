@@ -49,7 +49,7 @@ await optimizer
   .toPromise();
 ```
 
-This is essentially what we're doing in [`the build_new_platform_plugins script`][Cli] and the new [build system task][BuildTask].
+This is essentially what we're doing in [`script/build_new_platform_plugins`][Cli] and the new [build system task][BuildTask].
 
 ## Internals
 
