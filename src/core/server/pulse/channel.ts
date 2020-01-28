@@ -23,7 +23,6 @@ import { PulseCollectorConstructor } from './types';
 import { Logger } from '../logging';
 
 import { IPulseElasticsearchClient } from './client_wrappers/types';
-import { IClusterClient } from '../../elasticsearch';
 
 export interface PulseInstruction {
   owner: string;
@@ -38,7 +37,7 @@ export interface ChannelConfig<I = PulseInstruction> {
 }
 
 export interface ChannelSetupContext {
-  rawElasticsearch: IClusterClient;
+  rawElasticsearch: any;
   elasticsearch: IPulseElasticsearchClient;
   // savedObjects: SavedObjectsServiceSetup;
 }
