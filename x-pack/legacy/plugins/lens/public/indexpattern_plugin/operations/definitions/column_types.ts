@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// import { FieldFormat, Fo } from '../../../../../../../../src/plugins/data/common/field_formats';
 import { Operation, DimensionPriority } from '../../../types';
 
 /**
@@ -16,6 +17,7 @@ export interface BaseIndexPatternColumn extends Operation {
   operationType: string;
   sourceField: string;
   suggestedPriority?: DimensionPriority;
+  format?: { id: string; params?: Record<string, unknown> };
 }
 
 /**

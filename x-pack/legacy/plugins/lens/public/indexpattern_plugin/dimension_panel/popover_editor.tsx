@@ -35,6 +35,7 @@ import { hasField } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPattern, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
+import { FormatSelector } from './format_selector';
 
 const operationPanels = getOperationDisplay();
 
@@ -68,6 +69,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
     currentIndexPattern,
     uniqueLabel,
     hideGrouping,
+    data,
   } = props;
   const { operationByField, fieldByOperation } = operationFieldSupportMatrix;
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -400,6 +402,27 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     }}
                   />
                 )}
+
+                {selectedColumn && selectedColumn.dataType === 'number' ? (
+                  <FormatSelector
+                    selectedColumn={selectedColumn}
+                    data={data}
+                    currentIndexPattern={currentIndexPattern}
+                    onChange={(newFormat: unknown) => {
+                      setState(
+                        changeColumn({
+                          state,
+                          layerId,
+                          columnId,
+                          newColumn: {
+                            ...selectedColumn,
+                            format: newFormat,
+                          },
+                        })
+                      );
+                    }}
+                  />
+                ) : null}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

@@ -31,6 +31,7 @@ import {
 } from '../types';
 import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
+import { formatColumn } from './format_column';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
@@ -55,6 +56,7 @@ export class EditorFramePlugin {
 
   public setup(core: CoreSetup, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
     plugins.expressions.registerFunction(() => mergeTables);
+    plugins.expressions.registerFunction(() => formatColumn);
 
     return {
       registerDatasource: datasource => {

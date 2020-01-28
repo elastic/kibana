@@ -234,5 +234,6 @@ export type IFieldFormat = PublicMethodsOf<FieldFormat>;
 export type IFieldFormatId = FIELD_FORMAT_IDS | string;
 export type IFieldFormatType = (new (params?: any, getConfig?: Function) => FieldFormat) & {
   id: IFieldFormatId;
+  title?: string;
   fieldType: string | string[];
 };
