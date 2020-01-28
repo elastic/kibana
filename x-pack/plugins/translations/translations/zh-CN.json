@@ -6635,8 +6635,6 @@
     "xpack.infra.metricsExplorer.openInTSVB": "在 Visualize 中打开",
     "xpack.infra.metricsExplorer.viewNodeDetail": "查看 {name} 的指标",
     "xpack.infra.node.ariaLabel": "{nodeName}，单击打开菜单",
-    "xpack.infra.nodeContextMenu.viewLogsName": "查看日志",
-    "xpack.infra.nodeContextMenu.viewMetricsName": "查看指标",
     "xpack.infra.nodeDetails.labels.availabilityZone": "可用区",
     "xpack.infra.nodeDetails.labels.cloudProvider": "云服务提供商",
     "xpack.infra.nodeDetails.labels.containerized": "容器化",
