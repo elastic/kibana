@@ -6,12 +6,11 @@
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
-import { AlertDetails as RawAlertDetails } from './alert_details';
+import { AlertDetails } from './alert_details';
 import { Alert, ActionType } from '../../../../types';
 import { EuiTitle, EuiBadge, EuiFlexItem, EuiButtonEmpty, EuiSwitch } from '@elastic/eui';
 import { times, random } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { withBulkAlertOperations } from '../../common/components/with_bulk_alert_api_operations.mock';
 
 jest.mock('../../../app_context', () => ({
   useAppDependencies: jest.fn(() => ({
@@ -28,7 +27,14 @@ jest.mock('../../../lib/capabilities', () => ({
   hasSaveAlertsCapability: jest.fn(() => true),
 }));
 
-const AlertDetails = withBulkAlertOperations(RawAlertDetails);
+const mockAlertApis = {
+  muteAlert: jest.fn(),
+  unmuteAlert: jest.fn(),
+  enableAlert: jest.fn(),
+  disableAlert: jest.fn(),
+};
+
+// const AlertDetails = withBulkAlertOperations(RawAlertDetails);
 describe('alert_details', () => {
   // mock Api handlers
 
@@ -41,7 +47,7 @@ describe('alert_details', () => {
 
     expect(
       shallow(
-        <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+        <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
       ).containsMatchingElement(
         <EuiTitle size="m">
           <h1>{alert.name}</h1>
@@ -59,7 +65,7 @@ describe('alert_details', () => {
 
     expect(
       shallow(
-        <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+        <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
       ).containsMatchingElement(<EuiBadge>{alertType.name}</EuiBadge>)
     ).toBeTruthy();
   });
@@ -92,7 +98,12 @@ describe('alert_details', () => {
 
       expect(
         shallow(
-          <AlertDetails alert={alert} alertType={alertType} actionTypes={actionTypes} />
+          <AlertDetails
+            alert={alert}
+            alertType={alertType}
+            actionTypes={actionTypes}
+            {...mockAlertApis}
+          />
         ).containsMatchingElement(
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">{actionTypes[0].name}</EuiBadge>
@@ -137,7 +148,12 @@ describe('alert_details', () => {
       ];
 
       const details = shallow(
-        <AlertDetails alert={alert} alertType={alertType} actionTypes={actionTypes} />
+        <AlertDetails
+          alert={alert}
+          alertType={alertType}
+          actionTypes={actionTypes}
+          {...mockAlertApis}
+        />
       );
 
       expect(
@@ -169,7 +185,7 @@ describe('alert_details', () => {
 
       expect(
         shallow(
-          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
         ).containsMatchingElement(
           <EuiButtonEmpty disabled={true} iconType="pencil">
             <FormattedMessage
@@ -191,7 +207,7 @@ describe('alert_details', () => {
 
       expect(
         shallow(
-          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
         ).containsMatchingElement(
           <EuiButtonEmpty disabled={true} iconType="popout">
             <FormattedMessage
@@ -213,7 +229,7 @@ describe('alert_details', () => {
 
       expect(
         shallow(
-          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
         ).containsMatchingElement(
           <EuiButtonEmpty disabled={true} iconType="menuLeft">
             <FormattedMessage
@@ -239,7 +255,7 @@ describe('enable button', () => {
     };
 
     const enableButton = shallow(
-      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
       .find('[name="enable"]')
@@ -262,7 +278,7 @@ describe('enable button', () => {
     };
 
     const enableButton = shallow(
-      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
       .find('[name="enable"]')
@@ -290,6 +306,7 @@ describe('enable button', () => {
         alert={alert}
         alertType={alertType}
         actionTypes={[]}
+        {...mockAlertApis}
         disableAlert={disableAlert}
       />
     )
@@ -321,6 +338,7 @@ describe('enable button', () => {
         alert={alert}
         alertType={alertType}
         actionTypes={[]}
+        {...mockAlertApis}
         enableAlert={enableAlert}
       />
     )
@@ -350,7 +368,7 @@ describe('mute button', () => {
     };
 
     const enableButton = shallow(
-      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
       .find('[name="mute"]')
@@ -374,7 +392,7 @@ describe('mute button', () => {
     };
 
     const enableButton = shallow(
-      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
       .find('[name="mute"]')
@@ -399,7 +417,13 @@ describe('mute button', () => {
 
     const muteAlert = jest.fn();
     const enableButton = shallow(
-      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} muteAlert={muteAlert} />
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={[]}
+        {...mockAlertApis}
+        muteAlert={muteAlert}
+      />
     )
       .find(EuiSwitch)
       .find('[name="mute"]')
@@ -430,6 +454,7 @@ describe('mute button', () => {
         alert={alert}
         alertType={alertType}
         actionTypes={[]}
+        {...mockAlertApis}
         unmuteAlert={unmuteAlert}
       />
     )
@@ -457,7 +482,7 @@ describe('mute button', () => {
     };
 
     const enableButton = shallow(
-      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
       .find('[name="mute"]')
