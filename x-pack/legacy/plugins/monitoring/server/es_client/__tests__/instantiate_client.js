@@ -11,8 +11,8 @@ import { exposeClient, hasMonitoringCluster } from '../instantiate_client';
 
 function getMockServerFromConnectionUrl(monitoringClusterUrl) {
   const server = {
-    xpack: {
-      monitoring: {
+    monitoring: {
+      ui: {
         elasticsearch: {
           hosts: monitoringClusterUrl ? [monitoringClusterUrl] : [],
           username: 'monitoring-user-internal-test',
@@ -27,7 +27,7 @@ function getMockServerFromConnectionUrl(monitoringClusterUrl) {
   };
 
   return {
-    elasticsearchConfig: server.xpack.monitoring.elasticsearch,
+    elasticsearchConfig: server.monitoring.ui.elasticsearch,
     elasticsearchPlugin: {
       getCluster: sinon
         .stub()

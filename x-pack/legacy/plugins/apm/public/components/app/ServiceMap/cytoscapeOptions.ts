@@ -10,7 +10,10 @@ import { defaultIcon, iconForNode } from './icons';
 const layout = {
   name: 'dagre',
   nodeDimensionsIncludeLabels: true,
-  rankDir: 'LR'
+  rankDir: 'LR',
+  animate: true,
+  animationEasing: theme.euiAnimSlightBounce,
+  animationDuration: parseInt(theme.euiAnimSpeedNormal, 10)
 };
 
 function isService(el: cytoscape.NodeSingular) {
