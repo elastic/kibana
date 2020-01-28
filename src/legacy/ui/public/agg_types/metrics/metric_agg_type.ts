@@ -74,9 +74,11 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
     this.getFormat =
       config.getFormat ||
       (agg => {
-        const registeredFormats = npStart.plugins.data.fieldFormats;
+        const fieldFormatsService = npStart.plugins.data.fieldFormats;
         const field = agg.getField();
-        return field ? field.format : registeredFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
+        return field
+          ? field.format
+          : fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
       });
 
     this.subtype =

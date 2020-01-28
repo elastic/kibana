@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { monitorStatesQuery } from '../../../queries/monitor_states_query';
 import {
@@ -47,6 +48,12 @@ interface MonitorListProps {
 }
 
 type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
+
+const TruncatedEuiLink = styled(EuiLink)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
 
 export const MonitorListComponent = (props: Props) => {
   const {
@@ -104,13 +111,13 @@ export const MonitorListComponent = (props: Props) => {
       sortable: true,
     },
     {
-      aligh: 'left' as const,
+      align: 'left' as const,
       field: 'state.url.full',
       name: labels.URL,
       render: (url: string, summary: MonitorSummary) => (
-        <EuiLink href={url} target="_blank" color="text">
+        <TruncatedEuiLink href={url} target="_blank" color="text">
           {url} <EuiIcon size="s" type="popout" color="subbdued" />
-        </EuiLink>
+        </TruncatedEuiLink>
       ),
     },
     {
