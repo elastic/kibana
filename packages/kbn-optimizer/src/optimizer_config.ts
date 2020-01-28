@@ -102,8 +102,9 @@ export class OptimizerConfig {
       throw new TypeError('pluginPaths must all be absolute paths');
     }
 
-    const maxWorkerCount =
-      options.maxWorkerCount ?? Math.max(Math.ceil(Math.max(Os.cpus()?.length, 1) / 3), 2);
+    const maxWorkerCount = process.env.KBN_OPTIMIZER_MAX_WORKERS
+      ? parseInt(process.env.KBN_OPTIMIZER_MAX_WORKERS, 10)
+      : options.maxWorkerCount ?? Math.max(Math.ceil(Math.max(Os.cpus()?.length, 1) / 3), 2);
     if (typeof maxWorkerCount !== 'number' || !Number.isFinite(maxWorkerCount)) {
       throw new TypeError('worker count must be a number');
     }
