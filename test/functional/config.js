@@ -210,6 +210,21 @@ export default async function({ readConfigFile }) {
           kibana: [],
         },
 
+        kibana_date_nanos_custom: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['date_nanos_custom_timestamp'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
         kibana_large_strings: {
           elasticsearch: {
             cluster: [],
