@@ -26,6 +26,7 @@ import { errorChannelPayloads } from './mock_data/errors';
 export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseErrorsPluginStart> {
   private readonly stop$ = new Subject();
   private instructionsSubscription?: Subscription;
+  private instructionsSeen = new Set();
   constructor() {}
 
   public async setup(core: CoreSetup) {
@@ -41,12 +42,17 @@ export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseEr
         if (instructions && instructions.length) {
           instructions.forEach((instruction: any) => {
             // @ts-ignore-next-line this should be refering to the instruction, not the raw es document
-            if (instruction && instruction.status === 'new')
+            if (
+              instruction &&
+              instruction.status === 'new' &&
+              !this.instructionsSeen.has(instruction.hash)
+            )
               core.notifications.toasts.addError(new Error(JSON.stringify(instruction)), {
                 // @ts-ignore-next-line
                 title: `Error:${instruction.hash}`,
                 toastMessage: instruction.pulseMessage,
               });
+            this.instructionsSeen.add(instruction.hash);
           });
         }
       });
