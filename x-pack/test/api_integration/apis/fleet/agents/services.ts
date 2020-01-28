@@ -17,3 +17,15 @@ export function getSupertestWithoutAuth({ getService }: FtrProviderContext) {
 
   return supertestAsPromised(url.format(kibanaUrl));
 }
+
+export function setupIngest({ getService }: FtrProviderContext) {
+  before(async () => {
+    await getService('supertest')
+      .post(`/api/ingest/internals/setup`)
+      .set('kbn-xsrf', 'xxx')
+      .send({
+        admin_username: 'elastic',
+        admin_password: 'changeme',
+      });
+  });
+}

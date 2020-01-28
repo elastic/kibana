@@ -21,12 +21,12 @@ import { FileSystemArtifactRepository } from '../../repositories/artifacts/file_
 import { HttpAdapter } from '../../adapters/http_adapter/default';
 import { AgentEventsRepository } from '../../repositories/agent_events/default';
 import { InstallLib } from '../install';
-import { ElasticsearchAdapter } from '../../adapters/elasticsearch/default';
 import { AgentPolicyLib } from '../agent_policy';
 import { AgentEventLib } from '../agent_event';
 import { makePolicyUpdateHandler } from '../policy_update';
+import { FleetPluginsStart } from '../../shim';
 
-export function compose(server: any): FleetServerLib {
+export function compose(server: any, pluginsStart: FleetPluginsStart): FleetServerLib {
   const frameworkAdapter = new FrameworkAdapter(server);
   const policyAdapter = new PoliciesRepository(
     server.plugins.ingest.policy,
@@ -38,7 +38,6 @@ export function compose(server: any): FleetServerLib {
     server.savedObjects,
     server.plugins.elasticsearch
   );
-  const esAdapter = new ElasticsearchAdapter(server.plugins.elasticsearch);
   const encryptedObjectAdapter = new EncryptedSavedObjects(
     server.newPlatform.start.plugins.encryptedSavedObjects
   );
@@ -49,8 +48,9 @@ export function compose(server: any): FleetServerLib {
     encryptedObjectAdapter
   );
 
+  const libs: FleetServerLib = ({} as any) as FleetServerLib;
   const policies = new PolicyLib(policyAdapter);
-  const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, esAdapter, framework);
+  const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, libs, pluginsStart);
   const agentsPolicy = new AgentPolicyLib(agentsRepository, policies);
   const agentEvents = new AgentEventLib(agentEventsRepository);
   const agents = new AgentLib(agentsRepository, apiKeys, agentEvents);
@@ -60,7 +60,7 @@ export function compose(server: any): FleetServerLib {
 
   const install = new InstallLib(framework);
 
-  const libs = {
+  Object.assign(libs, {
     agents,
     agentsPolicy,
     agentEvents,
@@ -69,7 +69,8 @@ export function compose(server: any): FleetServerLib {
     artifacts,
     install,
     framework,
-  };
+  });
+
   const policyUpdateHandler = makePolicyUpdateHandler(libs);
   server.plugins.ingest.policy.registerPolicyUpdateHandler(policyUpdateHandler);
 

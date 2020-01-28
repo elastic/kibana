@@ -21,9 +21,7 @@ import { FileSystemArtifactRepository } from '../../repositories/artifacts/file_
 import { HttpAdapter } from '../../adapters/http_adapter/default';
 import { AgentEventsRepository } from '../../repositories/agent_events/default';
 import { InstallLib } from '../install';
-import { ElasticsearchAdapter } from '../../adapters/elasticsearch/default';
 import { MemorizeSODatabaseAdapter } from '../../adapters/saved_objects_database/memorize_adapter';
-import { MemorizedElasticsearchAdapter } from '../../adapters/elasticsearch/memorize_adapter';
 import { MemorizeEncryptedSavedObjects } from '../../adapters/encrypted_saved_objects/memorize_adapter';
 import { AgentPolicyLib } from '../agent_policy';
 import { AgentEventLib } from '../agent_event';
@@ -39,9 +37,6 @@ export function compose(server?: any): FleetServerLib {
   const soDatabaseAdapter = new MemorizeSODatabaseAdapter(
     server ? new SODatabaseAdapter(server.savedObjects, server.plugins.elasticsearch) : undefined
   );
-  const esAdapter = new MemorizedElasticsearchAdapter(
-    server ? new ElasticsearchAdapter(server.plugins.elasticsearch) : undefined
-  );
   const encryptedObjectAdapter = new MemorizeEncryptedSavedObjects(
     server
       ? new EncryptedSavedObjects(server.newPlatform.start.plugins.encryptedSavedObjects)
@@ -55,7 +50,9 @@ export function compose(server?: any): FleetServerLib {
   );
 
   const policies = new PolicyLib(policyRepository);
-  const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, esAdapter, framework);
+  // TODO will fix need to figure what to do with contract tests
+  // @ts-ignore
+  const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, framework);
   const agentEvents = new AgentEventLib(agentEventsRepository);
   const agents = new AgentLib(agentsRepository, apiKeys, agentEvents);
 

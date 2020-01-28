@@ -40,6 +40,12 @@ export const mappings = {
       hosts: { type: 'keyword' },
       ingest_pipeline: { type: 'keyword' },
       api_key: { type: 'keyword' },
+      admin_username: {
+        type: 'binary',
+      },
+      admin_password: {
+        type: 'binary',
+      },
     },
   },
   datasources: {

@@ -113,8 +113,7 @@ export default function({ getService }: FtrProviderContext) {
         enabled: true,
         metadata: {
           pki_delegated_by_realm: 'reserved',
-          // FIXME_INGEST Disabled because of https://github.com/elastic/kibana/pull/49037
-          pki_delegated_by_user: 'elastic',
+          pki_delegated_by_user: 'kibana',
           pki_dn: 'CN=first_client',
         },
         authentication_realm: { name: 'pki1', type: 'pki' },
@@ -156,8 +155,7 @@ export default function({ getService }: FtrProviderContext) {
           enabled: true,
           metadata: {
             pki_delegated_by_realm: 'reserved',
-            // FIXME_INGEST Disabled because of https://github.com/elastic/kibana/pull/49037
-            pki_delegated_by_user: 'elastic',
+            pki_delegated_by_user: 'kibana',
             pki_dn: 'CN=second_client',
           },
           authentication_realm: { name: 'pki1', type: 'pki' },
