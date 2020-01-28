@@ -31,17 +31,15 @@ export const errorChannelPayloads: PulseErrorInstructionValue[] = [
     currentKibanaVersion: 'v7.x',
     timestamp: moment().toDate(),
   },
-  // {
-  //   channel_id: 'errors',
-  //   deployment_id: '123',
-  //   message: 'Error: [resource_already_exists_exception]',
-  //   hash: 'index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg] already exists',
-  //   status: 'seen',
-  //   currentKibanaVersion: 'v7.x',
-  //   timestamp: moment()
-  //     .subtract(1, 'days')
-  //     .toDate(),
-  // },
+  {
+    channel_id: 'errors',
+    deployment_id: '123',
+    message: 'Error: [resource_already_exists_exception]',
+    hash: 'index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg] already exists',
+    status: 'new',
+    currentKibanaVersion: 'v7.x',
+    timestamp: moment().toDate(),
+  },
   {
     channel_id: 'errors',
     deployment_id: '123',
