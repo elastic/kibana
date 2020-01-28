@@ -133,7 +133,7 @@ export const startDatafeeds = async ({
   );
 
   await throwIfNotOk(response.response);
-  const json = await response.body!;
+  const json = response.body!;
   throwIfErrorAttached(json, datafeedIds);
 
   return json;
@@ -162,7 +162,7 @@ export const stopDatafeeds = async ({
   );
 
   await throwIfNotOk(stopDatafeedsResponse.response);
-  const stopDatafeedsResponseJson = await stopDatafeedsResponse.body!;
+  const stopDatafeedsResponseJson = stopDatafeedsResponse.body!;
 
   const datafeedPrefix = 'datafeed-';
   const closeJobsResponse = await npStart.core.http.fetch<CloseJobsResponse>(
