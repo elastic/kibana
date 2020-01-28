@@ -25,6 +25,7 @@ import { unit } from '../../../../style/variables';
 import Tooltip from '../Tooltip';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { tint } from 'polished';
+import { getTimezoneOffsetInMs } from '../CustomPlot/getTimezoneOffsetInMs';
 
 const XY_HEIGHT = unit * 10;
 const XY_MARGIN = {
@@ -104,6 +105,9 @@ export class HistogramInner extends PureComponent {
       return null;
     }
 
+    const isTimeSeries =
+      this.props.xType === 'time' || this.props.xType === 'time-utc';
+
     const xMin = d3.min(buckets, d => d.x0);
     const xMax = d3.max(buckets, d => d.x);
     const yMin = 0;
@@ -120,11 +124,25 @@ export class HistogramInner extends PureComponent {
       .range([XY_HEIGHT, 0])
       .nice();
 
+    const [xMinZone, xMaxZone] = [xMin, xMax].map(x => {
+      return x - getTimezoneOffsetInMs(x);
+    });
+
+    const xTickValues = isTimeSeries
+      ? d3.time.scale
+          .utc()
+          .domain([xMinZone, xMaxZone])
+          .range([0, XY_WIDTH])
+          .ticks(X_TICK_TOTAL)
+          .map(x => {
+            const time = x.getTime();
+            return new Date(time + getTimezoneOffsetInMs(time));
+          })
+      : undefined;
+
     const xDomain = x.domain();
     const yDomain = y.domain();
     const yTickValues = [0, yDomain[1] / 2, yDomain[1]];
-    const isTimeSeries =
-      this.props.xType === 'time' || this.props.xType === 'time-utc';
     const shouldShowTooltip =
       hoveredBucket.x > 0 && (hoveredBucket.y > 0 || isTimeSeries);
 
@@ -150,6 +168,7 @@ export class HistogramInner extends PureComponent {
               tickSizeInner={0}
               tickTotal={X_TICK_TOTAL}
               tickFormat={formatX}
+              tickValues={xTickValues}
             />
             <YAxis
               tickSize={0}
@@ -213,7 +232,7 @@ export class HistogramInner extends PureComponent {
                 [XY_MARGIN.left, XY_MARGIN.top],
                 [XY_WIDTH, XY_HEIGHT]
               ]}
-              nodes={this.props.buckets.map(bucket => {
+              nodes={buckets.map(bucket => {
                 return {
                   ...bucket,
                   xCenter: (bucket.x0 + bucket.x) / 2

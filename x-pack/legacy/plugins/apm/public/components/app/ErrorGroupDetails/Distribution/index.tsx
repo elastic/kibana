@@ -7,6 +7,7 @@
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { scaleUtc } from 'd3-scale';
+import d3 from 'd3';
 import React from 'react';
 import { asRelativeDateTimeRange } from '../../../../utils/formatters';
 import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
@@ -82,14 +83,13 @@ export function ErrorDistribution({ distribution, title }: Props) {
         tooltipHeader={tooltipHeader}
         verticalLineHover={(bucket: FormattedBucket) => bucket.x}
         xType="time-utc"
-        formatX={(value: any) => {
-          if (value && 'getTime' in value) {
-            const time = value.getTime();
-            return scaleUtc().tickFormat()(
-              new Date(time - getTimezoneOffsetInMs(time))
-            );
-          }
-          return value;
+        formatX={(value: Date) => {
+          const time = value.getTime();
+          const xMin = d3.min(buckets, d => d.x0);
+          const xMax = d3.max(buckets, d => d.x);
+          return scaleUtc()
+            .domain([xMin, xMax])
+            .tickFormat()(new Date(time - getTimezoneOffsetInMs(time)));
         }}
         buckets={buckets}
         bucketSize={distribution.bucketSize}
