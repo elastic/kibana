@@ -5,10 +5,7 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import {
-  SearchError,
-  getSearchErrorType,
-} from '../../../../../../src/legacy/core_plugins/data/public';
+import { SearchError, getSearchErrorType } from '../../../../../../src/plugins/data/public';
 
 function serializeFetchParams(searchRequests: any) {
   return JSON.stringify(

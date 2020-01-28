@@ -6,7 +6,7 @@
 
 import { npSetup, npStart } from 'ui/new_platform';
 import { aggTypeFilters, aggTypeFieldFilters, editorConfigProviders } from './legacy_imports';
-import { addSearchStrategy } from '../../../../../src/legacy/core_plugins/data/public';
+import { addSearchStrategy } from '../../../../../src/plugins/data/public';
 import { RollupPlugin } from './plugin';
 import { setup as management } from '../../../../../src/legacy/core_plugins/management/public/legacy';
 import { addBadgeExtension, addToggleExtension } from '../../index_management/public';
