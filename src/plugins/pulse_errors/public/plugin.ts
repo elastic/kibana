@@ -40,8 +40,8 @@ export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseEr
       .subscribe(instructions => {
         if (instructions && instructions.length) {
           instructions.forEach(instruction => {
-            // @ts-ignore-next-line
-            if (instruction.status === 'new')
+            // @ts-ignore-next-line this should be refering to the instruction, not the raw es document
+            if (instruction && instruction.status === 'new')
               core.notifications.toasts.addError(new Error(JSON.stringify(instruction)), {
                 // @ts-ignore-next-line
                 title: `Error:${instruction.hash}`,

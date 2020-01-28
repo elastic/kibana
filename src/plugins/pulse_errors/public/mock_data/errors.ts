@@ -26,7 +26,7 @@ export const errorChannelPayloads: PulseErrorInstructionValue[] = [
     channel_id: 'errors',
     deployment_id: '123',
     message: 'Error: [resource_already_exists_exception]',
-    hash: 'index [pulse-poc-raw-default/1234567890] already exists',
+    hash: 'index [my_index/1234567890] already exists',
     status: 'new',
     currentKibanaVersion: 'v7.x',
     timestamp: moment().toDate(),
@@ -42,16 +42,16 @@ export const errorChannelPayloads: PulseErrorInstructionValue[] = [
   //     .subtract(1, 'days')
   //     .toDate(),
   // },
-  // {
-  //   channel_id: 'errors',
-  //   deployment_id: '123',
-  //   message: '[TypeError]: Component failed to mount',
-  //   hash: 'generic:arbitraryError 1QJURO2GRfqpFfuOp12rIg',
-  //   status: 'seen',
-  //   fixedVersion: 'v7.5.2',
-  //   currentKibanaVersion: 'v7.x',
-  //   timestamp: moment()
-  //     .subtract(60, 'seconds')
-  //     .toDate(),
-  // },
+  {
+    channel_id: 'errors',
+    deployment_id: '123',
+    message: '[TypeError]: Component failed to mount',
+    hash: 'generic:arbitraryError 1QJURO2GRfqpFfuOp12rIg',
+    status: 'new',
+    fixedVersion: 'v7.5.2',
+    currentKibanaVersion: 'v7.x',
+    timestamp: moment()
+      // .subtract(60, 'seconds')
+      .toDate(),
+  },
 ];
