@@ -16,11 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { schema, TypeOf } from '@kbn/config-schema';
 
-import { ConsoleUIPlugin } from './plugin';
+export type Query = TypeOf<typeof routeValidationConfig.query>;
+export type Body = TypeOf<typeof routeValidationConfig.body>;
 
-export { ConsoleUIPlugin as Plugin };
-
-export function plugin() {
-  return new ConsoleUIPlugin();
-}
+export const routeValidationConfig = {
+  query: schema.object({
+    method: schema.string({
+      validate: method => {
+        return ['HEAD', 'GET', 'POST', 'PUT', 'DELETE'].some(
+          verb => verb.toLowerCase() === method.toLowerCase()
+        )
+          ? undefined
+          : `Method must be one of, case insensitive ['HEAD', 'GET', 'POST', 'PUT', 'DELETE']. Received '${method}'.`;
+      },
+    }),
+    path: schema.string(),
+  }),
+  body: schema.stream(),
+};

@@ -17,78 +17,99 @@
  * under the License.
  */
 
-import sinon from 'sinon';
+jest.mock('../../lib/proxy_request', () => ({
+  proxyRequest: jest.fn(),
+}));
+
 import expect from '@kbn/expect';
-import { Server } from 'hapi';
+import { duration } from 'moment';
+import { Readable } from 'stream';
+
+import { kibanaResponseFactory } from '../../../../../core/server';
+import { ProxyConfigCollection } from '../../lib';
+import { createHandler } from '../../routes/api/console/proxy/create_handler';
+import * as requestModule from '../../lib/proxy_request';
+import { coreMock } from '../../../../../core/server/mocks';
 import { createResponseStub } from './stubs';
-import { createProxyRoute } from '../../../../../legacy/core_plugins/console_legacy/server';
-import * as requestModule from '../../lib/request';
 
 describe('Console Proxy Route', () => {
-  const sandbox = sinon.createSandbox();
-  const teardowns = [];
-  let request;
+  let request: any;
 
   beforeEach(() => {
-    request = async (method, path, response) => {
-      sandbox.stub(requestModule, 'sendRequest').callsFake(createResponseStub(response));
-      const server = new Server();
-      server.route(
-        createProxyRoute({
+    request = (method: string, path: string, response: string) => {
+      (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub(response));
+      const log = coreMock.createPluginInitializerContext().logger.get();
+      const handler = createHandler({
+        proxyConfigCollection: new ProxyConfigCollection([]),
+        pathFilters: [/.*/],
+        readLegacyESConfig: () => ({
+          requestTimeout: duration(30000),
+          customHeaders: {},
+          requestHeadersWhitelist: [],
           hosts: ['http://localhost:9200'],
-        })
-      );
-
-      teardowns.push(() => server.stop());
-
-      const params = [];
-      if (path != null) params.push(`path=${path}`);
-      if (method != null) params.push(`method=${method}`);
-      return await server.inject({
-        method: 'POST',
-        url: `/api/console/proxy${params.length ? `?${params.join('&')}` : ''}`,
+        }),
+        log,
       });
+
+      return handler(
+        {} as any,
+        {
+          headers: {},
+          query: { method, path },
+        } as any,
+        kibanaResponseFactory
+      );
     };
   });
 
+  const readStream = (s: Readable) =>
+    new Promise(resolve => {
+      let v = '';
+      s.on('data', data => {
+        v += data;
+      });
+      s.on('end', () => resolve(v));
+    });
+
   afterEach(async () => {
-    sandbox.restore();
-    await Promise.all(teardowns.splice(0).map(fn => fn()));
+    jest.restoreAllMocks();
   });
 
   describe('response body', () => {
     describe('GET request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('GET', '/', 'foobar');
-        expect(payload).to.be('foobar');
+        expect(await readStream(payload)).to.be('foobar');
       });
     });
     describe('POST request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('POST', '/', 'foobar');
-        expect(payload).to.be('foobar');
+        expect(await readStream(payload)).to.be('foobar');
       });
     });
     describe('PUT request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('PUT', '/', 'foobar');
-        expect(payload).to.be('foobar');
+        expect(await readStream(payload)).to.be('foobar');
       });
     });
     describe('DELETE request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('DELETE', '/', 'foobar');
-        expect(payload).to.be('foobar');
+        expect(await readStream(payload)).to.be('foobar');
       });
     });
     describe('HEAD request', () => {
       it('returns the status code and text', async () => {
         const { payload } = await request('HEAD', '/');
+        expect(typeof payload).to.be('string');
         expect(payload).to.be('200 - OK');
       });
       describe('mixed casing', () => {
         it('returns the status code and text', async () => {
           const { payload } = await request('HeAd', '/');
+          expect(typeof payload).to.be('string');
           expect(payload).to.be('200 - OK');
         });
       });

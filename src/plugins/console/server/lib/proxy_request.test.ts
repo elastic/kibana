@@ -18,7 +18,7 @@
  */
 import http, { ClientRequest } from 'http';
 import * as sinon from 'sinon';
-import { proxyRequest } from './request';
+import { proxyRequest } from './proxy_request';
 import { URL } from 'url';
 import { fail } from 'assert';
 

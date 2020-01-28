@@ -21,7 +21,7 @@ import React, { useCallback } from 'react';
 import { debounce } from 'lodash';
 
 import { EditorContentSpinner } from '../../components';
-import { Panel, PanelsContainer } from '../../../../../../../../plugins/kibana_react/public';
+import { Panel, PanelsContainer } from '../../../../../kibana_react/public';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { StorageKeys } from '../../../services';
 import { useEditorReadContext, useServicesContext } from '../../contexts';

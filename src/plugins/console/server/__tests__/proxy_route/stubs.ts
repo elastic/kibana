@@ -16,27 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { IncomingMessage } from 'http';
 import { Readable } from 'stream';
 
-export function createResponseStub(response) {
-  return async () => {
-    const resp = new Readable({
-      read() {
-        if (response) {
-          this.push(response);
-        }
-        this.push(null);
-      },
-    });
+export function createResponseStub(response: any) {
+  const resp: any = new Readable({
+    read() {
+      if (response) {
+        this.push(response);
+      }
+      this.push(null);
+    },
+  });
 
-    resp.statusCode = 200;
-    resp.statusMessage = 'OK';
-    resp.headers = {
-      'content-type': 'text/plain',
-      'content-length': String(response ? response.length : 0),
-    };
-
-    return resp;
+  resp.statusCode = 200;
+  resp.statusMessage = 'OK';
+  resp.headers = {
+    'content-type': 'text/plain',
+    'content-length': String(response ? response.length : 0),
   };
+
+  return resp as IncomingMessage;
 }
