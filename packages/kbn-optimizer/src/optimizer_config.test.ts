@@ -35,6 +35,7 @@ jest.spyOn(Os, 'cpus').mockReturnValue(['foo'] as any);
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 beforeEach(() => {
+  delete process.env.KBN_OPTIMIZER_MAX_WORKERS;
   jest.clearAllMocks();
 });
 
@@ -198,6 +199,26 @@ describe('OptimizerConfig::parseOptions()', () => {
           <absolute path>/x/y/z,
           "/outside/of/repo",
         ],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "watch": false,
+      }
+    `);
+
+    process.env.KBN_OPTIMIZER_MAX_WORKERS = '100';
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        pluginScanDirs: [],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "dist": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 100,
+        "optimizerCachePath": <absolute path>/data/.kbn-optimizer-cache.json,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
         "watch": false,
