@@ -27,10 +27,8 @@ import { FetchResult, NewsfeedPluginInjectedConfig } from '../types';
 import { NewsfeedNavButton, NewsfeedApiFetchResult } from './components/newsfeed_header_nav_button';
 import { getApi } from './lib/api';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Setup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Start {}
+export type Setup = object;
+export type Start = object;
 
 export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
   private readonly kibanaVersion: string;
