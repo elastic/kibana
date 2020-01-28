@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import Path from 'path';
+
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
 import { REPO_ROOT, ToolingLog, ToolingLogCollectingWriter } from '@kbn/dev-utils';
@@ -33,6 +35,7 @@ it('produces expected messages and mirrors state updates downstream', async () =
   const config = OptimizerConfig.create({
     repoRoot: REPO_ROOT,
     maxWorkerCount: 2,
+    pluginScanDirs: [Path.resolve(__dirname, './__fixtures__/mock_repo/plugins')],
   });
 
   const stateUpdates: OptimizerState[] = [
@@ -111,7 +114,7 @@ it('produces expected messages and mirrors state updates downstream', async () =
 
   expect(logWriter.messages).toMatchInlineSnapshot(`
     Array [
-      " [34minfo[39m ⚙️  building 28 bundles using 2 workers",
+      " [34minfo[39m ⚙️  building 2 bundles using 2 workers",
       " [33mwarn[39m ⚙️  worker stderr something from stderr",
       " [33mwarn[39m ⚙️  worker stdout something from stdout",
       " [95msill[39m [foo] state = \\"running\\"",
