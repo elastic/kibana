@@ -27,6 +27,8 @@ export const endpointListSaga = async (
           paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
         }),
       });
+      // temp: request_page_index to reflect user request page index, not es page index
+      response.request_page_index = pageIndex;
       dispatch({
         type: 'serverReturnedEndpointList',
         payload: response,

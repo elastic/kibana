@@ -47,7 +47,7 @@ export interface EndpointData {
 export interface EndpointListData {
   endpoints: EndpointData[];
   request_page_size: number;
-  request_index: number;
+  request_page_index: number;
   total: number;
 }
 
