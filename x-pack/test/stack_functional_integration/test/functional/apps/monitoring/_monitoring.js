@@ -12,12 +12,12 @@ export default ({ getService, getPageObjects }) => {
     const PageObjects = getPageObjects(['security', 'monitoring', 'common']);
     const monitoringNoData = getService('monitoringNoData');
     const log = getService('log');
-    const isSaml = !!provisionedEnv.VM.includes('saml');
+    const isSaml = !!provisionedEnv.VM.includes('saml') || !!provisionedEnv.VM.includes('oidc');
 
     before(async () => {
       await browser.setWindowSize(1200, 800);
-      if (provisionedEnv.SECURITY === 'YES') {
-        await PageObjects.security.forceLogout(isSaml);
+      if ((provisionedEnv.SECURITY === 'YES') && !isSaml) {
+        await PageObjects.security.logout();
         log.debug('### log in as elastic superuser to enable monitoring');
         // Tests may be running as a non-superuser like `power` but that user
         // doesn't have the cluster privs to enable monitoring.
@@ -33,7 +33,9 @@ export default ({ getService, getPageObjects }) => {
     });
 
     after(async () => {
-      if (provisionedEnv.SECURITY === 'YES') await PageObjects.security.forceLogout(isSaml);
+      if ((provisionedEnv.SECURITY === 'YES') && !isSaml) {
+        await PageObjects.security.forceLogout(isSaml);
+      }
     });
   });
 };
