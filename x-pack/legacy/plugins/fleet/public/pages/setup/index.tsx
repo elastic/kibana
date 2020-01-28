@@ -32,7 +32,7 @@ export const SetupPage: React.FC<{
     setIsFormLoading(true);
     e.preventDefault();
     try {
-      await httpClient.post('/api/ingest/internals/setup', {
+      await httpClient.post('/api/ingest_manager/fleet/setup', {
         body: {
           admin_username: usernameInput.value,
           admin_password: passwordInput.value,
