@@ -7,13 +7,13 @@
 import { i18n } from '@kbn/i18n';
 import { CANVAS as canvas } from './constants';
 
-export const AngularStrings = {
-  CanvasRootController: {
-    getReadOnlyBadgeText: () =>
+export const CapabilitiesStrings = {
+  ReadOnlyBadge: {
+    getText: () =>
       i18n.translate('xpack.canvas.badge.readOnly.text', {
         defaultMessage: 'Read only',
       }),
-    getReadOnlyBadgeTooltip: () =>
+    getTooltip: () =>
       i18n.translate('xpack.canvas.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save {canvas} workpads',
         values: {
