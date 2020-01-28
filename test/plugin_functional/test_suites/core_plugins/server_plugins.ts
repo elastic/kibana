@@ -54,5 +54,15 @@ export default function({ getService }: PluginFunctionalProviderContext) {
           statusCode: 400,
         });
     });
+
+    it('sets request.isSystemRequest when kbn-system-request header is set', async () => {
+      await supertest
+        .post('/core_plugin_b/system_request')
+        .set('kbn-xsrf', 'anything')
+        .set('kbn-system-request', 'true')
+        .send()
+        .expect(200)
+        .expect('System request? true');
+    });
   });
 }
