@@ -80,4 +80,15 @@ specified explicitly.
 
 *Impact:* Any workflow that involved manually clearing generated bundles will have to be updated with the new path.
 
+
+[float]
+[[breaking_80_reporting_changes]]
+=== Reporting changes
+
+[float]
+==== Legacy job parameters are no longer supported
+*Details:* POST URL snippets that were copied in Kibana 6.2 or below are no longer supported. These logs have
+been deprecated with warnings that have been logged throughout 7.x. Please use Kibana UI to re-generate the
+POST URL snippets if you depend on these for automated PDF reports.
+
 // end::notable-breaking-changes[]

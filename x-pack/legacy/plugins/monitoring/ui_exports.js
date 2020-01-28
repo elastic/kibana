@@ -32,7 +32,7 @@ export const getUiExports = () => ({
   injectDefaultVars(server) {
     const config = server.config();
     return {
-      monitoringUiEnabled: config.get('monitoring.ui.enabled'),
+      monitoringUiEnabled: config.get('xpack.monitoring.ui.enabled'),
     };
   },
   hacks: ['plugins/monitoring/hacks/toggle_app_link_in_nav'],
