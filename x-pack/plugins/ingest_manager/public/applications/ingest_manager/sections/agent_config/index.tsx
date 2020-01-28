@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { PLUGIN_ID, EPM_API_ROUTES } from '../../../../common';
-export const BASE_PATH = '/app/ingest';
-export const EPM_PATH = '/epm';
-export const AGENT_CONFIG_PATH = '/configs';
-export const FLEET_PATH = '/fleet';
+import React from 'react';
+
+export const AgentConfigApp: React.FC = () => <div>hello world - agent config app</div>;

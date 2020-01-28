@@ -5,6 +5,7 @@
  */
 export { IngestManagerOverview } from './overview';
 export { EPMApp } from './epm';
+export { AgentConfigApp } from './agent_config';
 export { FleetApp } from './fleet';
 
-export type Section = 'overview' | 'epm' | 'fleet';
+export type Section = 'overview' | 'epm' | 'agent_config' | 'fleet';

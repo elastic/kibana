@@ -13,10 +13,11 @@ import {
   EuiFlexItem,
   EuiIcon,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import euiStyled from '../../../../../../legacy/common/eui_styled_components';
 import { Section } from '../sections';
 import { useLink, useConfig } from '../hooks';
-import { EPM_PATH, FLEET_PATH } from '../constants';
+import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from '../constants';
 
 interface Props {
   section: Section;
@@ -46,21 +47,36 @@ export const DefaultLayout: React.FC<Props> = ({ section, children }) => {
           <EuiFlexItem>
             <EuiTabs display="condensed">
               <EuiTab isSelected={!section || section === 'overview'} href={useLink()}>
-                Overview
+                <FormattedMessage
+                  id="xpack.ingestManager.appNavigation.overviewLinkText"
+                  defaultMessage="Overview"
+                />
               </EuiTab>
               <EuiTab
                 isSelected={section === 'epm'}
                 href={useLink(EPM_PATH)}
                 disabled={!epm?.enabled}
               >
-                Packages
+                <FormattedMessage
+                  id="xpack.ingestManager.appNavigation.packagesLinkText"
+                  defaultMessage="Packages"
+                />
+              </EuiTab>
+              <EuiTab isSelected={section === 'agent_config'} href={useLink(AGENT_CONFIG_PATH)}>
+                <FormattedMessage
+                  id="xpack.ingestManager.appNavigation.configurationsLinkText"
+                  defaultMessage="Configurations"
+                />
               </EuiTab>
               <EuiTab
                 isSelected={section === 'fleet'}
                 href={useLink(FLEET_PATH)}
                 disabled={!fleet?.enabled}
               >
-                Fleet
+                <FormattedMessage
+                  id="xpack.ingestManager.appNavigation.fleetLinkText"
+                  defaultMessage="Fleet"
+                />
               </EuiTab>
             </EuiTabs>
           </EuiFlexItem>

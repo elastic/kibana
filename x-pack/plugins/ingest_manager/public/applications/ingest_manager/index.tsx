@@ -8,33 +8,41 @@ import ReactDOM from 'react-dom';
 import { useObservable } from 'react-use';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { CoreStart, AppMountParameters } from 'kibana/public';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
 import { IngestManagerSetupDeps, IngestManagerConfigType } from '../../plugin';
-import { EPM_PATH, FLEET_PATH } from './constants';
+import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from './constants';
 import { DefaultLayout } from './layouts';
-import { IngestManagerOverview, EPMApp, FleetApp } from './sections';
+import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp } from './sections';
 import { CoreContext, DepsContext, ConfigContext, setHttpClient } from './hooks';
 
 const IngestManagerRoutes = ({ ...rest }) => (
-  <Router {...rest}>
-    <Switch>
-      <Route path={EPM_PATH}>
-        <DefaultLayout section="epm">
-          <EPMApp />
-        </DefaultLayout>
-      </Route>
-      <Route path={FLEET_PATH}>
-        <DefaultLayout section="fleet">
-          <FleetApp />
-        </DefaultLayout>
-      </Route>
-      <Route path="/">
-        <DefaultLayout section="overview">
-          <IngestManagerOverview />
-        </DefaultLayout>
-      </Route>
-    </Switch>
-  </Router>
+  <EuiErrorBoundary>
+    <Router {...rest}>
+      <Switch>
+        <Route path={EPM_PATH}>
+          <DefaultLayout section="epm">
+            <EPMApp />
+          </DefaultLayout>
+        </Route>
+        <Route path={AGENT_CONFIG_PATH}>
+          <DefaultLayout section="agent_config">
+            <AgentConfigApp />
+          </DefaultLayout>
+        </Route>
+        <Route path={FLEET_PATH}>
+          <DefaultLayout section="fleet">
+            <FleetApp />
+          </DefaultLayout>
+        </Route>
+        <Route path="/">
+          <DefaultLayout section="overview">
+            <IngestManagerOverview />
+          </DefaultLayout>
+        </Route>
+      </Switch>
+    </Router>
+  </EuiErrorBoundary>
 );
 
 const IngestManagerApp = ({

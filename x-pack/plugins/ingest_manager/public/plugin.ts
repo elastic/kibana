@@ -10,6 +10,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { BASE_PATH } from './applications/ingest_manager/constants';
 
@@ -35,9 +36,6 @@ export class IngestManagerPlugin implements Plugin {
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<IngestManagerConfigType>();
-
-    // eslint-disable-next-line no-console
-    console.log(`Ingest manager plugin set up. config: ${JSON.stringify(this.config)}`);
   }
 
   public setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
@@ -46,7 +44,7 @@ export class IngestManagerPlugin implements Plugin {
     // Register main Ingest Manager app
     core.application.register({
       id: 'ingestManager',
-      title: 'Ingest Manager',
+      title: i18n.translate('xpack.ingestManager.appTitle', { defaultMessage: 'Ingest Manager' }),
       appRoute: BASE_PATH,
       euiIconType: 'savedObjectsApp',
       async mount(params: AppMountParameters) {
