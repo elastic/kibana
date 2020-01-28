@@ -461,6 +461,7 @@ export const ResultsTable: FC<Props> = React.memo(
                       {docFields.map(({ name }) => (
                         <EuiCheckbox
                           id={name}
+                          key={name}
                           label={name}
                           checked={selectedFields.some(field => field.name === name)}
                           onChange={() => toggleColumn(name)}
