@@ -54,6 +54,9 @@ export async function check(es: IScopedClusterClient, { deploymentId, indexName 
     const instructionsToSend = sources.map((source: any) => {
       const instruction = {
         ...source,
+        pulseMessage: source.fixedVersion
+          ? `The error ${source.hash} has been fixed in version ${source.fixedVersion}.`
+          : 'The error has been reported to Pulse',
         sendTo: source.fixedVersion ? 'newsfeed' : 'toasts', // some sort of login to categorize where the notifications should render/be interpreted
       };
       return instruction;
