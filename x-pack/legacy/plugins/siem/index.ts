@@ -156,7 +156,7 @@ export const siem = (kibana: any) => {
       const serverFacade = {
         config,
         plugins: {
-          alerting: plugins.alerting,
+          alerting: newPlatform.start.plugins.alerting,
           actions: newPlatform.start.plugins.actions,
           elasticsearch: plugins.elasticsearch,
           spaces: plugins.spaces,

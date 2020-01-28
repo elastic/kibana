@@ -11,7 +11,8 @@ export interface ServerFacade {
   plugins: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     actions: any; // We have to do this at the moment because the types are not compatible
-    alerting?: Legacy.Server['plugins']['alerting'];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    alerting?: any;
     elasticsearch: Legacy.Server['plugins']['elasticsearch'];
     spaces: Legacy.Server['plugins']['spaces'];
     savedObjects: Legacy.Server['savedObjects']['SavedObjectsClient'];

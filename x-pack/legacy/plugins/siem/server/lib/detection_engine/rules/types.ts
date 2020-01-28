@@ -14,11 +14,10 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting/server/alerts_client';
+import { AlertsClient, Alert } from '../../../../../../../plugins/alerting/server';
 import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 import { RequestFacade } from '../../../types';
-import { Alert } from '../../../../../alerting/server/types';
 
 export type UpdateRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
   id: string | undefined;

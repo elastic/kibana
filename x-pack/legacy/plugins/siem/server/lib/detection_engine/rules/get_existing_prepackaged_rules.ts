@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertsClient } from '../../../../../../../plugins/alerting/server';
 import { INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting';
 import { RuleAlertType, isAlertTypes } from './types';
 import { findRules } from './find_rules';
 

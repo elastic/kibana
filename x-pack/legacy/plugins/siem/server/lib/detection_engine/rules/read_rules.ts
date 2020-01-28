@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Alert } from '../../../../../alerting/server/types';
+import { Alert } from '../../../../../../../plugins/alerting/server';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
 import { ReadRuleParams, isAlertType } from './types';

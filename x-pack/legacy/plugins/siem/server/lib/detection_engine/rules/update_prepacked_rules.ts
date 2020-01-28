@@ -5,8 +5,8 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
+import { AlertsClient } from '../../../../../../../plugins/alerting/server';
 import { ActionsClient } from '../../../../../../../plugins/actions/server';
-import { AlertsClient } from '../../../../../alerting';
 import { updateRules } from './update_rules';
 import { PrepackagedRules } from '../types';
 

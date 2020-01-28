@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { alertsClientMock } from '../../../../../alerting/server/alerts_client.mock';
 import { readRules } from './read_rules';
-import { AlertsClient } from '../../../../../alerting';
 import { getResult, getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
+import { AlertsClient, alertsClientMock } from '../../../../../../../plugins/alerting/server';
 
 describe('read_rules', () => {
   describe('readRules', () => {

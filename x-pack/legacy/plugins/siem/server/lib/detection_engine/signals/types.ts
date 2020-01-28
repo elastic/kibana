@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  AlertExecutorOptions,
+  AlertType,
+  State,
+} from '../../../../../../../plugins/alerting/server';
 import { RuleAlertParams, OutputRuleAlertRest } from '../types';
 import { SearchResponse } from '../../types';
 import { RequestFacade } from '../../../types';
-import { AlertType, State, AlertExecutorOptions } from '../../../../../alerting/server/types';
 
 export interface SignalsParams {
   signalIds: string[] | undefined | null;

@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { alertsClientMock } from '../../../../../alerting/server/alerts_client.mock';
 import {
   getResult,
   getFindResultWithSingleHit,
   FindHit,
 } from '../routes/__mocks__/request_responses';
-import { AlertsClient } from '../../../../../alerting';
 import { getExportAll } from './get_export_all';
+import { AlertsClient, alertsClientMock } from '../../../../../../../plugins/alerting/server';
 
 describe('getExportAll', () => {
   test('it exports everything from the alerts client', async () => {

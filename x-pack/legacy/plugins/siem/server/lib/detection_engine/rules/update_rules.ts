@@ -5,7 +5,7 @@
  */
 
 import { defaults } from 'lodash/fp';
-import { AlertAction, IntervalSchedule } from '../../../../../alerting/server/types';
+import { AlertAction, IntervalSchedule } from '../../../../../../../plugins/alerting/server';
 import { readRules } from './read_rules';
 import { UpdateRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './types';
 import { addTags } from './add_tags';

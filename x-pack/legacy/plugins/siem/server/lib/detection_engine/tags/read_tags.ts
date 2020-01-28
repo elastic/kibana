@@ -5,8 +5,8 @@
  */
 
 import { has } from 'lodash/fp';
+import { AlertsClient } from '../../../../../../../plugins/alerting/server';
 import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting';
 import { findRules } from '../rules/find_rules';
 
 const DEFAULT_PER_PAGE: number = 1000;

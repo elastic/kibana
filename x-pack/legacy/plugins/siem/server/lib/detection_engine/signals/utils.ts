@@ -5,8 +5,7 @@
  */
 import { createHash } from 'crypto';
 import moment from 'moment';
-
-import { parseDuration } from '../../../../../alerting/server/lib';
+import { parseDuration } from '../../../../../../../plugins/alerting/server';
 
 export const generateId = (
   docIndex: string,

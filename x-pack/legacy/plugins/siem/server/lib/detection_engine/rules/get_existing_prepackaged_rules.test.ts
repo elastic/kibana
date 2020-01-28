@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { alertsClientMock } from '../../../../../alerting/server/alerts_client.mock';
-import { AlertsClient } from '../../../../../alerting';
+import { alertsClientMock } from '../../../../../../../plugins/alerting/server/mocks';
+import { AlertsClient } from '../../../../../../../plugins/alerting/server';
 import {
   getResult,
   getFindResultWithSingleHit,
