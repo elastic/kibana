@@ -22,7 +22,6 @@ import { npSetup, npStart, legacyChrome } from './legacy_imports';
 import { LegacyAngularInjectedDependencies } from './plugin';
 import { start as data } from '../../../data/public/legacy';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
-import './saved_dashboard/saved_dashboard_register';
 import './dashboard_config';
 import { plugin } from './index';
 

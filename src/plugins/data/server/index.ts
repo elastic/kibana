@@ -18,7 +18,7 @@
  */
 
 import { PluginInitializerContext } from '../../../core/server';
-import { DataServerPlugin, DataPluginSetup } from './plugin';
+import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
@@ -29,14 +29,20 @@ export function plugin(initializerContext: PluginInitializerContext) {
  * @public
  */
 export { IRequestTypesMap, IResponseTypesMap } from './search';
+
 export {
-  // field formats
-  FIELD_FORMAT_IDS,
-  IFieldFormat,
-  IFieldFormatId,
-  IFieldFormatType,
+  // es query
+  esFilters,
+  esKuery,
+  esQuery,
+  fieldFormats,
+  // kbn field types
+  castEsToKbnFieldTypeName,
+  getKbnFieldType,
+  getKbnTypeNames,
   // index patterns
   IIndexPattern,
+  isFilterable,
   IFieldType,
   IFieldSubType,
   // kbn field types
@@ -62,36 +68,11 @@ export {
   shouldReadFieldFromDocValues,
   indexPatterns,
 } from './index_patterns';
-export * from './search';
-export {
-  // es query
-  esFilters,
-  esKuery,
-  esQuery,
-  // field formats
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DEFAULT_CONVERTER_COLOR,
-  DurationFormat,
-  FieldFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  StringFormat,
-  TruncateFormat,
-  UrlFormat,
-  // index patterns
-  isFilterable,
-  // kbn field types
-  castEsToKbnFieldTypeName,
-  getKbnFieldType,
-  getKbnTypeNames,
-} from '../common';
 
-export { DataServerPlugin as Plugin, DataPluginSetup as PluginSetup };
+export * from './search';
+
+export {
+  DataServerPlugin as Plugin,
+  DataPluginSetup as PluginSetup,
+  DataPluginStart as PluginStart,
+};
