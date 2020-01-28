@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiSpacer } from '@elastic/eui';
 import * as i18n from './translations';
 import { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';

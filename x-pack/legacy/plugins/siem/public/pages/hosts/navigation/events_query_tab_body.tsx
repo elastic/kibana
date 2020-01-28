@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiSpacer } from '@elastic/eui';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../../store/hosts';
