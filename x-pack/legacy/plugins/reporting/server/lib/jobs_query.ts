@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { errors as elasticsearchErrors } from 'elasticsearch';
 import { get } from 'lodash';
 import { ServerFacade, JobSource } from '../../types';
 import { ReportingSetupDeps } from '../plugin';
 
+const esErrors = elasticsearchErrors as Record<string, any>;
 const defaultSize = 10;
 
 interface QueryBody {
@@ -40,8 +42,7 @@ export function jobsQueryFactory(
   elasticsearch: ReportingSetupDeps['elasticsearch']
 ) {
   const index = server.config().get('xpack.reporting.index');
-  // @ts-ignore `errors` does not exist on type Cluster
-  const { callWithInternalUser, errors: esErrors } = elasticsearch.getCluster('admin');
+  const { callWithInternalUser } = elasticsearch.getCluster('admin');
 
   function getUsername(user: any) {
     return get(user, 'username', false);
