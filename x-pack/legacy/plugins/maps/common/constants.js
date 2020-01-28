@@ -27,6 +27,8 @@ export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
 export const TELEMETRY_TYPE = 'maps-telemetry';
 
+export const MVT_GETTILE_API_PATH = 'mvt/getTile';
+
 export const MAP_APP_PATH = `app/${APP_ID}`;
 export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;

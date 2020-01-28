@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
 
 import Boom from 'boom';
+import { initMVTRoutes } from './mvt_routes';
 
 const ROOT = `/${GIS_API_PATH}`;
 
@@ -64,6 +65,8 @@ export function initRoutes(server, licenseUid) {
       addQueryParams() {},
     };
   }
+
+  initMVTRoutes(server);
 
   server.route({
     method: 'GET',
@@ -421,6 +424,8 @@ export function initRoutes(server, licenseUid) {
     path: `/${INDEX_SETTINGS_API_PATH}`,
     handler: async (request, h) => {
       const { server, query } = request;
+
+      server.log('warning', 'getting index settings');
 
       if (!query.indexPatternTitle) {
         server.log('warning', `Required query parameter 'indexPatternTitle' not provided.`);
