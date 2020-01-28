@@ -1,0 +1,229 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should render categorical legend with breaks from custom 1`] = `""`;
+
+exports[`Should render categorical legend with breaks from default 1`] = `
+<div>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      key="0"
+    >
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="none"
+      >
+        <EuiFlexItem>
+          <EuiText
+            size="xs"
+          >
+            US_format
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <VectorIcon
+            fillColor="none"
+            isLinesOnly={false}
+            isPointsOnly={true}
+            strokeColor="#54B399"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="1"
+    >
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="none"
+      >
+        <EuiFlexItem>
+          <EuiText
+            size="xs"
+          >
+            CN_format
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <VectorIcon
+            fillColor="none"
+            isLinesOnly={false}
+            isPointsOnly={true}
+            strokeColor="#6092C0"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="2"
+    >
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="none"
+      >
+        <EuiFlexItem>
+          <EuiText
+            size="xs"
+          >
+            <EuiTextColor
+              color="secondary"
+            >
+              Other
+            </EuiTextColor>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <VectorIcon
+            fillColor="none"
+            isLinesOnly={false}
+            isPointsOnly={true}
+            strokeColor="#D36086"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceAround"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        position="top"
+        title="Border color"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`Should render ordinal legend 1`] = `
+<RangedStyleLegendRow
+  fieldLabel=""
+  header={
+    <ColorGradient
+      colorRampName="Blues"
+    />
+  }
+  maxLabel="100_format"
+  minLabel="0_format"
+  propertyLabel="Border color"
+/>
+`;
+
+exports[`Should render ordinal legend with breaks 1`] = `
+<div>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      key="0"
+    >
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="none"
+      >
+        <EuiFlexItem>
+          <EuiText
+            size="xs"
+          >
+            0_format
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <VectorIcon
+            fillColor="none"
+            isLinesOnly={false}
+            isPointsOnly={true}
+            strokeColor="#FF0000"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="1"
+    >
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="none"
+      >
+        <EuiFlexItem>
+          <EuiText
+            size="xs"
+          >
+            10_format
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <VectorIcon
+            fillColor="none"
+            isLinesOnly={false}
+            isPointsOnly={true}
+            strokeColor="#00FF00"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceAround"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        position="top"
+        title="Border color"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

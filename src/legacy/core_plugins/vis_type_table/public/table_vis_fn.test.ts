@@ -18,24 +18,16 @@
  */
 
 import { createTableVisFn } from './table_vis_fn';
+import { tableVisResponseHandler } from './table_vis_response_handler';
 
 // eslint-disable-next-line
 import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 
-jest.mock('./legacy_imports', () => {
-  const mockResponseHandler = jest.fn().mockReturnValue(
-    Promise.resolve({
-      tables: [{ columns: [], rows: [] }],
-    })
-  );
-
-  return {
-    mockResponseHandler,
-    legacyResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
-  };
-});
-
-const { mockResponseHandler } = jest.requireMock('./legacy_imports');
+jest.mock('./table_vis_response_handler', () => ({
+  tableVisResponseHandler: jest.fn().mockReturnValue({
+    tables: [{ columns: [], rows: [] }],
+  }),
+}));
 
 describe('interpreter/functions#table', () => {
   const fn = functionWrapper(createTableVisFn);
@@ -80,7 +72,7 @@ describe('interpreter/functions#table', () => {
 
   it('calls response handler with correct values', async () => {
     await fn(context, { visConfig: JSON.stringify(visConfig) }, undefined);
-    expect(mockResponseHandler).toHaveBeenCalledTimes(1);
-    expect(mockResponseHandler).toHaveBeenCalledWith(context, visConfig.dimensions);
+    expect(tableVisResponseHandler).toHaveBeenCalledTimes(1);
+    expect(tableVisResponseHandler).toHaveBeenCalledWith(context, visConfig.dimensions);
   });
 });

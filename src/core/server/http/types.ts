@@ -18,6 +18,8 @@
  */
 import { IContextProvider, IContextContainer } from '../context';
 import { ICspConfig } from '../csp';
+import { GetAuthState, IsAuthenticated } from './auth_state_storage';
+import { GetAuthHeaders } from './auth_headers_storage';
 import { RequestHandler, IRouter } from './router';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
@@ -183,6 +185,19 @@ export interface HttpServiceSetup {
    */
   basePath: IBasePath;
 
+  auth: {
+    /**
+     * Gets authentication state for a request. Returned by `auth` interceptor.
+     * {@link GetAuthState}
+     */
+    get: GetAuthState;
+    /**
+     * Returns authentication status for a request.
+     * {@link IsAuthenticated}
+     */
+    isAuthenticated: IsAuthenticated;
+  };
+
   /**
    * The CSP config used for Kibana.
    */
@@ -245,21 +260,12 @@ export interface InternalHttpServiceSetup
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
   createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+  getAuthHeaders: GetAuthHeaders;
   registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
     provider: RequestHandlerContextProvider<T>
   ) => RequestHandlerContextContainer;
-  config: {
-    /**
-     * @internalRemarks
-     * Deprecated part of the server config, provided until
-     * https://github.com/elastic/kibana/issues/40255
-     *
-     * @deprecated
-     * */
-    defaultRoute?: string;
-  };
 }
 
 /** @public */

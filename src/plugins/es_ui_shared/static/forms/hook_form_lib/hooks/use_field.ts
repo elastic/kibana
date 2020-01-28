@@ -17,12 +17,17 @@
  * under the License.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 
 import { FormHook, FieldHook, FieldConfig, FieldValidateResponse, ValidationError } from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
-export const useField = (form: FormHook, path: string, config: FieldConfig = {}) => {
+export const useField = (
+  form: FormHook,
+  path: string,
+  config: FieldConfig = {},
+  valueChangeListener?: (value: unknown) => void
+) => {
   const {
     type = FIELD_TYPES.TEXT,
     defaultValue = '',
@@ -37,17 +42,25 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     deserializer = (value: unknown) => value,
   } = config;
 
-  const [value, setStateValue] = useState(
-    typeof defaultValue === 'function' ? deserializer(defaultValue()) : deserializer(defaultValue)
+  const initialValue = useMemo(
+    () =>
+      typeof defaultValue === 'function'
+        ? deserializer(defaultValue())
+        : deserializer(defaultValue),
+    [defaultValue]
   );
+
+  const [value, setStateValue] = useState(initialValue);
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [isPristine, setPristine] = useState(true);
   const [isValidating, setValidating] = useState(false);
   const [isChangingValue, setIsChangingValue] = useState(false);
+  const [isValidated, setIsValidated] = useState(false);
   const validateCounter = useRef(0);
   const changeCounter = useRef(0);
   const inflightValidation = useRef<Promise<any> | null>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const isUnmounted = useRef<boolean>(false);
 
   // -- HELPERS
   // ----------------------------------
@@ -77,7 +90,10 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     if (isEmptyString) {
       return inputValue;
     }
-    return formatters.reduce((output, formatter) => formatter(output), inputValue);
+
+    const formData = form.getFormData({ unflatten: false });
+
+    return formatters.reduce((output, formatter) => formatter(output, formData), inputValue);
   };
 
   const onValueChange = async () => {
@@ -92,11 +108,22 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
       setIsChangingValue(true);
     }
 
+    const newValue = serializeOutput(value);
+
+    // Notify listener
+    if (valueChangeListener) {
+      valueChangeListener(newValue);
+    }
+
     // Update the form data observable
-    form.__updateFormDataAt(path, serializeOutput(value));
+    form.__updateFormDataAt(path, newValue);
 
     // Validate field(s) and set form.isValid flag
     await form.__validateFields(fieldsToValidateOnChange);
+
+    if (isUnmounted.current) {
+      return;
+    }
 
     /**
      * If we have set a delay to display the error message after the field value has changed,
@@ -263,6 +290,7 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
       validationType,
     } = validationData;
 
+    setIsValidated(true);
     setValidating(true);
 
     // By the time our validate function has reached completion, it’s possible
@@ -276,12 +304,10 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
         // This is the most recent invocation
         setValidating(false);
         // Update the errors array
-        setErrors(previousErrors => {
-          // First filter out the validation type we are currently validating
-          const filteredErrors = filterErrors(previousErrors, validationType);
-          return [...filteredErrors, ..._validationErrors];
-        });
+        const filteredErrors = filterErrors(errors, validationType);
+        setErrors([...filteredErrors, ..._validationErrors]);
       }
+
       return {
         isValid: _validationErrors.length === 0,
         errors: _validationErrors,
@@ -359,6 +385,22 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     return errorMessages ? errorMessages : null;
   };
 
+  const reset: FieldHook['reset'] = (resetOptions = { resetValue: true }) => {
+    const { resetValue = true } = resetOptions;
+
+    setPristine(true);
+    setValidating(false);
+    setIsChangingValue(false);
+    setIsValidated(false);
+    setErrors([]);
+
+    if (resetValue) {
+      setValue(initialValue);
+      return initialValue;
+    }
+    return value;
+  };
+
   const serializeOutput: FieldHook['__serializeOutput'] = (rawValue = value) =>
     serializer(rawValue);
 
@@ -390,6 +432,7 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     form,
     isPristine,
     isValidating,
+    isValidated,
     isChangingValue,
     onChange,
     getErrorsMessages,
@@ -397,10 +440,32 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     setErrors: _setErrors,
     clearErrors,
     validate,
+    reset,
     __serializeOutput: serializeOutput,
   };
 
-  form.__addField(field);
+  form.__addField(field); // Executed first (1)
+
+  useEffect(() => {
+    /**
+     * NOTE: effect cleanup actually happens *after* the new component has been mounted,
+     * but before the next effect callback is run.
+     * Ref: https://kentcdodds.com/blog/understanding-reacts-key-prop
+     *
+     * This means that, the "form.__addField(field)" outside the effect will be called *before*
+     * the cleanup `form.__removeField(path);` creating a race condition.
+     *
+     * TODO: See how we could refactor "use_field" & "use_form" to avoid having the
+     * `form.__addField(field)` call outside the effect.
+     */
+    form.__addField(field); // Executed third (3)
+
+    return () => {
+      // Remove field from the form when it is unmounted or if its path changes.
+      isUnmounted.current = true;
+      form.__removeField(path); // Executed second (2)
+    };
+  }, [path]);
 
   return field;
 };

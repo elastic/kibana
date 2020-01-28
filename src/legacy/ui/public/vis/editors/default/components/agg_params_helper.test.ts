@@ -19,15 +19,14 @@
 
 import { AggConfig, VisState } from '../../..';
 import { AggType } from 'ui/agg_types';
-import { IndexPattern, Field } from 'ui/index_patterns';
 import { IndexedArray } from 'ui/indexed_array';
 import {
   getAggParamsToRender,
-  getError,
   getAggTypeOptions,
   isInvalidParamsTouched,
 } from './agg_params_helper';
 import { EditorConfig } from '../../config/types';
+import { IndexPattern, Field } from '../../../../../../../plugins/data/public';
 
 jest.mock('ui/agg_types', () => ({
   aggTypes: {
@@ -159,20 +158,6 @@ describe('DefaultEditorAggParams helpers', () => {
         advanced: [],
       });
       expect(agg.getIndexPattern).toBeCalledTimes(1);
-    });
-  });
-
-  describe('getError', () => {
-    it('should not have any errors', () => {
-      const errors = getError({ schema: { title: 'Split series' } } as AggConfig, false);
-
-      expect(errors).toEqual([]);
-    });
-
-    it('should push an error if an agg is too low', () => {
-      const errors = getError({ schema: { title: 'Split series' } } as AggConfig, true);
-
-      expect(errors).toEqual(['"Split series" aggs must run before all other buckets!']);
     });
   });
 

@@ -7,7 +7,7 @@
 import { combineLatest } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
-  IClusterClient,
+  ICustomClusterClient,
   CoreSetup,
   KibanaRequest,
   Logger,
@@ -85,7 +85,7 @@ export interface PluginSetupDependencies {
  */
 export class Plugin {
   private readonly logger: Logger;
-  private clusterClient?: IClusterClient;
+  private clusterClient?: ICustomClusterClient;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private securityLicenseService?: SecurityLicenseService;
 
@@ -110,10 +110,7 @@ export class Plugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(
-    core: CoreSetup,
-    { features, licensing }: PluginSetupDependencies
-  ): Promise<RecursiveReadonly<PluginSetupContract>> {
+  public async setup(core: CoreSetup, { features, licensing }: PluginSetupDependencies) {
     const [config, legacyConfig] = await combineLatest([
       createConfig$(this.initializerContext, core.http.isTlsEnabled),
       this.initializerContext.config.legacy.globalConfig$,
@@ -169,7 +166,7 @@ export class Plugin {
       csp: core.http.csp,
     });
 
-    return deepFreeze({
+    return deepFreeze<PluginSetupContract>({
       authc,
 
       authz: {

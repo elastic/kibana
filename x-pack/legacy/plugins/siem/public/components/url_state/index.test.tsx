@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { HookWrapper } from '../../mock';
 import { SiemPageName } from '../../pages/home/types';
@@ -145,7 +145,7 @@ describe('UrlStateContainer', () => {
             ).toEqual({
               hash: '',
               pathname: examplePath,
-              search: [CONSTANTS.overviewPage, CONSTANTS.timelinePage].includes(page)
+              search: [CONSTANTS.timelinePage].includes(page)
                 ? '?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))'
                 : `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
               state: '',

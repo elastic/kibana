@@ -20,7 +20,7 @@
 import { EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { FunctionComponent } from 'react';
-import { AutocompleteSuggestion } from '../..';
+import { autocomplete } from '../..';
 
 function getEuiIconType(type: string) {
   switch (type) {
@@ -40,10 +40,10 @@ function getEuiIconType(type: string) {
 }
 
 interface Props {
-  onClick: (suggestion: AutocompleteSuggestion) => void;
+  onClick: (suggestion: autocomplete.QuerySuggestion) => void;
   onMouseEnter: () => void;
   selected: boolean;
-  suggestion: AutocompleteSuggestion;
+  suggestion: autocomplete.QuerySuggestion;
   innerRef: (node: HTMLDivElement) => void;
   ariaId: string;
 }

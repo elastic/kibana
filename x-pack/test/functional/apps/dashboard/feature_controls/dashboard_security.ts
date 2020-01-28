@@ -75,10 +75,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
-          'Dashboard',
-          'Management',
-        ]);
+        expect(navLinks.map(link => link.text)).to.eql(['Dashboard', 'Stack Management']);
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
@@ -107,7 +104,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('emptyDashboardAddPanelButton', { timeout: 10000 });
+        await testSubjects.existOrFail('emptyDashboardWidget', { timeout: 10000 });
       });
 
       it(`can view existing Dashboard`, async () => {
@@ -255,10 +252,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows dashboard navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Dashboard', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Dashboard', 'Stack Management']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {

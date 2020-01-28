@@ -18,11 +18,7 @@
  */
 
 import { Server } from 'http';
-
-jest.mock('fs', () => ({
-  readFileSync: jest.fn(),
-}));
-
+import { readFileSync } from 'fs';
 import supertest from 'supertest';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
@@ -39,6 +35,7 @@ import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { RequestHandlerContext } from 'kibana/server';
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
 const cookieOptions = {
   name: 'sid',
@@ -55,6 +52,14 @@ const loggingService = loggingServiceMock.create();
 const logger = loggingService.get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
+let certificate: string;
+let key: string;
+
+beforeAll(() => {
+  certificate = readFileSync(KBN_CERT_PATH, 'utf8');
+  key = readFileSync(KBN_KEY_PATH, 'utf8');
+});
+
 beforeEach(() => {
   config = {
     host: '127.0.0.1',
@@ -68,10 +73,10 @@ beforeEach(() => {
     ...config,
     ssl: {
       enabled: true,
-      certificate: '/certificate',
+      certificate,
       cipherSuites: ['cipherSuite'],
       getSecureOptions: () => 0,
-      key: '/key',
+      key,
       redirectHttpFromPort: config.port + 1,
     },
   } as HttpConfig;
@@ -1059,130 +1064,6 @@ describe('setup contract', () => {
 
       await create();
       expect(create()).rejects.toThrowError('A cookieSessionStorageFactory was already created');
-    });
-  });
-
-  describe('#auth.isAuthenticated()', () => {
-    it('returns true if has been authorized', async () => {
-      const { registerAuth, registerRouter, server: innerServer, auth } = await server.setup(
-        config
-      );
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await registerAuth((req, res, toolkit) => toolkit.authenticated());
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: true });
-    });
-
-    it('returns false if has not been authorized', async () => {
-      const { registerAuth, registerRouter, server: innerServer, auth } = await server.setup(
-        config
-      );
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await registerAuth((req, res, toolkit) => toolkit.authenticated());
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: false });
-    });
-
-    it('returns false if no authorization mechanism has been registered', async () => {
-      const { registerRouter, server: innerServer, auth } = await server.setup(config);
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: false });
-    });
-  });
-
-  describe('#auth.get()', () => {
-    it('returns authenticated status and allow associate auth state with request', async () => {
-      const user = { id: '42' };
-      const {
-        createCookieSessionStorageFactory,
-        registerRouter,
-        registerAuth,
-        server: innerServer,
-        auth,
-      } = await server.setup(config);
-      const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
-      registerAuth((req, res, toolkit) => {
-        sessionStorageFactory.asScoped(req).set({ value: user, expires: Date.now() + 1000 });
-        return toolkit.authenticated({ state: user });
-      });
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: auth.get(req) })
-      );
-      registerRouter(router);
-      await server.start();
-
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { state: user, status: 'authenticated' });
-    });
-
-    it('returns correct authentication unknown status', async () => {
-      const { registerRouter, server: innerServer, auth } = await server.setup(config);
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: auth.get(req) })
-      );
-
-      registerRouter(router);
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { status: 'unknown' });
-    });
-
-    it('returns correct unauthenticated status', async () => {
-      const authenticate = jest.fn();
-
-      const { registerRouter, registerAuth, server: innerServer, auth } = await server.setup(
-        config
-      );
-      await registerAuth(authenticate);
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: auth.get(req) })
-      );
-
-      registerRouter(router);
-      await server.start();
-
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { status: 'unauthenticated' });
-
-      expect(authenticate).not.toHaveBeenCalled();
     });
   });
 

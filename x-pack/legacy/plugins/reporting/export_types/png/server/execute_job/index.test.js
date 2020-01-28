@@ -27,7 +27,7 @@ beforeEach(() => {
     'server.port': 5601,
   };
   mockServer = {
-    expose: () => {},
+    expose: () => {}, // NOTE: this is for oncePerServer
     config: memoize(() => ({ get: jest.fn() })),
     info: {
       protocol: 'http',
@@ -57,6 +57,8 @@ beforeEach(() => {
 
 afterEach(() => generatePngObservableFactory.mockReset());
 
+const getMockLogger = () => new LevelLogger();
+
 const encryptHeaders = async headers => {
   const crypto = cryptoFactory(mockServer);
   return await crypto.encrypt(headers);
@@ -68,7 +70,7 @@ test(`passes browserTimezone to generatePng`, async () => {
   const generatePngObservable = generatePngObservableFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  const executeJob = executeJobFactory(mockServer, { browserDriverFactory: {} });
+  const executeJob = executeJobFactory(mockServer, getMockLogger(), { browserDriverFactory: {} });
   const browserTimezone = 'UTC';
   await executeJob(
     'pngJobId',
@@ -86,7 +88,7 @@ test(`passes browserTimezone to generatePng`, async () => {
 });
 
 test(`returns content_type of application/png`, async () => {
-  const executeJob = executeJobFactory(mockServer, { browserDriverFactory: {} });
+  const executeJob = executeJobFactory(mockServer, getMockLogger(), { browserDriverFactory: {} });
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePngObservable = generatePngObservableFactory();
@@ -106,7 +108,7 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   const generatePngObservable = generatePngObservableFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from(testContent)));
 
-  const executeJob = executeJobFactory(mockServer, { browserDriverFactory: {} });
+  const executeJob = executeJobFactory(mockServer, getMockLogger(), { browserDriverFactory: {} });
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob(
     'pngJobId',

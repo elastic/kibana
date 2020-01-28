@@ -447,6 +447,11 @@ describe('xy_expression', () => {
         .find(Axis)
         .first()
         .prop('tickFormat');
+
+      if (!tickFormatter) {
+        throw new Error('tickFormatter prop not found');
+      }
+
       tickFormatter('I');
 
       expect(convertSpy).toHaveBeenCalledWith('I');

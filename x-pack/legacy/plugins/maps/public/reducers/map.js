@@ -16,7 +16,7 @@ import {
   ADD_WAITING_FOR_MAP_READY_LAYER,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
-  TOGGLE_LAYER_VISIBLE,
+  SET_LAYER_VISIBILITY,
   MAP_EXTENT_CHANGED,
   MAP_READY,
   MAP_DESTROYED,
@@ -46,6 +46,7 @@ import {
   HIDE_TOOLBAR_OVERLAY,
   HIDE_LAYER_CONTROL,
   HIDE_VIEW_CONTROL,
+  SET_WAITING_FOR_READY_HIDDEN_LAYERS,
 } from '../actions/map_actions';
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
@@ -307,8 +308,8 @@ export function map(state = INITIAL_STATE, action) {
         ...state,
         waitingForMapReadyLayerList: [],
       };
-    case TOGGLE_LAYER_VISIBLE:
-      return updateLayerInList(state, action.layerId, 'visible');
+    case SET_LAYER_VISIBILITY:
+      return updateLayerInList(state, action.layerId, 'visible', action.visibility);
     case UPDATE_LAYER_STYLE:
       const styleLayerId = action.layerId;
       return updateLayerInList(state, styleLayerId, 'style', { ...action.style });
@@ -376,6 +377,14 @@ export function map(state = INITIAL_STATE, action) {
           hideViewControl: action.hideViewControl,
         },
       };
+    case SET_WAITING_FOR_READY_HIDDEN_LAYERS:
+      return {
+        ...state,
+        waitingForMapReadyLayerList: state.waitingForMapReadyLayerList.map(layer => ({
+          ...layer,
+          visible: !action.hiddenLayerIds.includes(layer.id),
+        })),
+      };
     default:
       return state;
   }
@@ -438,16 +447,28 @@ function updateWithDataResponse(state, action) {
   return resetDataRequest(state, action, dataRequest);
 }
 
-function resetDataRequest(state, action, request) {
+export function resetDataRequest(state, action, request) {
   const dataRequest = request || getValidDataRequest(state, action);
   if (!dataRequest) {
     return state;
   }
 
-  dataRequest.dataRequestToken = null;
-  dataRequest.dataId = action.dataId;
-  const layerList = [...state.layerList];
-  return { ...state, layerList };
+  const layer = findLayerById(state, action.layerId);
+  const dataRequestIndex = layer.__dataRequests.indexOf(dataRequest);
+
+  const newDataRequests = [...layer.__dataRequests];
+  newDataRequests[dataRequestIndex] = {
+    ...dataRequest,
+    dataRequestToken: null,
+  };
+
+  const layerIndex = state.layerList.indexOf(layer);
+  const newLayerList = [...state.layerList];
+  newLayerList[layerIndex] = {
+    ...layer,
+    __dataRequests: newDataRequests,
+  };
+  return { ...state, layerList: newLayerList };
 }
 
 function getValidDataRequest(state, action, checkRequestToken = true) {

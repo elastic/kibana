@@ -67,6 +67,11 @@ export interface TableListViewProps {
   tableListTitle: string;
   toastNotifications: ToastsStart;
   uiSettings: IUiSettingsClient;
+  /**
+   * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
+   * If the table is not empty, this component renders its own h1 element using the same id.
+   */
+  headingId?: string;
 }
 
 export interface TableListViewState {
@@ -463,7 +468,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h1>{this.props.tableListTitle}</h1>
+              <h1 id={this.props.headingId}>{this.props.tableListTitle}</h1>
             </EuiTitle>
           </EuiFlexItem>
 
@@ -498,7 +503,11 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         className="itemListing__page"
         restrictWidth
       >
-        <EuiPageBody>{this.renderPageContent()}</EuiPageBody>
+        <EuiPageBody
+          aria-labelledby={this.state.hasInitialFetchReturned ? this.props.headingId : undefined}
+        >
+          {this.renderPageContent()}
+        </EuiPageBody>
       </EuiPage>
     );
   }

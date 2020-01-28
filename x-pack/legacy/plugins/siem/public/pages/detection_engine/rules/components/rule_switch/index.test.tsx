@@ -5,17 +5,15 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { RuleSwitchComponent } from './index';
-jest.mock('../../../../../lib/kibana');
 
 describe('RuleSwitch', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <RuleSwitchComponent optionLabel="rule-switch" enabled={true} id={'7'} isLoading={false} />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

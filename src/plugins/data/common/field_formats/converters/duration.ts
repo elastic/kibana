@@ -171,6 +171,7 @@ export class DurationFormat extends FieldFormat {
   static fieldType = KBN_FIELD_TYPES.NUMBER;
   static inputFormats = inputFormats;
   static outputFormats = outputFormats;
+  allowsNumericalAggregations = true;
 
   isHuman() {
     return this.param('outputFormat') === HUMAN_FRIENDLY;

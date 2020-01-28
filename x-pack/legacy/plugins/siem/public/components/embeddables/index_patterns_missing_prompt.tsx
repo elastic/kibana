@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import * as React from 'react';
+import React from 'react';
 import chrome from 'ui/chrome';
 
 import { useKibana } from '../../lib/kibana';

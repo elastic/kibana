@@ -1,0 +1,18 @@
+.timExpressionInput {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  margin-top: $euiSize;
+}
+
+.timExpressionInput__editor {
+  height: 100%;
+  padding-top: $euiSizeS;
+}
+
+@include euiBreakpoint('xs', 's', 'm') {
+  .timExpressionInput__editor {
+    height: $euiSize * 15;
+    max-height: $euiSize * 15;
+  }
+}

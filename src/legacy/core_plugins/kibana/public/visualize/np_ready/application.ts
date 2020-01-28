@@ -63,9 +63,8 @@ export const renderApp = async (
   return () => $injector.get('$rootScope').$destroy();
 };
 
-const mainTemplate = (basePath: string) => `<div style="height: 100%">
+const mainTemplate = (basePath: string) => `<div ng-view class="kbnLocalApplicationWrapper">
   <base href="${basePath}" />
-  <div ng-view style="height: 100%;"></div>
 </div>
 `;
 
@@ -75,7 +74,7 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react'];
 
 function mountVisualizeApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
-  mountpoint.setAttribute('style', 'height: 100%');
+  mountpoint.setAttribute('class', 'kbnLocalApplicationWrapper');
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible

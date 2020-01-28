@@ -7,12 +7,12 @@
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { WithSource } from '../../../containers/with_source';
 import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_options';
 import { Toolbar } from '../../eui/toolbar';
 import { ToolbarProps } from './toolbar';
 import { fieldToName } from '../../waffle/lib/field_to_display_name';
-import { InfraSnapshotMetricType } from '../../../graphql/types';
 
 interface Props {
   children: (props: Omit<ToolbarProps, 'accounts' | 'regions'>) => React.ReactElement;
@@ -144,123 +144,125 @@ export const toGroupByOpt = (field: string) => ({
   field,
 });
 
-export const toMetricOpt = (metric: InfraSnapshotMetricType) => {
+export const toMetricOpt = (
+  metric: SnapshotMetricType
+): { text: string; value: SnapshotMetricType } => {
   switch (metric) {
-    case InfraSnapshotMetricType.cpu:
+    case 'cpu':
       return {
         text: ToolbarTranslations.CPUUsage,
-        value: InfraSnapshotMetricType.cpu,
+        value: 'cpu',
       };
-    case InfraSnapshotMetricType.memory:
+    case 'memory':
       return {
         text: ToolbarTranslations.MemoryUsage,
-        value: InfraSnapshotMetricType.memory,
+        value: 'memory',
       };
-    case InfraSnapshotMetricType.rx:
+    case 'rx':
       return {
         text: ToolbarTranslations.InboundTraffic,
-        value: InfraSnapshotMetricType.rx,
+        value: 'rx',
       };
-    case InfraSnapshotMetricType.tx:
+    case 'tx':
       return {
         text: ToolbarTranslations.OutboundTraffic,
-        value: InfraSnapshotMetricType.tx,
+        value: 'tx',
       };
-    case InfraSnapshotMetricType.logRate:
+    case 'logRate':
       return {
         text: ToolbarTranslations.LogRate,
-        value: InfraSnapshotMetricType.logRate,
+        value: 'logRate',
       };
-    case InfraSnapshotMetricType.load:
+    case 'load':
       return {
         text: ToolbarTranslations.Load,
-        value: InfraSnapshotMetricType.load,
+        value: 'load',
       };
 
-    case InfraSnapshotMetricType.count:
+    case 'count':
       return {
         text: ToolbarTranslations.Count,
-        value: InfraSnapshotMetricType.count,
+        value: 'count',
       };
-    case InfraSnapshotMetricType.diskIOReadBytes:
+    case 'diskIOReadBytes':
       return {
         text: ToolbarTranslations.DiskIOReadBytes,
-        value: InfraSnapshotMetricType.diskIOReadBytes,
+        value: 'diskIOReadBytes',
       };
-    case InfraSnapshotMetricType.diskIOWriteBytes:
+    case 'diskIOWriteBytes':
       return {
         text: ToolbarTranslations.DiskIOWriteBytes,
-        value: InfraSnapshotMetricType.diskIOWriteBytes,
+        value: 'diskIOWriteBytes',
       };
-    case InfraSnapshotMetricType.s3BucketSize:
+    case 's3BucketSize':
       return {
         text: ToolbarTranslations.s3BucketSize,
-        value: InfraSnapshotMetricType.s3BucketSize,
+        value: 's3BucketSize',
       };
-    case InfraSnapshotMetricType.s3TotalRequests:
+    case 's3TotalRequests':
       return {
         text: ToolbarTranslations.s3TotalRequests,
-        value: InfraSnapshotMetricType.s3TotalRequests,
+        value: 's3TotalRequests',
       };
-    case InfraSnapshotMetricType.s3NumberOfObjects:
+    case 's3NumberOfObjects':
       return {
         text: ToolbarTranslations.s3NumberOfObjects,
-        value: InfraSnapshotMetricType.s3NumberOfObjects,
+        value: 's3NumberOfObjects',
       };
-    case InfraSnapshotMetricType.s3DownloadBytes:
+    case 's3DownloadBytes':
       return {
         text: ToolbarTranslations.s3DownloadBytes,
-        value: InfraSnapshotMetricType.s3DownloadBytes,
+        value: 's3DownloadBytes',
       };
-    case InfraSnapshotMetricType.s3UploadBytes:
+    case 's3UploadBytes':
       return {
         text: ToolbarTranslations.s3UploadBytes,
-        value: InfraSnapshotMetricType.s3UploadBytes,
+        value: 's3UploadBytes',
       };
-    case InfraSnapshotMetricType.rdsConnections:
+    case 'rdsConnections':
       return {
         text: ToolbarTranslations.rdsConnections,
-        value: InfraSnapshotMetricType.rdsConnections,
+        value: 'rdsConnections',
       };
-    case InfraSnapshotMetricType.rdsQueriesExecuted:
+    case 'rdsQueriesExecuted':
       return {
         text: ToolbarTranslations.rdsQueriesExecuted,
-        value: InfraSnapshotMetricType.rdsQueriesExecuted,
+        value: 'rdsQueriesExecuted',
       };
-    case InfraSnapshotMetricType.rdsActiveTransactions:
+    case 'rdsActiveTransactions':
       return {
         text: ToolbarTranslations.rdsActiveTransactions,
-        value: InfraSnapshotMetricType.rdsActiveTransactions,
+        value: 'rdsActiveTransactions',
       };
-    case InfraSnapshotMetricType.rdsLatency:
+    case 'rdsLatency':
       return {
         text: ToolbarTranslations.rdsLatency,
-        value: InfraSnapshotMetricType.rdsLatency,
+        value: 'rdsLatency',
       };
-    case InfraSnapshotMetricType.sqsMessagesVisible:
+    case 'sqsMessagesVisible':
       return {
         text: ToolbarTranslations.sqsMessagesVisible,
-        value: InfraSnapshotMetricType.sqsMessagesVisible,
+        value: 'sqsMessagesVisible',
       };
-    case InfraSnapshotMetricType.sqsMessagesDelayed:
+    case 'sqsMessagesDelayed':
       return {
         text: ToolbarTranslations.sqsMessagesDelayed,
-        value: InfraSnapshotMetricType.sqsMessagesDelayed,
+        value: 'sqsMessagesDelayed',
       };
-    case InfraSnapshotMetricType.sqsMessagesSent:
+    case 'sqsMessagesSent':
       return {
         text: ToolbarTranslations.sqsMessagesSent,
-        value: InfraSnapshotMetricType.sqsMessagesSent,
+        value: 'sqsMessagesSent',
       };
-    case InfraSnapshotMetricType.sqsMessagesEmpty:
+    case 'sqsMessagesEmpty':
       return {
         text: ToolbarTranslations.sqsMessagesEmpty,
-        value: InfraSnapshotMetricType.sqsMessagesEmpty,
+        value: 'sqsMessagesEmpty',
       };
-    case InfraSnapshotMetricType.sqsOldestMessage:
+    case 'sqsOldestMessage':
       return {
         text: ToolbarTranslations.sqsOldestMessage,
-        value: InfraSnapshotMetricType.sqsOldestMessage,
+        value: 'sqsOldestMessage',
       };
   }
 };

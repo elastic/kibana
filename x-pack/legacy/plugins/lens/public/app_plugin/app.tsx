@@ -13,6 +13,7 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { AppMountContext, NotificationsStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { npStart } from 'ui/new_platform';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
@@ -50,6 +51,7 @@ export function App({
   docId,
   docStorage,
   redirectTo,
+  addToDashboardMode,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
@@ -58,6 +60,7 @@ export function App({
   docId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
+  addToDashboardMode?: boolean;
 }) {
   const language =
     storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
@@ -152,6 +155,7 @@ export function App({
 
   const isSaveable =
     lastKnownDoc &&
+    lastKnownDoc.expression &&
     lastKnownDoc.expression.length > 0 &&
     core.application.capabilities.visualize.save;
 
@@ -164,6 +168,13 @@ export function App({
   );
 
   const { TopNavMenu } = npStart.plugins.navigation.ui;
+
+  const confirmButton = addToDashboardMode ? (
+    <FormattedMessage
+      id="xpack.lens.app.saveAddToDashboard"
+      defaultMessage="Save and add to dashboard"
+    />
+  ) : null;
 
   return (
     <I18nProvider>
@@ -228,7 +239,9 @@ export function App({
                 setState(s => ({ ...s, savedQuery }));
               }}
               onSavedQueryUpdated={savedQuery => {
-                data.query.filterManager.setFilters(savedQuery.attributes.filters || state.filters);
+                const savedQueryFilters = savedQuery.attributes.filters || [];
+                const globalFilters = data.query.filterManager.getGlobalFilters();
+                data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
                 setState(s => ({
                   ...s,
                   savedQuery: { ...savedQuery }, // Shallow query for reference issues
@@ -241,11 +254,11 @@ export function App({
                 }));
               }}
               onClearSavedQuery={() => {
-                data.query.filterManager.removeAll();
+                data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
                 setState(s => ({
                   ...s,
                   savedQuery: undefined,
-                  filters: [],
+                  filters: data.query.filterManager.getGlobalFilters(),
                   query: {
                     query: '',
                     language:
@@ -319,12 +332,13 @@ export function App({
                     persistedDoc: newDoc,
                     lastKnownDoc: newDoc,
                   }));
-
                   if (docId !== id) {
                     redirectTo(id);
                   }
                 })
-                .catch(() => {
+                .catch(e => {
+                  // eslint-disable-next-line no-console
+                  console.dir(e);
                   trackUiEvent('save_failed');
                   core.notifications.toasts.addDanger(
                     i18n.translate('xpack.lens.app.docSavingError', {
@@ -336,10 +350,11 @@ export function App({
             }}
             onClose={() => setState(s => ({ ...s, isSaveModalVisible: false }))}
             title={lastKnownDoc.title || ''}
-            showCopyOnSave={true}
+            showCopyOnSave={!addToDashboardMode}
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',
             })}
+            confirmButtonLabel={confirmButton}
           />
         )}
       </KibanaContextProvider>

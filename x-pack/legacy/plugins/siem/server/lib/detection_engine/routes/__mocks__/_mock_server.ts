@@ -7,12 +7,15 @@
 import Hapi from 'hapi';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
-
+import { savedObjectsClientMock } from '../../../../../../../../../src/core/server/mocks';
 import { alertsClientMock } from '../../../../../../alerting/server/alerts_client.mock';
-import { actionsClientMock } from '../../../../../../actions/server/actions_client.mock';
+import { actionsClientMock } from '../../../../../../../../plugins/actions/server/mocks';
+import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../../common/constants';
+import { ServerFacade } from '../../../../types';
 
 const defaultConfig = {
   'kibana.index': '.kibana',
+  [`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`]: '.siem-signals',
 };
 
 const isKibanaConfig = (config: unknown): config is KibanaConfig =>
@@ -48,6 +51,7 @@ export const createMockServer = (config: Record<string, string> = defaultConfig)
 
   const actionsClient = actionsClientMock.create();
   const alertsClient = alertsClientMock.create();
+  const savedObjectsClient = savedObjectsClientMock.create();
   const elasticsearch = {
     getCluster: jest.fn().mockImplementation(() => ({
       callWithRequest: jest.fn(),
@@ -55,10 +59,20 @@ export const createMockServer = (config: Record<string, string> = defaultConfig)
   };
   server.decorate('request', 'getAlertsClient', () => alertsClient);
   server.decorate('request', 'getBasePath', () => '/s/default');
-  server.decorate('request', 'getActionsClient', () => actionsClient);
   server.plugins.elasticsearch = (elasticsearch as unknown) as ElasticsearchPlugin;
-
-  return { server, alertsClient, actionsClient, elasticsearch };
+  server.plugins.spaces = { getSpaceId: () => 'default' };
+  server.plugins.actions = {
+    getActionsClientWithRequest: () => actionsClient,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any; // The types have really bad conflicts at the moment so I have to use any
+  server.decorate('request', 'getSavedObjectsClient', () => savedObjectsClient);
+  return {
+    server: server as ServerFacade & Hapi.Server,
+    alertsClient,
+    actionsClient,
+    elasticsearch,
+    savedObjectsClient,
+  };
 };
 
 export const createMockServerWithoutAlertClientDecoration = (
@@ -68,41 +82,34 @@ export const createMockServerWithoutAlertClientDecoration = (
     port: 0,
   });
 
+  const savedObjectsClient = savedObjectsClientMock.create();
   serverWithoutAlertClient.config = () => createMockKibanaConfig(config);
+  serverWithoutAlertClient.decorate('request', 'getSavedObjectsClient', () => savedObjectsClient);
+  serverWithoutAlertClient.plugins.actions = {
+    getActionsClientWithRequest: () => actionsClient,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any; // The types have really bad conflicts at the moment so I have to use any
 
   const actionsClient = actionsClientMock.create();
   serverWithoutAlertClient.decorate('request', 'getBasePath', () => '/s/default');
-  serverWithoutAlertClient.decorate('request', 'getActionsClient', () => actionsClient);
-
-  return { serverWithoutAlertClient, actionsClient };
-};
-
-export const createMockServerWithoutActionClientDecoration = (
-  config: Record<string, string> = defaultConfig
-) => {
-  const serverWithoutActionClient = new Hapi.Server({
-    port: 0,
-  });
-
-  serverWithoutActionClient.config = () => createMockKibanaConfig(config);
-
-  const alertsClient = alertsClientMock.create();
-  serverWithoutActionClient.decorate('request', 'getBasePath', () => '/s/default');
-  serverWithoutActionClient.decorate('request', 'getAlertsClient', () => alertsClient);
-
-  return { serverWithoutActionClient, alertsClient };
-};
-
-export const createMockServerWithoutActionOrAlertClientDecoration = (
-  config: Record<string, string> = defaultConfig
-) => {
-  const serverWithoutActionOrAlertClient = new Hapi.Server({
-    port: 0,
-  });
-
-  serverWithoutActionOrAlertClient.config = () => createMockKibanaConfig(config);
 
   return {
-    serverWithoutActionOrAlertClient,
+    serverWithoutAlertClient: serverWithoutAlertClient as ServerFacade & Hapi.Server,
+    actionsClient,
   };
 };
+
+export const getMockIndexName = () =>
+  jest.fn().mockImplementation(() => ({
+    callWithRequest: jest.fn().mockImplementationOnce(() => 'index-name'),
+  }));
+
+export const getMockEmptyIndex = () =>
+  jest.fn().mockImplementation(() => ({
+    callWithRequest: jest.fn().mockImplementation(() => ({ _shards: { total: 0 } })),
+  }));
+
+export const getMockNonEmptyIndex = () =>
+  jest.fn().mockImplementation(() => ({
+    callWithRequest: jest.fn().mockImplementation(() => ({ _shards: { total: 1 } })),
+  }));

@@ -10,6 +10,7 @@ import { PluginInitializerContext } from 'src/core/server';
 import { PLUGIN } from './common/constants';
 import { KibanaServer, plugin } from './server';
 import { savedObjectMappings } from './server/saved_objects';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export const uptime = (kibana: any) =>
   new kibana.Plugin({
@@ -31,6 +32,7 @@ export const uptime = (kibana: any) =>
         main: 'plugins/uptime/app',
         order: 8900,
         url: '/app/uptime#/',
+        category: DEFAULT_APP_CATEGORIES.observability,
       },
       mappings: savedObjectMappings,
       home: ['plugins/uptime/register_feature'],

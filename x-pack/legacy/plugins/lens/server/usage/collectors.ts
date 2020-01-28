@@ -6,32 +6,25 @@
 
 import moment from 'moment';
 import { get } from 'lodash';
-import { Server } from 'src/legacy/server/kbn_server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { TaskManagerStartContract } from '../../../../../plugins/task_manager/server';
 
 import { LensUsage, LensTelemetryState } from './types';
 
-export function registerLensUsageCollector(usageCollection: UsageCollectionSetup, server: Server) {
+export function registerLensUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  taskManager: Promise<TaskManagerStartContract>
+) {
   let isCollectorReady = false;
-  async function determineIfTaskManagerIsReady() {
-    let isReady = false;
-    try {
-      isReady = await isTaskManagerReady(server);
-    } catch (err) {} // eslint-disable-line
-
-    if (isReady) {
-      isCollectorReady = true;
-    } else {
-      setTimeout(determineIfTaskManagerIsReady, 500);
-    }
-  }
-  determineIfTaskManagerIsReady();
-
+  taskManager.then(() => {
+    // mark lensUsageCollector as ready to collect when the TaskManager is ready
+    isCollectorReady = true;
+  });
   const lensUsageCollector = usageCollection.makeUsageCollector({
     type: 'lens',
     fetch: async (): Promise<LensUsage> => {
       try {
-        const docs = await getLatestTaskState(server);
+        const docs = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task
         const state: LensTelemetryState = get(docs, '[0].state');
 
@@ -73,17 +66,7 @@ function addEvents(prevEvents: Record<string, number>, newEvents: Record<string,
   });
 }
 
-async function isTaskManagerReady(server: Server) {
-  return (await getLatestTaskState(server)) !== null;
-}
-
-async function getLatestTaskState(server: Server) {
-  const taskManager = server.plugins.task_manager;
-
-  if (!taskManager) {
-    return null;
-  }
-
+async function getLatestTaskState(taskManager: TaskManagerStartContract) {
   try {
     const result = await taskManager.fetch({
       query: { bool: { filter: { term: { _id: `task:Lens-lens_telemetry` } } } },

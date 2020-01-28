@@ -5,8 +5,8 @@
  */
 
 import { Breadcrumb } from 'ui/chrome';
+import { get, isEmpty } from 'lodash/fp';
 
-import { get } from 'lodash/fp';
 import { decodeIpv6 } from '../../../lib/helpers';
 import { getNetworkUrl, getIPDetailsUrl } from '../../../components/link_to/redirect_to_network';
 import { networkModel } from '../../../store/network';
@@ -28,7 +28,7 @@ export const getBreadcrumbs = (params: NetworkRouteSpyState, search: string[]): 
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: `${getNetworkUrl()}${search && search[0] ? search[0] : ''}`,
+      href: `${getNetworkUrl()}${!isEmpty(search[0]) ? search[0] : ''}`,
     },
   ];
   if (params.detailName != null) {
@@ -36,7 +36,9 @@ export const getBreadcrumbs = (params: NetworkRouteSpyState, search: string[]): 
       ...breadcrumb,
       {
         text: decodeIpv6(params.detailName),
-        href: `${getIPDetailsUrl(params.detailName)}${search && search[1] ? search[1] : ''}`,
+        href: `${getIPDetailsUrl(params.detailName, params.flowTarget)}${
+          !isEmpty(search[1]) ? search[1] : ''
+        }`,
       },
     ];
   }

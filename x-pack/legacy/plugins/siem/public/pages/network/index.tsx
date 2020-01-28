@@ -9,6 +9,7 @@ import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
 import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
+import { FlowTarget } from '../../graphql/types';
 
 import { IPDetails } from './ip_details';
 import { Network } from './network';
@@ -20,9 +21,9 @@ import { NetworkRouteType } from './navigation/types';
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
 const networkPagePath = `/:pageName(${SiemPageName.network})`;
-const ipDetailsPagePath = `${networkPagePath}/ip/:detailName`;
+const ipDetailsPageBasePath = `${networkPagePath}/ip/:detailName`;
 
-export const NetworkContainer = React.memo<Props>(() => {
+const NetworkContainerComponent: React.FC<Props> = () => {
   const capabilities = useContext(MlCapabilitiesContext);
   const capabilitiesFetched = capabilities.capabilitiesFetched;
   const userHasMlUserPermissions = useMemo(() => hasMlUserPermissions(capabilities), [
@@ -54,19 +55,33 @@ export const NetworkContainer = React.memo<Props>(() => {
             )}
           />
           <Route
-            path={ipDetailsPagePath}
+            path={`${ipDetailsPageBasePath}/:flowTarget`}
             render={({
               match: {
-                params: { detailName },
+                params: { detailName, flowTarget },
               },
             }) => (
               <IPDetails
                 detailName={detailName}
+                flowTarget={flowTarget}
                 to={to}
                 from={from}
                 setQuery={setQuery}
                 deleteQuery={deleteQuery}
                 isInitializing={isInitializing}
+              />
+            )}
+          />
+          <Route
+            path={ipDetailsPageBasePath}
+            render={({
+              location: { search = '' },
+              match: {
+                params: { detailName },
+              },
+            }) => (
+              <Redirect
+                to={`/${SiemPageName.network}/ip/${detailName}/${FlowTarget.source}${search}`}
               />
             )}
           />
@@ -80,6 +95,6 @@ export const NetworkContainer = React.memo<Props>(() => {
       )}
     </GlobalTime>
   );
-});
+};
 
-NetworkContainer.displayName = 'NetworkContainer';
+export const NetworkContainer = React.memo(NetworkContainerComponent);

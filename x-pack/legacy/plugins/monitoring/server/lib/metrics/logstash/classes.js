@@ -90,7 +90,7 @@ export class LogstashEventsLatencyClusterMetric extends LogstashClusterMetric {
       },
     };
 
-    this.calculation = (bucket, _key, _metric, _bucketSizeInSeconds) => {
+    this.calculation = bucket => {
       const timeInMillisDeriv = _.get(bucket, 'events_time_in_millis_deriv.normalized_value', null);
       const totalEventsDeriv = _.get(bucket, 'events_total_deriv.normalized_value', null);
 
@@ -189,7 +189,7 @@ export class LogstashEventsLatencyMetric extends LogstashMetric {
       },
     };
 
-    this.calculation = (bucket, _key, _metric, _bucketSizeInSeconds) => {
+    this.calculation = bucket => {
       const timeInMillisDeriv = _.get(bucket, 'events_time_in_millis_deriv.normalized_value', null);
       const totalEventsDeriv = _.get(bucket, 'events_total_deriv.normalized_value', null);
 

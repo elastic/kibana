@@ -11,7 +11,7 @@ import {
   IndicesDeleteParams,
   IndicesCreateParams
 } from 'elasticsearch';
-import { merge } from 'lodash';
+import { merge, uniqueId } from 'lodash';
 import { cloneDeep, isString } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
@@ -127,6 +127,23 @@ export function getESClient(
     ? callAsInternalUser
     : callAsCurrentUser;
 
+  const debug = context.params.query._debug;
+
+  function withTime<T>(
+    fn: (log: typeof console.log) => Promise<T>
+  ): Promise<T> {
+    const log = console.log.bind(console, uniqueId());
+    if (!debug) {
+      return fn(log);
+    }
+    const time = process.hrtime();
+    return fn(log).then(data => {
+      const now = process.hrtime(time);
+      log(`took: ${Math.round(now[0] * 1000 + now[1] / 1e6)}ms`);
+      return data;
+    });
+  }
+
   return {
     search: async <
       TDocument = unknown,
@@ -141,27 +158,29 @@ export function getESClient(
         apmOptions
       );
 
-      if (context.params.query._debug) {
-        console.log(`--DEBUG ES QUERY--`);
-        console.log(
-          `${request.url.pathname} ${JSON.stringify(context.params.query)}`
-        );
-        console.log(`GET ${nextParams.index}/_search`);
-        console.log(JSON.stringify(nextParams.body, null, 2));
-      }
+      return withTime(log => {
+        if (context.params.query._debug) {
+          log(`--DEBUG ES QUERY--`);
+          log(
+            `${request.url.pathname} ${JSON.stringify(context.params.query)}`
+          );
+          log(`GET ${nextParams.index}/_search`);
+          log(JSON.stringify(nextParams.body, null, 2));
+        }
 
-      return (callMethod('search', nextParams) as unknown) as Promise<
-        ESSearchResponse<TDocument, TSearchRequest>
-      >;
+        return (callMethod('search', nextParams) as unknown) as Promise<
+          ESSearchResponse<TDocument, TSearchRequest>
+        >;
+      });
     },
     index: <Body>(params: APMIndexDocumentParams<Body>) => {
-      return callMethod('index', params);
+      return withTime(() => callMethod('index', params));
     },
     delete: (params: IndicesDeleteParams) => {
-      return callMethod('delete', params);
+      return withTime(() => callMethod('delete', params));
     },
     indicesCreate: (params: IndicesCreateParams) => {
-      return callMethod('indices.create', params);
+      return withTime(() => callMethod('indices.create', params));
     }
   };
 }

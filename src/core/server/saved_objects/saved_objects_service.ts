@@ -29,7 +29,7 @@ import {
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
 import { LegacyServiceDiscoverPlugins } from '../legacy';
-import { ElasticsearchServiceSetup, APICaller } from '../elasticsearch';
+import { InternalElasticsearchServiceSetup, APICaller } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
 import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { SavedObjectsConfigType } from './saved_objects_config';
@@ -37,13 +37,17 @@ import { KibanaRequest } from '../http';
 import { SavedObjectsClientContract } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
-  SavedObjectsClientFactory,
+  SavedObjectsClientFactoryProvider,
   SavedObjectsClientWrapperFactory,
 } from './service/lib/scoped_client_provider';
-import { Logger } from '..';
+import { Logger } from '../logging';
+import { SavedObjectsMapping } from './mappings';
+import { MigrationDefinition } from './migrations/core/document_migrator';
+import { SavedObjectsSchemaDefinition } from './schema';
+import { PropertyValidators } from './validation';
 
 /**
- * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
+ * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The
  * SavedObjectsServiceSetup API exposes methods for creating and registering
  * Saved Object client wrappers.
@@ -66,11 +70,11 @@ import { Logger } from '..';
  * constructor.
  *
  * @example
- * import {SavedObjectsClient, CoreSetup} from 'src/core/server';
+ * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
  *
  * export class Plugin() {
  *   setup: (core: CoreSetup) => {
- *     core.savedObjects.setClientFactory(({request: KibanaRequest}) => {
+ *     core.savedObjects.setClientFactory(({ request: KibanaRequest }) => {
  *       return new SavedObjectsClient(core.savedObjects.scopedRepository(request));
  *     })
  *   }
@@ -80,61 +84,25 @@ import { Logger } from '..';
  */
 export interface SavedObjectsServiceSetup {
   /**
-   * Set a default factory for creating Saved Objects clients. Only one client
-   * factory can be set, subsequent calls to this method will fail.
+   * Set the default {@link SavedObjectsClientFactoryProvider | factory provider} for creating Saved Objects clients.
+   * Only one provider can be set, subsequent calls to this method will fail.
    */
-  setClientFactory: (customClientFactory: SavedObjectsClientFactory<KibanaRequest>) => void;
+  setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 
   /**
-   * Add a client wrapper with the given priority.
+   * Add a {@link SavedObjectsClientWrapperFactory | client wrapper factory} with the given priority.
    */
   addClientWrapper: (
     priority: number,
     id: string,
-    factory: SavedObjectsClientWrapperFactory<KibanaRequest>
+    factory: SavedObjectsClientWrapperFactory
   ) => void;
-
-  /**
-   * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
-   * uses the credentials from the passed in request to authenticate with
-   * Elasticsearch.
-   *
-   * @remarks
-   * The repository should only be used for creating and registering a client
-   * factory or client wrapper. Using the repository directly for interacting
-   * with Saved Objects is an anti-pattern. Use the Saved Objects client from
-   * the
-   * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#getScopedClient }
-   * method or the {@link RequestHandlerContext | route handler context}
-   * instead.
-   */
-  createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
-
-  /**
-   * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
-   * uses the internal Kibana user for authenticating with Elasticsearch.
-   *
-   * @remarks
-   * The repository should only be used for creating and registering a client
-   * factory or client wrapper. Using the repository directly for interacting
-   * with Saved Objects is an anti-pattern. Use the Saved Objects client from
-   * the
-   * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#getScopedClient }
-   * method or the {@link RequestHandlerContext | route handler context}
-   * instead.
-   */
-  createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
 }
 
 /**
  * @internal
  */
-export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSetup {
-  getScopedClient: (
-    req: KibanaRequest,
-    options?: SavedObjectsClientProviderOptions
-  ) => SavedObjectsClientContract;
-}
+export type InternalSavedObjectsServiceSetup = SavedObjectsServiceSetup;
 
 /**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
@@ -158,6 +126,26 @@ export interface SavedObjectsServiceStart {
     req: KibanaRequest,
     options?: SavedObjectsClientProviderOptions
   ) => SavedObjectsClientContract;
+  /**
+   * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
+   * uses the credentials from the passed in request to authenticate with
+   * Elasticsearch.
+   *
+   * @param req - The request to create the scoped repository from.
+   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   *
+   * @remarks
+   * Prefer using `getScopedClient`. This should only be used when using methods
+   * not exposed on {@link SavedObjectsClientContract}
+   */
+  createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+  /**
+   * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
+   * uses the internal Kibana user for authenticating with Elasticsearch.
+   *
+   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   */
+  createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
 }
 
 export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceStart {
@@ -171,10 +159,40 @@ export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceSta
   clientProvider: ISavedObjectsClientProvider;
 }
 
+/**
+ * Factory provided when invoking a {@link SavedObjectsClientFactoryProvider | client factory provider}
+ * See {@link SavedObjectsServiceSetup.setClientFactoryProvider}
+ *
+ * @public
+ */
+export interface SavedObjectsRepositoryFactory {
+  /**
+   * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
+   * uses the credentials from the passed in request to authenticate with
+   * Elasticsearch.
+   *
+   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   */
+  createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+  /**
+   * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
+   * uses the internal Kibana user for authenticating with Elasticsearch.
+   *
+   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   */
+  createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+}
+
 /** @internal */
 export interface SavedObjectsSetupDeps {
   legacyPlugins: LegacyServiceDiscoverPlugins;
-  elasticsearch: ElasticsearchServiceSetup;
+  elasticsearch: InternalElasticsearchServiceSetup;
+}
+
+interface WrappedClientFactoryWrapper {
+  priority: number;
+  id: string;
+  factory: SavedObjectsClientWrapperFactory;
 }
 
 /** @internal */
@@ -183,19 +201,25 @@ export interface SavedObjectsStartDeps {}
 
 export class SavedObjectsService
   implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
-  private migrator: KibanaMigrator | undefined;
   private logger: Logger;
-  private clientProvider: ISavedObjectsClientProvider<KibanaRequest> | undefined;
+
+  private setupDeps?: SavedObjectsSetupDeps;
+  private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
+  private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
+
+  private mappings: SavedObjectsMapping[] = [];
+  private migrations: MigrationDefinition = {};
+  private schemas: SavedObjectsSchemaDefinition = {};
+  private validations: PropertyValidators = {};
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
   }
 
-  public async setup(
-    setupDeps: SavedObjectsSetupDeps,
-    migrationsRetryDelay?: number
-  ): Promise<InternalSavedObjectsServiceSetup> {
+  public async setup(setupDeps: SavedObjectsSetupDeps): Promise<InternalSavedObjectsServiceSetup> {
     this.logger.debug('Setting up SavedObjects service');
+
+    this.setupDeps = setupDeps;
 
     const {
       savedObjectSchemas: savedObjectsSchemasDefinition,
@@ -203,77 +227,52 @@ export class SavedObjectsService
       savedObjectMigrations,
       savedObjectValidations,
     } = setupDeps.legacyPlugins.uiExports;
-
-    const savedObjectSchemas = new SavedObjectsSchema(savedObjectsSchemasDefinition);
-
-    const adminClient = await setupDeps.elasticsearch.adminClient$.pipe(first()).toPromise();
-
-    const kibanaConfig = await this.coreContext.configService
-      .atPath<KibanaConfigType>('kibana')
-      .pipe(first())
-      .toPromise();
-
-    const savedObjectsConfig = await this.coreContext.configService
-      .atPath<SavedObjectsConfigType>('migrations')
-      .pipe(first())
-      .toPromise();
-
-    const migrator = (this.migrator = new KibanaMigrator({
-      savedObjectSchemas,
-      savedObjectMappings,
-      savedObjectMigrations,
-      savedObjectValidations,
-      logger: this.coreContext.logger.get('migrations'),
-      kibanaVersion: this.coreContext.env.packageInfo.version,
-      config: setupDeps.legacyPlugins.pluginExtendedConfig,
-      savedObjectsConfig,
-      kibanaConfig,
-      callCluster: migrationsRetryCallCluster(
-        adminClient.callAsInternalUser,
-        this.coreContext.logger.get('migrations'),
-        migrationsRetryDelay
-      ),
-    }));
-
-    const createSORepository = (callCluster: APICaller, extraTypes: string[] = []) => {
-      return SavedObjectsRepository.createRepository(
-        migrator,
-        savedObjectSchemas,
-        setupDeps.legacyPlugins.pluginExtendedConfig,
-        kibanaConfig.index,
-        callCluster,
-        extraTypes
-      );
-    };
-
-    this.clientProvider = new SavedObjectsClientProvider<KibanaRequest>({
-      defaultClientFactory({ request }) {
-        const repository = createSORepository(adminClient.asScoped(request).callAsCurrentUser);
-        return new SavedObjectsClient(repository);
-      },
-    });
+    this.mappings = savedObjectMappings;
+    this.migrations = savedObjectMigrations;
+    this.schemas = savedObjectsSchemasDefinition;
+    this.validations = savedObjectValidations;
 
     return {
-      getScopedClient: this.clientProvider.getClient.bind(this.clientProvider),
-      setClientFactory: this.clientProvider.setClientFactory.bind(this.clientProvider),
-      addClientWrapper: this.clientProvider.addClientWrapperFactory.bind(this.clientProvider),
-      createInternalRepository: (extraTypes?: string[]) =>
-        createSORepository(adminClient.callAsInternalUser, extraTypes),
-      createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) =>
-        createSORepository(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
+      setClientFactoryProvider: provider => {
+        if (this.clientFactoryProvider) {
+          throw new Error('custom client factory is already set, and can only be set once');
+        }
+        this.clientFactoryProvider = provider;
+      },
+      addClientWrapper: (priority, id, factory) => {
+        this.clientFactoryWrappers.push({
+          priority,
+          id,
+          factory,
+        });
+      },
     };
   }
 
-  public async start(core: SavedObjectsStartDeps): Promise<InternalSavedObjectsServiceStart> {
-    if (!this.clientProvider) {
+  public async start(
+    core: SavedObjectsStartDeps,
+    migrationsRetryDelay?: number
+  ): Promise<InternalSavedObjectsServiceStart> {
+    if (!this.setupDeps) {
       throw new Error('#setup() needs to be run first');
     }
 
     this.logger.debug('Starting SavedObjects service');
 
+    const kibanaConfig = await this.coreContext.configService
+      .atPath<KibanaConfigType>('kibana')
+      .pipe(first())
+      .toPromise();
+    const savedObjectsConfig = await this.coreContext.configService
+      .atPath<SavedObjectsConfigType>('migrations')
+      .pipe(first())
+      .toPromise();
+    const adminClient = this.setupDeps!.elasticsearch.adminClient;
+    const migrator = this.createMigrator(kibanaConfig, savedObjectsConfig, migrationsRetryDelay);
+
     /**
      * Note: We want to ensure that migrations have completed before
-     * continuing with further Core startup steps that might use SavedObjects
+     * continuing with further Core start steps that might use SavedObjects
      * such as running the legacy server, legacy plugins and allowing incoming
      * HTTP requests.
      *
@@ -282,19 +281,78 @@ export class SavedObjectsService
      * So, when the `migrations.skip` is true, we skip migrations altogether.
      */
     const cliArgs = this.coreContext.env.cliArgs;
-    const savedObjectsConfig = await this.coreContext.configService
-      .atPath<SavedObjectsConfigType>('migrations')
-      .pipe(first())
-      .toPromise();
     const skipMigrations = cliArgs.optimize || savedObjectsConfig.skip;
-    await this.migrator!.runMigrations(skipMigrations);
+
+    this.logger.debug('Starting saved objects migration');
+    await migrator.runMigrations(skipMigrations);
+    this.logger.debug('Saved objects migration completed');
+
+    const createRepository = (callCluster: APICaller, extraTypes: string[] = []) => {
+      return SavedObjectsRepository.createRepository(
+        migrator,
+        new SavedObjectsSchema(this.schemas),
+        this.setupDeps!.legacyPlugins.pluginExtendedConfig,
+        kibanaConfig.index,
+        callCluster,
+        extraTypes
+      );
+    };
+
+    const repositoryFactory: SavedObjectsRepositoryFactory = {
+      createInternalRepository: (extraTypes?: string[]) =>
+        createRepository(adminClient.callAsInternalUser, extraTypes),
+      createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) =>
+        createRepository(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
+    };
+
+    const clientProvider = new SavedObjectsClientProvider({
+      defaultClientFactory({ request }) {
+        const repository = repositoryFactory.createScopedRepository(request);
+        return new SavedObjectsClient(repository);
+      },
+    });
+    if (this.clientFactoryProvider) {
+      const clientFactory = this.clientFactoryProvider(repositoryFactory);
+      clientProvider.setClientFactory(clientFactory);
+    }
+    this.clientFactoryWrappers.forEach(({ id, factory, priority }) => {
+      clientProvider.addClientWrapperFactory(priority, id, factory);
+    });
 
     return {
-      migrator: this.migrator!,
-      clientProvider: this.clientProvider,
-      getScopedClient: this.clientProvider.getClient.bind(this.clientProvider),
+      migrator,
+      clientProvider,
+      getScopedClient: clientProvider.getClient.bind(clientProvider),
+      createScopedRepository: repositoryFactory.createScopedRepository,
+      createInternalRepository: repositoryFactory.createInternalRepository,
     };
   }
 
   public async stop() {}
+
+  private createMigrator(
+    kibanaConfig: KibanaConfigType,
+    savedObjectsConfig: SavedObjectsConfigType,
+    migrationsRetryDelay?: number
+  ): KibanaMigrator {
+    const savedObjectSchemas = new SavedObjectsSchema(this.schemas);
+    const adminClient = this.setupDeps!.elasticsearch.adminClient;
+
+    return new KibanaMigrator({
+      savedObjectSchemas,
+      savedObjectMappings: this.mappings,
+      savedObjectMigrations: this.migrations,
+      savedObjectValidations: this.validations,
+      logger: this.coreContext.logger.get('migrations'),
+      kibanaVersion: this.coreContext.env.packageInfo.version,
+      config: this.setupDeps!.legacyPlugins.pluginExtendedConfig,
+      savedObjectsConfig,
+      kibanaConfig,
+      callCluster: migrationsRetryCallCluster(
+        adminClient.callAsInternalUser,
+        this.coreContext.logger.get('migrations'),
+        migrationsRetryDelay
+      ),
+    });
+  }
 }

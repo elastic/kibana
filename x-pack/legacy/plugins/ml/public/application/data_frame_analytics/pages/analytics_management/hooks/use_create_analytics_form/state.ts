@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiComboBoxOptionProps } from '@elastic/eui';
 import { DeepPartial } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check/check_ml_nodes';
@@ -45,22 +46,29 @@ export interface State {
     createIndexPattern: boolean;
     dependentVariable: DependentVariable;
     dependentVariableFetchFail: boolean;
-    dependentVariableOptions: Array<{ label: DependentVariable }> | [];
+    dependentVariableOptions: EuiComboBoxOptionProps[] | [];
     description: string;
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
     destinationIndexNameEmpty: boolean;
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
+    excludes: string[];
+    excludesOptions: EuiComboBoxOptionProps[];
+    fieldOptionsFetchFail: boolean;
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
     jobIdEmpty: boolean;
     jobIdInvalidMaxLength: boolean;
     jobIdValid: boolean;
     jobType: AnalyticsJobType;
-    loadingDepFieldOptions: boolean;
+    loadingDepVarOptions: boolean;
+    loadingFieldOptions: boolean;
+    maxDistinctValuesError: string | undefined;
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
+    previousJobType: null | AnalyticsJobType;
+    previousSourceIndex: EsIndexName | undefined;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
@@ -96,15 +104,22 @@ export const getInitialState = (): State => ({
     destinationIndexNameEmpty: true,
     destinationIndexNameValid: false,
     destinationIndexPatternTitleExists: false,
+    excludes: [],
+    fieldOptionsFetchFail: false,
+    excludesOptions: [],
     jobId: '',
     jobIdExists: false,
     jobIdEmpty: true,
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
     jobType: undefined,
-    loadingDepFieldOptions: false,
+    loadingDepVarOptions: false,
+    loadingFieldOptions: false,
+    maxDistinctValuesError: undefined,
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
+    previousJobType: null,
+    previousSourceIndex: undefined,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
@@ -146,7 +161,7 @@ export const getJobConfigFromFormState = (
       index: formState.destinationIndex,
     },
     analyzed_fields: {
-      excludes: [],
+      excludes: formState.excludes,
     },
     analysis: {
       outlier_detection: {},

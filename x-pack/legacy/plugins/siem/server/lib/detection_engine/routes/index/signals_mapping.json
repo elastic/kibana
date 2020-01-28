@@ -5,6 +5,9 @@
         "properties": {
           "parent": {
             "properties": {
+              "rule": {
+                "type": "keyword"
+              },
               "index": {
                 "type": "keyword"
               },
@@ -18,6 +21,9 @@
                 "type": "long"
               }
             }
+          },
+          "ancestors": {
+            "type": "object"
           },
           "rule": {
             "properties": {
@@ -36,6 +42,9 @@
               "timeline_id": {
                 "type": "keyword"
               },
+              "timeline_title": {
+                "type": "keyword"
+              },
               "max_signals": {
                 "type": "keyword"
               },
@@ -47,9 +56,6 @@
               },
               "description": {
                 "type": "keyword"
-              },
-              "filter": {
-                "type": "object"
               },
               "from": {
                 "type": "keyword"
@@ -81,8 +87,38 @@
               "tags": {
                 "type": "keyword"
               },
-              "threats": {
-                "type": "object"
+              "threat": {
+                "properties": {
+                  "framework": {
+                    "type": "keyword"
+                  },
+                  "tactic": {
+                    "properties": {
+                      "id": {
+                        "type": "keyword"
+                      },
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "reference": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "technique": {
+                    "properties": {
+                      "id": {
+                        "type": "keyword"
+                      },
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "reference": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
               },
               "type": {
                 "type": "keyword"

@@ -6,8 +6,6 @@
 
 import { useEffect, useState } from 'react';
 
-import { useUiSetting$ } from '../../../lib/kibana';
-import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 import { useStateToaster } from '../../../components/toasters';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import { fetchRuleById } from './api';
@@ -25,7 +23,6 @@ type Return = [boolean, Rule | null];
 export const useRule = (id: string | undefined): Return => {
   const [rule, setRule] = useState<Rule | null>(null);
   const [loading, setLoading] = useState(true);
-  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
@@ -37,7 +34,6 @@ export const useRule = (id: string | undefined): Return => {
         setLoading(true);
         const ruleResponse = await fetchRuleById({
           id: idToFetch,
-          kbnVersion,
           signal: abortCtrl.signal,
         });
 

@@ -21,13 +21,16 @@ import {
   EuiOverlayMask,
   EuiSpacer,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { metadata } from 'ui/metadata';
 // metadata.branch corresponds to the version used in documentation links.
-const jobTipsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/create-jobs.html#job-tips`;
+const jobTipsUrl = `https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/create-jobs.html#job-tips`;
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
@@ -38,7 +41,7 @@ const defaultIconType = 'questionInCircle';
 const getDefaultState = () => ({
   ui: {
     iconType: defaultIconType,
-    isLoading: false,
+    isLoading: true,
     isModalVisible: false,
   },
   data: {
@@ -150,6 +153,14 @@ Callout.propTypes = {
   }),
 };
 
+const LoadingSpinner = () => (
+  <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="xl" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 const Modal = ({ close, title, children }) => (
   <EuiOverlayMask>
     <EuiModal onClose={close} style={{ width: '800px' }}>
@@ -249,10 +260,11 @@ export class ValidateJob extends Component {
     const isDisabled = this.props.isDisabled !== true ? false : true;
     const embedded = this.props.embedded === true;
     const idFilterList = this.props.idFilterList || [];
+    const isLoading = this.state.ui.isLoading;
 
     return (
       <Fragment>
-        {embedded === false && (
+        {embedded === false ? (
           <div>
             <EuiButton
               onClick={this.validate}
@@ -261,7 +273,7 @@ export class ValidateJob extends Component {
               iconType={isCurrentJobConfig ? this.state.ui.iconType : defaultIconType}
               iconSide="right"
               isDisabled={isDisabled}
-              isLoading={this.state.ui.isLoading}
+              isLoading={isLoading}
             >
               <FormattedMessage
                 id="xpack.ml.validateJob.validateJobButtonLabel"
@@ -280,7 +292,11 @@ export class ValidateJob extends Component {
                   />
                 }
               >
-                <MessageList messages={this.state.data.messages} idFilterList={idFilterList} />
+                {isLoading ? (
+                  <LoadingSpinner />
+                ) : (
+                  <MessageList messages={this.state.data.messages} idFilterList={idFilterList} />
+                )}
 
                 <EuiText>
                   <FormattedMessage
@@ -308,9 +324,14 @@ export class ValidateJob extends Component {
               </Modal>
             )}
           </div>
-        )}
-        {embedded === true && (
-          <MessageList messages={this.state.data.messages} idFilterList={idFilterList} />
+        ) : (
+          <Fragment>
+            {isLoading ? (
+              <LoadingSpinner />
+            ) : (
+              <MessageList messages={this.state.data.messages} idFilterList={idFilterList} />
+            )}
+          </Fragment>
         )}
       </Fragment>
     );

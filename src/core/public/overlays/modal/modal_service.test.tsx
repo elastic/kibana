@@ -80,6 +80,91 @@ describe('ModalService', () => {
         expect(onCloseComplete).toBeCalledTimes(1);
       });
     });
+
+    describe('with a currently active confirm', () => {
+      let confirm1: Promise<boolean>;
+
+      beforeEach(() => {
+        confirm1 = modals.openConfirm('confirm 1');
+      });
+
+      it('replaces the current confirm with the new one', () => {
+        modals.openConfirm('some confirm');
+        expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+        expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
+      });
+
+      it('resolves the previous confirm promise', async () => {
+        modals.open(mountReactNode(<span>Flyout content 2</span>));
+        expect(await confirm1).toEqual(false);
+      });
+    });
+  });
+
+  describe('openConfirm()', () => {
+    it('renders a mountpoint confirm message', () => {
+      expect(mockReactDomRender).not.toHaveBeenCalled();
+      modals.openConfirm(container => {
+        const content = document.createElement('span');
+        content.textContent = 'Modal content';
+        container.append(content);
+        return () => {};
+      });
+      expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+      const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
+      expect(modalContent.html()).toMatchSnapshot();
+    });
+
+    it('renders a string confirm message', () => {
+      expect(mockReactDomRender).not.toHaveBeenCalled();
+      modals.openConfirm('Some message');
+      expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+      const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
+      expect(modalContent.html()).toMatchSnapshot();
+    });
+
+    describe('with a currently active modal', () => {
+      let ref1: OverlayRef;
+
+      beforeEach(() => {
+        ref1 = modals.open(mountReactNode(<span>Modal content 1</span>));
+      });
+
+      it('replaces the current modal with the new confirm', () => {
+        modals.openConfirm('some confirm');
+        expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+        expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
+        expect(() => ref1.close()).not.toThrowError();
+        expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
+      });
+
+      it('resolves onClose on the previous ref', async () => {
+        const onCloseComplete = jest.fn();
+        ref1.onClose.then(onCloseComplete);
+        modals.openConfirm('some confirm');
+        await ref1.onClose;
+        expect(onCloseComplete).toBeCalledTimes(1);
+      });
+    });
+
+    describe('with a currently active confirm', () => {
+      let confirm1: Promise<boolean>;
+
+      beforeEach(() => {
+        confirm1 = modals.openConfirm('confirm 1');
+      });
+
+      it('replaces the current confirm with the new one', () => {
+        modals.openConfirm('some confirm');
+        expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+        expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
+      });
+
+      it('resolves the previous confirm promise', async () => {
+        modals.openConfirm('some confirm');
+        expect(await confirm1).toEqual(false);
+      });
+    });
   });
 
   describe('ModalRef#close()', () => {

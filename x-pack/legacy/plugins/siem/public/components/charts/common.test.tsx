@@ -13,8 +13,6 @@ import {
   defaultChartHeight,
   getChartHeight,
   getChartWidth,
-  getSeriesStyle,
-  SeriesType,
   WrappedByAutoSizer,
   ChartSeriesData,
   useTheme,
@@ -38,26 +36,6 @@ describe('WrappedByAutoSizer', () => {
   it('should render correct given height', () => {
     const wrapper = shallow(<WrappedByAutoSizer height="100px" />);
     expect(wrapper).toHaveStyleRule('height', '100px');
-  });
-});
-
-describe('getSeriesStyle', () => {
-  it('should not create style mapping if color is not given', () => {
-    const mockSeriesKey = 'mockSeriesKey';
-    const color = '';
-    const customSeriesColors = getSeriesStyle(mockSeriesKey, color, SeriesType.BAR);
-    expect(customSeriesColors).toBeUndefined();
-  });
-
-  it('should create correct style mapping for series of a chart', () => {
-    const mockSeriesKey = 'mockSeriesKey';
-    const color = 'red';
-    const customSeriesColors = getSeriesStyle(mockSeriesKey, color, SeriesType.BAR);
-    const expectedKey = { colorValues: [mockSeriesKey] };
-    customSeriesColors!.forEach((value, key) => {
-      expect(JSON.stringify(key)).toEqual(JSON.stringify(expectedKey));
-      expect(value).toEqual(color);
-    });
   });
 });
 

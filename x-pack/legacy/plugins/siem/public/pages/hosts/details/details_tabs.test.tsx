@@ -16,8 +16,6 @@ import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 
-jest.mock('../../../lib/kibana');
-
 jest.mock('../../../containers/source', () => ({
   indicesExistOrDataTemporarilyUnavailable: () => true,
   WithSource: ({

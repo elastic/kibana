@@ -74,7 +74,7 @@ export default function({ getService, getPageObjects }) {
       const toTime = 'Nov 19, 2016 @ 05:00:00.000';
 
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('alias2');
+      await PageObjects.discover.selectIndexPattern('alias2*');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
       await retry.try(async function() {

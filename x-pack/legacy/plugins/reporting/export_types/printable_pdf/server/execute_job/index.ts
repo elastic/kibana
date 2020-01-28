@@ -5,16 +5,16 @@
  */
 
 import * as Rx from 'rxjs';
-import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
+import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import {
   ServerFacade,
   ExecuteJobFactory,
   ESQueueWorkerExecuteFn,
   HeadlessChromiumDriverFactory,
+  Logger,
 } from '../../../../types';
 import { JobDocPayloadPDF } from '../../types';
-import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
-import { LevelLogger } from '../../../../server/lib';
+import { PDF_JOB_TYPE } from '../../../../common/constants';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import {
   decryptJobHeaders,
@@ -28,38 +28,34 @@ type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocP
 
 export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFactoryFn(
   server: ServerFacade,
+  parentLogger: Logger,
   { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
 ) {
   const generatePdfObservable = generatePdfObservableFactory(server, browserDriverFactory);
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'execute']);
+  const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
 
-  return function executeJob(
-    jobId: string,
-    jobToExecute: JobDocPayloadPDF,
-    cancellationToken: any
-  ) {
+  return function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
     const jobLogger = logger.clone([jobId]);
 
-    const process$ = Rx.of({ job: jobToExecute, server, logger }).pipe(
-      mergeMap(decryptJobHeaders),
-      map(omitBlacklistedHeaders),
-      map(getConditionalHeaders),
-      mergeMap(getCustomLogo),
-      mergeMap(getFullUrls),
-      mergeMap(
-        ({ job, conditionalHeaders, logo, urls }): Rx.Observable<Buffer> => {
-          const { browserTimezone, layout } = jobToExecute;
-          return generatePdfObservable(
-            jobLogger,
-            job.title,
-            urls,
-            browserTimezone,
-            conditionalHeaders,
-            layout,
-            logo
-          );
-        }
-      ),
+    const process$ = Rx.of(1).pipe(
+      mergeMap(() => decryptJobHeaders({ server, job, logger })),
+      map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
+      map(filteredHeaders => getConditionalHeaders({ server, job, filteredHeaders })),
+      mergeMap(conditionalHeaders => getCustomLogo({ server, job, conditionalHeaders })),
+      mergeMap(({ logo, conditionalHeaders }) => {
+        const urls = getFullUrls({ server, job });
+
+        const { browserTimezone, layout, title } = job;
+        return generatePdfObservable(
+          jobLogger,
+          title,
+          urls,
+          browserTimezone,
+          conditionalHeaders,
+          layout,
+          logo
+        );
+      }),
       map((buffer: Buffer) => ({
         content_type: 'application/pdf',
         content: buffer.toString('base64'),
@@ -72,7 +68,6 @@ export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFa
     );
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
-
     return process$.pipe(takeUntil(stop$)).toPromise();
   };
 };

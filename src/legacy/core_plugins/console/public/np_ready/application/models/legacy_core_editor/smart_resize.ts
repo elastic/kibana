@@ -24,7 +24,7 @@ export default function(editor: any) {
   const resize = editor.resize;
 
   const throttledResize = throttle(() => {
-    resize.call(editor);
+    resize.call(editor, false);
 
     // Keep current top line in view when resizing to avoid losing user context
     const userRow = get(throttledResize, 'topRow', 0);

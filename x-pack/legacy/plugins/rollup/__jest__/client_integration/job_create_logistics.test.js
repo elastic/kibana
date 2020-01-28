@@ -12,7 +12,7 @@ import {
   MONTH,
   YEAR,
 } from '../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../src/legacy/ui/public/index_patterns';
+import { indexPatterns } from '../../../../../../src/plugins/data/public';
 import { setupEnvironment, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
@@ -154,7 +154,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
           );
         };
 
-        [...INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, ','].reduce((promise, char) => {
+        [...indexPatterns.ILLEGAL_CHARACTERS_VISIBLE, ','].reduce((promise, char) => {
           return promise.then(() => expectInvalidChar(char));
         }, Promise.resolve());
       });

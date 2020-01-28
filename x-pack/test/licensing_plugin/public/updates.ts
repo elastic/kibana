@@ -32,7 +32,7 @@ export default function(ftrContext: FtrProviderContext) {
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
-          await testUtils.delay(100);
+          await testUtils.delay(500);
 
           const licensing: LicensingPluginSetup = setup.plugins.licensing;
           licensing.license$.subscribe(license => cb(license.type));
@@ -48,7 +48,7 @@ export default function(ftrContext: FtrProviderContext) {
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
-          await testUtils.delay(100);
+          await testUtils.delay(500);
 
           const licensing: LicensingPluginSetup = setup.plugins.licensing;
           licensing.license$.subscribe(license => cb(license.type));
@@ -64,7 +64,7 @@ export default function(ftrContext: FtrProviderContext) {
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
-          await testUtils.delay(100);
+          await testUtils.delay(500);
 
           const licensing: LicensingPluginSetup = setup.plugins.licensing;
           licensing.license$.subscribe(license => cb(license.type));
@@ -80,7 +80,7 @@ export default function(ftrContext: FtrProviderContext) {
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
-          await testUtils.delay(100);
+          await testUtils.delay(500);
 
           const licensing: LicensingPluginSetup = setup.plugins.licensing;
           licensing.license$.subscribe(license => cb(license.type));

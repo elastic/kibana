@@ -71,9 +71,6 @@ exports[`should enable sort order select when sort field provided 1`] = `
       <EuiSelect
         compressed={true}
         disabled={false}
-        fullWidth={false}
-        hasNoInitialSelection={false}
-        isLoading={false}
         onChange={[Function]}
         options={
           Array [
@@ -186,9 +183,6 @@ exports[`should render top hits form when useTopHits is true 1`] = `
       <EuiSelect
         compressed={true}
         disabled={true}
-        fullWidth={false}
-        hasNoInitialSelection={false}
-        isLoading={false}
         onChange={[Function]}
         options={
           Array [
@@ -341,9 +335,6 @@ exports[`should render update source editor 1`] = `
       <EuiSelect
         compressed={true}
         disabled={true}
-        fullWidth={false}
-        hasNoInitialSelection={false}
-        isLoading={false}
         onChange={[Function]}
         options={
           Array [

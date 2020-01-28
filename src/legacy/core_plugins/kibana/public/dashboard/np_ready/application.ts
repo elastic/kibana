@@ -19,33 +19,31 @@
 
 import { EuiConfirmModal, EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
+import { History } from 'history';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import {
   AppMountContext,
   ChromeStart,
+  IUiSettingsClient,
   LegacyCoreStart,
   SavedObjectsClientContract,
-  IUiSettingsClient,
 } from 'kibana/public';
-import { Storage } from '../../../../../../plugins/kibana_utils/public';
+import { IKbnUrlStateStorage, Storage } from '../../../../../../plugins/kibana_utils/public';
 import {
-  GlobalStateProvider,
-  StateManagementConfigProvider,
-  AppStateProvider,
-  PrivateProvider,
-  EventsProvider,
-  PersistedState,
+  configureAppAngularModule,
+  confirmModalFactory,
   createTopNavDirective,
   createTopNavHelper,
-  PromiseServiceCreator,
-  KbnUrlProvider,
-  RedirectWhenMissingProvider,
-  confirmModalFactory,
-  configureAppAngularModule,
-  SavedObjectLoader,
+  EventsProvider,
   IPrivate,
+  KbnUrlProvider,
+  PersistedState,
+  PrivateProvider,
+  PromiseServiceCreator,
+  RedirectWhenMissingProvider,
+  SavedObjectLoader,
+  StateManagementConfigProvider,
 } from '../legacy_imports';
-
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
 import { IEmbeddableStart } from '../../../../../../plugins/embeddable/public';
@@ -68,6 +66,8 @@ export interface RenderDeps {
   embeddables: IEmbeddableStart;
   localStorage: Storage;
   share: SharePluginStart;
+  history: History;
+  kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 let angularModuleInstance: IModule | null = null;
@@ -80,17 +80,17 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
     // custom routing stuff
     initDashboardApp(angularModuleInstance, deps);
   }
+
   const $injector = mountDashboardApp(appBasePath, element);
+
   return () => {
     $injector.get('$rootScope').$destroy();
   };
 };
 
-const mainTemplate = (basePath: string) => `<div style="height: 100%">
+const mainTemplate = (basePath: string) => `<div ng-view class="kbnLocalApplicationWrapper">
   <base href="${basePath}" />
-  <div ng-view style="height: 100%;"></div>
-</div>
-`;
+</div>`;
 
 const moduleName = 'app/dashboard';
 
@@ -98,7 +98,7 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react'];
 
 function mountDashboardApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
-  mountpoint.setAttribute('style', 'height: 100%');
+  mountpoint.setAttribute('class', 'kbnLocalApplicationWrapper');
   // eslint-disable-next-line
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
@@ -149,23 +149,13 @@ function createLocalConfirmModalModule() {
 }
 
 function createLocalStateModule() {
-  angular
-    .module('app/dashboard/State', [
-      'app/dashboard/Private',
-      'app/dashboard/Config',
-      'app/dashboard/KbnUrl',
-      'app/dashboard/Promise',
-      'app/dashboard/PersistedState',
-    ])
-    .factory('AppState', function(Private: any) {
-      return Private(AppStateProvider);
-    })
-    .service('getAppState', function(Private: any) {
-      return Private(AppStateProvider).getAppState;
-    })
-    .service('globalState', function(Private: any) {
-      return Private(GlobalStateProvider);
-    });
+  angular.module('app/dashboard/State', [
+    'app/dashboard/Private',
+    'app/dashboard/Config',
+    'app/dashboard/KbnUrl',
+    'app/dashboard/Promise',
+    'app/dashboard/PersistedState',
+  ]);
 }
 
 function createLocalPersistedStateModule() {

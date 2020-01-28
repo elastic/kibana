@@ -41,7 +41,6 @@ const INJECTED_METADATA = {
       version: expect.any(String),
     },
     pluginSearchPaths: expect.any(Array),
-    staticFilesDir: expect.any(String),
   },
   legacyMetadata: {
     branch: expect.any(String),
@@ -50,6 +49,7 @@ const INJECTED_METADATA = {
     version: expect.any(String),
   },
 };
+
 const { createKibanaRequest, createRawRequest } = httpServerMock;
 const legacyApp = { getId: () => 'legacy' };
 

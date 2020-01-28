@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Field } from '../../../../index_patterns';
+import { Field } from '../../../../../../../plugins/data/public';
 import { FieldParamEditor } from './field';
 import { getCompatibleAggs } from './top_aggregate';
 import { AggParamEditorProps } from '..';

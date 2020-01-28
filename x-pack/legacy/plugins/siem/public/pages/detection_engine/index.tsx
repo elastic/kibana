@@ -7,39 +7,48 @@
 import React from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
-import { CreateRuleComponent } from './rules/create';
-import { DetectionEngineComponent } from './detection_engine';
-import { EditRuleComponent } from './rules/edit';
-import { RuleDetailsComponent } from './rules/details';
-import { RulesComponent } from './rules';
+import { ManageUserInfo } from './components/user_info';
+import { CreateRulePage } from './rules/create';
+import { DetectionEnginePage } from './detection_engine';
+import { EditRulePage } from './rules/edit';
+import { RuleDetailsPage } from './rules/details';
+import { RulesPage } from './rules';
+import { DetectionEngineTab } from './types';
 
-const detectionEnginePath = `/:pageName(detection-engine)`;
+const detectionEnginePath = `/:pageName(detections)`;
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
-export const DetectionEngineContainer = React.memo<Props>(() => (
-  <Switch>
-    <Route exact path={detectionEnginePath} strict>
-      <DetectionEngineComponent />
-    </Route>
-    <Route exact path={`${detectionEnginePath}/rules`}>
-      <RulesComponent />
-    </Route>
-    <Route path={`${detectionEnginePath}/rules/create`}>
-      <CreateRuleComponent />
-    </Route>
-    <Route exact path={`${detectionEnginePath}/rules/:ruleId`}>
-      <RuleDetailsComponent />
-    </Route>
-    <Route path={`${detectionEnginePath}/rules/:ruleId/edit`}>
-      <EditRuleComponent />
-    </Route>
-    <Route
-      path="/detection-engine/"
-      render={({ location: { search = '' } }) => (
-        <Redirect from="/detection-engine/" to={`/detection-engine${search}`} />
-      )}
-    />
-  </Switch>
-));
-DetectionEngineContainer.displayName = 'DetectionEngineContainer';
+const DetectionEngineContainerComponent: React.FC<Props> = () => (
+  <ManageUserInfo>
+    <Switch>
+      <Route
+        exact
+        path={`${detectionEnginePath}/:tabName(${DetectionEngineTab.signals}|${DetectionEngineTab.alerts})`}
+        strict
+      >
+        <DetectionEnginePage />
+      </Route>
+      <Route exact path={`${detectionEnginePath}/rules`}>
+        <RulesPage />
+      </Route>
+      <Route exact path={`${detectionEnginePath}/rules/create`}>
+        <CreateRulePage />
+      </Route>
+      <Route exact path={`${detectionEnginePath}/rules/id/:detailName`}>
+        <RuleDetailsPage />
+      </Route>
+      <Route exact path={`${detectionEnginePath}/rules/id/:detailName/edit`}>
+        <EditRulePage />
+      </Route>
+      <Route
+        path="/detections/"
+        render={({ location: { search = '' } }) => (
+          <Redirect from="/detections/" to={`/detections/${DetectionEngineTab.signals}${search}`} />
+        )}
+      />
+    </Switch>
+  </ManageUserInfo>
+);
+
+export const DetectionEngineContainer = React.memo(DetectionEngineContainerComponent);

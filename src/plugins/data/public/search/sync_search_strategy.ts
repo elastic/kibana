@@ -36,14 +36,12 @@ export const syncSearchStrategyProvider: TSearchStrategyProvider<typeof SYNC_SEA
     request: ISyncSearchRequest,
     options: ISearchOptions = {}
   ) => {
-    const response: Promise<IKibanaSearchResponse> = context.core.http.fetch(
-      `/internal/search/${request.serverStrategy}`,
-      {
-        method: 'POST',
-        body: JSON.stringify(request),
-        signal: options.signal,
-      }
-    );
+    const response: Promise<IKibanaSearchResponse> = context.core.http.fetch({
+      path: `/internal/search/${request.serverStrategy}`,
+      method: 'POST',
+      body: JSON.stringify(request),
+      signal: options.signal,
+    });
 
     return from(response);
   };

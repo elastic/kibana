@@ -13,9 +13,9 @@ import {
   InventoryMetaResponseRT,
   InventoryMetaResponse,
 } from '../../../common/http_api/inventory_meta_api';
-import { InfraNodeType } from '../../graphql/types';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
-export function useInventoryMeta(sourceId: string, nodeType: InfraNodeType) {
+export function useInventoryMeta(sourceId: string, nodeType: InventoryItemType) {
   const decodeResponse = (response: any) => {
     return pipe(
       InventoryMetaResponseRT.decode(response),

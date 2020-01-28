@@ -17,7 +17,10 @@
  * under the License.
  */
 
+import { Type } from '@kbn/config-schema';
+
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import { ConfigDeprecationProvider } from './config';
 import { ContextSetup } from './context';
 import { InternalElasticsearchServiceSetup } from './elasticsearch';
 import { InternalHttpServiceSetup } from './http';
@@ -46,4 +49,19 @@ export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
+}
+
+/**
+ * @internal
+ */
+export interface ServiceConfigDescriptor<T = any> {
+  path: string;
+  /**
+   * Schema to use to validate the configuration.
+   */
+  schema: Type<T>;
+  /**
+   * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
+   */
+  deprecations?: ConfigDeprecationProvider;
 }

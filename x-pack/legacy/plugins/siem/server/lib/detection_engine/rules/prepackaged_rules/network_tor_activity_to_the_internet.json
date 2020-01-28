@@ -1,17 +1,37 @@
 {
-  "rule_id": "7d2c38d7-ede7-4bdf-b140-445906e6c540",
-  "risk_score": 50,
-  "description": "Network - Tor Activity to the Internet\t",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Network - Tor Activity to the Internet\t",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "(destination.port:9001 or destination.port:9030) and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "description": "This signal detects network events that may indicate the use of Tor traffic\nto the Internet. Tor is a network protocol that sends traffic through a\nseries of encrypted tunnels used to conceal a user's location and usage.\nTor may be used by threat actors as an alternate communication pathway to\nconceal the actor's indentity and avoid detection.\n",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
-  "filters": [],
-  "enabled": false,
+  "name": "Tor Activity to the Internet",
+  "query": "network.transport: tcp and destination.port: (9001 or 9030) and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
+  "risk_score": 25,
+  "rule_id": "7d2c38d7-ede7-4bdf-b140-445906e6c540",
+  "severity": "low",
+  "tags": ["Elastic", "network"],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
   "version": 1
 }

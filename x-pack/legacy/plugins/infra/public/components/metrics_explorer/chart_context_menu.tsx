@@ -21,9 +21,9 @@ import {
   MetricsExplorerChartOptions,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
-import { InfraNodeType } from '../../graphql/types';
 import { getNodeDetailUrl } from '../../pages/link_to/redirect_to_node_detail';
 import { SourceConfiguration } from '../../utils/source_configuration';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 interface Props {
   options: MetricsExplorerOptions;
@@ -35,15 +35,18 @@ interface Props {
   chartOptions: MetricsExplorerChartOptions;
 }
 
-const fieldToNodeType = (source: SourceConfiguration, field: string): InfraNodeType | undefined => {
+const fieldToNodeType = (
+  source: SourceConfiguration,
+  field: string
+): InventoryItemType | undefined => {
   if (source.fields.host === field) {
-    return InfraNodeType.host;
+    return 'host';
   }
   if (source.fields.pod === field) {
-    return InfraNodeType.pod;
+    return 'pod';
   }
   if (source.fields.container === field) {
-    return InfraNodeType.container;
+    return 'container';
   }
 };
 
@@ -54,7 +57,7 @@ const dateMathExpressionToEpoch = (dateMathExpression: string, roundUp = false):
 };
 
 export const createNodeDetailLink = (
-  nodeType: InfraNodeType,
+  nodeType: InventoryItemType,
   nodeId: string,
   from: string,
   to: string
