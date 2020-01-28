@@ -34,8 +34,6 @@ describe('Elasticsearch plugin', () => {
   let servers: TestUtils;
   let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
-
-  let kbnServer: TestKibanaUtils['kbnServer'];
   let elasticsearch: TestKibanaUtils['kbnServer']['server']['plugins']['elasticsearch'];
 
   const esNodesCompatibility$ = new BehaviorSubject<NodesVersionCompatibility>({
