@@ -28,10 +28,14 @@
 
 import _ from 'lodash';
 import { AggConfig, AggConfigOptions } from './agg_config';
-import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { Schema } from './schemas';
 import { AggGroupNames } from './agg_groups';
-import { IndexPattern, ISearchSource, FetchOptions } from '../../../../plugins/data/public';
+import {
+  IndexPattern,
+  ISearchSource,
+  FetchOptions,
+  TimeRange,
+} from '../../../../plugins/data/public';
 
 type Schemas = Record<string, any>;
 
