@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as _ from 'lodash';
 // @ts-ignore
 import contentDisposition from 'content-disposition';
+import * as _ from 'lodash';
+import { CSV_JOB_TYPE } from '../../../common/constants';
 import {
-  ServerFacade,
-  ExportTypesRegistry,
   ExportTypeDefinition,
+  ExportTypesRegistry,
   JobDocOutput,
   JobSource,
+  ServerFacade,
 } from '../../../types';
-import { CSV_JOB_TYPE } from '../../../common/constants';
 
 interface ICustomHeaders {
   [x: string]: any;
