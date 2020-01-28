@@ -44,6 +44,8 @@ describe('with_bulk_alert_api_operations', () => {
       expect(typeof props.enableAlert).toEqual('function');
       expect(typeof props.disableAlert).toEqual('function');
       expect(typeof props.deleteAlert).toEqual('function');
+      expect(typeof props.loadAlert).toEqual('function');
+      expect(typeof props.loadAlertTypes).toEqual('function');
       return <div />;
     };
 
@@ -208,6 +210,38 @@ describe('with_bulk_alert_api_operations', () => {
 
     expect(alertApi.deleteAlerts).toHaveBeenCalledTimes(1);
     expect(alertApi.deleteAlerts).toHaveBeenCalledWith({ ids: [alerts[0].id, alerts[1].id], http });
+  });
+
+  it('loadAlert calls the loadAlert api', () => {
+    const { http } = useAppDependencies();
+    const ComponentToExtend = ({
+      loadAlert,
+      alertId,
+    }: ComponentOpts & { alertId: Alert['id'] }) => {
+      return <button onClick={() => loadAlert(alertId)}>{'call api'}</button>;
+    };
+
+    const ExtendedComponent = withBulkAlertOperations(ComponentToExtend);
+    const alertId = uuid.v4();
+    const component = mount(<ExtendedComponent alertId={alertId} />);
+    component.find('button').simulate('click');
+
+    expect(alertApi.loadAlert).toHaveBeenCalledTimes(1);
+    expect(alertApi.loadAlert).toHaveBeenCalledWith({ alertId, http });
+  });
+
+  it('loadAlertTypes calls the loadAlertTypes api', () => {
+    const { http } = useAppDependencies();
+    const ComponentToExtend = ({ loadAlertTypes }: ComponentOpts) => {
+      return <button onClick={() => loadAlertTypes()}>{'call api'}</button>;
+    };
+
+    const ExtendedComponent = withBulkAlertOperations(ComponentToExtend);
+    const component = mount(<ExtendedComponent />);
+    component.find('button').simulate('click');
+
+    expect(alertApi.loadAlertTypes).toHaveBeenCalledTimes(1);
+    expect(alertApi.loadAlertTypes).toHaveBeenCalledWith({ http });
   });
 });
 

@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { Alert } from '../../../../types';
+import { Alert, AlertType } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import {
   deleteAlerts,
@@ -19,6 +19,8 @@ import {
   enableAlert,
   muteAlert,
   unmuteAlert,
+  loadAlert,
+  loadAlertTypes,
 } from '../../../lib/alert_api';
 
 export interface ComponentOpts {
@@ -32,6 +34,8 @@ export interface ComponentOpts {
   enableAlert: (alert: Alert) => Promise<void>;
   disableAlert: (alert: Alert) => Promise<void>;
   deleteAlert: (alert: Alert) => Promise<void>;
+  loadAlert: (id: Alert['id']) => Promise<Alert>;
+  loadAlertTypes: () => Promise<AlertType[]>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -83,6 +87,8 @@ export function withBulkAlertOperations<T>(
           }
         }}
         deleteAlert={async (alert: Alert) => deleteAlert({ http, id: alert.id })}
+        loadAlert={async (alertId: Alert['id']) => loadAlert({ http, alertId })}
+        loadAlertTypes={async () => loadAlertTypes({ http })}
       />
     );
   };

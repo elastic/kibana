@@ -18,7 +18,7 @@ import { AppContextProvider, useAppDependencies } from './app_context';
 import { hasShowAlertsCapability } from './lib/capabilities';
 import { LegacyDependencies, ActionTypeModel, AlertTypeModel } from '../types';
 import { TypeRegistry } from './type_registry';
-import { AlertDetailsRoute } from './sections/alert_details/components/alert_details_route';
+import { AlertDetailsRouteWithApi as AlertDetailsRoute } from './sections/alert_details/components/alert_details_route';
 
 export interface AppDeps {
   chrome: ChromeStart;
