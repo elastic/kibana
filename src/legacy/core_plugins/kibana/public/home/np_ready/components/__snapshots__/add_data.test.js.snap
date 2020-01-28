@@ -4,31 +4,6 @@ exports[`apmUiEnabled 1`] = `
 <EuiPanel
   paddingSize="l"
 >
-  <EuiFlexGroup>
-    <EuiFlexItem>
-      <EuiTitle>
-        <h2>
-          <FormattedMessage
-            defaultMessage="Add Data to Kibana"
-            id="kbn.home.addData.addDataToKibanaTitle"
-            values={Object {}}
-          />
-        </h2>
-      </EuiTitle>
-      <EuiText
-        size="s"
-      >
-        <p>
-          <FormattedMessage
-            defaultMessage="Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems."
-            id="kbn.home.addData.addDataToKibanaDescription"
-            values={Object {}}
-          />
-        </p>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer />
   <EuiFlexGroup
     className="homeAddData__flexGroup"
     gutterSize="l"
@@ -37,106 +12,143 @@ exports[`apmUiEnabled 1`] = `
     wrap={true}
   >
     <EuiFlexItem
-      grow={false}
+      className="homAddData__cardDivider"
     >
-      <EuiCard
-        className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addAmpButtonLabel"
-          >
-            APM automatically collects in-depth performance metrics and errors from inside your applications.
-          </span>
-        }
-        footer={
-          <EuiButton
-            aria-describedby="aria-describedby.addAmpButtonLabel"
-            className="homAddData__button"
-            href="#/home/tutorial/apm"
-          >
-            <FormattedMessage
-              defaultMessage="Add APM"
-              id="kbn.home.addData.apm.addApmButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        icon={
-          <EuiIcon
-            className="homAddData__icon"
-            type="logoAPM"
-          />
-        }
-        title="APM"
+      <EuiSpacer
+        size="m"
       />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiCard
-        className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addLogDataButtonLabel"
+      <EuiFlexGroup
+        justifyContent="spaceAround"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="m"
           >
-            Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
-          </span>
-        }
-        footer={
-          <EuiButton
-            aria-describedby="aria-describedby.addLogDataButtonLabel"
-            className="homAddData__button"
-            href="#/home/tutorial_directory/logging"
-          >
-            <FormattedMessage
-              defaultMessage="Add log data"
-              id="kbn.home.addData.logging.addLogDataButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        icon={
-          <EuiIcon
-            className="homAddData__icon"
-            type="logoLogging"
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiIcon
+                size="xxl"
+                type="logoObservability"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiTitle
+                size="s"
+              >
+                <h2>
+                  <FormattedMessage
+                    defaultMessage="Observability"
+                    id="kbn.home.addData.title.observability"
+                    values={Object {}}
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiFlexGroup
+        className="homeAddData__flexGroup"
+        gutterSize="l"
+        justifyContent="spaceAround"
+        responsive={false}
+        wrap={true}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiCard
+            className="homAddData__card"
+            description={
+              <span
+                id="aria-describedby.addAmpButtonLabel"
+              >
+                APM automatically collects in-depth performance metrics and errors from inside your applications.
+              </span>
+            }
+            footer={
+              <EuiButton
+                aria-describedby="aria-describedby.addAmpButtonLabel"
+                className="homAddData__button"
+                href="#/home/tutorial/apm"
+              >
+                <FormattedMessage
+                  defaultMessage="Add APM"
+                  id="kbn.home.addData.apm.addApmButtonLabel"
+                  values={Object {}}
+                />
+              </EuiButton>
+            }
+            title="APM"
+            titleSize="xs"
           />
-        }
-        title="Logs"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiCard
-        className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addMetricsButtonLabel"
-          >
-            Collect metrics from the operating system and services running on your servers.
-          </span>
-        }
-        footer={
-          <EuiButton
-            aria-describedby="aria-describedby.addMetricsButtonLabel"
-            className="homAddData__button"
-            href="#/home/tutorial_directory/metrics"
-          >
-            <FormattedMessage
-              defaultMessage="Add metric data"
-              id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        icon={
-          <EuiIcon
-            className="homAddData__icon"
-            type="logoMetrics"
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiCard
+            className="homAddData__card"
+            description={
+              <span
+                id="aria-describedby.addLogDataButtonLabel"
+              >
+                Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
+              </span>
+            }
+            footer={
+              <EuiButton
+                aria-describedby="aria-describedby.addLogDataButtonLabel"
+                className="homAddData__button"
+                href="#/home/tutorial_directory/logging"
+              >
+                <FormattedMessage
+                  defaultMessage="Add log data"
+                  id="kbn.home.addData.logging.addLogDataButtonLabel"
+                  values={Object {}}
+                />
+              </EuiButton>
+            }
+            title="Logs"
+            titleSize="xs"
           />
-        }
-        title="Metrics"
-      />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiCard
+            className="homAddData__card"
+            description={
+              <span
+                id="aria-describedby.addMetricsButtonLabel"
+              >
+                Collect metrics from the operating system and services running on your servers.
+              </span>
+            }
+            footer={
+              <EuiButton
+                aria-describedby="aria-describedby.addMetricsButtonLabel"
+                className="homAddData__button"
+                href="#/home/tutorial_directory/metrics"
+              >
+                <FormattedMessage
+                  defaultMessage="Add metric data"
+                  id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
+                  values={Object {}}
+                />
+              </EuiButton>
+            }
+            title="Metrics"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
@@ -157,19 +169,55 @@ exports[`apmUiEnabled 1`] = `
             href="#/home/tutorial_directory/siem"
           >
             <FormattedMessage
-              defaultMessage="Add security events"
+              defaultMessage="Add events"
               id="kbn.home.addData.siem.addSiemEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
         }
         icon={
-          <EuiIcon
-            className="homAddData__icon"
-            type="logoSecurity"
-          />
+          <React.Fragment>
+            <ForwardRef
+              justifyContent="spaceAround"
+            >
+              <EuiFlexItem
+                grow={false}
+              >
+                <ForwardRef
+                  alignItems="center"
+                  gutterSize="m"
+                >
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <EuiIcon
+                      size="xxl"
+                      type="logoSecurity"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <EuiTitle
+                      size="s"
+                    >
+                      <h2>
+                        <FormattedMessage
+                          defaultMessage="Security"
+                          id="kbn.home.addData.title.observability"
+                          values={Object {}}
+                        />
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </ForwardRef>
+              </EuiFlexItem>
+            </ForwardRef>
+            <EuiSpacer />
+          </React.Fragment>
         }
         title="SIEM"
+        titleSize="xs"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -257,31 +305,6 @@ exports[`isNewKibanaInstance 1`] = `
 <EuiPanel
   paddingSize="l"
 >
-  <EuiFlexGroup>
-    <EuiFlexItem>
-      <EuiTitle>
-        <h2>
-          <FormattedMessage
-            defaultMessage="Add Data to Kibana"
-            id="kbn.home.addData.addDataToKibanaTitle"
-            values={Object {}}
-          />
-        </h2>
-      </EuiTitle>
-      <EuiText
-        size="s"
-      >
-        <p>
-          <FormattedMessage
-            defaultMessage="Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems."
-            id="kbn.home.addData.addDataToKibanaDescription"
-            values={Object {}}
-          />
-        </p>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer />
   <EuiFlexGroup
     className="homeAddData__flexGroup"
     gutterSize="l"
@@ -290,72 +313,114 @@ exports[`isNewKibanaInstance 1`] = `
     wrap={false}
   >
     <EuiFlexItem
-      grow={false}
+      className="homAddData__cardDivider"
     >
-      <EuiCard
-        className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addLogDataButtonLabel"
-          >
-            Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
-          </span>
-        }
-        footer={
-          <EuiButton
-            aria-describedby="aria-describedby.addLogDataButtonLabel"
-            className="homAddData__button"
-            href="#/home/tutorial_directory/logging"
-          >
-            <FormattedMessage
-              defaultMessage="Add log data"
-              id="kbn.home.addData.logging.addLogDataButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        icon={
-          <EuiIcon
-            className="homAddData__icon"
-            type="logoLogging"
-          />
-        }
-        title="Logs"
+      <EuiSpacer
+        size="m"
       />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiCard
-        className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addMetricsButtonLabel"
+      <EuiFlexGroup
+        justifyContent="spaceAround"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="m"
           >
-            Collect metrics from the operating system and services running on your servers.
-          </span>
-        }
-        footer={
-          <EuiButton
-            aria-describedby="aria-describedby.addMetricsButtonLabel"
-            className="homAddData__button"
-            href="#/home/tutorial_directory/metrics"
-          >
-            <FormattedMessage
-              defaultMessage="Add metric data"
-              id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        icon={
-          <EuiIcon
-            className="homAddData__icon"
-            type="logoMetrics"
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiIcon
+                size="xxl"
+                type="logoObservability"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiTitle
+                size="s"
+              >
+                <h2>
+                  <FormattedMessage
+                    defaultMessage="Observability"
+                    id="kbn.home.addData.title.observability"
+                    values={Object {}}
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiFlexGroup
+        className="homeAddData__flexGroup"
+        gutterSize="l"
+        justifyContent="spaceAround"
+        responsive={false}
+        wrap={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiCard
+            className="homAddData__card"
+            description={
+              <span
+                id="aria-describedby.addLogDataButtonLabel"
+              >
+                Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
+              </span>
+            }
+            footer={
+              <EuiButton
+                aria-describedby="aria-describedby.addLogDataButtonLabel"
+                className="homAddData__button"
+                href="#/home/tutorial_directory/logging"
+              >
+                <FormattedMessage
+                  defaultMessage="Add log data"
+                  id="kbn.home.addData.logging.addLogDataButtonLabel"
+                  values={Object {}}
+                />
+              </EuiButton>
+            }
+            title="Logs"
+            titleSize="xs"
           />
-        }
-        title="Metrics"
-      />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiCard
+            className="homAddData__card"
+            description={
+              <span
+                id="aria-describedby.addMetricsButtonLabel"
+              >
+                Collect metrics from the operating system and services running on your servers.
+              </span>
+            }
+            footer={
+              <EuiButton
+                aria-describedby="aria-describedby.addMetricsButtonLabel"
+                className="homAddData__button"
+                href="#/home/tutorial_directory/metrics"
+              >
+                <FormattedMessage
+                  defaultMessage="Add metric data"
+                  id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
+                  values={Object {}}
+                />
+              </EuiButton>
+            }
+            title="Metrics"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
@@ -376,19 +441,55 @@ exports[`isNewKibanaInstance 1`] = `
             href="#/home/tutorial_directory/siem"
           >
             <FormattedMessage
-              defaultMessage="Add security events"
+              defaultMessage="Add events"
               id="kbn.home.addData.siem.addSiemEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
         }
         icon={
-          <EuiIcon
-            className="homAddData__icon"
-            type="logoSecurity"
-          />
+          <React.Fragment>
+            <ForwardRef
+              justifyContent="spaceAround"
+            >
+              <EuiFlexItem
+                grow={false}
+              >
+                <ForwardRef
+                  alignItems="center"
+                  gutterSize="m"
+                >
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <EuiIcon
+                      size="xxl"
+                      type="logoSecurity"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <EuiTitle
+                      size="s"
+                    >
+                      <h2>
+                        <FormattedMessage
+                          defaultMessage="Security"
+                          id="kbn.home.addData.title.observability"
+                          values={Object {}}
+                        />
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </ForwardRef>
+              </EuiFlexItem>
+            </ForwardRef>
+            <EuiSpacer />
+          </React.Fragment>
         }
         title="SIEM"
+        titleSize="xs"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -476,31 +577,6 @@ exports[`mlEnabled 1`] = `
 <EuiPanel
   paddingSize="l"
 >
-  <EuiFlexGroup>
-    <EuiFlexItem>
-      <EuiTitle>
-        <h2>
-          <FormattedMessage
-            defaultMessage="Add Data to Kibana"
-            id="kbn.home.addData.addDataToKibanaTitle"
-            values={Object {}}
-          />
-        </h2>
-      </EuiTitle>
-      <EuiText
-        size="s"
-      >
-        <p>
-          <FormattedMessage
-            defaultMessage="Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems."
-            id="kbn.home.addData.addDataToKibanaDescription"
-            values={Object {}}
-          />
-        </p>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer />
   <EuiFlexGroup
     className="homeAddData__flexGroup"
     gutterSize="l"
@@ -509,106 +585,143 @@ exports[`mlEnabled 1`] = `
     wrap={true}
   >
     <EuiFlexItem
-      grow={false}
+      className="homAddData__cardDivider"
     >
-      <EuiCard
-        className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addAmpButtonLabel"
-          >
-            APM automatically collects in-depth performance metrics and errors from inside your applications.
-          </span>
-        }
-        footer={
-          <EuiButton
-            aria-describedby="aria-describedby.addAmpButtonLabel"
-            className="homAddData__button"
-            href="#/home/tutorial/apm"
-          >
-            <FormattedMessage
-              defaultMessage="Add APM"
-              id="kbn.home.addData.apm.addApmButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        icon={
-          <EuiIcon
-            className="homAddData__icon"
-            type="logoAPM"
-          />
-        }
-        title="APM"
+      <EuiSpacer
+        size="m"
       />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiCard
-        className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addLogDataButtonLabel"
+      <EuiFlexGroup
+        justifyContent="spaceAround"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="m"
           >
-            Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
-          </span>
-        }
-        footer={
-          <EuiButton
-            aria-describedby="aria-describedby.addLogDataButtonLabel"
-            className="homAddData__button"
-            href="#/home/tutorial_directory/logging"
-          >
-            <FormattedMessage
-              defaultMessage="Add log data"
-              id="kbn.home.addData.logging.addLogDataButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        icon={
-          <EuiIcon
-            className="homAddData__icon"
-            type="logoLogging"
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiIcon
+                size="xxl"
+                type="logoObservability"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiTitle
+                size="s"
+              >
+                <h2>
+                  <FormattedMessage
+                    defaultMessage="Observability"
+                    id="kbn.home.addData.title.observability"
+                    values={Object {}}
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiFlexGroup
+        className="homeAddData__flexGroup"
+        gutterSize="l"
+        justifyContent="spaceAround"
+        responsive={false}
+        wrap={true}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiCard
+            className="homAddData__card"
+            description={
+              <span
+                id="aria-describedby.addAmpButtonLabel"
+              >
+                APM automatically collects in-depth performance metrics and errors from inside your applications.
+              </span>
+            }
+            footer={
+              <EuiButton
+                aria-describedby="aria-describedby.addAmpButtonLabel"
+                className="homAddData__button"
+                href="#/home/tutorial/apm"
+              >
+                <FormattedMessage
+                  defaultMessage="Add APM"
+                  id="kbn.home.addData.apm.addApmButtonLabel"
+                  values={Object {}}
+                />
+              </EuiButton>
+            }
+            title="APM"
+            titleSize="xs"
           />
-        }
-        title="Logs"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiCard
-        className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addMetricsButtonLabel"
-          >
-            Collect metrics from the operating system and services running on your servers.
-          </span>
-        }
-        footer={
-          <EuiButton
-            aria-describedby="aria-describedby.addMetricsButtonLabel"
-            className="homAddData__button"
-            href="#/home/tutorial_directory/metrics"
-          >
-            <FormattedMessage
-              defaultMessage="Add metric data"
-              id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        icon={
-          <EuiIcon
-            className="homAddData__icon"
-            type="logoMetrics"
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiCard
+            className="homAddData__card"
+            description={
+              <span
+                id="aria-describedby.addLogDataButtonLabel"
+              >
+                Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
+              </span>
+            }
+            footer={
+              <EuiButton
+                aria-describedby="aria-describedby.addLogDataButtonLabel"
+                className="homAddData__button"
+                href="#/home/tutorial_directory/logging"
+              >
+                <FormattedMessage
+                  defaultMessage="Add log data"
+                  id="kbn.home.addData.logging.addLogDataButtonLabel"
+                  values={Object {}}
+                />
+              </EuiButton>
+            }
+            title="Logs"
+            titleSize="xs"
           />
-        }
-        title="Metrics"
-      />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiCard
+            className="homAddData__card"
+            description={
+              <span
+                id="aria-describedby.addMetricsButtonLabel"
+              >
+                Collect metrics from the operating system and services running on your servers.
+              </span>
+            }
+            footer={
+              <EuiButton
+                aria-describedby="aria-describedby.addMetricsButtonLabel"
+                className="homAddData__button"
+                href="#/home/tutorial_directory/metrics"
+              >
+                <FormattedMessage
+                  defaultMessage="Add metric data"
+                  id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
+                  values={Object {}}
+                />
+              </EuiButton>
+            }
+            title="Metrics"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
@@ -629,19 +742,55 @@ exports[`mlEnabled 1`] = `
             href="#/home/tutorial_directory/siem"
           >
             <FormattedMessage
-              defaultMessage="Add security events"
+              defaultMessage="Add events"
               id="kbn.home.addData.siem.addSiemEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
         }
         icon={
-          <EuiIcon
-            className="homAddData__icon"
-            type="logoSecurity"
-          />
+          <React.Fragment>
+            <ForwardRef
+              justifyContent="spaceAround"
+            >
+              <EuiFlexItem
+                grow={false}
+              >
+                <ForwardRef
+                  alignItems="center"
+                  gutterSize="m"
+                >
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <EuiIcon
+                      size="xxl"
+                      type="logoSecurity"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <EuiTitle
+                      size="s"
+                    >
+                      <h2>
+                        <FormattedMessage
+                          defaultMessage="Security"
+                          id="kbn.home.addData.title.observability"
+                          values={Object {}}
+                        />
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </ForwardRef>
+              </EuiFlexItem>
+            </ForwardRef>
+            <EuiSpacer />
+          </React.Fragment>
         }
         title="SIEM"
+        titleSize="xs"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -765,31 +914,6 @@ exports[`render 1`] = `
 <EuiPanel
   paddingSize="l"
 >
-  <EuiFlexGroup>
-    <EuiFlexItem>
-      <EuiTitle>
-        <h2>
-          <FormattedMessage
-            defaultMessage="Add Data to Kibana"
-            id="kbn.home.addData.addDataToKibanaTitle"
-            values={Object {}}
-          />
-        </h2>
-      </EuiTitle>
-      <EuiText
-        size="s"
-      >
-        <p>
-          <FormattedMessage
-            defaultMessage="Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems."
-            id="kbn.home.addData.addDataToKibanaDescription"
-            values={Object {}}
-          />
-        </p>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer />
   <EuiFlexGroup
     className="homeAddData__flexGroup"
     gutterSize="l"
@@ -798,72 +922,114 @@ exports[`render 1`] = `
     wrap={false}
   >
     <EuiFlexItem
-      grow={false}
+      className="homAddData__cardDivider"
     >
-      <EuiCard
-        className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addLogDataButtonLabel"
-          >
-            Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
-          </span>
-        }
-        footer={
-          <EuiButton
-            aria-describedby="aria-describedby.addLogDataButtonLabel"
-            className="homAddData__button"
-            href="#/home/tutorial_directory/logging"
-          >
-            <FormattedMessage
-              defaultMessage="Add log data"
-              id="kbn.home.addData.logging.addLogDataButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        icon={
-          <EuiIcon
-            className="homAddData__icon"
-            type="logoLogging"
-          />
-        }
-        title="Logs"
+      <EuiSpacer
+        size="m"
       />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiCard
-        className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addMetricsButtonLabel"
+      <EuiFlexGroup
+        justifyContent="spaceAround"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="m"
           >
-            Collect metrics from the operating system and services running on your servers.
-          </span>
-        }
-        footer={
-          <EuiButton
-            aria-describedby="aria-describedby.addMetricsButtonLabel"
-            className="homAddData__button"
-            href="#/home/tutorial_directory/metrics"
-          >
-            <FormattedMessage
-              defaultMessage="Add metric data"
-              id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        icon={
-          <EuiIcon
-            className="homAddData__icon"
-            type="logoMetrics"
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiIcon
+                size="xxl"
+                type="logoObservability"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiTitle
+                size="s"
+              >
+                <h2>
+                  <FormattedMessage
+                    defaultMessage="Observability"
+                    id="kbn.home.addData.title.observability"
+                    values={Object {}}
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiFlexGroup
+        className="homeAddData__flexGroup"
+        gutterSize="l"
+        justifyContent="spaceAround"
+        responsive={false}
+        wrap={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiCard
+            className="homAddData__card"
+            description={
+              <span
+                id="aria-describedby.addLogDataButtonLabel"
+              >
+                Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
+              </span>
+            }
+            footer={
+              <EuiButton
+                aria-describedby="aria-describedby.addLogDataButtonLabel"
+                className="homAddData__button"
+                href="#/home/tutorial_directory/logging"
+              >
+                <FormattedMessage
+                  defaultMessage="Add log data"
+                  id="kbn.home.addData.logging.addLogDataButtonLabel"
+                  values={Object {}}
+                />
+              </EuiButton>
+            }
+            title="Logs"
+            titleSize="xs"
           />
-        }
-        title="Metrics"
-      />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiCard
+            className="homAddData__card"
+            description={
+              <span
+                id="aria-describedby.addMetricsButtonLabel"
+              >
+                Collect metrics from the operating system and services running on your servers.
+              </span>
+            }
+            footer={
+              <EuiButton
+                aria-describedby="aria-describedby.addMetricsButtonLabel"
+                className="homAddData__button"
+                href="#/home/tutorial_directory/metrics"
+              >
+                <FormattedMessage
+                  defaultMessage="Add metric data"
+                  id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
+                  values={Object {}}
+                />
+              </EuiButton>
+            }
+            title="Metrics"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
@@ -884,19 +1050,55 @@ exports[`render 1`] = `
             href="#/home/tutorial_directory/siem"
           >
             <FormattedMessage
-              defaultMessage="Add security events"
+              defaultMessage="Add events"
               id="kbn.home.addData.siem.addSiemEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
         }
         icon={
-          <EuiIcon
-            className="homAddData__icon"
-            type="logoSecurity"
-          />
+          <React.Fragment>
+            <ForwardRef
+              justifyContent="spaceAround"
+            >
+              <EuiFlexItem
+                grow={false}
+              >
+                <ForwardRef
+                  alignItems="center"
+                  gutterSize="m"
+                >
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <EuiIcon
+                      size="xxl"
+                      type="logoSecurity"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <EuiTitle
+                      size="s"
+                    >
+                      <h2>
+                        <FormattedMessage
+                          defaultMessage="Security"
+                          id="kbn.home.addData.title.observability"
+                          values={Object {}}
+                        />
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </ForwardRef>
+              </EuiFlexItem>
+            </ForwardRef>
+            <EuiSpacer />
+          </React.Fragment>
         }
         title="SIEM"
+        titleSize="xs"
       />
     </EuiFlexItem>
   </EuiFlexGroup>

@@ -4,6 +4,20 @@
   box-shadow: none;
 }
 
+.homAddData__cardDivider {
+  position: relative;
+
+  &:after {
+    position: absolute;
+    content: '';
+    width: 1px;
+    right: -$euiSizeS;
+    top: 0;
+    bottom: 0;
+    background: $euiBorderColor;
+  }
+}
+
 .homAddData__icon {
   width: $euiSizeXL * 2;
   height: $euiSizeXL * 2;
