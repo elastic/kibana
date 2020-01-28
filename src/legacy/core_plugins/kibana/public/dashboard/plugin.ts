@@ -47,7 +47,7 @@ import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public/state_management/url/kbn_url_tracker';
-import { getQuerySyncStateContainer } from '../../../../../plugins/data/public/query/state_sync/sync_query';
+import { getQueryStateObservable } from '../../../../../plugins/data/public/query/state_sync/sync_query';
 
 export interface LegacyAngularInjectedDependencies {
   dashboardConfig: any;
@@ -91,19 +91,23 @@ export class DashboardPlugin implements Plugin {
       npData,
     }: DashboardPluginSetupDependencies
   ) {
-    const { appMounted, appUnMounted, stop } = createKbnUrlTracker(
-      '',
+    const { state$, stop: stopQueryState } = getQueryStateObservable(npData.query);
+    const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker(
+      core.http.basePath.prepend('/app/kibana'),
+      '#/dashboards',
       core.uiSettings.get('state.storeInSessionStorage', false),
-      '_g',
       'lastUrl:dashboard',
-      getQuerySyncStateContainer(npData.query).state$,
+      '_g',
+      state$,
       this.appStateUpdater
     );
-    this.stopUrlTracking = stop;
+    this.stopUrlTracking = () => {
+      stopQueryState();
+      stopUrlTracker();
+    };
     const app: App = {
       id: '',
       title: 'Dashboards',
-      updater$: this.appStateUpdater,
       mount: async ({ core: contextCore }, params) => {
         if (this.startDependencies === null) {
           throw new Error('not started yet');
@@ -156,7 +160,13 @@ export class DashboardPlugin implements Plugin {
         };
       },
     };
-    kibana_legacy.registerLegacyApp({ ...app, id: 'dashboard' });
+    kibana_legacy.registerLegacyApp({
+      ...app,
+      id: 'dashboard',
+      // only register the updater in once app, otherwise all updates would happen twice
+      updater$: this.appStateUpdater.asObservable(),
+      navLinkId: 'kibana:dashboard',
+    });
     kibana_legacy.registerLegacyApp({ ...app, id: 'dashboards' });
 
     home.featureCatalogue.register({

@@ -82,9 +82,11 @@ export class LocalApplicationService {
 
       if (app.updater$) {
         app.updater$.subscribe(updater => {
-          const updatedFields = updater(app) as any;
-          if (updatedFields.navLink) {
-            npStart.core.chrome.navLinks.update(app.id, { url: updatedFields.navLink });
+          const updatedFields = updater(app);
+          if (updatedFields && updatedFields.activeUrl) {
+            npStart.core.chrome.navLinks.update(app.navLinkId || app.id, {
+              url: updatedFields.activeUrl,
+            });
           }
         });
       }

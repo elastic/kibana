@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { App } from 'kibana/public';
+import { App, AppBase, AppUpdatableFields } from 'kibana/public';
+import { Observable } from 'rxjs';
 
 interface ForwardDefinition {
   legacyAppId: string;
@@ -25,8 +26,15 @@ interface ForwardDefinition {
   keepPrefix: boolean;
 }
 
+export interface AngularRenderedApp extends App {
+  updater$?: Observable<
+    (app: AppBase) => Partial<AppUpdatableFields & { activeUrl: string }> | undefined
+  >;
+  navLinkId?: string;
+}
+
 export class KibanaLegacyPlugin {
-  private apps: App[] = [];
+  private apps: AngularRenderedApp[] = [];
   private forwards: ForwardDefinition[] = [];
 
   public setup() {
@@ -48,7 +56,7 @@ export class KibanaLegacyPlugin {
        *
        * @param app The app descriptor
        */
-      registerLegacyApp: (app: App) => {
+      registerLegacyApp: (app: AngularRenderedApp) => {
         this.apps.push(app);
       },
 

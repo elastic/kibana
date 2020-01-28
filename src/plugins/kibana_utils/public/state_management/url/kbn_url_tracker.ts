@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import { createBrowserHistory, History, UnregisterCallback } from 'history';
-import { getRelativeToHistoryPath, setStateToKbnUrl } from './kbn_url_storage';
-import {
-  BehaviorSubject,
-  Observable,
-} from 'rxjs';
+import { parse } from 'url';
+import { createHashHistory, History } from 'history';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { AppUpdater } from 'kibana/public';
+import { setStateToKbnUrl } from './kbn_url_storage';
 
 export interface KbnUrlTracker {
   appMounted: () => void;
@@ -37,6 +35,7 @@ export interface KbnUrlTracker {
  */
 export function createKbnUrlTracker(
   baseUrl: string,
+  defaultHash: string,
   useHash: boolean,
   // storage key,
   storageKey: string,
@@ -45,42 +44,57 @@ export function createKbnUrlTracker(
   stateUpdate$: Observable<unknown>,
   navLinkUpdater$: BehaviorSubject<AppUpdater>
 ): KbnUrlTracker {
-  const storage: Storage = sessionStorage;
-  const storedUrl = storage.getItem(storageKey);
   let currentUrl: string = '';
-  const history: History = createBrowserHistory();
-  let stopHistory: UnregisterCallback | undefined;
-  function listenToHistory() {
-    unlistenHistory();
-    stopHistory = history.listen(location => {
-      const url = getRelativeToHistoryPath(history.createHref(location), history);
-      currentUrl = url;
-      storage.setItem(storageKey, currentUrl);
-    });
+  let appIsMounted = false;
+  const history: History = createHashHistory();
+
+  function setNavLink(hash: string) {
+    navLinkUpdater$.next(() => ({ activeUrl: baseUrl + hash }));
   }
-  function unlistenHistory() {
-    if (stopHistory) {
-      stopHistory();
+
+  // track current hash when within app
+  const stopHistory = history.listen(location => {
+    if (!appIsMounted) {
+      return;
     }
-  }
-  const sub = stateUpdate$.subscribe(state => {
-    currentUrl = setStateToKbnUrl(urlKey, state, { useHash }, currentUrl);
+    currentUrl = '#' + location.pathname + location.search;
     storage.setItem(storageKey, currentUrl);
   });
+
+  // propagate state updates when in other apps
+  const sub = stateUpdate$.subscribe(state => {
+    if (appIsMounted) {
+      return;
+    }
+    const updatedAbsoluteUrl = setStateToKbnUrl(
+      urlKey,
+      state,
+      { useHash },
+      baseUrl + (currentUrl || defaultHash)
+    );
+    currentUrl = parse(updatedAbsoluteUrl).hash!;
+    storage.setItem(storageKey, currentUrl);
+    setNavLink(currentUrl);
+  });
+
+  // initialize right
+  const storage: Storage = sessionStorage;
+  const storedUrl = storage.getItem(storageKey);
   if (storedUrl) {
-    navLinkUpdater$.next(() => ({ url: storedUrl }));
+    currentUrl = storedUrl;
+    setNavLink(storedUrl);
   }
   return {
     appMounted() {
-      listenToHistory();
-      navLinkUpdater$.next(() => ({ url: currentUrl }));
+      appIsMounted = true;
+      setNavLink(defaultHash);
     },
     appUnMounted() {
-      unlistenHistory();
-      navLinkUpdater$.next(() => ({ url: baseUrl }));
+      appIsMounted = false;
+      setNavLink(currentUrl);
     },
     stop() {
-      unlistenHistory();
+      stopHistory();
       sub.unsubscribe();
     },
   };
