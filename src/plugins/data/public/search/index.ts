@@ -47,6 +47,7 @@ export {
   hasSearchStategyForIndexPattern,
   defaultSearchStrategy,
   SearchError,
+  SearchStrategyProvider,
 } from './search_strategy';
 
 export {

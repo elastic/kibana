@@ -37,10 +37,4 @@ export {
 /** @public static code */
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
-export {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  SearchError,
-  getSearchErrorType,
-  addSearchStrategy,
-} from './search';
+export { getRequestInspectorStats, getResponseInspectorStats } from './search';

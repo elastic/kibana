@@ -15,7 +15,7 @@ import {
   AggTypeFilters,
   AggTypeFieldFilters,
 } from './legacy_imports';
-import { SearchStrategyProvider } from '../../../../../src/legacy/core_plugins/data/public/search/search_strategy/types';
+import { SearchStrategyProvider } from '../../../../../src/plugins/data/public';
 import { ManagementSetup } from '../../../../../src/legacy/core_plugins/management/public/np_ready';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
 // @ts-ignore

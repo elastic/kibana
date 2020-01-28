@@ -18,5 +18,3 @@
  */
 
 export { getRequestInspectorStats, getResponseInspectorStats } from './utils';
-
-export { SearchError, getSearchErrorType, addSearchStrategy } from './search_strategy';
