@@ -19,13 +19,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Schemas, AggGroupNames, ColorSchemas, RangeValues } from './legacy_imports';
+import { Schemas, AggGroupNames, RangeValues } from './legacy_imports';
 import { AxisTypes, getHeatmapCollections, Positions, ScaleTypes } from './utils/collections';
 import { HeatmapOptions } from './components/options';
 import { createVislibVisController } from './vis_controller';
 import { TimeMarker } from './vislib/visualizations/time_marker';
 import { CommonVislibParams, ColorSchemaVislibParams, ValueAxis } from './types';
-import { KbnVislibVisTypesDependencies } from './plugin';
+import { VisTypeVislibDependencies } from './plugin';
+import { ColorSchemas } from '../../../../plugins/charts/public';
 
 export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaVislibParams {
   type: 'heatmap';
@@ -39,7 +40,7 @@ export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaVislibP
   times: TimeMarker[];
 }
 
-export const createHeatmapVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
+export const createHeatmapVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'heatmap',
   title: i18n.translate('visTypeVislib.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
   icon: 'visHeatmap',

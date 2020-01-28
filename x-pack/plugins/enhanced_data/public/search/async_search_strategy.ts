@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EMPTY, fromEvent, NEVER, Observable, of, throwError } from 'rxjs';
-import { mergeMap, takeWhile, expand, delay, first, takeUntil } from 'rxjs/operators';
+import { Observable, timer } from 'rxjs';
+import { mergeMap, takeWhile, expand } from 'rxjs/operators';
 import {
   IKibanaSearchResponse,
   ISearchContext,
@@ -36,43 +36,31 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
       const { serverStrategy } = request;
       let id: string | undefined = request.id;
 
-      const aborted$ = options.signal
-        ? fromEvent(options.signal, 'abort').pipe(
-            first(),
-            mergeMap(() => {
-              // If we haven't received the response to the initial request, including the ID, then
-              // we don't need to send a follow-up request to delete this search
-              if (id === undefined) return EMPTY; // mergeMap expects to return an observable
+      if (options.signal) {
+        options.signal.addEventListener('abort', () => {
+          // If we haven't received the response to the initial request, including the ID, then
+          // we don't need to send a follow-up request to delete this search
+          if (id === undefined) return;
 
-              // Send the follow-up request to delete this search, then throw an abort error
-              context.core.http.delete(`/internal/search/${request.serverStrategy}/${id}`);
-              return throwError(new AbortError());
-            })
-          )
-        : NEVER;
+          // Send the follow-up request to delete this search, then throw an abort error
+          context.core.http.delete(`/internal/search/${request.serverStrategy}/${id}`);
+        });
+      }
 
       return search(request, options, SYNC_SEARCH_STRATEGY).pipe(
         expand(response => {
           id = response.id;
-          return of(null).pipe(
-            // Delay by the given poll interval
-            delay(pollInterval),
+          // Delay by the given poll interval
+          return timer(pollInterval).pipe(
             // Send future requests using just the ID from the response
-            mergeMap(() => search({ id, serverStrategy }, options, SYNC_SEARCH_STRATEGY))
+            mergeMap(() => {
+              return search({ id, serverStrategy }, options, SYNC_SEARCH_STRATEGY);
+            })
           );
         }),
-        // Stop polling if the signal is aborted
-        takeUntil(aborted$),
         // Continue polling until the response indicates it is complete
         takeWhile(({ total = 1, loaded = 1 }) => loaded < total, true)
       );
     },
   };
 };
-
-export class AbortError extends Error {
-  constructor(...args: Parameters<ErrorConstructor>) {
-    super(...args);
-    this.name = 'AbortError';
-  }
-}
