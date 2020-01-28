@@ -18,7 +18,6 @@ export interface CoreSetup {
   http: {
     route: Legacy.Server['route'];
   };
-  injectUiAppVars: Legacy.Server['injectUiAppVars'];
 }
 
 export interface PluginsSetup {
@@ -52,7 +51,6 @@ export async function createSetupShim(
         ...server.newPlatform.setup.core.http,
         route: (...args) => server.route(...args),
       },
-      injectUiAppVars: server.injectUiAppVars,
     },
     pluginsSetup: {
       // @ts-ignore: New Platform not typed

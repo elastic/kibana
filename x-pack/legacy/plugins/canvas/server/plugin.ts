@@ -15,12 +15,6 @@ export class Plugin {
 
     plugins.interpreter.register({ serverFunctions: functions });
 
-    core.injectUiAppVars('canvas', async () => {
-      return {
-        ...plugins.kibana.injectedUiAppVars,
-      };
-    });
-
     plugins.features.registerFeature({
       id: 'canvas',
       name: 'Canvas',
