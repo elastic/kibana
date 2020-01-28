@@ -6,11 +6,11 @@
 
 import { ESTermSource, extractPropertiesMap } from './es_term_source';
 
+jest.mock('ui/new_platform');
 jest.mock('../vector_layer', () => {});
 jest.mock('ui/vis/editors/default/schemas', () => ({
   Schemas: function() {},
 }));
-jest.mock('../../kibana_services', () => {});
 jest.mock('ui/agg_types', () => {});
 jest.mock('ui/timefilter', () => {});
 
