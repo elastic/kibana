@@ -17,18 +17,15 @@
  * under the License.
  */
 
-/*
- * Using a random color generator presented awful colors and unpredictable color schemes.
- * So we needed to come up with a color scheme of our own that creates consistent, pleasing color patterns.
- * The order allows us to guarantee that 1st, 2nd, 3rd, etc values always get the same color.
- */
+import { colorSchemas, vislibColorMaps } from './color_maps';
+import { getHeatmapColors } from './heatmap_color';
+import { truncatedColorMaps, truncatedColorSchemas } from './truncated_color_maps';
 
-export const seedColors = [
-  '#00a69b',
-  '#57c17b',
-  '#6f87d8',
-  '#663db8',
-  '#bc52bc',
-  '#9e3533',
-  '#daa05d',
-];
+// Note: Using actual values due to existing test dependencies
+export const colorMapsMock = {
+  getHeatmapColors: jest.fn(getHeatmapColors),
+  vislibColorMaps,
+  colorSchemas,
+  truncatedColorMaps,
+  truncatedColorSchemas,
+} as any;

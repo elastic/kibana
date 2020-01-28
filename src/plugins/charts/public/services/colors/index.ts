@@ -17,22 +17,4 @@
  * under the License.
  */
 
-import { vislibColorMaps } from './color_maps';
-
-export const truncatedColorMaps = {};
-
-const colormaps = vislibColorMaps;
-for (const key in colormaps) {
-  if (colormaps.hasOwnProperty(key)) {
-    // slice off lightest colors
-    truncatedColorMaps[key] = {
-      ...colormaps[key],
-      value: colormaps[key].value.slice(Math.floor(colormaps[key].value.length / 4)),
-    };
-  }
-}
-
-export const truncatedColorSchemas = Object.values(truncatedColorMaps).map(({ id, label }) => ({
-  value: id,
-  text: label,
-}));
+export { ColorsService } from './colors';
