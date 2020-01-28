@@ -64,7 +64,7 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
       .then(savedConnector => {
         toastNotifications.addSuccess(
           i18n.translate(
-            'xpack.triggersActionsUI.sections.actionConnectorForm.updateSuccessNotificationText',
+            'xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText',
             {
               defaultMessage: "Updated '{connectorName}'",
               values: {

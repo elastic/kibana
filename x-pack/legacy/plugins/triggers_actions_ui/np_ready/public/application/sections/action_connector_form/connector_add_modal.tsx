@@ -64,7 +64,7 @@ export const ConnectorAddModal = ({
       .then(savedConnector => {
         toastNotifications.addSuccess(
           i18n.translate(
-            'xpack.triggersActionsUI.sections.actionConnectorForm.updateSuccessNotificationText',
+            'xpack.triggersActionsUI.sections.addModalConnectorForm.updateSuccessNotificationText',
             {
               defaultMessage: "Created '{connectorName}'",
               values: {
@@ -96,7 +96,7 @@ export const ConnectorAddModal = ({
                   <h3 id="flyoutTitle">
                     <FormattedMessage
                       defaultMessage="{actionTypeName} connector"
-                      id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
+                      id="xpack.triggersActionsUI.sections.addModalConnectorForm.flyoutTitle"
                       values={{
                         actionTypeName: actionType.name,
                       }}
@@ -121,7 +121,7 @@ export const ConnectorAddModal = ({
         <EuiModalFooter>
           <EuiButtonEmpty onClick={closeModal}>
             {i18n.translate(
-              'xpack.triggersActionsUI.sections.actionConnectorAddModal.cancelButtonLabel',
+              'xpack.triggersActionsUI.sections.addModalConnectorForm.cancelButtonLabel',
               {
                 defaultMessage: 'Cancel',
               }
@@ -146,7 +146,7 @@ export const ConnectorAddModal = ({
             }}
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.actionConnectorAddModal.saveButtonLabel"
+              id="xpack.triggersActionsUI.sections.addModalConnectorForm.saveButtonLabel"
               defaultMessage="Save"
             />
           </EuiButton>

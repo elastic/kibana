@@ -62,21 +62,21 @@ function validateBaseProperties(alertObject: Alert) {
   validationResult.errors = errors;
   if (!alertObject.name) {
     errors.name.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertAdd.error.requiredNameText', {
+      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredNameText', {
         defaultMessage: 'Name is required.',
       })
     );
   }
   if (!alertObject.schedule.interval) {
     errors.interval.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertAdd.error.requiredIntervalText', {
+      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredIntervalText', {
         defaultMessage: 'Check interval is required.',
       })
     );
   }
   if (!alertObject.alertTypeId) {
     errors.alertTypeId.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertAdd.error.requiredAlertTypeIdText', {
+      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredAlertTypeIdText', {
         defaultMessage: 'Alert trigger is required.',
       })
     );
@@ -125,7 +125,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertAdd.unableToLoadActionTypesMessage',
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
             { defaultMessage: 'Unable to load action types' }
           ),
         });
@@ -183,7 +183,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertAdd.unableToLoadActionsMessage',
+          'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
           {
             defaultMessage: 'Unable to load connectors',
           }
@@ -224,19 +224,19 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
   const tabs = [
     {
       id: ACTION_GROUPS.ALERT,
-      name: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.alertTabText', {
+      name: i18n.translate('xpack.triggersActionsUI.sections.alertForm.alertTabText', {
         defaultMessage: 'Alert',
       }),
     },
     {
       id: ACTION_GROUPS.WARNING,
-      name: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.warningTabText', {
+      name: i18n.translate('xpack.triggersActionsUI.sections.alertForm.warningTabText', {
         defaultMessage: 'Warning',
       }),
     },
     {
       id: ACTION_GROUPS.UNACKNOWLEDGED,
-      name: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.unacknowledgedTabText', {
+      name: i18n.translate('xpack.triggersActionsUI.sections.alertForm.unacknowledgedTabText', {
         defaultMessage: 'If unacknowledged',
       }),
       disabled: false,
@@ -247,7 +247,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
     try {
       const newAlert = await createAlert({ http, alert });
       toastNotifications.addSuccess(
-        i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
+        i18n.translate('xpack.triggersActionsUI.sections.alertForm.saveSuccessNotificationText', {
           defaultMessage: "Saved '{alertName}'",
           values: {
             alertName: newAlert.id,
@@ -349,7 +349,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
             <h5 id="selectedAlertTypeTitle">
               <FormattedMessage
                 defaultMessage="Trigger: {alertType}"
-                id="xpack.triggersActionsUI.sections.alertAdd.selectedAlertTypeTitle"
+                id="xpack.triggersActionsUI.sections.alertForm.selectedAlertTypeTitle"
                 values={{ alertType: alertType ? alertType.name : '' }}
               />
             </h5>
@@ -364,7 +364,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
           >
             <FormattedMessage
               defaultMessage="Change"
-              id="xpack.triggersActionsUI.sections.alertAdd.changeAlertTypeLink"
+              id="xpack.triggersActionsUI.sections.alertForm.changeAlertTypeLink"
             />
           </EuiLink>
         </EuiFlexItem>
@@ -436,7 +436,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
                 <h5>
                   <FormattedMessage
                     defaultMessage="Action: {actionConnectorName}"
-                    id="xpack.triggersActionsUI.sections.alertAdd.selectAlertActionTypeEditTitle"
+                    id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
                     values={{
                       actionConnectorName: actionConnector.name,
                     }}
@@ -452,7 +452,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
             color="danger"
             className="euiAccordionForm__extraAction"
             aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertAdd.accordion.deleteIconAriaLabel',
+              'xpack.triggersActionsUI.sections.alertForm.accordion.deleteIconAriaLabel',
               {
                 defaultMessage: 'Delete',
               }
@@ -470,7 +470,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertAdd.actionIdLabel"
+              id="xpack.triggersActionsUI.sections.alertForm.actionIdLabel"
               defaultMessage="{connectorInstance} instance"
               values={{
                 connectorInstance: actionTypesIndex
@@ -529,7 +529,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
                 <h5>
                   <FormattedMessage
                     defaultMessage="Action: {actionConnectorName}"
-                    id="xpack.triggersActionsUI.sections.alertAdd.selectAlertActionTypeEditTitle"
+                    id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
                     values={{
                       actionConnectorName: actionTypeRegisterd.actionTypeTitle,
                     }}
@@ -545,7 +545,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
             color="danger"
             className="euiAccordionForm__extraAction"
             aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertAdd.accordion.deleteIconAriaLabel',
+              'xpack.triggersActionsUI.sections.alertForm.accordion.deleteIconAriaLabel',
               {
                 defaultMessage: 'Delete',
               }
@@ -563,7 +563,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
         <EuiEmptyPrompt
           title={
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertAdd.saveButtonLabel"
+              id="xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel"
               defaultMessage="There are no {actionTypeName} connectors"
               values={{
                 actionTypeName,
@@ -580,7 +580,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
               }}
             >
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertAdd.saveButtonLabel"
+                id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
                 defaultMessage="Add {actionTypeName} connector"
                 values={{
                   actionTypeName,
@@ -619,7 +619,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
           onClick={() => setIsAddActionPanelOpen(true)}
         >
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertAdd.addActionButtonLabel"
+            id="xpack.triggersActionsUI.sections.alertForm.addActionButtonLabel"
             defaultMessage="Add action"
           />
         </EuiButton>
@@ -637,7 +637,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
           <h5 id="alertTypeTitle">
             <FormattedMessage
               defaultMessage="Select a trigger"
-              id="xpack.triggersActionsUI.sections.alertAdd.selectAlertTypeTitle"
+              id="xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle"
             />
           </h5>
         </EuiTitle>
@@ -652,13 +652,13 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
   const labelForAlertChecked = (
     <>
       <FormattedMessage
-        id="xpack.triggersActionsUI.sections.alertAdd.checkFieldLabel"
+        id="xpack.triggersActionsUI.sections.alertForm.checkFieldLabel"
         defaultMessage="Check every"
       />{' '}
       <EuiIconTip
         position="right"
         type="questionInCircle"
-        content={i18n.translate('xpack.triggersActionsUI.sections.alertAdd.checkWithTooltip', {
+        content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.checkWithTooltip', {
           defaultMessage: 'This is some help text here for check alert.',
         })}
       />
@@ -668,13 +668,13 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
   const labelForAlertRenotify = (
     <>
       <FormattedMessage
-        id="xpack.triggersActionsUI.sections.alertAdd.renotifyFieldLabel"
+        id="xpack.triggersActionsUI.sections.alertForm.renotifyFieldLabel"
         defaultMessage="Re-notify every"
       />{' '}
       <EuiIconTip
         position="right"
         type="questionInCircle"
-        content={i18n.translate('xpack.triggersActionsUI.sections.alertAdd.renotifyWithTooltip', {
+        content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.renotifyWithTooltip', {
           defaultMessage: 'This is some help text here for re-notify alert.',
         })}
       />
@@ -692,7 +692,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
                 id="alertName"
                 label={
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.alertAdd.alertNameLabel"
+                    id="xpack.triggersActionsUI.sections.alertForm.alertNameLabel"
                     defaultMessage="Name"
                   />
                 }
@@ -837,7 +837,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
                 <h5 id="alertActionTypeTitle">
                   <FormattedMessage
                     defaultMessage="Select an action"
-                    id="xpack.triggersActionsUI.sections.alertAdd.selectAlertActionTypeTitle"
+                    id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
                   />
                 </h5>
               </EuiTitle>
@@ -846,7 +846,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
                 {isLoadingActionTypes ? (
                   <SectionLoading>
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertAdd.loadingActionTypesDescription"
+                      id="xpack.triggersActionsUI.sections.alertForm.loadingActionTypesDescription"
                       defaultMessage="Loading action types…"
                     />
                   </SectionLoading>
@@ -862,7 +862,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={closeFlyout}>
-              {i18n.translate('xpack.triggersActionsUI.sections.alertAdd.cancelButtonLabel', {
+              {i18n.translate('xpack.triggersActionsUI.sections.alertForm.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}
             </EuiButtonEmpty>
@@ -888,7 +888,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
               }}
             >
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertAdd.saveButtonLabel"
+                id="xpack.triggersActionsUI.sections.alertForm.saveButtonLabel"
                 defaultMessage="Save"
               />
             </EuiButton>

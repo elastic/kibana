@@ -103,7 +103,7 @@ export const ConnectorAddFlyout = () => {
       .then(savedConnector => {
         toastNotifications.addSuccess(
           i18n.translate(
-            'xpack.triggersActionsUI.sections.actionConnectorForm.updateSuccessNotificationText',
+            'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
             {
               defaultMessage: "Created '{connectorName}'",
               values: {
