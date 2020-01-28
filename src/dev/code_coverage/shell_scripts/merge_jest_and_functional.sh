@@ -10,8 +10,3 @@ echo "### Merge coverage reports"
 for x in jest functional; do
   yarn nyc report --temp-dir $COMBINED_EXRACT_DIR/${x} --report-dir $EXTRACT_END_DIR/${x}-combined --reporter=html --reporter=json-summary
 done
-
-
-echo "### Copy mocha reports"
-mkdir -p $EXTRACT_END_DIR/mocha-combined
-cp -r $COMBINED_EXRACT_DIR/mocha/. $EXTRACT_END_DIR/mocha-combined/
