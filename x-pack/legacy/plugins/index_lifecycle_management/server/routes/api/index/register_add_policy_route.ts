@@ -9,33 +9,39 @@ import { isEsError } from '../../../lib/is_es_error';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
-async function createPolicy(callWithRequest, policy) {
+async function addLifecyclePolicy(
+  callWithRequest: any,
+  indexName: string,
+  policyName: string,
+  alias: string
+) {
   const body = {
-    policy: {
-      phases: policy.phases,
+    lifecycle: {
+      name: policyName,
+      rollover_alias: alias,
     },
   };
+
   const params = {
     method: 'PUT',
-    path: `/_ilm/policy/${encodeURIComponent(policy.name)}`,
-    ignore: [404],
+    path: `/${encodeURIComponent(indexName)}/_settings`,
     body,
   };
 
-  return await callWithRequest('transport.request', params);
+  return callWithRequest('transport.request', params);
 }
 
-export function registerCreateRoute(server) {
+export function registerAddPolicyRoute(server: any) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
-    path: '/api/index_lifecycle_management/policies',
+    path: '/api/index_lifecycle_management/index/add',
     method: 'POST',
-    handler: async request => {
+    handler: async (request: any) => {
       const callWithRequest = callWithRequestFactory(server, request);
-
+      const { indexName, policyName, alias } = request.payload as any;
       try {
-        const response = await createPolicy(callWithRequest, request.payload);
+        const response = await addLifecyclePolicy(callWithRequest, indexName, policyName, alias);
         return response;
       } catch (err) {
         if (isEsError(err)) {

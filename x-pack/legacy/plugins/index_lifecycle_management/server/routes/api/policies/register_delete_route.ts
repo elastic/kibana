@@ -9,48 +9,33 @@ import { isEsError } from '../../../lib/is_es_error';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
-function findMatchingNodes(stats, nodeAttrs) {
-  return Object.entries(stats.nodes).reduce((accum, [nodeId, stats]) => {
-    const attributes = stats.attributes || {};
-    for (const [key, value] of Object.entries(attributes)) {
-      if (`${key}:${value}` === nodeAttrs) {
-        accum.push({
-          nodeId,
-          stats,
-        });
-        break;
-      }
-    }
-    return accum;
-  }, []);
-}
-
-async function fetchNodeStats(callWithRequest) {
+async function deletePolicies(policyNames: string, callWithRequest: any): Promise<any> {
   const params = {
-    format: 'json',
+    method: 'DELETE',
+    path: `/_ilm/policy/${encodeURIComponent(policyNames)}`,
+    // we allow 404 since they may have no policies
+    ignore: [404],
   };
 
-  return await callWithRequest('nodes.stats', params);
+  return await callWithRequest('transport.request', params);
 }
 
-export function registerDetailsRoute(server) {
+export function registerDeleteRoute(server: any) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
-    path: '/api/index_lifecycle_management/nodes/{nodeAttrs}/details',
-    method: 'GET',
-    handler: async request => {
+    path: '/api/index_lifecycle_management/policies/{policyNames}',
+    method: 'DELETE',
+    handler: async (request: any) => {
       const callWithRequest = callWithRequestFactory(server, request);
-
+      const { policyNames } = request.params;
       try {
-        const stats = await fetchNodeStats(callWithRequest);
-        const response = findMatchingNodes(stats, request.params.nodeAttrs);
-        return response;
+        await deletePolicies(policyNames, callWithRequest);
+        return {};
       } catch (err) {
         if (isEsError(err)) {
           return wrapEsError(err);
         }
-
         return wrapUnknownError(err);
       }
     },

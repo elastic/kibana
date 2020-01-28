@@ -9,32 +9,33 @@ import { isEsError } from '../../../lib/is_es_error';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
-async function retryLifecycle(callWithRequest, indexNames) {
-  const responses = [];
-  for (let i = 0; i < indexNames.length; i++) {
-    const indexName = indexNames[i];
-    const params = {
-      method: 'POST',
-      path: `/${encodeURIComponent(indexName)}/_ilm/retry`,
-      ignore: [404],
-    };
+async function createPolicy(callWithRequest: any, policy: any): Promise<any> {
+  const body = {
+    policy: {
+      phases: policy.phases,
+    },
+  };
+  const params = {
+    method: 'PUT',
+    path: `/_ilm/policy/${encodeURIComponent(policy.name)}`,
+    ignore: [404],
+    body,
+  };
 
-    responses.push(callWithRequest('transport.request', params));
-  }
-  return Promise.all(responses);
+  return await callWithRequest('transport.request', params);
 }
 
-export function registerRetryRoute(server) {
+export function registerCreateRoute(server: any) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
-    path: '/api/index_lifecycle_management/index/retry',
+    path: '/api/index_lifecycle_management/policies',
     method: 'POST',
-    handler: async request => {
+    handler: async (request: any) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
-        const response = await retryLifecycle(callWithRequest, request.payload.indexNames);
+        const response = await createPolicy(callWithRequest, request.payload);
         return response;
       } catch (err) {
         if (isEsError(err)) {

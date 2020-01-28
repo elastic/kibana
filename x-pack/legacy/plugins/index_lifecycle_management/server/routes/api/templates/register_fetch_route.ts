@@ -17,7 +17,7 @@ import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_facto
  * @param {String} templateName The index template
  * @param {Array} indexPatterns Index patterns
  */
-function isReservedSystemTemplate(templateName, indexPatterns) {
+function isReservedSystemTemplate(templateName: string, indexPatterns: string[]): boolean {
   return (
     templateName.startsWith('kibana_index_template') ||
     (templateName.startsWith('.') &&
@@ -27,7 +27,7 @@ function isReservedSystemTemplate(templateName, indexPatterns) {
   );
 }
 
-function filterAndFormatTemplates(templates) {
+function filterAndFormatTemplates(templates: any): any {
   const formattedTemplates = [];
   const templateNames = Object.keys(templates);
   for (const templateName of templateNames) {
@@ -49,7 +49,7 @@ function filterAndFormatTemplates(templates) {
   return formattedTemplates;
 }
 
-async function fetchTemplates(callWithRequest) {
+async function fetchTemplates(callWithRequest: any): Promise<any> {
   const params = {
     method: 'GET',
     path: '/_template',
@@ -59,13 +59,13 @@ async function fetchTemplates(callWithRequest) {
 
   return await callWithRequest('transport.request', params);
 }
-export function registerFetchRoute(server) {
+export function registerFetchRoute(server: any) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
     path: '/api/index_lifecycle_management/templates',
     method: 'GET',
-    handler: async request => {
+    handler: async (request: any) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {

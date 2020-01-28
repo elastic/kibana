@@ -3,8 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { i18n } from '@kbn/i18n';
-export function checkLicense(xpackLicenseInfo) {
+
+export function checkLicense(xpackLicenseInfo: any): any {
   const pluginName = 'Index Lifecycle Policies';
 
   // If, for some reason, we cannot get the license information

@@ -5,14 +5,15 @@
  */
 
 import { once } from 'lodash';
+import { Legacy } from 'kibana';
 
-const callWithRequest = once(server => {
+const callWithRequest = once((server: Legacy.Server): any => {
   const cluster = server.plugins.elasticsearch.getCluster('data');
   return cluster.callWithRequest;
 });
 
-export const callWithRequestFactory = (server, request) => {
-  return (...args) => {
+export const callWithRequestFactory = (server: Legacy.Server, request: any) => {
+  return (...args: any[]) => {
     return callWithRequest(server)(request, ...args);
   };
 };

@@ -9,33 +9,38 @@ import { isEsError } from '../../../lib/is_es_error';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
-async function deletePolicies(policyNames, callWithRequest) {
-  const params = {
-    method: 'DELETE',
-    path: `/_ilm/policy/${encodeURIComponent(policyNames)}`,
-    // we allow 404 since they may have no policies
-    ignore: [404],
-  };
+async function retryLifecycle(callWithRequest: any, indexNames: string[]) {
+  const responses = [];
+  for (let i = 0; i < indexNames.length; i++) {
+    const indexName = indexNames[i];
+    const params = {
+      method: 'POST',
+      path: `/${encodeURIComponent(indexName)}/_ilm/retry`,
+      ignore: [404],
+    };
 
-  return await callWithRequest('transport.request', params);
+    responses.push(callWithRequest('transport.request', params));
+  }
+  return Promise.all(responses);
 }
 
-export function registerDeleteRoute(server) {
+export function registerRetryRoute(server: any) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
-    path: '/api/index_lifecycle_management/policies/{policyNames}',
-    method: 'DELETE',
-    handler: async request => {
+    path: '/api/index_lifecycle_management/index/retry',
+    method: 'POST',
+    handler: async (request: any) => {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { policyNames } = request.params;
+
       try {
-        await deletePolicies(policyNames, callWithRequest);
-        return {};
+        const response = await retryLifecycle(callWithRequest, request.payload.indexNames);
+        return response;
       } catch (err) {
         if (isEsError(err)) {
           return wrapEsError(err);
         }
+
         return wrapUnknownError(err);
       }
     },

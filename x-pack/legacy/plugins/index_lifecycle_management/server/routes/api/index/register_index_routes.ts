@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerFetchRoute } from './register_fetch_route';
-import { registerGetRoute } from './register_get_route';
+import { registerRetryRoute } from './register_retry_route';
+import { registerRemoveRoute } from './register_remove_route';
 import { registerAddPolicyRoute } from './register_add_policy_route';
 
-export function registerTemplatesRoutes(server) {
-  registerFetchRoute(server);
-  registerGetRoute(server);
+export function registerIndexRoutes(server: any) {
+  registerRetryRoute(server);
+  registerRemoveRoute(server);
   registerAddPolicyRoute(server);
 }

@@ -5,10 +5,12 @@
  */
 
 import { once } from 'lodash';
+import { Legacy } from 'kibana';
+
 import { PLUGIN_ID } from '../../../common/constants';
 import { wrapCustomError } from '../error_wrappers';
 
-export const licensePreRoutingFactory = once(server => {
+export const licensePreRoutingFactory = once((server: Legacy.Server) => {
   const xpackMainPlugin = server.plugins.xpack_main;
 
   // License checking and enable/disable logic

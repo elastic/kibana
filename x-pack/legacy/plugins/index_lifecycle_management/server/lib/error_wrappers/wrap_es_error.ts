@@ -13,7 +13,7 @@ import Boom from 'boom';
  * @param statusCodeToMessageMap Object Optional map of HTTP status codes => error messages
  * @return Object Boom error response
  */
-export function wrapEsError(err, statusCodeToMessageMap = {}) {
+export function wrapEsError(err: any, statusCodeToMessageMap: any = {}): any {
   const statusCode = err.statusCode;
 
   // If no custom message if specified for the error's status code, just

@@ -12,6 +12,6 @@ import Boom from 'boom';
  * @param err Object Unknown error
  * @return Object Boom error response
  */
-export function wrapUnknownError(err) {
+export function wrapUnknownError(err: any): any {
   return Boom.boomify(err);
 }

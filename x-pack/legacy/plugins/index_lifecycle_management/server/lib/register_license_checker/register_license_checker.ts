@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
+// @ts-ignore
 import { mirrorPluginStatus } from '../../../../../server/lib/mirror_plugin_status';
 import { PLUGIN_ID } from '../../../common/constants';
 import { checkLicense } from '../check_license';
 
-export function registerLicenseChecker(server) {
-  const xpackMainPlugin = server.plugins.xpack_main;
-  const ilmPlugin = server.plugins.index_lifecycle_management;
+export function registerLicenseChecker(server: Legacy.Server) {
+  const xpackMainPlugin = server.plugins.xpack_main as any;
+  const ilmPlugin = (server.plugins as any).index_lifecycle_management;
 
   mirrorPluginStatus(xpackMainPlugin, ilmPlugin);
   xpackMainPlugin.status.once('green', () => {

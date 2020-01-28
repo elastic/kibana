@@ -13,6 +13,6 @@ import Boom from 'boom';
  * @param statusCode Error status code
  * @return Object Boom error response
  */
-export function wrapCustomError(err, statusCode) {
+export function wrapCustomError(err: any, statusCode: any): any {
   return Boom.boomify(err, { statusCode });
 }

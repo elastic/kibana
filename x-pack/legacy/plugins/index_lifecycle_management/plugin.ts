@@ -11,7 +11,7 @@ import { registerNodesRoutes } from './server/routes/api/nodes';
 import { registerPoliciesRoutes } from './server/routes/api/policies';
 import { registerTemplatesRoutes } from './server/routes/api/templates';
 
-const indexLifecycleDataEnricher = async (indicesList, callWithRequest) => {
+const indexLifecycleDataEnricher = async (indicesList: any, callWithRequest: any) => {
   if (!indicesList || !indicesList.length) {
     return;
   }
@@ -20,7 +20,7 @@ const indexLifecycleDataEnricher = async (indicesList, callWithRequest) => {
     method: 'GET',
   };
   const { indices: ilmIndicesData } = await callWithRequest('transport.request', params);
-  return indicesList.map(index => {
+  return indicesList.map((index: any): any => {
     return {
       ...index,
       ilm: { ...(ilmIndicesData[index.name] || {}) },
@@ -40,12 +40,14 @@ export class Plugin {
     registerPoliciesRoutes(server);
     registerTemplatesRoutes(server);
 
+    const plugins = server.plugins as any;
+
     if (
       server.config().get('xpack.ilm.ui.enabled') &&
-      server.plugins.index_management &&
-      server.plugins.index_management.addIndexManagementDataEnricher
+      plugins.index_management &&
+      plugins.index_management.addIndexManagementDataEnricher
     ) {
-      server.plugins.index_management.addIndexManagementDataEnricher(indexLifecycleDataEnricher);
+      plugins.index_management.addIndexManagementDataEnricher(indexLifecycleDataEnricher);
     }
   }
 }

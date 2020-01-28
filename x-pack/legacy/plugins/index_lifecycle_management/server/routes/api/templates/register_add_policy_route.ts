@@ -11,12 +11,12 @@ import { isEsError } from '../../../lib/is_es_error';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
-async function getIndexTemplate(callWithRequest, templateName) {
+async function getIndexTemplate(callWithRequest: any, templateName: string): Promise<any> {
   const response = await callWithRequest('indices.getTemplate', { name: templateName });
   return response[templateName];
 }
 
-async function updateIndexTemplate(callWithRequest, indexTemplatePatch) {
+async function updateIndexTemplate(callWithRequest: any, indexTemplatePatch: any): Promise<any> {
   // Fetch existing template
   const template = await getIndexTemplate(callWithRequest, indexTemplatePatch.templateName);
   merge(template, {
@@ -40,13 +40,13 @@ async function updateIndexTemplate(callWithRequest, indexTemplatePatch) {
   return await callWithRequest('transport.request', params);
 }
 
-export function registerAddPolicyRoute(server) {
+export function registerAddPolicyRoute(server: any) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
     path: '/api/index_lifecycle_management/template',
     method: 'POST',
-    handler: async request => {
+    handler: async (request: any) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {

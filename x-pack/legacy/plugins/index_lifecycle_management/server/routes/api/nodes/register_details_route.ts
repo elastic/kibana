@@ -9,32 +9,42 @@ import { isEsError } from '../../../lib/is_es_error';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
-async function removeLifecycle(callWithRequest, indexNames) {
-  const responses = [];
-  for (let i = 0; i < indexNames.length; i++) {
-    const indexName = indexNames[i];
-    const params = {
-      method: 'POST',
-      path: `/${encodeURIComponent(indexName)}/_ilm/remove`,
-      ignore: [404],
-    };
-
-    responses.push(callWithRequest('transport.request', params));
-  }
-  return Promise.all(responses);
+function findMatchingNodes(stats: any, nodeAttrs: string): any {
+  return Object.entries(stats.nodes).reduce((accum: any[], [nodeId, nodeStats]: [any, any]) => {
+    const attributes = nodeStats.attributes || {};
+    for (const [key, value] of Object.entries(attributes)) {
+      if (`${key}:${value}` === nodeAttrs) {
+        accum.push({
+          nodeId,
+          stats: nodeStats,
+        });
+        break;
+      }
+    }
+    return accum;
+  }, []);
 }
 
-export function registerRemoveRoute(server) {
+async function fetchNodeStats(callWithRequest: any): Promise<any> {
+  const params = {
+    format: 'json',
+  };
+
+  return await callWithRequest('nodes.stats', params);
+}
+
+export function registerDetailsRoute(server: any) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
-    path: '/api/index_lifecycle_management/index/remove',
-    method: 'POST',
-    handler: async request => {
+    path: '/api/index_lifecycle_management/nodes/{nodeAttrs}/details',
+    method: 'GET',
+    handler: async (request: any) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
-        const response = await removeLifecycle(callWithRequest, request.payload.indexNames);
+        const stats = await fetchNodeStats(callWithRequest);
+        const response = findMatchingNodes(stats, request.params.nodeAttrs);
         return response;
       } catch (err) {
         if (isEsError(err)) {
