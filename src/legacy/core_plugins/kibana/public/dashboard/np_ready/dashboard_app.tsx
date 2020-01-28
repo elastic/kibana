@@ -51,7 +51,6 @@ export interface DashboardAppScope extends ng.IScope {
       | { to: string | moment.Moment | undefined; from: string | moment.Moment | undefined };
     refreshInterval: any;
   };
-  savedQuery?: SavedQuery;
   refreshInterval: any;
   panels: SavedDashboardPanel[];
   indexPatterns: IIndexPattern[];
@@ -60,19 +59,8 @@ export interface DashboardAppScope extends ng.IScope {
   getShouldShowEditHelp: () => boolean;
   getShouldShowViewHelp: () => boolean;
   updateQueryAndFetch: ({ query, dateRange }: { query: Query; dateRange?: TimeRange }) => void;
-  onRefreshChange: ({
-    isPaused,
-    refreshInterval,
-  }: {
-    isPaused: boolean;
-    refreshInterval: any;
-  }) => void;
-  onFiltersUpdated: (filters: esFilters.Filter[]) => void;
   onCancelApplyFilters: () => void;
   onApplyFilters: (filters: esFilters.Filter[]) => void;
-  onQuerySaved: (savedQuery: SavedQuery) => void;
-  onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
-  onClearSavedQuery: () => void;
   topNavMenu: any;
   showFilterBar: () => boolean;
   showAddPanel: any;

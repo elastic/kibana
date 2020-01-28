@@ -13,20 +13,9 @@
     show-save-query="showSaveQuery"
 
     query="model.query"
-    saved-query="savedQuery"
     screen-title="screenTitle"
     on-query-submit="updateQueryAndFetch"
-    index-patterns="indexPatterns"
-    filters="model.filters"
-    on-filters-updated="onFiltersUpdated"
-    date-range-from="model.timeRange.from"
-    date-range-to="model.timeRange.to"
-    is-refresh-paused="model.refreshInterval.pause"
-    refresh-interval="model.refreshInterval.value"
-    on-saved="onQuerySaved"
-    on-saved-query-updated="onSavedQueryUpdated"
-    on-clear-saved-query="onClearSavedQuery"
-    on-refresh-change="onRefreshChange">
+    index-patterns="indexPatterns">
   </kbn-top-nav>
 
   <!--
@@ -41,10 +30,9 @@
     show-filter-bar="true"
     show-save-query="false"
     show-date-picker="false"
+    show-query-bar="false"
 
-    filters="model.filters"
     index-patterns="indexPatterns"
-    on-filters-updated="onFiltersUpdated"
   >
   </kbn-top-nav>
 

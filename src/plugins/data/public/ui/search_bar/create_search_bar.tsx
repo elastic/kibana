@@ -148,10 +148,12 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
     const fmFilters = filterManager.getFilters();
     const [refreshInterval, setRefreshInterval] = useState(tfRefreshInterval.value);
     const [refreshPaused, setRefreshPaused] = useState(tfRefreshInterval.pause);
-    const [query, setQuery] = useState<Query>({
-      query: props.query?.query || '',
-      language: props.query?.language || core.uiSettings.get('search:queryLanguage'),
-    });
+    const [query, setQuery] = useState<Query>(
+      props.query || {
+        query: '',
+        language: core.uiSettings.get('search:queryLanguage'),
+      }
+    );
 
     const [filters, setFilters] = useState(fmFilters);
 
@@ -201,7 +203,14 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
         }}
       >
         <SearchBar
-          {...props}
+          showAutoRefreshOnly={props.showAutoRefreshOnly}
+          showDatePicker={props.showDatePicker}
+          showFilterBar={props.showFilterBar}
+          showQueryBar={props.showQueryBar}
+          showQueryInput={props.showQueryInput}
+          showSaveQuery={props.showSaveQuery}
+          screenTitle={props.screenTitle}
+          indexPatterns={props.indexPatterns}
           timeHistory={timefilter.history}
           dateRangeFrom={timeRange.from}
           dateRangeTo={timeRange.to}
