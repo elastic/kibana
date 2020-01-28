@@ -26,6 +26,11 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
             .find('.euiTableCellContent')
             .text()
             .trim(),
+          description: $tr
+            .findTestSubject('mlAnalyticsTableColumnJobDescription')
+            .find('.euiTableCellContent')
+            .text()
+            .trim(),
           sourceIndex: $tr
             .findTestSubject('mlAnalyticsTableColumnSourceIndex')
             .find('.euiTableCellContent')
@@ -87,6 +92,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
     public async openResultsView() {
       await this.assertJobViewButtonExists();
       await testSubjects.click('mlAnalyticsJobViewButton');
+      await testSubjects.existOrFail('mlPageDataFrameAnalyticsExploration', { timeout: 5000 });
     }
 
     public async filterWithSearchString(filter: string) {

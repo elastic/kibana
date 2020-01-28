@@ -145,6 +145,7 @@ export default function({ getService }: FtrProviderContext) {
         it('displays details for the created job in the analytics table', async () => {
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
+            description: testData.jobDescription,
             sourceIndex: testData.source,
             destinationIndex: testData.destinationIndex,
             type: testData.expected.row.type,
