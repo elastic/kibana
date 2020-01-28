@@ -14,6 +14,7 @@ import {
   CreateAgentConfigResponse,
   UpdateAgentConfigRequestSchema,
   DeleteAgentConfigsRequestSchema,
+  DeleteAgentConfigsResponse,
 } from '../../types';
 
 export const getAgentConfigsHandler: RequestHandler<
@@ -116,14 +117,19 @@ export const updateAgentConfigHandler: RequestHandler<
   }
 };
 
-export const deleteAgentConfigsHandler: RequestHandler<TypeOf<
-  typeof DeleteAgentConfigsRequestSchema.params
->> = async (context, request, response) => {
+export const deleteAgentConfigsHandler: RequestHandler<
+  unknown,
+  unknown,
+  TypeOf<typeof DeleteAgentConfigsRequestSchema.body>
+> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    await agentConfigService.delete(soClient, request.params.agentConfigIds);
+    const body: DeleteAgentConfigsResponse = await agentConfigService.delete(
+      soClient,
+      request.body.agentConfigIds
+    );
     return response.ok({
-      body: { success: true },
+      body,
     });
   } catch (e) {
     return response.customError({

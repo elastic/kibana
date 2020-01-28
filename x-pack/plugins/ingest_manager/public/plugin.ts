@@ -11,6 +11,7 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { BASE_PATH } from './applications/ingest_manager/constants';
 
@@ -19,6 +20,7 @@ export type IngestManagerStart = void;
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
+  data: DataPublicPluginSetup;
 }
 
 // Redeclare config type as to not reach into server/ code

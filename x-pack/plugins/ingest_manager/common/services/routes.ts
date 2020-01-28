@@ -71,7 +71,7 @@ export const agentConfigRouteService = {
     return AGENT_CONFIG_API_ROUTES.UPDATE_PATTERN.replace('{agentConfigId}', agentConfigId);
   },
 
-  getDeletePath: (agentConfigId: string) => {
-    return AGENT_CONFIG_API_ROUTES.DELETE_PATTERN.replace('{agentConfigId}', agentConfigId);
+  getDeletePath: () => {
+    return AGENT_CONFIG_API_ROUTES.DELETE_PATTERN;
   },
 };

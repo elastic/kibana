@@ -24,10 +24,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentConfig } from '../../../types';
 import { DEFAULT_AGENT_CONFIG_ID, AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
+// import { SearchBar } from '../../../components';
 import { useGetAgentConfigs, usePagination, useLink } from '../../../hooks';
+import { AgentConfigDeleteProvider } from '../components';
 import { CreateAgentConfigFlyout } from './components';
-
-// import { ConnectedLink, SearchBar, PolicyDeleteProvider } from '../../components';
 
 export const AgentConfigListPage: React.FC<{}> = () => {
   // Create agent config flyout state
@@ -46,7 +46,7 @@ export const AgentConfigListPage: React.FC<{}> = () => {
   // Base path for config details
   const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
 
-  // Some policies retrieved, set up table props
+  // Some configs retrieved, set up table props
   const columns = [
     {
       field: 'name',
@@ -102,15 +102,12 @@ export const AgentConfigListPage: React.FC<{}> = () => {
       title={
         <h2>
           <FormattedMessage
-            id="xpack.ingestManager.agentConfigList.noPoliciesPrompt"
+            id="xpack.ingestManager.agentConfigList.noAgentConfigsPrompt"
             defaultMessage="No agent configurations"
           />
         </h2>
       }
       actions={
-        // libs.framework.capabilities.write ? (
-        // <EuiButton fill iconType="plusInCircle" onClick={() => setIsCreatePolicyFlyoutOpen(true)}>
-        // ) : null
         <EuiButton
           fill
           iconType="plusInCircle"
@@ -163,40 +160,30 @@ export const AgentConfigListPage: React.FC<{}> = () => {
         <EuiFlexGroup alignItems={'center'} gutterSize="m">
           {selectedAgentConfigs.length ? (
             <EuiFlexItem>
-              {/* <PolicyDeleteProvider>
-                {deletePoliciesPrompt => ( */}
-              <EuiButton
-                color="danger"
-                onClick={() => {
-                  // deletePoliciesPrompt(
-                  //   selectedAgentConfigs.map(agentConfig => agentConfig.id),
-                  //   () => {
-                  //     // Reload policies if on first page and no search query, otherwise
-                  //     // reset to first page and reset search, which will trigger a reload
-                  //     if (pagination.currentPage === 1 && !search) {
-                  //       fetch();
-                  //     } else {
-                  //       setPagination({
-                  //         ...pagination,
-                  //         currentPage: 1,
-                  //       });
-                  //       setSearch('');
-                  //     }
-                  //     selectedAgentConfigs([]);
-                  //   }
-                  // );
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.ingestManager.agentConfigList.deleteButton"
-                  defaultMessage="Delete {count, plural, one {# agent config} other {# agent configs}}"
-                  values={{
-                    count: selectedAgentConfigs.length,
-                  }}
-                />
-              </EuiButton>
-              {/* )}
-              </PolicyDeleteProvider> */}
+              <AgentConfigDeleteProvider>
+                {deleteAgentConfigsPrompt => (
+                  <EuiButton
+                    color="danger"
+                    onClick={() => {
+                      deleteAgentConfigsPrompt(
+                        selectedAgentConfigs.map(agentConfig => agentConfig.id),
+                        () => {
+                          sendRequest();
+                          setSelectedAgentConfigs([]);
+                        }
+                      );
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.agentConfigList.deleteButton"
+                      defaultMessage="Delete {count, plural, one {# agent config} other {# agent configs}}"
+                      values={{
+                        count: selectedAgentConfigs.length,
+                      }}
+                    />
+                  </EuiButton>
+                )}
+              </AgentConfigDeleteProvider>
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={4}>
@@ -209,18 +196,17 @@ export const AgentConfigListPage: React.FC<{}> = () => {
                 });
                 setSearch(newSearch);
               }}
-              fieldPrefix="policies"
+              fieldPrefix={AGENT_CONFIG_SAVED_OBJECT_TYPE}
             /> */}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton color="secondary" iconType="refresh" onClick={() => sendRequest()}>
               <FormattedMessage
-                id="xpack.ingestManager.agentConfigList.reloadPoliciesButtonText"
+                id="xpack.ingestManager.agentConfigList.reloadAgentConfigsButtonText"
                 defaultMessage="Reload"
               />
             </EuiButton>
           </EuiFlexItem>
-          {/* {libs.framework.capabilities.write && ( */}
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
@@ -233,7 +219,6 @@ export const AgentConfigListPage: React.FC<{}> = () => {
               />
             </EuiButton>
           </EuiFlexItem>
-          {/* )} */}
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />

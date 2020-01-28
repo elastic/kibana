@@ -62,7 +62,7 @@ export const registerRoutes = (router: IRouter) => {
   );
 
   // Delete
-  router.delete(
+  router.post(
     {
       path: AGENT_CONFIG_API_ROUTES.DELETE_PATTERN,
       validate: DeleteAgentConfigsRequestSchema,

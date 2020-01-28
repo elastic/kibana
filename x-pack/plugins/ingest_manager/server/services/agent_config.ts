@@ -16,6 +16,7 @@ import {
   AgentConfigStatus,
   AgentConfigUpdateHandler,
   ListWithKuery,
+  DeleteAgentConfigsResponse,
 } from '../types';
 import { datasourceService } from './datasource';
 
@@ -40,7 +41,7 @@ class AgentConfigService {
   private async _update(
     soClient: SavedObjectsClientContract,
     id: string,
-    agentConfig: NewAgentConfig,
+    agentConfig: Partial<AgentConfig>,
     user?: AuthenticatedUser
   ): Promise<AgentConfig> {
     await soClient.update<AgentConfig>(SAVED_OBJECT_TYPE, id, {
@@ -157,7 +158,7 @@ class AgentConfigService {
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
-    agentConfig: NewAgentConfig,
+    agentConfig: Partial<AgentConfig>,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id);
@@ -226,15 +227,33 @@ class AgentConfigService {
     );
   }
 
-  public async delete(soClient: SavedObjectsClientContract, ids: string[]): Promise<void> {
+  public async delete(
+    soClient: SavedObjectsClientContract,
+    ids: string[]
+  ): Promise<DeleteAgentConfigsResponse> {
+    const result: DeleteAgentConfigsResponse = [];
+
     if (ids.includes(DEFAULT_AGENT_CONFIG_ID)) {
       throw new Error('The default agent configuration cannot be deleted');
     }
 
     for (const id of ids) {
-      await soClient.delete(SAVED_OBJECT_TYPE, id);
-      await this.triggerAgentConfigUpdatedEvent('deleted', id);
+      try {
+        await soClient.delete(SAVED_OBJECT_TYPE, id);
+        await this.triggerAgentConfigUpdatedEvent('deleted', id);
+        result.push({
+          id,
+          success: true,
+        });
+      } catch (e) {
+        result.push({
+          id,
+          success: false,
+        });
+      }
     }
+
+    return result;
   }
 }
 

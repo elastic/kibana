@@ -11,6 +11,8 @@ import {
   GetAgentConfigsResponse,
   CreateAgentConfigRequestSchema,
   CreateAgentConfigResponse,
+  DeleteAgentConfigsRequestSchema,
+  DeleteAgentConfigsResponse,
 } from '../../types';
 
 export const useGetAgentConfigs = (query: HttpFetchQuery = {}) => {
@@ -24,6 +26,16 @@ export const useGetAgentConfigs = (query: HttpFetchQuery = {}) => {
 export const sendCreateAgentConfig = (body: TypeOf<typeof CreateAgentConfigRequestSchema.body>) => {
   return sendRequest<CreateAgentConfigResponse>({
     path: agentConfigRouteService.getCreatePath(),
+    method: 'post',
+    body: JSON.stringify(body),
+  });
+};
+
+export const sendDeleteAgentConfigs = (
+  body: TypeOf<typeof DeleteAgentConfigsRequestSchema.body>
+) => {
+  return sendRequest<DeleteAgentConfigsResponse>({
+    path: agentConfigRouteService.getDeletePath(),
     method: 'post',
     body: JSON.stringify(body),
   });

@@ -40,7 +40,12 @@ export const UpdateAgentConfigRequestSchema = {
 };
 
 export const DeleteAgentConfigsRequestSchema = {
-  params: schema.object({
+  body: schema.object({
     agentConfigIds: schema.arrayOf(schema.string()),
   }),
 };
+
+export type DeleteAgentConfigsResponse = Array<{
+  id: string;
+  success: boolean;
+}>;

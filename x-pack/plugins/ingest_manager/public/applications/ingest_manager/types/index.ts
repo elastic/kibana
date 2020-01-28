@@ -11,4 +11,6 @@ export {
   GetAgentConfigsResponse,
   CreateAgentConfigRequestSchema,
   CreateAgentConfigResponse,
+  DeleteAgentConfigsRequestSchema,
+  DeleteAgentConfigsResponse,
 } from '../../../../common';

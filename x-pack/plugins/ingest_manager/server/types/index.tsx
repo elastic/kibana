@@ -18,17 +18,18 @@ export {
   ListWithKuerySchema,
   // Datasource schemas
   GetDatasourcesRequestSchema,
-  GetAgentConfigsResponse,
   GetOneDatasourceRequestSchema,
   CreateDatasourceRequestSchema,
-  CreateAgentConfigResponse,
   UpdateDatasourceRequestSchema,
   // Agent config schemas
   GetAgentConfigsRequestSchema,
+  GetAgentConfigsResponse,
   GetOneAgentConfigRequestSchema,
   CreateAgentConfigRequestSchema,
+  CreateAgentConfigResponse,
   UpdateAgentConfigRequestSchema,
   DeleteAgentConfigsRequestSchema,
+  DeleteAgentConfigsResponse,
 } from '../../common';
 
 export type AgentConfigUpdateHandler = (
