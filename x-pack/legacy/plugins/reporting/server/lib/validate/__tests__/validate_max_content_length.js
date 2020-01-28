@@ -11,6 +11,18 @@ const FIVE_HUNDRED_MEGABYTES = 524288000;
 const ONE_HUNDRED_MEGABYTES = 104857600;
 
 describe('Reporting: Validate Max Content Length', () => {
+  const elasticsearch = {
+    getCluster: () => ({
+      callWithInternalUser: () => ({
+        defaults: {
+          http: {
+            max_content_length: '100mb',
+          },
+        },
+      }),
+    }),
+  };
+
   const logger = {
     warning: sinon.spy(),
   };
@@ -24,22 +36,20 @@ describe('Reporting: Validate Max Content Length', () => {
       config: () => ({
         get: sinon.stub().returns(FIVE_HUNDRED_MEGABYTES),
       }),
-      plugins: {
-        elasticsearch: {
-          getCluster: () => ({
-            callWithInternalUser: () => ({
-              defaults: {
-                http: {
-                  max_content_length: '100mb',
-                },
-              },
-            }),
-          }),
-        },
-      },
+    };
+    const elasticsearch = {
+      getCluster: () => ({
+        callWithInternalUser: () => ({
+          defaults: {
+            http: {
+              max_content_length: '100mb',
+            },
+          },
+        }),
+      }),
     };
 
-    await validateMaxContentLength(server, logger);
+    await validateMaxContentLength(server, elasticsearch, logger);
 
     sinon.assert.calledWithMatch(
       logger.warning,
@@ -64,22 +74,11 @@ describe('Reporting: Validate Max Content Length', () => {
       config: () => ({
         get: sinon.stub().returns(ONE_HUNDRED_MEGABYTES),
       }),
-      plugins: {
-        elasticsearch: {
-          getCluster: () => ({
-            callWithInternalUser: () => ({
-              defaults: {
-                http: {
-                  max_content_length: '100mb',
-                },
-              },
-            }),
-          }),
-        },
-      },
     };
 
-    expect(async () => validateMaxContentLength(server, logger.warning)).not.to.throwError();
+    await expect(() =>
+      validateMaxContentLength(server, elasticsearch, logger.warning)
+    ).not.to.throwError();
     sinon.assert.notCalled(logger.warning);
   });
 });
