@@ -417,14 +417,78 @@ test('passes log record to appender with receiveAllLevels: true, regardless if l
 
   warnLogger.trace('trace-message');
   expect(receiveAllAppender.append).toHaveBeenCalledTimes(1);
+  expect(receiveAllAppender.append.mock.calls[0][0]).toMatchObject({
+    level: LogLevel.Trace,
+    message: 'trace-message',
+  });
+
   warnLogger.debug('debug-message');
   expect(receiveAllAppender.append).toHaveBeenCalledTimes(2);
+  expect(receiveAllAppender.append.mock.calls[1][0]).toMatchObject({
+    level: LogLevel.Debug,
+    message: 'debug-message',
+  });
+
   warnLogger.info('info-message');
   expect(receiveAllAppender.append).toHaveBeenCalledTimes(3);
+  expect(receiveAllAppender.append.mock.calls[2][0]).toMatchObject({
+    level: LogLevel.Info,
+    message: 'info-message',
+  });
+
   warnLogger.warn('warn-message');
   expect(receiveAllAppender.append).toHaveBeenCalledTimes(4);
+  expect(receiveAllAppender.append.mock.calls[3][0]).toMatchObject({
+    level: LogLevel.Warn,
+    message: 'warn-message',
+  });
+
   warnLogger.error('error-message');
   expect(receiveAllAppender.append).toHaveBeenCalledTimes(5);
+  expect(receiveAllAppender.append.mock.calls[4][0]).toMatchObject({
+    level: LogLevel.Error,
+    message: 'error-message',
+  });
+
   warnLogger.fatal('fatal-message');
   expect(receiveAllAppender.append).toHaveBeenCalledTimes(6);
+  expect(receiveAllAppender.append.mock.calls[5][0]).toMatchObject({
+    level: LogLevel.Fatal,
+    message: 'fatal-message',
+  });
+});
+
+test('passes log record to appender with receiveAllLevels: false, only if log level is supported', () => {
+  const notReceiveAllAppender = { append: jest.fn(), receiveAllLevels: false };
+  const warnLogger = new BaseLogger(context, LogLevel.Warn, [notReceiveAllAppender], factory);
+
+  warnLogger.trace('trace-message');
+  expect(notReceiveAllAppender.append).toHaveBeenCalledTimes(0);
+
+  warnLogger.debug('debug-message');
+  expect(notReceiveAllAppender.append).toHaveBeenCalledTimes(0);
+
+  warnLogger.info('info-message');
+  expect(notReceiveAllAppender.append).toHaveBeenCalledTimes(0);
+
+  warnLogger.warn('warn-message');
+  expect(notReceiveAllAppender.append).toHaveBeenCalledTimes(1);
+  expect(notReceiveAllAppender.append.mock.calls[0][0]).toMatchObject({
+    level: LogLevel.Warn,
+    message: 'warn-message',
+  });
+
+  warnLogger.error('error-message');
+  expect(notReceiveAllAppender.append).toHaveBeenCalledTimes(2);
+  expect(notReceiveAllAppender.append.mock.calls[1][0]).toMatchObject({
+    level: LogLevel.Error,
+    message: 'error-message',
+  });
+
+  warnLogger.fatal('fatal-message');
+  expect(notReceiveAllAppender.append).toHaveBeenCalledTimes(3);
+  expect(notReceiveAllAppender.append.mock.calls[2][0]).toMatchObject({
+    level: LogLevel.Fatal,
+    message: 'fatal-message',
+  });
 });
