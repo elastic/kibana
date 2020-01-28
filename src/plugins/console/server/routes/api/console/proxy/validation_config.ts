@@ -21,18 +21,24 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export type Query = TypeOf<typeof routeValidationConfig.query>;
 export type Body = TypeOf<typeof routeValidationConfig.body>;
 
+const acceptedHttpVerb = schema.string({
+  validate: method => {
+    return ['HEAD', 'GET', 'POST', 'PUT', 'DELETE'].some(
+      verb => verb.toLowerCase() === method.toLowerCase()
+    )
+      ? undefined
+      : `Method must be one of, case insensitive ['HEAD', 'GET', 'POST', 'PUT', 'DELETE']. Received '${method}'.`;
+  },
+});
+
+const nonEmptyString = schema.string({
+  validate: s => (s === '' ? 'Expected non-empty string' : undefined),
+});
+
 export const routeValidationConfig = {
   query: schema.object({
-    method: schema.string({
-      validate: method => {
-        return ['HEAD', 'GET', 'POST', 'PUT', 'DELETE'].some(
-          verb => verb.toLowerCase() === method.toLowerCase()
-        )
-          ? undefined
-          : `Method must be one of, case insensitive ['HEAD', 'GET', 'POST', 'PUT', 'DELETE']. Received '${method}'.`;
-      },
-    }),
-    path: schema.string(),
+    method: acceptedHttpVerb,
+    path: nonEmptyString,
   }),
   body: schema.stream(),
 };

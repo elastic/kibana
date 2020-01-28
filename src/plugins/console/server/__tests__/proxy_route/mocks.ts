@@ -26,7 +26,7 @@ import { ProxyConfigCollection } from '../../lib';
 import { CreateHandlerDependencies } from '../../routes/api/console/proxy/create_handler';
 import { coreMock } from '../../../../../core/server/mocks';
 
-export const proxyRouteHandlerDeps = ({
+export const getProxyRouteHandlerDeps = ({
   proxyConfigCollection = new ProxyConfigCollection([]),
   pathFilters = [/.*/],
   readLegacyESConfig = () => ({

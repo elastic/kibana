@@ -25,7 +25,7 @@ import { kibanaResponseFactory } from '../../../../../core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../core/server/http/router/request';
 
-import { proxyRouteHandlerDeps } from './mocks';
+import { getProxyRouteHandlerDeps } from './mocks';
 
 import expect from '@kbn/expect';
 import * as requestModule from '../../lib/proxy_request';
@@ -39,11 +39,11 @@ describe('Console Proxy Route', () => {
 
   beforeEach(() => {
     (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub(''));
-    handler = createHandler(proxyRouteHandlerDeps({}));
+    handler = createHandler(getProxyRouteHandlerDeps({}));
   });
 
   afterEach(async () => {
-    jest.restoreAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('headers', () => {

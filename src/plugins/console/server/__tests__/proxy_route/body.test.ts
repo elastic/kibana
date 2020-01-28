@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { proxyRouteHandlerDeps } from './mocks';
+import { getProxyRouteHandlerDeps } from './mocks';
 
 import expect from '@kbn/expect';
 import { Readable } from 'stream';
@@ -32,7 +32,7 @@ describe('Console Proxy Route', () => {
   beforeEach(() => {
     request = (method: string, path: string, response: string) => {
       (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub(response));
-      const handler = createHandler(proxyRouteHandlerDeps({}));
+      const handler = createHandler(getProxyRouteHandlerDeps({}));
 
       return handler(
         {} as any,
@@ -55,7 +55,7 @@ describe('Console Proxy Route', () => {
     });
 
   afterEach(async () => {
-    jest.restoreAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('response body', () => {
