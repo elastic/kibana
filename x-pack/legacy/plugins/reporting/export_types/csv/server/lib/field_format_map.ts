@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { FieldFormats } from '../../../../types';
+import { fieldFormats } from '../../../../../../../../src/plugins/data/server';
 
 interface IndexPatternSavedObject {
   attributes: {
@@ -25,7 +25,7 @@ interface IndexPatternSavedObject {
  */
 export function fieldFormatMapFactory(
   indexPatternSavedObject: IndexPatternSavedObject,
-  fieldFormats: FieldFormats
+  fieldFormatsRegistry: fieldFormats.FieldFormatsRegistry
 ) {
   const formatsMap = new Map();
 
@@ -33,10 +33,13 @@ export function fieldFormatMapFactory(
   if (_.has(indexPatternSavedObject, 'attributes.fieldFormatMap')) {
     const fieldFormatMap = JSON.parse(indexPatternSavedObject.attributes.fieldFormatMap);
     Object.keys(fieldFormatMap).forEach(fieldName => {
-      const formatConfig = fieldFormatMap[fieldName];
+      const formatConfig: fieldFormats.IFieldFormatConfig = fieldFormatMap[fieldName];
 
       if (!_.isEmpty(formatConfig)) {
-        formatsMap.set(fieldName, fieldFormats.getInstance(formatConfig));
+        formatsMap.set(
+          fieldName,
+          fieldFormatsRegistry.getInstance(formatConfig.id, formatConfig.params)
+        );
       }
     });
   }
@@ -45,7 +48,7 @@ export function fieldFormatMapFactory(
   const indexFields = JSON.parse(_.get(indexPatternSavedObject, 'attributes.fields', '[]'));
   indexFields.forEach((field: any) => {
     if (!formatsMap.has(field.name)) {
-      formatsMap.set(field.name, fieldFormats.getDefaultInstance(field.type));
+      formatsMap.set(field.name, fieldFormatsRegistry.getDefaultInstance(field.type));
     }
   });
 

@@ -43,7 +43,7 @@ import '../../data/public/legacy';
 import './services/saved_sheet_register';
 
 import rootTemplate from 'plugins/timelion/index.html';
-import { createSavedVisLoader } from '../../kibana/public/visualize';
+import { createSavedVisLoader, TypesService } from '../../visualizations/public';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
@@ -131,6 +131,7 @@ app.controller('timelion', function(
     indexPatterns: npStart.plugins.data.indexPatterns,
     chrome: npStart.core.chrome,
     overlays: npStart.core.overlays,
+    visualizationTypes: new TypesService().start(),
   });
   const timezone = Private(timezoneProvider)();
 
