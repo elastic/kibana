@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots renderers/Csv default 1`] = `
+<div
+  className="canvasCsv"
+  onBlur={[Function]}
+  onFocus={[Function]}
+  onMouseEnter={[Function]}
+  onMouseLeave={[Function]}
+  style={
+    Object {
+      "height": 200,
+      "position": "relative",
+      "width": 400,
+    }
+  }
+>
+  <span
+    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline canvasCsv__code"
+    style={Object {}}
+  >
+    <code
+      className="euiCodeBlock__code"
+    >
+      <pre
+        className="canvasCsv__content"
+      >
+        <p>
+          this,is,a,datatable
+        </p>
+        it's,in,CSV,format
+hover,me,to,download
+      </pre>
+    </code>
+  </span>
+  <button
+    className="euiButton euiButton--primary euiButton--small canvasCsv__button"
+    onClick={[Function]}
+    style={
+      Object {
+        "opacity": 0,
+      }
+    }
+    type="button"
+  >
+    <span
+      className="euiButton__content"
+    >
+      <span
+        className="euiButton__text"
+      >
+        Download
+      </span>
+    </span>
+  </button>
+</div>
+`;

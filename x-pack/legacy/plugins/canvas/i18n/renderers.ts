@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { JSON, HTML, MARKDOWN } from './constants';
+import { JSON, HTML, MARKDOWN, CSV } from './constants';
 
 export const RendererStrings = {
   advancedFilter: {
@@ -16,6 +16,19 @@ export const RendererStrings = {
     getHelpDescription: () =>
       i18n.translate('xpack.canvas.renderer.advancedFilter.helpDescription', {
         defaultMessage: 'Render a Canvas filter expression',
+      }),
+  },
+  csv: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.renderer.csv.displayName', {
+        defaultMessage: 'CSV Format',
+      }),
+    getHelpDescription: () =>
+      i18n.translate('xpack.canvas.renderer.csv.helpDescription', {
+        defaultMessage: 'Render a datatable in {CSV} format',
+        values: {
+          CSV,
+        },
       }),
   },
   debug: {

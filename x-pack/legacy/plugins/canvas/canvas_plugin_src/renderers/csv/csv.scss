@@ -1,0 +1,25 @@
+.canvasCsv {
+  position: relative;
+
+  .canvasCsv__code {
+    padding: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .canvasCsv__content {
+    @include euiScrollBar;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    padding: $euiSize;
+  }
+
+  .canvasCsv__button {
+    position: absolute;
+    right: 16px;
+    top: 8px;
+    transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
+    transition-delay: $euiAnimSpeedNormal;
+  }
+}

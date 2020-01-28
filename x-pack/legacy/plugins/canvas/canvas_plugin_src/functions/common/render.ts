@@ -36,6 +36,7 @@ export function render(): ExpressionFunction<'render', Render<any>, Arguments, R
         help: argHelp.as,
         options: [
           'advanced_filter',
+          'csv',
           'debug',
           'dropdown_filter',
           'error',

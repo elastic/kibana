@@ -5,6 +5,7 @@
  */
 
 import { advancedFilter } from './advanced_filter';
+import { csv } from './csv';
 import { debug } from './debug';
 import { dropdownFilter } from './dropdown_filter';
 import { embeddable } from './embeddable/embeddable';
@@ -24,6 +25,7 @@ import { timeFilter } from './time_filter';
 
 export const renderFunctions = [
   advancedFilter,
+  csv,
   debug,
   dropdownFilter,
   embeddable,
