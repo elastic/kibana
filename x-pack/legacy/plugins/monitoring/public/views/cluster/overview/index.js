@@ -17,6 +17,7 @@ import { SetupModeRenderer } from '../../../components/renderers';
 import {
   CODE_PATH_ALL,
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
+  KIBANA_ALERTING_ENABLED,
 } from '../../../../common/constants';
 
 const CODE_PATHS = [CODE_PATH_ALL];
@@ -69,10 +70,10 @@ uiRoutes.when('/overview', {
             return;
           }
 
-          const emailAddress =
-            config.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS) ||
-            chrome.getInjected('monitoringLegacyEmailAddress') ||
-            '';
+          let emailAddress = chrome.getInjected('monitoringLegacyEmailAddress') || '';
+          if (KIBANA_ALERTING_ENABLED) {
+            emailAddress = config.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS) || emailAddress;
+          }
 
           this.renderReact(
             <I18nContext>
