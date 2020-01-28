@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { isString, isEmpty } from 'lodash/fp';
 import React from 'react';
 
@@ -15,6 +15,8 @@ import { TruncatableText } from '../../../truncatable_text';
 
 import { isUrlInvalid } from '../../../../pages/detection_engine/rules/components/step_about_rule/helpers';
 import endPointSvg from '../../../../utils/logo_endpoint/64_color.svg';
+
+import * as i18n from './translations';
 
 export const renderRuleName = ({
   contextId,
@@ -88,13 +90,26 @@ export const renderEventModule = ({
           {content}
         </DefaultDraggable>
       </EuiFlexItem>
-      {endpointRefUrl != null && !isEmpty(endpointRefUrl) && !isUrlInvalid(endpointRefUrl) && (
-        <EuiFlexItem grow={false}>
-          <EuiLink href={endpointRefUrl} target="_blank">
-            <EuiIcon type={endPointSvg} size="m" />
-          </EuiLink>
-        </EuiFlexItem>
-      )}
+      {endpointRefUrl != null &&
+        !isEmpty(endpointRefUrl) &&
+        !isUrlInvalid(endpointRefUrl) &&
+        endpointRefUrl.includes('/alerts/') && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              data-test-subj="event-module-link-to-elastic-endpoint-security"
+              content={
+                <>
+                  <p>{i18n.LINK_ELASTIC_ENDPOINT_SECURITY}</p>
+                  <p>{endpointRefUrl}</p>
+                </>
+              }
+            >
+              <EuiLink href={endpointRefUrl} target="_blank">
+                <EuiIcon type={endPointSvg} size="m" />
+              </EuiLink>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
     </EuiFlexGroup>
   ) : (
     getEmptyTagValue()
