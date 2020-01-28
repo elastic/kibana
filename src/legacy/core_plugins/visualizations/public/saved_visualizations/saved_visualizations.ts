@@ -22,19 +22,19 @@ import { SavedObjectKibanaServices } from 'ui/saved_objects/types';
 // @ts-ignore
 import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
-import { createVisualizeEditUrl } from '../np_ready/visualize_constants';
-import { VisualizationsStart } from '../../../../visualizations/public/np_ready/public';
+import { createVisualizeEditUrl } from '../../../kibana/public/visualize';
+import { TypesStart } from '../np_ready/public/types';
 
-interface SavedObjectKibanaServicesWithVisualizations extends SavedObjectKibanaServices {
-  visualizations: VisualizationsStart;
+export interface SavedObjectKibanaServicesWithVisualizations extends SavedObjectKibanaServices {
+  visualizationTypes: TypesStart;
 }
 
 export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisualizations) {
-  const { savedObjectsClient, visualizations } = services;
+  const { savedObjectsClient, visualizationTypes } = services;
 
   class SavedObjectLoaderVisualize extends SavedObjectLoader {
     mapHitSource = (source: Record<string, any>, id: string) => {
-      const visTypes = visualizations.types;
+      const visTypes = visualizationTypes;
       source.id = id;
       source.url = this.urlFor(id);
 
@@ -72,7 +72,7 @@ export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisu
         size,
         mapSavedObjectApiHits: this.mapSavedObjectApiHits.bind(this),
         savedObjectsClient,
-        visTypes: visualizations.types.getAliases(),
+        visTypes: visualizationTypes.getAliases(),
       });
     }
   }
