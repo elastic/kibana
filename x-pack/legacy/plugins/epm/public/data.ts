@@ -92,15 +92,7 @@ export async function installDatasource(datasource: DatasourcePayload): Promise<
   return _fetch(path, { body, method: 'POST' });
 }
 
-// TODO: This should come from the shared Ingest types
-// However, they are in a /server directory so /public/* cannot access them
-// Using this partial/placeholder type until we can figure out how to share
-interface PlaceholderPolicy {
-  name: string;
-  id: string;
-}
-
-export async function getPolicies(): Promise<ReturnTypeList<PlaceholderPolicy>> {
+export async function getPolicies(): Promise<any> {
   const path = getListPoliciesPath();
   return _fetch(path);
 }

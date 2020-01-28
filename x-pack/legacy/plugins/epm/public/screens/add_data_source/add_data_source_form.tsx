@@ -67,8 +67,8 @@ export const AddDataSourceForm = ({ package: pkg }: AddDataSourceStepsProps) => 
   const [policyOptions, setPolicyOptions] = useState<PolicyOption[]>([defaultPolicyOption]);
   useEffect(() => {
     getPolicies()
-      .then(response => response.list)
-      .then(policies => policies.map(policy => ({ label: policy.name, value: policy.id })))
+      .then(response => response.items)
+      .then(policies => policies.map((policy: any) => ({ label: policy.name, value: policy.id })))
       .then(setPolicyOptions);
   }, []);
 

@@ -21,20 +21,21 @@ export async function addDatasourcesToPolicy({
   datasources: Array<Datasource['id']>;
   policyId: string;
 }) {
-  const result: ReturnTypeUpdate<Datasource> = await ingestAPI({
-    method: 'post',
-    path: `/api/ingest/policies/${policyId}/addDatasources`,
-    body: { datasources },
-    request,
-  });
+  throw new Error('Add datasource to policy is disabled');
+  // const result: ReturnTypeUpdate<Datasource> = await ingestAPI({
+  //   method: 'post',
+  //   path: `/api/ingest_manager/agent_configs/${policyId}/addDatasources`,
+  //   body: { datasources },
+  //   request,
+  // });
 
-  if (result.success) {
-    return result.item;
-  } else {
-    throw new Error(
-      result.error?.message || `Error adding datasources ${datasources} to policy ${policyId}`
-    );
-  }
+  // if (result.success) {
+  //   return result.item;
+  // } else {
+  //   throw new Error(
+  //     result.error?.message || `Error adding datasources ${datasources} to policy ${policyId}`
+  //   );
+  // }
 }
 
 export async function createDatasource({
@@ -45,9 +46,9 @@ export async function createDatasource({
   datasource: Omit<Datasource, 'id'>;
 }) {
   const result: ReturnTypeCreate<Datasource> = await ingestAPI({
-    path: '/api/ingest/datasources',
+    path: '/api/ingest_manager/agent_configs',
     method: 'post',
-    body: { datasource },
+    body: { ...datasource },
     request,
   });
 
