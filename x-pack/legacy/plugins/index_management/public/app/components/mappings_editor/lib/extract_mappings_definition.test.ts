@@ -108,7 +108,7 @@ describe('extractMappingsDefinition', () => {
 
   test('should detect that the mappings has one custom type whose name matches a mappings definition parameter', () => {
     const mappings = {
-      _source: {
+      dynamic: {
         _source: {
           excludes: [],
           includes: [],
@@ -128,8 +128,8 @@ describe('extractMappingsDefinition', () => {
     };
 
     expect(extractMappingsDefinition(mappings)).toEqual({
-      type: '_source',
-      mappings: mappings._source,
+      type: 'dynamic',
+      mappings: mappings.dynamic,
     });
   });
 
