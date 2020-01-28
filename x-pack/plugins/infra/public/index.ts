@@ -16,6 +16,5 @@ export const plugin: PluginInitializer<
   return new Plugin(context);
 };
 
-export { useTrackPageview } from './hooks/use_track_metric';
 export { FORMATTERS } from './utils/formatters';
 export { InfraFormatterType } from './lib/lib';

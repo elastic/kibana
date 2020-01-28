@@ -37,6 +37,7 @@ import { getConfigFromInjectedMetadata } from './getConfigFromInjectedMetadata';
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
@@ -131,21 +132,23 @@ export class ApmPlugin
 
     ReactDOM.render(
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <i18nCore.Context>
-          <Router history={history}>
-            <LocationProvider>
-              <MatchedRouteProvider routes={routes}>
-                <UrlParamsProvider>
-                  <LoadingIndicatorProvider>
-                    <LicenseProvider>
-                      <App />
-                    </LicenseProvider>
-                  </LoadingIndicatorProvider>
-                </UrlParamsProvider>
-              </MatchedRouteProvider>
-            </LocationProvider>
-          </Router>
-        </i18nCore.Context>
+        <KibanaContextProvider services={{ ...core, ...plugins }}>
+          <i18nCore.Context>
+            <Router history={history}>
+              <LocationProvider>
+                <MatchedRouteProvider routes={routes}>
+                  <UrlParamsProvider>
+                    <LoadingIndicatorProvider>
+                      <LicenseProvider>
+                        <App />
+                      </LicenseProvider>
+                    </LoadingIndicatorProvider>
+                  </UrlParamsProvider>
+                </MatchedRouteProvider>
+              </LocationProvider>
+            </Router>
+          </i18nCore.Context>
+        </KibanaContextProvider>
       </ApmPluginContext.Provider>,
       document.getElementById(REACT_APP_ROOT_ID)
     );

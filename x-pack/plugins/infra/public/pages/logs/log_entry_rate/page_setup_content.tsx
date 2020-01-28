@@ -16,7 +16,7 @@ import {
   LogAnalysisSetupPageContent,
   LogAnalysisSetupPageHeader,
 } from '../../../components/logging/log_analysis_setup';
-import { useTrackPageview } from '../../../hooks/use_track_metric';
+import { useTrackPageview } from '../../../../../observability/public';
 import { useLogEntryRateSetup } from './use_log_entry_rate_setup';
 
 export const LogEntryRateSetupContent: React.FunctionComponent = () => {

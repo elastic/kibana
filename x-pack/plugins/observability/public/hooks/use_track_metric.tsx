@@ -22,15 +22,23 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 type ObservabilityApp = 'infra_metrics' | 'infra_logs' | 'apm' | 'uptime';
 
 interface TrackOptions {
-  app: ObservabilityApp;
+  app?: ObservabilityApp;
   metricType?: UiStatsMetricType;
   delay?: number; // in ms
 }
 type EffectDeps = unknown[];
 
-type TrackMetricOptions = TrackOptions & { metric: string };
+export type TrackMetricOptions = TrackOptions & { metric: string };
+export type UiTracker = ReturnType<typeof useUiTracker>;
 
 export { METRIC_TYPE };
+
+export function useUiTracker({ app: defaultApp }: { app?: ObservabilityApp } = {}) {
+  const { reportUiStats } = useKibana<any>().services?.usageCollection;
+  return ({ app = defaultApp, metric, metricType = METRIC_TYPE.COUNT }: TrackMetricOptions) => {
+    reportUiStats(app, metricType, metric);
+  };
+}
 
 export function useTrackMetric(
   { app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }: TrackMetricOptions,
