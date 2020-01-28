@@ -15,7 +15,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'infraHome']);
 
   describe('Infrastructure Source Configuration', function() {
-    this.tags('smoke');
+    this.tags([
+      'smoke',
+      'skipFirefox', // Flaky in firefox: https://github.com/elastic/kibana/issues/55950
+    ]);
+
     before(async () => {
       await esArchiver.load('empty_kibana');
     });

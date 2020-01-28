@@ -13,7 +13,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
 
   describe('Infra link-to', function() {
-    this.tags('smoke');
+    this.tags([
+      'smoke',
+      'skipFirefox', // Flaky in firefox: https://github.com/elastic/kibana/issues/55652
+    ]);
+
     it('redirects to the logs app and parses URL search params correctly', async () => {
       const location = {
         hash: '',
