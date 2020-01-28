@@ -50,7 +50,7 @@ export const TopNav: FC = () => {
   useEffect(() => {
     setGlobalState({ refreshInterval });
     timefilter.setRefreshInterval(refreshInterval);
-  }, [refreshInterval.pause, refreshInterval.value]);
+  }, [refreshInterval?.pause, refreshInterval?.value]);
 
   const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
