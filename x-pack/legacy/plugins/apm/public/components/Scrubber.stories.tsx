@@ -6,10 +6,10 @@
 
 import {
   BarSeries,
+  BrushEndListener,
   Chart,
   getSpecId,
   ScaleType,
-  SeriesIdentifier,
   Settings,
   Theme,
   TooltipType
@@ -27,37 +27,25 @@ const entryTransactionId = '6528d29667c22f62';
 const waterfall = getWaterfall(response, entryTransactionId);
 
 const data = waterfall.items.map((item, index) => ({
-  min: item.offset,
+  ...item,
   max: item.offset + item.duration,
-  'service.name': item.doc.service.name,
   x: index
 }));
 
 const theme: Partial<Theme> = {
   chartPaddings: { left: 0, top: 0, bottom: 0, right: 0 },
   chartMargins: { left: 0, top: 0, bottom: 0, right: 0 },
-  scales: { barsPadding: 0 }
+  scales: { barsPadding: 0, histogramPadding: 0 }
 };
-
-// TODO: Split colors based on service name
-function barSeriesColorAccessor(series) {
-  if (series.splitAccessors.get('service.name') === 'opbeans-java') {
-    return 'rgb(96, 146, 192)';
-  } else if (series.splitAccessors.get('service.name') === 'opbeans-python') {
-    return 'rgb(84, 179, 153)';
-  } else {
-    return '#9170b8';
-  }
-}
 
 function TimelineScrubber() {
   const [selection, setSelection] = React.useState<
     [number, number] | [undefined, undefined]
   >([undefined, undefined]);
 
-  function onBrushEnd(y1, y2) {
+  const onBrushEnd: BrushEndListener = (y1, y2) => {
     setSelection([y1, y2]);
-  }
+  };
 
   return (
     <>
@@ -93,13 +81,14 @@ function TimelineScrubber() {
           />
           <BarSeries
             id={getSpecId('lines')}
-            customSeriesColors={barSeriesColorAccessor}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['max']}
-            y0Accessors={['min']}
-            //  splitSeriesAccessors={['service.name']}
+            y0Accessors={['offset']}
+            styleAccessor={value => {
+              return waterfall.serviceColors[value.datum.doc.service.name];
+            }}
             data={data}
           />
         </Chart>
