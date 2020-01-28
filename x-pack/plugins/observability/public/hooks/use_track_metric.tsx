@@ -34,9 +34,11 @@ export type UiTracker = ReturnType<typeof useUiTracker>;
 export { METRIC_TYPE };
 
 export function useUiTracker({ app: defaultApp }: { app?: ObservabilityApp } = {}) {
-  const { reportUiStats } = useKibana<any>().services?.usageCollection;
+  const reportUiStats = useKibana<any>().services?.usageCollection?.reportUiStats;
   return ({ app = defaultApp, metric, metricType = METRIC_TYPE.COUNT }: TrackMetricOptions) => {
-    reportUiStats(app, metricType, metric);
+    if (reportUiStats) {
+      reportUiStats(app, metricType, metric);
+    }
   };
 }
 
