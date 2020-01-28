@@ -19,7 +19,11 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import { uiModules } from '../modules';
+import { IScope } from 'angular';
+
+interface LazyScope extends IScope {
+  [key: string]: any;
+}
 
 export function CollapsibleSidebarProvider() {
   // simply a list of all of all of angulars .col-md-* classes except 12
@@ -29,7 +33,7 @@ export function CollapsibleSidebarProvider() {
 
   return {
     restrict: 'C',
-    link: function($scope, $elem) {
+    link: ($scope: LazyScope, $elem: any) => {
       let isCollapsed = false;
       const $collapser = $(
         `<button
@@ -48,10 +52,10 @@ export function CollapsibleSidebarProvider() {
       $collapser.append($icon);
       const $siblings = $elem.siblings();
 
-      const siblingsClass = listOfWidthClasses.reduce(function(prev, className) {
+      const siblingsClass = listOfWidthClasses.reduce((prev: string, className: string) => {
         if (prev) return prev;
         return $siblings.hasClass(className) && className;
-      }, false);
+      }, '');
 
       // If there is are only two elements we can assume the other one will take 100% of the width.
       const hasSingleSibling = $siblings.length === 1 && siblingsClass;
@@ -82,5 +86,3 @@ export function CollapsibleSidebarProvider() {
     },
   };
 }
-
-uiModules.get('kibana').directive('collapsibleSidebar', CollapsibleSidebarProvider);

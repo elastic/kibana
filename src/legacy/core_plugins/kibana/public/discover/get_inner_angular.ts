@@ -42,8 +42,6 @@ import { registerListenEventListener } from 'ui/directives/listen/listen';
 // @ts-ignore
 import { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
 // @ts-ignore
-import { CollapsibleSidebarProvider } from 'ui/collapsible_sidebar/collapsible_sidebar';
-// @ts-ignore
 import { CssTruncateProvide } from 'ui/directives/css_truncate';
 // @ts-ignore
 import { FixedScrollProvider } from 'ui/fixed_scroll';
@@ -82,9 +80,9 @@ import { createStringFieldProgressBarDirective } from './np_ready/components/fie
 import { FieldNameDirectiveProvider } from './np_ready/angular/directives/field_name';
 // @ts-ignore
 import { createFieldChooserDirective } from './np_ready/components/field_chooser/field_chooser';
-
 // @ts-ignore
 import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
+import { CollapsibleSidebarProvider } from './np_ready/angular/directives/collapsible_sidebar/collapsible_sidebar';
 import { DiscoverStartPlugins } from './plugin';
 
 /**

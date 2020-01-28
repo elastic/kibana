@@ -94,8 +94,6 @@ export {
 export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
 export { Adapters } from 'ui/inspector/types';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
-// @ts-ignore
-export { FieldName } from './np_ready/angular/directives/field_name';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore
 export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';
