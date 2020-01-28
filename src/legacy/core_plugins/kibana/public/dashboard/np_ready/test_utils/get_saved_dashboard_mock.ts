@@ -17,10 +17,29 @@
  * under the License.
  */
 
-/* global jest */
-export function getEmbeddableFactoryMock(config?: any) {
-  const embeddableFactoryMockDefaults = {
-    create: jest.fn(() => Promise.resolve({})),
-  };
-  return Object.assign(embeddableFactoryMockDefaults, config);
+import { searchSourceMock } from '../../../../../../../plugins/data/public/search/search_source/mocks';
+import { SavedObjectDashboard } from '../../saved_dashboard/saved_dashboard';
+
+export function getSavedDashboardMock(
+  config?: Partial<SavedObjectDashboard>
+): SavedObjectDashboard {
+  return {
+    id: '123',
+    title: 'my dashboard',
+    panelsJSON: '[]',
+    searchSource: searchSourceMock,
+    copyOnSave: false,
+    timeRestore: false,
+    timeTo: 'now',
+    timeFrom: 'now-15m',
+    optionsJSON: '',
+    lastSavedTitle: '',
+    destroy: () => {},
+    save: () => {
+      return Promise.resolve('123');
+    },
+    getQuery: () => ({ query: '', language: 'kuery' }),
+    getFilters: () => [],
+    ...config,
+  } as SavedObjectDashboard;
 }
