@@ -6,12 +6,13 @@
 
 import React, { FC } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { MonitorPage, OverviewPage, NotFoundPage } from './pages';
+import { MonitorPage, OverviewPage, NotFoundPage, SettingsPage } from './pages';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { UMUpdateBreadcrumbs } from './lib/lib';
 
 export const MONITOR_ROUTE = '/monitor/:monitorId?';
 export const OVERVIEW_ROUTE = '/';
+export const SETTINGS_ROUTE = '/settings';
 
 interface RouterProps {
   autocomplete: DataPublicPluginStart['autocomplete'];
@@ -23,6 +24,9 @@ export const PageRouter: FC<RouterProps> = ({ autocomplete, basePath, setBreadcr
   <Switch>
     <Route path={MONITOR_ROUTE}>
       <MonitorPage setBreadcrumbs={setBreadcrumbs} />
+    </Route>
+    <Route path={SETTINGS_ROUTE}>
+      <SettingsPage />
     </Route>
     <Route path={OVERVIEW_ROUTE}>
       <OverviewPage autocomplete={autocomplete} setBreadcrumbs={setBreadcrumbs} />

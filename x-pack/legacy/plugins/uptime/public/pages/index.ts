@@ -8,3 +8,4 @@ export { MonitorPage } from './monitor';
 export { OverviewPage } from './overview';
 export { NotFoundPage } from './not_found';
 export { PageHeader } from './page_header';
+export { SettingsPage } from './settings';
