@@ -17,42 +17,33 @@
  * under the License.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
-import { AppUpdater } from 'kibana/public';
+import { createBrowserHistory, History, Location } from 'history';
+import { getRelativeToHistoryPath } from './kbn_url_storage';
 
-export type UrlTrackingEvent =
-  | { type: 'CONTEXT_CHANGED'; urlUpdater: (oldUrl: string) => string }
-  | { type: 'APP_MOUNT' }
-  | { type: 'APP_UNMOUNT' };
-
-export function createRealUrlTracker(
-  baseUrl: string,
-  events$: Observable<UrlTrackingEvent>,
-  navLinkUpdater$: BehaviorSubject<AppUpdater>
-) {
-  // TODO pass this in or however
-  const key = 'sdfdsf';
-  const storage: Storage = sessionStorage;
-  const storedUrl = storage.getItem(key);
-  let currentUrl: string = '';
-  const subscription = events$.subscribe(event => {
-    switch (event.type) {
-      case 'CONTEXT_CHANGED':
-        currentUrl = event.urlUpdater(currentUrl);
-        storage.setItem(key, currentUrl);
-        break;
-      case 'APP_UNMOUNT':
-        navLinkUpdater$.next(() => ({ url: currentUrl }));
-        break;
-      case 'APP_MOUNT':
-        navLinkUpdater$.next(() => ({ url: baseUrl }));
-        break;
-    }
-  });
-
-  if (storedUrl) {
-    navLinkUpdater$.next(() => ({ url: storedUrl }));
-  }
-
-  return subscription.unsubscribe;
+export interface IUrlTracker {
+  startTrackingUrl: (history?: History) => () => void;
+  getTrackedUrl: () => string | null;
+  trackUrl: (url: string) => void;
+}
+/**
+ * Replicates what src/legacy/ui/public/chrome/api/nav.ts did
+ * Persists the url in sessionStorage so it could be restored if navigated back to the app
+ */
+export function createUrlTracker(key: string, storage: Storage = sessionStorage): IUrlTracker {
+  return {
+    startTrackingUrl(history: History = createBrowserHistory()) {
+      const track = (location: Location<any>) => {
+        const url = getRelativeToHistoryPath(history.createHref(location), history);
+        storage.setItem(key, url);
+      };
+      track(history.location);
+      return history.listen(track);
+    },
+    getTrackedUrl() {
+      return storage.getItem(key);
+    },
+    trackUrl(url: string) {
+      storage.setItem(key, url);
+    },
+  };
 }
