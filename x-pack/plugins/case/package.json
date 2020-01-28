@@ -1,0 +1,14 @@
+{
+  "author": "Elastic",
+  "name": "cases",
+  "version": "8.0.0",
+  "private": true,
+  "license": "Elastic-License",
+  "scripts": {},
+  "dependencies": {
+    "@types/lodash": "^4.14.110"
+  },
+  "devDependencies": {
+    "lodash": "^4.17.15"
+  }
+}
