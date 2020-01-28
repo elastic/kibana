@@ -116,7 +116,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allow saving via the saved query management component popover with no saved query loaded', async () => {
+      // Flaky: https://github.com/elastic/kibana/issues/50018
+      it.skip('allow saving via the saved query management component popover with no saved query loaded', async () => {
         await queryBar.setQuery('response:200');
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
