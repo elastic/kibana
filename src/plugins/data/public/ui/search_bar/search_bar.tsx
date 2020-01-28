@@ -323,15 +323,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
   }
 
-  public componentDidUpdate(prevProps: SearchBarProps, prevState: State) {
-    if (this.filterBarRef) {
-      this.setFilterBarHeight();
-      this.ro.unobserve(this.filterBarRef);
-    }
-    let nextState: State | null = null;
+  private updateQueryFromProps(prevProps: SearchBarProps): { query: Query } | null {
+    let nextQuery = null;
     if (!this.props.query && prevProps.query) {
-      nextState = {
-        ...this.state,
+      nextQuery = {
         query: {
           query: '',
           language: prevProps.query.language,
@@ -343,34 +338,53 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       (this.props.query.language !== prevProps.query.language ||
         this.props.query.query !== prevProps.query.query)
     ) {
-      nextState = {
-        ...this.state,
+      nextQuery = {
         query: this.props.query,
       };
     } else if (!this.props.savedQuery && prevProps.savedQuery) {
       // clear the query bar if saved query was cleared
-      nextState = {
-        ...this.state,
+      nextQuery = {
         query: {
           query: '',
           language: prevProps.savedQuery.attributes.query.language,
         },
       };
     }
+    return nextQuery;
+  }
 
+  private updateDateRangeFromProps(
+    prevProps: SearchBarProps
+  ): { dateRangeFrom: string; dateRangeTo: string } | null {
+    let nextDateRange: { dateRangeFrom: string; dateRangeTo: string } | null = null;
     const { dateRangeFrom, dateRangeTo } = this.props;
     if (
       dateRangeFrom &&
       dateRangeTo &&
       (dateRangeFrom !== prevProps.dateRangeFrom || dateRangeTo !== prevProps.dateRangeTo)
     ) {
-      nextState = {
-        ...this.state,
+      nextDateRange = {
         dateRangeFrom,
         dateRangeTo,
       };
     }
-    if (nextState) {
+    return nextDateRange;
+  }
+
+  public componentDidUpdate(prevProps: SearchBarProps, prevState: State) {
+    if (this.filterBarRef) {
+      this.setFilterBarHeight();
+      this.ro.unobserve(this.filterBarRef);
+    }
+    let nextState: State | null = null;
+    const nextQuery = this.updateQueryFromProps(prevProps);
+    const nextDateRange = this.updateDateRangeFromProps(prevProps);
+    if (nextQuery || nextDateRange) {
+      nextState = {
+        ...this.state,
+        ...nextQuery,
+        ...nextDateRange,
+      };
       this.setState(nextState);
     }
   }
