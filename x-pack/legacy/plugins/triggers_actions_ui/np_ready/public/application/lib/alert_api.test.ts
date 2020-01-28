@@ -83,20 +83,20 @@ describe('loadAlerts', () => {
     const result = await loadAlerts({ http, searchText: 'apples', page: { index: 0, size: 10 } });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      "/api/alert/_find",
-      Object {
-        "query": Object {
-          "default_search_operator": "AND",
-          "filter": undefined,
-          "page": 1,
-          "per_page": 10,
-          "search": "apples",
-          "search_fields": "[\\"name\\",\\"tags\\"]",
-        },
-      },
-    ]
-    `);
+          Array [
+            "/api/alert/_find",
+            Object {
+              "query": Object {
+                "default_search_operator": "AND",
+                "filter": undefined,
+                "page": 1,
+                "per_page": 10,
+                "search": "apples",
+                "search_fields": "[\\"name\\",\\"tags\\"]",
+              },
+            },
+          ]
+        `);
   });
 
   test('should call find API with actionTypesFilter', async () => {
@@ -115,20 +115,20 @@ describe('loadAlerts', () => {
     });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      "/api/alert/_find",
-      Object {
-        "query": Object {
-          "default_search_operator": "AND",
-          "filter": undefined,
-          "page": 1,
-          "per_page": 10,
-          "search": "foo",
-          "search_fields": "[\\"name\\",\\"tags\\"]",
-        },
-      },
-    ]
-    `);
+          Array [
+            "/api/alert/_find",
+            Object {
+              "query": Object {
+                "default_search_operator": "AND",
+                "filter": undefined,
+                "page": 1,
+                "per_page": 10,
+                "search": "foo",
+                "search_fields": "[\\"name\\",\\"tags\\"]",
+              },
+            },
+          ]
+        `);
   });
 
   test('should call find API with typesFilter', async () => {
@@ -147,20 +147,20 @@ describe('loadAlerts', () => {
     });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      "/api/alert/_find",
-      Object {
-        "query": Object {
-          "default_search_operator": "AND",
-          "filter": "alert.attributes.alertTypeId:(foo or bar)",
-          "page": 1,
-          "per_page": 10,
-          "search": undefined,
-          "search_fields": undefined,
-        },
-      },
-    ]
-    `);
+          Array [
+            "/api/alert/_find",
+            Object {
+              "query": Object {
+                "default_search_operator": "AND",
+                "filter": "alert.attributes.alertTypeId:(foo or bar)",
+                "page": 1,
+                "per_page": 10,
+                "search": undefined,
+                "search_fields": undefined,
+              },
+            },
+          ]
+        `);
   });
 
   test('should call find API with actionTypesFilter and typesFilter', async () => {
@@ -180,20 +180,20 @@ describe('loadAlerts', () => {
     });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      "/api/alert/_find",
-      Object {
-        "query": Object {
-          "default_search_operator": "AND",
-          "filter": "alert.attributes.alertTypeId:(foo or bar)",
-          "page": 1,
-          "per_page": 10,
-          "search": "baz",
-          "search_fields": "[\\"name\\",\\"tags\\"]",
-        },
-      },
-    ]
-    `);
+          Array [
+            "/api/alert/_find",
+            Object {
+              "query": Object {
+                "default_search_operator": "AND",
+                "filter": "alert.attributes.alertTypeId:(foo or bar)",
+                "page": 1,
+                "per_page": 10,
+                "search": "baz",
+                "search_fields": "[\\"name\\",\\"tags\\"]",
+              },
+            },
+          ]
+        `);
   });
 
   test('should call find API with searchText and tagsFilter and typesFilter', async () => {
@@ -213,20 +213,20 @@ describe('loadAlerts', () => {
     });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      "/api/alert/_find",
-      Object {
-        "query": Object {
-          "default_search_operator": "AND",
-          "filter": "alert.attributes.alertTypeId:(foo or bar)",
-          "page": 1,
-          "per_page": 10,
-          "search": "apples, foo, baz",
-          "search_fields": "[\\"name\\",\\"tags\\"]",
-        },
-      },
-    ]
-    `);
+          Array [
+            "/api/alert/_find",
+            Object {
+              "query": Object {
+                "default_search_operator": "AND",
+                "filter": "alert.attributes.alertTypeId:(foo or bar)",
+                "page": 1,
+                "per_page": 10,
+                "search": "apples, foo, baz",
+                "search_fields": "[\\"name\\",\\"tags\\"]",
+              },
+            },
+          ]
+        `);
   });
 });
 
@@ -259,13 +259,22 @@ describe('createAlert', () => {
       tags: ['foo'],
       enabled: true,
       alertTypeId: 'test',
-      schedule: { interval: '1m' },
+      schedule: {
+        interval: '1m',
+      },
       actions: [],
       params: {},
+      throttle: null,
+      createdAt: new Date('1970-01-01T00:00:00.000Z'),
+      updatedAt: new Date('1970-01-01T00:00:00.000Z'),
+      apiKey: null,
+      apiKeyOwner: null,
     };
     const resolvedValue: Alert = {
       ...alertToCreate,
       id: '123',
+      createdBy: null,
+      updatedBy: null,
       muteAll: false,
       mutedInstanceIds: [],
     };
@@ -277,7 +286,7 @@ describe('createAlert', () => {
       Array [
         "/api/alert",
         Object {
-          "body": "{\\"name\\":\\"test\\",\\"consumer\\":\\"alerting\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{}}",
+          "body": "{\\"name\\":\\"test\\",\\"consumer\\":\\"alerting\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
         },
       ]
     `);
@@ -291,15 +300,23 @@ describe('updateAlert', () => {
       consumer: 'alerting',
       name: 'test',
       tags: ['foo'],
-      schedule: { interval: '1m' },
+      schedule: {
+        interval: '1m',
+      },
       params: {},
       actions: [],
+      createdAt: new Date('1970-01-01T00:00:00.000Z'),
+      updatedAt: new Date('1970-01-01T00:00:00.000Z'),
+      apiKey: null,
+      apiKeyOwner: null,
     };
     const resolvedValue: Alert = {
       ...alertToUpdate,
       id: '123',
       enabled: true,
       alertTypeId: 'test',
+      createdBy: null,
+      updatedBy: null,
       muteAll: false,
       mutedInstanceIds: [],
     };
@@ -311,7 +328,7 @@ describe('updateAlert', () => {
       Array [
         "/api/alert/123",
         Object {
-          "body": "{\\"throttle\\":\\"1m\\",\\"consumer\\":\\"alerting\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[]}",
+          "body": "{\\"throttle\\":\\"1m\\",\\"consumer\\":\\"alerting\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
         },
       ]
     `);

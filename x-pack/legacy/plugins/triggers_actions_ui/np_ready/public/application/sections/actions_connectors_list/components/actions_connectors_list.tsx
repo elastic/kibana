@@ -26,13 +26,9 @@ import { hasDeleteActionsCapability, hasSaveActionsCapability } from '../../../l
 import { DeleteConnectorsModal } from '../../../components/delete_connectors_modal';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
-  const {
-    http,
-    toastNotifications,
-    legacy: { capabilities },
-  } = useAppDependencies();
-  const canDelete = hasDeleteActionsCapability(capabilities.get());
-  const canSave = hasSaveActionsCapability(capabilities.get());
+  const { http, toastNotifications, capabilities } = useAppDependencies();
+  const canDelete = hasDeleteActionsCapability(capabilities);
+  const canSave = hasSaveActionsCapability(capabilities);
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [actions, setActions] = useState<ActionConnector[]>([]);

@@ -32,13 +32,8 @@ export interface ConnectorEditProps {
 
 export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) => {
   let hasErrors = false;
-  const {
-    http,
-    toastNotifications,
-    legacy: { capabilities },
-    actionTypeRegistry,
-  } = useAppDependencies();
-  const canSave = hasSaveActionsCapability(capabilities.get());
+  const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
+  const canSave = hasSaveActionsCapability(capabilities);
   const {
     editFlyoutVisible,
     setEditFlyoutVisibility,

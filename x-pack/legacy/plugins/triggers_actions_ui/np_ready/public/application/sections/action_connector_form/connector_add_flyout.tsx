@@ -30,12 +30,7 @@ import { createActionConnector } from '../../lib/action_connector_api';
 
 export const ConnectorAddFlyout = () => {
   let hasErrors = false;
-  const {
-    http,
-    toastNotifications,
-    legacy: { capabilities },
-    actionTypeRegistry,
-  } = useAppDependencies();
+  const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
 
   // hooks
@@ -68,7 +63,7 @@ export const ConnectorAddFlyout = () => {
   const [serverError, setServerError] = useState<{
     body: { message: string; error: string };
   } | null>(null);
-  const canSave = hasSaveActionsCapability(capabilities.get());
+  const canSave = hasSaveActionsCapability(capabilities);
 
   if (!addFlyoutVisible) {
     return null;
