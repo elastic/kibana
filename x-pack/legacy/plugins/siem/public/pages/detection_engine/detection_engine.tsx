@@ -168,10 +168,13 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
                       {tabName === DetectionEngineTab.signals && (
                         <>
                           <SignalsHistogramPanel
+                            deleteQuery={deleteQuery}
                             filters={filters}
                             from={from}
                             loadingInitial={loading}
                             query={query}
+                            signalIndexName={signalIndexName}
+                            setQuery={setQuery}
                             stackByOptions={signalsHistogramOptions}
                             to={to}
                             updateDateRange={updateDateRangeCallback}
