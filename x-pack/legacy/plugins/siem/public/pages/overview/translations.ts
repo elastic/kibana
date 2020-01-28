@@ -13,7 +13,7 @@ export const ALERTS_COUNT_BY = (groupByField: string) =>
   });
 
 export const ALERTS_GRAPH_TITLE = i18n.translate('xpack.siem.overview.alertsGraphTitle', {
-  defaultMessage: 'Alert detection frequency',
+  defaultMessage: 'External alerts count',
 });
 
 export const EVENTS_COUNT_BY = (groupByField: string) =>
