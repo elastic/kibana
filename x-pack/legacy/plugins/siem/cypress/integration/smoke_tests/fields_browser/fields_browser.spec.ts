@@ -126,7 +126,7 @@ describe('Fields Browser', () => {
     });
   });
 
-  context.only('Editing the timeline', () => {
+  context('Editing the timeline', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_PAGE);
       openTimeline();
