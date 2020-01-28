@@ -12,4 +12,4 @@ export * from './components/load_mappings';
 
 export { OnUpdateHandler, Types } from './mappings_state';
 
-export { doesMappingsHasType } from './lib';
+export { doMappingsHaveType } from './lib';

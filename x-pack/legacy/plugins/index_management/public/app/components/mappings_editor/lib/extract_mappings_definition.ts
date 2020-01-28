@@ -52,7 +52,7 @@ const getMappingsDefinitionWithType = (mappings: GenericObject): MappingsWithTyp
   return typedMappings;
 };
 
-export const doesMappingsHasType = (mappings: GenericObject = {}): boolean =>
+export const doMappingsHaveType = (mappings: GenericObject = {}): boolean =>
   getMappingsDefinitionWithType(mappings).filter(({ type }) => type !== undefined).length > 0;
 
 /**
