@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTER_KEY = '\uE007';
 
 export function TriggersActionsPageProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   return {
@@ -95,6 +97,16 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     },
     async changeTabs(tab: 'alertsTab' | 'connectorsTab') {
       return await testSubjects.click(tab);
+    },
+    async toggleSwitch(testSubject: string) {
+      const switchBtn = await testSubjects.find(testSubject);
+      const valueBefore = await switchBtn.getAttribute('aria-checked');
+      await switchBtn.click();
+      await retry.try(async () => {
+        const switchBtnAfter = await testSubjects.find(testSubject);
+        const valueAfter = await switchBtnAfter.getAttribute('aria-checked');
+        expect(valueAfter).not.to.eql(valueBefore);
+      });
     },
   };
 }

@@ -8,8 +8,8 @@ import { first } from 'rxjs/operators';
 import { addRoutes } from './routes';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { createConfig$, EndpointConfigType } from './config';
-import { EndpointAppContext } from './types';
 import { registerEndpointRoutes } from './routes/endpoints';
+import { EndpointAppContext } from './types';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;

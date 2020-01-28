@@ -17,6 +17,5 @@
  * under the License.
  */
 
-export { SavedObjectsClientProvider } from './saved_objects_client_provider';
 export { SavedObjectLoader } from './saved_object_loader';
 export { findObjectByTitle } from './helpers/find_object_by_title';
