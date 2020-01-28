@@ -8,8 +8,34 @@ import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
 import { Alert, ActionType } from '../../../../types';
-import { EuiTitle, EuiBadge, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiTitle, EuiBadge, EuiFlexItem, EuiButtonEmpty, EuiSwitch } from '@elastic/eui';
 import { times, random } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import * as alertApi from '../../../lib/alert_api';
+jest.mock('../../../lib/alert_api');
+
+jest.mock('../../../app_context', () => ({
+  useAppDependencies: jest.fn(() => ({
+    http: jest.fn(),
+    legacy: {
+      capabilities: {
+        get: jest.fn(() => ({})),
+      },
+    },
+  })),
+}));
+
+jest.mock('../../../lib/capabilities', () => ({
+  hasSaveAlertsCapability: jest.fn(() => true),
+}));
+
+// jest.mock('../../../lib/alert_api', () => ({
+//   disableAlert: jest.fn(),
+//   enableAlert: jest.fn(),
+//   unmuteAlert: jest.fn(),
+//   muteAlert: jest.fn(),
+// }));
 
 describe('alert_details', () => {
   it('renders the alert name as a title', () => {
@@ -20,7 +46,9 @@ describe('alert_details', () => {
     };
 
     expect(
-      shallow(<AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />).contains(
+      shallow(
+        <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+      ).containsMatchingElement(
         <EuiTitle size="m">
           <h1>{alert.name}</h1>
         </EuiTitle>
@@ -36,9 +64,9 @@ describe('alert_details', () => {
     };
 
     expect(
-      shallow(<AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />).contains(
-        <EuiBadge>{alertType.name}</EuiBadge>
-      )
+      shallow(
+        <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+      ).containsMatchingElement(<EuiBadge>{alertType.name}</EuiBadge>)
     ).toBeTruthy();
   });
 
@@ -71,7 +99,7 @@ describe('alert_details', () => {
       expect(
         shallow(
           <AlertDetails alert={alert} alertType={alertType} actionTypes={actionTypes} />
-        ).contains(
+        ).containsMatchingElement(
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">{actionTypes[0].name}</EuiBadge>
           </EuiFlexItem>
@@ -80,6 +108,7 @@ describe('alert_details', () => {
     });
 
     it('renders a counter for multiple alert action', () => {
+      const actionCount = random(1, 10);
       const alert = mockAlert({
         actions: [
           {
@@ -88,7 +117,7 @@ describe('alert_details', () => {
             params: {},
             actionTypeId: '.server-log',
           },
-          ...times(random(1, 10), () => ({
+          ...times(actionCount, () => ({
             group: 'default',
             id: uuid.v4(),
             params: {},
@@ -118,7 +147,7 @@ describe('alert_details', () => {
       );
 
       expect(
-        details.contains(
+        details.containsMatchingElement(
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">{actionTypes[0].name}</EuiBadge>
           </EuiFlexItem>
@@ -126,9 +155,9 @@ describe('alert_details', () => {
       ).toBeTruthy();
 
       expect(
-        details.contains(
+        details.containsMatchingElement(
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{`+${alert.actions.length - 1}`}</EuiBadge>
+            <EuiBadge color="hollow">{`+${actionCount}`}</EuiBadge>
           </EuiFlexItem>
         )
       ).toBeTruthy();
@@ -145,10 +174,15 @@ describe('alert_details', () => {
       };
 
       expect(
-        shallow(<AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />).contains(
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty disabled={true}>Edit</EuiButtonEmpty>
-          </EuiFlexItem>
+        shallow(
+          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+        ).containsMatchingElement(
+          <EuiButtonEmpty disabled={true} iconType="pencil">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+              defaultMessage="Edit"
+            />
+          </EuiButtonEmpty>
         )
       ).toBeTruthy();
     });
@@ -162,10 +196,15 @@ describe('alert_details', () => {
       };
 
       expect(
-        shallow(<AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />).contains(
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty disabled={true}>View in app</EuiButtonEmpty>
-          </EuiFlexItem>
+        shallow(
+          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+        ).containsMatchingElement(
+          <EuiButtonEmpty disabled={true} iconType="popout">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
+              defaultMessage="View in app"
+            />
+          </EuiButtonEmpty>
         )
       ).toBeTruthy();
     });
@@ -179,12 +218,241 @@ describe('alert_details', () => {
       };
 
       expect(
-        shallow(<AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />).contains(
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty disabled={true}>Activity Log</EuiButtonEmpty>
-          </EuiFlexItem>
+        shallow(
+          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+        ).containsMatchingElement(
+          <EuiButtonEmpty disabled={true} iconType="menuLeft">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertDetails.activityLogButtonLabel"
+              defaultMessage="Activity Log"
+            />
+          </EuiButtonEmpty>
         )
       ).toBeTruthy();
+    });
+  });
+});
+
+describe('enable button', () => {
+  it('should render an enable button when alert is enabled', () => {
+    const alert = mockAlert({
+      enabled: true,
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+    };
+
+    const enableButton = shallow(
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+    )
+      .find(EuiSwitch)
+      .find('[name="enable"]')
+      .first();
+
+    expect(enableButton.props()).toMatchObject({
+      checked: true,
+      disabled: false,
+    });
+  });
+
+  it('should render an enable button when alert is disabled', () => {
+    const alert = mockAlert({
+      enabled: false,
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+    };
+
+    const enableButton = shallow(
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+    )
+      .find(EuiSwitch)
+      .find('[name="enable"]')
+      .first();
+
+    expect(enableButton.props()).toMatchObject({
+      checked: false,
+      disabled: false,
+    });
+  });
+
+  it('should enable the alert when alert is disabled and button is clicked', () => {
+    const alert = mockAlert({
+      enabled: true,
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+    };
+
+    const enableButton = shallow(
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+    )
+      .find(EuiSwitch)
+      .find('[name="enable"]')
+      .first();
+
+    enableButton.simulate('click');
+    const handler = enableButton.prop('onChange');
+    expect(typeof handler).toEqual('function');
+    expect(alertApi.disableAlert).toHaveBeenCalledTimes(0);
+    handler!({} as React.FormEvent);
+    expect(alertApi.disableAlert).toHaveBeenCalledTimes(1);
+  });
+
+  it('should disable the alert when alert is enabled and button is clicked', () => {
+    const alert = mockAlert({
+      enabled: false,
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+    };
+
+    const enableButton = shallow(
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+    )
+      .find(EuiSwitch)
+      .find('[name="enable"]')
+      .first();
+
+    enableButton.simulate('click');
+    const handler = enableButton.prop('onChange');
+    expect(typeof handler).toEqual('function');
+    expect(alertApi.enableAlert).toHaveBeenCalledTimes(0);
+    handler!({} as React.FormEvent);
+    expect(alertApi.enableAlert).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('mute button', () => {
+  it('should render an mute button when alert is enabled', () => {
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+    };
+
+    const enableButton = shallow(
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+    )
+      .find(EuiSwitch)
+      .find('[name="mute"]')
+      .first();
+
+    expect(enableButton.props()).toMatchObject({
+      checked: false,
+      disabled: false,
+    });
+  });
+
+  it('should render an muted button when alert is muted', () => {
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: true,
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+    };
+
+    const enableButton = shallow(
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+    )
+      .find(EuiSwitch)
+      .find('[name="mute"]')
+      .first();
+
+    expect(enableButton.props()).toMatchObject({
+      checked: true,
+      disabled: false,
+    });
+  });
+
+  it('should mute the alert when alert is unmuted and button is clicked', () => {
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+    };
+
+    const enableButton = shallow(
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+    )
+      .find(EuiSwitch)
+      .find('[name="mute"]')
+      .first();
+
+    enableButton.simulate('click');
+    const handler = enableButton.prop('onChange');
+    expect(typeof handler).toEqual('function');
+    expect(alertApi.muteAlert).toHaveBeenCalledTimes(0);
+    handler!({} as React.FormEvent);
+    expect(alertApi.muteAlert).toHaveBeenCalledTimes(1);
+  });
+
+  it('should unmute the alert when alert is muted and button is clicked', () => {
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: true,
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+    };
+
+    const enableButton = shallow(
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+    )
+      .find(EuiSwitch)
+      .find('[name="mute"]')
+      .first();
+
+    enableButton.simulate('click');
+    const handler = enableButton.prop('onChange');
+    expect(typeof handler).toEqual('function');
+    expect(alertApi.unmuteAlert).toHaveBeenCalledTimes(0);
+    handler!({} as React.FormEvent);
+    expect(alertApi.unmuteAlert).toHaveBeenCalledTimes(1);
+  });
+
+  it('should disabled mute button when alert is disabled', () => {
+    const alert = mockAlert({
+      enabled: false,
+      muteAll: false,
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+    };
+
+    const enableButton = shallow(
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+    )
+      .find(EuiSwitch)
+      .find('[name="mute"]')
+      .first();
+
+    expect(enableButton.props()).toMatchObject({
+      checked: false,
+      disabled: true,
     });
   });
 });
