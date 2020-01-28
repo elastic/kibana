@@ -9,7 +9,6 @@ import { InvalidLicensePage } from './error/invalid_license';
 import { NoAccessPage } from './error/no_access';
 import { AgentListPage } from './agent_list';
 import { AgentDetailsPage } from './agent_details';
-// import { PolicyListPage } from './policy_list';
 // import { PolicyDetailsPage } from './policy_details';
 
 export const routeMap = [
@@ -19,5 +18,4 @@ export const routeMap = [
   { path: '/agents/:agentId', component: AgentDetailsPage },
   { path: '/agents', component: AgentListPage },
   // { path: '/policies/:policyId', component: PolicyDetailsPage },
-  // { path: '/policies', component: PolicyListPage },
 ];
