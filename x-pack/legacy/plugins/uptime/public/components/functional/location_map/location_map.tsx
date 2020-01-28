@@ -18,7 +18,18 @@ import { LocationMissingWarning } from './location_missing';
 const MapPanel = styled.div`
   height: 240px;
   width: 520px;
+  @media (max-width: 574px) {
+    height: 250px;
+    width: 100%;
+    margin-right: 0;
+  }
   margin-right: 20px;
+`;
+
+const EuiFlexItemTags = styled(EuiFlexItem)`
+  @media (max-width: 830px) {
+    order: 1;
+  }
 `;
 
 interface LocationMapProps {
@@ -52,13 +63,14 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
       }
     });
   }
+
   return (
     <EuiErrorBoundary>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup wrap={true} alignItems={'stretch'} gutterSize={'none'}>
+        <EuiFlexItemTags>
           <LocationStatusTags locations={monitorLocations?.locations || []} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={true}>
+        </EuiFlexItemTags>
+        <EuiFlexItem grow={false}>
           {isGeoInfoMissing && <LocationMissingWarning />}
           <MapPanel>
             <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />

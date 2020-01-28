@@ -23,13 +23,17 @@ const TextStyle = styled.div`
 
 const BadgeItem = styled.div`
   margin-bottom: 5px;
+  @media (max-width: 830px) {
+    display: inline-block;
+    margin-right: 2px;
+  }
 `;
 
 // Set height so that it remains within panel, enough height to display 7 locations tags
 const TagContainer = styled.div`
-  padding: 10px;
   max-height: 229px;
   overflow: hidden;
+  margin-top: auto;
 `;
 
 const OtherLocationsDiv = styled.div`

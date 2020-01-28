@@ -54,7 +54,7 @@ export const MonitorStatusDetailsComponent = ({
 
   return (
     <EuiPanel>
-      <EuiFlexGroup gutterSize="l" wrap>
+      <EuiFlexGroup gutterSize="l" wrap responsive={true}>
         <EuiFlexItem grow={true}>
           <MonitorStatusBar
             monitorId={monitorId}

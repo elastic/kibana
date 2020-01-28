@@ -92,9 +92,16 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
 }
 
 .c0 {
-  padding: 10px;
   max-height: 229px;
   overflow: hidden;
+  margin-top: auto;
+}
+
+@media (max-width:830px) {
+  .c1 {
+    display: inline-block;
+    margin-right: 2px;
+  }
 }
 
 <div
@@ -199,9 +206,16 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
 }
 
 .c0 {
-  padding: 10px;
   max-height: 229px;
   overflow: hidden;
+  margin-top: auto;
+}
+
+@media (max-width:830px) {
+  .c1 {
+    display: inline-block;
+    margin-right: 2px;
+  }
 }
 
 <div
@@ -307,9 +321,16 @@ Array [
 }
 
 .c0 {
-  padding: 10px;
   max-height: 229px;
   overflow: hidden;
+  margin-top: auto;
+}
+
+@media (max-width:830px) {
+  .c1 {
+    display: inline-block;
+    margin-right: 2px;
+  }
 }
 
 <div
@@ -633,6 +654,10 @@ Array [
   </div>,
   .c0 {
   padding-left: 18px;
+}
+
+@media (max-width:830px) {
+
 }
 
 <div
