@@ -20,8 +20,6 @@ else
   echo " -> making hard link clones"
   cd ..
   cp -RlP kibana "kibana${CI_GROUP}"
-  rm "kibana${CI_GROUP}"/config/kibana.yml
-  cp kibana/config/kibana.yml "kibana${CI_GROUP}"/config/kibana.yml
   cd "kibana${CI_GROUP}/x-pack"
 
   echo " -> running tests from the clone folder"
