@@ -65,6 +65,7 @@ function getUiAppsNavLinks({ uiAppSpecs = [] }: LegacyUiExports, pluginSpecs: Le
 
     return {
       id,
+      category: spec.category,
       title: spec.title,
       order: typeof spec.order === 'number' ? spec.order : 0,
       icon: spec.icon,
@@ -79,10 +80,12 @@ function getNavLinks(uiExports: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]
   return (uiExports.navLinkSpecs || [])
     .map<LegacyNavLink>(spec => ({
       id: spec.id,
+      category: spec.category,
       title: spec.title,
       order: typeof spec.order === 'number' ? spec.order : 0,
       url: spec.url,
       subUrlBase: spec.subUrlBase || spec.url,
+      disableSubUrlTracking: spec.disableSubUrlTracking,
       icon: spec.icon,
       euiIconType: spec.euiIconType,
       linkToLastSub: 'linkToLastSubUrl' in spec ? spec.linkToLastSubUrl : false,

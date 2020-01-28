@@ -26,7 +26,7 @@ import { calculateLabel } from '../../../../../../../plugins/vis_type_timeseries
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
-import { FIELD_FORMAT_IDS } from '../../../../../../../plugins/data/public';
+import { fieldFormats } from '../../../../../../../plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { METRIC_TYPES } from '../../../../../../../plugins/vis_type_timeseries/common/metric_types';
@@ -49,8 +49,8 @@ export class TableVis extends Component {
   constructor(props) {
     super(props);
 
-    const fieldFormats = npStart.plugins.data.fieldFormats;
-    const DateFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
+    const fieldFormatsService = npStart.plugins.data.fieldFormats;
+    const DateFormat = fieldFormatsService.getType(fieldFormats.FIELD_FORMAT_IDS.DATE);
 
     this.dateFormatter = new DateFormat({}, this.props.getConfig);
   }

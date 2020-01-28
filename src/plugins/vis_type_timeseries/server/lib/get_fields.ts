@@ -22,6 +22,7 @@ import { RequestHandlerContext } from 'kibana/server';
 
 // @ts-ignore
 import { getIndexPatternObject } from './vis_data/helpers/get_index_pattern';
+import { isNestedField } from '../../../data/server';
 import { Framework } from '../plugin';
 import { FieldDescriptor, IndexPatternsFetcher } from '../../../data/server';
 
@@ -78,7 +79,7 @@ export async function getFields(
     reqFacade,
     indexPatternString,
     capabilities
-  )) as FieldDescriptor[]).filter(field => field.aggregatable);
+  )) as FieldDescriptor[]).filter(field => field.aggregatable && !isNestedField(field));
 
   return uniq(fields, field => field.name);
 }

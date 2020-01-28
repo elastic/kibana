@@ -33,7 +33,9 @@ describe('Search service', () => {
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      const setup = searchService.setup(mockCoreSetup);
+      const setup = searchService.setup(mockCoreSetup, {
+        version: '8',
+      } as any);
       expect(setup).toHaveProperty('registerSearchStrategyContext');
       expect(setup).toHaveProperty('registerSearchStrategyProvider');
     });

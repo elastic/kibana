@@ -7,6 +7,7 @@
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
+import { IUiSettingsClient } from 'kibana/server';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { ReportingConfigOptions, ReportingPluginSpecOptions } from './types.d';
 import { config as reportingConfig } from './config';
@@ -17,9 +18,15 @@ import {
   reportingPluginFactory,
 } from './server/plugin';
 
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+
 const kbToBase64Length = (kb: number) => {
   return Math.floor((kb * 1024 * 8) / 6);
 };
+
+interface ReportingDeps {
+  data: DataPluginStart;
+}
 
 export const reporting = (kibana: any) => {
   return new kibana.Plugin({
@@ -70,6 +77,14 @@ export const reporting = (kibana: any) => {
       const pluginsSetup: ReportingSetupDeps = {
         usageCollection: server.newPlatform.setup.plugins.usageCollection,
       };
+
+      const fieldFormatServiceFactory = async (uiSettings: IUiSettingsClient) => {
+        const [, plugins] = await coreSetup.getStartServices();
+        const { fieldFormats } = (plugins as ReportingDeps).data;
+
+        return fieldFormats.fieldFormatServiceFactory(uiSettings);
+      };
+
       const __LEGACY: LegacySetup = {
         config: server.config,
         info: server.info,
@@ -80,13 +95,12 @@ export const reporting = (kibana: any) => {
           security: server.plugins.security,
         },
         savedObjects: server.savedObjects,
+        fieldFormatServiceFactory,
         uiSettingsServiceFactory: server.uiSettingsServiceFactory,
-        // @ts-ignore Property 'fieldFormatServiceFactory' does not exist on type 'Server'.
-        fieldFormatServiceFactory: server.fieldFormatServiceFactory,
-        log: server.log.bind(server),
       };
 
-      const plugin: ReportingPlugin = reportingPluginFactory(__LEGACY, this);
+      const initializerContext = server.newPlatform.coreContext;
+      const plugin: ReportingPlugin = reportingPluginFactory(initializerContext, __LEGACY, this);
       await plugin.setup(coreSetup, pluginsSetup);
     },
 

@@ -22,6 +22,7 @@ import { schema } from '@kbn/config-schema';
 
 import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 import { ShortUrlLookupService } from './lib/short_url_lookup';
+import { getGotoPath } from '../../common/short_url_routes';
 
 export const createGotoRoute = ({
   router,
@@ -34,7 +35,7 @@ export const createGotoRoute = ({
 }) => {
   router.get(
     {
-      path: '/goto/{urlId}',
+      path: getGotoPath('{urlId}'),
       validate: {
         params: schema.object({ urlId: schema.string() }),
       },
@@ -54,10 +55,13 @@ export const createGotoRoute = ({
           },
         });
       }
-      return response.redirected({
+      const body = await context.core.rendering.render();
+
+      return response.ok({
         headers: {
-          location: http.basePath.prepend('/goto_LP/' + request.params.urlId),
+          'content-security-policy': http.csp.header,
         },
+        body,
       });
     })
   );

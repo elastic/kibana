@@ -19,17 +19,18 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Schemas, AggGroupNames, ColorSchemas } from './legacy_imports';
+import { Schemas, AggGroupNames } from './legacy_imports';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, GaugeTypes, ColorModes } from './utils/collections';
 import { createVislibVisController } from './vis_controller';
-import { KbnVislibVisTypesDependencies } from './plugin';
+import { VisTypeVislibDependencies } from './plugin';
+import { ColorSchemas } from '../../../../plugins/charts/public';
 
-export const createGoalVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
+export const createGoalVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'goal',
-  title: i18n.translate('kbnVislibVisTypes.goal.goalTitle', { defaultMessage: 'Goal' }),
+  title: i18n.translate('visTypeVislib.goal.goalTitle', { defaultMessage: 'Goal' }),
   icon: 'visGoal',
-  description: i18n.translate('kbnVislibVisTypes.goal.goalDescription', {
+  description: i18n.translate('visTypeVislib.goal.goalDescription', {
     defaultMessage: 'A goal chart indicates how close you are to your final goal.',
   }),
   visualization: createVislibVisController(deps),
@@ -80,7 +81,7 @@ export const createGoalVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('kbnVislibVisTypes.goal.metricTitle', { defaultMessage: 'Metric' }),
+        title: i18n.translate('visTypeVislib.goal.metricTitle', { defaultMessage: 'Metric' }),
         min: 1,
         aggFilter: [
           '!std_dev',
@@ -98,7 +99,7 @@ export const createGoalVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('kbnVislibVisTypes.goal.groupTitle', {
+        title: i18n.translate('visTypeVislib.goal.groupTitle', {
           defaultMessage: 'Split group',
         }),
         min: 0,
