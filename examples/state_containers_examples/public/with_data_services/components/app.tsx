@@ -42,6 +42,7 @@ import {
   IIndexPattern,
   QueryAppState,
   QueryGlobalState,
+  QueryStart,
 } from '../../../../../src/plugins/data/public';
 import {
   BaseState,
@@ -101,7 +102,7 @@ const App = ({
   const globalStateContainer = useGlobalStateContainer();
   const globalState = useGlobalState();
 
-  useStateSyncing(appStateContainer, globalStateContainer, data, kbnUrlStateStorage);
+  useStateSyncing(appStateContainer, globalStateContainer, data.query, kbnUrlStateStorage);
 
   const indexPattern = useIndexPattern(data);
   if (!indexPattern) return <div>Loading...</div>;
@@ -203,36 +204,45 @@ function useIndexPattern(data: DataPublicPluginStart) {
   return indexPattern;
 }
 
+/**
+ * Setup syncing of state containers with url
+ * @param appStateContainer
+ * @param globalStateContainer
+ * @param data
+ * @param kbnUrlStateStorage
+ */
 function useStateSyncing<AppState extends QueryAppState, GlobalState extends QueryGlobalState>(
   appStateContainer: BaseStateContainer<AppState>,
   globalStateContainer: BaseStateContainer<GlobalState>,
-  data: DataPublicPluginStart,
+  query: QueryStart,
   kbnUrlStateStorage: IKbnUrlStateStorage
 ) {
   // setup sync state utils
   useEffect(() => {
-    // sync global filters, time filters, refresh interval
+    // sync global filters, time filters, refresh interval from data.query to state container
     const stopSyncingQueryGlobalStateWithStateContainer = connectToQueryGlobalState(
-      data.query,
+      query,
       globalStateContainer
     );
 
-    // sync app filters with app state container
+    // sync app filters with app state container from data.query to state container
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryAppState(
-      data.query,
+      query,
       appStateContainer
     );
 
-    // sync app state container with url
+    // sets up syncing app state container with url
     const { start: startSyncingAppStateWithUrl, stop: stopSyncingAppStateWithUrl } = syncState({
       storageKey: '_a',
       stateStorage: kbnUrlStateStorage,
       stateContainer: {
         ...appStateContainer,
+        // stateSync utils requires explicit handling of default state ("null")
         set: state => state && appStateContainer.set(state),
       },
     });
-    // sync global state container with url
+
+    // sets up syncing global state container with url
     const {
       start: startSyncingGlobalStateWithUrl,
       stop: stopSyncingGlobalStateWithUrl,
@@ -241,25 +251,34 @@ function useStateSyncing<AppState extends QueryAppState, GlobalState extends Que
       stateStorage: kbnUrlStateStorage,
       stateContainer: {
         ...globalStateContainer,
+        // stateSync utils requires explicit handling of default state ("null")
         set: state => state && globalStateContainer.set(state),
       },
     });
 
+    // merge initial state from app state container and current state in url
     const initialAppState: AppState = {
       ...appStateContainer.get(),
       ...kbnUrlStateStorage.get<AppState>('_a'),
     };
+    // trigger state update. actually needed in case some data was in url
     appStateContainer.set(initialAppState);
 
+    // merge initial state from global state container and current state in url
     const initialGlobalState: GlobalState = {
       ...globalStateContainer.get(),
       ...kbnUrlStateStorage.get<GlobalState>('_g'),
     };
+    // trigger state update. actually needed in case some data was in url
     globalStateContainer.set(initialGlobalState);
 
+    // set current url to whatever is in app state container
     kbnUrlStateStorage.set<AppState>('_a', initialAppState);
+
+    // set current url to whatever is in global state container
     kbnUrlStateStorage.set<GlobalState>('_g', initialGlobalState);
 
+    // finally start syncing state containers with url
     startSyncingAppStateWithUrl();
     startSyncingGlobalStateWithUrl();
 
@@ -269,5 +288,5 @@ function useStateSyncing<AppState extends QueryAppState, GlobalState extends Que
       stopSyncingAppStateWithUrl();
       stopSyncingGlobalStateWithUrl();
     };
-  }, [data.query, kbnUrlStateStorage, appStateContainer, globalStateContainer]);
+  }, [query, kbnUrlStateStorage, appStateContainer, globalStateContainer]);
 }
