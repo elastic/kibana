@@ -11,6 +11,8 @@ import {
   SEARCH_OR_FILTER_CONTAINER,
   TIMELINE_FIELDS_BUTTON,
   SERVER_SIDE_EVENT_COUNT,
+  TIMELINE_SETTINGS_ICON,
+  TIMELINE_INSPECT_BUTTON,
 } from '../../screens/timeline/main';
 
 export const hostExistsQuery = 'host.name: *';
@@ -28,4 +30,17 @@ export const populateTimeline = () => {
 
 export const openTimelineFieldsBrowser = () => {
   cy.get(TIMELINE_FIELDS_BUTTON).click({ force: true });
+};
+
+export const executeTimelineKQL = (query: string) => {
+  cy.get(`${SEARCH_OR_FILTER_CONTAINER} input`).type(`${query} {enter}`);
+};
+
+export const openTimelineSettings = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).trigger('click', { force: true });
+};
+
+export const openTimelineInspectButton = () => {
+  cy.get(TIMELINE_INSPECT_BUTTON, { timeout: DEFAULT_TIMEOUT }).should('not.be.disabled');
+  cy.get(TIMELINE_INSPECT_BUTTON).trigger('click', { force: true });
 };
