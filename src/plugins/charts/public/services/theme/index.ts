@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { vislibColor } from './color';
+export { ThemeService } from './theme';

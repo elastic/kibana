@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { vislibColorMaps, ColorSchemas } from './legacy_imports';
 import {
   ExpressionFunction,
   KibanaDatatable,
@@ -29,6 +28,7 @@ import {
 } from '../../../../plugins/expressions/public';
 import { ColorModes } from '../../vis_type_vislib/public';
 import { visType, DimensionsVisParam, VisParams } from './types';
+import { ColorSchemas, vislibColorMaps } from '../../../../plugins/charts/public';
 
 export type Context = KibanaDatatable;
 

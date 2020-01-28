@@ -38,9 +38,9 @@ import {
 } from './utils/collections';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
 import { createVislibVisController } from './vis_controller';
-import { KbnVislibVisTypesDependencies } from './plugin';
+import { VisTypeVislibDependencies } from './plugin';
 
-export const createHistogramVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
+export const createHistogramVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'histogram',
   title: i18n.translate('visTypeVislib.histogram.histogramTitle', {
     defaultMessage: 'Vertical Bar',
