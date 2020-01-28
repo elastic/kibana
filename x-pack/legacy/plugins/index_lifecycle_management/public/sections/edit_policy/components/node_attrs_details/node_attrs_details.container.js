@@ -5,9 +5,10 @@
  */
 
 import { connect } from 'react-redux';
-import { NodeAttrsDetails as PresentationComponent } from './node_attrs_details';
+
 import { getNodeDetails } from '../../../../store/selectors';
 import { fetchNodeDetails } from '../../../../store/actions';
+import { NodeAttrsDetails as PresentationComponent } from './node_attrs_details';
 
 export const NodeAttrsDetails = connect(
   (state, ownProps) => ({

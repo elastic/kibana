@@ -5,10 +5,11 @@
  */
 
 import { connect } from 'react-redux';
-import { ColdPhase as PresentationComponent } from './cold_phase';
+
 import { getPhase } from '../../../../store/selectors';
 import { setPhaseData } from '../../../../store/actions';
 import { PHASE_COLD, PHASE_HOT, PHASE_ROLLOVER_ENABLED } from '../../../../constants';
+import { ColdPhase as PresentationComponent } from './cold_phase';
 
 export const ColdPhase = connect(
   state => ({

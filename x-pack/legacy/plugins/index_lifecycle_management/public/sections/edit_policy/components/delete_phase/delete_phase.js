@@ -5,13 +5,13 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
-import { MinAgeInput } from '../min_age_input';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiSwitch } from '@elastic/eui';
+
 import { PHASE_DELETE, PHASE_ENABLED } from '../../../../constants';
 import { ActiveBadge, PhaseErrorMessage } from '../../../components';
+import { MinAgeInput } from '../min_age_input';
 
 export class DeletePhase extends PureComponent {
   static propTypes = {

@@ -8,7 +8,9 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
+
 import { toastNotifications } from 'ui/notify';
+
 import { deletePolicy } from '../../../../services/api';
 import { showApiError } from '../../../../services/api_errors';
 

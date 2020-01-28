@@ -5,7 +5,7 @@
  */
 
 import { connect } from 'react-redux';
-import { PolicyTable as PresentationComponent } from './policy_table';
+
 import {
   fetchPolicies,
   policyFilterChanged,
@@ -13,6 +13,7 @@ import {
   policyPageSizeChanged,
   policySortChanged,
 } from '../../../../store/actions';
+
 import {
   getPolicies,
   getPageOfPolicies,
@@ -21,6 +22,8 @@ import {
   getPolicySort,
   isPolicyListLoaded,
 } from '../../../../store/selectors';
+
+import { PolicyTable as PresentationComponent } from './policy_table';
 
 const mapDispatchToProps = dispatch => {
   return {

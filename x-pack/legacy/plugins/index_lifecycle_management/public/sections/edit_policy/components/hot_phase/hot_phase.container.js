@@ -5,10 +5,11 @@
  */
 
 import { connect } from 'react-redux';
-import { HotPhase as PresentationComponent } from './hot_phase';
+
 import { getPhase } from '../../../../store/selectors';
 import { setPhaseData } from '../../../../store/actions';
 import { PHASE_HOT, PHASE_WARM, WARM_PHASE_ON_ROLLOVER } from '../../../../constants';
+import { HotPhase as PresentationComponent } from './hot_phase';
 
 export const HotPhase = connect(
   state => ({

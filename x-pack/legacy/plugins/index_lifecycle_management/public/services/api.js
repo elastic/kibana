@@ -3,7 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import chrome from 'ui/chrome';
+
 import {
   UIM_POLICY_DELETE,
   UIM_POLICY_ATTACH_INDEX,
@@ -11,6 +13,7 @@ import {
   UIM_POLICY_DETACH_INDEX,
   UIM_INDEX_RETRY_STEP,
 } from '../../common/constants';
+
 import { trackUiMetric } from './ui_metric';
 
 let httpClient;

@@ -5,9 +5,9 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
 import {
   EuiTextColor,
   EuiFlexGroup,
@@ -29,10 +29,10 @@ import {
   PHASE_REPLICA_COUNT,
   PHASE_SHRINK_ENABLED,
 } from '../../../../constants';
+import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
+import { ErrableFormRow } from '../../form_errors';
 import { SetPriorityInput } from '../set_priority_input';
 import { NodeAllocation } from '../node_allocation';
-import { ErrableFormRow } from '../../form_errors';
-import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
 import { MinAgeInput } from '../min_age_input';
 
 export class WarmPhase extends PureComponent {

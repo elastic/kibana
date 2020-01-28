@@ -6,6 +6,8 @@
 
 import React, { Component, Fragment } from 'react';
 import moment from 'moment-timezone';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -21,9 +23,9 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import { getPolicyPath } from '../../services/navigation';
+
 const getHeaders = () => {
   return {
     policy: i18n.translate(

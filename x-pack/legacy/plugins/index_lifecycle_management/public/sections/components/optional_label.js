@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 export const OptionalLabel = () => {
   return (
     <FormattedMessage id="xpack.indexLifecycleMgmt.optionalMessage" defaultMessage=" (optional)" />

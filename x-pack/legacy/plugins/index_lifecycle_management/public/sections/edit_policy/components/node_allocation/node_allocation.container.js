@@ -5,9 +5,10 @@
  */
 
 import { connect } from 'react-redux';
-import { NodeAllocation as PresentationComponent } from './node_allocation';
+
 import { getNodeOptions } from '../../../../store/selectors';
 import { fetchNodes } from '../../../../store/actions';
+import { NodeAllocation as PresentationComponent } from './node_allocation';
 
 export const NodeAllocation = connect(
   state => ({

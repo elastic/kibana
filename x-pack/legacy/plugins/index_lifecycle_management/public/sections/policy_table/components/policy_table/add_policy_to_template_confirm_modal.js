@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+
 import { toastNotifications } from 'ui/notify';
 
 import { addLifecyclePolicyToTemplate, loadIndexTemplates } from '../../../../services/api';

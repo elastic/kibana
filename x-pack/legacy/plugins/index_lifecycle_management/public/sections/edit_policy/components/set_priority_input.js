@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { LearnMoreLink, OptionalLabel } from '../../components';
-import { EuiFieldNumber, EuiTextColor, EuiDescribedFormGroup } from '@elastic/eui';
-import { PHASE_INDEX_PRIORITY } from '../../../constants';
-import { ErrableFormRow } from '../form_errors';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFieldNumber, EuiTextColor, EuiDescribedFormGroup } from '@elastic/eui';
+
+import { PHASE_INDEX_PRIORITY } from '../../../constants';
+import { LearnMoreLink, OptionalLabel } from '../../components';
+import { ErrableFormRow } from '../form_errors';
+
 export const SetPriorityInput = props => {
   const { errors, phaseData, phase, setPhaseData, isShowingErrors } = props;
 

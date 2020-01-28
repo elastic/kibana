@@ -7,18 +7,19 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { setHttpClient } from './services/api';
-import chrome from 'ui/chrome';
-import { App } from './app';
-import { BASE_PATH } from '../common/constants';
-import { indexLifecycleManagementStore } from './store';
-import { I18nContext } from 'ui/i18n';
-import { setUrlService } from './services/navigation';
 
+import chrome from 'ui/chrome';
+import { I18nContext } from 'ui/i18n';
 import routes from 'ui/routes';
 
-import template from './main.html';
+import { BASE_PATH } from '../common/constants';
+import { setHttpClient } from './services/api';
+import { setUrlService } from './services/navigation';
 import { manageAngularLifecycle } from './services/manage_angular_lifecycle';
+import { App } from './app';
+import { indexLifecycleManagementStore } from './store';
+import template from './main.html';
+
 let elem;
 const renderReact = async elem => {
   render(
@@ -30,6 +31,7 @@ const renderReact = async elem => {
     elem
   );
 };
+
 if (chrome.getInjected('ilmUiEnabled')) {
   routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
     template: template,

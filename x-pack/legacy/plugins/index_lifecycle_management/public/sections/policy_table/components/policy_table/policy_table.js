@@ -34,6 +34,7 @@ import {
   EuiPageContent,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
+
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
 import { getIndexListUri } from '../../../../../../index_management/public/app/services/navigation';

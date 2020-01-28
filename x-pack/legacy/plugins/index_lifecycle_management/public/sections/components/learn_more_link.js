@@ -6,8 +6,9 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
 

@@ -7,6 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiLink,
   EuiSelect,
@@ -21,11 +22,13 @@ import {
   EuiSpacer,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
-import { BASE_PATH } from '../../../common/constants';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import { toastNotifications } from 'ui/notify';
+
+import { BASE_PATH } from '../../../common/constants';
 import { loadPolicies, addLifecyclePolicyToIndex } from '../../services/api';
 import { showApiError } from '../../services/api_errors';
+
 export class AddLifecyclePolicyConfirmModal extends Component {
   constructor(props) {
     super(props);
