@@ -17,35 +17,18 @@
  * under the License.
  */
 
-import { cloneDeep, get, has, set } from 'lodash';
+import { ObjectToConfigAdapter } from './object_to_config_adapter';
 
-import { getFlattenedObject } from '../../utils';
-import { Config, ConfigPath } from './';
+describe('ObjectToConfigAdapter', () => {
+  describe('#getFlattenedPaths()', () => {
+    it('considers arrays as final values', () => {
+      const data = {
+        a: 'string',
+        b: ['an', 'array'],
+      };
+      const config = new ObjectToConfigAdapter(data);
 
-/**
- * Allows plain javascript object to behave like `RawConfig` instance.
- * @internal
- */
-export class ObjectToConfigAdapter implements Config {
-  constructor(private readonly rawConfig: Record<string, any>) {}
-
-  public has(configPath: ConfigPath) {
-    return has(this.rawConfig, configPath);
-  }
-
-  public get(configPath: ConfigPath) {
-    return get(this.rawConfig, configPath);
-  }
-
-  public set(configPath: ConfigPath, value: any) {
-    set(this.rawConfig, configPath, value);
-  }
-
-  public getFlattenedPaths() {
-    return Object.keys(getFlattenedObject(this.rawConfig));
-  }
-
-  public toRaw() {
-    return cloneDeep(this.rawConfig);
-  }
-}
+      expect(config.getFlattenedPaths()).toEqual(['a', 'b']);
+    });
+  });
+});
