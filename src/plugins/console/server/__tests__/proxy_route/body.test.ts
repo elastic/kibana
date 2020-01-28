@@ -16,20 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-jest.mock('../../lib/proxy_request', () => ({
-  proxyRequest: jest.fn(),
-}));
+import { proxyRouteHandlerDeps } from './mocks';
 
 import expect from '@kbn/expect';
-import { duration } from 'moment';
 import { Readable } from 'stream';
 
 import { kibanaResponseFactory } from '../../../../../core/server';
-import { ProxyConfigCollection } from '../../lib';
 import { createHandler } from '../../routes/api/console/proxy/create_handler';
 import * as requestModule from '../../lib/proxy_request';
-import { coreMock } from '../../../../../core/server/mocks';
 import { createResponseStub } from './stubs';
 
 describe('Console Proxy Route', () => {
@@ -38,18 +32,7 @@ describe('Console Proxy Route', () => {
   beforeEach(() => {
     request = (method: string, path: string, response: string) => {
       (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub(response));
-      const log = coreMock.createPluginInitializerContext().logger.get();
-      const handler = createHandler({
-        proxyConfigCollection: new ProxyConfigCollection([]),
-        pathFilters: [/.*/],
-        readLegacyESConfig: () => ({
-          requestTimeout: duration(30000),
-          customHeaders: {},
-          requestHeadersWhitelist: [],
-          hosts: ['http://localhost:9200'],
-        }),
-        log,
-      });
+      const handler = createHandler(proxyRouteHandlerDeps({}));
 
       return handler(
         {} as any,
