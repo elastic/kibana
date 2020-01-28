@@ -67,7 +67,7 @@ function TimelineScrubber() {
           fontSize: '11px',
           color: 'grey',
           textAlign: 'right',
-          margin: '1em'
+          marginBottom: 16
         }}
       >
         Selected {selection[0] && selection[0].toFixed(0)}
@@ -83,7 +83,7 @@ function TimelineScrubber() {
           Reset
         </a>
       </div>
-      <div style={{ height: 90 }}>
+      <div style={{ height: 60 }}>
         <Chart>
           <Settings
             onBrushEnd={onBrushEnd}
@@ -111,7 +111,11 @@ function TimelineScrubber() {
 storiesOf('TimelineScrubber', module).add(
   '¯\\_(ツ)_/¯',
   () => {
-    return <TimelineScrubber />;
+    return (
+      <div style={{ maxWidth: 1330, padding: 16, border: '1px solid grey' }}>
+        <TimelineScrubber />
+      </div>
+    );
   },
   { info: { source: false, propTables: false }, showAddonPanel: false }
 );
