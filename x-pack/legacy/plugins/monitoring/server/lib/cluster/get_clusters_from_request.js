@@ -55,7 +55,7 @@ export async function getClustersFromRequest(
   } = indexPatterns;
 
   const config = req.server.config();
-  const size = config.get('monitoring.max_bucket_size');
+  const size = config.get('monitoring.ui.max_bucket_size');
   const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
   let clusters = [];
