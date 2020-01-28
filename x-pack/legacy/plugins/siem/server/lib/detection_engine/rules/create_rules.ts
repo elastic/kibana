@@ -5,7 +5,7 @@
  */
 
 import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
-import { RuleParams } from './types';
+import { CreateRuleParams } from './types';
 import { addTags } from './add_tags';
 
 export const createRules = ({
@@ -37,7 +37,7 @@ export const createRules = ({
   type,
   references,
   version,
-}: RuleParams) => {
+}: CreateRuleParams) => {
   return alertsClient.create({
     data: {
       name,
