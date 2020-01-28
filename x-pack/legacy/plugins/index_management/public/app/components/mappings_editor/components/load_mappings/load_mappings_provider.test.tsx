@@ -19,7 +19,7 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-import { registerTestBed, nextTick } from '../../../../../../../../../test_utils';
+import { registerTestBed, nextTick, TestBed } from '../../../../../../../../../test_utils';
 import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (
@@ -38,11 +38,12 @@ const setup = (props: any) =>
     defaultProps: props,
   })();
 
-const openModalWithJsonContent = ({ find, component }) => async json => {
+const openModalWithJsonContent = ({ find, component }: TestBed) => async (json: any) => {
   find('load-json-button').simulate('click');
   component.update();
 
   // Set the mappings to load
+  // @ts-ignore
   await act(async () => {
     find('mockCodeEditor').simulate('change', {
       jsonString: JSON.stringify(json),

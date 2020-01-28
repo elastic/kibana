@@ -133,7 +133,7 @@ const areAllObjectKeysValidParameters = (obj: { [key: string]: any }) =>
 export const LoadMappingsProvider = ({ onJson, children }: Props) => {
   const [state, setState] = useState<State>({ isModalOpen: false });
   const [totalErrorsToDisplay, setTotalErrorsToDisplay] = useState<number>(MAX_ERRORS_TO_DISPLAY);
-  const jsonContent = useRef<Parameters<OnJsonEditorUpdateHandler>['0'] | undefined>();
+  const jsonContent = useRef<Parameters<OnJsonEditorUpdateHandler>['0'] | undefined>(undefined);
   const view: ModalView =
     state.json !== undefined && state.errors !== undefined ? 'validationResult' : 'json';
   const i18nTexts = getTexts(view, state.errors?.length);
