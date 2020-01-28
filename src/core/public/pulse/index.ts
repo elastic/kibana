@@ -48,7 +48,7 @@ export class PulseService {
   constructor() {
     this.channels = new Map(
       channelNames.map((id): [string, PulseChannel] => {
-        const instructions$ = new Subject<PulseInstruction>();
+        const instructions$ = new Subject<PulseInstruction[]>();
         this.instructions$.set(id, instructions$);
         const channel = new PulseChannel({ id, instructions$, logger });
         return [channel.id, channel];
@@ -57,13 +57,13 @@ export class PulseService {
   }
 
   public async setup(): Promise<PulseServiceSetup> {
-    if (sendUsageFrom === 'browser') {
-      // poll for instructions every second for this deployment
-      setInterval(() => {
-        // eslint-disable-next-line no-console
-        this.loadInstructions().catch(err => console.error(err.stack));
-      }, 10000);
+    // poll for instructions every second for this deployment
+    setInterval(() => {
+      // eslint-disable-next-line no-console
+      this.loadInstructions().catch(err => console.error(err.stack));
+    }, 10000);
 
+    if (sendUsageFrom === 'browser') {
       // eslint-disable-next-line no-console
       console.log('Will attempt first telemetry collection in 5 seconds...');
       setTimeout(() => {
@@ -134,7 +134,6 @@ export class PulseService {
           `Channel (${channel.id}) from service has no corresponding channel handler in client`
         );
       }
-
       channel.instructions.forEach(instruction => instructions$.next(instruction));
     });
   }

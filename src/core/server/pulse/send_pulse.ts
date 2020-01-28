@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { PulseChannel } from './channel';
+
+export const sendUsageFrom: 'browser' | 'server' = 'server';
 export const CLUSTER_UUID = '123';
 export const BASE_URL = 'http://localhost:5601/api/pulse_poc';
 export interface ChannelsToSend {
@@ -24,35 +27,30 @@ export interface ChannelsToSend {
   channel_id: string;
 }
 
-export interface IPulseChannel {
-  id: string;
-  getRecords: <T>() => Promise<T[]>;
-}
-
-export const sendUsageFrom: 'browser' | 'server' = 'browser';
-
 export type Fetcher<Response> = (
   url: string,
   channelsToSend: ChannelsToSend[]
 ) => Promise<Response>;
 
 export async function sendPulse<Response>(
-  channels: Map<string, IPulseChannel>,
+  channels: Map<string, Pick<PulseChannel, 'getRecords' | 'id' | 'clearRecords'>>,
   fetcher: Fetcher<Response>
 ) {
   const url = `${BASE_URL}/intake/${CLUSTER_UUID}`;
 
   const channelsToSend = [];
   for (const channel of channels.values()) {
-    // eslint-disable-next-line no-console
-    console.log(`Getting records from channel ${channel.id}`);
     const records = await channel.getRecords();
-    // eslint-disable-next-line no-console
-    console.log(`Got some records! ${JSON.stringify(records)}`);
+    if (!records || !records.length) {
+      continue;
+    }
     channelsToSend.push({
       records,
       channel_id: channel.id,
     });
+  }
+  if (!channelsToSend.length) {
+    return;
   }
 
   let response: any;
@@ -65,12 +63,21 @@ export async function sendPulse<Response>(
     // the instructions polling should handle logging for this case, yay for POCs
     return;
   }
+  if (response.status === 200) {
+    for (const sentChannel of channelsToSend) {
+      const channel = channels.get(sentChannel.channel_id);
+      const recordHashes = sentChannel.records.map((record: any) => record.hash).filter(Boolean);
+      // eslint-disable-next-line
+      channel?.clearRecords(recordHashes);
+    }
+
+    return;
+  }
   if (response.status === 503) {
     // the instructions polling should handle logging for this case, yay for POCs
     return;
   }
-  if (response.status !== 200) {
-    const responseBody = await response.text();
-    throw new Error(`${response.status}: ${responseBody}`);
-  }
+
+  const responseBody = await response.text();
+  throw new Error(`${response.status}: ${responseBody}`);
 }

@@ -30,20 +30,21 @@ export interface PulseInstruction {
   value: unknown;
 }
 
-export interface ChannelConfig {
+export interface ChannelConfig<I = PulseInstruction> {
   id: string;
-  instructions$: Subject<PulseInstruction>;
+  instructions$: Subject<I[]>;
   logger: Logger;
 }
+
 export interface ChannelSetupContext {
+  rawElasticsearch: any;
   elasticsearch: IPulseElasticsearchClient;
   // savedObjects: SavedObjectsServiceSetup;
 }
 
-export class PulseChannel<Payload = any, Rec = Payload> {
+export class PulseChannel<I = PulseInstruction> {
   private readonly collector: any;
-
-  constructor(private readonly config: ChannelConfig) {
+  constructor(private readonly config: ChannelConfig<I>) {
     const Collector: PulseCollectorConstructor = require(`${__dirname}/collectors/${this.id}`)
       .Collector;
     this.collector = new Collector(this.config.logger);
@@ -53,11 +54,18 @@ export class PulseChannel<Payload = any, Rec = Payload> {
     return this.collector.setup(setupContext);
   }
 
-  public async getRecords() {
+  public async getRecords(): Promise<Record<string, any>> {
     return this.collector.getRecords();
   }
+
   public get id() {
     return this.config.id;
+  }
+
+  public clearRecords(ids: string[]) {
+    if (this.collector.clearRecords) {
+      this.collector.clearRecords(ids);
+    }
   }
 
   public async sendPulse<T = any>(payload: T) {

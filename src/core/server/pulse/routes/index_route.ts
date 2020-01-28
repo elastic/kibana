@@ -23,11 +23,17 @@ import { RegisterRoute } from './types';
 
 const validate = {
   params: schema.object({
-    channel: schema.string(),
+    channelId: schema.string(),
   }),
   body: schema.object({
     payload: schema.object(
-      { message: schema.string(), errorId: schema.string() },
+      {
+        // error specific schema, we should remove this into `records`
+        message: schema.maybe(schema.string()),
+        errorId: schema.maybe(schema.string()),
+        // generic records (array of objects, each channel processes the records differently)
+        records: schema.arrayOf(schema.object({}, { allowUnknowns: true })),
+      },
       { allowUnknowns: true }
     ),
   }),
@@ -38,14 +44,17 @@ export const registerIndexRoute: RegisterRoute = (
   channels: Map<string, PulseChannel>
 ) => {
   return router.post(
-    { path: '/api/pulse_local/{channel}', validate },
+    { path: '/api/pulse_local/{channelId}', validate },
     async (context, request, response) => {
       try {
-        const { channel } = request.params;
-        const { payload } = request.body;
-        const ch = channels.get(channel);
+        const { channelId } = request.params as any;
+        const { payload } = request.body as any;
+        const channel = channels.get(channelId);
 
-        await ch?.sendPulse(payload);
+        await channel?.sendPulse({
+          channelId: channel,
+          ...payload,
+        });
         return response.ok({
           body: {
             message: `payload: ${payload} received`,

@@ -17,11 +17,83 @@
  * under the License.
  */
 
-import { PulseCollector } from '../types';
+import { PulseCollector, CollectorSetupContext } from '../types';
+
+export interface Payload {
+  records: NotificationInstruction[];
+  deploymentId: string;
+}
+
+export interface NotificationInstruction {
+  hash: string;
+  title: string;
+  status: 'new' | 'seen';
+  description: string;
+  linkUrl: string;
+  linkText: string;
+  badge: string;
+  publishOn: string;
+  expireOn: string;
+  seenOn: string;
+}
+
+function flatMap<T, X>(arr: T[], foldMethod: (x: T) => X | X[]): X[] {
+  return arr.reduce((acc, x) => acc.concat(foldMethod(x)), [] as X[]);
+}
 
 export class Collector extends PulseCollector {
-  public async putRecord() {}
-  public async getRecords() {
+  private readonly channelName = 'notifications';
+  private readonly indexName = '.kibana_pulse_local_notifications';
+  public async putRecord(payload: Payload) {
+    if (this.rawElasticsearch) {
+      await this.rawElasticsearch.callAsInternalUser<any>('bulk', {
+        // index: this.indexName,
+        body: flatMap(payload.records, record => {
+          return [
+            { update: { _index: this.indexName, _id: record.hash } },
+            { doc: record, doc_as_upsert: true },
+          ];
+        }),
+      });
+    }
+  }
+
+  public async setup(setupContext: CollectorSetupContext) {
+    await super.setup(setupContext);
+    if (this.elasticsearch?.createIndexIfNotExist) {
+      const mappings = {
+        properties: {
+          publishOn: { type: 'date' },
+        },
+      };
+      await this.elasticsearch!.createIndexIfNotExist(this.channelName, mappings);
+    }
+  }
+
+  public async getRecords(): Promise<NotificationInstruction[]> {
+    if (this.rawElasticsearch) {
+      const result = await this.rawElasticsearch.callAsInternalUser<NotificationInstruction>(
+        'search',
+        {
+          index: this.indexName,
+          ignoreUnavailable: true,
+          body: {
+            sort: [
+              {
+                publishOn: {
+                  order: 'desc',
+                },
+              },
+            ],
+          },
+        }
+      );
+
+      return result.hits.hits.map(hit => {
+        return hit._source;
+      });
+    }
+
     return [];
   }
 }

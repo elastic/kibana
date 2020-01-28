@@ -18,28 +18,52 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ChannelConfig } from 'src/core/server/pulse/channel';
-import { PulseClient } from './client_wrappers/pulse';
+import { ChannelConfig, PulseInstruction } from '../../server/pulse/channel';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { PulseInstruction } from '../../server/pulse/channel';
+export { PulseInstruction, ChannelConfig } from '../../server/pulse/channel';
 
-export class PulseChannel<Payload = any> {
-  private readonly pulseClient: PulseClient;
+export class PulseChannel<I = PulseInstruction> {
+  constructor(private readonly config: ChannelConfig<I>) {}
 
-  constructor(private readonly config: ChannelConfig) {
-    this.pulseClient = new PulseClient();
+  public async sendPulse<T = any | any[]>(doc: T) {
+    const records = Array.isArray(doc) ? doc : [doc];
+    await fetch(`/api/pulse_local/${this.config.id}`, {
+      method: 'post',
+      headers: {
+        'content-type': 'application/json',
+        'kbn-xsrf': 'true',
+      },
+      body: JSON.stringify({
+        payload: {
+          records,
+          deployment_id: '123',
+        },
+      }),
+    });
+  }
+
+  public clearRecords(ids: string[]) {
+    // not implemented yet
   }
 
   public async getRecords() {
-    return this.pulseClient.getRecords(this.id);
-  }
-  public get id() {
-    return this.config.id;
+    const response = await fetch(`/api/pulse_local/${this.config.id}`, {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'kbn-xsrf': 'true',
+      },
+    });
+    if (response.body) {
+      return response.json();
+    } else {
+      return [];
+    }
   }
 
-  public async sendPulse<T = any>(payload: T) {
-    await this.pulseClient.putRecord(this.id, payload);
+  public get id() {
+    return this.config.id;
   }
 
   public instructions$() {
