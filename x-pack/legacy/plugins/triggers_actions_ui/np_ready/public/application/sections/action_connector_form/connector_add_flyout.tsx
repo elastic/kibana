@@ -21,14 +21,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionTypeMenu } from './action_type_menu';
-import { ActionConnectorForm } from './action_connector_form';
-import { ActionType, ActionConnector } from '../../../types';
+import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
+import { ActionType, ActionConnector, IErrorObject } from '../../../types';
 import { useAppDependencies } from '../../app_context';
 import { connectorReducer } from './connector_reducer';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
 
 export const ConnectorAddFlyout = () => {
+  let hasErrors = false;
   const {
     http,
     toastNotifications,
@@ -47,7 +48,9 @@ export const ConnectorAddFlyout = () => {
   const setActionProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
-  const canSave = hasSaveActionsCapability(capabilities.get());
+  const setConnector = (value: any) => {
+    dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
+  };
 
   const {
     addFlyoutVisible,
@@ -55,14 +58,17 @@ export const ConnectorAddFlyout = () => {
     reloadConnectors,
   } = useActionsConnectorsContext();
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [hasErrors, setHasErrors] = useState<boolean>(false);
+
   const closeFlyout = useCallback(() => {
     setAddFlyoutVisibility(false);
     setActionType(undefined);
-  }, [setAddFlyoutVisibility, setActionType]);
+    setConnector(initialConnector);
+  }, [setAddFlyoutVisibility, initialConnector]);
+
   const [serverError, setServerError] = useState<{
     body: { message: string; error: string };
   } | null>(null);
+  const canSave = hasSaveActionsCapability(capabilities.get());
 
   if (!addFlyoutVisible) {
     return null;
@@ -80,18 +86,24 @@ export const ConnectorAddFlyout = () => {
   } else {
     actionTypeModel = actionTypeRegistry.get(actionType.id);
 
+    const errors = {
+      ...actionTypeModel?.validateConnector(connector).errors,
+      ...validateBaseProperties(connector).errors,
+    } as IErrorObject;
+    hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+
     currentForm = (
       <ActionConnectorForm
         actionTypeName={actionType.name}
         connector={connector}
         dispatch={dispatch}
         serverError={serverError}
-        setHasErrors={setHasErrors}
+        errors={errors}
       />
     );
   }
 
-  async function onActionConnectorSave(): Promise<ActionConnector | undefined> {
+  const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
       .then(savedConnector => {
         toastNotifications.addSuccess(
@@ -109,9 +121,8 @@ export const ConnectorAddFlyout = () => {
       })
       .catch(errorRes => {
         setServerError(errorRes);
+        return undefined;
       });
-    return;
-  }
 
   return (
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionAddTitle" size="m">
@@ -172,7 +183,7 @@ export const ConnectorAddFlyout = () => {
               <EuiButton
                 fill
                 color="secondary"
-                data-test-subj="saveActionButton"
+                data-test-subj="saveNewActionButton"
                 type="submit"
                 iconType="check"
                 isDisabled={hasErrors}

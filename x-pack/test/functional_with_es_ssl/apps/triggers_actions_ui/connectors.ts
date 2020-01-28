@@ -38,7 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await nameInput.type(connectorName);
 
       const saveButton = await find.byCssSelector(
-        '[data-test-subj="saveActionButton"]:not(disabled)'
+        '[data-test-subj="saveNewActionButton"]:not(disabled)'
       );
       await saveButton.click();
 
@@ -72,7 +72,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await nameInput.type(connectorName);
 
       const saveButton = await find.byCssSelector(
-        '[data-test-subj="saveActionButton"]:not(disabled)'
+        '[data-test-subj="saveNewActionButton"]:not(disabled)'
       );
       await saveButton.click();
 
@@ -94,7 +94,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await nameInputToUpdate.type(updatedConnectorName);
 
       const saveEditButton = await find.byCssSelector(
-        '[data-test-subj="saveActionButton"]:not(disabled)'
+        '[data-test-subj="saveEditedActionButton"]:not(disabled)'
       );
       await saveEditButton.click();
 
@@ -126,7 +126,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await nameInput.type(connectorName);
 
         const saveButton = await find.byCssSelector(
-          '[data-test-subj="saveActionButton"]:not(disabled)'
+          '[data-test-subj="saveNewActionButton"]:not(disabled)'
         );
         await saveButton.click();
         await pageObjects.common.closeToast();
@@ -166,7 +166,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await nameInput.type(connectorName);
 
         const saveButton = await find.byCssSelector(
-          '[data-test-subj="saveActionButton"]:not(disabled)'
+          '[data-test-subj="saveNewActionButton"]:not(disabled)'
         );
         await saveButton.click();
         await pageObjects.common.closeToast();

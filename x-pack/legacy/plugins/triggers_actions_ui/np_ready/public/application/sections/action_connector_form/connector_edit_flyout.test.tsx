@@ -88,7 +88,7 @@ describe('connector_edit_flyout', () => {
             },
           }}
         >
-          <ConnectorEditFlyout connector={connector} />
+          <ConnectorEditFlyout initialConnector={connector} />
         </ActionsConnectorsContextProvider>
       </AppContextProvider>
     );

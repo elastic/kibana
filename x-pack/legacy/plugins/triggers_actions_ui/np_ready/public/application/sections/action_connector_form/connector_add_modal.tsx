@@ -17,8 +17,8 @@ import {
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionConnectorForm } from './action_connector_form';
-import { ActionType, ActionConnector } from '../../../types';
+import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
+import { ActionType, ActionConnector, IErrorObject } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { useAppDependencies } from '../../app_context';
@@ -32,13 +32,13 @@ export const ConnectorAddModal = ({
   addModalVisible: boolean;
   setAddModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+  let hasErrors = false;
   const { http, toastNotifications, actionTypeRegistry } = useAppDependencies();
   const initialConnector = {
     actionTypeId: actionType.id,
     config: {},
     secrets: {},
   } as ActionConnector;
-  const [hasErrors, setHasErrors] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const closeModal = useCallback(() => {
@@ -53,7 +53,13 @@ export const ConnectorAddModal = ({
     return null;
   }
   const actionTypeModel = actionTypeRegistry.get(actionType.id);
-  async function onActionConnectorSave(): Promise<ActionConnector | undefined> {
+  const errors = {
+    ...actionTypeModel?.validateConnector(connector).errors,
+    ...validateBaseProperties(connector).errors,
+  } as IErrorObject;
+  hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+
+  const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
       .then(savedConnector => {
         toastNotifications.addSuccess(
@@ -71,9 +77,8 @@ export const ConnectorAddModal = ({
       })
       .catch(errorRes => {
         setServerError(errorRes);
+        return undefined;
       });
-    return;
-  }
 
   return (
     <EuiOverlayMask>
@@ -109,7 +114,7 @@ export const ConnectorAddModal = ({
             actionTypeName={actionType.name}
             dispatch={dispatch}
             serverError={serverError}
-            setHasErrors={setHasErrors}
+            errors={errors}
           />
         </EuiModalBody>
 

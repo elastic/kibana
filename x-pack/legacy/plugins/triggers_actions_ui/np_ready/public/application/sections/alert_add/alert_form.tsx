@@ -871,7 +871,7 @@ export const AlertForm = ({ initialAlert, setFlyoutVisibility }: AlertFormProps)
             <EuiButton
               fill
               color="secondary"
-              data-test-subj="saveActionButton"
+              data-test-subj="saveAlertButton"
               type="submit"
               iconType="check"
               isDisabled={hasErrors || hasActionErrors}

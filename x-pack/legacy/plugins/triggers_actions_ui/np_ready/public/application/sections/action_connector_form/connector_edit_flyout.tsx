@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
-import { ActionConnectorForm } from './action_connector_form';
+import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
 import { useAppDependencies } from '../../app_context';
-import { ActionConnectorTableItem, ActionConnector } from '../../../types';
+import { ActionConnectorTableItem, ActionConnector, IErrorObject } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { updateActionConnector } from '../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -31,6 +31,7 @@ export interface ConnectorEditProps {
 }
 
 export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) => {
+  let hasErrors = false;
   const {
     http,
     toastNotifications,
@@ -44,9 +45,10 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
     reloadConnectors,
   } = useActionsConnectorsContext();
   const closeFlyout = useCallback(() => setEditFlyoutVisibility(false), [setEditFlyoutVisibility]);
-  const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialConnector });
+  const [{ connector }, dispatch] = useReducer(connectorReducer, {
+    connector: { ...initialConnector, secrets: {} },
+  });
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [hasErrors, setHasErrors] = useState<boolean>(false);
   const [serverError, setServerError] = useState<{
     body: { message: string; error: string };
   } | null>(null);
@@ -56,8 +58,13 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
   }
 
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
+  const errors = {
+    ...actionTypeModel?.validateConnector(connector).errors,
+    ...validateBaseProperties(connector).errors,
+  } as IErrorObject;
+  hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
-  async function onActionConnectorSave(): Promise<ActionConnector | undefined> {
+  const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await updateActionConnector({ http, connector, id: connector.id })
       .then(savedConnector => {
         toastNotifications.addSuccess(
@@ -75,9 +82,8 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
       })
       .catch(errorRes => {
         setServerError(errorRes);
+        return undefined;
       });
-    return;
-  }
 
   return (
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionAddTitle" size="m">
@@ -102,13 +108,9 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ActionConnectorForm
-          key={connector.id}
-          connector={{
-            ...connector,
-            secrets: {},
-          }}
+          connector={connector}
           serverError={serverError}
-          setHasErrors={setHasErrors}
+          errors={errors}
           actionTypeName={connector.actionType}
           dispatch={dispatch}
         />
@@ -130,7 +132,7 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
               <EuiButton
                 fill
                 color="secondary"
-                data-test-subj="saveActionButton"
+                data-test-subj="saveEditedActionButton"
                 type="submit"
                 iconType="check"
                 isDisabled={hasErrors}

@@ -6,9 +6,6 @@
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { coreMock } from '../../../../../../../../../src/core/public/mocks';
-import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
-import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, ActionConnector } from '../../../types';
 import { ActionConnectorForm } from './action_connector_form';
@@ -16,12 +13,11 @@ import { AppContextProvider } from '../../app_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('action_connector_form', () => {
-  let wrapper: ReactWrapper<any>;
-
+  let deps: any;
   beforeAll(async () => {
     const mockes = coreMock.createSetup();
     const [{ chrome, docLinks }] = await mockes.getStartServices();
-    const deps = {
+    deps = {
       chrome,
       docLinks,
       toastNotifications: mockes.notifications.toasts,
@@ -45,7 +41,9 @@ describe('action_connector_form', () => {
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
     };
+  });
 
+  it('renders action_connector_form', () => {
     const actionType = {
       id: 'my-action-type',
       iconClass: 'test',
@@ -68,46 +66,19 @@ describe('action_connector_form', () => {
       config: {},
       secrets: {},
     } as ActionConnector;
-
-    await act(async () => {
-      wrapper = mountWithIntl(
-        <AppContextProvider appDeps={deps}>
-          <ActionsConnectorsContextProvider
-            value={{
-              addFlyoutVisible: true,
-              setAddFlyoutVisibility: () => {},
-              editFlyoutVisible: false,
-              setEditFlyoutVisibility: () => {},
-              actionTypesIndex: {
-                'my-action-type': { id: 'my-action-type', name: 'my-action-type-name' },
-              },
-              reloadConnectors: () => {
-                return new Promise<void>(() => {});
-              },
-            }}
-          >
-            <ActionConnectorForm
-              actionTypeName={'my-action-type-name'}
-              initialConnector={initialConnector}
-              setFlyoutVisibility={() => {}}
-            />
-          </ActionsConnectorsContextProvider>
-        </AppContextProvider>
-      );
-    });
-
-    await waitForRender(wrapper);
-  });
-
-  it('renders action_connector_form', () => {
+    const wrapper = mountWithIntl(
+      <AppContextProvider appDeps={deps}>
+        <ActionConnectorForm
+          actionTypeName={'my-action-type-name'}
+          connector={initialConnector}
+          dispatch={() => {}}
+          serverError={null}
+          errors={{ name: [] }}
+        />
+      </AppContextProvider>
+    );
     const connectorNameField = wrapper.find('[data-test-subj="nameInput"]');
     expect(connectorNameField.exists()).toBeTruthy();
     expect(connectorNameField.first().prop('value')).toBe('');
   });
 });
-
-async function waitForRender(wrapper: ReactWrapper<any, any>) {
-  await Promise.resolve();
-  await Promise.resolve();
-  wrapper.update();
-}
