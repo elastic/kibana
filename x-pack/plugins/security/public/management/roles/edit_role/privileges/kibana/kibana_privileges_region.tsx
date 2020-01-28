@@ -13,7 +13,7 @@ import { CollapsiblePanel } from '../../collapsible_panel';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './poc_space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
-import { POCPrivilegeCalculator } from './poc_privilege_calculator';
+import { PrivilegeCalculator } from './privilege_calculator';
 
 interface Props {
   role: Role;
@@ -53,7 +53,7 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
       return <TransformErrorSection />;
     }
 
-    const privilegeCalculator = new POCPrivilegeCalculator(kibanaPrivileges);
+    const privilegeCalculator = new PrivilegeCalculator(kibanaPrivileges);
 
     if (spacesEnabled) {
       return (

@@ -34,10 +34,53 @@ export class PrivilegeCollection {
     );
   }
 
+  public filter(predicate: (privilege: Privilege) => boolean) {
+    return new PrivilegeCollection(this.privileges.filter(predicate));
+  }
+
+  public includes(privilege: Privilege) {
+    return this.privileges.includes(privilege);
+  }
+
+  public removeRedundant() {
+    const privilegesToKeep: Privilege[] = [];
+
+    this.privileges.forEach((privilege, index) => {
+      const withoutPrivilege = this.filter(p => !p.equals(privilege));
+
+      if (!withoutPrivilege.grantsPrivilege(privilege).hasAllRequested) {
+        privilegesToKeep.push(privilege);
+      }
+    });
+
+    return new PrivilegeCollection(privilegesToKeep);
+  }
+
+  public bisect(bisector: (privilege: Privilege) => 'first' | 'second') {
+    const first: Privilege[] = [];
+    const second: Privilege[] = [];
+
+    this.privileges.forEach(privilege => {
+      const result = bisector(privilege);
+      switch (result) {
+        case 'first':
+          first.push(privilege);
+          break;
+        case 'second':
+          second.push(privilege);
+          break;
+        default:
+          throw new Error(`unsupported bisector return value: ${result}`);
+      }
+    });
+
+    return [new PrivilegeCollection(first), new PrivilegeCollection(second)];
+  }
+
   private checkActions(knownActions: ReadonlySet<string>, candidateActions: string[]) {
     const missing = candidateActions.filter(action => !knownActions.has(action));
 
-    const hasAllRequested = missing.length === 0;
+    const hasAllRequested = knownActions.size > 0 && missing.length === 0;
 
     return {
       missing,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IFeature } from '../../../../features/server';
+import { Feature } from '../../../../features/server';
 import { Actions } from '../actions';
 import { privilegesFactory } from './privileges';
 
@@ -12,7 +12,7 @@ const actions = new Actions('1.0.0-zeta1');
 
 describe('features', () => {
   test('actions defined at the feature cascade to the privileges', () => {
-    const features: IFeature[] = [
+    const features: Feature[] = [
       {
         id: 'foo-feature',
         name: 'Foo Feature',
@@ -25,7 +25,6 @@ describe('features', () => {
         },
         privileges: {
           all: {
-            name: 'All',
             savedObject: {
               all: [],
               read: [],
@@ -33,7 +32,6 @@ describe('features', () => {
             ui: [],
           },
           read: {
-            name: 'Read',
             savedObject: {
               all: [],
               read: [],
@@ -76,7 +74,7 @@ describe('features', () => {
   });
 
   test('actions defined at the privilege take precedence', () => {
-    const features: IFeature[] = [
+    const features: Feature[] = [
       {
         id: 'foo',
         name: 'Foo Feature',
@@ -88,7 +86,6 @@ describe('features', () => {
         },
         privileges: {
           all: {
-            name: 'All',
             app: ['all-app-1', 'all-app-2'],
             catalogue: ['catalogue-all-1', 'catalogue-all-2'],
             management: {
@@ -101,7 +98,6 @@ describe('features', () => {
             ui: [],
           },
           read: {
-            name: 'Read',
             app: ['read-app-1', 'read-app-2'],
             catalogue: ['catalogue-read-1', 'catalogue-read-2'],
             management: {
@@ -150,7 +146,7 @@ describe('features', () => {
   });
 
   test(`actions only specified at the privilege are alright too`, () => {
-    const features: IFeature[] = [
+    const features: Feature[] = [
       {
         id: 'foo',
         name: 'Foo Feature',
@@ -158,7 +154,6 @@ describe('features', () => {
         app: [],
         privileges: {
           all: {
-            name: 'All',
             savedObject: {
               all: ['all-savedObject-all-1', 'all-savedObject-all-2'],
               read: ['all-savedObject-read-1', 'all-savedObject-read-2'],
@@ -166,7 +161,6 @@ describe('features', () => {
             ui: ['all-ui-1', 'all-ui-2'],
           },
           read: {
-            name: 'Read',
             savedObject: {
               all: ['read-savedObject-all-1', 'read-savedObject-all-2'],
               read: ['read-savedObject-read-1', 'read-savedObject-read-2'],
@@ -246,12 +240,13 @@ describe('features', () => {
   });
 
   test(`features with no privileges aren't listed`, () => {
-    const features: IFeature[] = [
+    const features: Feature[] = [
       {
         id: 'foo',
         name: 'Foo Feature',
         icon: 'arrowDown',
         app: [],
+        privileges: {},
       },
     ];
 
@@ -282,7 +277,7 @@ describe('features', () => {
 ].forEach(({ group, expectManageSpaces, expectGetFeatures }) => {
   describe(`${group}`, () => {
     test('actions defined only at the feature are included in `all` and `read`', () => {
-      const features: IFeature[] = [
+      const features: Feature[] = [
         {
           id: 'foo',
           name: 'Foo Feature',
@@ -295,7 +290,6 @@ describe('features', () => {
           },
           privileges: {
             all: {
-              name: 'All',
               savedObject: {
                 all: [],
                 read: [],
@@ -303,7 +297,6 @@ describe('features', () => {
               ui: [],
             },
             read: {
-              name: 'Read',
               savedObject: {
                 all: [],
                 read: [],
@@ -357,7 +350,7 @@ describe('features', () => {
     });
 
     test('actions defined in any feature privilege are included in `all`', () => {
-      const features: IFeature[] = [
+      const features: Feature[] = [
         {
           id: 'foo',
           name: 'Foo Feature',
@@ -370,7 +363,6 @@ describe('features', () => {
           },
           privileges: {
             bar: {
-              name: 'Bar',
               management: {
                 'bar-management': ['bar-management-1', 'bar-management-2'],
               },
@@ -382,7 +374,6 @@ describe('features', () => {
               ui: ['bar-ui-1', 'bar-ui-2'],
             },
             all: {
-              name: 'All',
               management: {
                 'all-management': ['all-management-1', 'all-management-2'],
               },
@@ -394,7 +385,6 @@ describe('features', () => {
               ui: ['all-ui-1', 'all-ui-2'],
             },
             read: {
-              name: 'Read',
               management: {
                 'read-management': ['read-management-1', 'read-management-2'],
               },
@@ -405,7 +395,7 @@ describe('features', () => {
               },
               ui: ['read-ui-1', 'read-ui-2'],
             },
-          } as any,
+          },
         },
       ];
 
@@ -517,7 +507,7 @@ describe('features', () => {
     });
 
     test('actions defined in a feature privilege with name `read` are included in `read`', () => {
-      const features: IFeature[] = [
+      const features: Feature[] = [
         {
           id: 'foo',
           name: 'Foo Feature',
@@ -530,7 +520,6 @@ describe('features', () => {
           },
           privileges: {
             bar: {
-              name: 'Bar',
               management: {
                 'ignore-me': ['ignore-me-1', 'ignore-me-2'],
               },
@@ -542,7 +531,6 @@ describe('features', () => {
               ui: ['ignore-me-1', 'ignore-me-2'],
             },
             all: {
-              name: 'All',
               management: {
                 'ignore-me': ['ignore-me-1', 'ignore-me-2'],
               },
@@ -554,7 +542,6 @@ describe('features', () => {
               ui: ['ignore-me-1', 'ignore-me-2'],
             },
             read: {
-              name: 'Read',
               management: {
                 'read-management': ['read-management-1', 'read-management-2'],
               },
@@ -565,7 +552,7 @@ describe('features', () => {
               },
               ui: ['read-ui-1', 'read-ui-2'],
             },
-          } as any,
+          },
         },
       ];
 
@@ -612,7 +599,7 @@ describe('features', () => {
     });
 
     test('actions defined in a reserved privilege are not included in `all` or `read`', () => {
-      const features: IFeature[] = [
+      const features: Feature[] = [
         {
           id: 'foo',
           name: 'Foo Feature',
@@ -623,9 +610,9 @@ describe('features', () => {
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
           },
+          privileges: {},
           reserved: {
             privilege: {
-              name: '',
               savedObject: {
                 all: ['ignore-me-1', 'ignore-me-2'],
                 read: ['ignore-me-1', 'ignore-me-2'],
@@ -661,7 +648,7 @@ describe('features', () => {
     });
 
     test('actions defined in a feature with excludeFromBasePrivileges are not included in `all` or `read', () => {
-      const features: IFeature[] = [
+      const features: Feature[] = [
         {
           id: 'foo',
           name: 'Foo Feature',
@@ -675,7 +662,6 @@ describe('features', () => {
           },
           privileges: {
             bar: {
-              name: 'Bar',
               management: {
                 'bar-management': ['bar-management-1'],
               },
@@ -687,7 +673,6 @@ describe('features', () => {
               ui: ['bar-ui-1'],
             },
             all: {
-              name: 'All',
               management: {
                 'all-management': ['all-management-1'],
               },
@@ -699,7 +684,6 @@ describe('features', () => {
               ui: ['all-ui-1'],
             },
             read: {
-              name: 'Read',
               management: {
                 'read-management': ['read-management-1'],
               },
@@ -710,7 +694,7 @@ describe('features', () => {
               },
               ui: ['read-ui-1'],
             },
-          } as any,
+          },
         },
       ];
 
@@ -738,7 +722,7 @@ describe('features', () => {
     });
 
     test('actions defined in an individual feature privilege with excludeFromBasePrivileges are not included in `all` or `read`', () => {
-      const features: IFeature[] = [
+      const features: Feature[] = [
         {
           id: 'foo',
           name: 'Foo Feature',
@@ -751,7 +735,6 @@ describe('features', () => {
           },
           privileges: {
             bar: {
-              name: 'Bar',
               excludeFromBasePrivileges: true,
               management: {
                 'bar-management': ['bar-management-1'],
@@ -764,7 +747,6 @@ describe('features', () => {
               ui: ['bar-ui-1'],
             },
             all: {
-              name: 'All',
               excludeFromBasePrivileges: true,
               management: {
                 'all-management': ['all-management-1'],
@@ -777,7 +759,6 @@ describe('features', () => {
               ui: ['all-ui-1'],
             },
             read: {
-              name: 'Read',
               excludeFromBasePrivileges: true,
               management: {
                 'read-management': ['read-management-1'],
@@ -789,7 +770,7 @@ describe('features', () => {
               },
               ui: ['read-ui-1'],
             },
-          } as any,
+          },
         },
       ];
 
@@ -820,7 +801,7 @@ describe('features', () => {
 
 describe('reserved', () => {
   test('actions defined at the feature cascade to the privileges', () => {
-    const features: IFeature[] = [
+    const features: Feature[] = [
       {
         id: 'foo',
         name: 'Foo Feature',
@@ -831,9 +812,9 @@ describe('reserved', () => {
         management: {
           foo: ['management-1', 'management-2'],
         },
+        privileges: {},
         reserved: {
           privilege: {
-            name: '',
             savedObject: {
               all: [],
               read: [],
@@ -865,7 +846,7 @@ describe('reserved', () => {
   });
 
   test('actions defined at the reservedPrivilege take precedence', () => {
-    const features: IFeature[] = [
+    const features: Feature[] = [
       {
         id: 'foo',
         name: 'Foo Feature',
@@ -875,9 +856,9 @@ describe('reserved', () => {
         management: {
           foo: ['ignore-me-1', 'ignore-me-2'],
         },
+        privileges: {},
         reserved: {
           privilege: {
-            name: '',
             app: ['app-1', 'app-2'],
             catalogue: ['catalogue-1', 'catalogue-2'],
             management: {
@@ -913,15 +894,15 @@ describe('reserved', () => {
   });
 
   test(`actions only specified at the privilege are alright too`, () => {
-    const features: IFeature[] = [
+    const features: Feature[] = [
       {
         id: 'foo',
         name: 'Foo Feature',
         icon: 'arrowDown',
         app: [],
+        privileges: {},
         reserved: {
           privilege: {
-            name: '',
             savedObject: {
               all: ['savedObject-all-1', 'savedObject-all-2'],
               read: ['savedObject-read-1', 'savedObject-read-2'],
@@ -970,7 +951,7 @@ describe('reserved', () => {
   });
 
   test(`features with no reservedPrivileges aren't listed`, () => {
-    const features: IFeature[] = [
+    const features: Feature[] = [
       {
         id: 'foo',
         name: 'Foo Feature',
@@ -978,15 +959,6 @@ describe('reserved', () => {
         app: [],
         privileges: {
           all: {
-            name: 'All',
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['foo'],
-          },
-          read: {
-            name: 'Read',
             savedObject: {
               all: [],
               read: [],

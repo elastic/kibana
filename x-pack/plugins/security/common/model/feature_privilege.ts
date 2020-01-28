@@ -6,15 +6,16 @@
 
 import _ from 'lodash';
 import { FeatureKibanaPrivileges } from '../../../features/common';
-import { Privilege } from './poc_kibana_privileges/privilege_instance';
+import { Privilege, PrivilegeScope } from './poc_kibana_privileges/privilege_instance';
 
 export class FeaturePrivilege extends Privilege {
   constructor(
+    scope: PrivilegeScope,
     id: string,
     protected readonly config: FeatureKibanaPrivileges,
     public readonly actions: string[] = []
   ) {
-    super('feature', id, actions);
+    super(scope, 'feature', id, actions);
   }
 
   public get name() {
@@ -51,6 +52,7 @@ export class FeaturePrivilege extends Privilege {
 
   public merge(otherPrivilege: FeaturePrivilege) {
     return new FeaturePrivilege(
+      this.scope,
       this.id,
       this.mergePrivilegeConfigs(otherPrivilege),
       Array.from(new Set([...this.actions, ...otherPrivilege.actions]).values())

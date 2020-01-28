@@ -11,15 +11,15 @@ import {
   SubFeaturePrivilegeGroup,
   SubFeaturePrivilege,
 } from '../../../../../../../common/model';
-import { FeaturePrivilegesExplanations } from '../../../../../../../common/model/poc_kibana_privileges/feature_privileges_explanations';
 
 import { NO_PRIVILEGE_VALUE } from '../constants';
+import { ScopedPrivilegeCalculator } from '../privilege_calculator';
 
 interface Props {
   featureId: string;
   subFeature: SecuredSubFeature;
-  selectedPrivileges: string[];
-  privilegeExplanations: FeaturePrivilegesExplanations;
+  selectedFeaturePrivileges: string[];
+  privilegeCalculator: ScopedPrivilegeCalculator;
   onChange: (selectedPrivileges: string[]) => void;
   disabled?: boolean;
 }
@@ -52,11 +52,11 @@ export const SubFeatureForm = (props: Props) => {
     return (
       <div key={index}>
         {privilegeGroup.privileges.map((privilege: SubFeaturePrivilege) => {
-          const isSelected = props.privilegeExplanations.isGranted(props.featureId, privilege.id);
-          const isInherited = props.privilegeExplanations.isInherited(
+          const { selected, inherited } = props.privilegeCalculator.describeFeaturePrivilege(
             props.featureId,
             privilege.id
           );
+
           return (
             <EuiCheckbox
               key={privilege.id}
@@ -66,13 +66,13 @@ export const SubFeatureForm = (props: Props) => {
               onChange={e => {
                 const { checked } = e.target;
                 if (checked) {
-                  props.onChange([...props.selectedPrivileges, privilege.id]);
+                  props.onChange([...props.selectedFeaturePrivileges, privilege.id]);
                 } else {
-                  props.onChange(props.selectedPrivileges.filter(sp => sp !== privilege.id));
+                  props.onChange(props.selectedFeaturePrivileges.filter(sp => sp !== privilege.id));
                 }
               }}
-              checked={isSelected}
-              disabled={isInherited || props.disabled}
+              checked={selected}
+              disabled={inherited || props.disabled}
               compressed={true}
             />
           );
@@ -85,45 +85,29 @@ export const SubFeatureForm = (props: Props) => {
     privilegeGroup: SubFeaturePrivilegeGroup,
     index: number
   ) {
-    const firstSelectedPrivilege = privilegeGroup.privileges.find(p =>
-      props.privilegeExplanations.isGranted(props.featureId, p.id)
+    const calcResult = props.privilegeCalculator.describeMutuallyExclusiveSubFeaturePrivileges(
+      privilegeGroup
     );
 
-    const areAnyInherited = props.privilegeExplanations.exists(
-      (featureId, privilegeId, explanation) =>
-        privilegeGroup.privileges.some(
-          pgp => explanation.isInherited() && pgp.equals(explanation.privilege.privilege)
-        )
+    const firstSelectedPrivilege = privilegeGroup.privileges.find(
+      p => props.privilegeCalculator.describeFeaturePrivilege(props.featureId, p.id).selected
     );
-
-    // When to disable privilege group privilege:
-    // if inherited, and if a more permissive privilege in the group is NOT inherited
 
     const options = [
-      privilegeGroup.privileges.map((privilege, privilegeIndex) => {
+      ...privilegeGroup.privileges.map((privilege, privilegeIndex) => {
         return {
           id: privilege.id,
           label: privilege.name,
-          isDisabled:
-            props.disabled ||
-            props.privilegeExplanations.exists((featureId, privilegeId, explanation) => {
-              const morePermissiveGroupPrivileges = privilegeGroup.privileges.slice(
-                0,
-                privilegeIndex
-              );
-
-              return morePermissiveGroupPrivileges.some(
-                pgp => pgp.equals(explanation.privilege.privilege) && explanation.isInherited()
-              );
-            }),
+          isDisabled: props.disabled || !calcResult[privilege.id].enabled,
         };
       }),
-      {
-        id: NO_PRIVILEGE_VALUE,
-        label: 'None',
-        isDisabled: props.disabled || areAnyInherited,
-      },
-    ].flat();
+    ];
+
+    options.push({
+      id: NO_PRIVILEGE_VALUE,
+      label: 'None',
+      isDisabled: props.disabled || Object.values(calcResult).some(r => r.inherited),
+    });
 
     return (
       <EuiButtonGroup
@@ -135,7 +119,7 @@ export const SubFeatureForm = (props: Props) => {
         isDisabled={props.disabled}
         onChange={selectedPrivilegeId => {
           // Deselect all privileges which belong to this mutually-exclusive group
-          const privilegesWithoutGroupEntries = props.selectedPrivileges.filter(
+          const privilegesWithoutGroupEntries = props.selectedFeaturePrivileges.filter(
             sp => !privilegeGroup.privileges.some(privilege => privilege.id === sp)
           );
           // fire on-change with the newly selected privilege

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { POCPrivilegeCalculator } from './privilege_calculator';
+export { PrivilegeCalculator, ScopedPrivilegeCalculator } from './privilege_calculator';

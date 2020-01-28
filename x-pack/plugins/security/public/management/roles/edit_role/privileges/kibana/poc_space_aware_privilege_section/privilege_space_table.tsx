@@ -15,24 +15,19 @@ import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { getSpaceColor } from 'plugins/spaces/space_avatar';
-import {
-  Role,
-  FeaturesPrivileges,
-  RoleKibanaPrivilege,
-  copyRole,
-} from '../../../../../../../common/model';
+import { Role, FeaturesPrivileges, copyRole } from '../../../../../../../common/model';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
-import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
+import { PrivilegeCalculator } from '../privilege_calculator';
 
 const SPACES_DISPLAY_COUNT = 4;
 
 interface Props {
   role: Role;
-  privilegeCalculator: POCPrivilegeCalculator;
+  privilegeCalculator: PrivilegeCalculator;
   onChange: (role: Role) => void;
   onEdit: (spacesIndex: number) => void;
   displaySpaces: Space[];
@@ -57,6 +52,7 @@ interface TableRow {
     spaces: string[];
     base: string[];
     feature: FeaturesPrivileges;
+    reserved: string[];
   };
 }
 
@@ -93,6 +89,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           spaces: spacePrivs.spaces,
           base: spacePrivs.base || [],
           feature: spacePrivs.feature || {},
+          reserved: spacePrivs._reserved || [],
         },
       };
     });
@@ -173,26 +170,20 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
       {
         field: 'privileges',
         name: 'Privileges',
-        render: (privileges: RoleKibanaPrivilege, record: TableRow) => {
-          const basePrivilege = privilegeCalculator.getEffectiveBasePrivilege(
+        render: (privileges: TableRow['privileges'], record: TableRow) => {
+          const scopedCalculator = privilegeCalculator.getScopedInstance(
             this.props.role,
             record.spacesIndex
           );
-
-          // TODO: Reserved
-
-          const explanations = privilegeCalculator.explainAllEffectiveFeaturePrivileges(
-            this.props.role,
-            record.spacesIndex
+          const basePrivilege = Object.values(scopedCalculator.describeBasePrivileges()).find(
+            bp => bp.selected
           );
 
-          // if (effectivePrivilege.reserved != null && effectivePrivilege.reserved.length > 0) {
-          //   return <PrivilegeDisplay privilege={effectivePrivilege.reserved} />;
-          // } else
+          if (privileges.reserved.length > 0) {
+            return <PrivilegeDisplay privilege={privileges.reserved} />;
+          }
 
-          // TODO: Custom assignment value
-
-          const showCustom = explanations.hasNonSupersededCustomizations();
+          const showCustom = scopedCalculator.hasNonSupersededFeaturePrivileges();
 
           return (
             <PrivilegeDisplay

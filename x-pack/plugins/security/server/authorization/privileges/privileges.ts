@@ -5,14 +5,15 @@
  */
 
 import { flatten, uniq } from 'lodash';
-import {
-  RawKibanaFeaturePrivileges,
-  RawKibanaPrivileges,
-  SecuredFeature,
-} from '../../../common/model';
+import { Feature } from '../../../../features/server';
+import { RawKibanaPrivileges } from '../../../common/model';
 import { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 import { FeaturesService } from '../../plugin';
+import {
+  featurePrivilegeIterator,
+  subFeaturePrivilegeIterator,
+} from './feature_privilege_iterator';
 
 export interface PrivilegesService {
   get(): RawKibanaPrivileges;
@@ -23,24 +24,21 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
 
   return {
     get() {
-      const features = featuresService
-        .getFeatures()
-        .map(feature => new SecuredFeature(feature.toRaw()));
+      const features = featuresService.getFeatures();
       const basePrivilegeFeatures = features.filter(feature => !feature.excludeFromBasePrivileges);
 
       const allActions = uniq(
         flatten(
           basePrivilegeFeatures.map(feature => {
-            const featurePrivilegeActions = [];
-            for (const featurePrivilege of feature.privilegeIterator({
+            const featureActions = [];
+            for (const { privilege } of featurePrivilegeIterator(feature, {
               augmentWithSubFeaturePrivileges: true,
-              predicate: (id, privilege) => !privilege.excludeFromBasePrivileges,
+              predicate: (privilegeId, featurePrivilege) =>
+                !featurePrivilege.excludeFromBasePrivileges,
             })) {
-              featurePrivilegeActions.push(
-                ...featurePrivilegeBuilder.getActions(featurePrivilege, feature)
-              );
+              featureActions.push(...featurePrivilegeBuilder.getActions(privilege, feature));
             }
-            return featurePrivilegeActions;
+            return featureActions;
           })
         )
       );
@@ -48,62 +46,53 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
       const readActions = uniq(
         flatten(
           basePrivilegeFeatures.map(feature => {
-            const featurePrivilegeActions = [];
-            for (const featurePrivilege of feature.privilegeIterator({
+            const featureActions = [];
+            for (const { privilege } of featurePrivilegeIterator(feature, {
               augmentWithSubFeaturePrivileges: true,
-              predicate: privilege =>
-                privilege.id === 'read' && !privilege.excludeFromBasePrivileges,
+              predicate: (privilegeId, featurePrivilege) =>
+                !featurePrivilege.excludeFromBasePrivileges && privilegeId === 'read',
             })) {
-              featurePrivilegeActions.push(
-                ...featurePrivilegeBuilder.getActions(featurePrivilege, feature)
-              );
+              featureActions.push(...featurePrivilegeBuilder.getActions(privilege, feature));
             }
-            return featurePrivilegeActions;
+            return featureActions;
           })
         )
       );
 
+      const featurePrivileges: Record<string, Record<string, string[]>> = {};
+      for (const feature of features) {
+        featurePrivileges[feature.id] = {};
+        for (const featurePrivilege of featurePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: true,
+        })) {
+          featurePrivileges[feature.id][featurePrivilege.privilegeId] = [
+            actions.login,
+            actions.version,
+            ...featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature),
+          ];
+        }
+
+        for (const featurePrivilege of featurePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: false,
+        })) {
+          featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
+            actions.login,
+            actions.version,
+            ...featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature),
+          ];
+        }
+
+        for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature)) {
+          featurePrivileges[feature.id][subFeaturePrivilege.id] = [
+            actions.login,
+            actions.version,
+            ...featurePrivilegeBuilder.getActions(subFeaturePrivilege, feature),
+          ];
+        }
+      }
+
       return {
-        features: features.reduce((acc: RawKibanaFeaturePrivileges, feature: SecuredFeature) => {
-          for (const featurePrivilege of feature.privilegeIterator({
-            augmentWithSubFeaturePrivileges: false,
-          })) {
-            // TODO :(
-            acc[feature.id] = {
-              ...acc[feature.id],
-              [`minimal_${featurePrivilege.id}`]: [
-                actions.login,
-                actions.version,
-                ...featurePrivilegeBuilder.getActions(featurePrivilege, feature),
-                ...(featurePrivilege.id === 'all' ? [actions.allHack] : []),
-              ],
-            };
-          }
-          for (const featurePrivilege of feature.privilegeIterator({
-            augmentWithSubFeaturePrivileges: true,
-          })) {
-            acc[feature.id] = {
-              ...acc[feature.id],
-              [featurePrivilege.id]: [
-                actions.login,
-                actions.version,
-                ...featurePrivilegeBuilder.getActions(featurePrivilege, feature),
-                ...(featurePrivilege.id === 'all' ? [actions.allHack] : []),
-              ],
-            };
-          }
-          for (const subFeaturePrivilege of feature.subFeaturePrivilegeIterator()) {
-            acc[feature.id] = {
-              ...acc[feature.id],
-              [subFeaturePrivilege.id]: [
-                actions.login,
-                actions.version,
-                ...featurePrivilegeBuilder.getActions(subFeaturePrivilege, feature),
-              ],
-            };
-          }
-          return acc;
-        }, {}),
+        features: featurePrivileges,
         global: {
           all: [
             actions.login,
@@ -121,7 +110,7 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
           all: [actions.login, actions.version, ...allActions, actions.allHack],
           read: [actions.login, actions.version, ...readActions],
         },
-        reserved: features.reduce((acc: Record<string, string[]>, feature: SecuredFeature) => {
+        reserved: features.reduce((acc: Record<string, string[]>, feature: Feature) => {
           if (feature.reserved) {
             acc[feature.id] = [
               actions.version,

@@ -6,21 +6,26 @@
 
 import { Feature } from '../../../../features/public';
 import { RawKibanaPrivileges } from '../raw_kibana_privileges';
-import { Privilege, PrivilegeType } from './privilege_instance';
+import { Privilege, PrivilegeType, PrivilegeScope } from './privilege_instance';
 import { PrivilegeCollection } from './privilege_collection';
 import { RoleKibanaPrivilege } from '../role';
 import { SecuredFeature } from '../secured_feature';
 
-function toPrivilege(type: PrivilegeType, entry: [string, string[]]): [string, Privilege] {
+function toPrivilege(
+  scope: PrivilegeScope,
+  type: PrivilegeType,
+  entry: [string, string[]]
+): [string, Privilege] {
   const [privilegeId, actions] = entry;
-  return [privilegeId, new Privilege(type, privilegeId, actions)];
+  return [privilegeId, new Privilege(scope, type, privilegeId, actions)];
 }
 
 function recordsToPrivilegeMap(
+  scope: PrivilegeScope,
   type: PrivilegeType,
   record: Record<string, string[]>
 ): ReadonlyMap<string, Privilege> {
-  return new Map(Object.entries(record).map(entry => toPrivilege(type, entry)));
+  return new Map(Object.entries(record).map(entry => toPrivilege(scope, type, entry)));
 }
 
 export class KibanaPrivileges {
@@ -28,15 +33,23 @@ export class KibanaPrivileges {
 
   private spaces: ReadonlyMap<string, Privilege>;
 
-  private feature: ReadonlyMap<string, SecuredFeature>;
+  private globalFeature: ReadonlyMap<string, SecuredFeature>;
+
+  private spaceFeature: ReadonlyMap<string, SecuredFeature>;
 
   constructor(rawKibanaPrivileges: RawKibanaPrivileges, features: Feature[]) {
-    this.global = recordsToPrivilegeMap('base', rawKibanaPrivileges.global);
-    this.spaces = recordsToPrivilegeMap('base', rawKibanaPrivileges.space);
-    this.feature = new Map(
+    this.global = recordsToPrivilegeMap('global', 'base', rawKibanaPrivileges.global);
+    this.spaces = recordsToPrivilegeMap('space', 'base', rawKibanaPrivileges.space);
+    this.globalFeature = new Map(
       features.map(feature => {
         const rawPrivs = rawKibanaPrivileges.features[feature.id];
-        return [feature.id, new SecuredFeature(feature.toRaw(), rawPrivs)];
+        return [feature.id, new SecuredFeature(feature.toRaw(), rawPrivs, 'global')];
+      })
+    );
+    this.spaceFeature = new Map(
+      features.map(feature => {
+        const rawPrivs = rawKibanaPrivileges.features[feature.id];
+        return [feature.id, new SecuredFeature(feature.toRaw(), rawPrivs, 'space')];
       })
     );
   }
@@ -49,12 +62,45 @@ export class KibanaPrivileges {
     return Array.from(this.spaces.values());
   }
 
-  public getAllFeaturePrivileges() {
-    return this.feature;
+  public getBasePrivileges(scope: PrivilegeScope) {
+    switch (scope) {
+      case 'global':
+        return Array.from(this.global.values());
+      case 'space':
+        return Array.from(this.spaces.values());
+      default:
+        throw new Error(`Unsupported scope: ${scope}`);
+    }
   }
 
-  public getFeaturePrivileges(featureId: string) {
-    return this.feature.get(featureId)?.allPrivileges ?? [];
+  public getAllFeaturePrivileges(scope: PrivilegeScope) {
+    switch (scope) {
+      case 'global':
+        return this.globalFeature;
+      case 'space':
+        return this.spaceFeature;
+      default:
+        throw new Error(`Unsupported scope: ${scope}`);
+    }
+  }
+
+  public getSecuredFeature(scope: PrivilegeScope, featureId: string) {
+    return this.getAllFeaturePrivileges(scope).get(featureId)!;
+  }
+
+  public getSecuredFeatures(scope: PrivilegeScope) {
+    switch (scope) {
+      case 'global':
+        return Array.from(this.globalFeature.values());
+      case 'space':
+        return Array.from(this.spaceFeature.values());
+      default:
+        throw new Error(`Unsupported scope: ${scope}`);
+    }
+  }
+
+  public getFeaturePrivileges(scope: PrivilegeScope, featureId: string) {
+    return this.getAllFeaturePrivileges(scope).get(featureId)?.allPrivileges ?? [];
   }
 
   public createCollectionFromRoleKibanaPrivileges(roleKibanaPrivileges: RoleKibanaPrivilege[]) {
@@ -72,7 +118,7 @@ export class KibanaPrivileges {
 
         const featurePrivileges: Privilege[][] = Object.entries(rkp.feature).map(
           ([featureId, assignedFeaturePrivs]) => {
-            return this.getFeaturePrivileges(featureId).filter(
+            return this.getFeaturePrivileges(this.getScope(rkp), featureId).filter(
               filterAssigned(assignedFeaturePrivs)
             );
           }
@@ -91,5 +137,12 @@ export class KibanaPrivileges {
       return true;
     }
     return privilegeSpec.spaces.includes('*');
+  }
+
+  private getScope(privilegeSpec: RoleKibanaPrivilege): Privilege['scope'] {
+    if (this.isGlobalPrivilegeDefinition(privilegeSpec)) {
+      return 'global';
+    }
+    return 'space';
   }
 }

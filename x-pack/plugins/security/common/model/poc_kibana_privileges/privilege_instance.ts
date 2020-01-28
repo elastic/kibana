@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export type PrivilegeScope = 'global' | 'space';
 export type PrivilegeType = 'base' | 'feature';
 
 export class Privilege {
   constructor(
+    public readonly scope: PrivilegeScope,
     public readonly type: PrivilegeType,
     public readonly id: string,
     public readonly actions: string[] = []

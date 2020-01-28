@@ -29,13 +29,13 @@ import {
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
 import { NO_PRIVILEGE_VALUE } from '../constants';
-import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
+import { ScopedPrivilegeCalculator } from '../privilege_calculator';
 // TODO: move htis up to a common spot if it's to be used here...
 import { PrivilegeDisplay } from '../poc_space_aware_privilege_section/privilege_display';
 
 interface Props {
   role: Role;
-  privilegeCalculator: POCPrivilegeCalculator;
+  privilegeCalculator: ScopedPrivilegeCalculator;
   kibanaPrivileges: KibanaPrivileges;
   spacesIndex: number;
   onChange: (featureId: string, privileges: string[]) => void;
@@ -69,9 +69,9 @@ export class FeatureTable extends Component<Props, State> {
   }
 
   public render() {
-    const { role, privilegeCalculator, spacesIndex, kibanaPrivileges } = this.props;
+    const { role, privilegeCalculator } = this.props;
 
-    const featurePrivileges = Array.from(kibanaPrivileges.getAllFeaturePrivileges().values());
+    const featurePrivileges = privilegeCalculator.getSecuredFeatures();
 
     const items: TableRow[] = featurePrivileges
       .sort((feature1, feature2) => {
@@ -86,23 +86,11 @@ export class FeatureTable extends Component<Props, State> {
         return 0;
       })
       .map(feature => {
-        const inherited = privilegeCalculator.getInheritedFeaturePrivileges(
-          role,
-          spacesIndex,
-          feature.id
-        );
-
-        const effective = privilegeCalculator.getEffectiveFeaturePrivileges(
-          role,
-          spacesIndex,
-          feature.id
-        );
-
         return {
           featureId: feature.id,
           feature,
-          inherited,
-          effective,
+          inherited: [],
+          effective: [],
           role,
         };
       });
@@ -117,11 +105,12 @@ export class FeatureTable extends Component<Props, State> {
             ...acc,
             [featureId]: (
               <FeatureTableExpandedRow
-                spacesIndex={this.props.spacesIndex}
                 feature={featurePrivileges.find(f => f.id === featureId)!}
                 onChange={this.props.onChange}
-                role={this.props.role}
                 privilegeCalculator={this.props.privilegeCalculator}
+                selectedFeaturePrivileges={
+                  this.props.role.kibana[this.props.spacesIndex].feature[featureId]
+                }
                 disabled={this.props.disabled}
               />
             ),
@@ -207,74 +196,27 @@ export class FeatureTable extends Component<Props, State> {
             return <EuiText size={'s'}>{feature.reserved.description}</EuiText>;
           }
 
-          const featurePrivileges = this.props.kibanaPrivileges.getFeaturePrivileges(feature.id);
+          const featurePrivileges = this.props.privilegeCalculator.getFeaturePrivileges(feature.id);
 
           if (featurePrivileges.length === 0) {
             return null;
           }
 
-          const enabledFeaturePrivileges = this.getEnabledFeaturePrivileges(
-            featurePrivileges,
-            feature.id
-          );
+          const {
+            selectedPrivilegeId,
+            enabledPrivilegeIds,
+            areAnyInherited,
+          } = this.props.privilegeCalculator.describePrimaryFeaturePrivileges(feature.id);
 
-          const effectiveFeaturePrivileges = this.props.privilegeCalculator.getEffectiveFeaturePrivileges(
-            this.props.role,
-            this.props.spacesIndex,
-            feature.id
-          );
-
-          const featurePrivilegeExplanations = this.props.privilegeCalculator.explainEffectiveFeaturePrivileges(
-            this.props.role,
-            this.props.spacesIndex,
-            feature.id
-          );
-
-          // TODO: better min priv check
-          const selectedPrivilege = effectiveFeaturePrivileges.find(afp => {
-            const primary = record.feature.primaryFeaturePrivileges.findIndex(featurePriv =>
-              afp.equals(featurePriv)
-            );
-            const minimalPrimary = record.feature.minimalPrimaryFeaturePrivileges.findIndex(
-              featurePriv => afp.equals(featurePriv)
-            );
-
-            if (primary < 0 && minimalPrimary < 0) {
-              return undefined;
-            }
-
-            if (primary < 0 || minimalPrimary < primary) {
-              return record.feature.minimalPrimaryFeaturePrivileges[minimalPrimary];
-            }
-
-            return record.feature.primaryFeaturePrivileges[primary];
-          });
-
-          const selectedPrivilegeId = selectedPrivilege?.id.startsWith('minimal_')
-            ? selectedPrivilege?.id.substr('minimal_'.length)
-            : selectedPrivilege?.id;
-
-          // TODO
-          const allowsNone =
-            !selectedPrivilegeId ||
-            !featurePrivilegeExplanations.exists((fid, privilegeId, explanation) => {
-              const isPrimaryFeaturePrivilege =
-                explanation.privilege.privilege instanceof PrimaryFeaturePrivilege;
-
-              const isInheritedByGlobal = explanation
-                .getGrantSources()
-                .global.some(gp => gp.isParentScopeOf(explanation.privilege));
-
-              // Cannot deselect a primary feature privilege if it is inherited
-              return isPrimaryFeaturePrivilege && isInheritedByGlobal;
-            });
+          const allowsNone = !areAnyInherited;
 
           const canChangePrivilege =
-            !this.props.disabled && (allowsNone || enabledFeaturePrivileges.length > 1);
+            !this.props.disabled && (allowsNone || enabledPrivilegeIds.length > 1);
 
           if (!canChangePrivilege) {
-            const assignedBasePrivilege =
-              this.props.role.kibana[this.props.spacesIndex].base.length > 0;
+            const assignedBasePrivilege = Object.values(
+              this.props.privilegeCalculator.describeBasePrivileges()
+            ).some(p => p.directlyAssigned);
 
             const excludedFromBasePrivilegsTooltip = (
               <FormattedMessage
@@ -288,7 +230,7 @@ export class FeatureTable extends Component<Props, State> {
               <PrivilegeDisplay
                 privilege={selectedPrivilegeId}
                 tooltipContent={
-                  assignedBasePrivilege && effectiveFeaturePrivileges.length === 0
+                  assignedBasePrivilege && feature.excludeFromBasePrivileges
                     ? excludedFromBasePrivilegsTooltip
                     : undefined
                 }
@@ -296,13 +238,15 @@ export class FeatureTable extends Component<Props, State> {
             );
           }
 
-          const options = record.feature.primaryFeaturePrivileges.map(priv => {
-            return {
-              id: `${feature.id}_${priv.id}`,
-              label: priv.name,
-              isDisabled: !enabledFeaturePrivileges.some(ep => ep.id === priv.id),
-            };
-          });
+          const options = featurePrivileges
+            .filter(fp => fp instanceof PrimaryFeaturePrivilege && !fp.isMinimalFeaturePrivilege())
+            .map(privilege => {
+              return {
+                id: `${feature.id}_${privilege.id}`,
+                label: privilege.name,
+                isDisabled: !enabledPrivilegeIds.some(ep => ep === privilege.id),
+              };
+            });
 
           options.push({
             id: `${feature.id}_${NO_PRIVILEGE_VALUE}`,
@@ -352,13 +296,6 @@ export class FeatureTable extends Component<Props, State> {
         expandedFeatures: [...this.state.expandedFeatures, featureId],
       });
     }
-  };
-
-  private getEnabledFeaturePrivileges = (
-    featurePrivileges: Privilege[],
-    featureId: string
-  ): Privilege[] => {
-    return featurePrivileges;
   };
 
   private onChangeAllFeaturePrivileges = (privilege: string) => {

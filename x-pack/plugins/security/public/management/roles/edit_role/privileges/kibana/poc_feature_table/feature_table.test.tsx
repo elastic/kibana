@@ -16,7 +16,7 @@ import { findTestSubject } from 'test_utils/find_test_subject';
 import { FeatureTable } from './feature_table';
 import { Role } from '../../../../../../../common/model';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
+import { PrivilegeCalculator } from '../privilege_calculator';
 import { kibanaFeatures } from '../__fixtures__/kibana_features';
 import { Feature } from '../../../../../../../../features/public';
 import { createKibanaPrivileges } from '../__fixtures__/kibana_privileges';
@@ -98,7 +98,10 @@ interface TestConfig {
 }
 const setup = (config: TestConfig) => {
   const kibanaPrivileges = createKibanaPrivileges(config.features);
-  const calculator = new POCPrivilegeCalculator(kibanaPrivileges);
+  const calculator = new PrivilegeCalculator(kibanaPrivileges).getScopedInstance(
+    config.role,
+    config.spacesIndex
+  );
   const onChange = jest.fn();
   const onChangeAll = jest.fn();
   const wrapper = mountWithIntl(

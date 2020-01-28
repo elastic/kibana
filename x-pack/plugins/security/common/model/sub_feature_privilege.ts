@@ -7,6 +7,7 @@
 import { FeatureKibanaPrivileges } from '../../../features/common';
 import { FeaturePrivilege } from './feature_privilege';
 import { PrimaryFeaturePrivilege } from './primary_feature_privilege';
+import { PrivilegeScope } from './poc_kibana_privileges/privilege_instance';
 
 export interface SubFeaturePrivilegeConfig extends FeatureKibanaPrivileges {
   id: string;
@@ -15,14 +16,16 @@ export interface SubFeaturePrivilegeConfig extends FeatureKibanaPrivileges {
 
 export class SubFeaturePrivilege extends FeaturePrivilege {
   constructor(
+    scope: PrivilegeScope,
     protected readonly subPrivilegeConfig: SubFeaturePrivilegeConfig,
     public readonly actions: string[] = []
   ) {
-    super(subPrivilegeConfig.id, subPrivilegeConfig, actions);
+    super(scope, subPrivilegeConfig.id, subPrivilegeConfig, actions);
   }
 
-  public static empty() {
+  public static empty(scope: PrivilegeScope) {
     return new SubFeaturePrivilege(
+      scope,
       {
         id: '____EMPTY____',
         name: '____EMPTY SUB FEATURE PRIVILEGE____',
@@ -39,13 +42,6 @@ export class SubFeaturePrivilege extends FeaturePrivilege {
     );
   }
 
-  public includeIn(primaryFeaturePrivilege: PrimaryFeaturePrivilege) {
-    return (
-      this.subPrivilegeConfig.includeIn === primaryFeaturePrivilege.id ||
-      this.subPrivilegeConfig.includeIn === 'read'
-    );
-  }
-
   public merge(otherSubFeature: SubFeaturePrivilege): SubFeaturePrivilege {
     const mergedPrivilege: SubFeaturePrivilegeConfig = {
       ...this.subPrivilegeConfig,
@@ -59,6 +55,7 @@ export class SubFeaturePrivilege extends FeaturePrivilege {
     };
 
     return new SubFeaturePrivilege(
+      this.scope,
       mergedPrivilege,
       Array.from(new Set([...this.actions, ...otherSubFeature.actions]).values())
     );

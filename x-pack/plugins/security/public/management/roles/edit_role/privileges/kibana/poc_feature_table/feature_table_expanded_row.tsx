@@ -6,150 +6,44 @@
 
 import React, { useState, useEffect } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent, EuiText } from '@elastic/eui';
-import {
-  Role,
-  SecuredFeature,
-  PrimaryFeaturePrivilege,
-  SubFeaturePrivilege,
-} from '../../../../../../../common/model';
+import { SecuredFeature } from '../../../../../../../common/model';
 import { SubFeatureForm } from './sub_feature_form';
-import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
+import { ScopedPrivilegeCalculator } from '../privilege_calculator';
 
 interface Props {
   feature: SecuredFeature;
-  role: Role;
-  spacesIndex: number;
-  privilegeCalculator: POCPrivilegeCalculator;
+  privilegeCalculator: ScopedPrivilegeCalculator;
+  selectedFeaturePrivileges: string[];
   disabled?: boolean;
   onChange: (featureId: string, featurePrivileges: string[]) => void;
 }
 
 export const FeatureTableExpandedRow = ({
   feature,
-  role,
-  spacesIndex,
   onChange,
   privilegeCalculator,
+  selectedFeaturePrivileges,
   disabled,
 }: Props) => {
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [canCustomize, setCanCustomize] = useState(false);
-  const [hasInheritedCustomizations, setHasInheritedCustomizations] = useState(false);
-
-  const selectedPrivileges = role.kibana[spacesIndex].feature[feature.id] ?? [];
-
-  const selectedPrimaryFeaturePrivileges: PrimaryFeaturePrivilege[] = feature.primaryFeaturePrivileges.filter(
-    pfp => selectedPrivileges.includes(pfp.id)
-  );
-
-  const selectedMinimalPrimaryFeaturePrivileges: PrimaryFeaturePrivilege[] = feature.minimalPrimaryFeaturePrivileges.filter(
-    mpfp => selectedPrivileges.includes(mpfp.id)
-  );
-
-  const privilegeExplanations = privilegeCalculator.explainEffectiveFeaturePrivileges(
-    role,
-    spacesIndex,
-    feature.id
-  );
 
   useEffect(() => {
-    const hasEffectivePrimaryFeaturePrivilege = privilegeExplanations.exists(
-      (featureId, privilegeId, explanation) =>
-        explanation.isGranted() &&
-        explanation.privilege.privilege instanceof PrimaryFeaturePrivilege
-    );
-
-    const hasEffectiveBasePrivilege = !!privilegeCalculator.getEffectiveBasePrivilege(
-      role,
-      spacesIndex
-    );
-
-    const hasEffectiveNonMinimalPrimaryFeaturePrivilege = privilegeExplanations.exists(
-      (featureId, privilegeId, explanation) =>
-        explanation.isGranted() &&
-        explanation.privilege.privilege instanceof PrimaryFeaturePrivilege &&
-        !explanation.privilege.privilege.isMinimalFeaturePrivilege()
-    );
-    const hasEffectiveMinimalPrimaryFeaturePrivilege = privilegeExplanations.exists(
-      (featureId, privilegeId, explanation) =>
-        explanation.isGranted() &&
-        explanation.privilege.privilege instanceof PrimaryFeaturePrivilege &&
-        explanation.privilege.privilege.isMinimalFeaturePrivilege()
-    );
-
-    console.log({ disabled, hasEffectiveBasePrivilege, hasEffectivePrimaryFeaturePrivilege });
-
     setCanCustomize(
-      !Boolean(disabled) && !hasEffectiveBasePrivilege && hasEffectivePrimaryFeaturePrivilege
+      !Boolean(disabled) && privilegeCalculator.canCustomizeSubFeaturePrivileges(feature.id)
     );
 
-    setHasInheritedCustomizations(
-      privilegeExplanations.exists((featureId, privilegeId, explanation) => {
-        return (
-          explanation.privilege.privilege instanceof SubFeaturePrivilege &&
-          explanation
-            .getGrantSources()
-            .global.some(source => source.isParentScopeOf(explanation.privilege))
-        );
-      })
-    );
+    setIsCustomizing(privilegeCalculator.isCustomizingSubFeaturePrivileges(feature.id));
+  }, [disabled, feature.id, privilegeCalculator]);
 
-    setIsCustomizing(
-      (hasEffectiveMinimalPrimaryFeaturePrivilege &&
-        !hasEffectiveNonMinimalPrimaryFeaturePrivilege) ||
-        privilegeExplanations.hasNonSupersededSubFeatureCustomizations()
-    );
-  }, [
-    disabled,
-    hasInheritedCustomizations,
-    isCustomizing,
-    privilegeCalculator,
-    privilegeExplanations,
-    role,
-    role.kibana,
-    selectedMinimalPrimaryFeaturePrivileges.length,
-    spacesIndex,
-  ]);
-
-  // TODO: externalize
-  const isMinimumFeaturePrivilege = (privilege: string) => privilege.startsWith('minimal_');
-  const getMinimumFeaturePrivilege = (privilege: string) =>
-    isMinimumFeaturePrivilege(privilege) ? privilege : `minimal_${privilege}`;
-
-  const getRegularFeaturePrivilege = (privilege: string) =>
-    isMinimumFeaturePrivilege(privilege) ? privilege.substr(`minimal_`.length) : privilege;
-
-  // TODO: ugly change logic
   const onCustomizeSubFeatureChange = (e: EuiSwitchEvent) => {
-    const customizeSubFeatures = e.target.checked;
+    const nextPrimaryFeaturePrivilege = privilegeCalculator.toggleMinimalPrimaryFeaturePrivilege(
+      feature.id
+    ).id;
 
-    if (customizeSubFeatures) {
-      const selectedPrimaryFeaturePrivilege = selectedPrimaryFeaturePrivileges[0];
+    const updatedPrimaryFeaturePrivileges = [nextPrimaryFeaturePrivilege];
 
-      let updatedSelectedPrivileges = [...selectedPrivileges];
-      if (selectedPrimaryFeaturePrivilege) {
-        updatedSelectedPrivileges = selectedPrivileges.filter(
-          sp => sp !== selectedPrimaryFeaturePrivilege.id
-        );
-        updatedSelectedPrivileges.push(
-          getMinimumFeaturePrivilege(selectedPrimaryFeaturePrivilege.id)
-        );
-      }
-      setIsCustomizing(customizeSubFeatures);
-      onChange(feature.id, updatedSelectedPrivileges);
-    } else {
-      const selectedMinimalPrimaryFeaturePrivilege = selectedMinimalPrimaryFeaturePrivileges[0];
-
-      const updatedSelectedPrivileges = [];
-      if (selectedMinimalPrimaryFeaturePrivilege) {
-        updatedSelectedPrivileges.push(
-          getRegularFeaturePrivilege(selectedMinimalPrimaryFeaturePrivilege.id)
-        );
-      }
-
-      setIsCustomizing(customizeSubFeatures);
-      onChange(feature.id, updatedSelectedPrivileges);
-    }
+    onChange(feature.id, updatedPrimaryFeaturePrivileges);
   };
 
   if (!feature.subFeatures || feature.subFeatures.length === 0) {
@@ -174,11 +68,11 @@ export const FeatureTableExpandedRow = ({
         return (
           <EuiFlexItem key={subFeature.name}>
             <SubFeatureForm
+              privilegeCalculator={privilegeCalculator}
               featureId={feature.id}
               subFeature={subFeature}
               onChange={updatedPrivileges => onChange(feature.id, updatedPrivileges)}
-              selectedPrivileges={selectedPrivileges}
-              privilegeExplanations={privilegeExplanations}
+              selectedFeaturePrivileges={selectedFeaturePrivileges}
               disabled={disabled || !isCustomizing}
             />
           </EuiFlexItem>

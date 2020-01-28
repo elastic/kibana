@@ -7,11 +7,13 @@
 import { SubFeature, SubFeatureConfig } from '../../../features/common';
 import { SubFeaturePrivilege } from './sub_feature_privilege';
 import { SubFeaturePrivilegeGroup } from './sub_feature_privilege_group';
+import { PrivilegeScope } from './poc_kibana_privileges/privilege_instance';
 
 export class SecuredSubFeature extends SubFeature {
   public readonly privileges: SubFeaturePrivilege[];
 
   constructor(
+    private readonly scope: PrivilegeScope,
     config: SubFeatureConfig,
     private readonly actionMapping: { [privilegeId: string]: string[] } = {}
   ) {
@@ -24,7 +26,9 @@ export class SecuredSubFeature extends SubFeature {
   }
 
   public getPrivilegeGroups() {
-    return this.privilegeGroups.map(pg => new SubFeaturePrivilegeGroup(pg));
+    return this.privilegeGroups.map(
+      pg => new SubFeaturePrivilegeGroup(this.scope, pg, this.actionMapping)
+    );
   }
 
   public *privilegeIterator({
@@ -34,7 +38,7 @@ export class SecuredSubFeature extends SubFeature {
   } = {}): IterableIterator<SubFeaturePrivilege> {
     for (const group of this.privilegeGroups) {
       yield* group.privileges
-        .map(gp => new SubFeaturePrivilege(gp, this.actionMapping[gp.id]))
+        .map(gp => new SubFeaturePrivilege(this.scope, gp, this.actionMapping[gp.id]))
         .filter(privilege => predicate(privilege, this));
     }
   }

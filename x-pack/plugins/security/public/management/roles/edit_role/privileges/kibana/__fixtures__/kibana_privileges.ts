@@ -48,6 +48,7 @@ const createRawKibanaPrivileges = (features: Feature[]) => {
         raw.features[feature.id].all.push(action);
       }
       if (subFeaturePrivilege.includeIn === 'read') {
+        raw.features[feature.id].all.push(action);
         raw.features[feature.id].read.push(action);
       }
       raw.features[feature.id][subFeaturePrivilege.id] = [action];

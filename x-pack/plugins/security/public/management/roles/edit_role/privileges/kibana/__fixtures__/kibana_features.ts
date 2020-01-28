@@ -84,7 +84,7 @@ export const kibanaFeatures = [
             privileges: [
               {
                 id: 'cool_toggle_1',
-                name: 'Cool toggle 2',
+                name: 'Cool toggle 1',
                 includeIn: 'all',
                 savedObject: {
                   all: [],

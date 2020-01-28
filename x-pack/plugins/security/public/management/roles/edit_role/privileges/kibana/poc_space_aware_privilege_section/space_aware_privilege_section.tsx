@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiErrorBoundary,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
@@ -20,12 +21,12 @@ import { Space } from '../../../../../../../../spaces/common/model/space';
 import { RoleValidator } from '../../../validate_role';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { PrivilegeSpaceForm } from './privilege_space_form';
-import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
+import { PrivilegeCalculator } from '../privilege_calculator';
 
 interface Props {
   kibanaPrivileges: KibanaPrivileges;
   role: Role;
-  privilegeCalculator: POCPrivilegeCalculator;
+  privilegeCalculator: PrivilegeCalculator;
   spaces: Space[];
   onChange: (role: Role) => void;
   editable: boolean;
@@ -110,21 +111,23 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
     }
 
     return (
-      <Fragment>
-        {this.renderKibanaPrivileges()}
-        {this.state.showSpacePrivilegeEditor && (
-          <PrivilegeSpaceForm
-            role={this.props.role}
-            privilegeCalculator={this.props.privilegeCalculator}
-            kibanaPrivileges={this.props.kibanaPrivileges}
-            intl={this.props.intl}
-            onChange={this.onSpacesPrivilegeChange}
-            onCancel={this.onCancelEditPrivileges}
-            spaces={this.getAvailableSpaces(this.state.editingIndex)}
-            editingIndex={this.state.editingIndex}
-          />
-        )}
-      </Fragment>
+      <EuiErrorBoundary>
+        <Fragment>
+          {this.renderKibanaPrivileges()}
+          {this.state.showSpacePrivilegeEditor && (
+            <PrivilegeSpaceForm
+              role={this.props.role}
+              privilegeCalculator={this.props.privilegeCalculator}
+              kibanaPrivileges={this.props.kibanaPrivileges}
+              intl={this.props.intl}
+              onChange={this.onSpacesPrivilegeChange}
+              onCancel={this.onCancelEditPrivileges}
+              spaces={this.getAvailableSpaces(this.state.editingIndex)}
+              editingIndex={this.state.editingIndex}
+            />
+          )}
+        </Fragment>
+      </EuiErrorBoundary>
     );
   }
 

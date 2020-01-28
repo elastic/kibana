@@ -5,7 +5,7 @@
  */
 
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
-import { SubFeatureConfig } from './sub_feature';
+import { SubFeatureConfig, SubFeature } from './sub_feature';
 
 export class Feature {
   constructor(protected readonly config: IFeature) {}
@@ -43,7 +43,11 @@ export class Feature {
   }
 
   public get subFeatures() {
-    return this.config.subFeatures;
+    return (this.config.subFeatures || []).map(config => new SubFeature(config));
+  }
+
+  public get excludeFromBasePrivileges() {
+    return Boolean(this.config.excludeFromBasePrivileges);
   }
 
   public get reserved() {

@@ -30,12 +30,12 @@ import { Space } from '../../../../../../../../spaces/common/model/space';
 import { SpaceSelector } from './space_selector';
 import { FeatureTable } from '../poc_feature_table';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
-import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
+import { PrivilegeCalculator, ScopedPrivilegeCalculator } from '../privilege_calculator';
 
 interface Props {
   role: Role;
   kibanaPrivileges: KibanaPrivileges;
-  privilegeCalculator: POCPrivilegeCalculator;
+  privilegeCalculator: PrivilegeCalculator;
   spaces: Space[];
   editingIndex: number;
   onChange: (role: Role) => void;
@@ -44,6 +44,7 @@ interface Props {
 }
 
 interface State {
+  scopedPrivilegeCalculator: ScopedPrivilegeCalculator;
   editingIndex: number;
   selectedSpaceIds: string[];
   selectedBasePrivilege: string[];
@@ -76,6 +77,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     this.state = {
       role,
       editingIndex,
+      scopedPrivilegeCalculator: props.privilegeCalculator.getScopedInstance(role, editingIndex),
       selectedSpaceIds: [...role.kibana[editingIndex].spaces],
       selectedBasePrivilege: [...(role.kibana[editingIndex].base || [])],
       mode: props.editingIndex < 0 ? 'create' : 'update',
@@ -128,6 +130,10 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     const hasSelectedSpaces = this.state.selectedSpaceIds.length > 0;
 
+    const basePrivilegeDescription = this.state.scopedPrivilegeCalculator.describeBasePrivileges();
+
+    const canCustomizeBasePrivileges = basePrivilegeDescription.read.enabled;
+
     return (
       <EuiForm>
         <EuiFormRow
@@ -161,7 +167,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             options={[
               {
                 value: 'basePrivilege_custom',
-                disabled: !this.canCustomizeFeaturePrivileges(),
+                disabled: !canCustomizeBasePrivileges,
                 inputDisplay: (
                   <EuiText>
                     <FormattedMessage
@@ -189,12 +195,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               },
               {
                 value: 'basePrivilege_read',
-                disabled:
-                  // TODO: ugly, maybe incorrect
-                  this.props.privilegeCalculator.explainEffectiveBasePrivilege(
-                    this.props.role,
-                    this.props.editingIndex
-                  )?.privilege.privilege.id === 'all',
+                disabled: !canCustomizeBasePrivileges,
                 inputDisplay: (
                   <EuiText>
                     <FormattedMessage
@@ -270,7 +271,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
         <FeatureTable
           role={this.state.role}
-          privilegeCalculator={this.props.privilegeCalculator}
+          privilegeCalculator={this.state.scopedPrivilegeCalculator}
           onChange={this.onFeaturePrivilegesChange}
           onChangeAll={this.onChangeAllFeaturePrivileges}
           kibanaPrivileges={this.props.kibanaPrivileges}
@@ -437,6 +438,10 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     this.setState({
       selectedSpaceIds,
       role,
+      scopedPrivilegeCalculator: this.props.privilegeCalculator.getScopedInstance(
+        role,
+        this.state.editingIndex
+      ),
     });
   };
 
@@ -460,14 +465,20 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       selectedBasePrivilege: privilegeName === CUSTOM_PRIVILEGE_VALUE ? [] : [privilegeName],
       role,
       isCustomizingFeaturePrivileges,
+      scopedPrivilegeCalculator: this.props.privilegeCalculator.getScopedInstance(
+        role,
+        this.state.editingIndex
+      ),
     });
   };
 
   private getDisplayedBasePrivilege = () => {
-    const baseExplanation = this.props.privilegeCalculator.explainEffectiveBasePrivilege(
-      this.state.role,
-      this.state.editingIndex
-    );
+    const baseDescription = this.state.scopedPrivilegeCalculator.describeBasePrivileges();
+
+    const effectivePrivilegeEntry = Object.entries(baseDescription).find(bd => bd[1].selected);
+    const isDirectlyAssigned = effectivePrivilegeEntry
+      ? effectivePrivilegeEntry[1].directlyAssigned
+      : false;
 
     // If undefined base: Custom
     // If inherited base:
@@ -476,20 +487,11 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     // if customizing or has customizations: Custom
     // else assigned
 
-    if (baseExplanation?.isDirectlyAssigned() && !this.state.isCustomizingFeaturePrivileges) {
-      return `basePrivilege_${baseExplanation.privilege.privilege.id}`;
+    if (isDirectlyAssigned && !this.state.isCustomizingFeaturePrivileges) {
+      return `basePrivilege_${effectivePrivilegeEntry![0]}`;
     }
 
     return `basePrivilege_${CUSTOM_PRIVILEGE_VALUE}`;
-  };
-
-  private canCustomizeFeaturePrivileges = () => {
-    const explanations = this.props.privilegeCalculator.explainAllEffectiveFeaturePrivileges(
-      this.state.role,
-      this.state.editingIndex
-    );
-
-    return explanations.exists((featureId, privilegeId, explanation) => !explanation.isGranted());
   };
 
   private onFeaturePrivilegesChange = (featureId: string, privileges: string[]) => {
@@ -504,30 +506,32 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     this.setState({
       role,
+      scopedPrivilegeCalculator: this.props.privilegeCalculator.getScopedInstance(
+        role,
+        this.state.editingIndex
+      ),
     });
   };
 
   private onChangeAllFeaturePrivileges = (privileges: string[]) => {
-    // const role = copyRole(this.state.role);
-    // const form = role.kibana[this.state.editingIndex];
-    // const calculator = this.props.privilegeCalculator;
-    // // TODO
-    // const allowedPrivs = calculator.calculateAllowedPrivileges();
-    // if (privileges.length === 0) {
-    //   form.feature = {};
-    // } else {
-    //   this.props.features.forEach(feature => {
-    //     const allowedPrivilegesFeature = allowedPrivs[this.state.editingIndex].feature[feature.id];
-    //     const canAssign =
-    //       allowedPrivilegesFeature && allowedPrivilegesFeature.privileges.includes(privileges[0]);
-    //     if (canAssign) {
-    //       form.feature[feature.id] = [...privileges];
-    //     }
-    //   });
-    // }
-    // this.setState({
-    //   role,
-    // });
+    const role = copyRole(this.state.role);
+    const form = role.kibana[this.state.editingIndex];
+
+    if (privileges.length === 0) {
+      form.feature = {};
+    } else {
+      // todo
+      // this.props.features.forEach(feature => {
+      //   form.feature[feature.id] = [...privileges];
+      // });
+    }
+    this.setState({
+      role,
+      scopedPrivilegeCalculator: this.props.privilegeCalculator.getScopedInstance(
+        role,
+        this.state.editingIndex
+      ),
+    });
   };
 
   private canSave = () => {
