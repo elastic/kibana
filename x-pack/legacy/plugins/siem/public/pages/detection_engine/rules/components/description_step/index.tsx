@@ -97,7 +97,7 @@ const buildListItems = (
     []
   );
 
-const addFilterStateIfNotThere = (filters: esFilters.Filter[]): esFilters.Filter[] => {
+export const addFilterStateIfNotThere = (filters: esFilters.Filter[]): esFilters.Filter[] => {
   return filters.map(filter => {
     if (filter.$state == null) {
       return { $state: { store: esFilters.FilterStateStore.APP_STATE }, ...filter };
