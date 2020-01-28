@@ -24,10 +24,10 @@
 import moment from 'moment';
 import { PulseCollector, CollectorSetupContext } from '../types';
 
-export type Payload = Omit<
-  ErrorInstruction,
-  'channel_id' | 'deployment_id' | 'timestamp' | 'status'
->;
+export interface Payload {
+  deploymentId: string;
+  records: Omit<ErrorInstruction, 'channel_id' | 'deployment_id' | 'timestamp' | 'status'>;
+}
 export interface ErrorInstruction {
   channel_id: string;
   currentKibanaVersion?: string;
@@ -104,21 +104,28 @@ export class Collector extends PulseCollector<Payload> {
   }
   public async putRecord(originalPayload: Payload | Payload[]) {
     const payloads = Array.isArray(originalPayload) ? originalPayload : [originalPayload];
-    payloads.forEach(async payload => {
-      if (!payload.hash) {
-        throw Error(`error payload does not contain hash: ${JSON.stringify(payload)}.`);
-      }
-      if (this.elasticsearch) {
-        await this.elasticsearch.index(this.channelName, {
-          ...payload,
-          channel_id: 'errors',
-          deployment_id: '123',
-          status: 'new',
-          id: payload.hash,
-          timestamp: moment(),
-        });
-      }
-    });
+    await Promise.all(
+      payloads.reduce((promises, payload) => {
+        return [
+          ...promises,
+          ...payload.records.map(async record => {
+            if (!record.hash) {
+              throw Error(`error payload does not contain hash: ${JSON.stringify(record)}.`);
+            }
+            if (this.elasticsearch) {
+              await this.elasticsearch.index(this.channelName, {
+                ...record,
+                channel_id: 'errors',
+                deployment_id: '123',
+                status: 'new',
+                id: record.hash,
+                timestamp: moment(),
+              });
+            }
+          }),
+        ];
+      }, [] as Array<Promise<void>>)
+    );
   }
 
   public async getRecords() {
