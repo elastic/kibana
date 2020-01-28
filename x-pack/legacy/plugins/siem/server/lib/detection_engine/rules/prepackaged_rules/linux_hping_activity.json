@@ -4,22 +4,22 @@
     "Normal use of hping is uncommon apart from security testing and research. Use by non-security engineers is very uncommon."
   ],
   "index": [
-    "apm-*-transaction*",
-    "auditbeat-*",
-    "endgame-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "auditbeat-*"
   ],
   "language": "kuery",
   "max_signals": 33,
   "name": "Hping Process Activity",
   "query": "process.name: hping  and event.action:executed",
-  "references": ["https://en.wikipedia.org/wiki/Hping"],
-  "risk_score": 75,
+  "references": [
+    "https://en.wikipedia.org/wiki/Hping"
+  ],
+  "risk_score": 73,
   "rule_id": "90169566-2260-4824-b8e4-8615c3b4ed52",
   "severity": "high",
-  "tags": ["Elastic", "linux"],
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
   "type": "query",
   "version": 1
 }
