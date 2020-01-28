@@ -89,9 +89,11 @@ export const MonitorListComponent = (props: Props) => {
   const columns = [
     {
       align: 'left' as const,
-      width: '20%',
       field: 'state.monitor.status',
       name: labels.STATUS_COLUMN_LABEL,
+      mobileOptions: {
+        fullWidth: true,
+      },
       render: (status: string, { state: { timestamp, checks } }: MonitorSummary) => {
         return (
           <MonitorListStatusColumn status={status} timestamp={timestamp} checks={checks ?? []} />
@@ -100,9 +102,11 @@ export const MonitorListComponent = (props: Props) => {
     },
     {
       align: 'left' as const,
-      width: '30%',
       field: 'state.monitor.name',
       name: labels.NAME_COLUMN_LABEL,
+      mobileOptions: {
+        fullWidth: true,
+      },
       render: (name: string, summary: MonitorSummary) => (
         <MonitorPageLink monitorId={summary.monitor_id} linkParameters={linkParameters}>
           {name ? name : `Unnamed - ${summary.monitor_id}`}
@@ -142,6 +146,7 @@ export const MonitorListComponent = (props: Props) => {
       name: '',
       sortable: true,
       isExpander: true,
+      width: '24px',
       render: (id: string) => {
         return (
           <EuiButtonIcon

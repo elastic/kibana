@@ -24,17 +24,21 @@ exports[`MonitorList component renders a no items message when no data is provid
           Object {
             "align": "left",
             "field": "state.monitor.status",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Status",
             "render": [Function],
-            "width": "20%",
           },
           Object {
             "align": "left",
             "field": "state.monitor.name",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "30%",
           },
           Object {
             "align": "left",
@@ -58,6 +62,7 @@ exports[`MonitorList component renders a no items message when no data is provid
             "name": "",
             "render": [Function],
             "sortable": true,
+            "width": "24px",
           },
         ]
       }
@@ -124,17 +129,21 @@ exports[`MonitorList component renders the monitor list 1`] = `
           Object {
             "align": "left",
             "field": "state.monitor.status",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Status",
             "render": [Function],
-            "width": "20%",
           },
           Object {
             "align": "left",
             "field": "state.monitor.name",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "30%",
           },
           Object {
             "align": "left",
@@ -158,6 +167,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             "name": "",
             "render": [Function],
             "sortable": true,
+            "width": "24px",
           },
         ]
       }

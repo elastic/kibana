@@ -31,6 +31,12 @@ const PaddedSpan = styled.span`
   padding-left: 17px;
 `;
 
+const StatusColumnFlexG = styled(EuiFlexGroup)`
+  @media (max-width: 574px) {
+    min-width: 230px;
+  }
+`;
+
 const getHealthColor = (status: string): string => {
   switch (status) {
     case STATUS.UP:
@@ -69,7 +75,7 @@ const getRelativeShortTimeStamp = (timeStamp: any) => {
   return shortTimestamp;
 };
 
-const getLocationStatus = (checks: Check[], status: string) => {
+export const getLocationStatus = (checks: Check[], status: string) => {
   const upChecks: Set<string> = new Set();
   const downChecks: Set<string> = new Set();
 
@@ -94,8 +100,15 @@ const getLocationStatus = (checks: Check[], status: string) => {
     statusMessage = `${absUpChecks.size}/${totalLocations}`;
   }
 
+  if (totalLocations > 1) {
+    return i18n.translate('xpack.uptime.monitorList.statusColumn.locStatusMessage.multiple', {
+      defaultMessage: 'in {noLoc} Locations',
+      values: { noLoc: statusMessage },
+    });
+  }
+
   return i18n.translate('xpack.uptime.monitorList.statusColumn.locStatusMessage', {
-    defaultMessage: 'in {noLoc} Locations',
+    defaultMessage: 'in {noLoc} Location',
     values: { noLoc: statusMessage },
   });
 };
@@ -107,7 +120,7 @@ export const MonitorListStatusColumn = ({
 }: MonitorListStatusColumnProps) => {
   const timestamp = parseTimestamp(tsString);
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
+    <StatusColumnFlexG alignItems="center" gutterSize="none" wrap={false} responsive={false}>
       <EuiFlexItem grow={1}>
         <EuiHealth color={getHealthColor(status)} style={{ display: 'block' }}>
           {getHealthMessage(status)}
@@ -129,6 +142,6 @@ export const MonitorListStatusColumn = ({
       <EuiFlexItem grow={2}>
         <EuiText size="s">{getLocationStatus(checks, status)}</EuiText>
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </StatusColumnFlexG>
   );
 };
