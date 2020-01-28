@@ -35,7 +35,7 @@ const timeZoneOptions = moment.tz.names().map(name => ({
   text: name,
 }));
 
-class StepDateHistogram extends Component {
+export class StepDateHistogram extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -318,5 +318,3 @@ class StepDateHistogram extends Component {
     return <StepError />;
   };
 }
-
-export { StepDateHistogram };

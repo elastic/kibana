@@ -26,7 +26,7 @@ import { FieldList } from '../../components';
 
 import { FieldChooser, StepError } from './components';
 
-class StepHistogram extends Component {
+export class StepHistogram extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -212,5 +212,3 @@ class StepHistogram extends Component {
     return <StepError />;
   };
 }
-
-export { StepHistogram };

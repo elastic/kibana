@@ -120,7 +120,7 @@ const COLUMNS = [
   },
 ];
 
-class JobTable extends Component {
+export class JobTable extends Component {
   static propTypes = {
     jobs: PropTypes.array,
     pager: PropTypes.object.isRequired,
@@ -404,5 +404,3 @@ class JobTable extends Component {
     );
   }
 }
-
-export { JobTable };

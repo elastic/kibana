@@ -30,7 +30,7 @@ const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_REQUEST,
 ];
 
-class StepReview extends Component {
+export class StepReview extends Component {
   static propTypes = {
     job: PropTypes.object.isRequired,
   };
@@ -121,5 +121,3 @@ class StepReview extends Component {
     );
   }
 }
-
-export { StepReview };

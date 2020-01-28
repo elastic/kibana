@@ -64,7 +64,7 @@ const metricTypesConfig = (function() {
   });
 })();
 
-class StepMetrics extends Component {
+export class StepMetrics extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -472,5 +472,3 @@ class StepMetrics extends Component {
     },
   ];
 }
-
-export { StepMetrics };

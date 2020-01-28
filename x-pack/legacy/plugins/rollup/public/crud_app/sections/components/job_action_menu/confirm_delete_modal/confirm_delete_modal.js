@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
-class ConfirmDeleteModal extends Component {
+export class ConfirmDeleteModal extends Component {
   static propTypes = {
     isSingleSelection: PropTypes.bool.isRequired,
     jobs: PropTypes.array.isRequired,
@@ -115,5 +115,3 @@ class ConfirmDeleteModal extends Component {
     );
   }
 }
-
-export { ConfirmDeleteModal };

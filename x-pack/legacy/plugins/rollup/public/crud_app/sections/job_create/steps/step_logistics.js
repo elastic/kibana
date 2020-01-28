@@ -35,7 +35,7 @@ import { indexPatterns } from '../../../../../../../../../src/plugins/data/publi
 const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
-class StepLogistics extends Component {
+export class StepLogistics extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -522,5 +522,3 @@ class StepLogistics extends Component {
     return <StepError />;
   };
 }
-
-export { StepLogistics };

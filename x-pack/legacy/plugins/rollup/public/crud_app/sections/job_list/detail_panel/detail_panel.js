@@ -63,7 +63,7 @@ const tabToUiMetricMap = {
   [JOB_DETAILS_TAB_JSON]: UIM_DETAIL_PANEL_JSON_TAB_CLICK,
 };
 
-class DetailPanel extends Component {
+export class DetailPanel extends Component {
   static propTypes = {
     isOpen: PropTypes.bool.isRequired,
     isLoading: PropTypes.bool,
@@ -251,5 +251,3 @@ class DetailPanel extends Component {
     );
   }
 }
-
-export { DetailPanel };

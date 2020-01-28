@@ -23,7 +23,7 @@ import { FieldList } from '../../components';
 
 import { FieldChooser } from './components';
 
-class StepTerms extends Component {
+export class StepTerms extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -140,5 +140,3 @@ class StepTerms extends Component {
     );
   }
 }
-
-export { StepTerms };

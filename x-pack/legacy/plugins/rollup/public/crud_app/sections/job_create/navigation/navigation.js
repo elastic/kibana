@@ -18,7 +18,7 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 
-const Navigation = ({
+export const Navigation = ({
   isSaving,
   hasNextStep,
   hasPreviousStep,
@@ -129,5 +129,3 @@ Navigation.propTypes = {
   save: PropTypes.func.isRequired,
   canGoToNextStep: PropTypes.bool.isRequired,
 };
-
-export { Navigation };
