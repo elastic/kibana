@@ -4,22 +4,22 @@
     "Security scans and tests may result in these errors. Misconfigured or buggy applications may produce large numbers of these errors. If the source is unexpected, or the user is unauthorized, or the request is unusual, these may be suspicious or malicious activity."
   ],
   "index": [
-    "apm-*-transaction*",
-    "auditbeat-*",
-    "endgame-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "apm-*-transaction*"
   ],
   "language": "kuery",
   "max_signals": 33,
   "name": "Web Application Suspicious Activity: Unauthorized Method",
   "query": "http.response.status_code:405",
-  "references": ["https://en.wikipedia.org/wiki/HTTP_405"],
-  "risk_score": 50,
+  "references": [
+    "https://en.wikipedia.org/wiki/HTTP_405"
+  ],
+  "risk_score": 47,
   "rule_id": "75ee75d8-c180-481c-ba88-ee50129a6aef",
-  "severity": "low",
-  "tags": ["Elastic", "apm"],
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "APM"
+  ],
   "type": "query",
   "version": 1
 }
