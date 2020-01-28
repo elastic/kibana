@@ -297,7 +297,6 @@ export class DashboardAppController {
         onClearSavedQuery: $scope.onClearSavedQuery,
         onRefreshChange: $scope.onRefreshChange,
         timeHistory: queryService.timefilter.history,
-        filterBarPopoverHasOwnFocus: false,
       };
     };
     const dashboardNavBar = document.getElementById('dashboardChrome');

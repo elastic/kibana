@@ -84,9 +84,6 @@ export interface SearchBarOwnProps {
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
-
-  // should EuiPopover in FilterBar have its own focus
-  filterBarPopoverHasOwnFocus?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -108,7 +105,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showFilterBar: true,
     showDatePicker: true,
     showAutoRefreshOnly: false,
-    filterBarPopoverHasOwnFocus: true,
   };
 
   private services = this.props.kibana.services;
@@ -455,7 +451,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
               filters={this.props.filters!}
               onFiltersUpdated={this.props.onFiltersUpdated}
               indexPatterns={this.props.indexPatterns!}
-              popoverHasOwnFocus={this.props.filterBarPopoverHasOwnFocus}
             />
           </div>
         </div>

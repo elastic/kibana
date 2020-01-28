@@ -34,7 +34,6 @@ interface Props {
   className: string;
   indexPatterns: IIndexPattern[];
   intl: InjectedIntl;
-  popoverHasOwnFocus?: boolean;
 }
 
 function FilterBarUI(props: Props) {
@@ -96,7 +95,7 @@ function FilterBarUI(props: Props) {
           anchorPosition="downLeft"
           withTitle
           panelPaddingSize="none"
-          ownFocus={props.popoverHasOwnFocus}
+          ownFocus={true}
         >
           <EuiFlexItem grow={false}>
             <div style={{ width: 400 }}>
@@ -202,9 +201,5 @@ function FilterBarUI(props: Props) {
     </EuiFlexGroup>
   );
 }
-
-FilterBarUI.defaultProps = {
-  popoverHasOwnFocus: true,
-};
 
 export const FilterBar = injectI18n(FilterBarUI);
