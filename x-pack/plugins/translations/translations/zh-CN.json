@@ -870,7 +870,6 @@
     "data.functions.esaggs.inspector.dataRequest.description": "此请求将查询 Elasticsearch 以获取用于可视化的数据。",
     "data.functions.esaggs.inspector.dataRequest.title": "数据",
     "data.indexPatterns.editIndexPattern": "编辑索引模式",
-    "data.indexPatterns.fetchFieldErrorTitle": "提取字段时出错",
     "data.indexPatterns.unableWriteLabel": "无法写入索引模式！请刷新页面以获取此索引模式的最新更改。",
     "data.indexPatterns.unknownFieldErrorMessage": "indexPattern “{title}” 中的字段 “{name}” 使用未知字段类型。",
     "data.indexPatterns.unknownFieldHeader": "未知字段类型 {type}",
