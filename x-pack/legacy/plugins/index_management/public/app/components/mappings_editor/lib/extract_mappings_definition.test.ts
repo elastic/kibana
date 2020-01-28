@@ -106,6 +106,33 @@ describe('extractMappingsDefinition', () => {
     });
   });
 
+  test('should detect that the mappings has one custom type whose name matches a mappings definition parameter', () => {
+    const mappings = {
+      _source: {
+        _source: {
+          excludes: [],
+          includes: [],
+          enabled: true,
+        },
+        _meta: {},
+        _routing: {
+          required: false,
+        },
+        dynamic: true,
+        properties: {
+          title: {
+            type: 'keyword',
+          },
+        },
+      },
+    };
+
+    expect(extractMappingsDefinition(mappings)).toEqual({
+      type: '_source',
+      mappings: mappings._source,
+    });
+  });
+
   test('should detect that the mappings has one type at root level', () => {
     const mappings = {
       _source: {
