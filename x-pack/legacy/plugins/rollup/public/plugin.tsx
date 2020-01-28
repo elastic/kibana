@@ -5,7 +5,6 @@
  */
 
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter as Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -133,19 +132,17 @@ export class RollupPlugin implements Plugin {
         ]);
 
         render(
-          <Router>
-            <I18nContext>
-              <KibanaContextProvider
-                services={{
-                  setBreadcrumbs: params.setBreadcrumbs,
-                }}
-              >
-                <Provider store={rollupJobsStore}>
-                  <App />
-                </Provider>
-              </KibanaContextProvider>
-            </I18nContext>
-          </Router>,
+          <I18nContext>
+            <KibanaContextProvider
+              services={{
+                setBreadcrumbs: params.setBreadcrumbs,
+              }}
+            >
+              <Provider store={rollupJobsStore}>
+                <App />
+              </Provider>
+            </KibanaContextProvider>
+          </I18nContext>,
           params.element
         );
 
