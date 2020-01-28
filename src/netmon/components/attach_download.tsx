@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import { EuiButtonIcon } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { startAttachmentDownload } from '@logrhythm/nm-web-shared/services/session_files';

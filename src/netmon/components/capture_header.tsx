@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import { EuiButton, EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import SelectedCaptureSessions from '@logrhythm/nm-web-shared/services/selected_capture_sessions';
 import { startPcapDownload } from '@logrhythm/nm-web-shared/services/session_files';
