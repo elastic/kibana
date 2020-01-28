@@ -26,6 +26,7 @@ import { BaseParamType } from './base';
 import { toastNotifications } from '../../notify';
 import { propFilter } from '../filter';
 import { Field, IFieldList } from '../../../../../plugins/data/public';
+import { isNestedField } from '../../../../../plugins/data/public';
 
 const filterByType = propFilter('type');
 
@@ -116,7 +117,7 @@ export class FieldParamType extends BaseParamType {
       const { onlyAggregatable, scriptable, filterFieldTypes } = this;
 
       if (
-        (onlyAggregatable && (!field.aggregatable || field.subType?.nested)) ||
+        (onlyAggregatable && (!field.aggregatable || isNestedField(field))) ||
         (!scriptable && field.scripted)
       ) {
         return false;

@@ -61,7 +61,7 @@ export const UptimeDatePicker = () => {
         updateUrl({
           autorefreshInterval:
             refreshInterval === undefined ? autorefreshInterval : refreshInterval,
-          autorefreshPaused: isPaused,
+          autorefreshIsPaused: isPaused,
         });
       }}
     />

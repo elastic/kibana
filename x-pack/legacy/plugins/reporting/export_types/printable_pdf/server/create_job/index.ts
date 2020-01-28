@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
 import {
   CreateJobFactory,
   ESQueueCreateJobFn,
   ServerFacade,
   RequestFacade,
   ConditionalHeaders,
+  Logger,
 } from '../../../../types';
 import { validateUrls } from '../../../../common/validate_urls';
-import { LevelLogger } from '../../../../server/lib';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { JobParamsPDF } from '../../types';
 // @ts-ignore untyped module
@@ -29,8 +28,7 @@ interface CreateJobFnOpts {
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
->> = function createJobFactoryFn(server: ServerFacade) {
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'create']);
+>> = function createJobFactoryFn(server: ServerFacade, logger: Logger) {
   const compatibilityShim = compatibilityShimFactory(server, logger);
   const crypto = cryptoFactory(server);
 

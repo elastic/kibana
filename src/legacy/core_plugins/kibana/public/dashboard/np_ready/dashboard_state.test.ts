@@ -23,6 +23,7 @@ import { DashboardStateManager } from './dashboard_state_manager';
 import { getSavedDashboardMock } from '../__tests__';
 import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
+import { createKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 
 jest.mock('ui/agg_types', () => ({
   aggTypes: {
@@ -52,9 +53,9 @@ describe('DashboardState', function() {
   function initDashboardState() {
     dashboardState = new DashboardStateManager({
       savedDashboard,
-      useHashedUrl: false,
       hideWriteControls: false,
       kibanaVersion: '7.0.0',
+      kbnUrlStateStorage: createKbnUrlStateStorage(),
       history: createBrowserHistory(),
     });
   }

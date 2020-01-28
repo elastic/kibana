@@ -50,3 +50,16 @@ export const bucketRulesResponse = (response: Array<Rule | RuleError>) =>
     },
     { rules: [], errors: [] }
   );
+
+export const showRulesTable = ({
+  isInitialLoad,
+  rulesCustomInstalled,
+  rulesInstalled,
+}: {
+  isInitialLoad: boolean;
+  rulesCustomInstalled: number | null;
+  rulesInstalled: number | null;
+}) =>
+  !isInitialLoad &&
+  ((rulesCustomInstalled != null && rulesCustomInstalled > 0) ||
+    (rulesInstalled != null && rulesInstalled > 0));

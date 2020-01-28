@@ -32,8 +32,8 @@ export function registerJobGenerationRoutes(
   // @ts-ignore TODO
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
 
-  const esqueue = createQueueFactory(server, { exportTypesRegistry, browserDriverFactory });
-  const enqueueJob = enqueueJobFactory(server, { exportTypesRegistry, esqueue });
+  const esqueue = createQueueFactory(server, logger, { exportTypesRegistry, browserDriverFactory });
+  const enqueueJob = enqueueJobFactory(server, logger, { exportTypesRegistry, esqueue });
 
   /*
    * Generates enqueued job details to use in responses
@@ -48,7 +48,7 @@ export function registerJobGenerationRoutes(
     const user = request.pre.user;
     const headers = request.headers;
 
-    const job = await enqueueJob(logger, exportTypeId, jobParams, user, headers, request);
+    const job = await enqueueJob(exportTypeId, jobParams, user, headers, request);
 
     // return the queue's job information
     const jobJson = job.toJSON();
@@ -74,12 +74,12 @@ export function registerJobGenerationRoutes(
     return err;
   }
 
-  registerGenerateFromJobParams(server, handler, handleError);
-  registerLegacy(server, handler, handleError);
+  registerGenerateFromJobParams(server, handler, handleError, logger);
+  registerLegacy(server, handler, handleError, logger); // 7.x only
 
   // Register beta panel-action download-related API's
   if (config.get('xpack.reporting.csv.enablePanelActionDownload')) {
-    registerGenerateCsvFromSavedObject(server, handler, handleError);
+    registerGenerateCsvFromSavedObject(server, handler, handleError, logger);
     registerGenerateCsvFromSavedObjectImmediate(server, logger);
   }
 }
