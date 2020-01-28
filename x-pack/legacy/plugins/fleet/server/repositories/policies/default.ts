@@ -5,12 +5,11 @@
  */
 
 import { PoliciesRepository as PoliciesRepositoryType } from './types';
-import { FrameworkUser } from '../../adapters/framework/adapter_types';
 
 export class PoliciesRepository implements PoliciesRepositoryType {
   constructor(private readonly ingestPolicyLib?: any, private readonly ingestOutputLib?: any) {}
 
-  async getPolicyOutputByIDs(soClient: FrameworkUser) {
+  async getPolicyOutputByIDs(soClient: any) {
     if (this.ingestOutputLib) {
       return [await this.ingestOutputLib.get(soClient, 'default')];
     }

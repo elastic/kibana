@@ -20,7 +20,7 @@ export default function({ getService }: FtrProviderContext) {
     });
   }
 
-  describe('ingest_policies', () => {
+  describe.skip('ingest_policies', () => {
     describe('POST /api/ingest/policies', () => {
       useFixtures();
 

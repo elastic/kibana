@@ -21,7 +21,7 @@ export function getSupertestWithoutAuth({ getService }: FtrProviderContext) {
 export function setupIngest({ getService }: FtrProviderContext) {
   before(async () => {
     await getService('supertest')
-      .post(`/api/ingest/internals/setup`)
+      .post(`/api/ingest_manager/fleet/setup`)
       .set('kbn-xsrf', 'xxx')
       .send({
         admin_username: 'elastic',

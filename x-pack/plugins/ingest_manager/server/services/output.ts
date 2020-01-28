@@ -31,8 +31,8 @@ class OutputService {
         ...DEFAULT_OUTPUT,
         hosts: [configService.getConfig()!.fleet.defaultOutputHost],
         api_key: await this.createDefaultOutputApiKey(adminUser.username, adminUser.password),
-        admin_username: 'elastic',
-        admin_password: 'changeme',
+        admin_username: adminUser.username,
+        admin_password: adminUser.password,
       } as NewOutput;
 
       await this.create(soClient, newDefaultOutput, {

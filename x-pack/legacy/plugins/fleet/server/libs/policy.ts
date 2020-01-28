@@ -40,7 +40,7 @@ export class PolicyLib {
   }
 
   public async getFullPolicy(user: FrameworkUser, id: string): Promise<AgentPolicy | null> {
-    const policy = await this.policyAdapter.get(this.soAdapter, id);
+    const policy = await this.policyAdapter.get(this.soAdapter.getClient(user), id);
     if (!policy) {
       return null;
     }
@@ -49,7 +49,7 @@ export class PolicyLib {
       outputs: {
         ...(
           await this.policyAdapter.getPolicyOutputByIDs(
-            this.soAdapter,
+            this.soAdapter.getClient(user),
             this.outputIDsFromDatasources(policy.datasources)
           )
         ).reduce((outputs, { config, ...output }) => {
@@ -61,7 +61,10 @@ export class PolicyLib {
           return outputs;
         }, {} as AgentPolicy['outputs']),
       },
-      streams: this.storedDatasourceToAgentStreams(policy.datasources),
+      streams:
+        policy.datasources && policy.datasources.length
+          ? this.storedDatasourceToAgentStreams(policy.datasources)
+          : [],
     };
 
     return agentPolicy;
