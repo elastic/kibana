@@ -801,12 +801,8 @@ function discoverController(
   };
 
   $scope.updateQuery = function({ query }) {
-    // storing the updated timerange in the state will trigger a fetch
-    // call automatically, so only trigger fetch in case this is a refresh call (no changes in parameters).
-    if (!_.isEqual($state.query, query)) {
-      $state.query = query;
-      $fetchObservable.next();
-    }
+    $state.query = query;
+    $fetchObservable.next();
   };
 
   function onResults(resp) {

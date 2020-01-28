@@ -36,14 +36,14 @@ export type StatefulSearchBarProps = SearchBarOwnProps & {
   appName: string;
 };
 
-const defaultFiltersUpdated = (query: QueryStart) => {
+const defaultFiltersUpdated = (queryService: QueryStart) => {
   return (filters: esFilters.Filter[]) => {
-    query.filterManager.setFilters(filters);
+    queryService.filterManager.setFilters(filters);
   };
 };
 
-const defaultOnRefreshChange = (query: QueryStart) => {
-  const { timefilter } = query.timefilter;
+const defaultOnRefreshChange = (queryService: QueryStart) => {
+  const { timefilter } = queryService.timefilter;
   return (options: { isPaused: boolean; refreshInterval: number }) => {
     timefilter.setRefreshInterval({
       value: options.refreshInterval,
@@ -54,27 +54,31 @@ const defaultOnRefreshChange = (query: QueryStart) => {
 
 const defaultOnQuerySubmit = (
   props: StatefulSearchBarProps,
-  query: QueryStart,
+  queryService: QueryStart,
+  currentQuery: Query,
   setQueryStringState: Function
 ) => {
-  const { timefilter } = query.timefilter;
+  const { timefilter } = queryService.timefilter;
 
   return (payload: { dateRange: TimeRange; query?: Query }) => {
+    const isUpdate =
+      !_.isEqual(timefilter.getTime(), payload.dateRange) ||
+      !_.isEqual(payload.query, currentQuery);
     timefilter.setTime(payload.dateRange);
     setQueryStringState(payload.query);
 
-    if (props.onQuerySubmit) props.onQuerySubmit(payload);
+    if (props.onQuerySubmit && isUpdate) props.onQuerySubmit(payload);
   };
 };
 
 const defaultOnClearSavedQuery = (
   props: StatefulSearchBarProps,
   uiSettings: CoreStart['uiSettings'],
-  query: QueryStart,
+  queryService: QueryStart,
   setQueryStringState: Function
 ) => {
   return () => {
-    query.filterManager.removeAll();
+    queryService.filterManager.removeAll();
     setQueryStringState({
       query: '',
       language: uiSettings.get('search:queryLanguage'),
@@ -86,11 +90,11 @@ const defaultOnClearSavedQuery = (
 
 const populateStateFromSavedQuery = (
   props: StatefulSearchBarProps,
-  query: QueryStart,
+  queryService: QueryStart,
   savedQuery: SavedQuery,
   setQueryStringState: Function
 ) => {
-  const { timefilter } = query.timefilter;
+  const { timefilter } = queryService.timefilter;
   // timefilter
   if (savedQuery.attributes.timefilter) {
     timefilter.setTime({
@@ -109,28 +113,28 @@ const populateStateFromSavedQuery = (
 
   // filters
   const savedQueryFilters = savedQuery.attributes.filters || [];
-  const globalFilters = query.filterManager.getGlobalFilters();
-  query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
+  const globalFilters = queryService.filterManager.getGlobalFilters();
+  queryService.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
 };
 
 const defaultOnSavedQueryUpdated = (
   props: StatefulSearchBarProps,
-  query: QueryStart,
+  queryService: QueryStart,
   setQueryStringState: Function
 ) => {
   return (savedQuery: SavedQuery) => {
-    populateStateFromSavedQuery(props, query, savedQuery, setQueryStringState);
+    populateStateFromSavedQuery(props, queryService, savedQuery, setQueryStringState);
     if (props.onSavedQueryUpdated) props.onSavedQueryUpdated(savedQuery);
   };
 };
 
 const defaultOnQuerySaved = (
   props: StatefulSearchBarProps,
-  query: QueryStart,
+  queryService: QueryStart,
   setQueryStringState: Function
 ) => {
   return (savedQuery: SavedQuery) => {
-    populateStateFromSavedQuery(props, query, savedQuery, setQueryStringState);
+    populateStateFromSavedQuery(props, queryService, savedQuery, setQueryStringState);
     if (props.onSaved) props.onSaved(savedQuery);
   };
 };
@@ -207,7 +211,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           query={query}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
-          onQuerySubmit={defaultOnQuerySubmit(props, data.query, setQuery)}
+          onQuerySubmit={defaultOnQuerySubmit(props, data.query, query, setQuery)}
           onClearSavedQuery={defaultOnClearSavedQuery(props, core.uiSettings, data.query, setQuery)}
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, data.query, setQuery)}
           onSaved={defaultOnQuerySaved(props, data.query, setQuery)}

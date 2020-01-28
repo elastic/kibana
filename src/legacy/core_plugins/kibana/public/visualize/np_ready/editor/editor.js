@@ -19,7 +19,8 @@
 
 import angular from 'angular';
 import _ from 'lodash';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject, merge } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 
 import React from 'react';
@@ -92,12 +93,11 @@ function VisualizeAppController(
     chrome,
     getBasePath,
     core: { docLinks },
-    savedQueryService,
     uiSettings,
   } = getServices();
 
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
-  const queryFilter = filterManager;
+  const $fetchObservable = new Subject();
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
   const _applyVis = () => {
@@ -311,13 +311,6 @@ function VisualizeAppController(
     return appState;
   })();
 
-  $scope.filters = queryFilter.getFilters();
-
-  $scope.onFiltersUpdated = filters => {
-    // The filters will automatically be set when the queryFilter emits an update event (see below)
-    queryFilter.setFilters(filters);
-  };
-
   $scope.showSaveQuery = visualizeCapabilities.saveQuery;
 
   $scope.$watch(
@@ -340,7 +333,6 @@ function VisualizeAppController(
 
     $scope.searchSource = searchSource;
     $scope.state = $state;
-    $scope.refreshInterval = timefilter.getRefreshInterval();
 
     // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');
@@ -367,7 +359,6 @@ function VisualizeAppController(
       return vis.type.options.showTimePicker && hasTimeField;
     };
 
-    $scope.timeRange = timefilter.getTime();
     $scope.opts = _.pick($scope, 'savedVis', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
@@ -375,37 +366,23 @@ function VisualizeAppController(
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
 
+    $scope.updateQuery = function({ query }) {
+      $state.query = query;
+      $fetchObservable.next();
+    };
+
     $scope.$watch('state.query', (newQuery, oldQuery) => {
       if (!_.isEqual(newQuery, oldQuery)) {
         const query = migrateLegacyQuery(newQuery);
         if (!_.isEqual(query, newQuery)) {
-          $state.query = query;
+          $scope.updateQuery({ query });
         }
-        $scope.fetch();
       }
     });
 
     $state.replace();
 
-    const updateTimeRange = () => {
-      $scope.timeRange = timefilter.getTime();
-      $scope.$broadcast('render');
-    };
-
     const subscriptions = new Subscription();
-
-    subscriptions.add(
-      subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
-        next: () => {
-          $scope.refreshInterval = timefilter.getRefreshInterval();
-        },
-      })
-    );
-    subscriptions.add(
-      subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-        next: updateTimeRange,
-      })
-    );
 
     subscriptions.add(
       chrome.getIsVisible$().subscribe(isVisible => {
@@ -420,28 +397,22 @@ function VisualizeAppController(
       $state.save();
       $scope.query = $state.query;
       savedVis.searchSource.setField('query', $state.query);
-      savedVis.searchSource.setField('filter', $state.filters);
-      $scope.$broadcast('render');
+      savedVis.searchSource.setField('filter', filterManager.getFilters());
     };
 
     // update the searchSource when filters update
-    subscriptions.add(
-      subscribeWithScope($scope, queryFilter.getUpdates$(), {
-        next: () => {
-          $scope.filters = queryFilter.getFilters();
-          $scope.globalFilters = queryFilter.getGlobalFilters();
-        },
-      })
-    );
-    subscriptions.add(
-      subscribeWithScope($scope, queryFilter.getFetches$(), {
-        next: $scope.fetch,
-      })
-    );
+
+    const searchBarChanges$ = merge(
+      timefilter.getAutoRefreshFetch$(),
+      timefilter.getFetch$(),
+      filterManager.getFetches$(),
+      $fetchObservable
+    ).pipe(debounceTime(100));
 
     subscriptions.add(
-      subscribeWithScope($scope, timefilter.getAutoRefreshFetch$(), {
+      subscribeWithScope($scope, searchBarChanges$, {
         next: () => {
+          $scope.fetch();
           $scope.vis.forceReload();
         },
       })
@@ -462,92 +433,6 @@ function VisualizeAppController(
       $scope.$broadcast('render');
     });
   }
-
-  $scope.updateQueryAndFetch = function({ query, dateRange }) {
-    const isUpdate =
-      (query && !_.isEqual(query, $state.query)) ||
-      (dateRange && !_.isEqual(dateRange, $scope.timeRange));
-
-    $state.query = query;
-    timefilter.setTime(dateRange);
-
-    // If nothing has changed, trigger the fetch manually, otherwise it will happen as a result of the changes
-    if (!isUpdate) {
-      $scope.vis.forceReload();
-    }
-  };
-
-  $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
-    timefilter.setRefreshInterval({
-      pause: isPaused,
-      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value,
-    });
-  };
-
-  $scope.onQuerySaved = savedQuery => {
-    $scope.savedQuery = savedQuery;
-  };
-
-  $scope.onSavedQueryUpdated = savedQuery => {
-    $scope.savedQuery = { ...savedQuery };
-  };
-
-  $scope.onClearSavedQuery = () => {
-    delete $scope.savedQuery;
-    delete $state.savedQuery;
-    $state.query = {
-      query: '',
-      language:
-        localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
-    };
-    queryFilter.setFilters(queryFilter.getGlobalFilters());
-    $state.save();
-    $scope.fetch();
-  };
-
-  const updateStateFromSavedQuery = savedQuery => {
-    $state.query = savedQuery.attributes.query;
-    $state.save();
-
-    const savedQueryFilters = savedQuery.attributes.filters || [];
-    const globalFilters = queryFilter.getGlobalFilters();
-    queryFilter.setFilters([...globalFilters, ...savedQueryFilters]);
-
-    if (savedQuery.attributes.timefilter) {
-      timefilter.setTime({
-        from: savedQuery.attributes.timefilter.from,
-        to: savedQuery.attributes.timefilter.to,
-      });
-      if (savedQuery.attributes.timefilter.refreshInterval) {
-        timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
-      }
-    }
-
-    $scope.fetch();
-  };
-
-  $scope.$watch('savedQuery', newSavedQuery => {
-    if (!newSavedQuery) return;
-    $state.savedQuery = newSavedQuery.id;
-    $state.save();
-
-    updateStateFromSavedQuery(newSavedQuery);
-  });
-
-  $scope.$watch('state.savedQuery', newSavedQueryId => {
-    if (!newSavedQueryId) {
-      $scope.savedQuery = undefined;
-      return;
-    }
-    if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
-      savedQueryService.getSavedQuery(newSavedQueryId).then(savedQuery => {
-        $scope.$evalAsync(() => {
-          $scope.savedQuery = savedQuery;
-          updateStateFromSavedQuery(savedQuery);
-        });
-      });
-    }
-  });
 
   /**
    * Called when the user clicks "Save" button.
