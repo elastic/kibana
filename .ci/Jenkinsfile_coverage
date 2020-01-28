@@ -16,14 +16,14 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                 withEnv([
                   'NODE_ENV=test' // Needed for jest tests only
                 ]) {
-                  kibanaPipeline.legacyJobRunner('kibana-intake')()
+                  kibanaPipeline.intakeWorker('kibana-intake', './test/scripts/jenkins_unit.sh')()
                 }
               },
               'x-pack-intake-agent': {
                 withEnv([
                   'NODE_ENV=test' // Needed for jest tests only
                 ]) {
-                  kibanaPipeline.legacyJobRunner('x-pack-intake')()
+                  kibanaPipeline.intakeWorker('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
                 }
               },
               'kibana-oss-agent': kibanaPipeline.withWorkers('kibana-oss-tests', { kibanaPipeline.buildOss() }, [

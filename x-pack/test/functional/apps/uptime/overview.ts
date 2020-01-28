@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  // TODO: add UI functional tests
   const pageObjects = getPageObjects(['uptime']);
   const retry = getService('retry');
 
@@ -92,7 +91,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           DEFAULT_DATE_END
         );
         await pageObjects.uptime.setStatusFilter('down');
-        retry.try(async () => {
+
+        await retry.tryForTime(12000, async () => {
           const counts = await pageObjects.uptime.getSnapshotCount();
           expect(counts).to.eql({ up: '0', down: '7' });
         });
@@ -104,7 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           DEFAULT_DATE_END
         );
         await pageObjects.uptime.setStatusFilter('up');
-        retry.try(async () => {
+        await retry.tryForTime(12000, async () => {
           const counts = await pageObjects.uptime.getSnapshotCount();
           expect(counts).to.eql({ up: '93', down: '0' });
         });
