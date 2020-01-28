@@ -26,7 +26,7 @@ export class MessageImporter extends Importer {
   // multiline_start_pattern regex
   // if it does, it is a legitimate end of line and can be pushed into the list,
   // if not, it must be a newline char inside a field value, so keep looking.
-  async read(text) {
+  read(text) {
     try {
       const data = [];
 
@@ -35,21 +35,7 @@ export class MessageImporter extends Importer {
       for (let i = 0; i < text.length; i++) {
         const char = text[i];
         if (char === '\n') {
-          if (this.excludeLinesRegex === null || line.match(this.excludeLinesRegex) === null) {
-            if (
-              this.multilineStartRegex === null ||
-              line.match(this.multilineStartRegex) !== null
-            ) {
-              // if the message ended \r\n (Windows line endings)
-              // then omit the \r as well as the \n for consistency
-              message = message.replace(/\r$/, '');
-              data.push({ message });
-              message = '';
-            } else {
-              message += '\n';
-            }
-            message += line;
-          }
+          message = this.processLine(data, message, line);
           line = '';
         } else {
           line += char;
@@ -58,22 +44,12 @@ export class MessageImporter extends Importer {
 
       // the last line may have been missing a newline ending
       if (line !== '') {
-        if (this.excludeLinesRegex !== null && line.match(this.excludeLinesRegex) === null) {
-          if (this.multilineStartRegex === null || line.match(this.multilineStartRegex) !== null) {
-            message = message.replace(/\r$/, '');
-            data.push({ message });
-            message = '';
-          } else {
-            message += '\n';
-          }
-          message += line;
-        }
+        message = this.processLine(data, message, line);
       }
 
       // add the last message to the list if not already done
       if (message !== '') {
-        message = message.replace(/\r$/, '');
-        data.push({ message });
+        this.addMessage(data, message);
       }
 
       // remove first line if it is blank
@@ -94,5 +70,25 @@ export class MessageImporter extends Importer {
         error,
       };
     }
+  }
+
+  processLine(data, message, line) {
+    if (this.excludeLinesRegex === null || line.match(this.excludeLinesRegex) === null) {
+      if (this.multilineStartRegex === null || line.match(this.multilineStartRegex) !== null) {
+        this.addMessage(data, message);
+        message = '';
+      } else {
+        message += '\n';
+      }
+      message += line;
+    }
+    return message;
+  }
+
+  addMessage(data, message) {
+    // if the message ended \r\n (Windows line endings)
+    // then omit the \r as well as the \n for consistency
+    message = message.replace(/\r$/, '');
+    data.push({ message });
   }
 }
