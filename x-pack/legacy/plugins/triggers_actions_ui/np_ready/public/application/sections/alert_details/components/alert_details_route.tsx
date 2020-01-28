@@ -23,17 +23,19 @@ import {
   withActionOperations,
 } from '../../common/components/with_actions_api_operations';
 
-export type AlertDetailsRouteProps = {
+type AlertDetailsRouteProps = RouteComponentProps<{
   alertId: string;
-} & Pick<ActionApis, 'loadActionTypes'> &
+}> &
+  Pick<ActionApis, 'loadActionTypes'> &
   Pick<AlertApis, 'loadAlert' | 'loadAlertTypes'>;
 
-export const AlertDetailsRoute: React.FunctionComponent<RouteComponentProps<
-  AlertDetailsRouteProps
->> = ({
+export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> = ({
   match: {
-    params: { alertId, loadAlert, loadAlertTypes, loadActionTypes },
+    params: { alertId },
   },
+  loadAlert,
+  loadAlertTypes,
+  loadActionTypes,
 }) => {
   const { http, toastNotifications } = useAppDependencies();
 
@@ -112,7 +114,6 @@ export async function getAlertData(
   }
 }
 
-export const AlertDetailsRouteWithApi = compose(
-  withBulkAlertOperations,
-  withActionOperations
-)(AlertDetailsRoute);
+export const AlertDetailsRouteWithApi = withActionOperations(
+  withBulkAlertOperations(AlertDetailsRoute)
+);

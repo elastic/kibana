@@ -93,11 +93,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const muteSwitch = await testSubjects.find('muteSwitch');
       expect(await muteSwitch.getAttribute('aria-checked')).to.eql('false');
 
-      // await enableSwitch.click();
-
-      // const enabledSwitchAfterDisabling = await testSubjects.find('enableSwitch');
-      // expect(await enabledSwitchAfterDisabling.getAttribute('aria-checked')).to.eql('false');
-
       await muteSwitch.click();
 
       const muteSwitchAfterTryingToMute = await testSubjects.find('muteSwitch');

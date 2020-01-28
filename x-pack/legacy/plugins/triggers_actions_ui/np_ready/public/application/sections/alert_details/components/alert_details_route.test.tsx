@@ -23,9 +23,9 @@ describe('alert_details_route', () => {
     const alert = mockAlert();
 
     expect(
-      shallow(<AlertDetailsRoute {...mockRouterProps(alert)} />).containsMatchingElement(
-        <EuiLoadingSpinner size="l" />
-      )
+      shallow(
+        <AlertDetailsRoute {...mockRouterProps(alert)} {...mockApis()} />
+      ).containsMatchingElement(<EuiLoadingSpinner size="l" />)
     ).toBeTruthy();
   });
 });
@@ -374,14 +374,12 @@ function mockStateSetter() {
 }
 
 function mockRouterProps(alert: Alert) {
-  const apis = mockApis();
-
   return {
     match: {
       isExact: false,
       path: `/alert/${alert.id}`,
       url: '',
-      params: { alertId: alert.id, ...apis },
+      params: { alertId: alert.id },
     },
     history: createMemoryHistory(),
     location: createLocation(`/alert/${alert.id}`),
