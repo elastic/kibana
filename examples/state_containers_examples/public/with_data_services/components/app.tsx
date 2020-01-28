@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { History } from 'history';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { Router } from 'react-router-dom';
@@ -36,18 +36,20 @@ import {
 import { CoreStart } from '../../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import {
+  connectToQueryAppState,
+  connectToQueryGlobalState,
   DataPublicPluginStart,
-  esFilters,
   IIndexPattern,
-  syncAppFilters,
-  syncQuery,
-  QueryState,
+  QueryAppState,
+  QueryGlobalState,
 } from '../../../../../src/plugins/data/public';
 import {
+  BaseState,
   BaseStateContainer,
   createStateContainer,
   createStateContainerReactHelpers,
   IKbnUrlStateStorage,
+  ReduxLikeStateContainer,
   syncState,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../../../common';
@@ -61,33 +63,29 @@ interface StateDemoAppDeps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
-interface AppState {
+interface AppState extends QueryAppState {
   name: string;
-  appFilters: esFilters.Filter[];
 }
 const defaultAppState: AppState = {
   name: '',
-  appFilters: [],
 };
-const _appStateContainer = createStateContainer<AppState>(defaultAppState);
 const {
   Provider: AppStateContainerProvider,
   useState: useAppState,
   useContainer: useAppStateContainer,
-} = createStateContainerReactHelpers<typeof _appStateContainer>();
+} = createStateContainerReactHelpers<ReduxLikeStateContainer<AppState>>();
 
-interface GlobalState extends QueryState {
+interface GlobalState extends QueryGlobalState {
   globalData: string;
 }
 const defaultGlobalState: GlobalState = {
   globalData: '',
 };
-const _globalStateContainer = createStateContainer<GlobalState>(defaultGlobalState);
 const {
   Provider: GlobalStateContainerProvider,
   useState: useGlobalState,
   useContainer: useGlobalStateContainer,
-} = createStateContainerReactHelpers<typeof _globalStateContainer>();
+} = createStateContainerReactHelpers<ReduxLikeStateContainer<GlobalState>>();
 
 const App = ({
   notifications,
@@ -168,14 +166,27 @@ const App = ({
 };
 
 export const StateDemoApp = (props: StateDemoAppDeps) => {
+  const appStateContainer = useCreateStateContainer(defaultAppState);
+  const globalStateContainer = useCreateStateContainer(defaultGlobalState);
+
   return (
-    <AppStateContainerProvider value={_appStateContainer}>
-      <GlobalStateContainerProvider value={_globalStateContainer}>
+    <AppStateContainerProvider value={appStateContainer}>
+      <GlobalStateContainerProvider value={globalStateContainer}>
         <App {...props} />
       </GlobalStateContainerProvider>
     </AppStateContainerProvider>
   );
 };
+
+function useCreateStateContainer<State extends BaseState>(
+  defaultState: State
+): ReduxLikeStateContainer<State> {
+  const stateContainerRef = useRef<ReduxLikeStateContainer<State> | null>(null);
+  if (!stateContainerRef.current) {
+    stateContainerRef.current = createStateContainer(defaultState);
+  }
+  return stateContainerRef.current;
+}
 
 function useIndexPattern(data: DataPublicPluginStart) {
   const [indexPattern, setIndexPattern] = useState<IIndexPattern>();
@@ -192,10 +203,7 @@ function useIndexPattern(data: DataPublicPluginStart) {
   return indexPattern;
 }
 
-function useStateSyncing<
-  AppState extends { appFilters: esFilters.Filter[] },
-  GlobalState extends QueryState
->(
+function useStateSyncing<AppState extends QueryAppState, GlobalState extends QueryGlobalState>(
   appStateContainer: BaseStateContainer<AppState>,
   globalStateContainer: BaseStateContainer<GlobalState>,
   data: DataPublicPluginStart,
@@ -204,10 +212,16 @@ function useStateSyncing<
   // setup sync state utils
   useEffect(() => {
     // sync global filters, time filters, refresh interval
-    const stopSyncingQueryStateWithStateContainer = syncQuery(data.query, globalStateContainer);
+    const stopSyncingQueryGlobalStateWithStateContainer = connectToQueryGlobalState(
+      data.query,
+      globalStateContainer
+    );
 
-    // sync app filters wit app state container
-    const stopSyncingAppFiltersWithStateContainer = syncAppFilters(data.query, appStateContainer);
+    // sync app filters with app state container
+    const stopSyncingQueryAppStateWithStateContainer = connectToQueryAppState(
+      data.query,
+      appStateContainer
+    );
 
     // sync app state container with url
     const { start: startSyncingAppStateWithUrl, stop: stopSyncingAppStateWithUrl } = syncState({
@@ -231,12 +245,27 @@ function useStateSyncing<
       },
     });
 
+    const initialAppState: AppState = {
+      ...appStateContainer.get(),
+      ...kbnUrlStateStorage.get<AppState>('_a'),
+    };
+    appStateContainer.set(initialAppState);
+
+    const initialGlobalState: GlobalState = {
+      ...globalStateContainer.get(),
+      ...kbnUrlStateStorage.get<GlobalState>('_g'),
+    };
+    globalStateContainer.set(initialGlobalState);
+
+    kbnUrlStateStorage.set<AppState>('_a', initialAppState);
+    kbnUrlStateStorage.set<GlobalState>('_g', initialGlobalState);
+
     startSyncingAppStateWithUrl();
     startSyncingGlobalStateWithUrl();
 
     return () => {
-      stopSyncingQueryStateWithStateContainer();
-      stopSyncingAppFiltersWithStateContainer();
+      stopSyncingQueryGlobalStateWithStateContainer();
+      stopSyncingQueryAppStateWithStateContainer();
       stopSyncingAppStateWithUrl();
       stopSyncingGlobalStateWithUrl();
     };

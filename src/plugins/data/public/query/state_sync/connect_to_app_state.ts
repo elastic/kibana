@@ -24,18 +24,28 @@ import { esFilters } from '../../../common';
 import { BaseStateContainer } from '../../../../../plugins/kibana_utils/public';
 import { QueryStart } from '../query_service';
 
+export interface QueryAppState {
+  filters?: esFilters.Filter[];
+}
+
 /**
- * Helper utility to sync application's state filters, with filter manager
- * @param filterManager
- * @param appState
+ * Helper utility to sync app state data from query services: app filters (not pinned)
+ * with state container
+ * @param QueryStart
+ * @param stateContainer
  */
-export function syncAppFilters<S extends { appFilters: esFilters.Filter[] }>(
+export function connectToQueryAppState<S extends QueryAppState>(
   { filterManager }: QueryStart,
   appState: BaseStateContainer<S>
 ) {
-  // make sure initial app filters are picked by filterManager
-  filterManager.setAppFilters(_.cloneDeep(appState.get().appFilters));
+  // initial syncing
+  // TODO:
+  // filterManager takes precedence, this seems like a good default,
+  // and apps could anyway set their own value after initialisation,
+  // but maybe maybe this should be a configurable option?
+  appState.set({ ...appState.get(), filters: filterManager.getAppFilters() } as S);
 
+  // subscribe to updates
   const subs = [
     filterManager
       .getUpdates$()
@@ -43,24 +53,20 @@ export function syncAppFilters<S extends { appFilters: esFilters.Filter[] }>(
         map(() => filterManager.getAppFilters()),
         filter(
           // continue only if app state filters updated
-          appFilters => !compareFilters(appFilters, appState.get().appFilters, COMPARE_ALL_OPTIONS)
+          appFilters =>
+            !compareFilters(appFilters, appState.get().filters || [], COMPARE_ALL_OPTIONS)
         )
       )
       .subscribe(appFilters => {
-        appState.set({ ...appState.get(), appFilters } as S);
+        appState.set({ ...appState.get(), filters: appFilters } as S);
       }),
 
     // if appFilters in dashboardStateManager changed (e.g browser history update),
     // sync it to filterManager
-    appState.state$.subscribe(() => {
-      if (
-        !compareFilters(
-          appState.get().appFilters,
-          filterManager.getAppFilters(),
-          COMPARE_ALL_OPTIONS
-        )
-      ) {
-        filterManager.setAppFilters(_.cloneDeep(appState.get().appFilters));
+    appState.state$.pipe(map(state => state.filters)).subscribe(appFilters => {
+      appFilters = appFilters || [];
+      if (!compareFilters(appFilters, filterManager.getAppFilters(), COMPARE_ALL_OPTIONS)) {
+        filterManager.setAppFilters(_.cloneDeep(appFilters));
       }
     }),
   ];

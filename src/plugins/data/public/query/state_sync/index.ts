@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { syncQuery, QueryState } from './sync_query';
-export { syncAppFilters } from './sync_app_filters';
+export { connectToQueryGlobalState, QueryGlobalState } from './connect_to_global_state';
+export { connectToQueryAppState, QueryAppState } from './connect_to_app_state';
+export { syncGlobalQueryStateWithUrl } from './sync_global_state_with_url';

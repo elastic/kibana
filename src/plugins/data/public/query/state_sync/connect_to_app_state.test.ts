@@ -21,19 +21,32 @@ import { Subscription } from 'rxjs';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
 import { esFilters } from '../../../common';
-import { syncAppFilters } from './sync_app_filters';
+import { connectToQueryAppState } from './connect_to_app_state';
 import { coreMock } from '../../../../../core/public/mocks';
-import { BaseStateContainer, createStateContainer } from '../../../../kibana_utils/public';
+import { BaseStateContainer, createStateContainer, Storage } from '../../../../kibana_utils/public';
+import { QueryService, QueryStart } from '../query_service';
+import { StubBrowserStorage } from '../../../../../test_utils/public/stub_browser_storage';
 
 const setupMock = coreMock.createSetup();
+const startMock = coreMock.createStart();
 
 setupMock.uiSettings.get.mockImplementation((key: string) => {
-  return true;
+  switch (key) {
+    case 'filters:pinnedByDefault':
+      return true;
+    case 'timepicker:timeDefaults':
+      return { from: 'now-15m', to: 'now' };
+    case 'timepicker:refreshIntervalDefaults':
+      return { pause: false, value: 0 };
+    default:
+      throw new Error(`sync_query test: not mocked uiSetting: ${key}`);
+  }
 });
 
-describe('sync_app_filters', () => {
+describe('connect_to_app_state', () => {
+  let queryServiceStart: QueryStart;
   let filterManager: FilterManager;
-  let appState: BaseStateContainer<esFilters.Filter[]>;
+  let appState: BaseStateContainer<{ filters: esFilters.Filter[] }>;
   let appStateSub: Subscription;
   let appStateChangeTriggered = jest.fn();
   let filterManagerChangeSub: Subscription;
@@ -45,8 +58,15 @@ describe('sync_app_filters', () => {
   let aF2: esFilters.Filter;
 
   beforeEach(() => {
-    filterManager = new FilterManager(setupMock.uiSettings);
-    appState = createStateContainer([] as esFilters.Filter[]);
+    const queryService = new QueryService();
+    queryService.setup({
+      uiSettings: setupMock.uiSettings,
+      storage: new Storage(new StubBrowserStorage()),
+    });
+    queryServiceStart = queryService.start(startMock.savedObjects);
+    filterManager = queryServiceStart.filterManager;
+
+    appState = createStateContainer({ filters: [] as esFilters.Filter[] });
     appStateChangeTriggered = jest.fn();
     appStateSub = appState.state$.subscribe(appStateChangeTriggered);
 
@@ -65,93 +85,96 @@ describe('sync_app_filters', () => {
 
   describe('sync from filterManager to app state', () => {
     test('should sync app filters to app state when new app filters set to filterManager', () => {
-      const stop = syncAppFilters(filterManager, appState);
+      const stop = connectToQueryAppState(queryServiceStart, appState);
 
       filterManager.setFilters([gF1, aF1]);
 
-      expect(appState.get()).toHaveLength(1);
+      expect(appState.get().filters).toHaveLength(1);
       stop();
     });
 
     test('should not sync global filters to app state ', () => {
-      const stop = syncAppFilters(filterManager, appState);
+      const stop = connectToQueryAppState(queryServiceStart, appState);
 
       filterManager.setFilters([gF1, gF2]);
 
-      expect(appState.get()).toHaveLength(0);
+      expect(appState.get().filters).toHaveLength(0);
       stop();
     });
 
     test("should not trigger changes when app filters didn't change", () => {
-      const stop = syncAppFilters(filterManager, appState);
+      const stop = connectToQueryAppState(queryServiceStart, appState);
+      appStateChangeTriggered.mockClear();
 
       filterManager.setFilters([gF1, aF1]);
-
       filterManager.setFilters([gF2, aF1]);
 
       expect(appStateChangeTriggered).toBeCalledTimes(1);
-      expect(appState.get()).toHaveLength(1);
+      expect(appState.get().filters).toHaveLength(1);
 
       stop();
     });
 
     test('should trigger changes when app filters change', () => {
-      const stop = syncAppFilters(filterManager, appState);
+      const stop = connectToQueryAppState(queryServiceStart, appState);
+      appStateChangeTriggered.mockClear();
 
       filterManager.setFilters([gF1, aF1]);
       filterManager.setFilters([gF1, aF2]);
 
       expect(appStateChangeTriggered).toBeCalledTimes(2);
-      expect(appState.get()).toHaveLength(1);
+      expect(appState.get().filters).toHaveLength(1);
 
       stop();
     });
 
     test('resetting filters should sync to app state', () => {
-      const stop = syncAppFilters(filterManager, appState);
+      const stop = connectToQueryAppState(queryServiceStart, appState);
 
       filterManager.setFilters([gF1, aF1]);
 
-      expect(appState.get()).toHaveLength(1);
+      expect(appState.get().filters).toHaveLength(1);
 
       filterManager.removeAll();
 
-      expect(appState.get()).toHaveLength(0);
+      expect(appState.get().filters).toHaveLength(0);
 
       stop();
     });
 
     test("shouldn't sync filters when syncing is stopped", () => {
-      const stop = syncAppFilters(filterManager, appState);
+      const stop = connectToQueryAppState(queryServiceStart, appState);
 
       filterManager.setFilters([gF1, aF1]);
 
-      expect(appState.get()).toHaveLength(1);
+      expect(appState.get().filters).toHaveLength(1);
 
       stop();
 
       filterManager.removeAll();
 
-      expect(appState.get()).toHaveLength(1);
+      expect(appState.get().filters).toHaveLength(1);
     });
-  });
-  describe('sync from app state to filterManager', () => {
-    test('should pick up initial state from app state', () => {
-      appState.set([aF1]);
+
+    test('should pick up initial state from filterManager', () => {
+      appState.set({ filters: [aF1] });
       filterManager.setFilters([gF1]);
 
-      const stop = syncAppFilters(filterManager, appState);
-      expect(filterManager.getFilters()).toHaveLength(2);
+      appStateChangeTriggered.mockClear();
+      const stop = connectToQueryAppState(queryServiceStart, appState);
       expect(appStateChangeTriggered).toBeCalledTimes(1);
+      expect(appState.get().filters).toHaveLength(0);
 
       stop();
     });
-
+  });
+  describe('sync from app state to filterManager', () => {
     test('changes to app state should be synced to app filters', () => {
       filterManager.setFilters([gF1]);
-      const stop = syncAppFilters(filterManager, appState);
+      const stop = connectToQueryAppState(queryServiceStart, appState);
+      appStateChangeTriggered.mockClear();
 
-      appState.set([aF1]);
+      appState.set({ filters: [aF1] });
 
       expect(filterManager.getFilters()).toHaveLength(2);
       expect(filterManager.getAppFilters()).toHaveLength(1);
@@ -162,9 +185,10 @@ describe('sync_app_filters', () => {
 
     test('global filters should remain untouched', () => {
       filterManager.setFilters([gF1, gF2, aF1, aF2]);
-      const stop = syncAppFilters(filterManager, appState);
+      const stop = connectToQueryAppState(queryServiceStart, appState);
+      appStateChangeTriggered.mockClear();
 
-      appState.set([]);
+      appState.set({ filters: [] });
 
       expect(filterManager.getFilters()).toHaveLength(2);
       expect(filterManager.getGlobalFilters()).toHaveLength(2);
@@ -176,9 +200,9 @@ describe('sync_app_filters', () => {
       filterManager.setFilters([gF1, gF2, aF1, aF2]);
       filterManagerChangeTriggered.mockClear();
 
-      appState.set([aF1, aF2]);
-      const stop = syncAppFilters(filterManager, appState);
-      appState.set([aF1, aF2]);
+      appState.set({ filters: [aF1, aF2] });
+      const stop = connectToQueryAppState(queryServiceStart, appState);
+      appState.set({ filters: [aF1, aF2] });
 
       expect(filterManagerChangeTriggered).toBeCalledTimes(0);
       stop();
@@ -186,11 +210,11 @@ describe('sync_app_filters', () => {
 
     test('stop() should stop syncing', () => {
       filterManager.setFilters([gF1, gF2, aF1, aF2]);
-      const stop = syncAppFilters(filterManager, appState);
-      appState.set([]);
+      const stop = connectToQueryAppState(queryServiceStart, appState);
+      appState.set({ filters: [] });
       expect(filterManager.getFilters()).toHaveLength(2);
       stop();
-      appState.set([aF1]);
+      appState.set({ filters: [aF1] });
       expect(filterManager.getFilters()).toHaveLength(2);
     });
   });

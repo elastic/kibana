@@ -41,8 +41,8 @@ import {
   IndexPatternsContract,
   Query,
   SavedQuery,
-  syncAppFilters,
-  syncQuery,
+  syncGlobalQueryStateWithUrl,
+  connectToQueryAppState,
 } from '../../../../../../plugins/data/public';
 
 import {
@@ -122,7 +122,7 @@ export class DashboardAppController {
     const {
       stop: stopSyncingGlobalStateWithUrl,
       hasInheritedQueryFromUrl: hasInheritedGlobalStateFromUrl,
-    } = syncQuery(queryService, kbnUrlStateStorage);
+    } = syncGlobalQueryStateWithUrl(queryService, kbnUrlStateStorage);
 
     let lastReloadRequestTime = 0;
 
@@ -139,10 +139,13 @@ export class DashboardAppController {
       history,
     });
 
-    const stopSyncingAppFilters = syncAppFilters(filterManager, {
-      set: filters => dashboardStateManager.setFilters(filters),
-      get: () => dashboardStateManager.appState.filters,
-      state$: dashboardStateManager.appState$.pipe(map(state => state.filters)),
+    // sync initial app filters from state to filterManager
+    filterManager.setAppFilters(_.cloneDeep(dashboardStateManager.appState.filters));
+    // setup syncing of app filters between appState and filterManager
+    const stopSyncingAppFilters = connectToQueryAppState(queryService, {
+      set: ({ filters }) => dashboardStateManager.setFilters(filters || []),
+      get: () => ({ filters: dashboardStateManager.appState.filters }),
+      state$: dashboardStateManager.appState$.pipe(map(state => ({ filters: state.filters }))),
     });
 
     // The hash check is so we only update the time filter on dashboard open, not during
