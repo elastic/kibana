@@ -154,12 +154,12 @@ export const useUserInfo = (): State => {
     hasIndexWrite: hasApiIndexWrite,
     hasManageApiKey: hasApiManageApiKey,
   } = usePrivilegeUser();
-  const [
-    indexNameLoading,
-    isApiSignalIndexExists,
-    apiSignalIndexName,
-    createSignalIndex,
-  ] = useSignalIndex();
+  const {
+    loading: indexNameLoading,
+    signalIndexExists: isApiSignalIndexExists,
+    signalIndexName: apiSignalIndexName,
+    createDeSignalIndex: createSignalIndex,
+  } = useSignalIndex();
 
   const uiCapabilities = useKibana().services.application.capabilities;
   const capabilitiesCanUserCRUD: boolean =
@@ -172,46 +172,50 @@ export const useUserInfo = (): State => {
   }, [loading, privilegeLoading, indexNameLoading]);
 
   useEffect(() => {
-    if (hasIndexManage !== hasApiIndexManage && hasApiIndexManage != null) {
+    if (!loading && hasIndexManage !== hasApiIndexManage && hasApiIndexManage != null) {
       dispatch({ type: 'updateHasIndexManage', hasIndexManage: hasApiIndexManage });
     }
-  }, [hasIndexManage, hasApiIndexManage]);
+  }, [loading, hasIndexManage, hasApiIndexManage]);
 
   useEffect(() => {
-    if (hasIndexWrite !== hasApiIndexWrite && hasApiIndexWrite != null) {
+    if (!loading && hasIndexWrite !== hasApiIndexWrite && hasApiIndexWrite != null) {
       dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasApiIndexWrite });
     }
-  }, [hasIndexWrite, hasApiIndexWrite]);
+  }, [loading, hasIndexWrite, hasApiIndexWrite]);
 
   useEffect(() => {
-    if (hasManageApiKey !== hasApiManageApiKey && hasApiManageApiKey != null) {
+    if (!loading && hasManageApiKey !== hasApiManageApiKey && hasApiManageApiKey != null) {
       dispatch({ type: 'updateHasManageApiKey', hasManageApiKey: hasApiManageApiKey });
     }
-  }, [hasManageApiKey, hasApiManageApiKey]);
+  }, [loading, hasManageApiKey, hasApiManageApiKey]);
 
   useEffect(() => {
-    if (isSignalIndexExists !== isApiSignalIndexExists && isApiSignalIndexExists != null) {
+    if (
+      !loading &&
+      isSignalIndexExists !== isApiSignalIndexExists &&
+      isApiSignalIndexExists != null
+    ) {
       dispatch({ type: 'updateIsSignalIndexExists', isSignalIndexExists: isApiSignalIndexExists });
     }
-  }, [isSignalIndexExists, isApiSignalIndexExists]);
+  }, [loading, isSignalIndexExists, isApiSignalIndexExists]);
 
   useEffect(() => {
-    if (isAuthenticated !== isApiAuthenticated && isApiAuthenticated != null) {
+    if (!loading && isAuthenticated !== isApiAuthenticated && isApiAuthenticated != null) {
       dispatch({ type: 'updateIsAuthenticated', isAuthenticated: isApiAuthenticated });
     }
-  }, [isAuthenticated, isApiAuthenticated]);
+  }, [loading, isAuthenticated, isApiAuthenticated]);
 
   useEffect(() => {
-    if (canUserCRUD !== capabilitiesCanUserCRUD && capabilitiesCanUserCRUD != null) {
+    if (!loading && canUserCRUD !== capabilitiesCanUserCRUD && capabilitiesCanUserCRUD != null) {
       dispatch({ type: 'updateCanUserCRUD', canUserCRUD: capabilitiesCanUserCRUD });
     }
-  }, [canUserCRUD, capabilitiesCanUserCRUD]);
+  }, [loading, canUserCRUD, capabilitiesCanUserCRUD]);
 
   useEffect(() => {
-    if (signalIndexName !== apiSignalIndexName && apiSignalIndexName != null) {
+    if (!loading && signalIndexName !== apiSignalIndexName && apiSignalIndexName != null) {
       dispatch({ type: 'updateSignalIndexName', signalIndexName: apiSignalIndexName });
     }
-  }, [signalIndexName, apiSignalIndexName]);
+  }, [loading, signalIndexName, apiSignalIndexName]);
 
   useEffect(() => {
     if (

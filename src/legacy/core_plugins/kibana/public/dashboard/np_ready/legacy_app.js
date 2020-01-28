@@ -31,6 +31,7 @@ import {
 } from '../../../../../../plugins/kibana_utils/public';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
+import { syncQuery } from '../../../../../../plugins/data/public';
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
@@ -88,9 +89,14 @@ export function initDashboardApp(app, deps) {
         template: dashboardListingTemplate,
         controller($injector, $location, $scope) {
           const service = deps.savedDashboards;
-
           const kbnUrl = $injector.get('kbnUrl');
           const dashboardConfig = deps.dashboardConfig;
+
+          // syncs `_g` portion of url with query services
+          const { stop: stopSyncingGlobalStateWithUrl } = syncQuery(
+            deps.npDataStart.query,
+            deps.kbnUrlStateStorage
+          );
 
           $scope.listingLimit = deps.uiSettings.get('savedObjects:listingLimit');
           $scope.create = () => {
@@ -119,6 +125,10 @@ export function initDashboardApp(app, deps) {
           ]);
           addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
           $scope.core = deps.core;
+
+          $scope.$on('$destroy', () => {
+            stopSyncingGlobalStateWithUrl();
+          });
         },
         resolve: {
           dash: function($rootScope, $route, redirectWhenMissing, kbnUrl) {
@@ -206,7 +216,8 @@ export function initDashboardApp(app, deps) {
                 // See https://github.com/elastic/kibana/issues/10951 for more context.
                 if (error instanceof SavedObjectNotFound && id === 'create') {
                   // Note preserve querystring part is necessary so the state is preserved through the redirect.
-                  const history = deps.angularGlobalStateHacks.history;
+                  const history = deps
+                    .history;
                   history.replace({
                     ...history.location, // preserve query,
                     pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,

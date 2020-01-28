@@ -16,12 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ISearchSource } from 'ui/courier';
 import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 import { extractReferences, injectReferences } from './saved_dashboard_references';
 
-import { esFilters, Query, RefreshInterval } from '../../../../../../plugins/data/public';
+import {
+  esFilters,
+  ISearchSource,
+  Query,
+  RefreshInterval,
+} from '../../../../../../plugins/data/public';
 import { createDashboardEditUrl } from '..';
 
 export interface SavedObjectDashboard extends SavedObject {

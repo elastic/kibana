@@ -42,6 +42,7 @@ import {
   Query,
   SavedQuery,
   syncAppFilters,
+  syncQuery,
 } from '../../../../../../plugins/data/public';
 
 import {
@@ -107,20 +108,21 @@ export class DashboardAppController {
     embeddables,
     share,
     dashboardCapabilities,
-    npDataStart: {
-      query: {
-        filterManager,
-        timefilter: { timefilter },
-      },
-    },
+    npDataStart: { query: queryService },
     core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects, http },
-    angularGlobalStateHacks,
+    history,
+    kbnUrlStateStorage,
   }: DashboardAppControllerDependencies) {
-    const history = angularGlobalStateHacks!.history!;
-    const kbnUrlStateStorage = angularGlobalStateHacks!.kbnUrlStateStorage!;
-    const hasInheritedGlobalState = angularGlobalStateHacks!.hasInheritedGlobalState!;
-
+    const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
+    const timefilter = queryService.timefilter.timefilter;
+
+    // starts syncing `_g` portion of url with query services
+    // note: dashboard_state_manager.ts syncs `_a` portion of url
+    const {
+      stop: stopSyncingGlobalStateWithUrl,
+      hasInheritedQueryFromUrl: hasInheritedGlobalStateFromUrl,
+    } = syncQuery(queryService, kbnUrlStateStorage);
 
     let lastReloadRequestTime = 0;
 
@@ -145,7 +147,7 @@ export class DashboardAppController {
 
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
-    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !hasInheritedGlobalState) {
+    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !hasInheritedGlobalStateFromUrl) {
       dashboardStateManager.syncTimefilterWithDashboard(timefilter);
     }
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
@@ -308,8 +310,14 @@ export class DashboardAppController {
             // This has to be first because handleDashboardContainerChanges causes
             // appState.save which will cause refreshDashboardContainer to be called.
 
-            // Add filters modifies the object passed to it, hence the clone deep.
-            if (!_.isEqual(container.getInput().filters, queryFilter.getFilters())) {
+            if (
+              !compareFilters(
+                container.getInput().filters,
+                queryFilter.getFilters(),
+                COMPARE_ALL_OPTIONS
+              )
+            ) {
+              // Add filters modifies the object passed to it, hence the clone deep.
               queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
 
               dashboardStateManager.applyFilters($scope.model.query, container.getInput().filters);
@@ -417,13 +425,13 @@ export class DashboardAppController {
           key
         ];
         if (!_.isEqual(containerValue, appStateValue)) {
-          // cloneDeep hack is needed, as there are multiple place, where container's input mutated,
-          // but values from appStateValue are deeply frozen, as they can't be mutated directly
-          (differences as { [key: string]: unknown })[key] = _.cloneDeep(appStateValue);
+          (differences as { [key: string]: unknown })[key] = appStateValue;
         }
       });
 
-      return Object.values(differences).length === 0 ? undefined : differences;
+      // cloneDeep hack is needed, as there are multiple place, where container's input mutated,
+      // but values from appStateValue are deeply frozen, as they can't be mutated directly
+      return Object.values(differences).length === 0 ? undefined : _.cloneDeep(differences);
     };
 
     const refreshDashboardContainer = () => {
@@ -878,6 +886,7 @@ export class DashboardAppController {
 
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
+      stopSyncingGlobalStateWithUrl();
       stopSyncingAppFilters();
       visibleSubscription.unsubscribe();
       $scope.timefilterSubscriptions$.unsubscribe();

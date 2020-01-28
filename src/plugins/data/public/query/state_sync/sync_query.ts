@@ -18,6 +18,7 @@
  */
 
 import { Subscription } from 'rxjs';
+import _ from 'lodash';
 import { filter, map } from 'rxjs/operators';
 import {
   createStateContainer,
@@ -26,11 +27,11 @@ import {
 } from '../../../../kibana_utils/public';
 import { COMPARE_ALL_OPTIONS, compareFilters } from '../filter_manager/lib/compare_filters';
 import { esFilters, RefreshInterval, TimeRange } from '../../../common';
-import { QuerySetup, QueryStart } from '../query_service';
+import { QueryStart } from '../query_service';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 
-interface QuerySyncState {
+export interface QuerySyncState {
   time?: TimeRange;
   refreshInterval?: RefreshInterval;
   filters?: esFilters.Filter[];
@@ -64,7 +65,7 @@ export const syncQuery = (
   };
 
   // create state container, which will be used for syncing with syncState() util
-  const filtersSyncStateContainer = createStateContainer(
+  const querySyncStateContainer = createStateContainer(
     initialState,
     {
       setTime: (state: QuerySyncState) => (time: TimeRange) => ({ ...state, time }),
@@ -86,10 +87,10 @@ export const syncQuery = (
 
   const subs: Subscription[] = [
     timefilter.getTimeUpdate$().subscribe(() => {
-      filtersSyncStateContainer.transitions.setTime(timefilter.getTime());
+      querySyncStateContainer.transitions.setTime(timefilter.getTime());
     }),
     timefilter.getRefreshIntervalUpdate$().subscribe(() => {
-      filtersSyncStateContainer.transitions.setRefreshInterval(timefilter.getRefreshInterval());
+      querySyncStateContainer.transitions.setRefreshInterval(timefilter.getRefreshInterval());
     }),
     filterManager
       .getUpdates$()
@@ -98,7 +99,7 @@ export const syncQuery = (
         filter(newGlobalFilters => {
           // continue only if global filters changed
           // and ignore app state filters
-          const oldGlobalFilters = filtersSyncStateContainer.get().filters;
+          const oldGlobalFilters = querySyncStateContainer.get().filters;
           return (
             !oldGlobalFilters ||
             !compareFilters(newGlobalFilters, oldGlobalFilters, COMPARE_ALL_OPTIONS)
@@ -106,13 +107,12 @@ export const syncQuery = (
         })
       )
       .subscribe(newGlobalFilters => {
-        filtersSyncStateContainer.transitions.setFilters(newGlobalFilters);
+        querySyncStateContainer.transitions.setFilters(newGlobalFilters);
       }),
-    filtersSyncStateContainer.state$.subscribe(
+    querySyncStateContainer.state$.subscribe(
       ({ time, filters: globalFilters, refreshInterval }) => {
         // cloneDeep is required because services are mutating passed objects
         // and state in state container is frozen
-
         if (time && !_.isEqual(time, timefilter.getTime())) {
           timefilter.setTime(_.cloneDeep(time));
         }
@@ -140,16 +140,16 @@ export const syncQuery = (
   }
 
   // trigger initial syncing from state container to services if needed
-  filtersSyncStateContainer.set(initialState);
+  querySyncStateContainer.set(initialState);
 
   const { start, stop } = syncState({
     stateStorage: urlStateStorage,
     stateContainer: {
-      ...filtersSyncStateContainer,
+      ...querySyncStateContainer,
       set: state => {
         if (state) {
           // syncState utils requires to handle incoming "null" value
-          filtersSyncStateContainer.set(state);
+          querySyncStateContainer.set(state);
         }
       },
     },
@@ -164,93 +164,4 @@ export const syncQuery = (
     },
     hasInheritedQueryFromUrl,
   };
-};
-
-export const getQuerySyncStateContainer = ({
-  timefilter: { timefilter },
-  filterManager,
-}: QuerySetup) => {
-  const defaultState: QuerySyncState = {
-    time: timefilter.getTime(),
-    refreshInterval: timefilter.getRefreshInterval(),
-    filters: filterManager.getGlobalFilters(),
-  };
-
-  // prepare initial state, whatever was in URL takes precedences over current state in services
-  const initialState: QuerySyncState = {
-    ...defaultState,
-  };
-
-  // create state container, which will be used for syncing with syncState() util
-  const filtersSyncStateContainer = createStateContainer(
-    initialState,
-    {
-      setTime: (state: QuerySyncState) => (time: TimeRange) => ({ ...state, time }),
-      setRefreshInterval: (state: QuerySyncState) => (refreshInterval: RefreshInterval) => ({
-        ...state,
-        refreshInterval,
-      }),
-      setFilters: (state: QuerySyncState) => (filters: esFilters.Filter[]) => ({
-        ...state,
-        filters,
-      }),
-    },
-    {
-      time: (state: QuerySyncState) => () => state.time,
-      refreshInterval: (state: QuerySyncState) => () => state.refreshInterval,
-      filters: (state: QuerySyncState) => () => state.filters,
-    }
-  );
-
-  const subs: Subscription[] = [
-    timefilter.getTimeUpdate$().subscribe(() => {
-      filtersSyncStateContainer.transitions.setTime(timefilter.getTime());
-    }),
-    timefilter.getRefreshIntervalUpdate$().subscribe(() => {
-      filtersSyncStateContainer.transitions.setRefreshInterval(timefilter.getRefreshInterval());
-    }),
-    filterManager
-      .getUpdates$()
-      .pipe(
-        map(() => filterManager.getGlobalFilters()), // we need to track only global filters here
-        filter(newGlobalFilters => {
-          // continue only if global filters changed
-          // and ignore app state filters
-          const oldGlobalFilters = filtersSyncStateContainer.get().filters;
-          return (
-            !oldGlobalFilters ||
-            !compareFilters(newGlobalFilters, oldGlobalFilters, COMPARE_ALL_OPTIONS)
-          );
-        })
-      )
-      .subscribe(newGlobalFilters => {
-        filtersSyncStateContainer.transitions.setFilters(newGlobalFilters);
-      }),
-    filtersSyncStateContainer.state$.subscribe(
-      ({ time, filters: globalFilters, refreshInterval }) => {
-        // cloneDeep is required because services are mutating passed objects
-        // and state in state container is frozen
-
-        if (time && !_.isEqual(time, timefilter.getTime())) {
-          timefilter.setTime(_.cloneDeep(time));
-        }
-
-        if (refreshInterval && !_.isEqual(refreshInterval, timefilter.getRefreshInterval())) {
-          timefilter.setRefreshInterval(_.cloneDeep(refreshInterval));
-        }
-
-        if (
-          globalFilters &&
-          !compareFilters(globalFilters, filterManager.getGlobalFilters(), COMPARE_ALL_OPTIONS)
-        ) {
-          filterManager.setGlobalFilters(_.cloneDeep(globalFilters));
-        }
-      }
-    ),
-  ];
-
-  // trigger initial syncing from state container to services if needed
-  filtersSyncStateContainer.set(initialState);
-
-  return filtersSyncStateContainer;
 };
