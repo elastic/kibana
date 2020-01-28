@@ -45,7 +45,8 @@ interface ActionContext {
 
 async function isCompatible(context: ActionContext) {
   try {
-    return context.data;
+    const filters: esFilters.Filter[] = (await onBrushEvent(context.data, getIndexPatterns)) || [];
+    return filters.length > 0;
   } catch {
     return false;
   }

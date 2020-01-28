@@ -48,7 +48,6 @@ interface ActionContext {
 
 async function isCompatible(context: ActionContext) {
   try {
-    return true;
     const filters: esFilters.Filter[] = (await createFiltersFromEvent(context.data)) || [];
     return filters.length > 0;
   } catch {
