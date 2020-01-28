@@ -26,7 +26,7 @@ import { PulseCollector, CollectorSetupContext } from '../types';
 
 export interface Payload {
   deploymentId: string;
-  records: Omit<ErrorInstruction, 'channel_id' | 'deployment_id' | 'timestamp' | 'status'>;
+  records: Array<Omit<ErrorInstruction, 'channel_id' | 'deployment_id' | 'timestamp' | 'status'>>;
 }
 export interface ErrorInstruction {
   channel_id: string;
