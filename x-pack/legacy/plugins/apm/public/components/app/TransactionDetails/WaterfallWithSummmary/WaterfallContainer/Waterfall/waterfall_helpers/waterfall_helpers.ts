@@ -36,6 +36,7 @@ export interface IWaterfall {
   errorsPerTransaction: TraceAPIResponse['errorsPerTransaction'];
   errorsCount: number;
   serviceColors: IServiceColors;
+  errorItems: IWaterfallError[];
 }
 
 interface IWaterfallItemBase<T, U> {
@@ -70,10 +71,7 @@ export type IWaterfallTransaction = IWaterfallItemBase<
 export type IWaterfallSpan = IWaterfallItemBase<Span, 'span'>;
 export type IWaterfallError = IWaterfallItemBase<APMError, 'error'>;
 
-export type IWaterfallItem =
-  | IWaterfallTransaction
-  | IWaterfallSpan
-  | IWaterfallError;
+export type IWaterfallItem = IWaterfallTransaction | IWaterfallSpan;
 
 function getTransactionItem(transaction: Transaction): IWaterfallTransaction {
   return {
@@ -99,20 +97,29 @@ function getSpanItem(span: Span): IWaterfallSpan {
   };
 }
 
-function getErrorItem(error: APMError): IWaterfallError {
+function getErrorItem(
+  error: APMError,
+  items: IWaterfallItem[],
+  entryWaterfallTransaction?: IWaterfallTransaction
+): IWaterfallError {
+  const entryTimestamp = entryWaterfallTransaction?.doc.timestamp.us ?? 0;
+  const parent = items.find(
+    waterfallItem => waterfallItem.id === error?.parent?.id
+  );
   return {
     docType: 'error',
     doc: error,
     id: error.error.id,
-    parentId: error.parent?.id,
-    offset: 0,
-    skew: 0,
+    parent,
+    parentId: parent?.id,
+    offset: error.timestamp.us - entryTimestamp,
+    skew: getClockSkew((error as unknown) as IWaterfallItem, parent),
     duration: 0
   };
 }
 
 export function getClockSkew(
-  item: IWaterfallItem,
+  item: IWaterfallItem | IWaterfallError,
   parentItem?: IWaterfallItem
 ) {
   if (!parentItem) {
@@ -218,8 +225,6 @@ const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
         return getSpanItem(item as Span);
       case 'transaction':
         return getTransactionItem(item as Transaction);
-      case 'error':
-        return getErrorItem(item as APMError);
     }
   });
 
@@ -244,7 +249,8 @@ export function getWaterfall(
       items: [],
       errorsPerTransaction,
       errorsCount: sum(Object.values(errorsPerTransaction)),
-      serviceColors: {}
+      serviceColors: {},
+      errorItems: []
     };
   }
 
@@ -262,6 +268,36 @@ export function getWaterfall(
     entryWaterfallTransaction
   );
 
+  function isAncestor(
+    waterfallItemsList: IWaterfallItem[],
+    ancestorTransactionId: string,
+    currentItem: IWaterfallError | IWaterfallItem
+  ): boolean {
+    if (!currentItem.parentId) {
+      return false;
+    }
+    if (currentItem.parentId === ancestorTransactionId) {
+      return true;
+    }
+
+    const parentItem: IWaterfallItem | undefined = waterfallItemsList.find(
+      ({ id }) => id === currentItem.parentId
+    );
+
+    if (parentItem) {
+      return isAncestor(waterfallItemsList, ancestorTransactionId, parentItem);
+    }
+    return false;
+  }
+
+  const errorItems: IWaterfallError[] = trace.errorDocs
+    .map(errorDoc =>
+      getErrorItem(errorDoc as APMError, items, entryWaterfallTransaction)
+    )
+    .filter(errorItem => {
+      return isAncestor(items, entryTransactionId, errorItem);
+    });
+
   const rootTransaction = getRootTransaction(childrenByParentId);
   const duration = getWaterfallDuration(items);
   const serviceColors = getServiceColors(items);
@@ -274,7 +310,8 @@ export function getWaterfall(
     duration,
     items,
     errorsPerTransaction,
-    errorsCount: items.filter(item => item.docType === 'error').length,
-    serviceColors
+    errorsCount: errorItems.length,
+    serviceColors,
+    errorItems
   };
 }
