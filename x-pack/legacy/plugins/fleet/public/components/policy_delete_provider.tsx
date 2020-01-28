@@ -53,7 +53,7 @@ export const PolicyDeleteProvider: React.FunctionComponent<Props> = ({ children 
 
     try {
       const { data } = await sendRequest(libs.httpClient, {
-        path: `/api/ingest/policies/delete`,
+        path: `/api/ingest_manager/agent_configs/delete`,
         method: 'post',
         body: {
           policies,

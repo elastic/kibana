@@ -7,11 +7,6 @@
 import * as t from 'io-ts';
 import { Output, Policy } from '../../../common/types/domain_data';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
-import { PolicyLib } from '../../../../ingest/server/libs/policy';
-import { OutputsLib } from '../../../../ingest/server/libs/outputs';
-
-export type IngestOutputLib = OutputsLib;
-export type IngestPolicyLib = PolicyLib;
 
 export interface IngestPlugin {
   getPolicyOutputByIDs(user: FrameworkUser, ids: string[]): Promise<Output[]>;

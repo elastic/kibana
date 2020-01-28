@@ -45,7 +45,7 @@ export const AssignDatasourcesFlyout: React.FC<Props> = ({
     error: datasourcesError,
     sendRequest: refreshDatasources,
   } = useRequest({
-    path: '/api/ingest/datasources',
+    path: '/api/ingest_manager/datasources',
     method: 'get',
     query: {
       page: 1,
@@ -62,7 +62,7 @@ export const AssignDatasourcesFlyout: React.FC<Props> = ({
   const assignSelectedDatasources = async () => {
     setIsLoading(true);
     const { error } = await sendRequest(httpClient, {
-      path: `/api/ingest/policies/${policyId}/addDatasources`,
+      path: `/api/ingest_manager/agent_configs/${policyId}/addDatasources`,
       method: 'post',
       body: {
         datasources: selectedDatasources,
