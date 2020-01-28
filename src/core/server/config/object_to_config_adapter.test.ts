@@ -23,12 +23,31 @@ describe('ObjectToConfigAdapter', () => {
   describe('#getFlattenedPaths()', () => {
     it('considers arrays as final values', () => {
       const data = {
-        a: 'string',
-        b: ['an', 'array'],
+        string: 'string',
+        array: ['an', 'array'],
       };
       const config = new ObjectToConfigAdapter(data);
 
-      expect(config.getFlattenedPaths()).toEqual(['a', 'b']);
+      expect(config.getFlattenedPaths()).toEqual(['string', 'array']);
+    });
+
+    it('handles nested arrays', () => {
+      const data = {
+        string: 'string',
+        array: ['an', 'array'],
+        nested: {
+          number: 12,
+          array: [{ key: 1 }, { key: 2 }],
+        },
+      };
+      const config = new ObjectToConfigAdapter(data);
+
+      expect(config.getFlattenedPaths()).toEqual([
+        'string',
+        'array',
+        'nested.number',
+        'nested.array',
+      ]);
     });
   });
 });

@@ -209,6 +209,7 @@ describe('getUnusedConfigKeys', () => {
         settings: {
           core: {
             prop: 'value',
+            array: [1, 2, 3],
           },
           array: ['some', 'values'],
         },
