@@ -79,14 +79,13 @@ export const renderEventModule = ({
       }
     >
       <EuiFlexItem>
-        {' '}
         <DefaultDraggable
           field={fieldName}
           id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${moduleName}`}
           tooltipContent={value}
           value={value}
         >
-          {content}{' '}
+          {content}
         </DefaultDraggable>
       </EuiFlexItem>
       {endpointRefUrl != null && !isEmpty(endpointRefUrl) && !isUrlInvalid(endpointRefUrl) && (
