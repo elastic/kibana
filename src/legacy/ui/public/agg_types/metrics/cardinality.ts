@@ -37,9 +37,9 @@ export const cardinalityMetricAgg = new MetricAggType({
     });
   },
   getFormat() {
-    const fieldFormats = npStart.plugins.data.fieldFormats;
+    const fieldFormatsService = npStart.plugins.data.fieldFormats;
 
-    return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
+    return fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
   },
   params: [
     {

@@ -15,6 +15,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiFormRow, EuiCallOut } from '@elastic/eui';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
+import { isNestedField } from '../../../../../../../../src/plugins/data/public';
 
 import { npStart } from 'ui/new_platform';
 const { IndexPatternSelect } = npStart.plugins.data.ui;
@@ -91,7 +92,9 @@ export class CreateSourceEditor extends Component {
       return;
     }
 
-    const geoFields = indexPattern.fields.filter(filterGeoField);
+    const geoFields = indexPattern.fields
+      .filter(field => !isNestedField(field))
+      .filter(filterGeoField);
 
     this.setState({
       isLoadingIndexPattern: false,
@@ -163,7 +166,11 @@ export class CreateSourceEditor extends Component {
             value={this.state.destGeoField}
             onChange={this._onDestGeoSelect}
             filterField={filterGeoField}
-            fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
+            fields={
+              this.state.indexPattern
+                ? this.state.indexPattern.fields.filter(field => !isNestedField(field))
+                : undefined
+            }
           />
         </EuiFormRow>
       </Fragment>

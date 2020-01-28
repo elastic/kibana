@@ -290,7 +290,6 @@ export class DataRecognizer {
     request
   ) {
     this.savedObjectsClient = request.getSavedObjectsClient();
-    this.indexPatterns = await this.loadIndexPatterns();
 
     // load the config from disk
     const moduleConfig = await this.getModule(moduleId, jobPrefix);
@@ -303,7 +302,7 @@ export class DataRecognizer {
 
     this.indexPatternName =
       indexPatternName === undefined ? moduleConfig.defaultIndexPattern : indexPatternName;
-    this.indexPatternId = this.getIndexPatternId(this.indexPatternName);
+    this.indexPatternId = await this.getIndexPatternId(this.indexPatternName);
 
     // the module's jobs contain custom URLs which require an index patten id
     // but there is no corresponding index pattern, throw an error
@@ -450,12 +449,17 @@ export class DataRecognizer {
   }
 
   // returns a id based on an index pattern name
-  getIndexPatternId(name) {
-    if (this.indexPatterns && this.indexPatterns.saved_objects) {
-      const ip = this.indexPatterns.saved_objects.find(i => i.attributes.title === name);
+  async getIndexPatternId(name) {
+    try {
+      const indexPatterns = await this.loadIndexPatterns();
+      if (indexPatterns === undefined || indexPatterns.saved_objects === undefined) {
+        return;
+      }
+      const ip = indexPatterns.saved_objects.find(i => i.attributes.title === name);
       return ip !== undefined ? ip.id : undefined;
-    } else {
-      return undefined;
+    } catch (error) {
+      mlLog.warn(`Error loading index patterns, ${error}`);
+      return;
     }
   }
 

@@ -21,7 +21,6 @@ import angular from 'angular';
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import '../../saved_visualizations/saved_visualizations';
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -58,7 +57,7 @@ export function initEditorDirective(app, deps) {
     };
   });
 
-  initVisEditorDirective(app, deps);
+  initVisEditorDirective(app);
   initVisualizationDirective(app, deps);
 }
 
@@ -501,7 +500,7 @@ function VisualizeAppController(
       language:
         localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
     };
-    queryFilter.removeAll();
+    queryFilter.setFilters(queryFilter.getGlobalFilters());
     $state.save();
     $scope.fetch();
   };
@@ -510,7 +509,9 @@ function VisualizeAppController(
     $state.query = savedQuery.attributes.query;
     $state.save();
 
-    queryFilter.setFilters(savedQuery.attributes.filters || []);
+    const savedQueryFilters = savedQuery.attributes.filters || [];
+    const globalFilters = queryFilter.getGlobalFilters();
+    queryFilter.setFilters([...globalFilters, ...savedQueryFilters]);
 
     if (savedQuery.attributes.timefilter) {
       timefilter.setTime({

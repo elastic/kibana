@@ -4,27 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { drag, drop } from '../../lib/drag_n_drop/helpers';
+import { HOSTS_PAGE } from '../../lib/urls';
+
+import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../../tasks/login';
+
+import {
+  FIELDS_BROWSER_TITLE,
+  FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
+  FIELDS_BROWSER_SELECTED_CATEGORY_COUNT,
+  FIELDS_BROWSER_CATEGORIES_COUNT,
+  FIELDS_BROWSER_HOST_CATEGORIES_COUNT,
+  FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT,
+  FIELDS_BROWSER_FIELDS_COUNT,
+  FIELDS_BROWSER_MESSAGE_HEADER,
+  FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER,
+  FIELDS_BROWSER_HOST_GEO_COUNTRY_NAME_HEADER,
+  FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER,
+} from '../../../screens/timeline/fields_browser';
+
+import {
+  openTimeline,
+  populateTimeline,
+  openTimelineFieldsBrowser,
+} from '../../../tasks/timeline/main';
+
 import {
   clearFieldsBrowser,
-  clickOutsideFieldsBrowser,
-  openTimelineFieldsBrowser,
-  populateTimeline,
   filterFieldsBrowser,
-} from '../../lib/fields_browser/helpers';
-import {
-  FIELDS_BROWSER_CATEGORIES_COUNT,
-  FIELDS_BROWSER_CONTAINER,
-  FIELDS_BROWSER_FIELDS_COUNT,
-  FIELDS_BROWSER_FILTER_INPUT,
-  FIELDS_BROWSER_HOST_CATEGORIES_COUNT,
-  FIELDS_BROWSER_SELECTED_CATEGORY_COUNT,
-  FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
-  FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT,
-  FIELDS_BROWSER_TITLE,
-} from '../../lib/fields_browser/selectors';
-import { HOSTS_PAGE } from '../../lib/urls';
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
+  closeFieldsBrowser,
+  removesMessageField,
+  addsHostGeoCityNameToTimeline,
+  addsHostGeoCountryNameToTimelineDraggingIt,
+  addsHostGeoContinentNameToTimeline,
+  resetFields,
+} from '../../../tasks/timeline/fields_browser';
 
 const defaultHeaders = [
   { id: '@timestamp' },
@@ -41,6 +54,7 @@ describe('Fields Browser', () => {
   context('Fields Browser rendering', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_PAGE);
+      openTimeline();
       populateTimeline();
       openTimelineFieldsBrowser();
     });
@@ -78,7 +92,7 @@ describe('Fields Browser', () => {
 
       filterFieldsBrowser(filterInput);
 
-      cy.get(FIELDS_BROWSER_CATEGORIES_COUNT)
+      cy.get(FIELDS_BROWSER_CATEGORIES_COUNT, { timeout: DEFAULT_TIMEOUT })
         .invoke('text')
         .should('eq', '2 categories');
     });
@@ -88,18 +102,13 @@ describe('Fields Browser', () => {
 
       filterFieldsBrowser(filterInput);
 
-      cy.get(FIELDS_BROWSER_FILTER_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
-        'not.have.class',
-        'euiFieldSearch-isLoading'
-      );
-
       cy.get(FIELDS_BROWSER_HOST_CATEGORIES_COUNT)
         .invoke('text')
         .then(hostCategoriesCount => {
           cy.get(FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT)
             .invoke('text')
             .then(systemCategoriesCount => {
-              cy.get(FIELDS_BROWSER_FIELDS_COUNT)
+              cy.get(FIELDS_BROWSER_FIELDS_COUNT, { timeout: DEFAULT_TIMEOUT })
                 .invoke('text')
                 .should('eq', `${+hostCategoriesCount + +systemCategoriesCount} fields`);
             });
@@ -120,6 +129,7 @@ describe('Fields Browser', () => {
   context('Editing the timeline', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_PAGE);
+      openTimeline();
       populateTimeline();
       openTimelineFieldsBrowser();
     });
@@ -130,31 +140,17 @@ describe('Fields Browser', () => {
     });
 
     it('removes the message field from the timeline when the user un-checks the field', () => {
-      const toggleField = 'message';
+      cy.get(FIELDS_BROWSER_MESSAGE_HEADER).should('exist');
 
-      cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
-        'exist'
-      );
+      removesMessageField();
+      closeFieldsBrowser();
 
-      cy.get(
-        `[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`
-      ).uncheck({
-        force: true,
-      });
-
-      clickOutsideFieldsBrowser();
-
-      cy.get(FIELDS_BROWSER_CONTAINER).should('not.exist');
-
-      cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
-        'not.exist'
-      );
+      cy.get(FIELDS_BROWSER_MESSAGE_HEADER).should('not.exist');
     });
 
     it('selects a search results label with the expected count of categories matching the filter input', () => {
       const category = 'host';
-
-      filterFieldsBrowser(`${category}.`);
+      filterFieldsBrowser(category);
 
       cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE)
         .invoke('text')
@@ -163,75 +159,47 @@ describe('Fields Browser', () => {
 
     it('adds a field to the timeline when the user clicks the checkbox', () => {
       const filterInput = 'host.geo.c';
-      const toggleField = 'host.geo.city_name';
 
       filterFieldsBrowser(filterInput);
+      cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER).should('not.exist');
+      addsHostGeoCityNameToTimeline();
+      closeFieldsBrowser();
 
-      cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
-        'not.exist'
-      );
-
-      cy.get(`[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`).check({
-        force: true,
-      });
-
-      clickOutsideFieldsBrowser();
-
-      cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`, {
+      cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER, {
         timeout: DEFAULT_TIMEOUT,
       }).should('exist');
     });
 
     it('adds a field to the timeline when the user drags and drops a field', () => {
       const filterInput = 'host.geo.c';
-      const toggleField = 'host.geo.country_name';
 
       filterFieldsBrowser(filterInput);
 
-      cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
-        'not.exist'
-      );
+      cy.get(FIELDS_BROWSER_HOST_GEO_COUNTRY_NAME_HEADER).should('not.exist');
 
-      cy.get(
-        `[data-test-subj="timeline"] [data-test-subj="field-name-${toggleField}"]`
-      ).then(field => drag(field));
+      addsHostGeoCountryNameToTimelineDraggingIt();
 
-      cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`).then(headersDropArea =>
-        drop(headersDropArea)
-      );
-
-      cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`, {
+      cy.get(FIELDS_BROWSER_HOST_GEO_COUNTRY_NAME_HEADER, {
         timeout: DEFAULT_TIMEOUT,
       }).should('exist');
     });
 
     it('resets all fields in the timeline when `Reset Fields` is clicked', () => {
       const filterInput = 'host.geo.c';
-      const toggleField = 'host.geo.continent_name';
 
       filterFieldsBrowser(filterInput);
 
-      cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
-        'not.exist'
-      );
+      cy.get(FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER).should('not.exist');
 
-      cy.get(`[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`).check({
-        force: true,
-      });
+      addsHostGeoContinentNameToTimeline();
+      closeFieldsBrowser();
 
-      clickOutsideFieldsBrowser();
-
-      cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
-        'exist'
-      );
+      cy.get(FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER).should('exist');
 
       openTimelineFieldsBrowser();
+      resetFields();
 
-      cy.get('[data-test-subj="timeline"] [data-test-subj="reset-fields"]').click({ force: true });
-
-      cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
-        'not.exist'
-      );
+      cy.get(FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER).should('not.exist');
     });
   });
 });

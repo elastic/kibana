@@ -23,7 +23,7 @@ import { start as embeddables } from '../../../../../core_plugins/embeddable_api
 import { EditorRenderProps } from '../../../../../core_plugins/kibana/public/visualize/np_ready/types';
 import { VisualizeEmbeddable } from '../../../../../core_plugins/visualizations/public/embeddable';
 import { VisualizeEmbeddableFactory } from '../../../../../core_plugins/visualizations/public/embeddable/visualize_embeddable_factory';
-import { PanelsContainer, Panel } from '../../../../../../plugins/console/public';
+import { PanelsContainer, Panel } from '../../../../../../plugins/kibana_react/public';
 
 import './vis_type_agg_filter';
 import { DefaultEditorSideBar } from './components/sidebar';

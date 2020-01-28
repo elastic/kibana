@@ -16,6 +16,7 @@ import {
   ObjectRemover,
   AlertUtils,
   ensureDatetimeIsWithinRange,
+  TaskManagerUtils,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -24,6 +25,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
   const es = getService('legacyEs');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
+  const taskManagerUtils = new TaskManagerUtils(es, retry);
 
   function getAlertingTaskById(taskId: string) {
     return supertestWithoutAuth
@@ -73,6 +75,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
     });
 
     it('should schedule task, run alert and schedule actions', async () => {
+      const testStart = new Date();
       const reference = alertUtils.generateReference();
       const response = await alertUtils.createAlwaysFiringAction({ reference });
       const alertId = response.body.id;
@@ -121,6 +124,8 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
         reference,
         source: 'action:test.index-record',
       });
+
+      await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
     });
 
     it('should reschedule failing alerts using the alerting interval and not the Task Manager retry logic', async () => {
