@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GlobalState } from './reducer';
+import { GlobalState } from '../types';
 import * as alertListSelectors from './alerts/selectors';
 
 export const alertListData = composeSelectors(

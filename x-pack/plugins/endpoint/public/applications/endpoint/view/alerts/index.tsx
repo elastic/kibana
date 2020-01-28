@@ -14,16 +14,18 @@ import { usePageId } from '../use_page_id';
 export const AlertIndex = memo(() => {
   usePageId('alertsPage');
 
-  const columns: Array<{ id: string }> = [
-    { id: 'alert_type' },
-    { id: 'event_type' },
-    { id: 'os' },
-    { id: 'ip_address' },
-    { id: 'host_name' },
-    { id: 'timestamp' },
-    { id: 'archived' },
-    { id: 'malware_score' },
-  ];
+  const columns: Array<{ id: string }> = useMemo(() => {
+    return [
+      { id: 'alert_type' },
+      { id: 'event_type' },
+      { id: 'os' },
+      { id: 'ip_address' },
+      { id: 'host_name' },
+      { id: 'timestamp' },
+      { id: 'archived' },
+      { id: 'malware_score' },
+    ];
+  }, []);
 
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
 
@@ -31,26 +33,28 @@ export const AlertIndex = memo(() => {
 
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-      if (json.length === 0) {
+      if (rowIndex > json.length) {
         return null;
       }
 
+      const row = json[rowIndex];
+
       if (columnId === 'alert_type') {
-        return json[rowIndex].value.source.endgame.metadata.key;
+        return row.value.source.endgame.metadata.key;
       } else if (columnId === 'event_type') {
-        return json[rowIndex].value.source.endgame.data.file_operation;
+        return row.value.source.endgame.data.file_operation;
       } else if (columnId === 'os') {
-        return json[rowIndex].value.source.host.os.name;
+        return row.value.source.host.os.name;
       } else if (columnId === 'ip_address') {
-        return json[rowIndex].value.source.host.ip;
+        return row.value.source.host.ip;
       } else if (columnId === 'host_name') {
-        return json[rowIndex].value.source.host.hostname;
+        return row.value.source.host.hostname;
       } else if (columnId === 'timestamp') {
-        return json[rowIndex].value.source.endgame.timestamp_utc;
+        return row.value.source.endgame.timestamp_utc;
       } else if (columnId === 'archived') {
-        return null; // TODO change this once its available in backend
+        return null;
       } else if (columnId === 'malware_score') {
-        return json[rowIndex].value.source.endgame.data.malware_classification.score;
+        return row.value.source.endgame.data.malware_classification.score;
       }
       return null;
     };

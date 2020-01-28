@@ -63,7 +63,7 @@ export interface EndpointMetadata {
   };
 }
 
-export type AlertData = Immutable<{
+export interface AlertData {
   value: {
     source: {
       endgame: {
@@ -90,7 +90,7 @@ export type AlertData = Immutable<{
       };
     };
   };
-}>;
+}
 
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions

@@ -17,11 +17,6 @@ export function registerAlertRoutes(router: IRouter) {
     },
     async (context, req, res) => {
       try {
-        // const queryParams = await kibanaRequestToEndpointListQuery(req, endpointAppContext);
-        // const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
-        //   'search',
-        //   queryParams
-        // )) as SearchResponse<AlertData>;
         return res.ok({
           body: json,
           headers: {

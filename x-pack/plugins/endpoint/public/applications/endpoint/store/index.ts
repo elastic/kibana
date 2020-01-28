@@ -10,8 +10,6 @@ import { appSagaFactory } from './saga';
 import { appReducer } from './reducer';
 import { alertMiddlewareFactory } from './alerts/middleware';
 
-export { GlobalState } from './reducer';
-
 const composeWithReduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
   ? (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ name: 'EndpointApp' })
   : compose;

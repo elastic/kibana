@@ -5,7 +5,7 @@
  */
 
 import { Reducer } from 'redux';
-import { AlertListState } from './types';
+import { AlertListState } from '../../types';
 import { AppAction } from '../action';
 
 const initialState = (): AlertListState => {
