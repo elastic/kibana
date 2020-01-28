@@ -19,7 +19,6 @@
 
 import { EditorConfigProviderRegistry } from './editor_config_providers';
 import { EditorParamConfig, FixedParam, NumericIntervalParam, TimeIntervalParam } from './types';
-import { AggConfig } from '../..';
 
 jest.mock('ui/new_platform');
 
@@ -62,7 +61,6 @@ describe('EditorConfigProvider', () => {
     registry.register(provider2);
     expect(provider).not.toHaveBeenCalled();
     expect(provider2).not.toHaveBeenCalled();
-    const aggConfig = {} as AggConfig;
     registry.getConfigForAgg(indexPattern, aggTypeName, fieldName);
     expect(provider).toHaveBeenCalledWith(indexPattern, aggTypeName, fieldName);
     expect(provider2).toHaveBeenCalledWith(indexPattern, aggTypeName, fieldName);
