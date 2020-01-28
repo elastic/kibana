@@ -59,7 +59,7 @@ export class Plugin
         return startApp(
           this.composeLibs(coreStart, pluginsStart as ClientPluginsStart),
           coreStart,
-          plugins,
+          pluginsStart,
           params
         );
       },
@@ -80,7 +80,7 @@ export class Plugin
         return startApp(
           this.composeLibs(coreStart, pluginsStart as ClientPluginsStart),
           coreStart,
-          plugins,
+          pluginsStart,
           params
         );
       },
