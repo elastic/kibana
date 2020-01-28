@@ -25,7 +25,7 @@ import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { LoadingOverlayWrapper } from '../../../components/loading_overlay_wrapper';
 import { useInterval } from '../../../hooks/use_interval';
-import { useTrackPageview } from '../../../hooks/use_track_metric';
+import { useTrackPageview } from '../../../../../observability/public';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { AnomaliesResults } from './sections/anomalies';
 import { LogRateResults } from './sections/log_rate';

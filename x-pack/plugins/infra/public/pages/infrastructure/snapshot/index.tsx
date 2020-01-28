@@ -26,7 +26,7 @@ import { Source } from '../../../containers/source';
 import { WithWaffleFilterUrlState } from '../../../containers/waffle/with_waffle_filters';
 import { WithWaffleOptionsUrlState } from '../../../containers/waffle/with_waffle_options';
 import { WithWaffleTimeUrlState } from '../../../containers/waffle/with_waffle_time';
-import { useTrackPageview } from '../../../hooks/use_track_metric';
+import { useTrackPageview } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const SnapshotPage = () => {
