@@ -18,6 +18,7 @@ export {
   ListWithKuerySchema,
   // Datasource schemas
   GetDatasourcesRequestSchema,
+  GetAgentConfigsResponse,
   GetOneDatasourceRequestSchema,
   CreateDatasourceRequestSchema,
   UpdateDatasourceRequestSchema,

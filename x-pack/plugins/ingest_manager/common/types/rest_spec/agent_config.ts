@@ -4,12 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { NewAgentConfigSchema } from '../models';
+import { AgentConfig, NewAgentConfigSchema } from '../models';
 import { ListWithKuerySchema } from './common';
 
 export const GetAgentConfigsRequestSchema = {
   query: ListWithKuerySchema,
 };
+
+export interface GetAgentConfigsResponse {
+  items: AgentConfig[];
+  total: number;
+  page: number;
+  perPage: number;
+  success: boolean;
+}
 
 export const GetOneAgentConfigRequestSchema = {
   params: schema.object({

@@ -8,6 +8,7 @@ import { RequestHandler } from 'kibana/server';
 import { appContextService, agentConfigService } from '../../services';
 import {
   GetAgentConfigsRequestSchema,
+  GetAgentConfigsResponse,
   GetOneAgentConfigRequestSchema,
   CreateAgentConfigRequestSchema,
   UpdateAgentConfigRequestSchema,
@@ -21,15 +22,14 @@ export const getAgentConfigsHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   try {
     const { items, total, page, perPage } = await agentConfigService.list(soClient, request.query);
-    return response.ok({
-      body: {
-        items,
-        total,
-        page,
-        perPage,
-        success: true,
-      },
-    });
+    const body: GetAgentConfigsResponse = {
+      items,
+      total,
+      page,
+      perPage,
+      success: true,
+    };
+    return response.ok({ body });
   } catch (e) {
     return response.customError({
       statusCode: 500,

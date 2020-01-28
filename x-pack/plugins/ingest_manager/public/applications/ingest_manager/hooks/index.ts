@@ -8,4 +8,5 @@ export { useCore, CoreContext } from './use_core';
 export { useConfig, ConfigContext } from './use_config';
 export { useDeps, DepsContext } from './use_deps';
 export { useLink } from './use_link';
-export { useRequest, sendRequest, setHttpClient } from './use_request';
+export { usePagination } from './use_pagination';
+export * from './use_request';

@@ -4,5 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { HashRouter as Router, Switch, Route } from 'react-router-dom';
+import { AgentConfigListPage } from './list_page';
 
-export const AgentConfigApp: React.FC = () => <div>hello world - agent config app</div>;
+export const AgentConfigApp: React.FC = () => (
+  <Router>
+    <Switch>
+      <Route path="/">
+        <AgentConfigListPage />
+      </Route>
+    </Switch>
+  </Router>
+);

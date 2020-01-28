@@ -10,7 +10,7 @@ import {
   UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
-} from '../../../../../../../src/plugins/es_ui_shared/public';
+} from '../../../../../../../../src/plugins/es_ui_shared/public';
 
 let httpClient: HttpSetup;
 
@@ -18,16 +18,18 @@ export const setHttpClient = (client: HttpSetup) => {
   httpClient = client;
 };
 
-export const sendRequest = (config: SendRequestConfig): Promise<SendRequestResponse> => {
+export const sendRequest = <D = any>(
+  config: SendRequestConfig
+): Promise<SendRequestResponse<D>> => {
   if (!httpClient) {
     throw new Error('sendRequest has no http client set');
   }
-  return _sendRequest(httpClient, config);
+  return _sendRequest<D>(httpClient, config);
 };
 
-export const useRequest = (config: UseRequestConfig) => {
+export const useRequest = <D = any>(config: UseRequestConfig) => {
   if (!httpClient) {
     throw new Error('sendRequest has no http client set');
   }
-  return _useRequest(httpClient, config);
+  return _useRequest<D>(httpClient, config);
 };
