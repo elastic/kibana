@@ -41,7 +41,7 @@ function updateObjectsTable($scope, $injector) {
   const confirmModalPromise = $injector.get('confirmModalPromise');
 
   const savedObjectsClient = npStart.core.savedObjects.client;
-  const services = savedObjectManagementRegistry.all().map(obj => $injector.get(obj.service));
+  const services = savedObjectManagementRegistry.all().map(obj => obj.service);
   const uiCapabilites = npStart.core.application.capabilities;
 
   $scope.$$postDigest(() => {
