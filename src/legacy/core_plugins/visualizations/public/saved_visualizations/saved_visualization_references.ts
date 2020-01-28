@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectAttributes, SavedObjectReference } from 'kibana/server';
-import { VisSavedObject } from '../../../../visualizations/public/embeddable/visualize_embeddable';
+import { SavedObjectAttributes, SavedObjectReference } from 'kibana/public';
+import { VisSavedObject } from '../embeddable/visualize_embeddable';
 
 export function extractReferences({
   attributes,

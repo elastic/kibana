@@ -28,13 +28,13 @@
 import { Vis } from 'ui/vis';
 import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
-import { updateOldState } from '../../../../visualizations/public';
+import { updateOldState } from '../index';
 import { extractReferences, injectReferences } from './saved_visualization_references';
-import { IIndexPattern } from '../../../../../../plugins/data/public';
-import { VisSavedObject } from '../legacy_imports';
+import { IIndexPattern } from '../../../../../plugins/data/public';
+import { VisSavedObject } from '../embeddable/visualize_embeddable';
 
-import { createSavedSearchesService } from '../../discover';
-import { VisualizeConstants } from '../np_ready/visualize_constants';
+import { createSavedSearchesLoader } from '../../../kibana/public/discover';
+import { VisualizeConstants } from '../../../kibana/public/visualize';
 
 async function _afterEsResp(savedVis: VisSavedObject, services: any) {
   await _getLinkedSavedSearch(savedVis, services);
@@ -56,7 +56,7 @@ async function _getLinkedSavedSearch(savedVis: VisSavedObject, services: any) {
     savedVis.savedSearch.destroy();
     delete savedVis.savedSearch;
   }
-  const savedSearches = createSavedSearchesService(services);
+  const savedSearches = createSavedSearchesLoader(services);
 
   if (linkedSearch) {
     savedVis.savedSearch = await savedSearches.get(savedVis.savedSearchId!);
