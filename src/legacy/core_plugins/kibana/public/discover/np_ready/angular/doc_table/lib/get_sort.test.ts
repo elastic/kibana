@@ -20,13 +20,13 @@
 import { getSort, getSortArray } from './get_sort';
 // @ts-ignore
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { IIndexPattern } from '../../../../kibana_services';
+import { IndexPattern } from '../../../../kibana_services';
 
 describe('docTable', function() {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPattern;
 
   beforeEach(() => {
-    indexPattern = FixturesStubbedLogstashIndexPatternProvider() as IIndexPattern;
+    indexPattern = FixturesStubbedLogstashIndexPatternProvider() as IndexPattern;
   });
 
   describe('getSort function', function() {
@@ -46,25 +46,17 @@ describe('docTable', function() {
     });
 
     test('should return an empty array when passed an unsortable field', function() {
-      expect(getSort(['non-sortable', 'asc'], indexPattern)).toEqual([]);
-      expect(getSort(['lol_nope', 'asc'], indexPattern)).toEqual([]);
+      expect(getSort([['non-sortable', 'asc']], indexPattern)).toEqual([]);
+      expect(getSort([['lol_nope', 'asc']], indexPattern)).toEqual([]);
 
       delete indexPattern.timeFieldName;
-      expect(getSort(['non-sortable', 'asc'], indexPattern)).toEqual([]);
+      expect(getSort([['non-sortable', 'asc']], indexPattern)).toEqual([]);
     });
 
     test('should return an empty array ', function() {
       expect(getSort([], indexPattern)).toEqual([]);
-      expect(getSort(['foo'], indexPattern)).toEqual([]);
-      expect(getSort({ foo: 'bar' }, indexPattern)).toEqual([]);
-    });
-
-    test('should return an empty array on non-time patterns', function() {
-      delete indexPattern.timeFieldName;
-
-      expect(getSort([], indexPattern)).toEqual([]);
-      expect(getSort(['foo'], indexPattern)).toEqual([]);
-      expect(getSort({ foo: 'bar' }, indexPattern)).toEqual([]);
+      expect(getSort([['foo', 'bar']], indexPattern)).toEqual([]);
+      expect(getSort([{ foo: 'bar' }], indexPattern)).toEqual([]);
     });
   });
 
