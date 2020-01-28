@@ -33,9 +33,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 // eslint-disable-next-line
-import { PulseChannel } from 'src/core/server/pulse/channel';
+import { PulseChannel } from 'src/core/public/pulse/channel';
 // eslint-disable-next-line
-import { NotificationInstruction } from 'src/core/public/pulse/collectors/notifications';
+import { NotificationInstruction } from 'src/core/server/pulse/collectors/notifications';
 import moment from 'moment';
 import { EuiHeaderAlert } from '../../../../legacy/core_plugins/newsfeed/public/np_ready/components/header_alert/header_alert';
 import { NewsfeedContext, shouldUpdateHash, getLastItemHash } from './newsfeed_header_nav_button';
