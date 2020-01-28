@@ -1,26 +1,29 @@
 {
-  "description": "This signal detects DNS network traffic logs that indicate an internal network\nclient reaching out to infrastructure on the Internet directly to answer name\nqueries. This activity could be a default or misconfiguration. This impacts\nyour organization's ability to provide enterprise monitoring and logging of DNS\nand opens your network to a variety of abuses or malicious communications.\n",
+  "description": "This signal detects internal network client sending DNS traffic directly to the Internet.\nThis is atypical behavior for a managed network and can be indicative of malware,\nexfiltration, command and control or simply misconfiguration. This also impacts your\norganization's ability to provide enterprise monitoring and logging of DNS and opens\nyour network to a variety of abuses or malicious communications.\n",
   "false_positives": [
-    "You should apply a filter to this rule to exclude your enterprise nameservers that are expected to reach out to the Internet"
+    "DNS servers should be excluded from this rule as this is expected behavior for them. Endpoints usually query local DNS servers defined in their DHCP scopes but this may be overridden if a user configures their endpoint to use a remote DNS server. This is uncommon in managed enterprise networks because it would tend to break intra-net name resolution when split horizon DNS is utilized. Some consumer VPN services and browser plug-ins may send DNS traffic to remote Internet destinations; in that case, such devices or networks can be excluded from this rule if this is expected behavior."
   ],
   "index": [
-    "apm-*-transaction*",
     "auditbeat-*",
     "endgame-*",
     "filebeat-*",
     "packetbeat-*",
     "winlogbeat-*"
   ],
+  "language": "kuery",
   "name": "DNS Activity to the Internet",
   "query": "destination.port:53 and (\n    network.direction: outbound or (\n        source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip:( 169.254.169.254/32 or 127.0.0.53/32 or 10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 or 224.0.0.251 or ff02\\:\\:fb or 255.255.255.255 )\n    )\n)\n",
   "references": [
     "https://www.us-cert.gov/ncas/alerts/TA15-240A",
     "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-81-2.pdf"
   ],
-  "risk_score": 50,
+  "risk_score": 47,
   "rule_id": "6ea71ff0-9e95-475b-9506-2580d1ce6154",
-  "severity": "low",
-  "tags": ["Elastic", "network"],
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "network"
+  ],
   "threat": [
     {
       "framework": "MITRE ATT&CK",
