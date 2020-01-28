@@ -57,16 +57,7 @@ export { wrapInI18nContext } from 'ui/i18n';
 export { buildVislibDimensions } from '../../../visualizations/public';
 // @ts-ignore
 export { callAfterBindingsWorkaround } from 'ui/compat';
-export {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  hasSearchStategyForIndexPattern,
-  isDefaultTypeIndexPattern,
-  SearchSource,
-  EsQuerySortValue,
-  SortDirection,
-  ISearchSource,
-} from 'ui/courier';
+export { getRequestInspectorStats, getResponseInspectorStats } from '../../../data/public';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 // @ts-ignore
@@ -92,7 +83,12 @@ export {
   IIndexPattern,
   IndexPattern,
   indexPatterns,
+  hasSearchStategyForIndexPattern,
   IFieldType,
+  SearchSource,
+  ISearchSource,
+  EsQuerySortValue,
+  SortDirection,
 } from '../../../../../plugins/data/public';
 export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
 export { Adapters } from 'ui/inspector/types';

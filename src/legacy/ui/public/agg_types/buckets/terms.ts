@@ -19,7 +19,10 @@
 
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ISearchSource, getRequestInspectorStats, getResponseInspectorStats } from '../../courier';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from '../../../../core_plugins/data/public';
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './_bucket_agg_type';
@@ -28,7 +31,7 @@ import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exc
 import { AggConfigs } from '../agg_configs';
 
 import { Adapters } from '../../../../../plugins/inspector/public';
-import { ContentType, FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { ISearchSource, fieldFormats, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 import {
   buildOtherBucketAgg,
@@ -76,9 +79,9 @@ export const termsBucketAgg = new BucketAggType({
     const params = agg.params;
     return agg.getFieldDisplayName() + ': ' + params.order.text;
   },
-  getFormat(bucket): FieldFormat {
+  getFormat(bucket): fieldFormats.FieldFormat {
     return {
-      getConverterFor: (type: ContentType) => {
+      getConverterFor: (type: fieldFormats.ContentType) => {
         return (val: any) => {
           if (val === '__other__') {
             return bucket.params.otherBucketLabel;
@@ -90,7 +93,7 @@ export const termsBucketAgg = new BucketAggType({
           return bucket.params.field.format.convert(val, type);
         };
       },
-    } as FieldFormat;
+    } as fieldFormats.FieldFormat;
   },
   createFilter: createFilterTerms,
   postFlightRequest: async (

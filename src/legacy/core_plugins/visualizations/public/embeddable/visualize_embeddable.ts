@@ -27,7 +27,6 @@ import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
-import { ISearchSource } from 'ui/courier';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -36,6 +35,7 @@ import {
   onlyDisabledFiltersChanged,
   esFilters,
   mapAndFlattenFilters,
+  ISearchSource,
 } from '../../../../../plugins/data/public';
 import {
   EmbeddableInput,

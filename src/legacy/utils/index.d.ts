@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export function getFlattenedObject(rootValue: Record<string, any>): { [key: string]: any };
-
 export function unset(object: object, rawPath: string): void;

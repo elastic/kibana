@@ -252,15 +252,15 @@ module.exports = {
               {
                 target: [
                   '(src|x-pack)/plugins/**/*',
-                  '!(src|x-pack)/plugins/*/server/**/*',
+                  '!(src|x-pack)/plugins/**/server/**/*',
 
                   'src/legacy/core_plugins/**/*',
-                  '!src/legacy/core_plugins/*/server/**/*',
-                  '!src/legacy/core_plugins/*/index.{js,ts,tsx}',
+                  '!src/legacy/core_plugins/**/server/**/*',
+                  '!src/legacy/core_plugins/**/index.{js,ts,tsx}',
 
                   'x-pack/legacy/plugins/**/*',
-                  '!x-pack/legacy/plugins/*/server/**/*',
-                  '!x-pack/legacy/plugins/*/index.{js,ts,tsx}',
+                  '!x-pack/legacy/plugins/**/server/**/*',
+                  '!x-pack/legacy/plugins/**/index.{js,ts,tsx}',
 
                   'examples/**/*',
                   '!examples/**/server/**/*',

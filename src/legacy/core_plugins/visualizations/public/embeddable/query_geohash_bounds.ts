@@ -23,9 +23,13 @@ import { toastNotifications } from 'ui/notify';
 
 import { AggConfig } from 'ui/agg_types';
 import { timefilter } from 'ui/timefilter';
-import { SearchSource, ISearchSource } from '../../../../ui/public/courier';
-import { esFilters, Query } from '../../../../../plugins/data/public';
 import { Vis } from '../np_ready/public';
+import {
+  esFilters,
+  Query,
+  SearchSource,
+  ISearchSource,
+} from '../../../../../../plugins/data/public';
 
 interface QueryGeohashBoundsParams {
   filters?: esFilters.Filter[];

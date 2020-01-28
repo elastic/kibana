@@ -27,12 +27,17 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
-import { ISearchSource, FetchOptions } from '../courier/types';
 import { AggType } from './agg_type';
+import { AggGroupNames } from './agg_groups';
 import { writeParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
-import { ContentType, KBN_FIELD_TYPES } from '../../../../plugins/data/public';
 import { Schema } from './schemas';
+import {
+  ISearchSource,
+  FetchOptions,
+  fieldFormats,
+  KBN_FIELD_TYPES,
+} from '../../../../plugins/data/public';
 
 export interface AggConfigOptions {
   enabled: boolean;
@@ -52,7 +57,7 @@ const unknownSchema: Schema = {
   params: [],
   defaults: {},
   editor: false,
-  group: 'metrics',
+  group: AggGroupNames.Metrics,
 };
 
 const getTypeFromRegistry = (type: string): AggType => {
@@ -370,7 +375,7 @@ export class AggConfig {
     return this.aggConfigs.timeRange;
   }
 
-  fieldFormatter(contentType?: ContentType, defaultFormat?: any) {
+  fieldFormatter(contentType?: fieldFormats.ContentType, defaultFormat?: any) {
     const format = this.type && this.type.getFormat(this);
 
     if (format) {
@@ -380,12 +385,12 @@ export class AggConfig {
     return this.fieldOwnFormatter(contentType, defaultFormat);
   }
 
-  fieldOwnFormatter(contentType?: ContentType, defaultFormat?: any) {
-    const fieldFormats = npStart.plugins.data.fieldFormats;
+  fieldOwnFormatter(contentType?: fieldFormats.ContentType, defaultFormat?: any) {
+    const fieldFormatsService = npStart.plugins.data.fieldFormats;
     const field = this.getField();
     let format = field && field.format;
     if (!format) format = defaultFormat;
-    if (!format) format = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
+    if (!format) format = fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.STRING);
     return format.getConverterFor(contentType);
   }
 

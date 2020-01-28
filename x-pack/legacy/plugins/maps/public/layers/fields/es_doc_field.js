@@ -7,13 +7,15 @@
 import { AbstractField } from './field';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 import { COLOR_PALETTE_MAX_SIZE } from '../../../common/constants';
+import { isNestedField } from '../../../../../../../src/plugins/data/public';
 
 export class ESDocField extends AbstractField {
   static type = 'ES_DOC';
 
   async _getField() {
     const indexPattern = await this._source.getIndexPattern();
-    return indexPattern.fields.getByName(this._fieldName);
+    const field = indexPattern.fields.getByName(this._fieldName);
+    return isNestedField(field) ? undefined : field;
   }
 
   async createTooltipProperty(value) {

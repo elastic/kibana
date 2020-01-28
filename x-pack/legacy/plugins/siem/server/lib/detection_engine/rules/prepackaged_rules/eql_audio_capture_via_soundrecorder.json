@@ -1,20 +1,19 @@
 {
   "description": "An adversary can leverage a computer's peripheral devices or applications to capture audio recordings for the purpose of listening into sensitive conversations to gather information.",
   "index": [
-    "apm-*-transaction*",
-    "auditbeat-*",
-    "endgame-*",
-    "filebeat-*",
-    "packetbeat-*",
     "winlogbeat-*"
   ],
   "language": "kuery",
+  "max_signals": 33,
   "name": "Audio Capture via SoundRecorder",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"SoundRecorder.exe\" and process.args:\"/FILE\"",
-  "risk_score": 25,
+  "risk_score": 21,
   "rule_id": "f8e06892-ed10-4452-892e-2c5a38d552f1",
   "severity": "low",
-  "tags": ["Elastic"],
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
   "threat": [
     {
       "framework": "MITRE ATT&CK",
