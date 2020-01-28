@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { fieldFormatsMixin } from './field_formats';
 import { uiAppsMixin } from './ui_apps';
 import { uiBundlesMixin } from './ui_bundles';
 import { uiRenderMixin } from './ui_render';
@@ -27,6 +26,5 @@ export async function uiMixin(kbnServer) {
   await kbnServer.mixin(uiAppsMixin);
   await kbnServer.mixin(uiBundlesMixin);
   await kbnServer.mixin(uiSettingsMixin);
-  await kbnServer.mixin(fieldFormatsMixin);
   await kbnServer.mixin(uiRenderMixin);
 }

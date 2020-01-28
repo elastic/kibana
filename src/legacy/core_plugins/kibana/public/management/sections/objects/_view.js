@@ -49,17 +49,9 @@ uiModules
   .directive('kbnManagementObjectsView', function(kbnIndex, confirmModal) {
     return {
       restrict: 'E',
-      controller: function(
-        $scope,
-        $injector,
-        $routeParams,
-        $location,
-        $window,
-        $rootScope,
-        uiCapabilities
-      ) {
+      controller: function($scope, $routeParams, $location, $window, $rootScope, uiCapabilities) {
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
-        const service = $injector.get(serviceObj.service);
+        const service = serviceObj.service;
         const savedObjectsClient = npStart.core.savedObjects.client;
 
         /**
@@ -184,6 +176,7 @@ uiModules
                 return orderIndex > -1 ? orderIndex : Infinity;
               });
             });
+            $scope.$digest();
           })
           .catch(error => fatalError(error, location));
 
