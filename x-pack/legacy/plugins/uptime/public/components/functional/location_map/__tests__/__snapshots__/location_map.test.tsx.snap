@@ -46,23 +46,31 @@ exports[`LocationMap component doesnt shows warning if geo is provided 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <styled.div>
-        <EmbeddedMap
-          downPoints={Array []}
-          upPoints={
-            Array [
-              Object {
-                "lat": "40.730610",
-                "lon": " -73.935242",
-              },
-              Object {
-                "lat": "52.487448",
-                "lon": " 13.394798",
-              },
-            ]
-          }
-        />
-      </styled.div>
+      <EuiHideFor
+        sizes={
+          Array [
+            "xs",
+          ]
+        }
+      >
+        <styled.div>
+          <EmbeddedMap
+            downPoints={Array []}
+            upPoints={
+              Array [
+                Object {
+                  "lat": "40.730610",
+                  "lon": " -73.935242",
+                },
+                Object {
+                  "lat": "52.487448",
+                  "lon": " 13.394798",
+                },
+              ]
+            }
+          />
+        </styled.div>
+      </EuiHideFor>
     </EuiFlexItem>
   </EuiFlexGroup>
 </EuiErrorBoundary>
@@ -124,24 +132,32 @@ exports[`LocationMap component renders correctly against snapshot 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <LocationMissingWarning />
-      <styled.div>
-        <EmbeddedMap
-          downPoints={Array []}
-          upPoints={
-            Array [
-              Object {
-                "lat": "40.730610",
-                "lon": " -73.935242",
-              },
-              Object {
-                "lat": "52.487448",
-                "lon": " 13.394798",
-              },
-            ]
-          }
-        />
-      </styled.div>
+      <EuiHideFor
+        sizes={
+          Array [
+            "xs",
+          ]
+        }
+      >
+        <LocationMissingWarning />
+        <styled.div>
+          <EmbeddedMap
+            downPoints={Array []}
+            upPoints={
+              Array [
+                Object {
+                  "lat": "40.730610",
+                  "lon": " -73.935242",
+                },
+                Object {
+                  "lat": "52.487448",
+                  "lon": " 13.394798",
+                },
+              ]
+            }
+          />
+        </styled.div>
+      </EuiHideFor>
     </EuiFlexItem>
   </EuiFlexGroup>
 </EuiErrorBoundary>
@@ -189,20 +205,28 @@ exports[`LocationMap component shows warning if geo information is missing 1`] =
     <EuiFlexItem
       grow={false}
     >
-      <LocationMissingWarning />
-      <styled.div>
-        <EmbeddedMap
-          downPoints={Array []}
-          upPoints={
-            Array [
-              Object {
-                "lat": "52.487448",
-                "lon": " 13.394798",
-              },
-            ]
-          }
-        />
-      </styled.div>
+      <EuiHideFor
+        sizes={
+          Array [
+            "xs",
+          ]
+        }
+      >
+        <LocationMissingWarning />
+        <styled.div>
+          <EmbeddedMap
+            downPoints={Array []}
+            upPoints={
+              Array [
+                Object {
+                  "lat": "52.487448",
+                  "lon": " 13.394798",
+                },
+              ]
+            }
+          />
+        </styled.div>
+      </EuiHideFor>
     </EuiFlexItem>
   </EuiFlexGroup>
 </EuiErrorBoundary>
