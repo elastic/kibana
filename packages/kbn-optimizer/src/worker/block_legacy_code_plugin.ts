@@ -23,43 +23,9 @@ import webpack from 'webpack';
 import isPathInside from 'is-path-inside';
 
 import { BundleDefinition } from '../common';
+import { WebpackResolveData } from './webpack_helpers';
 
 const ANY_LEGACY_DIR = `${Path.sep}legacy${Path.sep}`;
-
-interface ResolveData {
-  /** compilation context */
-  context: string;
-  /** full request (with loaders) */
-  request: string;
-  dependencies: [
-    {
-      module: unknown;
-      weak: boolean;
-      optional: boolean;
-      loc: unknown;
-      request: string;
-      userRequest: string;
-    }
-  ];
-  /** absolute path, but probably includes loaders in some cases */
-  userRequest: string;
-  /** string from source code */
-  rawRequest: string;
-  loaders: unknown;
-  /** absolute path to file, but probablt includes loaders in some cases */
-  resource: string;
-  /** module type */
-  type: string | 'javascript/auto';
-
-  resourceResolveData: {
-    context: {
-      /** absolute path to the file that issued the request */
-      issuer: string;
-    };
-    /** absolute path to the resolved file */
-    path: string;
-  };
-}
 
 export class BlockLegacyCodePlugin {
   constructor(private readonly def: BundleDefinition) {}
@@ -68,7 +34,7 @@ export class BlockLegacyCodePlugin {
     compiler.hooks.normalModuleFactory.tap(BlockLegacyCodePlugin.name, normalModuleFactory => {
       normalModuleFactory.hooks.afterResolve.tap(
         BlockLegacyCodePlugin.name,
-        (resolveData: ResolveData) => {
+        (resolveData: WebpackResolveData) => {
           const {
             rawRequest,
             resourceResolveData: { context, path },

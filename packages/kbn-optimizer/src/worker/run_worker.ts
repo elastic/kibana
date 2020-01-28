@@ -26,7 +26,7 @@ import webpack, { Stats } from 'webpack';
 import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil } from 'rxjs/operators';
 
-import { CompilerMessages, WorkerMessages } from '../common';
+import { CompilerMessages, WorkerMessages, maybeMap } from '../common';
 import { getWebpackConfig } from './webpack.config';
 import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
 import {
@@ -119,10 +119,10 @@ const observeCompiler = (
    * is about to be started, so we shouldn't send complete quite yet
    */
   const complete$ = Rx.fromEventPattern<Stats>(cb => done.tap(PLUGIN_NAME, cb)).pipe(
-    mergeMap(stats => {
+    maybeMap(stats => {
       // @ts-ignore not included in types, but it is real https://github.com/webpack/webpack/blob/ab4fa8ddb3f433d286653cd6af7e3aad51168649/lib/Watching.js#L58
       if (stats.compilation.needAdditionalPass) {
-        return [];
+        return undefined;
       }
 
       if (workerConfig.profileWebpack) {
@@ -134,18 +134,14 @@ const observeCompiler = (
       }
 
       if (isFailureStats(stats)) {
-        return [
-          compilerMsgs.compilerFailure({
-            failure: failedStatsToErrorMessage(stats),
-          }),
-        ];
+        return compilerMsgs.compilerFailure({
+          failure: failedStatsToErrorMessage(stats),
+        });
       }
 
-      return [
-        compilerMsgs.compilerSuccess({
-          moduleCount: stats.compilation.modules.length,
-        }),
-      ];
+      return compilerMsgs.compilerSuccess({
+        moduleCount: stats.compilation.modules.length,
+      });
     })
   );
 

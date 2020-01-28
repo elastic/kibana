@@ -64,3 +64,38 @@ export function failedStatsToErrorMessage(stats: webpack.Stats) {
 
   return `Optimizations failure.\n${details.split('\n').join('\n    ')}`;
 }
+
+export interface WebpackResolveData {
+  /** compilation context */
+  context: string;
+  /** full request (with loaders) */
+  request: string;
+  dependencies: [
+    {
+      module: unknown;
+      weak: boolean;
+      optional: boolean;
+      loc: unknown;
+      request: string;
+      userRequest: string;
+    }
+  ];
+  /** absolute path, but probably includes loaders in some cases */
+  userRequest: string;
+  /** string from source code */
+  rawRequest: string;
+  loaders: unknown;
+  /** absolute path to file, but probablt includes loaders in some cases */
+  resource: string;
+  /** module type */
+  type: string | 'javascript/auto';
+
+  resourceResolveData: {
+    context: {
+      /** absolute path to the file that issued the request */
+      issuer: string;
+    };
+    /** absolute path to the resolved file */
+    path: string;
+  };
+}

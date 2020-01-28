@@ -21,3 +21,4 @@ export * from './bundle_definition';
 export * from './worker_config';
 export * from './worker_messages';
 export * from './compiler_messages';
+export * from './rxjs_helpers';

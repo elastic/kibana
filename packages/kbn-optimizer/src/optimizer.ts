@@ -23,8 +23,7 @@ import { createFailError } from '@kbn/dev-utils';
 
 import { observeWorker, WorkerStdio } from './observe_worker';
 import { OptimizerConfig } from './optimizer_config';
-import { CompilerState, WorkerMessage } from './common';
-import { closure } from './closure';
+import { CompilerState, WorkerMessage, pipeClosure } from './common';
 
 export interface OptimizerStateSummary {
   type: CompilerState['type'];
@@ -58,7 +57,7 @@ export class Optimizer {
   run() {
     return Rx.from(this.config.workers).pipe(
       mergeMap(worker => observeWorker(this.config, worker)),
-      closure(msg$ => {
+      pipeClosure(msg$ => {
         let prevSummaryType: OptimizerStateSummary['type'] | undefined;
         let startTime = Date.now();
         const compilerStates: CompilerState[] = [];
