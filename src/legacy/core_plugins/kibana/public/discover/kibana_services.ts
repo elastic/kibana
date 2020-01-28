@@ -49,7 +49,7 @@ export function setServices(newServices: any) {
 
 // import directives that
 import 'ui/directives/css_truncate';
-import 'ui/directives/field_name';
+import './np_ready/angular/directives/field_name';
 
 // EXPORT legacy static dependencies, should be migrated when available in a new version;
 export { angular };
@@ -94,7 +94,8 @@ export {
 export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
 export { Adapters } from 'ui/inspector/types';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
-export { FieldName } from 'ui/directives/field_name/field_name';
+// @ts-ignore
+export { FieldName } from './np_ready/angular/directives/field_name';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore
 export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';

@@ -42,8 +42,6 @@ import { registerListenEventListener } from 'ui/directives/listen/listen';
 // @ts-ignore
 import { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
 // @ts-ignore
-import { FieldNameDirectiveProvider } from 'ui/directives/field_name';
-// @ts-ignore
 import { CollapsibleSidebarProvider } from 'ui/collapsible_sidebar/collapsible_sidebar';
 // @ts-ignore
 import { CssTruncateProvide } from 'ui/directives/css_truncate';
@@ -80,6 +78,8 @@ import { createDocViewerDirective } from './np_ready/angular/doc_viewer';
 import { createFieldSearchDirective } from './np_ready/components/field_chooser/discover_field_search_directive';
 import { createIndexPatternSelectDirective } from './np_ready/components/field_chooser/discover_index_pattern_directive';
 import { createStringFieldProgressBarDirective } from './np_ready/components/field_chooser/string_progress_bar';
+// @ts-ignore
+import { FieldNameDirectiveProvider } from './np_ready/angular/directives/field_name';
 // @ts-ignore
 import { createFieldChooserDirective } from './np_ready/components/field_chooser/field_chooser';
 

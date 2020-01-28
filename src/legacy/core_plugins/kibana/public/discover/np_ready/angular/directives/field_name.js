@@ -17,9 +17,7 @@
  * under the License.
  */
 import { FieldName } from './field_name/field_name';
-import { uiModules } from '../modules';
-import { wrapInI18nContext } from 'ui/i18n';
-const module = uiModules.get('kibana');
+import { wrapInI18nContext } from '../../../kibana_services';
 
 export function FieldNameDirectiveProvider(config, reactDirective) {
   return reactDirective(
@@ -35,5 +33,3 @@ export function FieldNameDirectiveProvider(config, reactDirective) {
     }
   );
 }
-
-module.directive('fieldName', FieldNameDirectiveProvider);
