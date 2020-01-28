@@ -36,9 +36,8 @@ export const checkRecognizer = async ({
     `/api/ml/modules/recognize/${indexPatternName}`,
     {
       method: 'GET',
-      credentials: 'same-origin',
-      headers: { 'kbn-system-api': 'true' },
       asResponse: true,
+      asSystemRequest: true,
       signal,
     }
   );
@@ -58,9 +57,8 @@ export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Pr
     `/api/ml/modules/get_module/${moduleId}`,
     {
       method: 'GET',
-      credentials: 'same-origin',
-      headers: { 'kbn-system-api': 'true' },
       asResponse: true,
+      asSystemRequest: true,
       signal,
     }
   );
@@ -89,7 +87,6 @@ export const setupMlJob = async ({
     `/api/ml/modules/setup/${configTemplate}`,
     {
       method: 'POST',
-      credentials: 'same-origin',
       body: JSON.stringify({
         prefix,
         groups,
@@ -97,8 +94,8 @@ export const setupMlJob = async ({
         startDatafeed: false,
         useDedicatedIndex: true,
       }),
-      headers: { 'kbn-system-api': 'true' },
       asResponse: true,
+      asSystemRequest: true,
     }
   );
 
@@ -126,13 +123,12 @@ export const startDatafeeds = async ({
     '/api/ml/jobs/force_start_datafeeds',
     {
       method: 'POST',
-      credentials: 'same-origin',
       body: JSON.stringify({
         datafeedIds,
         ...(start !== 0 && { start }),
       }),
-      headers: { 'kbn-system-api': 'true' },
       asResponse: true,
+      asSystemRequest: true,
     }
   );
 
@@ -157,12 +153,11 @@ export const stopDatafeeds = async ({
     '/api/ml/jobs/stop_datafeeds',
     {
       method: 'POST',
-      credentials: 'same-origin',
       body: JSON.stringify({
         datafeedIds,
       }),
-      headers: { 'kbn-system-api': 'true' },
       asResponse: true,
+      asSystemRequest: true,
     }
   );
 
@@ -174,7 +169,6 @@ export const stopDatafeeds = async ({
     '/api/ml/jobs/close_jobs',
     {
       method: 'POST',
-      credentials: 'same-origin',
       body: JSON.stringify({
         jobIds: datafeedIds.map(dataFeedId =>
           dataFeedId.startsWith(datafeedPrefix)
@@ -182,8 +176,8 @@ export const stopDatafeeds = async ({
             : dataFeedId
         ),
       }),
-      headers: { 'kbn-system-api': 'true' },
       asResponse: true,
+      asSystemRequest: true,
     }
   );
 
@@ -202,10 +196,9 @@ export const stopDatafeeds = async ({
 export const getJobsSummary = async (signal: AbortSignal): Promise<JobSummary[]> => {
   const response = await npStart.core.http.fetch<JobSummary[]>('/api/ml/jobs/jobs_summary', {
     method: 'POST',
-    credentials: 'same-origin',
     body: JSON.stringify({}),
-    headers: { 'kbn-system-api': 'true' },
     asResponse: true,
+    asSystemRequest: true,
     signal,
   });
 

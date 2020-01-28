@@ -26,10 +26,9 @@ export const anomaliesTableData = async (body: Body, signal: AbortSignal): Promi
     '/api/ml/results/anomalies_table_data',
     {
       method: 'POST',
-      credentials: 'same-origin',
       body: JSON.stringify(body),
-      headers: { 'kbn-system-api': 'true' },
       asResponse: true,
+      asSystemRequest: true,
       signal,
     }
   );

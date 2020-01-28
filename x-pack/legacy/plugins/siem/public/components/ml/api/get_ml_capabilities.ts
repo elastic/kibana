@@ -25,9 +25,8 @@ export interface Body {
 export const getMlCapabilities = async (signal: AbortSignal): Promise<MlCapabilities> => {
   const response = await npStart.core.http.fetch<MlCapabilities>('/api/ml/ml_capabilities', {
     method: 'GET',
-    credentials: 'same-origin',
-    headers: { 'kbn-system-api': 'true' },
     asResponse: true,
+    asSystemRequest: true,
     signal,
   });
 
