@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { RoleMapping } from '../../../../../legacy/plugins/security/common/model';
+import { RoleMapping } from '../../../common/model';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { wrapError } from '../../errors';
 import { RouteDefinitionParams } from '..';

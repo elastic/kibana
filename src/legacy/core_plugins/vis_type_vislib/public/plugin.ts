@@ -39,19 +39,9 @@ import {
   createGoalVisTypeDefinition,
 } from './vis_type_vislib_vis_types';
 
-type ResponseHandlerProvider = () => {
-  name: string;
-  handler: (response: any, dimensions: any) => Promise<any>;
-};
 type KbnVislibVisTypesCoreSetup = CoreSetup<KbnVislibVisTypesPluginStartDependencies>;
 
 export interface LegacyDependencies {
-  initializeHierarchicalTooltipFormatter: () => Promise<void>;
-  getHierarchicalTooltipFormatter: () => Promise<void>;
-  initializePointSeriesTooltipFormatter: () => void;
-  getPointSeriesTooltipFormatter: () => void;
-  vislibSeriesResponseHandlerProvider: ResponseHandlerProvider;
-  vislibSlicesResponseHandlerProvider: ResponseHandlerProvider;
   vislibColor: (colors: Array<string | number>, mappings: any) => (value: any) => any;
 }
 
@@ -85,8 +75,8 @@ export class KbnVislibVisTypesPlugin implements Plugin<Promise<void>, void> {
       uiSettings: core.uiSettings,
     };
 
-    expressions.registerFunction(createKbnVislibVisTypesFn(visualizationDependencies));
-    expressions.registerFunction(createPieVisFn(visualizationDependencies));
+    expressions.registerFunction(createKbnVislibVisTypesFn());
+    expressions.registerFunction(createPieVisFn());
 
     [
       createHistogramVisTypeDefinition,

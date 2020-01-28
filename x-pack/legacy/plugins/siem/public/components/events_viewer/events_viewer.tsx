@@ -5,6 +5,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
 import { getOr, isEmpty, isEqual, union } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -34,6 +35,7 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../../src/plugins/data/public';
+import { inputsModel } from '../../store';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
@@ -41,6 +43,10 @@ const WrappedByAutoSizer = styled.div`
   width: 100%;
 `; // required by AutoSizer
 WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
+
+const StyledEuiPanel = styled(EuiPanel)`
+  max-width: 100%;
+`;
 
 interface Props {
   browserFields: BrowserFields;
@@ -63,7 +69,7 @@ interface Props {
   sort: Sort;
   timelineTypeContext: TimelineTypeContextProps;
   toggleColumn: (column: ColumnHeader) => void;
-  utilityBar?: (totalCount: number) => React.ReactNode;
+  utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 
 const EventsViewerComponent: React.FC<Props> = ({
@@ -113,7 +119,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiPanel data-test-subj="events-viewer-panel">
+    <StyledEuiPanel data-test-subj="events-viewer-panel">
       <AutoSizer detectAnyWindowResize={true} content>
         {({ measureRef, content: { width = 0 } }) => (
           <>
@@ -150,26 +156,24 @@ const EventsViewerComponent: React.FC<Props> = ({
                   const totalCountMinusDeleted =
                     totalCount > 0 ? totalCount - deletedEventIds.length : 0;
 
+                  const subtitle = `${
+                    i18n.SHOWING
+                  }: ${totalCountMinusDeleted.toLocaleString()} ${timelineTypeContext.unit?.(
+                    totalCountMinusDeleted
+                  ) ?? i18n.UNIT(totalCountMinusDeleted)}`;
+
                   // TODO: Reset eventDeletedIds/eventLoadingIds on refresh/loadmore (getUpdatedAt)
                   return (
                     <>
                       <HeaderSection
                         id={id}
-                        subtitle={
-                          utilityBar
-                            ? undefined
-                            : `${
-                                i18n.SHOWING
-                              }: ${totalCountMinusDeleted.toLocaleString()} ${i18n.UNIT(
-                                totalCountMinusDeleted
-                              )}`
-                        }
+                        subtitle={utilityBar ? undefined : subtitle}
                         title={timelineTypeContext?.title ?? i18n.EVENTS}
                       >
                         {headerFilterGroup}
                       </HeaderSection>
 
-                      {utilityBar?.(totalCountMinusDeleted)}
+                      {utilityBar?.(refetch, totalCountMinusDeleted)}
 
                       <div
                         data-test-subj={`events-container-loading-${loading}`}
@@ -225,22 +229,22 @@ const EventsViewerComponent: React.FC<Props> = ({
           </>
         )}
       </AutoSizer>
-    </EuiPanel>
+    </StyledEuiPanel>
   );
 };
 
 export const EventsViewer = React.memo(
   EventsViewerComponent,
   (prevProps, nextProps) =>
-    prevProps.browserFields === nextProps.browserFields &&
+    isEqual(prevProps.browserFields, nextProps.browserFields) &&
     prevProps.columns === nextProps.columns &&
     prevProps.dataProviders === nextProps.dataProviders &&
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
     prevProps.end === nextProps.end &&
-    isEqual(prevProps.filters, nextProps.filters) &&
+    deepEqual(prevProps.filters, nextProps.filters) &&
     prevProps.height === nextProps.height &&
     prevProps.id === nextProps.id &&
-    prevProps.indexPattern === nextProps.indexPattern &&
+    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
     prevProps.isLive === nextProps.isLive &&
     prevProps.itemsPerPage === nextProps.itemsPerPage &&
     prevProps.itemsPerPageOptions === nextProps.itemsPerPageOptions &&
