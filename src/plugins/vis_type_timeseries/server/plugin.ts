@@ -25,12 +25,13 @@ import {
   RequestHandlerContext,
   Logger,
   IRouter,
+  KibanaRequest,
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { Server } from 'hapi';
 import { VisTypeTimeseriesConfig } from '.';
 import { getVisData, GetVisData, GetVisDataOptions } from './lib/get_vis_data';
-import { ValidationTelemetryService } from './validation_telemetry/validation_telemetry_service';
+import { ValidationTelemetryService } from './validation_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { visDataRoutes } from './routes/vis';
 // @ts-ignore
@@ -101,8 +102,11 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     })();
 
     return {
-      getVisData: async (requestContext: RequestHandlerContext, options: GetVisDataOptions) => {
-        return await getVisData(requestContext, options, framework);
+      getVisData: async (
+        requestContext: RequestHandlerContext,
+        request: KibanaRequest<{}, {}, GetVisDataOptions>
+      ) => {
+        return await getVisData(requestContext, request, framework);
       },
       addSearchStrategy: searchStrategyRegistry.addStrategy.bind(searchStrategyRegistry),
     };

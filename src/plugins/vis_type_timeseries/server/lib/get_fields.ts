@@ -18,7 +18,7 @@
  */
 import { uniq } from 'lodash';
 import { first, map } from 'rxjs/operators';
-import { RequestHandlerContext } from 'kibana/server';
+import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 
 // @ts-ignore
 import { getIndexPatternObject } from './vis_data/helpers/get_index_pattern';
@@ -28,6 +28,7 @@ import { FieldDescriptor, IndexPatternsFetcher } from '../../../data/server';
 
 export async function getFields(
   requestContext: RequestHandlerContext,
+  request: KibanaRequest,
   framework: Framework,
   indexPattern: string
 ) {
@@ -36,6 +37,7 @@ export async function getFields(
   // level object passed from here. The layers should be refactored fully at some point, but for now
   // this works and we are still using the New Platform services for these vis data portions.
   const reqFacade: any = {
+    ...request,
     framework,
     pre: {
       indexPatternsService: new IndexPatternsFetcher(

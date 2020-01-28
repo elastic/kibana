@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter, KibanaRequest } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { getVisData } from '../lib/get_vis_data';
+import { getVisData, GetVisDataOptions } from '../lib/get_vis_data';
 import { visPayloadSchema } from './post_vis_schema';
 import { Framework, ValidationTelemetryServiceSetup } from '../index';
 
@@ -49,7 +49,11 @@ export const visDataRoutes = (
         );
       }
       try {
-        const results = await getVisData(requestContext, request.body, framework);
+        const results = await getVisData(
+          requestContext,
+          request as KibanaRequest<{}, {}, GetVisDataOptions>,
+          framework
+        );
         return response.ok({ body: results });
       } catch (error) {
         return response.internalError({
