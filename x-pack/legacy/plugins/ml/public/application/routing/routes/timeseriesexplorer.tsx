@@ -89,6 +89,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const [appState, setAppState] = useUrlState('_a');
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
+  const previousRefresh = usePrevious(lastRefresh);
   const [selectedJobId, setSelectedJobId] = useState<string>();
 
   const refresh = useRefresh();
@@ -295,6 +296,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         bounds,
         dateFormatTz,
         lastRefresh,
+        previousRefresh,
         selectedJobId,
         selectedDetectorIndex,
         selectedEntities,
