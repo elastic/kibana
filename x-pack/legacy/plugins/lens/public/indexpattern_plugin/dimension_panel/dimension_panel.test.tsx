@@ -8,10 +8,7 @@ import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiSideNav, EuiPopover, EuiFieldNumber } from '@elastic/eui';
-import {
-  Plugin as DataPlugin,
-  FieldFormatRegisty,
-} from '../../../../../../../src/plugins/data/public';
+import { Plugin as DataPlugin, fieldFormats } from '../../../../../../../src/plugins/data/public';
 import { changeColumn } from '../state_helpers';
 import {
   IndexPatternDimensionPanel,
@@ -153,7 +150,7 @@ describe('IndexPatternDimensionPanel', () => {
             id: 'bytes',
             title: 'Bytes',
           }),
-        } as unknown) as FieldFormatRegisty,
+        } as unknown) as fieldFormats.FieldFormatsRegistry,
       } as unknown) as ReturnType<DataPlugin['start']>,
     };
 

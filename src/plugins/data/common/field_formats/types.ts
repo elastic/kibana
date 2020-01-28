@@ -83,6 +83,7 @@ export type IFieldFormatId = FIELD_FORMAT_IDS | string;
 
 export type IFieldFormatType = (new (params?: any, getConfig?: GetConfigFn) => FieldFormat) & {
   id: IFieldFormatId;
+  title?: string;
   fieldType: string | string[];
 };
 

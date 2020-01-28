@@ -408,7 +408,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     selectedColumn={selectedColumn}
                     data={data}
                     currentIndexPattern={currentIndexPattern}
-                    onChange={(newFormat: unknown) => {
+                    onChange={newFormat => {
                       setState(
                         changeColumn({
                           state,
