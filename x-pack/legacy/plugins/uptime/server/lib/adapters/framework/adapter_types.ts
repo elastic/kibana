@@ -34,6 +34,8 @@ export interface UptimeCoreSetup {
 }
 
 export interface UptimeCorePlugins {
+  alerting: any;
+  elasticsearch: any;
   savedObjects: SavedObjectsLegacyService;
   usageCollection: UsageCollectionSetup;
   xpack: any;

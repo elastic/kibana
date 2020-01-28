@@ -16,7 +16,7 @@ export const uptime = (kibana: any) =>
     configPrefix: 'xpack.uptime',
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['alerting', 'kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.uptime.pluginDescription', {
@@ -38,7 +38,7 @@ export const uptime = (kibana: any) =>
     init(server: KibanaServer) {
       const initializerContext = {} as PluginInitializerContext;
       const { savedObjects } = server;
-      const { xpack_main } = server.plugins;
+      const { alerting, elasticsearch, xpack_main } = server.plugins;
       const { usageCollection } = server.newPlatform.setup.plugins;
 
       plugin(initializerContext).setup(
@@ -46,6 +46,8 @@ export const uptime = (kibana: any) =>
           route: server.newPlatform.setup.core.http.createRouter(),
         },
         {
+          alerting,
+          elasticsearch,
           savedObjects,
           usageCollection,
           xpack: xpack_main,

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const INDEX_NAMES = {
-  HEARTBEAT: 'heartbeat-8*',
-};
+import { UptimeAlertTypeFactory } from './types';
+import { statusCheckAlertFactory } from './status_check';
+
+export const uptimeAlertTypeFactories: UptimeAlertTypeFactory[] = [statusCheckAlertFactory];
