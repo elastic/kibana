@@ -19,11 +19,11 @@ export function resetDeprecationWarning() {
  * If so, use uiSettings API to fetch the X-Pack default admin email
  */
 export async function getDefaultAdminEmail(config, callCluster, log) {
-  if (!config.get('xpack.monitoring.cluster_alerts.email_notifications.enabled')) {
+  if (!config.get('monitoring.cluster_alerts.email_notifications.enabled')) {
     return null;
   }
 
-  const emailAddressConfigKey = `xpack.monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`;
+  const emailAddressConfigKey = `monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`;
   const configuredEmailAddress = config.get(emailAddressConfigKey);
 
   if (configuredEmailAddress) {
