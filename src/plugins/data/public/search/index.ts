@@ -48,6 +48,7 @@ export {
   defaultSearchStrategy,
   SearchError,
   SearchStrategyProvider,
+  getSearchErrorType,
 } from './search_strategy';
 
 export {
