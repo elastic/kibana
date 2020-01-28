@@ -113,6 +113,9 @@ export const createTopNavHelper = ({ TopNavMenu }) => reactDirective => {
     'refreshInterval',
     'disableAutoFocus',
     'showAutoRefreshOnly',
+
+    // temporary flag to use the stateful components  
+    'useDefaultBehaviors',
   ]);
 };
 

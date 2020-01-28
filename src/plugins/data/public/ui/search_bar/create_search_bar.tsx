@@ -34,6 +34,7 @@ interface StatefulSearchBarDeps {
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
   appName: string;
+  useDefaultBehaviors?: boolean;
 };
 
 const defaultFiltersUpdated = (queryService: QueryStart) => {
@@ -58,6 +59,8 @@ const defaultOnQuerySubmit = (
   currentQuery: Query,
   setQueryStringState: Function
 ) => {
+  if (!props.useDefaultBehaviors) return props.onQuerySubmit;
+
   const { timefilter } = queryService.timefilter;
 
   return (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -77,6 +80,7 @@ const defaultOnClearSavedQuery = (
   queryService: QueryStart,
   setQueryStringState: Function
 ) => {
+  if (!props.useDefaultBehaviors) return props.onClearSavedQuery;
   return () => {
     queryService.filterManager.removeAll();
     setQueryStringState({
@@ -122,6 +126,7 @@ const defaultOnSavedQueryUpdated = (
   queryService: QueryStart,
   setQueryStringState: Function
 ) => {
+  if (!props.useDefaultBehaviors) return props.onSavedQueryUpdated;
   return (savedQuery: SavedQuery) => {
     populateStateFromSavedQuery(props, queryService, savedQuery, setQueryStringState);
     if (props.onSavedQueryUpdated) props.onSavedQueryUpdated(savedQuery);
@@ -133,10 +138,15 @@ const defaultOnQuerySaved = (
   queryService: QueryStart,
   setQueryStringState: Function
 ) => {
+  if (!props.useDefaultBehaviors) return props.onSaved;
   return (savedQuery: SavedQuery) => {
     populateStateFromSavedQuery(props, queryService, savedQuery, setQueryStringState);
     if (props.onSaved) props.onSaved(savedQuery);
   };
+};
+
+const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
+  return props.useDefaultBehaviors ? {} : props;
 };
 
 export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
@@ -224,6 +234,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           onClearSavedQuery={defaultOnClearSavedQuery(props, core.uiSettings, data.query, setQuery)}
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, data.query, setQuery)}
           onSaved={defaultOnQuerySaved(props, data.query, setQuery)}
+          {...overrideDefaultBehaviors(props)}
         />
       </KibanaContextProvider>
     );
