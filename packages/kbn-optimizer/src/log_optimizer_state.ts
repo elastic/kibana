@@ -23,11 +23,10 @@ import { filter } from 'rxjs/operators';
 
 import { OptimizerConfig } from './optimizer_config';
 import { OptimizerState, OptimizerStateSummary } from './optimizer';
-import { CompilerState } from './common';
-import { closure } from './closure';
+import { CompilerState, pipeClosure } from './common';
 
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
-  return closure<OptimizerState, OptimizerStateSummary>(source => {
+  return pipeClosure<OptimizerState, OptimizerStateSummary>(source => {
     const bundleStates = new Map<string, CompilerState['type']>();
 
     log.info(
