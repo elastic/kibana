@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import uuid from 'uuid';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getSupertestWithoutAuth } from './services';
+import { getSupertestWithoutAuth, setupIngest } from './services';
 
 export default function(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -45,6 +45,7 @@ export default function(providerContext: FtrProviderContext) {
         },
       });
     });
+    setupIngest(providerContext);
     after(async () => {
       await esArchiver.unload('fleet/agents');
     });

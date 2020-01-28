@@ -7,26 +7,27 @@
 import * as _ from 'lodash';
 import Boom from 'boom';
 import uuid from 'uuid/v4';
+import { FakeRequest, KibanaRequest } from 'kibana/server';
 import {
   EnrollmentApiKeyVerificationResponse,
   EnrollmentApiKeysRepository,
   AccessApiKeyVerificationResponse,
 } from '../repositories/enrollment_api_keys/types';
-import { FrameworkLib } from './framework';
 import { FrameworkUser, internalAuthData } from '../adapters/framework/adapter_types';
-import { ElasticsearchAdapter } from '../adapters/elasticsearch/adapter_types';
 import { DEFAULT_POLICY_ID } from '../../common/constants';
 import {
   EnrollmentApiKey,
   EnrollmentRuleData,
   EnrollmentRule,
 } from '../../common/types/domain_data';
+import { FleetServerLib } from './types';
+import { FleetPluginsStart } from '../shim';
 
 export class ApiKeyLib {
   constructor(
     private readonly enrollmentApiKeysRepository: EnrollmentApiKeysRepository,
-    private readonly esAdapter: ElasticsearchAdapter,
-    private readonly frameworkLib: FrameworkLib
+    private readonly libs: FleetServerLib,
+    private readonly pluginsStart: FleetPluginsStart
   ) {}
 
   public async getEnrollmentApiKey(user: FrameworkUser, keyId: string) {
@@ -48,10 +49,9 @@ export class ApiKeyLib {
   ): Promise<EnrollmentApiKeyVerificationResponse> {
     try {
       const { apiKeyId } = this._parseApiKey(user);
-
-      await this.esAdapter.authenticate(user);
+      await this._authenticate(user);
       const enrollmentApiKey = await this.enrollmentApiKeysRepository.getByApiKeyId(
-        this.frameworkLib.getInternalUser(),
+        this.libs.framework.getInternalUser(),
         apiKeyId
       );
       if (!enrollmentApiKey || !enrollmentApiKey.active) {
@@ -77,7 +77,7 @@ export class ApiKeyLib {
     try {
       const { apiKeyId } = this._parseApiKey(user);
 
-      await this.esAdapter.authenticate(user);
+      await this._authenticate(user);
 
       return {
         valid: true,
@@ -97,20 +97,20 @@ export class ApiKeyLib {
   ): Promise<{ key: string; id: string }> {
     const name = this._getAccesstApiKeyName(agentId);
 
-    const key = await this.esAdapter.createApiKey(this.frameworkLib.getInternalUser(), {
-      name,
-
-      role_descriptors: {
-        'fleet-agent': {
-          index: [
-            {
-              names: ['logs-*', 'metrics-*'],
-              privileges: ['write'],
-            },
-          ],
-        },
+    const key = await this._createAPIKey(name, {
+      'fleet-agent': {
+        index: [
+          {
+            names: ['logs-*', 'metrics-*'],
+            privileges: ['write'],
+          },
+        ],
       },
     });
+
+    if (!key) {
+      throw new Error('Unable to create an access api key');
+    }
 
     return { id: key.id, key: Buffer.from(`${key.id}:${key.api_key}`).toString('base64') };
   }
@@ -127,14 +127,15 @@ export class ApiKeyLib {
     }
   ): Promise<EnrollmentApiKey> {
     const id = uuid();
-    const { name: providedKeyName, policyId = DEFAULT_POLICY_ID, expiration } = data;
+    const { name: providedKeyName, policyId = DEFAULT_POLICY_ID } = data;
 
     const name = this._getEnrollmentApiKeyName(id, providedKeyName, policyId);
 
-    const key = await this.esAdapter.createApiKey(this.frameworkLib.getInternalUser(), {
-      name,
-      expiration,
-    });
+    const key = await this._createAPIKey(name, {});
+
+    if (!key) {
+      throw new Error('Unable to create an enrollment api key');
+    }
 
     const apiKey = Buffer.from(`${key.id}:${key.api_key}`).toString('base64');
 
@@ -173,9 +174,7 @@ export class ApiKeyLib {
       throw Boom.notFound('Enrollment API key not found');
     }
 
-    await this.esAdapter.deleteApiKey(this.frameworkLib.getInternalUser(), {
-      id: enrollmentApiKey.api_key_id,
-    });
+    await this._invalidateAPIKey(id);
 
     await this.enrollmentApiKeysRepository.delete(user, id);
   }
@@ -298,6 +297,49 @@ export class ApiKeyLib {
     await this.enrollmentApiKeysRepository.update(user, enrollmentApiKey.id, {
       enrollment_rules: [],
     });
+  }
+
+  private async _invalidateAPIKey(id: string) {
+    const adminUser = await this.pluginsStart.ingest.outputs.getAdminUser();
+    const request: FakeRequest = {
+      headers: {
+        authorization: `Basic ${Buffer.from(`${adminUser.username}:${adminUser.password}`).toString(
+          'base64'
+        )}`,
+      },
+    };
+
+    return this.pluginsStart.security.authc.invalidateAPIKey(request as KibanaRequest, {
+      id,
+    });
+  }
+
+  private async _createAPIKey(name: string, roleDescriptors: any) {
+    const adminUser = await this.pluginsStart.ingest.outputs.getAdminUser();
+    const request: FakeRequest = {
+      headers: {
+        authorization: `Basic ${Buffer.from(`${adminUser.username}:${adminUser.password}`).toString(
+          'base64'
+        )}`,
+      },
+    };
+
+    return this.pluginsStart.security.authc.createAPIKey(request as KibanaRequest, {
+      name,
+      role_descriptors: roleDescriptors,
+    });
+  }
+
+  private async _authenticate(user: FrameworkUser) {
+    if (user.kind !== 'authenticated') {
+      throw new Error('Invalid user');
+    }
+
+    const res = await this.pluginsStart.security.authc.isAuthenticated(user[internalAuthData]);
+
+    if (!res) {
+      throw new Error('ApiKey is not valid: impossible to authicate user');
+    }
   }
 
   private async _getEnrollemntApiKeyByIdOrThrow(user: FrameworkUser, id: string) {

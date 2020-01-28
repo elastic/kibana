@@ -8,8 +8,9 @@ import { get } from 'lodash';
 import React, { useState, useEffect } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { Loading, ChildRoutes } from './components';
-import { useLibs, URLStateProps, WithUrlState } from './hooks';
+import { useLibs, URLStateProps, WithUrlState, useRequest } from './hooks';
 import { routeMap } from './pages';
+import { SetupPage } from './pages/setup';
 
 function useWaitUntilFrameworkReady() {
   const libs = useLibs();
@@ -33,11 +34,25 @@ function useWaitUntilFrameworkReady() {
 }
 
 export const AppRoutes: React.FC = () => {
+  const setupRequest = useRequest({
+    method: 'get',
+    path: '/api/ingest/internals/setup',
+  });
   const { isLoading } = useWaitUntilFrameworkReady();
   const libs = useLibs();
 
-  if (isLoading === true) {
+  if (isLoading === true || setupRequest.isLoading) {
     return <Loading />;
+  }
+
+  if (setupRequest.data.isInitialized === false) {
+    return (
+      <SetupPage
+        refresh={async () => {
+          await setupRequest.sendRequest();
+        }}
+      />
+    );
   }
 
   return (

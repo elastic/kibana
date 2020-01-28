@@ -185,6 +185,8 @@ export enum InputType {
  * Where to send the data
  */
 export interface Output {
+  admin_username?: string;
+  admin_password?: string;
   api_key?: string;
   username?: string;
   password?: string;
