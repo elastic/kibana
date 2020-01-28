@@ -65,6 +65,10 @@ export async function loadAlerts({
   });
 }
 
+export async function deleteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
+  await http.delete(`${BASE_ALERT_API_PATH}/${id}`);
+}
+
 export async function deleteAlerts({
   ids,
   http,
@@ -72,7 +76,7 @@ export async function deleteAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => http.delete(`${BASE_ALERT_API_PATH}/${id}`)));
+  await Promise.all(ids.map(id => deleteAlert({ http, id })));
 }
 
 export async function createAlert({

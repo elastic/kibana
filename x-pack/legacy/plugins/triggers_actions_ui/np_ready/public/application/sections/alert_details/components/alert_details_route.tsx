@@ -12,7 +12,7 @@ import { Alert, AlertType, ActionType } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import { loadAlert, loadAlertTypes } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_api';
-import { AlertDetails } from './alert_details';
+import { AlertDetailsWithApi as AlertDetails } from './alert_details';
 import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
 
 interface AlertDetailsRouteProps {

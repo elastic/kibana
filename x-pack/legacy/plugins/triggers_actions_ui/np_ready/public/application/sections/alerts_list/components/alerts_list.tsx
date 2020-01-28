@@ -24,9 +24,8 @@ import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_add';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
-import { withBulkAlertOperations } from '../../common/components/with_bulk_alert_operations';
-import { AlertQuickEditButtons } from '../../common/components/alert_quick_edit_buttons';
-import { CollapsedItemActions } from './collapsed_item_actions';
+import { AlertQuickEditButtonsWithApi as AlertQuickEditButtons } from '../../common/components/alert_quick_edit_buttons';
+import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { loadAlerts, loadAlertTypes } from '../../../lib/alert_api';
@@ -36,7 +35,6 @@ import { routeToAlertDetails } from '../../../constants';
 
 const ENTER_KEY = 13;
 
-const AlertQuickEditButtonsWithBulkApi = withBulkAlertOperations(AlertQuickEditButtons);
 interface AlertTypeState {
   isLoading: boolean;
   isInitialized: boolean;
@@ -261,7 +259,7 @@ export const AlertsList: React.FunctionComponent = () => {
             {selectedIds.length > 0 && canDelete && (
               <EuiFlexItem grow={false}>
                 <BulkOperationPopover>
-                  <AlertQuickEditButtonsWithBulkApi
+                  <AlertQuickEditButtons
                     selectedItems={convertAlertsToTableItems(
                       filterAlertsById(alertsState.data, selectedIds),
                       alertTypesState.data

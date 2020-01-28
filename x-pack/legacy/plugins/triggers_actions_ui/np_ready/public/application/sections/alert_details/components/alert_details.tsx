@@ -24,21 +24,27 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useAppDependencies } from '../../../app_context';
 import { hasSaveAlertsCapability } from '../../../lib/capabilities';
 import { Alert, AlertType, ActionType } from '../../../../types';
-import { disableAlert, enableAlert, unmuteAlert, muteAlert } from '../../../lib/alert_api';
+import {
+  ComponentOpts as BulkOperationsComponentOpts,
+  withBulkAlertOperations,
+} from '../../common/components/with_bulk_alert_api_operations';
 
-interface AlertDetailsProps {
+type AlertDetailsProps = {
   alert: Alert;
   alertType: AlertType;
   actionTypes: ActionType[];
-}
+} & BulkOperationsComponentOpts;
 
 export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   alert,
   alertType,
   actionTypes,
+  disableAlert,
+  enableAlert,
+  unmuteAlert,
+  muteAlert,
 }) => {
   const {
-    http,
     legacy: { capabilities },
   } = useAppDependencies();
 
@@ -122,10 +128,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                       onChange={async () => {
                         if (isEnabled) {
                           setIsEnabled(false);
-                          await disableAlert({ http, id: alert.id });
+                          await disableAlert(alert);
                         } else {
                           setIsEnabled(true);
-                          await enableAlert({ http, id: alert.id });
+                          await enableAlert(alert);
                         }
                       }}
                       label={
@@ -145,10 +151,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                       onChange={async () => {
                         if (isMuted) {
                           setIsMuted(false);
-                          await unmuteAlert({ http, id: alert.id });
+                          await unmuteAlert(alert);
                         } else {
                           setIsMuted(true);
-                          await muteAlert({ http, id: alert.id });
+                          await muteAlert(alert);
                         }
                       }}
                       label={
@@ -168,3 +174,5 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     </EuiPage>
   );
 };
+
+export const AlertDetailsWithApi = withBulkAlertOperations(AlertDetails);

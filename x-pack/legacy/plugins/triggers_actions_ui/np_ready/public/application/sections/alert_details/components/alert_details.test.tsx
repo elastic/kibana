@@ -6,14 +6,12 @@
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
-import { AlertDetails } from './alert_details';
+import { AlertDetails as RawAlertDetails } from './alert_details';
 import { Alert, ActionType } from '../../../../types';
 import { EuiTitle, EuiBadge, EuiFlexItem, EuiButtonEmpty, EuiSwitch } from '@elastic/eui';
 import { times, random } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import * as alertApi from '../../../lib/alert_api';
-jest.mock('../../../lib/alert_api');
+import { withBulkAlertOperations } from '../../common/components/with_bulk_alert_api_operations.mock';
 
 jest.mock('../../../app_context', () => ({
   useAppDependencies: jest.fn(() => ({
@@ -30,14 +28,10 @@ jest.mock('../../../lib/capabilities', () => ({
   hasSaveAlertsCapability: jest.fn(() => true),
 }));
 
-// jest.mock('../../../lib/alert_api', () => ({
-//   disableAlert: jest.fn(),
-//   enableAlert: jest.fn(),
-//   unmuteAlert: jest.fn(),
-//   muteAlert: jest.fn(),
-// }));
-
+const AlertDetails = withBulkAlertOperations(RawAlertDetails);
 describe('alert_details', () => {
+  // mock Api handlers
+
   it('renders the alert name as a title', () => {
     const alert = mockAlert();
     const alertType = {
@@ -290,8 +284,14 @@ describe('enable button', () => {
       name: 'No Op',
     };
 
+    const disableAlert = jest.fn();
     const enableButton = shallow(
-      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={[]}
+        disableAlert={disableAlert}
+      />
     )
       .find(EuiSwitch)
       .find('[name="enable"]')
@@ -300,9 +300,9 @@ describe('enable button', () => {
     enableButton.simulate('click');
     const handler = enableButton.prop('onChange');
     expect(typeof handler).toEqual('function');
-    expect(alertApi.disableAlert).toHaveBeenCalledTimes(0);
+    expect(disableAlert).toHaveBeenCalledTimes(0);
     handler!({} as React.FormEvent);
-    expect(alertApi.disableAlert).toHaveBeenCalledTimes(1);
+    expect(disableAlert).toHaveBeenCalledTimes(1);
   });
 
   it('should disable the alert when alert is enabled and button is clicked', () => {
@@ -315,8 +315,14 @@ describe('enable button', () => {
       name: 'No Op',
     };
 
+    const enableAlert = jest.fn();
     const enableButton = shallow(
-      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={[]}
+        enableAlert={enableAlert}
+      />
     )
       .find(EuiSwitch)
       .find('[name="enable"]')
@@ -325,9 +331,9 @@ describe('enable button', () => {
     enableButton.simulate('click');
     const handler = enableButton.prop('onChange');
     expect(typeof handler).toEqual('function');
-    expect(alertApi.enableAlert).toHaveBeenCalledTimes(0);
+    expect(enableAlert).toHaveBeenCalledTimes(0);
     handler!({} as React.FormEvent);
-    expect(alertApi.enableAlert).toHaveBeenCalledTimes(1);
+    expect(enableAlert).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -391,8 +397,9 @@ describe('mute button', () => {
       name: 'No Op',
     };
 
+    const muteAlert = jest.fn();
     const enableButton = shallow(
-      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} muteAlert={muteAlert} />
     )
       .find(EuiSwitch)
       .find('[name="mute"]')
@@ -401,9 +408,9 @@ describe('mute button', () => {
     enableButton.simulate('click');
     const handler = enableButton.prop('onChange');
     expect(typeof handler).toEqual('function');
-    expect(alertApi.muteAlert).toHaveBeenCalledTimes(0);
+    expect(muteAlert).toHaveBeenCalledTimes(0);
     handler!({} as React.FormEvent);
-    expect(alertApi.muteAlert).toHaveBeenCalledTimes(1);
+    expect(muteAlert).toHaveBeenCalledTimes(1);
   });
 
   it('should unmute the alert when alert is muted and button is clicked', () => {
@@ -417,8 +424,14 @@ describe('mute button', () => {
       name: 'No Op',
     };
 
+    const unmuteAlert = jest.fn();
     const enableButton = shallow(
-      <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} />
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={[]}
+        unmuteAlert={unmuteAlert}
+      />
     )
       .find(EuiSwitch)
       .find('[name="mute"]')
@@ -427,9 +440,9 @@ describe('mute button', () => {
     enableButton.simulate('click');
     const handler = enableButton.prop('onChange');
     expect(typeof handler).toEqual('function');
-    expect(alertApi.unmuteAlert).toHaveBeenCalledTimes(0);
+    expect(unmuteAlert).toHaveBeenCalledTimes(0);
     handler!({} as React.FormEvent);
-    expect(alertApi.unmuteAlert).toHaveBeenCalledTimes(1);
+    expect(unmuteAlert).toHaveBeenCalledTimes(1);
   });
 
   it('should disabled mute button when alert is disabled', () => {

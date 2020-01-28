@@ -8,9 +8,6 @@ import { TypeRegistry } from './application/type_registry';
 import { SanitizedAlert as Alert } from '../../../alerting/common';
 export { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
 
-import { SanitizedAlert as Alert } from '../../../alerting/common';
-export { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
-
 import { ActionType } from '../../../../../plugins/actions/common';
 export { ActionType } from '../../../../../plugins/actions/common';
 

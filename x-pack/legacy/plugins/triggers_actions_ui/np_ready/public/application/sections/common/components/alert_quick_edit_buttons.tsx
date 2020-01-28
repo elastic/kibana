@@ -11,7 +11,10 @@ import { EuiButtonEmpty } from '@elastic/eui';
 
 import { Alert } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
-import { ComponentOpts as BulkOperationsComponentOpts } from './with_bulk_alert_operations';
+import {
+  withBulkAlertOperations,
+  ComponentOpts as BulkOperationsComponentOpts,
+} from './with_bulk_alert_api_operations';
 
 export type ComponentOpts = {
   selectedItems: Alert[];
@@ -23,11 +26,11 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   selectedItems,
   onPerformingAction = noop,
   onActionPerformed = noop,
-  onMuteAlerts,
-  onUnmuteAlerts,
-  onEnableAlerts,
-  onDisableAlerts,
-  onDeleteAlerts,
+  muteAlerts,
+  unmuteAlerts,
+  enableAlerts,
+  disableAlerts,
+  deleteAlerts,
 }: ComponentOpts) => {
   const { toastNotifications } = useAppDependencies();
 
@@ -46,7 +49,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     onPerformingAction();
     setIsMutingAlerts(true);
     try {
-      await onMuteAlerts(selectedItems);
+      await muteAlerts(selectedItems);
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
@@ -66,7 +69,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     onPerformingAction();
     setIsUnmutingAlerts(true);
     try {
-      await onUnmuteAlerts(selectedItems);
+      await unmuteAlerts(selectedItems);
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
@@ -86,7 +89,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     onPerformingAction();
     setIsEnablingAlerts(true);
     try {
-      await onEnableAlerts(selectedItems);
+      await enableAlerts(selectedItems);
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
@@ -106,7 +109,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     onPerformingAction();
     setIsDisablingAlerts(true);
     try {
-      await onDisableAlerts(selectedItems.filter(item => !isAlertDisabled(item)));
+      await disableAlerts(selectedItems);
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
@@ -126,7 +129,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     onPerformingAction();
     setIsDeletingAlerts(true);
     try {
-      await onDeleteAlerts(selectedItems);
+      await deleteAlerts(selectedItems);
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
@@ -211,6 +214,8 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     </Fragment>
   );
 };
+
+export const AlertQuickEditButtonsWithApi = withBulkAlertOperations(AlertQuickEditButtons);
 
 function isAlertDisabled(alert: Alert) {
   return alert.enabled === false;
