@@ -21,14 +21,10 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
   }) {
     const config = { get: sinon.stub() };
 
-    config.get
-      .withArgs('xpack.monitoring.cluster_alerts.email_notifications.enabled')
-      .returns(enabled);
+    config.get.withArgs('monitoring.cluster_alerts.email_notifications.enabled').returns(enabled);
 
     if (adminEmail) {
-      config.get
-        .withArgs(`xpack.monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`)
-        .returns(adminEmail);
+      config.get.withArgs(`monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`).returns(adminEmail);
     }
 
     config.get.withArgs('kibana.index').returns('.kibana');
@@ -74,7 +70,7 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
       resetDeprecationWarning();
     });
 
-    describe('xpack.monitoring.cluster_alerts.email_notifications.enabled = false', () => {
+    describe('monitoring.cluster_alerts.email_notifications.enabled = false', () => {
       it('returns null', async () => {
         const { config, callCluster, log } = setup({ enabled: false });
         expect(await getDefaultAdminEmail(config, callCluster, log)).to.be(null);
@@ -131,12 +127,12 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
     });
   });
 
-  describe('using xpack.monitoring.cluster_alerts.email_notifications.email_address', () => {
+  describe('using monitoring.cluster_alerts.email_notifications.email_address', () => {
     beforeEach(() => {
       resetDeprecationWarning();
     });
 
-    describe('xpack.monitoring.cluster_alerts.email_notifications.enabled = false', () => {
+    describe('monitoring.cluster_alerts.email_notifications.enabled = false', () => {
       it('returns null', async () => {
         const { config, callCluster, log } = setup({ enabled: false });
         expect(await getDefaultAdminEmail(config, callCluster, log)).to.be(null);
