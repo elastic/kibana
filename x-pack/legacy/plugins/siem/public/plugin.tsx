@@ -29,6 +29,7 @@ export interface StartPlugins {
   data: DataPublicPluginStart;
   embeddable: IEmbeddableStart;
   inspector: InspectorStart;
+  newsfeed?: unknown;
   uiActions: IUiActionsStart;
 }
 export type StartServices = CoreStart & StartPlugins;
