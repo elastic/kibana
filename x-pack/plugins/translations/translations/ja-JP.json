@@ -6636,8 +6636,6 @@
     "xpack.infra.metricsExplorer.openInTSVB": "ビジュアライザーで開く",
     "xpack.infra.metricsExplorer.viewNodeDetail": "{name} のメトリックを表示",
     "xpack.infra.node.ariaLabel": "{nodeName}、クリックしてメニューを開きます",
-    "xpack.infra.nodeContextMenu.viewLogsName": "ログを表示",
-    "xpack.infra.nodeContextMenu.viewMetricsName": "メトリックを表示",
     "xpack.infra.nodeDetails.labels.availabilityZone": "アベイラビリティゾーン",
     "xpack.infra.nodeDetails.labels.cloudProvider": "クラウドプロバイダー",
     "xpack.infra.nodeDetails.labels.containerized": "コンテナー化",
