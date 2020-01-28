@@ -55,5 +55,5 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
     },
   });
 
-  initUptimeServer(libs);
+  initUptimeServer(server, libs, plugins);
 };
