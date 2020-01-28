@@ -139,7 +139,7 @@ export async function createCookieSessionStorageFactory<T>(
     path: basePath,
     clearInvalid: false,
     isHttpOnly: true,
-    isSameSite: false,
+    isSameSite: 'Strict',
   });
 
   return {
