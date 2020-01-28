@@ -24,9 +24,7 @@ import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { SiemCypressTestRunner } from './runner';
 
 export default async function({ readConfigFile }: FtrConfigProviderContext) {
-  const kibanaCommonTestsConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
-  );
+  const kibanaCommonTestsConfig = await readConfigFile(require.resolve('../common/config'));
   const xpackFunctionalTestsConfig = await readConfigFile(
     require.resolve('../functional/config.js')
   );
