@@ -86,7 +86,6 @@ export const AuthenticationsQueryTabBody = ({
         type={hostsModel.HostsType.page}
         updateDateRange={updateDateRange}
       />
-      <EuiSpacer size="l" />
       <AuthenticationsQuery
         endDate={endDate}
         filterQuery={filterQuery}

@@ -71,7 +71,6 @@ export const DnsQueryTabBody = ({
         type={networkModel.NetworkType.page}
         updateDateRange={updateDateRange}
       />
-      <EuiSpacer />
       <NetworkDnsQuery
         endDate={endDate}
         filterQuery={filterQuery}

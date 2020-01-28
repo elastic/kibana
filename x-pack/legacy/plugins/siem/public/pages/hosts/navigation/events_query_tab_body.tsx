@@ -65,7 +65,6 @@ export const EventsQueryTabBody = ({
         updateDateRange={updateDateRange}
         id={EVENTS_HISTOGRAM_ID}
       />
-      <EuiSpacer size="l" />
       <StatefulEventsViewer
         defaultModel={eventsDefaultModel}
         end={endDate}

@@ -54,7 +54,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const kibana = useKibana();
     const { tabName } = useParams();
 
-    const networkFilters = useMemo(() => {
+    const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.alerts) {
         return filters.length > 0 ? [...filters, ...filterAlertsNetwork] : filterAlertsNetwork;
       }
@@ -76,7 +76,13 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
               config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
               indexPattern,
               queries: [query],
-              filters: networkFilters,
+              filters,
+            });
+            const tabsFilterQuery = convertToBuildEsQuery({
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+              indexPattern,
+              queries: [query],
+              filters: tabsFilters,
             });
 
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -133,7 +139,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                       <EuiSpacer />
 
                       <NetworkRoutes
-                        filterQuery={filterQuery}
+                        filterQuery={tabsFilterQuery}
                         from={from}
                         isInitializing={isInitializing}
                         indexPattern={indexPattern}

@@ -80,7 +80,6 @@ export const AnomaliesQueryTabBody = ({
         type={type}
         updateDateRange={updateDateRange}
       />
-      <EuiSpacer />
       <AnomaliesTableComponent
         startDate={startDate}
         endDate={endDate}

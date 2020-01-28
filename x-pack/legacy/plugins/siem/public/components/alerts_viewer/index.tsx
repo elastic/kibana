@@ -79,7 +79,6 @@ export const AlertsView = ({
         type={type}
         updateDateRange={updateDateRange}
       />
-      <EuiSpacer size="l" />
       <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
     </>
   );
