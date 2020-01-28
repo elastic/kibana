@@ -124,31 +124,39 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   };
 
   // Most of these functions were moved directly from the old Legend class. Not a fan of this.
-  getLabels = async (data: any, type: string) => {
-    let labels = [];
-    if (CUSTOM_LEGEND_VIS_TYPES.includes(type)) {
-      const legendLabels = this.props.vislibVis.getLegendLabels();
-      if (legendLabels) {
-        labels = map(legendLabels, label => {
-          return { label };
-        });
+  setLabels = (data: any, type: string): Promise<void> =>
+    new Promise(async resolve => {
+      let labels = [];
+      if (CUSTOM_LEGEND_VIS_TYPES.includes(type)) {
+        const legendLabels = this.props.vislibVis.getLegendLabels();
+        if (legendLabels) {
+          labels = map(legendLabels, label => {
+            return { label };
+          });
+        }
+      } else {
+        if (!data) return [];
+        data = data.columns || data.rows || [data];
+
+        labels = type === 'pie' ? getPieNames(data) : this.getSeriesLabels(data);
       }
-    } else {
-      if (!data) return [];
-      data = data.columns || data.rows || [data];
 
-      labels = type === 'pie' ? getPieNames(data) : this.getSeriesLabels(data);
-    }
+      const labelsConfig = await Promise.all(
+        labels.map(async label => ({
+          ...label,
+          canFilter: await this.canFilter(label),
+        }))
+      );
 
-    return await Promise.all(
-      labels.map(async label => ({
-        ...label,
-        canFilter: await this.canFilter(label),
-      }))
-    );
-  };
+      this.setState(
+        {
+          labels: labelsConfig,
+        },
+        resolve
+      );
+    });
 
-  refresh = () => {
+  refresh = async () => {
     const vislibVis = this.props.vislibVis;
     if (!vislibVis || !vislibVis.visConfig) {
       this.setState({
@@ -170,17 +178,12 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       this.setState({ open: this.props.vis.params.addLegend });
     }
 
-    (async () => {
-      this.setState({
-        labels: await this.getLabels(this.props.visData, vislibVis.visConfigArgs.type),
-      });
-    })();
-
     if (vislibVis.visConfig) {
       this.getColor = this.props.vislibVis.visConfig.data.getColorFunc();
     }
 
     this.setState({ tableAggs: getTableAggs(this.props.vis) });
+    await this.setLabels(this.props.visData, vislibVis.visConfigArgs.type);
   };
 
   highlight = (event: BaseSyntheticEvent) => {
