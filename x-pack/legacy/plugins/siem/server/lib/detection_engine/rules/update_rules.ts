@@ -5,6 +5,7 @@
  */
 
 import { defaults, pickBy, isEmpty } from 'lodash/fp';
+import { PartialAlert } from '../../../../../alerting/server/types';
 import { readRules } from './read_rules';
 import { UpdateRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './types';
 import { addTags } from './add_tags';
@@ -108,7 +109,7 @@ export const updateRules = async ({
   type,
   references,
   version,
-}: UpdateRuleParams) => {
+}: UpdateRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
     return null;
@@ -206,5 +207,10 @@ export const updateRules = async ({
   } else {
     // enabled is null or undefined and we do not touch the rule
   }
-  return update;
+
+  if (enabled != null) {
+    return { ...update, enabled };
+  } else {
+    return update;
+  }
 };
