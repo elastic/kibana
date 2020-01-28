@@ -169,6 +169,18 @@ export const updateRules = async ({
     }
   );
 
+  const update = await alertsClient.update({
+    id: rule.id,
+    data: {
+      tags: addTags(tags ?? rule.tags, rule.params.ruleId, immutable ?? rule.params.immutable),
+      name: calculateName({ updatedName: name, originalName: rule.name }),
+      schedule: {
+        interval: calculateInterval(interval, rule.schedule.interval),
+      },
+      actions: rule.actions,
+      params: nextParams,
+    },
+  });
   if (rule.enabled && enabled === false) {
     await alertsClient.disable({ id: rule.id });
   } else if (!rule.enabled && enabled === true) {
@@ -194,16 +206,5 @@ export const updateRules = async ({
   } else {
     // enabled is null or undefined and we do not touch the rule
   }
-  return alertsClient.update({
-    id: rule.id,
-    data: {
-      tags: addTags(tags ?? rule.tags, rule.params.ruleId, immutable ?? rule.params.immutable),
-      name: calculateName({ updatedName: name, originalName: rule.name }),
-      schedule: {
-        interval: calculateInterval(interval, rule.schedule.interval),
-      },
-      actions: rule.actions,
-      params: nextParams,
-    },
-  });
+  return update;
 };
