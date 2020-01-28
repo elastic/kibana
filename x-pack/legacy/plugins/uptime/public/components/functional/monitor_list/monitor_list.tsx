@@ -5,17 +5,20 @@
  */
 
 import {
+  EuiButtonIcon,
   EuiBasicTable,
   EuiFlexGroup,
-  EuiPanel,
-  EuiTitle,
-  EuiButtonIcon,
   EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPanel,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { useState, Fragment } from 'react';
+import styled from 'styled-components';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { monitorStatesQuery } from '../../../queries/monitor_states_query';
 import {
@@ -46,6 +49,12 @@ interface MonitorListProps {
 }
 
 type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
+
+const TruncatedEuiLink = styled(EuiLink)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
 
 export const MonitorListComponent = (props: Props) => {
   const {
@@ -98,6 +107,16 @@ export const MonitorListComponent = (props: Props) => {
         </MonitorPageLink>
       ),
       sortable: true,
+    },
+    {
+      aligh: 'left' as const,
+      field: 'state.url.full',
+      name: labels.URL,
+      render: (url: string, summary: MonitorSummary) => (
+        <TruncatedEuiLink href={url} target="_blank" color="text">
+          {url} <EuiIcon size="s" type="popout" color="subbdued" />
+        </TruncatedEuiLink>
+      ),
     },
     {
       align: 'center' as const,

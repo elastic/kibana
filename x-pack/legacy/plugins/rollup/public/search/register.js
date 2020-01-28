@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { addSearchStrategy } from '../../../../../../src/legacy/ui/public/courier';
+import { addSearchStrategy } from '../../../../../../src/plugins/data/public';
 import { rollupSearchStrategy } from './rollup_search_strategy';
 
 export function initSearch() {
