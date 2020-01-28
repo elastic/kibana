@@ -32,15 +32,6 @@ beforeEach(() => {
     info: {
       protocol: 'http',
     },
-    plugins: {
-      elasticsearch: {
-        getCluster: memoize(() => {
-          return {
-            callWithRequest: jest.fn(),
-          };
-        }),
-      },
-    },
     savedObjects: {
       getScopedSavedObjectsClient: jest.fn(),
     },
@@ -57,6 +48,14 @@ beforeEach(() => {
 
 afterEach(() => generatePngObservableFactory.mockReset());
 
+const mockElasticsearch = {
+  getCluster: memoize(() => {
+    return {
+      callWithRequest: jest.fn(),
+    };
+  }),
+};
+
 const getMockLogger = () => new LevelLogger();
 
 const encryptHeaders = async headers => {
@@ -70,7 +69,9 @@ test(`passes browserTimezone to generatePng`, async () => {
   const generatePngObservable = generatePngObservableFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  const executeJob = executeJobFactory(mockServer, getMockLogger(), { browserDriverFactory: {} });
+  const executeJob = executeJobFactory(mockServer, mockElasticsearch, getMockLogger(), {
+    browserDriverFactory: {},
+  });
   const browserTimezone = 'UTC';
   await executeJob(
     'pngJobId',
@@ -88,7 +89,9 @@ test(`passes browserTimezone to generatePng`, async () => {
 });
 
 test(`returns content_type of application/png`, async () => {
-  const executeJob = executeJobFactory(mockServer, getMockLogger(), { browserDriverFactory: {} });
+  const executeJob = executeJobFactory(mockServer, mockElasticsearch, getMockLogger(), {
+    browserDriverFactory: {},
+  });
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePngObservable = generatePngObservableFactory();
@@ -108,7 +111,9 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   const generatePngObservable = generatePngObservableFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from(testContent)));
 
-  const executeJob = executeJobFactory(mockServer, getMockLogger(), { browserDriverFactory: {} });
+  const executeJob = executeJobFactory(mockServer, mockElasticsearch, getMockLogger(), {
+    browserDriverFactory: {},
+  });
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob(
     'pngJobId',

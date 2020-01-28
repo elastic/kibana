@@ -6,6 +6,7 @@
 
 import { get } from 'lodash';
 import { ServerFacade, JobSource } from '../../types';
+import { ReportingSetupDeps } from '../plugin';
 
 const defaultSize = 10;
 
@@ -34,12 +35,13 @@ interface CountAggResult {
   count: number;
 }
 
-export function jobsQueryFactory(server: ServerFacade) {
+export function jobsQueryFactory(
+  server: ServerFacade,
+  elasticsearch: ReportingSetupDeps['elasticsearch']
+) {
   const index = server.config().get('xpack.reporting.index');
   // @ts-ignore `errors` does not exist on type Cluster
-  const { callWithInternalUser, errors: esErrors } = server.plugins.elasticsearch.getCluster(
-    'admin'
-  );
+  const { callWithInternalUser, errors: esErrors } = elasticsearch.getCluster('admin');
 
   function getUsername(user: any) {
     return get(user, 'username', false);

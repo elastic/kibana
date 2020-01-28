@@ -30,11 +30,19 @@ export function registerJobGenerationRoutes(
 ) {
   const config = server.config();
   const DOWNLOAD_BASE_URL = config.get('server.basePath') + `${API_BASE_URL}/jobs/download`;
-  // @ts-ignore TODO
-  const { errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
 
-  const esqueue = createQueueFactory(server, logger, { exportTypesRegistry, browserDriverFactory });
-  const enqueueJob = enqueueJobFactory(server, logger, { exportTypesRegistry, esqueue });
+  const { elasticsearch } = plugins;
+  // @ts-ignore TODO
+  const { errors: esErrors } = elasticsearch.getCluster('admin');
+
+  const esqueue = createQueueFactory(server, elasticsearch, logger, {
+    exportTypesRegistry,
+    browserDriverFactory,
+  });
+  const enqueueJob = enqueueJobFactory(server, elasticsearch, logger, {
+    exportTypesRegistry,
+    esqueue,
+  });
 
   /*
    * Generates enqueued job details to use in responses

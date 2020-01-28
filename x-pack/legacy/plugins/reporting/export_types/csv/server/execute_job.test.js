@@ -40,6 +40,12 @@ describe('CSV Execute Job', function() {
   let callWithRequestStub;
   let uiSettingsGetStub;
 
+  const mockElasticsearch = {
+    getCluster: function() {
+      return clusterStub;
+    },
+  };
+
   beforeAll(async function() {
     const crypto = nodeCrypto({ encryptionKey });
     encryptedHeaders = await crypto.encrypt(headers);
@@ -68,7 +74,6 @@ describe('CSV Execute Job', function() {
     uiSettingsGetStub.withArgs('csv:quoteValues').returns(true);
 
     mockServer = {
-      expose: function() {},
       fieldFormatServiceFactory: function() {
         const uiConfigMock = {};
         uiConfigMock['format:defaultTypeMap'] = {
@@ -80,13 +85,6 @@ describe('CSV Execute Job', function() {
         fieldFormatsRegistry.init(key => uiConfigMock[key], {}, [fieldFormats.StringFormat]);
 
         return fieldFormatsRegistry;
-      },
-      plugins: {
-        elasticsearch: {
-          getCluster: function() {
-            return clusterStub;
-          },
-        },
       },
       config: function() {
         return {
@@ -117,7 +115,7 @@ describe('CSV Execute Job', function() {
 
   describe('calls getScopedSavedObjectsClient with request', function() {
     it('containing decrypted headers', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -135,7 +133,7 @@ describe('CSV Execute Job', function() {
         .config()
         .get.withArgs('server.basePath')
         .returns(serverBasePath);
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -153,7 +151,7 @@ describe('CSV Execute Job', function() {
         .config()
         .get.withArgs('server.basePath')
         .returns(serverBasePath);
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobBasePath = 'foo-job/basePath/';
       await executeJob(
         'job789',
@@ -176,7 +174,7 @@ describe('CSV Execute Job', function() {
     it('passed scoped SavedObjectsClient to uiSettingsServiceFactory', async function() {
       const returnValue = Symbol();
       mockServer.savedObjects.getScopedSavedObjectsClient.returns(returnValue);
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -191,7 +189,7 @@ describe('CSV Execute Job', function() {
 
   describe('basic Elasticsearch call behavior', function() {
     it('should decrypt encrypted headers and pass to callWithRequest', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -207,7 +205,7 @@ describe('CSV Execute Job', function() {
         testBody: true,
       };
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const job = {
         headers: encryptedHeaders,
         fields: [],
@@ -234,7 +232,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: scrollId,
       });
       callWithRequestStub.onSecondCall().resolves(defaultElasticsearchResponse);
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -248,7 +246,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should not execute scroll if there are no hits from the search', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -278,7 +276,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -313,7 +311,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: lastScrollId,
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -341,7 +339,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: lastScrollId,
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -371,7 +369,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -399,7 +397,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['=SUM(A1:A2)', 'two'],
@@ -427,7 +425,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -455,7 +453,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -475,7 +473,7 @@ describe('CSV Execute Job', function() {
   describe('Elasticsearch call errors', function() {
     it('should reject Promise if search call errors out', async function() {
       callWithRequestStub.rejects(new Error());
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -494,7 +492,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
       callWithRequestStub.onSecondCall().rejects(new Error());
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -515,7 +513,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: undefined,
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -536,7 +534,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: undefined,
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -564,7 +562,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: undefined,
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -592,7 +590,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: undefined,
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -626,7 +624,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should stop calling Elasticsearch when cancellationToken.cancel is called', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       executeJob(
         'job345',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -641,7 +639,7 @@ describe('CSV Execute Job', function() {
     });
 
     it(`shouldn't call clearScroll if it never got a scrollId`, async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       executeJob(
         'job345',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -655,7 +653,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should call clearScroll if it got a scrollId', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       executeJob(
         'job345',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -673,7 +671,7 @@ describe('CSV Execute Job', function() {
 
   describe('csv content', function() {
     it('should write column headers to output, even if there are no results', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -685,7 +683,7 @@ describe('CSV Execute Job', function() {
 
     it('should use custom uiSettings csv:separator for header', async function() {
       uiSettingsGetStub.withArgs('csv:separator').returns(';');
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -697,7 +695,7 @@ describe('CSV Execute Job', function() {
 
     it('should escape column headers if uiSettings csv:quoteValues is true', async function() {
       uiSettingsGetStub.withArgs('csv:quoteValues').returns(true);
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one and a half', 'two', 'three-and-four', 'five & six'],
@@ -709,7 +707,7 @@ describe('CSV Execute Job', function() {
 
     it(`shouldn't escape column headers if uiSettings csv:quoteValues is false`, async function() {
       uiSettingsGetStub.withArgs('csv:quoteValues').returns(false);
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one and a half', 'two', 'three-and-four', 'five & six'],
@@ -720,7 +718,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should write column headers to output, when there are results', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       callWithRequestStub.onFirstCall().resolves({
         hits: {
           hits: [{ one: '1', two: '2' }],
@@ -740,7 +738,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should use comma separated values of non-nested fields from _source', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       callWithRequestStub.onFirstCall().resolves({
         hits: {
           hits: [{ _source: { one: 'foo', two: 'bar' } }],
@@ -761,7 +759,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should concatenate the hits from multiple responses', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       callWithRequestStub.onFirstCall().resolves({
         hits: {
           hits: [{ _source: { one: 'foo', two: 'bar' } }],
@@ -789,7 +787,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should use field formatters to format fields', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       callWithRequestStub.onFirstCall().resolves({
         hits: {
           hits: [{ _source: { one: 'foo', two: 'bar' } }],
@@ -834,7 +832,7 @@ describe('CSV Execute Job', function() {
           .get.withArgs('xpack.reporting.csv.maxSizeBytes')
           .returns(1);
 
-        const executeJob = executeJobFactory(mockServer, mockLogger);
+        const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
         const jobParams = {
           headers: encryptedHeaders,
           fields: ['one', 'two'],
@@ -867,7 +865,7 @@ describe('CSV Execute Job', function() {
           .get.withArgs('xpack.reporting.csv.maxSizeBytes')
           .returns(9);
 
-        const executeJob = executeJobFactory(mockServer, mockLogger);
+        const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
         const jobParams = {
           headers: encryptedHeaders,
           fields: ['one', 'two'],
@@ -907,7 +905,7 @@ describe('CSV Execute Job', function() {
           _scroll_id: 'scrollId',
         });
 
-        const executeJob = executeJobFactory(mockServer, mockLogger);
+        const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
         const jobParams = {
           headers: encryptedHeaders,
           fields: ['one', 'two'],
@@ -948,7 +946,7 @@ describe('CSV Execute Job', function() {
           _scroll_id: 'scrollId',
         });
 
-        const executeJob = executeJobFactory(mockServer, mockLogger);
+        const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
         const jobParams = {
           headers: encryptedHeaders,
           fields: ['one', 'two'],
@@ -988,7 +986,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -1017,7 +1015,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -1046,7 +1044,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],

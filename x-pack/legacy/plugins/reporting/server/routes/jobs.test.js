@@ -43,18 +43,16 @@ beforeEach(() => {
     jobContentEncoding: 'base64',
     jobContentExtension: 'pdf',
   });
-  mockServer.plugins = {
-    elasticsearch: {
-      getCluster: memoize(() => ({ callWithInternalUser: jest.fn() })),
-      createCluster: () => ({
-        callWithRequest: jest.fn(),
-        callWithInternalUser: jest.fn(),
-      }),
-    },
-  };
 });
 
 const mockPlugins = {
+  elasticsearch: {
+    getCluster: memoize(() => ({ callWithInternalUser: jest.fn() })),
+    createCluster: () => ({
+      callWithRequest: jest.fn(),
+      callWithInternalUser: jest.fn(),
+    }),
+  },
   security: null,
 };
 
@@ -67,7 +65,7 @@ const getHits = (...sources) => {
 };
 
 test(`returns 404 if job not found`, async () => {
-  mockServer.plugins.elasticsearch
+  mockPlugins.elasticsearch
     .getCluster('admin')
     .callWithInternalUser.mockReturnValue(Promise.resolve(getHits()));
 
@@ -84,7 +82,7 @@ test(`returns 404 if job not found`, async () => {
 });
 
 test(`returns 401 if not valid job type`, async () => {
-  mockServer.plugins.elasticsearch
+  mockPlugins.elasticsearch
     .getCluster('admin')
     .callWithInternalUser.mockReturnValue(Promise.resolve(getHits({ jobtype: 'invalidJobType' })));
 
@@ -101,7 +99,7 @@ test(`returns 401 if not valid job type`, async () => {
 
 describe(`when job is incomplete`, () => {
   const getIncompleteResponse = async () => {
-    mockServer.plugins.elasticsearch
+    mockPlugins.elasticsearch
       .getCluster('admin')
       .callWithInternalUser.mockReturnValue(
         Promise.resolve(getHits({ jobtype: 'unencodedJobType', status: 'pending' }))
@@ -145,7 +143,7 @@ describe(`when job is failed`, () => {
       status: 'failed',
       output: { content: 'job failure message' },
     });
-    mockServer.plugins.elasticsearch
+    mockPlugins.elasticsearch
       .getCluster('admin')
       .callWithInternalUser.mockReturnValue(Promise.resolve(hits));
 
@@ -190,7 +188,7 @@ describe(`when job is completed`, () => {
         title,
       },
     });
-    mockServer.plugins.elasticsearch
+    mockPlugins.elasticsearch
       .getCluster('admin')
       .callWithInternalUser.mockReturnValue(Promise.resolve(hits));
 

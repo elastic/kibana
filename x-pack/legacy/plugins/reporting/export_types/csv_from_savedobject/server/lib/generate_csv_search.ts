@@ -15,6 +15,7 @@ import {
   SearchRequest,
   GenerateCsvParams,
 } from '../../../csv/types';
+import { ReportingSetupDeps } from '../../../../server/plugin';
 import {
   IndexPatternField,
   QueryFilter,
@@ -58,6 +59,7 @@ const getUiSettings = async (config: any) => {
 export async function generateCsvSearch(
   req: RequestFacade,
   server: ServerFacade,
+  elasticsearch: ReportingSetupDeps['elasticsearch'],
   logger: Logger,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
@@ -152,7 +154,8 @@ export async function generateCsvSearch(
       sort: sortConfig,
     },
   };
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+
+  const { callWithRequest } = elasticsearch.getCluster('data');
   const callCluster = (...params: [string, object]) => callWithRequest(req, ...params);
   const config = server.config();
   const uiSettings = await getUiSettings(uiConfig);

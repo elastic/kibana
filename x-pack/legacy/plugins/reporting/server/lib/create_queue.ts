@@ -11,6 +11,7 @@ import {
   QueueConfig,
   Logger,
 } from '../../types';
+import { ReportingSetupDeps } from '../plugin';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 import { createWorkerFactory } from './create_worker';
@@ -23,6 +24,7 @@ interface CreateQueueFactoryOpts {
 
 export function createQueueFactory(
   server: ServerFacade,
+  elasticsearch: ReportingSetupDeps['elasticsearch'],
   logger: Logger,
   { exportTypesRegistry, browserDriverFactory }: CreateQueueFactoryOpts
 ): Esqueue {
@@ -33,7 +35,7 @@ export function createQueueFactory(
     interval: queueConfig.indexInterval,
     timeout: queueConfig.timeout,
     dateSeparator: '.',
-    client: server.plugins.elasticsearch.getCluster('admin'),
+    client: elasticsearch.getCluster('admin'),
     logger: createTaggedLogger(logger, ['esqueue', 'queue-worker']),
   };
 
@@ -41,7 +43,7 @@ export function createQueueFactory(
 
   if (queueConfig.pollEnabled) {
     // create workers to poll the index for idle jobs waiting to be claimed and executed
-    const createWorker = createWorkerFactory(server, logger, {
+    const createWorker = createWorkerFactory(server, elasticsearch, logger, {
       exportTypesRegistry,
       browserDriverFactory,
     });

@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { cryptoFactory } from '../../../server/lib';
+import { ReportingSetupDeps } from '../../../server/plugin';
 import {
   ExecuteJobFactory,
   ImmediateExecuteFn,
@@ -21,7 +22,11 @@ import { createGenerateCsv } from './lib';
 
 export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
   JobParamsPanelCsv
->> = function executeJobFactoryFn(server: ServerFacade, parentLogger: Logger) {
+>> = function executeJobFactoryFn(
+  server: ServerFacade,
+  elasticsearch: ReportingSetupDeps['elasticsearch'],
+  parentLogger: Logger
+) {
   const crypto = cryptoFactory(server);
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
 
@@ -85,6 +90,7 @@ export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
       const generateResults: CsvResultFromSearch = await generateCsv(
         requestObject,
         server,
+        elasticsearch,
         visType as string,
         panel,
         jobParams

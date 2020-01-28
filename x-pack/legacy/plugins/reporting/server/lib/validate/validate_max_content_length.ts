@@ -6,13 +6,18 @@
 import numeral from '@elastic/numeral';
 import { defaults, get } from 'lodash';
 import { Logger, ServerFacade } from '../../../types';
+import { ReportingSetupDeps } from '../../plugin';
 
 const KIBANA_MAX_SIZE_BYTES_PATH = 'xpack.reporting.csv.maxSizeBytes';
 const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';
 
-export async function validateMaxContentLength(server: ServerFacade, logger: Logger) {
+export async function validateMaxContentLength(
+  server: ServerFacade,
+  elasticsearch: ReportingSetupDeps['elasticsearch'],
+  logger: Logger
+) {
   const config = server.config();
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('data');
+  const { callWithInternalUser } = elasticsearch.getCluster('data');
 
   const elasticClusterSettingsResponse = await callWithInternalUser('cluster.getSettings', {
     includeDefaults: true,

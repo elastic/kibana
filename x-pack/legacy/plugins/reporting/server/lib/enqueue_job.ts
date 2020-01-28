@@ -20,6 +20,7 @@ import {
   QueueConfig,
   ConditionalHeaders,
 } from '../../types';
+import { ReportingSetupDeps } from '../plugin';
 
 interface ConfirmedJob {
   id: string;
@@ -35,6 +36,7 @@ interface EnqueueJobFactoryOpts {
 
 export function enqueueJobFactory(
   server: ServerFacade,
+  elasticsearch: ReportingSetupDeps['elasticsearch'],
   parentLogger: Logger,
   { exportTypesRegistry, esqueue }: EnqueueJobFactoryOpts
 ): EnqueueJobFn {
@@ -61,7 +63,7 @@ export function enqueueJobFactory(
     }
 
     // TODO: the createJobFn should be unwrapped in the register method of the export types registry
-    const createJob = exportType.createJobFactory(server, logger) as CreateJobFn;
+    const createJob = exportType.createJobFactory(server, elasticsearch, logger) as CreateJobFn;
     const payload = await createJob(jobParams, headers, request);
 
     const options = {

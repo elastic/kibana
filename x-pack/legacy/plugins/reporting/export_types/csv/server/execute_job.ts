@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaRequest } from '../../../../../../../src/core/server';
 import { CSV_JOB_TYPE } from '../../../common/constants';
 import { cryptoFactory } from '../../../server/lib';
+import { ReportingSetupDeps } from '../../../server/plugin';
 import { ESQueueWorkerExecuteFn, ExecuteJobFactory, Logger, ServerFacade } from '../../../types';
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { fieldFormatMapFactory } from './lib/field_format_map';
@@ -15,8 +16,12 @@ import { createGenerateCsv } from './lib/generate_csv';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
->> = function executeJobFactoryFn(server: ServerFacade, parentLogger: Logger) {
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+>> = function executeJobFactoryFn(
+  server: ServerFacade,
+  elasticsearch: ReportingSetupDeps['elasticsearch'],
+  parentLogger: Logger
+) {
+  const { callWithRequest } = elasticsearch.getCluster('data');
   const crypto = cryptoFactory(server);
   const config = server.config();
   const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job']);

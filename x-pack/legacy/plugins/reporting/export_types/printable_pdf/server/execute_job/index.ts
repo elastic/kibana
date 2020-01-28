@@ -6,6 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { ReportingSetupDeps } from '../../../../server/plugin';
 import {
   ServerFacade,
   ExecuteJobFactory,
@@ -28,6 +29,7 @@ type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocP
 
 export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFactoryFn(
   server: ServerFacade,
+  elasticsearch: ReportingSetupDeps['elasticsearch'],
   parentLogger: Logger,
   { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
 ) {

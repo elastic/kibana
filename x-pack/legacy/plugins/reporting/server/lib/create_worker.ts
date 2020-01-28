@@ -7,6 +7,7 @@
 import { PLUGIN_ID } from '../../common/constants';
 import { ExportTypesRegistry, HeadlessChromiumDriverFactory } from '../../types';
 import { CancellationToken } from '../../common/cancellation_token';
+import { ReportingSetupDeps } from '../plugin';
 import {
   ESQueueInstance,
   QueueConfig,
@@ -29,6 +30,7 @@ interface CreateWorkerFactoryOpts {
 
 export function createWorkerFactory<JobParamsType>(
   server: ServerFacade,
+  elasticsearch: ReportingSetupDeps['elasticsearch'],
   logger: Logger,
   { exportTypesRegistry, browserDriverFactory }: CreateWorkerFactoryOpts
 ) {
@@ -50,7 +52,9 @@ export function createWorkerFactory<JobParamsType>(
       ExportTypeDefinition<JobParamsType, any, any, any>
     >) {
       // TODO: the executeJobFn should be unwrapped in the register method of the export types registry
-      const jobExecutor = exportType.executeJobFactory(server, logger, { browserDriverFactory });
+      const jobExecutor = exportType.executeJobFactory(server, elasticsearch, logger, {
+        browserDriverFactory,
+      });
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
 

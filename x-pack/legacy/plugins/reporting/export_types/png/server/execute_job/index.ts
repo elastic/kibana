@@ -7,6 +7,7 @@
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
+import { ReportingSetupDeps } from '../../../../server/plugin';
 import {
   ServerFacade,
   ExecuteJobFactory,
@@ -27,6 +28,7 @@ type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocP
 
 export const executeJobFactory: QueuedPngExecutorFactory = function executeJobFactoryFn(
   server: ServerFacade,
+  elasticsearch: ReportingSetupDeps['elasticsearch'],
   parentLogger: Logger,
   { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
 ) {
