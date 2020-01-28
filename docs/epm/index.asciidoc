@@ -107,7 +107,7 @@ Filtering for data in queries for example in visualizations or dashboards should
 Security permissions can be set on different levels. To set special permissions for the access on the prod namespace an index pattern as below can be used:
 
 ```
-/(logs|metrics)-[^-]+-prod-/
+/(logs|metrics)-[^-]+-prod-$/
 ```
 
 To set specific permissions on the logs index, the following can be used:
