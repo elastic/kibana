@@ -67,8 +67,12 @@ function usingWorkerProc<T>(
     (): ProcResource => {
       const proc = fork(require.resolve('./worker/run_worker'), [JSON.stringify(worker)], {
         stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
-        execArgv:
-          inspectFlag && config.inspectWorkers ? [`${inspectFlag}=${inspectPortCounter++}`] : [],
+        execArgv: [
+          ...(inspectFlag && config.inspectWorkers
+            ? [`${inspectFlag}=${inspectPortCounter++}`]
+            : []),
+          ...(config.workers.length <= 2 ? ['--max-old-space-size=2048'] : []),
+        ],
         env: {
           ...process.env,
           BROWSERSLIST_ENV: worker.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
