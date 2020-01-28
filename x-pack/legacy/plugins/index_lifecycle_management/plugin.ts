@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from './shim';
+import { CoreSetup } from 'kibana/server';
+import { LegacySetup } from './shim';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { registerIndexRoutes } from './server/routes/api/index';
 import { registerNodesRoutes } from './server/routes/api/nodes';
@@ -29,8 +30,8 @@ const indexLifecycleDataEnricher = async (indicesList: any, callWithRequest: any
 };
 
 export class Plugin {
-  public setup(core: CoreSetup): void {
-    const { server } = core;
+  public setup(core: CoreSetup, plugins: any, __LEGACY: LegacySetup): void {
+    const { server } = __LEGACY;
 
     registerLicenseChecker(server);
 
@@ -40,14 +41,14 @@ export class Plugin {
     registerPoliciesRoutes(server);
     registerTemplatesRoutes(server);
 
-    const plugins = server.plugins as any;
+    const serverPlugins = server.plugins as any;
 
     if (
       server.config().get('xpack.ilm.ui.enabled') &&
-      plugins.index_management &&
-      plugins.index_management.addIndexManagementDataEnricher
+      serverPlugins.index_management &&
+      serverPlugins.index_management.addIndexManagementDataEnricher
     ) {
-      plugins.index_management.addIndexManagementDataEnricher(indexLifecycleDataEnricher);
+      serverPlugins.index_management.addIndexManagementDataEnricher(indexLifecycleDataEnricher);
     }
   }
 }

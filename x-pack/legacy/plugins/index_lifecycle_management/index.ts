@@ -49,12 +49,14 @@ export function indexLifecycleManagement(kibana: any) {
       );
     },
     init(server: Legacy.Server) {
-      const { coreSetup } = createShim(server);
+      const core = server.newPlatform.setup.core;
+      const plugins = {};
+      const __LEGACY = createShim(server);
 
       const indexLifecycleManagementPlugin = new IndexLifecycleManagementPlugin();
 
       // Set up plugin.
-      indexLifecycleManagementPlugin.setup(coreSetup);
+      indexLifecycleManagementPlugin.setup(core, plugins, __LEGACY);
     },
   });
 }

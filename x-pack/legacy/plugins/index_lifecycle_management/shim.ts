@@ -6,14 +6,12 @@
 
 import { Legacy } from 'kibana';
 
-export interface CoreSetup {
+export interface LegacySetup {
   server: Legacy.Server;
 }
 
-export function createShim(server: Legacy.Server): { coreSetup: CoreSetup } {
+export function createShim(server: Legacy.Server): LegacySetup {
   return {
-    coreSetup: {
-      server,
-    },
+    server,
   };
 }
