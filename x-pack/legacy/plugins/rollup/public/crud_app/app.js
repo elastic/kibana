@@ -10,7 +10,7 @@ import { HashRouter, Switch, Route, Redirect, withRouter } from 'react-router-do
 
 import { UIM_APP_LOAD } from '../../common';
 import { CRUD_APP_BASE_PATH } from './constants';
-import { registerRouter, trackUiMetric, METRIC_TYPE } from './services';
+import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
 import { JobList, JobCreate } from './sections';
 
 class ShareRouterComponent extends Component {
@@ -43,6 +43,11 @@ const ShareRouter = withRouter(ShareRouterComponent);
 export class App extends Component {
   componentDidMount() {
     trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD);
+  }
+
+  componentWillUnmount() {
+    // Set internal flag so we can prevent reacting to route changes internally.
+    setUserHasLeftApp(true);
   }
 
   render() {

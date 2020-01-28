@@ -35,7 +35,13 @@ export { createNoticeableDelay } from './noticeable_delay';
 
 export { extractQueryParams } from './query_params';
 
-export { registerRouter, getRouter, getRouterLinkProps } from './routing';
+export {
+  setUserHasLeftApp,
+  getUserHasLeftApp,
+  registerRouter,
+  getRouter,
+  getRouterLinkProps,
+} from './routing';
 
 export { sortTable } from './sort_table';
 
