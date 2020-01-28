@@ -1,6 +1,5 @@
 {
   "id": "kibana_legacy",
-  "configPath": "kibana_new",
   "version": "kibana",
   "server": true,
   "ui": true

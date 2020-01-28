@@ -45,7 +45,7 @@ export type ConfigDeprecation = (
  * See {@link ConfigDeprecationFactory} for more usage examples.
  *
  * @example
- * ```ts
+ * ```typescript
  * const provider: ConfigDeprecationProvider = ({ rename, unused }) => [
  *   rename('oldKey', 'newKey'),
  *   unused('deprecatedKey'),
@@ -64,7 +64,7 @@ export type ConfigDeprecationProvider = (factory: ConfigDeprecationFactory) => C
  * See methods documentation for more detailed examples.
  *
  * @example
- * ```ts
+ * ```typescript
  * const provider: ConfigDeprecationProvider = ({ rename, unused }) => [
  *   rename('oldKey', 'newKey'),
  *   unused('deprecatedKey'),
@@ -79,8 +79,8 @@ export interface ConfigDeprecationFactory {
    * Will log a deprecation warning if the oldKey was found and deprecation applied.
    *
    * @example
-   * ```ts
-   * // Rename 'myplugin.oldKey' to 'myplugin.newKey'
+   * Rename 'myplugin.oldKey' to 'myplugin.newKey'
+   * ```typescript
    * const provider: ConfigDeprecationProvider = ({ rename }) => [
    *   rename('oldKey', 'newKey'),
    * ]
@@ -95,8 +95,8 @@ export interface ConfigDeprecationFactory {
    * To rename properties from inside a plugin's configuration, use 'rename' instead.
    *
    * @example
-   * ```ts
-   * // Rename 'oldplugin.key' to 'newplugin.key'
+   * Rename 'oldplugin.key' to 'newplugin.key'
+   * ```typescript
    * const provider: ConfigDeprecationProvider = ({ renameFromRoot }) => [
    *   renameFromRoot('oldplugin.key', 'newplugin.key'),
    * ]
@@ -108,8 +108,8 @@ export interface ConfigDeprecationFactory {
    * Will log a deprecation warning if the unused key was found and deprecation applied.
    *
    * @example
-   * ```ts
-   * // Flags 'myplugin.deprecatedKey' as unused
+   * Flags 'myplugin.deprecatedKey' as unused
+   * ```typescript
    * const provider: ConfigDeprecationProvider = ({ unused }) => [
    *   unused('deprecatedKey'),
    * ]
@@ -124,8 +124,8 @@ export interface ConfigDeprecationFactory {
    * To remove properties from inside a plugin's configuration, use 'unused' instead.
    *
    * @example
-   * ```ts
-   * // Flags 'somepath.deprecatedProperty' as unused
+   * Flags 'somepath.deprecatedProperty' as unused
+   * ```typescript
    * const provider: ConfigDeprecationProvider = ({ unusedFromRoot }) => [
    *   unusedFromRoot('somepath.deprecatedProperty'),
    * ]

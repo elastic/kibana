@@ -26,6 +26,10 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     defaultAppId: true,
   },
   schema: configSchema,
+  deprecations: ({ renameFromRoot }) => [
+    // TODO: Remove deprecation once defaultAppId is deleted
+    renameFromRoot('kibana.defaultAppId', 'kibana_legacy.defaultAppId'),
+  ],
 };
 
 class Plugin {
