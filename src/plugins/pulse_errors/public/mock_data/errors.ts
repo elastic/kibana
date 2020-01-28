@@ -19,7 +19,7 @@
 
 import moment from 'moment';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { PulseErrorInstructionValue } from '../channel';
+import { PulseErrorInstructionValue } from 'src/core/server/pulse/channel';
 
 export const errorChannelPayloads: PulseErrorInstructionValue[] = [
   {
@@ -31,27 +31,27 @@ export const errorChannelPayloads: PulseErrorInstructionValue[] = [
     currentKibanaVersion: 'v7.x',
     timestamp: moment().toDate(),
   },
-  {
-    channel_id: 'errors',
-    deployment_id: '123',
-    message: 'Error: [resource_already_exists_exception]',
-    hash: 'index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg] already exists',
-    status: 'seen',
-    currentKibanaVersion: 'v7.x',
-    timestamp: moment()
-      .subtract(1, 'days')
-      .toDate(),
-  },
-  {
-    channel_id: 'errors',
-    deployment_id: '123',
-    message: '[TypeError]: Component failed to mount',
-    hash: 'generic:arbitraryError 1QJURO2GRfqpFfuOp12rIg',
-    status: 'seen',
-    fixedVersion: 'v7.5.2',
-    currentKibanaVersion: 'v7.x',
-    timestamp: moment()
-      .subtract(60, 'seconds')
-      .toDate(),
-  },
+  // {
+  //   channel_id: 'errors',
+  //   deployment_id: '123',
+  //   message: 'Error: [resource_already_exists_exception]',
+  //   hash: 'index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg] already exists',
+  //   status: 'seen',
+  //   currentKibanaVersion: 'v7.x',
+  //   timestamp: moment()
+  //     .subtract(1, 'days')
+  //     .toDate(),
+  // },
+  // {
+  //   channel_id: 'errors',
+  //   deployment_id: '123',
+  //   message: '[TypeError]: Component failed to mount',
+  //   hash: 'generic:arbitraryError 1QJURO2GRfqpFfuOp12rIg',
+  //   status: 'seen',
+  //   fixedVersion: 'v7.5.2',
+  //   currentKibanaVersion: 'v7.x',
+  //   timestamp: moment()
+  //     .subtract(60, 'seconds')
+  //     .toDate(),
+  // },
 ];

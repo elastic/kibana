@@ -49,6 +49,7 @@ class Plugin {
     const errorPayload: ErrorPayload = {
       hash: error.message, // TODO: Find a way to hash the message
       message: error.message,
+      status: 'new',
     };
     try {
       await errorsChannel.sendPulse(errorPayload);

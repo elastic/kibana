@@ -40,11 +40,13 @@ export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseEr
       .subscribe(instructions => {
         if (instructions && instructions.length) {
           instructions.forEach(instruction => {
-            core.notifications.toasts.addError(new Error(JSON.stringify(instruction)), {
-              // @ts-ignore-next-line
-              title: `Error:${instruction.hash}`,
-              toastMessage: 'The error has been reported to Pulse',
-            });
+            // @ts-ignore-next-line
+            if (instruction.status === 'new')
+              core.notifications.toasts.addError(new Error(JSON.stringify(instruction)), {
+                // @ts-ignore-next-line
+                title: `Error:${instruction.hash}`,
+                toastMessage: 'The error has been reported to Pulse',
+              });
           });
         }
       });
