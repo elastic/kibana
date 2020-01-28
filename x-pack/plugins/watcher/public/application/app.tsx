@@ -34,6 +34,7 @@ import { WatchList } from './sections/watch_list/components/watch_list';
 import { registerRouter } from './lib/navigation';
 import { BASE_PATH } from './constants';
 import { AppContextProvider } from './app_context';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { children: any }) => {
   registerRouter({ history });
@@ -46,7 +47,7 @@ export interface AppDeps {
   toasts: ToastsSetup;
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
-  euiUtils: any;
+  theme: ChartsPluginSetup['theme'];
   createTimeBuckets: () => any;
   licenseStatus$: Observable<LicenseStatus>;
   MANAGEMENT_BREADCRUMB: any;

@@ -64,7 +64,6 @@ export default function(kibana) {
         'plugins/kibana/visualize/legacy',
         'plugins/kibana/dashboard/legacy',
       ],
-      savedObjectTypes: ['plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register'],
       app: {
         id: 'kibana',
         title: 'Kibana',
