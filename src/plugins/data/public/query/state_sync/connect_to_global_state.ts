@@ -66,16 +66,14 @@ export const connectToQueryGlobalState = <S extends QueryGlobalState>(
     filterManager
       .getUpdates$()
       .pipe(
-        map(() => filterManager.getGlobalFilters()), // we need to track only global filters here
-        filter(newGlobalFilters => {
-          // continue only if global filters changed
-          // and ignore app state filters
-          const oldGlobalFilters = globalState.get().filters;
-          return (
-            !oldGlobalFilters ||
-            !compareFilters(newGlobalFilters, oldGlobalFilters, COMPARE_ALL_OPTIONS)
-          );
-        })
+        // we need to track only global filters here
+        map(() => filterManager.getGlobalFilters()),
+        // continue only if global filters changed
+        // and ignore app state filters
+        filter(
+          newGlobalFilters =>
+            !compareFilters(newGlobalFilters, globalState.get().filters || [], COMPARE_ALL_OPTIONS)
+        )
       )
       .subscribe(newGlobalFilters => {
         globalState.set({ ...globalState.get(), filters: newGlobalFilters } as S);
