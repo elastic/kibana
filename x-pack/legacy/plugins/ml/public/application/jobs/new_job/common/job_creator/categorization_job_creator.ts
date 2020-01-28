@@ -100,6 +100,7 @@ export class CategorizationJobCreator extends JobCreator {
       delete this._job_config.analysis_config.categorization_field_name;
       this._categoryFieldExamples = [];
       this._validationChecks = [];
+      this._overallValidStatus = CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID;
     }
   }
 

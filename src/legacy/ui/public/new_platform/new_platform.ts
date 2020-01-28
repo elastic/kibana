@@ -27,7 +27,7 @@ import {
   Setup as InspectorSetup,
   Start as InspectorStart,
 } from '../../../../plugins/inspector/public';
-import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '../../../../plugins/charts/public';
 import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
@@ -42,6 +42,7 @@ import {
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
+  charts: ChartsPluginSetup;
   data: ReturnType<DataPlugin['setup']>;
   embeddable: IEmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
@@ -57,9 +58,9 @@ export interface PluginsSetup {
 
 export interface PluginsStart {
   bfetch: BfetchPublicStart;
+  charts: ChartsPluginStart;
   data: ReturnType<DataPlugin['start']>;
   embeddable: IEmbeddableStart;
-  eui_utils: EuiUtilsStart;
   expressions: ReturnType<ExpressionsPlugin['start']>;
   home: HomePublicPluginStart;
   inspector: InspectorStart;

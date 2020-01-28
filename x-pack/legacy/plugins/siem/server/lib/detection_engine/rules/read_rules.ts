@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Alert } from '../../../../../alerting/server/types';
+import { SanitizedAlert } from '../../../../../alerting/common';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
 import { ReadRuleParams, isAlertType } from './types';
@@ -21,7 +21,7 @@ export const readRules = async ({
   alertsClient,
   id,
   ruleId,
-}: ReadRuleParams): Promise<Alert | null> => {
+}: ReadRuleParams): Promise<SanitizedAlert | null> => {
   if (id != null) {
     try {
       const rule = await alertsClient.get({ id });

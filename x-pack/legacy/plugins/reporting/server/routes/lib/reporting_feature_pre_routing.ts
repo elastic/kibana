@@ -6,12 +6,15 @@
 
 import Boom from 'boom';
 import { Legacy } from 'kibana';
-import { ServerFacade } from '../../../types';
+import { Logger, ServerFacade } from '../../../types';
+import { ReportingSetupDeps } from '../../plugin';
 
 export type GetReportingFeatureIdFn = (request: Legacy.Request) => string;
 
 export const reportingFeaturePreRoutingFactory = function reportingFeaturePreRoutingFn(
-  server: ServerFacade
+  server: ServerFacade,
+  plugins: ReportingSetupDeps,
+  logger: Logger
 ) {
   const xpackMainPlugin = server.plugins.xpack_main;
   const pluginId = 'reporting';
@@ -20,7 +23,7 @@ export const reportingFeaturePreRoutingFactory = function reportingFeaturePreRou
   return function reportingFeaturePreRouting(getReportingFeatureId: GetReportingFeatureIdFn) {
     return function licensePreRouting(request: Legacy.Request) {
       const licenseCheckResults = xpackMainPlugin.info.feature(pluginId).getLicenseCheckResults();
-      const reportingFeatureId = getReportingFeatureId(request);
+      const reportingFeatureId = getReportingFeatureId(request) as string;
       const reportingFeature = licenseCheckResults[reportingFeatureId];
       if (!reportingFeature.showLinks || !reportingFeature.enableLinks) {
         throw Boom.forbidden(reportingFeature.message);

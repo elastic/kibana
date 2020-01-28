@@ -30,6 +30,7 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_RULES_STATUS_URL,
   DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
+  DETECTION_ENGINE_TAGS_URL,
 } from '../../../../common/constants';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
 
@@ -52,17 +53,21 @@ export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule>
 };
 
 /**
- * Fetches all rules or single specified rule from the Detection Engine API
+ * Fetches all rules from the Detection Engine API
  *
  * @param filterOptions desired filters (e.g. filter/sortField/sortOrder)
  * @param pagination desired pagination options (e.g. page/perPage)
  * @param signal to cancel request
+ *
  */
 export const fetchRules = async ({
   filterOptions = {
     filter: '',
-    sortField: 'name',
+    sortField: 'enabled',
     sortOrder: 'desc',
+    showCustomRules: false,
+    showElasticRules: false,
+    tags: [],
   },
   pagination = {
     page: 1,
@@ -71,12 +76,23 @@ export const fetchRules = async ({
   },
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
+  const filters = [
+    ...(filterOptions.filter.length ? [`alert.attributes.name: ${filterOptions.filter}`] : []),
+    ...(filterOptions.showCustomRules
+      ? [`alert.attributes.tags: "__internal_immutable:false"`]
+      : []),
+    ...(filterOptions.showElasticRules
+      ? [`alert.attributes.tags: "__internal_immutable:true"`]
+      : []),
+    ...(filterOptions.tags?.map(t => `alert.attributes.tags: ${t}`) ?? []),
+  ];
+
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
     sort_field: filterOptions.sortField,
     sort_order: filterOptions.sortOrder,
-    ...(filterOptions.filter ? { filter: `alert.attributes.name: ${filterOptions.filter}` } : {}),
+    ...(filters.length ? { filter: filters.join(' AND ') } : {}),
   };
 
   const response = await npStart.core.http.fetch<FetchRulesResponse>(
@@ -97,6 +113,8 @@ export const fetchRules = async ({
  * Fetch a Rule by providing a Rule ID
  *
  * @param id Rule ID's (not rule_id)
+ * @param signal to cancel request
+ *
  */
 export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> => {
   const response = await npStart.core.http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
@@ -297,6 +315,23 @@ export const getRuleStatusById = async ({
       asResponse: true,
     }
   );
+
+  await throwIfNotOk(response.response);
+  return response.body!;
+};
+
+/**
+ * Fetch all unique Tags used by Rules
+ *
+ * @param signal to cancel request
+ *
+ */
+export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> => {
+  const response = await npStart.core.http.fetch<string[]>(DETECTION_ENGINE_TAGS_URL, {
+    method: 'GET',
+    signal,
+    asResponse: true,
+  });
 
   await throwIfNotOk(response.response);
   return response.body!;

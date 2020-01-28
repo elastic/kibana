@@ -45,7 +45,6 @@ export const AppContainer: FunctionComponent<Props> = ({
   const [appNotFound, setAppNotFound] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef: MutableRefObject<AppUnmount | null> = useRef<AppUnmount>(null);
-  // const appStatus = useObservable(appStatus$);
 
   useLayoutEffect(() => {
     const unmount = () => {

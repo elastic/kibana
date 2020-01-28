@@ -30,7 +30,7 @@ export const NewRuleSchema = t.intersection([
     rule_id: t.string,
     saved_id: t.string,
     tags: t.array(t.string),
-    threats: t.array(t.unknown),
+    threat: t.array(t.unknown),
     to: t.string,
     updated_by: t.string,
   }),
@@ -73,7 +73,7 @@ export const RuleSchema = t.intersection([
     tags: t.array(t.string),
     type: t.string,
     to: t.string,
-    threats: t.array(t.unknown),
+    threat: t.array(t.unknown),
     updated_at: t.string,
     updated_by: t.string,
   }),
@@ -121,6 +121,9 @@ export interface FilterOptions {
   filter: string;
   sortField: string;
   sortOrder: 'asc' | 'desc';
+  showCustomRules?: boolean;
+  showElasticRules?: boolean;
+  tags?: string[];
 }
 
 export interface FetchRulesResponse {
@@ -198,6 +201,7 @@ export interface RuleInfoStatus {
 export type RuleStatusResponse = Record<string, RuleStatus>;
 
 export interface PrePackagedRulesStatusResponse {
+  rules_custom_installed: number;
   rules_installed: number;
   rules_not_installed: number;
   rules_not_updated: number;
