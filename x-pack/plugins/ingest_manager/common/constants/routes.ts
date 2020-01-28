@@ -36,5 +36,8 @@ export const AGENT_CONFIG_API_ROUTES = {
   DELETE_PATTERN: `${AGENT_CONFIG_API_ROOT}/delete`,
 };
 
-// Fleet API routes
-export const FLEET_API_ROUTES = {};
+// Fleet setup API routes
+export const FLEET_SETUP_API_ROUTES = {
+  INFO_PATTERN: `${FLEET_API_ROOT}/setup`,
+  CREATE_PATTERN: `${FLEET_API_ROOT}/setup`,
+};

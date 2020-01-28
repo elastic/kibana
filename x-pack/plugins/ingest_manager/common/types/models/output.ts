@@ -18,6 +18,8 @@ const OutputBaseSchema = {
   ingest_pipeline: schema.maybe(schema.string()),
   hosts: schema.maybe(schema.arrayOf(schema.string())),
   api_key: schema.maybe(schema.string()),
+  admin_username: schema.maybe(schema.string()),
+  admin_password: schema.maybe(schema.string()),
   config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 };
 

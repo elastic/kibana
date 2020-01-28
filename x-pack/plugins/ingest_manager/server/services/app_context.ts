@@ -5,14 +5,17 @@
  */
 import { ICustomClusterClient } from 'kibana/server';
 import { IngestManagerAppContext } from '../plugin';
+import { PluginStartContract as EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { PluginSetupContract as SecurityPluginSetup } from '../../../security/server';
 
 class AppContextService {
   private clusterClient: ICustomClusterClient | undefined;
+  private encryptedSavedObjects: EncryptedSavedObjectsPluginStart | undefined;
   private security: SecurityPluginSetup | undefined;
 
   public start(appContext: IngestManagerAppContext) {
     this.clusterClient = appContext.clusterClient;
+    this.encryptedSavedObjects = appContext.encryptedSavedObjects;
     this.security = appContext.security;
   }
 
@@ -24,6 +27,10 @@ class AppContextService {
 
   public getClusterClient() {
     return this.clusterClient;
+  }
+
+  public getEncryptedSavedObjects() {
+    return this.encryptedSavedObjects;
   }
 
   public getSecurity() {

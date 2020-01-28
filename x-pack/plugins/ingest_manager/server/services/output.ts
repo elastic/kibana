@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
 import { NewOutput, Output } from '../types';
 import { DEFAULT_OUTPUT, DEFAULT_OUTPUT_ID, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { configService } from './config';
@@ -12,7 +12,10 @@ import { appContextService } from './app_context';
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 class OutputService {
-  public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
+  public async createDefaultOutput(
+    soClient: SavedObjectsClientContract,
+    adminUser: { username: string; password: string }
+  ) {
     let defaultOutput;
 
     try {
@@ -26,8 +29,10 @@ class OutputService {
     if (!defaultOutput) {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
-        hosts: [configService.getConfig()?.fleet.defaultOutputHost],
-        api_key: await this.createDefaultOutputApiKey(),
+        hosts: [configService.getConfig()!.fleet.defaultOutputHost],
+        api_key: await this.createDefaultOutputApiKey(adminUser.username, adminUser.password),
+        admin_username: 'elastic',
+        admin_password: 'changeme',
       } as NewOutput;
 
       await this.create(soClient, newDefaultOutput, {
@@ -36,28 +41,43 @@ class OutputService {
     }
   }
 
-  private async createDefaultOutputApiKey(): Promise<string> {
-    const key = await appContextService
-      .getClusterClient()
-      ?.callAsInternalUser('transport.request', {
-        method: 'POST',
-        path: '/_security/api_key',
-        body: {
-          name: 'fleet-default-output',
-          role_descriptors: {
-            'fleet-output': {
-              cluster: ['monitor'],
-              index: [
-                {
-                  names: ['logs-*', 'metrics-*'],
-                  privileges: ['write'],
-                },
-              ],
-            },
+  public async getAdminUser() {
+    const so = await appContextService
+      .getEncryptedSavedObjects()
+      ?.getDecryptedAsInternalUser<Output>(OUTPUT_SAVED_OBJECT_TYPE, DEFAULT_OUTPUT_ID);
+
+    return {
+      username: so!.attributes.admin_username,
+      password: so!.attributes.admin_password,
+    };
+  }
+
+  // TODO: TEMPORARY this is going to be per agent
+  private async createDefaultOutputApiKey(username: string, password: string): Promise<string> {
+    const key = await appContextService.getSecurity()?.authc.createAPIKey(
+      {
+        headers: {
+          authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+        },
+      } as KibanaRequest,
+      {
+        name: 'fleet-default-output',
+        role_descriptors: {
+          'fleet-output': {
+            cluster: ['monitor'],
+            index: [
+              {
+                names: ['logs-*', 'metrics-*'],
+                privileges: ['write'],
+              },
+            ],
           },
         },
-      });
-
+      }
+    );
+    if (!key) {
+      throw new Error('An error occured while creating default API Key');
+    }
     return `${key.id}:${key.api_key}`;
   }
 

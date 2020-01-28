@@ -38,6 +38,8 @@ export const savedObjectMappings = {
       ingest_pipeline: { type: 'keyword' },
       hosts: { type: 'keyword' },
       api_key: { type: 'keyword' },
+      admin_username: { type: 'binary' },
+      admin_password: { type: 'binary' },
       config: { type: 'flattened' },
     },
   },

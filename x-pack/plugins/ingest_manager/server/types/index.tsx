@@ -30,6 +30,10 @@ export {
   UpdateAgentConfigRequestSchema,
   DeleteAgentConfigsRequestSchema,
   DeleteAgentConfigsResponse,
+  // Fleet setup schemas
+  GetFleetSetupRequestSchema,
+  CreateFleetSetupRequestSchema,
+  CreateFleetSetupResponse,
 } from '../../common';
 
 export type AgentConfigUpdateHandler = (
