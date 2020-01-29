@@ -75,13 +75,13 @@ export const getRollupSearchStrategy = (fetch: HttpSetup['fetch']): SearchStrate
     return {
       searching: promise.then(shimHitsInFetchResponse).catch(error => {
         const {
-          body: { statusText, error: title, message },
+          body: { statusCode, error: title, message },
           res: { url },
         } = error;
 
         // Format fetch error as a SearchError.
         const searchError = new SearchError({
-          status: statusText,
+          status: statusCode,
           title,
           message: `Rollup search error: ${message}`,
           path: url,
