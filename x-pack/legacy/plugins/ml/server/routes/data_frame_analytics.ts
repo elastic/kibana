@@ -23,6 +23,9 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
    * @api {get} /api/ml/data_frame/analytics Gets analytics data
    * @apiName GetDataFrameAnalytics
    * @apiGroup DataFrameAnalytics
+   *
+   * @apiSuccess {Number} count
+   * @apiSuccess {Object[]} data_frame_analytics
    */
   router.get(
     {
@@ -48,7 +51,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
    * @apiName GetDataFrameAnalyticsById
    * @apiGroup DataFrameAnalytics
    *
-   * @apiParam {String} [analyticsId] Analytics ID.
+   * @apiParam {String} analyticsId Analytics ID.
    */
   router.get(
     {
@@ -101,7 +104,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
    * @apiName GetDataFrameAnalyticsStatsById
    * @apiGroup DataFrameAnalytics
    *
-   * @apiParam {String} [analyticsId] Analytics ID.
+   * @apiParam {String} analyticsId Analytics ID.
    */
   router.get(
     {
@@ -133,7 +136,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
    * @apiName UpdateDataFrameAnalytics
    * @apiGroup DataFrameAnalytics
    *
-   * @apiParam {String} [analyticsId] Analytics ID.
+   * @apiParam {String} analyticsId Analytics ID.
    */
   router.put(
     {
@@ -198,13 +201,13 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
    * @apiName ExplainDataFrameAnalytics
    * @apiGroup DataFrameAnalytics
    *
-   * @apiSuccess {String} description
-   * @apiSuccess {Object} dest
-   * @apiSuccess {Object} source
-   * @apiSuccess {String} source.index
-   * @apiSuccess {Object} analysis
-   * @apiSuccess {Object} analyzed_fields
-   * @apiSuccess {String} model_memory_limit
+   * @apiParam {String} [description]
+   * @apiParam {Object} [dest]
+   * @apiParam {Object} source
+   * @apiParam {String} source.index
+   * @apiParam {Object} analysis
+   * @apiParam {Object} [analyzed_fields]
+   * @apiParam {String} [model_memory_limit]
    */
   router.post(
     {
@@ -235,7 +238,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
    * @apiName ExplainDataFrameAnalytics
    * @apiGroup DataFrameAnalytics
    *
-   * @apiParam {String} [analyticsId] Analytics ID.
+   * @apiParam {String} analyticsId Analytics ID.
    */
   router.delete(
     {
@@ -269,7 +272,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
    * @apiName StartDataFrameAnalyticsJob
    * @apiGroup DataFrameAnalytics
    *
-   * @apiParam {String} [analyticsId] Analytics ID.
+   * @apiParam {String} analyticsId Analytics ID.
    */
   router.post(
     {
@@ -300,7 +303,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
    * @apiName StopsDataFrameAnalyticsJob
    * @apiGroup DataFrameAnalytics
    *
-   * @apiParam {String} [analyticsId] Analytics ID.
+   * @apiParam {String} analyticsId Analytics ID.
    */
   router.post(
     {
@@ -341,7 +344,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
    * @apiName GetDataFrameAnalyticsMessages
    * @apiGroup DataFrameAnalytics
    *
-   * @apiParam {String} [analyticsId] Analytics ID.
+   * @apiParam {String} analyticsId Analytics ID.
    */
   router.get(
     {
