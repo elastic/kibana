@@ -1,5 +1,5 @@
-
 import { <%= upperCamelCaseName %>PublicPlugin } from './plugin';
+
 export function plugin() {
   return new <%= upperCamelCaseName %>PublicPlugin();
 }
