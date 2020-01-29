@@ -5,31 +5,24 @@
  */
 
 import { Reducer } from 'redux';
-import { EndpointListState } from './types';
+import { AlertListState } from '../../types';
 import { AppAction } from '../action';
 
-const initialState = (): EndpointListState => {
+const initialState = (): AlertListState => {
   return {
-    endpoints: [],
-    request_page_size: 10,
-    request_index: 0,
-    total: 0,
+    alerts: [],
   };
 };
 
-export const endpointListReducer: Reducer<EndpointListState, AppAction> = (
+export const alertListReducer: Reducer<AlertListState, AppAction> = (
   state = initialState(),
   action
 ) => {
-  if (action.type === 'serverReturnedEndpointList') {
+  if (action.type === 'serverReturnedAlertsData') {
     return {
       ...state,
-      ...action.payload,
+      alerts: action.payload,
     };
-  }
-
-  if (action.type === 'userExitedEndpointListPage') {
-    return initialState();
   }
 
   return state;
