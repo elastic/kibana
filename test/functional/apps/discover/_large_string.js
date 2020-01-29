@@ -79,6 +79,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     after(async () => {
+      await security.testUser.restoreDefaults();
       await esArchiver.unload('hamlet');
     });
   });

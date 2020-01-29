@@ -52,8 +52,9 @@ export default function({ getService, getPageObjects }) {
       expect(actualRowsText).to.eql(expectedRowsText);
     });
 
-    after(function unloadMakelogs() {
-      return esArchiver.unload('date_nanos_custom');
+    after(async function() {
+      await security.testUser.restoreDefaults();
+      await esArchiver.unload('date_nanos_custom');
     });
   });
 }

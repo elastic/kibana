@@ -239,15 +239,24 @@ export default async function({ readConfigFile }) {
           },
           kibana: [],
         },
+
+        kibana_time_zones: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['logstash-*'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
       },
 
-      defaultRoles: [
-        'test_logstash_reader',
-        'kibana_user',
-        'test_shakespeare_reader',
-        'test_testhuge_reader',
-        'test_alias_reader',
-      ],
+      defaultRoles: ['test_logstash_reader', 'kibana_user'],
     },
   };
 }

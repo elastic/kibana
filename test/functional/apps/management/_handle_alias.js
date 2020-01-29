@@ -23,10 +23,12 @@ export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
   const retry = getService('retry');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
 
   describe('Index patterns on aliases', function() {
     before(async function() {
+      await security.testUser.setRoles(['kibana_user', 'test_alias_reader']);
       await esArchiver.loadIfNeeded('alias');
       await esArchiver.load('empty_kibana');
       await es.indices.updateAliases({
@@ -83,6 +85,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     after(async () => {
+      await security.testUser.restoreDefaults();
       await esArchiver.unload('alias');
     });
   });
