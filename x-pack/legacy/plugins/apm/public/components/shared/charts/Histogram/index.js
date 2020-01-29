@@ -25,7 +25,7 @@ import { unit } from '../../../../style/variables';
 import Tooltip from '../Tooltip';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { tint } from 'polished';
-import { getTimezoneOffsetInMs } from '../CustomPlot/getTimezoneOffsetInMs';
+import { getTimeTicksTZ, getDomainTZ } from '../helper/timezone';
 
 const XY_HEIGHT = unit * 10;
 const XY_MARGIN = {
@@ -124,20 +124,13 @@ export class HistogramInner extends PureComponent {
       .range([XY_HEIGHT, 0])
       .nice();
 
-    const [xMinZone, xMaxZone] = [xMin, xMax].map(x => {
-      return x - getTimezoneOffsetInMs(x);
-    });
-
+    const [xMinZone, xMaxZone] = getDomainTZ(xMin, xMax);
     const xTickValues = isTimeSeries
-      ? d3.time.scale
-          .utc()
-          .domain([xMinZone, xMaxZone])
-          .range([0, XY_WIDTH])
-          .ticks(X_TICK_TOTAL)
-          .map(x => {
-            const time = x.getTime();
-            return new Date(time + getTimezoneOffsetInMs(time));
-          })
+      ? getTimeTicksTZ({
+          domain: [xMinZone, xMaxZone],
+          totalTicks: X_TICK_TOTAL,
+          width: XY_WIDTH
+        })
       : undefined;
 
     const xDomain = x.domain();
