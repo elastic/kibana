@@ -5,8 +5,15 @@
  */
 
 import moment from 'moment';
+import dateMath from '@elastic/datemath';
 
-import { generateId, parseInterval, getDriftTolerance, getGapBetweenRuns } from './utils';
+import {
+  generateId,
+  parseInterval,
+  parseScheduleDates,
+  getDriftTolerance,
+  getGapBetweenRuns,
+} from './utils';
 
 describe('utils', () => {
   let nowDate = moment('2020-01-01T00:00:00.000Z');
@@ -27,7 +34,7 @@ describe('utils', () => {
     });
   });
 
-  describe('getIntervalMilliseconds', () => {
+  describe('parseInterval', () => {
     test('it returns a duration when given one that is valid', () => {
       const duration = parseInterval('5m');
       expect(duration).not.toBeNull();
@@ -37,6 +44,34 @@ describe('utils', () => {
     test('it returns null given an invalid duration', () => {
       const duration = parseInterval('junk');
       expect(duration).toBeNull();
+    });
+  });
+
+  describe('parseScheduleDates', () => {
+    test('it returns a moment when given an ISO string', () => {
+      const result = parseScheduleDates('2020-01-01T00:00:00.000Z');
+      expect(result).not.toBeNull();
+      expect(result).toEqual(moment('2020-01-01T00:00:00.000Z'));
+    });
+
+    test('it returns a moment when given `now`', () => {
+      const result = parseScheduleDates('now');
+
+      expect(result).not.toBeNull();
+      expect(moment.isMoment(result)).toBeTruthy();
+    });
+
+    test('it returns a moment when given `now-x`', () => {
+      const result = parseScheduleDates('now-6m');
+
+      expect(result).not.toBeNull();
+      expect(moment.isMoment(result)).toBeTruthy();
+    });
+
+    test('it returns null when given a string that is not an ISO string, `now` or `now-x`', () => {
+      const result = parseScheduleDates('invalid');
+
+      expect(result).toBeNull();
     });
   });
 
