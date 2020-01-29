@@ -5,9 +5,6 @@
  */
 import { ReactNode, OptionHTMLAttributes } from 'react';
 
-import { FieldConfig } from './shared_imports';
-import { PARAMETERS_DEFINITION } from './constants';
-
 export interface DataTypeDefinition {
   label: string;
   value: DataType;
@@ -22,7 +19,7 @@ export interface DataTypeDefinition {
 export interface ParameterDefinition {
   title?: string;
   description?: JSX.Element | string;
-  fieldConfig: FieldConfig;
+  fieldConfig: any;
   schema?: any;
   props?: { [key: string]: ParameterDefinition };
   documentation?: {
@@ -140,10 +137,10 @@ export type ParameterName =
   | 'max_shingle_size';
 
 export interface Parameter {
-  fieldConfig: FieldConfig;
+  fieldConfig: any;
   paramName?: string;
   docs?: string;
-  props?: { [key: string]: FieldConfig };
+  props?: { [key: string]: any };
 }
 
 export interface Fields {
@@ -159,7 +156,7 @@ interface FieldBasic {
 }
 
 type FieldParams = {
-  [K in ParameterName]: typeof PARAMETERS_DEFINITION[K]['fieldConfig']['defaultValue'] | unknown;
+  [K in ParameterName]: unknown;
 };
 
 export type Field = FieldBasic & Partial<FieldParams>;
