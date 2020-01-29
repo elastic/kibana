@@ -45,7 +45,7 @@ headers, regardless of the `elasticsearch.requestHeadersWhitelist` configuration
 `elasticsearch.hosts:`:: *Default: `[ "http://localhost:9200" ]`* The URLs of the {es} instances to use for all your queries. All nodes
 listed here must be on the same cluster.
 +
-To enable SSL/TLS for outbound connections to {es}, use the `"https"` protocol in this setting.
+To enable SSL/TLS for outbound connections to {es}, use the `https` protocol in this setting.
 
 `elasticsearch.logQueries:`:: *Default: `false`* Logs queries sent to
 Elasticsearch. Requires `logging.verbose` set to `true`. This is useful for

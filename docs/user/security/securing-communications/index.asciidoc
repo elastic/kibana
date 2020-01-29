@@ -38,8 +38,8 @@ bin/elasticsearch-certutil csr -name kibana-server -dns some-website.com,www.som
 --------------------------------------------------------------------------------
 
 This will produce a ZIP archive named `kibana-server.zip`. Extract that archive to obtain the PEM-formatted CSR (`kibana-server.csr`) and
-unencrypted private key (`kibana-server.key`). In this example, the CSR has a common name (CN) of `"kibana-server"`, a SAN of
-`"some-website.com"`, and another SAN of `"www.some-website.com"`.
+unencrypted private key (`kibana-server.key`). In this example, the CSR has a common name (CN) of `kibana-server`, a SAN of
+`some-website.com`, and another SAN of `www.some-website.com`.
 
 NOTE: You will need to use a certificate authority (CA) to sign your CSR to obtain your server certificate. This certificate's signature
 will be verified by web browsers that are configured to trust the CA.
@@ -188,5 +188,5 @@ verification. For more information about this setting, see <<settings,{kib} conf
 --
 
 If the Elastic {monitor-features} are enabled and you have set up a separate {es} monitoring cluster, you can also configure {kib} to
-connect to the monitoring cluster via HTTPS. The steps are the same as above, but each setting is prefixed by `"xpack.monitoring."`. For
+connect to the monitoring cluster via HTTPS. The steps are the same as above, but each setting is prefixed by `xpack.monitoring.`. For
 example, `xpack.monitoring.elasticsearch.hosts`, `xpack.monitoring.elasticsearch.ssl.truststore.path`, etc.
