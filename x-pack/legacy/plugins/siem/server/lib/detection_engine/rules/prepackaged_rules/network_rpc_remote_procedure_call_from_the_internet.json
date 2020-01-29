@@ -29,7 +29,7 @@
         {
           "id": "T1190",
           "name": "Exploit Public-Facing Application",
-          "reference": "https://attack.mitre.org/techniques/T1043/"
+          "reference": "https://attack.mitre.org/techniques/T1190/"
         }
       ]
     }
