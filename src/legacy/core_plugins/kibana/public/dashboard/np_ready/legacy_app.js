@@ -57,11 +57,6 @@ export function initDashboardApp(app, deps) {
     addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
   }
 
-  app.config(stateManagementConfigProvider => {
-    // Dashboard state management is handled by state containers and state_sync utilities
-    stateManagementConfigProvider.disable();
-  });
-
   app.config(function($routeProvider) {
     const defaults = {
       reloadOnSearch: false,
