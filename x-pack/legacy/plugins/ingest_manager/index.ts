@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { savedObjectMappings } from '../../../plugins/ingest_manager/server';
+import {
+  savedObjectMappings,
+  OUTPUT_SAVED_OBJECT_TYPE,
+  AGENT_CONFIG_SAVED_OBJECT_TYPE,
+  DATASOURCE_SAVED_OBJECT_TYPE,
+} from '../../../plugins/ingest_manager/server';
 
 // TODO https://github.com/elastic/kibana/issues/46373
 // const INDEX_NAMES = {
@@ -15,7 +20,15 @@ export function ingestManager(kibana: any) {
     id: 'ingestManager',
     uiExports: {
       savedObjectSchemas: {
-        agent_configs: {
+        [AGENT_CONFIG_SAVED_OBJECT_TYPE]: {
+          isNamespaceAgnostic: true,
+          // indexPattern: INDEX_NAMES.INGEST,
+        },
+        [OUTPUT_SAVED_OBJECT_TYPE]: {
+          isNamespaceAgnostic: true,
+          // indexPattern: INDEX_NAMES.INGEST,
+        },
+        [DATASOURCE_SAVED_OBJECT_TYPE]: {
           isNamespaceAgnostic: true,
           // indexPattern: INDEX_NAMES.INGEST,
         },
