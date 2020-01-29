@@ -6,7 +6,7 @@
 
 import Hapi from 'hapi';
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchServiceSetup, KibanaRequest } from '../../../../../../../src/core/server';
+import { ElasticsearchServiceSetup, KibanaRequest } from 'kibana/server';
 import { CSV_JOB_TYPE } from '../../../common/constants';
 import { cryptoFactory } from '../../../server/lib';
 import { ESQueueWorkerExecuteFn, ExecuteJobFactory, Logger, ServerFacade } from '../../../types';

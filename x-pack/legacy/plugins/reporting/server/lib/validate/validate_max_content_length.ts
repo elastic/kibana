@@ -5,7 +5,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { CoreSetup } from 'src/core/server';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { defaults, get } from 'lodash';
 import { Logger, ServerFacade } from '../../../types';
 
@@ -14,7 +14,7 @@ const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';
 
 export async function validateMaxContentLength(
   server: ServerFacade,
-  elasticsearch: CoreSetup['elasticsearch'],
+  elasticsearch: ElasticsearchServiceSetup,
   logger: Logger
 ) {
   const config = server.config();

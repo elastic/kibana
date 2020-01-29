@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest, ElasticsearchServiceSetup } from '../../../../../../../../src/core/server';
+import { KibanaRequest, ElasticsearchServiceSetup } from 'kibana/server';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import { ServerFacade, RequestFacade, Logger } from '../../../../types';

@@ -5,9 +5,9 @@
  */
 
 import { errors as elasticsearchErrors } from 'elasticsearch';
-import { get } from 'lodash';
 import { ElasticsearchServiceSetup } from 'kibana/server';
-import { ServerFacade, JobSource } from '../../types';
+import { get } from 'lodash';
+import { JobSource, ServerFacade } from '../../types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 const defaultSize = 10;

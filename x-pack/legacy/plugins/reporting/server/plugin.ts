@@ -70,10 +70,13 @@ export function reportingPluginFactory(
 
     public async setup(core: CoreSetup, plugins: ReportingSetupDeps): Promise<ReportingSetup> {
       const exportTypesRegistry = getExportTypesRegistry();
+      const {
+        usageCollection,
+        core: { elasticsearch },
+      } = plugins;
 
       let isCollectorReady = false;
       // Register a function with server to manage the collection of usage stats
-      const { usageCollection } = plugins;
       registerReportingUsageCollector(
         usageCollection,
         __LEGACY,
@@ -85,7 +88,7 @@ export function reportingPluginFactory(
       const browserDriverFactory = await createBrowserDriverFactory(__LEGACY, logger);
 
       logConfiguration(__LEGACY, logger);
-      runValidations(__LEGACY, core.elasticsearch, logger, browserDriverFactory);
+      runValidations(__LEGACY, elasticsearch, logger, browserDriverFactory);
 
       const { xpack_main: xpackMainPlugin } = __LEGACY.plugins;
       mirrorPluginStatus(xpackMainPlugin, legacyPlugin);
