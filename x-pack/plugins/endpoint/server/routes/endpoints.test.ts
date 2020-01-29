@@ -120,4 +120,82 @@ describe('test endpoint route', () => {
     expect(endpointResultList.request_page_index).toEqual(10);
     expect(endpointResultList.request_page_size).toEqual(10);
   });
+
+  describe('Endpoint Details route', () => {
+    it('should return 404 on no results', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest({ params: { id: 'BADID' } });
+      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
+        Promise.resolve({
+          took: 3,
+          timed_out: false,
+          _shards: {
+            total: 1,
+            successful: 1,
+            skipped: 0,
+            failed: 0,
+          },
+          hits: {
+            total: {
+              value: 9,
+              relation: 'eq',
+            },
+            max_score: null,
+            hits: [],
+          },
+        })
+      );
+      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+        path.startsWith('/api/endpoint/endpoints')
+      )!;
+
+      await routeHandler(
+        ({
+          core: {
+            elasticsearch: {
+              dataClient: mockScopedClient,
+            },
+          },
+        } as unknown) as RequestHandlerContext,
+        mockRequest,
+        mockResponse
+      );
+
+      expect(mockScopedClient.callAsCurrentUser).toBeCalled();
+      expect(routeConfig.options).toEqual({ authRequired: true });
+      expect(mockResponse.notFound).toBeCalled();
+      const message = mockResponse.notFound.mock.calls[0][0]?.body;
+      expect(message).toEqual('Endpoint Not Found');
+    });
+
+    it('should return a single endpoint', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: data.hits.hits[0]._id },
+      });
+      const response: SearchResponse<EndpointMetadata> = (data as unknown) as SearchResponse<
+        EndpointMetadata
+      >;
+      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
+      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+        path.startsWith('/api/endpoint/endpoints')
+      )!;
+
+      await routeHandler(
+        ({
+          core: {
+            elasticsearch: {
+              dataClient: mockScopedClient,
+            },
+          },
+        } as unknown) as RequestHandlerContext,
+        mockRequest,
+        mockResponse
+      );
+
+      expect(mockScopedClient.callAsCurrentUser).toBeCalled();
+      expect(routeConfig.options).toEqual({ authRequired: true });
+      expect(mockResponse.ok).toBeCalled();
+      const result = mockResponse.ok.mock.calls[0][0]?.body as EndpointMetadata;
+      expect(result).toHaveProperty('endpoint');
+    });
+  });
 });
