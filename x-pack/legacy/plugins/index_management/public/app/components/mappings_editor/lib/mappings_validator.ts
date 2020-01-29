@@ -261,11 +261,11 @@ export const validateMappingsConfiguration = (
     });
   }
 
-  if (Boolean(unknownConfigurationParameters.length)) {
+  if (unknownConfigurationParameters.length > 0) {
     unknownConfigurationParameters.forEach(configName => configurationRemoved.add(configName));
   }
 
-  if (Boolean(unknownSourceConfigurationParameters.length)) {
+  if (unknownSourceConfigurationParameters.length > 0) {
     configurationRemoved.add('_source');
     delete copyOfMappingsConfig._source;
   }

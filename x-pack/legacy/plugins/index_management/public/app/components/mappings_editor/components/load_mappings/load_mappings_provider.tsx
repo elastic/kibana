@@ -173,15 +173,15 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
       hasCustomType = true;
       isMultiTypeMappings = Object.keys(unparsed).length > 1;
     }
-    // If all root level keys are *valid* parameters BUT they are all plain object which *also* has ALL valid config parameter
-    // we can assume that they are custom-type whose name matches a mappings definition parameter.
-    // This takes care of the case where a custom type would be "dynamic" for example which is a mappings configuration param.
+    // If all root level keys are *valid* parameters BUT they are all plain objects which *also* have ALL valid mappings config parameter
+    // we can assume that they are custom types whose name matches a mappings configuration parameter.
+    // This is to handle the case where a custom type would be for example "dynamic" which is a mappings configuration parameter.
     else if (areAllKeysValid && areAllValuesPlainObjects && areAllValuesObjKeysValidParameterName) {
       hasCustomType = true;
       isMultiTypeMappings = Object.keys(unparsed).length > 1;
     }
 
-    if (hasCustomType) {
+    if (hasCustomType && !isMultiTypeMappings) {
       customType = Object.keys(unparsed)[0];
     }
 
