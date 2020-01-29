@@ -8,8 +8,9 @@ import React from 'react';
 import { DEFAULT_ICON } from '../../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getOtherCategoryLabel } from '../../style_util';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { IconSelect } from './icon_select';
+import { StopInput } from '../stop_input';
 
 function isDuplicateStop(targetStop, iconStops) {
   const stops = iconStops.filter(({ stop }) => {
@@ -23,7 +24,13 @@ const DEFAULT_ICON_STOPS = [
   { stop: '', icon: DEFAULT_ICON },
 ];
 
-export function IconStops({ iconStops = DEFAULT_ICON_STOPS, isDarkMode, onChange, symbolOptions }) {
+export function IconStops({
+  getValueSuggestions,
+  iconStops = DEFAULT_ICON_STOPS,
+  isDarkMode,
+  onChange,
+  symbolOptions,
+}) {
   return iconStops.map(({ stop, icon }, index) => {
     const onIconSelect = selectedIconId => {
       const newIconStops = [...iconStops];
@@ -33,8 +40,7 @@ export function IconStops({ iconStops = DEFAULT_ICON_STOPS, isDarkMode, onChange
       };
       onChange({ customMapStops: newIconStops });
     };
-    const onStopChange = e => {
-      const newStopValue = e.target.value;
+    const onStopChange = newStopValue => {
       const newIconStops = [...iconStops];
       newIconStops[index] = {
         ...iconStops[index],
@@ -95,7 +101,8 @@ export function IconStops({ iconStops = DEFAULT_ICON_STOPS, isDarkMode, onChange
         <div>
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
             <EuiFlexItem>
-              <EuiFieldText
+              <StopInput
+                getValueSuggestions={getValueSuggestions}
                 aria-label={i18n.translate('xpack.maps.styles.iconStops.stopInputAriaLabel', {
                   defaultMessage: 'Icon stop',
                 })}

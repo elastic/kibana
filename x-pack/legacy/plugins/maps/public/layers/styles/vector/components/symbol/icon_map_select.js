@@ -13,6 +13,7 @@ import { IconStops } from './icon_stops';
 
 export function IconMapSelect({
   customIconStops,
+  getValueSuggestions,
   iconPaletteId,
   isDarkMode,
   onChange,
@@ -30,6 +31,7 @@ export function IconMapSelect({
   function renderCustomIconStopsInput(onCustomMapChange) {
     return (
       <IconStops
+        getValueSuggestions={getValueSuggestions}
         iconStops={customIconStops}
         isDarkMode={isDarkMode}
         onChange={onCustomMapChange}

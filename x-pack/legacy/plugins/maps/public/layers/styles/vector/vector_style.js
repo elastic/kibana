@@ -160,6 +160,8 @@ export class VectorStyle extends AbstractStyle {
       styleProperties[styleProperty.getStyleName()] = styleProperty;
     });
 
+    this._source.getValueSuggestions('machine.os.keyword', '');
+
     return (
       <VectorStyleEditor
         handlePropertyChange={handlePropertyChange}
@@ -612,6 +614,7 @@ export class VectorStyle extends AbstractStyle {
         field,
         this._getFieldMeta,
         this._getFieldFormatter,
+        this._source.getValueSuggestions,
         isSymbolizedAsIcon
       );
     } else {
@@ -631,7 +634,8 @@ export class VectorStyle extends AbstractStyle {
         styleName,
         field,
         this._getFieldMeta,
-        this._getFieldFormatter
+        this._getFieldFormatter,
+        this._source.getValueSuggestions
       );
     } else {
       throw new Error(`${descriptor} not implemented`);
@@ -663,7 +667,8 @@ export class VectorStyle extends AbstractStyle {
         VECTOR_STYLES.LABEL_TEXT,
         field,
         this._getFieldMeta,
-        this._getFieldFormatter
+        this._getFieldFormatter,
+        this._source.getValueSuggestions
       );
     } else {
       throw new Error(`${descriptor} not implemented`);
@@ -682,7 +687,8 @@ export class VectorStyle extends AbstractStyle {
         VECTOR_STYLES.ICON,
         field,
         this._getFieldMeta,
-        this._getFieldFormatter
+        this._getFieldFormatter,
+        this._source.getValueSuggestions
       );
     } else {
       throw new Error(`${descriptor} not implemented`);

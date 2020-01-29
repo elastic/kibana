@@ -43,8 +43,16 @@ function getSymbolSizeIcons() {
 }
 
 export class DynamicSizeProperty extends DynamicStyleProperty {
-  constructor(options, styleName, field, getFieldMeta, getFieldFormatter, isSymbolizedAsIcon) {
-    super(options, styleName, field, getFieldMeta, getFieldFormatter);
+  constructor(
+    options,
+    styleName,
+    field,
+    getFieldMeta,
+    getFieldFormatter,
+    getValueSuggestions,
+    isSymbolizedAsIcon
+  ) {
+    super(options, styleName, field, getFieldMeta, getFieldFormatter, getValueSuggestions);
     this._isSymbolizedAsIcon = isSymbolizedAsIcon;
   }
 
