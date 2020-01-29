@@ -49,7 +49,7 @@
       },
       "technique": [
         {
-          "id": "T1043",
+          "id": "T1048",
           "name": "Exfiltration Over Alternative Protocol",
           "reference": "https://attack.mitre.org/techniques/T1048/"
         }
