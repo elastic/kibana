@@ -130,6 +130,9 @@ export class CreateSourceEditor extends Component {
       return null;
     }
 
+    const fields = this.state.indexPattern
+      ? getAggregatableGeoFields(this.state.indexPattern.fields)
+      : undefined;
     return (
       <Fragment>
         <EuiFormRow
@@ -143,11 +146,7 @@ export class CreateSourceEditor extends Component {
             })}
             value={this.state.sourceGeoField}
             onChange={this._onSourceGeoSelect}
-            fields={
-              this.state.indexPattern
-                ? getAggregatableGeoFields(this.state.indexPattern.fields)
-                : undefined
-            }
+            fields={fields}
           />
         </EuiFormRow>
 
@@ -162,11 +161,7 @@ export class CreateSourceEditor extends Component {
             })}
             value={this.state.destGeoField}
             onChange={this._onDestGeoSelect}
-            fields={
-              this.state.indexPattern
-                ? getAggregatableGeoFields(this.state.indexPattern.fields)
-                : undefined
-            }
+            fields={fields}
           />
         </EuiFormRow>
       </Fragment>
