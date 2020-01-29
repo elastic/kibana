@@ -102,7 +102,7 @@ export async function getTile({
     server.log('info', `feature length ${featureCollection.features.length}`);
 
     const tileIndex = geojsonvt(featureCollection, {
-      maxZoom: 14, // max zoom to preserve detail on; can't be higher than 24
+      maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24
       tolerance: 3, // simplification tolerance (higher means simpler)
       extent: 4096, // tile extent (both width and height)
       buffer: 64, // tile buffer on each side

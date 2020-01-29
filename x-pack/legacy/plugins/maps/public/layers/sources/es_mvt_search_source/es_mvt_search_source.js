@@ -66,6 +66,9 @@ export class ESMVTSearchSource extends ESSearchSource {
     return `../${GIS_API_PATH}/${MVT_GETTILE_API_PATH}?x={x}&y={y}&z={z}&geometryFieldName=${geometryFieldBame}&indexPattern=${ipTitle}&fields=${fieldsParam}`;
   }
 
+  getMvtSourceLayer() {
+    return 'geojsonLayer';
+  }
   _createDefaultLayerDescriptor(options) {
     const tvl = TiledVectorLayer.createDescriptor({
       sourceDescriptor: this._descriptor,

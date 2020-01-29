@@ -8,10 +8,6 @@ import _ from 'lodash';
 import { RGBAImage } from './image_utils';
 
 export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
-
-  // console.log('dont remove orphaned');
-  // return;
-
   const mbStyle = mbMap.getStyle();
 
   const mbLayerIdsToRemove = [];
@@ -20,16 +16,10 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
       return layer.ownsMbLayerId(mbLayer.id);
     });
     if (!layer) {
-      // if (mbLayer.id.startsWith('foobar')){
-      //   console.log('dont remove', mbLayer.id);
-      //   return;
-      // }
       mbLayerIdsToRemove.push(mbLayer.id);
     }
   });
   mbLayerIdsToRemove.forEach(mbLayerId => mbMap.removeLayer(mbLayerId));
-
-  return;
 
   const mbSourcesToRemove = [];
   for (const mbSourceId in mbStyle.sources) {
@@ -38,10 +28,6 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
         return layer.ownsMbSourceId(mbSourceId);
       });
       if (!layer) {
-        // if (mbSourceId.startsWith('foobar')){
-        //   console.log('dont remove', mbSourceId);
-        //   return;
-        // }
         mbSourcesToRemove.push(mbSourceId);
       }
     }
@@ -56,9 +42,6 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
  * @param layerList
  */
 export function syncLayerOrderForSingleLayer(mbMap, layerList) {
-
-  return;
-
   if (!layerList || layerList.length === 0) {
     return;
   }

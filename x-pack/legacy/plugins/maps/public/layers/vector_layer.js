@@ -732,26 +732,34 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  _setMbLinePolygonProperties(mbMap) {
+  _setMbLinePolygonProperties(mbMap, {mvtSourceLayer}) {
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
     const hasJoins = this._hasJoins();
     if (!mbMap.getLayer(fillLayerId)) {
-      mbMap.addLayer({
+      const mbLayer = {
         id: fillLayerId,
         type: 'fill',
         source: sourceId,
         paint: {},
-      });
+      };
+      if (mvtSourceLayer) {
+        mbLayer['source-layer'] = mvtSourceLayer;
+      }
+      mbMap.addLayer(mbLayer);
     }
     if (!mbMap.getLayer(lineLayerId)) {
-      mbMap.addLayer({
+      const mbLayer = {
         id: lineLayerId,
         type: 'line',
         source: sourceId,
         paint: {},
-      });
+      }
+      if (mvtSourceLayer) {
+        mbLayer['source-layer'] = mvtSourceLayer;
+      }
+      mbMap.addLayer(mbLayer);
     }
     this._style.setMBPaintProperties({
       alpha: this.getAlpha(),
@@ -776,8 +784,8 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _syncStylePropertiesWithMb(mbMap) {
-    this._setMbPointsProperties(mbMap);
-    this._setMbLinePolygonProperties(mbMap);
+    this._setMbPointsProperties(mbMap, {});
+    this._setMbLinePolygonProperties(mbMap, {});
   }
 
   _syncSourceBindingWithMb(mbMap) {
