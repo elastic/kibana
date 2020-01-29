@@ -21,7 +21,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { I18nStart } from 'kibana/public';
-import { Vis, VisParams, SearchSource } from './legacy_imports';
+import { SearchSource } from './legacy_imports';
 
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
@@ -31,6 +31,7 @@ import { RangeControl } from './control/range_control_factory';
 import { ListControl } from './control/list_control_factory';
 import { InputControlVisDependencies } from './plugin';
 import { FilterManager, esFilters } from '../../../../plugins/data/public';
+import { VisParams, Vis } from '../../visualizations/public';
 
 export const createInputControlVisController = (deps: InputControlVisDependencies) => {
   return class InputControlVisController {
