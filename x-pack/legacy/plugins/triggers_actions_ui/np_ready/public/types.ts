@@ -71,6 +71,7 @@ export interface ActionConnectorTableItem extends ActionConnector {
 export interface AlertType {
   id: string;
   name: string;
+  actionGroups: string[];
 }
 
 export type AlertWithoutId = Omit<Alert, 'id'>;

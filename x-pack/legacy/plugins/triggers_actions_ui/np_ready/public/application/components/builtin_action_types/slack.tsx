@@ -168,10 +168,15 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           fullWidth
           isInvalid={errors.message.length > 0 && message !== undefined}
           name="message"
-          value={message}
+          value={message || ''}
           data-test-subj="slackMessageTextarea"
           onChange={e => {
             editAction('message', e.target.value, index);
+          }}
+          onBlur={() => {
+            if (!message) {
+              editAction('message', '', index);
+            }
           }}
         />
       </EuiFormRow>

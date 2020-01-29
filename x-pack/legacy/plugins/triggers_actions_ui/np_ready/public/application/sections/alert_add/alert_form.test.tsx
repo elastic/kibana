@@ -13,7 +13,6 @@ import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ValidationResult, Alert } from '../../../types';
 import { AlertForm } from './alert_form';
 import { AppContextProvider } from '../../app_context';
-import { AlertsContextProvider } from '../../context/alerts_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 
@@ -109,17 +108,7 @@ describe('alert_form', () => {
     await act(async () => {
       wrapper = mountWithIntl(
         <AppContextProvider appDeps={deps}>
-          <AlertsContextProvider
-            value={{
-              reloadAlerts: () => {
-                return new Promise<void>(() => {});
-              },
-              addFlyoutVisible: true,
-              setAddFlyoutVisibility: () => {},
-            }}
-          >
-            <AlertForm initialAlert={initialAlert} setFlyoutVisibility={() => {}} />
-          </AlertsContextProvider>
+          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{}} serverError={null} />
         </AppContextProvider>
       );
     });
