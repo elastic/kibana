@@ -17,9 +17,9 @@
  * under the License.
  */
 import { first } from 'rxjs/operators';
-import { Cluster } from './lib/cluster';
-import { createProxy } from './lib/create_proxy';
-import { handleESError } from './lib/handle_es_error';
+import { Cluster } from './server/lib/cluster';
+import { createProxy } from './server/lib/create_proxy';
+import { handleESError } from './server/lib/handle_es_error';
 import { versionHealthCheck } from './lib/version_health_check';
 
 export default function(kibana) {

@@ -84,7 +84,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
             const coreClients = {
               config,
               adminClient: this.createClusterClient('admin', config),
-              dataClient: this.createClusterClient('data', config, deps.http.auth.getAuthHeaders),
+              dataClient: this.createClusterClient('data', config, deps.http.getAuthHeaders),
             };
 
             subscriber.next(coreClients);
@@ -186,7 +186,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
 
       createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
         const finalConfig = merge({}, config, clientConfig);
-        return this.createClusterClient(type, finalConfig, deps.http.auth.getAuthHeaders);
+        return this.createClusterClient(type, finalConfig, deps.http.getAuthHeaders);
       },
     };
   }

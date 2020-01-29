@@ -20,7 +20,6 @@
 import 'angular';
 import '../chrome';
 import '../config';
-import '../es';
 import '../notify';
 import '../private';
 import '../promises';

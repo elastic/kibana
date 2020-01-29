@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import { LayerControl } from './view';
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { updateFlyout, setIsLayerTOCOpen } from '../../../actions/ui_actions';
+import { setSelectedLayer } from '../../../actions/map_actions';
 import {
   getIsReadOnly,
   getIsLayerTOCOpen,
@@ -26,7 +27,8 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    showAddLayerWizard: () => {
+    showAddLayerWizard: async () => {
+      await dispatch(setSelectedLayer(null));
       dispatch(updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD));
     },
     closeLayerTOC: () => {
