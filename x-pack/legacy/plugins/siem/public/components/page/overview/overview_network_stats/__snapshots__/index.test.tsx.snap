@@ -4,6 +4,9 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
 <styled.div
   data-test-subj="overview-network-stats"
 >
+  <EuiHorizontalRule
+    margin="xs"
+  />
   <EuiAccordion
     buttonContent={
       <ForwardRef
@@ -24,7 +27,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
         <EuiFlexItem
           grow={false}
         >
-          <Memo(StatValue)
+          <Memo(StatValueComponent)
             count={12}
             isGroupStat={true}
             isLoading={false}
@@ -38,38 +41,40 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
     initialIsOpen={false}
     paddingSize="none"
   >
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      key="auditbeatSocket"
-    >
-      <EuiFlexItem
-        grow={false}
+    <styled.div>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        key="auditbeatSocket"
       >
-        <EuiText
-          color="subdued"
-          size="s"
+        <EuiFlexItem
+          grow={false}
         >
-          <styled.div>
-            <FormattedMessage
-              defaultMessage="Socket"
-              id="xpack.siem.overview.auditBeatSocketTitle"
-              values={Object {}}
-            />
-          </styled.div>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="network-stat-auditbeatSocket"
-        grow={false}
-      >
-        <StatValue
-          count={12}
-          isGroupStat={false}
-          isLoading={false}
-          max={12}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <EuiText
+            color="subdued"
+            size="s"
+          >
+            <styled.div>
+              <FormattedMessage
+                defaultMessage="Socket"
+                id="xpack.siem.overview.auditBeatSocketTitle"
+                values={Object {}}
+              />
+            </styled.div>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem
+          data-test-subj="network-stat-auditbeatSocket"
+          grow={false}
+        >
+          <Memo(StatValueComponent)
+            count={12}
+            isGroupStat={false}
+            isLoading={false}
+            max={12}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </styled.div>
   </EuiAccordion>
   <EuiHorizontalRule
     margin="xs"
@@ -94,7 +99,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
         <EuiFlexItem
           grow={false}
         >
-          <Memo(StatValue)
+          <Memo(StatValueComponent)
             count={70860}
             isGroupStat={true}
             isLoading={false}
@@ -108,166 +113,168 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
     initialIsOpen={false}
     paddingSize="none"
   >
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      key="filebeatCisco"
-    >
-      <EuiFlexItem
-        grow={false}
+    <styled.div>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        key="filebeatCisco"
       >
-        <EuiText
-          color="subdued"
-          size="s"
+        <EuiFlexItem
+          grow={false}
         >
-          <styled.div>
-            <FormattedMessage
-              defaultMessage="Cisco"
-              id="xpack.siem.overview.filebeatCiscoTitle"
-              values={Object {}}
-            />
-          </styled.div>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="network-stat-filebeatCisco"
-        grow={false}
-      >
-        <StatValue
-          count={999}
-          isGroupStat={false}
-          isLoading={false}
-          max={70860}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      key="filebeatNetflow"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiText
-          color="subdued"
-          size="s"
+          <EuiText
+            color="subdued"
+            size="s"
+          >
+            <styled.div>
+              <FormattedMessage
+                defaultMessage="Cisco"
+                id="xpack.siem.overview.filebeatCiscoTitle"
+                values={Object {}}
+              />
+            </styled.div>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem
+          data-test-subj="network-stat-filebeatCisco"
+          grow={false}
         >
-          <styled.div>
-            <FormattedMessage
-              defaultMessage="Netflow"
-              id="xpack.siem.overview.filebeatNetflowTitle"
-              values={Object {}}
-            />
-          </styled.div>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="network-stat-filebeatNetflow"
-        grow={false}
+          <Memo(StatValueComponent)
+            count={999}
+            isGroupStat={false}
+            isLoading={false}
+            max={70860}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        key="filebeatNetflow"
       >
-        <StatValue
-          count={7777}
-          isGroupStat={false}
-          isLoading={false}
-          max={70860}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      key="filebeatPanw"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiText
-          color="subdued"
-          size="s"
+        <EuiFlexItem
+          grow={false}
         >
-          <styled.div>
-            <FormattedMessage
-              defaultMessage="Palo Alto Networks"
-              id="xpack.siem.overview.filebeatPanwTitle"
-              values={Object {}}
-            />
-          </styled.div>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="network-stat-filebeatPanw"
-        grow={false}
-      >
-        <StatValue
-          count={66}
-          isGroupStat={false}
-          isLoading={false}
-          max={70860}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      key="filebeatSuricata"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiText
-          color="subdued"
-          size="s"
+          <EuiText
+            color="subdued"
+            size="s"
+          >
+            <styled.div>
+              <FormattedMessage
+                defaultMessage="Netflow"
+                id="xpack.siem.overview.filebeatNetflowTitle"
+                values={Object {}}
+              />
+            </styled.div>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem
+          data-test-subj="network-stat-filebeatNetflow"
+          grow={false}
         >
-          <styled.div>
-            <FormattedMessage
-              defaultMessage="Suricata"
-              id="xpack.siem.overview.fileBeatSuricataTitle"
-              values={Object {}}
-            />
-          </styled.div>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="network-stat-filebeatSuricata"
-        grow={false}
+          <Memo(StatValueComponent)
+            count={7777}
+            isGroupStat={false}
+            isLoading={false}
+            max={70860}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        key="filebeatPanw"
       >
-        <StatValue
-          count={60015}
-          isGroupStat={false}
-          isLoading={false}
-          max={70860}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      key="filebeatZeek"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiText
-          color="subdued"
-          size="s"
+        <EuiFlexItem
+          grow={false}
         >
-          <styled.div>
-            <FormattedMessage
-              defaultMessage="Zeek"
-              id="xpack.siem.overview.fileBeatZeekTitle"
-              values={Object {}}
-            />
-          </styled.div>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="network-stat-filebeatZeek"
-        grow={false}
+          <EuiText
+            color="subdued"
+            size="s"
+          >
+            <styled.div>
+              <FormattedMessage
+                defaultMessage="Palo Alto Networks"
+                id="xpack.siem.overview.filebeatPanwTitle"
+                values={Object {}}
+              />
+            </styled.div>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem
+          data-test-subj="network-stat-filebeatPanw"
+          grow={false}
+        >
+          <Memo(StatValueComponent)
+            count={66}
+            isGroupStat={false}
+            isLoading={false}
+            max={70860}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        key="filebeatSuricata"
       >
-        <StatValue
-          count={2003}
-          isGroupStat={false}
-          isLoading={false}
-          max={70860}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiText
+            color="subdued"
+            size="s"
+          >
+            <styled.div>
+              <FormattedMessage
+                defaultMessage="Suricata"
+                id="xpack.siem.overview.fileBeatSuricataTitle"
+                values={Object {}}
+              />
+            </styled.div>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem
+          data-test-subj="network-stat-filebeatSuricata"
+          grow={false}
+        >
+          <Memo(StatValueComponent)
+            count={60015}
+            isGroupStat={false}
+            isLoading={false}
+            max={70860}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        key="filebeatZeek"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiText
+            color="subdued"
+            size="s"
+          >
+            <styled.div>
+              <FormattedMessage
+                defaultMessage="Zeek"
+                id="xpack.siem.overview.fileBeatZeekTitle"
+                values={Object {}}
+              />
+            </styled.div>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem
+          data-test-subj="network-stat-filebeatZeek"
+          grow={false}
+        >
+          <Memo(StatValueComponent)
+            count={2003}
+            isGroupStat={false}
+            isLoading={false}
+            max={70860}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </styled.div>
   </EuiAccordion>
   <EuiHorizontalRule
     margin="xs"
@@ -292,7 +299,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
         <EuiFlexItem
           grow={false}
         >
-          <Memo(StatValue)
+          <Memo(StatValueComponent)
             count={13677323}
             isGroupStat={true}
             isLoading={false}
@@ -306,102 +313,104 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
     initialIsOpen={false}
     paddingSize="none"
   >
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      key="packetbeatDNS"
-    >
-      <EuiFlexItem
-        grow={false}
+    <styled.div>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        key="packetbeatDNS"
       >
-        <EuiText
-          color="subdued"
-          size="s"
+        <EuiFlexItem
+          grow={false}
         >
-          <styled.div>
-            <FormattedMessage
-              defaultMessage="DNS"
-              id="xpack.siem.overview.packetBeatDnsTitle"
-              values={Object {}}
-            />
-          </styled.div>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="network-stat-packetbeatDNS"
-        grow={false}
-      >
-        <StatValue
-          count={10277307}
-          isGroupStat={false}
-          isLoading={false}
-          max={13677323}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      key="packetbeatFlow"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiText
-          color="subdued"
-          size="s"
+          <EuiText
+            color="subdued"
+            size="s"
+          >
+            <styled.div>
+              <FormattedMessage
+                defaultMessage="DNS"
+                id="xpack.siem.overview.packetBeatDnsTitle"
+                values={Object {}}
+              />
+            </styled.div>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem
+          data-test-subj="network-stat-packetbeatDNS"
+          grow={false}
         >
-          <styled.div>
-            <FormattedMessage
-              defaultMessage="Flow"
-              id="xpack.siem.overview.packetBeatFlowTitle"
-              values={Object {}}
-            />
-          </styled.div>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="network-stat-packetbeatFlow"
-        grow={false}
+          <Memo(StatValueComponent)
+            count={10277307}
+            isGroupStat={false}
+            isLoading={false}
+            max={13677323}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        key="packetbeatFlow"
       >
-        <StatValue
-          count={16}
-          isGroupStat={false}
-          isLoading={false}
-          max={13677323}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      key="packetbeatTLS"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiText
-          color="subdued"
-          size="s"
+        <EuiFlexItem
+          grow={false}
         >
-          <styled.div>
-            <FormattedMessage
-              defaultMessage="TLS"
-              id="xpack.siem.overview.packetbeatTLSTitle"
-              values={Object {}}
-            />
-          </styled.div>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="network-stat-packetbeatTLS"
-        grow={false}
+          <EuiText
+            color="subdued"
+            size="s"
+          >
+            <styled.div>
+              <FormattedMessage
+                defaultMessage="Flow"
+                id="xpack.siem.overview.packetBeatFlowTitle"
+                values={Object {}}
+              />
+            </styled.div>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem
+          data-test-subj="network-stat-packetbeatFlow"
+          grow={false}
+        >
+          <Memo(StatValueComponent)
+            count={16}
+            isGroupStat={false}
+            isLoading={false}
+            max={13677323}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        key="packetbeatTLS"
       >
-        <StatValue
-          count={3400000}
-          isGroupStat={false}
-          isLoading={false}
-          max={13677323}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiText
+            color="subdued"
+            size="s"
+          >
+            <styled.div>
+              <FormattedMessage
+                defaultMessage="TLS"
+                id="xpack.siem.overview.packetbeatTLSTitle"
+                values={Object {}}
+              />
+            </styled.div>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem
+          data-test-subj="network-stat-packetbeatTLS"
+          grow={false}
+        >
+          <Memo(StatValueComponent)
+            count={3400000}
+            isGroupStat={false}
+            isLoading={false}
+            max={13677323}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </styled.div>
   </EuiAccordion>
 </styled.div>
 `;

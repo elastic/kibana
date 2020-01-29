@@ -41,34 +41,36 @@ export interface OverviewHostProps extends QueryTemplateProps {
 }
 
 const OverviewHostComponentQuery = React.memo<OverviewHostProps & OverviewHostReducer>(
-  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
-    <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
-      query={overviewHostQuery}
-      fetchPolicy={getDefaultFetchPolicy()}
-      variables={{
-        sourceId,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
-        filterQuery: createFilter(filterQuery),
-        defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
-        inspect: isInspected,
-      }}
-    >
-      {({ data, loading, refetch }) => {
-        const overviewHost = getOr({}, `source.OverviewHost`, data);
-        return children({
-          id,
-          inspect: getOr(null, 'source.OverviewHost.inspect', data),
-          overviewHost,
-          loading,
-          refetch,
-        });
-      }}
-    </Query>
-  )
+  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => {
+    return (
+      <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
+        query={overviewHostQuery}
+        fetchPolicy={getDefaultFetchPolicy()}
+        variables={{
+          sourceId,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+          filterQuery: createFilter(filterQuery),
+          defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
+        }}
+      >
+        {({ data, loading, refetch }) => {
+          const overviewHost = getOr({}, `source.OverviewHost`, data);
+          return children({
+            id,
+            inspect: getOr(null, 'source.OverviewHost.inspect', data),
+            overviewHost,
+            loading,
+            refetch,
+          });
+        }}
+      </Query>
+    );
+  }
 );
 
 OverviewHostComponentQuery.displayName = 'OverviewHostComponentQuery';

@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointListAction } from './endpoint_list';
+import { AlertData, Immutable } from '../../../../../common/types';
 
-export type AppAction = EndpointListAction;
+type ServerReturnedAlertsData = Immutable<{
+  type: 'serverReturnedAlertsData';
+  payload: AlertData[];
+}>;
+
+export type AlertAction = ServerReturnedAlertsData;
