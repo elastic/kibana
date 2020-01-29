@@ -8,21 +8,23 @@ import boom from 'boom';
 import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
 import {
-  ServerFacade,
   ExportTypesRegistry,
   HeadlessChromiumDriverFactory,
-  ReportingResponseToolkit,
   Logger,
+  ReportingResponseToolkit,
+  ServerFacade,
 } from '../../types';
+import { createQueueFactory, enqueueJobFactory } from '../lib';
+import { ReportingSetupDeps } from '../plugin';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { registerLegacy } from './legacy';
-import { createQueueFactory, enqueueJobFactory } from '../lib';
 import { makeRequestFacade } from './lib/make_request_facade';
 
 export function registerJobGenerationRoutes(
   server: ServerFacade,
+  plugins: ReportingSetupDeps,
   exportTypesRegistry: ExportTypesRegistry,
   browserDriverFactory: HeadlessChromiumDriverFactory,
   logger: Logger
@@ -74,12 +76,12 @@ export function registerJobGenerationRoutes(
     return err;
   }
 
-  registerGenerateFromJobParams(server, handler, handleError, logger);
-  registerLegacy(server, handler, handleError, logger); // 7.x only
+  registerGenerateFromJobParams(server, plugins, handler, handleError, logger);
+  registerLegacy(server, plugins, handler, handleError, logger); // 7.x only
 
   // Register beta panel-action download-related API's
   if (config.get('xpack.reporting.csv.enablePanelActionDownload')) {
-    registerGenerateCsvFromSavedObject(server, handler, handleError, logger);
-    registerGenerateCsvFromSavedObjectImmediate(server, logger);
+    registerGenerateCsvFromSavedObject(server, plugins, handler, handleError, logger);
+    registerGenerateCsvFromSavedObjectImmediate(server, plugins, logger);
   }
 }
