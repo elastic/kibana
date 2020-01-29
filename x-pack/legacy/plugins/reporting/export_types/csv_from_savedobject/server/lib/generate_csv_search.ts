@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, ElasticsearchServiceSetup } from 'kibana/server';
+import { ElasticsearchServiceSetup, KibanaRequest } from '../../../../../../../../src/core/server';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import { ServerFacade, RequestFacade, Logger } from '../../../../types';
