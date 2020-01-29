@@ -36,9 +36,9 @@ export const mockContextValue = {
   createTimeBuckets: () => new MockTimeBuckets(),
   uiSettings: uiSettingsServiceMock.createSetupContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
-  euiUtils: {
+  theme: {
     useChartsTheme: jest.fn(),
-  },
+  } as any,
   // For our test harness, we don't use this mocked out http service
   http: httpServiceMock.createSetupContract(),
 };

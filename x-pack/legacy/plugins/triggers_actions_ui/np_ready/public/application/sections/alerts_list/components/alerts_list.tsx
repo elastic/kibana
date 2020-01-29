@@ -43,14 +43,9 @@ interface AlertState {
 }
 
 export const AlertsList: React.FunctionComponent = () => {
-  const {
-    http,
-    injectedMetadata,
-    toastNotifications,
-    legacy: { capabilities },
-  } = useAppDependencies();
-  const canDelete = hasDeleteAlertsCapability(capabilities.get());
-  const canSave = hasSaveAlertsCapability(capabilities.get());
+  const { http, injectedMetadata, toastNotifications, capabilities } = useAppDependencies();
+  const canDelete = hasDeleteAlertsCapability(capabilities);
+  const canSave = hasSaveAlertsCapability(capabilities);
   const createAlertUiEnabled = injectedMetadata.getInjectedVar('createAlertUiEnabled');
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
