@@ -42,7 +42,7 @@ export interface UseRequestConfig extends SendRequestConfig {
 export interface UseRequestResponse<D = any> {
   isInitialRequest: boolean;
   isLoading: boolean;
-  error: null | unknown;
+  error: Error | null;
   data: D | null;
   sendRequest: (...args: any[]) => Promise<SendRequestResponse<D>>;
 }
