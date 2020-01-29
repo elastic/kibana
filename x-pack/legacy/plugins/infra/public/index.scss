@@ -36,6 +36,12 @@
 
 .infrastructureChart .echTooltip__label {
   overflow-x: hidden;
-  white-space: no-wrap;
+  white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.metricsExplorerTitleAnchor {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline;
 }

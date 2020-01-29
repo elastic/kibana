@@ -40,7 +40,11 @@ export const LocationMissingWarning = () => {
   );
 
   return (
-    <EuiFlexGroup gutterSize="none" responsive={false}>
+    <EuiFlexGroup
+      data-test-subj="xpack.uptime.locationMap.locationMissing"
+      gutterSize="none"
+      responsive={false}
+    >
       <EuiPopoverRight grow={false}>
         <EuiPopover
           id="popover"

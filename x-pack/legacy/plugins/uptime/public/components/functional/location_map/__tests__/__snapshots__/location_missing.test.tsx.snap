@@ -8,6 +8,8 @@ exports[`LocationMissingWarning component renders correctly against snapshot 1`]
 
 <div
   class="euiFlexGroup euiFlexGroup--directionRow"
+  class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+  data-test-subj="xpack.uptime.locationMap.locationMissing"
 >
   <div
     class="euiFlexItem euiFlexItem--flexGrowZero c0"
@@ -51,6 +53,7 @@ exports[`LocationMissingWarning component renders correctly against snapshot 1`]
 
 exports[`LocationMissingWarning component shallow render correctly against snapshot 1`] = `
 <EuiFlexGroup
+  data-test-subj="xpack.uptime.locationMap.locationMissing"
   gutterSize="none"
   responsive={false}
 >

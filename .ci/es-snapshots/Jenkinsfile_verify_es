@@ -26,8 +26,8 @@ timeout(time: 120, unit: 'MINUTES') {
         withEnv(["ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}"]) {
           parallel([
             // TODO we just need to run integration tests from intake?
-            'kibana-intake-agent': kibanaPipeline.legacyJobRunner('kibana-intake'),
-            'x-pack-intake-agent': kibanaPipeline.legacyJobRunner('x-pack-intake'),
+            'kibana-intake-agent': kibanaPipeline.intakeWorker('kibana-intake', './test/scripts/jenkins_unit.sh'),
+            'x-pack-intake-agent': kibanaPipeline.intakeWorker('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
             'kibana-oss-agent': kibanaPipeline.withWorkers('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
               'oss-ciGroup1': kibanaPipeline.getOssCiGroupWorker(1),
               'oss-ciGroup2': kibanaPipeline.getOssCiGroupWorker(2),
