@@ -19,32 +19,31 @@
 
 import { EuiConfirmModal, EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
+import { History } from 'history';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import {
   AppMountContext,
   ChromeStart,
+  IUiSettingsClient,
   LegacyCoreStart,
   SavedObjectsClientContract,
-  IUiSettingsClient,
 } from 'kibana/public';
-import { Storage } from '../../../../../../plugins/kibana_utils/public';
+import { IKbnUrlStateStorage, Storage } from '../../../../../../plugins/kibana_utils/public';
 import {
-  GlobalStateProvider,
-  StateManagementConfigProvider,
-  PrivateProvider,
-  EventsProvider,
-  PersistedState,
+  configureAppAngularModule,
+  confirmModalFactory,
   createTopNavDirective,
   createTopNavHelper,
-  PromiseServiceCreator,
-  KbnUrlProvider,
-  RedirectWhenMissingProvider,
-  confirmModalFactory,
-  configureAppAngularModule,
-  SavedObjectLoader,
+  EventsProvider,
   IPrivate,
+  KbnUrlProvider,
+  PersistedState,
+  PrivateProvider,
+  PromiseServiceCreator,
+  RedirectWhenMissingProvider,
+  SavedObjectLoader,
+  StateManagementConfigProvider,
 } from '../legacy_imports';
-
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
 import { IEmbeddableStart } from '../../../../../../plugins/embeddable/public';
@@ -69,6 +68,8 @@ export interface RenderDeps {
   localStorage: Storage;
   share: SharePluginStart;
   config: KibanaLegacyStart['config'];
+  history: History;
+  kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 let angularModuleInstance: IModule | null = null;
@@ -81,7 +82,9 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
     // custom routing stuff
     initDashboardApp(angularModuleInstance, deps);
   }
+
   const $injector = mountDashboardApp(appBasePath, element);
+
   return () => {
     $injector.get('$rootScope').$destroy();
   };
@@ -148,17 +151,13 @@ function createLocalConfirmModalModule() {
 }
 
 function createLocalStateModule() {
-  angular
-    .module('app/dashboard/State', [
-      'app/dashboard/Private',
-      'app/dashboard/Config',
-      'app/dashboard/KbnUrl',
-      'app/dashboard/Promise',
-      'app/dashboard/PersistedState',
-    ])
-    .service('globalState', function(Private: any) {
-      return Private(GlobalStateProvider);
-    });
+  angular.module('app/dashboard/State', [
+    'app/dashboard/Private',
+    'app/dashboard/Config',
+    'app/dashboard/KbnUrl',
+    'app/dashboard/Promise',
+    'app/dashboard/PersistedState',
+  ]);
 }
 
 function createLocalPersistedStateModule() {

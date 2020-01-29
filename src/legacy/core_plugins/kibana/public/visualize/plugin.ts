@@ -27,9 +27,6 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/public';
 
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
@@ -44,9 +41,6 @@ import {
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
-import { createSavedVisLoader } from './saved_visualizations/saved_visualizations';
-// @ts-ignore
-import { savedObjectManagementRegistry } from '../management/saved_object_registry';
 import { Chrome } from './legacy_imports';
 
 export interface VisualizePluginStartDependencies {
@@ -97,13 +91,6 @@ export class VisualizePlugin implements Plugin {
           share,
         } = this.startDependencies;
 
-        const savedVisualizations = createSavedVisLoader({
-          savedObjectsClient,
-          indexPatterns: data.indexPatterns,
-          chrome: contextCore.chrome,
-          overlays: contextCore.overlays,
-          visualizations,
-        });
         const deps: VisualizeKibanaServices = {
           ...__LEGACY,
           addBasePath: contextCore.http.basePath.prepend,
@@ -116,7 +103,7 @@ export class VisualizePlugin implements Plugin {
           localStorage: new Storage(localStorage),
           navigation,
           savedObjectsClient,
-          savedVisualizations,
+          savedVisualizations: visualizations.getSavedVisualizationsLoader(),
           savedQueryService: data.query.savedQueries,
           share,
           toastNotifications: contextCore.notifications.toasts,
@@ -159,21 +146,5 @@ export class VisualizePlugin implements Plugin {
       share,
       visualizations,
     };
-
-    const savedVisualizations = createSavedVisLoader({
-      savedObjectsClient: core.savedObjects.client,
-      indexPatterns: data.indexPatterns,
-      chrome: core.chrome,
-      overlays: core.overlays,
-      visualizations,
-    });
-
-    // TODO: remove once savedobjectregistry is refactored
-    savedObjectManagementRegistry.register({
-      service: 'savedVisualizations',
-      title: 'visualizations',
-    });
-
-    uiModules.get('app/visualize').service('savedVisualizations', () => savedVisualizations);
   }
 }

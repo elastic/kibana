@@ -28,11 +28,13 @@ import { uiActionsPluginMock } from '../../../../../plugins/ui_actions/public/mo
 import { managementPluginMock } from '../../../../../plugins/management/public/mocks';
 import { usageCollectionPluginMock } from '../../../../../plugins/usage_collection/public/mocks';
 import { kibanaLegacyPluginMock } from '../../../../../plugins/kibana_legacy/public/mocks';
+import { chartPluginMock } from '../../../../../plugins/charts/public/mocks';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export const pluginsMock = {
   createSetup: () => ({
     data: dataPluginMock.createSetupContract(),
+    charts: chartPluginMock.createSetupContract(),
     navigation: navigationPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createSetupContract(),
     inspector: inspectorPluginMock.createSetupContract(),
@@ -43,6 +45,7 @@ export const pluginsMock = {
   }),
   createStart: () => ({
     data: dataPluginMock.createStartContract(),
+    charts: chartPluginMock.createStartContract(),
     navigation: navigationPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     inspector: inspectorPluginMock.createStartContract(),
