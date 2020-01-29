@@ -24,7 +24,7 @@ import { initParams } from './agg_params';
 
 import { AggConfig } from '../vis';
 import { AggConfigs } from './agg_configs';
-import { Adapters } from '../inspector';
+import { Adapters } from '../../../../plugins/inspector/public';
 import { BaseParamType } from './param_types/base';
 import { AggParamType } from '../agg_types/param_types/agg';
 import { KBN_FIELD_TYPES, fieldFormats, ISearchSource } from '../../../../plugins/data/public';

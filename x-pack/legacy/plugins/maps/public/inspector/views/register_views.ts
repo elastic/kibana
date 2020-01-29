@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { npSetup } from 'ui/new_platform';
+
+// @ts-ignore
 import { MapView } from './map_view';
 
-import { viewRegistry } from 'ui/inspector';
-
-viewRegistry.register(MapView);
+npSetup.plugins.inspector.registerView(MapView);
