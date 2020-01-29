@@ -41,8 +41,12 @@ export const LicenseDashboard = ({ setBreadcrumb } = { setBreadcrumb: () => {} }
                   hourlyCost
                 ).toPrecision(4)}/hour.`}
                 footer={
-                  <EuiButton data-test-subj="updateLicenseButton" href="https://cloud.elastic.co/">
-                    To know more and get a trial, follow go to Elastic Cloud
+                  <EuiButton
+                    data-test-subj="updateLicenseButton"
+                    href="https://cloud.elastic.co/"
+                    target="_blank"
+                  >
+                    I want to know more
                   </EuiButton>
                 }
               />
