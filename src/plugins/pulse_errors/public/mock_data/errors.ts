@@ -19,14 +19,14 @@
 
 import moment from 'moment';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { PulseErrorInstructionValue } from 'src/core/server/pulse/channel';
+import { PulseErrorPayloadRecord } from 'src/core/server/pulse/channel';
 
-export const errorChannelPayloads: PulseErrorInstructionValue[] = [
+export const errorChannelPayloads: PulseErrorPayloadRecord[] = [
   {
     channel_id: 'errors',
     deployment_id: '123',
-    message: 'Error: [resource_already_exists_exception]',
-    hash: 'index [my_index/1234567890] already exists',
+    message: 'The index [pulse-poc-raw-default/1234567890]',
+    hash: '[xpack][plugins][pulse] index [pulse-poc-raw-default/1234567890]',
     status: 'new',
     currentKibanaVersion: 'v7.x',
     timestamp: moment().toDate(),
@@ -34,8 +34,8 @@ export const errorChannelPayloads: PulseErrorInstructionValue[] = [
   {
     channel_id: 'errors',
     deployment_id: '123',
-    message: 'Error: [resource_already_exists_exception]',
-    hash: 'index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg] already exists',
+    message: 'The index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg] already exists',
+    hash: '[xpack][plugins][pulse] index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg]',
     status: 'new',
     currentKibanaVersion: 'v7.x',
     timestamp: moment()
@@ -45,8 +45,8 @@ export const errorChannelPayloads: PulseErrorInstructionValue[] = [
   {
     channel_id: 'errors',
     deployment_id: '123',
-    message: '[TypeError]: Component failed to mount',
-    hash: 'generic:arbitraryError 1',
+    message: 'The SampleDataSetCard key="ecommerce" component failed to mount',
+    hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 1',
     status: 'new',
     fixedVersion: 'v7.5.2',
     currentKibanaVersion: 'v7.x',
@@ -58,7 +58,7 @@ export const errorChannelPayloads: PulseErrorInstructionValue[] = [
     channel_id: 'errors',
     deployment_id: '123',
     message: '[Error]: Test',
-    hash: 'generic:arbitraryError 2',
+    hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 2',
     status: 'new',
     // fixedVersion: 'v7.5.2',
     currentKibanaVersion: 'v7.x',

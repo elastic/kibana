@@ -119,7 +119,7 @@ export class Collector extends PulseCollector<Payload> {
                 deployment_id: '123',
                 status: record.status || 'new',
                 id: record.hash,
-                timestamp: record.timestamp,
+                timestamp: record.timestamp || moment(),
               });
             }
           }),
