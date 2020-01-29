@@ -113,6 +113,9 @@ export const npSetup = {
     kibana_legacy: {
       registerLegacyApp: () => {},
       forwardApp: () => {},
+      config: {
+        defaultAppId: 'home',
+      },
     },
     inspector: {
       registerView: () => undefined,
@@ -172,6 +175,9 @@ export const npStart = {
     kibana_legacy: {
       getApps: () => [],
       getForwards: () => [],
+      config: {
+        defaultAppId: 'home',
+      },
     },
     data: {
       autocomplete: {
