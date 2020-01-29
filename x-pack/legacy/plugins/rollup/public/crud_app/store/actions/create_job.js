@@ -40,12 +40,13 @@ export const createJob = jobConfig => async dispatch => {
     ]);
   } catch (error) {
     if (error) {
-      const { statusCode, body } = error;
+      const { body } = error;
+      const statusCode = error.statusCode || (body && body.statusCode);
 
       // Expect an error in the shape provided by http service.
       if (body) {
         // Some errors have statusCode directly available but some are under a data property.
-        if ((statusCode || (body && body.statusCode)) === 409) {
+        if (statusCode === 409) {
           return dispatch({
             type: CREATE_JOB_FAILURE,
             payload: {
@@ -68,9 +69,9 @@ export const createJob = jobConfig => async dispatch => {
             error: {
               message: i18n.translate('xpack.rollupJobs.createAction.failedDefaultErrorMessage', {
                 defaultMessage: 'Request failed with a {statusCode} error. {message}',
-                values: { statusCode: body.statusCode, message: body.message },
+                values: { statusCode, message: body.message },
               }),
-              cause: body.error,
+              cause: body.cause,
             },
           },
         });
