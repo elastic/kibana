@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointListAction } from './endpoint_list';
+import { PageId } from '../../../../../common/types';
 
-export type AppAction = EndpointListAction;
+interface UserNavigatedToPage {
+  readonly type: 'userNavigatedToPage';
+  readonly payload: PageId;
+}
+
+export type RoutingAction = UserNavigatedToPage;
