@@ -13,7 +13,7 @@ import {
   EuiButton,
   EuiCallOut,
   EuiContextMenu,
-  EuiFieldText,
+  EuiFieldNumber,
   EuiForm,
   EuiFormRow,
   EuiPopover,
@@ -368,7 +368,7 @@ export class IndexActionsContextMenu extends Component {
           <EuiSpacer size="m" />
 
           <EuiForm
-            isInvalid={this.forcemergeSegmentsError()}
+            isInvalid={!!this.forcemergeSegmentsError()}
             error={this.forcemergeSegmentsError()}
           >
             <EuiFormRow
@@ -380,10 +380,11 @@ export class IndexActionsContextMenu extends Component {
               )}
               helpText={helpText}
             >
-              <EuiFieldText
+              <EuiFieldNumber
                 onChange={event => {
                   this.setState({ forcemergeSegments: event.target.value });
                 }}
+                min={1}
                 name="maxNumberSegments"
               />
             </EuiFormRow>

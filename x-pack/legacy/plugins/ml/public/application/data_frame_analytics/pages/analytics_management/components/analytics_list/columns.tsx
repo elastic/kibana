@@ -191,6 +191,7 @@ export const getColumns = (
       }),
       sortable: true,
       truncateText: true,
+      'data-test-subj': 'mlAnalyticsTableColumnJobDescription',
     },
     {
       field: DataFrameAnalyticsListColumn.configSourceIndex,

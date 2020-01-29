@@ -19,26 +19,19 @@
 
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ISearchSource, getRequestInspectorStats, getResponseInspectorStats } from '../../courier';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from '../../../../core_plugins/data/public';
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterTerms } from './create_filter/terms';
-import { wrapWithInlineComp } from './inline_comp_wrapper';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
-import { OrderAggParamEditor } from '../../vis/editors/default/controls/order_agg';
-import { OrderParamEditor } from '../../vis/editors/default/controls/order';
-import { OrderByParamEditor, aggFilter } from '../../vis/editors/default/controls/order_by';
-import { SizeParamEditor } from '../../vis/editors/default/controls/size';
-import { MissingBucketParamEditor } from '../../vis/editors/default/controls/missing_bucket';
-import { OtherBucketParamEditor } from '../../vis/editors/default/controls/other_bucket';
 import { AggConfigs } from '../agg_configs';
 
 import { Adapters } from '../../../../../plugins/inspector/public';
-import { ContentType, FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
-
-// @ts-ignore
-import { Schemas } from '../../vis/editors/default/schemas';
+import { ISearchSource, fieldFormats, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 import {
   buildOtherBucketAgg,
@@ -46,15 +39,32 @@ import {
   updateMissingBucket,
   // @ts-ignore
 } from './_terms_other_bucket_helper';
+import { Schemas } from '../schemas';
+import { AggGroupNames } from '../agg_groups';
+
+export const termsAggFilter = [
+  '!top_hits',
+  '!percentiles',
+  '!median',
+  '!std_dev',
+  '!derivative',
+  '!moving_avg',
+  '!serial_diff',
+  '!cumulative_sum',
+  '!avg_bucket',
+  '!max_bucket',
+  '!min_bucket',
+  '!sum_bucket',
+];
 
 const [orderAggSchema] = new Schemas([
   {
-    group: 'none',
+    group: AggGroupNames.None,
     name: 'orderAgg',
     // This string is never visible to the user so it doesn't need to be translated
     title: 'Order Agg',
     hideCustomLabel: true,
-    aggFilter,
+    aggFilter: termsAggFilter,
   },
 ]).all;
 
@@ -69,9 +79,9 @@ export const termsBucketAgg = new BucketAggType({
     const params = agg.params;
     return agg.getFieldDisplayName() + ': ' + params.order.text;
   },
-  getFormat(bucket): FieldFormat {
+  getFormat(bucket): fieldFormats.FieldFormat {
     return {
-      getConverterFor: (type: ContentType) => {
+      getConverterFor: (type: fieldFormats.ContentType) => {
         return (val: any) => {
           if (val === '__other__') {
             return bucket.params.otherBucketLabel;
@@ -83,7 +93,7 @@ export const termsBucketAgg = new BucketAggType({
           return bucket.params.field.format.convert(val, type);
         };
       },
-    } as FieldFormat;
+    } as fieldFormats.FieldFormat;
   },
   createFilter: createFilterTerms,
   postFlightRequest: async (
@@ -142,14 +152,12 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'orderBy',
-      editorComponent: OrderByParamEditor,
       write: noop, // prevent default write, it's handled by orderAgg
     },
     {
       name: 'orderAgg',
       type: 'agg',
       default: null,
-      editorComponent: OrderAggParamEditor,
       makeAgg(termsAgg, state) {
         state = state || {};
         state.schema = orderAggSchema;
@@ -202,7 +210,6 @@ export const termsBucketAgg = new BucketAggType({
       name: 'order',
       type: 'optioned',
       default: 'desc',
-      editorComponent: wrapWithInlineComp(OrderParamEditor),
       options: [
         {
           text: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
@@ -221,13 +228,11 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'size',
-      editorComponent: wrapWithInlineComp(SizeParamEditor),
       default: 5,
     },
     {
       name: 'otherBucket',
       default: false,
-      editorComponent: OtherBucketParamEditor,
       write: noop,
     },
     {
@@ -245,7 +250,6 @@ export const termsBucketAgg = new BucketAggType({
     {
       name: 'missingBucket',
       default: false,
-      editorComponent: MissingBucketParamEditor,
       write: noop,
     },
     {

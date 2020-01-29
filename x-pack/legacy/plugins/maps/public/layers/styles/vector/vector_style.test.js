@@ -9,6 +9,8 @@ import { DataRequest } from '../../util/data_request';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 
+jest.mock('ui/new_platform');
+
 class MockField {
   constructor({ fieldName }) {
     this._fieldName = fieldName;
@@ -85,6 +87,12 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
         options: {},
         type: 'STATIC',
       },
+      icon: {
+        options: {
+          value: 'airfield',
+        },
+        type: 'STATIC',
+      },
       iconOrientation: {
         options: {
           orientation: 0,
@@ -136,10 +144,9 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
         },
         type: 'STATIC',
       },
-      symbol: {
+      symbolizeAs: {
         options: {
-          symbolId: 'airfield',
-          symbolizeAs: 'circle',
+          value: 'circle',
         },
       },
     });
