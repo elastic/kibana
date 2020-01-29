@@ -1,6 +1,5 @@
 {
   "id": "telemetry",
-  "configPath": ["telemetry"],
   "version": "kibana",
   "server": false,
   "ui": true

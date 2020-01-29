@@ -110,7 +110,7 @@ const telemetry = (kibana: any) => {
           telemetryNotifyUserAboutOptInDefault: false,
         };
       },
-      hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],
+      hacks: ['plugins/telemetry/hacks/telemetry_opt_in'],
       mappings,
     },
     postInit(server: Server) {
