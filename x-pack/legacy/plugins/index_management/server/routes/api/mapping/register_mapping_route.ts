@@ -17,6 +17,7 @@ const handler: RouterRouteHandler = async (request, callWithRequest) => {
   const params = {
     expand_wildcards: 'none',
     index: indexName,
+    include_type_name: true,
   };
 
   const hit = await callWithRequest('indices.getMapping', params);

@@ -31,7 +31,7 @@ type TabName = 'fields' | 'advanced' | 'templates';
 export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSettings }: Props) => {
   const [selectedTab, selectTab] = useState<TabName>('fields');
 
-  const { parsedDefaultValue, multipleMappingsDeclared } = useMemo(() => {
+  const { parsedDefaultValue, multipleMappingsDeclared, mappingsType } = useMemo(() => {
     const mappingsDefinition = extractMappingsDefinition(defaultValue);
 
     if (mappingsDefinition === null) {
@@ -48,7 +48,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
       dynamic_date_formats,
       properties = {},
       dynamic_templates,
-    } = mappingsDefinition;
+    } = mappingsDefinition.mappings;
 
     const parsed = {
       configuration: {
@@ -66,7 +66,11 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
       },
     };
 
-    return { parsedDefaultValue: parsed, multipleMappingsDeclared: false };
+    return {
+      parsedDefaultValue: parsed,
+      multipleMappingsDeclared: false,
+      mappingsType: mappingsDefinition.type,
+    };
   }, [defaultValue]);
 
   useEffect(() => {
@@ -108,7 +112,11 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
         <MultipleMappingsWarning />
       ) : (
         <IndexSettingsProvider indexSettings={indexSettings}>
-          <MappingsState onUpdate={onUpdate} defaultValue={parsedDefaultValue!}>
+          <MappingsState
+            onUpdate={onUpdate}
+            defaultValue={parsedDefaultValue!}
+            mappingsType={mappingsType}
+          >
             {({ state }) => {
               const tabToContentMap = {
                 fields: <DocumentFields />,
