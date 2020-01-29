@@ -5,6 +5,10 @@
  */
 
 import { SerializerFunc } from '../shared_imports';
+import {
+  PARAMETER_SERIALIZERS,
+  PARAMETER_DESERIALIZERS,
+} from '../components/document_fields/field_parameters';
 import { Field, DataType, MainType, SubType } from '../types';
 import { INDEX_DEFAULT, MAIN_DATA_TYPE_DEFINITION } from '../constants';
 import { getMainTypeFromSubType } from './utils';
@@ -21,6 +25,25 @@ const sanitizeField = (field: Field): Field =>
       {} as any
     );
 
+/**
+ * Run custom parameter serializers on field.
+ * Each serializer takes the field as single argument and returns it serialized in an immutable way.
+ * @param field The field we are serializing
+ */
+const runParametersSerializers = (field: Field): Field =>
+  PARAMETER_SERIALIZERS.reduce((fieldSerialized, serializer) => serializer(fieldSerialized), field);
+
+/**
+ * Run custom parameter deserializers on field.
+ * Each deserializer takes the field as single argument and returns it deserialized in an immutable way.
+ * @param field The field we are deserializing
+ */
+const runParametersDeserializers = (field: Field): Field =>
+  PARAMETER_DESERIALIZERS.reduce(
+    (fieldDeserialized, serializer) => serializer(fieldDeserialized),
+    field
+  );
+
 export const fieldSerializer: SerializerFunc<Field> = (field: Field) => {
   // If a subType is present, use it as type for ES
   if ({}.hasOwnProperty.call(field, 'subType')) {
@@ -31,7 +54,7 @@ export const fieldSerializer: SerializerFunc<Field> = (field: Field) => {
   // Delete temp fields
   delete (field as any).useSameAnalyzerForSearch;
 
-  return sanitizeField(field);
+  return sanitizeField(runParametersSerializers(field));
 };
 
 export const fieldDeserializer: SerializerFunc<Field> = (field: Field): Field => {
@@ -50,5 +73,5 @@ export const fieldDeserializer: SerializerFunc<Field> = (field: Field): Field =>
   (field as any).useSameAnalyzerForSearch =
     {}.hasOwnProperty.call(field, 'search_analyzer') === false;
 
-  return field;
+  return runParametersDeserializers(field);
 };

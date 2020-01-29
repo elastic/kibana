@@ -120,8 +120,12 @@ export class Explorer extends React.Component {
 
       this.disableDragSelectOnMouseLeave = true;
     },
-    onDragStart() {
-      if (ALLOW_CELL_RANGE_SELECTION) {
+    onDragStart(e) {
+      let target = e.target;
+      while (target && target !== document.body && !target.classList.contains('sl-cell')) {
+        target = target.parentNode;
+      }
+      if (ALLOW_CELL_RANGE_SELECTION && target !== document.body) {
         dragSelect$.next({
           action: DRAG_SELECT_ACTION.DRAG_START,
         });

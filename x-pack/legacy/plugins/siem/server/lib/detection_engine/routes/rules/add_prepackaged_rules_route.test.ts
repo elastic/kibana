@@ -6,9 +6,7 @@
 
 import {
   createMockServer,
-  createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
-  createMockServerWithoutActionOrAlertClientDecoration,
   getMockEmptyIndex,
   getMockNonEmptyIndex,
 } from '../__mocks__/_mock_server';
@@ -23,9 +21,11 @@ import {
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
-    getPrepackagedRules: () => {
+    getPrepackagedRules: (): PrepackagedRules[] => {
       return [
         {
+          tags: [],
+          immutable: true,
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -45,6 +45,7 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
 });
 
 import { addPrepackedRulesRoute } from './add_prepackaged_rules_route';
+import { PrepackagedRules } from '../../types';
 
 describe('add_prepackaged_rules_route', () => {
   let { server, alertsClient, actionsClient, elasticsearch } = createMockServer();
@@ -59,7 +60,7 @@ describe('add_prepackaged_rules_route', () => {
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when creating a with a valid actionClient and alertClient', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
@@ -67,28 +68,10 @@ describe('add_prepackaged_rules_route', () => {
       expect(statusCode).toBe(200);
     });
 
-    test('returns 404 if actionClient is not available on the route', async () => {
-      const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      createRulesRoute(serverWithoutActionClient);
-      const { statusCode } = await serverWithoutActionClient.inject(addPrepackagedRulesRequest());
-      expect(statusCode).toBe(404);
-    });
-
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
       createRulesRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(addPrepackagedRulesRequest());
-      expect(statusCode).toBe(404);
-    });
-
-    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
-      const {
-        serverWithoutActionOrAlertClient,
-      } = createMockServerWithoutActionOrAlertClientDecoration();
-      createRulesRoute(serverWithoutActionOrAlertClient);
-      const { statusCode } = await serverWithoutActionOrAlertClient.inject(
-        addPrepackagedRulesRequest()
-      );
       expect(statusCode).toBe(404);
     });
   });

@@ -5,17 +5,18 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
-import { DETECTION_ENGINE_PAGE_NAME } from '../../../components/link_to/redirect_to_detection_engine';
-import { FormattedRelativePreferenceDate } from '../../../components/formatted_date';
-import { getEmptyTagValue } from '../../../components/empty_value';
-import { HeaderPage } from '../../../components/header_page';
+import {
+  getDetectionEngineUrl,
+  getCreateRuleUrl,
+} from '../../../components/link_to/redirect_to_detection_engine';
+import { DetectionEngineHeaderPage } from '../components/detection_engine_header_page';
 import { WrapperPage } from '../../../components/wrapper_page';
 import { SpyRoute } from '../../../utils/route/spy_routes';
+
 import { useUserInfo } from '../components/user_info';
 import { AllRules } from './all';
 import { ImportRuleModal } from './components/import_rule_modal';
@@ -26,7 +27,7 @@ import * as i18n from './translations';
 
 type Func = () => void;
 
-export const RulesComponent = React.memo(() => {
+const RulesPageComponent: React.FC = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importCompleteToggle, setImportCompleteToggle] = useState(false);
   const refreshRulesData = useRef<null | Func>(null);
@@ -35,7 +36,7 @@ export const RulesComponent = React.memo(() => {
     isSignalIndexExists,
     isAuthenticated,
     canUserCRUD,
-    hasIndexManage,
+    hasIndexWrite,
     hasManageApiKey,
   } = useUserInfo();
   const {
@@ -43,12 +44,13 @@ export const RulesComponent = React.memo(() => {
     loading: prePackagedRuleLoading,
     loadingCreatePrePackagedRules,
     refetchPrePackagedRulesStatus,
+    rulesCustomInstalled,
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,
   } = usePrePackagedRules({
     canUserCRUD,
-    hasIndexManage,
+    hasIndexWrite,
     hasManageApiKey,
     isSignalIndexExists,
     isAuthenticated,
@@ -61,7 +63,6 @@ export const RulesComponent = React.memo(() => {
 
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
-  const lastCompletedRun = undefined;
 
   const handleCreatePrePackagedRules = useCallback(async () => {
     if (createPrePackagedRules != null) {
@@ -87,7 +88,7 @@ export const RulesComponent = React.memo(() => {
     isAuthenticated != null &&
     (!isSignalIndexExists || !isAuthenticated)
   ) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+    return <Redirect to={getDetectionEngineUrl()} />;
   }
 
   return (
@@ -99,24 +100,11 @@ export const RulesComponent = React.memo(() => {
         importComplete={() => setImportCompleteToggle(!importCompleteToggle)}
       />
       <WrapperPage>
-        <HeaderPage
+        <DetectionEngineHeaderPage
           backOptions={{
-            href: `#${DETECTION_ENGINE_PAGE_NAME}`,
+            href: getDetectionEngineUrl(),
             text: i18n.BACK_TO_DETECTION_ENGINE,
           }}
-          subtitle={
-            lastCompletedRun ? (
-              <FormattedMessage
-                id="xpack.siem.headerPage.rules.pageSubtitle"
-                defaultMessage="Last completed run: {lastCompletedRun}"
-                values={{
-                  lastCompletedRun: <FormattedRelativePreferenceDate value={lastCompletedRun} />,
-                }}
-              />
-            ) : (
-              getEmptyTagValue()
-            )
-          }
           title={i18n.PAGE_TITLE}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
@@ -158,7 +146,7 @@ export const RulesComponent = React.memo(() => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/create`}
+                href={getCreateRuleUrl()}
                 iconType="plusInCircle"
                 isDisabled={userHasNoPermissions || loading}
               >
@@ -166,7 +154,7 @@ export const RulesComponent = React.memo(() => {
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </HeaderPage>
+        </DetectionEngineHeaderPage>
         {prePackagedRuleStatus === 'ruleNeedUpdate' && (
           <UpdatePrePackagedRulesCallOut
             loading={loadingCreatePrePackagedRules}
@@ -181,6 +169,7 @@ export const RulesComponent = React.memo(() => {
           hasNoPermissions={userHasNoPermissions}
           importCompleteToggle={importCompleteToggle}
           refetchPrePackagedRulesStatus={handleRefetchPrePackagedRulesStatus}
+          rulesCustomInstalled={rulesCustomInstalled}
           rulesInstalled={rulesInstalled}
           rulesNotInstalled={rulesNotInstalled}
           rulesNotUpdated={rulesNotUpdated}
@@ -191,6 +180,6 @@ export const RulesComponent = React.memo(() => {
       <SpyRoute />
     </>
   );
-});
+};
 
-RulesComponent.displayName = 'RulesComponent';
+export const RulesPage = React.memo(RulesPageComponent);
