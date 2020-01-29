@@ -143,6 +143,9 @@ export const npSetup = {
       environment: {
         update: sinon.fake(),
       },
+      config: {
+        disableWelcomeScreen: false,
+      },
     },
     charts: {
       theme: {
@@ -290,6 +293,9 @@ export const npStart = {
       },
       environment: {
         get: sinon.fake(),
+      },
+      config: {
+        disableWelcomeScreen: false,
       },
     },
     navigation: {
