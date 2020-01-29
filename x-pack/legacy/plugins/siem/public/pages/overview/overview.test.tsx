@@ -16,9 +16,6 @@ import { mocksSource } from '../../containers/source/mock';
 import { Overview } from './index';
 
 jest.mock('ui/chrome', () => ({
-  getBasePath: () => {
-    return '<basepath>';
-  },
   getKibanaVersion: () => {
     return 'v8.0.0';
   },

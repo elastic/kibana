@@ -14,9 +14,6 @@ import { TabNavigationProps } from '../tab_navigation/types';
 import { NetworkRouteType } from '../../../pages/network/navigation/types';
 
 jest.mock('ui/chrome', () => ({
-  getBasePath: () => {
-    return '<basepath>';
-  },
   breadcrumbs: {
     set: jest.fn(),
   },
