@@ -196,23 +196,30 @@ export const validateProperties = (properties = {}): PropertiesValidatorResponse
  * Single source of truth to validate the *configuration* of the mappings.
  * Whenever a user loads a JSON object it will be validate against this Joi schema.
  */
-export const mappingsConfigurationSchema = t.partial({
-  dynamic: t.union([t.literal(true), t.literal(false), t.literal('strict')]),
-  date_detection: t.boolean,
-  numeric_detection: t.boolean,
-  dynamic_date_formats: t.array(t.string),
-  _source: t.partial({
-    enabled: t.boolean,
-    includes: t.array(t.string),
-    excludes: t.array(t.string),
-  }),
-  _meta: t.UnknownRecord,
-  _routing: t.partial({
-    required: t.boolean,
-  }),
-});
+export const mappingsConfigurationSchema = t.exact(
+  t.partial({
+    dynamic: t.union([t.literal(true), t.literal(false), t.literal('strict')]),
+    date_detection: t.boolean,
+    numeric_detection: t.boolean,
+    dynamic_date_formats: t.array(t.string),
+    _source: t.exact(
+      t.partial({
+        enabled: t.boolean,
+        includes: t.array(t.string),
+        excludes: t.array(t.string),
+      })
+    ),
+    _meta: t.UnknownRecord,
+    _routing: t.interface({
+      required: t.boolean,
+    }),
+  })
+);
 
-export const mappingsConfigurationSchemaKeys = Object.keys(mappingsConfigurationSchema.props);
+const mappingsConfigurationSchemaKeys = Object.keys(mappingsConfigurationSchema.type.props);
+const sourceConfigurationSchemaKeys = Object.keys(
+  mappingsConfigurationSchema.type.props._source.type.props
+);
 
 export const validateMappingsConfiguration = (
   mappingsConfiguration: any
@@ -222,8 +229,20 @@ export const validateMappingsConfiguration = (
 
   let copyOfMappingsConfig = { ...mappingsConfiguration };
   const result = mappingsConfigurationSchema.decode(mappingsConfiguration);
+  const isSchemaInvalid = isLeft(result);
 
-  if (isLeft(result)) {
+  const unknownConfigurationParameters = Object.keys(mappingsConfiguration).filter(
+    key => mappingsConfigurationSchemaKeys.includes(key) === false
+  );
+
+  const unknownSourceConfigurationParameters =
+    mappingsConfiguration._source !== undefined
+      ? Object.keys(mappingsConfiguration._source).filter(
+          key => sourceConfigurationSchemaKeys.includes(key) === false
+        )
+      : [];
+
+  if (isSchemaInvalid) {
     /**
      * To keep the logic simple we will strip out the parameters that contain errors
      */
@@ -233,6 +252,15 @@ export const validateMappingsConfiguration = (
       configurationRemoved.add(configurationName);
       delete copyOfMappingsConfig[configurationName];
     });
+  }
+
+  if (unknownConfigurationParameters.length > 0) {
+    unknownConfigurationParameters.forEach(configName => configurationRemoved.add(configName));
+  }
+
+  if (unknownSourceConfigurationParameters.length > 0) {
+    configurationRemoved.add('_source');
+    delete copyOfMappingsConfig._source;
   }
 
   copyOfMappingsConfig = pick(copyOfMappingsConfig, mappingsConfigurationSchemaKeys);
@@ -252,7 +280,7 @@ export const validateMappings = (mappings: any = {}): MappingsValidatorResponse 
     return { value: {} };
   }
 
-  const { properties, dynamic_templates, ...mappingsConfiguration } = mappings;
+  const { properties, dynamic_templates: dynamicTemplates, ...mappingsConfiguration } = mappings;
 
   const { value: parsedConfiguration, errors: configurationErrors } = validateMappingsConfiguration(
     mappingsConfiguration
@@ -265,8 +293,14 @@ export const validateMappings = (mappings: any = {}): MappingsValidatorResponse 
     value: {
       ...parsedConfiguration,
       properties: parsedProperties,
-      dynamic_templates,
+      dynamic_templates: dynamicTemplates ?? [],
     },
     errors: errors.length ? errors : undefined,
   };
 };
+
+export const VALID_MAPPINGS_PARAMETERS = [
+  ...mappingsConfigurationSchemaKeys,
+  'dynamic_templates',
+  'properties',
+];
