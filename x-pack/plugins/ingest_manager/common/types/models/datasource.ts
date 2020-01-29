@@ -19,10 +19,12 @@ const DatasourceBaseSchema = {
   agent_config_id: schema.string(),
   package: schema.maybe(
     schema.object({
-      assets: schema.object({
-        id: schema.string(),
-        type: schema.string(),
-      }),
+      assets: schema.arrayOf(
+        schema.object({
+          id: schema.string(),
+          type: schema.string(),
+        })
+      ),
       description: schema.string(),
       name: schema.string(),
       title: schema.string(),
