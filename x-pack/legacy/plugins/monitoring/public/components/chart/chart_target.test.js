@@ -51,7 +51,7 @@ jest.mock('../../np_imports/ui/chrome', () => {
   };
 });
 
-describe('Test legends to toggle series: ', () => {
+describe.skip('Test legends to toggle series: ', () => {
   beforeEach(async () => {
     jest.doMock('ui/new_platform', () => ({
       npSetup: {

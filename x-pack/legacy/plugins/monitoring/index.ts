@@ -8,8 +8,8 @@ import { resolve } from 'path';
 import { Server } from 'src/legacy/server/kbn_server';
 import KbnServer from 'src/legacy/server/kbn_server';
 import { i18n } from '@kbn/i18n';
-
 import { LegacyPluginApi, LegacyPluginSpec } from 'src/legacy/plugin_discovery/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 // @ts-ignore
 import { config as configDefaults } from './config';
@@ -37,6 +37,7 @@ const uiExports = {
     euiIconType: 'monitoringApp',
     linkToLastSubUrl: false,
     main: 'plugins/monitoring/legacy',
+    category: DEFAULT_APP_CATEGORIES.management,
   },
   injectDefaultVars(server: Server) {
     const config = server.config();

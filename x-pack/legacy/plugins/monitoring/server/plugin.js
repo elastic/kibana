@@ -63,7 +63,7 @@ export class Plugin {
         await instantiateClient({
           log,
           events,
-          config,
+          elasticsearchConfig,
           elasticsearchPlugin: plugins.elasticsearch,
         }); // Instantiate the dedicated ES client
         await initMonitoringXpackInfo({
