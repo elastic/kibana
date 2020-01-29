@@ -107,7 +107,7 @@ export const WatchHistory = () => {
               defaultMessage="Error loading execution history"
             />
           }
-          error={historyError as Error}
+          error={(historyError as unknown) as Error}
         />
       </Fragment>
     );
@@ -186,7 +186,7 @@ export const WatchHistory = () => {
                   defaultMessage="Error loading execution details"
                 />
               }
-              error={watchHistoryDetailsError as Error}
+              error={(watchHistoryDetailsError as unknown) as Error}
               data-test-subj="errorMessage"
             />
           </EuiFlyoutBody>

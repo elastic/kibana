@@ -180,7 +180,7 @@ export const WatchVisualization = () => {
               defaultMessage="Cannot load watch visualization"
             />
           }
-          error={error as Error}
+          error={(error as unknown) as Error}
         />
         <EuiSpacer size="l" />
       </Fragment>
