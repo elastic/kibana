@@ -73,7 +73,7 @@ This indexing strategy has a few advantages:
 The ingest pipelines for a specific dataset will have the following naming scheme:
 
 ```
-{type}-{dataset}-{version}
+{type}-{dataset}-{package.version}
 ```
 
 As an example, the ingest pipeline for the Nginx access logs is called `logs-nginx.access-3.4.1`. The same ingest pipeline is used for all namespaces. It is possible that a dataset has multiple ingest pipelines in which case a suffix is added to the name.
