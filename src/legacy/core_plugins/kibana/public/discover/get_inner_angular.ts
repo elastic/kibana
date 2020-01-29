@@ -46,8 +46,6 @@ import { AppStateProvider } from 'ui/state_management/app_state';
 // @ts-ignore
 import { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
-import { createRenderCompleteDirective } from 'ui/render_complete/directive';
-// @ts-ignore
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 // @ts-ignore
 import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
@@ -83,6 +81,7 @@ import { createCssTruncateDirective } from './np_ready/angular/directives/css_tr
 import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll';
 // @ts-ignore
 import { DebounceProviderTimeout } from './np_ready/angular/directives/debounce/debounce';
+import { createRenderCompleteDirective } from './np_ready/angular/directives/render_complete';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover

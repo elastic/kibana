@@ -16,18 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { uiModules } from '../modules';
-import { RenderCompleteHelper } from '../../../../plugins/kibana_utils/public';
+import { IScope } from 'angular';
+import { RenderCompleteHelper } from '../../../../../../../../plugins/kibana_utils/public';
 
 export function createRenderCompleteDirective() {
   return {
-    controller($scope, $element) {
+    controller($scope: IScope, $element: JQLite) {
       const el = $element[0];
       const renderCompleteHelper = new RenderCompleteHelper(el);
       $scope.$on('$destroy', renderCompleteHelper.destroy);
     },
   };
 }
-
-uiModules.get('kibana').directive('renderComplete', createRenderCompleteDirective);
