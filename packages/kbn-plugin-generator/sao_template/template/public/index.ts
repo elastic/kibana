@@ -1,3 +1,7 @@
+<%_ if (hasScss) { -%>
+import './index.scss';
+<%_ } -%>
+
 import { <%= upperCamelCaseName %>PublicPlugin } from './plugin';
 
 export function plugin() {

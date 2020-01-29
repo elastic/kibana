@@ -63,6 +63,7 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
       },
     },
     filters: {
+      'public/**/index.scss': 'generateScss',
       'public/**/*': 'generateApp',
       'server/**/*': 'generateApi',
       'translations/**/*': 'generateTranslations',
@@ -84,6 +85,7 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
           upperCamelCaseName: name.charAt(0).toUpperCase() + camelCase(name).slice(1),
           hasUi: !!answers.generateApp,
           hasServer: !!answers.generateApi,
+          hasScss: !!answers.generateScss,
           relRoot: isKibanaPlugin ? '../../../..' : '../../..',
         },
         answers
