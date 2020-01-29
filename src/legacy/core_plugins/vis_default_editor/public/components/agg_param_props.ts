@@ -19,9 +19,8 @@
 
 import { Field } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { AggConfig, AggParam } from '../legacy_imports';
+import { AggConfig, AggParam, EditorConfig } from '../legacy_imports';
 import { ComboBoxGroupedOptions } from '../utils';
-import { EditorConfig } from '../config/types';
 
 // NOTE: we cannot export the interface with export { InterfaceName }
 // as there is currently a bug on babel typescript transform plugin for it

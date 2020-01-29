@@ -23,7 +23,14 @@ import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { AggConfig, AggGroupNames } from '../legacy_imports';
+import {
+  AggConfig,
+  AggGroupNames,
+  editorConfigProviders,
+  FixedParam,
+  TimeIntervalParam,
+  EditorParamConfig,
+} from '../legacy_imports';
 
 import { DefaultEditorAggSelect } from './agg_select';
 import { DefaultEditorAggParam } from './agg_param';
@@ -38,8 +45,6 @@ import {
   AGG_PARAMS_ACTION_KEYS,
   initAggParamsState,
 } from './agg_params_state';
-import { editorConfigProviders } from '../config/editor_config_providers';
-import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../config/types';
 import { DefaultEditorCommonProps } from './agg_common_props';
 
 const FIXED_VALUE_PROP = 'fixedValue';

@@ -19,13 +19,19 @@
 
 import { IndexPattern, Field } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { AggConfig, AggType, AggGroupNames, BUCKET_TYPES, IndexedArray } from '../legacy_imports';
+import {
+  AggConfig,
+  AggType,
+  AggGroupNames,
+  BUCKET_TYPES,
+  IndexedArray,
+  EditorConfig,
+} from '../legacy_imports';
 import {
   getAggParamsToRender,
   getAggTypeOptions,
   isInvalidParamsTouched,
 } from './agg_params_helper';
-import { EditorConfig } from '../config/types';
 import { FieldParamEditor, OrderByParamEditor } from './controls';
 
 jest.mock('../utils', () => ({

@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { AggConfig } from 'ui/agg_types';
 import { EditorConfigProviderRegistry } from './editor_config_providers';
 import { EditorParamConfig, FixedParam, NumericIntervalParam, TimeIntervalParam } from './types';
-import { AggConfig } from '../legacy_imports';
 
 jest.mock('ui/new_platform');
 

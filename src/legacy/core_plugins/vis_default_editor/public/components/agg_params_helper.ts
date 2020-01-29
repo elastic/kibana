@@ -22,7 +22,6 @@ import { get, isEmpty } from 'lodash';
 import { IndexPattern, Field } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
-import { EditorConfig } from '../config/types';
 import { AggTypeState, AggParamsState } from './agg_params_state';
 import { AggParamEditorProps } from './agg_param_props';
 import { aggParamsMap } from './agg_params_map';
@@ -34,6 +33,7 @@ import {
   AggParam,
   FieldParamType,
   AggType,
+  EditorConfig,
 } from '../legacy_imports';
 
 interface ParamInstanceBase {

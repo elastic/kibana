@@ -17,15 +17,5 @@
  * under the License.
  */
 
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { AggConfig, AggParam, EditorConfig } from '../../legacy_imports';
-
-export const aggParamCommonPropsMock = {
-  agg: {} as AggConfig,
-  aggParam: {} as AggParam,
-  editorConfig: {} as EditorConfig,
-  formIsTouched: false,
-  metricAggs: [] as AggConfig[],
-  state: {} as VisState,
-  showValidation: false,
-};
+export { editorConfigProviders } from './editor_config_providers';
+export * from './types';

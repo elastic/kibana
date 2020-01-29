@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { editorConfigProviders } from '../../../../../../src/legacy/core_plugins/vis_default_editor/public';
+import { editorConfigProviders } from 'ui/vis/config';
 
 export function initEditorConfig() {
   // Limit agg params based on rollup capabilities

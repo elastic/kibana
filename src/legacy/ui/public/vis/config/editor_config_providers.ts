@@ -18,8 +18,8 @@
  */
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { parseEsInterval } from '../../../data/public';
-import { AggConfig, leastCommonMultiple, leastCommonInterval } from '../legacy_imports';
+import { AggConfig } from 'ui/agg_types';
+import { parseEsInterval } from '../../../../core_plugins/data/public';
 import {
   TimeIntervalParam,
   EditorConfig,
@@ -27,6 +27,7 @@ import {
   FixedParam,
   NumericIntervalParam,
 } from './types';
+import { leastCommonInterval, leastCommonMultiple } from '../lib';
 
 type EditorConfigProvider = (indexPattern: IndexPattern, aggConfig: AggConfig) => EditorConfig;
 
