@@ -78,7 +78,8 @@ const defaultOnClearSavedQuery = (
   props: StatefulSearchBarProps,
   uiSettings: CoreStart['uiSettings'],
   queryService: QueryStart,
-  setQueryStringState: Function
+  setQueryStringState: Function,
+  setSavedQueryState: Function
 ) => {
   if (!props.useDefaultBehaviors) return props.onClearSavedQuery;
   return () => {
@@ -87,7 +88,7 @@ const defaultOnClearSavedQuery = (
       query: '',
       language: uiSettings.get('search:queryLanguage'),
     });
-
+    setSavedQueryState(undefined);
     if (props.onClearSavedQuery) props.onClearSavedQuery();
   };
 };
@@ -96,7 +97,8 @@ const populateStateFromSavedQuery = (
   props: StatefulSearchBarProps,
   queryService: QueryStart,
   savedQuery: SavedQuery,
-  setQueryStringState: Function
+  setQueryStringState: Function,
+  setSavedQueryState: Function
 ) => {
   const { timefilter } = queryService.timefilter;
   // timefilter
@@ -119,16 +121,25 @@ const populateStateFromSavedQuery = (
   const savedQueryFilters = savedQuery.attributes.filters || [];
   const globalFilters = queryService.filterManager.getGlobalFilters();
   queryService.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
+
+  setSavedQueryState(savedQuery);
 };
 
 const defaultOnSavedQueryUpdated = (
   props: StatefulSearchBarProps,
   queryService: QueryStart,
-  setQueryStringState: Function
+  setQueryStringState: Function,
+  setSavedQueryState: Function
 ) => {
   if (!props.useDefaultBehaviors) return props.onSavedQueryUpdated;
   return (savedQuery: SavedQuery) => {
-    populateStateFromSavedQuery(props, queryService, savedQuery, setQueryStringState);
+    populateStateFromSavedQuery(
+      props,
+      queryService,
+      savedQuery,
+      setQueryStringState,
+      setSavedQueryState
+    );
     if (props.onSavedQueryUpdated) props.onSavedQueryUpdated(savedQuery);
   };
 };
@@ -136,11 +147,18 @@ const defaultOnSavedQueryUpdated = (
 const defaultOnQuerySaved = (
   props: StatefulSearchBarProps,
   queryService: QueryStart,
-  setQueryStringState: Function
+  setQueryStringState: Function,
+  setSavedQueryState: Function
 ) => {
   if (!props.useDefaultBehaviors) return props.onSaved;
   return (savedQuery: SavedQuery) => {
-    populateStateFromSavedQuery(props, queryService, savedQuery, setQueryStringState);
+    populateStateFromSavedQuery(
+      props,
+      queryService,
+      savedQuery,
+      setQueryStringState,
+      setSavedQueryState
+    );
     if (props.onSaved) props.onSaved(savedQuery);
   };
 };
@@ -164,6 +182,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
         language: core.uiSettings.get('search:queryLanguage'),
       }
     );
+    const [savedQuery, setSavedQuery] = useState<SavedQuery>();
 
     const [filters, setFilters] = useState(fmFilters);
 
@@ -230,10 +249,22 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           query={query}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
+          savedQuery={savedQuery}
           onQuerySubmit={defaultOnQuerySubmit(props, data.query, query, setQuery)}
-          onClearSavedQuery={defaultOnClearSavedQuery(props, core.uiSettings, data.query, setQuery)}
-          onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, data.query, setQuery)}
-          onSaved={defaultOnQuerySaved(props, data.query, setQuery)}
+          onClearSavedQuery={defaultOnClearSavedQuery(
+            props,
+            core.uiSettings,
+            data.query,
+            setQuery,
+            setSavedQuery
+          )}
+          onSavedQueryUpdated={defaultOnSavedQueryUpdated(
+            props,
+            data.query,
+            setQuery,
+            setSavedQuery
+          )}
+          onSaved={defaultOnQuerySaved(props, data.query, setQuery, setSavedQuery)}
           {...overrideDefaultBehaviors(props)}
         />
       </KibanaContextProvider>
