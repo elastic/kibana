@@ -12,13 +12,15 @@ import {
   ScaleType,
   Settings,
   Theme,
-  TooltipType
+  TooltipType,
+  RectAnnotation
 } from '@elastic/charts';
 import '@elastic/charts/dist/theme_light.css';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { getWaterfall } from './app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 import response from './scrubber.data.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 // The contents of scrubber.data.json is was directly copied from a trace API
 // response, originally http://localhost:5601/kbn/api/apm/traces/21bd90461ba6355df98352070360f5f7.
@@ -31,20 +33,64 @@ const data = waterfall.items.map((item, index) => ({
   max: item.offset + item.duration,
   x: index
 }));
-
-const theme: Partial<Theme> = {
+console.log({ data });
+const chartTheme: Partial<Theme> = {
   chartPaddings: { left: 0, top: 0, bottom: 0, right: 0 },
   chartMargins: { left: 0, top: 0, bottom: 0, right: 0 },
   scales: { barsPadding: 0, histogramPadding: 0 }
 };
 
+function SelectionAnnotation({ selection }: { selection: Selection }) {
+  const x0 = 0;
+  let x1 = waterfall.items.length - 1;
+  if (!selection[0]) {
+    x1 = 0;
+  }
+  const maxY = 21000;
+  return (
+    <RectAnnotation
+      dataValues={[
+        {
+          coordinates: {
+            x0,
+            x1,
+            y0: 0,
+            y1: 9000
+          }
+        },
+        {
+          coordinates: {
+            x0,
+            x1,
+            y0: 10000,
+            y1: maxY
+          }
+        }
+      ]}
+      id="selection"
+      style={{
+        strokeWidth: parseInt(theme.euiBorderWidthThin, 10),
+        stroke: theme.euiBorderColor,
+        // fill: theme.euiColorLightestShade,
+        fill: 'green',
+        opacity: 0.5
+      }}
+      zIndex={1}
+    />
+  );
+}
+
+type Selection = [number, number] | [undefined, undefined];
+
 function TimelineScrubber() {
-  const [selection, setSelection] = React.useState<
-    [number, number] | [undefined, undefined]
-  >([undefined, undefined]);
+  const [selection, setSelection] = React.useState<Selection>([
+    undefined,
+    undefined
+  ]);
 
   const onBrushEnd: BrushEndListener = (y1, y2) => {
     setSelection([y1, y2]);
+    console.log(y1, y2);
   };
 
   return (
@@ -74,11 +120,13 @@ function TimelineScrubber() {
       <div style={{ height: 60 }}>
         <Chart>
           <Settings
+            debug={true}
             onBrushEnd={onBrushEnd}
             rotation={90}
-            theme={theme}
+            theme={chartTheme}
             tooltip={TooltipType.None}
           />
+          <SelectionAnnotation selection={selection} />
           <BarSeries
             id={getSpecId('lines')}
             xScaleType={ScaleType.Linear}
