@@ -19,7 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-export function extractTimeFields(fields) {
+// todo this should probably live somewhere else
+interface Field {
+  type: string;
+  name: string;
+}
+
+export function extractTimeFields(fields: Field[]) {
   const dateFields = fields.filter(field => field.type === 'date');
   const label = i18n.translate('kbn.management.createIndexPattern.stepTime.noTimeFieldsLabel', {
     defaultMessage: "The indices which match this index pattern don't contain any time fields.",

@@ -18,9 +18,10 @@
  */
 
 import { getIndices } from '../get_indices';
-import successfulResponse from './api/get_indices.success.json';
-import errorResponse from './api/get_indices.error.json';
-import exceptionResponse from './api/get_indices.exception.json';
+import { successfulResponse, errorResponse, exceptionResponse } from './api/get_indices';
+import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
+
+/*
 const mockIndexPatternCreationType = {
   getIndexPatternType: () => 'default',
   getIndexPatternName: () => 'name',
@@ -33,85 +34,116 @@ const mockIndexPatternCreationType = {
   getIndexTags: () => {
     return [];
   },
+  key: 'default' as 'default',
+  name: 'name',
+  showSystemIndices: false,
+  httpClient: {},
+  isBeta: false,
+  getIndexPatternCreationOption: {},
+  getIsBeta: () => false,
+  getFetchForWildcardOptions: () => {},
+};
+*/
+
+const mockIndexPatternCreationType = new IndexPatternCreationConfig({
+  type: 'default',
+  name: 'name',
+  showSystemIndices: false,
+  httpClient: {},
+  isBeta: false,
+});
+
+function getLegacyApiCallerResponse(response: any) {
+  return {
+    abort: () => {},
+    ...new Promise(resolve => resolve({ ...response })),
+  };
+}
+
+const es = {
+  search: () => getLegacyApiCallerResponse(successfulResponse),
+  // search: () => new Promise(resolve => resolve({ ...successfulResponse })),
+  msearch: () => getLegacyApiCallerResponse({}),
 };
 
 describe('getIndices', () => {
   it('should work in a basic case', async () => {
-    const es = {
-      search: () => new Promise(resolve => resolve(successfulResponse)),
-    };
-
     const result = await getIndices(es, mockIndexPatternCreationType, 'kibana', 1);
     expect(result.length).toBe(2);
+    // @ts-ignore
     expect(result[0].name).toBe('1');
+    // @ts-ignore
     expect(result[1].name).toBe('2');
   });
 
   it('should ignore ccs query-all', async () => {
-    expect((await getIndices(null, mockIndexPatternCreationType, '*:')).length).toBe(0);
+    expect((await getIndices(es, mockIndexPatternCreationType, '*:', 10)).length).toBe(0);
   });
 
   it('should ignore a single comma', async () => {
-    expect((await getIndices(null, mockIndexPatternCreationType, ',')).length).toBe(0);
-    expect((await getIndices(null, mockIndexPatternCreationType, ',*')).length).toBe(0);
-    expect((await getIndices(null, mockIndexPatternCreationType, ',foobar')).length).toBe(0);
+    expect((await getIndices(es, mockIndexPatternCreationType, ',', 10)).length).toBe(0);
+    expect((await getIndices(es, mockIndexPatternCreationType, ',*', 10)).length).toBe(0);
+    expect((await getIndices(es, mockIndexPatternCreationType, ',foobar', 10)).length).toBe(0);
   });
 
   it('should trim the input', async () => {
     let index;
-    const es = {
+    const esClient = {
+      search: () => getLegacyApiCallerResponse({ index: 'kibana' }), // todo
+      msearch: () => getLegacyApiCallerResponse({}),
+      /*
       search: jest.fn().mockImplementation(params => {
         index = params.index;
       }),
+      */
     };
 
-    await getIndices(es, mockIndexPatternCreationType, 'kibana          ', 1);
+    await getIndices(esClient, mockIndexPatternCreationType, 'kibana          ', 1);
     expect(index).toBe('kibana');
   });
 
   it('should use the limit', async () => {
     let limit;
-    const es = {
+    const esClient = {
       search: jest.fn().mockImplementation(params => {
         limit = params.body.aggs.indices.terms.size;
       }),
     };
-
-    await getIndices(es, mockIndexPatternCreationType, 'kibana', 10);
+    // @ts-ignore
+    await getIndices(esClient, mockIndexPatternCreationType, 'kibana', 10);
     expect(limit).toBe(10);
   });
 
   describe('errors', () => {
     it('should handle errors gracefully', async () => {
-      const es = {
+      const esClient = {
         search: () => new Promise(resolve => resolve(errorResponse)),
       };
-
-      const result = await getIndices(es, mockIndexPatternCreationType, 'kibana', 1);
+      // @ts-ignore
+      const result = await getIndices(esClient, mockIndexPatternCreationType, 'kibana', 1);
       expect(result.length).toBe(0);
     });
 
     it('should throw exceptions', async () => {
-      const es = {
+      const esClient = {
         search: () => {
           throw new Error('Fail');
         },
       };
 
-      await expect(getIndices(es, mockIndexPatternCreationType, 'kibana', 1)).rejects.toThrow();
+      await expect(
+        // @ts-ignore
+        getIndices(esClient, mockIndexPatternCreationType, 'kibana', 1)
+      ).rejects.toThrow();
     });
 
     it('should handle index_not_found_exception errors gracefully', async () => {
-      const es = {
+      const esClient = {
         search: () => new Promise((resolve, reject) => reject(exceptionResponse)),
       };
-
-      const result = await getIndices(es, mockIndexPatternCreationType, 'kibana', 1);
+      // @ts-ignore
+      const result = await getIndices(esClient, mockIndexPatternCreationType, 'kibana', 1);
       expect(result.length).toBe(0);
-    });
-
-    it('should throw an exception if no limit is provided', async () => {
-      await expect(getIndices({}, mockIndexPatternCreationType, 'kibana')).rejects.toThrow();
     });
   });
 });

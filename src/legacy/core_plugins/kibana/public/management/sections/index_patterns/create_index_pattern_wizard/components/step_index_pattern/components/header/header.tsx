@@ -42,6 +42,14 @@ export const Header = ({
   goToNextStep,
   isNextStepDisabled,
   ...rest
+}: {
+  isInputInvalid: boolean;
+  errors: any;
+  characterList: string;
+  query: string;
+  onQueryChanged: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  goToNextStep: (query: string) => void;
+  isNextStepDisabled: boolean;
 }) => (
   <div {...rest}>
     <EuiTitle size="s">

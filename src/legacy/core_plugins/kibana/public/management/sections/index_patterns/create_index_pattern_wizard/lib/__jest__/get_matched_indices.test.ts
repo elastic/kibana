@@ -23,18 +23,26 @@ jest.mock('../../constants', () => ({
   MAX_NUMBER_OF_MATCHING_INDICES: 6,
 }));
 
+const tags: string[] = [];
 const indices = [
-  { name: 'kibana' },
-  { name: 'es' },
-  { name: 'logstash' },
-  { name: 'packetbeat' },
-  { name: 'metricbeat' },
-  { name: '.kibana' },
+  { name: 'kibana', tags },
+  { name: 'es', tags },
+  { name: 'logstash', tags },
+  { name: 'packetbeat', tags },
+  { name: 'metricbeat', tags },
+  { name: '.kibana', tags },
 ];
 
-const partialIndices = [{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }];
+const partialIndices = [
+  { name: 'kibana', tags },
+  { name: 'es', tags },
+  { name: '.kibana', tags },
+];
 
-const exactIndices = [{ name: 'kibana' }, { name: '.kibana' }];
+const exactIndices = [
+  { name: 'kibana', tags },
+  { name: '.kibana', tags },
+];
 
 describe('getMatchedIndices', () => {
   it('should return all indices', () => {

@@ -18,32 +18,39 @@
  */
 
 import React from 'react';
-import { EmptyState } from '../empty_state';
-import { shallow } from 'enzyme';
-import sinon from 'sinon';
+import { Header } from '../header';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-describe('EmptyState', () => {
+describe('Header', () => {
   it('should render normally', () => {
-    const component = shallow(
-      <EmptyState loadingDataDocUrl="http://www.elastic.co" onRefresh={() => {}} />
+    const component = shallowWithI18nProvider(
+      <Header
+        isInputInvalid={false}
+        errors={[]}
+        characterList={'%'}
+        query={'k'}
+        onQueryChanged={() => {}}
+        goToNextStep={() => {}}
+        isNextStepDisabled={false}
+      />
     );
 
     expect(component).toMatchSnapshot();
   });
 
-  describe('props', () => {
-    describe('onRefresh', () => {
-      it('is called when refresh button is clicked', () => {
-        const onRefreshHandler = sinon.stub();
+  it('should mark the input as invalid', () => {
+    const component = shallowWithI18nProvider(
+      <Header
+        isInputInvalid={true}
+        errors={['Input is invalid']}
+        characterList={'%'}
+        query={'%'}
+        onQueryChanged={() => {}}
+        goToNextStep={() => {}}
+        isNextStepDisabled={true}
+      />
+    );
 
-        const component = shallow(
-          <EmptyState loadingDataDocUrl="http://www.elastic.co" onRefresh={onRefreshHandler} />
-        );
-
-        component.find('[data-test-subj="refreshIndicesButton"]').simulate('click');
-
-        sinon.assert.calledOnce(onRefreshHandler);
-      });
-    });
+    expect(component).toMatchSnapshot();
   });
 });

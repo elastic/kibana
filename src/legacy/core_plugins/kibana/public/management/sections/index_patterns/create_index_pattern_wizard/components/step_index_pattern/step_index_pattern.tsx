@@ -18,8 +18,15 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { indexPatterns } from '../../../../../../../../../../plugins/data/public';
+import { EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import {
+  indexPatterns,
+  DataPublicPluginStart,
+} from '../../../../../../../../../../plugins/data/public';
+import { SavedObjectsClient } from '../../../../../../../../../../core/public/saved_objects';
 import { MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,
@@ -32,47 +39,55 @@ import { LoadingIndices } from './components/loading_indices';
 import { StatusMessage } from './components/status_message';
 import { IndicesList } from './components/indices_list';
 import { Header } from './components/header';
-
-import { EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
+import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
+import { MatchedIndex } from '../../types';
 
 const uiSettings = chrome.getUiSettingsClient();
 
-export class StepIndexPattern extends Component {
-  static propTypes = {
-    allIndices: PropTypes.array.isRequired,
-    isIncludingSystemIndices: PropTypes.bool.isRequired,
-    esService: PropTypes.object.isRequired,
-    savedObjectsClient: PropTypes.object.isRequired,
-    indexPatternCreationType: PropTypes.object.isRequired,
-    goToNextStep: PropTypes.func.isRequired,
-    initialQuery: PropTypes.string,
-  };
+interface StepIndexPatternProps {
+  allIndices: any[];
+  isIncludingSystemIndices: boolean;
+  esService: DataPublicPluginStart['search']['__LEGACY']['esClient'];
+  savedObjectsClient: SavedObjectsClient;
+  indexPatternCreationType: IndexPatternCreationConfig;
+  goToNextStep: () => void;
+  initialQuery?: string;
+}
 
-  static defaultProps = {
-    initialQuery: uiSettings.get('indexPattern:placeholder'),
-  };
+interface StepIndexPatternState {
+  partialMatchedIndices: MatchedIndex[];
+  exactMatchedIndices: MatchedIndex[];
+  isLoadingIndices: boolean;
+  existingIndexPatterns: string[];
+  indexPatternExists: boolean;
+  query: string;
+  appendedWildcard: boolean;
+  showingIndexPatternQueryErrors: boolean;
+  indexPatternName: string;
+}
 
-  constructor(props) {
+export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndexPatternState> {
+  state = {
+    partialMatchedIndices: [],
+    exactMatchedIndices: [],
+    isLoadingIndices: false,
+    existingIndexPatterns: [],
+    indexPatternExists: false,
+    query: '',
+    appendedWildcard: false,
+    showingIndexPatternQueryErrors: false,
+    indexPatternName: '',
+  };
+  ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS]; // no reason to copy this locally
+  lastQuery: string | undefined;
+
+  constructor(props: StepIndexPatternProps) {
     super(props);
     const { indexPatternCreationType } = this.props;
-    this.state = {
-      partialMatchedIndices: [],
-      exactMatchedIndices: [],
-      isLoadingIndices: false,
-      existingIndexPatterns: [],
-      indexPatternExists: false,
-      query: props.initialQuery,
-      appendedWildcard: false,
-      showingIndexPatternQueryErrors: false,
+    this.setState({
+      query: uiSettings.get('indexPattern:placeholder'),
       indexPatternName: indexPatternCreationType.getIndexPatternName(),
-    };
-
-    this.ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
-    this.lastQuery = null;
+    });
   }
 
   async UNSAFE_componentWillMount() {
@@ -91,15 +106,16 @@ export class StepIndexPattern extends Component {
     });
     const existingIndexPatterns = savedObjects.map(obj =>
       obj && obj.attributes ? obj.attributes.title : ''
-    );
+    ) as string[];
+
     this.setState({ existingIndexPatterns });
   };
 
-  fetchIndices = async query => {
+  fetchIndices = async (query: string) => {
     const { esService, indexPatternCreationType } = this.props;
     const { existingIndexPatterns } = this.state;
 
-    if (existingIndexPatterns.includes(query)) {
+    if ((existingIndexPatterns as string[]).includes(query)) {
       this.setState({ indexPatternExists: true });
       return;
     }
@@ -135,7 +151,7 @@ export class StepIndexPattern extends Component {
     });
   };
 
-  onQueryChanged = e => {
+  onQueryChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { appendedWildcard } = this.state;
     const { target } = e;
 
@@ -166,9 +182,13 @@ export class StepIndexPattern extends Component {
     return <LoadingIndices data-test-subj="createIndexPatternStep1Loading" />;
   }
 
-  renderStatusMessage(matchedIndices) {
-    const { indexPatternCreationType } = this.props;
-    const { query, isLoadingIndices, indexPatternExists, isIncludingSystemIndices } = this.state;
+  renderStatusMessage(matchedIndices: {
+    allIndices: MatchedIndex[]; // todo share type
+    exactMatchedIndices: MatchedIndex[];
+    partialMatchedIndices: MatchedIndex[];
+  }) {
+    const { indexPatternCreationType, isIncludingSystemIndices } = this.props;
+    const { query, isLoadingIndices, indexPatternExists } = this.state;
 
     if (isLoadingIndices || indexPatternExists) {
       return null;
@@ -184,7 +204,13 @@ export class StepIndexPattern extends Component {
     );
   }
 
-  renderList({ visibleIndices, allIndices }) {
+  renderList({
+    visibleIndices,
+    allIndices,
+  }: {
+    visibleIndices: MatchedIndex[];
+    allIndices: MatchedIndex[];
+  }) {
     const { query, isLoadingIndices, indexPatternExists } = this.state;
 
     if (isLoadingIndices || indexPatternExists) {
@@ -224,8 +250,8 @@ export class StepIndexPattern extends Component {
     );
   }
 
-  renderHeader({ exactMatchedIndices: indices }) {
-    const { goToNextStep, indexPatternCreationType } = this.props;
+  renderHeader({ exactMatchedIndices: indices }: { exactMatchedIndices: MatchedIndex[] }) {
+    const { goToNextStep } = this.props;
     const {
       query,
       showingIndexPatternQueryErrors,
@@ -238,7 +264,6 @@ export class StepIndexPattern extends Component {
     const characterList = this.ILLEGAL_CHARACTERS.slice(0, this.ILLEGAL_CHARACTERS.length - 1).join(
       ', '
     );
-    const checkIndices = indexPatternCreationType.checkIndicesForErrors(indices);
 
     if (!query || !query.length || query === '.' || query === '..') {
       // This is an error scenario but do not report an error
@@ -254,9 +279,6 @@ export class StepIndexPattern extends Component {
       );
 
       errors.push(errorMessage);
-      containsErrors = true;
-    } else if (checkIndices) {
-      errors.push(...checkIndices);
       containsErrors = true;
     }
 
@@ -293,7 +315,7 @@ export class StepIndexPattern extends Component {
       <EuiPanel paddingSize="l">
         {this.renderHeader(matchedIndices)}
         <EuiSpacer size="s" />
-        {this.renderLoadingState(matchedIndices)}
+        {this.renderLoadingState()}
         {this.renderIndexPatternExists()}
         {this.renderStatusMessage(matchedIndices)}
         <EuiSpacer size="s" />

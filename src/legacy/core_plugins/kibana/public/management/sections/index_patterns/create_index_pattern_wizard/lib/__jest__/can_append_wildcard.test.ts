@@ -17,10 +17,26 @@
  * under the License.
  */
 
-export const canAppendWildcard = keyPressed => {
-  // If it's not a letter, number or is something longer, reject it
-  if (!keyPressed || !/[a-z0-9]/i.test(keyPressed) || keyPressed.length !== 1) {
-    return false;
-  }
-  return true;
-};
+import { canAppendWildcard } from '../can_append_wildcard';
+
+describe('canAppendWildcard', () => {
+  test('ignores symbols', () => {
+    expect(canAppendWildcard('%')).toBeFalsy();
+  });
+
+  test('accepts numbers', () => {
+    expect(canAppendWildcard('1')).toBeTruthy();
+  });
+
+  test('accepts letters', () => {
+    expect(canAppendWildcard('b')).toBeTruthy();
+  });
+
+  test('accepts uppercase letters', () => {
+    expect(canAppendWildcard('B')).toBeTruthy();
+  });
+
+  test('ignores if more than one key pressed', () => {
+    expect(canAppendWildcard('ab')).toBeFalsy();
+  });
+});

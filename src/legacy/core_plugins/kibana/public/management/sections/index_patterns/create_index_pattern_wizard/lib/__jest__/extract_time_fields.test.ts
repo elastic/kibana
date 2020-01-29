@@ -17,30 +17,27 @@
  * under the License.
  */
 
-import { canAppendWildcard } from '../can_append_wildcard';
+import { extractTimeFields } from '../extract_time_fields';
 
-describe('canAppendWildcard', () => {
-  test('ignores no data', () => {
-    expect(canAppendWildcard({})).toBeFalsy();
+describe('extractTimeFields', () => {
+  it('should handle no date fields', () => {
+    const fields = [
+      { type: 'text', name: 'name' },
+      { type: 'text', name: 'name' },
+    ];
+
+    expect(extractTimeFields(fields)).toEqual([
+      { display: `The indices which match this index pattern don't contain any time fields.` },
+    ]);
   });
 
-  test('ignores symbols', () => {
-    expect(canAppendWildcard('%')).toBeFalsy();
-  });
+  it('should add extra options', () => {
+    const fields = [{ type: 'date', name: '@timestamp' }];
 
-  test('accepts numbers', () => {
-    expect(canAppendWildcard('1')).toBeTruthy();
-  });
-
-  test('accepts letters', () => {
-    expect(canAppendWildcard('b')).toBeTruthy();
-  });
-
-  test('accepts uppercase letters', () => {
-    expect(canAppendWildcard('B')).toBeTruthy();
-  });
-
-  test('ignores if more than one key pressed', () => {
-    expect(canAppendWildcard('ab')).toBeFalsy();
+    expect(extractTimeFields(fields)).toEqual([
+      { display: '@timestamp', fieldName: '@timestamp' },
+      { isDisabled: true, display: '───', fieldName: '' },
+      { display: `I don't want to use the Time Filter`, fieldName: undefined },
+    ]);
   });
 });

@@ -22,32 +22,39 @@ import { Header } from '../header';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 describe('Header', () => {
+  const indexPatternName = 'test index pattern';
   it('should render normally', () => {
     const component = shallowWithI18nProvider(
       <Header
-        isInputInvalid={false}
-        errors={[]}
-        characterList={['%']}
-        query={'k'}
-        onQueryChanged={() => {}}
-        goToNextStep={() => {}}
-        isNextStepDisabled={false}
+        indexPatternName={indexPatternName}
+        isIncludingSystemIndices={true}
+        onChangeIncludingSystemIndices={() => {}}
       />
     );
 
     expect(component).toMatchSnapshot();
   });
 
-  it('should mark the input as invalid', () => {
+  it('should render without including system indices', () => {
     const component = shallowWithI18nProvider(
       <Header
-        isInputInvalid={true}
-        errors={['Input is invalid']}
-        characterList={['%']}
-        query={'%'}
-        onQueryChanged={() => {}}
-        goToNextStep={() => {}}
-        isNextStepDisabled={true}
+        indexPatternName={indexPatternName}
+        isIncludingSystemIndices={false}
+        onChangeIncludingSystemIndices={() => {}}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render a different name, prompt, and beta tag if provided', () => {
+    const component = shallowWithI18nProvider(
+      <Header
+        isIncludingSystemIndices={false}
+        onChangeIncludingSystemIndices={() => {}}
+        prompt={<div>Test prompt</div>}
+        indexPatternName={indexPatternName}
+        isBeta={true}
       />
     );
 
