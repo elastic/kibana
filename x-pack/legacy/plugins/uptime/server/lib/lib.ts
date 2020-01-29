@@ -12,9 +12,13 @@ import {
   UMElasticsearchQueryFn,
 } from './adapters';
 import { UMLicenseCheck } from './domains';
-import { GetPingsParams } from './database_calls/get_pings';
 import { PingResults, Ping, DocCount } from '../../common/graphql/types';
-import { GetLatestMonitorParams, GetMonitorParams, GetPingHistogramParams } from './database_calls';
+import {
+  GetLatestMonitorParams,
+  GetMonitorParams,
+  GetPingHistogramParams,
+  GetPingsParams,
+} from './requests';
 import { HistogramResult } from '../../common/domain_types';
 
 type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;

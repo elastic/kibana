@@ -6,7 +6,7 @@
 
 import { UMKibanaBackendFrameworkAdapter } from '../adapters/framework';
 import { elasticsearchMonitorsAdapter } from '../adapters/monitors';
-import * as databaseCalls from '../database_calls';
+import * as requests from '../requests';
 import { licenseCheck } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
 import { elasticsearchMonitorStatesAdapter } from '../adapters/monitor_states';
@@ -18,7 +18,7 @@ export function compose(server: UptimeCoreSetup, plugins: UptimeCorePlugins): UM
 
   const domainLibs: UMDomainLibs = {
     db: {
-      ...databaseCalls,
+      ...requests,
     },
     license: licenseCheck,
     monitors: elasticsearchMonitorsAdapter,
