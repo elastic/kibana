@@ -6,7 +6,6 @@
 
 import { set } from 'lodash';
 import { elasticsearchPingsAdapter as adapter } from '../es_pings';
-import { assertCloseTo } from '../../../helper';
 
 describe('ElasticsearchPingsAdapter class', () => {
   let mockHits: any[];
