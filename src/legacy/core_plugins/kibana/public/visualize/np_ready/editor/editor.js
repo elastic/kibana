@@ -462,7 +462,7 @@ function VisualizeAppController(
     });
   }
 
-  $scope.filterManagerAndFetch = function({ query, dateRange }) {
+  $scope.updateQueryAndFetch = function({ query, dateRange }) {
     const isUpdate =
       (query && !_.isEqual(query, $state.query)) ||
       (dateRange && !_.isEqual(dateRange, $scope.timeRange));
