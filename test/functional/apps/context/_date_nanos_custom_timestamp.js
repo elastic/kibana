@@ -28,8 +28,9 @@ export default function({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
-
-  describe('context view for date_nanos with custom timestamp', () => {
+  // skipped due to a recent change in ES that caused search_after queries with data containing
+  // custom timestamp formats like in the testdata to fail
+  describe.skip('context view for date_nanos with custom timestamp', () => {
     before(async function() {
       await esArchiver.loadIfNeeded('date_nanos_custom');
       await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });

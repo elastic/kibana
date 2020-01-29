@@ -23,7 +23,7 @@ import React, { RefObject } from 'react';
 // @ts-ignore
 import { Vis as Vislib } from './vislib/vis';
 import { Positions } from './utils/collections';
-import { KbnVislibVisTypesDependencies } from './plugin';
+import { VisTypeVislibDependencies } from './plugin';
 import { mountReactNode } from '../../../../core/public/utils';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
 import { VisParams, Vis } from '../../visualizations/public';
@@ -35,7 +35,7 @@ const legendClassName = {
   right: 'visLib--legend-right',
 };
 
-export const createVislibVisController = (deps: KbnVislibVisTypesDependencies) => {
+export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
   return class VislibVisController {
     unmount: (() => void) | null = null;
     visParams?: VisParams;
