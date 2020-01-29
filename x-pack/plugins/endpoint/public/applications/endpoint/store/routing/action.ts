@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MapView } from './map_view';
+import { PageId } from '../../../../../common/types';
 
-import { viewRegistry } from 'ui/inspector';
+interface UserNavigatedToPage {
+  readonly type: 'userNavigatedToPage';
+  readonly payload: PageId;
+}
 
-viewRegistry.register(MapView);
+export type RoutingAction = UserNavigatedToPage;
