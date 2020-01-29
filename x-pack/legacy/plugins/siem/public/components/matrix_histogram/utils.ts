@@ -11,6 +11,7 @@ import { MatrixHistogramDataTypes, MatrixHistogramMappingTypes } from './types';
 import { histogramDateTimeFormatter } from '../utils';
 
 interface GetBarchartConfigsProps {
+  chartHeight?: number;
   from: number;
   legendPosition?: Position;
   to: number;
@@ -20,7 +21,10 @@ interface GetBarchartConfigsProps {
   showLegend?: boolean;
 }
 
+export const DEFAULT_CHART_HEIGHT = 174;
+
 export const getBarchartConfigs = ({
+  chartHeight,
   from,
   legendPosition,
   to,
@@ -65,7 +69,7 @@ export const getBarchartConfigs = ({
       },
     },
   },
-  customHeight: 324,
+  customHeight: chartHeight ?? DEFAULT_CHART_HEIGHT,
 });
 
 export const formatToChartDataItem = ([key, value]: [
