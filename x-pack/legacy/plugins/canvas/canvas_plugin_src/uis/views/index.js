@@ -9,6 +9,7 @@ import { getCell } from './getCell';
 import { image } from './image';
 import { markdown } from './markdown';
 import { metric } from './metric';
+import { multifilterControl } from './multifilter_control';
 import { pie } from './pie';
 import { plot } from './plot';
 import { progress } from './progress';
@@ -25,6 +26,7 @@ export const viewSpecs = [
   image,
   markdown,
   metric,
+  multifilterControl,
   pie,
   plot,
   progress,

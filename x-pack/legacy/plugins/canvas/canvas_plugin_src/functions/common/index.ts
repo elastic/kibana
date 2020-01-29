@@ -36,6 +36,7 @@ import { mapCenter } from './map_center';
 import { mapColumn } from './mapColumn';
 import { math } from './math';
 import { metric } from './metric';
+import { multiFilterControl } from './multifilter_control';
 import { neq } from './neq';
 import { palette } from './palette';
 import { pie } from './pie';
@@ -97,6 +98,7 @@ export const functions = [
   mapColumn,
   math,
   metric,
+  multiFilterControl,
   neq,
   palette,
   pie,
