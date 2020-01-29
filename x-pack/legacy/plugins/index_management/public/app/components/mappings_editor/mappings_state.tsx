@@ -157,11 +157,8 @@ export const MappingsState = React.memo(
               : Promise.resolve(true);
 
           const templatesFormValidator =
-            state.templates.submitForm !== undefined
-              ? new Promise(async resolve => {
-                  const { isValid } = await state.templates.submitForm!();
-                  resolve(isValid);
-                })
+            state.templates.form !== undefined
+              ? (await state.templates.form!.submit()).isValid
               : Promise.resolve(true);
 
           const promisesToValidate = [configurationFormValidator, templatesFormValidator];
