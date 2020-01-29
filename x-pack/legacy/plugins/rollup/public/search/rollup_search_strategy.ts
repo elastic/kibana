@@ -5,11 +5,18 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { SearchError, getSearchErrorType } from '../../../../../../src/plugins/data/public';
+import {
+  SearchError,
+  getSearchErrorType,
+  IIndexPattern,
+  SearchStrategyProvider,
+  SearchResponse,
+  SearchRequest,
+} from '../../../../../../src/plugins/data/public';
 
-function serializeFetchParams(searchRequests: any) {
+function serializeFetchParams(searchRequests: SearchRequest[]) {
   return JSON.stringify(
-    searchRequests.map((searchRequestWithFetchParams: any) => {
+    searchRequests.map(searchRequestWithFetchParams => {
       const indexPattern =
         searchRequestWithFetchParams.index.title || searchRequestWithFetchParams.index;
       const {
@@ -30,8 +37,8 @@ function serializeFetchParams(searchRequests: any) {
 // Rollup search always returns 0 hits, but visualizations expect search responses
 // to return hits > 0, otherwise they do not render. We fake the number of hits here
 // by counting the number of aggregation buckets/values returned by rollup search.
-function shimHitsInFetchResponse(response: any) {
-  return response.map((result: any) => {
+function shimHitsInFetchResponse(response: SearchResponse[]) {
+  return response.map(result => {
     const buckets = result.aggregations
       ? Object.keys(result.aggregations).reduce((allBuckets, agg) => {
           return allBuckets.concat(
@@ -51,10 +58,10 @@ function shimHitsInFetchResponse(response: any) {
   });
 }
 
-export const getRollupSearchStrategy = (fetch: HttpSetup['fetch']) => ({
+export const getRollupSearchStrategy = (fetch: HttpSetup['fetch']): SearchStrategyProvider => ({
   id: 'rollup',
 
-  search: ({ searchRequests }: any) => {
+  search: ({ searchRequests }) => {
     // Serialize the fetch params into a format suitable for the body of an ES query.
     const serializedFetchParams = serializeFetchParams(searchRequests);
 
@@ -72,7 +79,7 @@ export const getRollupSearchStrategy = (fetch: HttpSetup['fetch']) => ({
           res: { url },
         } = error;
 
-        // Format kfetch error as a SearchError.
+        // Format fetch error as a SearchError.
         const searchError = new SearchError({
           status: statusText,
           title,
@@ -87,7 +94,7 @@ export const getRollupSearchStrategy = (fetch: HttpSetup['fetch']) => ({
     };
   },
 
-  isViable: (indexPattern: any) => {
+  isViable: (indexPattern: IIndexPattern) => {
     if (!indexPattern) {
       return false;
     }

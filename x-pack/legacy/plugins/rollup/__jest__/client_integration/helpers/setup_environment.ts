@@ -5,18 +5,15 @@
  */
 
 interface RequestMocks {
-  jobs: object;
-  createdJob: object;
-  indxPatternVldtResp: object;
+  jobs?: object;
+  createdJob?: object;
+  indxPatternVldtResp?: object;
+  [key: string]: any;
 }
 
 const mockHttpRequest = (
   http: any,
-  {
-    jobs = {},
-    createdJob = {},
-    indxPatternVldtResp = {},
-  }: RequestMocks | { [key: string]: any } = {}
+  { jobs = {}, createdJob = {}, indxPatternVldtResp = {} }: RequestMocks = {}
 ) => {
   http.get.mockImplementation(async (url: string) => {
     if (url === '/api/rollup/jobs') {
