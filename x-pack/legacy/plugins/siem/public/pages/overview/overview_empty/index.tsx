@@ -13,7 +13,7 @@ import { useKibana } from '../../../lib/kibana';
 
 const basePath = chrome.getBasePath();
 
-export const OverviewEmpty = React.memo(() => {
+const OverviewEmptyComponent: React.FC = () => {
   const docLinks = useKibana().services.docLinks;
 
   return (
@@ -30,6 +30,8 @@ export const OverviewEmpty = React.memo(() => {
       title={i18nCommon.EMPTY_TITLE}
     />
   );
-});
+};
 
-OverviewEmpty.displayName = 'OverviewEmpty';
+OverviewEmptyComponent.displayName = 'OverviewEmptyComponent';
+
+export const OverviewEmpty = React.memo(OverviewEmptyComponent);
