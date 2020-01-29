@@ -8,7 +8,7 @@ import React from 'react';
 import { VectorStyle } from './styles/vector/vector_style';
 import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 import { VectorLayer } from './vector_layer';
-import {EuiIcon} from "@elastic/eui";
+import { EuiIcon } from '@elastic/eui';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -48,14 +48,11 @@ export class TiledVectorLayer extends VectorLayer {
     };
   }
 
-  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
-    console.log('tvl syncData');
-    if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
-      return;
-    }
+  async _syncMVTUrlTemplate({ startLoading, stopLoading, onLoadError, dataFilters }) {
     const sourceDataRequest = this.getSourceDataRequest();
     if (sourceDataRequest) {
       //data is immmutable
+      console.log('already synced, no need to do again');
       return;
     }
     console.log('need to syncdata');
@@ -63,11 +60,22 @@ export class TiledVectorLayer extends VectorLayer {
     startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
       console.log('source!', this._source);
-      const url = await this._source.getUrlTemplate();
+      const url = await this._source.getUrlTemplate(dataFilters);
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, url, {});
     } catch (error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
     }
+  }
+
+  async syncData(syncContext) {
+    console.log('tvl syncData');
+    if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
+      return;
+    }
+
+    await this._syncSourceStyleMeta(syncContext);
+    await this._syncSourceFormatters(syncContext);
+    await this._syncMVTUrlTemplate(syncContext);
   }
 
   _syncSourceBindingWithMb(mbMap) {
@@ -98,10 +106,10 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   _syncStylePropertiesWithMb(mbMap) {
-    // this._setMbPointsProperties(mbMap);
-    this._setMbLinePolygonProperties(mbMap, {mvtSourceLayer: this._source.getMvtSourceLayer()});
+    const options = { mvtSourceLayer: this._source.getMvtSourceLayer() };
+    this._setMbPointsProperties(mbMap, options);
+    this._setMbLinePolygonProperties(mbMap, options);
   }
-
 
   syncLayerWithMB(mbMap) {
     this._syncSourceBindingWithMb(mbMap);

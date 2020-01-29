@@ -7,21 +7,15 @@
 import { ESSearchSource } from '../es_search_source';
 import {
   ES_MVT_SEARCH,
-  ES_SEARCH,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
-  SORT_ORDER,
+  ES_GEO_FIELD_TYPE,
 } from '../../../../common/constants';
-import { VectorStyle } from '../../styles/vector/vector_style';
 import { TiledVectorLayer } from '../../tiled_vector_layer';
 import uuid from 'uuid/v4';
 import { CreateSourceEditor } from '../es_search_source/create_source_editor';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { VectorLayer } from '../../vector_layer';
-import _ from 'lodash';
-import { DEFAULT_FILTER_BY_MAP_BOUNDS } from '../es_search_source/constants';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
 
 export class ESMVTSearchSource extends ESSearchSource {
   static type = ES_MVT_SEARCH;
@@ -51,7 +45,9 @@ export class ESMVTSearchSource extends ESSearchSource {
       console.log('create esmvt source', source);
       onPreviewSource(source);
     };
-    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
+    return (
+      <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} showBoundsFilter={false} geoTypes={[ES_GEO_FIELD_TYPE.GEO_SHAPE]}/>
+    );
   }
 
   async getUrlTemplate() {
@@ -80,7 +76,7 @@ export class ESMVTSearchSource extends ESSearchSource {
   }
 
   renderSourceSettingsEditor({ onChange }) {
-    return <div>No source settings to edit</div>;
+    return null;
   }
 
   isFilterByMapBounds() {
@@ -113,6 +109,22 @@ export class ESMVTSearchSource extends ESSearchSource {
 
   supportsESFilters() {
     return false;
+  }
+
+  async getFields() {
+    return [];
+  }
+
+  async getDateFields() {
+    return [];
+  }
+
+  async getNumberFields() {
+    return [];
+  }
+
+  async getCategoricalFields() {
+    return [];
   }
 
   async getImmutableProperties() {

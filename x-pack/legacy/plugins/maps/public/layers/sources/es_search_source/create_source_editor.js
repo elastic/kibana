@@ -185,7 +185,7 @@ export class CreateSourceEditor extends Component {
   }
 
   _renderFilterByMapBounds() {
-    if (!this.state.showFilterByBoundsSwitch) {
+    if (!this.state.showFilterByBoundsSwitch || this.props.showBoundsFilter === false) {
       return null;
     }
 
@@ -261,7 +261,7 @@ export class CreateSourceEditor extends Component {
                 defaultMessage: 'Select index pattern',
               }
             )}
-            fieldTypes={[ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE]}
+            fieldTypes={this.props.geoTypes ?this.props.geoTypes : [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE]}
             onNoIndexPatterns={this._onNoIndexPatterns}
           />
         </EuiFormRow>
