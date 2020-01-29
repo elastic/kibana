@@ -632,6 +632,12 @@ function discoverController(
         $scope.enableTimeRangeSelector = !!timefield;
       });
 
+      $scope.$watch('state.interval', function(newInterval, oldInterval) {
+        if (newInterval !== oldInterval) {
+          $fetchObservable.next();
+        }
+      });
+
       $scope.$watch('vis.aggs', function() {
         // no timefield, no vis, nothing to update
         if (!$scope.opts.timefield) return;
