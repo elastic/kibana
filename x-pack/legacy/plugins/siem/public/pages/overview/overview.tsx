@@ -64,51 +64,57 @@ const OverviewComponent: React.FC<OverviewComponentReduxProps> = ({
                 <EuiFlexItem grow={true}>
                   <GlobalTime>
                     {({ from, deleteQuery, setQuery, to }) => (
-                      <>
-                        <EventsByDataset
-                          deleteQuery={deleteQuery}
-                          filters={filters}
-                          from={from}
-                          indexPattern={indexPattern}
-                          query={query}
-                          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
-                          setQuery={setQuery}
-                          to={to}
-                        />
+                      <EuiFlexGroup direction="column" gutterSize="none">
+                        <EuiFlexItem grow={false}>
+                          <SignalsByCategory
+                            filters={filters}
+                            from={from}
+                            indexPattern={indexPattern}
+                            query={query}
+                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
+                            setQuery={setQuery}
+                            to={to}
+                          />
+                          <EuiSpacer size="l" />
+                        </EuiFlexItem>
 
-                        <EventCounts
-                          filters={filters}
-                          from={from}
-                          indexPattern={indexPattern}
-                          query={query}
-                          setQuery={setQuery}
-                          to={to}
-                        />
+                        <EuiFlexItem grow={false}>
+                          <AlertsByCategory
+                            deleteQuery={deleteQuery}
+                            filters={filters}
+                            from={from}
+                            indexPattern={indexPattern}
+                            query={query}
+                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
+                            setQuery={setQuery}
+                            to={to}
+                          />
+                        </EuiFlexItem>
 
-                        <EuiSpacer size="l" />
+                        <EuiFlexItem grow={false}>
+                          <EventsByDataset
+                            deleteQuery={deleteQuery}
+                            filters={filters}
+                            from={from}
+                            indexPattern={indexPattern}
+                            query={query}
+                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
+                            setQuery={setQuery}
+                            to={to}
+                          />
+                        </EuiFlexItem>
 
-                        <AlertsByCategory
-                          deleteQuery={deleteQuery}
-                          filters={filters}
-                          from={from}
-                          indexPattern={indexPattern}
-                          query={query}
-                          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
-                          setQuery={setQuery}
-                          to={to}
-                        />
-
-                        <SignalsByCategory
-                          deleteQuery={deleteQuery}
-                          filters={filters}
-                          from={from}
-                          indexPattern={indexPattern}
-                          query={query}
-                          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
-                          setQuery={setQuery}
-                          to={to}
-                        />
-                      </>
+                        <EuiFlexItem grow={false}>
+                          <EventCounts
+                            filters={filters}
+                            from={from}
+                            indexPattern={indexPattern}
+                            query={query}
+                            setQuery={setQuery}
+                            to={to}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     )}
                   </GlobalTime>
                 </EuiFlexItem>
