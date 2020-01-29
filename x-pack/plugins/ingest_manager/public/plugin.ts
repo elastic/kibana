@@ -11,6 +11,7 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { BASE_PATH } from './applications/ingest_manager/constants';
@@ -46,6 +47,7 @@ export class IngestManagerPlugin implements Plugin {
     // Register main Ingest Manager app
     core.application.register({
       id: 'ingestManager',
+      category: DEFAULT_APP_CATEGORIES.management,
       title: i18n.translate('xpack.ingestManager.appTitle', { defaultMessage: 'Ingest Manager' }),
       appRoute: BASE_PATH,
       euiIconType: 'savedObjectsApp',
