@@ -435,7 +435,7 @@ export class AggConfig {
 
     if (fieldParam) {
       // @ts-ignore
-      availableFields = fieldParam.getAvailableFields(this.getIndexPattern().fields);
+      availableFields = fieldParam.getAvailableFields(this);
     }
 
     // clear out the previous params except for a few special ones

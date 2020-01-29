@@ -17,24 +17,28 @@
  * under the License.
  */
 
-// @ts-ignore
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from '../../vis';
+import { isFunction } from 'lodash';
+import { AggConfig } from '../agg_config';
 import { SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
 import { FieldParamEditor } from '../../vis/editors/default/controls/field';
 import { BaseParamType } from './base';
 import { toastNotifications } from '../../notify';
 import { propFilter } from '../filter';
-import { Field, IFieldList } from '../../../../../plugins/data/public';
+import { Field, IFieldList, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { isNestedField } from '../../../../../plugins/data/public';
+import { IMetricAggConfig } from '../metrics/metric_agg_type';
 
 const filterByType = propFilter('type');
+
+type FieldTypes = KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
+export type FilterFieldTypes = ((aggConfig: IMetricAggConfig) => FieldTypes) | FieldTypes;
 
 export class FieldParamType extends BaseParamType {
   editorComponent = FieldParamEditor;
   required = true;
   scriptable = true;
-  filterFieldTypes: string;
+  filterFieldTypes: FilterFieldTypes;
   onlyAggregatable: boolean;
 
   constructor(config: Record<string, any>) {
@@ -87,9 +91,7 @@ export class FieldParamType extends BaseParamType {
       }
 
       // @ts-ignore
-      const validField = this.getAvailableFields(aggConfig.getIndexPattern().fields).find(
-        (f: any) => f.name === fieldName
-      );
+      const validField = this.getAvailableFields(aggConfig).find((f: any) => f.name === fieldName);
       if (!validField) {
         toastNotifications.addDanger(
           i18n.translate(
@@ -112,7 +114,8 @@ export class FieldParamType extends BaseParamType {
   /**
    * filter the fields to the available ones
    */
-  getAvailableFields = (fields: IFieldList) => {
+  getAvailableFields = (aggConfig: AggConfig) => {
+    const fields = aggConfig.getIndexPattern().fields;
     const filteredFields = fields.filter((field: Field) => {
       const { onlyAggregatable, scriptable, filterFieldTypes } = this;
 
@@ -125,6 +128,12 @@ export class FieldParamType extends BaseParamType {
 
       if (!filterFieldTypes) {
         return true;
+      }
+
+      if (isFunction(filterFieldTypes)) {
+        const filter = filterFieldTypes(aggConfig as IMetricAggConfig);
+
+        return filterByType([field], filter).length !== 0;
       }
 
       return filterByType([field], filterFieldTypes).length !== 0;

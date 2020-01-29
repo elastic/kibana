@@ -20,6 +20,7 @@
 import { BaseParamType } from './base';
 import { FieldParamType } from './field';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { AggConfig } from '../agg_config';
 
 jest.mock('ui/new_platform');
 
@@ -45,7 +46,11 @@ describe('Field', () => {
         searchable: true,
       },
     ],
-  } as any;
+  };
+
+  const agg = ({
+    getIndexPattern: jest.fn(() => indexPattern),
+  } as unknown) as AggConfig;
 
   describe('constructor', () => {
     it('it is an instance of BaseParamType', () => {
@@ -65,7 +70,7 @@ describe('Field', () => {
         type: 'field',
       });
 
-      const fields = aggParam.getAvailableFields(indexPattern.fields);
+      const fields = aggParam.getAvailableFields(agg);
 
       expect(fields.length).toBe(1);
 
@@ -82,7 +87,18 @@ describe('Field', () => {
 
       aggParam.onlyAggregatable = false;
 
-      const fields = aggParam.getAvailableFields(indexPattern.fields);
+      const fields = aggParam.getAvailableFields(agg);
+
+      expect(fields.length).toBe(2);
+    });
+
+    it('should return all fields if filterFieldTypes was not specified', () => {
+      const aggParam = new FieldParamType({
+        name: 'field',
+        type: 'field',
+      });
+
+      const fields = aggParam.getAvailableFields(agg);
 
       expect(fields.length).toBe(2);
     });
