@@ -79,7 +79,7 @@ describe('test endpoint route', () => {
     expect(endpointResultList.request_page_size).toEqual(10);
   });
 
-  it('test find the latest of all endpoints with params', async () => {
+  it('test find the latest of all endpoints with paging properties', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       body: {
         paging_properties: [
@@ -112,6 +112,69 @@ describe('test endpoint route', () => {
     );
 
     expect(mockScopedClient.callAsCurrentUser).toBeCalled();
+    expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
+      match_all: {},
+    });
+    expect(routeConfig.options).toEqual({ authRequired: true });
+    expect(mockResponse.ok).toBeCalled();
+    const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as EndpointResultList;
+    expect(endpointResultList.endpoints.length).toEqual(2);
+    expect(endpointResultList.total).toEqual(2);
+    expect(endpointResultList.request_page_index).toEqual(10);
+    expect(endpointResultList.request_page_size).toEqual(10);
+  });
+
+  it('test find the latest of all endpoints with paging and filters properties', async () => {
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body: {
+        paging_properties: [
+          {
+            page_size: 10,
+          },
+          {
+            page_index: 1,
+          },
+        ],
+
+        filters: 'not host.ip:10.140.73.246',
+      },
+    });
+    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
+      Promise.resolve((data as unknown) as SearchResponse<EndpointMetadata>)
+    );
+    [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
+      path.startsWith('/api/endpoint/endpoints')
+    )!;
+
+    await routeHandler(
+      ({
+        core: {
+          elasticsearch: {
+            dataClient: mockScopedClient,
+          },
+        },
+      } as unknown) as RequestHandlerContext,
+      mockRequest,
+      mockResponse
+    );
+
+    expect(mockScopedClient.callAsCurrentUser).toBeCalled();
+    expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
+      bool: {
+        must_not: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match: {
+                  'host.ip': '10.140.73.246',
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as EndpointResultList;

@@ -6,6 +6,10 @@
 import { KibanaRequest } from 'kibana/server';
 import { EndpointAppConstants } from '../../../common/types';
 import { EndpointAppContext } from '../../types';
+import {
+  fromKueryExpression,
+  toElasticsearchQuery,
+} from '../../../../../../src/plugins/data/common/es_query/kuery/ast';
 
 export const kibanaRequestToEndpointListQuery = async (
   request: KibanaRequest<any, any, any>,
@@ -14,9 +18,7 @@ export const kibanaRequestToEndpointListQuery = async (
   const pagingProperties = await getPagingProperties(request, endpointAppContext);
   return {
     body: {
-      query: {
-        match_all: {},
-      },
+      query: buildQueryBody(request),
       collapse: {
         field: 'host.id.keyword',
         inner_hits: {
@@ -63,5 +65,14 @@ async function getPagingProperties(
   return {
     pageSize: pagingProperties.page_size || config.endpointResultListDefaultPageSize,
     pageIndex: pagingProperties.page_index || config.endpointResultListDefaultFirstPageIndex,
+  };
+}
+
+function buildQueryBody(request: KibanaRequest<any, any, any>): Record<string, any> {
+  if (request?.body?.filters && typeof request.body.filters === 'string') {
+    return toElasticsearchQuery(fromKueryExpression(request.body.filters));
+  }
+  return {
+    match_all: {},
   };
 }
