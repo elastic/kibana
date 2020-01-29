@@ -69,6 +69,14 @@ export class IngestManagerPlugin implements Plugin {
             },
             ui: ['show'],
           },
+          read: {
+            api: [PLUGIN_ID],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['show'],
+          },
         },
       });
     }
