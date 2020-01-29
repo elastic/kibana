@@ -42,10 +42,6 @@ import { registerListenEventListener } from 'ui/directives/listen/listen';
 // @ts-ignore
 import { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
 // @ts-ignore
-import { FixedScrollProvider } from 'ui/fixed_scroll';
-// @ts-ignore
-import { DebounceProviderTimeout } from 'ui/directives/debounce/debounce';
-// @ts-ignore
 import { AppStateProvider } from 'ui/state_management/app_state';
 // @ts-ignore
 import { GlobalStateProvider } from 'ui/state_management/global_state';
@@ -83,6 +79,10 @@ import { createDiscoverFieldDirective } from './np_ready/components/field_choose
 import { CollapsibleSidebarProvider } from './np_ready/angular/directives/collapsible_sidebar/collapsible_sidebar';
 import { DiscoverStartPlugins } from './plugin';
 import { createCssTruncateDirective } from './np_ready/angular/directives/css_truncate';
+// @ts-ignore
+import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll';
+// @ts-ignore
+import { DebounceProviderTimeout } from './np_ready/angular/directives/debounce/debounce';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
