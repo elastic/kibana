@@ -22,7 +22,7 @@
  * that defined in Kibana's package.json.
  */
 
-import { interval, from } from 'rxjs';
+import { interval } from 'rxjs';
 import { map, switchMap, distinctUntilChanged, catchError, startWith } from 'rxjs/operators';
 import {
   esVersionCompatibleWithKibana,
