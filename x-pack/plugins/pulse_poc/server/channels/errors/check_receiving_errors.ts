@@ -6,7 +6,7 @@
 
 import { IScopedClusterClient } from 'src/core/server';
 import { CheckContext } from '../../types';
-
+// TODO: we still want a lookup hash table of error hashes with their fixed versions and/or steps to take to resolve them in here. However, it shouldn't be a blocker for actually sending instructions.
 export async function check(es: IScopedClusterClient, { deploymentId, indexName }: CheckContext) {
   // TODO: modify the search query for full text search and for the correct search!
   const response = await es.callAsInternalUser('search', {

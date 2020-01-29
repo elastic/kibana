@@ -26,9 +26,9 @@ import { PulseCollector, CollectorSetupContext } from '../types';
 
 export interface Payload {
   deploymentId: string;
-  records: Array<Omit<ErrorInstruction, 'channel_id' | 'deployment_id' | 'timestamp' | 'status'>>;
+  records: Array<Omit<ErrorPayloadValue, 'channel_id' | 'deployment_id' | 'timestamp'>>;
 }
-export interface ErrorInstruction {
+export interface ErrorPayloadValue {
   channel_id: string;
   currentKibanaVersion?: string;
   deployment_id: string;
@@ -117,7 +117,7 @@ export class Collector extends PulseCollector<Payload> {
                 ...record,
                 channel_id: 'errors',
                 deployment_id: '123',
-                status: 'new',
+                status: record.status || 'new',
                 id: record.hash,
                 timestamp: moment(),
               });

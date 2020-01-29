@@ -26,7 +26,7 @@ import { errorChannelPayloads } from './mock_data/errors';
 export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseErrorsPluginStart> {
   private readonly stop$ = new Subject();
   private instructionsSubscription?: Subscription;
-  private instructionsSeen = new Set();
+  private instructionsSeen = new Set(); // TODO: possibly change this to a map later to store more detailed info.
   constructor() {}
 
   public async setup(core: CoreSetup) {
