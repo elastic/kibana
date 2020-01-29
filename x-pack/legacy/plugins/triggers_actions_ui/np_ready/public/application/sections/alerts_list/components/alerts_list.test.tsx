@@ -77,7 +77,13 @@ describe('alerts_list component empty', () => {
     });
 
     const mockes = coreMock.createSetup();
-    const [{ chrome, docLinks }] = await mockes.getStartServices();
+    const [
+      {
+        chrome,
+        docLinks,
+        application: { capabilities },
+      },
+    ] = await mockes.getStartServices();
     const deps = {
       chrome,
       docLinks,
@@ -91,18 +97,15 @@ describe('alerts_list component empty', () => {
       } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      capabilities: {
+        ...capabilities,
+        siem: {
+          'alerting:show': true,
+          'alerting:save': true,
+          'alerting:delete': true,
+        },
+      },
       legacy: {
-        capabilities: {
-          get() {
-            return {
-              siem: {
-                'alerting:show': true,
-                'alerting:save': true,
-                'alerting:delete': true,
-              },
-            };
-          },
-        } as any,
         MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
       },
       actionTypeRegistry: actionTypeRegistry as any,
@@ -200,7 +203,13 @@ describe('alerts_list component with items', () => {
       data: [],
     });
     const mockes = coreMock.createSetup();
-    const [{ chrome, docLinks }] = await mockes.getStartServices();
+    const [
+      {
+        chrome,
+        docLinks,
+        application: { capabilities },
+      },
+    ] = await mockes.getStartServices();
     const deps = {
       chrome,
       docLinks,
@@ -214,18 +223,15 @@ describe('alerts_list component with items', () => {
       } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      capabilities: {
+        ...capabilities,
+        siem: {
+          'alerting:show': true,
+          'alerting:save': true,
+          'alerting:delete': true,
+        },
+      },
       legacy: {
-        capabilities: {
-          get() {
-            return {
-              siem: {
-                'alerting:show': true,
-                'alerting:save': true,
-                'alerting:delete': true,
-              },
-            };
-          },
-        } as any,
         MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
       },
       actionTypeRegistry: actionTypeRegistry as any,
@@ -284,7 +290,13 @@ describe('alerts_list component empty with show only capability', () => {
       data: [],
     });
     const mockes = coreMock.createSetup();
-    const [{ chrome, docLinks }] = await mockes.getStartServices();
+    const [
+      {
+        chrome,
+        docLinks,
+        application: { capabilities },
+      },
+    ] = await mockes.getStartServices();
     const deps = {
       chrome,
       docLinks,
@@ -298,18 +310,15 @@ describe('alerts_list component empty with show only capability', () => {
       } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      capabilities: {
+        ...capabilities,
+        siem: {
+          'alerting:show': true,
+          'alerting:save': false,
+          'alerting:delete': false,
+        },
+      },
       legacy: {
-        capabilities: {
-          get() {
-            return {
-              siem: {
-                'alerting:show': true,
-                'alerting:save': false,
-                'alerting:delete': false,
-              },
-            };
-          },
-        } as any,
         MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
       },
       actionTypeRegistry: {
@@ -403,7 +412,13 @@ describe('alerts_list with show only capability', () => {
       data: [],
     });
     const mockes = coreMock.createSetup();
-    const [{ chrome, docLinks }] = await mockes.getStartServices();
+    const [
+      {
+        chrome,
+        docLinks,
+        application: { capabilities },
+      },
+    ] = await mockes.getStartServices();
     const deps = {
       chrome,
       docLinks,
@@ -417,18 +432,15 @@ describe('alerts_list with show only capability', () => {
       } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      capabilities: {
+        ...capabilities,
+        siem: {
+          'alerting:show': true,
+          'alerting:save': false,
+          'alerting:delete': false,
+        },
+      },
       legacy: {
-        capabilities: {
-          get() {
-            return {
-              siem: {
-                'alerting:show': true,
-                'alerting:save': false,
-                'alerting:delete': false,
-              },
-            };
-          },
-        } as any,
         MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
       },
       actionTypeRegistry: actionTypeRegistry as any,

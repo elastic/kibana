@@ -38,12 +38,10 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   muteAlert,
   deleteAlert,
 }: ComponentOpts) => {
-  const {
-    legacy: { capabilities },
-  } = useAppDependencies();
+  const { capabilities } = useAppDependencies();
 
-  const canDelete = hasDeleteAlertsCapability(capabilities.get());
-  const canSave = hasSaveAlertsCapability(capabilities.get());
+  const canDelete = hasDeleteAlertsCapability(capabilities);
+  const canSave = hasSaveAlertsCapability(capabilities);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 

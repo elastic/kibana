@@ -11,6 +11,7 @@ import {
   ToastsSetup,
   HttpSetup,
   IUiSettingsClient,
+  ApplicationStart,
 } from 'kibana/public';
 import { BASE_PATH, Section, routeToAlertDetails } from './constants';
 import { TriggersActionsUIHome } from './home';
@@ -28,6 +29,7 @@ export interface AppDeps {
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
   legacy: LegacyDependencies;
+  capabilities: ApplicationStart['capabilities'];
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
 }
@@ -47,10 +49,8 @@ export const App = (appDeps: AppDeps) => {
 };
 
 export const AppWithoutRouter = ({ sectionsRegex }: any) => {
-  const {
-    legacy: { capabilities },
-  } = useAppDependencies();
-  const canShowAlerts = hasShowAlertsCapability(capabilities.get());
+  const { capabilities } = useAppDependencies();
+  const canShowAlerts = hasShowAlertsCapability(capabilities);
   const DEFAULT_SECTION: Section = canShowAlerts ? 'alerts' : 'connectors';
   return (
     <Switch>

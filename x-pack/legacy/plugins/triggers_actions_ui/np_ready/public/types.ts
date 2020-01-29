@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { capabilities } from 'ui/capabilities';
 import { TypeRegistry } from './application/type_registry';
 import { SanitizedAlert as Alert } from '../../../alerting/common';
 export { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
@@ -92,5 +91,4 @@ export interface IErrorObject {
 
 export interface LegacyDependencies {
   MANAGEMENT_BREADCRUMB: { text: string; href?: string };
-  capabilities: typeof capabilities;
 }
