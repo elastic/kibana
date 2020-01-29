@@ -56,7 +56,7 @@ export const HostsComponent = React.memo<HostsComponentProps>(
     const capabilities = React.useContext(MlCapabilitiesContext);
     const kibana = useKibana();
     const { tabName } = useParams();
-    const hostsFilters = React.useMemo(() => {
+    const tabsFilters = React.useMemo(() => {
       if (tabName === HostsTableType.alerts) {
         return filters.length > 0 ? [...filters, ...filterAlertsHosts] : filterAlertsHosts;
       }
@@ -77,7 +77,13 @@ export const HostsComponent = React.memo<HostsComponentProps>(
               config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
               indexPattern,
               queries: [query],
-              filters: hostsFilters,
+              filters,
+            });
+            const tabsFilterQuery = convertToBuildEsQuery({
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+              indexPattern,
+              queries: [query],
+              filters: tabsFilters,
             });
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
@@ -123,7 +129,7 @@ export const HostsComponent = React.memo<HostsComponentProps>(
                   <HostsTabs
                     deleteQuery={deleteQuery}
                     to={to}
-                    filterQuery={filterQuery}
+                    filterQuery={tabsFilterQuery}
                     isInitializing={isInitializing}
                     setQuery={setQuery}
                     from={from}
