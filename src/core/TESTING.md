@@ -548,9 +548,300 @@ _How to test SO operations_
 
 _How to test ES clients_
 
-## Plugin Integrations
+## Plugin integrations
 
-_How to test against specific plugin APIs (eg. data plugin)_
+In the new platform, all plugin's dependencies to other plugins are explicitly declared in their `kibana.json`
+manifest. As for `core`, the dependencies `setup` and `start` contracts are injected in your plugin's respective 
+`setup` and `start` phases. One of the upside regarding testing is that every usage of the dependencies is explicit,
+and that the plugin's contracts must be propagated to the parts of the code using them, meaning that isolating a 
+specific logical component for unit testing is way easier than in legacy.
+
+The approach to test parts of a plugin's code that is relying on other plugins is quite similar to testing
+code using `core` APIs: it's expected to mock the dependency, and make it return the value the test is expecting.
+
+Most plugins are defining mocks for their contracts. The convention is to expose them in a `mocks` file at 
+the `public/server` level. For example for the `data` plugin, the client-side mocks are located in 
+`src/plugins/data/public/mocks.ts`. When such mocks are present, it's strongly recommended to use them
+when testing against dependencies. Otherwise, one should create it's own mocked implementation of the dependency's
+contract (and should probably ping the plugin's owner to ask them to add proper contract mocks).
+
+### Preconditions
+
+For these examples, we are going to see how we should test the `myPlugin` plugin.
+ 
+This plugin declares the `data` plugin as  a `required` dependency and the `usageCollection` plugin as an `optional` 
+one. It also exposes a `getSpecialSuggestions` API in it's start contract, which relies on the `data` plugin to retrieve
+data.
+
+`MyPlugin` plugin definition:
+
+```typescript
+// src/plugins/myplugin/public/plugin.ts
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
+import { SuggestionsService } from './suggestions';
+
+interface MyPluginSetupDeps {
+  data: DataPublicPluginSetup;
+  usageCollection?: UsageCollectionSetup;
+}
+
+interface MyPluginStartDeps {
+  data: DataPublicPluginStart;
+}
+
+export class MyPlugin implements Plugin<MyPluginSetup, MyPluginStart, MyPluginSetupDeps, MyPluginStartDeps> {
+  private suggestionsService = new SuggestionsService();
+
+  public setup(core: CoreSetup, { data, usageCollection }: MyPluginSetupDeps) {
+    // setup our internal service
+    this.suggestionsService.setup(data);
+
+    // an example on using an optional dependency that will be tested
+    if (usageCollection) {
+      usageCollection.allowTrackUserAgent(true);
+    }
+
+    return {};
+  }
+
+  public start(core: CoreStart, { data }: MyPluginStartDeps) {
+    const suggestions = this.suggestionsService.start(data);
+    return {
+      getSpecialSuggestions: (query: string) => suggestions.getSuggestions(query),
+    };
+  }
+
+  public stop() {}
+}
+
+export type MyPluginSetup = ReturnType<MyPlugin['setup']>;
+export type MyPluginStart = ReturnType<MyPlugin['start']>;
+```
+
+The underlying `SuggestionsService` implementation:
+
+```typescript
+// src/plugins/myplugin/public/suggestions/suggestion_service.ts
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../data/public';
+
+// stubs for testing purposes
+const suggestDependingOn = (...args: any[]) => [];
+const baseOptions = {} as any;
+export const defaultSuggestions = [
+  {
+    text: 'a default suggestion',
+  },
+] as any[];
+
+export class SuggestionsService {
+  public setup(data: DataPublicPluginSetup) {
+    // register a suggestion provider to the `data` dependency plugin
+    data.autocomplete.addQuerySuggestionProvider('fr', async args => {
+      return suggestDependingOn(args);
+    });
+  }
+
+  public start(data: DataPublicPluginStart) {
+    return {
+      getSuggestions: async (query: string) => {
+        // use the `data` plugin contract to retrieve arbitrary data
+        // note: this logic does not really make any sense and is only here to introduce a behavior to test
+        const baseSuggestions = await data.autocomplete.getQuerySuggestions({
+          ...baseOptions,
+          query,
+        });
+        if (!baseSuggestions || baseSuggestions.length === 0) {
+          return defaultSuggestions;
+        }
+        return baseSuggestions.filter(suggestion => suggestion.type !== 'conjunction');
+      },
+    };
+  }
+}
+```
+
+### Testing dependencies usages
+
+A plugin should test expected usage and calls on it's dependency plugins' API.
+
+Some calls, such as 'registration' APIs exposed from dependency plugins, should be checked,
+to ensure both that they are actually executed, and performed with the correct parameters.
+
+For our example plugin's `SuggestionsService`, we should assert that the suggestion provider is correctly 
+registered to the `data` plugin during the `setup` phase, and that `getSuggestions` calls 
+`autocomplete.getQuerySuggestions` with the correct parameters.
+
+```typescript
+// src/plugins/myplugin/public/suggestions/suggestion_service.test.ts
+import {
+  dataPluginMock,
+  Setup as DataPluginSetupMock,
+  Start as DataPluginStartMock,
+} from '../../../data/public/mocks';
+import { SuggestionsService } from './suggestion_service';
+
+describe('SuggestionsService', () => {
+  let service: SuggestionsService;
+  let dataSetup: DataPluginSetupMock;
+  let dataStart: DataPluginStartMock;
+
+  beforeEach(() => {
+    service = new SuggestionsService();
+    dataSetup = dataPluginMock.createSetupContract();
+    dataStart = dataPluginMock.createStartContract();
+  });
+
+  describe('#setup', () => {
+    it('registers the query suggestion provider to the data plugin', () => {
+      service.setup(dataSetup);
+
+      expect(dataSetup.autocomplete.addQuerySuggestionProvider).toHaveBeenCalledTimes(1);
+      expect(dataSetup.autocomplete.addQuerySuggestionProvider).toHaveBeenCalledWith(
+        'fr',
+        expect.any(Function)
+      );
+    });
+  });
+
+  describe('#start', () => {
+    describe('#getSuggestions', () => {
+      it('calls getQuerySuggestions with the correct query', async () => {
+        service.setup(dataSetup);
+        const serviceStart = service.start(dataStart);
+
+        await serviceStart.getSuggestions('some query');
+
+        expect(dataStart.autocomplete.getQuerySuggestions).toHaveBeenCalledTimes(1);
+        expect(dataStart.autocomplete.getQuerySuggestions).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: 'some query',
+          })
+        );
+      });
+    });
+  });
+});
+```
+
+### Testing components consuming the dependencies
+
+When testing parts of your plugin code that depends on the dependency plugin's data, the best approach
+is to mock the dependency to be able to get the behavior expected for the test.
+
+In this example, we are going to mock the results of `autocomplete.getQuerySuggestions` to be able to test 
+the service's `getSuggestions` method.
+
+```typescript
+// src/plugins/myplugin/public/suggestions/suggestion_service.ts
+
+describe('#start', () => {
+  describe('#getSuggestions', () => {
+    it('returns the default suggestions when autocomplete returns no results', async () => {
+      dataStart.autocomplete.getQuerySuggestions.mockResolvedValue([]);
+
+      service.setup(dataSetup);
+      const serviceStart = service.start(dataStart);
+
+      const results = await serviceStart.getSuggestions('some query');
+      expect(results).toEqual(defaultSuggestions);
+    });
+
+    it('excludes conjunctions from the autocomplete results', async () => {
+      dataStart.autocomplete.getQuerySuggestions.mockResolvedValue([
+        {
+          type: 'field',
+          text: 'field suggestion',
+        },
+        {
+          type: 'conjunction',
+          text: 'conjunction suggestion',
+        },
+      ]);
+
+      service.setup(dataSetup);
+      const serviceStart = service.start(dataStart);
+
+      const results = await serviceStart.getSuggestions('some query');
+
+      expect(results).toEqual([
+        {
+          type: 'field',
+          text: 'field suggestion',
+        },
+      ]);
+    });
+  });
+});
+```
+
+### Testing optional plugin dependencies
+
+Plugins should test that their behavior remains correct when their optional dependencies are either available or not.
+
+A basic test would be to ensure that the plugin properly initialize without error when the optional
+dependency is missing:
+
+```typescript
+// src/plugins/myplugin/public/plugin.test.ts
+import { coreMock } from '../../../core/public/mocks';
+import { dataPluginMock } from '../../data/public/mocks';
+import { MyPlugin } from './plugin';
+
+describe('Plugin', () => {
+  it('initializes correctly if usageCollection is disabled', () => {
+    const plugin = new MyPlugin(coreMock.createPluginInitializerContext());
+    const coreSetup = coreMock.createSetup();
+    const setupDeps = {
+      data: dataPluginMock.createSetupContract(),
+      // optional usageCollector dependency is not available
+    };
+  
+    const coreStart = coreMock.createStart();
+    const startDeps = {
+      data: dataPluginMock.createStartContract(),
+    };
+  
+    expect(() => {
+      plugin.setup(coreSetup, setupDeps);
+    }).not.toThrow();
+    expect(() => {
+      plugin.start(coreStart, startDeps);
+    }).not.toThrow();
+  });
+});
+```
+
+Then we should test that when optional dependency is properly used when present:
+
+```typescript
+// src/plugins/myplugin/public/plugin.test.ts
+import { coreMock } from '../../../core/public/mocks';
+import { dataPluginMock } from '../../data/public/mocks';
+import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
+
+import { MyPlugin } from './plugin';
+
+describe('Plugin', () => {
+  // [...]
+
+  it('enables trackUserAgent when usageCollection is available', async () => {
+    const plugin = new MyPlugin(coreMock.createPluginInitializerContext());
+    const coreSetup = coreMock.createSetup();
+    const usageCollectionSetup = usageCollectionPluginMock.createSetupContract();
+    const setupDeps = {
+      data: dataPluginMock.createSetupContract(),
+      usageCollection: usageCollectionSetup,
+    };
+
+    plugin.setup(coreSetup, setupDeps);
+
+    expect(usageCollectionSetup.allowTrackUserAgent).toHaveBeenCalledTimes(1);
+    expect(usageCollectionSetup.allowTrackUserAgent).toHaveBeenCalledWith(true);
+  });
+});
+```
 
 ## Plugin Contracts
 
