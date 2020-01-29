@@ -6,16 +6,10 @@
 
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
-import { Legacy } from 'kibana';
+import { PluginInitializerContext } from 'src/core/server';
 import { RollupSetup } from '../../../plugins/rollup/server';
 import { PLUGIN, CONFIG_ROLLUPS } from './common';
 import { plugin } from './server';
-import { PluginInitializerContext } from '../siem/public/plugin';
-
-// import { rollupDataEnricher } from './rollup_data_enricher';
-// import { registerRollupSearchStrategy } from './server/lib/search_strategies';
-
-export type ServerFacade = Legacy.Server;
 
 export function rollup(kibana: any) {
   return new kibana.Plugin({
@@ -48,7 +42,7 @@ export function rollup(kibana: any) {
       visualize: ['plugins/rollup/visualize'],
       search: ['plugins/rollup/search'],
     },
-    init(server: ServerFacade) {
+    init(server: any) {
       const { core, plugins } = server.newPlatform.setup;
       const { usageCollection } = plugins;
 
@@ -65,16 +59,10 @@ export function rollup(kibana: any) {
           plugins: {
             xpack_main: server.plugins.xpack_main,
             rollup: server.plugins[PLUGIN.ID],
+            index_management: server.plugins.index_management,
           },
         },
       });
-
-      // if (
-      //   server.plugins.index_management &&
-      //   server.plugins.index_management.addIndexManagementDataEnricher
-      // ) {
-      //   server.plugins.index_management.addIndexManagementDataEnricher(rollupDataEnricher);
-      // }
     },
   });
 }

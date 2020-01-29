@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const rollupDataEnricher = async (indicesList, callWithRequest) => {
+interface Index {
+  name: string;
+  [key: string]: unknown;
+}
+
+export const rollupDataEnricher = async (indicesList: Index[], callWithRequest: any) => {
   if (!indicesList || !indicesList.length) {
     return indicesList;
   }
+
   const params = {
     path: '/_all/_rollup/data',
     method: 'GET',
   };
+
   try {
     const rollupJobData = await callWithRequest('transport.request', params);
     return indicesList.map(index => {

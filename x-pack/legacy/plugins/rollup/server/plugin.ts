@@ -21,6 +21,8 @@ import {
 
 import { registerRollupUsageCollector } from './collectors';
 
+import { rollupDataEnricher } from './rollup_data_enricher';
+
 export class RollupsServerPlugin implements Plugin<void, void, any, any> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -64,6 +66,13 @@ export class RollupsServerPlugin implements Plugin<void, void, any, any> {
             .get('rollup')
             .warn(`Registering Rollup collector failed: ${e}`);
         });
+    }
+
+    if (
+      serverShim.plugins.index_management &&
+      serverShim.plugins.index_management.addIndexManagementDataEnricher
+    ) {
+      serverShim.plugins.index_management.addIndexManagementDataEnricher(rollupDataEnricher);
     }
   }
   start() {}

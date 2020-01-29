@@ -2,7 +2,8 @@
   "id": "rollup",
   "version": "kibana",
   "requiredPlugins": [
-    "home"
+    "home",
+    "index_management"
   ],
   "optionalPlugins": [
     "usageCollection"
