@@ -15,6 +15,7 @@ import { serializeTemplate } from '../../../../common/lib';
 
 const handler: RouterRouteHandler = async (req, callWithRequest) => {
   const template = req.payload as Template;
+  const { include_type_name } = req.query as any;
   const serializedTemplate = serializeTemplate(template) as TemplateEs;
 
   const { name, order, index_patterns, version, settings, mappings, aliases } = serializedTemplate;
@@ -49,6 +50,7 @@ const handler: RouterRouteHandler = async (req, callWithRequest) => {
   return await callWithRequest('indices.putTemplate', {
     name,
     order,
+    include_type_name,
     body: {
       index_patterns,
       version,

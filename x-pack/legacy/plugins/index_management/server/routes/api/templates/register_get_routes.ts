@@ -13,7 +13,9 @@ let callWithInternalUser: any;
 const allHandler: RouterRouteHandler = async (_req, callWithRequest) => {
   const managedTemplatePrefix = await getManagedTemplatePrefix(callWithInternalUser);
 
-  const indexTemplatesByName = await callWithRequest('indices.getTemplate');
+  const indexTemplatesByName = await callWithRequest('indices.getTemplate', {
+    include_type_name: true,
+  });
 
   return deserializeTemplateList(indexTemplatesByName, managedTemplatePrefix);
 };
@@ -21,7 +23,10 @@ const allHandler: RouterRouteHandler = async (_req, callWithRequest) => {
 const oneHandler: RouterRouteHandler = async (req, callWithRequest) => {
   const { name } = req.params;
   const managedTemplatePrefix = await getManagedTemplatePrefix(callWithInternalUser);
-  const indexTemplateByName = await callWithRequest('indices.getTemplate', { name });
+  const indexTemplateByName = await callWithRequest('indices.getTemplate', {
+    name,
+    include_type_name: true,
+  });
 
   if (indexTemplateByName[name]) {
     return deserializeTemplate({ ...indexTemplateByName[name], name }, managedTemplatePrefix);
