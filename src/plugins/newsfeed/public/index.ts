@@ -18,7 +18,9 @@
  */
 
 import { PluginInitializerContext } from 'src/core/public';
-import { NewsfeedPublicPlugin } from './plugin';
+import { Setup, Start, NewsfeedPublicPlugin } from './plugin';
+
+export { Setup, Start };
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new NewsfeedPublicPlugin(initializerContext);

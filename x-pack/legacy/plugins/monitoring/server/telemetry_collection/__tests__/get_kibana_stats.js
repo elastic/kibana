@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getUsageStats, combineStats, rollUpTotals } from '../get_kibana_stats';
+import { getUsageStats, combineStats, rollUpTotals, ensureTimeSpan } from '../get_kibana_stats';
 import expect from '@kbn/expect';
 
 describe('Get Kibana Stats', () => {
@@ -540,6 +540,52 @@ describe('Get Kibana Stats', () => {
       const addOn = { my_field: { total: 3 } };
 
       expect(rollUpTotals(rollUp, addOn, 'my_field')).to.eql({ total: 4 });
+    });
+  });
+
+  describe('Ensure minimum time difference', () => {
+    it('should return start and end as is when none are provided', () => {
+      const { start, end } = ensureTimeSpan(undefined, undefined);
+      expect(start).to.be.undefined;
+      expect(end).to.be.undefined;
+    });
+
+    it('should return start and end as is when only end is provided', () => {
+      const initialEnd = '2020-01-01T00:00:00Z';
+      const { start, end } = ensureTimeSpan(undefined, initialEnd);
+      expect(start).to.be.undefined;
+      expect(end).to.be.equal(initialEnd);
+    });
+
+    it('should return start and end as is because they are already 24h away', () => {
+      const initialStart = '2019-12-31T00:00:00Z';
+      const initialEnd = '2020-01-01T00:00:00Z';
+      const { start, end } = ensureTimeSpan(initialStart, initialEnd);
+      expect(start).to.be.equal(initialStart);
+      expect(end).to.be.equal(initialEnd);
+    });
+
+    it('should return start and end as is because they are already 24h+ away', () => {
+      const initialStart = '2019-12-31T00:00:00Z';
+      const initialEnd = '2020-01-01T01:00:00Z';
+      const { start, end } = ensureTimeSpan(initialStart, initialEnd);
+      expect(start).to.be.equal(initialStart);
+      expect(end).to.be.equal(initialEnd);
+    });
+
+    it('should modify start to a date 24h before end', () => {
+      const initialStart = '2020-01-01T00:00:00.000Z';
+      const initialEnd = '2020-01-01T01:00:00.000Z';
+      const { start, end } = ensureTimeSpan(initialStart, initialEnd);
+      expect(start).to.be.equal('2019-12-31T01:00:00.000Z');
+      expect(end).to.be.equal(initialEnd);
+    });
+
+    it('should modify start to a date 24h before now', () => {
+      const initialStart = new Date().toISOString();
+      const { start, end } = ensureTimeSpan(initialStart, undefined);
+      expect(start).to.not.be.equal(initialStart);
+      expect(end).to.be.undefined;
     });
   });
 });
