@@ -22,10 +22,13 @@
 */
 
 import uuid from 'uuid';
-import { IPulseElasticsearchClient } from './types';
 import { IClusterClient } from '../../elasticsearch';
 
-export class PulseElasticsearchClient implements IPulseElasticsearchClient {
+export interface PulseDocument {
+  hash?: string;
+}
+
+export class PulseElasticsearchClient {
   constructor(private readonly elasticsearch: IClusterClient) {}
 
   public async createIndexIfNotExist(channel: string, mappings: Record<string, any>) {
@@ -45,19 +48,27 @@ export class PulseElasticsearchClient implements IPulseElasticsearchClient {
     }
   }
 
-  public async index(channel: string, doc: any) {
-    const id = uuid.v4();
-    await this.elasticsearch!.callAsInternalUser('index', {
-      index: this.buildIndex(channel),
-      id: `${id}`,
-      body: doc,
+  public async index(channel: string, doc: PulseDocument | PulseDocument[]) {
+    const records = Array.isArray(doc) ? doc : [doc];
+    await this.elasticsearch.callAsInternalUser<any>('bulk', {
+      body: records.reduce((acc, record) => {
+        return [
+          ...acc,
+          { update: { _index: this.buildIndex(channel), _id: record.hash || uuid.v4() } },
+          { doc: record, doc_as_upsert: true },
+        ];
+      }, [] as object[]),
     });
   }
 
-  public async search<T>(channel: string, query: any) {
+  public async search<T>(channel: string, query: any, options: any = {}) {
+    const { body, ...rest } = options;
     const result = await this.elasticsearch.callAsInternalUser('search', {
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      ...rest,
+      body: { query, ...body },
       index: this.buildIndex(channel),
-      body: { query },
     });
     return result.hits.hits.map(h => h._source as T);
   }

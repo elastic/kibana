@@ -93,7 +93,7 @@ export class PulseService {
 
     this.channels.forEach(channel =>
       channel.setup({
-        rawElasticsearch: this.elasticsearch,
+        rawElasticsearch: this.elasticsearch!,
         elasticsearch: pulseElasticsearchClient,
         // savedObjects: deps.savedObjects,
       })
@@ -149,14 +149,9 @@ export class PulseService {
     const responseBody: InstructionsResponse = await response.json();
 
     responseBody.channels.forEach(channel => {
-      const instructions$ = this.instructions$.get(channel.id);
-      if (!instructions$) {
-        throw new Error(
-          `Channel (${channel.id}) from service has no corresponding channel handler in client`
-        );
-      }
-
-      channel.instructions.forEach(instruction => instructions$.next(instruction));
+      channel.instructions.forEach(instruction =>
+        this.instructions$.get(channel.id)?.next(instruction)
+      );
     });
   }
 
