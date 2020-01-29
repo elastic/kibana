@@ -39,15 +39,10 @@ export const ActionConnectorForm = ({
   actionTypeName,
   setFlyoutVisibility,
 }: ActionConnectorProps) => {
-  const {
-    http,
-    toastNotifications,
-    legacy: { capabilities },
-    actionTypeRegistry,
-  } = useAppDependencies();
+  const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
 
   const { reloadConnectors } = useActionsConnectorsContext();
-  const canSave = hasSaveActionsCapability(capabilities.get());
+  const canSave = hasSaveActionsCapability(capabilities);
 
   // hooks
   const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialConnector });

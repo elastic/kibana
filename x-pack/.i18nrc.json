@@ -41,7 +41,7 @@
     "xpack.transform": "legacy/plugins/transform",
     "xpack.upgradeAssistant": "legacy/plugins/upgrade_assistant",
     "xpack.uptime": "legacy/plugins/uptime",
-    "xpack.watcher": "legacy/plugins/watcher"
+    "xpack.watcher": "plugins/watcher"
   },
   "translations": [
     "plugins/translations/translations/zh-CN.json",

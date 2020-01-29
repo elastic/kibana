@@ -24,9 +24,6 @@ export { AggGroupNames, VisOptionsProps } from 'ui/vis/editors/default';
 // @ts-ignore
 export { Schemas } from 'ui/vis/editors/default/schemas';
 // @ts-ignore
-export { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
-
-// @ts-ignore
 export { PrivateProvider } from 'ui/private/private';
 // @ts-ignore
 export { PaginateDirectiveProvider } from 'ui/directives/paginate';
