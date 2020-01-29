@@ -203,7 +203,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
                             setQuery={setQuery}
                             to={to}
                           />
-                          <EuiSpacer size="l" />
                           <AlertsTable endDate={to} startDate={from} />
                         </>
                       )}

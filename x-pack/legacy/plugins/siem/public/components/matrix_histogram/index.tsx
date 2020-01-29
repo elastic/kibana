@@ -7,7 +7,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ScaleType } from '@elastic/charts';
 
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as i18n from './translations';
 import { BarChart } from '../charts/barchart';
@@ -141,48 +141,51 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   }
 
   return (
-    <InspectButtonContainer show={!isInitialLoading}>
-      <Panel data-test-subj={`${id}Panel`}>
-        {loading && !isInitialLoading && (
-          <EuiProgress
-            data-test-subj="initialLoadingPanelMatrixOverTime"
-            size="xs"
-            position="absolute"
-            color="accent"
-          />
-        )}
+    <>
+      <InspectButtonContainer show={!isInitialLoading}>
+        <Panel data-test-subj={`${id}Panel`}>
+          {loading && !isInitialLoading && (
+            <EuiProgress
+              data-test-subj="initialLoadingPanelMatrixOverTime"
+              size="xs"
+              position="absolute"
+              color="accent"
+            />
+          )}
 
-        {isInitialLoading ? (
-          <>
-            <HeaderSection id={id} title={titleWithStackByField} />
-            <MatrixLoader />
-          </>
-        ) : (
-          <>
-            <HeaderSection
-              id={id}
-              title={titleWithStackByField}
-              subtitle={!loading && (totalCount >= 0 ? subtitleWithCounts : null)}
-            >
-              <EuiFlexGroup alignItems="center" gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  {stackByOptions?.length > 1 && (
-                    <EuiSelect
-                      onChange={setSelectedChartOptionCallback}
-                      options={stackByOptions}
-                      prepend={i18n.STACK_BY}
-                      value={selectedStackByOption?.value}
-                    />
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>{headerChildren}</EuiFlexItem>
-              </EuiFlexGroup>
-            </HeaderSection>
-            <BarChart barChart={barChartData} configs={barchartConfigs} />
-          </>
-        )}
-      </Panel>
-    </InspectButtonContainer>
+          {isInitialLoading ? (
+            <>
+              <HeaderSection id={id} title={titleWithStackByField} />
+              <MatrixLoader />
+            </>
+          ) : (
+            <>
+              <HeaderSection
+                id={id}
+                title={titleWithStackByField}
+                subtitle={!loading && (totalCount >= 0 ? subtitleWithCounts : null)}
+              >
+                <EuiFlexGroup alignItems="center" gutterSize="none">
+                  <EuiFlexItem grow={false}>
+                    {stackByOptions?.length > 1 && (
+                      <EuiSelect
+                        onChange={setSelectedChartOptionCallback}
+                        options={stackByOptions}
+                        prepend={i18n.STACK_BY}
+                        value={selectedStackByOption?.value}
+                      />
+                    )}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>{headerChildren}</EuiFlexItem>
+                </EuiFlexGroup>
+              </HeaderSection>
+              <BarChart barChart={barChartData} configs={barchartConfigs} />
+            </>
+          )}
+        </Panel>
+      </InspectButtonContainer>
+      <EuiSpacer size="l" />
+    </>
   );
 };
 

@@ -76,8 +76,6 @@ const OverviewComponent: React.FC<OverviewComponentReduxProps> = ({
                           to={to}
                         />
 
-                        <EuiSpacer size="l" />
-
                         <EventCounts
                           filters={filters}
                           from={from}
@@ -99,8 +97,6 @@ const OverviewComponent: React.FC<OverviewComponentReduxProps> = ({
                           setQuery={setQuery}
                           to={to}
                         />
-
-                        <EuiSpacer size="l" />
 
                         <SignalsByCategory
                           deleteQuery={deleteQuery}
