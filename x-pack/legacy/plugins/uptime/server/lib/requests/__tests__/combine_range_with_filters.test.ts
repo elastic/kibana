@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineRangeWithFilters } from '../elasticsearch_monitors_adapter';
+import { combineRangeWithFilters } from '../get_filter_bar';
 
 describe('combineRangeWithFilters', () => {
   it('combines filters that have no filter clause', () => {

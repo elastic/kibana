@@ -24,7 +24,7 @@ export const createGetMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs)
 
     return response.ok({
       body: {
-        ...(await libs.db.getMonitor({ callES, monitorId })),
+        ...(await libs.requests.getMonitor({ callES, monitorId })),
       },
     });
   },
@@ -45,7 +45,7 @@ export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLib
   },
   handler: async ({ callES }, _context, request, response): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
-    const result = await libs.db.getLatestMonitor({
+    const result = await libs.requests.getLatestMonitor({
       callES,
       monitorId,
       dateStart,

@@ -6,35 +6,15 @@
 
 import {
   UMBackendFrameworkAdapter,
-  UMMonitorsAdapter,
   UMMonitorStatesAdapter,
   UMSavedObjectsAdapter,
-  UMElasticsearchQueryFn,
 } from './adapters';
 import { UMLicenseCheck } from './domains';
-import { PingResults, Ping, DocCount } from '../../common/graphql/types';
-import {
-  GetLatestMonitorParams,
-  GetMonitorParams,
-  GetPingHistogramParams,
-  GetPingsParams,
-} from './requests';
-import { HistogramResult } from '../../common/domain_types';
-
-type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;
-
-interface ElasticsearchCalls {
-  getDocCount: ESQ<{}, DocCount>;
-  getLatestMonitor: ESQ<GetLatestMonitorParams, Ping>;
-  getMonitor: ESQ<GetMonitorParams, Ping>;
-  getPings: ESQ<GetPingsParams, PingResults>;
-  getPingHistogram: ESQ<GetPingHistogramParams, HistogramResult>;
-}
+import { UptimeRequests } from './requests';
 
 export interface UMDomainLibs {
-  db: ElasticsearchCalls;
+  requests: UptimeRequests;
   license: UMLicenseCheck;
-  monitors: UMMonitorsAdapter;
   monitorStates: UMMonitorStatesAdapter;
   savedObjects: UMSavedObjectsAdapter;
 }

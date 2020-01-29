@@ -28,7 +28,7 @@ export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
   handler: async ({ callES }, _context, request, response): Promise<any> => {
     const { dateRangeStart, dateRangeEnd, location, monitorId, size, sort, status } = request.query;
 
-    const result = await libs.db.getPings({
+    const result = await libs.requests.getPings({
       callES,
       dateRangeStart,
       dateRangeEnd,

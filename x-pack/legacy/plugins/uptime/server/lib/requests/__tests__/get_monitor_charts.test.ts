@@ -5,17 +5,16 @@
  */
 
 import { get, set } from 'lodash';
-import { elasticsearchMonitorsAdapter as adapter } from '../elasticsearch_monitors_adapter';
 import mockChartsData from './monitor_charts_mock.json';
-import { assertCloseTo } from '../../../helper';
+import { assertCloseTo } from '../../helper';
+import { getMonitorCharts } from '../get_monitor_charts';
 
-// FIXME: there are many untested functions in this adapter. They should be tested.
 describe('ElasticsearchMonitorsAdapter', () => {
   it('getMonitorChartsData will run expected parameters when no location is specified', async () => {
     expect.assertions(3);
     const searchMock = jest.fn();
     const search = searchMock.bind({});
-    await adapter.getMonitorChartsData({
+    await getMonitorCharts({
       callES: search,
       monitorId: 'fooID',
       dateRangeStart: 'now-15m',
@@ -50,7 +49,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     expect.assertions(3);
     const searchMock = jest.fn();
     const search = searchMock.bind({});
-    await adapter.getMonitorChartsData({
+    await getMonitorCharts({
       callES: search,
       monitorId: 'fooID',
       dateRangeStart: 'now-15m',
@@ -87,7 +86,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     searchMock.mockReturnValue(mockChartsData);
     const search = searchMock.bind({});
     expect(
-      await adapter.getMonitorChartsData({
+      await getMonitorCharts({
         callES: search,
         monitorId: 'id',
         dateRangeStart: 'now-15m',

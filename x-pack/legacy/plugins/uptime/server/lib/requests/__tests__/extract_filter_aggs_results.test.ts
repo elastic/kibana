@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { extractFilterAggsResults } from '../elasticsearch_monitors_adapter';
+import { extractFilterAggsResults } from '../get_filter_bar';
 
 describe('extractFilterAggsResults', () => {
   it('extracts the bucket values of the expected filter fields', () => {

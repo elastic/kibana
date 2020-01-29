@@ -43,7 +43,7 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
       }
     }
 
-    const filtersResponse = await libs.monitors.getFilterBar({
+    const filtersResponse = await libs.requests.getFilterBar({
       callES,
       dateRangeStart,
       dateRangeEnd,

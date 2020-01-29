@@ -53,7 +53,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { dateRangeStart, dateRangeEnd, filters, monitorId, statusFilter },
       { APICaller }
     ): Promise<HistogramResult> {
-      return await libs.db.getPingHistogram({
+      return await libs.requests.getPingHistogram({
         callES: APICaller,
         dateRangeStart,
         dateRangeEnd,
@@ -67,7 +67,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { monitorId, dateRangeStart, dateRangeEnd, location },
       { APICaller }
     ): Promise<MonitorChart> {
-      return await libs.monitors.getMonitorChartsData({
+      return await libs.requests.getMonitorCharts({
         callES: APICaller,
         monitorId,
         dateRangeStart,

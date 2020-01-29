@@ -5,7 +5,12 @@
  */
 
 export { getDocCount } from './get_doc_count';
+export { getFilterBar, GetFilterBarParams } from './get_filter_bar';
 export { getLatestMonitor, GetLatestMonitorParams } from './get_latest_monitor';
 export { getMonitor, GetMonitorParams } from './get_monitor';
+export { getMonitorCharts, GetMonitorChartsParams } from './get_monitor_charts';
+export { getMonitorDetails, GetMonitorDetailsParams } from './get_monitor_details';
+export { getMonitorLocations, GetMonitorLocationsParams } from './get_monitor_locations';
 export { getPings, GetPingsParams } from './get_pings';
 export { getPingHistogram, GetPingHistogramParams } from './get_ping_histogram';
+export { UptimeRequests } from './uptime_requests';

@@ -90,7 +90,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = asy
     // Calculate here the length of the content string in bytes, this is easier than in client JS, where
     // we don't have access to Buffer.byteLength. There are some hacky ways to do this in the
     // client but this is cleaner.
-    const httpBody: HttpBody = _source.http.response.body;
+    const httpBody: HttpBody | undefined = _source?.http?.response?.body;
     if (httpBody && httpBody.content) {
       httpBody.content_bytes = Buffer.byteLength(httpBody.content);
     }
