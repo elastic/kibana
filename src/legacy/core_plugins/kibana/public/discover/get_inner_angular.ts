@@ -42,8 +42,6 @@ import { registerListenEventListener } from 'ui/directives/listen/listen';
 // @ts-ignore
 import { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
 // @ts-ignore
-import { CssTruncateProvide } from 'ui/directives/css_truncate';
-// @ts-ignore
 import { FixedScrollProvider } from 'ui/fixed_scroll';
 // @ts-ignore
 import { DebounceProviderTimeout } from 'ui/directives/debounce/debounce';
@@ -84,6 +82,7 @@ import { createFieldChooserDirective } from './np_ready/components/field_chooser
 import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
 import { CollapsibleSidebarProvider } from './np_ready/angular/directives/collapsible_sidebar/collapsible_sidebar';
 import { DiscoverStartPlugins } from './plugin';
+import { createCssTruncateDirective } from './np_ready/angular/directives/css_truncate';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -179,7 +178,7 @@ export function initializeInnerAngularModule(
     .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
     .directive('fieldName', FieldNameDirectiveProvider)
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
-    .directive('cssTruncate', CssTruncateProvide)
+    .directive('cssTruncate', createCssTruncateDirective)
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverFieldSearch', createFieldSearchDirective)

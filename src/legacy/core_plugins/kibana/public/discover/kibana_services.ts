@@ -47,10 +47,6 @@ export function setServices(newServices: any) {
   services = newServices;
 }
 
-// import directives that
-import 'ui/directives/css_truncate';
-import './np_ready/angular/directives/field_name';
-
 // EXPORT legacy static dependencies, should be migrated when available in a new version;
 export { angular };
 export { wrapInI18nContext } from 'ui/i18n';

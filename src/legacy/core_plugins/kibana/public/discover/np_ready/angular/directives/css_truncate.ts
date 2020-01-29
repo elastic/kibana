@@ -16,15 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { uiModules } from '../modules';
-const module = uiModules.get('kibana');
-
-export function CssTruncateProvide() {
+export function createCssTruncateDirective() {
   return {
     restrict: 'A',
     scope: {},
-    link: function($scope, $elem, attrs) {
+    link: ($scope: any, $elem: any, attrs: any) => {
       $elem.css({
         overflow: 'hidden',
         'white-space': 'nowrap',
@@ -63,5 +59,3 @@ export function CssTruncateProvide() {
     },
   };
 }
-
-module.directive('cssTruncate', CssTruncateProvide);
