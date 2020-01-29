@@ -5,6 +5,7 @@
  */
 import { createHash } from 'crypto';
 import moment from 'moment';
+import dateMath from '@elastic/datemath';
 
 import { parseDuration } from '../../../../../alerting/server/lib';
 
@@ -30,21 +31,27 @@ export const getDriftTolerance = ({
   from,
   to,
   interval,
+  now = moment(),
 }: {
   from: string;
   to: string;
   interval: moment.Duration;
+  now?: moment.Moment;
 }): moment.Duration | null => {
   if (to.trim() !== 'now') {
     // TODO: use Elastic date math
     return null;
   }
+  let duration: moment.Duration | null;
   if (!from.trim().startsWith('now-')) {
-    // we only support from tha starts with now for drift detection
-    return null;
+    const isStringDate = !isNaN(Date.parse(from));
+    const date = (isStringDate && dateMath.parse(from)) || from;
+    duration = (isStringDate && moment.duration(now.diff(date))) || parseInterval('6m');
+  } else {
+    const split = from.split('-');
+    duration = parseInterval(split[1]);
   }
-  const split = from.split('-');
-  const duration = parseInterval(split[1]);
+
   if (duration !== null) {
     return duration.subtract(interval);
   } else {
