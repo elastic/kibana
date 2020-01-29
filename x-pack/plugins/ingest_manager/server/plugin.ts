@@ -14,6 +14,7 @@ import {
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import { PluginStartContract as EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
 import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { PLUGIN_ID } from './constants';
 import { licenseService, configService, appContextService } from './services';
 import {
@@ -27,6 +28,7 @@ import { IngestManagerConfigType } from './';
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
+  features?: FeaturesPluginSetup;
 }
 
 export interface IngestManagerAppContext {
@@ -48,6 +50,28 @@ export class IngestManagerPlugin implements Plugin {
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
     this.clusterClient = core.elasticsearch.createClient(PLUGIN_ID);
     this.security = deps.security;
+
+    // Register feature
+    // TODO: Flesh out privileges
+    if (deps.features) {
+      deps.features.registerFeature({
+        id: PLUGIN_ID,
+        name: 'Ingest Manager',
+        icon: 'savedObjectsApp',
+        navLinkId: PLUGIN_ID,
+        app: [PLUGIN_ID, 'kibana'],
+        privileges: {
+          all: {
+            api: [PLUGIN_ID],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['show'],
+          },
+        },
+      });
+    }
 
     // Create router
     const router = core.http.createRouter();

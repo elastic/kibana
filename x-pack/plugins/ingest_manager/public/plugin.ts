@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
+import { PLUGIN_ID } from '../common/constants';
 import { BASE_PATH } from './applications/ingest_manager/constants';
 
 export type IngestManagerSetup = void;
@@ -46,7 +47,7 @@ export class IngestManagerPlugin implements Plugin {
 
     // Register main Ingest Manager app
     core.application.register({
-      id: 'ingestManager',
+      id: PLUGIN_ID,
       category: DEFAULT_APP_CATEGORIES.management,
       title: i18n.translate('xpack.ingestManager.appTitle', { defaultMessage: 'Ingest Manager' }),
       appRoute: BASE_PATH,
