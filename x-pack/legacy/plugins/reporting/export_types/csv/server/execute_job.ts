@@ -5,17 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaRequest } from '../../../../../../../src/core/server';
 import { CSV_JOB_TYPE } from '../../../common/constants';
 import { cryptoFactory } from '../../../server/lib';
-import {
-  ESQueueWorkerExecuteFn,
-  ExecuteJobFactory,
-  FieldFormats,
-  Logger,
-  ServerFacade,
-} from '../../../types';
+import { ESQueueWorkerExecuteFn, ExecuteJobFactory, Logger, ServerFacade } from '../../../types';
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { fieldFormatMapFactory } from './lib/field_format_map';
 import { createGenerateCsv } from './lib/generate_csv';
@@ -94,7 +87,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
 
     const [formatsMap, uiSettings] = await Promise.all([
       (async () => {
-        const fieldFormats = (await server.fieldFormatServiceFactory(uiConfig)) as FieldFormats;
+        const fieldFormats = await server.fieldFormatServiceFactory(uiConfig);
         return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
       })(),
       (async () => {

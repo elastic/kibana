@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
-  const browser = getService('browser');
+  //const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
