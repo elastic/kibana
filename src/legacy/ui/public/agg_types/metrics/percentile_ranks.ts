@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
-import { PercentileRanksEditor } from '../../vis/editors/default/controls/percentile_ranks';
 import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 
@@ -68,7 +67,6 @@ export const percentileRanksMetricAgg = new MetricAggType<IPercentileRanksAggCon
     },
     {
       name: 'values',
-      editorComponent: PercentileRanksEditor,
       default: [],
     },
     {

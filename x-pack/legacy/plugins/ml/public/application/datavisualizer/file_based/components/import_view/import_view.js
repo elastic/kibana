@@ -207,7 +207,7 @@ export class ImportView extends Component {
                 if (success) {
                   const importer = importerFactory(format, results, indexCreationSettings);
                   if (importer !== undefined) {
-                    const readResp = await importer.read(fileContents, this.setReadProgress);
+                    const readResp = importer.read(fileContents, this.setReadProgress);
                     success = readResp.success;
                     this.setState({
                       readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,

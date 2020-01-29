@@ -47,7 +47,7 @@ export const NAVIGATION_EVENTS_TITLE = i18n.translate('xpack.siem.hosts.navigati
 });
 
 export const NAVIGATION_ALERTS_TITLE = i18n.translate('xpack.siem.hosts.navigation.alertsTitle', {
-  defaultMessage: 'Alerts',
+  defaultMessage: 'External alerts',
 });
 
 export const ERROR_FETCHING_AUTHENTICATIONS_DATA = i18n.translate(
