@@ -25,7 +25,13 @@ import { IInjector } from '../legacy_imports';
 import { ViewMode } from '../../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
-import { IIndexPattern, TimeRange, Query, esFilters } from '../../../../../../plugins/data/public';
+import {
+  IIndexPattern,
+  TimeRange,
+  Query,
+  esFilters,
+  SavedQuery,
+} from '../../../../../../plugins/data/public';
 
 import { DashboardAppController } from './dashboard_app_controller';
 import { RenderDeps } from './application';
@@ -45,6 +51,7 @@ export interface DashboardAppScope extends ng.IScope {
       | { to: string | moment.Moment | undefined; from: string | moment.Moment | undefined };
     refreshInterval: any;
   };
+  savedQuery?: SavedQuery;
   refreshInterval: any;
   panels: SavedDashboardPanel[];
   indexPatterns: IIndexPattern[];
@@ -53,8 +60,19 @@ export interface DashboardAppScope extends ng.IScope {
   getShouldShowEditHelp: () => boolean;
   getShouldShowViewHelp: () => boolean;
   updateQueryAndFetch: ({ query, dateRange }: { query: Query; dateRange?: TimeRange }) => void;
+  onRefreshChange: ({
+    isPaused,
+    refreshInterval,
+  }: {
+    isPaused: boolean;
+    refreshInterval: any;
+  }) => void;
+  onFiltersUpdated: (filters: esFilters.Filter[]) => void;
   onCancelApplyFilters: () => void;
   onApplyFilters: (filters: esFilters.Filter[]) => void;
+  onQuerySaved: (savedQuery: SavedQuery) => void;
+  onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
+  onClearSavedQuery: () => void;
   topNavMenu: any;
   showFilterBar: () => boolean;
   showAddPanel: any;

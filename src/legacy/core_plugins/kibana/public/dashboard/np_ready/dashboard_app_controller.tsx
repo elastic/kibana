@@ -40,6 +40,7 @@ import {
   IndexPattern,
   IndexPatternsContract,
   Query,
+  SavedQuery,
   syncAppFilters,
   syncQuery,
 } from '../../../../../../plugins/data/public';
@@ -440,6 +441,10 @@ export class DashboardAppController {
     };
 
     $scope.updateQueryAndFetch = function({ query, dateRange }) {
+      if (dateRange) {
+        timefilter.setTime(dateRange);
+      }
+
       const oldQuery = $scope.model.query;
       if (_.isEqual(oldQuery, query)) {
         // The user can still request a reload in the query bar, even if the
@@ -452,6 +457,93 @@ export class DashboardAppController {
         dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
       }
     };
+
+    $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
+      timefilter.setRefreshInterval({
+        pause: isPaused,
+        value: refreshInterval ? refreshInterval : $scope.model.refreshInterval.value,
+      });
+    };
+
+    $scope.onFiltersUpdated = filters => {
+      // The filters will automatically be set when the filterManager emits an update event (see below)
+      filterManager.setFilters(filters);
+    };
+
+    $scope.onQuerySaved = savedQuery => {
+      $scope.savedQuery = savedQuery;
+    };
+
+    $scope.onSavedQueryUpdated = savedQuery => {
+      $scope.savedQuery = { ...savedQuery };
+    };
+
+    $scope.onClearSavedQuery = () => {
+      delete $scope.savedQuery;
+      dashboardStateManager.setSavedQueryId(undefined);
+      dashboardStateManager.applyFilters(
+        {
+          query: '',
+          language:
+            localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
+        },
+        filterManager.getGlobalFilters()
+      );
+      // Making this method sync broke the updates.
+      // Temporary fix, until we fix the complex state in this file.
+      setTimeout(() => {
+        filterManager.setFilters(filterManager.getGlobalFilters());
+      }, 0);
+    };
+
+    const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
+      const savedQueryFilters = savedQuery.attributes.filters || [];
+      const globalFilters = filterManager.getGlobalFilters();
+      const allFilters = [...globalFilters, ...savedQueryFilters];
+
+      dashboardStateManager.applyFilters(savedQuery.attributes.query, allFilters);
+      if (savedQuery.attributes.timefilter) {
+        timefilter.setTime({
+          from: savedQuery.attributes.timefilter.from,
+          to: savedQuery.attributes.timefilter.to,
+        });
+        if (savedQuery.attributes.timefilter.refreshInterval) {
+          timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
+        }
+      }
+      // Making this method sync broke the updates.
+      // Temporary fix, until we fix the complex state in this file.
+      setTimeout(() => {
+        filterManager.setFilters(allFilters);
+      }, 0);
+    };
+
+    $scope.$watch('savedQuery', (newSavedQuery: SavedQuery) => {
+      if (!newSavedQuery) return;
+      dashboardStateManager.setSavedQueryId(newSavedQuery.id);
+
+      updateStateFromSavedQuery(newSavedQuery);
+    });
+
+    $scope.$watch(
+      () => {
+        return dashboardStateManager.getSavedQueryId();
+      },
+      newSavedQueryId => {
+        if (!newSavedQueryId) {
+          $scope.savedQuery = undefined;
+          return;
+        }
+        if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
+          savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery: SavedQuery) => {
+            $scope.$evalAsync(() => {
+              $scope.savedQuery = savedQuery;
+              updateStateFromSavedQuery(savedQuery);
+            });
+          });
+        }
+      }
+    );
 
     $scope.indexPatterns = [];
 
