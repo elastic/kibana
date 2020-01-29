@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  height: 350px; /* to avoid jump when histogram loads */
+  flex 1;
 `;
 
 const MatrixLoaderComponent = () => (

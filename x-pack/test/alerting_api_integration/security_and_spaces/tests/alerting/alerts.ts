@@ -147,6 +147,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 reference,
                 source: 'action:test.index-record',
               });
+
+              await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

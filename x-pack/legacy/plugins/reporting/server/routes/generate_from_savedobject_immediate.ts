@@ -7,18 +7,19 @@
 import { Legacy } from 'kibana';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
-import {
-  ServerFacade,
-  ResponseFacade,
-  HeadlessChromiumDriverFactory,
-  ReportingResponseToolkit,
-  Logger,
-  JobDocOutput,
-} from '../../types';
-import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
-import { getRouteOptionsCsv } from './lib/route_config_factories';
+import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
+import {
+  HeadlessChromiumDriverFactory,
+  JobDocOutput,
+  Logger,
+  ReportingResponseToolkit,
+  ResponseFacade,
+  ServerFacade,
+} from '../../types';
+import { ReportingSetupDeps } from '../plugin';
 import { makeRequestFacade } from './lib/make_request_facade';
+import { getRouteOptionsCsv } from './lib/route_config_factories';
 
 /*
  * This function registers API Endpoints for immediate Reporting jobs. The API inputs are:
@@ -31,9 +32,10 @@ import { makeRequestFacade } from './lib/make_request_facade';
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
   server: ServerFacade,
+  plugins: ReportingSetupDeps,
   parentLogger: Logger
 ) {
-  const routeOptions = getRouteOptionsCsv(server, parentLogger);
+  const routeOptions = getRouteOptionsCsv(server, plugins, parentLogger);
 
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
