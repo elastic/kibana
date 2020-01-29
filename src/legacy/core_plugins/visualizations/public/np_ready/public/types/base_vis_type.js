@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-import { DefaultEditorController } from '../../../legacy_imports';
+import { DefaultEditorController } from '../../../../../vis_default_editor/public';
 
 export class BaseVisType {
   constructor(opts = {}) {

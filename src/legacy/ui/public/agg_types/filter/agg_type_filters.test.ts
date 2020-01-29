@@ -19,8 +19,7 @@
 
 import { IndexPattern } from '../../../../../plugins/data/public';
 import { AggTypeFilters } from './agg_type_filters';
-import { AggType } from '..';
-import { AggConfig } from '../../vis';
+import { AggConfig, AggType } from '..';
 
 describe('AggTypeFilters', () => {
   let registry: AggTypeFilters;

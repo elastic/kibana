@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
 import { IUiSettingsClient } from 'kibana/server';
+import { resolve } from 'path';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+import { PluginSetupContract as SecurityPluginSetup } from '../../../plugins/security/server';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
-import { ReportingConfigOptions, ReportingPluginSpecOptions } from './types.d';
 import { config as reportingConfig } from './config';
 import {
   LegacySetup,
   ReportingPlugin,
-  ReportingSetupDeps,
   reportingPluginFactory,
+  ReportingSetupDeps,
 } from './server/plugin';
-
-import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+import { ReportingConfigOptions, ReportingPluginSpecOptions } from './types.d';
 
 const kbToBase64Length = (kb: number) => {
   return Math.floor((kb * 1024 * 8) / 6);
@@ -75,6 +75,7 @@ export const reporting = (kibana: any) => {
     async init(server: Legacy.Server) {
       const coreSetup = server.newPlatform.setup.core;
       const pluginsSetup: ReportingSetupDeps = {
+        security: server.newPlatform.setup.plugins.security as SecurityPluginSetup,
         usageCollection: server.newPlatform.setup.plugins.usageCollection,
       };
 
@@ -92,7 +93,6 @@ export const reporting = (kibana: any) => {
         plugins: {
           elasticsearch: server.plugins.elasticsearch,
           xpack_main: server.plugins.xpack_main,
-          security: server.plugins.security,
         },
         savedObjects: server.savedObjects,
         fieldFormatServiceFactory,
