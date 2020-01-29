@@ -6,13 +6,13 @@
 
 import { InnerJoin } from './inner_join';
 
+jest.mock('ui/new_platform');
 jest.mock('ui/vis/editors/default/schemas', () => {
   class MockSchemas {}
   return {
     Schemas: MockSchemas,
   };
 });
-jest.mock('../../kibana_services', () => {});
 jest.mock('ui/agg_types', () => {});
 jest.mock('ui/timefilter', () => {});
 jest.mock('../vector_layer', () => {});

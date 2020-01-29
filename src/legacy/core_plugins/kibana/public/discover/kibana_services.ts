@@ -58,8 +58,6 @@ export { getRequestInspectorStats, getResponseInspectorStats } from '../../../da
 export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 // @ts-ignore
 export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-// @ts-ignore
-export { RequestAdapter } from 'ui/inspector/adapters';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
@@ -88,7 +86,6 @@ export {
   SortDirection,
 } from '../../../../../plugins/data/public';
 export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
-export { Adapters } from 'ui/inspector/types';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore

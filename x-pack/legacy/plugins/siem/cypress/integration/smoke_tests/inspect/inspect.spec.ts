@@ -9,12 +9,15 @@ import {
   INSPECT_MODAL,
   INSPECT_NETWORK_BUTTONS_IN_SIEM,
   INSPECT_HOSTS_BUTTONS_IN_SIEM,
-  TIMELINE_SETTINGS_ICON,
-  TIMELINE_INSPECT_BUTTON,
-} from '../../lib/inspect/selectors';
-import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../lib/util/helpers';
-import { executeKQL, hostExistsQuery, toggleTimelineVisibility } from '../../lib/timeline/helpers';
-import { closesModal, openStatsAndTables } from '../../lib/inspect/helpers';
+} from '../../../screens/inspect';
+import {
+  executeTimelineKQL,
+  openTimeline,
+  openTimelineSettings,
+  openTimelineInspectButton,
+} from '../../../tasks/timeline/main';
+import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../../tasks/login';
+import { closesModal, openStatsAndTables } from '../../../tasks/inspect';
 
 describe('Inspect', () => {
   context('Hosts stats and tables', () => {
@@ -51,12 +54,12 @@ describe('Inspect', () => {
 
   context('Timeline', () => {
     it('inspects the timeline', () => {
+      const hostExistsQuery = 'host.name: *';
       loginAndWaitForPage(HOSTS_PAGE);
-      toggleTimelineVisibility();
-      executeKQL(hostExistsQuery);
-      cy.get(TIMELINE_SETTINGS_ICON).trigger('click', { force: true });
-      cy.get(TIMELINE_INSPECT_BUTTON, { timeout: DEFAULT_TIMEOUT }).should('not.be.disabled');
-      cy.get(TIMELINE_INSPECT_BUTTON).trigger('click', { force: true });
+      openTimeline();
+      executeTimelineKQL(hostExistsQuery);
+      openTimelineSettings();
+      openTimelineInspectButton();
       cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
     });
   });

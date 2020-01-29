@@ -432,6 +432,9 @@ const TimeseriesChartIntl = injectI18n(
       }
       focusLoadTo = Math.min(focusLoadTo, contextXMax);
 
+      const brushVisibility = focusLoadFrom !== contextXMin || focusLoadTo !== contextXMax;
+      this.setBrushVisibility(brushVisibility);
+
       if (focusLoadFrom !== contextXMin || focusLoadTo !== contextXMax) {
         this.setContextBrushExtent(new Date(focusLoadFrom), new Date(focusLoadTo), true);
         const newSelectedBounds = {

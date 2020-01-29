@@ -7,7 +7,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { getOr } from 'lodash/fp';
 
-import { EuiSpacer } from '@elastic/eui';
 import { NetworkDnsTable } from '../../../components/page/network/network_dns_table';
 import { NetworkDnsQuery, HISTOGRAM_ID } from '../../../containers/network_dns';
 import { manageQuery } from '../../../components/page/manage_query';
@@ -71,7 +70,6 @@ export const DnsQueryTabBody = ({
         type={networkModel.NetworkType.page}
         updateDateRange={updateDateRange}
       />
-      <EuiSpacer />
       <NetworkDnsQuery
         endDate={endDate}
         filterQuery={filterQuery}
