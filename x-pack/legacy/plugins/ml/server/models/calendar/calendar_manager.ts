@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { difference } from 'lodash';
 import Boom from 'boom';
 import { EventManager, CalendarEvent } from './event_manager';
 
@@ -23,33 +23,25 @@ export interface FormCalendar extends BasicCalendar {
 }
 
 export class CalendarManager {
-  private isLegacy: boolean;
-  private client: any;
-  private eventManager: any;
+  private _client: any;
+  private _eventManager: any;
 
   constructor(isLegacy: boolean, client: any) {
-    this.isLegacy = isLegacy;
-    this.client = client;
-    this.eventManager = new EventManager(isLegacy, client);
+    const actualClient = isLegacy === true ? client : client.ml!.mlClient.callAsCurrentUser;
+    this._client = actualClient;
+    this._eventManager = new EventManager(actualClient);
   }
 
   async getCalendar(calendarId: string) {
     try {
-      let resp;
-      if (this.isLegacy === true) {
-        resp = await this.client('ml.calendars', {
-          calendarId,
-        });
-      } else {
-        resp = await this.client.ml!.mlClient.callAsCurrentUser('ml.calendars', {
-          calendarId,
-        });
-      }
+      const resp = await this._client('ml.calendars', {
+        calendarId,
+      });
 
       const calendars = resp.calendars;
       if (calendars.length) {
         const calendar = calendars[0];
-        calendar.events = await this.eventManager.getCalendarEvents(calendarId);
+        calendar.events = await this._eventManager.getCalendarEvents(calendarId);
         return calendar;
       } else {
         throw Boom.notFound(`Calendar with the id "${calendarId}" not found`);
@@ -61,14 +53,9 @@ export class CalendarManager {
 
   async getAllCalendars() {
     try {
-      let calendarsResp;
-      if (this.isLegacy === true) {
-        calendarsResp = await this.client('ml.calendars');
-      } else {
-        calendarsResp = await this.client.ml!.mlClient.callAsCurrentUser('ml.calendars');
-      }
+      const calendarsResp = await this._client('ml.calendars');
 
-      const events: CalendarEvent[] = await this.eventManager.getAllEvents();
+      const events: CalendarEvent[] = await this._eventManager.getAllEvents();
       const calendars: Calendar[] = calendarsResp.calendars;
       calendars.forEach(cal => (cal.events = []));
 
@@ -105,19 +92,13 @@ export class CalendarManager {
     delete calendar.calendarId;
     delete calendar.events;
     try {
-      if (this.isLegacy === true) {
-        await this.client('ml.addCalendar', {
-          calendarId,
-          body: calendar,
-        });
-      } else {
-        await this.client.ml!.mlClient.callAsCurrentUser('ml.addCalendar', {
-          calendarId,
-          body: calendar,
-        });
-      }
+      await this._client('ml.addCalendar', {
+        calendarId,
+        body: calendar,
+      });
+
       if (events.length) {
-        await this.eventManager.addEvents(calendarId, events);
+        await this._eventManager.addEvents(calendarId, events);
       }
 
       // return the newly created calendar
@@ -131,18 +112,18 @@ export class CalendarManager {
     const origCalendar: Calendar = await this.getCalendar(calendarId);
     try {
       // update job_ids
-      const jobsToAdd = _.difference(calendar.job_ids, origCalendar.job_ids);
-      const jobsToRemove = _.difference(origCalendar.job_ids, calendar.job_ids);
+      const jobsToAdd = difference(calendar.job_ids, origCalendar.job_ids);
+      const jobsToRemove = difference(origCalendar.job_ids, calendar.job_ids);
 
       // workout the differences between the original events list and the new one
       // if an event has no event_id, it must be new
       const eventsToAdd = calendar.events.filter(
-        event => origCalendar.events.find(e => this.eventManager.isEqual(e, event)) === undefined
+        event => origCalendar.events.find(e => this._eventManager.isEqual(e, event)) === undefined
       );
 
       // if an event in the original calendar cannot be found, it must have been deleted
       const eventsToRemove: CalendarEvent[] = origCalendar.events.filter(
-        event => calendar.events.find(e => this.eventManager.isEqual(e, event)) === undefined
+        event => calendar.events.find(e => this._eventManager.isEqual(e, event)) === undefined
       );
 
       // note, both of the loops below could be removed if the add and delete endpoints
@@ -150,43 +131,29 @@ export class CalendarManager {
 
       // add all new jobs
       if (jobsToAdd.length) {
-        if (this.isLegacy === true) {
-          await this.client('ml.addJobToCalendar', {
-            calendarId,
-            jobId: jobsToAdd.join(','),
-          });
-        } else {
-          await this.client.ml!.mlClient.callAsCurrentUser('ml.addJobToCalendar', {
-            calendarId,
-            jobId: jobsToAdd.join(','),
-          });
-        }
+        await this._client('ml.addJobToCalendar', {
+          calendarId,
+          jobId: jobsToAdd.join(','),
+        });
       }
 
       // remove all removed jobs
       if (jobsToRemove.length) {
-        if (this.isLegacy === true) {
-          await this.client('ml.removeJobFromCalendar', {
-            calendarId,
-            jobId: jobsToRemove.join(','),
-          });
-        } else {
-          await this.client.ml!.mlClient.callAsCurrentUser('ml.removeJobFromCalendar', {
-            calendarId,
-            jobId: jobsToRemove.join(','),
-          });
-        }
+        await this._client('ml.removeJobFromCalendar', {
+          calendarId,
+          jobId: jobsToRemove.join(','),
+        });
       }
 
       // add all new events
       if (eventsToAdd.length !== 0) {
-        await this.eventManager.addEvents(calendarId, eventsToAdd);
+        await this._eventManager.addEvents(calendarId, eventsToAdd);
       }
 
       // remove all removed events
       await Promise.all(
         eventsToRemove.map(async event => {
-          await this.eventManager.deleteEvent(calendarId, event.event_id);
+          await this._eventManager.deleteEvent(calendarId, event.event_id);
         })
       );
     } catch (error) {
@@ -198,9 +165,6 @@ export class CalendarManager {
   }
 
   async deleteCalendar(calendarId: string) {
-    if (this.isLegacy === true) {
-      return this.client('ml.deleteCalendar', { calendarId });
-    }
-    return this.client.ml!.mlClient.callAsCurrentUser('ml.deleteCalendar', { calendarId });
+    return this._client('ml.deleteCalendar', { calendarId });
   }
 }

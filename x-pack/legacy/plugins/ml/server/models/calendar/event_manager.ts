@@ -15,21 +15,15 @@ export interface CalendarEvent {
 }
 
 export class EventManager {
-  private isLegacy: boolean;
-  private client: any;
-  constructor(isLegacy: boolean, client: any) {
-    this.isLegacy = isLegacy;
-    this.client = client;
+  private _client: any;
+  constructor(client: any) {
+    this._client = client;
   }
 
   async getCalendarEvents(calendarId: string) {
     try {
-      let resp;
-      if (this.isLegacy === true) {
-        resp = await this.client('ml.events', { calendarId });
-      } else {
-        resp = await this.client.ml!.mlClient.callAsCurrentUser('ml.events', { calendarId });
-      }
+      const resp = await this._client('ml.events', { calendarId });
+
       return resp.events;
     } catch (error) {
       throw Boom.badRequest(error);
@@ -40,18 +34,10 @@ export class EventManager {
   async getAllEvents(jobId?: string) {
     const calendarId = '_all';
     try {
-      let resp;
-      if (this.isLegacy === true) {
-        resp = await this.client('ml.events', {
-          calendarId,
-          jobId,
-        });
-      } else {
-        resp = await this.client.ml!.mlClient.callAsCurrentUser('ml.events', {
-          calendarId,
-          jobId,
-        });
-      }
+      const resp = await this._client('ml.events', {
+        calendarId,
+        jobId,
+      });
 
       return resp.events;
     } catch (error) {
@@ -63,24 +49,17 @@ export class EventManager {
     const body = { events };
 
     try {
-      if (this.isLegacy === true) {
-        return await this.client('ml.addEvent', {
-          calendarId,
-          body,
-        });
-      }
-      return await this.client.ml!.mlClient.callAsCurrentUser('ml.addEvent', { calendarId, body });
+      return await this._client('ml.addEvent', {
+        calendarId,
+        body,
+      });
     } catch (error) {
       throw Boom.badRequest(error);
     }
   }
 
   async deleteEvent(calendarId: string, eventId: string) {
-    if (this.isLegacy === true) {
-      return this.client('ml.deleteEvent', { calendarId, eventId });
-    }
-
-    return this.client.ml!.mlClient.callAsCurrentUser('ml.deleteEvent', { calendarId, eventId });
+    return this._client('ml.deleteEvent', { calendarId, eventId });
   }
 
   isEqual(ev1: CalendarEvent, ev2: CalendarEvent) {
