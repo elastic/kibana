@@ -12,7 +12,7 @@ const ONE_HUNDRED_MEGABYTES = 104857600;
 
 describe('Reporting: Validate Max Content Length', () => {
   const elasticsearch = {
-    getCluster: () => ({
+    dataClient: {
       callAsInternalUser: () => ({
         defaults: {
           http: {
@@ -20,7 +20,7 @@ describe('Reporting: Validate Max Content Length', () => {
           },
         },
       }),
-    }),
+    },
   };
 
   const logger = {
@@ -76,8 +76,8 @@ describe('Reporting: Validate Max Content Length', () => {
       }),
     };
 
-    await expect(() =>
-      validateMaxContentLength(server, elasticsearch, logger.warning)
+    expect(
+      async () => await validateMaxContentLength(server, elasticsearch, logger.warning)
     ).not.toThrow();
     sinon.assert.notCalled(logger.warning);
   });
