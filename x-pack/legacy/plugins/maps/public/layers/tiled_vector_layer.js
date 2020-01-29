@@ -9,6 +9,8 @@ import { VectorStyle } from './styles/vector/vector_style';
 import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 import { VectorLayer } from './vector_layer';
 import { EuiIcon } from '@elastic/eui';
+import { canSkipSourceUpdate } from './util/can_skip_fetch';
+import _ from 'lodash';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -28,7 +30,6 @@ export class TiledVectorLayer extends VectorLayer {
   constructor(options) {
     super(options);
     this._style = new VectorStyle(this._descriptor.style, this._source, this);
-    console.log('created oner with style!', this._style);
   }
 
   destroy() {
@@ -42,25 +43,46 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   getCustomIconAndTooltipContent() {
-    console.log('since no feature collection, not sure what to do..');
     return {
       icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
     };
   }
 
-  async _syncMVTUrlTemplate({ startLoading, stopLoading, onLoadError, dataFilters }) {
-    const sourceDataRequest = this.getSourceDataRequest();
-    if (sourceDataRequest) {
-      //data is immmutable
-      console.log('already synced, no need to do again');
-      return;
+  _getSearchFilters(dataFilters) {
+    const fieldNames = [...this._source.getFieldNames(), ...this._style.getSourceFieldNames()];
+
+    return {
+      ...dataFilters,
+      fieldNames: _.uniq(fieldNames).sort(),
+      sourceQuery: this.getQuery(),
+    };
+  }
+
+  async _syncMVTUrlTemplate({
+    startLoading,
+    stopLoading,
+    onLoadError,
+    registerCancelCallback,
+    dataFilters,
+  }) {
+    const requestToken = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
+    const searchFilters = this._getSearchFilters(dataFilters);
+    const prevDataRequest = this.getSourceDataRequest();
+    const canSkip = await canSkipSourceUpdate({
+      source: this._source,
+      prevDataRequest,
+      nextMeta: searchFilters,
+    });
+    if (canSkip) {
+      console.log('mvt Can skip update!');
+      return null;
+    } else {
+      console.log('mvt cannot skip');
     }
-    console.log('need to syncdata');
-    const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
-    startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
+
+    startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
     try {
-      console.log('source!', this._source);
-      const url = await this._source.getUrlTemplate(dataFilters);
+      const url = await this._source.getUrlTemplate(searchFilters);
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, url, {});
     } catch (error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
@@ -68,7 +90,6 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   async syncData(syncContext) {
-    console.log('tvl syncData');
     if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
       return;
     }
@@ -79,7 +100,6 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   _syncSourceBindingWithMb(mbMap) {
-    console.log('tbl sync source bingins');
     const mbSource = mbMap.getSource(this.getId());
     if (!mbSource) {
       const sourceDataRequest = this.getSourceDataRequest();
@@ -87,13 +107,11 @@ export class TiledVectorLayer extends VectorLayer {
         //this is possible if the layer was invisible at startup.
         //the actions will not perform any data=syncing as an optimization when a layer is invisible
         //when turning the layer back into visible, it's possible the url has not been resovled yet.
-        console.log('no sdr');
         return;
       }
 
       const url = sourceDataRequest.getData();
       if (!url) {
-        console.log('no url!');
         return;
       }
 
@@ -106,18 +124,56 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   _syncStylePropertiesWithMb(mbMap) {
+    const mbSource = mbMap.getSource(this.getId());
+    if (!mbSource) {
+      return;
+    }
+
     const options = { mvtSourceLayer: this._source.getMvtSourceLayer() };
     this._setMbPointsProperties(mbMap, options);
     this._setMbLinePolygonProperties(mbMap, options);
   }
 
+  _requiresPrevSourceCleanup(mbMap) {
+    const tileSource = mbMap.getSource(this.getId());
+    if (!tileSource) {
+      return false;
+    }
+    const dataRequest = this.getSourceDataRequest();
+    if (!dataRequest) {
+      return false;
+    }
+    const newUrl = dataRequest.getData();
+    if (tileSource.tiles[0] === newUrl) {
+      //TileURL captures all the state. If this does not change, no updates are required.
+      return false;
+    }
+
+    return true;
+  }
+
   syncLayerWithMB(mbMap) {
+    const requiresCleanup = this._requiresPrevSourceCleanup(mbMap);
+    if (requiresCleanup) {
+      console.log('requires cleanup, source changed')
+      const mbStyle = mbMap.getStyle();
+      mbStyle.layers.forEach(mbLayer => {
+        if (this.ownsMbLayerId(mbLayer.id)) {
+          mbMap.removeLayer(mbLayer.id);
+        }
+      });
+      Object.keys(mbStyle.sources).some(mbSourceId => {
+        if (this.ownsMbSourceId(mbSourceId)) {
+          mbMap.removeSource(mbSourceId);
+        }
+      });
+    }
+
     this._syncSourceBindingWithMb(mbMap);
     this._syncStylePropertiesWithMb(mbMap);
   }
 
   getJoins() {
-    console.log('wtf is this getting called?');
     return [];
   }
 }

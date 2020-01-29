@@ -30,7 +30,6 @@ export class TileLayer extends AbstractLayer {
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
-      console.log('calling', this._source);
       const url = await this._source.getUrlTemplate();
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, url, {});
     } catch (error) {

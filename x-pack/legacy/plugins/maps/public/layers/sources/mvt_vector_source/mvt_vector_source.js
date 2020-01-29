@@ -59,7 +59,6 @@ export class MVTVectorSource extends AbstractSource {
   }
 
   async getUrlTemplate() {
-    console.log('return templat', this._descriptor.urlTemplate);
    return this._descriptor.urlTemplate;
   }
 }

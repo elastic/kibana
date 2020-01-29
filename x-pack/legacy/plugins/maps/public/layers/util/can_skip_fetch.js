@@ -59,6 +59,8 @@ export async function canSkipSourceUpdate({ source, prevDataRequest, nextMeta })
   const isQueryAware = source.isQueryAware();
   const isGeoGridPrecisionAware = source.isGeoGridPrecisionAware();
 
+  console.log('can skip?', {timeAware, refreshTimerAware, extentAware, isFieldAware, isQueryAware, isGeoGridPrecisionAware})
+
   if (
     !timeAware &&
     !refreshTimerAware &&
@@ -121,6 +123,8 @@ export async function canSkipSourceUpdate({ source, prevDataRequest, nextMeta })
   const updateDueToExtentChange = updateDueToExtent(source, prevMeta, nextMeta);
 
   const updateDueToSourceMetaChange = !_.isEqual(prevMeta.sourceMeta, nextMeta.sourceMeta);
+
+  console.log('update due to source query?', updateDueToSourceQuery);
 
   return (
     !updateDueToTime &&

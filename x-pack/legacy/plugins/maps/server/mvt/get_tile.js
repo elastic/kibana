@@ -6,6 +6,7 @@
 
 import geojsonvt from 'geojson-vt';
 import vtpbf from 'vt-pbf';
+import _ from 'lodash';
 
 export async function getTile({
   esClient,
@@ -17,48 +18,53 @@ export async function getTile({
   y,
   z,
   fields = [],
+  requestBody = {},
 }) {
-
-  server.log('info', {indexPattern, size,geometryFieldName,x,y,z,fields});
+  server.log('info', { indexPattern, size, geometryFieldName, x, y, z, fields });
   const polygon = toBoundingBox(x, y, z);
 
   try {
     let result;
     try {
-      const includes = fields.concat([geometryFieldName]);
-      const esQuery = {
-        index: indexPattern,
-        body: {
-          size: size,
-          _source: {
-            includes: includes,
-          },
-          stored_fields: [geometryFieldName],
-          query: {
-            bool: {
-              must: [],
-              filter: [
-                {
-                  match_all: {},
-                },
-                {
-                  geo_shape: {
-                    [geometryFieldName]: {
-                      shape: polygon,
-                      relation: 'INTERSECTS',
-                    },
-                  },
-                },
-              ],
-              should: [],
-              must_not: [],
-            },
+
+      const geoShapeFilter = {
+        geo_shape: {
+          [geometryFieldName]: {
+            shape: polygon,
+            relation: 'INTERSECTS',
           },
         },
       };
-      server.log('info', esQuery);
+
+      requestBody.query.bool.filter.push(geoShapeFilter);
+
+      // const esQuery = {
+      //   index: indexPattern,
+      //   body: {
+      //     size: requestBody.size,
+      //     _source: requestBody._source,
+      //     stored_fields: requestBody.stored_fields,
+      //     query: {
+      //       bool: {
+      //         must: [],
+      //         filter: requestBody.query.bool.filter.concat(geoShapeFilter),
+      //         should: [],
+      //         must_not: [],
+      //       },
+      //     },
+      //   },
+      // };
+
+
+      const esQuery = {
+        index: indexPattern,
+        body: requestBody,
+      }
+      server.log('info', JSON.stringify(esQuery));
       result = await esClient.search(esQuery);
+      server.log('result', JSON.stringify(result));
     } catch (e) {
+      server.log('error',e.message);
       throw e;
     }
 

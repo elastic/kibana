@@ -12,7 +12,6 @@ export function GlobalFilterCheckbox({ applyGlobalQuery, label, setApplyGlobalQu
     setApplyGlobalQuery(event.target.checked);
   };
 
-  console.log('enable switch', enableSwitch);
   return (
     <EuiFormRow display="columnCompressedSwitch">
       <EuiSwitch

@@ -226,7 +226,7 @@ export class FilterEditor extends Component {
           })}
           applyGlobalQuery={this.props.layer.getSource().getApplyGlobalQuery()}
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
-          enableSwitch={this.props.layer.getSource().isQueryAware()}
+          enableSwitch={this.props.layer.getSource().isQueryAwareTogglable()}
         />
       </Fragment>
     );

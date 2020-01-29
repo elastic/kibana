@@ -59,8 +59,6 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   constructor(descriptor, inspectorAdapters) {
-    console.log('de', descriptor);
-    console.log('type', descriptor.type);
     super(
       {
         ...descriptor,

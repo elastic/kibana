@@ -16,6 +16,8 @@ import uuid from 'uuid/v4';
 import { CreateSourceEditor } from '../es_search_source/create_source_editor';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import {loadIndexSettings} from "../es_search_source/load_index_settings";
+import  rison from 'rison-node';
 
 export class ESMVTSearchSource extends ESSearchSource {
   static type = ES_MVT_SEARCH;
@@ -38,11 +40,11 @@ export class ESMVTSearchSource extends ESSearchSource {
           id: uuid(),
           ...sourceConfig,
           type: ESMVTSearchSource.type,
+          applyGlobalQuery: false,
         },
         inspectorAdapters
       );
 
-      console.log('create esmvt source', source);
       onPreviewSource(source);
     };
     return (
@@ -50,16 +52,33 @@ export class ESMVTSearchSource extends ESSearchSource {
     );
   }
 
-  async getUrlTemplate() {
-    console.log('need to get vector template!', this);
+  async getUrlTemplate(searchFilters) {
+
 
     const indexPattern = await this.getIndexPattern();
+    const indexSettings = await loadIndexSettings(indexPattern.title);
+
+    const searchSource = await this._makeSearchSource(searchFilters, indexSettings.maxResultWindow);
+    console.log('sf', searchFilters);
+    console.log('ss', searchSource);
+
+    window._ss = searchSource;
+
+
     const ipTitle = indexPattern.title;
     const geometryFieldBame = this._descriptor.geoField;
     const fields = ['_id'];
     const fieldsParam = fields.join(',');
 
-    return `../${GIS_API_PATH}/${MVT_GETTILE_API_PATH}?x={x}&y={y}&z={z}&geometryFieldName=${geometryFieldBame}&indexPattern=${ipTitle}&fields=${fieldsParam}`;
+    const dsl = await searchSource.getSearchRequestBody();
+    const dslString = JSON.stringify(dsl);
+    const urlEncode = encodeURI(dslString);
+
+    const risonDsl = rison.encode(dsl);
+    console.log(risonDsl);
+    console.log(urlEncode);
+
+    return `../${GIS_API_PATH}/${MVT_GETTILE_API_PATH}?x={x}&y={y}&z={z}&geometryFieldName=${geometryFieldBame}&indexPattern=${ipTitle}&fields=${fieldsParam}&requestBody=${risonDsl}`;
   }
 
   getMvtSourceLayer() {
@@ -71,7 +90,6 @@ export class ESMVTSearchSource extends ESSearchSource {
       ...options,
     });
 
-    console.log('create tiledvectorlayer descriptor');
     return tvl;
   }
 
@@ -95,11 +113,11 @@ export class ESMVTSearchSource extends ESSearchSource {
     return false;
   }
 
-  isQueryAware() {
+  isJoinable() {
     return false;
   }
 
-  isJoinable() {
+  isQueryAwareTogglable() {
     return false;
   }
 

@@ -82,6 +82,10 @@ export class AbstractSource {
     return false;
   }
 
+  isQueryAwareTogglable() {
+    return true;
+  }
+
   getFieldNames() {
     return [];
   }
@@ -96,10 +100,6 @@ export class AbstractSource {
 
   getApplyGlobalQuery() {
     return !!this._descriptor.applyGlobalQuery;
-  }
-
-  supportsGlobalQuery() {
-    return false;
   }
 
   getIndexPatternIds() {
