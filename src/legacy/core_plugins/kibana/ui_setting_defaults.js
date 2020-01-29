@@ -815,6 +815,9 @@ export function getUiSettingDefaults() {
       value: 'en',
       type: 'select',
       options: numeralLanguageIds,
+      optionLabels: Object.fromEntries(
+        numeralLanguages.map(language => [language.id, language.name])
+      ),
       description: i18n.translate('kbn.advancedSettings.format.formattingLocaleText', {
         defaultMessage: `{numeralLanguageLink} locale`,
         description:

@@ -2041,6 +2041,11 @@
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.3.tgz#94d38a35bd315efa7a6918b22695128fc40a885e"
   integrity sha512-0OyB9oztlYIq8F1LHjcNf+T089PKfYw78tgUY+q2dtox/jmb4xzFKtI9kv1hwAt5tcgBUTtUMK9kszpSh1UZaQ==
 
+"@elastic/numeral@2.3.5":
+  version "2.3.5"
+  resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.5.tgz#fcaeac57ddc55cd4b7f0b9c7e070c242dd5d0600"
+  integrity sha512-lJVZHPuI2csrfwDIEdKedFqNIF+5YsyqvX2soAqhu49iKOd9n7tifLRn30vP6D7oKd+6HsiGfPzT0nzdJWsexQ==
+
 "@elastic/request-crypto@^1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-1.0.2.tgz#bf27bf009227166f3eeb2b5193a108752335ebd3"

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { findLast, cloneDeep, template, escape } from 'lodash';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
@@ -28,7 +29,9 @@ const convertTemplate = template('<span style="<%- style %>"><%- val %></span>')
 
 export class ColorFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.COLOR;
-  static title = 'Color';
+  static title = i18n.translate('data.common.fieldFormats.color.title', {
+    defaultMessage: 'Color',
+  });
   static fieldType = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
 
   getParamDefaults() {
