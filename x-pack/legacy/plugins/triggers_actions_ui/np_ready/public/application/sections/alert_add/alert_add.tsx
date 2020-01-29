@@ -54,17 +54,10 @@ export const AlertAdd = () => {
     setAlert(initialAlert);
     setServerError(null);
   }, [initialAlert, setAddFlyoutVisibility]);
+
   const [serverError, setServerError] = useState<{
     body: { message: string; error: string };
   } | null>(null);
-
-  /* const closeFlyout = useCallback(() => {
-    setFlyoutVisibility(false);
-    setAlertType(undefined);
-    setIsAddActionPanelOpen(true);
-    setServerError(null);
-    setInitialAlert(initialAlert);
-  }, [initialAlert, setFlyoutVisibility]); */
 
   if (!addFlyoutVisible) {
     return null;
@@ -116,7 +109,7 @@ export const AlertAdd = () => {
   return (
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutAlertAddTitle" size="m" maxWidth={620}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
+        <EuiTitle size="s" data-test-subj="addAlertFlyoutTitle">
           <h3 id="flyoutTitle">
             <FormattedMessage
               defaultMessage="Create Alert"

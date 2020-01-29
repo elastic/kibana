@@ -89,7 +89,9 @@ interface AlertFormProps {
 
 export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormProps) => {
   const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = useAppDependencies();
-  const [alertType, setAlertType] = useState<AlertTypeModel | undefined>(undefined);
+  const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
+    alertTypeRegistry.get(alert.alertTypeId)
+  );
 
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
@@ -139,7 +141,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
           actionGroups: ['Alert', 'Warning', 'If unacknowledged'],
           name: 'threshold',
         });
-        const index: ActionTypeIndex = {};
+        const index: AlertTypeIndex = {};
         for (const alertTypeItem of alertTypes) {
           index[alertTypeItem.id] = alertTypeItem;
         }
@@ -208,7 +210,9 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
     return { ...acc, [alertAction.id]: actionValidationErrors };
   }, {});
 
-  const AlertParamsExpressionComponent = alertType ? alertType.alertParamsExpression : null;
+  const AlertParamsExpressionComponent = alertTypeModel
+    ? alertTypeModel.alertParamsExpression
+    : null;
 
   function addActionType(actionTypeModel: ActionTypeModel) {
     setIsAddActionPanelOpen(false);
@@ -252,7 +256,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
         label={item.name}
         onClick={() => {
           setAlertProperty('alertTypeId', item.id);
-          setAlertType(item);
+          setAlertTypeModel(item);
           if (
             alertTypesIndex &&
             alertTypesIndex[item.id] &&
@@ -362,6 +366,9 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
                 (item: AlertAction) => item.id !== actionItem.id
               );
               setAlertProperty('actions', updatedActions);
+              setIsAddActionPanelOpen(
+                updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length === 0
+              );
             }}
           />
         }
@@ -454,6 +461,9 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
                 (item: AlertAction) => item.id !== actionItem.id
               );
               setAlertProperty('actions', updatedActions);
+              setIsAddActionPanelOpen(
+                updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length === 0
+              );
             }}
           />
         }
@@ -494,6 +504,10 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
             actionType={actionTypesIndex[actionItem.actionTypeId]}
             addModalVisible={addModalVisible}
             setAddModalVisibility={setAddModalVisibility}
+            postSaveEventHandler={(savedAction: ActionConnector) => {
+              connectors.push(savedAction);
+              setActionProperty('id', savedAction.id, index);
+            }}
           />
         ) : null}
       </EuiAccordion>
@@ -511,7 +525,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
         return getActionTypeForm(actionItem, actionConnector, index);
       })}
       <EuiSpacer size="m" />
-      {!isAddActionPanelOpen ? (
+      {isAddActionPanelOpen === false ? (
         <EuiButton
           iconType="plusInCircle"
           data-test-subj="addAlertActionButton"
@@ -530,12 +544,12 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
     <Fragment>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="s" data-test-subj="selectedAlertTypeTitle">
             <h5 id="selectedAlertTypeTitle">
               <FormattedMessage
                 defaultMessage="Trigger: {alertType}"
                 id="xpack.triggersActionsUI.sections.alertForm.selectedAlertTypeTitle"
-                values={{ alertType: alertType ? alertType.name : '' }}
+                values={{ alertType: alertTypeModel ? alertTypeModel.name : '' }}
               />
             </h5>
           </EuiTitle>
@@ -544,7 +558,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
           <EuiLink
             onClick={() => {
               setAlertProperty('alertTypeId', null);
-              setAlertType(undefined);
+              setAlertTypeModel(null);
             }}
           >
             <FormattedMessage
@@ -765,7 +779,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="m" />
-      {alertType ? (
+      {alertTypeModel ? (
         <Fragment>{alertTypeDetails}</Fragment>
       ) : (
         <Fragment>

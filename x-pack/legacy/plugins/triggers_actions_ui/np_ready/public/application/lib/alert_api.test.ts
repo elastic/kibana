@@ -28,6 +28,7 @@ describe('loadAlertTypes', () => {
       {
         id: 'test',
         name: 'Test',
+        actionGroups: ['default'],
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);

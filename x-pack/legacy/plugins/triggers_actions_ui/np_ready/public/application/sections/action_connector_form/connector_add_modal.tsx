@@ -27,10 +27,12 @@ export const ConnectorAddModal = ({
   actionType,
   addModalVisible,
   setAddModalVisibility,
+  postSaveEventHandler,
 }: {
   actionType: ActionType;
   addModalVisible: boolean;
   setAddModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  postSaveEventHandler?: (savedAction: ActionConnector) => void;
 }) => {
   let hasErrors = false;
   const { http, toastNotifications, actionTypeRegistry } = useAppDependencies();
@@ -141,6 +143,9 @@ export const ConnectorAddModal = ({
               const savedAction = await onActionConnectorSave();
               setIsSaving(false);
               if (savedAction) {
+                if (postSaveEventHandler) {
+                  postSaveEventHandler(savedAction);
+                }
                 closeModal();
               }
             }}
