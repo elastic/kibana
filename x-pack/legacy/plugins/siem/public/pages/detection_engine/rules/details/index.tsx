@@ -24,7 +24,11 @@ import { ActionCreator } from 'typescript-fsa';
 import { connect } from 'react-redux';
 import { FiltersGlobal } from '../../../../components/filters_global';
 import { FormattedDate } from '../../../../components/formatted_date';
-import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
+import {
+  getDetectionEngineUrl,
+  getEditRuleUrl,
+  getRulesUrl,
+} from '../../../../components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../components/search_bar';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { useRule } from '../../../../containers/detection_engine/rules';
@@ -237,7 +241,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     isAuthenticated != null &&
     (!isSignalIndexExists || !isAuthenticated)
   ) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+    return <Redirect to={`/${getDetectionEngineUrl()}`} />;
   }
 
   return (
@@ -257,7 +261,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
                   <WrapperPage>
                     <DetectionEngineHeaderPage
                       backOptions={{
-                        href: `#${DETECTION_ENGINE_PAGE_NAME}/rules`,
+                        href: getRulesUrl(),
                         text: i18n.BACK_TO_RULES,
                       }}
                       border
@@ -291,7 +295,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
                           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                             <EuiFlexItem grow={false}>
                               <EuiButton
-                                href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}/edit`}
+                                href={getEditRuleUrl(ruleId ?? '')}
                                 iconType="visControls"
                                 isDisabled={(userHasNoPermissions || rule?.immutable) ?? true}
                               >
