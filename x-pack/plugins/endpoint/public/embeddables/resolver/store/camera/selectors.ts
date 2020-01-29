@@ -479,42 +479,6 @@ export const scalingFactor = (state: CameraState): CameraState['scalingFactor'] 
 export const userIsPanning = (state: CameraState): boolean => state.panning !== undefined;
 
 /**
- * The magnitude of the animation in terms of nudges.
- */
-function nudgeFactor(
-  animation: CameraAnimationState,
-  scaleNotConsideringAnimation: Vector2
-): number {
-  // TODO assumes that scale is same in both axis
-  const lengthOfNudge = vector2.length(
-    vector2.divide([0, scalingConstants.unitsPerNudge], scaleNotConsideringAnimation)
-  );
-
-  return (
-    vector2.length(vector2.subtract(animation.targetTranslation, animation.initialTranslation)) /
-    lengthOfNudge
-  );
-}
-
-/**
- * If the distance between the start and end translation is greater than a 'nudge'.
- */
-function animationIsGreaterThanNudge(
-  animation: CameraAnimationState,
-  scaleNotConsideringAnimation: Vector2
-): boolean {
-  return (
-    vector2.distance(animation.initialTranslation, animation.targetTranslation) >
-    vector2.length(
-      vector2.divide(
-        [scalingConstants.unitsPerNudge, scalingConstants.unitsPerNudge],
-        scaleNotConsideringAnimation
-      )
-    )
-  );
-}
-
-/**
  * Returns a number 0<=n<=1 where:
  * 0 meaning it just started,
  * 1 meaning it is done.
