@@ -134,6 +134,9 @@ export const timelineQuery = gql`
                 name
                 ip
               }
+              rule {
+                reference
+              }
               source {
                 bytes
                 ip
