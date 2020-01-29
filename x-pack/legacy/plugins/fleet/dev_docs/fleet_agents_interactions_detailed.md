@@ -1,11 +1,13 @@
 # Fleet <-> Agent Interactions
 
+## Agent enrollment and checkin
+
 Fleet workflow:
 
 - an agent enroll to fleet using an enrollmentAPiKey
 - Every n seconds agent is polling the checkin API to send events and check for new configuration
 
-## Agent enrollment
+### Agent enrollment
 
 An agent can enroll using the REST Api provided by fleet.
 When an agent enroll Fleet:
@@ -18,7 +20,7 @@ When an agent enroll Fleet:
 
 ![](schema/agent_enroll.png)
 
-## Agent checkin
+### Agent checkin
 
 Agent are going to poll the checkin API to send events and check for new configration. To checkin agent are going to use the REST Api provided by fleet.
 
@@ -32,6 +34,12 @@ When an agent checkin fleet:
 
 ![](schema/agent_checkin.png)
 
-## Agent acknowledgement
+### Agent acknowledgement
 
-This is really similar to the checkin (same auth mecanism) and it's used for agent
+This is really similar to the checkin (same auth mecanism) and it's used for agent to acknowlege action received during checkin
+
+## Other interactions
+
+### Agent Configuration update
+
+![](schema/agent_config_update.png)
