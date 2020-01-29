@@ -66,8 +66,6 @@ export interface RenderDeps {
   embeddables: IEmbeddableStart;
   localStorage: Storage;
   share: SharePluginStart;
-  history: History;
-  kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 let angularModuleInstance: IModule | null = null;
