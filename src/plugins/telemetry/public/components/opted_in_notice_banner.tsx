@@ -20,25 +20,19 @@
 /* eslint @elastic/eui/href-or-on-click:0 */
 
 import * as React from 'react';
-import chrome from 'ui/chrome';
 import { EuiButton, EuiLink, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PATH_TO_ADVANCED_SETTINGS } from '../../common/constants';
 
 interface Props {
   onSeenBanner: () => any;
+  privacyStatementHref: string;
+  disableTelemetryHref: string;
 }
 
-/**
- * React component for displaying the Telemetry opt-in notice.
- */
 export class OptedInBanner extends React.PureComponent<Props> {
-  onLinkClick = () => {
-    this.props.onSeenBanner();
-    return;
-  };
-
   render() {
+    const { privacyStatementHref, disableTelemetryHref, onSeenBanner } = this.props;
+
     return (
       <EuiCallOut title="Help us improve the Elastic Stack">
         <FormattedMessage
@@ -48,7 +42,7 @@ export class OptedInBanner extends React.PureComponent<Props> {
             privacyStatementLink: (
               <EuiLink
                 onClick={this.onLinkClick}
-                href="https://www.elastic.co/legal/privacy-statement"
+                href={privacyStatementHref}
                 target="_blank"
                 rel="noopener"
               >
@@ -59,10 +53,7 @@ export class OptedInBanner extends React.PureComponent<Props> {
               </EuiLink>
             ),
             disableLink: (
-              <EuiLink
-                href={chrome.addBasePath(PATH_TO_ADVANCED_SETTINGS)}
-                onClick={this.onLinkClick}
-              >
+              <EuiLink href={disableTelemetryHref} onClick={onSeenBanner}>
                 <FormattedMessage
                   id="telemetry.telemetryOptedInDisableUsage"
                   defaultMessage="disable usage data here"
@@ -72,7 +63,7 @@ export class OptedInBanner extends React.PureComponent<Props> {
           }}
         />
         <EuiSpacer size="s" />
-        <EuiButton size="s" onClick={this.props.onSeenBanner}>
+        <EuiButton size="s" onClick={onSeenBanner}>
           <FormattedMessage
             id="telemetry.telemetryOptedInDismissMessage"
             defaultMessage="Dismiss"

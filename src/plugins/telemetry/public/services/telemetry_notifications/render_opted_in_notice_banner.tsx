@@ -17,14 +17,25 @@
  * under the License.
  */
 
-/**
- * Determine if the notice banner should be displayed.
- *
- * This method can have side-effects related to deprecated config settings.
- *
- * @param {Object} telemetryOptInProvider The Telemetry opt-in provider singleton.
- * @return {Boolean} {@code true} if the banner should be displayed. {@code false} otherwise.
- */
-export async function shouldShowOptInBanner(telemetryOptInProvider) {
-  return telemetryOptInProvider.notifyUserAboutOptInDefault();
+import React from 'react';
+import { CoreStart } from 'kibana/public';
+import { OptedInBanner } from '../../components/opted_in_notice_banner';
+import { PATH_TO_ADVANCED_SETTINGS, PRIVACY_STATEMENT_URL } from '../../../common/constants';
+import { toMountPoint } from '../../../../kibana_react/public';
+
+interface RenderBannerConfig {
+  overlays: CoreStart['overlays'];
+  onSeen: () => void;
+}
+export function renderOptedInBanner({ onSeen, overlays }: RenderBannerConfig) {
+  const mount = toMountPoint(
+    <OptedInBanner
+      onSeenBanner={onSeen}
+      disableTelemetryHref={PATH_TO_ADVANCED_SETTINGS}
+      privacyStatementHref={PRIVACY_STATEMENT_URL}
+    />
+  );
+  const bannerId = overlays.banners.add(mount, 10000);
+
+  return bannerId;
 }

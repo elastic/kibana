@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Telemetry } from './telemetry';
+import { TelemetrySender } from './telemetry_sender';
 import { REPORT_INTERVAL_MS, LOCALSTORAGE_KEY } from '../../common/constants';
 
 describe('telemetry class', () => {

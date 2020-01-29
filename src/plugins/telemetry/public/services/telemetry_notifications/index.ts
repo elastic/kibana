@@ -17,23 +17,4 @@
  * under the License.
  */
 
-/**
- * The amount of time, in milliseconds, to wait between reports when enabled.
- * Currently 24 hours.
- */
-export const REPORT_INTERVAL_MS = 86400000;
-
-/*
- * Key for the localStorage service
- */
-export const LOCALSTORAGE_KEY = 'telemetry.data';
-
-/**
- * Link to Advanced Settings.
- */
-export const PATH_TO_ADVANCED_SETTINGS = 'kibana#/management/kibana/settings';
-
-/**
- * Link to the Elastic Telemetry privacy statement.
- */
-export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/privacy-statement`;
+export { TelemetryNotifications } from './telemetry_notifications';

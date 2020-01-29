@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component, Ref } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -22,24 +22,46 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 
-import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
-import { optInToTelemetry } from '../../../lib/telemetry';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
 import { EXTERNAL_LINKS } from '../../../../../../common/constants';
 import { getDocLinks } from '../../../lib/docs_links';
+import { TelemetryPluginStart } from '../../../lib/telemetry';
 
-export class StartTrial extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = { showConfirmation: false };
-  }
+interface Props {
+  loadTrialStatus: () => void;
+  startLicenseTrial: () => void;
+  telemetry: TelemetryPluginStart;
+  shouldShowStartTrial: boolean;
+}
+
+interface State {
+  shouldShowTelemetryOptIn: boolean;
+  showConfirmation: boolean;
+  isOptingInToTelemetry: boolean;
+}
+
+export class StartTrial extends Component<Props, State> {
+  cancelRef: any;
+  confirmRef: any;
+
+  state: State = {
+    shouldShowTelemetryOptIn: true,
+    showConfirmation: false,
+    isOptingInToTelemetry: false,
+  };
+
   UNSAFE_componentWillMount() {
     this.props.loadTrialStatus();
   }
-  startLicenseTrial = () => {
-    const { startLicenseTrial } = this.props;
-    if (this.telemetryOptIn.isOptingInToTelemetry()) {
-      optInToTelemetry(true);
+
+  onOptInChange = (isOptingInToTelemetry: boolean) => {
+    this.setState({ isOptingInToTelemetry });
+  };
+  onStartLicenseTrial = () => {
+    const { telemetry, startLicenseTrial } = this.props;
+    if (this.state.isOptingInToTelemetry) {
+      telemetry.telemetryService.setOptIn(true);
     }
     startLicenseTrial();
   };
@@ -158,12 +180,14 @@ export class StartTrial extends React.PureComponent {
           <EuiModalFooter>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
-                <TelemetryOptIn
-                  isStartTrial={true}
-                  ref={ref => {
-                    this.telemetryOptIn = ref;
-                  }}
-                />
+                {this.state.shouldShowTelemetryOptIn && (
+                  <TelemetryOptIn
+                    telemetry={this.props.telemetry}
+                    isStartTrial={true}
+                    onOptInChange={this.onOptInChange}
+                    isOptingInToTelemetry={this.state.isOptingInToTelemetry}
+                  />
+                )}
               </EuiFlexItem>
               <EuiFlexItem grow={false} className="licManagement__ieFlex">
                 <EuiFlexGroup responsive={false}>
@@ -182,7 +206,7 @@ export class StartTrial extends React.PureComponent {
                   <EuiFlexItem grow={false} className="licManagement__ieFlex">
                     <EuiButton
                       data-test-subj="confirmModalConfirmButton"
-                      onClick={this.startLicenseTrial}
+                      onClick={this.onStartLicenseTrial}
                       fill
                       buttonRef={this.confirmRef}
                       color="primary"

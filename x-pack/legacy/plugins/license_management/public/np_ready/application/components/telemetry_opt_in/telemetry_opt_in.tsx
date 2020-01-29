@@ -6,26 +6,31 @@
 
 import React, { Fragment } from 'react';
 import { EuiLink, EuiCheckbox, EuiSpacer, EuiText, EuiTitle, EuiPopover } from '@elastic/eui';
-import {
-  shouldShowTelemetryOptIn,
-  getTelemetryFetcher,
-  PRIVACY_STATEMENT_URL,
-  OptInExampleFlyout,
-} from '../../lib/telemetry';
 import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  OptInExampleFlyout,
+  PRIVACY_STATEMENT_URL,
+  TelemetryPluginStart,
+} from '../../lib/telemetry';
 
-export class TelemetryOptIn extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      showMoreTelemetryInfo: false,
-      isOptingInToTelemetry: false,
-      showExample: false,
-    };
-  }
-  isOptingInToTelemetry = () => {
-    return this.state.isOptingInToTelemetry;
+interface State {
+  showMoreTelemetryInfo: boolean;
+  showExample: boolean;
+}
+
+interface Props {
+  onOptInChange: (isOptingInToTelemetry: boolean) => void;
+  isOptingInToTelemetry: boolean;
+  isStartTrial: boolean;
+  telemetry: TelemetryPluginStart;
+}
+
+export class TelemetryOptIn extends React.Component<Props, State> {
+  state: State = {
+    showMoreTelemetryInfo: false,
+    showExample: false,
   };
+
   closeReadMorePopover = () => {
     this.setState({ showMoreTelemetryInfo: false });
   };
@@ -37,20 +42,22 @@ export class TelemetryOptIn extends React.Component {
     this.setState({ showExample: true });
     this.closeReadMorePopover();
   };
-  onChangeOptIn = event => {
+  onChangeOptIn = (event: any) => {
     const isOptingInToTelemetry = event.target.checked;
-    this.setState({ isOptingInToTelemetry });
+    const { onOptInChange } = this.props;
+    onOptInChange(isOptingInToTelemetry);
   };
+
   render() {
-    const { showMoreTelemetryInfo, isOptingInToTelemetry, showExample } = this.state;
-    const { isStartTrial } = this.props;
+    const { showMoreTelemetryInfo, showExample } = this.state;
+    const { isStartTrial, isOptingInToTelemetry, telemetry } = this.props;
 
     let example = null;
     if (showExample) {
       example = (
         <OptInExampleFlyout
           onClose={() => this.setState({ showExample: false })}
-          fetchTelemetry={getTelemetryFetcher}
+          fetchExample={telemetry.telemetryService.fetchExample}
         />
       );
     }
@@ -123,7 +130,7 @@ export class TelemetryOptIn extends React.Component {
       </EuiPopover>
     );
 
-    return shouldShowTelemetryOptIn() ? (
+    return (
       <Fragment>
         {example}
         {toCurrentCustomers}
@@ -144,6 +151,6 @@ export class TelemetryOptIn extends React.Component {
           onChange={this.onChangeOptIn}
         />
       </Fragment>
-    ) : null;
+    );
   }
 }

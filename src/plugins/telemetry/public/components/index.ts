@@ -17,22 +17,4 @@
  * under the License.
  */
 
-import React from 'react';
-
-import { banners } from 'ui/notify';
-import { OptedInBanner } from '../../components/opted_in_notice_banner';
-
-/**
- * Render the Telemetry Opt-in notice banner.
- *
- * @param {Object} telemetryOptInProvider The telemetry opt-in provider.
- * @param {Object} _banners Banners singleton, which can be overridden for tests.
- */
-export function renderOptedInBanner(telemetryOptInProvider, { _banners = banners } = {}) {
-  const bannerId = _banners.add({
-    component: <OptedInBanner onSeenBanner={telemetryOptInProvider.setOptInNoticeSeen} />,
-    priority: 10000,
-  });
-
-  telemetryOptInProvider.setOptInBannerNoticeId(bannerId);
-}
+export { OptInExampleFlyout } from './opt_in_example_flyout';

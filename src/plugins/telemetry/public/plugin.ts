@@ -23,7 +23,7 @@ import {
   CoreStart,
   HttpSetup,
 } from '../../../core/public';
-import { TelemetrySender, TelemetryService } from './services';
+import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 
 // interface PublicConfigType {
 //   uiMetric: {
@@ -32,28 +32,40 @@ import { TelemetrySender, TelemetryService } from './services';
 //   };
 // }
 
-export interface TelemetryStart {
+export interface TelemetryPluginStart {
   telemetryService: TelemetryService;
+  telemetryNotifications: TelemetryNotifications;
 }
 
-export class TelemetryPlugin implements Plugin<void, TelemetryStart> {
+export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
   // private config: PublicConfigType;
   private isUnauthenticated: boolean = false;
   // constructor(initializerContext: PluginInitializerContext) {
   //   this.config = initializerContext.config.get<PublicConfigType>();
   // }
 
-  public setup({ http }: CoreSetup): TelemetrySetup {
+  public setup({ http }: CoreSetup) {
     this.isUnauthenticated = this.getIsUnauthenticated(http);
-    return {};
   }
 
-  public start({ injectedMetadata, http }: CoreStart): TelemetryStart {
+  public start({ injectedMetadata, http, notifications, overlays }: CoreStart): TelemetryStart {
     const isPluginEnabled = injectedMetadata.getInjectedVar('telemetryEnabled') as boolean;
     const sendUsageFrom = injectedMetadata.getInjectedVar('telemetrySendUsageFrom') as
       | 'browser'
       | 'server';
-    const telemetryService = new TelemetryService({ http, injectedMetadata });
+
+    const telemetryService = new TelemetryService({
+      http,
+      injectedMetadata,
+      notifications,
+    });
+
+    const telemetryNotifications = new TelemetryNotifications({
+      http,
+      injectedMetadata,
+      notifications,
+      overlays,
+    });
 
     this.maybeStartTelemetryPoller({
       telemetryService,
@@ -61,8 +73,13 @@ export class TelemetryPlugin implements Plugin<void, TelemetryStart> {
       sendUsageFrom,
     });
 
+    this.maybeShowOptedInNotificationBanner({
+      telemetryNotifications,
+    });
+
     return {
       telemetryService,
+      telemetryNotifications,
     };
   }
 
@@ -86,6 +103,25 @@ export class TelemetryPlugin implements Plugin<void, TelemetryStart> {
       if (!this.isUnauthenticated) {
         sender.startChecking();
       }
+    }
+  }
+
+  private maybeShowOptedInNotificationBanner({
+    telemetryNotifications,
+  }: {
+    telemetryNotifications: TelemetryNotifications;
+  }) {
+    if (this.isUnauthenticated) {
+      return;
+    }
+    // and no banner on status page
+    // if (chrome.getApp().id === 'status_page') {
+    //   return;
+    // }
+
+    const shouldShowBanner = telemetryNotifications.shouldShowOptedInNoticeBanner();
+    if (shouldShowBanner) {
+      telemetryNotifications.renderOptedInNoticeBanner();
     }
   }
 }

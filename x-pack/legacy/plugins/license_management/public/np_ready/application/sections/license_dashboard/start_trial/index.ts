@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 export { StartTrial } from './start_trial.container';

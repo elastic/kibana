@@ -38,13 +38,13 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getServices } from '../../kibana_services';
+import { TelemetryPluginStart } from '../../../../../../../plugins/telemetry/public';
 
 import { SampleDataCard } from './sample_data';
 interface Props {
   urlBasePath: string;
   onSkip: () => void;
-  onOptInSeen: () => any;
-  currentOptInStatus: boolean;
+  telemetry: TelemetryPluginStart;
 }
 
 /**
@@ -75,8 +75,9 @@ export class Welcome extends React.Component<Props> {
   };
 
   componentDidMount() {
+    const { telemetry } = this.props;
     this.services.trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
-    this.props.onOptInSeen();
+    telemetry.telemetryNotifications.setOptedInNoticeSeen();
     document.addEventListener('keydown', this.hideOnEsc);
   }
 
@@ -85,7 +86,9 @@ export class Welcome extends React.Component<Props> {
   }
 
   private renderTelemetryEnabledOrDisabledText = () => {
-    if (this.props.currentOptInStatus) {
+    const { telemetry } = this.props;
+    const isOptedIn = telemetry.telemetryService.getIsOptedIn();
+    if (isOptedIn) {
       return (
         <Fragment>
           <FormattedMessage

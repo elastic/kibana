@@ -23,14 +23,10 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 
-const bannerId: string | null = null;
-const optInBannerNoticeId: string | null = null;
-const currentOptInStatus = false;
-const telemetryNotifyUserAboutOptInDefault = true;
-
 interface TelemetryServiceConstructor {
   http: CoreStart['http'];
   injectedMetadata: CoreStart['injectedMetadata'];
+  notifications: CoreStart['notifications'];
   reportOptInStatusChange?: boolean;
 }
 
@@ -38,46 +34,53 @@ export class TelemetryService {
   private readonly http: CoreStart['http'];
   private readonly injectedMetadata: CoreStart['injectedMetadata'];
   private readonly reportOptInStatusChange: boolean;
+  private readonly notifications: CoreStart['notifications'];
   private isOptedIn: boolean;
 
   constructor({
     http,
     injectedMetadata,
+    notifications,
     reportOptInStatusChange = true,
   }: TelemetryServiceConstructor) {
     const isOptedIn = injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean;
 
     this.reportOptInStatusChange = reportOptInStatusChange;
     this.injectedMetadata = injectedMetadata;
+    this.notifications = notifications;
     this.http = http;
 
     this.isOptedIn = isOptedIn;
   }
 
-  public getCanChangeOptInStatus() {
+  public getCanChangeOptInStatus = () => {
     const allowChangingOptInStatus = this.injectedMetadata.getInjectedVar(
       'allowChangingOptInStatus'
     ) as boolean;
     return allowChangingOptInStatus;
-  }
+  };
 
-  public getOptInStatusUrl() {
+  public getOptInStatusUrl = () => {
     const telemetryOptInStatusUrl = this.injectedMetadata.getInjectedVar(
       'telemetryOptInStatusUrl'
     ) as string;
     return telemetryOptInStatusUrl;
-  }
+  };
 
-  public getTelemetryUrl() {
+  public getTelemetryUrl = () => {
     const telemetryUrl = this.injectedMetadata.getInjectedVar('telemetryUrl') as string;
     return telemetryUrl;
-  }
+  };
 
-  public getIsOptedIn() {
+  public getIsOptedIn = () => {
     return this.isOptedIn;
-  }
+  };
 
-  public async fetchTelemetry({ unencrypted = false } = {}) {
+  public fetchExample = async () => {
+    return await this.fetchTelemetry({ unencrypted: true });
+  };
+
+  public fetchTelemetry = async ({ unencrypted = false } = {}) => {
     const now = moment();
     return this.http.post(`/api/telemetry/v2/clusters/_stats`, {
       body: JSON.stringify({
@@ -88,9 +91,9 @@ export class TelemetryService {
         },
       }),
     });
-  }
+  };
 
-  public async setOptIn(optedIn: boolean): Promise<boolean> {
+  public setOptIn = async (optedIn: boolean): Promise<boolean> => {
     const canChangeOptInStatus = this.getCanChangeOptInStatus();
     if (!canChangeOptInStatus) {
       return false;
@@ -105,7 +108,7 @@ export class TelemetryService {
       }
       this.isOptedIn = optedIn;
     } catch (err) {
-      toastNotifications.addError(err, {
+      this.notifications.toasts.addError(err, {
         title: i18n.translate('telemetry.optInErrorToastTitle', {
           defaultMessage: 'Error',
         }),
@@ -118,9 +121,9 @@ export class TelemetryService {
     }
 
     return true;
-  }
+  };
 
-  private async reportOptInStatus(OptInStatus: boolean) {
+  private reportOptInStatus = async (OptInStatus: boolean): Promise<void> => {
     const telemetryOptInStatusUrl = this.getOptInStatusUrl();
 
     try {
@@ -128,7 +131,7 @@ export class TelemetryService {
       //   body: JSON.stringify({ enabled, unencrypted: false })
       // });
 
-      return await fetch(telemetryOptInStatusUrl, {
+      await fetch(telemetryOptInStatusUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -139,47 +142,13 @@ export class TelemetryService {
       // Sending the ping is best-effort. Telemetry tries to send the ping once and discards it immediately if sending fails.
       // swallow any errors
     }
-  }
+  };
 }
 
-// getBannerId: () => bannerId,
-//     getOptInBannerNoticeId: () => optInBannerNoticeId,
-//     getOptIn: () => currentOptInStatus,
-//     canChangeOptInStatus: () => allowChangingOptInStatus,
-//     notifyUserAboutOptInDefault: () => telemetryNotifyUserAboutOptInDefault,
-//     setBannerId(id: string) {
-//       bannerId = id;
-//     },
-//     setOptInBannerNoticeId(id: string) {
-//       optInBannerNoticeId = id;
-//     },
-//     setOptInNoticeSeen: async () => {
-//       const $http = $injector.get('$http');
-
-//       // If they've seen the notice don't spam the API
-//       if (!telemetryNotifyUserAboutOptInDefault) {
-//         return telemetryNotifyUserAboutOptInDefault;
-//       }
-
-//       if (optInBannerNoticeId) {
-//         banners.remove(optInBannerNoticeId);
-//       }
-
-//       try {
-//         await $http.put(chrome.addBasePath('/api/telemetry/v2/userHasSeenNotice'));
-//         telemetryNotifyUserAboutOptInDefault = false;
-//       } catch (error) {
-//         toastNotifications.addError(error, {
-//           title: i18n.translate('telemetry.optInNoticeSeenErrorTitle', {
-//             defaultMessage: 'Error',
-//           }),
-//           toastMessage: i18n.translate('telemetry.optInNoticeSeenErrorToastText', {
-//             defaultMessage: 'An error occurred dismissing the notice',
-//           }),
-//         });
-//         telemetryNotifyUserAboutOptInDefault = true;
-//       }
-
-//       return telemetryNotifyUserAboutOptInDefault;
-//     },
-//   };
+// export const shouldShowTelemetryOptIn = () => {
+//   return (
+//     telemetryEnabled &&
+//     !telemetryOptInService.getOptIn() &&
+//     telemetryOptInService.canChangeOptInStatus()
+//   );
+// };

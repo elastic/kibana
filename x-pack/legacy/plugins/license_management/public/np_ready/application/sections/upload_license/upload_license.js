@@ -22,20 +22,30 @@ import {
   EuiPageContentBody,
 } from '@elastic/eui';
 import { TelemetryOptIn } from '../../components/telemetry_opt_in';
-import { optInToTelemetry } from '../../lib/telemetry';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class UploadLicense extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isOptingInToTelemetry: false,
+      shouldShowTelemetryOptIn: true,
+    };
+  }
   componentDidMount() {
     this.props.setBreadcrumb('upload');
     this.props.addUploadErrorMessage('');
   }
+  onOptInChange = isOptingInToTelemetry => {
+    this.setState({ isOptingInToTelemetry });
+  };
   send = acknowledge => {
     const file = this.file;
     const fr = new FileReader();
+
     fr.onload = ({ target: { result } }) => {
-      if (this.telemetryOptIn.isOptingInToTelemetry()) {
-        optInToTelemetry(true);
+      if (this.state.isOptingInToTelemetry) {
+        this.props.telemetry.telemetryService.setOptIn(true);
       }
       this.props.uploadLicense(result, this.props.currentLicenseType, acknowledge);
     };
@@ -170,11 +180,13 @@ export class UploadLicense extends React.PureComponent {
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
-              <TelemetryOptIn
-                ref={ref => {
-                  this.telemetryOptIn = ref;
-                }}
-              />
+              {this.state.shouldShowTelemetryOptIn && (
+                <TelemetryOptIn
+                  isOptingInToTelemetry={this.state.isOptingInToTelemetry}
+                  onOptInChange={this.onOptInChange}
+                  telemetry={this.props.telemetry}
+                />
+              )}
               <EuiSpacer size="m" />
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>

@@ -11,6 +11,8 @@ import { StartTrial } from './start_trial';
 import { AddLicense } from './add_license';
 import { RequestTrialExtension } from './request_trial_extension';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { npStart } from 'ui/new_platform';
 
 export const LicenseDashboard = ({ setBreadcrumb } = { setBreadcrumb: () => {} }) => {
   useEffect(() => {
@@ -25,7 +27,7 @@ export const LicenseDashboard = ({ setBreadcrumb } = { setBreadcrumb: () => {} }
         <EuiFlexItem>
           <AddLicense />
         </EuiFlexItem>
-        <StartTrial />
+        <StartTrial telemetry={npStart.plugins.telemetry} shouldShowTelemetryOptIn={true} />
         <RequestTrialExtension />
         <RevertToBasic />
       </EuiFlexGroup>
