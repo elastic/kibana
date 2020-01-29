@@ -147,6 +147,13 @@ export const npSetup = {
         useChartsTheme: sinon.fake(),
       },
     },
+    management: {
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
+        }),
+      },
+    },
   },
 };
 
