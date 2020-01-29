@@ -44,11 +44,9 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   unmuteAlert,
   muteAlert,
 }) => {
-  const {
-    legacy: { capabilities },
-  } = useAppDependencies();
+  const { capabilities } = useAppDependencies();
 
-  const canSave = hasSaveAlertsCapability(capabilities.get());
+  const canSave = hasSaveAlertsCapability(capabilities);
 
   const actionTypesByTypeId = indexBy(actionTypes, 'id');
   const [firstAction, ...otherActions] = alert.actions;
