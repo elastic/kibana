@@ -18,8 +18,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { Schemas } from 'ui/vis/editors/default/schemas';
+
+import { Schemas } from './legacy_imports';
 import { Status } from '../../visualizations/public';
 
 import { TagCloudOptions } from './components/tag_cloud_options';
