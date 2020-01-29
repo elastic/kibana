@@ -27,6 +27,18 @@ export const parseInterval = (intervalString: string): moment.Duration | null =>
   }
 };
 
+export const parseScheduleDates = (time: string): moment.Moment | null => {
+  const isValidDateString = !isNaN(Date.parse(time));
+  const isValidInput = isValidDateString || time.trim().startsWith('now');
+  const formattedDate = isValidDateString
+    ? moment(time)
+    : isValidInput
+    ? dateMath.parse(time)
+    : null;
+
+  return formattedDate || null;
+};
+
 export const getDriftTolerance = ({
   from,
   to,
@@ -38,19 +50,10 @@ export const getDriftTolerance = ({
   interval: moment.Duration;
   now?: moment.Moment;
 }): moment.Duration | null => {
-  if (to.trim() !== 'now') {
-    // TODO: use Elastic date math
-    return null;
-  }
-  let duration: moment.Duration | null;
-  if (!from.trim().startsWith('now-')) {
-    const isStringDate = !isNaN(Date.parse(from));
-    const date = (isStringDate && dateMath.parse(from)) || from;
-    duration = (isStringDate && moment.duration(now.diff(date))) || parseInterval('6m');
-  } else {
-    const split = from.split('-');
-    duration = parseInterval(split[1]);
-  }
+  const toDate = parseScheduleDates(to) ?? now;
+  const fromDate = parseScheduleDates(from) ?? dateMath.parse('now-6m');
+  const timeSegment = toDate.diff(fromDate);
+  const duration = moment.duration(timeSegment);
 
   if (duration !== null) {
     return duration.subtract(interval);

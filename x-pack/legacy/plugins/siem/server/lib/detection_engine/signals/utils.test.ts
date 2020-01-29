@@ -90,37 +90,33 @@ describe('utils', () => {
       expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
     });
 
-    xtest('returns a drift tolerance of 4 minutes when "to" is "now-x" and interval is 1 minute', () => {
+    test('returns a drift tolerance of 4 minutes when "to" is "now-x" and interval is 5 minute', () => {
       const drift = getDriftTolerance({
-        from: 'now-6m',
+        from: 'now-10m',
         to: 'now-1m',
         interval: moment.duration(5, 'minutes'),
-        now: nowDate.clone(),
       });
       expect(drift).not.toBeNull();
-      expect(drift?.asMilliseconds()).toEqual(0);
+      expect(drift?.asMilliseconds()).toEqual(moment.duration(4, 'minutes').asMilliseconds());
     });
 
     test('it returns expected drift tolerance when "from" is an ISO string', () => {
-      const now = moment().toISOString();
       const drift = getDriftTolerance({
-        from: moment(now)
+        from: moment()
           .subtract(10, 'minutes')
           .toISOString(),
         to: 'now',
         interval: moment.duration(5, 'minutes'),
-        now: moment(now),
       });
       expect(drift).not.toBeNull();
-      expect(drift?.asMilliseconds()).toEqual(moment.duration(5, 'm').asMilliseconds());
+      expect(drift?.asMilliseconds()).toEqual(moment.duration(5, 'minutes').asMilliseconds());
     });
 
-    xtest('it returns expected drift tolerance when "to" is an ISO string', () => {
+    test('it returns expected drift tolerance when "to" is an ISO string', () => {
       const drift = getDriftTolerance({
         from: 'now-6m',
         to: moment().toISOString(),
         interval: moment.duration(5, 'minutes'),
-        now: nowDate.clone(),
       });
       expect(drift).not.toBeNull();
       expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
@@ -264,15 +260,16 @@ describe('utils', () => {
       expect(gap?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
     });
 
-    xtest('it returns null if to is an invalid string such as "invalid"', () => {
+    test('it returns the expected result when "to" is an invalid string such as "invalid"', () => {
       const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate.clone(),
+        previousStartedAt: nowDate.clone().subtract(7, 'minutes'),
         interval: '5m',
-        from: 'now-5m',
-        to: 'invalid', // if not set to "now" this function returns null
+        from: 'now-6m',
+        to: 'invalid',
         now: nowDate.clone(),
       });
-      expect(gap).toBeNull();
+      expect(gap?.asMilliseconds()).not.toBeNull();
+      expect(gap?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
     });
   });
 });
