@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { render, unmountComponentAtNode } from 'react-dom';
-import { Provider } from 'react-redux';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import {
@@ -35,15 +32,11 @@ import {
 } from '../../../../../src/plugins/home/public';
 // @ts-ignore
 import { CRUD_APP_BASE_PATH } from './crud_app/constants';
-// @ts-ignore
-import { App } from './crud_app/app';
 import { ManagementStart } from '../../../../../src/plugins/management/public';
-// @ts-ignore
-import { rollupJobsStore } from './crud_app/store';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 // @ts-ignore
 import { setEsBaseAndXPackBase, setHttp } from './crud_app/services';
 import { setNotifications, setFatalErrors } from './kibana_services';
+import { renderApp } from './application';
 
 export interface RollupPluginSetupDependencies {
   __LEGACY: {
@@ -115,41 +108,23 @@ export class RollupPlugin implements Plugin {
     setEsBaseAndXPackBase(core.docLinks.ELASTIC_WEBSITE_URL, core.docLinks.DOC_LINK_VERSION);
 
     const esSection = management.sections.getSection('elasticsearch');
+    if (esSection) {
+      esSection.registerApp({
+        id: 'rollup_jobs',
+        title: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
+        order: 3,
+        mount(params) {
+          params.setBreadcrumbs([
+            {
+              text: i18n.translate('xpack.rollupJobs.breadcrumbsTitle', {
+                defaultMessage: 'Rollup Jobs',
+              }),
+            },
+          ]);
 
-    const I18nContext = core.i18n.Context;
-
-    esSection!.registerApp({
-      id: 'rollup_jobs',
-      title: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
-      order: 3,
-      mount(params) {
-        params.setBreadcrumbs([
-          {
-            text: i18n.translate('xpack.rollupJobs.breadcrumbsTitle', {
-              defaultMessage: 'Rollup Jobs',
-            }),
-          },
-        ]);
-
-        render(
-          <I18nContext>
-            <KibanaContextProvider
-              services={{
-                setBreadcrumbs: params.setBreadcrumbs,
-              }}
-            >
-              <Provider store={rollupJobsStore}>
-                <App />
-              </Provider>
-            </KibanaContextProvider>
-          </I18nContext>,
-          params.element
-        );
-
-        return () => {
-          unmountComponentAtNode(params.element);
-        };
-      },
-    });
+          return renderApp(core, params);
+        },
+      });
+    }
   }
 }
