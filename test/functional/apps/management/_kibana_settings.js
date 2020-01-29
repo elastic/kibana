@@ -82,7 +82,7 @@ export default function({ getService, getPageObjects }) {
       it('when true, dashboard state is hashed', async function() {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.dashboard.waitForRenderComplete();
         const currentUrl = await browser.getCurrentUrl();
         const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
         const globalState = urlPieces[2];
