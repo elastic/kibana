@@ -205,6 +205,25 @@ def uploadCoverageStaticSite(timestamp) {
   })
 }
 
+def uploadCoverageStaticSite_PROD(timestamp) {
+  def uploadPrefix = "elastic-bekitzur-kibana-coverage-live/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${timestamp}"
+  def ARTIFACT_PATTERNS = [
+    'target/kibana-*/**/*.png',
+    'target/kibana-*/**/*.css',
+    'target/kibana-*/**/*.html',
+    'target/kibana-*/**/*.js',
+  ]
+
+  withEnv([
+    "GCS_UPLOAD_PREFIX=${uploadPrefix}"
+  ], {
+    ARTIFACT_PATTERNS.each { pattern ->
+      uploadGcsArtifact(uploadPrefix, pattern)
+    }
+  })
+}
+
+
 def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
