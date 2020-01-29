@@ -25,8 +25,8 @@ const name = 'kibana_datatable';
 
 export interface KibanaDatatableColumnMeta {
   type: string;
-  indexPatternId: string;
-  params: Record<string, any>;
+  indexPatternId?: string;
+  aggConfigParams?: Record<string, any>;
 }
 
 export interface KibanaDatatableColumn {

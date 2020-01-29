@@ -18,7 +18,7 @@
  */
 
 import { esFilters } from '../../../../../../plugins/data/public';
-import { unserializeAggConfig } from '../../search/expressions/utils';
+import { deserializeAggConfig } from '../../search/expressions/utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getIndexPatterns } from '../../../../../../plugins/data/public/services';
 
@@ -68,9 +68,9 @@ const getOtherBucketFilterTerms = (table, columnIndex, rowIndex) => {
 const createFilter = async (table, columnIndex, rowIndex) => {
   if (!table || !table.columns || !table.columns[columnIndex]) return;
   const column = table.columns[columnIndex];
-  const aggConfig = unserializeAggConfig({
+  const aggConfig = deserializeAggConfig({
     type: column.meta.type,
-    params: column.meta.params,
+    aggConfigParams: column.meta.aggConfigParams,
     indexPattern: await getIndexPatterns().get(column.meta.indexPatternId),
   });
   let filter = [];

@@ -101,7 +101,7 @@ export function valueClickAction(
               )
             ),
             {
-              'data-test-subj': 'test',
+              'data-test-subj': 'selectFilterOverlay',
             }
           );
         });

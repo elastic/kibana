@@ -20,21 +20,32 @@
 import { AggConfig } from 'ui/agg_types/agg_config';
 import { AggConfigs } from '../../../../../ui/public/agg_types/agg_configs';
 import { KibanaDatatableColumnMeta } from '../../../../../../plugins/expressions/common/expression_types';
+import { IndexPattern } from '../../../../../../plugins/data/public';
 
 export const serializeAggConfig = (aggConfig: AggConfig): KibanaDatatableColumnMeta => {
   return {
     type: aggConfig.type.name,
-    indexPatternId: aggConfig.getIndexPattern().id as string,
-    params: aggConfig.toJSON().params,
+    indexPatternId: aggConfig.getIndexPattern().id,
+    aggConfigParams: aggConfig.toJSON().params,
   };
 };
 
-export const unserializeAggConfig = ({ type, params, indexPattern }: any) => {
+interface DeserializeAggConfigParams {
+  type: string;
+  aggConfigParams: Record<string, any>;
+  indexPattern: IndexPattern;
+}
+
+export const deserializeAggConfig = ({
+  type,
+  aggConfigParams,
+  indexPattern,
+}: DeserializeAggConfigParams) => {
   const aggConfigs = new AggConfigs(indexPattern);
   const aggConfig = aggConfigs.createAggConfig({
     enabled: true,
     type,
-    params,
+    params: aggConfigParams,
   });
   return aggConfig;
 };

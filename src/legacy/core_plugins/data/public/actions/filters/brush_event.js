@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { esFilters } from '../../../../../../plugins/data/public';
-import { unserializeAggConfig } from '../../search/expressions/utils';
+import { deserializeAggConfig } from '../../search/expressions/utils';
 
 export async function onBrushEvent(event, getIndexPatterns) {
   const isNumber = event.data.ordered;
@@ -32,7 +32,7 @@ export async function onBrushEvent(event, getIndexPatterns) {
   if (!column) return [];
   if (!column.meta) return [];
   const indexPattern = await getIndexPatterns().get(column.meta.indexPatternId);
-  const aggConfig = unserializeAggConfig({
+  const aggConfig = deserializeAggConfig({
     ...column.meta,
     indexPattern,
   });
