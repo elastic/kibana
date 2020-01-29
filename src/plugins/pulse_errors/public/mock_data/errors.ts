@@ -38,18 +38,32 @@ export const errorChannelPayloads: PulseErrorInstructionValue[] = [
     hash: 'index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg] already exists',
     status: 'new',
     currentKibanaVersion: 'v7.x',
-    timestamp: moment().toDate(),
+    timestamp: moment()
+      .add(30, 'seconds')
+      .toDate(),
   },
   {
     channel_id: 'errors',
     deployment_id: '123',
     message: '[TypeError]: Component failed to mount',
-    hash: 'generic:arbitraryError 1QJURO2GRfqpFfuOp12rIg',
+    hash: 'generic:arbitraryError 1',
     status: 'new',
     fixedVersion: 'v7.5.2',
     currentKibanaVersion: 'v7.x',
     timestamp: moment()
-      // .subtract(60, 'seconds')
+      .add(60, 'seconds')
+      .toDate(),
+  },
+  {
+    channel_id: 'errors',
+    deployment_id: '123',
+    message: '[Error]: Test',
+    hash: 'generic:arbitraryError 2',
+    status: 'new',
+    // fixedVersion: 'v7.5.2',
+    currentKibanaVersion: 'v7.x',
+    timestamp: moment()
+      .add(90, 'seconds')
       .toDate(),
   },
 ];

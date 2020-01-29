@@ -26,7 +26,7 @@ import { PulseCollector, CollectorSetupContext } from '../types';
 
 export interface Payload {
   deploymentId: string;
-  records: Array<Omit<ErrorPayloadValue, 'channel_id' | 'deployment_id' | 'timestamp'>>;
+  records: Array<Omit<ErrorPayloadValue, 'channel_id' | 'deployment_id'>>;
 }
 export interface ErrorPayloadValue {
   channel_id: string;
@@ -119,7 +119,7 @@ export class Collector extends PulseCollector<Payload> {
                 deployment_id: '123',
                 status: record.status || 'new',
                 id: record.hash,
-                timestamp: moment(),
+                timestamp: record.timestamp,
               });
             }
           }),

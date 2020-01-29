@@ -29,7 +29,7 @@ export async function check(es: IScopedClusterClient, { deploymentId, indexName 
           filter: {
             range: {
               timestamp: {
-                gte: 'now-5s',
+                gte: 'now-10s',
                 lte: 'now',
               },
             },
