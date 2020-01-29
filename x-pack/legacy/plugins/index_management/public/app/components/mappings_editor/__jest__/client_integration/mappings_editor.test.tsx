@@ -28,7 +28,7 @@ describe('<MappingsEditor />', () => {
           },
         },
       };
-      const testBed = await setup({ onUpdate: mockOnUpdate, defaultValue })();
+      const testBed = await setup({ onUpdate: mockOnUpdate, defaultValue });
       const { exists } = testBed;
 
       expect(exists('mappingsEditor')).toBe(true);
@@ -44,7 +44,7 @@ describe('<MappingsEditor />', () => {
           },
         },
       };
-      const testBed = await setup({ onUpdate: mockOnUpdate, defaultValue })();
+      const testBed = await setup({ onUpdate: mockOnUpdate, defaultValue });
       const { exists } = testBed;
 
       expect(exists('mappingsEditor')).toBe(true);
