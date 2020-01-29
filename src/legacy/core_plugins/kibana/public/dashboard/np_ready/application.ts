@@ -19,7 +19,6 @@
 
 import { EuiConfirmModal, EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
-import { History } from 'history';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import {
   AppMountContext,
@@ -28,7 +27,7 @@ import {
   LegacyCoreStart,
   SavedObjectsClientContract,
 } from 'kibana/public';
-import { IKbnUrlStateStorage, Storage } from '../../../../../../plugins/kibana_utils/public';
+import { Storage } from '../../../../../../plugins/kibana_utils/public';
 import {
   configureAppAngularModule,
   confirmModalFactory,
