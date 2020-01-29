@@ -37,10 +37,6 @@ export function createMapPath(id) {
   return `${MAP_BASE_URL}/${id}`;
 }
 
-export const DEFAULT_ZOOM = 1;
-export const DEFAULT_LAT = 20;
-export const DEFAULT_LON = 15;
-
 export const LAYER_TYPE = {
   TILE: 'TILE',
   VECTOR: 'VECTOR',

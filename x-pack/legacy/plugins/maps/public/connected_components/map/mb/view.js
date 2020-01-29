@@ -13,13 +13,7 @@ import {
   addSpritesheetToMap,
 } from './utils';
 import { getGlyphUrl, isRetina } from '../../../meta';
-import {
-  DEFAULT_ZOOM,
-  DEFAULT_LAT,
-  DEFAULT_LON,
-  DECIMAL_DEGREES_PRECISION,
-  ZOOM_PRECISION,
-} from '../../../../common/constants';
+import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
@@ -113,11 +107,6 @@ export class MBMapContainer extends React.Component {
   }
 
   async _createMbMapInstance() {
-    const initialView = _.get(this.props.goto, 'center', {
-      zoom: DEFAULT_ZOOM,
-      lat: DEFAULT_LAT,
-      lon: DEFAULT_LON,
-    });
     return new Promise(resolve => {
       const mbStyle = {
         version: 8,
@@ -136,12 +125,17 @@ export class MBMapContainer extends React.Component {
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false),
         interactive: !this.props.disableInteractive,
-        zoom: initialView.zoom,
-        center: {
+      };
+      const initialView = _.get(this.props.goto, 'center');
+      if (initialView) {
+        options.zoom = initialView.zoom;
+        options.center = {
           lng: initialView.lon,
           lat: initialView.lat,
-        },
-      };
+        };
+      } else {
+        options.bounds = [-170, -60, 170, 75];
+      }
       const mbMap = new mapboxgl.Map(options);
       mbMap.dragRotate.disable();
       mbMap.touchZoomRotate.disableRotation();
