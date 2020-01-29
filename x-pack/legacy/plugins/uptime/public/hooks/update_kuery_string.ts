@@ -8,10 +8,23 @@ import { combineFiltersAndUserSearch, stringifyKueries } from '../lib/helper';
 import { esKuery } from '../../../../../../src/plugins/data/common/es_query';
 import { store } from '../state';
 import { setEsKueryString } from '../state/actions';
+import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 
-export const useUpdateKueryString = (indexPattern: any, search: string, urlFilters: string) => {
-  let error: any;
-  let kueryString: string = '';
+const updateEsQueryForFilterGroup = (filterQueryString: string, indexPattern: IIndexPattern) => {
+  // Update EsQuery in Redux to be used in FilterGroup
+  const searchDSL: string = filterQueryString
+    ? JSON.stringify(
+        esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(filterQueryString), indexPattern)
+      )
+    : '';
+  store.dispatch(setEsKueryString(searchDSL));
+};
+
+const getKueryString = (urlFilters: string): string => {
+  let kueryString = '';
+  // We are using try/catch here because this is user entered value
+  // and JSON.parse and stringifyKueries can have hard time parsing
+  // all possible scenarios
   try {
     if (urlFilters !== '') {
       const filterMap = new Map<string, Array<string | number>>(JSON.parse(urlFilters));
@@ -20,31 +33,31 @@ export const useUpdateKueryString = (indexPattern: any, search: string, urlFilte
   } catch {
     kueryString = '';
   }
+  return kueryString;
+};
 
-  const filterQueryString = search || '';
-  let filters: any | undefined;
+export const useUpdateKueryString = (
+  indexPattern: IIndexPattern,
+  filterQueryString = '',
+  urlFilters: string
+): [string?, Error?] => {
+  const kueryString = getKueryString(urlFilters);
+
+  const combinedFilterString = combineFiltersAndUserSearch(filterQueryString, kueryString);
+
+  let esFilters: string | undefined;
   try {
-    if (filterQueryString || urlFilters) {
-      if (indexPattern) {
-        const staticIndexPattern = indexPattern;
-        const combinedFilterString = combineFiltersAndUserSearch(filterQueryString, kueryString);
-        const ast = esKuery.fromKueryExpression(combinedFilterString);
-        const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, staticIndexPattern);
-        filters = JSON.stringify(elasticsearchQuery);
-        const searchDSL: string = filterQueryString
-          ? JSON.stringify(
-              esKuery.toElasticsearchQuery(
-                esKuery.fromKueryExpression(filterQueryString),
-                staticIndexPattern
-              )
-            )
-          : '';
-        store.dispatch(setEsKueryString(searchDSL));
-      }
+    if ((filterQueryString || urlFilters) && indexPattern) {
+      const ast = esKuery.fromKueryExpression(combinedFilterString);
+
+      const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, indexPattern);
+
+      esFilters = JSON.stringify(elasticsearchQuery);
+
+      updateEsQueryForFilterGroup(filterQueryString, indexPattern);
     }
-    return [filters, error];
-  } catch (e) {
-    error = e;
-    return [urlFilters, error];
+    return [esFilters];
+  } catch (err) {
+    return [urlFilters, err];
   }
 };

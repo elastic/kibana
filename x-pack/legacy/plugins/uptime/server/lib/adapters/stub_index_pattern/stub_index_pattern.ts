@@ -5,16 +5,19 @@
  */
 
 import { APICaller } from 'kibana/server';
-import { UMSavedObjectsAdapter } from './types';
 import {
   IndexPatternsFetcher,
   IIndexPattern,
 } from '../../../../../../../../src/plugins/data/server';
+import { INDEX_NAMES } from '../../../../common/constants';
+import { UMElasticsearchQueryFn } from '../framework';
 
-export const savedObjectsAdapter: UMSavedObjectsAdapter = {
+export interface StubIndexPatternAdapter {
+  getUptimeIndexPattern: UMElasticsearchQueryFn<any>;
+}
+
+export const stubIndexPatternAdapter: StubIndexPatternAdapter = {
   getUptimeIndexPattern: async callES => {
-    const indexPatternTitle = 'heartbeat-8*';
-
     const indexPatternsFetcher = new IndexPatternsFetcher((...rest: Parameters<APICaller>) =>
       callES(...rest)
     );
@@ -25,12 +28,12 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
     // (would be a bad first time experience)
     try {
       const fields = await indexPatternsFetcher.getFieldsForWildcard({
-        pattern: 'heartbeat-8*',
+        pattern: INDEX_NAMES.HEARTBEAT,
       });
 
       const indexPattern: IIndexPattern = {
         fields,
-        title: indexPatternTitle,
+        title: INDEX_NAMES.HEARTBEAT,
       };
 
       return indexPattern;
@@ -39,7 +42,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       if (notExists) {
         // eslint-disable-next-line no-console
         console.error(
-          `Could not get dynamic index pattern because indices "${indexPatternTitle}" don't exist`
+          `Could not get dynamic index pattern because indices "${INDEX_NAMES.HEARTBEAT}" don't exist`
         );
         return;
       }

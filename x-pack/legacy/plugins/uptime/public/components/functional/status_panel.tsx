@@ -16,7 +16,6 @@ interface StatusPanelProps {
   dateRangeEnd: string;
   filters?: string;
   statusFilter?: string;
-  sharedProps: { [key: string]: any };
 }
 
 const STATUS_CHART_HEIGHT = '160px';
@@ -28,7 +27,6 @@ export const StatusPanel = ({
   dateRangeEnd,
   filters,
   statusFilter,
-  sharedProps,
 }: StatusPanelProps) => (
   <EuiPanel>
     <EuiFlexGroup gutterSize="l">
@@ -47,7 +45,7 @@ export const StatusPanel = ({
           absoluteEndDate={absoluteDateRangeEnd}
           height={STATUS_CHART_HEIGHT}
           isResponsive={true}
-          variables={sharedProps}
+          variables={{ dateRangeStart, dateRangeEnd, filters, statusFilter }}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

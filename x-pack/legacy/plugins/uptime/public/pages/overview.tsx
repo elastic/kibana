@@ -9,7 +9,6 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 import {
   EmptyState,
-  FilterGroup,
   MonitorList,
   OverviewPageParsingErrorCallout,
   StatusPanel,
@@ -19,15 +18,15 @@ import { useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { PageHeader } from './page_header';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { DataPublicPluginStart, IIndexPattern } from '../../../../../../src/plugins/data/public';
 import { UptimeThemeContext } from '../contexts';
-import { KueryBar } from '../components/connected';
+import { FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginStart['autocomplete'];
   setBreadcrumbs: UMUpdateBreadcrumbs;
-  indexPattern: any;
+  indexPattern: IIndexPattern;
 }
 
 type Props = OverviewPageProps;
@@ -43,7 +42,7 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
 
 export const OverviewPageComponent = ({ autocomplete, setBreadcrumbs, indexPattern }: Props) => {
   const { colors } = useContext(UptimeThemeContext);
-  const [getUrlParams, updateUrl] = useUrlParams();
+  const [getUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
   const {
     dateRangeStart,
@@ -59,13 +58,13 @@ export const OverviewPageComponent = ({ autocomplete, setBreadcrumbs, indexPatte
   useTrackPageview({ app: 'uptime', path: 'overview' });
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
-  const [filters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
+  const [esFilters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
 
   const sharedProps = {
     dateRangeStart,
     dateRangeEnd,
-    filters,
     statusFilter,
+    filters: esFilters,
   };
 
   const linkParameters = stringifyUrlParams(params, true);
@@ -79,15 +78,7 @@ export const OverviewPageComponent = ({ autocomplete, setBreadcrumbs, indexPatte
             <KueryBar autocomplete={autocomplete} />
           </EuiFlexItem>
           <EuiFlexItemStyled grow={true}>
-            <FilterGroup
-              {...sharedProps}
-              currentFilter={filters}
-              onFilterUpdate={(filtersKuery: string) => {
-                if (filters !== filtersKuery) {
-                  updateUrl({ filters: filtersKuery, pagination: '' });
-                }
-              }}
-            />
+            <FilterGroup esFilters={esFilters} />
           </EuiFlexItemStyled>
           {error && <OverviewPageParsingErrorCallout error={error} />}
         </EuiFlexGroup>
@@ -97,16 +88,15 @@ export const OverviewPageComponent = ({ autocomplete, setBreadcrumbs, indexPatte
           absoluteDateRangeEnd={absoluteDateRangeEnd}
           dateRangeStart={dateRangeStart}
           dateRangeEnd={dateRangeEnd}
-          filters={filters}
+          filters={esFilters}
           statusFilter={statusFilter}
-          sharedProps={sharedProps}
         />
         <EuiSpacer size="s" />
         <MonitorList
           absoluteStartDate={absoluteDateRangeStart}
           absoluteEndDate={absoluteDateRangeEnd}
           dangerColor={colors.danger}
-          hasActiveFilters={!!filters}
+          hasActiveFilters={!!esFilters}
           implementsCustomErrorState={true}
           linkParameters={linkParameters}
           successColor={colors.success}

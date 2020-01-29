@@ -5,5 +5,3 @@
  */
 
 export const UNNAMED_LOCATION = 'Unnamed-location';
-
-export const UPTIME_INDEX_PATTERN = 'heartbeat-8*';
