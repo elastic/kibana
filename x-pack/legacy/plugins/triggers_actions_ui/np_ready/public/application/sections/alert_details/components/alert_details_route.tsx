@@ -9,7 +9,6 @@ import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { ToastsApi } from 'kibana/public';
-import { compose } from 'lodash';
 import { Alert, AlertType, ActionType } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import { AlertDetailsWithApi as AlertDetails } from './alert_details';
