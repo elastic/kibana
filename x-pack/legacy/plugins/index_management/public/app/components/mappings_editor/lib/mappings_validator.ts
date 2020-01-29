@@ -231,13 +231,6 @@ export const validateMappingsConfiguration = (
   const result = mappingsConfigurationSchema.decode(mappingsConfiguration);
   const isSchemaInvalid = isLeft(result);
 
-  /**
-   * Note: io-ts is not what we want for the validation we need to do here.
-   * It is extremely verbose, and as we can see below, there isn't a way to make the validation fail on unknown properties.
-   * We need the hack below to return errors when unknown properties are detected.
-   *
-   * TODO: I propose to refactor and use Ajv (https://ajv.js.org/) that has a much simpler implementation for the validation we need to do.
-   */
   const unknownConfigurationParameters = Object.keys(mappingsConfiguration).filter(
     key => mappingsConfigurationSchemaKeys.includes(key) === false
   );
