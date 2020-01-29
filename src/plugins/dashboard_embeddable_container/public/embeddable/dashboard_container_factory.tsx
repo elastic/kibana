@@ -18,8 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes } from '../../../../core/public';
-import { SavedObjectMetaData } from '../types';
+import { SavedObjectAttributes, SavedObjectMetaData } from '../../../../core/public';
 import {
   ContainerOutput,
   EmbeddableFactory,

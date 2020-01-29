@@ -72,7 +72,6 @@ export function createMockGraphStore({
     http: {} as HttpStart,
     notifyAngular: jest.fn(),
     savePolicy: 'configAndData',
-    showSaveModal: jest.fn(),
     setLiveResponseFields: jest.fn(),
     setUrlTemplates: jest.fn(),
     setWorkspaceInitialized: jest.fn(),

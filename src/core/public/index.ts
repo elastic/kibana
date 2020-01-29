@@ -137,6 +137,15 @@ export {
   SavedObjectsImportUnknownError,
   SavedObjectsImportError,
   SavedObjectsImportRetry,
+  showSaveModal,
+  SaveResult,
+  MinimalSaveModalProps,
+  SavedObjectSaveModal,
+  OnSaveProps,
+  SavedObjectMetaData,
+  SavedObjectFinderProps,
+  SavedObjectFinder,
+  SavedObjectFinderUi,
 } from './saved_objects';
 
 export {

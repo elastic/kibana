@@ -45,8 +45,6 @@ import {
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { docTitle } from 'ui/doc_title';
 import { indexPatternService, getInspector } from '../kibana_services';
-import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { toastNotifications } from 'ui/notify';
 import { getInitialLayers } from './get_initial_layers';
 import { getInitialQuery } from './get_initial_query';
@@ -55,6 +53,7 @@ import { getInitialRefreshConfig } from './get_initial_refresh_config';
 import { MAP_SAVED_OBJECT_TYPE, MAP_APP_PATH } from '../../common/constants';
 import { npStart } from 'ui/new_platform';
 import { esFilters } from '../../../../../../src/plugins/data/public';
+import { showSaveModal, SavedObjectSaveModal } from '../../../../../../src/core/public';
 
 const savedQueryService = npStart.plugins.data.query.savedQueries;
 

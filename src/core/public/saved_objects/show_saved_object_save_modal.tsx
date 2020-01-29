@@ -19,7 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nContext } from 'ui/i18n';
+import { npStart } from 'ui/new_platform';
 
 /**
  * Represents the result of trying to persist the saved object.
@@ -62,5 +62,6 @@ export function showSaveModal(saveModal: React.ReactElement<MinimalSaveModalProp
     onClose: closeModal,
   });
 
+  const I18nContext = npStart.core.i18n.Context;
   ReactDOM.render(<I18nContext>{element}</I18nContext>, container);
 }

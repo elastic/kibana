@@ -7,13 +7,13 @@
 import React from 'react';
 
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
-import {
-  SavedObjectFinderUi,
-  SavedObjectMetaData,
-} from '../../../../../../../src/plugins/kibana_react/public/saved_objects'; // eslint-disable-line
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { ComponentStrings } from '../../../i18n';
-import { CoreStart } from '../../../../../../../src/core/public';
+import {
+  CoreStart,
+  SavedObjectFinderUi,
+  SavedObjectMetaData,
+} from '../../../../../../../src/core/public';
 
 const { AddEmbeddableFlyout: strings } = ComponentStrings;
 

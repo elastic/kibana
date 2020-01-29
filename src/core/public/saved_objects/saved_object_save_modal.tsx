@@ -35,11 +35,11 @@ import {
   EuiSwitchEvent,
   EuiTextArea,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/target/types/react';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../legacy/core_plugins/visualizations/public/embeddable/constants';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../legacy/core_plugins/visualizations/public/embeddable/constants'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 
 export interface OnSaveProps {
   newTitle: string;

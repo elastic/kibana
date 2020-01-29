@@ -25,10 +25,7 @@ import * as i18n from './translations';
 import { MapEmbeddable, SetQuery } from './types';
 import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 import { useKibana, useUiSetting$ } from '../../lib/kibana';
-import {
-  SavedObjectFinderProps,
-  SavedObjectFinderUi,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { SavedObjectFinder } from '../../../../../../../src/core/public';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -176,14 +173,6 @@ export const EmbeddedMapComponent = ({
       embeddable.updateInput({ timeRange });
     }
   }, [startDate, endDate]);
-
-  const SavedObjectFinder = (props: SavedObjectFinderProps) => (
-    <SavedObjectFinderUi
-      {...props}
-      savedObjects={services.savedObjects}
-      uiSettings={services.uiSettings}
-    />
-  );
 
   return isError ? null : (
     <Embeddable>

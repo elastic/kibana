@@ -25,6 +25,7 @@ import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import '../components/field_chooser/field_chooser';
 
+import { showSaveModal, SavedObjectSaveModal } from '../../../../../../../core/public';
 import { RequestAdapter } from '../../../../../../../plugins/inspector/public';
 // doc table
 import './doc_table';
@@ -47,13 +48,11 @@ import {
   hasSearchStategyForIndexPattern,
   intervalOptions,
   migrateLegacyQuery,
-  showSaveModal,
   unhashUrl,
   stateMonitorFactory,
   subscribeWithScope,
   tabifyAggResponse,
   Vis,
-  SavedObjectSaveModal,
   getAngularModule,
   ensureDefaultIndexPattern,
   registerTimefilterWithGlobalStateFactory,

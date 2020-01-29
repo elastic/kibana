@@ -31,6 +31,14 @@ export {
 } from './saved_objects_client';
 export { SimpleSavedObject } from './simple_saved_object';
 export { SavedObjectsStart, SavedObjectsService } from './saved_objects_service';
+export { showSaveModal, SaveResult, MinimalSaveModalProps } from './show_saved_object_save_modal';
+export { SavedObjectSaveModal, OnSaveProps } from './saved_object_save_modal';
+export {
+  SavedObjectMetaData,
+  SavedObjectFinderProps,
+  SavedObjectFinder,
+  SavedObjectFinderUi,
+} from './saved_object_finder';
 export {
   SavedObject,
   SavedObjectAttribute,

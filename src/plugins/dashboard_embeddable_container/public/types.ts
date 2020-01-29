@@ -50,14 +50,6 @@ export interface SimpleSavedObject<T extends SavedObjectAttributes> {
   delete(): void;
 }
 
-export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
-  type: string;
-  name: string;
-  getIconForSavedObject(savedObject: SimpleSavedObject<T>): IconType;
-  getTooltipForSavedObject?(savedObject: SimpleSavedObject<T>): string;
-  showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
-}
-
 interface FieldSubType {
   multi?: { parent: string };
   nested?: { path: string };
