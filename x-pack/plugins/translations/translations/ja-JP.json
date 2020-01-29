@@ -1913,8 +1913,6 @@
     "kbn.embeddable.inspectorRequestDescription": "このリクエストは Elasticsearch にクエリをかけ、検索データを取得します。",
     "kbn.embeddable.search.displayName": "検索",
     "kbn.embeddable.visualizations.displayName": "ビジュアライゼーション",
-    "kbn.home.addData.addDataToKibanaDescription": "これらのソリューションで、データを作成済みのダッシュボードと監視システムへとすぐに変えることができます。",
-    "kbn.home.addData.addDataToKibanaTitle": "Kibana にデータを追加",
     "kbn.home.addData.apm.addApmButtonLabel": "APM を追加",
     "kbn.home.addData.apm.nameDescription": "APM は、集約内から自動的に詳細なパフォーマンスメトリックやエラーを集めます。",
     "kbn.home.addData.apm.nameTitle": "APM",
