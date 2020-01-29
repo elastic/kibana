@@ -4,40 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RequestHandlerContext } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
 import { calendarSchema } from '../new_platform/calendars_schema';
-import { CalendarManager } from '../models/calendar';
+import { CalendarManager, Calendar, FormCalendar } from '../models/calendar';
 
-function getAllCalendars(context: any) {
+function getAllCalendars(context: RequestHandlerContext) {
   const cal = new CalendarManager(false, context);
   return cal.getAllCalendars();
 }
 
-function getCalendar(context: any, calendarId: string) {
+function getCalendar(context: RequestHandlerContext, calendarId: string) {
   const cal = new CalendarManager(false, context);
   return cal.getCalendar(calendarId);
 }
 
-function newCalendar(context: any, calendar: any) {
+function newCalendar(context: RequestHandlerContext, calendar: FormCalendar) {
   const cal = new CalendarManager(false, context);
   return cal.newCalendar(calendar);
 }
 
-function updateCalendar(context: any, calendarId: string, calendar: any) {
+function updateCalendar(context: RequestHandlerContext, calendarId: string, calendar: Calendar) {
   const cal = new CalendarManager(false, context);
   return cal.updateCalendar(calendarId, calendar);
 }
 
-function deleteCalendar(context: any, calendarId: string) {
+function deleteCalendar(context: RequestHandlerContext, calendarId: string) {
   const cal = new CalendarManager(false, context);
   return cal.deleteCalendar(calendarId);
 }
 
-function getCalendarsByIds(context: any, calendarIds: string) {
-  const cal = new CalendarManager(context);
+function getCalendarsByIds(context: RequestHandlerContext, calendarIds: string) {
+  const cal = new CalendarManager(false, context);
   return cal.getCalendarsByIds(calendarIds);
 }
 

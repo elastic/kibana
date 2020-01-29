@@ -6,6 +6,14 @@
 
 import Boom from 'boom';
 
+export interface CalendarEvent {
+  calendar_id?: string;
+  event_id?: string;
+  description: string;
+  start_time: number;
+  end_time: number;
+}
+
 export class EventManager {
   private isLegacy: boolean;
   private client: any;
@@ -51,7 +59,7 @@ export class EventManager {
     }
   }
 
-  async addEvents(calendarId: string, events: any) {
+  async addEvents(calendarId: string, events: CalendarEvent[]) {
     const body = { events };
 
     try {
@@ -75,7 +83,7 @@ export class EventManager {
     return this.client.ml!.mlClient.callAsCurrentUser('ml.deleteEvent', { calendarId, eventId });
   }
 
-  isEqual(ev1: any, ev2: any) {
+  isEqual(ev1: CalendarEvent, ev2: CalendarEvent) {
     return (
       ev1.event_id === ev2.event_id &&
       ev1.description === ev2.description &&
