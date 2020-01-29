@@ -6,11 +6,14 @@
 
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { scaleUtc } from 'd3-scale';
+import d3 from 'd3';
 import React from 'react';
+import { asRelativeDateTimeRange } from '../../../../utils/formatters';
+import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { asRelativeDateTimeRange } from '../../../../utils/formatters';
 
 interface IBucket {
   key: number;
@@ -61,7 +64,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
     distribution.bucketSize
   );
 
-  if (distribution.noHits) {
+  if (!buckets || distribution.noHits) {
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.errorGroupDetails.noErrorsLabel', {
@@ -71,6 +74,12 @@ export function ErrorDistribution({ distribution, title }: Props) {
     );
   }
 
+  const xMin = d3.min(buckets, d => d.x0);
+  const xMax = d3.max(buckets, d => d.x);
+  const tickFormat = scaleUtc()
+    .domain([xMin, xMax])
+    .tickFormat();
+
   return (
     <div>
       <EuiTitle size="xs">
@@ -79,7 +88,11 @@ export function ErrorDistribution({ distribution, title }: Props) {
       <Histogram
         tooltipHeader={tooltipHeader}
         verticalLineHover={(bucket: FormattedBucket) => bucket.x}
-        xType="time"
+        xType="time-utc"
+        formatX={(value: Date) => {
+          const time = value.getTime();
+          return tickFormat(new Date(time - getTimezoneOffsetInMs(time)));
+        }}
         buckets={buckets}
         bucketSize={distribution.bucketSize}
         formatYShort={(value: number) =>
