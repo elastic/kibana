@@ -24,7 +24,7 @@ export const setup = plugin.setup(npSetup.core, {
     addSearchStrategy,
     addBadgeExtension,
     addToggleExtension,
-    management,
+    managementLegacy: management,
   },
 });
-export const start = plugin.start(npStart.core, npStart.plugins);
+export const start = plugin.start(npStart.core);

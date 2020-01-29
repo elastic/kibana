@@ -8,7 +8,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { ChromeBreadcrumb, CoreStart } from '../../../../../src/core/public';
+import { ChromeBreadcrumb, CoreSetup } from '../../../../../src/core/public';
 // @ts-ignore
 import { rollupJobsStore } from './crud_app/store';
 // @ts-ignore
@@ -18,13 +18,14 @@ import { App } from './crud_app/app';
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
 export const renderApp = async (
-  core: CoreStart,
+  core: CoreSetup,
   {
     element,
     setBreadcrumbs,
   }: { element: HTMLElement; setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void }
 ) => {
-  const I18nContext = core.i18n.Context;
+  const [coreStart] = await core.getStartServices();
+  const I18nContext = coreStart.i18n.Context;
 
   render(
     <I18nContext>

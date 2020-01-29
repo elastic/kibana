@@ -12,7 +12,7 @@ import {
   AggTypeFieldFilters,
 } from './legacy_imports';
 import { SearchStrategyProvider } from '../../../../../src/plugins/data/public';
-import { ManagementSetup } from '../../../../../src/legacy/core_plugins/management/public/np_ready';
+import { ManagementSetup as ManagementSetupLegacy } from '../../../../../src/legacy/core_plugins/management/public/np_ready';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
 // @ts-ignore
 import { RollupIndexPatternCreationConfig } from './index_pattern_creation/rollup_index_pattern_creation_config';
@@ -32,7 +32,7 @@ import {
 } from '../../../../../src/plugins/home/public';
 // @ts-ignore
 import { CRUD_APP_BASE_PATH } from './crud_app/constants';
-import { ManagementStart } from '../../../../../src/plugins/management/public';
+import { ManagementSetup } from '../../../../../src/plugins/management/public';
 // @ts-ignore
 import { setEsBaseAndXPackBase, setHttp } from './crud_app/services';
 import { setNotifications, setFatalErrors } from './kibana_services';
@@ -44,15 +44,12 @@ export interface RollupPluginSetupDependencies {
     aggTypeFieldFilters: AggTypeFieldFilters;
     editorConfigProviders: EditorConfigProviderRegistry;
     addSearchStrategy: (searchStrategy: SearchStrategyProvider) => void;
-    management: ManagementSetup;
+    managementLegacy: ManagementSetupLegacy;
     addBadgeExtension: (badgeExtension: any) => void;
     addToggleExtension: (toggleExtension: any) => void;
   };
   home?: HomePublicPluginSetup;
-}
-
-export interface RollupPluginStartDependencies {
-  management: ManagementStart;
+  management: ManagementSetup;
 }
 
 export class RollupPlugin implements Plugin {
@@ -64,11 +61,12 @@ export class RollupPlugin implements Plugin {
         aggTypeFieldFilters,
         editorConfigProviders,
         addSearchStrategy,
-        management: managementLegacy,
+        managementLegacy,
         addBadgeExtension,
         addToggleExtension,
       },
       home,
+      management,
     }: RollupPluginSetupDependencies
   ) {
     setFatalErrors(core.fatalErrors);
@@ -100,12 +98,6 @@ export class RollupPlugin implements Plugin {
         category: FeatureCatalogueCategory.ADMIN,
       });
     }
-  }
-
-  start(core: CoreStart, { management }: RollupPluginStartDependencies) {
-    setHttp(core.http);
-    setNotifications(core.notifications);
-    setEsBaseAndXPackBase(core.docLinks.ELASTIC_WEBSITE_URL, core.docLinks.DOC_LINK_VERSION);
 
     const esSection = management.sections.getSection('elasticsearch');
     if (esSection) {
@@ -126,5 +118,11 @@ export class RollupPlugin implements Plugin {
         },
       });
     }
+  }
+
+  start(core: CoreStart) {
+    setHttp(core.http);
+    setNotifications(core.notifications);
+    setEsBaseAndXPackBase(core.docLinks.ELASTIC_WEBSITE_URL, core.docLinks.DOC_LINK_VERSION);
   }
 }
