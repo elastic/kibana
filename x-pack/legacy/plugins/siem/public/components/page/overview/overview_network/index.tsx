@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -23,7 +24,7 @@ import { getOverviewNetworkStats, OverviewNetworkStats } from '../overview_netwo
 import { getNetworkUrl } from '../../../link_to';
 import { InspectButtonContainer } from '../../../inspect';
 
-export interface OwnProps {
+export interface OverviewNetworkProps {
   startDate: number;
   endDate: number;
   filterQuery?: ESQuery | string;
@@ -42,35 +43,40 @@ export interface OwnProps {
 
 const OverviewNetworkStatsManage = manageQuery(OverviewNetworkStats);
 
-export const OverviewNetwork = React.memo<OwnProps>(
-  ({ endDate, filterQuery, startDate, setQuery }) => {
-    const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
+  endDate,
+  filterQuery,
+  startDate,
+  setQuery,
+}) => {
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-    return (
-      <EuiFlexItem>
-        <InspectButtonContainer>
-          <EuiPanel>
-            <OverviewNetworkQuery
-              endDate={endDate}
-              filterQuery={filterQuery}
-              sourceId="default"
-              startDate={startDate}
-            >
-              {({ overviewNetwork, loading, id, inspect, refetch }) => {
-                const networkEventsCount = getOverviewNetworkStats(overviewNetwork).reduce(
-                  (total, stat) => total + stat.count,
-                  0
-                );
-                const formattedNetworkEventsCount = numeral(networkEventsCount).format(
-                  defaultNumberFormat
-                );
+  return (
+    <EuiFlexItem>
+      <InspectButtonContainer>
+        <EuiPanel>
+          <OverviewNetworkQuery
+            data-test-subj="overview-network-query"
+            endDate={endDate}
+            filterQuery={filterQuery}
+            sourceId="default"
+            startDate={startDate}
+          >
+            {({ overviewNetwork, loading, id, inspect, refetch }) => {
+              const networkEventsCount = getOverviewNetworkStats(overviewNetwork).reduce(
+                (total, stat) => total + stat.count,
+                0
+              );
+              const formattedNetworkEventsCount = numeral(networkEventsCount).format(
+                defaultNumberFormat
+              );
 
-                return (
-                  <>
-                    <HeaderSection
-                      border
-                      id={OverviewNetworkQueryId}
-                      subtitle={
+              return (
+                <>
+                  <HeaderSection
+                    id={OverviewNetworkQueryId}
+                    subtitle={
+                      !isEmpty(overviewNetwork) ? (
                         <FormattedMessage
                           defaultMessage="Showing: {formattedNetworkEventsCount} {networkEventsCount, plural, one {event} other {events}}"
                           id="xpack.siem.overview.overviewNetwork.networkSubtitle"
@@ -79,39 +85,43 @@ export const OverviewNetwork = React.memo<OwnProps>(
                             networkEventsCount,
                           }}
                         />
-                      }
-                      title={
-                        <FormattedMessage
-                          id="xpack.siem.overview.networkTitle"
-                          defaultMessage="Network events"
-                        />
-                      }
-                    >
-                      <EuiButton href={getNetworkUrl()}>
-                        <FormattedMessage
-                          id="xpack.siem.overview.networkAction"
-                          defaultMessage="View network"
-                        />
-                      </EuiButton>
-                    </HeaderSection>
+                      ) : (
+                        <>{''}</>
+                      )
+                    }
+                    title={
+                      <FormattedMessage
+                        id="xpack.siem.overview.networkTitle"
+                        defaultMessage="Network events"
+                      />
+                    }
+                  >
+                    <EuiButton href={getNetworkUrl()}>
+                      <FormattedMessage
+                        id="xpack.siem.overview.networkAction"
+                        defaultMessage="View network"
+                      />
+                    </EuiButton>
+                  </HeaderSection>
 
-                    <OverviewNetworkStatsManage
-                      loading={loading}
-                      data={overviewNetwork}
-                      id={id}
-                      inspect={inspect}
-                      setQuery={setQuery}
-                      refetch={refetch}
-                    />
-                  </>
-                );
-              }}
-            </OverviewNetworkQuery>
-          </EuiPanel>
-        </InspectButtonContainer>
-      </EuiFlexItem>
-    );
-  }
-);
+                  <OverviewNetworkStatsManage
+                    loading={loading}
+                    data={overviewNetwork}
+                    id={id}
+                    inspect={inspect}
+                    setQuery={setQuery}
+                    refetch={refetch}
+                  />
+                </>
+              );
+            }}
+          </OverviewNetworkQuery>
+        </EuiPanel>
+      </InspectButtonContainer>
+    </EuiFlexItem>
+  );
+};
 
-OverviewNetwork.displayName = 'OverviewNetwork';
+OverviewNetworkComponent.displayName = 'OverviewNetworkComponent';
+
+export const OverviewNetwork = React.memo(OverviewNetworkComponent);
