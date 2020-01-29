@@ -35,7 +35,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { AppMountParameters, CoreStart } from '<%= relRoot %>/../src/core/public';
+import { CoreStart } from '<%= relRoot %>/../src/core/public';
 import { NavigationPublicPluginStart } from '<%= relRoot %>/../src/plugins/navigation/public';
 
 import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
@@ -103,13 +103,13 @@ export const <%= upperCamelCaseName %>App = ({ basename, notifications, http, na
                     <p>
                       <FormattedMessage
                         id="<%= camelCase(name) %>.content"
-                        defaultMessage="Look through the generated code and checkout the plugin developmment documentation."
+                        defaultMessage="Look through the generated code and checkout the plugin development documentation."
                       />
                     </p>
                     <EuiHorizontalRule/>
                     <p>
                       <FormattedMessage
-                        id="banana.timestampText"
+                        id="<%= camelCase(name) %>.timestampText"
                         defaultMessage="Last timestamp: {time}"
                         values={{ time: timestamp ? timestamp : 'Unknown' }}
                       />

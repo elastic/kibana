@@ -1,5 +1,5 @@
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin } from '<%= relRoot %>/src/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '<%= relRoot %>/src/core/public';
 import { <%= upperCamelCaseName %>PublicPluginSetup, <%= upperCamelCaseName %>PublicPluginStart, AppPluginDependencies } from './types';
 import { PLUGIN_NAME } from '../common';
 
@@ -11,7 +11,7 @@ export class <%= upperCamelCaseName %>PublicPlugin
     core.application.register({
       id: '<%= camelCase(name) %>',
       title: PLUGIN_NAME,
-      async mount(params) {
+      async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');
         // Get start services as specified in kibana.json
