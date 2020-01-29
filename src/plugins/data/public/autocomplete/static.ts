@@ -17,17 +17,11 @@
  * under the License.
  */
 
-import { AutocompleteService } from './autocomplete_service';
-
-/** @public **/
-export type AutocompleteSetup = ReturnType<AutocompleteService['setup']>;
-
-/** @public **/
-export type AutocompleteStart = ReturnType<AutocompleteService['start']>;
-
-/** @public **/
 export {
   QuerySuggestion,
+  QuerySuggestionsTypes,
   QuerySuggestionsGetFn,
-  QuerySuggestionType,
+  QuerySuggestionsGetFnArgs,
+  BasicQuerySuggestion,
+  FieldQuerySuggestion,
 } from './providers/query_suggestion_provider';

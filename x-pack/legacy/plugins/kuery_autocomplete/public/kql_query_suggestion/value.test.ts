@@ -3,10 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { getSuggestionsProvider } from './value';
-import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 import { npStart } from 'ui/new_platform';
+
+import { setupGetValueSuggestions } from './value';
+import indexPatternResponse from './__fixtures__/index_pattern_response.json';
+import { coreMock } from '../../../../../../src/core/public/mocks';
+import { autocomplete, esKuery } from '../../../../../../src/plugins/data/public';
 
 jest.mock('ui/new_platform', () => ({
   npStart: {
@@ -14,7 +16,8 @@ jest.mock('ui/new_platform', () => ({
       data: {
         autocomplete: {
           getValueSuggestions: jest.fn(({ field }) => {
-            let res;
+            let res: any[];
+
             if (field.type === 'boolean') {
               res = [true, false];
             } else if (field.name === 'machine.os') {
@@ -32,17 +35,23 @@ jest.mock('ui/new_platform', () => ({
   },
 }));
 
-describe('Kuery value suggestions', function() {
-  let indexPatterns;
-  let getSuggestions;
+const mockKueryNode = (kueryNode: Partial<esKuery.KueryNode>) =>
+  (kueryNode as unknown) as esKuery.KueryNode;
+
+describe('Kuery value suggestions', () => {
+  let getSuggestions: ReturnType<typeof setupGetValueSuggestions>;
+  let querySuggestionsArgs: autocomplete.QuerySuggestionsGetFnArgs;
 
   beforeEach(() => {
-    indexPatterns = [indexPatternResponse];
-    getSuggestions = getSuggestionsProvider({ indexPatterns });
+    getSuggestions = setupGetValueSuggestions(coreMock.createSetup());
+    querySuggestionsArgs = ({
+      indexPatterns: [indexPatternResponse],
+    } as unknown) as autocomplete.QuerySuggestionsGetFnArgs;
+
     jest.clearAllMocks();
   });
 
-  test('should return a function', function() {
+  test('should return a function', () => {
     expect(typeof getSuggestions).toBe('function');
   });
 
@@ -51,22 +60,28 @@ describe('Kuery value suggestions', function() {
     const prefix = '';
     const suffix = '';
 
-    const suggestions = await getSuggestions({ fieldName, prefix, suffix });
-    expect(suggestions.map(({ text }) => text)).toEqual([]);
+    const suggestions = await getSuggestions(
+      querySuggestionsArgs,
+      mockKueryNode({ fieldName, prefix, suffix })
+    );
 
+    expect(suggestions.map(({ text }) => text)).toEqual([]);
     expect(npStart.plugins.data.autocomplete.getValueSuggestions).toHaveBeenCalledTimes(0);
   });
 
   test('should format suggestions', async () => {
     const start = 1;
     const end = 5;
-    const suggestions = await getSuggestions({
-      fieldName: 'ssl',
-      prefix: '',
-      suffix: '',
-      start,
-      end,
-    });
+    const suggestions = await getSuggestions(
+      querySuggestionsArgs,
+      mockKueryNode({
+        fieldName: 'ssl',
+        prefix: '',
+        suffix: '',
+        start,
+        end,
+      })
+    );
 
     expect(suggestions[0].type).toEqual('value');
     expect(suggestions[0].start).toEqual(start);
@@ -74,37 +89,62 @@ describe('Kuery value suggestions', function() {
   });
 
   test('should handle nested paths', async () => {
-    const suggestions = await getSuggestions({
-      fieldName: 'child',
-      nestedPath: 'nestedField',
-      prefix: '',
-      suffix: '',
-    });
+    const suggestions = await getSuggestions(
+      querySuggestionsArgs,
+      mockKueryNode({
+        fieldName: 'child',
+        nestedPath: 'nestedField',
+        prefix: '',
+        suffix: '',
+      })
+    );
+
     expect(suggestions.length).toEqual(1);
     expect(suggestions[0].text).toEqual('"foo" ');
   });
 
-  describe('Boolean suggestions', function() {
+  describe('Boolean suggestions', () => {
     test('should stringify boolean fields', async () => {
-      const suggestions = await getSuggestions({ fieldName: 'ssl', prefix: '', suffix: '' });
+      const suggestions = await getSuggestions(
+        querySuggestionsArgs,
+        mockKueryNode({
+          fieldName: 'ssl',
+          prefix: '',
+          suffix: '',
+        })
+      );
 
       expect(suggestions.map(({ text }) => text)).toEqual(['true ', 'false ']);
       expect(npStart.plugins.data.autocomplete.getValueSuggestions).toHaveBeenCalledTimes(1);
     });
 
     test('should filter out boolean suggestions', async () => {
-      const suggestions = await getSuggestions({ fieldName: 'ssl', prefix: 'fa', suffix: '' });
+      const suggestions = await getSuggestions(
+        querySuggestionsArgs,
+        mockKueryNode({
+          fieldName: 'ssl',
+          prefix: 'fa',
+          suffix: '',
+        })
+      );
 
       expect(suggestions.length).toEqual(1);
     });
   });
 
-  describe('String suggestions', function() {
+  describe('String suggestions', () => {
     test('should merge prefix and suffix', async () => {
       const prefix = 'he';
       const suffix = 'llo';
 
-      await getSuggestions({ fieldName: 'machine.os.raw', prefix, suffix });
+      await getSuggestions(
+        querySuggestionsArgs,
+        mockKueryNode({
+          fieldName: 'machine.os.raw',
+          prefix,
+          suffix,
+        })
+      );
 
       expect(npStart.plugins.data.autocomplete.getValueSuggestions).toHaveBeenCalledTimes(1);
       expect(npStart.plugins.data.autocomplete.getValueSuggestions).toBeCalledWith(
@@ -116,7 +156,14 @@ describe('Kuery value suggestions', function() {
     });
 
     test('should escape quotes in suggestions', async () => {
-      const suggestions = await getSuggestions({ fieldName: 'machine.os', prefix: '', suffix: '' });
+      const suggestions = await getSuggestions(
+        querySuggestionsArgs,
+        mockKueryNode({
+          fieldName: 'machine.os',
+          prefix: '',
+          suffix: '',
+        })
+      );
 
       expect(suggestions[0].text).toEqual('"Windo\\"ws" ');
       expect(suggestions[1].text).toEqual('"Mac\'" ');
@@ -124,21 +171,27 @@ describe('Kuery value suggestions', function() {
     });
 
     test('should filter out string suggestions', async () => {
-      const suggestions = await getSuggestions({
-        fieldName: 'machine.os',
-        prefix: 'banana',
-        suffix: '',
-      });
+      const suggestions = await getSuggestions(
+        querySuggestionsArgs,
+        mockKueryNode({
+          fieldName: 'machine.os',
+          prefix: 'banana',
+          suffix: '',
+        })
+      );
 
       expect(suggestions.length).toEqual(0);
     });
 
     test('should partially filter out string suggestions - case insensitive', async () => {
-      const suggestions = await getSuggestions({
-        fieldName: 'machine.os',
-        prefix: 'ma',
-        suffix: '',
-      });
+      const suggestions = await getSuggestions(
+        querySuggestionsArgs,
+        mockKueryNode({
+          fieldName: 'machine.os',
+          prefix: 'ma',
+          suffix: '',
+        })
+      );
 
       expect(suggestions.length).toEqual(1);
     });

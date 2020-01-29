@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { $Keys } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-const type = 'conjunction';
+import { KqlQuerySuggestionProvider } from './types';
+import { autocomplete } from '../../../../../../src/plugins/data/public';
 
 const bothArgumentsText = (
   <FormattedMessage
@@ -24,7 +25,7 @@ const oneOrMoreArgumentsText = (
   />
 );
 
-const conjunctions = {
+const conjunctions: Record<string, JSX.Element> = {
   and: (
     <p>
       <FormattedMessage
@@ -55,18 +56,20 @@ const conjunctions = {
   ),
 };
 
-function getDescription(conjunction) {
-  return conjunctions[conjunction];
-}
+export const setupGetConjunctionSuggestions: KqlQuerySuggestionProvider = core => {
+  return (querySuggestionsArgs, { text, end }) => {
+    let suggestions: autocomplete.QuerySuggestion[] | [] = [];
 
-export function getSuggestionsProvider() {
-  return function getConjunctionSuggestions({ text, end }) {
-    if (!text.endsWith(' ')) return [];
-    const suggestions = Object.keys(conjunctions).map(conjunction => {
-      const text = `${conjunction} `;
-      const description = getDescription(conjunction);
-      return { type, text, description, start: end, end };
-    });
-    return suggestions;
+    if (text.endsWith(' ')) {
+      suggestions = Object.keys(conjunctions).map((key: $Keys<typeof conjunctions>) => ({
+        type: autocomplete.QuerySuggestionsTypes.conjunction,
+        text: `${key} `,
+        description: conjunctions[key],
+        start: end,
+        end,
+      }));
+    }
+
+    return Promise.resolve(suggestions);
   };
-}
+};

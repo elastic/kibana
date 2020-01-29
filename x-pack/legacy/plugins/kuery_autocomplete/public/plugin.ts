@@ -26,7 +26,7 @@ export class KueryAutocompletePlugin implements Plugin<Promise<void>, void> {
   }
 
   public async setup(core: CoreSetup, plugins: KueryAutocompletePluginSetupDependencies) {
-    const kueryProvider = setupKqlQuerySuggestionProvider(core, plugins);
+    const kueryProvider = setupKqlQuerySuggestionProvider(core);
 
     plugins.data.autocomplete.addQuerySuggestionProvider(KUERY_LANGUAGE_NAME, kueryProvider);
   }

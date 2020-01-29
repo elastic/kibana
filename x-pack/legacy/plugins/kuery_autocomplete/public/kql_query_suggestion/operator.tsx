@@ -6,8 +6,11 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { $Keys } from 'utility-types';
 import { flatten } from 'lodash';
-const type = 'operator';
+
+import { KqlQuerySuggestionProvider } from './types';
+import { autocomplete } from '../../../../../../src/plugins/data/public';
 
 const equalsText = (
   <FormattedMessage
@@ -133,36 +136,42 @@ const operators = {
         'xpack.kueryAutocomplete.existOperatorDescription.existsText' for 'exists' part."
       />
     ),
+    fieldTypes: undefined,
   },
 };
 
-function getDescription(operator) {
-  const { description } = operators[operator];
-  return <p>{description}</p>;
-}
+type Operators = $Keys<typeof operators>;
 
-export function getSuggestionsProvider({ indexPatterns }) {
-  const allFields = flatten(
-    indexPatterns.map(indexPattern => {
-      return indexPattern.fields.slice();
-    })
-  );
-  return function getOperatorSuggestions({ end, fieldName, nestedPath }) {
-    const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
-    const fields = allFields.filter(field => field.name === fullFieldName);
-    return flatten(
-      fields.map(field => {
-        const matchingOperators = Object.keys(operators).filter(operator => {
-          const { fieldTypes } = operators[operator];
-          return !fieldTypes || fieldTypes.includes(field.type);
-        });
-        const suggestions = matchingOperators.map(operator => {
-          const text = operator + ' ';
-          const description = getDescription(operator);
-          return { type, text, description, start: end, end };
-        });
-        return suggestions;
+const getOperatorByName = (operator: string) => operators[operator as Operators];
+const getDescription = (operator: string) => <p>{getOperatorByName(operator).description}</p>;
+
+export const setupGetOperatorSuggestions: KqlQuerySuggestionProvider = () => {
+  return ({ indexPatterns }, { end, fieldName, nestedPath }) => {
+    const allFields = flatten(
+      indexPatterns.map(indexPattern => {
+        return indexPattern.fields.slice();
       })
     );
+    const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
+    const fields = allFields
+      .filter(field => field.name === fullFieldName)
+      .map(field => {
+        const matchingOperators = Object.keys(operators).filter(operator => {
+          const { fieldTypes } = getOperatorByName(operator);
+
+          return !fieldTypes || fieldTypes.includes(field.type);
+        });
+
+        const suggestions = matchingOperators.map(operator => ({
+          type: autocomplete.QuerySuggestionsTypes.operator,
+          text: operator + ' ',
+          description: getDescription(operator),
+          start: end,
+          end,
+        }));
+        return suggestions;
+      });
+
+    return Promise.resolve(flatten(fields));
   };
-}
+};
