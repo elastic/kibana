@@ -61,6 +61,10 @@ export class AbstractESSource extends AbstractVectorSource {
     return true;
   }
 
+  supportsESFilters() {
+    return this.isESSource();
+  }
+
   destroy() {
     this._inspectorAdapters.requests.resetRequest(this.getId());
   }

@@ -49,6 +49,7 @@ export class ESSearchSource extends AbstractESSource {
         {
           id: uuid(),
           ...sourceConfig,
+          type: ESSearchSource.type
         },
         inspectorAdapters
       );
@@ -58,11 +59,13 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   constructor(descriptor, inspectorAdapters) {
+    console.log('de', descriptor);
+    console.log('type', descriptor.type);
     super(
       {
         ...descriptor,
         id: descriptor.id,
-        type: ESSearchSource.type,
+        // type: ESSearchSource.type,
         indexPatternId: descriptor.indexPatternId,
         geoField: descriptor.geoField,
         filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),

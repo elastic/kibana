@@ -23,15 +23,28 @@ import { VectorLayer } from './vector_layer';
 export class TiledVectorLayer extends AbstractLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
 
+  // static createDescriptor(options, mapColors) {
+  //   const layerDescriptor = super.createDescriptor(options);
+  //   layerDescriptor.type = TiledVectorLayer.type;
+  //   return layerDescriptor;
+  // }
+
   static createDescriptor(options, mapColors) {
     const layerDescriptor = super.createDescriptor(options);
     layerDescriptor.type = TiledVectorLayer.type;
+
+    if (!options.style) {
+      const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors);
+      layerDescriptor.style = VectorStyle.createDescriptor(styleProperties);
+    }
+
     return layerDescriptor;
   }
 
   constructor(options) {
     super(options);
-    // this._style = new VectorStyle(this._descriptor.style, this._source, this);
+    this._style = new VectorStyle(this._descriptor.style, this._source, this);
+    console.log('created oner with style!', this._style);
   }
 
   destroy() {
@@ -44,15 +57,6 @@ export class TiledVectorLayer extends AbstractLayer {
     return 'vector';
   }
 
-  createDefaultLayer(options, mapColors) {
-    const layerDescriptor = this._createDefaultLayerDescriptor(options, mapColors);
-    const style = new VectorStyle(layerDescriptor.style, this);
-    return new VectorLayer({
-      layerDescriptor: layerDescriptor,
-      source: this,
-      style,
-    });
-  }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
@@ -63,9 +67,11 @@ export class TiledVectorLayer extends AbstractLayer {
       //data is immmutable
       return;
     }
+    console.log('need to syncdata');
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
+      console.log('source!', this._source);
       const url = await this._source.getUrlTemplate();
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, url, {});
     } catch (error) {
@@ -225,6 +231,7 @@ export class TiledVectorLayer extends AbstractLayer {
       const url = sourceDataRequest.getData();
       console.log('url', url);
       if (!url) {
+        console.log('no url!');
         return;
       }
 
@@ -288,5 +295,10 @@ export class TiledVectorLayer extends AbstractLayer {
 
   ownsMbSourceId(mbSourceId) {
     return this.getId() === mbSourceId;
+  }
+
+  getJoins() {
+    console.log('wtf is this getting called?');
+    return [];
   }
 }

@@ -81,7 +81,7 @@ export class AbstractLayer {
   }
 
   supportsElasticsearchFilters() {
-    return this._source.isESSource();
+    return this._source.supportsESFilters();
   }
 
   async supportsFitToBounds() {

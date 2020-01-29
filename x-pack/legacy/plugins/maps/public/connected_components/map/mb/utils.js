@@ -20,10 +20,10 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
       return layer.ownsMbLayerId(mbLayer.id);
     });
     if (!layer) {
-      if (mbLayer.id.startsWith('foobar')){
-        console.log('dont remove', mbLayer.id);
-        return;
-      }
+      // if (mbLayer.id.startsWith('foobar')){
+      //   console.log('dont remove', mbLayer.id);
+      //   return;
+      // }
       mbLayerIdsToRemove.push(mbLayer.id);
     }
   });
@@ -38,10 +38,10 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
         return layer.ownsMbSourceId(mbSourceId);
       });
       if (!layer) {
-        if (mbSourceId.startsWith('foobar')){
-          console.log('dont remove', mbSourceId);
-          return;
-        }
+        // if (mbSourceId.startsWith('foobar')){
+        //   console.log('dont remove', mbSourceId);
+        //   return;
+        // }
         mbSourcesToRemove.push(mbSourceId);
       }
     }

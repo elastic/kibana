@@ -18,12 +18,14 @@ export async function getTile({
   z,
   fields = [],
 }) {
+
+  server.log('info', {indexPattern, size,geometryFieldName,x,y,z,fields});
   const polygon = toBoundingBox(x, y, z);
 
   try {
     let result;
     try {
-      const includes = fields.concat([geometryFieldName, '_id']);
+      const includes = fields.concat([geometryFieldName]);
       const esQuery = {
         index: indexPattern,
         body: {
@@ -54,6 +56,7 @@ export async function getTile({
           },
         },
       };
+      server.log('info', esQuery);
       result = await esClient.search(esQuery);
     } catch (e) {
       throw e;
