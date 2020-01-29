@@ -288,7 +288,7 @@ export class SavedObjectsService
         'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'
       );
     } else {
-      this.logger.debug(
+      this.logger.info(
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
       );
       await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
@@ -296,9 +296,8 @@ export class SavedObjectsService
         take(1)
       ).toPromise();
 
-      this.logger.debug('Starting saved objects migration');
+      this.logger.info('Starting saved objects migrations');
       await migrator.runMigrations();
-      this.logger.debug('Saved objects migration completed');
     }
 
     const createRepository = (callCluster: APICaller, extraTypes: string[] = []) => {
@@ -357,14 +356,14 @@ export class SavedObjectsService
       savedObjectMappings: this.mappings,
       savedObjectMigrations: this.migrations,
       savedObjectValidations: this.validations,
-      logger: this.coreContext.logger.get('migrations'),
+      logger: this.logger,
       kibanaVersion: this.coreContext.env.packageInfo.version,
       config: this.setupDeps!.legacyPlugins.pluginExtendedConfig,
       savedObjectsConfig,
       kibanaConfig,
       callCluster: migrationsRetryCallCluster(
         adminClient.callAsInternalUser,
-        this.coreContext.logger.get('migrations'),
+        this.logger,
         migrationsRetryDelay
       ),
     });
