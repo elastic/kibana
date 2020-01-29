@@ -1,20 +1,19 @@
 {
-  "description": "Identifies User Account Control (UAC) bypass via cmstp.  Attackers bypass UAC to stealthily execute code with elevated permissions.",
+  "description": "Identifies User Account Control (UAC) bypass via cmstp.exe.  Attackers bypass UAC to stealthily execute code with elevated permissions.",
   "index": [
-    "apm-*-transaction*",
-    "auditbeat-*",
-    "endgame-*",
-    "filebeat-*",
-    "packetbeat-*",
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "name": "Bypass UAC via CMSTP",
+  "max_signals": 33,
+  "name": "Bypass UAC via Cmstp",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.name:\"cmstp.exe\" and process.parent.args:(\"/s\" and \"/au\")",
-  "risk_score": 25,
+  "risk_score": 21,
   "rule_id": "2f7403da-1a4c-46bb-8ecc-c1a596e10cd0",
   "severity": "low",
-  "tags": ["Elastic"],
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
   "threat": [
     {
       "framework": "MITRE ATT&CK",

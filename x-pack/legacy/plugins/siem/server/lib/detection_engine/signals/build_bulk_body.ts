@@ -15,7 +15,9 @@ interface BuildBulkBodyParams {
   ruleParams: RuleTypeParams;
   id: string;
   name: string;
+  createdAt: string;
   createdBy: string;
+  updatedAt: string;
   updatedBy: string;
   interval: string;
   enabled: boolean;
@@ -28,7 +30,9 @@ export const buildBulkBody = ({
   ruleParams,
   id,
   name,
+  createdAt,
   createdBy,
+  updatedAt,
   updatedBy,
   interval,
   enabled,
@@ -39,7 +43,9 @@ export const buildBulkBody = ({
     id,
     name,
     enabled,
+    createdAt,
     createdBy,
+    updatedAt,
     updatedBy,
     interval,
     tags,
