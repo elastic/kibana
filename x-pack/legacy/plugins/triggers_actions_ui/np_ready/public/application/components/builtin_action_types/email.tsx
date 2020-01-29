@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFieldText,
   EuiFlexItem,
@@ -12,8 +13,12 @@ import {
   EuiFieldPassword,
   EuiComboBox,
   EuiTextArea,
+  EuiButtonEmpty,
   EuiSwitch,
   EuiFormRow,
+  EuiTextColor,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -149,7 +154,7 @@ export function getActionType(): ActionTypeModel {
         errors.cc.push(errorText);
         errors.bcc.push(errorText);
       }
-      if (!actionParams.message) {
+      if (!actionParams.message || actionParams.message.length === 0) {
         errors.message.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredMessageText',
@@ -159,7 +164,7 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
-      if (!actionParams.subject) {
+      if (!actionParams.subject || actionParams.subject.length === 0) {
         errors.subject.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredSubjectText',
@@ -381,9 +386,21 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
   const ccOptions = cc ? cc.map((label: string) => ({ label })) : [];
   const bccOptions = bcc ? bcc.map((label: string) => ({ label })) : [];
+  const [addCC, setAddCC] = useState<boolean>(false);
+  const [addBCC, setAddBCC] = useState<boolean>(false);
 
   return (
     <Fragment>
+      <EuiSpacer color="subdued" size="m" />
+      <EuiText>
+        <EuiTextColor color="subdued">
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.composeMessageTitle"
+            defaultMessage="Compose Message:"
+          />
+        </EuiTextColor>
+      </EuiText>
+      <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
         error={errors.to}
@@ -391,9 +408,32 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientTextFieldLabel',
           {
-            defaultMessage: 'To',
+            defaultMessage: 'To:',
           }
         )}
+        labelAppend={
+          <Fragment>
+            <span>
+              {!addCC ? (
+                <EuiButtonEmpty size="xs" onClick={() => setAddCC(true)}>
+                  <FormattedMessage
+                    defaultMessage="Add CC"
+                    id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addCcButton"
+                  />
+                </EuiButtonEmpty>
+              ) : null}
+              {!addBCC ? (
+                <EuiButtonEmpty size="xs" onClick={() => setAddBCC(true)}>
+                  <FormattedMessage
+                    defaultMessage="{titleBcc}"
+                    id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addCcButton"
+                    values={{ titleBcc: !addCC ? '/ BCC' : 'Add BCC' }}
+                  />
+                </EuiButtonEmpty>
+              ) : null}
+            </span>
+          </Fragment>
+        }
       >
         <EuiComboBox
           noSuggestions
@@ -423,84 +463,88 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        error={errors.cc}
-        isInvalid={errors.cc.length > 0 && cc !== undefined}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientCopyTextFieldLabel',
-          {
-            defaultMessage: 'Cc',
-          }
-        )}
-      >
-        <EuiComboBox
-          noSuggestions
+      {addCC ? (
+        <EuiFormRow
+          fullWidth
+          error={errors.cc}
           isInvalid={errors.cc.length > 0 && cc !== undefined}
-          fullWidth
-          data-test-subj="ccEmailAddressInput"
-          selectedOptions={ccOptions}
-          onCreateOption={(searchValue: string) => {
-            const newOptions = [...ccOptions, { label: searchValue }];
-            editAction(
-              'cc',
-              newOptions.map(newOption => newOption.label),
-              index
-            );
-          }}
-          onChange={(selectedOptions: Array<{ label: string }>) => {
-            editAction(
-              'cc',
-              selectedOptions.map(selectedOption => selectedOption.label),
-              index
-            );
-          }}
-          onBlur={() => {
-            if (!cc) {
-              editAction('cc', [], index);
+          label={i18n.translate(
+            'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientCopyTextFieldLabel',
+            {
+              defaultMessage: 'Cc:',
             }
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        error={errors.bcc}
-        isInvalid={errors.bcc.length > 0 && bcc !== undefined}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientBccTextFieldLabel',
-          {
-            defaultMessage: 'Bcc',
-          }
-        )}
-      >
-        <EuiComboBox
-          noSuggestions
+          )}
+        >
+          <EuiComboBox
+            noSuggestions
+            isInvalid={errors.cc.length > 0 && cc !== undefined}
+            fullWidth
+            data-test-subj="ccEmailAddressInput"
+            selectedOptions={ccOptions}
+            onCreateOption={(searchValue: string) => {
+              const newOptions = [...ccOptions, { label: searchValue }];
+              editAction(
+                'cc',
+                newOptions.map(newOption => newOption.label),
+                index
+              );
+            }}
+            onChange={(selectedOptions: Array<{ label: string }>) => {
+              editAction(
+                'cc',
+                selectedOptions.map(selectedOption => selectedOption.label),
+                index
+              );
+            }}
+            onBlur={() => {
+              if (!cc) {
+                editAction('cc', [], index);
+              }
+            }}
+          />
+        </EuiFormRow>
+      ) : null}
+      {addBCC ? (
+        <EuiFormRow
+          fullWidth
+          error={errors.bcc}
           isInvalid={errors.bcc.length > 0 && bcc !== undefined}
-          fullWidth
-          data-test-subj="bccEmailAddressInput"
-          selectedOptions={bccOptions}
-          onCreateOption={(searchValue: string) => {
-            const newOptions = [...bccOptions, { label: searchValue }];
-            editAction(
-              'bcc',
-              newOptions.map(newOption => newOption.label),
-              index
-            );
-          }}
-          onChange={(selectedOptions: Array<{ label: string }>) => {
-            editAction(
-              'bcc',
-              selectedOptions.map(selectedOption => selectedOption.label),
-              index
-            );
-          }}
-          onBlur={() => {
-            if (!bcc) {
-              editAction('bcc', [], index);
+          label={i18n.translate(
+            'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientBccTextFieldLabel',
+            {
+              defaultMessage: 'Bcc:',
             }
-          }}
-        />
-      </EuiFormRow>
+          )}
+        >
+          <EuiComboBox
+            noSuggestions
+            isInvalid={errors.bcc.length > 0 && bcc !== undefined}
+            fullWidth
+            data-test-subj="bccEmailAddressInput"
+            selectedOptions={bccOptions}
+            onCreateOption={(searchValue: string) => {
+              const newOptions = [...bccOptions, { label: searchValue }];
+              editAction(
+                'bcc',
+                newOptions.map(newOption => newOption.label),
+                index
+              );
+            }}
+            onChange={(selectedOptions: Array<{ label: string }>) => {
+              editAction(
+                'bcc',
+                selectedOptions.map(selectedOption => selectedOption.label),
+                index
+              );
+            }}
+            onBlur={() => {
+              if (!bcc) {
+                editAction('bcc', [], index);
+              }
+            }}
+          />
+        </EuiFormRow>
+      ) : null}
       <EuiFormRow
         fullWidth
         error={errors.subject}
@@ -508,7 +552,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.subjectTextFieldLabel',
           {
-            defaultMessage: 'Subject',
+            defaultMessage: 'Subject:',
           }
         )}
       >
@@ -518,8 +562,14 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           name="subject"
           data-test-subj="emailSubjectInput"
           value={subject || ''}
+          placeholder="Text field (placeholder)"
           onChange={e => {
             editAction('subject', e.target.value, index);
+          }}
+          onBlur={() => {
+            if (!subject) {
+              editAction('subject', '', index);
+            }
           }}
         />
       </EuiFormRow>
@@ -530,7 +580,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.messageTextAreaFieldLabel',
           {
-            defaultMessage: 'Message',
+            defaultMessage: 'Message:',
           }
         )}
       >
@@ -542,6 +592,11 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           data-test-subj="emailMessageInput"
           onChange={e => {
             editAction('message', e.target.value, index);
+          }}
+          onBlur={() => {
+            if (!message) {
+              editAction('message', '', index);
+            }
           }}
         />
       </EuiFormRow>

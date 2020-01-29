@@ -218,8 +218,6 @@ describe('EmailParamsFields renders', () => {
         .first()
         .prop('selectedOptions')
     ).toStrictEqual([{ label: 'test@test.com' }]);
-    expect(wrapper.find('[data-test-subj="ccEmailAddressInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bccEmailAddressInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailSubjectInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailMessageInput"]').length > 0).toBeTruthy();
   });
