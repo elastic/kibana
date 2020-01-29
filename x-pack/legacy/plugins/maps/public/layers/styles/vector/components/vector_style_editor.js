@@ -18,6 +18,7 @@ import { OrientationEditor } from './orientation/orientation_editor';
 import {
   getDefaultDynamicProperties,
   getDefaultStaticProperties,
+  LABEL_BORDER_SIZES,
   VECTOR_STYLES,
 } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
@@ -159,6 +160,11 @@ export class VectorStyleEditor extends Component {
       : label.getOptions().value != null && label.getOptions().value.length;
   }
 
+  _hasLabelBorder() {
+    const labelBorderSize = this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_SIZE];
+    return labelBorderSize.getOptions().size !== LABEL_BORDER_SIZES.NONE;
+  }
+
   _renderFillColor() {
     return (
       <VectorStyleColorEditor
@@ -233,6 +239,7 @@ export class VectorStyleEditor extends Component {
 
   _renderLabelProperties() {
     const hasLabel = this._hasLabel();
+    const hasLabelBorder = this._hasLabelBorder();
     return (
       <Fragment>
         <VectorStyleLabelEditor
@@ -283,8 +290,8 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         <VectorStyleColorEditor
-          disabled={!hasLabel}
-          disabledBy={VECTOR_STYLES.LABEL_TEXT}
+          disabled={!hasLabel || !hasLabelBorder}
+          disabledBy={hasLabel ? VECTOR_STYLES.LABEL_BORDER_SIZE : VECTOR_STYLES.LABEL_TEXT}
           swatches={DEFAULT_LINE_COLORS}
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
