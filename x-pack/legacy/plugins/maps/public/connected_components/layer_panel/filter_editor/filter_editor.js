@@ -219,12 +219,14 @@ export class FilterEditor extends Component {
 
         {filterByBoundsSwitch}
 
+
         <GlobalFilterCheckbox
           label={i18n.translate('xpack.maps.filterEditor.applyGlobalQueryCheckboxLabel', {
             defaultMessage: `Apply global filter to layer data`,
           })}
           applyGlobalQuery={this.props.layer.getSource().getApplyGlobalQuery()}
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
+          enableSwitch={this.props.layer.getSource().isQueryAware()}
         />
       </Fragment>
     );

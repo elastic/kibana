@@ -98,6 +98,10 @@ export class AbstractSource {
     return !!this._descriptor.applyGlobalQuery;
   }
 
+  supportsGlobalQuery() {
+    return false;
+  }
+
   getIndexPatternIds() {
     return [];
   }

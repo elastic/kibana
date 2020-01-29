@@ -91,10 +91,6 @@ export class ESMVTSearchSource extends ESSearchSource {
     return false;
   }
 
-  isFieldAware() {
-    return false;
-  }
-
   isRefreshTimerAware() {
     return false;
   }
@@ -108,7 +104,7 @@ export class ESMVTSearchSource extends ESSearchSource {
   }
 
   supportsESFilters() {
-    return false;
+    return true;
   }
 
   async getFields() {
