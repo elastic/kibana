@@ -5,7 +5,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest } from '../../../../../../../../src/core/server';
+import { KibanaRequest, ElasticsearchServiceSetup } from '../../../../../../../../src/core/server';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import { ServerFacade, RequestFacade, Logger } from '../../../../types';
@@ -15,7 +15,6 @@ import {
   SearchRequest,
   GenerateCsvParams,
 } from '../../../csv/types';
-import { ReportingSetupDeps } from '../../../../server/plugin';
 import {
   IndexPatternField,
   QueryFilter,
@@ -59,7 +58,7 @@ const getUiSettings = async (config: any) => {
 export async function generateCsvSearch(
   req: RequestFacade,
   server: ServerFacade,
-  elasticsearch: ReportingSetupDeps['elasticsearch'],
+  elasticsearch: ElasticsearchServiceSetup,
   logger: Logger,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
@@ -155,8 +154,10 @@ export async function generateCsvSearch(
     },
   };
 
-  const { callWithRequest } = elasticsearch.getCluster('data');
-  const callCluster = (...params: [string, object]) => callWithRequest(req, ...params);
+  const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
+    KibanaRequest.from(req.getRawRequest())
+  );
+  const callCluster = (...params: [string, object]) => callAsCurrentUser(...params);
   const config = server.config();
   const uiSettings = await getUiSettings(uiConfig);
 

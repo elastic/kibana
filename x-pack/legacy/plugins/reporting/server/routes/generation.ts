@@ -33,7 +33,7 @@ export function registerJobGenerationRoutes(
 ) {
   const config = server.config();
   const DOWNLOAD_BASE_URL = config.get('server.basePath') + `${API_BASE_URL}/jobs/download`;
-  const { elasticsearch } = plugins;
+  const { elasticsearch } = plugins.core;
   const esqueue = createQueueFactory(server, elasticsearch, logger, {
     exportTypesRegistry,
     browserDriverFactory,

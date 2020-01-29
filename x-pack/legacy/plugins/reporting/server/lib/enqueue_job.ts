@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
 import {
@@ -20,7 +21,6 @@ import {
   QueueConfig,
   ConditionalHeaders,
 } from '../../types';
-import { ReportingSetupDeps } from '../plugin';
 
 interface ConfirmedJob {
   id: string;
@@ -36,7 +36,7 @@ interface EnqueueJobFactoryOpts {
 
 export function enqueueJobFactory(
   server: ServerFacade,
-  elasticsearch: ReportingSetupDeps['elasticsearch'],
+  elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger,
   { exportTypesRegistry, esqueue }: EnqueueJobFactoryOpts
 ): EnqueueJobFn {

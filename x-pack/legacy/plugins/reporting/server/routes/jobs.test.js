@@ -46,12 +46,10 @@ beforeEach(() => {
 });
 
 const mockPlugins = {
-  elasticsearch: {
-    getCluster: memoize(() => ({ callWithInternalUser: jest.fn() })),
-    createCluster: () => ({
-      callWithRequest: jest.fn(),
-      callWithInternalUser: jest.fn(),
-    }),
+  core: {
+    elasticsearch: {
+      adminClient: { callAsInternalUser: jest.fn() },
+    },
   },
   security: null,
 };
@@ -65,9 +63,9 @@ const getHits = (...sources) => {
 };
 
 test(`returns 404 if job not found`, async () => {
-  mockPlugins.elasticsearch
-    .getCluster('admin')
-    .callWithInternalUser.mockReturnValue(Promise.resolve(getHits()));
+  mockPlugins.core.elasticsearch.adminClient = {
+    callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(getHits())),
+  };
 
   registerJobInfoRoutes(mockServer, mockPlugins, exportTypesRegistry, mockLogger);
 
@@ -82,9 +80,11 @@ test(`returns 404 if job not found`, async () => {
 });
 
 test(`returns 401 if not valid job type`, async () => {
-  mockPlugins.elasticsearch
-    .getCluster('admin')
-    .callWithInternalUser.mockReturnValue(Promise.resolve(getHits({ jobtype: 'invalidJobType' })));
+  mockPlugins.core.elasticsearch.adminClient = {
+    callAsInternalUser: jest
+      .fn()
+      .mockReturnValue(Promise.resolve(getHits({ jobtype: 'invalidJobType' }))),
+  };
 
   registerJobInfoRoutes(mockServer, mockPlugins, exportTypesRegistry, mockLogger);
 
@@ -99,11 +99,13 @@ test(`returns 401 if not valid job type`, async () => {
 
 describe(`when job is incomplete`, () => {
   const getIncompleteResponse = async () => {
-    mockPlugins.elasticsearch
-      .getCluster('admin')
-      .callWithInternalUser.mockReturnValue(
-        Promise.resolve(getHits({ jobtype: 'unencodedJobType', status: 'pending' }))
-      );
+    mockPlugins.core.elasticsearch.adminClient = {
+      callAsInternalUser: jest
+        .fn()
+        .mockReturnValue(
+          Promise.resolve(getHits({ jobtype: 'unencodedJobType', status: 'pending' }))
+        ),
+    };
 
     registerJobInfoRoutes(mockServer, mockPlugins, exportTypesRegistry, mockLogger);
 
@@ -143,9 +145,9 @@ describe(`when job is failed`, () => {
       status: 'failed',
       output: { content: 'job failure message' },
     });
-    mockPlugins.elasticsearch
-      .getCluster('admin')
-      .callWithInternalUser.mockReturnValue(Promise.resolve(hits));
+    mockPlugins.core.elasticsearch.adminClient = {
+      callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
+    };
 
     registerJobInfoRoutes(mockServer, mockPlugins, exportTypesRegistry, mockLogger);
 
@@ -188,9 +190,9 @@ describe(`when job is completed`, () => {
         title,
       },
     });
-    mockPlugins.elasticsearch
-      .getCluster('admin')
-      .callWithInternalUser.mockReturnValue(Promise.resolve(hits));
+    mockPlugins.core.elasticsearch.adminClient = {
+      callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
+    };
 
     registerJobInfoRoutes(mockServer, mockPlugins, exportTypesRegistry, mockLogger);
 

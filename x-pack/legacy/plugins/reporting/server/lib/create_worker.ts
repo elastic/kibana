@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { PLUGIN_ID } from '../../common/constants';
 import { ExportTypesRegistry, HeadlessChromiumDriverFactory } from '../../types';
 import { CancellationToken } from '../../common/cancellation_token';
-import { ReportingSetupDeps } from '../plugin';
 import {
   ESQueueInstance,
   QueueConfig,
@@ -30,7 +30,7 @@ interface CreateWorkerFactoryOpts {
 
 export function createWorkerFactory<JobParamsType>(
   server: ServerFacade,
-  elasticsearch: ReportingSetupDeps['elasticsearch'],
+  elasticsearch: ElasticsearchServiceSetup,
   logger: Logger,
   { exportTypesRegistry, browserDriverFactory }: CreateWorkerFactoryOpts
 ) {

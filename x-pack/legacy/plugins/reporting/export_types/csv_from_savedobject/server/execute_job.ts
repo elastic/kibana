@@ -5,9 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { cryptoFactory } from '../../../server/lib';
-import { ReportingSetupDeps } from '../../../server/plugin';
 import {
   ExecuteJobFactory,
   ImmediateExecuteFn,
@@ -24,7 +24,7 @@ export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
   JobParamsPanelCsv
 >> = function executeJobFactoryFn(
   server: ServerFacade,
-  elasticsearch: ReportingSetupDeps['elasticsearch'],
+  elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger
 ) {
   const crypto = cryptoFactory(server);

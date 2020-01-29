@@ -49,11 +49,9 @@ beforeEach(() => {
 afterEach(() => generatePngObservableFactory.mockReset());
 
 const mockElasticsearch = {
-  getCluster: memoize(() => {
-    return {
-      callWithRequest: jest.fn(),
-    };
-  }),
+  dataClient: {
+    asScoped: () => ({ callAsCurrentUser: jest.fn() }),
+  },
 };
 
 const getMockLogger = () => new LevelLogger();

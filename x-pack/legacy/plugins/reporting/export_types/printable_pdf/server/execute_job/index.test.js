@@ -50,11 +50,9 @@ afterEach(() => generatePdfObservableFactory.mockReset());
 
 const getMockLogger = () => new LevelLogger();
 const mockElasticsearch = {
-  getCluster: memoize(() => {
-    return {
-      callWithRequest: jest.fn(),
-    };
-  }),
+  dataClient: {
+    asScoped: () => ({ callAsCurrentUser: jest.fn() }),
+  },
 };
 
 const encryptHeaders = async headers => {

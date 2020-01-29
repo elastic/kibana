@@ -13,7 +13,7 @@ const ONE_HUNDRED_MEGABYTES = 104857600;
 describe('Reporting: Validate Max Content Length', () => {
   const elasticsearch = {
     getCluster: () => ({
-      callWithInternalUser: () => ({
+      callAsInternalUser: () => ({
         defaults: {
           http: {
             max_content_length: '100mb',
@@ -38,15 +38,15 @@ describe('Reporting: Validate Max Content Length', () => {
       }),
     };
     const elasticsearch = {
-      getCluster: () => ({
-        callWithInternalUser: () => ({
+      dataClient: {
+        callAsInternalUser: () => ({
           defaults: {
             http: {
               max_content_length: '100mb',
             },
           },
         }),
-      }),
+      },
     };
 
     await validateMaxContentLength(server, elasticsearch, logger);

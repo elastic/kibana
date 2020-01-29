@@ -38,7 +38,7 @@ export function registerJobInfoRoutes(
   exportTypesRegistry: ExportTypesRegistry,
   logger: Logger
 ) {
-  const { elasticsearch } = plugins;
+  const { elasticsearch } = plugins.core;
   const jobsQuery = jobsQueryFactory(server, elasticsearch);
   const getRouteConfig = getRouteConfigFactoryManagementPre(server, plugins, logger);
   const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server, plugins, logger);

@@ -5,8 +5,8 @@
  */
 
 import * as Rx from 'rxjs';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { ReportingSetupDeps } from '../../../../server/plugin';
 import {
   ServerFacade,
   ExecuteJobFactory,
@@ -29,7 +29,7 @@ type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocP
 
 export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFactoryFn(
   server: ServerFacade,
-  elasticsearch: ReportingSetupDeps['elasticsearch'],
+  elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger,
   { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
 ) {

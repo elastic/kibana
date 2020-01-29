@@ -3,23 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import numeral from '@elastic/numeral';
+import { CoreSetup } from 'src/core/server';
 import { defaults, get } from 'lodash';
 import { Logger, ServerFacade } from '../../../types';
-import { ReportingSetupDeps } from '../../plugin';
 
 const KIBANA_MAX_SIZE_BYTES_PATH = 'xpack.reporting.csv.maxSizeBytes';
 const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';
 
 export async function validateMaxContentLength(
   server: ServerFacade,
-  elasticsearch: ReportingSetupDeps['elasticsearch'],
+  elasticsearch: CoreSetup['elasticsearch'],
   logger: Logger
 ) {
   const config = server.config();
-  const { callWithInternalUser } = elasticsearch.getCluster('data');
+  const { callAsInternalUser } = elasticsearch.dataClient;
 
-  const elasticClusterSettingsResponse = await callWithInternalUser('cluster.getSettings', {
+  const elasticClusterSettingsResponse = await callAsInternalUser('cluster.getSettings', {
     includeDefaults: true,
   });
   const { persistent, transient, defaults: defaultSettings } = elasticClusterSettingsResponse;

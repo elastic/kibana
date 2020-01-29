@@ -5,8 +5,8 @@
  */
 
 import * as sinon from 'sinon';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { HeadlessChromiumDriverFactory, ServerFacade } from '../../types';
-import { ReportingSetupDeps } from '../plugin';
 import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
@@ -51,7 +51,7 @@ describe('Create Worker', () => {
     const exportTypesRegistry = getMockExportTypesRegistry();
     const createWorker = createWorkerFactory(
       getMockServer(),
-      {} as ReportingSetupDeps['elasticsearch'],
+      {} as ElasticsearchServiceSetup,
       getMockLogger(),
       {
         exportTypesRegistry: exportTypesRegistry as ExportTypesRegistry,
@@ -90,7 +90,7 @@ Object {
     ]);
     const createWorker = createWorkerFactory(
       getMockServer(),
-      {} as ReportingSetupDeps['elasticsearch'],
+      {} as ElasticsearchServiceSetup,
       getMockLogger(),
       {
         exportTypesRegistry: exportTypesRegistry as ExportTypesRegistry,

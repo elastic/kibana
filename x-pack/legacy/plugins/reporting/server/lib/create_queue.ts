@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import {
   ServerFacade,
   ExportTypesRegistry,
@@ -11,7 +12,6 @@ import {
   QueueConfig,
   Logger,
 } from '../../types';
-import { ReportingSetupDeps } from '../plugin';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 import { createWorkerFactory } from './create_worker';
@@ -24,7 +24,7 @@ interface CreateQueueFactoryOpts {
 
 export function createQueueFactory(
   server: ServerFacade,
-  elasticsearch: ReportingSetupDeps['elasticsearch'],
+  elasticsearch: ElasticsearchServiceSetup,
   logger: Logger,
   { exportTypesRegistry, browserDriverFactory }: CreateQueueFactoryOpts
 ): Esqueue {
@@ -35,7 +35,7 @@ export function createQueueFactory(
     interval: queueConfig.indexInterval,
     timeout: queueConfig.timeout,
     dateSeparator: '.',
-    client: elasticsearch.getCluster('admin'),
+    client: elasticsearch.dataClient,
     logger: createTaggedLogger(logger, ['esqueue', 'queue-worker']),
   };
 

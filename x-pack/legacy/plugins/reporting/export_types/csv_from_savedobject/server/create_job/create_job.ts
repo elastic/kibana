@@ -6,9 +6,9 @@
 
 import { notFound, notImplemented } from 'boom';
 import { get } from 'lodash';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
 import { cryptoFactory } from '../../../../server/lib';
-import { ReportingSetupDeps } from '../../../../server/plugin';
 import {
   CreateJobFactory,
   ImmediateCreateJobFn,
@@ -38,7 +38,7 @@ export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
   JobParamsPanelCsv
 >> = function createJobFactoryFn(
   server: ServerFacade,
-  elasticsearch: ReportingSetupDeps['elasticsearch'],
+  elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger
 ) {
   const crypto = cryptoFactory(server);

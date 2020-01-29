@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
 import { IUiSettingsClient } from 'kibana/server';
 import { resolve } from 'path';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { PluginSetupContract as SecurityPluginSetup } from '../../../plugins/security/server';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
@@ -76,7 +75,7 @@ export const reporting = (kibana: any) => {
     async init(server: Legacy.Server) {
       const coreSetup = server.newPlatform.setup.core;
       const pluginsSetup: ReportingSetupDeps = {
-        elasticsearch: server.newPlatform.setup.plugins.elasticsearch as ElasticsearchPlugin,
+        core: coreSetup,
         security: server.newPlatform.setup.plugins.security as SecurityPluginSetup,
         usageCollection: server.newPlatform.setup.plugins.usageCollection,
       };

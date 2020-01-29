@@ -6,7 +6,6 @@
 
 import { Legacy } from 'kibana';
 import { CoreSetup, CoreStart, LoggerFactory, Plugin } from 'src/core/server';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { PluginSetupContract as SecurityPluginSetup } from '../../../../plugins/security/server';
@@ -30,7 +29,7 @@ export type ReportingSetup = object;
 export type ReportingStart = object;
 
 export interface ReportingSetupDeps {
-  elasticsearch: ElasticsearchPlugin;
+  core: CoreSetup;
   usageCollection: UsageCollectionSetup;
   security: SecurityPluginSetup;
 }
@@ -86,7 +85,7 @@ export function reportingPluginFactory(
       const browserDriverFactory = await createBrowserDriverFactory(__LEGACY, logger);
 
       logConfiguration(__LEGACY, logger);
-      runValidations(__LEGACY, plugins.elasticsearch, logger, browserDriverFactory);
+      runValidations(__LEGACY, core.elasticsearch, logger, browserDriverFactory);
 
       const { xpack_main: xpackMainPlugin } = __LEGACY.plugins;
       mirrorPluginStatus(xpackMainPlugin, legacyPlugin);

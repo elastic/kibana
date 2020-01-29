@@ -6,6 +6,7 @@
 
 import { EventEmitter } from 'events';
 import { ResponseObject } from 'hapi';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { Legacy } from 'kibana';
 import { CallCluster } from '../../../../src/legacy/core_plugins/elasticsearch';
 import { CancellationToken } from './common/cancellation_token';
@@ -276,12 +277,12 @@ export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
 
 export type CreateJobFactory<CreateJobFnType> = (
   server: ServerFacade,
-  elasticsearch: ReportingSetupDeps['elasticsearch'],
+  elasticsearch: ElasticsearchServiceSetup,
   logger: LevelLogger
 ) => CreateJobFnType;
 export type ExecuteJobFactory<ExecuteJobFnType> = (
   server: ServerFacade,
-  elasticsearch: ReportingSetupDeps['elasticsearch'],
+  elasticsearch: ElasticsearchServiceSetup,
   logger: LevelLogger,
   opts: {
     browserDriverFactory: HeadlessChromiumDriverFactory;

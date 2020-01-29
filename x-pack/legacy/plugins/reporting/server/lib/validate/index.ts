@@ -5,8 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { CoreSetup } from 'src/core/server';
 import { ServerFacade, Logger } from '../../../types';
-import { ReportingSetupDeps } from '../../plugin';
 import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_factory';
 import { validateBrowser } from './validate_browser';
 import { validateEncryptionKey } from './validate_encryption_key';
@@ -15,7 +15,7 @@ import { validateServerHost } from './validate_server_host';
 
 export async function runValidations(
   server: ServerFacade,
-  elasticsearch: ReportingSetupDeps['elasticsearch'],
+  elasticsearch: CoreSetup['elasticsearch'],
   logger: Logger,
   browserFactory: HeadlessChromiumDriverFactory
 ) {
