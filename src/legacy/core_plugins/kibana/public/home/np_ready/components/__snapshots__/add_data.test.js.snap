@@ -184,7 +184,7 @@ exports[`apmUiEnabled 1`] = `
                 <h2>
                   <FormattedMessage
                     defaultMessage="Security"
-                    id="kbn.home.addData.title.observability"
+                    id="kbn.home.addData.title.security"
                     values={Object {}}
                   />
                 </h2>
@@ -458,7 +458,7 @@ exports[`isNewKibanaInstance 1`] = `
                 <h2>
                   <FormattedMessage
                     defaultMessage="Security"
-                    id="kbn.home.addData.title.observability"
+                    id="kbn.home.addData.title.security"
                     values={Object {}}
                   />
                 </h2>
@@ -761,7 +761,7 @@ exports[`mlEnabled 1`] = `
                 <h2>
                   <FormattedMessage
                     defaultMessage="Security"
-                    id="kbn.home.addData.title.observability"
+                    id="kbn.home.addData.title.security"
                     values={Object {}}
                   />
                 </h2>
@@ -1071,7 +1071,7 @@ exports[`render 1`] = `
                 <h2>
                   <FormattedMessage
                     defaultMessage="Security"
-                    id="kbn.home.addData.title.observability"
+                    id="kbn.home.addData.title.security"
                     values={Object {}}
                   />
                 </h2>

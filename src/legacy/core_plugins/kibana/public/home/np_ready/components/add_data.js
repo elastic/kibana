@@ -211,7 +211,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
                   <EuiTitle size="s">
                     <h2>
                       <FormattedMessage
-                        id="kbn.home.addData.title.observability"
+                        id="kbn.home.addData.title.security"
                         defaultMessage="Security"
                       />
                     </h2>
