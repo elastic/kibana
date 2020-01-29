@@ -5,7 +5,7 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { editorConfigProviders } from 'ui/vis/editors/config/editor_config_providers';
+import { editorConfigProviders } from 'ui/vis/config';
 import { aggTypeFilters } from 'ui/agg_types/filter';
 import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
 import { addSearchStrategy } from '../../../../../src/plugins/data/public';

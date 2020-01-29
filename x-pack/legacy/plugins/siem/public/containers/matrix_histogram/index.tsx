@@ -24,6 +24,7 @@ import { UpdateDateRange } from '../../components/charts/common';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 
 export interface OwnProps extends QueryTemplateProps {
+  chartHeight?: number;
   dataKey: string | string[];
   defaultStackByOption: MatrixHistogramOption;
   errorMessage: string;
@@ -37,6 +38,7 @@ export interface OwnProps extends QueryTemplateProps {
   isEventsHistogram?: boolean;
   legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
+  panelHeight?: number;
   query: Maybe<string>;
   setQuery: SetQuery;
   showLegend?: boolean;
