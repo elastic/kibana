@@ -12,13 +12,12 @@
     width: 100%;
     height: 100%;
     overflow: auto;
-    padding: $euiSize;
   }
 
   .canvasCsv__button {
     position: absolute;
     right: 16px;
-    top: 8px;
+    top: 72px;
     transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
     transition-delay: $euiAnimSpeedNormal;
   }

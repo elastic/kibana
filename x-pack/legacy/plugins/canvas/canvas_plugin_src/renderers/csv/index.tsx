@@ -29,9 +29,10 @@ export const csv: RendererFactory<Config> = () => ({
       return;
     }
 
-    const { offsetHeight: height, offsetWidth: width } = domNode;
-
-    const renderCSV = () => <Csv {...{ datatable, height, width }} />;
+    const renderCSV = () => {
+      const { offsetHeight: height, offsetWidth: width } = domNode;
+      return <Csv {...{ datatable, height, width }} />;
+    };
 
     ReactDOM.render(renderCSV(), domNode, () => handlers.done());
 

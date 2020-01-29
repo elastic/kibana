@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import fileSaver from 'file-saver';
-import { EuiCode, EuiButton } from '@elastic/eui';
+import { EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
 
 import { Datatable } from '../../../types';
 
@@ -17,8 +17,6 @@ interface Props {
 }
 
 export const Csv: FC<Props> = ({ datatable, height, width }) => {
-  const [isVisible, setIsVisible] = useState(false);
-
   const columns = datatable.columns.map(column => column.name).join(',');
   const rows = datatable.rows
     .map(row => datatable.columns.map(column => row[column.name]).join(','))
@@ -30,34 +28,20 @@ export const Csv: FC<Props> = ({ datatable, height, width }) => {
     fileSaver.saveAs(csvBlob, `datatable.csv`);
   };
 
-  const hover = () => setIsVisible(true);
-  const unHover = () => setIsVisible(false);
-
   return (
-    <div
-      className="canvasCsv"
-      style={{ width, height, position: 'relative' }}
-      onMouseEnter={hover}
-      onMouseLeave={unHover}
-      onFocus={hover}
-      onBlur={unHover}
-    >
-      <EuiCode className="canvasCsv__code">
+    <div className="canvasCsv" style={{ width, height, position: 'relative' }}>
+      <EuiCodeBlock className="canvasCsv__code" isCopyable paddingSize="m" overflowHeight={height}>
         <pre className="canvasCsv__content">
           <p>{columns}</p>
           {rows}
         </pre>
-      </EuiCode>
-      <EuiButton
-        className="canvasCsv__button"
+      </EuiCodeBlock>
+      <EuiButtonIcon
         {...{ onClick }}
-        size="s"
-        style={{
-          opacity: isVisible ? 1 : 0,
-        }}
-      >
-        Download
-      </EuiButton>
+        className="canvasCsv__button"
+        iconType="exportAction"
+        color="text"
+      />
     </div>
   );
 };
