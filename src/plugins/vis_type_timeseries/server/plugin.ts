@@ -25,7 +25,7 @@ import {
   RequestHandlerContext,
   Logger,
   IRouter,
-  KibanaRequest,
+  FakeRequest,
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { Server } from 'hapi';
@@ -49,6 +49,7 @@ interface VisTypeTimeseriesPluginSetupDependencies {
 export interface VisTypeTimeseriesSetup {
   getVisData: (
     requestContext: RequestHandlerContext,
+    fakeRequest: FakeRequest,
     options: GetVisDataOptions
   ) => ReturnType<GetVisData>;
   addSearchStrategy: SearchStrategyRegistry['addStrategy'];
@@ -104,9 +105,10 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     return {
       getVisData: async (
         requestContext: RequestHandlerContext,
-        request: KibanaRequest<{}, {}, GetVisDataOptions>
+        fakeRequest: FakeRequest,
+        options: GetVisDataOptions
       ) => {
-        return await getVisData(requestContext, request, framework);
+        return await getVisData(requestContext, { ...fakeRequest, body: options }, framework);
       },
       addSearchStrategy: searchStrategyRegistry.addStrategy.bind(searchStrategyRegistry),
     };

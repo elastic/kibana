@@ -25,6 +25,7 @@ import { getIndexPatternObject } from './vis_data/helpers/get_index_pattern';
 import { isNestedField } from '../../../data/server';
 import { Framework } from '../plugin';
 import { FieldDescriptor, IndexPatternsFetcher } from '../../../data/server';
+import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
 
 export async function getFields(
   requestContext: RequestHandlerContext,
@@ -36,9 +37,10 @@ export async function getFields(
   // removes the need to refactor many layers of dependencies on "req", and instead just augments the top
   // level object passed from here. The layers should be refactored fully at some point, but for now
   // this works and we are still using the New Platform services for these vis data portions.
-  const reqFacade: any = {
+  const reqFacade: ReqFacade = {
     ...request,
     framework,
+    payload: {},
     pre: {
       indexPatternsService: new IndexPatternsFetcher(
         requestContext.core.elasticsearch.dataClient.callAsCurrentUser

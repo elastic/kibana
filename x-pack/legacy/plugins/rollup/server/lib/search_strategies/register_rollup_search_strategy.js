@@ -12,7 +12,7 @@ import {
   AbstractSearchStrategy,
 } from '../../../../../../../src/plugins/vis_type_timeseries/server';
 
-export const registerRollupSearchStrategy = (kbnServer, server) =>
+export const registerRollupSearchStrategy = kbnServer =>
   kbnServer.afterPluginsInit(() => {
     if (!kbnServer.newPlatform.setup.plugins.metrics) {
       return;

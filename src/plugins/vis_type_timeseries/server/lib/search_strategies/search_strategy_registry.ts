@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
 import { AbstractSearchStrategy } from './strategies/abstract_search_strategy';
 // @ts-ignore
 import { DefaultSearchStrategy } from './strategies/default_search_strategy';

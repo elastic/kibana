@@ -64,7 +64,7 @@ export function rollup(kibana) {
         server.plugins.index_management.addIndexManagementDataEnricher(rollupDataEnricher);
       }
 
-      registerRollupSearchStrategy(this.kbnServer, server);
+      registerRollupSearchStrategy(this.kbnServer);
     },
   });
 }

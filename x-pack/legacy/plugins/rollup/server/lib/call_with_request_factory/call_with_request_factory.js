@@ -8,8 +8,6 @@ import { once } from 'lodash';
 import { elasticsearchJsPlugin } from '../../client/elasticsearch_rollup';
 
 const callWithRequest = once(server => {
-  console.log('>>>>>>>>>>>>');
-  console.log(server);
   const client = server.newPlatform.setup.core.elasticsearch.createClient('rollup', {
     plugins: [elasticsearchJsPlugin],
   });
