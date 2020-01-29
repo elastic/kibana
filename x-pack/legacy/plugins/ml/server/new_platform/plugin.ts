@@ -102,7 +102,8 @@ export interface RouteInitialization {
   config?: any;
   elasticsearchPlugin: ElasticsearchPlugin;
   elasticsearchService: ElasticsearchServiceSetup;
-  route(route: ServerRoute | ServerRoute[]): void;
+  // route(route: ServerRoute | ServerRoute[]): void;
+  route: any; // remove
   router: IRouter;
   xpackMainPlugin: MlXpackMainPlugin;
   savedObjects?: SavedObjectsLegacyService;
