@@ -40,7 +40,7 @@ export class ESMVTSearchSource extends ESSearchSource {
           id: uuid(),
           ...sourceConfig,
           type: ESMVTSearchSource.type,
-          applyGlobalQuery: false,
+          applyGlobalQuery: true,
         },
         inspectorAdapters
       );
@@ -117,9 +117,9 @@ export class ESMVTSearchSource extends ESSearchSource {
     return false;
   }
 
-  isQueryAwareTogglable() {
-    return false;
-  }
+  // isQueryAwareTogglable() {
+  //   return false;
+  // }
 
   supportsESFilters() {
     return true;

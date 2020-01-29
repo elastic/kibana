@@ -55,6 +55,7 @@ export class TiledVectorLayer extends VectorLayer {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
       sourceQuery: this.getQuery(),
+      applyGlobalQuery: this._source.getApplyGlobalQuery(),
     };
   }
 
