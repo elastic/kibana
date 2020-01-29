@@ -42,7 +42,13 @@ describe('actions_connectors_list component empty', () => {
       },
     ]);
     const mockes = coreMock.createSetup();
-    const [{ chrome, docLinks }] = await mockes.getStartServices();
+    const [
+      {
+        chrome,
+        docLinks,
+        application: { capabilities },
+      },
+    ] = await mockes.getStartServices();
     const deps = {
       chrome,
       docLinks,
@@ -50,18 +56,15 @@ describe('actions_connectors_list component empty', () => {
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      capabilities: {
+        ...capabilities,
+        siem: {
+          'actions:show': true,
+          'actions:save': true,
+          'actions:delete': true,
+        },
+      },
       legacy: {
-        capabilities: {
-          get() {
-            return {
-              siem: {
-                'actions:show': true,
-                'actions:save': true,
-                'actions:delete': true,
-              },
-            };
-          },
-        } as any,
         MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
       },
       actionTypeRegistry: actionTypeRegistry as any,
@@ -136,7 +139,13 @@ describe('actions_connectors_list component with items', () => {
     ]);
 
     const mockes = coreMock.createSetup();
-    const [{ chrome, docLinks }] = await mockes.getStartServices();
+    const [
+      {
+        chrome,
+        docLinks,
+        application: { capabilities },
+      },
+    ] = await mockes.getStartServices();
     const deps = {
       chrome,
       docLinks,
@@ -144,18 +153,15 @@ describe('actions_connectors_list component with items', () => {
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      capabilities: {
+        ...capabilities,
+        siem: {
+          'actions:show': true,
+          'actions:save': true,
+          'actions:delete': true,
+        },
+      },
       legacy: {
-        capabilities: {
-          get() {
-            return {
-              siem: {
-                'actions:show': true,
-                'actions:save': true,
-                'actions:delete': true,
-              },
-            };
-          },
-        } as any,
         MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
       },
       actionTypeRegistry: {
@@ -217,7 +223,13 @@ describe('actions_connectors_list component empty with show only capability', ()
       },
     ]);
     const mockes = coreMock.createSetup();
-    const [{ chrome, docLinks }] = await mockes.getStartServices();
+    const [
+      {
+        chrome,
+        docLinks,
+        application: { capabilities },
+      },
+    ] = await mockes.getStartServices();
     const deps = {
       chrome,
       docLinks,
@@ -225,18 +237,15 @@ describe('actions_connectors_list component empty with show only capability', ()
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      capabilities: {
+        ...capabilities,
+        siem: {
+          'actions:show': true,
+          'actions:save': false,
+          'actions:delete': false,
+        },
+      },
       legacy: {
-        capabilities: {
-          get() {
-            return {
-              siem: {
-                'actions:show': true,
-                'actions:save': false,
-                'actions:delete': false,
-              },
-            };
-          },
-        } as any,
         MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
       },
       actionTypeRegistry: {
@@ -303,7 +312,13 @@ describe('actions_connectors_list with show only capability', () => {
       },
     ]);
     const mockes = coreMock.createSetup();
-    const [{ chrome, docLinks }] = await mockes.getStartServices();
+    const [
+      {
+        chrome,
+        docLinks,
+        application: { capabilities },
+      },
+    ] = await mockes.getStartServices();
     const deps = {
       chrome,
       docLinks,
@@ -311,18 +326,15 @@ describe('actions_connectors_list with show only capability', () => {
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      capabilities: {
+        ...capabilities,
+        siem: {
+          'actions:show': true,
+          'actions:save': false,
+          'actions:delete': false,
+        },
+      },
       legacy: {
-        capabilities: {
-          get() {
-            return {
-              siem: {
-                'actions:show': true,
-                'actions:save': false,
-                'actions:delete': false,
-              },
-            };
-          },
-        } as any,
         MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
       },
       actionTypeRegistry: {

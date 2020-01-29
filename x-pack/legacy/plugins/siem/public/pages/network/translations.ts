@@ -45,7 +45,7 @@ export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
 );
 
 export const NAVIGATION_ALERTS_TITLE = i18n.translate('xpack.siem.network.navigation.alertsTitle', {
-  defaultMessage: 'Alerts',
+  defaultMessage: 'External alerts',
 });
 
 export const DOMAINS_COUNT_BY = (groupByField: string) =>
