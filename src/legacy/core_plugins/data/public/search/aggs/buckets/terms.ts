@@ -19,10 +19,7 @@
 
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../../../core_plugins/data/public';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../../../index';
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './_bucket_agg_type';
@@ -30,8 +27,12 @@ import { createFilterTerms } from './create_filter/terms';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 import { AggConfigs } from '../agg_configs';
 
-import { Adapters } from '../../../../../plugins/inspector/public';
-import { ISearchSource, fieldFormats, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { Adapters } from '../../../../../../../plugins/inspector/public';
+import {
+  ISearchSource,
+  fieldFormats,
+  KBN_FIELD_TYPES,
+} from '../../../../../../../plugins/data/public';
 
 import {
   buildOtherBucketAgg,

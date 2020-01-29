@@ -23,7 +23,7 @@ import { AggConfigOptions } from '../agg_config';
 
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { IBucketAggConfig } from './_bucket_agg_type';
 import { METRIC_TYPES } from '../metrics/metric_agg_types';
 

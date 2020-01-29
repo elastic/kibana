@@ -24,7 +24,7 @@ import { toastNotifications } from 'ui/notify';
 import { npStart } from 'ui/new_platform';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 export interface AutoBounds {

@@ -25,7 +25,7 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 
 // @ts-ignore
 import { createFilterIpRange } from './create_filter/ip_range';
-import { KBN_FIELD_TYPES, fieldFormats } from '../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES, fieldFormats } from '../../../../../../../plugins/data/public';
 
 const ipRangeTitle = i18n.translate('common.ui.aggTypes.buckets.ipRangeTitle', {
   defaultMessage: 'IPv4 Range',

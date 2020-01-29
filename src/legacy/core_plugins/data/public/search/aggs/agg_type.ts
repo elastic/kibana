@@ -24,10 +24,14 @@ import { initParams } from './agg_params';
 
 import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
-import { Adapters } from '../../../../plugins/inspector/public';
+import { Adapters } from '../../../../../../plugins/inspector/public';
 import { BaseParamType } from './param_types/base';
-import { AggParamType } from '../agg_types/param_types/agg';
-import { KBN_FIELD_TYPES, fieldFormats, ISearchSource } from '../../../../plugins/data/public';
+import { AggParamType } from './param_types/agg';
+import {
+  KBN_FIELD_TYPES,
+  fieldFormats,
+  ISearchSource,
+} from '../../../../../../plugins/data/public';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,

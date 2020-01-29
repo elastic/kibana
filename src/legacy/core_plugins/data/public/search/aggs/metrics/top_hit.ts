@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { aggTypeFieldFilters } from '../param_types/filter';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 // @ts-ignore
 import { wrapWithInlineComp } from '../buckets/inline_comp_wrapper';

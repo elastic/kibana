@@ -19,13 +19,12 @@
 
 // @ts-ignore
 import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 import { AggConfig } from '../agg_config';
-import { SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
+import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 import { BaseParamType } from './base';
-import { toastNotifications } from '../../notify';
 import { propFilter } from '../filter';
-import { Field, IFieldList } from '../../../../../plugins/data/public';
-import { isNestedField } from '../../../../../plugins/data/public';
+import { Field, IFieldList, isNestedField } from '../../../../../../../plugins/data/public';
 
 const filterByType = propFilter('type');
 

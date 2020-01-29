@@ -21,7 +21,7 @@ import { initParams } from './agg_params';
 import { BaseParamType } from './param_types/base';
 import { FieldParamType } from './param_types/field';
 import { OptionedParamType } from './param_types/optioned';
-import { AggParamType } from '../agg_types/param_types/agg';
+import { AggParamType } from '../aggs/param_types/agg';
 
 jest.mock('ui/new_platform');
 

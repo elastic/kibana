@@ -22,16 +22,16 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
 import { npStart } from 'ui/new_platform';
+import { timefilter } from 'ui/timefilter';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
-import { timefilter } from '../../timefilter';
-import { dateHistogramInterval } from '../../../../core_plugins/data/public';
+import { dateHistogramInterval } from '../../../../common';
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 // @ts-ignore
 import { TimeBuckets } from '../../time_buckets';

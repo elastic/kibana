@@ -37,7 +37,7 @@ import {
   FetchOptions,
   fieldFormats,
   KBN_FIELD_TYPES,
-} from '../../../../plugins/data/public';
+} from '../../../../../../plugins/data/public';
 
 export interface AggConfigOptions {
   enabled: boolean;
@@ -63,7 +63,7 @@ const unknownSchema: Schema = {
 const getTypeFromRegistry = (type: string): AggType => {
   // We need to inline require here, since we're having a cyclic dependency
   // from somewhere inside agg_types back to AggConfig.
-  const aggTypes = require('../agg_types').aggTypes;
+  const aggTypes = require('../aggs').aggTypes;
   const registeredType =
     aggTypes.metrics.find((agg: AggType) => agg.name === type) ||
     aggTypes.buckets.find((agg: AggType) => agg.name === type);
@@ -96,12 +96,12 @@ export class AggConfig {
   static ensureIds(list: AggConfig[]) {
     const have: AggConfig[] = [];
     const haveNot: AggConfig[] = [];
-    list.forEach(function (obj) {
+    list.forEach(function(obj) {
       (obj.id ? have : haveNot).push(obj);
     });
 
     let nextId = AggConfig.nextId(have);
-    haveNot.forEach(function (obj) {
+    haveNot.forEach(function(obj) {
       obj.id = String(nextId++);
     });
 
@@ -116,7 +116,7 @@ export class AggConfig {
   static nextId(list: AggConfig[]) {
     return (
       1 +
-      list.reduce(function (max, obj) {
+      list.reduce(function(max, obj) {
         return Math.max(max, +obj.id || 0);
       }, 0)
     );
@@ -361,9 +361,9 @@ export class AggConfig {
     if (!this.type) return '';
     return percentageMode
       ? i18n.translate('common.ui.vis.aggConfig.percentageOfLabel', {
-        defaultMessage: 'Percentage of {label}',
-        values: { label: this.type.makeLabel(this) },
-      })
+          defaultMessage: 'Percentage of {label}',
+          values: { label: this.type.makeLabel(this) },
+        })
       : `${this.type.makeLabel(this)}`;
   }
 
@@ -415,7 +415,7 @@ export class AggConfig {
     if (this.__typeDecorations) {
       _.forOwn(
         this.__typeDecorations,
-        function (prop, name: string | undefined) {
+        function(prop, name: string | undefined) {
           // @ts-ignore
           delete this[name];
         },

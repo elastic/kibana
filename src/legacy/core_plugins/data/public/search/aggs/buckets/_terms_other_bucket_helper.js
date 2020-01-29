@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { esFilters, esQuery } from '../../../../../plugins/data/public';
+import { esFilters, esQuery } from '../../../../../../../plugins/data/public';
 import { AggGroupNames } from '../agg_groups';
 
 /**

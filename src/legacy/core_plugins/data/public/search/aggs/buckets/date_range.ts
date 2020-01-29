@@ -24,7 +24,7 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 
-import { KBN_FIELD_TYPES, fieldFormats } from '../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES, fieldFormats } from '../../../../../../../plugins/data/public';
 
 const dateRangeTitle = i18n.translate('common.ui.aggTypes.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',

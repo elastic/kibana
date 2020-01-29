@@ -19,9 +19,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { geohashColumns } from 'ui/vis/map/decode_geo_hash';
-import chrome from '../../chrome';
+import chrome from 'ui/chrome';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 import { geoContains, scaleBounds, GeoBoundingBox } from './lib/geo_utils';
 import { BUCKET_TYPES } from './bucket_agg_types';

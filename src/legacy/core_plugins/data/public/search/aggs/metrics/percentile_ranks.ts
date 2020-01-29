@@ -24,7 +24,7 @@ import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_respons
 
 import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
-import { fieldFormats, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { fieldFormats, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 // required by the values editor
 

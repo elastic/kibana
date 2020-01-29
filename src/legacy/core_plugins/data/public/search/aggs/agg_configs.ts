@@ -35,7 +35,7 @@ import {
   ISearchSource,
   FetchOptions,
   TimeRange,
-} from '../../../../plugins/data/public';
+} from '../../../../../../plugins/data/public';
 
 type Schemas = Record<string, any>;
 
