@@ -163,7 +163,7 @@ export type DeleteRuleParams = Clients & {
   ruleId: string | undefined | null;
 };
 
-export type RuleParams = RuleAlertParams & Clients;
+export type CreateRuleParams = Omit<RuleAlertParams, 'ruleId'> & { ruleId: string } & Clients;
 
 export interface ReadRuleParams {
   alertsClient: AlertsClient;
