@@ -193,7 +193,7 @@ yarn es snapshot
 ##### Keeping data between snapshots
 
 If you want to keep the data inside your Elasticsearch between usages of this command,
-you should use the following command, to keep your data folder outside the downloaded snapshot 
+you should use the following command, to keep your data folder outside the downloaded snapshot
 folder:
 
 ```bash
@@ -290,6 +290,7 @@ Follow the [cross-cluster search](https://www.elastic.co/guide/en/kibana/current
 
 ### Running Kibana
 
+Change to your local Kibana directory.
 Start the development server.
 
 ```bash
