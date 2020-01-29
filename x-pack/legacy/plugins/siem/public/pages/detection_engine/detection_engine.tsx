@@ -173,8 +173,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
                             from={from}
                             loadingInitial={loading}
                             query={query}
-                            signalIndexName={signalIndexName}
                             setQuery={setQuery}
+                            showTotalSignalsCount={true}
+                            signalIndexName={signalIndexName}
                             stackByOptions={signalsHistogramOptions}
                             to={to}
                             updateDateRange={updateDateRangeCallback}

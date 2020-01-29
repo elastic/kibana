@@ -26,6 +26,10 @@ export const eventsStackByOptions: MatrixHistogramOption[] = [
     text: 'event.dataset',
     value: 'event.dataset',
   },
+  {
+    text: 'event.module',
+    value: 'event.module',
+  },
 ];
 
 export const EventsQueryTabBody = ({
