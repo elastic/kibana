@@ -1190,5 +1190,16 @@ export function getUiSettingDefaults() {
         }),
       },
     },
+    'doc_table:legacyTable': {
+      name: i18n.translate('kbn.advancedSettings.context.tieBreakerFieldsTitle', {
+        defaultMessage: 'Use legacy table',
+      }),
+      value: false,
+      description: i18n.translate('kbn.advancedSettings.docTableVersion', {
+        defaultMessage:
+          'Prefer the legacy version of the documents table in Discover while available',
+      }),
+      category: ['discover'],
+    },
   };
 }

@@ -224,6 +224,7 @@ function discoverController(
   $scope.refreshInterval = timefilter.getRefreshInterval();
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
   $scope.useShortDots = config.get('shortDots:enable');
+  $scope.useNewGrid = config.get('doc_table:legacyTable');
 
   $scope.$watch(
     () => uiCapabilities.discover.saveQuery,

@@ -116,7 +116,8 @@
                 id="reload_saved_search"
                 ng-click="resetQuery()"
               >
-                {{::'kbn.discover.reloadSavedSearchButton' | i18n: {defaultMessage: 'Reset search'} }}
+                {{::'kbn.discover.reloadSavedSearchButton' | i18n: {defaultMessage: 'Reset search'}
+                }}
               </button>
             </div>
 
@@ -181,7 +182,7 @@
                 i18n-default-message="Documents"
               ></h2>
               <discover-grid
-                ng-if="rows"
+                ng-if="rows && !useNewGrid"
                 aria-labelled-by="'documentsAriaLabel'"
                 columns="tableColumns"
                 index-pattern="indexPattern"
@@ -197,6 +198,44 @@
                 on-remove-column="removeColumn"
                 on-sort="setSortOrder"
               ></discover-grid>
+              <div ng-if="useNewGrid">
+                <doc-table
+                  hits="rows"
+                  index-pattern="indexPattern"
+                  sorting="state.sort"
+                  columns="state.columns"
+                  infinite-scroll="true"
+                  filter="filterQuery"
+                  filters="state.filters"
+                  data-shared-item
+                  data-title="{{opts.savedSearch.lastSavedTitle}}"
+                  data-description="{{opts.savedSearch.description}}"
+                  minimum-visible-rows="minimumVisibleRows"
+                  render-complete
+                  on-add-column="addColumn"
+                  on-change-sort-order="setSortOrder"
+                  on-move-column="moveColumn"
+                  on-remove-column="removeColumn"
+                ></doc-table>
+
+                <a tabindex="0" id="discoverBottomMarker"></a>
+
+                <div ng-if="rows.length == opts.sampleSize" class="dscTable__footer">
+                  <span
+                    i18n-id="kbn.discover.howToSeeOtherMatchingDocumentsDescription"
+                    i18n-default-message="These are the first {sampleSize} documents matching
+                  your search, refine your search to see others. "
+                    i18n-values="{
+                    sampleSize: opts.sampleSize,
+                  }"
+                  ></span>
+                  <a
+                    kbn-accessible-click
+                    ng-click="scrollToTop()"
+                    i18n-id="kbn.discover.backToTopLinkText"
+                    i18n-default-message="Back to top."
+                  ></a>
+                </div>
               </div>
             </section>
           </div>
