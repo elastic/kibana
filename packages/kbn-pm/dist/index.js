@@ -43648,10 +43648,6 @@ class KbnClientStatus {
             path: 'api/status',
         });
     }
-    async isDistributable() {
-        const status = await this.get();
-        return !status.running_from_source;
-    }
     /**
      * Get the overall/merged state
      */

@@ -20,15 +20,12 @@
 // eslint-disable-next-line
 import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 import { createPieVisFn } from './pie_fn';
-import { KbnVislibVisTypesDependencies } from './plugin';
+// @ts-ignore
+import { vislibSlicesResponseHandler } from './vislib/response_handler';
 
 jest.mock('ui/new_platform');
-
-const deps: KbnVislibVisTypesDependencies = {
-  vislibSlicesResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
-} as any;
-const mockResponseHandler = jest.fn().mockReturnValue(
-  Promise.resolve({
+jest.mock('./vislib/response_handler', () => ({
+  vislibSlicesResponseHandler: jest.fn().mockReturnValue({
     hits: 1,
     names: ['Count'],
     raw: {
@@ -41,11 +38,11 @@ const mockResponseHandler = jest.fn().mockReturnValue(
     tooltipFormatter: {
       id: 'number',
     },
-  })
-);
+  }),
+}));
 
 describe('interpreter/functions#pie', () => {
-  const fn = functionWrapper(createPieVisFn(deps));
+  const fn = functionWrapper(createPieVisFn);
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],
@@ -86,7 +83,7 @@ describe('interpreter/functions#pie', () => {
 
   it('calls response handler with correct values', async () => {
     await fn(context, { visConfig: JSON.stringify(visConfig) });
-    expect(mockResponseHandler).toHaveBeenCalledTimes(1);
-    expect(mockResponseHandler).toHaveBeenCalledWith(context, visConfig.dimensions);
+    expect(vislibSlicesResponseHandler).toHaveBeenCalledTimes(1);
+    expect(vislibSlicesResponseHandler).toHaveBeenCalledWith(context, visConfig.dimensions);
   });
 });

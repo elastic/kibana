@@ -21,17 +21,11 @@ import { noop, map, omit, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { BucketAggType } from './_bucket_agg_type';
-import { IpRangeTypeParamEditor } from '../../vis/editors/default/controls/ip_range_type';
-import { IpRangesParamEditor } from '../../vis/editors/default/controls/ip_ranges';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 // @ts-ignore
 import { createFilterIpRange } from './create_filter/ip_range';
-import {
-  KBN_FIELD_TYPES,
-  TEXT_CONTEXT_TYPE,
-  FieldFormat,
-} from '../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES, fieldFormats } from '../../../../../plugins/data/public';
 
 const ipRangeTitle = i18n.translate('common.ui.aggTypes.buckets.ipRangeTitle', {
   defaultMessage: 'IPv4 Range',
@@ -52,12 +46,12 @@ export const ipRangeBucketAgg = new BucketAggType({
     return { type: 'range', from: bucket.from, to: bucket.to };
   },
   getFormat(agg) {
-    const fieldFormats = npStart.plugins.data.fieldFormats;
+    const fieldFormatsService = npStart.plugins.data.fieldFormats;
     const formatter = agg.fieldOwnFormatter(
-      TEXT_CONTEXT_TYPE,
-      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.IP)
+      fieldFormats.TEXT_CONTEXT_TYPE,
+      fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.IP)
     );
-    const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {
+    const IpRangeFormat = fieldFormats.FieldFormat.from(function(range: IpRangeKey) {
       return convertIPRangeToString(range, formatter);
     });
     return new IpRangeFormat();
@@ -78,7 +72,6 @@ export const ipRangeBucketAgg = new BucketAggType({
     },
     {
       name: 'ipRangeType',
-      editorComponent: IpRangeTypeParamEditor,
       default: 'fromTo',
       write: noop,
     },
@@ -91,7 +84,6 @@ export const ipRangeBucketAgg = new BucketAggType({
         ],
         mask: [{ mask: '0.0.0.0/1' }, { mask: '128.0.0.0/2' }],
       },
-      editorComponent: IpRangesParamEditor,
       write(aggConfig, output) {
         const ipRangeType = aggConfig.params.ipRangeType;
         let ranges = aggConfig.params.ranges[ipRangeType];
