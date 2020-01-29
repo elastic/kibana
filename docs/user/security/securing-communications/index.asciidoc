@@ -16,7 +16,7 @@ supports certificates and private keys in PEM or PKCS#12 format.
 [[configuring-tls-browser-kib]]
 ==== Encrypting traffic between the browser and {kib}
 
-NOTE: You do not need to enable {security-features} for this type of encryption.
+NOTE: You do not need to enable the {es} {security-features} for this type of encryption.
 
 . Obtain a server certificate and private key for {kib}.
 +
