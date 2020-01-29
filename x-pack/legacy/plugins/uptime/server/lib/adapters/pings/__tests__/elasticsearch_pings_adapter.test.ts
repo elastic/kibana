@@ -35,6 +35,7 @@ describe('ElasticsearchPingsAdapter class', () => {
             },
           },
         ],
+        interval: '1s',
       },
     },
   };
@@ -102,8 +103,7 @@ describe('ElasticsearchPingsAdapter class', () => {
         dateEnd: 'now',
         filters: '',
       });
-      assertCloseTo(result.interval, 36000, 100);
-      result.interval = 36000;
+      result.interval = '10s';
       expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
     });
@@ -121,7 +121,7 @@ describe('ElasticsearchPingsAdapter class', () => {
         filters: '',
       });
       assertCloseTo(result.interval, 36000, 100);
-      result.interval = 36000;
+      result.interval = '1m';
 
       expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
@@ -181,8 +181,7 @@ describe('ElasticsearchPingsAdapter class', () => {
         monitorId: undefined,
         statusFilter: 'down',
       });
-      assertCloseTo(result.interval, 5609564928000, 1000);
-      result.interval = 5609564928000;
+      result.interval = '1h';
 
       expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
@@ -234,8 +233,7 @@ describe('ElasticsearchPingsAdapter class', () => {
         filters,
       });
 
-      assertCloseTo(result.interval, 36000, 100);
-      result.interval = 36000;
+      result.interval = '1m';
       expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
     });
@@ -252,8 +250,8 @@ describe('ElasticsearchPingsAdapter class', () => {
         monitorId: undefined,
         statusFilter: 'down',
       });
-      assertCloseTo(result.interval, 5609564928000, 1000);
-      result.interval = 5609564928000;
+
+      result.interval = '1d';
 
       expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();

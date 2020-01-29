@@ -28,5 +28,5 @@ export interface GetPingHistogramParams {
 
 export interface HistogramResult {
   histogram: HistogramDataPoint[];
-  interval: number;
+  interval: string;
 }
