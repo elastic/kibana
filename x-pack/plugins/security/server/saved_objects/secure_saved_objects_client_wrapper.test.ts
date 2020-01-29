@@ -9,6 +9,11 @@ import { Actions } from '../authorization';
 import { securityAuditLoggerMock } from '../audit/index.mock';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectActions } from '../authorization/actions/saved_object';
+
+let clientOpts: ReturnType<typeof createSecureSavedObjectsClientWrapperOptions>;
+let client: SecureSavedObjectsClientWrapper;
+const USERNAME = Symbol();
 
 const createSecureSavedObjectsClientWrapperOptions = () => {
   const actions = new Actions('some-version');
@@ -27,7 +32,10 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
   return {
     actions,
     baseClient: savedObjectsClientMock.create(),
-    checkSavedObjectsPrivilegesAsCurrentUser: jest.fn(),
+    checkSavedObjectsPrivilegesAsCurrentUser: {
+      atNamespaces: jest.fn(),
+      dynamically: jest.fn(),
+    },
     errors,
     auditLogger: securityAuditLoggerMock.create(),
     forbiddenError,
@@ -35,797 +43,469 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
   };
 };
 
-describe('#errors', () => {
-  test(`assigns errors from constructor to .errors`, () => {
-    const options = createSecureSavedObjectsClientWrapperOptions();
-    const client = new SecureSavedObjectsClientWrapper(options);
+const expectGeneralError = async (fn: Function, args: Record<string, any>) => {
+  // mock the checkPrivileges.globally rejection
+  const rejection = new Error('An actual error would happen here');
+  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.dynamically.mockRejectedValue(rejection);
 
-    expect(client.errors).toBe(options.errors);
+  await expect(fn.bind(client)(...Object.values(args))).rejects.toThrowError(
+    clientOpts.generalError
+  );
+  expect(clientOpts.errors.decorateGeneralError).toHaveBeenCalledTimes(1);
+  expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+  expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+};
+
+/**
+ * Fails the first authorization check, passes any others
+ * Requires that function args are passed in as key/value pairs
+ * The argument properties must be in the correct order to be spread properly
+ */
+const expectForbiddenError = async (fn: Function, args: Record<string, any>) => {
+  // mock the checkPrivileges.globally rejection
+  let _actions: string[];
+  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.dynamically.mockImplementation(
+    (actions: string | string[], _namespace?: string) => {
+      _actions = Array.isArray(actions) ? actions : [actions];
+      return {
+        hasAllRequested: false,
+        username: USERNAME,
+        privileges: _actions.reduce((acc, cur, idx) => ({ ...acc, [cur]: idx > 0 }), {}),
+      };
+    }
+  );
+
+  await expect(fn.bind(client)(...Object.values(args))).rejects.toThrowError(
+    clientOpts.forbiddenError
+  );
+  const getCalls = (clientOpts.actions.savedObject.get as jest.MockedFunction<
+    SavedObjectActions['get']
+  >).mock.calls;
+  const ACTION = getCalls[0][1];
+  const types = getCalls.map(x => x[0]);
+  const missing = [_actions![0]]; // if there was more than one type, only the first type was unauthorized
+
+  expect(clientOpts.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
+  expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
+  expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+    USERNAME,
+    ACTION,
+    types,
+    missing,
+    args
+  );
+  expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+};
+
+const expectSuccess = async (fn: Function, args: Record<string, any>) => {
+  const result = await fn.bind(client)(...Object.values(args));
+  const getCalls = (clientOpts.actions.savedObject.get as jest.MockedFunction<
+    SavedObjectActions['get']
+  >).mock.calls;
+  const ACTION = getCalls[0][1];
+  const types = getCalls.map(x => x[0]);
+
+  expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+  expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
+  expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
+    USERNAME,
+    ACTION,
+    types,
+    args
+  );
+  return result;
+};
+
+const expectPrivilegeCheck = async (fn: Function, args: Record<string, any>) => {
+  // mock the checkPrivileges.globally rejection
+  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.dynamically.mockResolvedValue({
+    hasAllRequested: false,
+    username: USERNAME,
+    privileges: [], // doesn't matter
+  });
+
+  await expect(fn.bind(client)(...Object.values(args))).rejects.toThrow(); // test is simpler with error case
+  const getResults = (clientOpts.actions.savedObject.get as jest.MockedFunction<
+    SavedObjectActions['get']
+  >).mock.results;
+  const actions = getResults.map(x => x.value);
+
+  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.dynamically).toHaveBeenCalledTimes(1);
+  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.dynamically).toHaveBeenCalledWith(
+    actions,
+    args.options?.namespace
+  );
+};
+
+/**
+ * Fails the authorization check for the first namespace, passes any others
+ */
+const mockUnauthorizedNamespaces = () => {
+  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces.mockImplementation(
+    (actions: string | string[], namespaces: string[]) => {
+      const _actions = Array.isArray(actions) ? actions : [actions];
+      return {
+        hasAllRequested: false,
+        username: USERNAME,
+        spacePrivileges: namespaces.reduce(
+          (acc, cur, idx) => ({
+            ...acc,
+            [cur]: _actions.reduce((_acc, _cur) => ({ ..._acc, [_cur]: idx > 0 }), {}),
+          }),
+          {}
+        ),
+      };
+    }
+  );
+};
+
+const expectObjectNamespaceFiltering = async (fn: Function, args: Record<string, any>) => {
+  mockUnauthorizedNamespaces();
+  const namespaces = ['foo', 'bar'];
+  const returnValue = { namespaces, foo: 'bar' };
+  // we don't know which base client method will be called; mock them all
+  clientOpts.baseClient.create.mockReturnValue(returnValue as any);
+  clientOpts.baseClient.get.mockReturnValue(returnValue as any);
+  clientOpts.baseClient.update.mockReturnValue(returnValue as any);
+
+  const result = await fn.bind(client)(...Object.values(args));
+  expect(result).toEqual(expect.objectContaining({ namespaces: ['?', 'bar'] }));
+
+  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces).toHaveBeenCalledTimes(1);
+  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces).toHaveBeenCalledWith(
+    'login:',
+    namespaces
+  );
+};
+
+const expectObjectsNamespaceFiltering = async (fn: Function, args: Record<string, any>) => {
+  mockUnauthorizedNamespaces();
+  const returnValue = {
+    saved_objects: [
+      { namespaces: ['foo'] },
+      { namespaces: ['bar'] },
+      { namespaces: ['bar', 'foo'] },
+    ],
+  };
+
+  // we don't know which base client method will be called; mock them all
+  clientOpts.baseClient.bulkCreate.mockReturnValue(returnValue as any);
+  clientOpts.baseClient.bulkGet.mockReturnValue(returnValue as any);
+  clientOpts.baseClient.bulkUpdate.mockReturnValue(returnValue as any);
+  clientOpts.baseClient.find.mockReturnValue(returnValue as any);
+
+  const result = await fn.bind(client)(...Object.values(args));
+  expect(result).toEqual(
+    expect.objectContaining({
+      saved_objects: [{ namespaces: ['?'] }, { namespaces: ['bar'] }, { namespaces: ['bar', '?'] }],
+    })
+  );
+
+  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces).toHaveBeenCalledTimes(1);
+  expect(
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces
+  ).toHaveBeenCalledWith('login:', ['foo', 'bar']);
+};
+
+/**
+ * Before each test, create the Client with its Options
+ */
+beforeEach(() => {
+  clientOpts = createSecureSavedObjectsClientWrapperOptions();
+  client = new SecureSavedObjectsClientWrapper(clientOpts);
+
+  // succeed privilege checks by default
+  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.dynamically.mockImplementation(
+    (actions: string | string[], _namespace?: string) => {
+      const _actions = Array.isArray(actions) ? actions : [actions];
+      return {
+        hasAllRequested: true,
+        username: USERNAME,
+        privileges: _actions.reduce((acc, cur) => ({ ...acc, [cur]: true }), {}),
+      };
+    }
+  );
+  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces.mockImplementation(
+    (actions: string | string[], namespaces: string[]) => {
+      const _actions = Array.isArray(actions) ? actions : [actions];
+      return {
+        hasAllRequested: true,
+        username: USERNAME,
+        spacePrivileges: namespaces.reduce(
+          (acc, cur) => ({
+            ...acc,
+            [cur]: _actions.reduce((_acc, _cur) => ({ ..._acc, [_cur]: true }), {}),
+          }),
+          {}
+        ),
+      };
+    }
+  );
+});
+
+describe('#bulkCreate', () => {
+  const attributes = { some: 'attr' };
+  const obj1 = Object.freeze({ type: 'foo', otherThing: 'sup', attributes });
+  const obj2 = Object.freeze({ type: 'bar', otherThing: 'everyone', attributes });
+  const options = Object.freeze({ namespace: 'some-ns' });
+
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    const objects = [obj1];
+    await expectGeneralError(client.bulkCreate, { objects });
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    const objects = [obj1, obj2];
+    await expectForbiddenError(client.bulkCreate, { objects, options });
+  });
+
+  test(`returns result of baseClient.bulkCreate when authorized`, async () => {
+    const apiCallReturnValue = { saved_objects: [], foo: 'bar' };
+    clientOpts.baseClient.bulkCreate.mockReturnValue(apiCallReturnValue as any);
+
+    const objects = [obj1, obj2];
+    const result = await expectSuccess(client.bulkCreate, { objects, options });
+    expect(result).toEqual(apiCallReturnValue);
+  });
+
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    const objects = [obj1, obj2];
+    await expectPrivilegeCheck(client.bulkCreate, { objects, options });
+  });
+
+  test(`filters namespaces that the user doesn't have access to`, async () => {
+    const objects = [obj1, obj2];
+    await expectObjectsNamespaceFiltering(client.bulkCreate, { objects, options });
   });
 });
 
-describe(`spaces disabled`, () => {
-  describe('#create', () => {
-    test(`throws decorated GeneralError when checkPrivileges.globally rejects promise`, async () => {
-      const type = 'foo';
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(
-        new Error('An actual error would happen here')
-      );
-      const client = new SecureSavedObjectsClientWrapper(options);
+describe('#bulkGet', () => {
+  const obj1 = Object.freeze({ type: 'foo', id: 'foo-id' });
+  const obj2 = Object.freeze({ type: 'bar', id: 'bar-id' });
+  const options = Object.freeze({ namespace: 'some-ns' });
 
-      await expect(client.create(type)).rejects.toThrowError(options.generalError);
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'create')],
-        undefined
-      );
-      expect(options.errors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`throws decorated ForbiddenError when unauthorized`, async () => {
-      const type = 'foo';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: false,
-        username,
-        privileges: { [options.actions.savedObject.get(type, 'create')]: false },
-      });
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const attributes = { some_attr: 's' };
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(client.create(type, attributes, apiCallOptions)).rejects.toThrowError(
-        options.forbiddenError
-      );
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'create')],
-        apiCallOptions.namespace
-      );
-      expect(options.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        'create',
-        [type],
-        [options.actions.savedObject.get(type, 'create')],
-        { type, attributes, options: apiCallOptions }
-      );
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`returns result of baseClient.create when authorized`, async () => {
-      const type = 'foo';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: true,
-        username,
-        privileges: { [options.actions.savedObject.get(type, 'create')]: true },
-      });
-
-      const apiCallReturnValue = Symbol();
-      options.baseClient.create.mockReturnValue(apiCallReturnValue as any);
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const attributes = { some_attr: 's' };
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(client.create(type, attributes, apiCallOptions)).resolves.toBe(
-        apiCallReturnValue
-      );
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'create')],
-        apiCallOptions.namespace
-      );
-      expect(options.baseClient.create).toHaveBeenCalledWith(type, attributes, apiCallOptions);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
-        username,
-        'create',
-        [type],
-        { type, attributes, options: apiCallOptions }
-      );
-    });
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    const objects = [obj1];
+    await expectGeneralError(client.bulkGet, { objects });
   });
 
-  describe('#bulkCreate', () => {
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type = 'foo';
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(
-        new Error('An actual error would happen here')
-      );
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(
-        client.bulkCreate([{ type, attributes: {} }], apiCallOptions)
-      ).rejects.toThrowError(options.generalError);
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'bulk_create')],
-        apiCallOptions.namespace
-      );
-      expect(options.errors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`throws decorated ForbiddenError when unauthorized`, async () => {
-      const type1 = 'foo';
-      const type2 = 'bar';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: false,
-        username,
-        privileges: {
-          [options.actions.savedObject.get(type1, 'bulk_create')]: false,
-          [options.actions.savedObject.get(type2, 'bulk_create')]: true,
-        },
-      });
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const objects = [
-        { type: type1, attributes: {} },
-        { type: type2, attributes: {} },
-      ];
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(client.bulkCreate(objects, apiCallOptions)).rejects.toThrowError(
-        options.forbiddenError
-      );
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [
-          options.actions.savedObject.get(type1, 'bulk_create'),
-          options.actions.savedObject.get(type2, 'bulk_create'),
-        ],
-        apiCallOptions.namespace
-      );
-      expect(options.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        'bulk_create',
-        [type1, type2],
-        [options.actions.savedObject.get(type1, 'bulk_create')],
-        { objects, options: apiCallOptions }
-      );
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`returns result of baseClient.bulkCreate when authorized`, async () => {
-      const type1 = 'foo';
-      const type2 = 'bar';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: true,
-        username,
-        privileges: {
-          [options.actions.savedObject.get(type1, 'bulk_create')]: true,
-          [options.actions.savedObject.get(type2, 'bulk_create')]: true,
-        },
-      });
-
-      const apiCallReturnValue = Symbol();
-      options.baseClient.bulkCreate.mockReturnValue(apiCallReturnValue as any);
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const objects = [
-        { type: type1, otherThing: 'sup', attributes: {} },
-        { type: type2, otherThing: 'everyone', attributes: {} },
-      ];
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(client.bulkCreate(objects, apiCallOptions)).resolves.toBe(apiCallReturnValue);
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [
-          options.actions.savedObject.get(type1, 'bulk_create'),
-          options.actions.savedObject.get(type2, 'bulk_create'),
-        ],
-        apiCallOptions.namespace
-      );
-      expect(options.baseClient.bulkCreate).toHaveBeenCalledWith(objects, apiCallOptions);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
-        username,
-        'bulk_create',
-        [type1, type2],
-        { objects, options: apiCallOptions }
-      );
-    });
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    const objects = [obj1, obj2];
+    await expectForbiddenError(client.bulkGet, { objects, options });
   });
 
-  describe('#delete', () => {
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type = 'foo';
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(
-        new Error('An actual error would happen here')
-      );
-      const client = new SecureSavedObjectsClientWrapper(options);
+  test(`returns result of baseClient.bulkGet when authorized`, async () => {
+    const apiCallReturnValue = { saved_objects: [], foo: 'bar' };
+    clientOpts.baseClient.bulkGet.mockReturnValue(apiCallReturnValue as any);
 
-      await expect(client.delete(type, 'bar')).rejects.toThrowError(options.generalError);
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'delete')],
-        undefined
-      );
-      expect(options.errors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`throws decorated ForbiddenError when unauthorized`, async () => {
-      const type = 'foo';
-      const id = 'bar';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: false,
-        username,
-        privileges: {
-          [options.actions.savedObject.get(type, 'delete')]: false,
-        },
-      });
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(client.delete(type, id, apiCallOptions)).rejects.toThrowError(
-        options.forbiddenError
-      );
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'delete')],
-        apiCallOptions.namespace
-      );
-      expect(options.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        'delete',
-        [type],
-        [options.actions.savedObject.get(type, 'delete')],
-        { type, id, options: apiCallOptions }
-      );
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`returns result of internalRepository.delete when authorized`, async () => {
-      const type = 'foo';
-      const id = 'bar';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: true,
-        username,
-        privileges: { [options.actions.savedObject.get(type, 'delete')]: true },
-      });
-
-      const apiCallReturnValue = Symbol();
-      options.baseClient.delete.mockReturnValue(apiCallReturnValue as any);
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(client.delete(type, id, apiCallOptions)).resolves.toBe(apiCallReturnValue);
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'delete')],
-        apiCallOptions.namespace
-      );
-      expect(options.baseClient.delete).toHaveBeenCalledWith(type, id, apiCallOptions);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
-        username,
-        'delete',
-        [type],
-        { type, id, options: apiCallOptions }
-      );
-    });
+    const objects = [obj1, obj2];
+    const result = await expectSuccess(client.bulkGet, { objects, options });
+    expect(result).toEqual(apiCallReturnValue);
   });
 
-  describe('#find', () => {
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type = 'foo';
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(
-        new Error('An actual error would happen here')
-      );
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      await expect(client.find({ type })).rejects.toThrowError(options.generalError);
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'find')],
-        undefined
-      );
-      expect(options.errors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`throws decorated ForbiddenError when type's singular and unauthorized`, async () => {
-      const type = 'foo';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: false,
-        username,
-        privileges: { [options.actions.savedObject.get(type, 'find')]: false },
-      });
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const apiCallOptions = Object.freeze({ type, namespace: 'some-ns' });
-      await expect(client.find(apiCallOptions)).rejects.toThrowError(options.forbiddenError);
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'find')],
-        apiCallOptions.namespace
-      );
-      expect(options.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        'find',
-        [type],
-        [options.actions.savedObject.get(type, 'find')],
-        { options: apiCallOptions }
-      );
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`throws decorated ForbiddenError when type's an array and unauthorized`, async () => {
-      const type1 = 'foo';
-      const type2 = 'bar';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: false,
-        username,
-        privileges: {
-          [options.actions.savedObject.get(type1, 'find')]: false,
-          [options.actions.savedObject.get(type2, 'find')]: true,
-        },
-      });
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const apiCallOptions = Object.freeze({ type: [type1, type2], namespace: 'some-ns' });
-      await expect(client.find(apiCallOptions)).rejects.toThrowError(options.forbiddenError);
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [
-          options.actions.savedObject.get(type1, 'find'),
-          options.actions.savedObject.get(type2, 'find'),
-        ],
-        apiCallOptions.namespace
-      );
-      expect(options.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        'find',
-        [type1, type2],
-        [options.actions.savedObject.get(type1, 'find')],
-        { options: apiCallOptions }
-      );
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`returns result of baseClient.find when authorized`, async () => {
-      const type = 'foo';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: true,
-        username,
-        privileges: { [options.actions.savedObject.get(type, 'find')]: true },
-      });
-
-      const apiCallReturnValue = Symbol();
-      options.baseClient.find.mockReturnValue(apiCallReturnValue as any);
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const apiCallOptions = Object.freeze({ type, namespace: 'some-ns' });
-      await expect(client.find(apiCallOptions)).resolves.toBe(apiCallReturnValue);
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'find')],
-        apiCallOptions.namespace
-      );
-      expect(options.baseClient.find).toHaveBeenCalledWith(apiCallOptions);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
-        username,
-        'find',
-        [type],
-        { options: apiCallOptions }
-      );
-    });
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    const objects = [obj1, obj2];
+    await expectPrivilegeCheck(client.bulkGet, { objects, options });
   });
 
-  describe('#bulkGet', () => {
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type = 'foo';
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(
-        new Error('An actual error would happen here')
-      );
-      const client = new SecureSavedObjectsClientWrapper(options);
+  test(`filters namespaces that the user doesn't have access to`, async () => {
+    const objects = [obj1, obj2];
+    await expectObjectsNamespaceFiltering(client.bulkGet, { objects, options });
+  });
+});
 
-      await expect(client.bulkGet([{ id: 'bar', type }])).rejects.toThrowError(
-        options.generalError
-      );
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'bulk_get')],
-        undefined
-      );
-      expect(options.errors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
+describe('#bulkUpdate', () => {
+  const obj1 = Object.freeze({ type: 'foo', id: 'foo-id', attributes: { some: 'attr' } });
+  const obj2 = Object.freeze({ type: 'bar', id: 'bar-id', attributes: { other: 'attr' } });
+  const options = Object.freeze({ namespace: 'some-ns' });
 
-    test(`throws decorated ForbiddenError when unauthorized`, async () => {
-      const type1 = 'foo';
-      const type2 = 'bar';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: false,
-        username,
-        privileges: {
-          [options.actions.savedObject.get(type1, 'bulk_get')]: false,
-          [options.actions.savedObject.get(type2, 'bulk_get')]: true,
-        },
-      });
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const objects = [
-        { type: type1, id: `bar-${type1}` },
-        { type: type2, id: `bar-${type2}` },
-      ];
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(client.bulkGet(objects, apiCallOptions)).rejects.toThrowError(
-        options.forbiddenError
-      );
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [
-          options.actions.savedObject.get(type1, 'bulk_get'),
-          options.actions.savedObject.get(type2, 'bulk_get'),
-        ],
-        apiCallOptions.namespace
-      );
-      expect(options.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        'bulk_get',
-        [type1, type2],
-        [options.actions.savedObject.get(type1, 'bulk_get')],
-        { objects, options: apiCallOptions }
-      );
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`returns result of baseClient.bulkGet when authorized`, async () => {
-      const type1 = 'foo';
-      const type2 = 'bar';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: true,
-        username,
-        privileges: {
-          [options.actions.savedObject.get(type1, 'bulk_get')]: true,
-          [options.actions.savedObject.get(type2, 'bulk_get')]: true,
-        },
-      });
-
-      const apiCallReturnValue = Symbol();
-      options.baseClient.bulkGet.mockReturnValue(apiCallReturnValue as any);
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const objects = [
-        { type: type1, id: `id-${type1}` },
-        { type: type2, id: `id-${type2}` },
-      ];
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(client.bulkGet(objects, apiCallOptions)).resolves.toBe(apiCallReturnValue);
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [
-          options.actions.savedObject.get(type1, 'bulk_get'),
-          options.actions.savedObject.get(type2, 'bulk_get'),
-        ],
-        apiCallOptions.namespace
-      );
-      expect(options.baseClient.bulkGet).toHaveBeenCalledWith(objects, apiCallOptions);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
-        username,
-        'bulk_get',
-        [type1, type2],
-        { objects, options: apiCallOptions }
-      );
-    });
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    const objects = [obj1];
+    await expectGeneralError(client.bulkUpdate, { objects });
   });
 
-  describe('#get', () => {
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type = 'foo';
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(
-        new Error('An actual error would happen here')
-      );
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      await expect(client.get(type, 'bar')).rejects.toThrowError(options.generalError);
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'get')],
-        undefined
-      );
-      expect(options.errors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`throws decorated ForbiddenError when unauthorized`, async () => {
-      const type = 'foo';
-      const id = 'bar';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: false,
-        username,
-        privileges: {
-          [options.actions.savedObject.get(type, 'get')]: false,
-        },
-      });
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(client.get(type, id, apiCallOptions)).rejects.toThrowError(
-        options.forbiddenError
-      );
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'get')],
-        apiCallOptions.namespace
-      );
-      expect(options.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        'get',
-        [type],
-        [options.actions.savedObject.get(type, 'get')],
-        { type, id, options: apiCallOptions }
-      );
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`returns result of baseClient.get when authorized`, async () => {
-      const type = 'foo';
-      const id = 'bar';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: true,
-        username,
-        privileges: { [options.actions.savedObject.get(type, 'get')]: true },
-      });
-
-      const apiCallReturnValue = Symbol();
-      options.baseClient.get.mockReturnValue(apiCallReturnValue as any);
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(client.get(type, id, apiCallOptions)).resolves.toBe(apiCallReturnValue);
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'get')],
-        apiCallOptions.namespace
-      );
-      expect(options.baseClient.get).toHaveBeenCalledWith(type, id, apiCallOptions);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
-        username,
-        'get',
-        [type],
-        { type, id, options: apiCallOptions }
-      );
-    });
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    const objects = [obj1, obj2];
+    await expectForbiddenError(client.bulkUpdate, { objects, options });
   });
 
-  describe('#update', () => {
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type = 'foo';
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(
-        new Error('An actual error would happen here')
-      );
-      const client = new SecureSavedObjectsClientWrapper(options);
+  test(`returns result of baseClient.bulkUpdate when authorized`, async () => {
+    const apiCallReturnValue = { saved_objects: [], foo: 'bar' };
+    clientOpts.baseClient.bulkUpdate.mockReturnValue(apiCallReturnValue as any);
 
-      await expect(client.update(type, 'bar', {})).rejects.toThrowError(options.generalError);
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'update')],
-        undefined
-      );
-      expect(options.errors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`throws decorated ForbiddenError when unauthorized`, async () => {
-      const type = 'foo';
-      const id = 'bar';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: false,
-        username,
-        privileges: {
-          [options.actions.savedObject.get(type, 'update')]: false,
-        },
-      });
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const attributes = { some: 'attr' };
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(client.update(type, id, attributes, apiCallOptions)).rejects.toThrowError(
-        options.forbiddenError
-      );
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'update')],
-        apiCallOptions.namespace
-      );
-      expect(options.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        'update',
-        [type],
-        [options.actions.savedObject.get(type, 'update')],
-        { type, id, attributes, options: apiCallOptions }
-      );
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`returns result of baseClient.update when authorized`, async () => {
-      const type = 'foo';
-      const id = 'bar';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: true,
-        username,
-        privileges: { [options.actions.savedObject.get(type, 'update')]: true },
-      });
-
-      const apiCallReturnValue = Symbol();
-      options.baseClient.update.mockReturnValue(apiCallReturnValue as any);
-
-      const client = new SecureSavedObjectsClientWrapper(options);
-
-      const attributes = { some: 'attr' };
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(client.update(type, id, attributes, apiCallOptions)).resolves.toBe(
-        apiCallReturnValue
-      );
-
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'update')],
-        apiCallOptions.namespace
-      );
-      expect(options.baseClient.update).toHaveBeenCalledWith(type, id, attributes, apiCallOptions);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
-        username,
-        'update',
-        [type],
-        { type, id, attributes, options: apiCallOptions }
-      );
-    });
+    const objects = [obj1, obj2];
+    const result = await expectSuccess(client.bulkUpdate, { objects, options });
+    expect(result).toEqual(apiCallReturnValue);
   });
 
-  describe('#bulkUpdate', () => {
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type = 'foo';
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(
-        new Error('An actual error would happen here')
-      );
-      const client = new SecureSavedObjectsClientWrapper(options);
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    const objects = [obj1, obj2];
+    await expectPrivilegeCheck(client.bulkUpdate, { objects, options });
+  });
 
-      await expect(client.bulkUpdate([{ id: 'bar', type, attributes: {} }])).rejects.toThrowError(
-        options.generalError
-      );
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'bulk_update')],
-        undefined
-      );
-      expect(options.errors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
+  test(`filters namespaces that the user doesn't have access to`, async () => {
+    const objects = [obj1, obj2];
+    await expectObjectsNamespaceFiltering(client.bulkUpdate, { objects, options });
+  });
+});
 
-    test(`throws decorated ForbiddenError when unauthorized`, async () => {
-      const type = 'foo';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: false,
-        username,
-        privileges: {
-          [options.actions.savedObject.get(type, 'bulk_update')]: false,
-        },
-      });
+describe('#create', () => {
+  const type = 'foo';
+  const attributes = { some_attr: 's' };
+  const options = Object.freeze({ namespace: 'some-ns' });
 
-      const client = new SecureSavedObjectsClientWrapper(options);
+  test(`throws decorated GeneralError when checkPrivileges.globally rejects promise`, async () => {
+    await expectGeneralError(client.create, { type });
+  });
 
-      const objects = [{ type, id: `bar-${type}`, attributes: {} }];
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(client.bulkUpdate(objects, apiCallOptions)).rejects.toThrowError(
-        options.forbiddenError
-      );
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    await expectForbiddenError(client.create, { type, attributes, options });
+  });
 
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'bulk_update')],
-        apiCallOptions.namespace
-      );
-      expect(options.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        'bulk_update',
-        [type],
-        [options.actions.savedObject.get(type, 'bulk_update')],
-        { objects, options: apiCallOptions }
-      );
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
+  test(`returns result of baseClient.create when authorized`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.create.mockResolvedValue(apiCallReturnValue as any);
 
-    test(`returns result of baseClient.bulkUpdate when authorized`, async () => {
-      const type = 'foo';
-      const username = Symbol();
-      const options = createSecureSavedObjectsClientWrapperOptions();
-      options.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
-        hasAllRequested: true,
-        username,
-        privileges: {
-          [options.actions.savedObject.get(type, 'bulk_update')]: true,
-        },
-      });
+    const result = await expectSuccess(client.create, { type, attributes, options });
+    expect(result).toBe(apiCallReturnValue);
+  });
 
-      const apiCallReturnValue = Symbol();
-      options.baseClient.bulkUpdate.mockReturnValue(apiCallReturnValue as any);
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    await expectPrivilegeCheck(client.create, { type, attributes, options });
+  });
 
-      const client = new SecureSavedObjectsClientWrapper(options);
+  test(`filters namespaces that the user doesn't have access to`, async () => {
+    await expectObjectNamespaceFiltering(client.create, { type, attributes, options });
+  });
+});
 
-      const objects = [{ type, id: `id-${type}`, attributes: {} }];
-      const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
-      await expect(client.bulkUpdate(objects, apiCallOptions)).resolves.toBe(apiCallReturnValue);
+describe('#delete', () => {
+  const type = 'foo';
+  const id = `${type}-id`;
+  const options = Object.freeze({ namespace: 'some-ns' });
 
-      expect(options.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-        [options.actions.savedObject.get(type, 'bulk_update')],
-        apiCallOptions.namespace
-      );
-      expect(options.baseClient.bulkUpdate).toHaveBeenCalledWith(objects, apiCallOptions);
-      expect(options.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(options.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
-        username,
-        'bulk_update',
-        [type],
-        { objects, options: apiCallOptions }
-      );
-    });
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    await expectGeneralError(client.delete, { type, id });
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    await expectForbiddenError(client.delete, { type, id, options });
+  });
+
+  test(`returns result of internalRepository.delete when authorized`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.delete.mockReturnValue(apiCallReturnValue as any);
+
+    const result = await expectSuccess(client.delete, { type, id, options });
+    expect(result).toBe(apiCallReturnValue);
+  });
+
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    await expectPrivilegeCheck(client.delete, { type, id, options });
+  });
+});
+
+describe('#find', () => {
+  const type1 = 'foo';
+  const type2 = 'bar';
+
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    await expectGeneralError(client.find, { type: type1 });
+  });
+
+  test(`throws decorated ForbiddenError when type's singular and unauthorized`, async () => {
+    const options = Object.freeze({ type: type1, namespace: 'some-ns' });
+    await expectForbiddenError(client.find, { options });
+  });
+
+  test(`throws decorated ForbiddenError when type's an array and unauthorized`, async () => {
+    const options = Object.freeze({ type: [type1, type2], namespace: 'some-ns' });
+    await expectForbiddenError(client.find, { options });
+  });
+
+  test(`returns result of baseClient.find when authorized`, async () => {
+    const apiCallReturnValue = { saved_objects: [], foo: 'bar' };
+    clientOpts.baseClient.find.mockReturnValue(apiCallReturnValue as any);
+
+    const options = Object.freeze({ type: type1, namespace: 'some-ns' });
+    const result = await expectSuccess(client.find, { options });
+    expect(result).toEqual(apiCallReturnValue);
+  });
+
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    const options = Object.freeze({ type: [type1, type2], namespace: 'some-ns' });
+    await expectPrivilegeCheck(client.find, { options });
+  });
+
+  test(`filters namespaces that the user doesn't have access to`, async () => {
+    const options = Object.freeze({ type: [type1, type2], namespace: 'some-ns' });
+    await expectObjectsNamespaceFiltering(client.find, { options });
+  });
+});
+
+describe('#get', () => {
+  const type = 'foo';
+  const id = `${type}-id`;
+  const options = Object.freeze({ namespace: 'some-ns' });
+
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    await expectGeneralError(client.get, { type, id });
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    await expectForbiddenError(client.get, { type, id, options });
+  });
+
+  test(`returns result of baseClient.get when authorized`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.get.mockReturnValue(apiCallReturnValue as any);
+
+    const result = await expectSuccess(client.get, { type, id, options });
+    expect(result).toBe(apiCallReturnValue);
+  });
+
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    await expectPrivilegeCheck(client.get, { type, id, options });
+  });
+
+  test(`filters namespaces that the user doesn't have access to`, async () => {
+    await expectObjectNamespaceFiltering(client.get, { type, id, options });
+  });
+});
+
+describe('#update', () => {
+  const type = 'foo';
+  const id = `${type}-id`;
+  const attributes = { some: 'attr' };
+  const options = Object.freeze({ namespace: 'some-ns' });
+
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    await expectGeneralError(client.update, { type, id, attributes });
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    await expectForbiddenError(client.update, { type, id, attributes, options });
+  });
+
+  test(`returns result of baseClient.update when authorized`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.update.mockReturnValue(apiCallReturnValue as any);
+
+    const result = await expectSuccess(client.update, { type, id, attributes, options });
+    expect(result).toBe(apiCallReturnValue);
+  });
+
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    await expectPrivilegeCheck(client.update, { type, id, attributes, options });
+  });
+
+  test(`filters namespaces that the user doesn't have access to`, async () => {
+    await expectObjectNamespaceFiltering(client.update, { type, id, attributes, options });
+  });
+});
+
+describe('other', () => {
+  test(`assigns errors from constructor to .errors`, () => {
+    expect(client.errors).toBe(clientOpts.errors);
   });
 });

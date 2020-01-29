@@ -17,80 +17,90 @@
  * under the License.
  */
 
-import { SavedObjectsSchema } from './schema';
+import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from './schema';
 
 describe('#isNamespaceAgnostic', () => {
+  const expectResult = (expected: boolean, schemaDefinition?: SavedObjectsSchemaDefinition) => {
+    const schema = new SavedObjectsSchema(schemaDefinition);
+    const result = schema.isNamespaceAgnostic('foo');
+    expect(result).toBe(expected);
+  };
+
+  it(`returns false when no schema is defined`, () => {
+    expectResult(false);
+  });
+
   it(`returns false for unknown types`, () => {
-    const schema = new SavedObjectsSchema();
-    const result = schema.isNamespaceAgnostic('bar');
-    expect(result).toBe(false);
+    expectResult(false, { bar: {} });
   });
 
-  it(`returns true for explicitly namespace agnostic type`, () => {
-    const schema = new SavedObjectsSchema({
-      foo: {
-        isNamespaceAgnostic: true,
-      },
-    });
-    const result = schema.isNamespaceAgnostic('foo');
-    expect(result).toBe(true);
+  it(`returns false for non-namespace-agnostic type`, () => {
+    expectResult(false, { foo: { isNamespaceAgnostic: false } });
+    expectResult(false, { foo: { isNamespaceAgnostic: undefined } });
   });
 
-  it(`returns false for explicitly namespaced type`, () => {
-    const schema = new SavedObjectsSchema({
-      foo: {
-        isNamespaceAgnostic: false,
-      },
-    });
-    const result = schema.isNamespaceAgnostic('foo');
-    expect(result).toBe(false);
+  it(`returns true for explicitly namespace-agnostic type`, () => {
+    expectResult(true, { foo: { isNamespaceAgnostic: true } });
   });
 });
 
 describe('#isNamespace', () => {
+  const expectResult = (expected: boolean, schemaDefinition?: SavedObjectsSchemaDefinition) => {
+    const schema = new SavedObjectsSchema(schemaDefinition);
+    const result = schema.isNamespace('foo');
+    expect(result).toBe(expected);
+  };
+
+  it(`returns true when no schema is defined`, () => {
+    expectResult(true);
+  });
+
   it(`returns true for unknown types`, () => {
-    const schema = new SavedObjectsSchema();
-    const result = schema.isNamespace('bar');
-    expect(result).toBe(true);
+    expectResult(true, { bar: {} });
   });
 
-  it(`returns false for explicitly namespace agnostic type`, () => {
-    const schema = new SavedObjectsSchema({
-      foo: {
-        isNamespaceAgnostic: true,
-      },
-    });
-    const result = schema.isNamespace('foo');
-    expect(result).toBe(false);
+  it(`returns false for explicitly namespace-agnostic type`, () => {
+    expectResult(false, { foo: { isNamespaceAgnostic: true } });
   });
 
-  it(`returns true for explicitly not namespace agnostic type`, () => {
-    const schema = new SavedObjectsSchema({
-      foo: {
-        isNamespaceAgnostic: false,
-      },
-    });
-    const result = schema.isNamespace('foo');
-    expect(result).toBe(true);
+  it(`returns false for explicitly multi-namespace type`, () => {
+    expectResult(false, { foo: { namespaces: true } });
   });
 
-  it(`returns false for explicitly namespaces`, () => {
-    const schema = new SavedObjectsSchema({
-      foo: {
-        namespaces: true,
-      },
-    });
-    const result = schema.isNamespace('foo');
-    expect(result).toBe(false);
+  it(`returns true for non-namespace-agnostic and non-multi-namespace type`, () => {
+    expectResult(true, { foo: { isNamespaceAgnostic: false, namespaces: false } });
+    expectResult(true, { foo: { isNamespaceAgnostic: false, namespaces: undefined } });
+    expectResult(true, { foo: { isNamespaceAgnostic: undefined, namespaces: false } });
+    expectResult(true, { foo: { isNamespaceAgnostic: undefined, namespaces: undefined } });
+  });
+});
+
+describe('#isNamespaces', () => {
+  const expectResult = (expected: boolean, schemaDefinition?: SavedObjectsSchemaDefinition) => {
+    const schema = new SavedObjectsSchema(schemaDefinition);
+    const result = schema.isNamespaces('foo');
+    expect(result).toBe(expected);
+  };
+
+  it(`returns false when no schema is defined`, () => {
+    expectResult(false);
   });
 
-  it(`returns true for explicitly not namespaces type`, () => {
-    const schema = new SavedObjectsSchema({
-      foo: {
-        namespaces: false,
-      },
-    });
-    const result = schema.isNamespace('foo');
-    expect(result).toBe(true);
+  it(`returns false for unknown types`, () => {
+    expectResult(false, { bar: {} });
+  });
+
+  it(`returns false for explicitly namespace-agnostic type`, () => {
+    expectResult(false, { foo: { isNamespaceAgnostic: true } });
+  });
+
+  it(`returns false for non-multi-namespace type`, () => {
+    expectResult(false, { foo: { namespaces: false } });
+    expectResult(false, { foo: { namespaces: undefined } });
+  });
+
+  it(`returns true for non-namespace-agnostic and explicitly multi-namespace type`, () => {
+    expectResult(true, { foo: { isNamespaceAgnostic: false, namespaces: true } });
+    expectResult(true, { foo: { isNamespaceAgnostic: undefined, namespaces: true } });
   });
 });

@@ -38,7 +38,7 @@ export const checkSavedObjectsPrivilegesWithRequestFactory = (
         if (spacesService === undefined) {
           throw new Error(`Can't check saved object privileges at spaces if spaces is disabled`);
         }
-        const spaceIds = namespaces.map(spacesService.namespaceToSpaceId);
+        const spaceIds = namespaces.map(x => spacesService.namespaceToSpaceId(x));
         return await checkPrivilegesWithRequest(request).atSpaces(spaceIds, actions);
       },
       async dynamically(actions: string | string[], namespace?: string) {

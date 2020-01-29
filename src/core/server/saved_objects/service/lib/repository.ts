@@ -221,6 +221,7 @@ export class SavedObjectsRepository {
     const {
       id,
       migrationVersion,
+      namespace,
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
@@ -246,8 +247,8 @@ export class SavedObjectsRepository {
     let savedObjectNamespace;
     let savedObjectNamespaces;
 
-    if (this._registry.isNamespace(type) && options.namespace) {
-      savedObjectNamespace = options.namespace;
+    if (this._registry.isNamespace(type) && namespace) {
+      savedObjectNamespace = namespace;
     } else if (this._registry.isNamespaces(type)) {
       if (method === 'index') {
         const response = await this._callCluster('get', {
@@ -258,14 +259,12 @@ export class SavedObjectsRepository {
 
         const docFound = response.found === true;
         const indexFound = response.status !== 404;
-        if (docFound && indexFound && !this._rawInNamespaces(response, options.namespace)) {
+        if (docFound && indexFound && !this._rawInNamespaces(response, namespace)) {
           throw SavedObjectsErrorHelpers.createConflictError(type, id!);
         }
-        savedObjectNamespaces = docFound
-          ? response._source.namespaces
-          : [options.namespace === undefined ? 'default' : options.namespace];
+        savedObjectNamespaces = docFound ? response._source.namespaces : [namespace ?? 'default'];
       } else {
-        savedObjectNamespaces = [options.namespace === undefined ? 'default' : options.namespace];
+        savedObjectNamespaces = [namespace ?? 'default'];
       }
     }
 
@@ -507,7 +506,7 @@ export class SavedObjectsRepository {
    */
   async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}): Promise<{}> {
     if (!this._allowedTypes.includes(type)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError();
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
     const { namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
@@ -521,11 +520,7 @@ export class SavedObjectsRepository {
 
     const getDocNotFound = getResponse.found === false;
     const getIndexNotFound = getResponse.status === 404;
-    if (
-      getDocNotFound ||
-      getIndexNotFound ||
-      !this._rawInNamespaces(getResponse, options.namespace)
-    ) {
+    if (getDocNotFound || getIndexNotFound || !this._rawInNamespaces(getResponse, namespace)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
@@ -865,11 +860,7 @@ export class SavedObjectsRepository {
 
     const getDocNotFound = getResponse.found === false;
     const getIndexNotFound = getResponse.status === 404;
-    if (
-      getDocNotFound ||
-      getIndexNotFound ||
-      !this._rawInNamespaces(getResponse, options.namespace)
-    ) {
+    if (getDocNotFound || getIndexNotFound || !this._rawInNamespaces(getResponse, namespace)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
@@ -999,7 +990,7 @@ export class SavedObjectsRepository {
         delete documentToSave.references;
       }
 
-      if (!this._registry.isNamespaces) {
+      if (!this._registry.isNamespaces(type)) {
         return {
           tag: 'Right' as 'Right',
           value: {
@@ -1158,10 +1149,31 @@ export class SavedObjectsRepository {
     const { migrationVersion, namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
 
     const time = this._getCurrentTime();
+    let savedObjectNamespace;
+    let savedObjectNamespaces;
+
+    if (this._registry.isNamespace(type) && namespace) {
+      savedObjectNamespace = namespace;
+    } else if (this._registry.isNamespaces(type)) {
+      const response = await this._callCluster('get', {
+        id: this._serializer.generateRawId(undefined, type, id),
+        index: this.getIndexForType(type),
+        ignore: [404],
+      });
+
+      const docFound = response.found === true;
+      const indexFound = response.status !== 404;
+      if (docFound && indexFound && !this._rawInNamespaces(response, namespace)) {
+        throw SavedObjectsErrorHelpers.createConflictError(type, id);
+      }
+      savedObjectNamespaces = docFound ? response._source.namespaces : [namespace ?? 'default'];
+    }
 
     const migrated = this._migrator.migrateDocument({
       id,
       type,
+      ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+      ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
       attributes: { [counterFieldName]: 1 },
       migrationVersion,
       updated_at: time,
@@ -1170,7 +1182,7 @@ export class SavedObjectsRepository {
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
     const response = await this._writeToCluster('update', {
-      id: this._serializer.generateRawId(namespace, type, id),
+      id: raw._id,
       index: this.getIndexForType(type),
       refresh,
       _source: true,
@@ -1194,10 +1206,6 @@ export class SavedObjectsRepository {
           },
         },
         upsert: raw._source,
-        ...getSearchDsl(this._mappings, this._registry, {
-          type,
-          namespace,
-        }),
       },
     });
 
@@ -1278,7 +1286,7 @@ export class SavedObjectsRepository {
 function getBulkOperationError(error: { type: string; reason?: string }, type: string, id: string) {
   switch (error.type) {
     case 'version_conflict_engine_exception':
-      return { statusCode: 409, message: 'version conflict, document already exists' };
+      return SavedObjectsErrorHelpers.createConflictError(type, id).output.payload;
     case 'document_missing_exception':
       return SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload;
     default:

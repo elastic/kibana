@@ -164,48 +164,76 @@ describe('SavedObjectTypeRegistry', () => {
   });
 
   describe('#isNamespaceAgnostic', () => {
-    it('returns correct value for the type', () => {
-      registry.registerType(createType({ name: 'typeA', namespaceAgnostic: true }));
-      registry.registerType(createType({ name: 'typeB', namespaceAgnostic: false }));
+    const expectResult = (expected: boolean, schemaDefinition?: Partial<SavedObjectsType>) => {
+      registry = new SavedObjectTypeRegistry();
+      registry.registerType(createType({ name: 'foo', ...schemaDefinition }));
+      expect(registry.isNamespaceAgnostic('foo')).toBe(expected);
+    };
 
-      expect(registry.isNamespaceAgnostic('typeA')).toEqual(true);
-      expect(registry.isNamespaceAgnostic('typeB')).toEqual(false);
-    });
-    it('returns false when the type is not registered', () => {
-      registry.registerType(createType({ name: 'typeA', namespaceAgnostic: true }));
-      registry.registerType(createType({ name: 'typeB', namespaceAgnostic: false }));
-
+    it(`returns false when the type is not registered`, () => {
       expect(registry.isNamespaceAgnostic('unknownType')).toEqual(false);
+    });
+
+    it(`returns false for non-namespace-agnostic type`, () => {
+      expectResult(false, { namespaceAgnostic: false });
+      expectResult(false, { namespaceAgnostic: undefined });
+    });
+
+    it(`returns true for explicitly namespace-agnostic type`, () => {
+      expectResult(true, { namespaceAgnostic: true });
     });
   });
 
   describe('#isNamespace', () => {
+    const expectResult = (expected: boolean, schemaDefinition?: Partial<SavedObjectsType>) => {
+      registry = new SavedObjectTypeRegistry();
+      registry.registerType(createType({ name: 'foo', ...schemaDefinition }));
+      expect(registry.isNamespace('foo')).toBe(expected);
+    };
+
     it(`returns true when the type is not registered`, () => {
       expect(registry.isNamespace('unknownType')).toEqual(true);
     });
 
-    it(`returns false for explicitly namespace agnostic type`, () => {
-      registry.registerType(createType({ name: 'typeA', namespaceAgnostic: true }));
-
-      expect(registry.isNamespace('typeA')).toEqual(false);
+    it(`returns false for explicitly namespace-agnostic type`, () => {
+      expectResult(false, { namespaceAgnostic: true });
     });
 
-    it(`returns true for explicitly not namespace agnostic type`, () => {
-      registry.registerType(createType({ name: 'typeA', namespaceAgnostic: false }));
-
-      expect(registry.isNamespace('typeA')).toEqual(true);
+    it(`returns false for explicitly multi-namespace type`, () => {
+      expectResult(false, { namespaces: true });
     });
 
-    it(`returns false for explicitly namespaces`, () => {
-      registry.registerType(createType({ name: 'typeA', namespaces: true }));
+    it(`returns true for non-namespace-agnostic and non-multi-namespace type`, () => {
+      expectResult(true, { namespaceAgnostic: false, namespaces: false });
+      expectResult(true, { namespaceAgnostic: false, namespaces: undefined });
+      expectResult(true, { namespaceAgnostic: undefined, namespaces: false });
+      expectResult(true, { namespaceAgnostic: undefined, namespaces: undefined });
+    });
+  });
 
-      expect(registry.isNamespace('typeA')).toEqual(false);
+  describe('#isNamespaces', () => {
+    const expectResult = (expected: boolean, schemaDefinition?: Partial<SavedObjectsType>) => {
+      registry = new SavedObjectTypeRegistry();
+      registry.registerType(createType({ name: 'foo', ...schemaDefinition }));
+      expect(registry.isNamespaces('foo')).toBe(expected);
+    };
+
+    it(`returns false when the type is not registered`, () => {
+      expect(registry.isNamespaces('unknownType')).toEqual(false);
     });
 
-    it(`returns true for explicitly not namespaces type`, () => {
-      registry.registerType(createType({ name: 'typeA', namespaces: false }));
+    it(`returns false for explicitly namespace-agnostic type`, () => {
+      expectResult(false, { namespaceAgnostic: true });
+    });
 
-      expect(registry.isNamespace('typeA')).toEqual(true);
+    it(`returns false for non-multi-namespace type`, () => {
+      expectResult(false, { namespaces: false });
+      expectResult(false, { namespaces: undefined });
+    });
+
+    it(`returns true for non-namespace-agnostic and explicitly multi-namespace type`, () => {
+      expectResult(true, { namespaceAgnostic: false, namespaces: true });
+      expectResult(true, { namespaceAgnostic: undefined, namespaces: true });
     });
   });
 

@@ -73,8 +73,8 @@ export class SavedObjectsSerializer {
     return {
       type,
       id: this.trimIdPrefix(namespace, type, _id),
-      ...(namespace && !this.registry.isNamespaceAgnostic(type) && { namespace }),
-      ...(namespaces && { namespaces }),
+      ...(namespace && this.registry.isNamespace(type) && { namespace }),
+      ...(namespaces && this.registry.isNamespaces(type) && { namespaces }),
       attributes: _source[type],
       references: _source.references || [],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
@@ -104,8 +104,8 @@ export class SavedObjectsSerializer {
       [type]: attributes,
       type,
       references,
-      ...(namespace && !this.registry.isNamespaceAgnostic(type) && { namespace }),
-      ...(namespaces && { namespaces }),
+      ...(namespace && this.registry.isNamespace(type) && { namespace }),
+      ...(namespaces && this.registry.isNamespaces(type) && { namespaces }),
       ...(migrationVersion && { migrationVersion }),
       ...(updated_at && { updated_at }),
     };
