@@ -359,6 +359,7 @@ function VisualizeAppController(
       return vis.type.options.showTimePicker && hasTimeField;
     };
 
+    $scope.timeRange = timefilter.getTime();
     $scope.opts = _.pick($scope, 'savedVis', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
@@ -395,6 +396,7 @@ function VisualizeAppController(
     // update the searchSource when query updates
     $scope.fetch = function() {
       $state.save();
+      $scope.timeRange = timefilter.getTime();
       $scope.query = $state.query;
       savedVis.searchSource.setField('query', $state.query);
       savedVis.searchSource.setField('filter', filterManager.getFilters());
