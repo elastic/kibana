@@ -120,7 +120,6 @@ describe('ElasticsearchPingsAdapter class', () => {
         dateEnd: 'now',
         filters: '',
       });
-      assertCloseTo(result.interval, 36000, 100);
       result.interval = '1m';
 
       expect(mockEsClient).toHaveBeenCalledTimes(1);
