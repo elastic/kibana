@@ -18,19 +18,20 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { SearchService, SearchStart } from './search';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import {
+  DataPublicPluginStart,
+  addSearchStrategy,
+  defaultSearchStrategy,
+} from '../../../../plugins/data/public';
 import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
 import {
-  setFieldFormats,
-  setNotifications,
   setIndexPatterns,
   setQueryService,
-  setSearchService,
   setUiSettings,
   setInjectedMetadata,
-  setHttp,
+  setFieldFormats,
+  setSearchService,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
 
@@ -47,9 +48,7 @@ export interface DataPluginStartDependencies {
  *
  * @public
  */
-export interface DataStart {
-  search: SearchStart;
-}
+export interface DataStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 /**
  * Data Plugin - public
@@ -65,29 +64,22 @@ export interface DataStart {
 
 export class DataPlugin
   implements Plugin<void, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
-  private readonly search = new SearchService();
-
   public setup(core: CoreSetup) {
     setInjectedMetadata(core.injectedMetadata);
+
+    // This is to be deprecated once we switch to the new search service fully
+    addSearchStrategy(defaultSearchStrategy);
   }
 
   public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
-    // This is required for when Angular code uses Field and FieldList.
-    setFieldFormats(data.fieldFormats);
+    setUiSettings(core.uiSettings);
     setQueryService(data.query);
-    setSearchService(data.search);
     setIndexPatterns(data.indexPatterns);
     setFieldFormats(data.fieldFormats);
-    setNotifications(core.notifications);
-    setUiSettings(core.uiSettings);
-    setHttp(core.http);
+    setSearchService(data.search);
 
-    return {
-      search: this.search.start(core),
-    };
+    return {};
   }
 
-  public stop() {
-    this.search.stop();
-  }
+  public stop() {}
 }

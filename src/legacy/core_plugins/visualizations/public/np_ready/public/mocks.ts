@@ -48,6 +48,7 @@ const createStartContract = (): VisualizationsStart => ({
     all: jest.fn(),
     getAliases: jest.fn(),
   },
+  getSavedVisualizationsLoader: jest.fn(),
 });
 
 const createInstance = async () => {

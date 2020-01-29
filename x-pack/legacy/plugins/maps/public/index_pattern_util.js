@@ -5,6 +5,7 @@
  */
 
 import { indexPatternService } from './kibana_services';
+import { isNestedField } from '../../../../../src/plugins/data/public';
 
 export async function getIndexPatternsFromIds(indexPatternIds = []) {
   const promises = [];
@@ -20,7 +21,11 @@ export async function getIndexPatternsFromIds(indexPatternIds = []) {
 
 export function getTermsFields(fields) {
   return fields.filter(field => {
-    return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
+    return (
+      field.aggregatable &&
+      !isNestedField(field) &&
+      ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type)
+    );
   });
 }
 
@@ -29,6 +34,6 @@ export function getSourceFields(fields) {
   return fields.filter(field => {
     // Multi fields are not stored in _source and only exist in index.
     const isMultiField = field.subType && field.subType.multi;
-    return !isMultiField;
+    return !isMultiField && !isNestedField(field);
   });
 }
