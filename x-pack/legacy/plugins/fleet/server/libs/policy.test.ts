@@ -85,7 +85,7 @@ describe.skip('Policies Lib', () => {
           return policy;
         },
       };
-      const policyLib = new PolicyLib(repository);
+      const policyLib = new PolicyLib(repository, {});
 
       const fullPolicy = (await policyLib.getFullPolicy(
         getUser(),

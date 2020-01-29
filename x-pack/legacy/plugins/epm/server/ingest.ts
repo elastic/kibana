@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import fetch from 'node-fetch';
-import { ReturnTypeCreate, ReturnTypeUpdate } from '../../ingest/common/types/std_return_format';
+import { ReturnTypeCreate } from '../../ingest/common/types/std_return_format';
 import { Datasource } from '../../ingest/common/types/domain_data';
 import { Request } from './types';
 

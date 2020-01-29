@@ -24,7 +24,6 @@ import {
   PackagesGroupedByStatus,
   DatasourcePayload,
 } from '../common/types';
-import { ReturnTypeList } from '../../ingest/common/types/std_return_format';
 
 const defaultClient: HttpHandler = (path: string, options?: HttpFetchOptions) =>
   fetch(path, options).then(res => res.json());

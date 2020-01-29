@@ -5,7 +5,6 @@
  */
 
 import {
-  ReturnTypeList,
   ReturnTypeCreate,
   ReturnTypeGet,
   ReturnTypeUpdate,
