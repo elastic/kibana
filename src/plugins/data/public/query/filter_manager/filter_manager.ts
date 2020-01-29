@@ -124,17 +124,16 @@ export class FilterManager {
 
   /* Setters */
 
-  public addFilters(filters: esFilters.Filter[] | esFilters.Filter, pinFilterStatus?: boolean) {
+  public addFilters(
+    filters: esFilters.Filter[] | esFilters.Filter,
+    pinFilterStatus: boolean = this.uiSettings.get('filters:pinnedByDefault')
+  ) {
     if (!Array.isArray(filters)) {
       filters = [filters];
     }
 
     if (filters.length === 0) {
       return;
-    }
-
-    if (pinFilterStatus === undefined) {
-      pinFilterStatus = this.uiSettings.get('filters:pinnedByDefault');
     }
 
     // Set the store of all filters. For now.
@@ -157,7 +156,16 @@ export class FilterManager {
     this.handleStateUpdate(newFilters);
   }
 
-  public setFilters(newFilters: esFilters.Filter[]) {
+  public setFilters(
+    newFilters: esFilters.Filter[],
+    pinFilterStatus: boolean = this.uiSettings.get('filters:pinnedByDefault')
+  ) {
+    const store = pinFilterStatus
+      ? esFilters.FilterStateStore.GLOBAL_STATE
+      : esFilters.FilterStateStore.APP_STATE;
+
+    FilterManager.setFiltersStore(newFilters, store);
+
     const mappedFilters = mapAndFlattenFilters(newFilters);
     const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
     const mergedFilters = this.mergeIncomingFilters(newPartitionedFilters);
