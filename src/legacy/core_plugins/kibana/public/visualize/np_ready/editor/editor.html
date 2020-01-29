@@ -42,13 +42,22 @@
     show-filter-bar="showFilterBar() && isVisible"
     show-date-picker="showQueryBarTimePicker()"
     show-auto-refresh-only="!showQueryBarTimePicker()"
-    show-save-query="showSaveQuery"
     query="state.query"
+    saved-query="savedQuery"
     screen-title="state.vis.title"
-    on-query-submit="updateQuery"
+    on-query-submit="updateQueryAndFetch"
     index-patterns="[indexPattern]"
-
-    use-default-behaviors="true"
+    filters="filters"
+    on-filters-updated="onFiltersUpdated"
+    date-range-from="timeRange.from"
+    date-range-to="timeRange.to"
+    is-refresh-paused="refreshInterval.pause"
+    refresh-interval="refreshInterval.value"
+    on-refresh-change="onRefreshChange"
+    show-save-query="showSaveQuery"
+    on-saved="onQuerySaved"
+    on-saved-query-updated="onSavedQueryUpdated"
+    on-clear-saved-query="onClearSavedQuery"
   >
   </kbn-top-nav>
 
@@ -61,13 +70,13 @@
 
     app-name="'visualize'"
     show-search-bar="true"
-    show-query-bar="false"
     show-filter-bar="true"
     show-save-query="false"
     show-date-picker="false"
 
+    filters="filters"
+    on-filters-updated="onFiltersUpdated"
     index-patterns="[indexPattern]"
-    use-default-behaviors="true"
   >
   </kbn-top-nav>
 
