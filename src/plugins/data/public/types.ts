@@ -21,7 +21,7 @@ import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete/types';
-import { FieldFormatsSetup, FieldFormatsStart } from './field_formats_provider';
+import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternSelectProps } from './ui/index_pattern_select';

@@ -42,7 +42,7 @@ jest.mock('./vislib/response_handler', () => ({
 }));
 
 describe('interpreter/functions#pie', () => {
-  const fn = functionWrapper(createPieVisFn());
+  const fn = functionWrapper(createPieVisFn);
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],

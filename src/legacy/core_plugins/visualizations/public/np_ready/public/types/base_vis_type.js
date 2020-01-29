@@ -20,7 +20,7 @@
 import _ from 'lodash';
 
 import { createFiltersFromEvent, onBrushEvent } from '../filters';
-import { DefaultEditorController } from '../../../legacy_imports';
+import { DefaultEditorController } from '../../../../../vis_default_editor/public';
 
 export class BaseVisType {
   constructor(opts = {}) {
