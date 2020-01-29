@@ -103,13 +103,15 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           });
 
           it(`does not show link to view logs`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
-            await testSubjects.missingOrFail('viewLogsContextMenuItem');
+            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+            const link = await testSubjects.find('~viewLogsContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
 
           it(`does not show link to view apm traces`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
-            await testSubjects.missingOrFail('viewApmTracesContextMenuItem');
+            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+            const link = await testSubjects.find('~viewApmTracesContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
         });
 
@@ -216,13 +218,15 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           });
 
           it(`does not show link to view logs`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
-            await testSubjects.missingOrFail('viewLogsContextMenuItem');
+            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+            const link = await testSubjects.find('~viewLogsContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
 
           it(`does not show link to view apm traces`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
-            await testSubjects.missingOrFail('viewApmTracesContextMenuItem');
+            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+            const link = await testSubjects.find('~viewApmTracesContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
         });
 

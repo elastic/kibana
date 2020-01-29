@@ -141,6 +141,12 @@ export const npSetup = {
         update: sinon.fake(),
       },
     },
+    charts: {
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
+      },
+    },
   },
 };
 
@@ -276,10 +282,19 @@ export const npStart = {
       featureCatalogue: {
         register: sinon.fake(),
       },
+      environment: {
+        get: sinon.fake(),
+      },
     },
     navigation: {
       ui: {
         TopNavMenu: mockComponent,
+      },
+    },
+    charts: {
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
       },
     },
   },
