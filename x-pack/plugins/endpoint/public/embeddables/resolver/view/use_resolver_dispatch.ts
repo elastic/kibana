@@ -7,4 +7,7 @@
 import { useDispatch } from 'react-redux';
 import { ResolverAction } from '../types';
 
+/**
+ * Call `useDispatch`, but only accept `ResolverAction` actions.
+ */
 export const useResolverDispatch: () => (action: ResolverAction) => unknown = useDispatch;
