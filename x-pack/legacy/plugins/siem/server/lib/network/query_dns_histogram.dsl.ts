@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createQueryFilterClauses, calculateTimeseriesInterval } from '../../utils/build_query';
+import { createQueryFilterClauses, calculateTimeSeriesInterval } from '../../utils/build_query';
 import { MatrixHistogramRequestOptions } from '../framework';
 
 export const buildDnsHistogramQuery = ({
@@ -29,12 +29,12 @@ export const buildDnsHistogramQuery = ({
   ];
 
   const getHistogramAggregation = () => {
-    const interval = calculateTimeseriesInterval(from, to);
+    const interval = calculateTimeSeriesInterval(from, to);
     const histogramTimestampField = '@timestamp';
     const dateHistogram = {
       date_histogram: {
         field: histogramTimestampField,
-        fixed_interval: `${interval}s`,
+        fixed_interval: interval,
       },
     };
 

@@ -4,22 +4,22 @@
     "Security scans and tests may result in these errors. Misconfigured or buggy applications may produce large numbers of these errors. If the source is unexpected, or the user is unauthorized, or the request is unusual, these may be suspicious or malicious activity."
   ],
   "index": [
-    "apm-*-transaction*",
-    "auditbeat-*",
-    "endgame-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "apm-*-transaction*"
   ],
   "language": "kuery",
   "max_signals": 33,
   "name": "Web Application Suspicious Activity: POST Request Declined",
   "query": "http.response.status_code:403 and http.request.method:post",
-  "references": ["https://en.wikipedia.org/wiki/HTTP_403"],
-  "risk_score": 50,
+  "references": [
+    "https://en.wikipedia.org/wiki/HTTP_403"
+  ],
+  "risk_score": 47,
   "rule_id": "a87a4e42-1d82-44bd-b0bf-d9b7f91fb89e",
-  "severity": "low",
-  "tags": ["Elastic", "apm"],
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "APM"
+  ],
   "type": "query",
   "version": 1
 }
