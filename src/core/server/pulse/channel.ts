@@ -25,6 +25,8 @@ import { Logger } from '../logging';
 
 import { IPulseElasticsearchClient } from './client_wrappers/types';
 // I'll probably need to extend the PulseInstruction to declare the value types for an Error Instruction
+
+// this type needs to be renamed to PuselErrorInstructionValue!
 export interface PulseErrorPayloadRecord {
   timestamp: Date;
   message: string;

@@ -22,9 +22,6 @@ export async function check(es: IScopedClusterClient, { deploymentId, indexName 
             {
               term: { deployment_id: deploymentId },
             },
-            {
-              match: { status: 'new' },
-            },
           ],
           filter: {
             range: {

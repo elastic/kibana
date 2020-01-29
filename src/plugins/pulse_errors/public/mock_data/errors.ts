@@ -45,7 +45,7 @@ export const errorChannelPayloads: PulseErrorPayloadRecord[] = [
   {
     channel_id: 'errors',
     deployment_id: '123',
-    message: 'The SampleDataSetCard key="ecommerce" component failed to mount',
+    message: 'The SampleDataSetCard [key=ecommerce] component failed to mount',
     hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 1',
     status: 'new',
     fixedVersion: 'v7.5.2',

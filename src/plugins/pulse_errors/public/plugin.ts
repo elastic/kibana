@@ -50,7 +50,7 @@ export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseEr
               core.notifications.toasts.addError(new Error(JSON.stringify(instruction)), {
                 // @ts-ignore-next-line
                 title: `Error:${instruction.hash}`,
-                toastMessage: `An error occurred: ${instruction.message}. Pulse message: ${instruction.pulseMessage}`,
+                toastMessage: `An error occurred: ${instruction.message}. Pulse message:${instruction.pulseMessage}`,
               });
             this.instructionsSeen.add(instruction.hash);
           });

@@ -26,9 +26,9 @@ import { PulseCollector, CollectorSetupContext } from '../types';
 
 export interface Payload {
   deploymentId: string;
-  records: Array<Omit<ErrorPayloadValue, 'channel_id' | 'deployment_id'>>;
+  records: Array<Omit<PulseErrorPayloadRecord, 'channel_id' | 'deployment_id'>>;
 }
-export interface ErrorPayloadValue {
+export interface PulseErrorPayloadRecord {
   channel_id: string;
   currentKibanaVersion?: string;
   deployment_id: string;

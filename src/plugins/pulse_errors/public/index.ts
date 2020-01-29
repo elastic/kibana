@@ -23,3 +23,4 @@ import { PulseErrorsPlugin, PulseErrorsPluginSetup, PulseErrorsPluginStart } fro
 export const plugin: PluginInitializer<PulseErrorsPluginSetup, PulseErrorsPluginStart> = (
   initializerContext: PluginInitializerContext
 ) => new PulseErrorsPlugin(initializerContext);
+// TODO: figure out the error with passing 1 parameter to PulseErrorsPlugin when I'm being told no arguments are expected.
