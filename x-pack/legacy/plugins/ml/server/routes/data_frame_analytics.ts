@@ -15,7 +15,15 @@ import {
   dataAnalyticsExplainSchema,
 } from '../new_platform/data_analytics_schema';
 
+/**
+ * Routes for the data frame analytics
+ */
 export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+  /**
+   * @api {get} /api/ml/data_frame/analytics Gets analytics data
+   * @apiName GetDataFrameAnalytics
+   * @apiGroup DataFrameAnalytics
+   */
   router.get(
     {
       path: '/api/ml/data_frame/analytics',
@@ -35,6 +43,13 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @api {get} /api/ml/data_frame/analytics/:analyticsId Gets analytics data by id
+   * @apiName GetDataFrameAnalyticsById
+   * @apiGroup DataFrameAnalytics
+   *
+   * @apiParam {String} [analyticsId] Analytics ID.
+   */
   router.get(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}',
@@ -57,6 +72,11 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @api {get} /api/ml/data_frame/analytics/_stats Gets analytics stats
+   * @apiName GetDataFrameAnalyticsStats
+   * @apiGroup DataFrameAnalytics
+   */
   router.get(
     {
       path: '/api/ml/data_frame/analytics/_stats',
@@ -76,6 +96,13 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @api {get} /api/ml/data_frame/analytics/:analyticsId/_stats Gets stats for requested analytics job
+   * @apiName GetDataFrameAnalyticsStatsById
+   * @apiGroup DataFrameAnalytics
+   *
+   * @apiParam {String} [analyticsId] Analytics ID.
+   */
   router.get(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/_stats',
@@ -101,6 +128,13 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @api {put} /api/ml/data_frame/analytics/:analyticsId Gets stats for requested analytics job
+   * @apiName UpdateDataFrameAnalytics
+   * @apiGroup DataFrameAnalytics
+   *
+   * @apiParam {String} [analyticsId] Analytics ID.
+   */
   router.put(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}',
@@ -130,6 +164,11 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @api {post} /api/ml/data_frame/_evaluate Gets stats for requested analytics job
+   * @apiName EvaluateDataFrameAnalytics
+   * @apiGroup DataFrameAnalytics
+   */
   router.post(
     {
       path: '/api/ml/data_frame/_evaluate',
@@ -154,6 +193,19 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @api {post} /api/ml/data_frame/_explain Provides additional info for requested analytics job
+   * @apiName ExplainDataFrameAnalytics
+   * @apiGroup DataFrameAnalytics
+   *
+   * @apiSuccess {String} description
+   * @apiSuccess {Object} dest
+   * @apiSuccess {Object} source
+   * @apiSuccess {String} source.index
+   * @apiSuccess {Object} analysis
+   * @apiSuccess {Object} analyzed_fields
+   * @apiSuccess {String} model_memory_limit
+   */
   router.post(
     {
       path: '/api/ml/data_frame/analytics/_explain',
@@ -178,6 +230,13 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @api {delete} /api/ml/data_frame/analytics/:analyticsId Deletes specified analytics job
+   * @apiName ExplainDataFrameAnalytics
+   * @apiGroup DataFrameAnalytics
+   *
+   * @apiParam {String} [analyticsId] Analytics ID.
+   */
   router.delete(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}',
@@ -205,6 +264,13 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @api {post} /api/ml/data_frame/analytics/:analyticsId/_start Starts specified analytics job
+   * @apiName StartDataFrameAnalyticsJob
+   * @apiGroup DataFrameAnalytics
+   *
+   * @apiParam {String} [analyticsId] Analytics ID.
+   */
   router.post(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/_start',
@@ -229,6 +295,13 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @api {post} /api/ml/data_frame/analytics/:analyticsId/_stop Stops specified analytics job
+   * @apiName StopsDataFrameAnalyticsJob
+   * @apiGroup DataFrameAnalytics
+   *
+   * @apiParam {String} [analyticsId] Analytics ID.
+   */
   router.post(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/_stop',
@@ -263,6 +336,13 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @api {get} /api/ml/data_frame/analytics/:analyticsId/messages Gets analytics job messages
+   * @apiName GetDataFrameAnalyticsMessages
+   * @apiGroup DataFrameAnalytics
+   *
+   * @apiParam {String} [analyticsId] Analytics ID.
+   */
   router.get(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/messages',

@@ -1,0 +1,7 @@
+{
+  "name": "ml_kibana_api",
+  "version": "0.1.0",
+  "description": "ML Kibana API",
+  "title": "ML Kibana API",
+  "url" : "/api/ml/"
+}
