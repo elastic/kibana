@@ -35,12 +35,15 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       datePickerStartValue: string,
       datePickerEndValue: string,
       monitorId: string,
-      monitorName: string
+      monitorName?: string
     ) {
       await pageObjects.common.navigateToApp('uptime');
       await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
       await uptimeService.navigateToMonitorWithId(monitorId);
-      if ((await uptimeService.getMonitorNameDisplayedOnPageTitle()) !== monitorName) {
+      if (
+        monitorName &&
+        (await uptimeService.getMonitorNameDisplayedOnPageTitle()) !== monitorName
+      ) {
         throw new Error('Expected monitor name not found');
       }
     }
@@ -88,6 +91,10 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
 
     public async getSnapshotCount() {
       return await uptimeService.getSnapshotCount();
+    }
+
+    public locationMissingIsDisplayed() {
+      return uptimeService.locationMissingExists();
     }
   })();
 }
