@@ -29,6 +29,7 @@ export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    'doc_table:legacyTable': true,
   };
 
   describe('discover test', function describeIndexTests() {

@@ -739,6 +739,12 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await this.clickKibanaSettings();
       await this.setAdvancedSettingsSelect('pageNavigation', navType);
     }
+
+    async toggleDiscoverDataGrid(legacyTable: boolean) {
+      await PageObjects.common.navigateToApp('settings');
+      await this.clickKibanaSettings();
+      await this.toggleAdvancedSettingCheckbox('doc_table:legacyTable');
+    }
   }
 
   return new SettingsPage();

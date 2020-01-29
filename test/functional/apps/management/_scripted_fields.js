@@ -58,7 +58,7 @@ export default function({ getService, getPageObjects }) {
     before(async function() {
       await browser.setWindowSize(1200, 800);
       // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({});
+      await kibanaServer.uiSettings.replace({ 'doc_table:legacyTable': true });
       await PageObjects.settings.createIndexPattern();
       await kibanaServer.uiSettings.update({});
     });

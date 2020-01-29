@@ -74,26 +74,39 @@ const cellPopoverRenderer = (
 ) => {
   return (
     <>
-      {value}
+      <span id="foo">{value}</span>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <EuiButtonEmpty
             iconType="magnifyWithPlus"
-            aria-label={`Filter on ${value}`}
+            aria-label={i18n.translate('kbn.discover.grid.ariaFilterOn', {
+              defaultMessage: 'Filter on {value}',
+              // @ts-ignore // TODO@myasonik value renders as [object Object]
+              values: { value },
+            })}
+            aria-describedby="foo"
             onClick={positiveFilterClick}
           >
-            Filter on value
+            {i18n.translate('kbn.discover.grid.filterOn', {
+              defaultMessage: 'Filter on value',
+            })}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButtonEmpty
             iconType="magnifyWithMinus"
-            aria-label={`Filter without ${value}`}
+            aria-label={i18n.translate('kbn.discover.grid.ariaFilterOut', {
+              defaultMessage: 'Filter without {value}',
+              // @ts-ignore // TODO@myasonik value renders as [object Object]
+              values: { value },
+            })}
             color="danger"
             onClick={negativeFilterClick}
           >
-            Filter without value
+            {i18n.translate('kbn.discover.grid.filterOut', {
+              defaultMessage: 'Filter without value',
+            })}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -236,7 +249,9 @@ export function DiscoverGrid({
 
         return (
           <EuiButtonToggle
-            label="Toggle dialog with details"
+            label={i18n.translate('kbn.discover.grid.viewDoc', {
+              defaultMessage: 'Toggle dialog with details',
+            })}
             iconType={showFlyout ? 'eye' : 'eyeClosed'}
             onChange={() => setFlyoutRow(row)}
             isSelected={showFlyout}

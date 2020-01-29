@@ -98,13 +98,13 @@ discover-app {
     font-family: $euiCodeFontFamily;
     font-size: $euiFontSizeXS;
   }
+}
 
-  // TODO: Delete when old Discover table is removed
-  .dscTable__footer {
-    background-color: $euiColorLightShade;
-    padding: 5px 10px;
-    text-align: center;
-  }
+// TODO: Delete when old Discover table is removed
+.dscTable__footer {
+  background-color: $euiColorLightShade;
+  padding: 5px 10px;
+  text-align: center;
 }
 
 /**
