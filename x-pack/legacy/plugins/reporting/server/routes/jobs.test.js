@@ -54,6 +54,10 @@ beforeEach(() => {
   };
 });
 
+const mockPlugins = {
+  security: null,
+};
+
 const getHits = (...sources) => {
   return {
     hits: {
@@ -67,7 +71,7 @@ test(`returns 404 if job not found`, async () => {
     .getCluster('admin')
     .callWithInternalUser.mockReturnValue(Promise.resolve(getHits()));
 
-  registerJobInfoRoutes(mockServer, exportTypesRegistry, mockLogger);
+  registerJobInfoRoutes(mockServer, mockPlugins, exportTypesRegistry, mockLogger);
 
   const request = {
     method: 'GET',
@@ -84,7 +88,7 @@ test(`returns 401 if not valid job type`, async () => {
     .getCluster('admin')
     .callWithInternalUser.mockReturnValue(Promise.resolve(getHits({ jobtype: 'invalidJobType' })));
 
-  registerJobInfoRoutes(mockServer, exportTypesRegistry, mockLogger);
+  registerJobInfoRoutes(mockServer, mockPlugins, exportTypesRegistry, mockLogger);
 
   const request = {
     method: 'GET',
@@ -103,7 +107,7 @@ describe(`when job is incomplete`, () => {
         Promise.resolve(getHits({ jobtype: 'unencodedJobType', status: 'pending' }))
       );
 
-    registerJobInfoRoutes(mockServer, exportTypesRegistry, mockLogger);
+    registerJobInfoRoutes(mockServer, mockPlugins, exportTypesRegistry, mockLogger);
 
     const request = {
       method: 'GET',
@@ -145,7 +149,7 @@ describe(`when job is failed`, () => {
       .getCluster('admin')
       .callWithInternalUser.mockReturnValue(Promise.resolve(hits));
 
-    registerJobInfoRoutes(mockServer, exportTypesRegistry, mockLogger);
+    registerJobInfoRoutes(mockServer, mockPlugins, exportTypesRegistry, mockLogger);
 
     const request = {
       method: 'GET',
@@ -190,7 +194,7 @@ describe(`when job is completed`, () => {
       .getCluster('admin')
       .callWithInternalUser.mockReturnValue(Promise.resolve(hits));
 
-    registerJobInfoRoutes(mockServer, exportTypesRegistry, mockLogger);
+    registerJobInfoRoutes(mockServer, mockPlugins, exportTypesRegistry, mockLogger);
 
     const request = {
       method: 'GET',

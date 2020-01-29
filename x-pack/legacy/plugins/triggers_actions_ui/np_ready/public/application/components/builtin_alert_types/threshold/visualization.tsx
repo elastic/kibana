@@ -100,7 +100,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
   const [error, setError] = useState<undefined | any>(undefined);
   const [visualizationData, setVisualizationData] = useState<Record<string, any>>([]);
 
-  const chartsTheme = npStart.plugins.eui_utils.useChartsTheme();
+  const chartsTheme = npStart.plugins.charts.theme.useChartsTheme();
   const {
     index,
     timeField,
