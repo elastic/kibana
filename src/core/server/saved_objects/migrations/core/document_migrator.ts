@@ -67,21 +67,17 @@ import Semver from 'semver';
 import { Logger } from '../../../logging';
 import { RawSavedObjectDoc } from '../../serialization';
 import { SavedObjectsMigrationVersion } from '../../types';
-import { MigrationLogger, SavedObjectsMigrationLogger } from './migration_logger';
+import { MigrationLogger } from './migration_logger';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { SavedObjectMigrationFn } from '../types';
 
 export type TransformFn = (doc: RawSavedObjectDoc) => RawSavedObjectDoc;
 
-type MigrationFn = (doc: RawSavedObjectDoc, log: SavedObjectsMigrationLogger) => RawSavedObjectDoc;
-
 type ValidateDoc = (doc: RawSavedObjectDoc) => void;
 
-export interface MigrationDefinition {
-  [type: string]: { [version: string]: MigrationFn };
-}
-
-interface Opts {
+interface DocumentMigratorOptions {
   kibanaVersion: string;
-  migrations: MigrationDefinition;
+  typeRegistry: SavedObjectTypeRegistry;
   validateDoc: ValidateDoc;
   log: Logger;
 }
@@ -114,22 +110,22 @@ export class DocumentMigrator implements VersionedTransformer {
   /**
    * Creates an instance of DocumentMigrator.
    *
-   * @param {Opts} opts
+   * @param {DocumentMigratorOptions} opts
    * @prop {string} kibanaVersion - The current version of Kibana
-   * @prop {MigrationDefinition} migrations - The migrations that will be used to migrate documents
+   * @prop {SavedObjectTypeRegistry} typeRegistry - The type registry to get type migrations from
    * @prop {ValidateDoc} validateDoc - A function which, given a document throws an error if it is
    *   not up to date. This is used to ensure we don't let unmigrated documents slip through.
    * @prop {Logger} log - The migration logger
    * @memberof DocumentMigrator
    */
-  constructor(opts: Opts) {
-    validateMigrationDefinition(opts.migrations);
+  constructor({ typeRegistry, kibanaVersion, log, validateDoc }: DocumentMigratorOptions) {
+    validateMigrationDefinition(typeRegistry);
 
-    this.migrations = buildActiveMigrations(opts.migrations, opts.log);
+    this.migrations = buildActiveMigrations(typeRegistry, log);
     this.transformDoc = buildDocumentTransform({
-      kibanaVersion: opts.kibanaVersion,
+      kibanaVersion,
       migrations: this.migrations,
-      validateDoc: opts.validateDoc,
+      validateDoc,
     });
   }
 
@@ -166,7 +162,7 @@ export class DocumentMigrator implements VersionedTransformer {
  * language. So, this is just to provide a little developer-friendly error messaging. Joi was
  * giving weird errors, so we're just doing manual validation.
  */
-function validateMigrationDefinition(migrations: MigrationDefinition) {
+function validateMigrationDefinition(registry: SavedObjectTypeRegistry) {
   function assertObject(obj: any, prefix: string) {
     if (!obj || typeof obj !== 'object') {
       throw new Error(`${prefix} Got ${obj}.`);
@@ -187,16 +183,14 @@ function validateMigrationDefinition(migrations: MigrationDefinition) {
     }
   }
 
-  assertObject(migrations, 'Migration definition should be an object.');
-
-  Object.entries(migrations).forEach(([type, versions]: any) => {
+  registry.getAllTypes().forEach(type => {
     assertObject(
-      versions,
-      `Migration for type ${type} should be an object like { '2.0.0': (doc) => doc }.`
+      type.migrations,
+      `Migration for type ${type.name} should be an object like { '2.0.0': (doc) => doc }.`
     );
-    Object.entries(versions).forEach(([version, fn]) => {
-      assertValidSemver(version, type);
-      assertValidTransform(fn, version, type);
+    Object.entries(type.migrations).forEach(([version, fn]) => {
+      assertValidSemver(version, type.name);
+      assertValidTransform(fn, version, type.name);
     });
   });
 }
@@ -207,19 +201,28 @@ function validateMigrationDefinition(migrations: MigrationDefinition) {
  * From: { type: { version: fn } }
  * To:   { type: { latestVersion: string, transforms: [{ version: string, transform: fn }] } }
  */
-function buildActiveMigrations(migrations: MigrationDefinition, log: Logger): ActiveMigrations {
-  return _.mapValues(migrations, (versions, prop) => {
-    const transforms = Object.entries(versions)
-      .map(([version, transform]) => ({
-        version,
-        transform: wrapWithTry(version, prop!, transform, log),
-      }))
-      .sort((a, b) => Semver.compare(a.version, b.version));
-    return {
-      latestVersion: _.last(transforms).version,
-      transforms,
-    };
-  });
+function buildActiveMigrations(
+  typeRegistry: SavedObjectTypeRegistry,
+  log: Logger
+): ActiveMigrations {
+  return typeRegistry
+    .getAllTypes()
+    .filter(type => type.migrations && Object.keys(type.migrations).length > 0)
+    .reduce((migrations, type) => {
+      const transforms = Object.entries(type.migrations)
+        .map(([version, transform]) => ({
+          version,
+          transform: wrapWithTry(version, type.name, transform, log),
+        }))
+        .sort((a, b) => Semver.compare(a.version, b.version));
+      return {
+        ...migrations,
+        [type.name]: {
+          latestVersion: _.last(transforms).version,
+          transforms,
+        },
+      };
+    }, {} as ActiveMigrations);
 }
 
 /**
@@ -296,20 +299,25 @@ function markAsUpToDate(doc: RawSavedObjectDoc, migrations: ActiveMigrations) {
  * If a specific transform function fails, this tacks on a bit of information
  * about the document and transform that caused the failure.
  */
-function wrapWithTry(version: string, prop: string, transform: MigrationFn, log: Logger) {
+function wrapWithTry(
+  version: string,
+  type: string,
+  migrationFn: SavedObjectMigrationFn,
+  log: Logger
+) {
   return function tryTransformDoc(doc: RawSavedObjectDoc) {
     try {
-      const result = transform(doc, new MigrationLogger(log));
+      const result = migrationFn(doc, new MigrationLogger(log));
 
       // A basic sanity check to help migration authors detect basic errors
       // (e.g. forgetting to return the transformed doc)
       if (!result || !result.type) {
-        throw new Error(`Invalid saved object returned from migration ${prop}:${version}.`);
+        throw new Error(`Invalid saved object returned from migration ${type}:${version}.`);
       }
 
       return result;
     } catch (error) {
-      const failedTransform = `${prop}:${version}`;
+      const failedTransform = `${type}:${version}`;
       const failedDoc = JSON.stringify(doc);
       log.warn(
         `Failed to transform document ${doc}. Transform: ${failedTransform}\nDoc: ${failedDoc}`

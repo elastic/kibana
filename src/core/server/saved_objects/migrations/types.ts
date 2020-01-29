@@ -17,5 +17,14 @@
  * under the License.
  */
 
-export { KibanaMigrator, IKibanaMigrator } from './kibana';
-export { SavedObjectMigrationFn, SavedObjectMigrationMap } from './types';
+import { RawSavedObjectDoc } from '../serialization';
+import { SavedObjectsMigrationLogger } from './core/migration_logger';
+
+export type SavedObjectMigrationFn = (
+  doc: RawSavedObjectDoc,
+  log: SavedObjectsMigrationLogger // TODO: use plain Logger interface instead
+) => RawSavedObjectDoc;
+
+export interface SavedObjectMigrationMap {
+  [version: string]: SavedObjectMigrationFn;
+}

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { SavedObjectsLegacyMapping } from './types';
+import { LegacyConfig } from '../legacy';
+import { SavedObjectsLegacyMapping, SavedObjectsType, SavedObjectsLegacyUiExports } from './types';
 import { SavedObjectsTypeMapping } from './mappings';
 
 export const convertLegacyMappings = (
@@ -33,4 +34,36 @@ export const convertLegacyMappings = (
       })),
     ];
   }, [] as SavedObjectsTypeMapping[]);
+};
+
+export const convertLegacyTypes = (
+  {
+    savedObjectMappings,
+    savedObjectMigrations,
+    savedObjectSchemas,
+    savedObjectValidations,
+  }: SavedObjectsLegacyUiExports,
+  legacyConfig: LegacyConfig
+): SavedObjectsType[] => {
+  return savedObjectMappings.reduce((types, { pluginId, properties }) => {
+    return [
+      ...types,
+      ...Object.entries(properties).map(([type, mappings]) => {
+        const schema = savedObjectSchemas[type];
+        const migrations = savedObjectMigrations[type];
+        return {
+          name: type,
+          hidden: schema?.hidden ?? false,
+          namespaceAgnostic: schema?.isNamespaceAgnostic ?? false,
+          mappings,
+          indexPattern:
+            typeof schema?.indexPattern === 'function'
+              ? schema.indexPattern(legacyConfig)
+              : schema?.indexPattern,
+          convertToAliasScript: schema.convertToAliasScript,
+          migrations: migrations ?? {},
+        };
+      }),
+    ];
+  }, [] as SavedObjectsType[]);
 };

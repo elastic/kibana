@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { schemaMock } from '../../../schema/schema.mock';
+import { typeRegistryMock } from '../../../saved_objects_type_registry.mock';
 import { getQueryParams } from './query_params';
 
-const SCHEMA = schemaMock.create();
+const registry = typeRegistryMock.create();
+
 const MAPPINGS = {
   properties: {
     type: {
@@ -85,7 +86,7 @@ const createTypeClause = (type: string, namespace?: string) => {
 describe('searchDsl/queryParams', () => {
   describe('no parameters', () => {
     it('searches for all known types without a namespace specified', () => {
-      expect(getQueryParams({ mappings: MAPPINGS, schema: SCHEMA })).toEqual({
+      expect(getQueryParams({ mappings: MAPPINGS, registry })).toEqual({
         query: {
           bool: {
             filter: [
@@ -108,9 +109,7 @@ describe('searchDsl/queryParams', () => {
 
   describe('namespace', () => {
     it('filters namespaced types for namespace, and ensures namespace agnostic types have no namespace', () => {
-      expect(
-        getQueryParams({ mappings: MAPPINGS, schema: SCHEMA, namespace: 'foo-namespace' })
-      ).toEqual({
+      expect(getQueryParams({ mappings: MAPPINGS, registry, namespace: 'foo-namespace' })).toEqual({
         query: {
           bool: {
             filter: [
@@ -134,7 +133,7 @@ describe('searchDsl/queryParams', () => {
   describe('type (singular, namespaced)', () => {
     it('includes a terms filter for type and namespace not being specified', () => {
       expect(
-        getQueryParams({ mappings: MAPPINGS, schema: SCHEMA, namespace: undefined, type: 'saved' })
+        getQueryParams({ mappings: MAPPINGS, registry, namespace: undefined, type: 'saved' })
       ).toEqual({
         query: {
           bool: {
@@ -155,7 +154,7 @@ describe('searchDsl/queryParams', () => {
   describe('type (singular, global)', () => {
     it('includes a terms filter for type and namespace not being specified', () => {
       expect(
-        getQueryParams({ mappings: MAPPINGS, schema: SCHEMA, namespace: undefined, type: 'global' })
+        getQueryParams({ mappings: MAPPINGS, registry, namespace: undefined, type: 'global' })
       ).toEqual({
         query: {
           bool: {
@@ -178,7 +177,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: undefined,
           type: ['saved', 'global'],
         })
@@ -204,7 +203,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: 'foo-namespace',
           type: ['saved', 'global'],
         })
@@ -230,7 +229,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: undefined,
           type: undefined,
           search: 'us*',
@@ -270,7 +269,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: 'foo-namespace',
           type: undefined,
           search: 'us*',
@@ -310,7 +309,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: undefined,
           type: ['saved', 'global'],
           search: 'us*',
@@ -346,7 +345,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: 'foo-namespace',
           type: ['saved', 'global'],
           search: 'us*',
@@ -382,7 +381,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: undefined,
           type: undefined,
           search: 'y*',
@@ -419,7 +418,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: undefined,
           type: undefined,
           search: 'y*',
@@ -456,7 +455,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: undefined,
           type: undefined,
           search: 'y*',
@@ -503,7 +502,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: 'foo-namespace',
           type: undefined,
           search: 'y*',
@@ -540,7 +539,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: 'foo-namespace',
           type: undefined,
           search: 'y*',
@@ -577,7 +576,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: 'foo-namespace',
           type: undefined,
           search: 'y*',
@@ -624,7 +623,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: undefined,
           type: ['saved', 'global'],
           search: 'y*',
@@ -657,7 +656,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: undefined,
           type: ['saved', 'global'],
           search: 'y*',
@@ -690,7 +689,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: undefined,
           type: ['saved', 'global'],
           search: 'y*',
@@ -726,7 +725,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: 'foo-namespace',
           type: ['saved', 'global'],
           search: 'y*',
@@ -759,7 +758,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: 'foo-namespace',
           type: ['saved', 'global'],
           search: 'y*',
@@ -792,7 +791,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: 'foo-namespace',
           type: ['saved', 'global'],
           search: 'y*',
@@ -828,7 +827,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: 'foo-namespace',
           type: ['saved', 'global'],
           search: 'foo',
@@ -902,7 +901,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: 'foo-namespace',
           type: ['saved', 'global'],
           search: undefined,
@@ -958,7 +957,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: 'foo-namespace',
           kueryNode: {
             type: 'function',
@@ -1052,7 +1051,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: 'foo-namespace',
           kueryNode: {
             type: 'function',
@@ -1189,7 +1188,7 @@ describe('searchDsl/queryParams', () => {
       expect(
         getQueryParams({
           mappings: MAPPINGS,
-          schema: SCHEMA,
+          registry,
           namespace: 'foo-namespace',
           search: 'y*',
           searchFields: ['title'],

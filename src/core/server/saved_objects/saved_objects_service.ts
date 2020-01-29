@@ -21,7 +21,6 @@ import { CoreService } from 'src/core/types';
 import { first } from 'rxjs/operators';
 import {
   SavedObjectsClient,
-  SavedObjectsSchema,
   SavedObjectsClientProvider,
   ISavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
@@ -42,11 +41,9 @@ import {
   SavedObjectsClientWrapperFactory,
 } from './service/lib/scoped_client_provider';
 import { Logger } from '../logging';
-import { SavedObjectsTypeMapping } from './mappings';
-import { MigrationDefinition } from './migrations/core/document_migrator';
-import { SavedObjectsSchemaDefinition } from './schema';
+import { convertLegacyTypes } from './utils';
+import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { PropertyValidators } from './validation';
-import { convertLegacyMappings } from './utils';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -251,9 +248,7 @@ export class SavedObjectsService
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
 
-  private mappings: SavedObjectsTypeMapping[] = [];
-  private migrations: MigrationDefinition = {};
-  private schemas: SavedObjectsSchemaDefinition = {};
+  private typeRegistry = new SavedObjectTypeRegistry();
   private validations: PropertyValidators = {};
 
   constructor(private readonly coreContext: CoreContext) {
@@ -265,17 +260,12 @@ export class SavedObjectsService
 
     this.setupDeps = setupDeps;
 
-    const {
-      savedObjectSchemas: savedObjectsSchemasDefinition,
-      savedObjectMappings: legacyMappings,
-      savedObjectMigrations,
-      savedObjectValidations,
-    } = setupDeps.legacyPlugins.uiExports;
-
-    this.mappings = convertLegacyMappings(legacyMappings || []);
-    this.migrations = savedObjectMigrations;
-    this.schemas = savedObjectsSchemasDefinition;
-    this.validations = savedObjectValidations;
+    const legacyTypes = convertLegacyTypes(
+      setupDeps.legacyPlugins.uiExports,
+      setupDeps.legacyPlugins.pluginExtendedConfig
+    );
+    legacyTypes.forEach(this.typeRegistry.registerType);
+    this.validations = setupDeps.legacyPlugins.uiExports.savedObjectValidations || {};
 
     return {
       setClientFactoryProvider: provider => {
@@ -292,6 +282,8 @@ export class SavedObjectsService
         });
       },
       registerMappings: (pluginId, mappings) => {
+        // TODO: hide for now.
+        /*
         this.mappings.push(
           ...Object.entries(mappings).map(([type, definition]) => ({
             pluginId,
@@ -299,6 +291,7 @@ export class SavedObjectsService
             definition,
           }))
         );
+        */
       },
     };
   }
@@ -344,8 +337,7 @@ export class SavedObjectsService
     const createRepository = (callCluster: APICaller, extraTypes: string[] = []) => {
       return SavedObjectsRepository.createRepository(
         migrator,
-        new SavedObjectsSchema(this.schemas),
-        this.setupDeps!.legacyPlugins.pluginExtendedConfig,
+        this.typeRegistry,
         kibanaConfig.index,
         callCluster,
         extraTypes
@@ -389,18 +381,14 @@ export class SavedObjectsService
     savedObjectsConfig: SavedObjectsConfigType,
     migrationsRetryDelay?: number
   ): KibanaMigrator {
-    const savedObjectSchemas = new SavedObjectsSchema(this.schemas);
     const adminClient = this.setupDeps!.elasticsearch.adminClient;
 
     return new KibanaMigrator({
-      savedObjectSchemas,
-      savedObjectMappings: this.mappings,
-      savedObjectMigrations: this.migrations,
-      savedObjectValidations: this.validations,
+      typeRegistry: this.typeRegistry,
       logger: this.coreContext.logger.get('migrations'),
       kibanaVersion: this.coreContext.env.packageInfo.version,
-      config: this.setupDeps!.legacyPlugins.pluginExtendedConfig,
       savedObjectsConfig,
+      savedObjectValidations: this.validations,
       kibanaConfig,
       callCluster: migrationsRetryCallCluster(
         adminClient.callAsInternalUser,

@@ -17,5 +17,27 @@
  * under the License.
  */
 
-export { KibanaMigrator, IKibanaMigrator } from './kibana';
-export { SavedObjectMigrationFn, SavedObjectMigrationMap } from './types';
+import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
+
+type RegistryMock = jest.Mocked<SavedObjectTypeRegistry>;
+
+const createRegistryMock = (): RegistryMock => {
+  const mock = {
+    registerType: jest.fn(),
+    getType: jest.fn(),
+    getAllTypes: jest.fn(),
+    isNamespaceAgnostic: jest.fn(),
+    isHidden: jest.fn(),
+    getIndex: jest.fn(),
+  };
+
+  mock.getIndex.mockReturnValue('.kibana-test');
+  mock.isHidden.mockReturnValue(false);
+  mock.isNamespaceAgnostic.mockImplementation((type: string) => type === 'global');
+
+  return mock as any;
+};
+
+export const typeRegistryMock = {
+  create: createRegistryMock,
+};

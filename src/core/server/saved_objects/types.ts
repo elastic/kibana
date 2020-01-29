@@ -18,9 +18,8 @@
  */
 
 import { SavedObjectsClient } from './service/saved_objects_client';
-import { SavedObjectsTypeMappingDefinitions } from './mappings';
-import { MigrationDefinition } from './migrations/core/document_migrator';
-import { SavedObjectsSchemaDefinition } from './schema';
+import { SavedObjectsTypeMappingDefinition, SavedObjectsTypeMappingDefinitions } from './mappings';
+import { SavedObjectMigrationMap } from './migrations';
 import { PropertyValidators } from './validation';
 
 export {
@@ -34,6 +33,7 @@ export {
 } from './import/types';
 
 import { SavedObjectAttributes } from '../../types';
+import { LegacyConfig } from '../legacy';
 export {
   SavedObjectAttributes,
   SavedObjectAttribute,
@@ -209,13 +209,30 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
 /**
+ * // TODO: documentation
+ *
+ * @public
+ */
+export interface SavedObjectsType {
+  name: string;
+  hidden: boolean;
+  namespaceAgnostic: boolean;
+  indexPattern?: string;
+  convertToAliasScript?: string;
+
+  mappings: SavedObjectsTypeMappingDefinition;
+  migrations: SavedObjectMigrationMap;
+  // validations
+}
+
+/**
  * @internal
  * @deprecated
  */
 export interface SavedObjectsLegacyUiExports {
   savedObjectMappings: SavedObjectsLegacyMapping[];
-  savedObjectMigrations: MigrationDefinition;
-  savedObjectSchemas: SavedObjectsSchemaDefinition;
+  savedObjectMigrations: SavedObjectsLegacyMigrationDefinitions;
+  savedObjectSchemas: SavedObjectsLegacySchemaDefinitions;
   savedObjectValidations: PropertyValidators;
 }
 
@@ -226,4 +243,24 @@ export interface SavedObjectsLegacyUiExports {
 export interface SavedObjectsLegacyMapping {
   pluginId: string;
   properties: SavedObjectsTypeMappingDefinitions;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacyMigrationDefinitions {
+  [type: string]: SavedObjectMigrationMap;
+}
+
+interface SavedObjectsLegacyTypeSchema {
+  isNamespaceAgnostic: boolean;
+  hidden?: boolean;
+  indexPattern?: ((config: LegacyConfig) => string) | string;
+  convertToAliasScript?: string;
+}
+
+/** @internal */
+export interface SavedObjectsLegacySchemaDefinitions {
+  [type: string]: SavedObjectsLegacyTypeSchema;
 }

@@ -20,7 +20,7 @@
 jest.mock('./query_params');
 jest.mock('./sorting_params');
 
-import { schemaMock } from '../../../schema/schema.mock';
+import { typeRegistryMock } from '../../../saved_objects_type_registry.mock';
 import * as queryParamsNS from './query_params';
 import { getSearchDsl } from './search_dsl';
 import * as sortParamsNS from './sorting_params';
@@ -28,8 +28,8 @@ import * as sortParamsNS from './sorting_params';
 const getQueryParams = queryParamsNS.getQueryParams as jest.Mock;
 const getSortingParams = sortParamsNS.getSortingParams as jest.Mock;
 
-const SCHEMA = schemaMock.create();
-const MAPPINGS = { properties: {} };
+const registry = typeRegistryMock.create();
+const mappings = { properties: {} };
 
 describe('getSearchDsl', () => {
   afterEach(() => {
@@ -40,7 +40,7 @@ describe('getSearchDsl', () => {
   describe('validation', () => {
     it('throws when type is not specified', () => {
       expect(() => {
-        getSearchDsl(MAPPINGS, SCHEMA, {
+        getSearchDsl(mappings, registry, {
           type: undefined as any,
           sortField: 'title',
         });
@@ -48,7 +48,7 @@ describe('getSearchDsl', () => {
     });
     it('throws when sortOrder without sortField', () => {
       expect(() => {
-        getSearchDsl(MAPPINGS, SCHEMA, {
+        getSearchDsl(mappings, registry, {
           type: 'foo',
           sortOrder: 'desc',
         });
@@ -70,11 +70,11 @@ describe('getSearchDsl', () => {
         },
       };
 
-      getSearchDsl(MAPPINGS, SCHEMA, opts);
+      getSearchDsl(mappings, registry, opts);
       expect(getQueryParams).toHaveBeenCalledTimes(1);
       expect(getQueryParams).toHaveBeenCalledWith({
-        mappings: MAPPINGS,
-        schema: SCHEMA,
+        mappings,
+        registry,
         namespace: opts.namespace,
         type: opts.type,
         search: opts.search,
@@ -92,10 +92,10 @@ describe('getSearchDsl', () => {
         sortOrder: 'baz',
       };
 
-      getSearchDsl(MAPPINGS, SCHEMA, opts);
+      getSearchDsl(mappings, registry, opts);
       expect(getSortingParams).toHaveBeenCalledTimes(1);
       expect(getSortingParams).toHaveBeenCalledWith(
-        MAPPINGS,
+        mappings,
         opts.type,
         opts.sortField,
         opts.sortOrder
@@ -105,7 +105,7 @@ describe('getSearchDsl', () => {
     it('returns combination of getQueryParams and getSortingParams', () => {
       getQueryParams.mockReturnValue({ a: 'a' });
       getSortingParams.mockReturnValue({ b: 'b' });
-      expect(getSearchDsl(MAPPINGS, SCHEMA, { type: 'foo' })).toEqual({ a: 'a', b: 'b' });
+      expect(getSearchDsl(mappings, registry, { type: 'foo' })).toEqual({ a: 'a', b: 'b' });
     });
   });
 });

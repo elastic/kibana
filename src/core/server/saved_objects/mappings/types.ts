@@ -93,6 +93,7 @@ export interface SavedObjectsTypeMappingDefinition {
  * @public
  */
 export interface SavedObjectsTypeMappingDefinitions {
+  // TODO: move to internalm remove doc.
   [type: string]: SavedObjectsTypeMappingDefinition;
 }
 

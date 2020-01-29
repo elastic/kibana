@@ -24,34 +24,23 @@
 
 import { Logger } from 'src/core/server/logging';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
-import {
-  SavedObjectsTypeMapping,
-  IndexMapping,
-  SavedObjectsTypeMappingDefinitions,
-} from '../../mappings';
-import { SavedObjectsSchema } from '../../schema';
+import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator, PropertyValidators } from '../../validation';
 import { buildActiveMappings, CallCluster, IndexMigrator } from '../core';
-import {
-  DocumentMigrator,
-  VersionedTransformer,
-  MigrationDefinition,
-} from '../core/document_migrator';
+import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsConfigType } from '../../saved_objects_config';
-import { LegacyConfig } from '../../../legacy';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { SavedObjectsType } from '../../types';
 
 export interface KibanaMigratorOptions {
   callCluster: CallCluster;
-  config: LegacyConfig;
+  typeRegistry: SavedObjectTypeRegistry;
   savedObjectsConfig: SavedObjectsConfigType;
   kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
   logger: Logger;
-  savedObjectMappings: SavedObjectsTypeMapping[];
-  savedObjectMigrations: MigrationDefinition;
-  savedObjectSchemas: SavedObjectsSchema;
   savedObjectValidations: PropertyValidators;
 }
 
@@ -62,13 +51,12 @@ export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
  */
 export class KibanaMigrator {
   private readonly callCluster: CallCluster;
-  private readonly config: LegacyConfig;
   private readonly savedObjectsConfig: SavedObjectsConfigType;
   private readonly documentMigrator: VersionedTransformer;
   private readonly kibanaConfig: KibanaConfigType;
   private readonly log: Logger;
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
-  private readonly schema: SavedObjectsSchema;
+  private readonly typeRegistry: SavedObjectTypeRegistry;
   private readonly serializer: SavedObjectsSerializer;
   private migrationResult?: Promise<Array<{ status: string }>>;
 
@@ -77,27 +65,23 @@ export class KibanaMigrator {
    */
   constructor({
     callCluster,
-    config,
+    typeRegistry,
     kibanaConfig,
     savedObjectsConfig,
+    savedObjectValidations,
     kibanaVersion,
     logger,
-    savedObjectMappings,
-    savedObjectMigrations,
-    savedObjectSchemas,
-    savedObjectValidations,
   }: KibanaMigratorOptions) {
-    this.config = config;
     this.callCluster = callCluster;
     this.kibanaConfig = kibanaConfig;
     this.savedObjectsConfig = savedObjectsConfig;
-    this.schema = savedObjectSchemas;
-    this.serializer = new SavedObjectsSerializer(this.schema);
-    this.mappingProperties = mergeTypes(savedObjectMappings || []);
+    this.typeRegistry = typeRegistry;
+    this.serializer = new SavedObjectsSerializer(this.typeRegistry);
+    this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
     this.log = logger;
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion,
-      migrations: savedObjectMigrations || {},
+      typeRegistry,
       validateDoc: docValidator(savedObjectValidations || {}),
       log: this.log,
     });
@@ -131,10 +115,9 @@ export class KibanaMigrator {
 
     const kibanaIndexName = this.kibanaConfig.index;
     const indexMap = createIndexMap({
-      config: this.config,
       kibanaIndexName,
       indexMap: this.mappingProperties,
-      schema: this.schema,
+      registry: this.typeRegistry,
     });
 
     const migrators = Object.keys(indexMap).map(index => {
@@ -181,17 +164,15 @@ export class KibanaMigrator {
  * Merges savedObjectMappings properties into a single object, verifying that
  * no mappings are redefined.
  */
-export function mergeTypes(
-  mappings: SavedObjectsTypeMapping[]
-): SavedObjectsTypeMappingDefinitions {
-  return mappings.reduce((acc, { pluginId, type, definition }) => {
+export function mergeTypes(types: SavedObjectsType[]): SavedObjectsTypeMappingDefinitions {
+  return types.reduce((acc, { name: type, mappings }) => {
     const duplicate = acc.hasOwnProperty(type);
     if (duplicate) {
-      throw new Error(`Plugin ${pluginId} is attempting to redefine mapping "${type}".`);
+      throw new Error(`Type ${type} is already defined.`);
     }
     return {
       ...acc,
-      [type]: definition,
+      [type]: mappings,
     };
   }, {});
 }

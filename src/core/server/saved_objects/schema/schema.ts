@@ -20,6 +20,7 @@
 import { LegacyConfig } from '../../legacy';
 
 interface SavedObjectsSchemaTypeDefinition {
+  // TODO: remove
   isNamespaceAgnostic: boolean;
   hidden?: boolean;
   indexPattern?: ((config: LegacyConfig) => string) | string;
@@ -28,11 +29,13 @@ interface SavedObjectsSchemaTypeDefinition {
 
 /** @internal */
 export interface SavedObjectsSchemaDefinition {
+  // TODO: remove
   [key: string]: SavedObjectsSchemaTypeDefinition;
 }
 
 /** @internal */
 export class SavedObjectsSchema {
+  // TODO: remove
   private readonly definition?: SavedObjectsSchemaDefinition;
   constructor(schemaDefinition?: SavedObjectsSchemaDefinition) {
     this.definition = schemaDefinition;
