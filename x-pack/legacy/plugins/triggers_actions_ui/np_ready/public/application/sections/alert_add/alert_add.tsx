@@ -36,26 +36,18 @@ export const AlertAdd = () => {
   }
 
   return (
-    <EuiPortal>
-      <EuiFlyout
-        ownFocus
-        onClose={closeFlyout}
-        aria-labelledby="flyoutAlertAddTitle"
-        size="m"
-        maxWidth={620}
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s">
-            <h3 id="flyoutTitle">
-              <FormattedMessage
-                defaultMessage="Create Alert"
-                id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
-              />
-            </h3>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <AlertForm initialAlert={initialAlert} setFlyoutVisibility={setAddFlyoutVisibility} />
-      </EuiFlyout>
-    </EuiPortal>
+    <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutAlertAddTitle" size="m" maxWidth={620}>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h3 id="flyoutTitle">
+            <FormattedMessage
+              defaultMessage="Create Alert"
+              id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
+            />
+          </h3>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <AlertForm initialAlert={initialAlert} setFlyoutVisibility={setAddFlyoutVisibility} />
+    </EuiFlyout>
   );
 };
