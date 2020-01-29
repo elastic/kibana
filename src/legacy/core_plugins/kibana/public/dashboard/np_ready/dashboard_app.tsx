@@ -25,13 +25,7 @@ import { IInjector } from '../legacy_imports';
 import { ViewMode } from '../../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
-import {
-  IIndexPattern,
-  TimeRange,
-  Query,
-  esFilters,
-  SavedQuery,
-} from '../../../../../../plugins/data/public';
+import { IIndexPattern, TimeRange, Query, esFilters } from '../../../../../../plugins/data/public';
 
 import { DashboardAppController } from './dashboard_app_controller';
 import { RenderDeps } from './application';
