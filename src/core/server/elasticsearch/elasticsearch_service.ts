@@ -170,6 +170,13 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
       unknown
     >).connect();
 
+    // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
+    esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+      if (!isCompatible && message) {
+        this.log.error(message);
+      }
+    });
+
     return {
       legacy: { config$: clients$.pipe(map(clients => clients.config)) },
 

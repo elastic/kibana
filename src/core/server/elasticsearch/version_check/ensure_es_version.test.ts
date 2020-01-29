@@ -111,7 +111,7 @@ describe('mapNodesVersionCompatibility', () => {
 describe('pollEsNodesVersion', () => {
   const callWithInternalUser = jest.fn();
   it('keeps polling when a poll request throws', done => {
-    expect.assertions(2);
+    expect.assertions(3);
     callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
     callWithInternalUser.mockRejectedValueOnce(new Error('mock request error'));
     callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1'));
@@ -122,7 +122,7 @@ describe('pollEsNodesVersion', () => {
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
     })
-      .pipe(take(2))
+      .pipe(take(3))
       .subscribe({
         next: result => expect(result.isCompatible).toBeDefined(),
         complete: done,

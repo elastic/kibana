@@ -106,7 +106,7 @@ const configSchema = schema.object({
   ignoreVersionMismatch: schema.conditional(
     schema.contextRef('dev'),
     false,
-    schema.any({
+    schema.boolean({
       validate: rawValue => {
         if (rawValue === true) {
           return '"ignoreVersionMismatch" can only be set to true in development mode';

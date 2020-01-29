@@ -22,10 +22,12 @@
  * that defined in Kibana's package.json.
  */
 
-import { coerce } from 'semver';
-import { interval } from 'rxjs';
-import { map, switchMap, catchError, distinctUntilChanged } from 'rxjs/operators';
-import { isEsCompatibleWithKibana } from './is_es_compatible_with_kibana';
+import { interval, from } from 'rxjs';
+import { map, switchMap, distinctUntilChanged, catchError, startWith } from 'rxjs/operators';
+import {
+  esVersionCompatibleWithKibana,
+  esVersionEqualsKibana,
+} from './es_kibana_version_compatability';
 import { Logger } from '../../logging';
 import { APICaller } from '..';
 
@@ -37,12 +39,6 @@ export interface PollEsNodesVersionOptions {
   esVersionCheckInterval: number;
 }
 
-export interface NodesInfo {
-  nodes: {
-    [key: string]: NodeInfo;
-  };
-}
-
 interface NodeInfo {
   version: string;
   ip: string;
@@ -50,6 +46,12 @@ interface NodeInfo {
     publish_address: string;
   };
   name: string;
+}
+
+export interface NodesInfo {
+  nodes: {
+    [key: string]: NodeInfo;
+  };
 }
 
 export interface NodesVersionCompatibility {
@@ -77,18 +79,14 @@ export function mapNodesVersionCompatibility(
 
   // Aggregate incompatible ES nodes.
   const incompatibleNodes = nodes.filter(
-    node => !isEsCompatibleWithKibana(node.version, kibanaVersion)
+    node => !esVersionCompatibleWithKibana(node.version, kibanaVersion)
   );
 
   // Aggregate ES nodes which should prompt a Kibana upgrade. It's acceptable
-  // if ES and Kibana versions are not the same so long as they are not
+  // if ES and Kibana versions are not the same as long as they are not
   // incompatible, but we should warn about it.
   // Ignore version qualifiers https://github.com/elastic/elasticsearch/issues/36859
-  const warningNodes = nodes.filter(node => {
-    const nodeSemVer = coerce(node.version);
-    const kibanaSemver = coerce(kibanaVersion);
-    return nodeSemVer && kibanaSemver && nodeSemVer.version !== kibanaSemver.version;
-  });
+  const warningNodes = nodes.filter(node => !esVersionEqualsKibana(node.version, kibanaVersion));
 
   let message;
   if (incompatibleNodes.length > 0) {
@@ -115,6 +113,18 @@ export function mapNodesVersionCompatibility(
   };
 }
 
+// Returns true if two NodesVersionCompatibility entries match
+function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompatibility) {
+  const nodesEqual = (n: NodeInfo, m: NodeInfo) => n.ip === m.ip && n.version === m.version;
+  return (
+    curr.isCompatible === prev.isCompatible &&
+    curr.incompatibleNodes.length === prev.incompatibleNodes.length &&
+    curr.warningNodes.length === prev.warningNodes.length &&
+    curr.incompatibleNodes.every((node, i) => nodesEqual(node, prev.incompatibleNodes[i])) &&
+    curr.warningNodes.every((node, i) => nodesEqual(node, prev.warningNodes[i]))
+  );
+}
+
 export const pollEsNodesVersion = ({
   callWithInternalUser,
   log,
@@ -130,22 +140,21 @@ export const pollEsNodesVersion = ({
         filterPath: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
       });
     }),
-    // Log, but otherwise ignore 'nodes.info' request errors
-    catchError((err, caught$) => {
-      log.error('Unable to retrieve version information from Elasticsearch nodes.', err);
-      return caught$;
-    }),
     map((nodesInfo: NodesInfo) =>
       mapNodesVersionCompatibility(nodesInfo, kibanaVersion, ignoreVersionMismatch)
     ),
-    // Only emit if the IP or version numbers of the nodes changed from the
-    // previous result.
-    distinctUntilChanged((prev, curr) => {
-      const nodesEqual = (n: NodeInfo, m: NodeInfo) => n.ip === m.ip && n.version === m.version;
-      return (
-        curr.incompatibleNodes.every((node, i) => nodesEqual(node, prev.incompatibleNodes[i])) &&
-        curr.warningNodes.every((node, i) => nodesEqual(node, prev.warningNodes[i]))
+    catchError((_err, caught$) => {
+      // Return `isCompatible=false` when there's a 'nodes.info' request error
+      return caught$.pipe(
+        startWith({
+          isCompatible: false,
+          message: 'Unable to retrieve version information from Elasticsearch nodes.',
+          incompatibleNodes: [],
+          warningNodes: [],
+          kibanaVersion,
+        })
       );
-    })
+    }),
+    distinctUntilChanged(compareNodes) // Only emit if there are new nodes or versions
   );
 };

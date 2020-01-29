@@ -25,7 +25,7 @@ export const versionHealthCheck = (esPlugin, logWithMetadata, esNodesCompatibili
       if (!isCompatible) {
         esPlugin.status.red(message);
       } else {
-        if (message && message.length > 0) {
+        if (message) {
           logWithMetadata(['warning'], message, {
             kibanaVersion,
             nodes: warningNodes,

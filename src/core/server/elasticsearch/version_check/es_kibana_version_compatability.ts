@@ -17,15 +17,14 @@
  * under the License.
  */
 
+import semver, { coerce } from 'semver';
+
 /**
- * Let's weed out the ES versions that won't work with a given Kibana version.
+ * Checks for the compatibilitiy between Elasticsearch and Kibana versions
  * 1. Major version differences will never work together.
  * 2. Older versions of ES won't work with newer versions of Kibana.
  */
-
-import semver from 'semver';
-
-export function isEsCompatibleWithKibana(esVersion: string, kibanaVersion: string) {
+export function esVersionCompatibleWithKibana(esVersion: string, kibanaVersion: string) {
   const esVersionNumbers = {
     major: semver.major(esVersion),
     minor: semver.minor(esVersion),
@@ -49,4 +48,10 @@ export function isEsCompatibleWithKibana(esVersion: string, kibanaVersion: strin
   }
 
   return true;
+}
+
+export function esVersionEqualsKibana(nodeVersion: string, kibanaVersion: string) {
+  const nodeSemVer = coerce(nodeVersion);
+  const kibanaSemver = coerce(kibanaVersion);
+  return nodeSemVer && kibanaSemver && nodeSemVer.version === kibanaSemver.version;
 }
