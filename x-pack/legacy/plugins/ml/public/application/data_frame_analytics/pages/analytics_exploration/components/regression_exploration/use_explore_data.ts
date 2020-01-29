@@ -7,6 +7,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
+import { cloneDeep } from 'lodash';
 
 import { SortDirection, SORT_DIRECTION } from '../../../../../components/ml_in_memory_table';
 
@@ -24,7 +25,13 @@ import {
   SearchQuery,
 } from '../../../../common';
 import { Field } from '../../../../../../../common/types/fields';
-import { LoadExploreDataArg } from '../../../../common/analytics';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../../src/plugins/data/public';
+import {
+  LoadExploreDataArg,
+  defaultSearchQuery,
+  ResultsSearchQuery,
+  isResultsSearchBoolQuery,
+} from '../../../../common/analytics';
 
 export type TableItem = Record<string, any>;
 
@@ -41,7 +48,8 @@ export const useExploreData = (
   jobConfig: DataFrameAnalyticsConfig | undefined,
   selectedFields: Field[],
   setSelectedFields: React.Dispatch<React.SetStateAction<Field[]>>,
-  setDocFields: React.Dispatch<React.SetStateAction<Field[]>>
+  setDocFields: React.Dispatch<React.SetStateAction<Field[]>>,
+  setDepVarType: React.Dispatch<React.SetStateAction<ES_FIELD_TYPES | undefined>>
 ): UseExploreDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
@@ -53,11 +61,13 @@ export const useExploreData = (
     const { fields } = newJobCapsService;
 
     if (selectedFields.length === 0 && jobConfig !== undefined) {
-      const { selectedFields: defaultSelected, docFields } = getDefaultFieldsFromJobCaps(
-        fields,
-        jobConfig
-      );
+      const {
+        selectedFields: defaultSelected,
+        docFields,
+        depVarType,
+      } = getDefaultFieldsFromJobCaps(fields, jobConfig);
 
+      setDepVarType(depVarType);
       setSelectedFields(defaultSelected);
       setDocFields(docFields);
     }
@@ -75,8 +85,32 @@ export const useExploreData = (
 
       try {
         const resultsField = jobConfig.dest.results_field;
+        const searchQueryClone: ResultsSearchQuery = cloneDeep(searchQuery);
+        let query: ResultsSearchQuery;
+
+        if (JSON.stringify(searchQuery) === JSON.stringify(defaultSearchQuery)) {
+          query = {
+            exists: {
+              field: resultsField,
+            },
+          };
+        } else if (isResultsSearchBoolQuery(searchQueryClone)) {
+          if (searchQueryClone.bool.must === undefined) {
+            searchQueryClone.bool.must = [];
+          }
+
+          searchQueryClone.bool.must.push({
+            exists: {
+              field: resultsField,
+            },
+          });
+
+          query = searchQueryClone;
+        } else {
+          query = searchQueryClone;
+        }
         const body: SearchQuery = {
-          query: searchQuery,
+          query,
         };
 
         if (field !== undefined) {

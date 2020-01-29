@@ -1,68 +1,42 @@
 {
-  "rule_id": "81cc58f5-8062-49a2-ba84-5cc4b4d31c40",
-  "risk_score": 50,
-  "description": "Linux: Kernel Module Activity",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Linux: Kernel Module Activity",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.name: (insmod or kmod or modprobe or rmod)",
+  "description": "Identifies loadable kernel module errors, often indicative of potential persistence attempts.",
+  "false_positives": [
+    "Security tools and device drivers may run these programs in order to load legitimate kernel modules. Use of these programs by ordinary users is uncommon."
+  ],
+  "index": [
+    "auditbeat-*"
+  ],
   "language": "kuery",
-  "filters": [
+  "max_signals": 33,
+  "name": "Persistence via Kernel Module Modification",
+  "query": "process.name: (insmod or kmod or modprobe or rmod) and event.action:executed",
+  "references": [
+    "https://www.hackers-arise.com/single-post/2017/11/03/Linux-for-Hackers-Part-10-Loadable-Kernel-Modules-LKM"
+  ],
+  "risk_score": 21,
+  "rule_id": "81cc58f5-8062-49a2-ba84-5cc4b4d31c40",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "threat": [
     {
-      "meta": {
-        "negate": false,
-        "type": "phrase",
-        "key": "event.dataset",
-        "value": "process",
-        "params": {
-          "query": "process"
-        },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/techniques/TA0003/"
       },
-      "query": {
-        "match": {
-          "event.dataset": {
-            "query": "process",
-            "type": "phrase"
-          }
+      "technique": [
+        {
+          "id": "T1215",
+          "name": "Kernel Modules and Extensions",
+          "reference": "https://attack.mitre.org/techniques/T1215/"
         }
-      },
-      "$state": {
-        "store": "appState"
-      }
-    },
-    {
-      "meta": {
-        "negate": false,
-        "type": "phrase",
-        "key": "event.action",
-        "value": "process_started",
-        "params": {
-          "query": "process_started"
-        },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
-      },
-      "query": {
-        "match": {
-          "event.action": {
-            "query": "process_started",
-            "type": "phrase"
-          }
-        }
-      },
-      "$state": {
-        "store": "appState"
-      }
+      ]
     }
   ],
-  "enabled": false,
+  "type": "query",
   "version": 1
 }

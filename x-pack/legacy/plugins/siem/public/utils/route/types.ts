@@ -10,6 +10,7 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { HostsTableType } from '../../store/hosts/model';
 import { NetworkRouteType } from '../../pages/network/navigation/types';
+import { FlowTarget } from '../../graphql/types';
 
 export type SiemRouteType = HostsTableType | NetworkRouteType;
 export interface RouteSpyState {
@@ -19,6 +20,8 @@ export interface RouteSpyState {
   search: string;
   pathName: string;
   history?: H.History;
+  flowTarget?: FlowTarget;
+  state?: Record<string, string | undefined>;
 }
 
 export interface HostRouteSpyState extends RouteSpyState {
@@ -36,7 +39,10 @@ export type RouteSpyAction =
     }
   | {
       type: 'updateRouteWithOutSearch';
-      route: Pick<RouteSpyState, 'pageName' & 'detailName' & 'tabName' & 'pathName' & 'history'>;
+      route: Pick<
+        RouteSpyState,
+        'pageName' & 'detailName' & 'tabName' & 'pathName' & 'history' & 'state'
+      >;
     }
   | {
       type: 'updateRoute';
@@ -52,4 +58,7 @@ export type SpyRouteProps = RouteComponentProps<{
   detailName: string | undefined;
   tabName: HostsTableType | undefined;
   search: string;
-}>;
+  flowTarget: FlowTarget | undefined;
+}> & {
+  state?: Record<string, string | undefined>;
+};

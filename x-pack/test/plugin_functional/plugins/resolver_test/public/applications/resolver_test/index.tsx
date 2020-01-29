@@ -13,7 +13,7 @@ import { useEffect } from 'react';
 import styled from 'styled-components';
 
 /**
- * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
+ * Render the Resolver Test app. Returns a cleanup function.
  */
 export function renderApp(
   { element }: AppMountParameters,

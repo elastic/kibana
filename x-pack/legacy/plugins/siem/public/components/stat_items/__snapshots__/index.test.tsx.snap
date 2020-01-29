@@ -20,7 +20,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
       fields={
         Array [
           Object {
-            "color": "#3185FC",
+            "color": "#6092C0",
             "icon": "cross",
             "key": "hosts",
             "value": null,
@@ -49,7 +49,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
               show={true}
             >
               <div
-                className="sc-AykKF iWeiGa"
+                className="sc-AykKF jvsAjF"
               >
                 <EuiPanel>
                   <div
@@ -254,7 +254,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
       fields={
         Array [
           Object {
-            "color": "#3185FC",
+            "color": "#6092C0",
             "icon": "cross",
             "key": "hosts",
             "value": null,
@@ -283,7 +283,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
               show={true}
             >
               <div
-                className="sc-AykKF iWeiGa"
+                className="sc-AykKF jvsAjF"
               >
                 <EuiPanel>
                   <div
@@ -483,7 +483,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
     areaChart={
       Array [
         Object {
-          "color": "#DB1374",
+          "color": "#D36086",
           "key": "uniqueSourceIpsHistogram",
           "value": Array [
             Object {
@@ -501,7 +501,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
           ],
         },
         Object {
-          "color": "#490092",
+          "color": "#9170B8",
           "key": "uniqueDestinationIpsHistogram",
           "value": Array [
             Object {
@@ -523,7 +523,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
     barChart={
       Array [
         Object {
-          "color": "#DB1374",
+          "color": "#D36086",
           "key": "uniqueSourceIps",
           "value": Array [
             Object {
@@ -533,7 +533,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
           ],
         },
         Object {
-          "color": "#490092",
+          "color": "#9170B8",
           "key": "uniqueDestinationIps",
           "value": Array [
             Object {
@@ -550,14 +550,14 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
     fields={
       Array [
         Object {
-          "color": "#DB1374",
+          "color": "#D36086",
           "description": "Source",
           "icon": "cross",
           "key": "uniqueSourceIps",
           "value": 1714,
         },
         Object {
-          "color": "#490092",
+          "color": "#9170B8",
           "description": "Dest.",
           "icon": "cross",
           "key": "uniqueDestinationIps",
@@ -587,7 +587,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
             show={true}
           >
             <div
-              className="sc-AykKF bIbcmW"
+              className="sc-AykKF jbBKkl"
             >
               <EuiPanel>
                 <div
@@ -728,7 +728,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                       className="euiFlexItem euiFlexItem--flexGrowZero sc-AykKG dLVTBE"
                                     >
                                       <EuiIcon
-                                        color="#DB1374"
+                                        color="#D36086"
                                         data-test-subj="stat-icon"
                                         size="l"
                                         type="cross"
@@ -741,7 +741,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                           role="img"
                                           style={
                                             Object {
-                                              "fill": "#DB1374",
+                                              "fill": "#D36086",
                                             }
                                           }
                                         >
@@ -754,7 +754,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                             role="img"
                                             style={
                                               Object {
-                                                "fill": "#DB1374",
+                                                "fill": "#D36086",
                                               }
                                             }
                                             viewBox="0 0 16 16"
@@ -823,7 +823,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                       className="euiFlexItem euiFlexItem--flexGrowZero sc-AykKG dLVTBE"
                                     >
                                       <EuiIcon
-                                        color="#490092"
+                                        color="#9170B8"
                                         data-test-subj="stat-icon"
                                         size="l"
                                         type="cross"
@@ -836,7 +836,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                           role="img"
                                           style={
                                             Object {
-                                              "fill": "#490092",
+                                              "fill": "#9170B8",
                                             }
                                           }
                                         >
@@ -849,7 +849,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                             role="img"
                                             style={
                                               Object {
-                                                "fill": "#490092",
+                                                "fill": "#9170B8",
                                               }
                                             }
                                             viewBox="0 0 16 16"
@@ -912,7 +912,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               barChart={
                                 Array [
                                   Object {
-                                    "color": "#DB1374",
+                                    "color": "#D36086",
                                     "key": "uniqueSourceIps",
                                     "value": Array [
                                       Object {
@@ -922,7 +922,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                     ],
                                   },
                                   Object {
-                                    "color": "#490092",
+                                    "color": "#9170B8",
                                     "key": "uniqueDestinationIps",
                                     "value": Array [
                                       Object {
@@ -971,7 +971,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               areaChart={
                                 Array [
                                   Object {
-                                    "color": "#DB1374",
+                                    "color": "#D36086",
                                     "key": "uniqueSourceIpsHistogram",
                                     "value": Array [
                                       Object {
@@ -989,7 +989,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                     ],
                                   },
                                   Object {
-                                    "color": "#490092",
+                                    "color": "#9170B8",
                                     "key": "uniqueDestinationIpsHistogram",
                                     "value": Array [
                                       Object {

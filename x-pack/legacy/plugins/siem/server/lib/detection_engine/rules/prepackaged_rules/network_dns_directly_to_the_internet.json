@@ -1,17 +1,46 @@
 {
-  "rule_id": "6ea71ff0-9e95-475b-9506-2580d1ce6154",
-  "risk_score": 50,
-  "description": "Network - DNS Directly to the Internet\t",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Network - DNS Directly to the Internet\t",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "destination.port:53 and not destination.ip: 169.254.169.254/32 and not destination.ip:127.0.0.53/32 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "description": "This signal detects internal network client sending DNS traffic directly to the Internet.\nThis is atypical behavior for a managed network and can be indicative of malware,\nexfiltration, command and control or simply misconfiguration. This also impacts your\norganization's ability to provide enterprise monitoring and logging of DNS and opens\nyour network to a variety of abuses or malicious communications.\n",
+  "false_positives": [
+    "DNS servers should be excluded from this rule as this is expected behavior for them. Endpoints usually query local DNS servers defined in their DHCP scopes but this may be overridden if a user configures their endpoint to use a remote DNS server. This is uncommon in managed enterprise networks because it would tend to break intra-net name resolution when split horizon DNS is utilized. Some consumer VPN services and browser plug-ins may send DNS traffic to remote Internet destinations; in that case, such devices or networks can be excluded from this rule if this is expected behavior."
+  ],
+  "index": [
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
-  "filters": [],
-  "enabled": false,
+  "name": "DNS Activity to the Internet",
+  "query": "destination.port:53 and (\n    network.direction: outbound or (\n        source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip:( 169.254.169.254/32 or 127.0.0.53/32 or 10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 or 224.0.0.251 or ff02\\:\\:fb or 255.255.255.255 )\n    )\n)\n",
+  "references": [
+    "https://www.us-cert.gov/ncas/alerts/TA15-240A",
+    "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-81-2.pdf"
+  ],
+  "risk_score": 47,
+  "rule_id": "6ea71ff0-9e95-475b-9506-2580d1ce6154",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
   "version": 1
 }

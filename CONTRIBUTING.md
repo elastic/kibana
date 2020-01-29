@@ -193,7 +193,7 @@ yarn es snapshot
 ##### Keeping data between snapshots
 
 If you want to keep the data inside your Elasticsearch between usages of this command,
-you should use the following command, to keep your data folder outside the downloaded snapshot 
+you should use the following command, to keep your data folder outside the downloaded snapshot
 folder:
 
 ```bash
@@ -290,6 +290,7 @@ Follow the [cross-cluster search](https://www.elastic.co/guide/en/kibana/current
 
 ### Running Kibana
 
+Change to your local Kibana directory.
 Start the development server.
 
 ```bash
@@ -338,7 +339,7 @@ The `config/kibana.yml` file stores user configuration directives. Since this fi
 
 #### Setting Up SSL
 
-Kibana includes a self-signed certificate that can be used for development purposes: `yarn start --ssl`.
+Kibana includes self-signed certificates that can be used for development purposes in the browser and for communicating with Elasticsearch: `yarn start --ssl` & `yarn es snapshot --ssl`.
 
 ### Linting
 

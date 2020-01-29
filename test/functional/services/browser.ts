@@ -200,6 +200,14 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Pauses the execution in the browser, similar to setting a breakpoint for debugging.
+     * @return {Promise<void>}
+     */
+    public async pause() {
+      await driver.executeAsyncScript(`(async () => { debugger; return Promise.resolve(); })()`);
+    }
+
+    /**
      * Moves the remote environment’s mouse cursor to the specified point {x, y} which is
      * offset to browser page top left corner.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
@@ -232,8 +240,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async dragAndDrop(
-      from: { offset: { x: any; y: any }; location: any },
-      to: { offset: { x: any; y: any }; location: any }
+      from: { offset?: { x: any; y: any }; location: any },
+      to: { offset?: { x: any; y: any }; location: any }
     ) {
       if (this.isW3CEnabled) {
         // The offset should be specified in pixels relative to the center of the element's bounding box
@@ -305,9 +313,21 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Moves forwards in the browser history.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Navigation.html#forward
+     *
+     * @return {Promise<void>}
      */
     public async goForward() {
       await driver.navigate().forward();
+    }
+
+    /**
+     * Navigates to a URL via the browser history.
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Navigation.html#to
+     *
+     * @return {Promise<void>}
+     */
+    public async navigateTo(url: string) {
+      await driver.navigate().to(url);
     }
 
     /**

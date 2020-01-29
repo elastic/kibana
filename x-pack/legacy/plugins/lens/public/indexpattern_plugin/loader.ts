@@ -21,6 +21,7 @@ import { updateLayerIndexPattern } from './state_helpers';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
 import { documentField } from './document_field';
+import { isNestedField, IFieldType } from '../../../../../../src/plugins/data/public';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;
@@ -234,7 +235,8 @@ export async function syncExistingFields({
         query.timeFieldName = pattern.timeFieldName;
       }
 
-      return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
+      return fetchJson({
+        path: `${BASE_API_URL}/existing_fields/${pattern.id}`,
         query,
       }) as Promise<ExistingFields>;
     })
@@ -270,9 +272,9 @@ function fromSavedObject(
     id,
     type,
     title: attributes.title,
-    fields: (JSON.parse(attributes.fields) as IndexPatternField[])
-      .filter(({ aggregatable, scripted }) => !!aggregatable || !!scripted)
-      .concat(documentField),
+    fields: (JSON.parse(attributes.fields) as IFieldType[])
+      .filter(field => !isNestedField(field) && (!!field.aggregatable || !!field.scripted))
+      .concat(documentField) as IndexPatternField[],
     typeMeta: attributes.typeMeta
       ? (JSON.parse(attributes.typeMeta) as SavedRestrictionsInfo)
       : undefined,

@@ -30,10 +30,10 @@ import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
 import 'ui/kbn_top_nav';
-import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'leaflet';
+import 'plugins/kibana/dashboard/legacy';
 import { npStart } from 'ui/new_platform';
 import { localApplicationService } from 'plugins/kibana/local_application_service';
 

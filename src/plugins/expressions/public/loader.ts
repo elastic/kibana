@@ -178,6 +178,9 @@ export class ExpressionLoader {
     if (params.extraHandlers && this.params) {
       this.params.extraHandlers = params.extraHandlers;
     }
+    if (params.variables && this.params) {
+      this.params.variables = params.variables;
+    }
   }
 }
 

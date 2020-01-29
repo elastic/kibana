@@ -13,7 +13,7 @@ exports[`removes aria-label when instructed not to announce the space name 1`] =
   <EuiAvatar
     aria-hidden={true}
     aria-label=""
-    color="#F19F58"
+    color="#DA8B45"
     data-test-subj="space-avatar-"
     imageUrl=""
     initials=""
@@ -29,7 +29,7 @@ exports[`removes aria-label when instructed not to announce the space name 1`] =
       data-test-subj="space-avatar-"
       style={
         Object {
-          "backgroundColor": "#F19F58",
+          "backgroundColor": "#DA8B45",
           "backgroundImage": "none",
           "color": "#000000",
         }
@@ -55,7 +55,7 @@ exports[`renders with a space name entirely made of whitespace 1`] = `
 
 exports[`renders without crashing 1`] = `
 <EuiAvatar
-  color="#F19F58"
+  color="#DA8B45"
   data-test-subj="space-avatar-"
   imageUrl=""
   initials=""

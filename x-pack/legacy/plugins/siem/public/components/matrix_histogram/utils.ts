@@ -3,36 +3,44 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
+import { ScaleType, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
 
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
 import { MatrixHistogramDataTypes, MatrixHistogramMappingTypes } from './types';
+import { histogramDateTimeFormatter } from '../utils';
 
-export const getBarchartConfigs = ({
-  from,
-  to,
-  scaleType,
-  onBrushEnd,
-  yTickFormatter,
-  showLegend,
-  legendPosition,
-}: {
+interface GetBarchartConfigsProps {
+  chartHeight?: number;
   from: number;
+  legendPosition?: Position;
   to: number;
   scaleType: ScaleType;
   onBrushEnd: UpdateDateRange;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
-  legendPosition?: Position;
-}) => ({
+}
+
+export const DEFAULT_CHART_HEIGHT = 174;
+
+export const getBarchartConfigs = ({
+  chartHeight,
+  from,
+  legendPosition,
+  to,
+  scaleType,
+  onBrushEnd,
+  yTickFormatter,
+  showLegend,
+}: GetBarchartConfigsProps) => ({
   series: {
     xScaleType: scaleType || ScaleType.Time,
     yScaleType: ScaleType.Linear,
     stackAccessors: ['g'],
   },
   axis: {
-    xTickFormatter: scaleType === ScaleType.Time ? niceTimeFormatter([from, to]) : undefined,
+    xTickFormatter:
+      scaleType === ScaleType.Time ? histogramDateTimeFormatter([from, to]) : undefined,
     yTickFormatter:
       yTickFormatter != null
         ? yTickFormatter
@@ -40,9 +48,9 @@ export const getBarchartConfigs = ({
     tickSize: 8,
   },
   settings: {
-    legendPosition: legendPosition || Position.Bottom,
+    legendPosition: legendPosition ?? Position.Bottom,
     onBrushEnd,
-    showLegend: showLegend || true,
+    showLegend: showLegend ?? true,
     theme: {
       scales: {
         barsPadding: 0.08,
@@ -61,7 +69,7 @@ export const getBarchartConfigs = ({
       },
     },
   },
-  customHeight: 324,
+  customHeight: chartHeight ?? DEFAULT_CHART_HEIGHT,
 });
 
 export const formatToChartDataItem = ([key, value]: [

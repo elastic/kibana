@@ -1,17 +1,36 @@
 {
-  "rule_id": "e8571d5f-bea1-46c2-9f56-998de2d3ed95",
-  "risk_score": 50,
-  "description": "EQL - Local Service Commands",
-  "immutable": true,
-  "interval": "5m",
-  "name": "EQL - Local Service Commands",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and  process.name:sc.exe and process.args:(\"create\" or \"config\" or \"failure\" or \"start\")",
+  "description": "Identifies use of sc.exe to create, modify, or start services on remote hosts. This could be indicative of adversary lateral movement but will be noisy if commonly done by admins.",
+  "index": [
+    "winlogbeat-*"
+  ],
   "language": "kuery",
-  "filters": [],
-  "enabled": false,
+  "max_signals": 33,
+  "name": "Local Service Commands",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and  process.name:sc.exe and process.args:(\"create\" or \"config\" or \"failure\" or \"start\")",
+  "risk_score": 21,
+  "rule_id": "e8571d5f-bea1-46c2-9f56-998de2d3ed95",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
   "version": 1
 }

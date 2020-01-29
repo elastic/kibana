@@ -5,7 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { RequestAdapter } from 'ui/inspector/adapters';
+import { RequestAdapter } from '../../../../../../src/plugins/inspector/public';
 import { MapAdapter } from '../inspector/adapters/map_adapter';
 
 const REGISTER_CANCEL_CALLBACK = 'REGISTER_CANCEL_CALLBACK';
