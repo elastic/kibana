@@ -1,0 +1,1801 @@
+[[plugin-api-changes-7.6]]
+= Kibana Plugin API Changes for 7.6
+
+## Kibana no longer crashes when a plugin version does not match the server
+
+Kibana no longer crashes when a plugin is used against an incompatible Kibana version. A warning is now displayed in the console instead of throwing and crashing.
+
+*via [#54404](https://github.com/elastic/kibana/pull/54404)*
+
+## Generate legacy vars when rendering all applications
+
+Rendering any type of application, even ones for the new platform, should still generate legacy vars injected into the page metadata, and this ensures these vars are injected for HTTP route rendering as well.
+
+*via [#54768](https://github.com/elastic/kibana/pull/54768)*
+
+## `uiSettings` image upload field config
+
+In `uiSettings`, the image upload field required specifying `maxSize` via the `options` field. This was in conflict with the stated use and type of `options` - which is a `string[]` use to populate select fields. `uiOptions` has been provided instead, accepting `Record<string, any>` values.
+
+*via [#54522](https://github.com/elastic/kibana/pull/54522)*
+
+## Replaced `map.manifestServiceUrl` setting in kibana.yml with `map.emsTileApiUrl` and `map.emsFileApiUrl`
+
+The undocumented `map.manifestServiceUrl` setting in kibana.yml has been replaced by `map.emsTileApiUrl` and `map.emsFileApiUrl`. These settings configure the base URL for the tile basemap manifest and vector file manifests used in Elastic Maps and the region map and coordinate map.visualizations.
+
+*via [#54399](https://github.com/elastic/kibana/pull/54399)*
+
+## New platform applications can now prompt user with a message
+
+New platform applications can now prompt a message when users are trying to leave the app, allowing to notify them if some changes are unsaved.
+
+```typescript
+
+   core.application.register({
+
+      id: 'my-app',
+
+      title: 'MyApp',
+
+      mount: (context, { appBasePath, element, onAppLeave }) => {
+
+        onAppLeave(actions => {
+
+          if(someUnsavedChanges) {
+
+            return actions.confirm(
+
+              'Some changes are unsaved and will be lost. Are you sure you want to leave MyApp?',
+
+              'Leaving application'
+
+            );
+
+          }
+
+          return actions.default();
+
+        });
+
+        const div = document.createElement('div');
+
+        div.innerHTML = '.....';
+
+        element.appendChild(div);
+
+        return () => div.remove();
+
+      },
+
+    });
+
+```
+
+*via [#54221](https://github.com/elastic/kibana/pull/54221)*
+
+## [NP] Add lifecycle timeout
+
+Kibana platform deprecates async lifecycles by `v8` release. Kibana supports async lifecycles for BWC, but limits their time duration to 30 sec.
+
+*via [#54129](https://github.com/elastic/kibana/pull/54129)*
+
+## Don't expose Elasticsearch client as Observable
+
+Elasticsearch clients aren't exposed via the Observable interface anymore. Elasticsearch client provides a static API that handles all elasticsearch config updates under the hood, transparent to the end-user.
+
+```js
+
+const client = core.elasticsearch.dataClient;
+
+const data = await client.callAsInternalUser('endpoint');
+
+```
+
+*via [#53824](https://github.com/elastic/kibana/pull/53824)*
+
+## Migrate config deprecations and `ShieldUser` functionality to the New Platform
+
+[Security Plugin]
+
+Legacy `ShieldUser` angular service has been removed and replaced with the dedicated method on the Kibana platform plugin `setup` contract:
+
+**Before**:
+
+```typescript
+
+const currentUser = await $injector.get('ShieldUser').getCurrent().$promise;
+
+```
+
+**Now**:
+
+Legacy plugin:
+
+```typescript
+
+import { npSetup } from 'ui/new_platform';
+
+const currentUser = await npSetup.plugins.security.authc.getCurrentUser();
+
+```
+
+Kibana platform plugin:
+
+```json
+
+// manifest.json
+
+....
+
+[optional]requiredPlugins: ["security"],
+
+....
+
+```
+
+```typescript
+
+// my_plugin/public/plugin.ts
+
+public setup(core: CoreSetup, { security }: PluginSetupDependencies) {
+
+    const currentUser = await security.authc.getCurrentUser();
+
+}
+
+```
+
+*via [#53768](https://github.com/elastic/kibana/pull/53768)*
+
+## Reduce license plugin api
+
+License method `isOneOf` was superseded by `hasAtLeast` that checks the current license is not less than passes minimal required license.
+
+```js
+
+//before
+
+license.isOneOf(['platinum', 'enterprise', 'trial'])
+
+// after
+
+license.hasAtLeast('platinum')
+
+```
+
+*via [#53489](https://github.com/elastic/kibana/pull/53489)*
+
+## NP Migration: Move doc views registry and existing doc views into discover plugin
+
+The `ui/registry/doc_views` registry is removed in favor of the same functionality exposed through the setup contract of the `discover` plugin in `core_plugins/kibana`.
+
+Old way of registering a doc view:
+
+```ts
+
+import { addDocView } from 'ui/registry/doc_views';
+
+addDocView({
+
+  title: '',
+
+  order: 10,
+
+  component: MyComponent,
+
+});
+
+```
+
+New way of registering a doc view:
+
+```ts
+
+import { setup } from '../src/legacy/core_plugins/kibana/public/discover';
+
+setup.addDocView({
+
+  title: '',
+
+  order: 10,
+
+  component: MyComponent,
+
+});
+
+```
+
+*via [#53465](https://github.com/elastic/kibana/pull/53465)*
+
+### New platform plugin
+
+```tsx
+
+class MyPlugin {
+
+   public setup(core: CoreSetup, { navigation }: MyPluginSetupDependencies) {
+
+      const customDiscoverExtension = {
+
+         id: 'registered-discover-prop',
+
+         label: 'Registered Discover Button',
+
+         description: 'Registered Discover Demo',
+
+         run() {},
+
+         testId: 'demoDiscoverRegisteredNewButton',
+
+         appName: 'discover',
+
+      };
+
+      navigation.registerMenuItem(customDiscoverExtension);
+
+   }
+
+}
+```
+
+### Legacy plugin
+
+```tsx
+
+const customDiscoverExtension = {
+
+  id: 'registered-discover-prop',
+
+  label: 'Registered Discover Button',
+
+  description: 'Registered Discover Demo',
+
+  run() {},
+
+  testId: 'demoDiscoverRegisteredNewButton',
+
+  appName: 'discover',
+
+};
+
+npSetup.plugins.navigation.registerMenuItem(customDiscoverExtension);
+```
+
+*via [#53136](https://github.com/elastic/kibana/pull/53136)*
+
+## bfetch
+
+`ajax_stream` has been ported to the New Platform. Use `fetchStreaming()` method of `bfetch` plugin instead.
+
+```js
+
+import { npStart } from 'ui/new_platform';
+
+const { stream, promise } = npStart.plugins.bfetch.fetchStreaming({ url: 'http://elastic.co' });
+
+```
+
+*via [#52888](https://github.com/elastic/kibana/pull/52888)*
+
+## Move CSP options to new platform
+
+The default options used for managing Kibana's Content Security Policy have been moved into core for the new platform. Relevant items exposed from `src/core/server` include:
+
+- `CspConfig`: TypeScript class for generating CSP configuration. Will generate default configuration for any properties not specified in initialization.
+
+- `CspConfig.DEFAULT`: Default CSP configuration.
+
+- `ICspConfig`: Interface representing CSP configuration.
+
+*via [#52698](https://github.com/elastic/kibana/pull/52698)*
+
+## Management API for Kibana Platform
+
+Management API for Kibana Platform implemented. Demonstration code available at `test/plugin_functional/plugins/management_test_plugin/public/plugin.tsx`
+
+*via [#52579](https://github.com/elastic/kibana/pull/52579)*
+
+## State containers
+
+State containers have now been rewritten and to create state container you use `createStateContainer` instead of previous `createStore`.
+
+```ts
+
+import { createStateContainer } from 'src/plugins/kibana_utils';
+
+const container = createStateContainer(0, {
+
+  increment: (cnt: number) => (by: number) => cnt + by,
+
+  double: (cnt: number) => () => cnt * 2,
+
+});
+
+container.transitions.increment(5);
+
+container.transitions.double();
+
+console.log(container.get()); // 10
+
+```
+
+[See full documentation here](https://github.com/streamich/kibana/blob/state-containers/src/plugins/kibana_utils/docs/state_containers/README.md).
+
+*via [#52384](https://github.com/elastic/kibana/pull/52384)*
+
+## Add pre-response http interceptor
+
+HttpService provides `onPreResponse` interceptor. Interceptor supports extending a response with custom headers.
+
+```js
+
+ this.registerOnPreResponse((request, preResponseInfo, t) => {
+
+   if(preResponseInfo.statusCode < 300){
+
+     return t.next({
+
+       headers: {
+
+         'x-foo-header': 'bar'
+
+       }
+
+   });
+
+  }
+
+  return t.next()
+
+});
+
+```
+
+*via [#52366](https://github.com/elastic/kibana/pull/52366)*
+
+## Implements config deprecation in New Platform
+
+New platform plugin's configuration now supports deprecation. Use the `deprecations` key of a plugin's config descriptor to register them.
+
+```typescript
+
+ // my_plugin/server/index.ts
+
+ import { schema, TypeOf } from '@kbn/config-schema';
+
+ import { PluginConfigDescriptor } from 'kibana/server';
+
+ 
+
+ const configSchema = schema.object({
+
+   someNewKey: schema.string({ defaultValue: 'a string' }),
+
+ });
+
+ 
+
+ type ConfigType = TypeOf<typeof configSchema>;
+
+ 
+
+ export const config: PluginConfigDescriptor<ConfigType> = {
+
+   schema: configSchema,
+
+   deprecations: ({ rename, unused }) => [
+
+     rename('someOldKey', 'someNewKey'),
+
+     unused('deprecatedProperty'),
+
+   ],
+
+ };
+
+```
+
+*via [#52251](https://github.com/elastic/kibana/pull/52251)*
+
+## Add server rendering service to enable standalone route rendering
+
+Render a bootstrapped HTML page from a route handler using the `RenderingService` from your **server plugin**:
+
+```ts
+
+const router = createRouter();
+
+router.get(
+
+  { path: '/', validate: false },
+
+  (context, request, response) =>
+
+    response.ok({
+
+      headers: {
+
+        'content-security-policy': context.core.http.csp.header,
+
+      },
+
+      body: await context.core.rendering.render(),
+
+    })
+
+);
+
+```
+
+*via [#52161](https://github.com/elastic/kibana/pull/52161)*
+
+## Disabled actions
+
+Embeddable input now has `disabledActions` property. Actions with ID listed in `disabledActions` will not be rendered by embeddable panel in drop down context menu and badge list.
+
+```ts
+
+const embeddable = await embeddableFactory.createFromState(
+
+  state,
+
+  {
+
+    // ...
+
+    disabledActions: ['CUSTOM_TIME_RANGE', 'CUSTOM_TIME_RANGE_BADGE'],
+
+  },
+
+  // ...
+
+);
+
+```
+
+*via [#51975](https://github.com/elastic/kibana/pull/51975)*
+
+## [Telemetry] Migrate ui_metric plugin to NP under usageCollection
+
+Migrates `ui_metrics` to NP under `usageCollection`.
+
+*via [#51972](https://github.com/elastic/kibana/pull/51972)*
+
+## NP licensing plugin improvements 
+
+Licensing plugin retrieves license data from Elasticsearch and becomes a source of license data for all Kibana plugins on server-side and client-side.
+
+### Server-side API
+
+ The licensing plugin retrieves license data from **Elasticsearch** at regular configurable intervals.
+
+- `license$: Observable<ILicense>` Provides a steam of license data [ILicense](./common/types.ts). Plugin emits new value whenever it detects changes in license info. If the plugin cannot retrieve a license from **Elasticsearch**, it will emit `an empty license` object. 
+
+- `refresh: () => Promise<ILicense>` allows a plugin to enforce license retrieval.
+
+### Client-side API
+
+ The licensing plugin retrieves license data from **licensing Kibana plugin** and does not communicate with Elasticsearch directly.
+
+- `license$: Observable<ILicense>` Provides a steam of license data [ILicense](./common/types.ts). Plugin emits new value whenever it detects changes in license info. If the plugin cannot retrieve a license from **Kibana**, it will emit `an empty license` object. 
+
+- `refresh: () => Promise<ILicense>` allows a plugin to enforce license retrieval.
+
+*via [#51818](https://github.com/elastic/kibana/pull/51818)*
+
+## [Cloud] move cloud plugin to np
+
+Fully migrates `cloud` plugin over to NP. To use the NP contract exposed by the cloud plugin (ex `cloudId` or `isCloudEnabled`) follow this quick guide below (Note that all the plugins are already migrated to use the NP plugin in this very same PR):
+
+```json
+
+// plugin/kibana.json
+
+{
+
+  "id": "...",
+
+  "optionalPlugins": ["cloud"]
+
+}
+
+```
+
+- Server side: Check for cloud plugin in the `setup` function:
+
+```ts
+
+// server/plugin.ts
+
+import { get } from 'lodash';
+
+class Plugin {
+
+  setup(core, plugins) {
+
+    const { cloud } = plugins;
+
+    // use `lodash.get` as cloud might not be available if set as an optional plugin.
+
+		const isCloudEnabled = get<boolean>(cloud, 'isCloudEnabled', false);
+
+    // ...
+
+  }
+
+}
+
+```
+
+- Client side: both `cloudId` and `isCloudEnabled` are exposed for the the plugins to consume in the plugins. Until fully transitioned to new platform, your plugins can use `npSetup` to access the cloud plugin:
+
+```ts
+
+import { npSetup } from 'ui/new_platform';
+
+import { get } from 'lodash';
+
+// ...
+
+const { cloud } = npSetup.plugins;
+
+const isCloudEnabled = get<boolean>(cloud, 'isCloudEnabled', false);
+
+```
+
+*via [#51789](https://github.com/elastic/kibana/pull/51789)*
+
+## [Telemetry] Migrate Usage Collector Set to thew new Kibana Platform
+
+Fully migrate (`server.usage.collectorSet`) to New Platform under (`UsageCollection`) plugin. To use the `UsageCollector` plugin to collect server side stats with the NP follow the quick guide below (Note that all the plugins are already migrated to use this new plugin in this very same PR):
+
+Make sure `usageCollection` is in your optional Plugins:
+
+```json
+
+// plugin/kibana.json
+
+{
+
+  "id": "...",
+
+  "optionalPlugins": ["usageCollection"]
+
+}
+
+```
+
+Register Usage collector in the `setup` function:
+
+```ts
+
+// server/plugin.ts
+
+class Plugin {
+
+  setup(core, plugins) {
+
+    registerMyPluginUsageCollector(plugins.usageCollection);
+
+  }
+
+}
+
+```
+
+Creating and registering a Usage Collector. Ideally collectors would be defined in a separate directory `server/collectors/register.ts`.
+
+```ts
+
+// server/collectors/register.ts
+
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+
+export function registerMyPluginUsageCollector(usageCollection?: UsageCollectionSetup): void {
+
+  // usageCollection is an optional dependency, so make sure to return if it is not registered.
+
+  if (!usageCollection) {
+
+    return;
+
+  }
+
+  // create usage collector
+
+  const myCollector = usageCollection.makeUsageCollector({
+
+    type: MY_USAGE_TYPE,
+
+    fetch: async (callCluster: CallCluster) => {
+
+    // query ES and get some data
+
+    // summarize the data into a model
+
+    // return the modeled object that includes whatever you want to track
+
+      return {
+
+        my_objects: {
+
+          total: SOME_NUMBER
+
+        }
+
+      };
+
+    },
+
+  });
+
+  // register usage collector
+
+  usageCollection.registerCollector(myCollector);
+
+}
+
+```
+
+*via [#51618](https://github.com/elastic/kibana/pull/51618)*
+
+## Allow chromeless applications to render via non-/app routes
+
+Allow applications to routable from paths that do not start with `/app`. This is first enabled via the `appRoute` flag during **UI application registration**:
+
+```ts
+
+export class MyPlugin implements Plugin {
+
+  setup({ application }) {
+
+    application.register({
+
+      id: 'my-app',
+
+      // App can be accessed via the /my-app route
+
+      appRoute: '/my-app',
+
+      async mount(context, params) {
+
+        const { renderApp } = await import('./application');
+
+        return renderApp(context, params);
+
+      },
+
+    });
+
+  }
+
+}
+
+```
+
+*via [#51527](https://github.com/elastic/kibana/pull/51527)*
+
+## Add compatibility wrapper for Boom errors thrown from route handler
+
+Added a new `handleLegacyErrors` method to core `HttpService` router. The method wraps a `RequestHandler` to intercept any thrown `Boom` errors and converts them into proper NP error response.
+
+```ts
+
+// plugins/myplugin/server/plugin.ts
+
+import { schema } from '@kbn/config-schema';
+
+import { CoreSetup } from 'src/core/server';
+
+export interface DemoPluginsSetup {};
+
+class Plugin {
+
+  public setup(core: CoreSetup, pluginSetup: DemoPluginSetup) {
+
+    const router = core.http.createRouter();
+
+    router.post(
+
+      {
+
+        path: '/api/myplugin/endpoint',
+
+        validate: false,
+
+      },
+
+      router.wrapErrors((context, req, res) => {
+
+        throw Boom.notFound('not there'); // will be converted into properly interpreted error
+
+      })
+
+    )
+
+  }
+
+}
+
+```
+
+*via [#51157](https://github.com/elastic/kibana/pull/51157)*
+
+## Move SearchBar ⇒ NP 
+
+Move SearchBar React component to NP
+
+The SearchBar component is now available by importing from the data plugin.
+
+```tsx
+
+import { SearchBar } from '../../../plugins/data/public';
+
+```
+
+There is also a stateful version available, that requires much fewer dependencies 
+
+```tsx
+
+export class MyPublicPlugin {
+
+  public start(
+
+    core: CoreStart,
+
+    { data }: MyPublicPluginDependencies
+
+  ) {
+
+    const { SearchBar } = data.ui;
+
+    ...
+
+    return <SearchBar
+
+       ...
+
+    ></SearchBar>
+
+  }
+
+}
+
+```
+
+*via [#51028](https://github.com/elastic/kibana/pull/51028)*
+
+### Saved Query Service 
+
+Saved query service is now available on the data plugin's `query` start contract.
+
+```
+
+class MyPlugin {
+
+    public start(core: CoreStart, { data }: MyPluginDependencies) {
+
+        const allSavedQueries = data.query.savedQueries.getAllSavedQueries()
+
+    }
+
+}
+
+  
+
+```
+
+### Saved Query UI Components
+
+The Saved Query management UI components can be imported from `data` plugin directly.
+
+```
+
+   import { SavedQueryManagementComponent, SaveQueryForm } from '../../plugins/data/public';
+
+```
+
+`SavedQueryManagementComponent`
+
+![image](https://user-images.githubusercontent.com/3016806/70060096-91bf8600-15ea-11ea-94a1-d802411eabee.png)
+
+`SaveQueryForm`
+
+![image](https://user-images.githubusercontent.com/3016806/70060171-abf96400-15ea-11ea-859c-378792957c0e.png)
+
+*via [#51024](https://github.com/elastic/kibana/pull/51024)*
+
+## Move QueryBarInput ⇒ NP
+
+* `QueryBarInput` components was renamed to `QueryStringInput` and moved to `src/plugins/data/public`
+
+* The `typeahead` UI component can now be used independently of `QueryStringInput`. It can be imported from `src/plugins/data/public`.
+
+```
+
+   import { QueryStringInput, SuggestionsComponent } from '../../plugins\data\public'
+
+```
+
+*via [#51023](https://github.com/elastic/kibana/pull/51023)*
+
+## Move ApplyFiltersPopover ⇒ NP
+
+The `ApplyFiltersPopover` component is no longer exported.
+
+If you wish to open the filter selection popover, you should use the **Actions API** from within an `embeddable`:
+
+```
+
+ await uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+
+    embeddable: this,
+
+    filters,
+
+ });
+
+```
+
+*via [#51022](https://github.com/elastic/kibana/pull/51022)*
+
+### Deprecated the `filter-bar` directive
+
+If you need to render a filter bar from `angular`, use the `kbn-top-nav` directive with the following configuration:
+
+```
+
+<kbn-top-nav
+
+  app-name="'my-app'"
+
+  show-search-bar="true"
+
+  show-filter-bar="true"
+
+  show-save-query="false"
+
+  show-date-picker="false"
+
+  filters="filters"
+
+  on-filters-updated="updateFilters"
+
+  index-patterns="[indexPattern]"
+
+>
+
+</kbn-top-nav>
+
+```
+
+### Move `FilterBar` React component to NP
+
+The `FilterBar` component is now available by importing from the `data` plugin.
+
+```
+
+import { FilterBar } from '../../../plugins/data/public';
+
+```
+
+### Move filter related utilities to NP
+
+ * `IDataPluginServices` ⇒ import from `data`
+
+ * `getDisplayValueFromFilter` ⇒ `data.utils`
+
+ * `buildCustomFilter` ⇒ `esFilters.buildCustomFilter`
+
+ * `buildFilter` ⇒ `esFilters.buildFilter`
+
+ * `getFilterParams` ⇒ `esFilters.getFilterParams`
+
+ * `getIndexPatternFromFilter` ⇒ `utils.getIndexPatternFromFilter`
+
+ * `getQueryDslFromFilter` ⇒ replaced with `esFilters.cleanFIlter`
+
+ * `isFilterable` ⇒ import from `data`
+
+*via [#51020](https://github.com/elastic/kibana/pull/51020)*
+
+## Kibana app migration: Remove old apis
+
+The following undocumented APIs for scroll search and index document count have been removed:
+
+* `POST /api/kibana/legacy_scroll_continue`
+
+* `POST /api/kibana/legacy_scroll_start`
+
+* `POST /api/kibana/{id}/_count`
+
+*via [#50881](https://github.com/elastic/kibana/pull/50881)*
+
+## Np kibana plugin home feature catalogue
+
+The `ui/registries/feature_catalogue` module has been deprecated for removal in 8.0
+
+Plugins wishing to migrate may remove their usage of `ui/registries/feature_catalogue` and rely on either:
+
+```ts
+
+// For legacy plugins
+
+import { npSetup } from 'ui/new_platform';
+
+npSetup.plugins.home.featureCatalogue.register(/* same details here */);
+
+// For new plugins: first add 'home` to the list of `optionalPlugins` 
+
+// in your kibana.json file. Then access the plugin directly in `setup`:
+
+class MyPlugin {
+
+  setup(core, plugins) {
+
+    if (plugins.home) {
+
+      plugins.home.featureCatalogue.register(/* same details here. */);
+
+    }
+
+  }
+
+}
+
+```
+
+Note that the old module supported providing a Angular DI function to receive Angular dependencies. This is no longer supported as we migrate away from Angular.
+
+*via [#50838](https://github.com/elastic/kibana/pull/50838)*
+
+## ChromeHelpExtension
+
+The `chrome.helpExtension` has been updated to where it no longer just accepts a function to spit out any content. Now, the extension looks like:
+
+```tsx
+
+export interface ChromeHelpExtension {
+
+  appName: string;
+
+  links?: HeaderHelpMenuUIExtraLink[];
+
+  // You can still pass custom content via the `content` key
+
+  content?: (element: HTMLDivElement) => () => void;
+
+}
+
+```
+
+*via [#50736](https://github.com/elastic/kibana/pull/50736)*
+
+## Expose whitelisted config values to client-side plugin
+
+New Platform plugins with both a server and client parts can now expose configuration properties to the client-side plugin.
+
+The properties to expose must be whitelisted in the config declaration
+
+```typescript
+
+// my_plugin/server/index.ts
+
+const configSchema = schema.object({
+
+  secret: schema.string({ defaultValue: 'Not really a secret :/' }),
+
+  uiProp: schema.string({ defaultValue: 'Accessible from client' }),
+
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+
+  exposeToBrowser: {
+
+    uiProp: true,
+
+  },
+
+  schema: configSchema,
+
+};
+
+```
+
+And can then be accessed in the client-side plugin using the `PluginInitializerContext`:
+
+```typescript
+
+// my_plugin/public/index.ts
+
+interface ClientConfigType {
+
+  uiProp: string;
+
+}
+
+export class Plugin implements Plugin<PluginSetup, PluginStart> {
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
+  public async setup(core: CoreSetup, deps: {}) {
+
+    const config = this.initializerContext.config.get<ClientConfigType>();
+
+    // ...
+
+  }
+
+```
+
+*via [#50641](https://github.com/elastic/kibana/pull/50641)*
+
+## [NP Kibana Migrations ] kibana plugin home
+
+The api to register new tutorials was moved to the new platform. You are now able to add new tutorials by creating a plugin in the new platform, adding a dependency to `home` in its `kibana.json` and using the `tutorials.registerTutorial` method in the setup lifecycle:
+
+```ts
+
+class MyPlugin {
+
+  setup(core: CoreSetup, plugins: { home: HomeServerPluginSetup }) {
+
+    home.tutorials.registerTutorial(() => ({ /* tutorial definition */ }));
+
+  }
+
+}
+
+```
+
+It is still possible to register tutorials from within the legacy platform by calling the same method exposed on the server object:
+
+```js
+
+server.newPlatform.setup.plugins.home.tutorials.registerTutorial(() => ({ /* tutorial definition */ }));
+
+```
+
+*via [#50444](https://github.com/elastic/kibana/pull/50444)*
+
+## Expressions fully migrated to the New Platform
+
+The Expressions service has been moved to the New Platform. Moving forward, any expressions-related code should be consumed via the new plugin's contracts (`src/plugins/expressions`).
+
+Use it in your New Platform plugin:
+
+```ts
+
+class MyPlugin {
+
+  setup (core, { expressions }) {
+
+    expressions.registerFunction(myFunction);
+
+    // ...
+
+  }
+
+  start (core, { expressions }) {
+
+    expressions.execute(myExpression);
+
+    // ...
+
+  }
+
+}
+
+```
+
+Or, in your legacy platform plugin, consume it through the `ui/new_platform` module:
+
+```ts
+
+import { npSetup, npStart } from 'ui/new_platform';
+
+npSetup.plugins.expressions.registerFunction(myFunction);
+
+npStart.plugins.expressions.execute(myExpression);
+
+// ...
+
+```
+
+*via [#50294](https://github.com/elastic/kibana/pull/50294)*
+
+## allows plugins to define validation schema for "enabled" flag
+
+If you want your plugin to be disabled by default you can specify it via config:
+
+```js
+
+export const config = {
+
+  schema: schema.object({ enabled: schema.boolean({ defaultValue: true }) })
+
+}
+
+```
+
+*via [#50286](https://github.com/elastic/kibana/pull/50286)*
+
+## Add getStartServices API
+
+Context is being deprecated on the front-end and replaced by the `core.getStartServices()` API.
+
+```ts
+
+class Plugin {
+
+  setup(core, plugins) {
+
+    core.application.register({
+
+      id: 'myApp',
+
+      title: 'My App',
+
+      // `mount` functions with just one argument will only receive `params`
+
+      async mount(params) {
+
+        const [coreStart, depsStart] = await core.getStartServices();
+
+        const { renderApp } = await import('./application');
+
+        return renderApp(coreStart, depsStart, params);
+
+      }
+
+    });
+
+  }
+
+}
+
+```
+
+*via [#50231](https://github.com/elastic/kibana/pull/50231)*
+
+## Relocated `@kbn/es-query` package to `data` plugin
+
+The `@kbn/es-query` package has been moved to `src/plugins/data` and is available under the `esQuery` namespace on both the client and the server.
+
+```ts
+
+// old
+
+import {
+
+  buildEsQuery,
+
+  EsQueryConfig,
+
+  buildQueryFromFilters,
+
+  luceneStringToDsl,
+
+  decorateQuery,
+
+  getEsQueryConfig,
+
+} from '@kbn/es-query';
+
+// new
+
+import { esQuery } from 'src/plugins/data/public'; // or `src/plugins/data/server`
+
+esQuery.buildEsQuery(...);
+
+```
+
+*via [#50182](https://github.com/elastic/kibana/pull/50182)*
+
+## Migrate share registry
+
+The `ui/share` registry is removed in favor of the `share` plugin which exposes a `register` method in the setup contract. The interface of share menu providers does not change except for the removal of angular dependency injection. The function to render the menu also moves into a function exposed by the `share` plugin in the start phase instead of a function which has to be called with the menu item providers. The following items have also been renamed:
+
+- `ShowProps` -> `ShowShareMenuOptions` 
+
+- `ShareMenuItemProps` -> `ShareContext` 
+
+- `showShareContextMenu` -> `toggleShareContextMenu`
+
+*via [#50137](https://github.com/elastic/kibana/pull/50137)*
+
+## Move generateFilters ⇒ NP
+
+Filter generator is now available a a utility function in the `data` plugin.
+
+```
+
+import { generateFilters } from '../plugins/data/public';
+
+const { filterManager } = plugins.data.query;
+
+const filters = generateFilters(filterManager, field, values, negate, indexString);
+
+```
+
+*via [#50118](https://github.com/elastic/kibana/pull/50118)*
+
+## Ensure chromeless applications hide left navbar link
+
+Chromeless applications no longer display a navigation link in the left application menu.
+
+*via [#50060](https://github.com/elastic/kibana/pull/50060)*
+
+## Allow registered applications to hide Kibana chrome
+
+When registering an application, you can now use the `chromeless` option to hide the Kibana chrome UI when the application is mounted.
+
+```ts
+
+application.register({
+
+  id: 'my-app',
+
+  chromeless: true,
+
+  async mount(context, params) {
+
+    /* ... */
+
+  },
+
+});
+
+```
+
+*via [#49795](https://github.com/elastic/kibana/pull/49795)*
+
+## Move Query type ⇒ NP
+
+Moved the data `Query` type, used to represent a query string in a specific querying language  to `src/plugins/data`.
+
+```
+
+// previously
+
+import { Query } from `src/legacy/core_plugins/data/public`;
+
+// now
+
+import { Query } from `src/plugins/data/public`;
+
+```
+
+*via [#49636](https://github.com/elastic/kibana/pull/49636)*
+
+## Remove react references from core `Notifications` apis
+
+The core `NotificationService` and `ToastsApi` methods are now framework agnostic and no longer accept react components as input. Please use `kibana_react`'s`toMountPoint` utility to convert a react node to a mountPoint.
+
+*via [#49573](https://github.com/elastic/kibana/pull/49573)*
+
+## Move Timefilter service ⇒ NP
+
+Moved the `timefilter` service to New Platform.
+
+Usage in **old platform**:
+
+```ts
+
+import { TimeRange } from 'src/plugins/data/public';
+
+import { npSetup, npStart } from 'ui/new_platform';
+
+const { timefilter } = npStart.data.timefilter;
+
+const timeRange: TimeRange = timefilter.getTime();
+
+const refreshInterval: RefreshInterval = timefilter.getRefreshInterval()
+
+```
+
+Usage in **new platform**:
+
+```
+
+class MyPlugin {
+
+   public setup(core: CoreSetup, { data }: MyPluginSetupDependencies) {
+
+      const timeRange: TimeRange = data.timefilter.timefilter.getTime();
+
+   }
+
+   public start(core: CoreStart, { data }: MyPluginStartDependencies) {
+
+      const newTimeRange = { from: getYesterday(), to: getNow() }
+
+      data.timefilter.timefilter.setTime(newTimeRange);
+
+   }
+
+}
+
+```
+
+*via [#49491](https://github.com/elastic/kibana/pull/49491)*
+
+## Move Storage ⇒ NP
+
+Move `Storage` to `kibana_utils`.
+
+ - Move `Storage` class to NP, and introduce the interface `IStorageWrapper` for when we only pass storage around.
+
+ - Rename places where `storage` was called `store`
+
+ - Load the Storage directives only where applicable (not in autoload)
+
+*via [#49448](https://github.com/elastic/kibana/pull/49448)*
+
+## Shim dev tools
+
+The `ui/registry/dev_tools` is removed in favor of the `DevTools` plugin which exposes a `register` method in the setup contract. Registering app works mostly the same as registering apps in `core.application.register`. Routing will be handled by the id of the dev tool - your dev tool will be mounted when the URL matches `/app/kibana#/dev_tools/<YOUR ID>`. This API doesn't support angular, for registering angular dev tools, bootstrap a local module on mount into the given HTML element.
+
+*via [#49349](https://github.com/elastic/kibana/pull/49349)*
+
+## Licensing plugin
+
+Add x-pack plugin for new platform public licensing information. This will eventually replace the licensing information consumed via `xpack_main`. Upon setup, this plugin exposes an observable API for inspecting and making checks against the license information.
+
+```ts
+
+license$.subscribe(license => {
+
+   console.log(license.uid);
+
+   console.log(license.isActive);
+
+   console.log(license.type);
+
+   const { state } = license.check('my-plugin', LICENSE_TYPE.gold);
+
+   if (state !== LICENSE_STATUS.Valid) {
+
+     disableSomething();
+
+   }
+
+});
+
+```
+
+*via [#49345](https://github.com/elastic/kibana/pull/49345)*
+
+## Kibana app migration: Shim dashboard
+
+The route flag `requireDefaultIndex` making sure there are index patterns and the `defaultIndex` advanced setting is set was removed.
+
+The same functionality can be achieved by using the helper function `ensureDefaultIndexPattern` from `ui/legacy_compat` within the `resolve` object of a route.
+
+*via [#48913](https://github.com/elastic/kibana/pull/48913)*
+
+## Migrate ui/registry/feature_catalogue to New Platform plugin
+
+The `ui/registries/feature_catalogue` module has been deprecated for removal in 8.0
+
+Plugins wishing to migrate may remove their usage of `ui/registries/feature_catalogue` and rely on either:
+
+```ts
+
+// For legacy plugins
+
+import { npSetup } from 'ui/new_platform';
+
+npSetup.plugins.feature_catalogue.register(/* same details here */);
+
+// For new plugins: first add 'feature_catalogue` to the list of `optionalPlugins` 
+
+// in your kibana.json file. Then access the plugin directly in `setup`:
+
+class MyPlugin {
+
+  setup(core, plugins) {
+
+    if (plugins.feature_catalogue) {
+
+      plugins.feature_catalogue.register(/* same details here. */);
+
+    }
+
+  }
+
+}
+
+```
+
+Note that the old module supported providing a Angular DI function to receive Angular dependencies. This is no longer supported as we migrate away from Angular.
+
+*via [#48818](https://github.com/elastic/kibana/pull/48818)*
+
+## Migrate necessary ui/autoload functionality to NP
+
+The `ui/autoload/styles` and `ui/autoload/settings` modules have been removed and are no longer necessary to import in your plugin code. Remove these imports starting in 7.6.
+
+If you still require font awesome, you should import it manually from the npm module:
+
+```
+
+import 'font-awesome/less/font-awesome';
+
+```
+
+*via [#48689](https://github.com/elastic/kibana/pull/48689)*
+
+## Remove react references from core `OverlayService` apis
+
+The core `OverlayService` methods are now framework agnostic and no longer accept react components as input. Please use `kibana_react`'s`toMountPoint` utility to convert a react component to a mountPoint.
+
+For exemple:
+
+```typescript
+
+core.overlays.openModal(<MyComponent/>)
+
+```
+
+Becomes:
+
+```typescript
+
+core.overlays.openModal(toMountPoint(<MyComponent/>))
+
+```
+
+*via [#48431](https://github.com/elastic/kibana/pull/48431)*
+
+## Supply deprecated req and res properties on IHttpFetchError for legacy compatibility
+
+Expose deprecated `req: Request` and `res: Response` properties on `IHttpFetchError`s to help plugins migrated faster by removing an additional migration burden.
+
+*via [#48430](https://github.com/elastic/kibana/pull/48430)*
+
+## Provide uiSettings service in NP
+
+New platform plugins can register custom uiSettings via `uiSettings.register` method
+
+```js
+
+// src/plugins/my-plugin/server/plugin.ts
+
+setup(core: CoreSetup){
+
+  core.uiSettings.register({
+
+    'my-plugin:my-setting': {
+
+      name: 'just-work',
+
+      value: true,
+
+      description: 'make it work',
+
+      category: ['my-category'],
+
+    },
+
+  })
+
+}
+
+```
+
+UiSettings client can be accessed:
+
+- via RequestHandlerContext on server-side:
+
+```js
+
+(context, req, res) {
+
+  const uiSettingsClient = context.core.uiSettings.client;
+
+  const value = await uiSettings.get('myPlugin:key');
+
+  // ...
+
+}
+
+```
+
+- via core interface in setup/start lifecycles on the client-side:
+
+```js
+
+public start({ uiSettings }) {
+
+  const value = uiSettings.get('myPlugin:key');
+
+```
+
+*via [#48413](https://github.com/elastic/kibana/pull/48413)*
+
+## Move FilterManager ⇒ NP
+
+Moved Filter Manager to New Platform.
+
+Usage in **old platform**:
+
+```
+
+import { npSetup, npStart } from 'ui/new_platform';
+
+npStart.data.query.filterManager.getFilters()
+
+...
+
+```
+
+Usage in **new platform**:
+
+```
+
+class MyPlugin {
+
+   public setup(core: CoreSetup, { data }: MyPluginSetupDependencies) {
+
+      data.query.filterManager.getFilters();
+
+   }
+
+   public start(core: CoreStart, { data }: MyPluginStartDependencies) {
+
+      data.query.filterManager.getFilters();
+
+   }
+
+}
+
+```
+
+*via [#48391](https://github.com/elastic/kibana/pull/48391)*
+
+## Migrate ui/doc_title to New platform
+
+Migrate `chrome.docTitle` to new platform. Plugins can now change the page title using this API.
+
+```ts
+
+coreStart.docTitle.change('My Title');
+
+```
+
+*via [#48121](https://github.com/elastic/kibana/pull/48121)*
+
+## Use NP registry instead of ui/registry/field_formats 
+
+The `FieldFormats` service has been moved to the `data` plugin in the New Platform. If your plugin has any imports from `ui/registry/field_formats`, you'll need to update your imports as follows:
+
+Use it in your New Platform plugin:
+
+```ts
+
+class MyPlugin {
+
+  setup (core, { data }) {
+
+    data.fieldFormats.register(myFieldFormat);
+
+    // ...
+
+  }
+
+  start (core, { data }) {
+
+    data.fieldFormats.getType(myFieldFormatId);
+
+    // ...
+
+  }
+
+}
+
+```
+
+Or, in your legacy platform plugin, consume it through the `ui/new_platform` module:
+
+```ts
+
+import { npSetup, npStart } from 'ui/new_platform';
+
+npSetup.plugins.data.fieldFormats.register(myFieldFormat);
+
+npStart.plugins.data.fieldFormats.getType(myFieldFormatId);
+
+// ...
+
+```
+
+*via [#48108](https://github.com/elastic/kibana/pull/48108)*
+
+## Timelion server API
+
+The server side api of Timelion `/api/timelion/run` used to accept datemath strings (like `now`) for the `time.from` and `time.to` properties. This PR removes support for datemath, from now on only ISO8601 encoded strings are supported.
+
+*via [#47813](https://github.com/elastic/kibana/pull/47813)*
+
+## Pass along request object to all HTTP interceptors
+
+Make the `Request` instance available to all HTTP interceptors, which is now in a read-only state. You may now also under-specify the object returned from HTTP response interceptors to only overwrite specific properties.
+
+*via [#47258](https://github.com/elastic/kibana/pull/47258)*
+
+## ui/management -> new platform
+
+The following interfaces were previously available under `ui/management` and are now available via 
+
+`import { setup as managementSetup } from '${correct path to top dir}src/legacy/core_plugins/management/public/legacy';`
+
+'ui/management/saved_objects_management'
+
+'ui/management/index_pattern_creation'
+
+'ui/management/index_pattern_list'
+
+*via [#45747](https://github.com/elastic/kibana/pull/45747)*
+
+## `ui/public` cleanup
+
+### Removed / moved modules
+
+In preparation for Kibana's upcoming [new platform](https://github.com/elastic/kibana/issues/9675), we are in the process of [migrating away](https://github.com/elastic/kibana/issues/26505) from the `ui/public` directory. Over time, the contents of this directory will be either deprecated or housed inside a parent plugin. If your plugin imports the listed items from the following `ui/public` modules, you will need to either update your import statements as indicated below, so that you are pulling these modules from their new locations, or copy the relevant code into your plugin. 
+
+#### `ui/state_management` [#51835](https://github.com/elastic/kibana/pull/51835), [#52172](https://github.com/elastic/kibana/pull/52172), [#52280](https://github.com/elastic/kibana/pull/52280), [#53582 ](https://github.com/elastic/kibana/pull/53582)
+
+The `hashUrl` and `unhashUrl` functions no longer rely on states being provided as an argument, therefore `getUnhashableStates`/`getUnhashableStatesProvider` have been removed.
+
+```ts
+// old
+
+import {
+
+  hashUrl,
+
+  unhashUrl,
+
+  getUnhashableStatesProvider, // deprecated
+
+} from 'ui/state_management/state_hashing';
+
+const getUnhashableStates = Private(getUnhashableStatesProvider);
+
+unhashUrl(window.location.href, getUnhashableStates());
+
+hashUrl([new AppState(), globalState], myRedirectUrl);
+
+// new
+
+import { hashUrl, unhashUrl } from '../../plugins/kibana_utils/public'
+
+hashUrl(window.location.href);
+
+unhashUrl(myRedirectUrl);
+
+```
+
+HashedItemStore was also moved to the `kibana_utils` plugin.
+
+```ts
+// old
+
+import { HashedItemStoreSingleton } from 'ui/state_management/state_storage'
+
+// new
+
+import { hashedItemStore } from '../../plugins/kibana_utils/public'
+
+```
+
+##### New state syncing utilities (AppState & GlobalState replacement in NP) 
+
+Created new state syncing utilities for syncing state between state containers and different type of state storage (e.g. query params in URL or session storage).
+
+Example app: `examples/state_containers_examples`
+
+This should become a replacement for `AppState` and `GlobalState` in NP.
+
+#### `ui/public/utils` cleanup
+
+- `base_object` and `find_by_param` utilities have been removed #52500
+
+- `decode_geo_hash` and `zoom_to_precision` utilities have been moved 👉`ui/vis/map` #52615
+
+- `range` utility has beed moved  👉`ui/vis/editors/default` #52615
+
+- `cidr_mask`, `date_range`, `geo_utils`,  `ip_range`, `ordinal_suffix` utilities have been moved 👉`ui/agg_types` #52744
+
+- `case_conversion` #53819
+
+    - `keysToSnakeCaseShallow` moved 👉 `src/legacy/server/status/lib`
+
+    - `keysToCamelCaseShallow` moved 👉 `src/legacy/core_plugins/kibana/public/management`
+
+- `collection` #53819
+
+    - `organizeBy moved  👉 `src/legacy/ui/public/indexed_array`
+
+    - `pushAll` was removed
+
+- `diff_object moved 👉 `ui/state_management` #53819
+
+- `function` was removed #53819
+
+- `key_map` moved 👉`ui/directives` #53819
+
+- `math` moved 👉`ui/vis`  #53819
+
+- `numeric` moved 👉`src/legacy/core_plugins/kibana/public/management` #53819
+
+- `parse_interval` moved 👉`src/legacy/core_plugins/data/common` #53819
+
+- `sort_prefix_first` moved 👉`x-pack/legacy/plugins/kuery_autocomplete` #53819
+
+- `supports` moved 👉`src/legacy/core_plugins/tile_map/public` #53819
+
+*via [#43511](https://github.com/elastic/kibana/pull/43511)*
+
+## Index Patterns 👉 New Platform
+
+The `indexPatterns` service is now available from the data plugin.
+
+```ts
+
+class MyPlugin {
+
+  start(core, data) {
+
+    const indexPatterns = data.indexPatterns.get(indexPatternId);
+
+    ...
+
+  }
+
+}
+```
+
+### Type Definitions 
+
+ * The `IIndexPattern` type replaces the legacy `StaticIndexPattern` type
+ * `IndexPattern` was moved to the new plugin.
+ * `FieldList` was moved to the new plugin and the `IFieldList` type was added.
+ * `Field` was moved to the new plugin, along side the `IFieldType` type.
+```ts
+
+    import { IIndexPattern, IFieldType } from 'src/plugins/data/public';
+
+    const indexPattern: IIndexPattern = data.indexPatterns.find(indexPatternId);
+
+    const field: IFieldType[] = indexPattern.fields;
+
+```
+
+### Helper functions
+
+```ts
+
+    import { indexPatterns as indexPatternsUtils } from 'src/plugins/data/public';
+
+    const indexPattern: IIndexPattern = indexPatterns.getFromSavedObject(savedObject)
+
+    const isValid = indexPatterns.validateIndexPattern(indexPatternString)
+
+```
+
+### Deletions
+
+  * `IndexPatternAlreadyExists`
+
+  *  `NoDefaultIndexPattern`
+
+  *  `NoDefinedIndexPatterns`
+
+*via [#43438](https://github.com/elastic/kibana/pull/43438)*
