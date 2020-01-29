@@ -4,6 +4,6 @@
   "server": true,
   "ui": true,
   "configPath": ["xpack", "ingestManager"],
-  "requiredPlugins": ["licensing", "data", "encryptedSavedObjects", "features"],
-  "optionalPlugins": ["security"]
+  "requiredPlugins": ["licensing", "data", "encryptedSavedObjects"],
+  "optionalPlugins": ["security", "features"]
 }
