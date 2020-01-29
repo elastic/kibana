@@ -46,7 +46,7 @@ export const DOCKER_ALLOWED_LIST = [
 ];
 
 export const AWS_S3_ALLOWED_LIST = ['aws.s3'];
-export const AWS_METRICS_ALLOWED_LIST = ['aws.cloudwatch'];
+export const AWS_METRICS_ALLOWED_LIST = ['aws.dimensions'];
 
 export const getAllowedListForPrefix = memoize((prefix: string) => {
   const firstPart = first(prefix.split(/\./));
@@ -60,11 +60,9 @@ export const getAllowedListForPrefix = memoize((prefix: string) => {
       return [...defaultAllowedList, ...K8S_ALLOWED_LIST];
     case 'aws':
       if (prefix === 'aws.s3_daily_storage') {
-        return [...defaultAllowedList, ...AWS_S3_ALLOWED_LIST];
+        return [...defaultAllowedList, ...AWS_S3_ALLOWED_LIST, ...AWS_METRICS_ALLOWED_LIST];
       }
-      if (prefix === 'aws.metrics') {
-        return [...defaultAllowedList, ...AWS_METRICS_ALLOWED_LIST];
-      }
+      return [...defaultAllowedList, ...AWS_METRICS_ALLOWED_LIST];
     default:
       return defaultAllowedList;
   }

@@ -20,11 +20,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { Schemas } from 'ui/vis/editors/default/schemas';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
+import { Schemas } from 'ui/agg_types';
 
-import { createTileMapVisualization } from './tile_map_visualization';
 import { Status } from '../../visualizations/public';
+import { createTileMapVisualization } from './tile_map_visualization';
 import { TileMapOptions } from './components/tile_map_options';
 import { MapTypes } from './map_types';
 import { supportsCssFilters } from './css_filters';
