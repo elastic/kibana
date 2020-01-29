@@ -11,7 +11,7 @@ export class NdjsonImporter extends Importer {
     super(settings);
   }
 
-  async read(json) {
+  read(json) {
     try {
       const splitJson = json.split(/}\s*\n/);
 

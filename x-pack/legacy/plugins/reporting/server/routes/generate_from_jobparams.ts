@@ -4,24 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
 import boom from 'boom';
 import Joi from 'joi';
+import { Legacy } from 'kibana';
 import rison from 'rison-node';
 import { API_BASE_URL } from '../../common/constants';
-import { ServerFacade, ReportingResponseToolkit, Logger } from '../../types';
+import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
+import { ReportingSetupDeps } from '../plugin';
+import { makeRequestFacade } from './lib/make_request_facade';
 import {
-  getRouteConfigFactoryReportingPre,
   GetRouteConfigFactoryFn,
+  getRouteConfigFactoryReportingPre,
   RouteConfigFactory,
 } from './lib/route_config_factories';
-import { makeRequestFacade } from './lib/make_request_facade';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerGenerateFromJobParams(
   server: ServerFacade,
+  plugins: ReportingSetupDeps,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction,
   logger: Logger
@@ -29,6 +31,7 @@ export function registerGenerateFromJobParams(
   const getRouteConfig = () => {
     const getOriginalRouteConfig: GetRouteConfigFactoryFn = getRouteConfigFactoryReportingPre(
       server,
+      plugins,
       logger
     );
     const routeConfigFactory: RouteConfigFactory = getOriginalRouteConfig(

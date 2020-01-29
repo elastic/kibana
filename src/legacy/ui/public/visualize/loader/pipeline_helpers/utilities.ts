@@ -22,8 +22,7 @@ import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
 import { npStart } from 'ui/new_platform';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
-
-import { IFieldFormatId, FieldFormat, ContentType } from '../../../../../../plugins/data/public';
+import { fieldFormats } from '../../../../../../plugins/data/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import { DateRangeKey, convertDateRangeToString } from '../../../agg_types/buckets/date_range';
@@ -43,13 +42,16 @@ function isTermsFieldFormat(
 
 const getConfig = (key: string, defaultOverride?: any): any =>
   npStart.core.uiSettings.get(key, defaultOverride);
-const DefaultFieldFormat = FieldFormat.from(identity);
+const DefaultFieldFormat = fieldFormats.FieldFormat.from(identity);
 
-const getFieldFormat = (id?: IFieldFormatId, params: object = {}): FieldFormat => {
-  const fieldFormats = npStart.plugins.data.fieldFormats;
+const getFieldFormat = (
+  id?: fieldFormats.IFieldFormatId,
+  params: object = {}
+): fieldFormats.FieldFormat => {
+  const fieldFormatsService = npStart.plugins.data.fieldFormats;
 
   if (id) {
-    const Format = fieldFormats.getType(id);
+    const Format = fieldFormatsService.getType(id);
 
     if (Format) {
       return new Format(params, getConfig);
@@ -91,7 +93,7 @@ export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
   return formats[agg.type.name] ? formats[agg.type.name]() : format;
 };
 
-export type FormatFactory = (mapping?: SerializedFieldFormat) => FieldFormat;
+export type FormatFactory = (mapping?: SerializedFieldFormat) => fieldFormats.FieldFormat;
 
 export const getFormat: FormatFactory = mapping => {
   if (!mapping) {
@@ -99,7 +101,7 @@ export const getFormat: FormatFactory = mapping => {
   }
   const { id } = mapping;
   if (id === 'range') {
-    const RangeFormat = FieldFormat.from((range: any) => {
+    const RangeFormat = fieldFormats.FieldFormat.from((range: any) => {
       const format = getFieldFormat(id, mapping.params);
       const gte = '\u2265';
       const lt = '\u003c';
@@ -116,21 +118,21 @@ export const getFormat: FormatFactory = mapping => {
     return new RangeFormat();
   } else if (id === 'date_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
-    const DateRangeFormat = FieldFormat.from((range: DateRangeKey) => {
+    const DateRangeFormat = fieldFormats.FieldFormat.from((range: DateRangeKey) => {
       const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
       return convertDateRangeToString(range, format.convert.bind(format));
     });
     return new DateRangeFormat();
   } else if (id === 'ip_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
-    const IpRangeFormat = FieldFormat.from((range: IpRangeKey) => {
+    const IpRangeFormat = fieldFormats.FieldFormat.from((range: IpRangeKey) => {
       const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
       return convertIPRangeToString(range, format.convert.bind(format));
     });
     return new IpRangeFormat();
   } else if (isTermsFieldFormat(mapping) && mapping.params) {
     const { params } = mapping;
-    const convert = (val: string, type: ContentType) => {
+    const convert = (val: string, type: fieldFormats.ContentType) => {
       const format = getFieldFormat(params.id, mapping.params);
 
       if (val === '__other__') {
@@ -145,8 +147,8 @@ export const getFormat: FormatFactory = mapping => {
 
     return {
       convert,
-      getConverterFor: (type: ContentType) => (val: string) => convert(val, type),
-    } as FieldFormat;
+      getConverterFor: (type: fieldFormats.ContentType) => (val: string) => convert(val, type),
+    } as fieldFormats.FieldFormat;
   } else {
     return getFieldFormat(id, mapping.params);
   }
@@ -159,5 +161,3 @@ export const getTableAggs = (vis: Vis): AggConfig[] => {
   const columns = tabifyGetColumns(vis.aggs.getResponseAggs(), !vis.isHierarchical());
   return columns.map(c => c.aggConfig);
 };
-
-export { FieldFormat };
