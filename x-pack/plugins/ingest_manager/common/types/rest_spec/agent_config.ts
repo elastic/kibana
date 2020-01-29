@@ -25,6 +25,11 @@ export const GetOneAgentConfigRequestSchema = {
   }),
 };
 
+export interface GetOneAgentConfigResponse {
+  item: AgentConfig;
+  success: boolean;
+}
+
 export const CreateAgentConfigRequestSchema = {
   body: NewAgentConfigSchema,
 };
@@ -38,6 +43,11 @@ export const UpdateAgentConfigRequestSchema = {
   ...GetOneAgentConfigRequestSchema,
   body: NewAgentConfigSchema,
 };
+
+export interface UpdateAgentConfigResponse {
+  item: AgentConfig;
+  success: boolean;
+}
 
 export const DeleteAgentConfigsRequestSchema = {
   body: schema.object({

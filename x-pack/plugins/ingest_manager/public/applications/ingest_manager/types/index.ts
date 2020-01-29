@@ -9,8 +9,11 @@ export {
   NewAgentConfig,
   // API schemas
   GetAgentConfigsResponse,
+  GetOneAgentConfigResponse,
   CreateAgentConfigRequestSchema,
   CreateAgentConfigResponse,
+  UpdateAgentConfigRequestSchema,
+  UpdateAgentConfigResponse,
   DeleteAgentConfigsRequestSchema,
   DeleteAgentConfigsResponse,
 } from '../../../../common';

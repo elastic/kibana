@@ -9,8 +9,11 @@ import { useRequest, sendRequest } from './use_request';
 import { agentConfigRouteService } from '../../services';
 import {
   GetAgentConfigsResponse,
+  GetOneAgentConfigResponse,
   CreateAgentConfigRequestSchema,
   CreateAgentConfigResponse,
+  UpdateAgentConfigRequestSchema,
+  UpdateAgentConfigResponse,
   DeleteAgentConfigsRequestSchema,
   DeleteAgentConfigsResponse,
 } from '../../types';
@@ -23,10 +26,28 @@ export const useGetAgentConfigs = (query: HttpFetchQuery = {}) => {
   });
 };
 
+export const useGetOneAgentConfig = (agentConfigId: string) => {
+  return useRequest<GetOneAgentConfigResponse>({
+    path: agentConfigRouteService.getInfoPath(agentConfigId),
+    method: 'get',
+  });
+};
+
 export const sendCreateAgentConfig = (body: TypeOf<typeof CreateAgentConfigRequestSchema.body>) => {
   return sendRequest<CreateAgentConfigResponse>({
     path: agentConfigRouteService.getCreatePath(),
     method: 'post',
+    body: JSON.stringify(body),
+  });
+};
+
+export const sendUpdateAgentConfig = (
+  agentConfigId: string,
+  body: TypeOf<typeof UpdateAgentConfigRequestSchema.body>
+) => {
+  return sendRequest<UpdateAgentConfigResponse>({
+    path: agentConfigRouteService.getUpdatePath(agentConfigId),
+    method: 'put',
     body: JSON.stringify(body),
   });
 };

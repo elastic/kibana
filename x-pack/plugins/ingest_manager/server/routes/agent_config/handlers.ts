@@ -10,9 +10,11 @@ import {
   GetAgentConfigsRequestSchema,
   GetAgentConfigsResponse,
   GetOneAgentConfigRequestSchema,
+  GetOneAgentConfigResponse,
   CreateAgentConfigRequestSchema,
   CreateAgentConfigResponse,
   UpdateAgentConfigRequestSchema,
+  UpdateAgentConfigResponse,
   DeleteAgentConfigsRequestSchema,
   DeleteAgentConfigsResponse,
 } from '../../types';
@@ -47,11 +49,12 @@ export const getOneAgentConfigHandler: RequestHandler<TypeOf<
   try {
     const agentConfig = await agentConfigService.get(soClient, request.params.agentConfigId);
     if (agentConfig) {
+      const body: GetOneAgentConfigResponse = {
+        item: agentConfig,
+        success: true,
+      };
       return response.ok({
-        body: {
-          item: agentConfig,
-          success: true,
-        },
+        body,
       });
     } else {
       return response.customError({
@@ -106,8 +109,9 @@ export const updateAgentConfigHandler: RequestHandler<
         user: user || undefined,
       }
     );
+    const body: UpdateAgentConfigResponse = { item: agentConfig, success: true };
     return response.ok({
-      body: { item: agentConfig, success: true },
+      body,
     });
   } catch (e) {
     return response.customError({

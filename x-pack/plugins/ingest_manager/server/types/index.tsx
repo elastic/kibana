@@ -25,9 +25,11 @@ export {
   GetAgentConfigsRequestSchema,
   GetAgentConfigsResponse,
   GetOneAgentConfigRequestSchema,
+  GetOneAgentConfigResponse,
   CreateAgentConfigRequestSchema,
   CreateAgentConfigResponse,
   UpdateAgentConfigRequestSchema,
+  UpdateAgentConfigResponse,
   DeleteAgentConfigsRequestSchema,
   DeleteAgentConfigsResponse,
   // Fleet setup schemas
