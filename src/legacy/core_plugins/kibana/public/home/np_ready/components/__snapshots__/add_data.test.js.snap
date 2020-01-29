@@ -5,7 +5,7 @@ exports[`apmUiEnabled 1`] = `
   paddingSize="l"
 >
   <EuiFlexGroup
-    className="homeAddData__flexGroup"
+    className="homeAddData__flexGroup homAddData__flexTablet"
     gutterSize="l"
     justifyContent="spaceAround"
     responsive={false}
@@ -19,6 +19,7 @@ exports[`apmUiEnabled 1`] = `
       />
       <EuiFlexGroup
         justifyContent="spaceAround"
+        responsive={false}
       >
         <EuiFlexItem
           grow={false}
@@ -26,6 +27,7 @@ exports[`apmUiEnabled 1`] = `
           <EuiFlexGroup
             alignItems="center"
             gutterSize="m"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}
@@ -153,6 +155,47 @@ exports[`apmUiEnabled 1`] = `
     <EuiFlexItem
       grow={false}
     >
+      <EuiFlexGroup
+        justifyContent="spaceAround"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="m"
+            responsive={false}
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiIcon
+                size="xxl"
+                type="logoSecurity"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiTitle
+                size="s"
+              >
+                <h2>
+                  <FormattedMessage
+                    defaultMessage="Security"
+                    id="kbn.home.addData.title.observability"
+                    values={Object {}}
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer
+        size="s"
+      />
       <EuiCard
         className="homAddData__card"
         description={
@@ -174,47 +217,6 @@ exports[`apmUiEnabled 1`] = `
               values={Object {}}
             />
           </EuiButton>
-        }
-        icon={
-          <React.Fragment>
-            <ForwardRef
-              justifyContent="spaceAround"
-            >
-              <EuiFlexItem
-                grow={false}
-              >
-                <ForwardRef
-                  alignItems="center"
-                  gutterSize="m"
-                >
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <EuiIcon
-                      size="xxl"
-                      type="logoSecurity"
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <EuiTitle
-                      size="s"
-                    >
-                      <h2>
-                        <FormattedMessage
-                          defaultMessage="Security"
-                          id="kbn.home.addData.title.observability"
-                          values={Object {}}
-                        />
-                      </h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </ForwardRef>
-              </EuiFlexItem>
-            </ForwardRef>
-            <EuiSpacer />
-          </React.Fragment>
         }
         title="SIEM"
         titleSize="xs"
@@ -306,7 +308,7 @@ exports[`isNewKibanaInstance 1`] = `
   paddingSize="l"
 >
   <EuiFlexGroup
-    className="homeAddData__flexGroup"
+    className="homeAddData__flexGroup homAddData__flexTablet"
     gutterSize="l"
     justifyContent="spaceAround"
     responsive={false}
@@ -320,6 +322,7 @@ exports[`isNewKibanaInstance 1`] = `
       />
       <EuiFlexGroup
         justifyContent="spaceAround"
+        responsive={false}
       >
         <EuiFlexItem
           grow={false}
@@ -327,6 +330,7 @@ exports[`isNewKibanaInstance 1`] = `
           <EuiFlexGroup
             alignItems="center"
             gutterSize="m"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}
@@ -425,6 +429,47 @@ exports[`isNewKibanaInstance 1`] = `
     <EuiFlexItem
       grow={false}
     >
+      <EuiFlexGroup
+        justifyContent="spaceAround"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="m"
+            responsive={false}
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiIcon
+                size="xxl"
+                type="logoSecurity"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiTitle
+                size="s"
+              >
+                <h2>
+                  <FormattedMessage
+                    defaultMessage="Security"
+                    id="kbn.home.addData.title.observability"
+                    values={Object {}}
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer
+        size="s"
+      />
       <EuiCard
         className="homAddData__card"
         description={
@@ -446,47 +491,6 @@ exports[`isNewKibanaInstance 1`] = `
               values={Object {}}
             />
           </EuiButton>
-        }
-        icon={
-          <React.Fragment>
-            <ForwardRef
-              justifyContent="spaceAround"
-            >
-              <EuiFlexItem
-                grow={false}
-              >
-                <ForwardRef
-                  alignItems="center"
-                  gutterSize="m"
-                >
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <EuiIcon
-                      size="xxl"
-                      type="logoSecurity"
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <EuiTitle
-                      size="s"
-                    >
-                      <h2>
-                        <FormattedMessage
-                          defaultMessage="Security"
-                          id="kbn.home.addData.title.observability"
-                          values={Object {}}
-                        />
-                      </h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </ForwardRef>
-              </EuiFlexItem>
-            </ForwardRef>
-            <EuiSpacer />
-          </React.Fragment>
         }
         title="SIEM"
         titleSize="xs"
@@ -578,7 +582,7 @@ exports[`mlEnabled 1`] = `
   paddingSize="l"
 >
   <EuiFlexGroup
-    className="homeAddData__flexGroup"
+    className="homeAddData__flexGroup homAddData__flexTablet"
     gutterSize="l"
     justifyContent="spaceAround"
     responsive={false}
@@ -592,6 +596,7 @@ exports[`mlEnabled 1`] = `
       />
       <EuiFlexGroup
         justifyContent="spaceAround"
+        responsive={false}
       >
         <EuiFlexItem
           grow={false}
@@ -599,6 +604,7 @@ exports[`mlEnabled 1`] = `
           <EuiFlexGroup
             alignItems="center"
             gutterSize="m"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}
@@ -726,6 +732,47 @@ exports[`mlEnabled 1`] = `
     <EuiFlexItem
       grow={false}
     >
+      <EuiFlexGroup
+        justifyContent="spaceAround"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="m"
+            responsive={false}
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiIcon
+                size="xxl"
+                type="logoSecurity"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiTitle
+                size="s"
+              >
+                <h2>
+                  <FormattedMessage
+                    defaultMessage="Security"
+                    id="kbn.home.addData.title.observability"
+                    values={Object {}}
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer
+        size="s"
+      />
       <EuiCard
         className="homAddData__card"
         description={
@@ -747,47 +794,6 @@ exports[`mlEnabled 1`] = `
               values={Object {}}
             />
           </EuiButton>
-        }
-        icon={
-          <React.Fragment>
-            <ForwardRef
-              justifyContent="spaceAround"
-            >
-              <EuiFlexItem
-                grow={false}
-              >
-                <ForwardRef
-                  alignItems="center"
-                  gutterSize="m"
-                >
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <EuiIcon
-                      size="xxl"
-                      type="logoSecurity"
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <EuiTitle
-                      size="s"
-                    >
-                      <h2>
-                        <FormattedMessage
-                          defaultMessage="Security"
-                          id="kbn.home.addData.title.observability"
-                          values={Object {}}
-                        />
-                      </h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </ForwardRef>
-              </EuiFlexItem>
-            </ForwardRef>
-            <EuiSpacer />
-          </React.Fragment>
         }
         title="SIEM"
         titleSize="xs"
@@ -915,7 +921,7 @@ exports[`render 1`] = `
   paddingSize="l"
 >
   <EuiFlexGroup
-    className="homeAddData__flexGroup"
+    className="homeAddData__flexGroup homAddData__flexTablet"
     gutterSize="l"
     justifyContent="spaceAround"
     responsive={false}
@@ -929,6 +935,7 @@ exports[`render 1`] = `
       />
       <EuiFlexGroup
         justifyContent="spaceAround"
+        responsive={false}
       >
         <EuiFlexItem
           grow={false}
@@ -936,6 +943,7 @@ exports[`render 1`] = `
           <EuiFlexGroup
             alignItems="center"
             gutterSize="m"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}
@@ -1034,6 +1042,47 @@ exports[`render 1`] = `
     <EuiFlexItem
       grow={false}
     >
+      <EuiFlexGroup
+        justifyContent="spaceAround"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="m"
+            responsive={false}
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiIcon
+                size="xxl"
+                type="logoSecurity"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiTitle
+                size="s"
+              >
+                <h2>
+                  <FormattedMessage
+                    defaultMessage="Security"
+                    id="kbn.home.addData.title.observability"
+                    values={Object {}}
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer
+        size="s"
+      />
       <EuiCard
         className="homAddData__card"
         description={
@@ -1055,47 +1104,6 @@ exports[`render 1`] = `
               values={Object {}}
             />
           </EuiButton>
-        }
-        icon={
-          <React.Fragment>
-            <ForwardRef
-              justifyContent="spaceAround"
-            >
-              <EuiFlexItem
-                grow={false}
-              >
-                <ForwardRef
-                  alignItems="center"
-                  gutterSize="m"
-                >
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <EuiIcon
-                      size="xxl"
-                      type="logoSecurity"
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <EuiTitle
-                      size="s"
-                    >
-                      <h2>
-                        <FormattedMessage
-                          defaultMessage="Security"
-                          id="kbn.home.addData.title.observability"
-                          values={Object {}}
-                        />
-                      </h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </ForwardRef>
-              </EuiFlexItem>
-            </ForwardRef>
-            <EuiSpacer />
-          </React.Fragment>
         }
         title="SIEM"
         titleSize="xs"

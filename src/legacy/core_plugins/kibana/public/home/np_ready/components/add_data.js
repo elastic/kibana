@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
@@ -115,7 +115,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
 
     return (
       <EuiFlexGroup
-        className="homeAddData__flexGroup"
+        className="homeAddData__flexGroup homAddData__flexTablet"
         wrap={apmUiEnabled}
         gutterSize="l"
         justifyContent="spaceAround"
@@ -123,9 +123,9 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
       >
         <EuiFlexItem className="homAddData__cardDivider">
           <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexGroup justifyContent="spaceAround" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="m">
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIcon size="xxl" type="logoObservability" />
                 </EuiFlexItem>
@@ -201,33 +201,29 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="spaceAround" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon size="xxl" type="logoSecurity" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h2>
+                      <FormattedMessage
+                        id="kbn.home.addData.title.observability"
+                        defaultMessage="Security"
+                      />
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
           <EuiCard
             titleSize="xs"
             className="homAddData__card"
-            icon={
-              <Fragment>
-                <EuiFlexGroup justifyContent="spaceAround">
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup alignItems="center" gutterSize="m">
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon size="xxl" type="logoSecurity" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiTitle size="s">
-                          <h2>
-                            <FormattedMessage
-                              id="kbn.home.addData.title.observability"
-                              defaultMessage="Security"
-                            />
-                          </h2>
-                        </EuiTitle>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer />
-              </Fragment>
-            }
             title={siemData.title}
             description={<span id={siemData.ariaDescribedby}>{siemData.description}</span>}
             footer={
