@@ -169,7 +169,7 @@ describe('test endpoint route', () => {
 
     it('should return a single endpoint', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
-        params: { id: data.hits.hits[0]._id },
+        params: { id: (data as any).hits.hits[0]._id },
       });
       const response: SearchResponse<EndpointMetadata> = (data as unknown) as SearchResponse<
         EndpointMetadata
