@@ -19,8 +19,6 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiKeyPadMenuItem,
-  EuiTabs,
-  EuiTab,
   EuiLink,
   EuiFieldNumber,
   EuiSelect,
@@ -28,10 +26,6 @@ import {
   EuiAccordion,
   EuiButtonIcon,
   EuiEmptyPrompt,
-  EuiButtonEmpty,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
 } from '@elastic/eui';
 import { useAppDependencies } from '../../app_context';
 import { loadAlertTypes } from '../../lib/alert_api';
@@ -93,18 +87,12 @@ interface AlertFormProps {
   } | null;
 }
 
-interface ActionGroupTab {
-  id: string;
-  name: string;
-  disabled?: boolean;
-}
-
 export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormProps) => {
   const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = useAppDependencies();
   const [alertType, setAlertType] = useState<AlertTypeModel | undefined>(undefined);
+
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
-  const [selectedTabId, setSelectedTabId] = useState<string>('alert');
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
   const [alertInterval, setAlertInterval] = useState<number | null>(null);
@@ -113,11 +101,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('m');
   const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
-  // const [tabs, setTabs] = useState<ActionGroupTab[]>([]);
-  const [isAddActionGroupPopoverOpen, setIsAddActionGroupPopoverOpen] = useState<boolean>(false);
-  const [actionGroupsOptions, setActionGroupsOptions] = useState<JSX.Element[]>([]);
-  const [tabs, setTabs] = useState<ActionGroupTab[]>([]);
-  const [selectedActionGroups, setSelectedActionGroups] = useState<string[]>([]);
+  const [defaultActionGroup, setDefaultActionGroup] = useState<string | undefined>(undefined);
 
   // load action types
   useEffect(() => {
@@ -241,7 +225,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
         alert.actions.push({
           id: '',
           actionTypeId: actionTypeModel.id,
-          group: selectedTabId,
+          group: defaultActionGroup ?? 'Alert',
           params: {},
         });
         setActionProperty('id', actionTypeConnectors[0].id, alert.actions.length - 1);
@@ -253,7 +237,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
       alert.actions.push({
         id: '',
         actionTypeId: actionTypeModel.id,
-        group: selectedTabId,
+        group: defaultActionGroup ?? 'Alert',
         params: {},
       });
       setActionProperty('id', alert.actions.length, alert.actions.length - 1);
@@ -269,28 +253,12 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
         onClick={() => {
           setAlertProperty('alertTypeId', item.id);
           setAlertType(item);
-          if (alertTypesIndex) {
-            alertTypesIndex[item.id].actionGroups.forEach(alertTypeActionGroup => {
-              actionGroupsOptions.push(
-                <EuiContextMenuItem
-                  key={alertTypeActionGroup}
-                  icon="empty"
-                  onClick={() => {
-                    setIsAddActionGroupPopoverOpen(false);
-                    if (tabs.length === 0) {
-                      tabs.push({
-                        id: alertTypesIndex[item.id].actionGroups[0],
-                        name: alertTypesIndex[item.id].actionGroups[0],
-                      });
-                    }
-                    tabs.push({ id: alertTypeActionGroup, name: alertTypeActionGroup });
-                  }}
-                >
-                  {alertTypeActionGroup}
-                </EuiContextMenuItem>
-              );
-            });
-            selectedActionGroups.push(alertTypesIndex[item.id].actionGroups[0]);
+          if (
+            alertTypesIndex &&
+            alertTypesIndex[item.id] &&
+            alertTypesIndex[item.id].actionGroups.length > 0
+          ) {
+            setDefaultActionGroup(alertTypesIndex[item.id].actionGroups[0]);
           }
         }}
       >
@@ -311,86 +279,6 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
       </EuiKeyPadMenuItem>
     );
   });
-
-  const alertTabs = tabs.map(function(tab, index): any {
-    return (
-      <EuiTab
-        onClick={() => {
-          setSelectedTabId(tab.id);
-          if (!alert.actions.find((action: AlertAction) => action.group === tab.id)) {
-            setIsAddActionPanelOpen(true);
-          } else {
-            setIsAddActionPanelOpen(false);
-          }
-        }}
-        isSelected={tab.id === selectedTabId}
-        disabled={tab.disabled}
-        key={index}
-      >
-        {tab.name}
-      </EuiTab>
-    );
-  });
-
-  const alertTypeDetails = (
-    <Fragment>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h5 id="selectedAlertTypeTitle">
-              <FormattedMessage
-                defaultMessage="Trigger: {alertType}"
-                id="xpack.triggersActionsUI.sections.alertForm.selectedAlertTypeTitle"
-                values={{ alertType: alertType ? alertType.name : '' }}
-              />
-            </h5>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            onClick={() => {
-              setAlertProperty('alertTypeId', null);
-              setAlertType(undefined);
-            }}
-          >
-            <FormattedMessage
-              defaultMessage="Change"
-              id="xpack.triggersActionsUI.sections.alertForm.changeAlertTypeLink"
-            />
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiPopover
-        id="contextMenu"
-        button={
-          <EuiButtonEmpty
-            onClick={() => setIsAddActionGroupPopoverOpen(!isAddActionGroupPopoverOpen)}
-            iconType="plusInCircle"
-          >
-            Add action group
-          </EuiButtonEmpty>
-        }
-        isOpen={isAddActionGroupPopoverOpen}
-        closePopover={() => setIsAddActionGroupPopoverOpen(false)}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-      >
-        <EuiContextMenuPanel
-          items={actionGroupsOptions.filter(
-            (item: any) => !selectedActionGroups.find(ag => ag === item.key)
-          )}
-        />
-      </EuiPopover>
-      {AlertParamsExpressionComponent ? (
-        <AlertParamsExpressionComponent
-          alert={alert}
-          errors={errors}
-          setAlertParams={setAlertParams}
-          setAlertProperty={setAlertProperty}
-        />
-      ) : null}
-    </Fragment>
-  );
 
   const getSelectedOptions = (actionItemId: string) => {
     const val = connectors.find(connector => connector.id === actionItemId);
@@ -425,7 +313,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
         id,
       }));
     const actionTypeRegisterd = actionTypeRegistry.get(actionConnector.actionTypeId);
-    if (actionTypeRegisterd === null || actionItem.group !== selectedTabId) return null;
+    if (actionTypeRegisterd === null || actionItem.group !== defaultActionGroup) return null;
     const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
     const actionParamsErrors =
       Object.keys(actionsErrors).length > 0 ? actionsErrors[actionItem.id] : {};
@@ -521,7 +409,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
       ? actionTypesIndex[actionItem.actionTypeId].name
       : actionItem.actionTypeId;
     const actionTypeRegisterd = actionTypeRegistry.get(actionItem.actionTypeId);
-    if (actionTypeRegisterd === null || actionItem.group !== selectedTabId) return null;
+    if (actionTypeRegisterd === null || actionItem.group !== defaultActionGroup) return null;
     return (
       <EuiAccordion
         initialIsOpen={true}
@@ -612,7 +500,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
     );
   };
 
-  const actionsListForGroup = (
+  const selectedGroupActions = (
     <Fragment>
       {alert.actions.map((actionItem: AlertAction, index: number) => {
         const actionConnector = connectors.find(field => field.id === actionItem.id);
@@ -638,27 +526,71 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
     </Fragment>
   );
 
-  let alertTypeArea;
-  if (alertType) {
-    alertTypeArea = <Fragment>{alertTypeDetails}</Fragment>;
-  } else {
-    alertTypeArea = (
-      <Fragment>
-        <EuiTitle size="s">
-          <h5 id="alertTypeTitle">
+  const alertTypeDetails = (
+    <Fragment>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h5 id="selectedAlertTypeTitle">
+              <FormattedMessage
+                defaultMessage="Trigger: {alertType}"
+                id="xpack.triggersActionsUI.sections.alertForm.selectedAlertTypeTitle"
+                values={{ alertType: alertType ? alertType.name : '' }}
+              />
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink
+            onClick={() => {
+              setAlertProperty('alertTypeId', null);
+              setAlertType(undefined);
+            }}
+          >
             <FormattedMessage
-              defaultMessage="Trigger: Select a trigger type"
-              id="xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle"
+              defaultMessage="Change"
+              id="xpack.triggersActionsUI.sections.alertForm.changeAlertTypeLink"
             />
-          </h5>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiFlexGroup gutterSize="s" wrap>
-          {alertTypeNodes}
-        </EuiFlexGroup>
-      </Fragment>
-    );
-  }
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {AlertParamsExpressionComponent ? (
+        <AlertParamsExpressionComponent
+          alert={alert}
+          errors={errors}
+          setAlertParams={setAlertParams}
+          setAlertProperty={setAlertProperty}
+        />
+      ) : null}
+      <EuiSpacer size="xl" />
+      {selectedGroupActions}
+      {isAddActionPanelOpen ? (
+        <Fragment>
+          <EuiTitle size="s">
+            <h5 id="alertActionTypeTitle">
+              <FormattedMessage
+                defaultMessage="Actions: Select an action type"
+                id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer />
+          <EuiFlexGroup gutterSize="s" wrap>
+            {isLoadingActionTypes ? (
+              <SectionLoading>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertForm.loadingActionTypesDescription"
+                  defaultMessage="Loading action types…"
+                />
+              </SectionLoading>
+            ) : (
+              actionTypeNodes
+            )}
+          </EuiFlexGroup>
+        </Fragment>
+      ) : null}
+    </Fragment>
+  );
 
   const labelForAlertChecked = (
     <>
@@ -833,36 +765,24 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="m" />
-      {tabs.length > 0 ? <EuiTabs>{alertTabs}</EuiTabs> : <EuiSpacer size="l" color="grey" />}
-      <EuiSpacer size="m" />
-      {alertTypeArea}
-      <EuiSpacer size="xl" />
-      {actionsListForGroup}
-      {isAddActionPanelOpen ? (
+      {alertType ? (
+        <Fragment>{alertTypeDetails}</Fragment>
+      ) : (
         <Fragment>
           <EuiTitle size="s">
-            <h5 id="alertActionTypeTitle">
+            <h5 id="alertTypeTitle">
               <FormattedMessage
-                defaultMessage="Actions: Select an action type"
-                id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
+                defaultMessage="Trigger: Select a trigger type"
+                id="xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle"
               />
             </h5>
           </EuiTitle>
           <EuiSpacer />
           <EuiFlexGroup gutterSize="s" wrap>
-            {isLoadingActionTypes ? (
-              <SectionLoading>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.loadingActionTypesDescription"
-                  defaultMessage="Loading action types…"
-                />
-              </SectionLoading>
-            ) : (
-              actionTypeNodes
-            )}
+            {alertTypeNodes}
           </EuiFlexGroup>
         </Fragment>
-      ) : null}
+      )}
     </EuiForm>
   );
 };
