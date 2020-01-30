@@ -56,13 +56,7 @@ export const MonitorPage = ({ setBreadcrumbs }: MonitorPageProps) => {
         dateEnd={absoluteDateRangeEnd}
       />
       <EuiSpacer size="s" />
-      <MonitorCharts
-        {...colors}
-        monitorId={monitorId}
-        variables={sharedVariables}
-        dateRangeStart={dateRangeStart}
-        dateRangeEnd={dateRangeEnd}
-      />
+      <MonitorCharts {...colors} monitorId={monitorId} variables={sharedVariables} />
       <EuiSpacer size="s" />
       <PingList
         onPageCountChange={setPingListPageCount}

@@ -10,8 +10,6 @@ import { Snapshot } from './snapshot';
 import { PingHistogram } from '../connected';
 
 interface StatusPanelProps {
-  absoluteDateRangeStart: number;
-  absoluteDateRangeEnd: number;
   dateRangeStart: string;
   dateRangeEnd: string;
   filters?: string;
@@ -21,8 +19,6 @@ interface StatusPanelProps {
 const STATUS_CHART_HEIGHT = '160px';
 
 export const StatusPanel = ({
-  absoluteDateRangeStart,
-  absoluteDateRangeEnd,
   dateRangeStart,
   dateRangeEnd,
   filters,
@@ -40,16 +36,7 @@ export const StatusPanel = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={10}>
-        <PingHistogram
-          absoluteStartDate={absoluteDateRangeStart}
-          absoluteEndDate={absoluteDateRangeEnd}
-          dateStart={dateRangeStart}
-          dateEnd={dateRangeEnd}
-          filters={filters}
-          height={STATUS_CHART_HEIGHT}
-          statusFilter={statusFilter}
-          isResponsive={true}
-        />
+        <PingHistogram height={STATUS_CHART_HEIGHT} isResponsive={true} />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
