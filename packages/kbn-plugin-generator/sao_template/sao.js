@@ -63,7 +63,7 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
       },
       generateEslint: {
         type: 'confirm',
-        message: 'Should generate custom eslint file be used?',
+        message: 'Would you like to use a custom eslint file?',
         default: !isKibanaPlugin,
       },
     },

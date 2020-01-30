@@ -57,7 +57,7 @@ export const <%= upperCamelCaseName %>App = ({ basename, notifications, http, na
     http.get('/api/<%= snakeCase(name) %>/example').then(res => {
       setTimestamp(res.time);
       // Use the core notifications service to display a success message.
-      notifications.toasts.addSuccess(i18n.translate('banana.dataUpdated', {
+      notifications.toasts.addSuccess(i18n.translate('<%= camelCase(name) %>.dataUpdated', {
         defaultMessage: 'Data updated',
       }));
     });
