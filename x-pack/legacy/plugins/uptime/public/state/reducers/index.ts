@@ -10,6 +10,7 @@ import { overviewFiltersReducer } from './overview_filters';
 import { snapshotReducer } from './snapshot';
 import { uiReducer } from './ui';
 import { monitorStatusReducer } from './monitor_status';
+import { pingReducer } from './ping';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
@@ -17,4 +18,5 @@ export const rootReducer = combineReducers({
   snapshot: snapshotReducer,
   ui: uiReducer,
   monitorStatus: monitorStatusReducer,
+  ping: pingReducer,
 });
