@@ -51,8 +51,12 @@ export const useDataInit = () => {
           });
           dispatch({ type: 'setCurrentTextObject', payload: newObject });
         } else {
-          // For now, we always take the first text object returned.
-          dispatch({ type: 'setCurrentTextObject', payload: results[0] });
+          dispatch({
+            type: 'setCurrentTextObject',
+            // For backwards compatibility, we sort here according to date created to
+            // always take the first item created.
+            payload: results.sort((a, b) => a.createdAt - b.createdAt)[0],
+          });
         }
       } catch (e) {
         setError(e);

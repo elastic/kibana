@@ -97,7 +97,7 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
   const params = {
     index: esIndexPattern,
     // TODO: composite aggregation
-    size: config.get('xpack.monitoring.max_bucket_size'),
+    size: config.get('monitoring.ui.max_bucket_size'),
     ignoreUnavailable: true,
     filterPath: [
       // only filter path can filter for inner_hits
