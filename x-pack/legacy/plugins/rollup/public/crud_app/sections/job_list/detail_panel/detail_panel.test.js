@@ -58,12 +58,12 @@ describe('<DetailPanel />', () => {
     });
 
     it("should have children if it's open", () => {
-      expect(component.find('DetailPanelUi').children().length).toBeTruthy();
+      expect(component.find('DetailPanel').children().length).toBeTruthy();
     });
 
     it('should *not* have children if its closed', () => {
       ({ component } = initTestBed({ isOpen: false }));
-      expect(component.find('DetailPanelUi').children().length).toBeFalsy();
+      expect(component.find('DetailPanel').children().length).toBeFalsy();
     });
 
     it('should show a loading when the job is loading', () => {

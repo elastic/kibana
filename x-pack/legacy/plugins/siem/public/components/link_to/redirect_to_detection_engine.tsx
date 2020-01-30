@@ -57,9 +57,7 @@ export const RedirectToEditRulePage = ({
   location: { search },
 }: DetectionEngineComponentProps) => {
   return (
-    <RedirectWrapper
-      to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/rule-details/${detailName}${search}/edit`}
-    />
+    <RedirectWrapper to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${detailName}/edit${search}`} />
   );
 };
 
