@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fatalError, toastNotifications } from 'ui/notify';
+import { getNotifications, getFatalErrors } from '../../kibana_services';
 
-function createToastConfig(error, errorTitle) {
-  // Expect an error in the shape provided by Angular's $http service.
-  if (error && error.data) {
-    const { error: errorString, statusCode, message } = error.data;
+function createToastConfig(error: any, errorTitle: string) {
+  // Expect an error in the shape provided by http service.
+  if (error && error.body) {
+    const { error: errorString, statusCode, message } = error.body;
     return {
       title: errorTitle,
       text: `${statusCode}: ${errorString}. ${message}`,
@@ -17,26 +17,26 @@ function createToastConfig(error, errorTitle) {
   }
 }
 
-export function showApiWarning(error, errorTitle) {
+export function showApiWarning(error: any, errorTitle: string) {
   const toastConfig = createToastConfig(error, errorTitle);
 
   if (toastConfig) {
-    return toastNotifications.addWarning(toastConfig);
+    return getNotifications().toasts.addWarning(toastConfig);
   }
 
   // This error isn't an HTTP error, so let the fatal error screen tell the user something
   // unexpected happened.
-  return fatalError(error, errorTitle);
+  return getFatalErrors().add(error, errorTitle);
 }
 
-export function showApiError(error, errorTitle) {
+export function showApiError(error: any, errorTitle: string) {
   const toastConfig = createToastConfig(error, errorTitle);
 
   if (toastConfig) {
-    return toastNotifications.addDanger(toastConfig);
+    return getNotifications().toasts.addDanger(toastConfig);
   }
 
   // This error isn't an HTTP error, so let the fatal error screen tell the user something
   // unexpected happened.
-  fatalError(error, errorTitle);
+  getFatalErrors().add(error, errorTitle);
 }
