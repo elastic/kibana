@@ -18,8 +18,19 @@ import { fromExpression } from '@kbn/interpreter/common';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression, flushContext } from '../../state/actions/elements';
 import { getFunctionDefinitions } from '../../lib/function_definitions';
-import { ElementNotSelected } from './element_not_selected';
+import { functions as browserFunctions } from '../../../canvas_plugin_src/functions/browser';
+import { functions as serverFunctions } from '../../../canvas_plugin_src/functions/server';
+import { clientFunctions } from '../../functions';
 import { Expression as Component } from './expression';
+import { ElementNotSelected } from './element_not_selected';
+
+const fnList = [
+  ...browserFunctions.map(fn => fn().name),
+  ...serverFunctions.map(fn => fn().name),
+  ...clientFunctions.map(fn => fn().name),
+  'font',
+  // ignore embeddables functions for now
+].filter(fn => !['savedMap', 'savedVisualization', 'savedSearch'].includes(fn));
 
 const mapStateToProps = state => ({
   pageId: getSelectedPage(state),
@@ -68,7 +79,9 @@ const expressionLifecycle = lifecycle({
   },
   componentDidMount() {
     const { functionDefinitionsPromise, setFunctionDefinitions } = this.props;
-    functionDefinitionsPromise.then(defs => setFunctionDefinitions(defs));
+    functionDefinitionsPromise.then(defs =>
+      setFunctionDefinitions(defs.filter(def => fnList.includes(def.name)))
+    );
   },
 });
 
