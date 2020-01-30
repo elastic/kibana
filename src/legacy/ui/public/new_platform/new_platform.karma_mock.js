@@ -147,6 +147,13 @@ export const npSetup = {
         useChartsTheme: sinon.fake(),
       },
     },
+    management: {
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
+        }),
+      },
+    },
   },
 };
 
@@ -165,6 +172,11 @@ export const npStart = {
           register: sinon.fake(),
           deregister: sinon.fake(),
           hasItem: sinon.fake(),
+        }),
+      },
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
         }),
       },
     },
