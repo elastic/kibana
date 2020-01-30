@@ -16,35 +16,12 @@ import {
   FETCH_SUCCESS,
   UPDATE_PAGINATION,
 } from './constants';
-import { FlattenedCasesSavedObjects, Direction, SortFieldCase } from './types';
+import { FlattenedCasesSavedObjects, SortFieldCase, CasesState, QueryArgs, Action } from './types';
+import { Direction } from '../../graphql/types';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { flattenSavedObjects } from './utils';
-interface PaginationArgs {
-  page: number;
-  perPage: number;
-  sortField: SortFieldCase;
-  sortOrder: Direction;
-}
-
-interface QueryArgs {
-  page?: number;
-  perPage?: number;
-  sortField?: SortFieldCase;
-  sortOrder?: Direction;
-}
-
-interface CasesState {
-  data: FlattenedCasesSavedObjects;
-  isLoading: boolean;
-  isError: boolean;
-  pagination: PaginationArgs;
-}
-interface Action {
-  type: string;
-  payload?: FlattenedCasesSavedObjects | QueryArgs;
-}
 
 const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
   switch (action.type) {

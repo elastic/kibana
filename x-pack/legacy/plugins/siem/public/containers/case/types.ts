@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsBaseOptions } from 'kibana/server';
-export { Direction } from '../../graphql/types';
+import { Direction } from '../../graphql/types';
 
 interface Case {
   case_type: string;
@@ -41,6 +41,32 @@ export interface CaseResult {
   tags: string[] | [];
   title: string;
   updated_at: number;
+}
+
+export interface PaginationOptions {
+  page: number;
+  perPage: number;
+  sortField: SortFieldCase;
+  sortOrder: Direction;
+}
+
+export interface QueryArgs {
+  page?: number;
+  perPage?: number;
+  sortField?: SortFieldCase;
+  sortOrder?: Direction;
+}
+
+export interface CasesState {
+  data: FlattenedCasesSavedObjects;
+  isLoading: boolean;
+  isError: boolean;
+  pagination: PaginationOptions;
+  filterOptions: FilterOptions;
+}
+export interface Action {
+  type: string;
+  payload?: FlattenedCasesSavedObjects | QueryArgs;
 }
 
 export interface FilterOptions {
@@ -89,12 +115,6 @@ export interface CaseFindOptions extends SavedObjectsBaseOptions {
 export interface ElasticUser {
   username: string;
   full_name?: string;
-}
-
-export interface PaginationOptions {
-  page: number;
-  perPage: number;
-  total: number;
 }
 
 export interface FetchCasesProps {

@@ -17,10 +17,12 @@ import * as i18n from './translations';
 
 import { getCasesColumns } from './columns';
 import {
-  Direction,
   SortFieldCase,
   FlattenedCaseSavedObject,
+  FilterOptions,
 } from '../../../../containers/case/types';
+
+import { Direction } from '../../../../graphql/types';
 import { useGetCases } from '../../../../containers/case/use_get_cases';
 import { EuiBasicTableOnChange } from '../../../detection_engine/rules/types';
 import { Panel } from '../../../../components/panel';
