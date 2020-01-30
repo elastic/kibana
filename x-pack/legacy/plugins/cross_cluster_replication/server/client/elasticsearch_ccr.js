@@ -84,7 +84,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         },
       },
     ],
-    method: 'PUT',
+    method: 'POST',
   });
 
   ccr.resumeAutoFollowPattern = ca({
@@ -98,7 +98,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         },
       },
     ],
-    method: 'PUT',
+    method: 'POST',
   });
 
   ccr.info = ca({

@@ -177,4 +177,80 @@ export const registerAutoFollowPatternRoutes = server => {
       };
     },
   });
+
+  /**
+   * Pause auto-follow pattern(s)
+   */
+  server.route({
+    path: `${API_BASE_PATH}/auto_follow_patterns/{id}/pause`,
+    method: 'POST',
+    config: {
+      pre: [licensePreRouting],
+    },
+    handler: async request => {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { id } = request.params;
+      const ids = id.split(',');
+
+      const itemsPaused = [];
+      const errors = [];
+
+      await Promise.all(
+        ids.map(_id =>
+          callWithRequest('ccr.pauseAutoFollowPattern', { id: _id })
+            .then(() => itemsPaused.push(_id))
+            .catch(err => {
+              if (isEsError(err)) {
+                errors.push({ id: _id, error: wrapEsError(err) });
+              } else {
+                errors.push({ id: _id, error: wrapUnknownError(err) });
+              }
+            })
+        )
+      );
+
+      return {
+        itemsPaused,
+        errors,
+      };
+    },
+  });
+
+  /**
+   * Resume auto-follow pattern(s)
+   */
+  server.route({
+    path: `${API_BASE_PATH}/auto_follow_patterns/{id}/resume`,
+    method: 'POST',
+    config: {
+      pre: [licensePreRouting],
+    },
+    handler: async request => {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { id } = request.params;
+      const ids = id.split(',');
+
+      const itemsResumed = [];
+      const errors = [];
+
+      await Promise.all(
+        ids.map(_id =>
+          callWithRequest('ccr.resumeAutoFollowPattern', { id: _id })
+            .then(() => itemsResumed.push(_id))
+            .catch(err => {
+              if (isEsError(err)) {
+                errors.push({ id: _id, error: wrapEsError(err) });
+              } else {
+                errors.push({ id: _id, error: wrapUnknownError(err) });
+              }
+            })
+        )
+      );
+
+      return {
+        itemsResumed,
+        errors,
+      };
+    },
+  });
 };
