@@ -39,9 +39,6 @@ export function useCamera(): {
     projectionMatrixAtTime(new Date())
   );
 
-  // TODO try removing, seems useless
-  const rafRef = useRef<number>();
-
   const userIsPanning = useSelector(selectors.userIsPanning);
   const isAnimatingAtTime = useSelector(selectors.isAnimating);
 
@@ -181,21 +178,22 @@ export function useCamera(): {
   useLayoutEffect(() => {
     const startDate = new Date();
     if (isAnimatingAtTime(startDate)) {
+      let rafRef: null | number = null;
       const handleFrame = () => {
         const date = new Date();
         if (projectionMatrixAtTimeRef.current !== undefined) {
           setProjectionMatrix(projectionMatrixAtTimeRef.current(date));
         }
         if (isAnimatingAtTime(date)) {
-          rafRef.current = requestAnimationFrame(handleFrame);
+          rafRef = requestAnimationFrame(handleFrame);
         } else {
-          rafRef.current = undefined;
+          rafRef = null;
         }
       };
-      rafRef.current = requestAnimationFrame(handleFrame);
+      rafRef = requestAnimationFrame(handleFrame);
       return () => {
-        if (rafRef.current !== undefined) {
-          cancelAnimationFrame(rafRef.current);
+        if (rafRef !== null) {
+          cancelAnimationFrame(rafRef);
         }
       };
     }
