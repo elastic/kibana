@@ -27,7 +27,7 @@ const MapPanel = styled.div`
 `;
 
 const EuiFlexItemTags = styled(EuiFlexItem)`
-  @media (max-width: 830px) {
+  @media (max-width: 816px) {
     order: 1;
   }
 `;
