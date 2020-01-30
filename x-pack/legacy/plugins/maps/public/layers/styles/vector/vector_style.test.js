@@ -87,6 +87,12 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
         options: {},
         type: 'STATIC',
       },
+      icon: {
+        options: {
+          value: 'airfield',
+        },
+        type: 'STATIC',
+      },
       iconOrientation: {
         options: {
           orientation: 0,
@@ -138,10 +144,9 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
         },
         type: 'STATIC',
       },
-      symbol: {
+      symbolizeAs: {
         options: {
-          symbolId: 'airfield',
-          symbolizeAs: 'circle',
+          value: 'circle',
         },
       },
     });

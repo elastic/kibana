@@ -45,7 +45,7 @@
       },
       "technique": [
         {
-          "id": "T1190",
+          "id": "T1021",
           "name": "Remote Services",
           "reference": "https://attack.mitre.org/techniques/T1021/"
         }
