@@ -22,15 +22,16 @@ import React, { Component } from 'react';
 
 import { isColorDark } from '@elastic/eui';
 
-import { getHeatmapColors, getFormat, Vis } from '../legacy_imports';
+import { getFormat } from '../legacy_imports';
 import { MetricVisValue } from './metric_vis_value';
 import { fieldFormats } from '../../../../../plugins/data/public';
 import { Context } from '../metric_vis_fn';
 import { KibanaDatatable } from '../../../../../plugins/expressions/public';
+import { getHeatmapColors } from '../../../../../plugins/charts/public';
 import { VisParams, MetricVisMetric } from '../types';
-import { SchemaConfig } from '../../../visualizations/public';
+import { SchemaConfig, Vis } from '../../../visualizations/public';
 
-interface MetricVisComponentProps {
+export interface MetricVisComponentProps {
   visParams: VisParams;
   visData: Context;
   vis: Vis;
@@ -50,7 +51,6 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
       const to = isPercentageMode ? Math.round((100 * range.to) / max) : range.to;
       labels.push(`${from} - ${to}`);
     });
-
     return labels;
   }
 

@@ -57,7 +57,7 @@ Import an index pattern and dashboard:
 
 [source,js]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson <1>
+$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
 
 The `file.ndjson` file contains the following:

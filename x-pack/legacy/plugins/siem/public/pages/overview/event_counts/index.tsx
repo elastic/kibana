@@ -6,14 +6,20 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { esFilters, IIndexPattern, Query } from 'src/plugins/data/public';
 import styled from 'styled-components';
 
 import { OverviewHost } from '../../../components/page/overview/overview_host';
 import { OverviewNetwork } from '../../../components/page/overview/overview_network';
+import { filterHostData } from '../../hosts/navigation/alerts_query_tab_body';
 import { useKibana } from '../../../lib/kibana';
 import { convertToBuildEsQuery } from '../../../lib/keury';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
+import { filterNetworkData } from '../../network/navigation/alerts_query_tab_body';
+import {
+  esFilters,
+  esQuery,
+  IIndexPattern,
+  Query,
+} from '../../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../../store';
 
 const HorizontalSpacer = styled(EuiFlexItem)`
@@ -56,7 +62,7 @@ const EventCountsComponent: React.FC<Props> = ({
             config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
             indexPattern,
             queries: [query],
-            filters,
+            filters: [...filters, ...filterHostData],
           })}
           startDate={from}
           setQuery={setQuery}
@@ -72,7 +78,7 @@ const EventCountsComponent: React.FC<Props> = ({
             config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
             indexPattern,
             queries: [query],
-            filters,
+            filters: [...filters, ...filterNetworkData],
           })}
           startDate={from}
           setQuery={setQuery}
