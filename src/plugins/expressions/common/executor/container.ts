@@ -24,13 +24,13 @@ import {
 import { ExpressionFunction } from '../expression_functions';
 import { ExpressionType } from '../expression_types';
 
-export interface ExecutorState {
+export interface ExecutorState<Context extends Record<string, unknown> = Record<string, unknown>> {
   functions: Record<string, ExpressionFunction>;
   types: Record<string, ExpressionType>;
-  context: Record<string, unknown>;
+  context: Context;
 }
 
-export const defaultState: ExecutorState = {
+export const defaultState: ExecutorState<any> = {
   functions: {},
   types: {},
   context: {},
@@ -63,15 +63,17 @@ export const pureSelectors: ExecutorPureSelectors = {
   getContext: ({ context }) => () => context,
 };
 
-export type ExecutorContainer = StateContainer<
-  ExecutorState,
-  ExecutorPureTransitions,
-  ExecutorPureSelectors
->;
+export type ExecutorContainer<
+  Context extends Record<string, unknown> = Record<string, unknown>
+> = StateContainer<ExecutorState<Context>, ExecutorPureTransitions, ExecutorPureSelectors>;
 
-export const createExecutorContainer = (state: ExecutorState = defaultState): ExecutorContainer => {
+export const createExecutorContainer = <
+  Context extends Record<string, unknown> = Record<string, unknown>
+>(
+  state: ExecutorState<Context> = defaultState
+): ExecutorContainer<Context> => {
   const container = createStateContainer<
-    ExecutorState,
+    ExecutorState<Context>,
     ExecutorPureTransitions,
     ExecutorPureSelectors
   >(state, pureTransitions, pureSelectors);

@@ -23,19 +23,21 @@ import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { Defer } from '../../../kibana_utils/common';
 import { isExpressionValueError } from '../expression_types/specs/error';
-import { ExpressionAstExpression, ExpressionAstFunction } from '../parser';
+import { ExpressionAstExpression, ExpressionAstFunction, parse } from '../ast';
 import { ExecutionContext } from './types';
 import { getType } from '../expression_types';
 import { ArgumentType, ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
-import { parse } from '../parser/parse';
 
-export interface ExecutionParams {
-  executor: Executor;
+export interface ExecutionParams<
+  ExtraContext extends Record<string, unknown> = Record<string, unknown>
+> {
+  executor: Executor<any>;
   ast: ExpressionAstExpression;
+  context: ExtraContext;
 }
 
-export class Execution {
+export class Execution<ExtraContext extends Record<string, unknown> = Record<string, unknown>> {
   /**
    * Dynamic state of the execution.
    */
@@ -53,7 +55,7 @@ export class Execution {
    * Execution context - object that allows to do side-effects, which is passed
    * to every function.
    */
-  context: ExecutionContext;
+  context: ExecutionContext & ExtraContext;
 
   private hasStarted: boolean = false;
   private firstResultFuture: Defer<unknown> = new Defer<unknown>();
@@ -62,18 +64,29 @@ export class Execution {
     return this.firstResultFuture.promise;
   }
 
-  constructor(public readonly params: ExecutionParams) {
+  constructor(public readonly params: ExecutionParams<ExtraContext>) {
     const { executor, ast } = params;
     this.state = createExecutionContainer({
       ...executor.state.get(),
       ast,
     });
-    this.context = {
-      ...executor.context,
+
+    const executionContext: ExecutionContext = {
       getInitialInput: () => this.input,
       getInitialContext: () => this.input,
       variables: {},
       types: executor.getTypes(),
+    };
+    this.context = {
+      ...params.context,
+      ...executionContext,
+    };
+  }
+
+  public extendContext(extraContext: Record<string, unknown>) {
+    this.context = {
+      ...this.context,
+      ...extraContext,
     };
   }
 

@@ -27,12 +27,12 @@ import { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
 import { getType } from '../expression_types';
-import { ExpressionAstExpression, ExpressionAstNode, parseExpression } from '../parser';
+import { ExpressionAstExpression, ExpressionAstNode, parseExpression } from '../ast';
 import { typeSpecs } from '../expression_types/specs';
 import { functionSpecs } from '../expression_functions/specs';
 
 export class TypesRegistry implements IRegistry<ExpressionType> {
-  constructor(private readonly executor: Executor) {}
+  constructor(private readonly executor: Executor<any>) {}
 
   public register(
     typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
@@ -54,7 +54,7 @@ export class TypesRegistry implements IRegistry<ExpressionType> {
 }
 
 export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
-  constructor(private readonly executor: Executor) {}
+  constructor(private readonly executor: Executor<any>) {}
 
   public register(
     functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
@@ -75,15 +75,17 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
   }
 }
 
-export class Executor {
-  static createWithDefaults(state?: ExecutorState): Executor {
-    const executor = new Executor(state);
+export class Executor<Context extends Record<string, unknown> = Record<string, unknown>> {
+  static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(
+    state?: ExecutorState<Ctx>
+  ): Executor<Ctx> {
+    const executor = new Executor<Ctx>(state);
     for (const type of typeSpecs) executor.registerType(type);
     for (const func of functionSpecs) executor.registerFunction(func);
     return executor;
   }
 
-  public readonly state: ExecutorContainer;
+  public readonly state: ExecutorContainer<Context>;
 
   /**
    * @deprecated
@@ -95,8 +97,8 @@ export class Executor {
    */
   public readonly types: TypesRegistry;
 
-  constructor(state?: ExecutorState) {
-    this.state = createExecutorContainer(state);
+  constructor(state?: ExecutorState<Context>) {
+    this.state = createExecutorContainer<Context>(state);
     this.functions = new FunctionsRegistry(this);
     this.types = new TypesRegistry(this);
   }
@@ -158,11 +160,36 @@ export class Executor {
     return await execution.result;
   }
 
-  public createExecution(ast: string | ExpressionAstExpression): Execution {
+  /**
+   * Execute expression and return result.
+   *
+   * @param ast Expression AST or a string representing expression.
+   * @param input Initial input to the first expression function.
+   * @param context Extra global context object that will be merged into the
+   *    expression global context object that is provided to each function to allow side-effects.
+   */
+  public async run<Input, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(
+    ast: string | ExpressionAstExpression,
+    input: Input,
+    context?: ExtraContext
+  ) {
+    const execution = this.createExecution(ast, context);
+    execution.start(input);
+    return await execution.result;
+  }
+
+  public createExecution<ExtraContext extends Record<string, unknown> = Record<string, unknown>>(
+    ast: string | ExpressionAstExpression,
+    context: ExtraContext = {} as ExtraContext
+  ): Execution<Context & ExtraContext> {
     if (typeof ast === 'string') ast = parseExpression(ast);
-    const execution = new Execution({
+    const execution = new Execution<Context & ExtraContext>({
       ast,
       executor: this,
+      context: {
+        ...this.context,
+        ...context,
+      } as Context & ExtraContext,
     });
     return execution;
   }
