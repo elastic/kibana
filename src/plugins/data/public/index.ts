@@ -92,6 +92,7 @@ export {
   getKbnTypeNames,
   // utils
   parseInterval,
+  isNestedField,
 } from '../common';
 
 // Export plugin after all other imports

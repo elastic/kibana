@@ -45,6 +45,11 @@ describe('state selectors', () => {
       monitor: null,
       loading: false,
     },
+    ping: {
+      pingHistogram: null,
+      loading: false,
+      errors: [],
+    },
   };
 
   it('selects base path from state', () => {

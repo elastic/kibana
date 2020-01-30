@@ -287,3 +287,7 @@ export interface SearchMetadata {
    */
   stringMatch: string | null;
 }
+
+export interface GenericObject {
+  [key: string]: any;
+}

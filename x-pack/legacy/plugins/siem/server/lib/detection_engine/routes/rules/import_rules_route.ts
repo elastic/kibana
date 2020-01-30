@@ -104,7 +104,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
             name,
             severity,
             tags,
-            threats,
+            threat,
             to,
             type,
             references,
@@ -129,7 +129,6 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
               const createdRule = await createRules({
                 alertsClient,
                 actionsClient,
-                createdAt: new Date().toISOString(),
                 description,
                 enabled,
                 falsePositives,
@@ -153,8 +152,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                 tags,
                 to,
                 type,
-                threats,
-                updatedAt: new Date().toISOString(),
+                threat,
                 references,
                 version,
               });
@@ -188,7 +186,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                 tags,
                 to,
                 type,
-                threats,
+                threat,
                 references,
                 version,
               });

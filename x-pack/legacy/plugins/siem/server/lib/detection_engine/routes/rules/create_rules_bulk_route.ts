@@ -50,7 +50,6 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
       const rules = await Promise.all(
         request.payload.map(async payloadRule => {
           const {
-            created_at: createdAt,
             description,
             enabled,
             false_positives: falsePositives,
@@ -69,10 +68,9 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             name,
             severity,
             tags,
-            threats,
+            threat,
             to,
             type,
-            updated_at: updatedAt,
             references,
             timeline_id: timelineId,
             timeline_title: timelineTitle,
@@ -103,7 +101,6 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             const createdRule = await createRules({
               alertsClient,
               actionsClient,
-              createdAt,
               description,
               enabled,
               falsePositives,
@@ -127,8 +124,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               tags,
               to,
               type,
-              threats,
-              updatedAt,
+              threat,
               references,
               version,
             });

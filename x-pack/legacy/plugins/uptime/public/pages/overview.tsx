@@ -33,11 +33,6 @@ interface OverviewPageProps {
 
 type Props = OverviewPageProps;
 
-export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
-  query?: { text: string };
-  queryText?: string;
-}) => void;
-
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {
     min-width: 598px;
@@ -109,7 +104,7 @@ export const OverviewPage = ({ autocomplete, setBreadcrumbs }: Props) => {
     statusFilter,
   };
 
-  const linkParameters = stringifyUrlParams(params);
+  const linkParameters = stringifyUrlParams(params, true);
 
   return (
     <Fragment>
@@ -140,7 +135,6 @@ export const OverviewPage = ({ autocomplete, setBreadcrumbs }: Props) => {
           dateRangeEnd={dateRangeEnd}
           filters={filters}
           statusFilter={statusFilter}
-          sharedProps={sharedProps}
         />
         <EuiSpacer size="s" />
         <MonitorList
