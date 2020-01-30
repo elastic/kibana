@@ -205,7 +205,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                       createBulkErrorObject({
                         ruleId,
                         statusCode: 409,
-                        message: `This Rule ${rule.name} already exists`,
+                        message: `This Rule "${rule.name}" already exists`,
                       })
                     );
                   }
@@ -230,7 +230,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       return {
         success: errorsResp.length === 0,
         success_count: importRuleResponse.filter(resp => resp.status_code === 200).length,
-        errors: errorsResp.map(resp => resp.error),
+        errors: errorsResp,
       };
     },
   };
