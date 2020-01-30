@@ -87,6 +87,8 @@ async function attemptToCreateCommand(
           'use-fake-device-for-media-stream',
           // Bypass the media stream infobar by selecting the default device for media streams (e.g. WebRTC). Works with --use-fake-device-for-media-stream.
           'use-fake-ui-for-media-stream',
+          // Allow testing with self-signed certificates
+          'ignore-certificate-errors',
         ];
         if (process.platform === 'linux') {
           // The /dev/shm partition is too small in certain VM environments, causing
