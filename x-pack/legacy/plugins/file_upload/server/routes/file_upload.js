@@ -90,7 +90,6 @@ const idConditionalValidation = (body, boolHasId) => {
 
 const finishValidationAndProcessReq = (elasticsearchPlugin, getSavedObjectsRepository) => {
   return async (con, req, { ok, badRequest }) => {
-    // Validate with or without id
     const {
       query: { id },
       body,
@@ -98,23 +97,26 @@ const finishValidationAndProcessReq = (elasticsearchPlugin, getSavedObjectsRepos
     const boolHasId = !!id;
     const validIdReqData = idConditionalValidation(body, boolHasId);
 
-    // If no id's been established then this is a new index, update telemetry
-    if (!boolHasId) {
-      await updateTelemetry({ elasticsearchPlugin, getSavedObjectsRepository });
-    }
-
+    let resp;
     try {
       const processedReq = await importData({
         id,
         callWithRequest: callWithRequestFactory(elasticsearchPlugin, validIdReqData),
         ...validIdReqData,
       });
-      return processedReq.success
-        ? ok({ body: processedReq })
-        : badRequest(`Error processing request: ${processedReq.error.message}`, ['body']);
+      if (processedReq.success) {
+        resp = ok({ body: processedReq });
+        // If no id's been established then this is a new index, update telemetry
+        if (!boolHasId) {
+          await updateTelemetry({ elasticsearchPlugin, getSavedObjectsRepository });
+        }
+      } else {
+        resp = badRequest(`Error processing request: ${processedReq.error.message}`, ['body']);
+      }
     } catch (e) {
-      return badRequest(`Invalid use of request/id. Error: ${e.message}`, ['id']);
+      resp = badRequest(`Error processing request: : ${e.message}`, ['body']);
     }
+    return resp;
   };
 };
 
