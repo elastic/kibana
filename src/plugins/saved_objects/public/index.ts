@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './saved_object_finder';
+export * from './save_modal';

@@ -17,9 +17,4 @@
  * under the License.
  */
 
-/**
- * @deprecated
- *
- * Do not import this component from here. Import from `src/plugins/kibana_react` instead.
- */
-export { SavedObjectSaveModal } from '../../../../../plugins/kibana_react/public';
+export { SavedObjectSaveModal, OnSaveProps } from './saved_object_save_modal';

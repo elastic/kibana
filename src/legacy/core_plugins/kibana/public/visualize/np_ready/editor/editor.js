@@ -31,6 +31,7 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { FilterStateManager } from '../../../../../data/public';
 import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
+import { SavedObjectSaveModal } from '../../../../../../../plugins/saved_objects/public';
 
 import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
@@ -40,7 +41,6 @@ import {
   absoluteToParsedUrl,
   KibanaParsedUrl,
   migrateLegacyQuery,
-  SavedObjectSaveModal,
   showSaveModal,
   stateMonitorFactory,
   DashboardConstants,

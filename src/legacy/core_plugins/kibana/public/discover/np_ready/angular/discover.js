@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import '../components/field_chooser/field_chooser';
 
 import { RequestAdapter } from '../../../../../../../plugins/inspector/public';
+import { SavedObjectSaveModal } from '../../../../../../../plugins/saved_objects/public';
 // doc table
 import './doc_table';
 import { getSort } from './doc_table/lib/get_sort';
@@ -52,7 +53,6 @@ import {
   stateMonitorFactory,
   subscribeWithScope,
   tabifyAggResponse,
-  SavedObjectSaveModal,
   getAngularModule,
   ensureDefaultIndexPattern,
   registerTimefilterWithGlobalStateFactory,
