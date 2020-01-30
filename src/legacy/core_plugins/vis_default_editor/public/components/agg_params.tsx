@@ -18,7 +18,7 @@
  */
 
 import React, { useCallback, useReducer, useEffect, useMemo } from 'react';
-import { EuiForm, EuiAccordion, EuiSpacer, EuiFormRow } from '@elastic/eui';
+import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
@@ -219,7 +219,8 @@ function DefaultEditorAggParams({
       })}
 
       {params.advanced.length ? (
-        <EuiFormRow>
+        <>
+          <EuiSpacer size="m" />
           <EuiAccordion
             id="advancedAccordion"
             data-test-subj={`advancedParams-${agg.id}`}
@@ -247,7 +248,7 @@ function DefaultEditorAggParams({
               );
             })}
           </EuiAccordion>
-        </EuiFormRow>
+        </>
       ) : null}
     </EuiForm>
   );
