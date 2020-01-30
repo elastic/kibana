@@ -4,7 +4,7 @@
 
 ## SavedObjectsServiceStart.createSerializer property
 
-Creates a [serializer](./kibana-plugin-server.savedobjectsserializer.md) that is aware of all registered types
+Creates a [serializer](./kibana-plugin-server.savedobjectsserializer.md) that is aware of all registered types.
 
 <b>Signature:</b>
 

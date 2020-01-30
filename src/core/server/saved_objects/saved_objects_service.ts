@@ -150,7 +150,7 @@ export interface SavedObjectsServiceStart {
    */
   createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
   /**
-   * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types
+   * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types.
    */
   createSerializer: () => SavedObjectsSerializer;
 }

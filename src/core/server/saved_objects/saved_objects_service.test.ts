@@ -108,7 +108,7 @@ describe('SavedObjectsService', () => {
     });
 
     describe('registerType', () => {
-      it('register type to the typeRegistry', async () => {
+      it('registers the type to the internal typeRegistry', async () => {
         const coreContext = mockCoreContext.create();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
