@@ -5,7 +5,7 @@
  */
 import { MainType, SubType, DataType, DataTypeDefinition } from '../types';
 
-export const TYPE_DEFINITION: { [key in DataType]: boolean } = {
+const TYPE_DEFINITION: { [key in DataType]: boolean } = {
   text: true,
   keyword: true,
   numeric: true,
@@ -46,7 +46,7 @@ export const TYPE_DEFINITION: { [key in DataType]: boolean } = {
   shape: true,
 };
 
-export const MAIN_TYPES: MainType[] = [
+const MAIN_TYPES: MainType[] = [
   'alias',
   'binary',
   'boolean',
@@ -73,7 +73,7 @@ export const MAIN_TYPES: MainType[] = [
   'token_count',
 ];
 
-export const MAIN_DATA_TYPE_DEFINITION: {
+const MAIN_DATA_TYPE_DEFINITION: {
   [key in MainType]: DataTypeDefinition;
 } = MAIN_TYPES.reduce(
   (acc, type) => ({
@@ -94,7 +94,7 @@ export const MAIN_DATA_TYPE_DEFINITION: {
  *   short: 'numeric',
  * }
  */
-export const SUB_TYPE_MAP_TO_MAIN = Object.entries(MAIN_DATA_TYPE_DEFINITION).reduce(
+const SUB_TYPE_MAP_TO_MAIN = Object.entries(MAIN_DATA_TYPE_DEFINITION).reduce(
   (acc, [type, definition]) => {
     if ({}.hasOwnProperty.call(definition, 'subTypes')) {
       definition.subTypes!.types.forEach(subType => {

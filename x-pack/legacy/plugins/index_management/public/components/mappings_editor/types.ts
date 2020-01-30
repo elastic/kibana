@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ReactNode, OptionHTMLAttributes } from 'react';
+import { ReactNode } from 'react';
 
 export interface DataTypeDefinition {
   label: string;
@@ -14,19 +14,6 @@ export interface DataTypeDefinition {
   };
   subTypes?: { label: string; types: SubType[] };
   description?: () => ReactNode;
-}
-
-export interface ParameterDefinition {
-  title?: string;
-  description?: JSX.Element | string;
-  fieldConfig: any;
-  schema?: any;
-  props?: { [key: string]: ParameterDefinition };
-  documentation?: {
-    main: string;
-    [key: string]: string;
-  };
-  [key: string]: any;
 }
 
 export type MainType =
@@ -136,17 +123,6 @@ export type ParameterName =
   | 'relations'
   | 'max_shingle_size';
 
-export interface Parameter {
-  fieldConfig: any;
-  paramName?: string;
-  docs?: string;
-  props?: { [key: string]: any };
-}
-
-export interface Fields {
-  [key: string]: Omit<Field, 'name'>;
-}
-
 interface FieldBasic {
   name: string;
   type: DataType;
@@ -171,119 +147,7 @@ export interface FieldMeta {
   isExpanded: boolean;
 }
 
-export interface NormalizedFields {
-  byId: {
-    [id: string]: NormalizedField;
-  };
-  rootLevelFields: string[];
-  aliases: { [key: string]: string[] };
-  maxNestedDepth: number;
-}
-
-export interface NormalizedField extends FieldMeta {
-  id: string;
-  parentId?: string;
-  nestedDepth: number;
-  path: string[];
-  source: Omit<Field, 'properties' | 'fields'>;
-  isMultiField: boolean;
-}
-
 export type ChildFieldName = 'properties' | 'fields';
-
-export type FieldsEditor = 'default' | 'json';
-
-export type SelectOption<T extends string = string> = {
-  value: unknown;
-  text: T | ReactNode;
-} & OptionHTMLAttributes<HTMLOptionElement>;
-
-export interface SuperSelectOption {
-  value: unknown;
-  inputDisplay?: ReactNode;
-  dropdownDisplay?: ReactNode;
-  disabled?: boolean;
-  'data-test-subj'?: string;
-}
-
-export interface AliasOption {
-  id: string;
-  label: string;
-}
-
-export interface IndexSettingsInterface {
-  analysis?: {
-    analyzer: {
-      [key: string]: {
-        type: string;
-        tokenizer: string;
-        char_filter?: string[];
-        filter?: string[];
-        position_increment_gap?: number;
-      };
-    };
-  };
-}
-
-/**
- * When we define the index settings we can skip
- * the "index" property and directly add the "analysis".
- * ES always returns the settings wrapped under "index".
- */
-export type IndexSettings = IndexSettingsInterface | { index: IndexSettingsInterface };
-
-export interface ComboBoxOption {
-  label: string;
-  value?: unknown;
-}
-
-export interface SearchResult {
-  display: JSX.Element;
-  field: NormalizedField;
-}
-
-export interface SearchMetadata {
-  /**
-   * Whether or not the search term match some part of the field path.
-   */
-  matchPath: boolean;
-  /**
-   * If the search term matches the field type we will give it a higher score.
-   */
-  matchType: boolean;
-  /**
-   * If the last word of the search terms matches the field name
-   */
-  matchFieldName: boolean;
-  /**
-   * If the search term matches the beginning of the path we will give it a higher score
-   */
-  matchStartOfPath: boolean;
-  /**
-   * If the last word of the search terms fully matches the field name
-   */
-  fullyMatchFieldName: boolean;
-  /**
-   * If the search term exactly matches the field type
-   */
-  fullyMatchType: boolean;
-  /**
-   * If the search term matches the full field path
-   */
-  fullyMatchPath: boolean;
-  /**
-   * The score of the result that will allow us to sort the list
-   */
-  score: number;
-  /**
-   * The JSX with <strong> tag wrapping the matched string
-   */
-  display: JSX.Element;
-  /**
-   * The field path substring that matches the search
-   */
-  stringMatch: string | null;
-}
 
 export interface GenericObject {
   [key: string]: any;
