@@ -19,12 +19,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Schemas, AggGroupNames, ColorSchemas, RangeValues } from './legacy_imports';
+import { RangeValues } from '../../vis_default_editor/public';
+import { Schemas, AggGroupNames } from './legacy_imports';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, Alignments, ColorModes, GaugeTypes } from './utils/collections';
 import { createVislibVisController } from './vis_controller';
 import { ColorSchemaVislibParams, Labels, Style } from './types';
-import { KbnVislibVisTypesDependencies } from './plugin';
+import { VisTypeVislibDependencies } from './plugin';
+import { ColorSchemas } from '../../../../plugins/charts/public';
 
 export interface Gauge extends ColorSchemaVislibParams {
   backStyle: 'Full';
@@ -54,7 +56,7 @@ export interface GaugeVisParams {
   gauge: Gauge;
 }
 
-export const createGaugeVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
+export const createGaugeVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'gauge',
   title: i18n.translate('visTypeVislib.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
   icon: 'visGauge',

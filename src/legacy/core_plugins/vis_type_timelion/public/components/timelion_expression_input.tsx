@@ -110,37 +110,39 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
         <FormattedMessage id="timelion.vis.expressionLabel" defaultMessage="Timelion expression" />
       </EuiFormLabel>
       <div className="timExpressionInput__editor">
-        <CodeEditor
-          languageId={LANGUAGE_ID}
-          value={value}
-          onChange={setValue}
-          suggestionProvider={{
-            triggerCharacters: ['.', ',', '(', '=', ':'],
-            provideCompletionItems,
-          }}
-          hoverProvider={{ provideHover }}
-          options={{
-            fixedOverflowWidgets: true,
-            fontSize: 14,
-            folding: false,
-            lineNumbers: 'off',
-            scrollBeyondLastLine: false,
-            minimap: {
-              enabled: false,
-            },
-            wordBasedSuggestions: false,
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-          }}
-          languageConfiguration={{
-            autoClosingPairs: [
-              {
-                open: '(',
-                close: ')',
+        <div className="timExpressionInput__absolute">
+          <CodeEditor
+            languageId={LANGUAGE_ID}
+            value={value}
+            onChange={setValue}
+            suggestionProvider={{
+              triggerCharacters: ['.', ',', '(', '=', ':'],
+              provideCompletionItems,
+            }}
+            hoverProvider={{ provideHover }}
+            options={{
+              fixedOverflowWidgets: true,
+              fontSize: 14,
+              folding: false,
+              lineNumbers: 'off',
+              scrollBeyondLastLine: false,
+              minimap: {
+                enabled: false,
               },
-            ],
-          }}
-        />
+              wordBasedSuggestions: false,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+            }}
+            languageConfiguration={{
+              autoClosingPairs: [
+                {
+                  open: '(',
+                  close: ')',
+                },
+              ],
+            }}
+          />
+        </div>
       </div>
     </div>
   );
