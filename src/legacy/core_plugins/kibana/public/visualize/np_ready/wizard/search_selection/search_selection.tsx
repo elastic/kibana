@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { IUiSettingsClient, SavedObjectsStart } from 'kibana/public';
 
-import { SavedObjectFinderUi } from '../../../../../../../../plugins/kibana_react/public';
+import { SavedObjectFinderUi } from '../../../../../../../../plugins/saved_objects/public';
 import { VisType } from '../../../legacy_imports';
 
 interface SearchSelectionProps {

@@ -25,10 +25,7 @@ import * as i18n from './translations';
 import { MapEmbeddable, SetQuery } from './types';
 import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 import { useKibana, useUiSetting$ } from '../../lib/kibana';
-import {
-  SavedObjectFinderProps,
-  SavedObjectFinderUi,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -177,14 +174,6 @@ export const EmbeddedMapComponent = ({
     }
   }, [startDate, endDate]);
 
-  const SavedObjectFinder = (props: SavedObjectFinderProps) => (
-    <SavedObjectFinderUi
-      {...props}
-      savedObjects={services.savedObjects}
-      uiSettings={services.uiSettings}
-    />
-  );
-
   return isError ? null : (
     <Embeddable>
       <EmbeddableHeader title={i18n.EMBEDDABLE_HEADER_TITLE}>
@@ -213,7 +202,7 @@ export const EmbeddedMapComponent = ({
             notifications={services.notifications}
             overlays={services.overlays}
             inspector={services.inspector}
-            SavedObjectFinder={SavedObjectFinder}
+            SavedObjectFinder={getSavedObjectFinder(services.savedObjects, services.uiSettings)}
           />
         ) : !isLoading && isIndexError ? (
           <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />

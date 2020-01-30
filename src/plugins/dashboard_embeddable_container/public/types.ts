@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { IconType } from '@elastic/eui';
 import { SavedObject as SavedObjectType, SavedObjectAttributes } from '../../../core/public';
 
 export interface DashboardCapabilities {
@@ -48,14 +47,6 @@ export interface SimpleSavedObject<T extends SavedObjectAttributes> {
   has(key: string): boolean;
   save(): Promise<SimpleSavedObject<T>>;
   delete(): void;
-}
-
-export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
-  type: string;
-  name: string;
-  getIconForSavedObject(savedObject: SimpleSavedObject<T>): IconType;
-  getTooltipForSavedObject?(savedObject: SimpleSavedObject<T>): string;
-  showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
 }
 
 interface FieldSubType {

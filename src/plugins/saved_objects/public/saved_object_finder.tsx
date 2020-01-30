@@ -44,9 +44,13 @@ import {
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectAttributes } from '../../../../core/public';
-import { SimpleSavedObject, CoreStart } from '../../../../core/public';
-import { useKibana } from '../context';
+import {
+  SavedObjectAttributes,
+  SimpleSavedObject,
+  CoreStart,
+  IUiSettingsClient,
+  SavedObjectsStart,
+} from 'src/core/public';
 
 // TODO the typings for EuiListGroup are incorrect - maxWidth is missing. This can be removed when the types are adjusted
 const FixedEuiListGroup = (EuiListGroup as any) as React.FunctionComponent<
@@ -534,15 +538,10 @@ class SavedObjectFinderUi extends React.Component<
   }
 }
 
-const SavedObjectFinder = (props: SavedObjectFinderProps) => {
-  const { services } = useKibana();
-  return (
-    <SavedObjectFinderUi
-      {...props}
-      savedObjects={services.savedObject}
-      uiSettings={services.uiSettings}
-    />
+const getSavedObjectFinder = (savedObject: SavedObjectsStart, uiSettings: IUiSettingsClient) => {
+  return (props: SavedObjectFinderProps) => (
+    <SavedObjectFinderUi {...props} savedObjects={savedObject} uiSettings={uiSettings} />
   );
 };
 
-export { SavedObjectFinder, SavedObjectFinderUi };
+export { getSavedObjectFinder, SavedObjectFinderUi };
