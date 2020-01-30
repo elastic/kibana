@@ -102,3 +102,9 @@ export interface FetchCasesProps {
   filterOptions?: FilterOptions;
 }
 
+export interface FetchCasesResponse {
+  page: number;
+  perPage: number;
+  total: number;
+  data: Case[];
+}
