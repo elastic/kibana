@@ -14,9 +14,8 @@
     on-query-submit="updateQuery"
 	
     show-save-query="showSaveQuery"
-    on-saved="updateSavedQueryState"	
-    on-saved-query-updated="updateSavedQueryState"	
-    on-clear-saved-query="updateSavedQueryState"
+    saved-query-id="state.savedQuery"
+    on-saved-query-id-change="updateSavedQueryId"
 
     use-default-behaviors="true"
   >

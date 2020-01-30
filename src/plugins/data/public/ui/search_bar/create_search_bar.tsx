@@ -35,6 +35,8 @@ interface StatefulSearchBarDeps {
 export type StatefulSearchBarProps = SearchBarOwnProps & {
   appName: string;
   useDefaultBehaviors?: boolean;
+  savedQueryId?: string;
+  onSavedQueryIdChange?: (savedQueryId?: string) => void;
 };
 
 const defaultFiltersUpdated = (queryService: QueryStart) => {
@@ -89,7 +91,7 @@ const defaultOnClearSavedQuery = (
       language: uiSettings.get('search:queryLanguage'),
     });
     setSavedQueryState(undefined);
-    if (props.onClearSavedQuery) props.onClearSavedQuery();
+    if (props.onSavedQueryIdChange) props.onSavedQueryIdChange();
   };
 };
 
@@ -140,7 +142,7 @@ const defaultOnSavedQueryUpdated = (
       setQueryStringState,
       setSavedQueryState
     );
-    if (props.onSavedQueryUpdated) props.onSavedQueryUpdated(savedQuery);
+    if (props.onSavedQueryIdChange) props.onSavedQueryIdChange(savedQuery.id);
   };
 };
 
@@ -159,7 +161,7 @@ const defaultOnQuerySaved = (
       setQueryStringState,
       setSavedQueryState
     );
-    if (props.onSaved) props.onSaved(savedQuery);
+    if (props.onSavedQueryIdChange) props.onSavedQueryIdChange(savedQuery.id);
   };
 };
 
@@ -171,9 +173,8 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
-    const { filterManager, timefilter } = data.query;
+    const { filterManager, timefilter, savedQueries } = data.query;
     const tfRefreshInterval = timefilter.timefilter.getRefreshInterval();
-    const fmFilters = filterManager.getFilters();
     const [refreshInterval, setRefreshInterval] = useState(tfRefreshInterval.value);
     const [refreshPaused, setRefreshPaused] = useState(tfRefreshInterval.pause);
     const [query, setQuery] = useState<Query>(
@@ -182,9 +183,20 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
         language: core.uiSettings.get('search:queryLanguage'),
       }
     );
-    const [savedQuery, setSavedQuery] = useState<SavedQuery>();
 
-    const [filters, setFilters] = useState(fmFilters);
+    // Handle saved queries
+    const [savedQuery, setSavedQuery] = useState<SavedQuery>();
+    useEffect(() => {
+      const fetchSavedQuery = async () => {
+        if (props.savedQueryId) {
+          const newSavedQuery = await savedQueries.getSavedQuery(props.savedQueryId);
+          if (newSavedQuery) setSavedQuery(newSavedQuery);
+        }
+      };
+      fetchSavedQuery();
+    }, [props.savedQueryId, savedQueries]);
+
+    const [filters, setFilters] = useState(filterManager.getFilters());
 
     // We do not really need to keep track of the time
     // since this is just for initialization

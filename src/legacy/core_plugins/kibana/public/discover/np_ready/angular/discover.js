@@ -941,9 +941,9 @@ function discoverController(
     $scope.minimumVisibleRows = $scope.hits;
   };
 
-  $scope.updateSavedQueryState = savedQuery => {
-    if (savedQuery) {
-      $state.savedQuery = savedQuery;
+  $scope.updateSavedQueryId = newSavedQueryId => {
+    if (newSavedQueryId) {
+      $state.savedQuery = newSavedQueryId;
     } else {
       delete $state.savedQuery;
     }
