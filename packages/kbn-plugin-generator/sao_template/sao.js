@@ -61,6 +61,11 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
         when: answers => answers.generateApp,
         default: true,
       },
+      generateEslint: {
+        type: 'confirm',
+        message: 'Should generate custom eslint file be used?',
+        default: !isKibanaPlugin,
+      },
     },
     filters: {
       'public/**/index.scss': 'generateScss',
@@ -68,6 +73,7 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
       'server/**/*': 'generateApi',
       'translations/**/*': 'generateTranslations',
       '.i18nrc.json': 'generateTranslations',
+      'eslintrc.js': 'generateEslint',
     },
     move: {
       'eslintrc.js': '.eslintrc.js',
