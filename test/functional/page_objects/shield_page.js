@@ -45,7 +45,10 @@ export function ShieldPageProvider({ getService }) {
 
   class ShieldPage {
     async login(user, pwd) {
-      if (provisionedEnv.REMOTE_SESSION_URL) {
+      if (
+        provisionedEnv.VM === 'ubuntu18_deb_oidc' ||
+        provisionedEnv.VM === 'ubuntu16_deb_desktop_saml'
+      ) {
         const [samlUser, samlPass] = parse(provisionedEnv.KIBANAURL);
         await samlLogin(samlUser, samlPass);
         return;
