@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { componentRegistry } from './component_registry';
+import { ComponentRegistry } from './component_registry';
 
 export interface AdvancedSettingsSetup {
-  componentRegistry: typeof componentRegistry;
+  component: ComponentRegistry['setup'];
 }
 export interface AdvancedSettingsStart {
-  componentRegistry: typeof componentRegistry;
+  component: ComponentRegistry['start'];
 }

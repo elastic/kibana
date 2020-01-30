@@ -5,21 +5,14 @@
  */
 
 import { AdvancedSettingsService } from './advanced_settings_service';
+import { componentRegistryMock } from '../../../../../../src/plugins/advanced_settings/public/mocks';
 
 describe('Advanced Settings Service', () => {
   describe('#setup', () => {
     it('registers space-aware components to augment the advanced settings screen', () => {
       const deps = {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'foo', name: 'foo-space' }),
-        componentRegistry: {
-          register: jest.fn(),
-          get: jest.fn(),
-          componentType: {
-            PAGE_TITLE_COMPONENT: 'page_title_component',
-            PAGE_SUBTITLE_COMPONENT: 'page_subtitle_component',
-            PAGE_FOOTER_COMPONENT: 'page_footer_component',
-          },
-        },
+        componentRegistry: componentRegistryMock,
       };
 
       const advancedSettingsService = new AdvancedSettingsService();

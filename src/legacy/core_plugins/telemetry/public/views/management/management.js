@@ -19,7 +19,7 @@
 import React from 'react';
 import routes from 'ui/routes';
 
-import { npStart } from 'ui/new_platform';
+import { npSetup } from 'ui/new_platform';
 import { TelemetryOptInProvider } from '../../services';
 import { TelemetryForm } from '../../components';
 
@@ -27,7 +27,7 @@ routes.defaults(/\/management/, {
   resolve: {
     telemetryManagementSection: function(Private) {
       const telemetryOptInProvider = Private(TelemetryOptInProvider);
-      const componentRegistry = npStart.plugins.advancedSettings.componentRegistry;
+      const componentRegistry = npSetup.plugins.advancedSettings.componentRegistry;
 
       const Component = props => (
         <TelemetryForm

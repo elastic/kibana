@@ -17,66 +17,56 @@
  * under the License.
  */
 
-import React, { FunctionComponent } from 'react';
-import {
-  tryRegisterSettingsComponent,
-  registerSettingsComponent,
-  getSettingsComponent,
-} from './component_registry';
+import React from 'react';
+import { ComponentRegistry } from './component_registry';
 
-describe('tryRegisterSettingsComponent', () => {
-  it('should allow a component to be registered', () => {
-    const component = () => <div />;
-    expect(tryRegisterSettingsComponent('tryTest1', component)).toEqual(true);
+describe('ComponentRegistry', () => {
+  describe('register', () => {
+    it('should allow a component to be registered', () => {
+      const component = () => <div />;
+      new ComponentRegistry().setup.register(
+        ComponentRegistry.componentType.PAGE_TITLE_COMPONENT,
+        component
+      );
+    });
+
+    it('should disallow registering a component with a duplicate id', () => {
+      const registry = new ComponentRegistry();
+      const component = () => <div />;
+      registry.setup.register(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT, component);
+      expect(() =>
+        registry.setup.register(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT, () => (
+          <span />
+        ))
+      ).toThrowErrorMatchingSnapshot();
+    });
+
+    it('should allow a component to be overriden', () => {
+      const registry = new ComponentRegistry();
+      const component = () => <div />;
+      registry.setup.register(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT, component);
+
+      const anotherComponent = () => <span />;
+      registry.setup.register(
+        ComponentRegistry.componentType.PAGE_TITLE_COMPONENT,
+        anotherComponent,
+        true
+      );
+
+      expect(registry.start.get(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT)).toBe(
+        anotherComponent
+      );
+    });
   });
 
-  it('should return false if the component is already registered, and not allow an override', () => {
-    const component = () => <div />;
-    expect(tryRegisterSettingsComponent('tryTest2', component)).toEqual(true);
-
-    const updatedComponent = () => <div />;
-    expect(tryRegisterSettingsComponent('tryTest2', updatedComponent)).toEqual(false);
-    expect(getSettingsComponent('tryTest2')).toBe(component);
-  });
-});
-
-describe('registerSettingsComponent', () => {
-  it('should allow a component to be registered', () => {
-    const component = () => <div />;
-    registerSettingsComponent('test', component);
-  });
-
-  it('should disallow registering a component with a duplicate id', () => {
-    const component = () => <div />;
-    registerSettingsComponent('test2', component);
-    expect(() => registerSettingsComponent('test2', () => <span />)).toThrowErrorMatchingSnapshot();
-  });
-
-  it('should allow a component to be overriden', () => {
-    const component = () => <div />;
-    registerSettingsComponent('test3', component);
-
-    const anotherComponent = () => <span />;
-    registerSettingsComponent('test3', anotherComponent, true);
-
-    expect(getSettingsComponent('test3')).toBe(anotherComponent);
-  });
-
-  it('should set a displayName for the component', () => {
-    const component = () => <div />;
-    registerSettingsComponent('display_name_component', component);
-    expect((component as FunctionComponent).displayName).toEqual('display_name_component');
-  });
-});
-
-describe('getSettingsComponent', () => {
-  it('should allow a component to be retrieved', () => {
-    const component = () => <div />;
-    registerSettingsComponent('test4', component);
-    expect(getSettingsComponent('test4')).toBe(component);
-  });
-
-  it('should throw an error when requesting a component that does not exist', () => {
-    expect(() => getSettingsComponent('does not exist')).toThrowErrorMatchingSnapshot();
+  describe('get', () => {
+    it('should allow a component to be retrieved', () => {
+      const registry = new ComponentRegistry();
+      const component = () => <div />;
+      registry.setup.register(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT, component);
+      expect(registry.start.get(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT)).toBe(
+        component
+      );
+    });
   });
 });

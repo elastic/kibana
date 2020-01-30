@@ -18,66 +18,63 @@
  */
 
 import { ComponentType } from 'react';
+import { PageTitle } from './page_title';
+import { PageSubtitle } from './page_subtitle';
+import { PageFooter } from './page_footer';
 
-type Id = string;
-const registry: Record<Id, ComponentType<Record<string, any> | undefined>> = {};
-
-/**
- * Attempts to register the provided component.
- * If a component with that ID is already registered, then the registration fails.
- *
- * @param {*} id the id of the component to register
- * @param {*} component the component
- */
-export function tryRegisterSettingsComponent(
-  id: Id,
-  component: ComponentType<Record<string, any> | undefined>
-) {
-  if (id in registry) {
-    return false;
-  }
-
-  registerSettingsComponent(id, component);
-  return true;
+enum Id {
+  PAGE_TITLE_COMPONENT,
+  PAGE_SUBTITLE_COMPONENT,
+  PAGE_FOOTER_COMPONENT,
 }
 
-/**
- * Attempts to register the provided component, with the ability to optionally allow
- * the component to override an existing one.
- *
- * If the intent is to override, then `allowOverride` must be set to true, otherwise an exception is thrown.
- *
- * @param {*} id the id of the component to register
- * @param {*} component the component
- * @param {*} allowOverride (default: false) - optional flag to allow this component to override a previously registered component
- */
-export function registerSettingsComponent(
-  id: Id,
-  component: ComponentType<Record<string, any> | undefined>,
-  allowOverride = false
-) {
-  if (!allowOverride && id in registry) {
-    throw new Error(`Component with id ${id} is already registered.`);
+type RegistryComponent = ComponentType<Record<string, any> | undefined>;
+
+export class ComponentRegistry {
+  static readonly componentType = Id;
+  static readonly defaultRegistry: Record<Id, RegistryComponent> = {
+    [Id.PAGE_TITLE_COMPONENT]: PageTitle,
+    [Id.PAGE_SUBTITLE_COMPONENT]: PageSubtitle,
+    [Id.PAGE_FOOTER_COMPONENT]: PageFooter,
+  };
+
+  registry: { [key in Id]?: RegistryComponent } = {};
+
+  /**
+   * Attempts to register the provided component, with the ability to optionally allow
+   * the component to override an existing one.
+   *
+   * If the intent is to override, then `allowOverride` must be set to true, otherwise an exception is thrown.
+   *
+   * @param {*} id the id of the component to register
+   * @param {*} component the component
+   * @param {*} allowOverride (default: false) - optional flag to allow this component to override a previously registered component
+   */
+  private register(id: Id, component: RegistryComponent, allowOverride = false) {
+    if (!allowOverride && id in this.registry) {
+      throw new Error(`Component with id ${id} is already registered.`);
+    }
+
+    this.registry[id] = component;
   }
 
-  // Setting a display name if one does not already exist.
-  // This enhances the snapshots, as well as the debugging experience.
-  if (!component.displayName) {
-    component.displayName = id;
+  /**
+   * Retrieve a registered component by its ID.
+   * If the component does not exist, then an exception is thrown.
+   *
+   * @param {*} id the ID of the component to retrieve
+   */
+  private get(id: Id): RegistryComponent {
+    return this.registry[id] || ComponentRegistry.defaultRegistry[id];
   }
 
-  registry[id] = component;
-}
+  setup = {
+    componentType: ComponentRegistry.componentType,
+    register: this.register.bind(this),
+  };
 
-/**
- * Retrieve a registered component by its ID.
- * If the component does not exist, then an exception is thrown.
- *
- * @param {*} id the ID of the component to retrieve
- */
-export function getSettingsComponent(id: Id): ComponentType<Record<string, any> | undefined> {
-  if (!(id in registry)) {
-    throw new Error(`Component not found with id ${id}`);
-  }
-  return registry[id];
+  start = {
+    componentType: ComponentRegistry.componentType,
+    get: this.get.bind(this),
+  };
 }
