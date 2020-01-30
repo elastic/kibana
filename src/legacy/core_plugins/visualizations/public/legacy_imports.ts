@@ -26,7 +26,6 @@ export {
 } from '../../../ui/public/agg_types/buckets/date_histogram';
 export { createFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
 export { I18nContext } from '../../../ui/public/i18n';
-export { DefaultEditorController } from '../../../ui/public/vis/editors/default/default_editor_controller';
 import chrome from '../../../ui/public/chrome';
 export { chrome as legacyChrome };
 import '../../../ui/public/directives/bind';
