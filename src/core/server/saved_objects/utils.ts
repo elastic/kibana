@@ -19,6 +19,7 @@
 
 import { LegacyConfig } from '../legacy';
 import { SavedObjectsType, SavedObjectsLegacyUiExports } from './types';
+import { SavedObjectsSchemaDefinition } from './schema';
 
 /**
  * Converts the legacy savedObjects mappings, schema, and migrations
@@ -53,4 +54,23 @@ export const convertLegacyTypes = (
       }),
     ];
   }, [] as SavedObjectsType[]);
+};
+
+/**
+ * Convert {@link SavedObjectsType | saved object types} to the legacy {@link SavedObjectsSchemaDefinition | schema} format
+ */
+export const convertTypesToLegacySchema = (
+  types: SavedObjectsType[]
+): SavedObjectsSchemaDefinition => {
+  return types.reduce((schema, type) => {
+    return {
+      ...schema,
+      [type.name]: {
+        isNamespaceAgnostic: type.namespaceAgnostic,
+        hidden: type.hidden,
+        indexPattern: type.indexPattern,
+        convertToAliasScript: type.convertToAliasScript,
+      },
+    };
+  }, {} as SavedObjectsSchemaDefinition);
 };

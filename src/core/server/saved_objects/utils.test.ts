@@ -18,8 +18,8 @@
  */
 
 import { legacyServiceMock } from '../legacy/legacy_service.mock';
-import { convertLegacyTypes } from './utils';
-import { SavedObjectsLegacyUiExports } from './types';
+import { convertLegacyTypes, convertTypesToLegacySchema } from './utils';
+import { SavedObjectsLegacyUiExports, SavedObjectsType } from './types';
 import { LegacyConfig } from 'kibana/server';
 
 describe('convertLegacyTypes', () => {
@@ -248,5 +248,38 @@ describe('convertLegacyTypes', () => {
 
     const converted = convertLegacyTypes(uiExports, legacyConfig);
     expect(converted).toMatchSnapshot();
+  });
+});
+
+describe('convertTypesToLegacySchema', () => {
+  it('converts types to the legacy schema format', () => {
+    const types: SavedObjectsType[] = [
+      {
+        name: 'typeA',
+        hidden: false,
+        namespaceAgnostic: true,
+        mappings: { properties: {} },
+        convertToAliasScript: 'some script',
+      },
+      {
+        name: 'typeB',
+        hidden: true,
+        namespaceAgnostic: false,
+        indexPattern: 'myIndex',
+        mappings: { properties: {} },
+      },
+    ];
+    expect(convertTypesToLegacySchema(types)).toEqual({
+      typeA: {
+        hidden: false,
+        isNamespaceAgnostic: true,
+        convertToAliasScript: 'some script',
+      },
+      typeB: {
+        hidden: true,
+        isNamespaceAgnostic: false,
+        indexPattern: 'myIndex',
+      },
+    });
   });
 });

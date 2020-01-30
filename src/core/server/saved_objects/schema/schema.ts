@@ -35,7 +35,7 @@ interface SavedObjectsSchemaTypeDefinition {
  * @internal
  **/
 export interface SavedObjectsSchemaDefinition {
-  [key: string]: SavedObjectsSchemaTypeDefinition;
+  [type: string]: SavedObjectsSchemaTypeDefinition;
 }
 
 /**
@@ -84,6 +84,4 @@ export class SavedObjectsSchema {
     }
     return Boolean(typeSchema.isNamespaceAgnostic);
   }
-
-  // These are methods required to implements SavedObjectTypeProvider during transition period
 }

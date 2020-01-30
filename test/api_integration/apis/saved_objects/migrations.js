@@ -27,8 +27,10 @@ import {
   DocumentMigrator,
   IndexMigrator,
 } from '../../../../src/core/server/saved_objects/migrations/core';
-import { SavedObjectsSerializer } from '../../../../src/core/server/saved_objects/serialization';
-import { SavedObjectsSchema } from '../../../../src/core/server/saved_objects/schema';
+import {
+  SavedObjectsSerializer,
+  SavedObjectTypeRegistry,
+} from '../../../../src/core/server/saved_objects';
 
 export default ({ getService }) => {
   const es = getService('legacyEs');
@@ -366,7 +368,7 @@ async function migrateIndex({
     log: { info: _.noop, debug: _.noop, warn: _.noop },
     pollInterval: 50,
     scrollDuration: '5m',
-    serializer: new SavedObjectsSerializer(new SavedObjectsSchema()),
+    serializer: new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
   });
 
   return await migrator.migrate();

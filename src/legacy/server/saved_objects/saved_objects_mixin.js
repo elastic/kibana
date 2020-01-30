@@ -28,6 +28,7 @@ import {
   resolveImportErrors,
 } from '../../../core/server/saved_objects';
 import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
+import { convertTypesToLegacySchema } from '../../../core/server/saved_objects/utils';
 import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
 import {
@@ -59,7 +60,7 @@ export function savedObjectsMixin(kbnServer, server) {
   const typeRegistry = kbnServer.newPlatform.__internals.typeRegistry;
   const mappings = migrator.getActiveMappings();
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
-  const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
+  const schema = new SavedObjectsSchema(convertTypesToLegacySchema(typeRegistry.getAllTypes()));
   const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
   const importableAndExportableTypes = getImportableAndExportableTypes({ kbnServer, visibleTypes });
 
