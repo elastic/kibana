@@ -5,7 +5,7 @@
  */
 
 import { ManagementSetup, ManagementSection } from 'src/plugins/management/public';
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup, Capabilities } from 'src/core/public';
 import { SecurityPluginSetup } from '../../../security/public';
 import { SpacesManager } from '../spaces_manager';
 import { PluginsStart } from '../plugin';
@@ -16,6 +16,10 @@ interface SetupDeps {
   getStartServices: CoreSetup<PluginsStart>['getStartServices'];
   spacesManager: SpacesManager;
   securityLicense?: SecurityPluginSetup['license'];
+}
+
+interface StartDeps {
+  capabilities: Capabilities;
 }
 export class ManagementService {
   private kibanaSection?: ManagementSection;
@@ -29,9 +33,17 @@ export class ManagementService {
     }
   }
 
-  public start() {}
+  public start({ capabilities }: StartDeps) {
+    if (!capabilities.spaces.manage) {
+      this.disableSpacesApp();
+    }
+  }
 
   public stop() {
+    this.disableSpacesApp();
+  }
+
+  private disableSpacesApp() {
     if (this.kibanaSection) {
       const spacesApp = this.kibanaSection.getApp(spacesManagementApp.id);
       if (spacesApp) {
