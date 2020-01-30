@@ -17,27 +17,5 @@
  * under the License.
  */
 
-import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-
-jest.mock('../../legacy_imports', () => ({
-  SavedObjectSaveModal: () => null,
-}));
-
-jest.mock('ui/new_platform');
-
-import { DashboardSaveModal } from './save_modal';
-
-test('renders DashboardSaveModal', () => {
-  const component = shallowWithI18nProvider(
-    <DashboardSaveModal
-      onSave={() => {}}
-      onClose={() => {}}
-      title="dash title"
-      description="dash description"
-      timeRestore={true}
-      showCopyOnSave={true}
-    />
-  );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
-});
+export * from './saved_object_finder';
+export * from './saved_object_save_modal';

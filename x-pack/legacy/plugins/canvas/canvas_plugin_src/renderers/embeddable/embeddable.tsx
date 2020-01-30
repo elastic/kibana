@@ -17,7 +17,10 @@ import {
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
-import { SavedObjectFinderProps, SavedObjectFinderUi } from '../../../../../../../src/core/public';
+import {
+  SavedObjectFinderProps,
+  SavedObjectFinderUi,
+} from '../../../../../../../src/plugins/kibana_react/public';
 
 const { embeddable: strings } = RendererStrings;
 import { embeddableInputToExpression } from './embeddable_input_to_expression';

@@ -7,7 +7,10 @@
 import React, { useState } from 'react';
 import { EuiFormRow, EuiTextArea, EuiCallOut, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectSaveModal, OnSaveProps } from '../../../../../../src/core/public';
+import {
+  SavedObjectSaveModal,
+  OnSaveProps,
+} from '../../../../../../src/plugins/kibana_react/public';
 
 import { GraphSavePolicy } from '../types/config';
 

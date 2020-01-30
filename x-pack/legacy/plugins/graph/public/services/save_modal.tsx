@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { showSaveModal, SaveResult } from '../../../../../../src/core/public';
 import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
 import { SaveModal, OnSaveGraphProps } from '../components/save_modal';
+import { SaveResult } from '../legacy_imports';
 
 export type SaveWorkspaceHandler = (
   saveOptions: {
@@ -23,11 +23,13 @@ export function openSaveModal({
   hasData,
   workspace,
   saveWorkspace,
+  showSaveModal,
 }: {
   savePolicy: GraphSavePolicy;
   hasData: boolean;
   workspace: GraphWorkspaceSavedObject;
   saveWorkspace: SaveWorkspaceHandler;
+  showSaveModal: (el: React.ReactNode) => void;
 }) {
   const currentTitle = workspace.title;
   const currentDescription = workspace.description;

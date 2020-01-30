@@ -37,7 +37,7 @@ import React from 'react';
 import * as sinon from 'sinon';
 import { SavedObjectFinderUi as SavedObjectFinder } from './saved_object_finder';
 // eslint-disable-next-line
-import { coreMock } from '../mocks';
+import { coreMock } from '../../../../core/public/mocks';
 
 describe('SavedObjectsFinder', () => {
   const doc = {

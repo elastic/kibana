@@ -44,9 +44,9 @@ import {
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectAttributes } from '.';
-import { SimpleSavedObject, CoreStart } from '../';
-import { useKibana } from '../../../plugins/kibana_react/public'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { SavedObjectAttributes } from '../../../../core/public';
+import { SimpleSavedObject, CoreStart } from '../../../../core/public';
+import { useKibana } from '../context';
 
 // TODO the typings for EuiListGroup are incorrect - maxWidth is missing. This can be removed when the types are adjusted
 const FixedEuiListGroup = (EuiListGroup as any) as React.FunctionComponent<
@@ -108,7 +108,7 @@ interface SavedObjectFinderInitialPageSize extends BaseSavedObjectFinder {
 
 export type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize;
 
-type SavedObjectFinderUiProps = {
+export type SavedObjectFinderUiProps = {
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
 } & SavedObjectFinderProps;

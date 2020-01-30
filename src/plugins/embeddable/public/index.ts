@@ -51,6 +51,7 @@ export {
   PanelNotFoundError,
   PanelState,
   PropertySpec,
+  SavedObjectMetaData,
   ViewMode,
   isErrorEmbeddable,
   openAddPanelFlyout,

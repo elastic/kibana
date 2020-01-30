@@ -54,6 +54,7 @@ export interface GraphStoreDependencies {
   getSavedWorkspace: () => GraphWorkspaceSavedObject;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
+  showSaveModal: (el: React.ReactNode) => void;
   savePolicy: GraphSavePolicy;
   changeUrl: (newUrl: string) => void;
   notifyAngular: () => void;

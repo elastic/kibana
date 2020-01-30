@@ -197,6 +197,7 @@ function showModal(
     savePolicy: deps.savePolicy,
     hasData: workspace.nodes.length > 0 || workspace.blacklistedNodes.length > 0,
     workspace: savedWorkspace,
+    showSaveModal: deps.showSaveModal,
     saveWorkspace: saveWorkspaceHandler,
   });
 }

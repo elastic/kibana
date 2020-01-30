@@ -21,7 +21,7 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 
-import { SavedObjectSaveModal } from '../../../../../../../core/public';
+import { SavedObjectSaveModal } from '../../legacy_imports';
 
 interface SaveOptions {
   newTitle: string;

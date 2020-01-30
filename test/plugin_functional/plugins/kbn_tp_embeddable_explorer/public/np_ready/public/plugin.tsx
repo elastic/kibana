@@ -18,13 +18,7 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  SavedObjectFinderProps,
-  SavedObjectFinderUi,
-} from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { IUiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { createHelloWorldAction } from '../../../../../../../src/plugins/ui_actions/public/tests/test_samples';
 
@@ -43,6 +37,10 @@ import {
   ContactCardEmbeddableFactory,
 } from './embeddable_api';
 import { App } from './app';
+import {
+  SavedObjectFinderProps,
+  SavedObjectFinderUi,
+} from '../../../../../../../src/plugins/kibana_react/public/saved_objects';
 import { HelloWorldEmbeddableFactory } from '../../../../../../../examples/embeddable_examples/public';
 import {
   IEmbeddableStart,

@@ -17,27 +17,9 @@
  * under the License.
  */
 
-import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-
-jest.mock('../../legacy_imports', () => ({
-  SavedObjectSaveModal: () => null,
-}));
-
-jest.mock('ui/new_platform');
-
-import { DashboardSaveModal } from './save_modal';
-
-test('renders DashboardSaveModal', () => {
-  const component = shallowWithI18nProvider(
-    <DashboardSaveModal
-      onSave={() => {}}
-      onClose={() => {}}
-      title="dash title"
-      description="dash description"
-      timeRestore={true}
-      showCopyOnSave={true}
-    />
-  );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
-});
+/**
+ * @deprecated
+ *
+ * Do not import this component from here. Import from `src/plugins/kibana_react` instead.
+ */
+export { SavedObjectSaveModal } from '../../../../../plugins/kibana_react/public';

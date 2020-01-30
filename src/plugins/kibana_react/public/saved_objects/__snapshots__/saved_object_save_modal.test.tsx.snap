@@ -1,0 +1,100 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
+<EuiOverlayMask>
+  <form
+    onSubmit={[Function]}
+  >
+    <EuiModal
+      className="kbnSavedObjectSaveModal"
+      data-test-subj="savedObjectSaveModal"
+      maxWidth={true}
+      onClose={[Function]}
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            defaultMessage="Save {objectType}"
+            id="kibana-react.savedObjects.saveModal.saveTitle"
+            values={
+              Object {
+                "objectType": "visualization",
+              }
+            }
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiForm>
+          <EuiFormRow
+            describedByIds={Array []}
+            display="row"
+            fullWidth={true}
+            hasChildLabel={true}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Title"
+                id="kibana-react.savedObjects.saveModal.titleLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiFieldText
+              autoFocus={true}
+              data-test-subj="savedObjectTitle"
+              fullWidth={true}
+              isInvalid={false}
+              onChange={[Function]}
+              value="Saved Object title"
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            describedByIds={Array []}
+            display="row"
+            fullWidth={true}
+            hasChildLabel={true}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Description"
+                id="kibana-react.savedObjects.saveModal.descriptionLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiTextArea
+              data-test-subj="viewDescription"
+              onChange={[Function]}
+              value=""
+            />
+          </EuiFormRow>
+        </EuiForm>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty
+          data-test-subj="saveCancelButton"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="kibana-react.savedObjects.saveModal.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+        <EuiButton
+          data-test-subj="confirmSaveSavedObjectButton"
+          fill={true}
+          isDisabled={false}
+          isLoading={false}
+          type="submit"
+        >
+          Save
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  </form>
+</EuiOverlayMask>
+`;
