@@ -48,9 +48,7 @@ export class AggParamType<TAggConfig extends AggConfig = AggConfig> extends Base
         return this.makeAgg(agg, state);
       };
     }
-    if (!config.editorComponent) {
-      this.editorComponent = require('../../vis/editors/default/controls/sub_agg');
-    }
+
     this.makeAgg = config.makeAgg;
     this.valueType = AggConfig;
   }

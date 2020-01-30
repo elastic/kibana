@@ -14,6 +14,7 @@ import {
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { Start as NewsfeedStart } from '../../../../../src/plugins/newsfeed/public';
 import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 import { IUiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
@@ -29,6 +30,7 @@ export interface StartPlugins {
   data: DataPublicPluginStart;
   embeddable: IEmbeddableStart;
   inspector: InspectorStart;
+  newsfeed?: NewsfeedStart;
   uiActions: IUiActionsStart;
 }
 export type StartServices = CoreStart & StartPlugins;
