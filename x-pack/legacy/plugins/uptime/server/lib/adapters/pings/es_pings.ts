@@ -7,9 +7,8 @@
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { HttpBody, Ping, PingResults } from '../../../../common/graphql/types';
-import { parseFilterQuery, getFilterClause, getHistogramIntervalFormatted } from '../../helper';
-import { UMPingsAdapter, HistogramQueryResult } from './adapter_types';
-import { getHistogramInterval } from '../../helper/get_histogram_interval';
+import { UMPingsAdapter } from './types';
+import { esGetPingHistogram } from './es_get_ping_historgram';
 
 export const elasticsearchPingsAdapter: UMPingsAdapter = {
   getAll: async ({
@@ -174,80 +173,7 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
     return result.hits.hits[0]?._source;
   },
 
-  getPingHistogram: async ({
-    callES,
-    dateRangeStart,
-    dateRangeEnd,
-    filters,
-    monitorId,
-    statusFilter,
-  }) => {
-    const boolFilters = parseFilterQuery(filters);
-    const additionalFilters = [];
-    if (monitorId) {
-      additionalFilters.push({ match: { 'monitor.id': monitorId } });
-    }
-    if (boolFilters) {
-      additionalFilters.push(boolFilters);
-    }
-    const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionalFilters);
-    const interval = getHistogramInterval(dateRangeStart, dateRangeEnd);
-    const intervalFormatted = getHistogramIntervalFormatted(dateRangeStart, dateRangeEnd);
-
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        query: {
-          bool: {
-            filter,
-          },
-        },
-        size: 0,
-        aggs: {
-          timeseries: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: intervalFormatted,
-            },
-            aggs: {
-              down: {
-                filter: {
-                  term: {
-                    'monitor.status': 'down',
-                  },
-                },
-              },
-              up: {
-                filter: {
-                  term: {
-                    'monitor.status': 'up',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    const result = await callES('search', params);
-    const buckets: HistogramQueryResult[] = get(result, 'aggregations.timeseries.buckets', []);
-    const histogram = buckets.map(bucket => {
-      const x: number = get(bucket, 'key');
-      const downCount: number = get(bucket, 'down.doc_count');
-      const upCount: number = get(bucket, 'up.doc_count');
-      return {
-        x,
-        downCount: statusFilter && statusFilter !== 'down' ? 0 : downCount,
-        upCount: statusFilter && statusFilter !== 'up' ? 0 : upCount,
-        y: 1,
-      };
-    });
-    return {
-      histogram,
-      interval,
-    };
-  },
+  getPingHistogram: esGetPingHistogram,
 
   getDocCount: async ({ callES }) => {
     const { count } = await callES('count', { index: INDEX_NAMES.HEARTBEAT });
