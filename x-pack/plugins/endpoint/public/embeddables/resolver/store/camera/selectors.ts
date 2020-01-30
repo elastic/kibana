@@ -6,7 +6,7 @@
 
 import { createSelector, defaultMemoize } from 'reselect';
 import { easing } from 'ts-easing';
-import { clamp } from '../../lib/math';
+import { clamp, lerp } from '../../lib/math';
 import * as vector2 from '../../lib/vector2';
 import { multiply, add as addMatrix } from '../../lib/matrix3';
 import {
@@ -41,7 +41,34 @@ function animationIsActive(animation: CameraAnimationState, time: Date): boolean
 
 /**
  * The scale by which world values are scaled when rendered.
- * TODO fix comments
+ *
+ *   When the camera position (translation) is changed programatically, it may be animated.
+ *   The duration of the animation is generally fixed for a given type of interaction. This way
+ *   the user won't have to wait for a variable amount of time to complete their interaction.
+ *
+ *   Since the duration is fixed and the amount that the camera position changes is variable,
+ *   the speed at which the camera changes is also variable. If the distance the camera will move
+ *   is very far, the camera will move very fast.
+ *
+ *   When the camera moves fast, elements will move across the screen quickly. These
+ *   quick moving elements can be distracting to the user. They may also hinder the quality of
+ *   animation.
+ *
+ *   The speed at which objects move across the screen is dependent on the speed of the camera
+ *   as well as the scale. If the scale is high, the camera is zoomed in, and so objects move
+ *   across the screen faster at a given camera speed. Think of looking into a telephoto lense
+ *   and moving around only a few degrees: many things might pass through your sight.
+ *
+ *   If the scale is low, the camera is zoomed out, objects look further away, and so they move
+ *   across the screen slower at a given camera speed. Therefore we can control the speed at
+ *   hich objects move across the screen without changing the camera speed. We do this by changing scale.
+ *
+ *   Changing the scale abruptly isn't acceptable because it would be visually jarring. Also, the
+ *   change in scale should be temporary, and the original scale should be resumed after the animation.
+ *
+ *   In order to change the scale to lower value, and then back, without being jarring to the user,
+ *   we calculate a temporary target scale and animate to it.
+ *
  */
 export const scale: (state: CameraState) => (time: Date) => Vector2 = createSelector(
   state => state.scalingFactor,
@@ -59,19 +86,29 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
         animation.targetTranslation,
         animation.initialTranslation
       );
-      // TODO, make scale a number
-      const speed = (panningDistance * scaleNotCountingAnimation[0]) / animation.duration;
+
+      const panningDistanceInPixels = panningDistance * scaleNotCountingAnimation;
+
       /**
-       * If the camera isn't moving very fast, no change in scale is necessary. The speed at which an animation is triggered
-       * is a constant:
+       * The speed at which pixels move across the screen during animation in pixels per millisecond.
+       */
+      const speed = panningDistanceInPixels / animation.duration;
+
+      /**
+       * The speed (in pixels per millisecond) at which an animation is triggered is a constant.
+       * If the camera isn't moving very fast, no change in scale is necessary.
        */
       const speedThreshold = 0.4;
+
       /**
-       * Growth in speed beyond the threshold is controlled by a constant.
+       * Growth in speed beyond the threshold is taken to the power of a constant. This limits the
+       * rate of growth of speed.
        */
       const speedGrowthFactor = 0.4;
+
       /*
-       * When the camera is moving faster than the threshold, additional growth is taken to the power of the `speedGrowthFactor`.
+       * Limit the rate of growth of speed. If the speed is too great, the animation will be
+       * unpleasant and have poor performance.
        *
        *      gnuplot> plot [x=0:10][y=0:3] threshold=0.4, growthFactor=0.4, x < threshold ? x : x ** growthFactor - (threshold ** growthFactor - threshold)
        *
@@ -116,47 +153,34 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
        *                                     camera speed (pixels per ms)
        *
        **/
-      const targetSpeed =
+      const limitedSpeed =
         speed < speedThreshold
           ? speed
           : speed ** speedGrowthFactor - (speedThreshold ** speedGrowthFactor - speedThreshold);
+
       /**
-       * The scale, adjusted to match the target speed if possible, is clamped within an upper
-       * and lower bound. Without these, the visualization would have to support an unbounded
-       * range of scale.
+       * The distance and duration of the animation are independent variables. If the speed was
+       * limited, only the scale can change. The lower the scale, the further the camera is
+       * away from things, and therefore the slower things move across the screen. Adjust the
+       * scale (within its own limits) to match the limited speed.
+       *
+       * This will cause the camera to zoom out if it would otherwise move too fast.
        */
       const adjustedScale = clamp(
-        (targetSpeed * animation.duration) / panningDistance,
+        (limitedSpeed * animation.duration) / panningDistance,
         scalingConstants.minimum,
         scalingConstants.maximum
       );
+
       return time => {
-        if (animationIsActive(animation, time)) {
+        /**
+         * If the animation has completed, return the `scaleNotCountingAnimation`, as
+         * the animation always completes with the scale set back at starting value.
+         */
+        if (animationIsActive(animation, time) === false) {
+          return [scaleNotCountingAnimation, scaleNotCountingAnimation];
+        } else {
           /**
-           *   When the camera position (translation) is changed programatically, it may be animated.
-           *   The duration of the animation is generally fixed for a given type of interaction. This way
-           *   the user won't have to wait for a variable amount of time to complete their interaction.
-           *
-           *   Since the duration is fixed and the amount of camera change is variable, the speed of the
-           *   camera is variable. If the distance the camera moves is very far, the camera will move
-           *   very fast.
-           *
-           *   When the camera moves fast, elements of Resolver move across the camera fast as well. These
-           *   quick moving elements can be distracting to the user. They may hinder the quality of
-           *   animation as well.
-           *
-           *   The speed with which objects move across the screen is dependent on the speed of the camera
-           *   as well as the scale. If the scale is high, the camera is zoomed in, objects look closer,
-           *   and so they move across the screen faster at a given camera speed. If the scale is low, the camera is
-           *   zoomed out, objects look further away, and so they move across the screen slower at a given camera
-           *   speed. Therefore we can control the speed at which objects move across the screen without changing
-           *   the camera speed. We do this by changing scale.
-           *
-           *   Changing the scale abruptly isn't acceptable because it would be visually jarring. Also, the
-           *   change in scale should be temporary, and the original scale should be resumed after the animation.
-           *
-           *   In order to change the scale to lower value, and then back, without being jarring to the user,
-           *   we calculate a temporary target scale and animate to it.
            *
            *   Animation is defined by a starting time, duration, starting position, and ending position. The amount of time
            *   which has passed since the start time, compared to the duration, defines the progress of the animation.
@@ -167,8 +191,10 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
           /**
            * The change in scale over the duration of the animation should not be linear. It should grow to the target value,
            * then shrink back down to the original value. We adjust the animation progress so that it reaches its peak
-           * halfway through the animation. Then we ease the value, so that the change from not-animating-at-all to animating
-           * at full speed isn't abrupt, and so that the change from growing-to-changing isn't abrupt. See the graph:
+           * halfway through the animation and then returns to the beginning value by the end of the animation.
+           *
+           * We ease the value so that the change from not-animating-at-all to animating-at-full-speed isn't abrupt.
+           * See the graph:
            *
            *  gnuplot> plot [x=-0:1][x=0:1.2] eased(t)=t<.5? 4*t**3 : (t-1)*(2*t-2)**2+1, progress(t)=-abs(2*t-1)+1, eased(progress(x))
            *
@@ -214,28 +240,39 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
            *
            */
           const easedInOutAnimationProgress = easing.inOutCubic(-Math.abs(2 * x - 1) + 1);
+
           /**
-           * TODO, explain
            * Linearly interpolate between these, using the bell-shaped easing value
            */
-          return vector2.lerp(
+          const lerpedScale = lerp(
             scaleNotCountingAnimation,
-            [adjustedScale, adjustedScale],
+            adjustedScale,
             easedInOutAnimationProgress
           );
-        } else {
-          return scaleNotCountingAnimation;
+
+          /**
+           * The scale should be the same in both axes.
+           */
+          return [lerpedScale, lerpedScale];
         }
       };
     } else {
-      return () => scaleNotCountingAnimation;
+      /**
+       * The scale should be the same in both axes.
+       */
+      return () => [scaleNotCountingAnimation, scaleNotCountingAnimation];
     }
 
-    function scaleFromScalingFactor(factor: number): Vector2 {
-      const delta = scalingConstants.maximum - scalingConstants.minimum;
-      const value =
-        Math.pow(factor, scalingConstants.zoomCurveRate) * delta + scalingConstants.minimum;
-      return [value, value];
+    /**
+     * Interpolate between the minimum and maximum scale,
+     * using a curved ratio based on `factor`.
+     */
+    function scaleFromScalingFactor(factor: number): number {
+      return lerp(
+        scalingConstants.minimum,
+        scalingConstants.maximum,
+        Math.pow(factor, scalingConstants.zoomCurveRate)
+      );
     }
   }
 );
