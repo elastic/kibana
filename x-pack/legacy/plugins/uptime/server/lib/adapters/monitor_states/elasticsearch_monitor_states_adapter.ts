@@ -61,7 +61,7 @@ export const elasticsearchMonitorStatesAdapter: UMMonitorStatesAdapter = {
       dateRangeEnd,
       CONTEXT_DEFAULTS.CURSOR_PAGINATION,
       filters && filters !== '' ? JSON.parse(filters) : null,
-      CONTEXT_DEFAULTS.MAX_MONITORS_FOR_SNAPSHOT_COUNT,
+      Infinity,
       statusFilter
     );
 

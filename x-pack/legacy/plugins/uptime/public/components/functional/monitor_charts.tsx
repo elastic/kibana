@@ -11,8 +11,8 @@ import { MonitorChart } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorChartsQuery } from '../../queries';
 import { DurationChart } from './charts';
-import { SnapshotHistogram } from './charts/snapshot_histogram';
 import { useUrlParams } from '../../hooks';
+import { PingHistogram } from '../connected';
 
 interface MonitorChartsQueryResult {
   monitorChartsData?: MonitorChart;
@@ -58,12 +58,14 @@ export const MonitorChartsComponent = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <SnapshotHistogram
+          <PingHistogram
             absoluteStartDate={absoluteDateRangeStart}
             absoluteEndDate={absoluteDateRangeEnd}
             height="400px"
             isResponsive={false}
-            variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+            dateStart={dateRangeStart}
+            dateEnd={dateRangeEnd}
+            monitorId={monitorId}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

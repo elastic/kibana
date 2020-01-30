@@ -27,6 +27,7 @@ import { plugin } from '.';
 const plugins: Readonly<TagCloudPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
   visualizations: visualizationsSetup,
+  charts: npSetup.plugins.charts,
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);

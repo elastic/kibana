@@ -17,7 +17,4 @@
  * under the License.
  */
 
-export * from './fetch/types';
-export * from './search_source/types';
-export * from './search_strategy/types';
 export * from './utils/types';

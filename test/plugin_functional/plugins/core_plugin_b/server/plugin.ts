@@ -54,6 +54,16 @@ export class CorePluginBPlugin implements Plugin {
         return res.ok({ body: `ID: ${req.query.id} - ${req.body.bar.toUpperCase()}` });
       }
     );
+
+    router.post(
+      {
+        path: '/core_plugin_b/system_request',
+        validate: false,
+      },
+      async (context, req, res) => {
+        return res.ok({ body: `System request? ${req.isSystemRequest}` });
+      }
+    );
   }
 
   public start() {}

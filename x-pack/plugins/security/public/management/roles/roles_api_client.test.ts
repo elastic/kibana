@@ -16,7 +16,7 @@ describe('RolesAPIClient', () => {
     await rolesAPIClient.saveRole({ role, spacesEnabled });
     expect(httpMock.put).toHaveBeenCalledTimes(1);
 
-    return JSON.parse(httpMock.put.mock.calls[0][1]?.body as any);
+    return JSON.parse((httpMock.put.mock.calls[0] as any)[1]?.body as any);
   }
 
   describe('spaces disabled', () => {
