@@ -16,8 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Request } from '../../../../common/adapters/request/types';
 
-export interface RequestDetailsProps {
-  request: Request;
-}
+export * from './adapters';
