@@ -52,11 +52,11 @@ import {
   stateMonitorFactory,
   subscribeWithScope,
   tabifyAggResponse,
-  Vis,
   getAngularModule,
   ensureDefaultIndexPattern,
   registerTimefilterWithGlobalStateFactory,
 } from '../../kibana_services';
+import { Vis } from '../../../../../visualizations/public';
 
 const {
   core,

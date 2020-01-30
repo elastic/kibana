@@ -10,7 +10,7 @@ import { esFilters } from '../../../../../../../../src/plugins/data/common/es_qu
 import { AlertsView } from '../../../components/alerts_viewer';
 import { AlertsComponentQueryProps } from './types';
 
-export const filterAlertsHosts: esFilters.Filter[] = [
+export const filterHostData: esFilters.Filter[] = [
   {
     query: {
       bool: {
@@ -44,7 +44,7 @@ export const filterAlertsHosts: esFilters.Filter[] = [
 export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQueryProps) => {
   const { pageFilters, ...rest } = alertsProps;
   const hostPageFilters = useMemo(
-    () => (pageFilters != null ? [...filterAlertsHosts, ...pageFilters] : filterAlertsHosts),
+    () => (pageFilters != null ? [...filterHostData, ...pageFilters] : filterHostData),
     [pageFilters]
   );
 

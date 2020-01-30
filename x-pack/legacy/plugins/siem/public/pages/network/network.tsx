@@ -29,7 +29,7 @@ import { networkModel, State, inputsSelectors } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
-import { filterAlertsNetwork } from './navigation/alerts_query_tab_body';
+import { filterNetworkData } from './navigation/alerts_query_tab_body';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
 import { NetworkComponentProps } from './types';
@@ -56,7 +56,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.alerts) {
-        return filters.length > 0 ? [...filters, ...filterAlertsNetwork] : filterAlertsNetwork;
+        return filters.length > 0 ? [...filters, ...filterNetworkData] : filterNetworkData;
       }
       return filters;
     }, [tabName, filters]);
