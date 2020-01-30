@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CursorPagination } from '../../adapter_types';
-import { CursorDirection, SortOrder } from '../../../../../../common/graphql/types';
+import { CursorPagination } from '../types';
+import { CursorDirection, SortOrder } from '../../../../../common/graphql/types';
 import { QueryContext } from '../query_context';
 
 export const prevPagination = (key: any): CursorPagination => {

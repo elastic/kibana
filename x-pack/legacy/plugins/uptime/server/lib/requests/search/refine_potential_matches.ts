@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { INDEX_NAMES } from '../../../../../common/constants';
+import { INDEX_NAMES } from '../../../../common/constants';
 import { QueryContext } from './query_context';
-import { CursorDirection } from '../../../../../common/graphql/types';
+import { CursorDirection } from '../../../../common/graphql/types';
 import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 
 /**

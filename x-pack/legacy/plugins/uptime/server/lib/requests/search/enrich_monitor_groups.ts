@@ -6,15 +6,15 @@
 
 import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
-import { getHistogramIntervalFormatted } from '../../../helper';
-import { INDEX_NAMES, STATES } from '../../../../../common/constants';
+import { getHistogramIntervalFormatted } from '../../helper';
+import { INDEX_NAMES, STATES } from '../../../../common/constants';
 import {
   MonitorSummary,
   SummaryHistogram,
   Check,
   CursorDirection,
   SortOrder,
-} from '../../../../../common/graphql/types';
+} from '../../../../common/graphql/types';
 import { MonitorEnricher } from './fetch_page';
 
 export const enrichMonitorGroups: MonitorEnricher = async (

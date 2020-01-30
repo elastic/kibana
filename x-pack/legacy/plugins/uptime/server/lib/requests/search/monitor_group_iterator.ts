@@ -5,10 +5,10 @@
  */
 
 import { QueryContext } from './query_context';
-import { CursorPagination } from '../adapter_types';
 import { fetchChunk } from './fetch_chunk';
-import { CursorDirection } from '../../../../../common/graphql/types';
+import { CursorDirection } from '../../../../common/graphql/types';
 import { MonitorGroups } from './fetch_page';
+import { CursorPagination } from './types';
 
 // Hardcoded chunk size for how many monitors to fetch at a time when querying
 export const CHUNK_SIZE = 1000;

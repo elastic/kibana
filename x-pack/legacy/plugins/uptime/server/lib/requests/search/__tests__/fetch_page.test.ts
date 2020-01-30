@@ -12,7 +12,7 @@ import {
   MonitorGroupsPage,
 } from '../fetch_page';
 import { QueryContext } from '../query_context';
-import { MonitorSummary } from '../../../../../../common/graphql/types';
+import { MonitorSummary } from '../../../../../common/graphql/types';
 import { nextPagination, prevPagination, simpleQueryContext } from './test_helpers';
 
 const simpleFixture: MonitorGroups[] = [

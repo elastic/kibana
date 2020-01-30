@@ -8,7 +8,6 @@ import { UMKibanaBackendFrameworkAdapter } from '../adapters/framework';
 import * as requests from '../requests';
 import { licenseCheck } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
-import { elasticsearchMonitorStatesAdapter } from '../adapters/monitor_states';
 import { savedObjectsAdapter } from '../adapters/saved_objects';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters/framework';
 
@@ -20,7 +19,6 @@ export function compose(server: UptimeCoreSetup, plugins: UptimeCorePlugins): UM
       ...requests,
     },
     license: licenseCheck,
-    monitorStates: elasticsearchMonitorStatesAdapter,
     savedObjects: savedObjectsAdapter,
   };
 

@@ -6,3 +6,4 @@
 
 export { fetchPage, MonitorGroups, MonitorLocCheckGroup, MonitorGroupsPage } from './fetch_page';
 export { MonitorGroupIterator } from './monitor_group_iterator';
+export { QueryContext } from './query_context';

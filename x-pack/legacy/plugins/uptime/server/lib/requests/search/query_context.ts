@@ -6,8 +6,8 @@
 
 import DateMath from '@elastic/datemath';
 import { APICaller } from 'kibana/server';
-import { CursorPagination } from '../adapter_types';
-import { INDEX_NAMES } from '../../../../../common/constants';
+import { CursorPagination } from './types';
+import { INDEX_NAMES } from '../../../../common/constants';
 
 export class QueryContext {
   callES: APICaller;
