@@ -19,7 +19,6 @@ exports[`apmUiEnabled 1`] = `
         size="m"
       />
       <EuiFlexGroup
-        justifyContent="spaceAround"
         responsive={false}
       >
         <EuiFlexItem
@@ -90,6 +89,7 @@ exports[`apmUiEnabled 1`] = `
                 />
               </EuiButton>
             }
+            textAlign="left"
             title="APM"
             titleSize="xs"
           />
@@ -120,6 +120,7 @@ exports[`apmUiEnabled 1`] = `
                 />
               </EuiButton>
             }
+            textAlign="left"
             title="Logs"
             titleSize="xs"
           />
@@ -150,6 +151,7 @@ exports[`apmUiEnabled 1`] = `
                 />
               </EuiButton>
             }
+            textAlign="left"
             title="Metrics"
             titleSize="xs"
           />
@@ -161,7 +163,6 @@ exports[`apmUiEnabled 1`] = `
       grow={1}
     >
       <EuiFlexGroup
-        justifyContent="spaceAround"
         responsive={false}
       >
         <EuiFlexItem
@@ -223,6 +224,7 @@ exports[`apmUiEnabled 1`] = `
             />
           </EuiButton>
         }
+        textAlign="left"
         title="SIEM"
         titleSize="xs"
       />
@@ -327,7 +329,6 @@ exports[`isNewKibanaInstance 1`] = `
         size="m"
       />
       <EuiFlexGroup
-        justifyContent="spaceAround"
         responsive={false}
       >
         <EuiFlexItem
@@ -398,6 +399,7 @@ exports[`isNewKibanaInstance 1`] = `
                 />
               </EuiButton>
             }
+            textAlign="left"
             title="Logs"
             titleSize="xs"
           />
@@ -428,6 +430,7 @@ exports[`isNewKibanaInstance 1`] = `
                 />
               </EuiButton>
             }
+            textAlign="left"
             title="Metrics"
             titleSize="xs"
           />
@@ -439,7 +442,6 @@ exports[`isNewKibanaInstance 1`] = `
       grow={1}
     >
       <EuiFlexGroup
-        justifyContent="spaceAround"
         responsive={false}
       >
         <EuiFlexItem
@@ -501,6 +503,7 @@ exports[`isNewKibanaInstance 1`] = `
             />
           </EuiButton>
         }
+        textAlign="left"
         title="SIEM"
         titleSize="xs"
       />
@@ -605,7 +608,6 @@ exports[`mlEnabled 1`] = `
         size="m"
       />
       <EuiFlexGroup
-        justifyContent="spaceAround"
         responsive={false}
       >
         <EuiFlexItem
@@ -676,6 +678,7 @@ exports[`mlEnabled 1`] = `
                 />
               </EuiButton>
             }
+            textAlign="left"
             title="APM"
             titleSize="xs"
           />
@@ -706,6 +709,7 @@ exports[`mlEnabled 1`] = `
                 />
               </EuiButton>
             }
+            textAlign="left"
             title="Logs"
             titleSize="xs"
           />
@@ -736,6 +740,7 @@ exports[`mlEnabled 1`] = `
                 />
               </EuiButton>
             }
+            textAlign="left"
             title="Metrics"
             titleSize="xs"
           />
@@ -747,7 +752,6 @@ exports[`mlEnabled 1`] = `
       grow={1}
     >
       <EuiFlexGroup
-        justifyContent="spaceAround"
         responsive={false}
       >
         <EuiFlexItem
@@ -809,6 +813,7 @@ exports[`mlEnabled 1`] = `
             />
           </EuiButton>
         }
+        textAlign="left"
         title="SIEM"
         titleSize="xs"
       />
@@ -949,7 +954,6 @@ exports[`render 1`] = `
         size="m"
       />
       <EuiFlexGroup
-        justifyContent="spaceAround"
         responsive={false}
       >
         <EuiFlexItem
@@ -1020,6 +1024,7 @@ exports[`render 1`] = `
                 />
               </EuiButton>
             }
+            textAlign="left"
             title="Logs"
             titleSize="xs"
           />
@@ -1050,6 +1055,7 @@ exports[`render 1`] = `
                 />
               </EuiButton>
             }
+            textAlign="left"
             title="Metrics"
             titleSize="xs"
           />
@@ -1061,7 +1067,6 @@ exports[`render 1`] = `
       grow={1}
     >
       <EuiFlexGroup
-        justifyContent="spaceAround"
         responsive={false}
       >
         <EuiFlexItem
@@ -1123,6 +1128,7 @@ exports[`render 1`] = `
             />
           </EuiButton>
         }
+        textAlign="left"
         title="SIEM"
         titleSize="xs"
       />

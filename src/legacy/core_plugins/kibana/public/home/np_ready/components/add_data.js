@@ -93,6 +93,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
     const getApmCard = () => (
       <EuiFlexItem grow={1} className="homAddData__flexItem">
         <EuiCard
+          textAlign="left"
           className="homAddData__card"
           titleSize="xs"
           title={apmData.title}
@@ -123,7 +124,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
       >
         <EuiFlexItem className="homAddData__cardDivider homAddData__flexItem" grow={3}>
           <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="spaceAround" responsive={false}>
+          <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem grow={false}>
@@ -154,6 +155,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
 
             <EuiFlexItem grow={1} className="homAddData__flexItem">
               <EuiCard
+                textAlign="left"
                 className="homAddData__card"
                 title={loggingData.title}
                 titleSize="xs"
@@ -177,6 +179,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
 
             <EuiFlexItem grow={1} className="homAddData__flexItem">
               <EuiCard
+                textAlign="left"
                 className="homAddData__card"
                 title={metricsData.title}
                 titleSize="xs"
@@ -201,7 +204,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
         </EuiFlexItem>
 
         <EuiFlexItem grow={1} className="homAddData__flexItem">
-          <EuiFlexGroup justifyContent="spaceAround" responsive={false}>
+          <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem grow={false}>
@@ -222,6 +225,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
           </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiCard
+            textAlign="left"
             titleSize="xs"
             className="homAddData__card"
             title={siemData.title}
