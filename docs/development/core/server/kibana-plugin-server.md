@@ -144,7 +144,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SessionStorage](./kibana-plugin-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
 |  [SessionStorageCookieOptions](./kibana-plugin-server.sessionstoragecookieoptions.md) | Configuration used to create HTTP session storage based on top of cookie mechanism. |
 |  [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
-|  [StringValidation](./kibana-plugin-server.stringvalidation.md) |  |
+|  [StringValidationRegex](./kibana-plugin-server.stringvalidationregex.md) | StringValidation with regex object |
+|  [StringValidationRegexString](./kibana-plugin-server.stringvalidationregexstring.md) | StringValidation as regex string |
 |  [UiSettingsParams](./kibana-plugin-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |  |
 |  [UiSettingsServiceStart](./kibana-plugin-server.uisettingsservicestart.md) |  |
@@ -173,7 +174,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ConfigPath](./kibana-plugin-server.configpath.md) |  |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
-|  [GetAuthState](./kibana-plugin-server.getauthstate.md) | Get authentication state for a request. Returned by <code>auth</code> interceptor. |
+|  [GetAuthState](./kibana-plugin-server.getauthstate.md) | Gets authentication state for a request. Returned by <code>auth</code> interceptor. |
 |  [HandlerContextType](./kibana-plugin-server.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-server.handlerfunction.md) to represent the type of the context. |
 |  [HandlerFunction](./kibana-plugin-server.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-server.icontextcontainer.md) |
 |  [HandlerParameters](./kibana-plugin-server.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-server.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-server.handlercontexttype.md)<!-- -->. |
@@ -183,7 +184,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IClusterClient](./kibana-plugin-server.iclusterclient.md) | Represents an Elasticsearch cluster API client created by the platform. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-server.clusterclient.md)<!-- -->. |
 |  [IContextProvider](./kibana-plugin-server.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [ICustomClusterClient](./kibana-plugin-server.icustomclusterclient.md) | Represents an Elasticsearch cluster API client created by a plugin. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-server.clusterclient.md)<!-- -->. |
-|  [IsAuthenticated](./kibana-plugin-server.isauthenticated.md) | Return authentication status for a request. |
+|  [IsAuthenticated](./kibana-plugin-server.isauthenticated.md) | Returns authentication status for a request. |
 |  [ISavedObjectsRepository](./kibana-plugin-server.isavedobjectsrepository.md) | See [SavedObjectsRepository](./kibana-plugin-server.savedobjectsrepository.md) |
 |  [IScopedClusterClient](./kibana-plugin-server.iscopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md)<!-- -->. |
 |  [KibanaRequestRouteOptions](./kibana-plugin-server.kibanarequestrouteoptions.md) | Route options: If 'GET' or 'OPTIONS' method, body options won't be returned. |
@@ -222,5 +223,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClientWrapperFactory](./kibana-plugin-server.savedobjectsclientwrapperfactory.md) | Describes the factory used to create instances of Saved Objects Client Wrappers. |
 |  [ScopeableRequest](./kibana-plugin-server.scopeablerequest.md) | A user credentials container. It accommodates the necessary auth credentials to impersonate the current user.<!-- -->See [KibanaRequest](./kibana-plugin-server.kibanarequest.md)<!-- -->. |
 |  [SharedGlobalConfig](./kibana-plugin-server.sharedglobalconfig.md) |  |
+|  [StringValidation](./kibana-plugin-server.stringvalidation.md) | Allows regex objects or a regex string |
 |  [UiSettingsType](./kibana-plugin-server.uisettingstype.md) | UI element type to represent the settings. |
 

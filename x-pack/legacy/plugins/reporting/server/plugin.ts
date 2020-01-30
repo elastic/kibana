@@ -5,19 +5,24 @@
  */
 
 import { Legacy } from 'kibana';
-import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
-import { IUiSettingsClient } from 'src/core/server';
+import { CoreSetup, CoreStart, Plugin, LoggerFactory } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { PluginSetupContract as SecurityPluginSetup } from '../../../../plugins/security/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
 import { PLUGIN_ID } from '../common/constants';
 import { ReportingPluginSpecOptions } from '../types.d';
 import { registerRoutes } from './routes';
-import { LevelLogger, checkLicenseFactory, getExportTypesRegistry, runValidations } from './lib';
+import { checkLicenseFactory, getExportTypesRegistry, runValidations, LevelLogger } from './lib';
 import { createBrowserDriverFactory } from './browsers';
 import { registerReportingUsageCollector } from './usage';
 import { logConfiguration } from '../log_configuration';
+import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+
+export interface ReportingInitializerContext {
+  logger: LoggerFactory;
+}
 
 // For now there is no exposed functionality to other plugins
 export type ReportingSetup = object;
@@ -25,6 +30,7 @@ export type ReportingStart = object;
 
 export interface ReportingSetupDeps {
   usageCollection: UsageCollectionSetup;
+  security: SecurityPluginSetup;
 }
 export type ReportingStartDeps = object;
 
@@ -33,10 +39,8 @@ type LegacyPlugins = Legacy.Server['plugins'];
 export interface LegacySetup {
   config: Legacy.Server['config'];
   info: Legacy.Server['info'];
-  log: Legacy.Server['log'];
   plugins: {
     elasticsearch: LegacyPlugins['elasticsearch'];
-    security: LegacyPlugins['security'];
     xpack_main: XPackMainPlugin & {
       status?: any;
     };
@@ -44,7 +48,7 @@ export interface LegacySetup {
   route: Legacy.Server['route'];
   savedObjects: Legacy.Server['savedObjects'];
   uiSettingsServiceFactory: Legacy.Server['uiSettingsServiceFactory'];
-  fieldFormatServiceFactory: (uiConfig: IUiSettingsClient) => unknown;
+  fieldFormatServiceFactory: DataPluginStart['fieldFormats']['fieldFormatServiceFactory'];
 }
 
 export type ReportingPlugin = Plugin<
@@ -59,10 +63,17 @@ export type ReportingPlugin = Plugin<
  * into `setup`. The factory parameters take the legacy dependencies, and the
  * `setup` method gets it from enclosure */
 export function reportingPluginFactory(
+  initializerContext: ReportingInitializerContext,
   __LEGACY: LegacySetup,
   legacyPlugin: ReportingPluginSpecOptions
 ) {
   return new (class ReportingPlugin implements ReportingPlugin {
+    private initializerContext: ReportingInitializerContext;
+
+    constructor(context: ReportingInitializerContext) {
+      this.initializerContext = context;
+    }
+
     public async setup(core: CoreSetup, plugins: ReportingSetupDeps): Promise<ReportingSetup> {
       const exportTypesRegistry = getExportTypesRegistry();
 
@@ -76,8 +87,8 @@ export function reportingPluginFactory(
         exportTypesRegistry
       );
 
-      const logger = LevelLogger.createForServer(__LEGACY, [PLUGIN_ID]);
-      const browserDriverFactory = await createBrowserDriverFactory(__LEGACY);
+      const logger = new LevelLogger(this.initializerContext.logger.get('reporting'));
+      const browserDriverFactory = await createBrowserDriverFactory(__LEGACY, logger);
 
       logConfiguration(__LEGACY, logger);
       runValidations(__LEGACY, logger, browserDriverFactory);
@@ -95,7 +106,7 @@ export function reportingPluginFactory(
       isCollectorReady = true;
 
       // Reporting routes
-      registerRoutes(__LEGACY, exportTypesRegistry, browserDriverFactory, logger);
+      registerRoutes(__LEGACY, plugins, exportTypesRegistry, browserDriverFactory, logger);
 
       return {};
     }
@@ -103,5 +114,5 @@ export function reportingPluginFactory(
     public start(core: CoreStart, plugins: ReportingStartDeps): ReportingStart {
       return {};
     }
-  })();
+  })(initializerContext);
 }

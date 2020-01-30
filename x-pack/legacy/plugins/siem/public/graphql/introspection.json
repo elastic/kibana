@@ -3986,6 +3986,14 @@
             "deprecationReason": null
           },
           {
+            "name": "rule",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "RuleEcsField", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "signal",
             "description": "",
             "args": [],
@@ -4745,6 +4753,25 @@
       },
       {
         "kind": "OBJECT",
+        "name": "RuleEcsField",
+        "description": "",
+        "fields": [
+          {
+            "name": "reference",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "SignalField",
         "description": "",
         "fields": [
@@ -4940,7 +4967,7 @@
             "deprecationReason": null
           },
           {
-            "name": "threats",
+            "name": "threat",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "ToAny", "ofType": null },
@@ -9291,7 +9318,15 @@
             "deprecationReason": null
           },
           {
-            "name": "winlogbeat",
+            "name": "winlogbeatSecurity",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "winlogbeatMWSysmonOperational",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },

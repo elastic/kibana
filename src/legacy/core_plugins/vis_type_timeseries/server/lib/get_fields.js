@@ -19,6 +19,7 @@
 import { SearchStrategiesRegister } from './search_strategies/search_strategies_register';
 import { uniq } from 'lodash';
 import { getIndexPatternObject } from './vis_data/helpers/get_index_pattern';
+import { isNestedField } from '../../../../../plugins/data/server';
 
 export async function getFields(req) {
   const indexPattern = req.query.index;
@@ -30,7 +31,7 @@ export async function getFields(req) {
 
   const fields = (
     await searchStrategy.getFieldsForWildcard(req, indexPatternString, capabilities)
-  ).filter(field => field.aggregatable);
+  ).filter(field => field.aggregatable && !isNestedField(field));
 
   return uniq(fields, field => field.name);
 }
