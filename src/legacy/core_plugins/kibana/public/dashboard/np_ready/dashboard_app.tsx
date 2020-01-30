@@ -86,7 +86,6 @@ export interface DashboardAppScope extends ng.IScope {
 export function initDashboardAppDirective(app: any, deps: RenderDeps) {
   app.directive('dashboardApp', function($injector: IInjector) {
     const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
-    const config = deps.uiSettings;
 
     return {
       restrict: 'E',
@@ -102,7 +101,6 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
           $route,
           $scope,
           $routeParams,
-          config,
           confirmModal,
           indexPatterns: deps.npDataStart.indexPatterns,
           ...deps,

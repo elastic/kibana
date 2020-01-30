@@ -85,7 +85,6 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   $routeParams: any;
   indexPatterns: IndexPatternsContract;
   dashboardConfig: any;
-  config: any;
   confirmModal: ConfirmModalFn;
 }
 
@@ -102,7 +101,6 @@ export class DashboardAppController {
     dashboardConfig,
     localStorage,
     indexPatterns,
-    config,
     confirmModal,
     savedQueryService,
     embeddables,
@@ -369,7 +367,7 @@ export class DashboardAppController {
       dashboardStateManager.getQuery() || {
         query: '',
         language:
-          localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
+          localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
       },
       queryFilter.getFilters()
     );
@@ -486,7 +484,7 @@ export class DashboardAppController {
         {
           query: '',
           language:
-            localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
+            localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
         },
         queryFilter.getGlobalFilters()
       );
