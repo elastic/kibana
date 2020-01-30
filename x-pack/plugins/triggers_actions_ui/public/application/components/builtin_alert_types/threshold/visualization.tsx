@@ -19,13 +19,12 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-/* TODO: When this file is used / enabled we'll need to fix this */
-/* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
-import { TimeBuckets } from 'ui/time_buckets';
 import dateMath from '@elastic/datemath';
 import moment from 'moment-timezone';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+/* TODO: This file was copied from ui/time_buckets for NP migration. We should clean this up and add TS support */
+import { TimeBuckets } from './lib/time_buckets';
 import { getThresholdAlertVisualizationData } from './lib/api';
 import { comparators, aggregationTypes } from './expression';
 import { useAppDependencies } from '../../../app_context';
