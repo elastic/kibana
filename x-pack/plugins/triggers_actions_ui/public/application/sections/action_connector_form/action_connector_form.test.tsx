@@ -14,6 +14,7 @@ import { ValidationResult, ActionConnector } from '../../../types';
 import { ActionConnectorForm } from './action_connector_form';
 import { AppContextProvider } from '../../app_context';
 import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
@@ -32,6 +33,7 @@ describe('action_connector_form', () => {
     const deps = {
       chrome,
       docLinks,
+      dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,

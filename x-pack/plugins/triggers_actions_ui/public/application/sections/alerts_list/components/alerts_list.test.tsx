@@ -14,6 +14,7 @@ import { AlertsList } from './alerts_list';
 import { ValidationResult } from '../../../../types';
 import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
+import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
@@ -82,6 +83,7 @@ describe('alerts_list component empty', () => {
     const deps = {
       chrome,
       docLinks,
+      dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: {
@@ -207,6 +209,7 @@ describe('alerts_list component with items', () => {
     const deps = {
       chrome,
       docLinks,
+      dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: {
@@ -293,6 +296,7 @@ describe('alerts_list component empty with show only capability', () => {
     const deps = {
       chrome,
       docLinks,
+      dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: {
@@ -414,6 +418,7 @@ describe('alerts_list with show only capability', () => {
     const deps = {
       chrome,
       docLinks,
+      dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: {

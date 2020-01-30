@@ -15,11 +15,13 @@ import { TypeRegistry } from './application/type_registry';
 import { ManagementStart } from '../../../../src/plugins/management/public';
 import { boot } from './application/boot';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 export type Setup = void;
 export type Start = void;
 
 interface PluginsStart {
+  data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   management: ManagementStart;
 }
@@ -65,6 +67,7 @@ export class Plugin implements CorePlugin<Setup, Start> {
       order: 7,
       mount: params => {
         boot({
+          dataPlugin: plugins.data,
           charts: plugins.charts,
           element: params.element,
           toastNotifications: core.notifications.toasts,

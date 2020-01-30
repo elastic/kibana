@@ -21,8 +21,10 @@ import { hasShowAlertsCapability } from './lib/capabilities';
 import { ActionTypeModel, AlertTypeModel } from '../types';
 import { TypeRegistry } from './type_registry';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
 export interface AppDeps {
+  dataPlugin: DataPublicPluginStart;
   charts: ChartsPluginStart;
   chrome: ChromeStart;
   docLinks: DocLinksStart;

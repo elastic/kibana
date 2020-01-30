@@ -29,6 +29,7 @@ import { getThresholdAlertVisualizationData } from './lib/api';
 import { comparators, aggregationTypes } from './expression';
 import { useAppDependencies } from '../../../app_context';
 import { Alert } from '../../../../types';
+import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
 
 const customTheme = () => {
   return {
@@ -83,9 +84,13 @@ const getThreshold = (alertParams: any) => {
   );
 };
 
-const getTimeBuckets = (alertParams: any) => {
+const getTimeBuckets = (
+  uiSettings: IUiSettingsClient,
+  dataPlugin: DataPublicPluginStart,
+  alertParams: any
+) => {
   const domain = getDomain(alertParams);
-  const timeBuckets = new TimeBuckets();
+  const timeBuckets = new TimeBuckets(uiSettings, dataPlugin);
   timeBuckets.setBounds(domain);
   return timeBuckets;
 };
@@ -95,7 +100,7 @@ interface Props {
 }
 
 export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }) => {
-  const { http, uiSettings, toastNotifications, charts } = useAppDependencies();
+  const { http, uiSettings, toastNotifications, charts, dataPlugin } = useAppDependencies();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<undefined | any>(undefined);
   const [visualizationData, setVisualizationData] = useState<Record<string, any>>([]);
@@ -118,7 +123,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
   } = alert.params;
 
   const domain = getDomain(alert.params);
-  const timeBuckets = new TimeBuckets();
+  const timeBuckets = new TimeBuckets(uiSettings, dataPlugin);
   timeBuckets.setBounds(domain);
   const interval = timeBuckets.getInterval().expression;
   const visualizeOptions = {
@@ -226,7 +231,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
     const dateFormatter = (d: number) => {
       return moment(d)
         .tz(timezone)
-        .format(getTimeBuckets(alert.params).getScaledDateFormat());
+        .format(getTimeBuckets(uiSettings, dataPlugin, alert.params).getScaledDateFormat());
     };
     const aggLabel = aggregationTypes[aggType].text;
     return (

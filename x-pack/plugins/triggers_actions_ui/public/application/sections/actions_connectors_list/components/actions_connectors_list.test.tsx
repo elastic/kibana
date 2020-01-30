@@ -12,6 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
+import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -54,6 +55,7 @@ describe('actions_connectors_list component empty', () => {
     const deps = {
       chrome,
       docLinks,
+      dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
@@ -150,6 +152,7 @@ describe('actions_connectors_list component with items', () => {
     const deps = {
       chrome,
       docLinks,
+      dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
@@ -233,6 +236,7 @@ describe('actions_connectors_list component empty with show only capability', ()
     const deps = {
       chrome,
       docLinks,
+      dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
@@ -321,6 +325,7 @@ describe('actions_connectors_list with show only capability', () => {
     const deps = {
       chrome,
       docLinks,
+      dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,

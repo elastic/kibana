@@ -12,6 +12,7 @@ import { ValidationResult } from '../../../types';
 import { ConnectorEditFlyout } from './connector_edit_flyout';
 import { AppContextProvider } from '../../app_context';
 import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 let deps: any;
@@ -29,6 +30,7 @@ describe('connector_edit_flyout', () => {
     deps = {
       chrome,
       docLinks,
+      dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
