@@ -28,12 +28,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 // Static exports.
-export {
-  ExpressionInterpretWithHandlers,
-  ExpressionExecutor,
-  IExpressionLoaderParams,
-} from './types';
-export { interpreterProvider, ExpressionInterpret } from './interpreter_provider';
+export { ExpressionExecutor, IExpressionLoaderParams } from './types';
 export { ExpressionRendererComponent, ExpressionRendererProps } from './expression_renderer';
 export { ExpressionDataHandler } from './execute';
 export { ExpressionRenderHandler } from './render';

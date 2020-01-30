@@ -17,23 +17,12 @@
  * under the License.
  */
 
-import { ExpressionInterpret } from '../interpreter_provider';
 import { TimeRange, Query, esFilters } from '../../../data/public';
 import { Adapters } from '../../../inspector/public';
-
-/**
- * @deprecated
- *
- * This type if remainder from legacy platform, will be deleted going further.
- */
-export type ExpressionInterpretWithHandlers = (
-  ast: Parameters<ExpressionInterpret>[0],
-  context: Parameters<ExpressionInterpret>[1],
-  handlers: IInterpreterHandlers
-) => ReturnType<ExpressionInterpret>;
+import { Executor } from '../../common';
 
 export interface ExpressionInterpreter {
-  interpretAst: ExpressionInterpretWithHandlers;
+  interpretAst: Executor['run'];
 }
 
 /**

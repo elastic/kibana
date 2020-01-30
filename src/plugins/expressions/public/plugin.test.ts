@@ -26,12 +26,22 @@ describe('ExpressionsPublicPlugin', () => {
     expect(typeof setup.registerFunction).toBe('function');
   });
 
-  describe('.registerFunction()', () => {
-    test('can register a function', async () => {
-      const { setup } = await expressionsPluginMock.createPlugin();
-      expect(setup.getFunctions().add).toBe(undefined);
-      setup.registerFunction(add);
-      expect(setup.getFunctions().add.name).toBe('add');
+  describe('setup contract', () => {
+    describe('.registerFunction()', () => {
+      test('can register a function', async () => {
+        const { setup } = await expressionsPluginMock.createPlugin();
+        expect(setup.getFunctions().add).toBe(undefined);
+        setup.registerFunction(add);
+        expect(setup.getFunctions().add.name).toBe('add');
+      });
+    });
+
+    describe('.run()', () => {
+      test('can execute simple expression', async () => {
+        const { setup } = await expressionsPluginMock.createPlugin();
+        const bar = await setup.run('var_set name="foo" value="bar" | var name="foo"', null);
+        expect(bar).toBe('bar');
+      });
     });
   });
 });
