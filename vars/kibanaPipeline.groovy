@@ -16,7 +16,7 @@ def withPostBuildReporting(Closure closure) {
   }
 }
 
-def functionalTestProcess(name, Closure closure) {
+def functionalTestProcess(String name, Closure closure) {
   return { workerNumber ->
     def kibanaPort = "61${workerNumber}1"
     def esPort = "61${workerNumber}2"
@@ -36,7 +36,7 @@ def functionalTestProcess(name, Closure closure) {
   }
 }
 
-def functionalTestProcess(name, String script) {
+def functionalTestProcess(String name, String script) {
   return functionalTestProcess(name) {
     retryable(name) {
       runbld(script, "Execute ${name}")
@@ -45,7 +45,7 @@ def functionalTestProcess(name, String script) {
 }
 
 def ossCiGroupProcess(ciGroup) {
-  return functionalTestProcess("ciGroup" + ciGroup, {
+  return functionalTestProcess("ciGroup" + ciGroup) {
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
@@ -54,11 +54,11 @@ def ossCiGroupProcess(ciGroup) {
         runbld("./test/scripts/jenkins_ci_group.sh", "Execute kibana-ciGroup${ciGroup}")
       }
     }
-  })
+  }
 }
 
 def xpackCiGroupProcess(ciGroup) {
-  return functionalTestProcess("xpack-ciGroup" + ciGroup, {
+  return functionalTestProcess("xpack-ciGroup" + ciGroup) {
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
@@ -67,7 +67,7 @@ def xpackCiGroupProcess(ciGroup) {
         runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${ciGroup}")
       }
     }
-  })
+  }
 }
 
 def uploadGcsArtifact(uploadPrefix, pattern) {

@@ -4,7 +4,7 @@ def base(Map params, Closure closure) {
     error "You must specify an agent label, such as 'tests-xl' or 'linux && immutable', when using withWorker()"
   }
 
-  node(label) {
+  node(config.label) {
     agentInfo.print()
 
     if (config.ramDisk) {
@@ -85,7 +85,7 @@ def intake(jobName, String script) {
 
 def functional(name, Closure setup, Map processes) {
   return {
-    parallelProcesses(name: machineName, setup: setup, processes: processes, delayBetweenProcesses: 20, label: 'tests-xl')
+    parallelProcesses(name: name, setup: setup, processes: processes, delayBetweenProcesses: 20, label: 'tests-xl')
   }
 }
 
