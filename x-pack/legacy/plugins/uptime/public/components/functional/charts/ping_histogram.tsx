@@ -4,21 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Axis, BarSeries, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
-import { EuiEmptyPrompt, EuiTitle, EuiPanel } from '@elastic/eui';
+import { Axis, BarSeries, Chart, Position, Settings, timeFormatter } from '@elastic/charts';
+import { EuiEmptyPrompt, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import { getChartDateLabel } from '../../../lib/helper';
-import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
-import { snapshotHistogramQuery } from '../../../queries/snapshot_histogram_query';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeThemeContext } from '../../../contexts';
-import { ResponsiveWrapperProps, withResponsiveWrapper } from '../../higher_order';
-import { HistogramResult } from '../../../../common/domain_types';
+import { HistogramResult } from '../../../../common/types';
 
-interface HistogramProps {
+export interface PingHistogramComponentProps {
   /**
    * The date/time for the start of the timespan.
    */
@@ -32,29 +29,23 @@ interface HistogramProps {
    * Height is needed, since by default charts takes height of 100%
    */
   height?: string;
+
+  data?: HistogramResult;
+
+  loading?: boolean;
 }
 
-export type SnapshotHistogramProps = HistogramProps & ResponsiveWrapperProps;
-
-interface SnapshotHistogramQueryResult {
-  queryResult?: HistogramResult;
-}
-
-type Props = UptimeGraphQLQueryProps<SnapshotHistogramQueryResult> &
-  SnapshotHistogramProps &
-  ResponsiveWrapperProps;
-
-export const SnapshotHistogramComponent: React.FC<Props> = ({
+export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   absoluteStartDate,
   absoluteEndDate,
   data,
   loading = false,
   height,
-}: Props) => {
+}) => {
   const {
     colors: { danger, gray },
   } = useContext(UptimeThemeContext);
-  if (!data || !data.queryResult)
+  if (!data || !data.histogram)
     /**
      * TODO: the Fragment, EuiTitle, and EuiPanel should be extracted to a dumb component
      * that we can reuse in the subsequent return statement at the bottom of this function.
@@ -93,19 +84,15 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
         </EuiPanel>
       </>
     );
-  const {
-    queryResult: { histogram, interval },
-  } = data;
+  const { histogram } = data;
 
-  const downMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
+  const downSpecId = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
     defaultMessage: 'Down Monitors',
   });
-  const downSpecId = downMonitorsId;
 
   const upMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
     defaultMessage: 'Up',
   });
-  const upSpecId = upMonitorsId;
   return (
     <>
       <EuiTitle size="xs">
@@ -131,7 +118,6 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
         <Chart>
           <Settings
             xDomain={{
-              minInterval: interval,
               min: absoluteStartDate,
               max: absoluteEndDate,
             }}
@@ -139,7 +125,7 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
           />
           <Axis
             id={i18n.translate('xpack.uptime.snapshotHistogram.xAxisId', {
-              defaultMessage: 'Snapshot X Axis',
+              defaultMessage: 'Ping X Axis',
             })}
             position={Position.Bottom}
             showOverlappingTicks={false}
@@ -147,7 +133,7 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
           />
           <Axis
             id={i18n.translate('xpack.uptime.snapshotHistogram.yAxisId', {
-              defaultMessage: 'Snapshot Y Axis',
+              defaultMessage: 'Ping Y Axis',
             })}
             position="left"
             title={i18n.translate('xpack.uptime.snapshotHistogram.yAxis.title', {
@@ -173,7 +159,7 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
           <BarSeries
             customSeriesColors={[gray]}
             data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
-            id={upSpecId}
+            id={upMonitorsId}
             name={upMonitorsId}
             stackAccessors={[0]}
             timeZone="local"
@@ -187,8 +173,3 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
     </>
   );
 };
-
-export const SnapshotHistogram = withUptimeGraphQL<
-  SnapshotHistogramQueryResult,
-  SnapshotHistogramProps
->(withResponsiveWrapper<Props>(SnapshotHistogramComponent), snapshotHistogramQuery);
