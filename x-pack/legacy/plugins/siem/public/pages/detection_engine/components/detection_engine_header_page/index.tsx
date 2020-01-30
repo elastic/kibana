@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import areEqual from 'fast-deep-equal/react';
 
 import { HeaderPage, HeaderPageProps } from '../../../../components/header_page';
 import * as i18n from './translations';
@@ -21,4 +22,4 @@ DetectionEngineHeaderPageComponent.defaultProps = {
   },
 };
 
-export const DetectionEngineHeaderPage = React.memo(DetectionEngineHeaderPageComponent);
+export const DetectionEngineHeaderPage = React.memo(DetectionEngineHeaderPageComponent, areEqual);

@@ -10,6 +10,7 @@ import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import styled, { css } from 'styled-components';
+import areEqual from 'fast-deep-equal/react';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -174,4 +175,11 @@ const mapDispatchToProps = {
 export const InspectButton = connect(
   makeMapStateToProps,
   mapDispatchToProps
-)(React.memo(InspectButtonComponent));
+)(
+  React.memo(
+    InspectButtonComponent,
+    // @ts-ignore
+    ({ refetch: prevRefetch, ...prevProps }, { refetch: nextRefetch, ...nextProps }) =>
+      areEqual(prevProps, nextProps)
+  )
+);

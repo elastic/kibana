@@ -213,4 +213,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   );
 };
 
+StatefulEventComponent.whyDidYouRender = true;
+
 export const StatefulEvent = React.memo(StatefulEventComponent);

@@ -6,10 +6,11 @@
 
 import { EuiBadge } from '@elastic/eui';
 import { defaultTo, getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
+import areEqual from 'fast-deep-equal/react';
 
 import { State, timelineSelectors } from '../../store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
@@ -82,28 +83,40 @@ export const FlyoutComponent = React.memo<Props>(
     timelineId,
     usersViewing,
     width,
-  }) => (
-    <>
-      <Visible show={show}>
-        <Pane
-          flyoutHeight={flyoutHeight}
-          headerHeight={headerHeight}
-          onClose={() => showTimeline({ id: timelineId, show: false })}
+  }) => {
+    const onOpen = useCallback(() => showTimeline({ id: timelineId, show: true }), [
+      showTimeline,
+      timelineId,
+    ]);
+    const onClose = useCallback(() => showTimeline({ id: timelineId, show: false }), [
+      showTimeline,
+      timelineId,
+    ]);
+
+    return (
+      <>
+        <Visible show={show}>
+          <Pane
+            flyoutHeight={flyoutHeight}
+            headerHeight={headerHeight}
+            onClose={onClose}
+            timelineId={timelineId}
+            usersViewing={usersViewing}
+            width={width}
+          >
+            {children}
+          </Pane>
+        </Visible>
+        <FlyoutButton
+          dataProviders={dataProviders!}
+          show={!show}
           timelineId={timelineId}
-          usersViewing={usersViewing}
-          width={width}
-        >
-          {children}
-        </Pane>
-      </Visible>
-      <FlyoutButton
-        dataProviders={dataProviders!}
-        show={!show}
-        timelineId={timelineId}
-        onOpen={() => showTimeline({ id: timelineId, show: true })}
-      />
-    </>
-  )
+          onOpen={onOpen}
+        />
+      </>
+    );
+  },
+  areEqual
 );
 
 FlyoutComponent.displayName = 'FlyoutComponent';

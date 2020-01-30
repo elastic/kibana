@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import { DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
+import areEqual from 'fast-deep-equal/react';
 
 import { BeforeCapture } from './drag_drop_context';
 import { BrowserFields } from '../../containers/source';
@@ -91,12 +92,7 @@ export const DragDropContextWrapperComponent = React.memo<Props>(
       </DragDropContext>
     );
   },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.children === nextProps.children &&
-      prevProps.dataProviders === nextProps.dataProviders
-    ); // prevent re-renders when data providers are added or removed, but all other props are the same
-  }
+  areEqual
 );
 
 DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';

@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
+import areEqual from 'fast-deep-equal/react';
 
 import { useTimeZone } from '../../hooks';
 import { AutoSizer } from '../auto_sizer';
@@ -35,6 +36,11 @@ const checkIfAnyValidSeriesExist = (
   !checkIfAllValuesAreZero(data) &&
   data.some(checkIfAllTheDataInTheSeriesAreValid);
 
+const MemoSettings = React.memo(Settings, areEqual);
+const MemoBarSeries = React.memo(BarSeries, areEqual);
+const MemoChart = React.memo(Chart, areEqual);
+const MemoAxis = React.memo(Axis, areEqual);
+
 // Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = ({
   data,
@@ -57,13 +63,12 @@ export const BarChartBaseComponent = ({
     ...deepmerge(get('configs.settings', chartConfigs), { theme }),
   };
 
-  return chartConfigs.width && chartConfigs.height ? (
-    <Chart>
-      <Settings {...settings} />
-      {data.map(series => {
+  const dataSeries = useMemo(
+    () =>
+      data.map(series => {
         const barSeriesKey = series.key;
         return checkIfAllTheDataInTheSeriesAreValid ? (
-          <BarSeries
+          <MemoBarSeries
             id={barSeriesKey}
             key={barSeriesKey}
             name={series.key}
@@ -78,9 +83,17 @@ export const BarChartBaseComponent = ({
             customSeriesColors={series.color ? [series.color] : undefined}
           />
         ) : null;
-      })}
+      }),
+    [data]
+  );
 
-      <Axis
+  return chartConfigs.width && chartConfigs.height ? (
+    <MemoChart>
+      <MemoSettings {...settings} />
+
+      {dataSeries}
+
+      <MemoAxis
         id={xAxisId}
         position={Position.Bottom}
         showOverlappingTicks={false}
@@ -88,14 +101,19 @@ export const BarChartBaseComponent = ({
         tickFormat={xTickFormatter}
       />
 
-      <Axis id={yAxisId} position={Position.Left} tickSize={tickSize} tickFormat={yTickFormatter} />
-    </Chart>
+      <MemoAxis
+        id={yAxisId}
+        position={Position.Left}
+        tickSize={tickSize}
+        tickFormat={yTickFormatter}
+      />
+    </MemoChart>
   ) : null;
 };
 
 BarChartBaseComponent.displayName = 'BarChartBaseComponent';
 
-export const BarChartBase = React.memo(BarChartBaseComponent);
+export const BarChartBase = React.memo(BarChartBaseComponent, areEqual);
 
 BarChartBase.displayName = 'BarChartBase';
 
@@ -108,24 +126,30 @@ export const BarChartComponent = ({
 }) => {
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
+  const chartPlaceholderHeight = getChartHeight(customHeight);
+  const chartPlaceholderWidth = getChartWidth(customWidth);
 
   return checkIfAnyValidSeriesExist(barChart) ? (
     <AutoSizer detectAnyWindowResize={false} content>
-      {({ measureRef, content: { height, width } }) => (
-        <WrappedByAutoSizer ref={measureRef} height={getChartHeight(customHeight, height)}>
-          <BarChartBaseComponent
-            height={getChartHeight(customHeight, height)}
-            width={getChartWidth(customWidth, width)}
-            data={barChart}
-            configs={configs}
-          />
-        </WrappedByAutoSizer>
-      )}
+      {({ measureRef, content: { height, width } }) => {
+        const chartHeight = getChartHeight(customHeight, height);
+        const chartWidth = getChartWidth(customWidth, width);
+        return (
+          <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
+            <BarChartBaseComponent
+              height={chartHeight}
+              width={chartWidth}
+              data={barChart}
+              configs={configs}
+            />
+          </WrappedByAutoSizer>
+        );
+      }}
     </AutoSizer>
   ) : (
     <ChartPlaceHolder
-      height={getChartHeight(customHeight)}
-      width={getChartWidth(customWidth)}
+      height={chartPlaceholderHeight}
+      width={chartPlaceholderWidth}
       data={barChart}
     />
   );
@@ -133,6 +157,6 @@ export const BarChartComponent = ({
 
 BarChartComponent.displayName = 'BarChartComponent';
 
-export const BarChart = React.memo(BarChartComponent);
+export const BarChart = React.memo(BarChartComponent, areEqual);
 
 BarChart.displayName = 'BarChart';

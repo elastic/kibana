@@ -16,6 +16,8 @@ import {
   RecursivePartial,
 } from '@elastic/charts';
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
+import areEqual from 'fast-deep-equal/react';
+
 import { AutoSizer } from '../auto_sizer';
 import { ChartPlaceHolder } from './chart_place_holder';
 import { useTimeZone } from '../../hooks';
@@ -60,6 +62,9 @@ const checkIfAnyValidSeriesExist = (
 ): data is ChartSeriesData[] =>
   Array.isArray(data) && data.some(checkIfAllTheDataInTheSeriesAreValid);
 
+const MemoSettings = React.memo(Settings, areEqual);
+const MemoAreaSeries = React.memo(AreaSeries, areEqual);
+
 // https://ela.st/multi-areaseries
 export const AreaChartBaseComponent = ({
   data,
@@ -84,11 +89,11 @@ export const AreaChartBaseComponent = ({
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
-        <Settings {...settings} />
+        <MemoSettings {...settings} />
         {data.map(series => {
           const seriesKey = series.key;
           return checkIfAllTheDataInTheSeriesAreValid(series) ? (
-            <AreaSeries
+            <MemoAreaSeries
               id={seriesKey}
               key={seriesKey}
               name={series.key.replace('Histogram', '')}
@@ -120,7 +125,7 @@ export const AreaChartBaseComponent = ({
 
 AreaChartBaseComponent.displayName = 'AreaChartBaseComponent';
 
-export const AreaChartBase = React.memo(AreaChartBaseComponent);
+export const AreaChartBase = React.memo(AreaChartBaseComponent, areEqual);
 
 AreaChartBase.displayName = 'AreaChartBase';
 
@@ -158,6 +163,6 @@ export const AreaChartComponent = ({
 
 AreaChartComponent.displayName = 'AreaChartComponent';
 
-export const AreaChart = React.memo(AreaChartComponent);
+export const AreaChart = React.memo(AreaChartComponent, areEqual);
 
 AreaChart.displayName = 'AreaChart';

@@ -6,7 +6,6 @@
 
 import { Position } from '@elastic/charts';
 import React from 'react';
-import { compose } from 'redux';
 
 import { connect } from 'react-redux';
 import { State, inputsSelectors, hostsModel, networkModel } from '../../store';
@@ -61,6 +60,4 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const MatrixHistogramContainer = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps)
-)(MatrixHistogram);
+export const MatrixHistogramContainer = connect(makeMapStateToProps)(MatrixHistogram);

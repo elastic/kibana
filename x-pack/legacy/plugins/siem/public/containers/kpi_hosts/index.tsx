@@ -8,6 +8,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
+import areEqual from 'fast-deep-equal/react';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetKpiHostsQuery, KpiHostsData } from '../../graphql/types';
@@ -66,7 +67,8 @@ const KpiHostsComponentQuery = React.memo<KpiHostsProps & KpiHostsReducer>(
         });
       }}
     </Query>
-  )
+  ),
+  areEqual
 );
 
 KpiHostsComponentQuery.displayName = 'KpiHostsComponentQuery';

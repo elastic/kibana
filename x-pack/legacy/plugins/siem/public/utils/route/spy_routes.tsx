@@ -8,7 +8,7 @@ import * as H from 'history';
 import { isEqual } from 'lodash/fp';
 import { memo, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
-import deepEqual from 'fast-deep-equal';
+import deepEqual from 'fast-deep-equal/react';
 
 import { SpyRouteProps } from './types';
 import { useRouteSpy } from './use_route_spy';
@@ -82,7 +82,8 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
       }
     }, [pathname, search, pageName, detailName, tabName, flowTarget, state]);
     return null;
-  }
+  },
+  deepEqual
 );
 
 export const SpyRoute = withRouter(SpyRouteComponent);

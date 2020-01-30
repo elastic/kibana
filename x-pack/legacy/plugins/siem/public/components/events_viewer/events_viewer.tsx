@@ -5,7 +5,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
+import deepEqual from 'fast-deep-equal/react';
 import { getOr, isEmpty, isEqual, union } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -175,10 +175,7 @@ const EventsViewerComponent: React.FC<Props> = ({
 
                       {utilityBar?.(refetch, totalCountMinusDeleted)}
 
-                      <div
-                        data-test-subj={`events-container-loading-${loading}`}
-                        style={{ width: `${width}px` }}
-                      >
+                      <div data-test-subj={`events-container-loading-${loading}`}>
                         <ManageTimelineContext
                           loading={loading}
                           width={width}

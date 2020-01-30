@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isEqual from 'lodash/fp/isEqual';
-import deepEqual from 'fast-deep-equal';
+import deepEqual from 'fast-deep-equal/react';
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -69,17 +68,7 @@ export const SiemNavigationComponent: React.FC<SiemNavigationComponentProps &
 
 export const SiemNavigationRedux = compose<
   React.ComponentClass<SiemNavigationProps & RouteSpyState>
->(connect(makeMapStateToProps))(
-  React.memo(
-    SiemNavigationComponent,
-    (prevProps, nextProps) =>
-      prevProps.pathName === nextProps.pathName &&
-      prevProps.search === nextProps.search &&
-      isEqual(prevProps.navTabs, nextProps.navTabs) &&
-      isEqual(prevProps.urlState, nextProps.urlState) &&
-      deepEqual(prevProps.state, nextProps.state)
-  )
-);
+>(connect(makeMapStateToProps))(React.memo(SiemNavigationComponent, deepEqual));
 
 const SiemNavigationContainer: React.FC<SiemNavigationProps> = props => {
   const [routeProps] = useRouteSpy();
@@ -91,4 +80,4 @@ const SiemNavigationContainer: React.FC<SiemNavigationProps> = props => {
   return <SiemNavigationRedux {...stateNavReduxProps} />;
 };
 
-export const SiemNavigation = SiemNavigationContainer;
+export const SiemNavigation = React.memo(SiemNavigationContainer, deepEqual);

@@ -8,6 +8,7 @@ import { isEqual } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+import areEqual from 'fast-deep-equal/react';
 
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 
@@ -166,6 +167,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     updateItemsPerPage,
     upsertColumn,
   }) => {
+    console.error('aaa');
     const { loading, signalIndexExists, signalIndexName } = useSignalIndex();
 
     const indexToAdd = useMemo<string[]>(() => {
@@ -298,29 +300,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       </WithSource>
     );
   },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.activePage === nextProps.activePage &&
-      prevProps.eventType === nextProps.eventType &&
-      prevProps.end === nextProps.end &&
-      prevProps.flyoutHeaderHeight === nextProps.flyoutHeaderHeight &&
-      prevProps.flyoutHeight === nextProps.flyoutHeight &&
-      prevProps.id === nextProps.id &&
-      prevProps.isLive === nextProps.isLive &&
-      prevProps.itemsPerPage === nextProps.itemsPerPage &&
-      prevProps.kqlMode === nextProps.kqlMode &&
-      prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
-      prevProps.pageCount === nextProps.pageCount &&
-      prevProps.show === nextProps.show &&
-      prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
-      prevProps.start === nextProps.start &&
-      isEqual(prevProps.columns, nextProps.columns) &&
-      isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-      isEqual(prevProps.filters, nextProps.filters) &&
-      isEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
-      isEqual(prevProps.sort, nextProps.sort)
-    );
-  }
+  areEqual
 );
 
 StatefulTimelineComponent.displayName = 'StatefulTimelineComponent';
@@ -369,7 +349,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const StatefulTimeline = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   addProvider: timelineActions.addProvider,
   createTimeline: timelineActions.createTimeline,
   onDataProviderEdited: timelineActions.dataProviderEdited,
@@ -384,4 +364,9 @@ export const StatefulTimeline = connect(makeMapStateToProps, {
   updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
   updateSort: timelineActions.updateSort,
   upsertColumn: timelineActions.upsertColumn,
-})(StatefulTimelineComponent);
+};
+
+export const StatefulTimeline = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(StatefulTimelineComponent);

@@ -13,8 +13,12 @@ import { HomePage } from './pages/home';
 import { ManageRoutesSpy } from './utils/route/manage_spy_routes';
 
 /* Uncomment only during debugging */
-// const whyDidYouRender = require('@welldone-software/why-did-you-render');
-// whyDidYouRender(React);
+const whyDidYouRender = require('@welldone-software/why-did-you-render'); // eslint-disable-line
+whyDidYouRender(React, {
+  exclude: [/^ColumnHeadersComponent/, /^Connect/],
+  trackAllPureComponents: true,
+  trackHooks: false,
+});
 
 interface RouterProps {
   history: History;
@@ -24,8 +28,12 @@ const PageRouterComponent: FC<RouterProps> = ({ history }) => (
   <ManageRoutesSpy>
     <Router history={history}>
       <Switch>
-        <Route path="/" render={() => <HomePage />} />
-        <Route render={() => <NotFoundPage />} />
+        <Route path="/">
+          <HomePage />
+        </Route>
+        <Route>
+          <NotFoundPage />
+        </Route>
       </Switch>
     </Router>
   </ManageRoutesSpy>

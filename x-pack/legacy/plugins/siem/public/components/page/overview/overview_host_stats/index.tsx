@@ -8,6 +8,7 @@ import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } f
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import styled from 'styled-components';
+import areEqual from 'fast-deep-equal/react';
 
 import { OverviewHostData } from '../../../../graphql/types';
 import { FormattedStat, StatGroup } from '../types';
@@ -268,4 +269,4 @@ const OverviewHostStatsComponent: React.FC<OverviewHostProps> = ({ data, loading
 
 OverviewHostStatsComponent.displayName = 'OverviewHostStatsComponent';
 
-export const OverviewHostStats = React.memo(OverviewHostStatsComponent);
+export const OverviewHostStats = React.memo(OverviewHostStatsComponent, areEqual);

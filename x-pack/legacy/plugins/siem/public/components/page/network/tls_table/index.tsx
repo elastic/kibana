@@ -7,7 +7,6 @@
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/network';
@@ -152,11 +151,11 @@ const makeMapStateToProps = () => {
   return (state: State, { type }: OwnProps) => getTlsSelector(state, type);
 };
 
-export const TlsTable = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps, {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  })
-)(TlsTableComponent);
+const mapDispatchToProps = {
+  updateNetworkTable: networkActions.updateNetworkTable,
+};
+
+export const TlsTable = connect(makeMapStateToProps, mapDispatchToProps)(TlsTableComponent);
 
 const getSortField = (sortField: TlsSortField): SortingBasicTable => ({
   field: `node.${sortField.field}`,

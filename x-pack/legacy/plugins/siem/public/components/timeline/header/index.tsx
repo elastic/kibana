@@ -8,6 +8,7 @@ import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { IIndexPattern } from 'src/plugins/data/public';
+import areEqual from 'react-fast-compare';
 
 import { Sort } from '../body/sort';
 import { DataProviders } from '../data_providers';
@@ -93,6 +94,6 @@ export const TimelineHeaderComponent = ({
 
 TimelineHeaderComponent.displayName = 'TimelineHeaderComponent';
 
-export const TimelineHeader = React.memo(TimelineHeaderComponent);
+export const TimelineHeader = React.memo(TimelineHeaderComponent, areEqual);
 
 TimelineHeader.displayName = 'TimelineHeader';

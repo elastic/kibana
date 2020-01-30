@@ -71,85 +71,86 @@ export const ColumnHeadersComponent = ({
   timelineId,
   toggleColumn,
 }: Props) => (
-  <EventsThead data-test-subj="column-headers">
-    <EventsTrHeader>
-      <EventsThGroupActions
-        actionsColumnWidth={actionsColumnWidth}
-        justifyContent={showSelectAllCheckbox ? 'flexStart' : 'space-between'}
-        data-test-subj="actions-container"
-      >
-        {showEventsSelect && (
-          <EventsTh>
-            <EventsThContent textAlign="center">
-              <EventsSelect checkState="unchecked" timelineId={timelineId} />
-            </EventsThContent>
-          </EventsTh>
-        )}
-        {showSelectAllCheckbox && (
-          <EventsTh>
-            <EventsThContent textAlign="center">
-              <EuiCheckbox
-                data-test-subj="select-all-events"
-                id={'select-all-events'}
-                checked={isSelectAllChecked}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  onSelectAll({ isSelected: event.currentTarget.checked });
-                }}
-              />
-            </EventsThContent>
-          </EventsTh>
-        )}
-        <EventsTh>
-          <EventsThContent textAlign={showSelectAllCheckbox ? 'left' : 'center'}>
-            <StatefulFieldsBrowser
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              data-test-subj="field-browser"
-              height={FIELD_BROWSER_HEIGHT}
-              isEventViewer={isEventViewer}
-              onUpdateColumns={onUpdateColumns}
-              timelineId={timelineId}
-              toggleColumn={toggleColumn}
-              width={FIELD_BROWSER_WIDTH}
-            />
-          </EventsThContent>
-        </EventsTh>
-      </EventsThGroupActions>
+  <div />
+  // <EventsThead data-test-subj="column-headers">
+  //   <EventsTrHeader>
+  //     <EventsThGroupActions
+  //       actionsColumnWidth={actionsColumnWidth}
+  //       justifyContent={showSelectAllCheckbox ? 'flexStart' : 'space-between'}
+  //       data-test-subj="actions-container"
+  //     >
+  //       {showEventsSelect && (
+  //         <EventsTh>
+  //           <EventsThContent textAlign="center">
+  //             <EventsSelect checkState="unchecked" timelineId={timelineId} />
+  //           </EventsThContent>
+  //         </EventsTh>
+  //       )}
+  //       {showSelectAllCheckbox && (
+  //         <EventsTh>
+  //           <EventsThContent textAlign="center">
+  //             <EuiCheckbox
+  //               data-test-subj="select-all-events"
+  //               id={'select-all-events'}
+  //               checked={isSelectAllChecked}
+  //               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+  //                 onSelectAll({ isSelected: event.currentTarget.checked });
+  //               }}
+  //             />
+  //           </EventsThContent>
+  //         </EventsTh>
+  //       )}
+  //       <EventsTh>
+  //         <EventsThContent textAlign={showSelectAllCheckbox ? 'left' : 'center'}>
+  //           <StatefulFieldsBrowser
+  //             browserFields={browserFields}
+  //             columnHeaders={columnHeaders}
+  //             data-test-subj="field-browser"
+  //             height={FIELD_BROWSER_HEIGHT}
+  //             isEventViewer={isEventViewer}
+  //             onUpdateColumns={onUpdateColumns}
+  //             timelineId={timelineId}
+  //             toggleColumn={toggleColumn}
+  //             width={FIELD_BROWSER_WIDTH}
+  //           />
+  //         </EventsThContent>
+  //       </EventsTh>
+  //     </EventsThGroupActions>
 
-      <Droppable
-        direction={'horizontal'}
-        droppableId={`${droppableTimelineColumnsPrefix}${timelineId}`}
-        isDropDisabled={false}
-        type={DRAG_TYPE_FIELD}
-      >
-        {(dropProvided, snapshot) => (
-          <>
-            <EventsThGroupData
-              data-test-subj="headers-group"
-              ref={dropProvided.innerRef}
-              isDragging={snapshot.isDraggingOver}
-              {...dropProvided.droppableProps}
-            >
-              {columnHeaders.map((header, draggableIndex) => (
-                <ColumnHeader
-                  key={header.id}
-                  draggableIndex={draggableIndex}
-                  timelineId={timelineId}
-                  header={header}
-                  onColumnRemoved={onColumnRemoved}
-                  onColumnSorted={onColumnSorted}
-                  onFilterChange={onFilterChange}
-                  onColumnResized={onColumnResized}
-                  sort={sort}
-                />
-              ))}
-            </EventsThGroupData>
-            {dropProvided.placeholder}
-          </>
-        )}
-      </Droppable>
-    </EventsTrHeader>
-  </EventsThead>
+  //     <Droppable
+  //       direction={'horizontal'}
+  //       droppableId={`${droppableTimelineColumnsPrefix}${timelineId}`}
+  //       isDropDisabled={false}
+  //       type={DRAG_TYPE_FIELD}
+  //     >
+  //       {(dropProvided, snapshot) => (
+  //         <>
+  //           <EventsThGroupData
+  //             data-test-subj="headers-group"
+  //             ref={dropProvided.innerRef}
+  //             isDragging={snapshot.isDraggingOver}
+  //             {...dropProvided.droppableProps}
+  //           >
+  //             {columnHeaders.map((header, draggableIndex) => (
+  //               <ColumnHeader
+  //                 key={header.id}
+  //                 draggableIndex={draggableIndex}
+  //                 timelineId={timelineId}
+  //                 header={header}
+  //                 onColumnRemoved={onColumnRemoved}
+  //                 onColumnSorted={onColumnSorted}
+  //                 onFilterChange={onFilterChange}
+  //                 onColumnResized={onColumnResized}
+  //                 sort={sort}
+  //               />
+  //             ))}
+  //           </EventsThGroupData>
+  //           {dropProvided.placeholder}
+  //         </>
+  //       )}
+  //     </Droppable>
+  //   </EventsTrHeader>
+  // </EventsThead>
 );
 
 export const ColumnHeaders = React.memo(ColumnHeadersComponent);

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiPortal } from '@elastic/eui';
 import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { Resizable, ResizeCallback } from 're-resizable';
@@ -19,6 +20,10 @@ import { Header } from './header';
 import { ColumnId } from '../column_id';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
+
+export const ConditionalPortal = React.memo<{ children: React.ReactNode; usePortal: boolean }>(
+  ({ children, usePortal }) => (usePortal ? <EuiPortal>{children}</EuiPortal> : <>{children}</>)
+);
 
 /** The specification of a column header */
 export interface ColumnHeader {
@@ -90,31 +95,33 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
         type={DRAG_TYPE_FIELD}
       >
         {(dragProvided, dragSnapshot) => (
-          <EventsTh
-            data-test-subj="draggable-header"
-            {...dragProvided.draggableProps}
-            {...dragProvided.dragHandleProps}
-            ref={dragProvided.innerRef}
-          >
-            {!dragSnapshot.isDragging ? (
-              <EventsThContent>
-                <Header
-                  timelineId={timelineId}
-                  header={header}
-                  onColumnRemoved={onColumnRemoved}
-                  onColumnSorted={onColumnSorted}
-                  onFilterChange={onFilterChange}
-                  sort={sort}
-                />
-              </EventsThContent>
-            ) : (
-              <DraggingContainer onDragging={setIsDragging}>
-                <DragEffects>
-                  <DraggableFieldBadge fieldId={header.id} fieldWidth={`${header.width}px`} />
-                </DragEffects>
-              </DraggingContainer>
-            )}
-          </EventsTh>
+          <ConditionalPortal usePortal={dragSnapshot.isDragging}>
+            <EventsTh
+              data-test-subj="draggable-header"
+              {...dragProvided.draggableProps}
+              {...dragProvided.dragHandleProps}
+              ref={dragProvided.innerRef}
+            >
+              {!dragSnapshot.isDragging ? (
+                <EventsThContent>
+                  <Header
+                    timelineId={timelineId}
+                    header={header}
+                    onColumnRemoved={onColumnRemoved}
+                    onColumnSorted={onColumnSorted}
+                    onFilterChange={onFilterChange}
+                    sort={sort}
+                  />
+                </EventsThContent>
+              ) : (
+                <DraggingContainer onDragging={setIsDragging}>
+                  <DragEffects>
+                    <DraggableFieldBadge fieldId={header.id} fieldWidth={`${header.width}px`} />
+                  </DragEffects>
+                </DraggingContainer>
+              )}
+            </EventsTh>
+          </ConditionalPortal>
         )}
       </Draggable>
     </Resizable>

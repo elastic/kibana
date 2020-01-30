@@ -8,6 +8,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
+import areEqual from 'fast-deep-equal/react';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
@@ -232,6 +233,6 @@ export const TimelineComponent = ({
 
 TimelineComponent.displayName = 'TimelineComponent';
 
-export const Timeline = React.memo(TimelineComponent);
+export const Timeline = React.memo(TimelineComponent, areEqual);
 
 Timeline.displayName = 'Timeline';

@@ -10,6 +10,7 @@ import { has } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+import areEqual from 'fast-deep-equal/react';
 
 import { hostsActions } from '../../../../store/hosts';
 import { AuthenticationsEdges } from '../../../../graphql/types';
@@ -142,7 +143,8 @@ const AuthenticationTableComponent = React.memo<AuthenticationTableProps>(
         updateActivePage={updateActivePage}
       />
     );
-  }
+  },
+  areEqual
 );
 
 AuthenticationTableComponent.displayName = 'AuthenticationTableComponent';
@@ -154,10 +156,14 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const AuthenticationTable = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   updateTableActivePage: hostsActions.updateTableActivePage,
   updateTableLimit: hostsActions.updateTableLimit,
-})(AuthenticationTableComponent);
+};
+export const AuthenticationTable = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(AuthenticationTableComponent);
 
 const getAuthenticationColumns = (): AuthTableColumns => [
   {

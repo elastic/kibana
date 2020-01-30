@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useRef, useState, useCallback } from 'react';
-import { AutoSizer, List, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
-import { VariableSizeList } from 'react-window';
+import React, { useMemo, useRef, useCallback } from 'react';
+import { VariableSizeList, areEqual } from 'react-window';
 
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../graphql/types';
@@ -118,7 +117,7 @@ export const Body = React.memo<BodyProps>(
 
     const getItemSize = index => rowHeights[index] || 33;
 
-    const Row = ({ index, style }) => {
+    const Row = React.memo(({ index, style }) => {
       const ref = useRef();
       const event = data[index];
       const isEventPinned = eventIsPinned({
@@ -128,15 +127,13 @@ export const Body = React.memo<BodyProps>(
 
       const measure = useCallback(() => {
         if (ref && ref.current) {
-          console.error('duopa', ref.current.getBoundingClientRect());
           rowHeights[index] = ref.current.getBoundingClientRect().height;
-          console.error('ehig', rowHeights);
           listRef.current.resetAfterIndex(index);
         }
       }, [ref]);
 
       return (
-        <div style={{ ...style, top: style.top + 33 }}>
+        <div style={{ ...style, top: style.top + 33, overflow: 'hidden' }}>
           <div ref={ref}>
             <StatefulEvent
               actionsColumnWidth={actionsColumnWidth}
@@ -167,10 +164,10 @@ export const Body = React.memo<BodyProps>(
           </div>
         </div>
       );
-    };
+    }, areEqual);
 
     const innerElementType = ({ children, style }) => (
-      <>
+      <div style={{ position: 'relative', minWidth: columnWidths }}>
         <ColumnHeaders
           actionsColumnWidth={actionsColumnWidth}
           browserFields={browserFields}
@@ -190,7 +187,7 @@ export const Body = React.memo<BodyProps>(
           toggleColumn={toggleColumn}
         />
         <div style={style}>{children}</div>
-      </>
+      </div>
     );
 
     return (
@@ -202,98 +199,10 @@ export const Body = React.memo<BodyProps>(
           itemSize={getItemSize}
           innerElementType={innerElementType}
           width="100%"
-          overscanCount={10}
+          overscanCount={5}
         >
           {Row}
         </VariableSizeList>
-        {/* <TimelineBody data-test-subj="timeline-body" bodyHeight={height}> */}
-
-        {/* <EventsTable
-            data-test-subj="events-table"
-            // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-            style={{ minWidth: `${columnWidths}px` }}
-          >
-            <ColumnHeaders
-              actionsColumnWidth={actionsColumnWidth}
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              isEventViewer={isEventViewer}
-              isSelectAllChecked={isSelectAllChecked}
-              onColumnRemoved={onColumnRemoved}
-              onColumnResized={onColumnResized}
-              onColumnSorted={onColumnSorted}
-              onFilterChange={onFilterChange}
-              onSelectAll={onSelectAll}
-              onUpdateColumns={onUpdateColumns}
-              showEventsSelect={false}
-              showSelectAllCheckbox={showCheckboxes}
-              sort={sort}
-              timelineId={id}
-              toggleColumn={toggleColumn}
-            />
-
-            <div style={{ flex: '1 1 auto' }}>
-              <AutoSizer>
-                {({ width }) => (
-                  <List
-                    height={height}
-                    width={width}
-                    rowHeight={listCache.rowHeight}
-                    rowCount={data.length}
-                    deferredMeasurementCache={listCache}
-                    overscanRowCount={10}
-                    rowRenderer={({ index, key, style, parent }) => {
-                      const event = data[index];
-                      return (
-                        <CellMeasurer
-                          key={key}
-                          cache={listCache}
-                          parent={parent}
-                          columnIndex={0}
-                          rowIndex={index}
-                        >
-                          {({ measure }) => (
-                            <div style={{ ...style, overflow: 'hidden' }}>
-                              <StatefulEvent
-                                actionsColumnWidth={actionsColumnWidth}
-                                addNoteToEvent={addNoteToEvent}
-                                browserFields={browserFields}
-                                columnHeaders={columnHeaders}
-                                columnRenderers={columnRenderers}
-                                event={event}
-                                eventIdToNoteIds={eventIdToNoteIds}
-                                getNotesByIds={getNotesByIds}
-                                isEventPinned={eventIsPinned({
-                                  eventId: event._id,
-                                  pinnedEventIds,
-                                })}
-                                isEventViewer={isEventViewer}
-                                key={event._id}
-                                loadingEventIds={loadingEventIds}
-                                onColumnResized={onColumnResized}
-                                onPinEvent={onPinEvent}
-                                onRowSelected={onRowSelected}
-                                onUnPinEvent={onUnPinEvent}
-                                onUpdateColumns={onUpdateColumns}
-                                rowRenderers={rowRenderers}
-                                selectedEventIds={selectedEventIds}
-                                showCheckboxes={showCheckboxes}
-                                timelineId={id}
-                                toggleColumn={toggleColumn}
-                                updateNote={updateNote}
-                                measure={measure}
-                              />
-                            </div>
-                          )}
-                        </CellMeasurer>
-                      );
-                    }}
-                  />
-                )}
-              </AutoSizer>
-            </div>
-          </EventsTable> */}
-        {/* </TimelineBody> */}
         <TimelineBodyGlobalStyle />
       </>
     );

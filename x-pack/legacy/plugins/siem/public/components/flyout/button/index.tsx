@@ -8,6 +8,7 @@ import { EuiNotificationBadge, EuiIcon, EuiButton } from '@elastic/eui';
 import { rgba } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
+import areEqual from 'fast-deep-equal/react';
 
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import {
@@ -142,10 +143,7 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(
         />
       </Container>
     ) : null,
-  (prevProps, nextProps) =>
-    prevProps.show === nextProps.show &&
-    prevProps.dataProviders === nextProps.dataProviders &&
-    prevProps.timelineId === nextProps.timelineId
+  areEqual
 );
 
 FlyoutButton.displayName = 'FlyoutButton';

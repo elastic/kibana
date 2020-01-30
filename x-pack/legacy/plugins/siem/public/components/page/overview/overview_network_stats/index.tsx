@@ -8,6 +8,7 @@ import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } f
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import styled from 'styled-components';
+import areEqual from 'fast-deep-equal/react';
 
 import { OverviewNetworkData } from '../../../../graphql/types';
 import { FormattedStat, StatGroup } from '../types';
@@ -190,6 +191,6 @@ export const OverviewNetworkStats = React.memo<OverviewNetworkProps>(({ data, lo
       })}
     </NetworkStatsContainer>
   );
-});
+}, areEqual);
 
 OverviewNetworkStats.displayName = 'OverviewNetworkStats';

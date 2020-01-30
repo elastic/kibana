@@ -33,11 +33,6 @@ interface HostDetailsComponentDispatchProps extends HostBodyComponentDispatchPro
   setHostDetailsTablesActivePageToZero: ActionCreator<null>;
 }
 
-export interface HostDetailsProps extends HostsQueryProps {
-  detailName: string;
-  hostDetailsPagePath: string;
-}
-
 export type HostDetailsComponentProps = HostDetailsComponentReduxProps &
   HostDetailsComponentDispatchProps &
   HostComponentProps &

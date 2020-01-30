@@ -8,9 +8,9 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-import { compose } from 'redux';
-
 import { useParams } from 'react-router-dom';
+import areEqual from 'fast-deep-equal/react';
+
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -153,7 +153,8 @@ export const HostsComponent = React.memo<HostsComponentProps>(
         <SpyRoute />
       </>
     );
-  }
+  },
+  areEqual
 );
 HostsComponent.displayName = 'HostsComponent';
 
@@ -168,13 +169,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-interface HostsProps extends GlobalTimeArgs {
-  hostsPagePath: string;
-}
+const mapDispatchToProps = {
+  setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
+};
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const Hosts = compose<React.ComponentClass<HostsProps>>(
-  connect(makeMapStateToProps, {
-    setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-  })
-)(HostsComponent);
+export const Hosts = connect(makeMapStateToProps, mapDispatchToProps)(HostsComponent);

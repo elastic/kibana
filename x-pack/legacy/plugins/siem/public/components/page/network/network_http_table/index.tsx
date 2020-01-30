@@ -6,7 +6,6 @@
 
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/actions';
@@ -155,8 +154,11 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const NetworkHttpTable = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps, {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  })
+const mapDispatchToProps = {
+  updateNetworkTable: networkActions.updateNetworkTable,
+};
+
+export const NetworkHttpTable = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
 )(NetworkHttpTableComponent);

@@ -8,6 +8,7 @@ import { getOr, isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
+import areEqual from 'fast-deep-equal/react';
 
 import { esFilters, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
@@ -180,27 +181,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       />
     );
   },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.eventType === nextProps.eventType &&
-      prevProps.from === nextProps.from &&
-      prevProps.fromStr === nextProps.fromStr &&
-      prevProps.to === nextProps.to &&
-      prevProps.toStr === nextProps.toStr &&
-      prevProps.isRefreshPaused === nextProps.isRefreshPaused &&
-      prevProps.refreshInterval === nextProps.refreshInterval &&
-      prevProps.timelineId === nextProps.timelineId &&
-      isEqual(prevProps.browserFields, nextProps.browserFields) &&
-      isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-      isEqual(prevProps.filters, nextProps.filters) &&
-      isEqual(prevProps.filterQuery, nextProps.filterQuery) &&
-      isEqual(prevProps.filterQueryDraft, nextProps.filterQueryDraft) &&
-      isEqual(prevProps.indexPattern, nextProps.indexPattern) &&
-      isEqual(prevProps.kqlMode, nextProps.kqlMode) &&
-      isEqual(prevProps.savedQueryId, nextProps.savedQueryId) &&
-      isEqual(prevProps.timelineId, nextProps.timelineId)
-    );
-  }
+  areEqual
 );
 StatefulSearchOrFilterComponent.displayName = 'StatefulSearchOrFilterComponent';
 

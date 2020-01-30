@@ -6,6 +6,7 @@
 
 import React, { memo } from 'react';
 import { Route, Switch } from 'react-router-dom';
+import areEqual from 'fast-deep-equal/react';
 
 import { HostsTabsProps } from './types';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
@@ -22,7 +23,7 @@ import {
 } from './navigation';
 import { HostAlertsQueryTabBody } from './navigation/alerts_query_tab_body';
 
-const HostsTabs = memo<HostsTabsProps>(
+export const HostsTabs = memo<HostsTabsProps>(
   ({
     deleteQuery,
     filterQuery,
@@ -87,9 +88,8 @@ const HostsTabs = memo<HostsTabsProps>(
         />
       </Switch>
     );
-  }
+  },
+  areEqual
 );
 
 HostsTabs.displayName = 'HostsTabs';
-
-export { HostsTabs };

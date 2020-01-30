@@ -7,7 +7,8 @@
 import React, { useMemo, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
-import { IIndexPattern } from 'src/plugins/data/public';
+import areEqual from 'fast-deep-equal/react';
+
 import { hostsActions } from '../../../../store/actions';
 import {
   Direction,
@@ -37,7 +38,6 @@ interface OwnProps {
   data: HostsEdges[];
   fakeTotalCount: number;
   id: string;
-  indexPattern: IIndexPattern;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -102,7 +102,6 @@ const HostsTableComponent = React.memo<HostsTableProps>(
     direction,
     fakeTotalCount,
     id,
-    indexPattern,
     isInspect,
     limit,
     loading,
@@ -183,7 +182,8 @@ const HostsTableComponent = React.memo<HostsTableProps>(
         updateActivePage={updateActivePage}
       />
     );
-  }
+  },
+  areEqual
 );
 
 HostsTableComponent.displayName = 'HostsTableComponent';
@@ -217,10 +217,12 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const HostsTable = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   updateHostsSort: hostsActions.updateHostsSort,
   updateTableActivePage: hostsActions.updateTableActivePage,
   updateTableLimit: hostsActions.updateTableLimit,
-})(HostsTableComponent);
+};
+
+export const HostsTable = connect(makeMapStateToProps, mapDispatchToProps)(HostsTableComponent);
 
 HostsTable.displayName = 'HostsTable';

@@ -6,7 +6,6 @@
 import { isEqual, last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/actions';
@@ -180,8 +179,11 @@ const makeMapStateToProps = () => {
     getTopNFlowSelector(state, type, flowTargeted);
 };
 
-export const NetworkTopNFlowTable = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps, {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  })
+const mapDispatchToProps = {
+  updateNetworkTable: networkActions.updateNetworkTable,
+};
+
+export const NetworkTopNFlowTable = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
 )(React.memo(NetworkTopNFlowTableComponent));

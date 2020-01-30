@@ -5,7 +5,7 @@
  */
 
 import React, { useContext, useMemo } from 'react';
-import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
 import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
@@ -18,12 +18,10 @@ import { SiemPageName } from '../home/types';
 import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
 
-type Props = Partial<RouteComponentProps<{}>> & { url: string };
-
 const networkPagePath = `/:pageName(${SiemPageName.network})`;
 const ipDetailsPageBasePath = `${networkPagePath}/ip/:detailName`;
 
-const NetworkContainerComponent: React.FC<Props> = () => {
+const NetworkContainerComponent: React.FC = () => {
   const capabilities = useContext(MlCapabilitiesContext);
   const capabilitiesFetched = capabilities.capabilitiesFetched;
   const userHasMlUserPermissions = useMemo(() => hasMlUserPermissions(capabilities), [

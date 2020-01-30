@@ -7,6 +7,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import areEqual from 'fast-deep-equal/react';
+
 import { KpiHostsData, KpiHostDetailsData } from '../../../../graphql/types';
 import { StatItemsComponent, StatItemsProps, useKpiMatrixStatus } from '../../../stat_items';
 import { kpiHostsMapping } from './kpi_hosts_mapping';
@@ -32,9 +34,7 @@ interface KpiHostDetailsProps extends GenericKpiHostProps {
 }
 
 const FlexGroupSpinner = styled(EuiFlexGroup)`
-   {
-    min-height: ${kpiWidgetHeight}px;
-  }
+  min-height: ${kpiWidgetHeight}px;
 `;
 
 FlexGroupSpinner.displayName = 'FlexGroupSpinner';
@@ -65,15 +65,15 @@ export const KpiHostsComponentBase = ({
     </FlexGroupSpinner>
   ) : (
     <EuiFlexGroup>
-      {statItemsProps.map((mappedStatItemProps, idx) => {
+      {/* {statItemsProps.map((mappedStatItemProps, idx) => {
         return <StatItemsComponent {...mappedStatItemProps} />;
-      })}
+      })} */}
     </EuiFlexGroup>
   );
 };
 
 KpiHostsComponentBase.displayName = 'KpiHostsComponentBase';
 
-export const KpiHostsComponent = React.memo(KpiHostsComponentBase);
+export const KpiHostsComponent = React.memo(KpiHostsComponentBase, areEqual);
 
 KpiHostsComponent.displayName = 'KpiHostsComponent';

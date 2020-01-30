@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { ManageUserInfo } from './components/user_info';
 import { CreateRulePage } from './rules/create';
@@ -17,9 +17,7 @@ import { DetectionEngineTab } from './types';
 
 const detectionEnginePath = `/:pageName(detections)`;
 
-type Props = Partial<RouteComponentProps<{}>> & { url: string };
-
-const DetectionEngineContainerComponent: React.FC<Props> = () => (
+const DetectionEngineContainerComponent: React.FC = () => (
   <ManageUserInfo>
     <Switch>
       <Route
