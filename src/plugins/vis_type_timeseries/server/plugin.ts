@@ -24,19 +24,19 @@ import {
   Plugin,
   RequestHandlerContext,
   Logger,
+  IRouter,
+  FakeRequest,
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { Server } from 'hapi';
-import { once } from 'lodash';
 import { VisTypeTimeseriesConfig } from '.';
-import {
-  init,
-  getVisData,
-  GetVisData,
-  GetVisDataOptions,
-} from '../../../legacy/core_plugins/vis_type_timeseries/server';
-import { ValidationTelemetryService } from './validation_telemetry/validation_telemetry_service';
+import { getVisData, GetVisData, GetVisDataOptions } from './lib/get_vis_data';
+import { ValidationTelemetryService } from './validation_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
+import { visDataRoutes } from './routes/vis';
+// @ts-ignore
+import { fieldsRoutes } from './routes/fields';
+import { SearchStrategyRegistry } from './lib/search_strategies';
 
 export interface LegacySetup {
   server: Server;
@@ -47,15 +47,12 @@ interface VisTypeTimeseriesPluginSetupDependencies {
 }
 
 export interface VisTypeTimeseriesSetup {
-  /** @deprecated */
-  __legacy: {
-    config$: Observable<VisTypeTimeseriesConfig>;
-    registerLegacyAPI: (__LEGACY: LegacySetup) => void;
-  };
   getVisData: (
     requestContext: RequestHandlerContext,
+    fakeRequest: FakeRequest,
     options: GetVisDataOptions
   ) => ReturnType<GetVisData>;
+  addSearchStrategy: SearchStrategyRegistry['addStrategy'];
 }
 
 export interface Framework {
@@ -64,6 +61,8 @@ export interface Framework {
   config$: Observable<VisTypeTimeseriesConfig>;
   globalConfig$: PluginInitializerContext['config']['legacy']['globalConfig$'];
   logger: Logger;
+  router: IRouter;
+  searchStrategyRegistry: SearchStrategyRegistry;
 }
 
 export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
@@ -79,6 +78,9 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     const config$ = this.initializerContext.config.create<VisTypeTimeseriesConfig>();
     // Global config contains things like the ES shard timeout
     const globalConfig$ = this.initializerContext.config.legacy.globalConfig$;
+    const router = core.http.createRouter();
+
+    const searchStrategyRegistry = new SearchStrategyRegistry();
 
     const framework: Framework = {
       core,
@@ -86,23 +88,29 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
       config$,
       globalConfig$,
       logger,
+      router,
+      searchStrategyRegistry,
     };
 
-    return {
-      __legacy: {
-        config$,
-        registerLegacyAPI: once(async (__LEGACY: LegacySetup) => {
-          const validationTelemetrySetup = await this.validationTelementryService.setup(core, {
-            ...plugins,
-            globalConfig$,
-          });
+    (async () => {
+      const validationTelemetry = await this.validationTelementryService.setup(core, {
+        ...plugins,
+        globalConfig$,
+      });
+      visDataRoutes(router, framework, validationTelemetry);
 
-          await init(framework, __LEGACY, validationTelemetrySetup);
-        }),
+      fieldsRoutes(framework);
+    })();
+
+    return {
+      getVisData: async (
+        requestContext: RequestHandlerContext,
+        fakeRequest: FakeRequest,
+        options: GetVisDataOptions
+      ) => {
+        return await getVisData(requestContext, { ...fakeRequest, body: options }, framework);
       },
-      getVisData: async (requestContext: RequestHandlerContext, options: GetVisDataOptions) => {
-        return await getVisData(requestContext, options, framework);
-      },
+      addSearchStrategy: searchStrategyRegistry.addStrategy.bind(searchStrategyRegistry),
     };
   }
 

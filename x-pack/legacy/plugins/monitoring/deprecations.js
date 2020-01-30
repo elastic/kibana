@@ -28,7 +28,7 @@ export const deprecations = () => {
       }
     },
     (settings, log) => {
-      const fromPath = 'xpack.monitoring.elasticsearch';
+      const fromPath = 'monitoring.elasticsearch';
       const es = get(settings, 'elasticsearch');
       if (es) {
         if (es.username === 'elastic') {
@@ -39,7 +39,7 @@ export const deprecations = () => {
       }
     },
     (settings, log) => {
-      const fromPath = 'xpack.monitoring.elasticsearch.ssl';
+      const fromPath = 'monitoring.elasticsearch.ssl';
       const ssl = get(settings, 'elasticsearch.ssl');
       if (ssl) {
         if (ssl.key !== undefined && ssl.certificate === undefined) {
