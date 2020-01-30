@@ -106,5 +106,6 @@ export interface FetchCasesResponse {
   page: number;
   perPage: number;
   total: number;
+  saved_objects: CaseSavedObject[];
   data: Case[];
 }
