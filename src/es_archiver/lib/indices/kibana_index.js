@@ -88,7 +88,7 @@ export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
 
   const savedObjectTypes = convertLegacyTypes(uiExports, config);
   const typeRegistry = new SavedObjectTypeRegistry();
-  savedObjectTypes.forEach(typeRegistry.registerType);
+  savedObjectTypes.forEach(type => typeRegistry.registerType(type));
 
   const migratorOptions = {
     savedObjectsConfig: {

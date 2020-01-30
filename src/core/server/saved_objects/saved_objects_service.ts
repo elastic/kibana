@@ -234,7 +234,7 @@ export class SavedObjectsService
       setupDeps.legacyPlugins.uiExports,
       setupDeps.legacyPlugins.pluginExtendedConfig
     );
-    legacyTypes.forEach(this.typeRegistry.registerType);
+    legacyTypes.forEach(type => this.typeRegistry.registerType(type));
     this.validations = setupDeps.legacyPlugins.uiExports.savedObjectValidations || {};
 
     return {
