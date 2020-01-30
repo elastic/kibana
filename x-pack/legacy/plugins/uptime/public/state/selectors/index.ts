@@ -28,3 +28,7 @@ export const selectSelectedMonitor = (state: AppState) => {
 export const selectMonitorStatus = (state: AppState) => {
   return state.monitorStatus.status;
 };
+
+export const selectPingHistogram = ({ ping, ui }: AppState) => {
+  return { data: ping.pingHistogram, loading: ping.loading, lastRefresh: ui.lastRefresh };
+};

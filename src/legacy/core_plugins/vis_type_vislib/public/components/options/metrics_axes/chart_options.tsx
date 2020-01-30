@@ -22,7 +22,7 @@ import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { VisOptionsProps } from '../../../legacy_imports';
+import { VisOptionsProps } from '../../../../../vis_default_editor/public';
 import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../types';
 import { ChartTypes } from '../../../utils/collections';
 import { SelectOption } from '../../common';
