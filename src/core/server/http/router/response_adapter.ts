@@ -118,7 +118,11 @@ export class HapiResponseAdapter {
 
     // Special case for when we are proxying requests and want to enable streaming back error responses opaquely.
     if (Buffer.isBuffer(payload) || payload instanceof stream.Readable) {
-      return this.responseToolkit.response(payload).code(kibanaResponse.status);
+      const response = this.responseToolkit
+        .response(kibanaResponse.payload)
+        .code(kibanaResponse.status);
+      setHeaders(response, kibanaResponse.options.headers);
+      return response;
     }
 
     // we use for BWC with Boom payload for error responses - {error: string, message: string, statusCode: string}
