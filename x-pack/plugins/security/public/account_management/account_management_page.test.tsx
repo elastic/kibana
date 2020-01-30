@@ -11,6 +11,7 @@ import { AccountManagementPage } from './account_management_page';
 import { coreMock } from 'src/core/public/mocks';
 import { securityMock } from '../mocks';
 import { userAPIClientMock } from '../management/users/index.mock';
+import { SecurityPluginSetup } from '..';
 
 interface Options {
   withFullName?: boolean;

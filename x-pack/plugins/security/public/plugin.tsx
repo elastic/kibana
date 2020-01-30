@@ -21,7 +21,7 @@ import {
   SessionTimeoutHttpInterceptor,
   UnauthorizedResponseHttpInterceptor,
 } from './session';
-import { SecurityLicenseService } from '../common/licensing';
+import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { SecurityNavControlService } from './nav_control';
 import { AccountManagementPage } from './account_management';
 import { AuthenticationService, AuthenticationServiceSetup } from './authentication';
@@ -51,6 +51,7 @@ export class SecurityPlugin
   private readonly securityLicenseService = new SecurityLicenseService();
   private readonly managementService = new ManagementService();
   private authc!: AuthenticationServiceSetup;
+  private securityLicense!: SecurityLicense;
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
@@ -69,6 +70,7 @@ export class SecurityPlugin
     http.intercept(new SessionTimeoutHttpInterceptor(this.sessionTimeout, anonymousPaths));
 
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
+    this.securityLicense = license;
 
     this.authc = new AuthenticationService().setup({ http: core.http });
 
@@ -110,7 +112,7 @@ export class SecurityPlugin
     };
   }
 
-  public start(core: CoreStart, { data, management }: PluginStartDependencies) {
+  public start(core: CoreStart, { management }: PluginStartDependencies) {
     this.sessionTimeout.start();
     this.navControlService.start({ core });
 
@@ -119,6 +121,7 @@ export class SecurityPlugin
     }
 
     return {
+      securityLicense: this.securityLicense,
       __legacyCompat: {
         account_management: {
           AccountManagementPage: () => (
