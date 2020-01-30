@@ -144,30 +144,6 @@ export class ESMVTSearchSource extends ESSearchSource {
     return false;
   }
 
-  // isQueryAwareTogglable() {
-  //   return false;
-  // }
-
-  supportsESFilters() {
-    return true;
-  }
-
-  async getFields() {
-    return [];
-  }
-
-  // async getDateFields() {
-  //   return [];
-  // }
-  //
-  // async getNumberFields() {
-  //   return [];
-  // }
-  //
-  // async getCategoricalFields() {
-  //   return [];
-  // }
-
   async getImmutableProperties() {
     const ip = await super.getImmutableProperties();
     ip.push({

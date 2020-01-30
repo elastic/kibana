@@ -16,10 +16,12 @@ import { ESSearchSource } from './es_search_source';
 import { ESPewPewSource } from './es_pew_pew_source/es_pew_pew_source';
 import { MVTVectorSource } from './mvt_vector_source/mvt_vector_source';
 import { ESMVTSearchSource } from './es_mvt_search_source/es_mvt_search_source';
+import {ESMVTGeoGridSource} from "./es_mvt_geo_grid_source/es_mvt_geo_grid_source";
 
 export const ALL_SOURCES = [
   // MVTVectorSource,
   ESMVTSearchSource,
+  ESMVTGeoGridSource,
   GeojsonFileSource,
   ESSearchSource,
   ESGeoGridSource,

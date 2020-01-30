@@ -59,6 +59,7 @@ export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';
 export const ES_PEW_PEW = 'ES_PEW_PEW';
 export const ES_MVT_SEARCH = 'ES_MVT_SEARCH';
+export const ES_MVT_GEO_GRID = 'ES_MVT_GEO_GRID';
 
 export const FIELD_ORIGIN = {
   SOURCE: 'source',
