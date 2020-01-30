@@ -6,10 +6,17 @@
 
 // @ts-ignore
 import { MAP_SAVED_OBJECT_TYPE } from '../../../maps/common/constants';
+import { LENS_EMBEDDABLE_TYPE } from '../../../lens/common/constants';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/visualizations/public/embeddable/constants';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/constants';
 
-export const EmbeddableTypes: { map: string; search: string; visualization: string } = {
+export const EmbeddableTypes: {
+  lens: string;
+  map: string;
+  search: string;
+  visualization: string;
+} = {
+  lens: LENS_EMBEDDABLE_TYPE,
   map: MAP_SAVED_OBJECT_TYPE,
   search: SEARCH_EMBEDDABLE_TYPE,
   visualization: VISUALIZE_EMBEDDABLE_TYPE,
