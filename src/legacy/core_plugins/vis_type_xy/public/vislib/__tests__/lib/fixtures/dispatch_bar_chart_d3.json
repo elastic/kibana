@@ -1,0 +1,19 @@
+{
+    "series": [
+        {
+            "id": "1",
+            "rawId": "Late Aircraft Delay-col-2-1",
+            "label": "Late Aircraft Delay"
+        },
+        {
+            "id": "1",
+            "rawId": "No Delay-col-2-1",
+            "label": "No Delay"
+        },
+        {
+            "id": "1",
+            "rawId": "NAS Delay-col-2-1",
+            "label": "NAS Delay"
+        }
+    ]
+}

@@ -1,0 +1,129 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { once } from 'lodash';
+
+import { EuiCallOut } from '@elastic/eui';
+
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  IUiSettingsClient,
+  PluginInitializerContext,
+  MountPoint,
+  UnmountCallback,
+} from 'kibana/public';
+
+import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
+import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
+import { createVisTypeXyVisFn } from './vis_type_vislib_vis_fn';
+import { createPieVisFn } from './pie_fn';
+import {
+  createHistogramVisTypeDefinition,
+  createLineVisTypeDefinition,
+  createPieVisTypeDefinition,
+  createAreaVisTypeDefinition,
+  createHeatmapVisTypeDefinition,
+  createHorizontalBarVisTypeDefinition,
+  createGaugeVisTypeDefinition,
+  createGoalVisTypeDefinition,
+} from './vis_type_vislib_vis_types';
+import { ChartsPluginSetup } from '../../../../plugins/charts/public';
+
+export interface VisTypeXyDependencies {
+  uiSettings: IUiSettingsClient;
+  charts: ChartsPluginSetup;
+  mountBanner: (mount: MountPoint<HTMLElement>) => UnmountCallback;
+}
+
+/** @internal */
+export interface VisTypeXyPluginSetupDependencies {
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
+  visualizations: VisualizationsSetup;
+  charts: ChartsPluginSetup;
+}
+
+/** @internal */
+export interface VisTypeXyPluginStartDependencies {
+  expressions: ReturnType<ExpressionsPublicPlugin['start']>;
+  visualizations: VisualizationsStart;
+}
+
+type VisTypeXyCoreSetup = CoreSetup<VisTypeXyPluginStartDependencies>;
+
+/** @internal */
+export class VisTypeXyPlugin implements Plugin<Promise<void>, void> {
+  constructor(public initializerContext: PluginInitializerContext) {}
+
+  public async setup(
+    core: VisTypeXyCoreSetup,
+    { expressions, visualizations, charts }: VisTypeXyPluginSetupDependencies
+  ) {
+    const [{ overlays }] = await core.getStartServices();
+    const mountBanner: VisTypeXyDependencies['mountBanner'] = mountBannerOnce(overlays);
+
+    const visualizationDependencies: Readonly<VisTypeXyDependencies> = {
+      uiSettings: core.uiSettings,
+      mountBanner,
+      charts,
+    };
+
+    expressions.registerFunction(createVisTypeXyVisFn);
+    expressions.registerFunction(createPieVisFn);
+
+    [
+      createHistogramVisTypeDefinition,
+      createLineVisTypeDefinition,
+      createPieVisTypeDefinition,
+      createAreaVisTypeDefinition,
+      createHeatmapVisTypeDefinition,
+      createHorizontalBarVisTypeDefinition,
+      createGaugeVisTypeDefinition,
+      createGoalVisTypeDefinition,
+    ].forEach(vis => visualizations.types.createBaseVisualization(vis(visualizationDependencies)));
+  }
+
+  public start(core: CoreStart, deps: VisTypeXyPluginStartDependencies) {
+    // nothing to do here
+  }
+}
+
+/**
+ * Helper method used to display warning using `vis_type_kbn` plugin over `vis_type_vislib`
+ */
+const mountBannerOnce = ({ banners }: CoreStart['overlays']) => {
+  let count = 0;
+  let id: string;
+
+  return (mount: MountPoint<HTMLElement>) => {
+    count++;
+
+    if (count === 1) {
+      id = banners.add(mount);
+    }
+    return () => {
+      count--;
+
+      if (count === 0) banners.remove(id);
+    };
+  };
+};
