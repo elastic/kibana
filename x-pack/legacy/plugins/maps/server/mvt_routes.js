@@ -27,7 +27,7 @@ export function initMVTRoutes(server) {
     handler: async (request, h) => {
       const { server, query } = request;
 
-      server.log('warning', query);
+      // server.log('warning', query);
 
 
       const indexPattern = query.indexPattern;
@@ -42,7 +42,7 @@ export function initMVTRoutes(server) {
       const size = parseInt(query.size) || 10000;
 
       const requestBodyDSL = rison.decode(query.requestBody);
-      server.log('info',requestBodyDSL);
+      // server.log('info',requestBodyDSL);
       const tile = await getTile({
         server,
         esClient,
@@ -56,7 +56,7 @@ export function initMVTRoutes(server) {
         requestBody: requestBodyDSL
       });
 
-      server.log('info', tile);
+      // server.log('info', tile);
 
       if (!tile) {
         return null;

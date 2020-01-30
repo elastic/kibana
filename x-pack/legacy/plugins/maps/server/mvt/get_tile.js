@@ -21,7 +21,7 @@ export async function getTile({
   fields = [],
   requestBody = {},
 }) {
-  server.log('info', { indexPattern, size, geometryFieldName, x, y, z, fields });
+  // server.log('info', { indexPattern, size, geometryFieldName, x, y, z, fields });
   const polygon = toBoundingBox(x, y, z);
 
   try {
@@ -71,15 +71,17 @@ export async function getTile({
       };
 
       const firstFields = {};
-      const fields = hit.fields;
-      Object.keys(fields).forEach(key => {
-        const value = fields[key];
-        if (Array.isArray(value)) {
-          firstFields[key] = value[0];
-        } else {
-          firstFields[key] = value;
-        }
-      });
+      if (hit.fields) {
+        const fields = hit.fields;
+        Object.keys(fields).forEach(key => {
+          const value = fields[key];
+          if (Array.isArray(value)) {
+            firstFields[key] = value[0];
+          } else {
+            firstFields[key] = value;
+          }
+        });
+      }
 
       const properties = {
         ...hit._source,
@@ -105,7 +107,7 @@ export async function getTile({
       type: 'FeatureCollection',
     };
 
-    server.log('info', `feature length ${featureCollection.features.length}`);
+    // server.log('info', `feature length ${featureCollection.features.length}`);
 
     const tileIndex = geojsonvt(featureCollection, {
       maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24
@@ -125,7 +127,7 @@ export async function getTile({
       const pbf = vtpbf.fromGeojsonVt({ geojsonLayer: tile }, { version: 2 });
       const buffer = Buffer.from(pbf);
 
-      server.log('info', `bytelength: ${buffer.byteLength}`);
+      // server.log('info', `bytelength: ${buffer.byteLength}`);
 
       return buffer;
     } else {
