@@ -76,6 +76,19 @@ visualization. To disable automatic updates, you can disconnect a visualization
 from the saved search.
 
 [float]
+[[vis-inspector]]
+== Inspect visualizations
+
+Many visualizations allow you to inspect the query and data behind the visualization.
+
+. In the {kib} toolbar, click *Inspect*.
+. To download the data, click *Download CSV*, then choose one of the following options:
+* *Formatted CSV* - Downloads the data in table format.
+* *Raw CSV* - Downloads the data as provided.
+. To view the data collection requests, select *Requests* from the *View*
+dropdown.
+
+[float]
 [[save-visualize]]
 == Save visualizations
 To use your visualizations in <<dashboard, dashboards>>, you must save them.
@@ -109,19 +122,6 @@ to view an embedded visualization
 * Share a direct link to a {kib} visualization
 * Generate a PDF report
 * Generate a PNG report
-
-[float]
-[[vis-inspector]]
-== Inspect visualizations
-
-Many visualizations allow you to inspect the query and data behind the visualization.
-
-. In the {kib} toolbar, click *Inspect*.
-. To download the data, click *Download CSV*, then choose one of the following options:
-* *Formatted CSV* - Downloads the data in table format.
-* *Raw CSV* - Downloads the data as provided.
-. To view the data collection requests, select *Requests* from the *View*
-dropdown.
 
 --
 include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
