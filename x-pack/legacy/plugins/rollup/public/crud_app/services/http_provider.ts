@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// This is an Angular service, which is why we use this provider pattern to access it within
-// our React app.
-let _http;
+import { HttpStart } from 'src/core/public';
 
-export function setHttp(http) {
+let _http: HttpStart | null = null;
+
+export function setHttp(http: HttpStart) {
   _http = http;
 }
 
 export function getHttp() {
+  if (!_http) {
+    throw new Error('Rollup http is not defined');
+  }
   return _http;
 }
