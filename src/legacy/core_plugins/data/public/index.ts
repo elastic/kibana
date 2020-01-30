@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin, DataStart } from './plugin';
+import { DataPlugin as Plugin } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -27,14 +27,49 @@ export function plugin() {
 // /// Export types & static code
 
 /** @public types */
-export { DataStart };
+export { DataSetup, DataStart } from './plugin';
 export {
   SavedQueryAttributes,
   SavedQuery,
   SavedQueryTimeFilter,
 } from '../../../../plugins/data/public';
+export {
+  // agg_types
+  AggParam,
+  AggParamOption,
+  DateRangeKey,
+  IpRangeKey,
+  ISchemas,
+  OptionedParamEditorProps,
+  OptionedValueProp,
+} from './search/types';
 
 /** @public static code */
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
-export { getRequestInspectorStats, getResponseInspectorStats } from './search';
+export {
+  // agg_types TODO need to group these under a namespace or prefix
+  AggParamType,
+  aggTypeFilters,
+  AggGroupNames,
+  aggGroupNamesMap,
+  BUCKET_TYPES,
+  CidrMask,
+  convertDateRangeToString,
+  convertIPRangeToString,
+  intervalOptions, // only used in Discover
+  isDateHistogramBucketAggConfig,
+  isStringType,
+  isType,
+  isValidInterval,
+  isValidJson,
+  METRIC_TYPES,
+  OptionedParamType,
+  propFilter,
+  Schema,
+  Schemas,
+  termsAggFilter,
+  // search_source
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from './search';

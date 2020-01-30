@@ -17,87 +17,27 @@
  * under the License.
  */
 
-import { countMetricAgg } from './metrics/count';
-import { avgMetricAgg } from './metrics/avg';
-import { sumMetricAgg } from './metrics/sum';
-import { medianMetricAgg } from './metrics/median';
-import { minMetricAgg } from './metrics/min';
-import { maxMetricAgg } from './metrics/max';
-import { topHitMetricAgg } from './metrics/top_hit';
-import { stdDeviationMetricAgg } from './metrics/std_deviation';
-import { cardinalityMetricAgg } from './metrics/cardinality';
-import { percentilesMetricAgg } from './metrics/percentiles';
-import { geoBoundsMetricAgg } from './metrics/geo_bounds';
-import { geoCentroidMetricAgg } from './metrics/geo_centroid';
-import { percentileRanksMetricAgg } from './metrics/percentile_ranks';
-import { derivativeMetricAgg } from './metrics/derivative';
-import { cumulativeSumMetricAgg } from './metrics/cumulative_sum';
-import { movingAvgMetricAgg } from './metrics/moving_avg';
-import { serialDiffMetricAgg } from './metrics/serial_diff';
-import { dateHistogramBucketAgg, setBounds } from './buckets/date_histogram';
-import { histogramBucketAgg } from './buckets/histogram';
-import { rangeBucketAgg } from './buckets/range';
-import { dateRangeBucketAgg } from './buckets/date_range';
-import { ipRangeBucketAgg } from './buckets/ip_range';
-import { termsBucketAgg, termsAggFilter } from './buckets/terms';
-import { filterBucketAgg } from './buckets/filter';
-import { filtersBucketAgg } from './buckets/filters';
-import { significantTermsBucketAgg } from './buckets/significant_terms';
-import { geoHashBucketAgg } from './buckets/geo_hash';
-import { geoTileBucketAgg } from './buckets/geo_tile';
-import { bucketSumMetricAgg } from './metrics/bucket_sum';
-import { bucketAvgMetricAgg } from './metrics/bucket_avg';
-import { bucketMinMetricAgg } from './metrics/bucket_min';
-import { bucketMaxMetricAgg } from './metrics/bucket_max';
-
+export { aggTypes } from './agg_types';
 export { AggType } from './agg_type';
-
-export const aggTypes = {
-  metrics: [
-    countMetricAgg,
-    avgMetricAgg,
-    sumMetricAgg,
-    medianMetricAgg,
-    minMetricAgg,
-    maxMetricAgg,
-    stdDeviationMetricAgg,
-    cardinalityMetricAgg,
-    percentilesMetricAgg,
-    percentileRanksMetricAgg,
-    topHitMetricAgg,
-    derivativeMetricAgg,
-    cumulativeSumMetricAgg,
-    movingAvgMetricAgg,
-    serialDiffMetricAgg,
-    bucketAvgMetricAgg,
-    bucketSumMetricAgg,
-    bucketMinMetricAgg,
-    bucketMaxMetricAgg,
-    geoBoundsMetricAgg,
-    geoCentroidMetricAgg,
-  ],
-  buckets: [
-    dateHistogramBucketAgg,
-    histogramBucketAgg,
-    rangeBucketAgg,
-    dateRangeBucketAgg,
-    ipRangeBucketAgg,
-    termsBucketAgg,
-    filterBucketAgg,
-    filtersBucketAgg,
-    significantTermsBucketAgg,
-    geoHashBucketAgg,
-    geoTileBucketAgg,
-  ],
-};
-
-export { AggParam } from './agg_params';
 export { AggConfig } from './agg_config';
 export { AggConfigs } from './agg_configs';
-export { AggGroupNames, aggGroupNamesMap } from './agg_groups';
 export { FieldParamType } from './param_types';
+export { aggTypeFieldFilters } from './param_types/filter';
+export { parentPipelineAggHelper } from './metrics/lib/parent_pipeline_agg_helper';
+
+// static code
+export { AggParamType } from './param_types/agg';
+export { AggGroupNames, aggGroupNamesMap } from './agg_groups';
+export { intervalOptions } from './buckets/_interval_options'; // only used in Discover
+export { isDateHistogramBucketAggConfig, setBounds } from './buckets/date_histogram';
+export { termsAggFilter } from './buckets/terms';
+export { isType, isStringType } from './buckets/migrate_include_exclude_format';
+export { CidrMask } from './buckets/lib/cidr_mask';
+export { convertDateRangeToString } from './buckets/date_range';
+export { convertIPRangeToString } from './buckets/ip_range';
+export { aggTypeFilters, propFilter } from './filter';
+export { OptionedParamType } from './param_types/optioned';
+export { isValidJson, isValidInterval } from './utils';
 export { BUCKET_TYPES } from './buckets/bucket_agg_types';
 export { METRIC_TYPES } from './metrics/metric_agg_types';
 export { ISchemas, Schema, Schemas } from './schemas';
-
-export { setBounds, termsAggFilter };

@@ -45,7 +45,7 @@ export interface Schema {
   aggSettings?: any;
 }
 
-class Schemas {
+export class Schemas {
   // @ts-ignore
   all: IndexedArray<Schema>;
 
@@ -103,5 +103,3 @@ class Schemas {
       .commit();
   }
 }
-
-export { Schemas };
