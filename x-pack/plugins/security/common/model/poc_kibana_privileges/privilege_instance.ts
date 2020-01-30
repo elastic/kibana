@@ -19,8 +19,8 @@ export class Privilege {
     return this.checkActions(this.actions, candidatePrivilege.actions);
   }
 
-  public equals({ type, id }: Privilege) {
-    return type === this.type && id === this.id;
+  public equals({ scope, type, id }: Privilege) {
+    return scope === this.scope && type === this.type && id === this.id;
   }
 
   private checkActions(knownActions: string[], candidateActions: string[]) {

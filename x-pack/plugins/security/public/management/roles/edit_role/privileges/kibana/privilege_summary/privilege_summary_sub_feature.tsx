@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FeaturePrivilege } from './feature_privilege';
+import React from 'react';
 
-export class PrimaryFeaturePrivilege extends FeaturePrivilege {
-  public isMinimalFeaturePrivilege() {
-    return this.id.startsWith('minimal_');
-  }
-}
+export const PrivilegeSummarySubFeature = () => {
+  return <span>shit here</span>;
+};

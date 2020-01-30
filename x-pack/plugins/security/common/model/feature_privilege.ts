@@ -49,26 +49,4 @@ export class FeaturePrivilege extends Privilege {
   public get excludeFromBasePrivileges() {
     return Boolean(this.config.excludeFromBasePrivileges);
   }
-
-  public merge(otherPrivilege: FeaturePrivilege) {
-    return new FeaturePrivilege(
-      this.scope,
-      this.id,
-      this.mergePrivilegeConfigs(otherPrivilege),
-      Array.from(new Set([...this.actions, ...otherPrivilege.actions]).values())
-    );
-  }
-
-  protected mergePrivilegeConfigs(other: FeaturePrivilege) {
-    return {
-      ...this.config,
-      api: this.api ? [...(this.api || []), ...(other.config.api || [])] : undefined,
-      app: this.app ? [...(this.app || []), ...(other.config.app || [])] : undefined,
-      ui: this.ui ? [...this.ui, ...other.config.ui!] : [],
-      savedObject: {
-        all: [...this.savedObject.all, ...other.config.savedObject.all],
-        read: [...this.savedObject.read, ...other.config.savedObject.read],
-      },
-    };
-  }
 }

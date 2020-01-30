@@ -6,7 +6,6 @@
 
 import { FeatureKibanaPrivileges } from '../../../features/common';
 import { FeaturePrivilege } from './feature_privilege';
-import { PrimaryFeaturePrivilege } from './primary_feature_privilege';
 import { PrivilegeScope } from './poc_kibana_privileges/privilege_instance';
 
 export interface SubFeaturePrivilegeConfig extends FeatureKibanaPrivileges {
@@ -39,25 +38,6 @@ export class SubFeaturePrivilege extends FeaturePrivilege {
         },
       } as SubFeaturePrivilegeConfig,
       []
-    );
-  }
-
-  public merge(otherSubFeature: SubFeaturePrivilege): SubFeaturePrivilege {
-    const mergedPrivilege: SubFeaturePrivilegeConfig = {
-      ...this.subPrivilegeConfig,
-      api: this.api ? [...(this.api || []), ...(otherSubFeature.api || [])] : undefined,
-      app: this.app ? [...(this.app || []), ...(otherSubFeature.app || [])] : undefined,
-      ui: this.ui ? [...this.ui, ...otherSubFeature.ui!] : [],
-      savedObject: {
-        all: [...this.savedObject.all, ...otherSubFeature.savedObject.all],
-        read: [...this.savedObject.read, ...otherSubFeature.savedObject.read],
-      },
-    };
-
-    return new SubFeaturePrivilege(
-      this.scope,
-      mergedPrivilege,
-      Array.from(new Set([...this.actions, ...otherSubFeature.actions]).values())
     );
   }
 }

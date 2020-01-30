@@ -62,6 +62,7 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
           role={role}
           privilegeCalculator={privilegeCalculator}
           spaces={spaces}
+          features={features}
           uiCapabilities={uiCapabilities}
           onChange={onChange}
           editable={editable}

@@ -12,7 +12,8 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { SpaceAvatar } from '../../../../../../../legacy/plugins/spaces/public/space_avatar';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../spaces/common';
@@ -20,7 +21,6 @@ import { Space } from '../../../../../../spaces/common/model/space';
 
 interface Props {
   spaces: Space[];
-  intl: InjectedIntl;
   buttonText: string;
 }
 
@@ -60,15 +60,13 @@ export class SpacesPopoverList extends Component<Props, State> {
   }
 
   private getMenuPanel = () => {
-    const { intl } = this.props;
     const { searchTerm } = this.state;
 
     const items = this.getVisibleSpaces(searchTerm).map(this.renderSpaceMenuItem);
 
     const panelProps = {
       className: 'spcMenu',
-      title: intl.formatMessage({
-        id: 'xpack.security.management.editRole.spacesPopoverList.popoverTitle',
+      title: i18n.translate('xpack.security.management.editRole.spacesPopoverList.popoverTitle', {
         defaultMessage: 'Spaces',
       }),
       watchedItemProps: ['data-search-term'],
@@ -142,15 +140,16 @@ export class SpacesPopoverList extends Component<Props, State> {
   };
 
   private renderSearchField = () => {
-    const { intl } = this.props;
     return (
       <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
         {
           <EuiFieldSearch
-            placeholder={intl.formatMessage({
-              id: 'xpack.security.management.editRole.spacesPopoverList.findSpacePlaceholder',
-              defaultMessage: 'Find a space',
-            })}
+            placeholder={i18n.translate(
+              'xpack.security.management.editRole.spacesPopoverList.findSpacePlaceholder',
+              {
+                defaultMessage: 'Find a space',
+              }
+            )}
             incremental={true}
             onSearch={this.onSearch}
             onKeyDown={this.onSearchKeyDown}

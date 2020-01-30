@@ -9,10 +9,13 @@ import { FeaturePrivilege } from './feature_privilege';
 import { PrimaryFeaturePrivilege } from './primary_feature_privilege';
 import { SecuredSubFeature } from './secured_sub_feature';
 import { PrivilegeScope } from './poc_kibana_privileges/privilege_instance';
+import { SubFeaturePrivilege } from './sub_feature_privilege';
 
 export class SecuredFeature extends Feature {
   public readonly primaryFeaturePrivileges: PrimaryFeaturePrivilege[];
   public readonly minimalPrimaryFeaturePrivileges: PrimaryFeaturePrivilege[];
+
+  public readonly subFeaturePrivileges: SubFeaturePrivilege[];
 
   public readonly subFeatures: SecuredSubFeature[];
 
@@ -38,6 +41,13 @@ export class SecuredFeature extends Feature {
 
     this.subFeatures =
       this.config.subFeatures?.map(sf => new SecuredSubFeature(scope, sf, actionMapping)) ?? [];
+
+    this.subFeaturePrivileges = [];
+    for (const subFeature of this.subFeatures) {
+      for (const subFeaturePriv of subFeature.privilegeIterator()) {
+        this.subFeaturePrivileges.push(subFeaturePriv);
+      }
+    }
 
     this.scope = scope;
   }

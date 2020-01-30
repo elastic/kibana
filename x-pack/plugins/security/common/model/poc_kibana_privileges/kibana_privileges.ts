@@ -54,14 +54,6 @@ export class KibanaPrivileges {
     );
   }
 
-  public getGlobalPrivileges() {
-    return Array.from(this.global.values());
-  }
-
-  public getSpacesPrivileges() {
-    return Array.from(this.spaces.values());
-  }
-
   public getBasePrivileges(scope: PrivilegeScope) {
     switch (scope) {
       case 'global':
@@ -73,19 +65,15 @@ export class KibanaPrivileges {
     }
   }
 
-  public getAllFeaturePrivileges(scope: PrivilegeScope) {
+  public getSecuredFeature(scope: PrivilegeScope, featureId: string) {
     switch (scope) {
       case 'global':
-        return this.globalFeature;
+        return this.globalFeature.get(featureId)!;
       case 'space':
-        return this.spaceFeature;
+        return this.spaceFeature.get(featureId)!;
       default:
         throw new Error(`Unsupported scope: ${scope}`);
     }
-  }
-
-  public getSecuredFeature(scope: PrivilegeScope, featureId: string) {
-    return this.getAllFeaturePrivileges(scope).get(featureId)!;
   }
 
   public getSecuredFeatures(scope: PrivilegeScope) {
@@ -100,7 +88,7 @@ export class KibanaPrivileges {
   }
 
   public getFeaturePrivileges(scope: PrivilegeScope, featureId: string) {
-    return this.getAllFeaturePrivileges(scope).get(featureId)?.allPrivileges ?? [];
+    return this.getSecuredFeature(scope, featureId).allPrivileges ?? [];
   }
 
   public createCollectionFromRoleKibanaPrivileges(roleKibanaPrivileges: RoleKibanaPrivilege[]) {
@@ -109,13 +97,9 @@ export class KibanaPrivileges {
 
     const privileges: Privilege[] = roleKibanaPrivileges
       .map(rkp => {
-        let basePrivileges: Privilege[];
-        if (this.isGlobalPrivilegeDefinition(rkp)) {
-          basePrivileges = this.getGlobalPrivileges().filter(filterAssigned(rkp.base));
-        } else {
-          basePrivileges = this.getSpacesPrivileges().filter(filterAssigned(rkp.base));
-        }
-
+        const basePrivileges = this.getBasePrivileges(this.getScope(rkp)).filter(
+          filterAssigned(rkp.base)
+        );
         const featurePrivileges: Privilege[][] = Object.entries(rkp.feature).map(
           ([featureId, assignedFeaturePrivs]) => {
             return this.getFeaturePrivileges(this.getScope(rkp), featureId).filter(

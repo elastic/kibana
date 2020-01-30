@@ -13,13 +13,13 @@ import {
 } from '../../../../../../../common/model';
 
 import { NO_PRIVILEGE_VALUE } from '../constants';
-import { ScopedPrivilegeCalculator } from '../privilege_calculator';
+import { ScopedPrivilegeCalculator, PrivilegeFormCalculator } from '../privilege_calculator';
 
 interface Props {
   featureId: string;
   subFeature: SecuredSubFeature;
   selectedFeaturePrivileges: string[];
-  privilegeCalculator: ScopedPrivilegeCalculator;
+  privilegeCalculator: PrivilegeFormCalculator;
   onChange: (selectedPrivileges: string[]) => void;
   disabled?: boolean;
 }
@@ -52,11 +52,10 @@ export const SubFeatureForm = (props: Props) => {
     return (
       <div key={index}>
         {privilegeGroup.privileges.map((privilege: SubFeaturePrivilege) => {
-          const { selected, inherited } = props.privilegeCalculator.describeFeaturePrivilege(
+          const isGranted = props.privilegeCalculator.isIndependentSubFeaturePrivilegeGranted(
             props.featureId,
             privilege.id
           );
-
           return (
             <EuiCheckbox
               key={privilege.id}
@@ -71,8 +70,8 @@ export const SubFeatureForm = (props: Props) => {
                   props.onChange(props.selectedFeaturePrivileges.filter(sp => sp !== privilege.id));
                 }
               }}
-              checked={selected}
-              disabled={inherited || props.disabled}
+              checked={isGranted}
+              disabled={props.disabled}
               compressed={true}
             />
           );
@@ -85,12 +84,9 @@ export const SubFeatureForm = (props: Props) => {
     privilegeGroup: SubFeaturePrivilegeGroup,
     index: number
   ) {
-    const calcResult = props.privilegeCalculator.describeMutuallyExclusiveSubFeaturePrivileges(
+    const firstSelectedPrivilege = props.privilegeCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege(
+      props.featureId,
       privilegeGroup
-    );
-
-    const firstSelectedPrivilege = privilegeGroup.privileges.find(
-      p => props.privilegeCalculator.describeFeaturePrivilege(props.featureId, p.id).selected
     );
 
     const options = [
@@ -98,7 +94,7 @@ export const SubFeatureForm = (props: Props) => {
         return {
           id: privilege.id,
           label: privilege.name,
-          isDisabled: props.disabled || !calcResult[privilege.id].enabled,
+          isDisabled: props.disabled,
         };
       }),
     ];
@@ -106,7 +102,7 @@ export const SubFeatureForm = (props: Props) => {
     options.push({
       id: NO_PRIVILEGE_VALUE,
       label: 'None',
-      isDisabled: props.disabled || Object.values(calcResult).some(r => r.inherited),
+      isDisabled: props.disabled,
     });
 
     return (

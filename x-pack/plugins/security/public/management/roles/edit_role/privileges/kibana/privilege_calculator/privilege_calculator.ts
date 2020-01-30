@@ -10,13 +10,11 @@ import {
   KibanaPrivileges,
   Role,
   Privilege,
-  PrimaryFeaturePrivilege,
   SubFeaturePrivilege,
   SubFeaturePrivilegeGroup,
   RoleKibanaPrivilege,
   SecuredFeature,
 } from '../../../../../../../common/model';
-import { NO_PRIVILEGE_VALUE } from '../constants';
 
 export type ScopedPrivilegeCalculator = ReturnType<PrivilegeCalculator['getScopedInstance']>;
 
@@ -24,20 +22,22 @@ export class PrivilegeCalculator {
   constructor(private readonly kibanaPrivileges: KibanaPrivileges) {}
 
   public getScopedInstance(role: Role, privilegeIndex: number) {
-    const scope = this._getScope(role, privilegeIndex);
+    const scope = this.getScope(role, privilegeIndex);
 
-    const { direct, inherited } = this._getRelevantEntries(role, privilegeIndex);
+    const { direct, inherited } = this.getRelevantEntries(role, privilegeIndex);
 
     const inheritedPrivileges = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges(
       inherited
     );
+
+    const directPrivileges = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges(direct);
 
     const assignedPrivileges = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges([
       ...direct,
       ...inherited,
     ]);
 
-    const features = Array.from(this.kibanaPrivileges.getAllFeaturePrivileges(scope).values());
+    const features = this.kibanaPrivileges.getSecuredFeatures(scope);
 
     return {
       getSecuredFeatures: () => this.kibanaPrivileges.getSecuredFeatures(scope),
@@ -61,22 +61,35 @@ export class PrivilegeCalculator {
           features.find(f => f.id === featureId)!
         ),
 
-      canCustomizeSubFeaturePrivileges: (featureId: string) =>
-        this.canCustomizeSubFeaturePrivileges(
+      canCustomizeSubFeaturePrivileges: (featureId: string) => {
+        const isCustomizing = this.isCustomizingSubFeaturePrivileges(
           assignedPrivileges,
           inheritedPrivileges,
+          role.kibana[privilegeIndex],
           features.find(f => f.id === featureId)!
-        ),
+        );
+
+        return this.canCustomizeSubFeaturePrivileges(
+          assignedPrivileges,
+          directPrivileges,
+          inheritedPrivileges,
+          isCustomizing,
+          features.find(f => f.id === featureId)!
+        );
+      },
 
       isCustomizingSubFeaturePrivileges: (featureId: string) =>
         this.isCustomizingSubFeaturePrivileges(
           assignedPrivileges,
+          inheritedPrivileges,
+          role.kibana[privilegeIndex],
           features.find(f => f.id === featureId)!
         ),
 
       toggleMinimalPrimaryFeaturePrivilege: (featureId: string) =>
         this.toggleMinimalPrimaryFeaturePrivilege(
           assignedPrivileges,
+          directPrivileges,
           features.find(f => f.id === featureId)!
         ),
 
@@ -94,34 +107,18 @@ export class PrivilegeCalculator {
     };
   }
 
-  public _locateGlobalPrivilege(role: Role) {
+  private locateGlobalPrivilege(role: Role) {
     return role.kibana.find(entry => this.isGlobalPrivilege(entry));
   }
 
-  public _getScope(role: Role, privilegeIndex: number): PrivilegeScope {
+  private getScope(role: Role, privilegeIndex: number): PrivilegeScope {
     if (this.isGlobalPrivilege(role.kibana[privilegeIndex])) {
       return 'global';
     }
     return 'space';
   }
 
-  public _collectRelevantEntries(role: Role, privilegeIndex: number) {
-    const entries = [];
-
-    const entry = role.kibana[privilegeIndex];
-    if (entry) {
-      entries.push(entry);
-    }
-
-    const globalEntry = this._locateGlobalPrivilege(role);
-    if (globalEntry && globalEntry !== entry) {
-      entries.push(globalEntry);
-    }
-
-    return entries;
-  }
-
-  public _getRelevantEntries(role: Role, privilegeIndex: number) {
+  private getRelevantEntries(role: Role, privilegeIndex: number) {
     const result = {
       inherited: [] as RoleKibanaPrivilege[],
       direct: [] as RoleKibanaPrivilege[],
@@ -132,7 +129,7 @@ export class PrivilegeCalculator {
       result.direct.push(directEntry);
     }
 
-    const globalEntry = this._locateGlobalPrivilege(role);
+    const globalEntry = this.locateGlobalPrivilege(role);
     if (globalEntry && globalEntry !== directEntry) {
       result.inherited.push(globalEntry);
     }
@@ -142,7 +139,7 @@ export class PrivilegeCalculator {
 
   public getFeaturePrivileges(role: Role, privilegeIndex: number, featureId: string) {
     return this.kibanaPrivileges.getFeaturePrivileges(
-      this._getScope(role, privilegeIndex),
+      this.getScope(role, privilegeIndex),
       featureId
     );
   }
@@ -241,8 +238,37 @@ export class PrivilegeCalculator {
     return result;
   }
 
-  // Customize Sub-Feature Privileges Checkbox
-  public canCustomizeSubFeaturePrivileges(
+  public canUnsetSubFeaturePrivileges(
+    assignedPrivileges: PrivilegeCollection,
+    directPrivileges: PrivilegeCollection,
+    inheritedPrivileges: PrivilegeCollection,
+    feature: SecuredFeature
+  ) {
+    // I can unset if there are no inherited sub feature privileges,
+    // or if unsetting will not reduce my effective privilege set
+
+    const inheritedSubFeaturePrivilegesCollection = inheritedPrivileges.filter(
+      p => p instanceof SubFeaturePrivilege
+    );
+
+    const allOtherFeaturePrivilegesCollection = assignedPrivileges.subtract(
+      inheritedSubFeaturePrivilegesCollection
+    );
+
+    const subFeaturePrivileges = feature.allPrivileges.filter(
+      p => p instanceof SubFeaturePrivilege
+    );
+
+    const hasNonSupersededInheritedSubFeaturePrivileges = subFeaturePrivileges.some(
+      sfp =>
+        inheritedSubFeaturePrivilegesCollection.grantsPrivilege(sfp).hasAllRequested &&
+        !allOtherFeaturePrivilegesCollection.grantsPrivilege(sfp).hasAllRequested
+    );
+
+    return !hasNonSupersededInheritedSubFeaturePrivileges || !hypotheticalNextPrimary;
+  }
+
+  public canSetSubFeaturePrivileges(
     assignedPrivileges: PrivilegeCollection,
     inheritedPrivileges: PrivilegeCollection,
     feature: SecuredFeature
@@ -257,42 +283,37 @@ export class PrivilegeCalculator {
     if (!assignedPrimaryFeaturePrivilege) {
       return false;
     }
-
     const hasUninheritedSubFeaturePrivilege = feature.allPrivileges.some(
       p => !inheritedPrivileges.grantsPrivilege(p).hasAllRequested
     );
 
-    if (!hasUninheritedSubFeaturePrivilege) {
-      return false;
+    return hasUninheritedSubFeaturePrivilege;
+  }
+
+  // Customize Sub-Feature Privileges Checkbox
+  public canCustomizeSubFeaturePrivileges(
+    assignedPrivileges: PrivilegeCollection,
+    directPrivileges: PrivilegeCollection,
+    inheritedPrivileges: PrivilegeCollection,
+    isCustomizing: boolean,
+    feature: SecuredFeature
+  ) {
+    return true;
+    if (isCustomizing) {
+      return this.canUnsetSubFeaturePrivileges(
+        assignedPrivileges,
+        directPrivileges,
+        inheritedPrivileges,
+        feature
+      );
     }
-
-    const [
-      assignedPrimaryFeaturePrivileges,
-      otherPrivileges,
-    ] = assignedPrivileges.bisect(privilege =>
-      privilege.type === 'feature' && privilege instanceof PrimaryFeaturePrivilege
-        ? 'first'
-        : 'second'
-    );
-
-    const mostPermissiveAssignedGrantIndex = feature.allPrivileges.findIndex(
-      fp => assignedPrimaryFeaturePrivileges.grantsPrivilege(fp).hasAllRequested
-    );
-
-    const mostPermissiveInheritedGrantIndex = feature.allPrivileges.findIndex(
-      fp => otherPrivileges.grantsPrivilege(fp).hasAllRequested
-    );
-
-    const hasNonSupersededPrimaryFeaturePrivilege =
-      mostPermissiveAssignedGrantIndex >= 0 &&
-      (mostPermissiveInheritedGrantIndex < 0 ||
-        mostPermissiveInheritedGrantIndex > mostPermissiveAssignedGrantIndex);
-
-    return hasNonSupersededPrimaryFeaturePrivilege;
+    return this.canSetSubFeaturePrivileges(assignedPrivileges, inheritedPrivileges, feature);
   }
 
   public isCustomizingSubFeaturePrivileges(
     assignedPrivileges: PrivilegeCollection,
+    inheritedPrivileges: PrivilegeCollection,
+    rawRolePrivileges: RoleKibanaPrivilege,
     feature: SecuredFeature
   ) {
     const [
@@ -310,6 +331,15 @@ export class PrivilegeCalculator {
         !otherPrivilegesCollection.grantsPrivilege(sfp).hasAllRequested
     );
 
+    const hasUninheritedSubFeaturePrivileges = subFeaturePrivileges.some(
+      sfp => !inheritedPrivileges.grantsPrivilege(sfp).hasAllRequested
+    );
+
+    const rawFeaturePrivs = rawRolePrivileges.feature[feature.id] ?? [];
+    const hasDirectlyAssignedMinimumPrimaryFeaturePrivilege = feature.minimalPrimaryFeaturePrivileges.some(
+      fp => rawFeaturePrivs.includes(fp.id)
+    );
+
     const mostPermissiveMinimumPrimary = feature.minimalPrimaryFeaturePrivileges.find(
       fp => assignedPrivileges.grantsPrivilege(fp).hasAllRequested
     );
@@ -322,12 +352,17 @@ export class PrivilegeCalculator {
       Boolean(mostPermissiveMinimumPrimary) &&
       !assignedPrivileges.grantsPrivilege(correspondingPrimary!).hasAllRequested;
 
-    return hasEffectiveMininiumPrimaryFeaturePrivilege || hasNonSupersededSubFeaturePrivileges;
+    return (
+      hasEffectiveMininiumPrimaryFeaturePrivilege ||
+      hasNonSupersededSubFeaturePrivileges ||
+      (hasDirectlyAssignedMinimumPrimaryFeaturePrivilege && hasUninheritedSubFeaturePrivileges)
+    );
   }
 
   // Customize Sub-Feature Privileges Checkbox
   public toggleMinimalPrimaryFeaturePrivilege(
     assignedPrivileges: PrivilegeCollection,
+    directPrivileges: PrivilegeCollection,
     feature: SecuredFeature
   ) {
     const grantedNonMinimalPrivilege = feature.primaryFeaturePrivileges.find(
@@ -339,17 +374,34 @@ export class PrivilegeCalculator {
     );
 
     if (grantedNonMinimalPrivilege) {
-      return feature.minimalPrimaryFeaturePrivileges.find(
-        fp => fp.id === `minimal_${grantedNonMinimalPrivilege.id}`
-      )!;
+      const isDirectlyAssigned = directPrivileges.grantsPrivilege(grantedNonMinimalPrivilege)
+        .hasAllRequested;
+
+      const isMinimalDirectlyAssigned =
+        grantedMinimalPrivilege &&
+        directPrivileges.grantsPrivilege(grantedMinimalPrivilege).hasAllRequested;
+
+      if (isDirectlyAssigned || !isMinimalDirectlyAssigned) {
+        return feature.minimalPrimaryFeaturePrivileges.find(
+          fp => fp.id === `minimal_${grantedNonMinimalPrivilege.id}`
+        )!;
+      }
+      return undefined;
     }
     if (grantedMinimalPrivilege) {
-      return feature.primaryFeaturePrivileges.find(
-        fp => `minimal_${fp.id}` === grantedMinimalPrivilege.id
-      )!;
+      const isDirectlyAssigned = directPrivileges.grantsPrivilege(grantedMinimalPrivilege)
+        .hasAllRequested;
+
+      if (isDirectlyAssigned) {
+        return feature.primaryFeaturePrivileges.find(
+          fp => `minimal_${fp.id}` === grantedMinimalPrivilege.id
+        )!;
+      }
+      return undefined;
     }
+
     throw new Error(
-      `Expected either a minimal or non-minimal primary feature privilege to be assigned for feature ${feature.id}`
+      `Expected an effective minimal/non-minimal primary feature privilege to be assigned.`
     );
   }
 
@@ -363,7 +415,6 @@ export class PrivilegeCalculator {
 
       const isInherited = grantingPrivileges.some(gp => gp.scope !== privilege.scope);
       const isSelected = grantingPrivileges.some(gp => gp.id === privilege.id);
-      const isDirectlyAssigned = grantingPrivileges.some(gp => gp.equals(privilege));
       const isEnabled = !isInherited || isSelected;
 
       return {
@@ -375,23 +426,6 @@ export class PrivilegeCalculator {
         },
       };
     }, {} as Record<string, { inherited: boolean; enabled: boolean; selected: boolean }>);
-  }
-
-  public getEffectiveBasePrivilege(role: Role, privilegeIndex: number) {
-    const privilegeSet = role.kibana[privilegeIndex];
-
-    const entries = this._collectRelevantEntries(role, privilegeIndex);
-    const collection = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges(entries);
-
-    const basePrivileges = this.isGlobalPrivilege(privilegeSet)
-      ? this.kibanaPrivileges.getGlobalPrivileges()
-      : this.kibanaPrivileges.getSpacesPrivileges();
-
-    const effectiveBasePrivilege: Privilege | undefined = basePrivileges.find(
-      base => collection.grantsPrivilege(base).hasAllRequested
-    );
-
-    return effectiveBasePrivilege;
   }
 
   private describePrivilegeAssignment(

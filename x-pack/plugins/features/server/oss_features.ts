@@ -83,7 +83,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                   includeIn: 'read',
                   savedObject: {
                     all: [],
-                    read: ['read'],
+                    read: ['alerts'],
                   },
                   ui: ['readAlerts'],
                 },
@@ -176,7 +176,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                   includeIn: 'read',
                   savedObject: {
                     all: [],
-                    read: ['read'],
+                    read: ['alerts'],
                   },
                   ui: ['readAlerts'],
                 },

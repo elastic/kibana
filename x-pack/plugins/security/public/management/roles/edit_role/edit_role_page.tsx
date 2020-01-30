@@ -49,6 +49,7 @@ import {
   copyRole,
   prepareRoleClone,
   RoleIndexPrivilege,
+  SecuredFeature,
 } from '../../../../common/model';
 import { ROLES_PATH } from '../../management_urls';
 import { RoleValidationResult, RoleValidator } from './validate_role';
@@ -234,7 +235,11 @@ function useFeatures(
   fatalErrors: FatalErrorsSetup
 ) {
   const [features, setFeatures] = useState<Feature[] | null>(null);
+  const [privileges] = usePrivileges(privilegesAPIClient, fatalErrors) || [];
   useEffect(() => {
+    if (!privileges) {
+      return;
+    }
     http
       .get<IFeature[]>('/api/features')
       .catch((err: IHttpFetchError) => {
@@ -254,9 +259,12 @@ function useFeatures(
         throw err;
       })
       .then(rawFeatures => {
-        setFeatures(rawFeatures.map(raw => new Feature(raw)));
+        // TODO: SCOPE
+        setFeatures(
+          rawFeatures.map(raw => new SecuredFeature(raw, privileges.features[raw.id], 'space'))
+        );
       });
-  }, [http, fatalErrors]);
+  }, [http, fatalErrors, privileges]);
 
   return features;
 }

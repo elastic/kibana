@@ -30,7 +30,11 @@ import { Space } from '../../../../../../../../spaces/common/model/space';
 import { SpaceSelector } from './space_selector';
 import { FeatureTable } from '../poc_feature_table';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
-import { PrivilegeCalculator, ScopedPrivilegeCalculator } from '../privilege_calculator';
+import {
+  PrivilegeCalculator,
+  ScopedPrivilegeCalculator,
+  PrivilegeFormCalculator,
+} from '../privilege_calculator';
 
 interface Props {
   role: Role;
@@ -103,6 +107,19 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             <EuiErrorBoundary>{this.getForm()}</EuiErrorBoundary>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
+            {new PrivilegeFormCalculator(
+              this.props.kibanaPrivileges,
+              this.state.role,
+              this.state.editingIndex
+            ).hasSupersededPrivileges() && (
+              <Fragment>
+                <EuiCallOut color="warning" iconType="alert">
+                  This is a warning message explaining how global privileges are more permissive
+                  than whatever you decided to set here.
+                </EuiCallOut>
+                <EuiSpacer size="s" />
+              </Fragment>
+            )}
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
@@ -271,7 +288,13 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
         <FeatureTable
           role={this.state.role}
-          privilegeCalculator={this.state.scopedPrivilegeCalculator}
+          privilegeCalculator={
+            new PrivilegeFormCalculator(
+              this.props.kibanaPrivileges,
+              this.state.role,
+              this.state.editingIndex
+            )
+          }
           onChange={this.onFeaturePrivilegesChange}
           onChangeAll={this.onChangeAllFeaturePrivileges}
           kibanaPrivileges={this.props.kibanaPrivileges}
@@ -473,22 +496,14 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   };
 
   private getDisplayedBasePrivilege = () => {
-    const baseDescription = this.state.scopedPrivilegeCalculator.describeBasePrivileges();
+    const selectedPrivileges = this.state.role.kibana[this.state.editingIndex].base;
+    const basePrivileges = this.props.kibanaPrivileges.getBasePrivileges(
+      this.isDefiningGlobalPrivilege() ? 'global' : 'space'
+    );
 
-    const effectivePrivilegeEntry = Object.entries(baseDescription).find(bd => bd[1].selected);
-    const isDirectlyAssigned = effectivePrivilegeEntry
-      ? effectivePrivilegeEntry[1].directlyAssigned
-      : false;
-
-    // If undefined base: Custom
-    // If inherited base:
-    // Custom
-    // If directly assigned base:
-    // if customizing or has customizations: Custom
-    // else assigned
-
-    if (isDirectlyAssigned && !this.state.isCustomizingFeaturePrivileges) {
-      return `basePrivilege_${effectivePrivilegeEntry![0]}`;
+    const selectedBasePrivilege = basePrivileges.find(bp => selectedPrivileges.includes(bp.id));
+    if (selectedBasePrivilege) {
+      return `basePrivilege_${selectedBasePrivilege.id}`;
     }
 
     return `basePrivilege_${CUSTOM_PRIVILEGE_VALUE}`;
@@ -520,10 +535,16 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     if (privileges.length === 0) {
       form.feature = {};
     } else {
-      // todo
-      // this.props.features.forEach(feature => {
-      //   form.feature[feature.id] = [...privileges];
-      // });
+      this.props.kibanaPrivileges
+        .getSecuredFeatures(this.isDefiningGlobalPrivilege() ? 'global' : 'space')
+        .forEach(feature => {
+          const nextFeaturePrivilege = feature.primaryFeaturePrivileges.find(pfp =>
+            privileges.includes(pfp.id)
+          );
+          if (nextFeaturePrivilege) {
+            form.feature[feature.id] = [nextFeaturePrivilege.id];
+          }
+        });
     }
     this.setState({
       role,

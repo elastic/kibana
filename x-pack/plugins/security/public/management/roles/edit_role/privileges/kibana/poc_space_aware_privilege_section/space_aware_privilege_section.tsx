@@ -16,18 +16,21 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { Capabilities } from 'src/core/public';
+import { Feature } from '../../../../../../../../features/public';
 import { KibanaPrivileges, Role, isReservedRole } from '../../../../../../../common/model';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { RoleValidator } from '../../../validate_role';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeCalculator } from '../privilege_calculator';
+import { PrivilegeSummary } from '../privilege_summary';
 
 interface Props {
   kibanaPrivileges: KibanaPrivileges;
   role: Role;
   privilegeCalculator: PrivilegeCalculator;
   spaces: Space[];
+  features: Feature[];
   onChange: (role: Role) => void;
   editable: boolean;
   validator: RoleValidator;
@@ -203,7 +206,14 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
       return addPrivilegeButton;
     }
 
-    const viewMatrixButton = <b>matrix button goes here</b>;
+    const viewMatrixButton = (
+      <PrivilegeSummary
+        role={this.props.role}
+        spaces={this.getDisplaySpaces()}
+        features={this.props.features}
+        kibanaPrivileges={this.props.kibanaPrivileges}
+      />
+    );
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween">

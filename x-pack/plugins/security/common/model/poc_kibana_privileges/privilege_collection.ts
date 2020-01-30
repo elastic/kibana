@@ -23,15 +23,8 @@ export class PrivilegeCollection {
     return this.privileges.filter(p => p.grantsPrivilege(privilege).hasAllRequested);
   }
 
-  public without(...privileges: Array<Pick<Privilege, 'type' | 'id'>>) {
-    return new PrivilegeCollection(
-      this.privileges.filter(
-        p =>
-          !privileges.find(
-            withoutPrivilege => p.type === withoutPrivilege.type && p.id === withoutPrivilege.id
-          )
-      )
-    );
+  public subtract(otherCollection: PrivilegeCollection) {
+    return new PrivilegeCollection(this.privileges.filter(p => !otherCollection.includes(p)));
   }
 
   public filter(predicate: (privilege: Privilege) => boolean) {
@@ -39,21 +32,7 @@ export class PrivilegeCollection {
   }
 
   public includes(privilege: Privilege) {
-    return this.privileges.includes(privilege);
-  }
-
-  public removeRedundant() {
-    const privilegesToKeep: Privilege[] = [];
-
-    this.privileges.forEach((privilege, index) => {
-      const withoutPrivilege = this.filter(p => !p.equals(privilege));
-
-      if (!withoutPrivilege.grantsPrivilege(privilege).hasAllRequested) {
-        privilegesToKeep.push(privilege);
-      }
-    });
-
-    return new PrivilegeCollection(privilegesToKeep);
+    return this.privileges.some(p => p.equals(privilege));
   }
 
   public bisect(bisector: (privilege: Privilege) => 'first' | 'second') {

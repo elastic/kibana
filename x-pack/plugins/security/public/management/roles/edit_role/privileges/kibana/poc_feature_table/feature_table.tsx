@@ -7,13 +7,13 @@
 import {
   // @ts-ignore
   EuiButtonGroup,
-  EuiIcon,
   EuiIconTip,
   EuiInMemoryTable,
   EuiText,
-  IconType,
   EuiButtonIcon,
   EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -29,13 +29,12 @@ import {
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
 import { NO_PRIVILEGE_VALUE } from '../constants';
-import { ScopedPrivilegeCalculator } from '../privilege_calculator';
-// TODO: move htis up to a common spot if it's to be used here...
-import { PrivilegeDisplay } from '../poc_space_aware_privilege_section/privilege_display';
+import { PrivilegeFormCalculator } from '../privilege_calculator';
+import { FeatureTableCell } from '../feature_table_cell';
 
 interface Props {
   role: Role;
-  privilegeCalculator: ScopedPrivilegeCalculator;
+  privilegeCalculator: PrivilegeFormCalculator;
   kibanaPrivileges: KibanaPrivileges;
   spacesIndex: number;
   onChange: (featureId: string, privileges: string[]) => void;
@@ -109,7 +108,7 @@ export class FeatureTable extends Component<Props, State> {
                 onChange={this.props.onChange}
                 privilegeCalculator={this.props.privilegeCalculator}
                 selectedFeaturePrivileges={
-                  this.props.role.kibana[this.props.spacesIndex].feature[featureId]
+                  this.props.role.kibana[this.props.spacesIndex].feature[featureId] ?? []
                 }
                 disabled={this.props.disabled}
               />
@@ -141,35 +140,7 @@ export class FeatureTable extends Component<Props, State> {
           }
         ),
         render: (feature: SecuredFeature) => {
-          let tooltipElement = null;
-          if (feature.privilegesTooltip) {
-            const tooltipContent = (
-              <EuiText>
-                <p>{feature.privilegesTooltip}</p>
-              </EuiText>
-            );
-            tooltipElement = (
-              <EuiIconTip
-                iconProps={{
-                  className: 'eui-alignTop',
-                }}
-                type={'iInCircle'}
-                color={'subdued'}
-                content={tooltipContent}
-              />
-            );
-          }
-
-          return (
-            <span>
-              <EuiIcon
-                size="m"
-                type={feature.icon as IconType}
-                className="secPrivilegeFeatureIcon"
-              />
-              {feature.name} {tooltipElement}
-            </span>
-          );
+          return <FeatureTableCell feature={feature} />;
         },
       },
       {
@@ -183,7 +154,7 @@ export class FeatureTable extends Component<Props, State> {
             />
             {!this.props.disabled && (
               <ChangeAllPrivilegesControl
-                privileges={[NO_PRIVILEGE_VALUE]}
+                privileges={[NO_PRIVILEGE_VALUE, 'read', 'all']}
                 onChange={this.onChangeAllFeaturePrivileges}
               />
             )}
@@ -202,41 +173,9 @@ export class FeatureTable extends Component<Props, State> {
             return null;
           }
 
-          const {
-            selectedPrivilegeId,
-            enabledPrivilegeIds,
-            areAnyInherited,
-          } = this.props.privilegeCalculator.describePrimaryFeaturePrivileges(feature.id);
-
-          const allowsNone = !areAnyInherited;
-
-          const canChangePrivilege =
-            !this.props.disabled && (allowsNone || enabledPrivilegeIds.length > 1);
-
-          if (!canChangePrivilege) {
-            const assignedBasePrivilege = Object.values(
-              this.props.privilegeCalculator.describeBasePrivileges()
-            ).some(p => p.directlyAssigned);
-
-            const excludedFromBasePrivilegsTooltip = (
-              <FormattedMessage
-                id="xpack.security.management.editRole.featureTable.excludedFromBasePrivilegsTooltip"
-                defaultMessage='Use "Custom" privileges to grant access. {featureName} isn&apos;t part of the base privileges.'
-                values={{ featureName: feature.name }}
-              />
-            );
-
-            return (
-              <PrivilegeDisplay
-                privilege={selectedPrivilegeId}
-                tooltipContent={
-                  assignedBasePrivilege && feature.excludeFromBasePrivileges
-                    ? excludedFromBasePrivilegsTooltip
-                    : undefined
-                }
-              />
-            );
-          }
+          const selectedPrivilegeId = this.props.privilegeCalculator.getDisplayedPrimaryFeaturePrivilege(
+            feature.id
+          )?.id;
 
           const options = featurePrivileges
             .filter(fp => fp instanceof PrimaryFeaturePrivilege && !fp.isMinimalFeaturePrivilege())
@@ -244,26 +183,36 @@ export class FeatureTable extends Component<Props, State> {
               return {
                 id: `${feature.id}_${privilege.id}`,
                 label: privilege.name,
-                isDisabled: !enabledPrivilegeIds.some(ep => ep === privilege.id),
+                isDisabled: this.props.disabled,
               };
             });
 
           options.push({
             id: `${feature.id}_${NO_PRIVILEGE_VALUE}`,
             label: 'None',
-            isDisabled: !allowsNone,
+            isDisabled: this.props.disabled,
           });
 
+          let warningIcon = <EuiIconTip type="empty" content={null} />;
+          if (this.props.privilegeCalculator.hasNonSupersededSubFeaturePrivileges(feature.id)) {
+            warningIcon = <EuiIconTip type="alert" color="warning" content="AHHHH" />;
+          }
+
           return (
-            <EuiButtonGroup
-              name={`featurePrivilege_${feature.id}`}
-              data-test-subj={`primaryFeaturePrivilegeControl`}
-              buttonSize="s"
-              isFullWidth={true}
-              options={options}
-              idSelected={`${feature.id}_${selectedPrivilegeId ?? NO_PRIVILEGE_VALUE}`}
-              onChange={this.onChange(feature.id)}
-            />
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiFlexItem>{warningIcon}</EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButtonGroup
+                  name={`featurePrivilege_${feature.id}`}
+                  data-test-subj={`primaryFeaturePrivilegeControl`}
+                  buttonSize="s"
+                  isFullWidth={true}
+                  options={options}
+                  idSelected={`${feature.id}_${selectedPrivilegeId ?? NO_PRIVILEGE_VALUE}`}
+                  onChange={this.onChange(feature.id)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         },
       },

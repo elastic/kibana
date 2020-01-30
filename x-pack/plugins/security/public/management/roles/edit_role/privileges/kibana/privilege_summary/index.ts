@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FeaturePrivilege } from './feature_privilege';
-
-export class PrimaryFeaturePrivilege extends FeaturePrivilege {
-  public isMinimalFeaturePrivilege() {
-    return this.id.startsWith('minimal_');
-  }
-}
+export { PrivilegeSummary } from './privilege_summary';

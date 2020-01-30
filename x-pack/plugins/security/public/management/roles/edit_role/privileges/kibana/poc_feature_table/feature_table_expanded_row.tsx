@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent, EuiText } from '@elastic/eui';
-import { SecuredFeature } from '../../../../../../../common/model';
+import {
+  SecuredFeature,
+  SubFeaturePrivilege,
+  PrimaryFeaturePrivilege,
+} from '../../../../../../../common/model';
 import { SubFeatureForm } from './sub_feature_form';
-import { ScopedPrivilegeCalculator } from '../privilege_calculator';
+import { PrivilegeFormCalculator } from '../privilege_calculator';
 
 interface Props {
   feature: SecuredFeature;
-  privilegeCalculator: ScopedPrivilegeCalculator;
+  privilegeCalculator: PrivilegeFormCalculator;
   selectedFeaturePrivileges: string[];
   disabled?: boolean;
   onChange: (featureId: string, featurePrivileges: string[]) => void;
@@ -25,25 +29,25 @@ export const FeatureTableExpandedRow = ({
   selectedFeaturePrivileges,
   disabled,
 }: Props) => {
-  const [isCustomizing, setIsCustomizing] = useState(false);
-  const [canCustomize, setCanCustomize] = useState(false);
-
-  useEffect(() => {
-    setCanCustomize(
-      !Boolean(disabled) && privilegeCalculator.canCustomizeSubFeaturePrivileges(feature.id)
-    );
-
-    setIsCustomizing(privilegeCalculator.isCustomizingSubFeaturePrivileges(feature.id));
-  }, [disabled, feature.id, privilegeCalculator]);
+  const [isCustomizing, setIsCustomizing] = useState(() => {
+    return feature.allPrivileges
+      .filter(
+        ap =>
+          ap instanceof SubFeaturePrivilege ||
+          (ap instanceof PrimaryFeaturePrivilege && ap.isMinimalFeaturePrivilege())
+      )
+      .some(p => selectedFeaturePrivileges.includes(p.id));
+  });
 
   const onCustomizeSubFeatureChange = (e: EuiSwitchEvent) => {
-    const nextPrimaryFeaturePrivilege = privilegeCalculator.toggleMinimalPrimaryFeaturePrivilege(
-      feature.id
-    ).id;
-
-    const updatedPrimaryFeaturePrivileges = [nextPrimaryFeaturePrivilege];
-
-    onChange(feature.id, updatedPrimaryFeaturePrivileges);
+    onChange(
+      feature.id,
+      privilegeCalculator.updateSelectedFeaturePrivilegesForCustomization(
+        feature.id,
+        e.target.checked
+      )
+    );
+    setIsCustomizing(e.target.checked);
   };
 
   if (!feature.subFeatures || feature.subFeatures.length === 0) {
@@ -61,7 +65,7 @@ export const FeatureTableExpandedRow = ({
           label="Customize sub-feature privileges"
           checked={isCustomizing}
           onChange={onCustomizeSubFeatureChange}
-          disabled={!canCustomize}
+          disabled={disabled || !privilegeCalculator.canCustomizeSubFeaturePrivileges(feature.id)}
         />
       </EuiFlexItem>
       {feature.subFeatures.map(subFeature => {

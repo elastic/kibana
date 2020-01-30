@@ -117,7 +117,6 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             button = (
               <SpacesPopoverList
                 spaces={this.props.displaySpaces}
-                intl={this.props.intl}
                 buttonText={this.props.intl.formatMessage({
                   id: 'xpack.security.management.editRole.spacePrivilegeTable.showAllSpacesLink',
                   defaultMessage: 'show spaces',
