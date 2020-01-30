@@ -41,7 +41,7 @@ export class OptedInBanner extends React.PureComponent<Props> {
           values={{
             privacyStatementLink: (
               <EuiLink
-                onClick={this.onLinkClick}
+                onClick={onSeenBanner}
                 href={privacyStatementHref}
                 target="_blank"
                 rel="noopener"

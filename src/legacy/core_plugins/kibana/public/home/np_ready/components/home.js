@@ -261,5 +261,8 @@ Home.propTypes = {
   localStorage: PropTypes.object.isRequired,
   urlBasePath: PropTypes.string.isRequired,
   mlEnabled: PropTypes.bool.isRequired,
-  telemetry: PropTypes.shape({}),
+  telemetry: PropTypes.shape({
+    telemetryService: PropTypes.any,
+    telemetryNotifications: PropTypes.any,
+  }),
 };

@@ -18,7 +18,6 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiCallOut,
   EuiPanel,
@@ -29,30 +28,36 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { PRIVACY_STATEMENT_URL } from '../../common/constants';
-import { OptInExampleFlyout } from './opt_in_details_component';
-import { Field } from '../../../kibana/public/management/sections/settings/components/field/field';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-
+import { PRIVACY_STATEMENT_URL } from '../../common/constants';
+import { OptInExampleFlyout } from './opt_in_example_flyout';
+import { Field } from '../../../../legacy/core_plugins/kibana/public/management/sections/settings/components/field/field';
+import { TelemetryService } from '../services/telemetry_service';
 const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 
-export class TelemetryForm extends Component {
-  static propTypes = {
-    telemetryOptInProvider: PropTypes.object.isRequired,
-    query: PropTypes.object,
-    onQueryMatchChange: PropTypes.func.isRequired,
-    showAppliesSettingMessage: PropTypes.bool.isRequired,
-    enableSaving: PropTypes.bool.isRequired,
-  };
+interface Props {
+  telemetryService: TelemetryService;
+  onQueryMatchChange: (searchTermMatches: boolean) => void;
+  showAppliesSettingMessage: boolean;
+  enableSaving: boolean;
+  query?: any;
+}
 
-  state = {
+interface State {
+  processing: boolean;
+  showExample: boolean;
+  queryMatches: boolean | null;
+}
+
+export class TelemetryManagementSection extends Component<Props, State> {
+  state: State = {
     processing: false,
     showExample: false,
     queryMatches: null,
   };
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const { query } = nextProps;
 
     const searchTerm = (query.text || '').toLowerCase();
@@ -71,11 +76,10 @@ export class TelemetryForm extends Component {
   }
 
   render() {
-    const { telemetryOptInProvider } = this.props;
-
+    const { telemetryService } = this.props;
     const { showExample, queryMatches } = this.state;
 
-    if (!telemetryOptInProvider.canChangeOptInStatus()) {
+    if (!telemetryService.getCanChangeOptInStatus()) {
       return null;
     }
 
@@ -87,7 +91,7 @@ export class TelemetryForm extends Component {
       <Fragment>
         {showExample && (
           <OptInExampleFlyout
-            fetchTelemetry={() => telemetryOptInProvider.fetchExample()}
+            fetchExample={telemetryService.fetchExample}
             onClose={this.toggleExample}
           />
         )}
@@ -108,7 +112,7 @@ export class TelemetryForm extends Component {
             <Field
               setting={{
                 type: 'boolean',
-                value: telemetryOptInProvider.getOptIn() || false,
+                value: telemetryService.getIsOptedIn(),
                 description: this.renderDescription(),
                 defVal: true,
                 ariaName: i18n.translate('telemetry.provideUsageStatisticsLabel', {
@@ -185,29 +189,21 @@ export class TelemetryForm extends Component {
     </Fragment>
   );
 
-  toggleOptIn = async () => {
-    const newOptInValue = !this.props.telemetryOptInProvider.getOptIn();
+  toggleOptIn = async (): Promise<any> => {
+    const { telemetryService } = this.props;
+    const newOptInValue = !telemetryService.getIsOptedIn();
 
     return new Promise((resolve, reject) => {
-      this.setState(
-        {
-          enabled: newOptInValue,
-          processing: true,
-        },
-        () => {
-          this.props.telemetryOptInProvider.setOptIn(newOptInValue).then(
-            () => {
-              this.setState({ processing: false });
-              resolve();
-            },
-            e => {
-              // something went wrong
-              this.setState({ processing: false });
-              reject(e);
-            }
-          );
+      this.setState({ processing: true }, async () => {
+        try {
+          await telemetryService.setOptIn(newOptInValue);
+          this.setState({ processing: false });
+          resolve();
+        } catch (err) {
+          this.setState({ processing: false });
+          reject(err);
         }
-      );
+      });
     });
   };
 

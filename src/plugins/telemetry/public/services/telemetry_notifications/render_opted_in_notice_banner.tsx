@@ -27,7 +27,7 @@ interface RenderBannerConfig {
   overlays: CoreStart['overlays'];
   onSeen: () => void;
 }
-export function renderOptedInBanner({ onSeen, overlays }: RenderBannerConfig) {
+export function renderOptedInNoticeBanner({ onSeen, overlays }: RenderBannerConfig) {
   const mount = toMountPoint(
     <OptedInBanner
       onSeenBanner={onSeen}

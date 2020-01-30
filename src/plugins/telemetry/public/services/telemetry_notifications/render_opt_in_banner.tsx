@@ -17,8 +17,19 @@
  * under the License.
  */
 
-// @ts-ignore
-export { TelemetryForm } from './telemetry_form';
-export { OptInExampleFlyout } from './opt_in_details_component';
-export { OptInBanner } from './opt_in_banner_component';
-export { OptInMessage } from './opt_in_message';
+import React from 'react';
+import { CoreStart } from 'kibana/public';
+import { OptInBanner } from '../../components/opt_in_banner';
+import { toMountPoint } from '../../../../kibana_react/public';
+
+interface RenderBannerConfig {
+  overlays: CoreStart['overlays'];
+  setOptIn: (isOptIn: boolean) => Promise<any>;
+}
+
+export function renderOptInBanner({ setOptIn, overlays }: RenderBannerConfig) {
+  const mount = toMountPoint(<OptInBanner onChangeOptInClick={setOptIn} />);
+  const bannerId = overlays.banners.add(mount, 10000);
+
+  return bannerId;
+}

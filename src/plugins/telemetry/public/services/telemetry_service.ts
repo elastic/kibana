@@ -18,8 +18,6 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
-// import { banners, toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 
@@ -35,7 +33,8 @@ export class TelemetryService {
   private readonly injectedMetadata: CoreStart['injectedMetadata'];
   private readonly reportOptInStatusChange: boolean;
   private readonly notifications: CoreStart['notifications'];
-  private isOptedIn: boolean;
+  private isOptedIn: boolean | null;
+  private userHasSeenOptedInNotice: boolean;
 
   constructor({
     http,
@@ -43,14 +42,17 @@ export class TelemetryService {
     notifications,
     reportOptInStatusChange = true,
   }: TelemetryServiceConstructor) {
-    const isOptedIn = injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean;
-
+    const isOptedIn = injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean | null;
+    const userHasSeenOptedInNotice = injectedMetadata.getInjectedVar(
+      'telemetryNotifyUserAboutOptInDefault'
+    ) as boolean;
     this.reportOptInStatusChange = reportOptInStatusChange;
     this.injectedMetadata = injectedMetadata;
     this.notifications = notifications;
     this.http = http;
 
     this.isOptedIn = isOptedIn;
+    this.userHasSeenOptedInNotice = userHasSeenOptedInNotice;
   }
 
   public getCanChangeOptInStatus = () => {
@@ -70,6 +72,10 @@ export class TelemetryService {
   public getTelemetryUrl = () => {
     const telemetryUrl = this.injectedMetadata.getInjectedVar('telemetryUrl') as string;
     return telemetryUrl;
+  };
+
+  public getUserHasSeenOptedInNotice = () => {
+    return this.userHasSeenOptedInNotice;
   };
 
   public getIsOptedIn = () => {
@@ -123,14 +129,27 @@ export class TelemetryService {
     return true;
   };
 
+  public setUserHasSeenNotice = async (): Promise<void> => {
+    try {
+      await this.http.put('/api/telemetry/v2/userHasSeenNotice');
+      this.userHasSeenOptedInNotice = true;
+    } catch (error) {
+      this.notifications.toasts.addError(error, {
+        title: i18n.translate('telemetry.optInNoticeSeenErrorTitle', {
+          defaultMessage: 'Error',
+        }),
+        toastMessage: i18n.translate('telemetry.optInNoticeSeenErrorToastText', {
+          defaultMessage: 'An error occurred dismissing the notice',
+        }),
+      });
+      this.userHasSeenOptedInNotice = false;
+    }
+  };
+
   private reportOptInStatus = async (OptInStatus: boolean): Promise<void> => {
     const telemetryOptInStatusUrl = this.getOptInStatusUrl();
 
     try {
-      // const optInStatus = await this.http.post('/api/telemetry/v2/clusters/_opt_in_stats', {
-      //   body: JSON.stringify({ enabled, unencrypted: false })
-      // });
-
       await fetch(telemetryOptInStatusUrl, {
         method: 'POST',
         headers: {
@@ -144,11 +163,3 @@ export class TelemetryService {
     }
   };
 }
-
-// export const shouldShowTelemetryOptIn = () => {
-//   return (
-//     telemetryEnabled &&
-//     !telemetryOptInService.getOptIn() &&
-//     telemetryOptInService.canChangeOptInStatus()
-//   );
-// };

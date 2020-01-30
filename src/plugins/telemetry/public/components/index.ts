@@ -18,3 +18,4 @@
  */
 
 export { OptInExampleFlyout } from './opt_in_example_flyout';
+export { TelemetryManagementSection } from './telemetry_management_section';

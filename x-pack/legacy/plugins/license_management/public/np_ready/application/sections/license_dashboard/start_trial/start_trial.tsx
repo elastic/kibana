@@ -26,17 +26,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
 import { EXTERNAL_LINKS } from '../../../../../../common/constants';
 import { getDocLinks } from '../../../lib/docs_links';
-import { TelemetryPluginStart } from '../../../lib/telemetry';
+import { TelemetryPluginStart, shouldShowTelemetryOptIn } from '../../../lib/telemetry';
 
 interface Props {
   loadTrialStatus: () => void;
   startLicenseTrial: () => void;
-  telemetry: TelemetryPluginStart;
+  telemetry?: TelemetryPluginStart;
   shouldShowStartTrial: boolean;
 }
 
 interface State {
-  shouldShowTelemetryOptIn: boolean;
   showConfirmation: boolean;
   isOptingInToTelemetry: boolean;
 }
@@ -46,7 +45,6 @@ export class StartTrial extends Component<Props, State> {
   confirmRef: any;
 
   state: State = {
-    shouldShowTelemetryOptIn: true,
     showConfirmation: false,
     isOptingInToTelemetry: false,
   };
@@ -58,18 +56,21 @@ export class StartTrial extends Component<Props, State> {
   onOptInChange = (isOptingInToTelemetry: boolean) => {
     this.setState({ isOptingInToTelemetry });
   };
+
   onStartLicenseTrial = () => {
     const { telemetry, startLicenseTrial } = this.props;
-    if (this.state.isOptingInToTelemetry) {
+    if (this.state.isOptingInToTelemetry && telemetry) {
       telemetry.telemetryService.setOptIn(true);
     }
     startLicenseTrial();
   };
+
   cancel = () => {
     this.setState({ showConfirmation: false });
   };
   acknowledgeModal() {
-    const { showConfirmation } = this.state;
+    const { showConfirmation, isOptingInToTelemetry } = this.state;
+    const { telemetry } = this.props;
     if (!showConfirmation) {
       return null;
     }
@@ -180,12 +181,12 @@ export class StartTrial extends Component<Props, State> {
           <EuiModalFooter>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
-                {this.state.shouldShowTelemetryOptIn && (
+                {shouldShowTelemetryOptIn(telemetry) && (
                   <TelemetryOptIn
-                    telemetry={this.props.telemetry}
+                    telemetry={telemetry}
                     isStartTrial={true}
                     onOptInChange={this.onOptInChange}
-                    isOptingInToTelemetry={this.state.isOptingInToTelemetry}
+                    isOptingInToTelemetry={isOptingInToTelemetry}
                   />
                 )}
               </EuiFlexItem>

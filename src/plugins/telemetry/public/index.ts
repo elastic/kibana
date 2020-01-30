@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
 import { TelemetryPlugin } from './plugin';
 export { TelemetryPluginStart } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new TelemetryPlugin(initializerContext);
+export function plugin() {
+  return new TelemetryPlugin();
 }

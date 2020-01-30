@@ -16,19 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { OptInExampleFlyout } from './opt_in_details_component';
 
-describe('OptInDetailsComponent', () => {
-  it('renders as expected', () => {
-    expect(
-      shallowWithIntl(
-        <OptInExampleFlyout
-          fetchTelemetry={jest.fn(async () => ({ data: [] }))}
-          onClose={jest.fn()}
-        />
-      )
-    ).toMatchSnapshot();
-  });
-});
+export { handleOldSettings } from './handle_old_settings';

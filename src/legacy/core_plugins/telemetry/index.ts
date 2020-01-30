@@ -29,7 +29,13 @@ import { getConfigPath } from '../../../core/server/path';
 import mappings from './mappings.json';
 import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
 import { getXpackConfigWithDeprecated } from './common/get_xpack_config_with_deprecated';
-import { telemetryPlugin, replaceTelemetryInjectedVars, FetcherTask, PluginsSetup } from './server';
+import {
+  telemetryPlugin,
+  replaceTelemetryInjectedVars,
+  FetcherTask,
+  PluginsSetup,
+  handleOldSettings,
+} from './server';
 
 const ENDPOINT_VERSION = 'v2';
 
@@ -76,16 +82,6 @@ const telemetry = (kibana: any) => {
     },
     uiExports: {
       managementSections: ['plugins/telemetry/views/management'],
-      uiSettingDefaults: {
-        [CONFIG_TELEMETRY]: {
-          name: i18n.translate('telemetry.telemetryConfigTitle', {
-            defaultMessage: 'Telemetry opt-in',
-          }),
-          description: getConfigTelemetryDesc(),
-          value: false,
-          readonly: true,
-        },
-      },
       savedObjectSchemas: {
         telemetry: {
           isNamespaceAgnostic: true,
@@ -108,16 +104,16 @@ const telemetry = (kibana: any) => {
           allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
           telemetrySendUsageFrom: config.get('telemetry.sendUsageFrom'),
           telemetryNotifyUserAboutOptInDefault: false,
+          telemetryBanner1: 'lol',
         };
       },
-      hacks: ['plugins/telemetry/hacks/telemetry_opt_in'],
       mappings,
     },
     postInit(server: Server) {
       const fetcherTask = new FetcherTask(server);
       fetcherTask.start();
     },
-    init(server: Server) {
+    async init(server: Server) {
       const { usageCollection } = server.newPlatform.setup.plugins;
       const initializerContext = {
         env: {
@@ -144,6 +140,12 @@ const telemetry = (kibana: any) => {
         http: { server },
         log: server.log,
       } as any) as CoreSetup;
+
+      try {
+        await handleOldSettings(server);
+      } catch (err) {
+        server.log(['warning', 'telemetry'], 'Unable to update legacy telemetry configs.');
+      }
 
       const pluginsSetup: PluginsSetup = {
         usageCollection,

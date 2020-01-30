@@ -18,81 +18,67 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
-import { renderOptedInBanner } from './render_opted_in_notice_banner';
+import { renderOptedInNoticeBanner } from './render_opted_in_notice_banner';
+import { renderOptInBanner } from './render_opt_in_banner';
+import { TelemetryService } from '../telemetry_service';
 
 interface TelemetryNotificationsConstructor {
-  notifications: CoreStart['notifications'];
-  injectedMetadata: CoreStart['injectedMetadata'];
   overlays: CoreStart['overlays'];
-  http: CoreStart['http'];
+  telemetryService: TelemetryService;
 }
 
 export class TelemetryNotifications {
   private readonly overlays: CoreStart['overlays'];
-  private readonly notifications: CoreStart['notifications'];
-  private readonly http: CoreStart['http'];
+  private readonly telemetryService: TelemetryService;
+  private optedInNoticeBannerId?: string;
+  private optInBannerId?: string;
 
-  private optedInBannerNoticeId?: string;
-  // private optInBannerId?: string;
-  private showOptedInNoticeBanner: boolean;
-
-  constructor({
-    notifications,
-    http,
-    overlays,
-    injectedMetadata,
-  }: TelemetryNotificationsConstructor) {
-    this.notifications = notifications;
-    this.http = http;
+  constructor({ overlays, telemetryService }: TelemetryNotificationsConstructor) {
+    this.telemetryService = telemetryService;
     this.overlays = overlays;
-
-    this.showOptedInNoticeBanner = injectedMetadata.getInjectedVar(
-      'telemetryNotifyUserAboutOptInDefault'
-    ) as boolean;
   }
 
-  public shouldShowOptedInNoticeBanner() {
-    return this.showOptedInNoticeBanner;
-  }
+  public shouldShowOptedInNoticeBanner = (): boolean => {
+    const userHasSeenOptedInNotice = this.telemetryService.getUserHasSeenOptedInNotice();
+    return userHasSeenOptedInNotice;
+  };
 
-  public renderOptedInNoticeBanner = () => {
-    const bannerId = renderOptedInBanner({
+  public renderOptedInNoticeBanner = (): void => {
+    const bannerId = renderOptedInNoticeBanner({
       onSeen: this.setOptedInNoticeSeen,
       overlays: this.overlays,
     });
 
-    this.optedInBannerNoticeId = bannerId;
+    this.optedInNoticeBannerId = bannerId;
+  };
+
+  public shouldShowOptInBanner = (): boolean => {
+    const isOptedIn = this.telemetryService.getIsOptedIn();
+    return isOptedIn === null;
+  };
+
+  public renderOptInBanner = (): void => {
+    const bannerId = renderOptInBanner({
+      setOptIn: this.onSetOptInClick,
+      overlays: this.overlays,
+    });
+
+    this.optInBannerId = bannerId;
+  };
+
+  private onSetOptInClick = async (isOptIn: boolean) => {
+    if (this.optInBannerId) {
+      this.overlays.banners.remove(this.optInBannerId);
+    }
+
+    await this.telemetryService.setOptIn(isOptIn);
   };
 
   public setOptedInNoticeSeen = async (): Promise<void> => {
-    // If they've seen the notice don't spam the API
-    if (!this.showOptedInNoticeBanner) {
-      return;
+    if (this.optedInNoticeBannerId) {
+      this.overlays.banners.remove(this.optedInNoticeBannerId);
     }
 
-    const optInBannerNoticeId = this.optedInBannerNoticeId;
-    if (optInBannerNoticeId) {
-      this.overlays.banners.remove(optInBannerNoticeId);
-    }
-
-    try {
-      await this.http.put('/api/telemetry/v2/userHasSeenNotice');
-      this.showOptedInNoticeBanner = false;
-    } catch (error) {
-      this.notifications.toasts.addError(error, {
-        title: i18n.translate('telemetry.optInNoticeSeenErrorTitle', {
-          defaultMessage: 'Error',
-        }),
-        toastMessage: i18n.translate('telemetry.optInNoticeSeenErrorToastText', {
-          defaultMessage: 'An error occurred dismissing the notice',
-        }),
-      });
-      this.showOptedInNoticeBanner = true;
-    }
+    await this.telemetryService.setUserHasSeenNotice();
   };
 }
-
-// telemetryEnabled &&
-//     !telemetryOptInService.getOptIn() &&
-//     telemetryOptInService.canChangeOptInStatus()

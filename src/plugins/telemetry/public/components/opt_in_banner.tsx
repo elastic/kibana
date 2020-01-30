@@ -23,15 +23,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { OptInMessage } from './opt_in_message';
 
 interface Props {
-  fetchTelemetry: () => Promise<any[]>;
-  optInClick: (optIn: boolean) => void;
+  onChangeOptInClick: (isOptIn: boolean) => void;
 }
 
-/**
- * React component for displaying the Telemetry opt-in banner.
- */
 export class OptInBanner extends React.PureComponent<Props> {
   render() {
+    const { onChangeOptInClick } = this.props;
     const title = (
       <FormattedMessage
         id="telemetry.welcomeBanner.title"
@@ -40,11 +37,11 @@ export class OptInBanner extends React.PureComponent<Props> {
     );
     return (
       <EuiCallOut iconType="questionInCircle" title={title}>
-        <OptInMessage fetchTelemetry={this.props.fetchTelemetry} />
+        <OptInMessage />
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={() => this.props.optInClick(true)}>
+            <EuiButton size="s" onClick={() => onChangeOptInClick(true)}>
               <FormattedMessage
                 id="telemetry.welcomeBanner.enableButtonLabel"
                 defaultMessage="Enable"
@@ -52,7 +49,7 @@ export class OptInBanner extends React.PureComponent<Props> {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={() => this.props.optInClick(false)}>
+            <EuiButton size="s" onClick={() => onChangeOptInClick(false)}>
               <FormattedMessage
                 id="telemetry.welcomeBanner.disableButtonLabel"
                 defaultMessage="Disable"

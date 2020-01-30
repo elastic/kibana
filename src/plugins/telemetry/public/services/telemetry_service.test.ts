@@ -53,3 +53,34 @@ describe('fetch_telemetry', () => {
     );
   });
 });
+
+// describe('setOptIn', () => {
+//   it('sets setting unsuccessfully, adds toast, and does not touch banner', async () => {
+//     const optIn = true;
+//     const telemetryService = mockTelemetryService();
+//     const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
+//     await telemetryNotifications['onSetOptInClick'](optIn);
+
+//   });
+
+//   // it('sets setting unsuccessfully with error, adds toast, and does not touch banner', async () => {
+//   //   const toastNotifications = {
+//   //     addDanger: sinon.spy(),
+//   //   };
+//   //   const banners = {
+//   //     remove: sinon.spy(),
+//   //   };
+//   //   const optIn = false;
+//   //   mockInjectedMetadata({ telemetryOptedIn: null, allowChangingOptInStatus: true });
+//   //   const telemetryOptInProvider = getTelemetryOptInProvider({ simulateError: true });
+
+//   //   await clickBanner(telemetryOptInProvider, optIn, {
+//   //     _banners: banners,
+//   //     _toastNotifications: toastNotifications,
+//   //   });
+
+//   //   expect(telemetryOptInProvider.getOptIn()).toBe(null);
+//   //   expect(toastNotifications.addDanger.calledOnce).toBe(true);
+//   //   expect(banners.remove.notCalled).toBe(true);
+//   // });
+// })

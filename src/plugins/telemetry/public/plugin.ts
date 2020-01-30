@@ -16,21 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  // PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  CoreStart,
-  HttpSetup,
-} from '../../../core/public';
-import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
+import { Plugin, CoreSetup, CoreStart, HttpSetup } from '../../../core/public';
 
-// interface PublicConfigType {
-//   uiMetric: {
-//     enabled: boolean;
-//     debug: boolean;
-//   };
-// }
+import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 
 export interface TelemetryPluginStart {
   telemetryService: TelemetryService;
@@ -38,18 +26,21 @@ export interface TelemetryPluginStart {
 }
 
 export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
-  // private config: PublicConfigType;
-  private isUnauthenticated: boolean = false;
-  // constructor(initializerContext: PluginInitializerContext) {
-  //   this.config = initializerContext.config.get<PublicConfigType>();
-  // }
+  private isUnauthenticated: boolean = true;
 
   public setup({ http }: CoreSetup) {
     this.isUnauthenticated = this.getIsUnauthenticated(http);
   }
 
-  public start({ injectedMetadata, http, notifications, overlays }: CoreStart): TelemetryStart {
+  public start({
+    injectedMetadata,
+    application,
+    http,
+    notifications,
+    overlays,
+  }: CoreStart): TelemetryPluginStart {
     const isPluginEnabled = injectedMetadata.getInjectedVar('telemetryEnabled') as boolean;
+    const telemetryBanner = injectedMetadata.getInjectedVar('telemetryBanner') as boolean;
     const sendUsageFrom = injectedMetadata.getInjectedVar('telemetrySendUsageFrom') as
       | 'browser'
       | 'server';
@@ -61,10 +52,8 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
     });
 
     const telemetryNotifications = new TelemetryNotifications({
-      http,
-      injectedMetadata,
-      notifications,
       overlays,
+      telemetryService,
     });
 
     this.maybeStartTelemetryPoller({
@@ -73,9 +62,15 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
       sendUsageFrom,
     });
 
-    this.maybeShowOptedInNotificationBanner({
-      telemetryNotifications,
-    });
+    // const isStatusPage = chrome.getApp().id === 'status_page';
+    if (telemetryBanner) {
+      this.maybeShowOptedInNotificationBanner({
+        telemetryNotifications,
+      });
+      this.maybeShowOptInBanner({
+        telemetryNotifications,
+      });
+    }
 
     return {
       telemetryService,
@@ -99,7 +94,7 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
   }) {
     if (isPluginEnabled && sendUsageFrom === 'browser') {
       const sender = new TelemetrySender(telemetryService);
-      // no telemetry for non-logged in users
+
       if (!this.isUnauthenticated) {
         sender.startChecking();
       }
@@ -114,14 +109,25 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
     if (this.isUnauthenticated) {
       return;
     }
-    // and no banner on status page
-    // if (chrome.getApp().id === 'status_page') {
-    //   return;
-    // }
 
     const shouldShowBanner = telemetryNotifications.shouldShowOptedInNoticeBanner();
     if (shouldShowBanner) {
       telemetryNotifications.renderOptedInNoticeBanner();
+    }
+  }
+
+  private maybeShowOptInBanner({
+    telemetryNotifications,
+  }: {
+    telemetryNotifications: TelemetryNotifications;
+  }) {
+    if (this.isUnauthenticated) {
+      return;
+    }
+
+    const shouldShowBanner = telemetryNotifications.shouldShowOptInBanner();
+    if (shouldShowBanner) {
+      telemetryNotifications.renderOptInBanner();
     }
   }
 }

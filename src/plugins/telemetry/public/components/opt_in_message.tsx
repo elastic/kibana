@@ -20,19 +20,14 @@
 import * as React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import { PRIVACY_STATEMENT_URL } from '../../common/constants';
-
-interface Props {
-  fetchTelemetry: () => Promise<any[]>;
-}
 
 interface State {
   showDetails: boolean;
   showExample: boolean;
 }
 
-export class OptInMessage extends React.PureComponent<Props, State> {
+export class OptInMessage extends React.PureComponent<{}, State> {
   public readonly state: State = {
     showDetails: false,
     showExample: false,
