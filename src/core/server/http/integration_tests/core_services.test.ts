@@ -43,7 +43,7 @@ describe('http service', () => {
   describe('auth', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
-      root = kbnTestServer.createRoot();
+      root = kbnTestServer.createRoot({ migrations: { skip: true } });
     }, 30000);
 
     afterEach(async () => {
