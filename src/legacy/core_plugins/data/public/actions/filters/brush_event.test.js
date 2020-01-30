@@ -65,7 +65,7 @@ describe('brushEvent', () => {
                       meta: {
                         type: 'histogram',
                         indexPatternId: 'indexPatternId',
-                        params: aggConfigs[0].params,
+                        aggConfigParams: aggConfigs[0].params,
                       },
                     },
                   ],
