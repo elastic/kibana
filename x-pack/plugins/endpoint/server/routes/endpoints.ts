@@ -8,7 +8,10 @@ import { IRouter } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 
-import { kibanaRequestToEndpointListQuery } from '../services/endpoint/endpoint_query_builders';
+import {
+  kibanaRequestToEndpointListQuery,
+  kibanaRequestToEndpointFetchQuery,
+} from '../services/endpoint/endpoint_query_builders';
 import { EndpointMetadata, EndpointResultList } from '../../common/types';
 import { EndpointAppContext } from '../types';
 
@@ -56,6 +59,33 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           queryParams
         )) as SearchResponse<EndpointMetadata>;
         return res.ok({ body: mapToEndpointResultList(queryParams, response) });
+      } catch (err) {
+        return res.internalError({ body: err });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/endpoint/endpoints/{id}',
+      validate: {
+        params: schema.object({ id: schema.string() }),
+      },
+      options: { authRequired: true },
+    },
+    async (context, req, res) => {
+      try {
+        const query = kibanaRequestToEndpointFetchQuery(req, endpointAppContext);
+        const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
+          'search',
+          query
+        )) as SearchResponse<EndpointMetadata>;
+
+        if (response.hits.hits.length === 0) {
+          return res.notFound({ body: 'Endpoint Not Found' });
+        }
+
+        return res.ok({ body: response.hits.hits[0]._source });
       } catch (err) {
         return res.internalError({ body: err });
       }

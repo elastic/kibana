@@ -417,6 +417,10 @@ export const ecsSchema = gql`
     original_time: ToStringArray
   }
 
+  type RuleEcsField {
+    reference: ToStringArray
+  }
+
   type ECS {
     _id: String!
     _index: String
@@ -428,6 +432,7 @@ export const ecsSchema = gql`
     geo: GeoEcsFields
     host: HostEcsFields
     network: NetworkEcsField
+    rule: RuleEcsField
     signal: SignalField
     source: SourceEcsFields
     suricata: SuricataEcsFields

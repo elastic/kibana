@@ -5,10 +5,13 @@
  */
 import { httpServerMock, loggingServiceMock } from '../../../../../../src/core/server/mocks';
 import { EndpointConfigSchema } from '../../config';
-import { kibanaRequestToEndpointListQuery } from './endpoint_query_builders';
+import {
+  kibanaRequestToEndpointListQuery,
+  kibanaRequestToEndpointFetchQuery,
+} from './endpoint_query_builders';
 
-describe('test query builder', () => {
-  describe('test query builder request processing', () => {
+describe('query builder', () => {
+  describe('EndpointListQuery', () => {
     it('test default query params for all endpoints when no params or body is provided', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {},
@@ -108,6 +111,29 @@ describe('test query builder', () => {
         size: 10,
         index: 'endpoint-agent*',
       } as Record<string, any>);
+    });
+  });
+
+  describe('EndpointFetchQuery', () => {
+    it('searches for the correct ID', () => {
+      const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: {
+          id: mockID,
+        },
+      });
+      const query = kibanaRequestToEndpointFetchQuery(mockRequest, {
+        logFactory: loggingServiceMock.create(),
+        config: () => Promise.resolve(EndpointConfigSchema.validate({})),
+      });
+      expect(query).toEqual({
+        body: {
+          query: { match: { 'host.id.keyword': mockID } },
+          sort: [{ 'event.created': { order: 'desc' } }],
+          size: 1,
+        },
+        index: 'endpoint-agent*',
+      });
     });
   });
 });
