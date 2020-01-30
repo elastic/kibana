@@ -12,45 +12,35 @@ import { schema } from '@kbn/config-schema';
 
 export const IMPORT_ROUTE = '/api/fileupload/import';
 
-function importData({ callWithRequest, id, index, settings, mappings, ingestPipeline, data }) {
-  const { importData: importDataFunc } = importDataProvider(callWithRequest);
-  return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
-}
+const querySchema = schema.maybe(
+  schema.object({
+    id: schema.nullable(schema.string()),
+  })
+);
 
-const queryValidation = (data, { ok, badRequest }) => {
-  const validQuery = schema
-    .maybe(
-      schema.object({
-        id: schema.nullable(schema.string()),
-      })
-    )
-    .validate(data);
+const bodySchema = schema.object(
+  {
+    app: schema.maybe(schema.string()),
+    index: schema.string(),
+    fileType: schema.string(),
+    ingestPipeline: schema.maybe(
+      schema.object(
+        {},
+        {
+          defaultValue: {},
+          allowUnknowns: true,
+        }
+      )
+    ),
+  },
+  { allowUnknowns: true }
+);
 
-  return validQuery ? ok(validQuery) : badRequest('Invalid query', ['query']);
-};
-
-const bodyValidation = (data, { ok, badRequest }) => {
-  const validBody = schema
-    .object(
-      {
-        app: schema.maybe(schema.string()),
-        index: schema.string(),
-        fileType: schema.string(),
-        ingestPipeline: schema.maybe(
-          schema.object(
-            {},
-            {
-              defaultValue: {},
-              allowUnknowns: true,
-            }
-          )
-        ),
-      },
-      { allowUnknowns: true }
-    )
-    .validate(data);
-
-  return validBody ? ok(validBody) : badRequest('Invalid payload', ['body']);
+const options = {
+  body: {
+    maxBytes: MAX_BYTES,
+    accepts: ['application/json'],
+  },
 };
 
 const idConditionalValidation = (body, boolHasId) => {
@@ -95,15 +85,23 @@ const finishValidationAndProcessReq = (elasticsearchPlugin, getSavedObjectsRepos
       body,
     } = req;
     const boolHasId = !!id;
-    const validIdReqData = idConditionalValidation(body, boolHasId);
 
     let resp;
     try {
-      const processedReq = await importData({
+      const validIdReqData = idConditionalValidation(body, boolHasId);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, validIdReqData);
+      const { importData: importDataFunc } = importDataProvider(callWithRequest);
+
+      const { index, settings, mappings, ingestPipeline, data } = validIdReqData;
+      const processedReq = await importDataFunc(
         id,
-        callWithRequest: callWithRequestFactory(elasticsearchPlugin, validIdReqData),
-        ...validIdReqData,
-      });
+        index,
+        settings,
+        mappings,
+        ingestPipeline,
+        data
+      );
+
       if (processedReq.success) {
         resp = ok({ body: processedReq });
         // If no id's been established then this is a new index, update telemetry
@@ -111,29 +109,22 @@ const finishValidationAndProcessReq = (elasticsearchPlugin, getSavedObjectsRepos
           await updateTelemetry({ elasticsearchPlugin, getSavedObjectsRepository });
         }
       } else {
-        resp = badRequest(`Error processing request: ${processedReq.error.message}`, ['body']);
+        resp = badRequest(`Error processing request 1: ${processedReq.error.message}`, ['body']);
       }
     } catch (e) {
-      resp = badRequest(`Error processing request: : ${e.message}`, ['body']);
+      resp = badRequest(`Error processing request 2: : ${e.message}`, ['body']);
     }
     return resp;
   };
 };
 
 export const initRoutes = (router, esPlugin, getSavedObjectsRepository) => {
-  const options = {
-    body: {
-      maxBytes: MAX_BYTES,
-      accepts: ['application/json'],
-    },
-  };
-
   router.post(
     {
       path: `${IMPORT_ROUTE}{id?}`,
       validate: {
-        query: queryValidation,
-        body: bodyValidation,
+        query: querySchema,
+        body: bodySchema,
       },
       options,
     },
