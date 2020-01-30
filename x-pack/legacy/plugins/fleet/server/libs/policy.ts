@@ -40,10 +40,20 @@ export class PolicyLib {
   }
 
   public async getFullPolicy(user: FrameworkUser, id: string): Promise<AgentPolicy | null> {
-    const policy = await this.policyAdapter.get(this.soAdapter.getClient(user), id);
+    let policy;
+
+    try {
+      policy = await this.policyAdapter.get(this.soAdapter.getClient(user), id);
+    } catch (err) {
+      if (!err.isBoom || err.output.statusCode !== 404) {
+        throw err;
+      }
+    }
+
     if (!policy) {
       return null;
     }
+
     const agentPolicy = {
       id: policy.id,
       outputs: {
