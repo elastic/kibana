@@ -471,7 +471,7 @@ an error or continue as normal. This is a simple "gate-keeping" pattern.
 // Legacy pre-handler
 const licensePreRouting = (request) => {
   const licenseInfo = getMyPluginLicenseInfo(request.server.plugins.xpack_main);
-  if (!licenseInfo.isHighEnough()) {
+  if (!licenseInfo.isOneOf(['gold', 'platinum', 'trial'])) {
     throw Boom.forbidden(`You don't have the right license for MyPlugin!`);
   }
 }
@@ -504,7 +504,7 @@ const checkLicense = <P, Q, B>(
   return (context, req, res) => {
     const licenseInfo = getMyPluginLicenseInfo(context.licensing.license);
 
-    if (licenseInfo.isHighEnough()) {
+    if (licenseInfo.hasAtLeast('gold')) {
       return handler(context, req, res);
     } else {
       return res.forbidden({ body: `You don't have the right license for MyPlugin!` });
@@ -531,7 +531,7 @@ handler.
 // Legacy pre-handler
 const licensePreRouting = (request) => {
   const licenseInfo = getMyPluginLicenseInfo(request.server.plugins.xpack_main);
-  if (licenseInfo.isHighEnough()) {
+  if (licenseInfo.isOneOf(['gold', 'platinum', 'trial'])) {
     // In this case, the return value of the pre-handler is made available on
     // whatever the 'assign' option is in the route config.
     return licenseInfo;
@@ -555,9 +555,11 @@ server.route({
 })
 ```
 
-In this case, we'll use a handler factory as the argument to our high-order
-handler. This way the high-order handler can pass arbitrary arguments to the
-route handler.
+In many cases, it may be simpler to duplicate the function call
+to retrieve the data again in the main handler. In this other cases, you can
+utilize a handler _factory_ rather than a raw handler as the argument to your
+high-order handler. This way the high-order handler can pass arbitrary arguments
+to the route handler.
 
 ```ts
 // New Platform high-order handler
@@ -567,7 +569,7 @@ const checkLicense = <P, Q, B>(
   return (context, req, res) => {
     const licenseInfo = getMyPluginLicenseInfo(context.licensing.license);
 
-    if (licenseInfo.isHighEnough()) {
+    if (licenseInfo.hasAtLeast('gold')) {
       const handler = handlerFactory(licenseInfo);
       return handler(context, req, res);
     } else {
