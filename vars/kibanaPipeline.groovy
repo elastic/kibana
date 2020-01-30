@@ -1,43 +1,54 @@
-def withWorkers(machineName, preWorkerClosure = {}, workerClosures = [:]) {
-  return {
-    jobRunner('tests-xl', true) {
-      withGcsArtifactUpload(machineName, {
-        withPostBuildReporting {
-          doSetup()
-          preWorkerClosure()
+def withParallelWorker(Map params) {
+  def config = [name: 'parallel-worker', setup: {}, processes: [:], delayBetweenProcesses: 0, label: 'tests-xl'].putAll(params)
 
-          def nextWorker = 1
-          def worker = { workerClosure ->
-            def workerNumber = nextWorker
-            nextWorker++
+  withCiWorker(label: config.label, name: config.name) {
+    config.setup()
 
-            return {
-              // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
-              def delay = (workerNumber-1)*20
-              sleep(delay)
+    def nextProcessNumber = 1
+    def process = { processName, processClosure ->
+      def processNumber = nextProcessNumber
+      nextProcessNumber++
 
-              workerClosure(workerNumber)
-            }
-          }
-
-          def workers = [:]
-          workerClosures.each { workerName, workerClosure ->
-            workers[workerName] = worker(workerClosure)
-          }
-
-          parallel(workers)
+      return {
+        if (config.delayBetweenProcesses && config.delayBetweenProcesses > 0) {
+          // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
+          def delay = (processNumber-1)*config.delayBetweenProcesses
+          sleep(delay)
         }
-      })
+
+        withEnv(["JOB=${processName}"]) {
+          processClosure(processNumber)
+        }
+      }
     }
+
+    def processes = [:]
+    config.processes.each { processName, processClosure ->
+      processes[processName] = process(processName, processClosure)
+    }
+
+    parallel(processes)
   }
 }
 
-def withWorker(machineName, label, Closure closure) {
+def functionalWorker(name, Closure setup, Map processes) {
   return {
-    jobRunner(label, false) {
-      withGcsArtifactUpload(machineName) {
-        withPostBuildReporting {
+    withParallelWorker(name: machineName, setup: preWorkerClosure, processes: workerClosures, delayBetweenProcesses: 20, label: 'tests-xl')
+  }
+}
+
+def withCiWorker(Map params, Closure closure) {
+  def config = [ramDisk: true, bootstrapped: true].putAll(params)
+
+  return withWorker(config) {
+    withGcsArtifactUpload(config.name) {
+      withPostBuildReporting {
+        if (config.bootstrapped) {
           doSetup()
+        }
+        withEnv([
+          "JOB=${config.name}"
+        ]) {
           closure()
         }
       }
@@ -46,10 +57,8 @@ def withWorker(machineName, label, Closure closure) {
 }
 
 def intakeWorker(jobName, String script) {
-  return withWorker(jobName, 'linux && immutable') {
-    withEnv([
-      "JOB=${jobName}",
-    ]) {
+  return {
+    withCiWorker(name: jobName, label: 'linux && immutable') {
       runbld(script, "Execute ${jobName}")
     }
   }
@@ -73,7 +82,7 @@ def withPostBuildReporting(Closure closure) {
   }
 }
 
-def getPostBuildWorker(name, closure) {
+def functionalTestProcess(name, Closure closure) {
   return { workerNumber ->
     def kibanaPort = "61${workerNumber}1"
     def esPort = "61${workerNumber}2"
@@ -93,8 +102,16 @@ def getPostBuildWorker(name, closure) {
   }
 }
 
-def getOssCiGroupWorker(ciGroup) {
-  return getPostBuildWorker("ciGroup" + ciGroup, {
+def functionalTestProcess(name, String script) {
+  return functionalTestProcess(name) {
+    retryable(name) {
+      runbld(script, "Execute ${name}")
+    }
+  }
+}
+
+def ossCiGroupProcess(ciGroup) {
+  return functionalTestProcess("ciGroup" + ciGroup, {
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
@@ -106,8 +123,8 @@ def getOssCiGroupWorker(ciGroup) {
   })
 }
 
-def getXpackCiGroupWorker(ciGroup) {
-  return getPostBuildWorker("xpack-ciGroup" + ciGroup, {
+def xpackCiGroupProcess(ciGroup) {
+  return functionalTestProcess("xpack-ciGroup" + ciGroup, {
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
@@ -119,11 +136,16 @@ def getXpackCiGroupWorker(ciGroup) {
   })
 }
 
-def jobRunner(label, useRamDisk, closure) {
+def withWorker(Map params, Closure closure) {
+  def config = [label: '', ramDisk: true, bootstrapped: true, name: 'unnamed-worker', scm: scm].putAll(params)
+  if (!config.label) {
+    error "You must specify an agent label, such as 'tests-xl' or 'linux && immutable', when using withWorker()"
+  }
+
   node(label) {
     agentInfo.print()
 
-    if (useRamDisk) {
+    if (config.ramDisk) {
       // Move to a temporary workspace, so that we can symlink the real workspace into /dev/shm
       def originalWorkspace = env.WORKSPACE
       ws('/tmp/workspace') {
@@ -139,11 +161,13 @@ def jobRunner(label, useRamDisk, closure) {
       }
     }
 
-    def scmVars
+    def scmVars = [:]
 
-    // Try to clone from Github up to 8 times, waiting 15 secs between attempts
-    retryWithDelay(8, 15) {
-      scmVars = checkout scm
+    if (config.scm) {
+      // Try to clone from Github up to 8 times, waiting 15 secs between attempts
+      retryWithDelay(8, 15) {
+        scmVars = checkout scm
+      }
     }
 
     withEnv([
@@ -153,7 +177,7 @@ def jobRunner(label, useRamDisk, closure) {
       "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
       "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
       "TEST_BROWSER_HEADLESS=1",
-      "GIT_BRANCH=${scmVars.GIT_BRANCH}",
+      "GIT_BRANCH=${scmVars.GIT_BRANCH ?: ''}",
     ]) {
       withCredentials([
         string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
