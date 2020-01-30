@@ -18,12 +18,11 @@
  */
 
 import { first, skip, toArray } from 'rxjs/operators';
-import { fromExpression } from '@kbn/interpreter/common';
 import { loader, ExpressionLoader } from './loader';
 import { ExpressionDataHandler } from './execute';
 import { IInterpreterRenderHandlers } from './types';
 import { Observable } from 'rxjs';
-import { ExpressionAstExpression } from '../common';
+import { ExpressionAstExpression, parseExpression } from '../common';
 
 const element: HTMLElement = null as any;
 
@@ -83,7 +82,7 @@ describe('ExpressionLoader', () => {
     });
 
     it('accepts expression AST', () => {
-      const expressionAST = fromExpression(expressionString) as ExpressionAstExpression;
+      const expressionAST = parseExpression(expressionString);
       const expressionLoader = new ExpressionLoader(element, expressionAST, {});
       expect(expressionLoader.getExpression()).toEqual(expressionString);
       expect(expressionLoader.getAst()).toEqual(expressionAST);

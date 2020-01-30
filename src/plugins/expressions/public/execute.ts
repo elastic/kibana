@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { fromExpression, toExpression } from '@kbn/interpreter/target/common';
 import { DataAdapter, RequestAdapter, Adapters } from '../../inspector/public';
 import { getInterpreter } from './services';
 import { IExpressionLoaderParams, IInterpreterResult } from './types';
-import { ExpressionAstExpression } from '../common';
+import { ExpressionAstExpression, parseExpression, formatExpression } from '../common';
 
 /**
  * The search context describes a specific context (filters, time range and query)
@@ -43,10 +42,10 @@ export class ExpressionDataHandler {
   constructor(expression: string | ExpressionAstExpression, params: IExpressionLoaderParams) {
     if (typeof expression === 'string') {
       this.expression = expression;
-      this.ast = fromExpression(expression) as ExpressionAstExpression;
+      this.ast = parseExpression(expression);
     } else {
       this.ast = expression;
-      this.expression = toExpression(this.ast);
+      this.expression = formatExpression(this.ast);
     }
 
     this.abortController = new AbortController();

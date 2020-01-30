@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { fromExpression } from '@kbn/interpreter/common';
 import { execute, ExpressionDataHandler } from './execute';
-import { ExpressionAstExpression } from '../common';
+import { ExpressionAstExpression, parseExpression } from '../common';
 
 jest.mock('./services', () => ({
   getInterpreter: () => {
@@ -55,7 +54,7 @@ describe('ExpressionDataHandler', () => {
     });
 
     it('accepts expression AST', () => {
-      const expressionAST = fromExpression(expressionString) as ExpressionAstExpression;
+      const expressionAST = parseExpression(expressionString) as ExpressionAstExpression;
       const expressionDataHandler = new ExpressionDataHandler(expressionAST, {});
       expect(expressionDataHandler.getExpression()).toEqual(expressionString);
       expect(expressionDataHandler.getAst()).toEqual(expressionAST);

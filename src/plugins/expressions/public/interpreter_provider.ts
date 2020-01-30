@@ -17,9 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
-import { fromExpression, getByAlias } from '@kbn/interpreter/common';
-
 import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { createError } from './create_error';
 import {
@@ -29,6 +26,8 @@ import {
   AnyExpressionFunctionDefinition,
   ArgumentType,
   FunctionsRegistry,
+  parseExpression,
+  getByAlias,
 } from '../common';
 
 export { createError };

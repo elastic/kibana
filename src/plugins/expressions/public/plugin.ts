@@ -89,6 +89,9 @@ export class ExpressionsPublicPlugin
   public setup(core: CoreSetup, { inspector, bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
     const { executor, renderers } = this;
 
+    executor.extendContext({
+      environment: 'client',
+    });
     executor.registerFunction(kibanaContextFunction());
 
     setRenderersRegistry(renderers);
@@ -101,14 +104,8 @@ export class ExpressionsPublicPlugin
 
     // TODO: Refactor this function.
     const getExecutor = () => {
-      const interpretAst: ExpressionInterpretWithHandlers = (ast, context, handlers) => {
-        const interpret = interpreterProvider({
-          types: executor.getTypes(),
-          handlers: { ...handlers, ...createHandlers() },
-          functions: executor.functions,
-        });
-        return interpret(ast, context);
-      };
+      const interpretAst: ExpressionInterpretWithHandlers = (ast, input, extraContext?) =>
+        executor.run(ast, input, extraContext);
       return { interpreter: { interpretAst } } as ExpressionExecutor;
     };
 
