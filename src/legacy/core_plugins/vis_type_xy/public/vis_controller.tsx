@@ -125,7 +125,7 @@ export const createVislibVisController = (deps: VisTypeXyDependencies) => {
             color="warning"
             iconType="alert"
             size="s"
-            title="The visTypeXy plugin in enabled"
+            title="The visTypeXy plugin is enabled"
           >
             <p>
               Some visualizations on this page are using @elastic/charts and may not be fully
