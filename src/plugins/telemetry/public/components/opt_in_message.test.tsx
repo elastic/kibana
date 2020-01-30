@@ -22,8 +22,6 @@ import { OptInMessage } from './opt_in_message';
 
 describe('OptInMessage', () => {
   it('renders as expected', () => {
-    expect(
-      shallowWithIntl(<OptInMessage fetchTelemetry={jest.fn(async () => [])} />)
-    ).toMatchSnapshot();
+    expect(shallowWithIntl(<OptInMessage />)).toMatchSnapshot();
   });
 });

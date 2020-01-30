@@ -18,9 +18,10 @@
  */
 
 import { TelemetrySender } from './telemetry_sender';
+import { mockTelemetryService } from '../telemetry.mock';
 import { REPORT_INTERVAL_MS, LOCALSTORAGE_KEY } from '../../common/constants';
 
-describe('telemetry class', () => {
+describe('TelemetrySender', () => {
   const clusters = [{ cluster_uuid: 'fake-123' }, { cluster_uuid: 'fake-456' }];
   const telemetryUrl = 'https://not.a.valid.url.0';
   const mockFetchTelemetry = () => Promise.resolve({ data: clusters });

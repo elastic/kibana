@@ -41,7 +41,7 @@ export class OptInBanner extends React.PureComponent<Props> {
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={() => onChangeOptInClick(true)}>
+            <EuiButton size="s" data-test-subj="enable" onClick={() => onChangeOptInClick(true)}>
               <FormattedMessage
                 id="telemetry.welcomeBanner.enableButtonLabel"
                 defaultMessage="Enable"
@@ -49,7 +49,7 @@ export class OptInBanner extends React.PureComponent<Props> {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={() => onChangeOptInClick(false)}>
+            <EuiButton size="s" data-test-subj="disable" onClick={() => onChangeOptInClick(false)}>
               <FormattedMessage
                 id="telemetry.welcomeBanner.disableButtonLabel"
                 defaultMessage="Disable"

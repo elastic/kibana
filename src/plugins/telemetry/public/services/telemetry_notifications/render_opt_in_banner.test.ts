@@ -17,26 +17,27 @@
  * under the License.
  */
 
-import '../../services/telemetry_opt_in.test.mocks';
-import { renderBanner } from './render_banner';
+import { renderOptInBanner } from './render_opt_in_banner';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { overlayServiceMock } from '../../../../../core/public/overlays/overlay_service.mock';
 
-describe('render_banner', () => {
+describe('renderOptInBanner', () => {
   it('adds a banner to banners with priority of 10000', () => {
-    const bannerID = 'brucer-banner';
+    const bannerID = 'brucer-wayne';
+    const overlays = overlayServiceMock.createStartContract();
+    overlays.banners.add.mockReturnValue(bannerID);
 
-    const telemetryOptInProvider = { setBannerId: jest.fn() };
-    const banners = { add: jest.fn().mockReturnValue(bannerID) };
-    const fetchTelemetry = jest.fn();
+    const returnedBannerId = renderOptInBanner({
+      setOptIn: jest.fn(),
+      overlays,
+    });
 
-    renderBanner(telemetryOptInProvider, fetchTelemetry, { _banners: banners });
+    expect(overlays.banners.add).toBeCalledTimes(1);
 
-    expect(banners.add).toBeCalledTimes(1);
-    expect(fetchTelemetry).toBeCalledTimes(0);
-    expect(telemetryOptInProvider.setBannerId).toBeCalledWith(bannerID);
+    expect(returnedBannerId).toBe(bannerID);
+    const bannerConfig = overlays.banners.add.mock.calls[0];
 
-    const bannerConfig = banners.add.mock.calls[0][0];
-
-    expect(bannerConfig.component).not.toBe(undefined);
-    expect(bannerConfig.priority).toBe(10000);
+    expect(bannerConfig[0]).not.toBe(undefined);
+    expect(bannerConfig[1]).toBe(10000);
   });
 });

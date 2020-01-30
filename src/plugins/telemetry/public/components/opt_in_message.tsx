@@ -22,23 +22,7 @@ import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PRIVACY_STATEMENT_URL } from '../../common/constants';
 
-interface State {
-  showDetails: boolean;
-  showExample: boolean;
-}
-
-export class OptInMessage extends React.PureComponent<{}, State> {
-  public readonly state: State = {
-    showDetails: false,
-    showExample: false,
-  };
-
-  toggleShowExample = () => {
-    this.setState(prevState => ({
-      showExample: !prevState.showExample,
-    }));
-  };
-
+export class OptInMessage extends React.PureComponent {
   render() {
     return (
       <React.Fragment>

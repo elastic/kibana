@@ -22,16 +22,15 @@
 import * as React from 'react';
 import { EuiButton, EuiLink, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { PATH_TO_ADVANCED_SETTINGS, PRIVACY_STATEMENT_URL } from '../../common/constants';
 
 interface Props {
   onSeenBanner: () => any;
-  privacyStatementHref: string;
-  disableTelemetryHref: string;
 }
 
-export class OptedInBanner extends React.PureComponent<Props> {
+export class OptedInNoticeBanner extends React.PureComponent<Props> {
   render() {
-    const { privacyStatementHref, disableTelemetryHref, onSeenBanner } = this.props;
+    const { onSeenBanner } = this.props;
 
     return (
       <EuiCallOut title="Help us improve the Elastic Stack">
@@ -42,7 +41,7 @@ export class OptedInBanner extends React.PureComponent<Props> {
             privacyStatementLink: (
               <EuiLink
                 onClick={onSeenBanner}
-                href={privacyStatementHref}
+                href={PRIVACY_STATEMENT_URL}
                 target="_blank"
                 rel="noopener"
               >
@@ -53,7 +52,7 @@ export class OptedInBanner extends React.PureComponent<Props> {
               </EuiLink>
             ),
             disableLink: (
-              <EuiLink href={disableTelemetryHref} onClick={onSeenBanner}>
+              <EuiLink href={PATH_TO_ADVANCED_SETTINGS} onClick={onSeenBanner}>
                 <FormattedMessage
                   id="telemetry.telemetryOptedInDisableUsage"
                   defaultMessage="disable usage data here"

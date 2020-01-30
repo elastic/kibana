@@ -19,16 +19,16 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { OptedInBanner } from './opted_in_notice_banner';
+import { OptedInNoticeBanner } from './opted_in_notice_banner';
 
 describe('OptInDetailsComponent', () => {
   it('renders as expected', () => {
-    expect(shallowWithIntl(<OptedInBanner onSeenBanner={() => {}} />)).toMatchSnapshot();
+    expect(shallowWithIntl(<OptedInNoticeBanner onSeenBanner={() => {}} />)).toMatchSnapshot();
   });
 
   it('fires the "onSeenBanner" prop when a link is clicked', () => {
     const onLinkClick = jest.fn();
-    const component = shallowWithIntl(<OptedInBanner onSeenBanner={onLinkClick} />);
+    const component = shallowWithIntl(<OptedInNoticeBanner onSeenBanner={onLinkClick} />);
 
     const button = component.findWhere(n => n.type() === EuiButton);
 

@@ -19,8 +19,7 @@
 
 import React from 'react';
 import { CoreStart } from 'kibana/public';
-import { OptedInBanner } from '../../components/opted_in_notice_banner';
-import { PATH_TO_ADVANCED_SETTINGS, PRIVACY_STATEMENT_URL } from '../../../common/constants';
+import { OptedInNoticeBanner } from '../../components';
 import { toMountPoint } from '../../../../kibana_react/public';
 
 interface RenderBannerConfig {
@@ -28,13 +27,7 @@ interface RenderBannerConfig {
   onSeen: () => void;
 }
 export function renderOptedInNoticeBanner({ onSeen, overlays }: RenderBannerConfig) {
-  const mount = toMountPoint(
-    <OptedInBanner
-      onSeenBanner={onSeen}
-      disableTelemetryHref={PATH_TO_ADVANCED_SETTINGS}
-      privacyStatementHref={PRIVACY_STATEMENT_URL}
-    />
-  );
+  const mount = toMountPoint(<OptedInNoticeBanner onSeenBanner={onSeen} />);
   const bannerId = overlays.banners.add(mount, 10000);
 
   return bannerId;
