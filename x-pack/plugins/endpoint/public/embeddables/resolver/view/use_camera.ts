@@ -29,6 +29,16 @@ export function useCamera(): {
    */
   const projectionMatrixAtTime = useSelector(selectors.projectionMatrix);
 
+  /**
+   * Use a ref to refer to the `projectionMatrixAtTime` function. The rAF loop
+   * accesses this and sets state during the rAF cycle. If the rAF loop
+   * effect read this directly from the selector, the rAF loop would need to
+   * be re-inited each time this function changed. The `projectionMatrixAtTime` function
+   * changes each frame during an animation, so the rAF loop would be causing
+   * itself to reinit on each frame. This would necessarily cause a drop in FPS as there
+   * would be a dead zone between when the rAF loop stopped and restarted itself.
+   * TODO prove this.
+   */
   const projectionMatrixAtTimeRef = useRef<typeof projectionMatrixAtTime>();
 
   /**
