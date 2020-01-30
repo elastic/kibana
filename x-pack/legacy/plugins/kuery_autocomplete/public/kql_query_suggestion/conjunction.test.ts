@@ -19,18 +19,18 @@ describe('Kuery conjunction suggestions', () => {
     getSuggestions = setupGetConjunctionSuggestions(coreMock.createSetup());
   });
 
-  it('should return a function', function() {
+  test('should return a function', () => {
     expect(typeof getSuggestions).toBe('function');
   });
 
-  it('should not suggest anything for phrases not ending in whitespace', async () => {
+  test('should not suggest anything for phrases not ending in whitespace', async () => {
     const text = 'foo';
     const suggestions = await getSuggestions(querySuggestionsArgs, mockKueryNode({ text }));
 
     expect(suggestions).toEqual([]);
   });
 
-  it('should suggest and/or for phrases ending in whitespace', async () => {
+  test('should suggest and/or for phrases ending in whitespace', async () => {
     const text = 'foo ';
     const suggestions = await getSuggestions(querySuggestionsArgs, mockKueryNode({ text }));
 
@@ -38,7 +38,7 @@ describe('Kuery conjunction suggestions', () => {
     expect(suggestions.map(suggestion => suggestion.text)).toEqual(['and ', 'or ']);
   });
 
-  it('should suggest to insert the suggestion at the end of the string', async () => {
+  test('should suggest to insert the suggestion at the end of the string', async () => {
     const text = 'bar ';
     const end = text.length;
     const suggestions = await getSuggestions(querySuggestionsArgs, mockKueryNode({ text, end }));
@@ -48,7 +48,7 @@ describe('Kuery conjunction suggestions', () => {
     expect(suggestions.map(suggestion => suggestion.end)).toEqual([end, end]);
   });
 
-  it('should have descriptions', async () => {
+  test('should have descriptions', async () => {
     const text = ' ';
     const suggestions = await getSuggestions(querySuggestionsArgs, mockKueryNode({ text }));
 
