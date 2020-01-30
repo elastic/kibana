@@ -14,5 +14,5 @@ export { MonitorList } from './monitor_list';
 export { OverviewPageParsingErrorCallout } from './overview_page_parsing_error_callout';
 export { PingList } from './ping_list';
 export { Snapshot } from './snapshot';
-export { SnapshotHistogram } from './charts';
+export { PingHistogramComponent } from './charts';
 export { StatusPanel } from './status_panel';

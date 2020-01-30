@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { PingHistogram } from './charts/ping_histogram';
 export { KueryBar } from './kuerybar/kuery_bar_container';
 export { OverviewPage } from './pages/overview_container';
 export { FilterGroup } from './filter_group/filter_group_container';

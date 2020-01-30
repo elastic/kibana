@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AggConfig } from '../../vis';
+import { AggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 
 export interface OptionedValueProp {

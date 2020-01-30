@@ -11,6 +11,7 @@ import { snapshotReducer } from './snapshot';
 import { uiReducer } from './ui';
 import { monitorStatusReducer } from './monitor_status';
 import { indexPatternReducer } from './index_pattern';
+import { pingReducer } from './ping';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
@@ -19,4 +20,5 @@ export const rootReducer = combineReducers({
   ui: uiReducer,
   monitorStatus: monitorStatusReducer,
   indexPattern: indexPatternReducer,
+  ping: pingReducer,
 });
