@@ -221,7 +221,7 @@ export interface SavedObjectsType {
   convertToAliasScript?: string;
 
   mappings: SavedObjectsTypeMappingDefinition;
-  migrations: SavedObjectMigrationMap;
+  migrations?: SavedObjectMigrationMap;
   // validations
 }
 
@@ -254,7 +254,7 @@ export interface SavedObjectsLegacyMigrationDefinitions {
 }
 
 interface SavedObjectsLegacyTypeSchema {
-  isNamespaceAgnostic: boolean;
+  isNamespaceAgnostic?: boolean;
   hidden?: boolean;
   indexPattern?: ((config: LegacyConfig) => string) | string;
   convertToAliasScript?: string;

@@ -17,74 +17,236 @@
  * under the License.
  */
 
-import { convertLegacyMappings } from './utils';
-import { SavedObjectsLegacyMapping } from './types';
+import { legacyServiceMock } from '../legacy/legacy_service.mock';
+import { convertLegacyTypes } from './utils';
+import { SavedObjectsLegacyUiExports } from './types';
+import { LegacyConfig } from 'kibana/server';
 
-describe('convertLegacyMappings', () => {
-  it('converts the legacy uiExport mappings to core format', () => {
-    const legacyMappings: SavedObjectsLegacyMapping[] = [
-      {
-        pluginId: 'pluginA',
-        properties: {
-          typeA: {
-            properties: {
-              fieldA: { type: 'text' },
+describe('convertLegacyTypes', () => {
+  let legacyConfig: ReturnType<typeof legacyServiceMock.createLegacyConfig>;
+
+  beforeEach(() => {
+    legacyConfig = legacyServiceMock.createLegacyConfig();
+  });
+
+  it('converts the legacy mappings using default values if no schemas are specified', () => {
+    const uiExports: SavedObjectsLegacyUiExports = {
+      savedObjectMappings: [
+        {
+          pluginId: 'pluginA',
+          properties: {
+            typeA: {
+              properties: {
+                fieldA: { type: 'text' },
+              },
+            },
+            typeB: {
+              properties: {
+                fieldB: { type: 'text' },
+              },
             },
           },
-          typeB: {
-            properties: {
-              fieldB: { type: 'text' },
+        },
+        {
+          pluginId: 'pluginB',
+          properties: {
+            typeC: {
+              properties: {
+                fieldC: { type: 'text' },
+              },
             },
           },
+        },
+      ],
+      savedObjectMigrations: {},
+      savedObjectSchemas: {},
+      savedObjectValidations: {},
+    };
+
+    const converted = convertLegacyTypes(uiExports, legacyConfig);
+    expect(converted).toMatchSnapshot();
+  });
+
+  it('merges the mappings and the schema to create the type when schema exists for the type', () => {
+    const uiExports: SavedObjectsLegacyUiExports = {
+      savedObjectMappings: [
+        {
+          pluginId: 'pluginA',
+          properties: {
+            typeA: {
+              properties: {
+                fieldA: { type: 'text' },
+              },
+            },
+          },
+        },
+        {
+          pluginId: 'pluginB',
+          properties: {
+            typeC: {
+              properties: {
+                fieldC: { type: 'text' },
+              },
+            },
+          },
+        },
+      ],
+      savedObjectMigrations: {},
+      savedObjectSchemas: {
+        typeA: {
+          indexPattern: 'fooBar',
+          hidden: true,
+          isNamespaceAgnostic: true,
         },
       },
-      {
-        pluginId: 'pluginB',
-        properties: {
-          typeC: {
-            properties: {
-              fieldC: { type: 'text' },
+      savedObjectValidations: {},
+    };
+
+    const converted = convertLegacyTypes(uiExports, legacyConfig);
+    expect(converted).toMatchSnapshot();
+  });
+
+  it('invokes indexPattern to retrieve the index when it is a function', () => {
+    const indexPatternAccessor: (config: LegacyConfig) => string = jest.fn(config => {
+      config.get('foo.bar');
+      return 'myIndex';
+    });
+
+    const uiExports: SavedObjectsLegacyUiExports = {
+      savedObjectMappings: [
+        {
+          pluginId: 'pluginA',
+          properties: {
+            typeA: {
+              properties: {
+                fieldA: { type: 'text' },
+              },
             },
           },
+        },
+      ],
+      savedObjectMigrations: {},
+      savedObjectSchemas: {
+        typeA: {
+          indexPattern: indexPatternAccessor,
+          hidden: true,
+          isNamespaceAgnostic: true,
         },
       },
-    ];
-    expect(convertLegacyMappings(legacyMappings)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "definition": Object {
-            "properties": Object {
-              "fieldA": Object {
-                "type": "text",
+      savedObjectValidations: {},
+    };
+
+    const converted = convertLegacyTypes(uiExports, legacyConfig);
+
+    expect(indexPatternAccessor).toHaveBeenCalledWith(legacyConfig);
+    expect(legacyConfig.get).toHaveBeenCalledWith('foo.bar');
+    expect(converted.length).toEqual(1);
+    expect(converted[0].indexPattern).toEqual('myIndex');
+  });
+
+  it('import migrations from the uiExports', () => {
+    const migrationsA = {
+      '1.0.0': jest.fn(),
+      '2.0.4': jest.fn(),
+    };
+    const migrationsB = {
+      '1.5.3': jest.fn(),
+    };
+
+    const uiExports: SavedObjectsLegacyUiExports = {
+      savedObjectMappings: [
+        {
+          pluginId: 'pluginA',
+          properties: {
+            typeA: {
+              properties: {
+                fieldA: { type: 'text' },
               },
             },
           },
-          "pluginId": "pluginA",
-          "type": "typeA",
         },
-        Object {
-          "definition": Object {
-            "properties": Object {
-              "fieldB": Object {
-                "type": "text",
+        {
+          pluginId: 'pluginB',
+          properties: {
+            typeB: {
+              properties: {
+                fieldC: { type: 'text' },
               },
             },
           },
-          "pluginId": "pluginA",
-          "type": "typeB",
         },
-        Object {
-          "definition": Object {
-            "properties": Object {
-              "fieldC": Object {
-                "type": "text",
+      ],
+      savedObjectMigrations: {
+        typeA: migrationsA,
+        typeB: migrationsB,
+      },
+      savedObjectSchemas: {},
+      savedObjectValidations: {},
+    };
+
+    const converted = convertLegacyTypes(uiExports, legacyConfig);
+    expect(converted.length).toEqual(2);
+    expect(converted[0].migrations).toEqual(migrationsA);
+    expect(converted[1].migrations).toEqual(migrationsB);
+  });
+
+  it('merges everything when all are present', () => {
+    const uiExports: SavedObjectsLegacyUiExports = {
+      savedObjectMappings: [
+        {
+          pluginId: 'pluginA',
+          properties: {
+            typeA: {
+              properties: {
+                fieldA: { type: 'text' },
+              },
+            },
+            typeB: {
+              properties: {
+                fieldB: { type: 'text' },
+                anotherFieldB: { type: 'boolean' },
               },
             },
           },
-          "pluginId": "pluginB",
-          "type": "typeC",
         },
-      ]
-    `);
+        {
+          pluginId: 'pluginB',
+          properties: {
+            typeC: {
+              properties: {
+                fieldC: { type: 'text' },
+              },
+            },
+          },
+        },
+      ],
+      savedObjectMigrations: {
+        typeA: {
+          '1.0.0': jest.fn(),
+          '2.0.4': jest.fn(),
+        },
+        typeC: {
+          '1.5.3': jest.fn(),
+        },
+      },
+      savedObjectSchemas: {
+        typeA: {
+          indexPattern: jest.fn(config => {
+            config.get('foo.bar');
+            return 'myIndex';
+          }),
+          hidden: true,
+          isNamespaceAgnostic: true,
+        },
+        typeB: {
+          convertToAliasScript: 'some alias script',
+          hidden: false,
+        },
+      },
+      savedObjectValidations: {},
+    };
+
+    const converted = convertLegacyTypes(uiExports, legacyConfig);
+    expect(converted).toMatchSnapshot();
   });
 });

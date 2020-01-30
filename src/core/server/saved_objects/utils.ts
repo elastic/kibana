@@ -18,30 +18,17 @@
  */
 
 import { LegacyConfig } from '../legacy';
-import { SavedObjectsLegacyMapping, SavedObjectsType, SavedObjectsLegacyUiExports } from './types';
-import { SavedObjectsTypeMapping } from './mappings';
+import { SavedObjectsType, SavedObjectsLegacyUiExports } from './types';
 
-export const convertLegacyMappings = (
-  legacyMappings: SavedObjectsLegacyMapping[]
-): SavedObjectsTypeMapping[] => {
-  return legacyMappings.reduce((mappings, { pluginId, properties }) => {
-    return [
-      ...mappings,
-      ...Object.entries(properties).map(([type, definition]) => ({
-        pluginId,
-        type,
-        definition,
-      })),
-    ];
-  }, [] as SavedObjectsTypeMapping[]);
-};
-
+/**
+ * Converts the legacy savedObjects mappings, schema, and migrations
+ * to actual {@link SavedObjectsType | saved object types}
+ */
 export const convertLegacyTypes = (
   {
-    savedObjectMappings,
-    savedObjectMigrations,
-    savedObjectSchemas,
-    savedObjectValidations,
+    savedObjectMappings = [],
+    savedObjectMigrations = {},
+    savedObjectSchemas = {},
   }: SavedObjectsLegacyUiExports,
   legacyConfig: LegacyConfig
 ): SavedObjectsType[] => {
@@ -60,7 +47,7 @@ export const convertLegacyTypes = (
             typeof schema?.indexPattern === 'function'
               ? schema.indexPattern(legacyConfig)
               : schema?.indexPattern,
-          convertToAliasScript: schema.convertToAliasScript,
+          convertToAliasScript: schema?.convertToAliasScript,
           migrations: migrations ?? {},
         };
       }),

@@ -1,0 +1,144 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`convertLegacyTypes converts the legacy mappings using default values if no schemas are specified 1`] = `
+Array [
+  Object {
+    "convertToAliasScript": undefined,
+    "hidden": false,
+    "indexPattern": undefined,
+    "mappings": Object {
+      "properties": Object {
+        "fieldA": Object {
+          "type": "text",
+        },
+      },
+    },
+    "migrations": Object {},
+    "name": "typeA",
+    "namespaceAgnostic": false,
+  },
+  Object {
+    "convertToAliasScript": undefined,
+    "hidden": false,
+    "indexPattern": undefined,
+    "mappings": Object {
+      "properties": Object {
+        "fieldB": Object {
+          "type": "text",
+        },
+      },
+    },
+    "migrations": Object {},
+    "name": "typeB",
+    "namespaceAgnostic": false,
+  },
+  Object {
+    "convertToAliasScript": undefined,
+    "hidden": false,
+    "indexPattern": undefined,
+    "mappings": Object {
+      "properties": Object {
+        "fieldC": Object {
+          "type": "text",
+        },
+      },
+    },
+    "migrations": Object {},
+    "name": "typeC",
+    "namespaceAgnostic": false,
+  },
+]
+`;
+
+exports[`convertLegacyTypes merges everything when all are present 1`] = `
+Array [
+  Object {
+    "convertToAliasScript": undefined,
+    "hidden": true,
+    "indexPattern": "myIndex",
+    "mappings": Object {
+      "properties": Object {
+        "fieldA": Object {
+          "type": "text",
+        },
+      },
+    },
+    "migrations": Object {
+      "1.0.0": [MockFunction],
+      "2.0.4": [MockFunction],
+    },
+    "name": "typeA",
+    "namespaceAgnostic": true,
+  },
+  Object {
+    "convertToAliasScript": "some alias script",
+    "hidden": false,
+    "indexPattern": undefined,
+    "mappings": Object {
+      "properties": Object {
+        "anotherFieldB": Object {
+          "type": "boolean",
+        },
+        "fieldB": Object {
+          "type": "text",
+        },
+      },
+    },
+    "migrations": Object {},
+    "name": "typeB",
+    "namespaceAgnostic": false,
+  },
+  Object {
+    "convertToAliasScript": undefined,
+    "hidden": false,
+    "indexPattern": undefined,
+    "mappings": Object {
+      "properties": Object {
+        "fieldC": Object {
+          "type": "text",
+        },
+      },
+    },
+    "migrations": Object {
+      "1.5.3": [MockFunction],
+    },
+    "name": "typeC",
+    "namespaceAgnostic": false,
+  },
+]
+`;
+
+exports[`convertLegacyTypes merges the mappings and the schema to create the type when schema exists for the type 1`] = `
+Array [
+  Object {
+    "convertToAliasScript": undefined,
+    "hidden": true,
+    "indexPattern": "fooBar",
+    "mappings": Object {
+      "properties": Object {
+        "fieldA": Object {
+          "type": "text",
+        },
+      },
+    },
+    "migrations": Object {},
+    "name": "typeA",
+    "namespaceAgnostic": true,
+  },
+  Object {
+    "convertToAliasScript": undefined,
+    "hidden": false,
+    "indexPattern": undefined,
+    "mappings": Object {
+      "properties": Object {
+        "fieldC": Object {
+          "type": "text",
+        },
+      },
+    },
+    "migrations": Object {},
+    "name": "typeC",
+    "namespaceAgnostic": false,
+  },
+]
+`;
