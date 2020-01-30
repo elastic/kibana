@@ -97,3 +97,8 @@ export interface PaginationOptions {
   total: number;
 }
 
+export interface FetchCasesProps {
+  pagination?: PaginationOptions;
+  filterOptions?: FilterOptions;
+}
+
