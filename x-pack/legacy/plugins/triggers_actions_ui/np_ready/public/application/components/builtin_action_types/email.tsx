@@ -425,7 +425,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
                 <EuiButtonEmpty size="xs" onClick={() => setAddBCC(true)}>
                   <FormattedMessage
                     defaultMessage="{titleBcc}"
-                    id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addCcButton"
+                    id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addBccButton"
                     values={{ titleBcc: !addCC ? '/ BCC' : 'Add BCC' }}
                   />
                 </EuiButtonEmpty>

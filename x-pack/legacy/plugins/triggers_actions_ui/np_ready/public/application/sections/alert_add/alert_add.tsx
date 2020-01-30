@@ -35,9 +35,6 @@ export const AlertAdd = () => {
     },
     actions: [],
     tags: [],
-    muteAll: false,
-    enabled: false,
-    mutedInstanceIds: [],
   } as unknown) as Alert;
 
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
@@ -45,6 +42,9 @@ export const AlertAdd = () => {
 
   const setAlert = (value: any) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
+  };
+  const setActionProperty = (key: string, value: any, index: number) => {
+    dispatch({ command: { type: 'setAlertActionProperty' }, payload: { key, value, index } });
   };
 
   const { addFlyoutVisible, setAddFlyoutVisibility, reloadAlerts } = useAlertsContext();
@@ -89,6 +89,11 @@ export const AlertAdd = () => {
 
   async function onSaveAlert(): Promise<any> {
     try {
+      // remove actionTypeId for actions to valid save
+      alert.actions.forEach((_alertAction: AlertAction, index: number) => {
+        setActionProperty('actionTypeId', undefined, index);
+      });
+
       const newAlert = await createAlert({ http, alert });
       toastNotifications.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.alertForm.saveSuccessNotificationText', {
