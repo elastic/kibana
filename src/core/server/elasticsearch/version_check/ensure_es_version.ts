@@ -22,8 +22,8 @@
  * that defined in Kibana's package.json.
  */
 
-import { timer } from 'rxjs';
-import { map, switchMap, distinctUntilChanged, catchError, startWith } from 'rxjs/operators';
+import { timer, of, from, Observable } from 'rxjs';
+import { map, distinctUntilChanged, catchError, exhaustMap } from 'rxjs/operators';
 import {
   esVersionCompatibleWithKibana,
   esVersionEqualsKibana,
@@ -72,6 +72,15 @@ export function mapNodesVersionCompatibility(
   kibanaVersion: string,
   ignoreVersionMismatch: boolean
 ): NodesVersionCompatibility {
+  if (Object.keys(nodesInfo.nodes).length === 0) {
+    return {
+      isCompatible: false,
+      message: 'Unable to retrieve version information from Elasticsearch nodes.',
+      incompatibleNodes: [],
+      warningNodes: [],
+      kibanaVersion,
+    };
+  }
   const nodes = Object.keys(nodesInfo.nodes)
     .sort() // Sorting ensures a stable node ordering for comparison
     .map(key => nodesInfo.nodes[key])
@@ -133,30 +142,23 @@ export const pollEsNodesVersion = ({
   kibanaVersion,
   ignoreVersionMismatch,
   esVersionCheckInterval: healthCheckInterval,
-}: PollEsNodesVersionOptions) => {
+}: PollEsNodesVersionOptions): Observable<any> => {
   log.debug('Checking Elasticsearch version');
-
   return timer(0, healthCheckInterval).pipe(
-    switchMap(() => {
-      return callWithInternalUser('nodes.info', {
-        filterPath: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
-      });
+    exhaustMap(() => {
+      return from(
+        callWithInternalUser('nodes.info', {
+          filterPath: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+        })
+      ).pipe(
+        catchError(_err => {
+          return of({ nodes: {} });
+        })
+      );
     }),
     map((nodesInfo: NodesInfo) =>
       mapNodesVersionCompatibility(nodesInfo, kibanaVersion, ignoreVersionMismatch)
     ),
-    catchError((_err, caught$) => {
-      // Return `isCompatible=false` when there's a 'nodes.info' request error
-      return caught$.pipe(
-        startWith({
-          isCompatible: false,
-          message: 'Unable to retrieve version information from Elasticsearch nodes.',
-          incompatibleNodes: [],
-          warningNodes: [],
-          kibanaVersion,
-        })
-      );
-    }),
     distinctUntilChanged(compareNodes) // Only emit if there are new nodes or versions
   );
 };

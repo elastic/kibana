@@ -18,7 +18,9 @@
  */
 import { mapNodesVersionCompatibility, pollEsNodesVersion, NodesInfo } from './ensure_es_version';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
-import { take } from 'rxjs/operators';
+import { take, delay } from 'rxjs/operators';
+import { TestScheduler } from 'rxjs/testing';
+import { of } from 'rxjs';
 
 const mockLoggerFactory = loggingServiceMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
@@ -110,9 +112,19 @@ describe('mapNodesVersionCompatibility', () => {
 
 describe('pollEsNodesVersion', () => {
   const callWithInternalUser = jest.fn();
-  const expectedCompatibilityResults = [false, false, true];
+  const getTestScheduler = () =>
+    new TestScheduler((actual, expected) => {
+      expect(actual).toEqual(expected);
+    });
+
+  beforeEach(() => {
+    callWithInternalUser.mockClear();
+  });
+
   it('returns iscCompatible=false and keeps polling when a poll request throws', done => {
     expect.assertions(3);
+    const expectedCompatibilityResults = [false, false, true];
+    jest.clearAllMocks();
     callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
     callWithInternalUser.mockRejectedValueOnce(new Error('mock request error'));
     callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1'));
@@ -176,5 +188,74 @@ describe('pollEsNodesVersion', () => {
         complete: done,
         error: done,
       });
+  });
+
+  it('starts polling immediately and then every esVersionCheckInterval', () => {
+    expect.assertions(1);
+    callWithInternalUser.mockReturnValueOnce([createNodes('5.1.0', '5.2.0', '5.0.0')]);
+    callWithInternalUser.mockReturnValueOnce([createNodes('5.1.1', '5.2.0', '5.0.0')]);
+
+    getTestScheduler().run(({ expectObservable }) => {
+      const expected = 'a 99ms (b|)';
+
+      const esNodesCompatibility$ = pollEsNodesVersion({
+        callWithInternalUser,
+        esVersionCheckInterval: 100,
+        ignoreVersionMismatch: false,
+        kibanaVersion: KIBANA_VERSION,
+        log: mockLogger,
+      }).pipe(take(2));
+
+      expectObservable(esNodesCompatibility$).toBe(expected, {
+        a: mapNodesVersionCompatibility(
+          createNodes('5.1.0', '5.2.0', '5.0.0'),
+          KIBANA_VERSION,
+          false
+        ),
+        b: mapNodesVersionCompatibility(
+          createNodes('5.1.1', '5.2.0', '5.0.0'),
+          KIBANA_VERSION,
+          false
+        ),
+      });
+    });
+  });
+
+  it('waits for es version check requests to complete before scheduling the next one', () => {
+    expect.assertions(2);
+
+    getTestScheduler().run(({ expectObservable }) => {
+      const expected = '100ms a 99ms (b|)';
+
+      callWithInternalUser.mockReturnValueOnce(
+        of(createNodes('5.1.0', '5.2.0', '5.0.0')).pipe(delay(100))
+      );
+      callWithInternalUser.mockReturnValueOnce(
+        of(createNodes('5.1.1', '5.2.0', '5.0.0')).pipe(delay(100))
+      );
+
+      const esNodesCompatibility$ = pollEsNodesVersion({
+        callWithInternalUser,
+        esVersionCheckInterval: 10,
+        ignoreVersionMismatch: false,
+        kibanaVersion: KIBANA_VERSION,
+        log: mockLogger,
+      }).pipe(take(2));
+
+      expectObservable(esNodesCompatibility$).toBe(expected, {
+        a: mapNodesVersionCompatibility(
+          createNodes('5.1.0', '5.2.0', '5.0.0'),
+          KIBANA_VERSION,
+          false
+        ),
+        b: mapNodesVersionCompatibility(
+          createNodes('5.1.1', '5.2.0', '5.0.0'),
+          KIBANA_VERSION,
+          false
+        ),
+      });
+    });
+
+    expect(callWithInternalUser).toHaveBeenCalledTimes(2);
   });
 });
