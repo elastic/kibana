@@ -3,8 +3,8 @@
 exports[`LocationMap component doesnt shows warning if geo is provided 1`] = `
 <EuiErrorBoundary>
   <EuiFlexGroup
-    alignItems="stretch"
     gutterSize="none"
+    justifyContent="center"
     wrap={true}
   >
     <Styled(EuiFlexItem)>
@@ -79,8 +79,8 @@ exports[`LocationMap component doesnt shows warning if geo is provided 1`] = `
 exports[`LocationMap component renders correctly against snapshot 1`] = `
 <EuiErrorBoundary>
   <EuiFlexGroup
-    alignItems="stretch"
     gutterSize="none"
+    justifyContent="center"
     wrap={true}
   >
     <Styled(EuiFlexItem)>
@@ -166,8 +166,8 @@ exports[`LocationMap component renders correctly against snapshot 1`] = `
 exports[`LocationMap component renders named locations that have missing geo data 1`] = `
 <EuiErrorBoundary>
   <EuiFlexGroup
-    alignItems="stretch"
     gutterSize="none"
+    justifyContent="center"
     wrap={true}
   >
     <Styled(EuiFlexItem)>
@@ -215,8 +215,8 @@ exports[`LocationMap component renders named locations that have missing geo dat
 exports[`LocationMap component shows warning if geo information is missing 1`] = `
 <EuiErrorBoundary>
   <EuiFlexGroup
-    alignItems="stretch"
     gutterSize="none"
+    justifyContent="center"
     wrap={true}
   >
     <Styled(EuiFlexItem)>
