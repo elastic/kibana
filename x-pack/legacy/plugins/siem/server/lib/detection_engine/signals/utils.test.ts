@@ -26,7 +26,7 @@ describe('utils', () => {
     clock = sinon.useFakeTimers(unix);
   });
 
-  afterEach(function() {
+  afterEach(() => {
     clock.restore();
   });
 
