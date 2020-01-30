@@ -22,6 +22,10 @@ export function getVectorStyleLabel(styleName) {
       return i18n.translate('xpack.maps.styles.vector.borderWidthLabel', {
         defaultMessage: 'Border width',
       });
+    case VECTOR_STYLES.ICON:
+      return i18n.translate('xpack.maps.styles.vector.iconLabel', {
+        defaultMessage: 'Icon',
+      });
     case VECTOR_STYLES.ICON_SIZE:
       return i18n.translate('xpack.maps.styles.vector.symbolSizeLabel', {
         defaultMessage: 'Symbol size',
