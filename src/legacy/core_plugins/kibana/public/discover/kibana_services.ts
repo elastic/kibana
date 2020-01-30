@@ -62,7 +62,6 @@ export { getRequestInspectorStats, getResponseInspectorStats } from '../../../da
 export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 // @ts-ignore
 export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore

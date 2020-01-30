@@ -12,7 +12,7 @@ import { Provider } from 'react-redux';
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import { showSaveModal } from './legacy_imports';
+import { showSaveModal } from '../../../../../src/plugins/saved_objects/public';
 
 import appTemplate from './angular/templates/index.html';
 import listingTemplate from './angular/templates/listing_ng_wrapper.html';
@@ -290,6 +290,7 @@ export function initGraphApp(angularModule, deps) {
         $scope.$digest();
       },
       chrome,
+      I18nContext: coreStart.i18n.Context,
     });
 
     // register things on scope passed down to react components

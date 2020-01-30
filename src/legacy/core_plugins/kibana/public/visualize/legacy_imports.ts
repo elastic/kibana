@@ -44,8 +44,6 @@ export { IPrivate } from 'ui/private';
 // @ts-ignore
 export { PrivateProvider } from 'ui/private/private';
 
-export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 // @ts-ignore

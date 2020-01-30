@@ -63,6 +63,9 @@ export function createMockGraphStore({
     indexPatterns: [
       ({ id: '123', attributes: { title: 'test-pattern' } } as unknown) as IndexPatternSavedObject,
     ],
+    I18nContext: jest
+      .fn()
+      .mockImplementation(({ children }: { children: React.ReactNode }) => children),
     notifications: ({
       toasts: {
         addDanger: jest.fn(),

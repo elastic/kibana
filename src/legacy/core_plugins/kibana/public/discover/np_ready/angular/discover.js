@@ -26,7 +26,10 @@ import { i18n } from '@kbn/i18n';
 import '../components/field_chooser/field_chooser';
 
 import { RequestAdapter } from '../../../../../../../plugins/inspector/public';
-import { SavedObjectSaveModal } from '../../../../../../../plugins/saved_objects/public';
+import {
+  SavedObjectSaveModal,
+  showSaveModal,
+} from '../../../../../../../plugins/saved_objects/public';
 // doc table
 import './doc_table';
 import { getSort } from './doc_table/lib/get_sort';
@@ -48,7 +51,6 @@ import {
   hasSearchStategyForIndexPattern,
   intervalOptions,
   migrateLegacyQuery,
-  showSaveModal,
   unhashUrl,
   stateMonitorFactory,
   subscribeWithScope,
@@ -310,7 +312,7 @@ function discoverController(
             })}
           />
         );
-        showSaveModal(saveModal);
+        showSaveModal(saveModal, core.i18n.Context);
       },
     };
 

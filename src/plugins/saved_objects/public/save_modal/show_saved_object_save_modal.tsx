@@ -19,7 +19,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nContext } from 'ui/i18n';
+
+import { I18nStart } from 'src/core/public';
 
 /**
  * Represents the result of trying to persist the saved object.
@@ -34,12 +35,15 @@ function isSuccess(result: SaveResult): result is { id?: string } {
   return 'id' in result;
 }
 
-export interface MinimalSaveModalProps {
+interface MinimalSaveModalProps {
   onSave: (...args: any[]) => Promise<SaveResult>;
   onClose: () => void;
 }
 
-export function showSaveModal(saveModal: React.ReactElement<MinimalSaveModalProps>) {
+export function showSaveModal(
+  saveModal: React.ReactElement<MinimalSaveModalProps>,
+  I18nContext: I18nStart['Context']
+) {
   const container = document.createElement('div');
   const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);

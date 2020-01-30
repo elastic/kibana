@@ -30,8 +30,6 @@ import {
   ConfirmationButtonTypes,
   migrateLegacyQuery,
   SavedObjectSaveOpts,
-  SaveResult,
-  showSaveModal,
   subscribeWithScope,
 } from '../legacy_imports';
 import {
@@ -44,6 +42,7 @@ import {
   syncAppFilters,
   syncQuery,
 } from '../../../../../../plugins/data/public';
+import { SaveResult, showSaveModal } from '../../../../../../plugins/saved_objects/public';
 
 import {
   DASHBOARD_CONTAINER_TYPE,
@@ -109,7 +108,16 @@ export class DashboardAppController {
     share,
     dashboardCapabilities,
     npDataStart: { query: queryService },
-    core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects, http },
+    core: {
+      notifications,
+      overlays,
+      chrome,
+      injectedMetadata,
+      uiSettings,
+      savedObjects,
+      http,
+      i18n: i18nStart,
+    },
     history,
     kbnUrlStateStorage,
   }: DashboardAppControllerDependencies) {
@@ -772,7 +780,7 @@ export class DashboardAppController {
           showCopyOnSave={dash.id ? true : false}
         />
       );
-      showSaveModal(dashboardSaveModal);
+      showSaveModal(dashboardSaveModal, i18nStart.Context);
     };
     navActions[TopNavIds.CLONE] = () => {
       const currentTitle = dashboardStateManager.getTitle();
