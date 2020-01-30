@@ -20,7 +20,7 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { DiscoverPlugin } from './plugin';
 
-export { createSavedSearchesService } from './saved_searches/saved_searches';
+export { createSavedSearchesLoader } from './saved_searches/saved_searches';
 
 // Core will be looking for this when loading our plugin in the new platform
 export const plugin = (context: PluginInitializerContext) => {
