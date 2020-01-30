@@ -31,6 +31,10 @@
   text-align: center;
 }
 
+.homAddData__logo {
+  margin-left: $euiSize;
+}
+
 @include euiBreakpoint('xs', 's') {
   .homeAddData__flexGroup {
     flex-wrap: wrap;

@@ -19,40 +19,33 @@ exports[`apmUiEnabled 1`] = `
         size="m"
       />
       <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
         responsive={false}
       >
         <EuiFlexItem
           grow={false}
         >
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="m"
-            responsive={false}
+          <EuiIcon
+            className="homAddData__logo"
+            size="xl"
+            type="logoObservability"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiTitle
+            size="s"
           >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                size="xxl"
-                type="logoObservability"
+            <h2>
+              <FormattedMessage
+                defaultMessage="Observability"
+                id="kbn.home.addData.title.observability"
+                values={Object {}}
               />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiTitle
-                size="s"
-              >
-                <h2>
-                  <FormattedMessage
-                    defaultMessage="Observability"
-                    id="kbn.home.addData.title.observability"
-                    values={Object {}}
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </h2>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -163,40 +156,33 @@ exports[`apmUiEnabled 1`] = `
       grow={1}
     >
       <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
         responsive={false}
       >
         <EuiFlexItem
           grow={false}
         >
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="m"
-            responsive={false}
+          <EuiIcon
+            className="homAddData__logo"
+            size="xl"
+            type="logoSecurity"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiTitle
+            size="s"
           >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                size="xxl"
-                type="logoSecurity"
+            <h2>
+              <FormattedMessage
+                defaultMessage="Security"
+                id="kbn.home.addData.title.security"
+                values={Object {}}
               />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiTitle
-                size="s"
-              >
-                <h2>
-                  <FormattedMessage
-                    defaultMessage="Security"
-                    id="kbn.home.addData.title.security"
-                    values={Object {}}
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </h2>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer
@@ -329,40 +315,33 @@ exports[`isNewKibanaInstance 1`] = `
         size="m"
       />
       <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
         responsive={false}
       >
         <EuiFlexItem
           grow={false}
         >
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="m"
-            responsive={false}
+          <EuiIcon
+            className="homAddData__logo"
+            size="xl"
+            type="logoObservability"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiTitle
+            size="s"
           >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                size="xxl"
-                type="logoObservability"
+            <h2>
+              <FormattedMessage
+                defaultMessage="Observability"
+                id="kbn.home.addData.title.observability"
+                values={Object {}}
               />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiTitle
-                size="s"
-              >
-                <h2>
-                  <FormattedMessage
-                    defaultMessage="Observability"
-                    id="kbn.home.addData.title.observability"
-                    values={Object {}}
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </h2>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -442,40 +421,33 @@ exports[`isNewKibanaInstance 1`] = `
       grow={1}
     >
       <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
         responsive={false}
       >
         <EuiFlexItem
           grow={false}
         >
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="m"
-            responsive={false}
+          <EuiIcon
+            className="homAddData__logo"
+            size="xl"
+            type="logoSecurity"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiTitle
+            size="s"
           >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                size="xxl"
-                type="logoSecurity"
+            <h2>
+              <FormattedMessage
+                defaultMessage="Security"
+                id="kbn.home.addData.title.security"
+                values={Object {}}
               />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiTitle
-                size="s"
-              >
-                <h2>
-                  <FormattedMessage
-                    defaultMessage="Security"
-                    id="kbn.home.addData.title.security"
-                    values={Object {}}
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </h2>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer
@@ -608,40 +580,33 @@ exports[`mlEnabled 1`] = `
         size="m"
       />
       <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
         responsive={false}
       >
         <EuiFlexItem
           grow={false}
         >
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="m"
-            responsive={false}
+          <EuiIcon
+            className="homAddData__logo"
+            size="xl"
+            type="logoObservability"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiTitle
+            size="s"
           >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                size="xxl"
-                type="logoObservability"
+            <h2>
+              <FormattedMessage
+                defaultMessage="Observability"
+                id="kbn.home.addData.title.observability"
+                values={Object {}}
               />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiTitle
-                size="s"
-              >
-                <h2>
-                  <FormattedMessage
-                    defaultMessage="Observability"
-                    id="kbn.home.addData.title.observability"
-                    values={Object {}}
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </h2>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -752,40 +717,33 @@ exports[`mlEnabled 1`] = `
       grow={1}
     >
       <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
         responsive={false}
       >
         <EuiFlexItem
           grow={false}
         >
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="m"
-            responsive={false}
+          <EuiIcon
+            className="homAddData__logo"
+            size="xl"
+            type="logoSecurity"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiTitle
+            size="s"
           >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                size="xxl"
-                type="logoSecurity"
+            <h2>
+              <FormattedMessage
+                defaultMessage="Security"
+                id="kbn.home.addData.title.security"
+                values={Object {}}
               />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiTitle
-                size="s"
-              >
-                <h2>
-                  <FormattedMessage
-                    defaultMessage="Security"
-                    id="kbn.home.addData.title.security"
-                    values={Object {}}
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </h2>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer
@@ -954,40 +912,33 @@ exports[`render 1`] = `
         size="m"
       />
       <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
         responsive={false}
       >
         <EuiFlexItem
           grow={false}
         >
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="m"
-            responsive={false}
+          <EuiIcon
+            className="homAddData__logo"
+            size="xl"
+            type="logoObservability"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiTitle
+            size="s"
           >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                size="xxl"
-                type="logoObservability"
+            <h2>
+              <FormattedMessage
+                defaultMessage="Observability"
+                id="kbn.home.addData.title.observability"
+                values={Object {}}
               />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiTitle
-                size="s"
-              >
-                <h2>
-                  <FormattedMessage
-                    defaultMessage="Observability"
-                    id="kbn.home.addData.title.observability"
-                    values={Object {}}
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </h2>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -1067,40 +1018,33 @@ exports[`render 1`] = `
       grow={1}
     >
       <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
         responsive={false}
       >
         <EuiFlexItem
           grow={false}
         >
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="m"
-            responsive={false}
+          <EuiIcon
+            className="homAddData__logo"
+            size="xl"
+            type="logoSecurity"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiTitle
+            size="s"
           >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                size="xxl"
-                type="logoSecurity"
+            <h2>
+              <FormattedMessage
+                defaultMessage="Security"
+                id="kbn.home.addData.title.security"
+                values={Object {}}
               />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiTitle
-                size="s"
-              >
-                <h2>
-                  <FormattedMessage
-                    defaultMessage="Security"
-                    id="kbn.home.addData.title.security"
-                    values={Object {}}
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </h2>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer
