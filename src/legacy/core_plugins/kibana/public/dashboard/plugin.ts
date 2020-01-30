@@ -46,7 +46,7 @@ import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public/state_management/url/kbn_url_tracker';
-import { getQueryStateObservable } from '../../../../../plugins/data/public/query/state_sync/sync_query';
+import { getQueryStateContainer } from '../../../../../plugins/data/public/query/state_sync/sync_query';
 
 export interface LegacyAngularInjectedDependencies {
   dashboardConfig: any;
@@ -90,18 +90,24 @@ export class DashboardPlugin implements Plugin {
       npData,
     }: DashboardPluginSetupDependencies
   ) {
-    const { state$, stop: stopQueryState } = getQueryStateObservable(npData.query);
-    const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker(
-      core.http.basePath.prepend('/app/kibana'),
-      '#/dashboards',
-      core.uiSettings.get('state.storeInSessionStorage', false),
-      'lastUrl:dashboard',
-      '_g',
-      state$,
-      this.appStateUpdater
+    const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
+      npData.query
     );
+    const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
+      baseUrl: core.http.basePath.prepend('/app/kibana'),
+      defaultSubUrl: '#/dashboards',
+      storageKey: 'lastUrl:dashboard',
+      navLinkUpdater$: this.appStateUpdater,
+      stateParams: [
+        {
+          useHash: () => core.uiSettings.get('state:storeInSessionStorage', false),
+          kbnUrlKey: '_g',
+          stateUpdate$: querySyncStateContainer.state$,
+        },
+      ],
+    });
     this.stopUrlTracking = () => {
-      stopQueryState();
+      stopQuerySyncStateContainer();
       stopUrlTracker();
     };
     const app: App = {
