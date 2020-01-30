@@ -10,6 +10,7 @@ import { EuiHorizontalRule, EuiInMemoryTable } from '@elastic/eui';
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { ProcessEvent } from '../types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
 
@@ -33,21 +34,26 @@ const HorizontalRule = memo(function HorizontalRule() {
 });
 
 export const Panel = memo(function Event({ className }: { className?: string }) {
-  const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
   interface ProcessTableView {
     name: string;
     timestamp: Date;
+    event: ProcessEvent;
   }
 
-  // TODO fix names and structure of this stuff.
-  const processTableView = [...processNodePositions.keys()].map(processEvent => {
-    const { data_buffer } = processEvent;
-    return {
-      name: data_buffer.process_name,
-      timestamp: new Date(data_buffer.timestamp_utc),
-      event: processEvent,
-    };
-  });
+  const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
+
+  const processTableView: ProcessTableView[] = useMemo(
+    () =>
+      [...processNodePositions.keys()].map(processEvent => {
+        const { data_buffer } = processEvent;
+        return {
+          name: data_buffer.process_name,
+          timestamp: new Date(data_buffer.timestamp_utc),
+          event: processEvent,
+        };
+      }),
+    [processNodePositions]
+  );
 
   const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
     year: 'numeric',
@@ -77,16 +83,28 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
     () => [
       {
         field: 'name',
-        name: 'Process Name',
+        name: i18n.translate('endpoint.resolver.panel.tabel.row.processNameTitle', {
+          defaultMessage: 'Process Name',
+        }),
         sortable: true,
         truncateText: true,
         render(name: string) {
-          return name === '' ? <EuiBadge color="warning">Value is missing</EuiBadge> : name;
+          return name === '' ? (
+            <EuiBadge color="warning">
+              {i18n.translate('endpoint.resolver.panel.table.row.valueMissingDescription', {
+                defaultMessage: 'Value is missing',
+              })}
+            </EuiBadge>
+          ) : (
+            name
+          );
         },
       },
       {
         field: 'timestamp',
-        name: 'Timestamp',
+        name: i18n.translate('endpoint.resolver.panel.tabel.row.timestampTitle', {
+          defaultMessage: 'Timestamp',
+        }),
         dataType: 'date' as const,
         sortable: true,
         render(timestamp: Date) {
@@ -94,11 +112,20 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
         },
       },
       {
-        name: 'Actions',
+        name: i18n.translate('endpoint.resolver.panel.tabel.row.actionsTitle', {
+          defaultMessage: 'Actions',
+        }),
         actions: [
           {
-            name: 'Bring into view',
-            description: 'Bring the process into view on the map.',
+            name: i18n.translate(
+              'endpoint.resolver.panel.tabel.row.actions.bringIntoViewButtonLabel',
+              {
+                defaultMessage: 'Bring into view',
+              }
+            ),
+            description: i18n.translate('endpoint.resolver.panel.tabel.row.bringIntoViewLabel', {
+              defaultMessage: 'Bring the process into view on the map.',
+            }),
             type: 'icon',
             icon: 'flag',
             onClick: handleBringIntoViewClick,
@@ -111,7 +138,11 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
   return (
     <EuiPanel className={className}>
       <EuiTitle size="xs">
-        <h4>Hey There</h4>
+        <h4>
+          {i18n.translate('endpoint.resolver.panel.title', {
+            defaultMessage: 'Processes',
+          })}
+        </h4>
       </EuiTitle>
       <HorizontalRule />
       <EuiInMemoryTable<ProcessTableView> items={processTableView} columns={columns} sorting />

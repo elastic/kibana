@@ -28,5 +28,3 @@ export const unitsPerNudge = 50;
  * The duration a nudge animation lasts.
  */
 export const nudgeAnimationDuration = 300;
-
-// TODO, rename file maybe?
