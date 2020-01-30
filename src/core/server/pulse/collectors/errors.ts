@@ -38,7 +38,7 @@ export interface ErrorInstruction {
 }
 export interface Payload {
   deploymentId: string;
-  records: PulseErrorPayloadRecord[];
+  records: Array<Omit<PulseErrorPayloadRecord, 'channel_id' | 'deployment_id'>>;
 }
 export interface PulseErrorPayloadRecord {
   channel_id: string;
@@ -127,7 +127,10 @@ export class Collector extends PulseCollector<Payload> {
             if (this.elasticsearch) {
               await this.elasticsearch.index(this.channelName, {
                 ...record,
+                channel_id: 'errors',
+                deployment_id: '123',
                 status: record.status || 'new',
+                id: record.hash,
                 timestamp: record.timestamp || moment(),
               });
             }

@@ -27,12 +27,6 @@ import { IClusterClient } from '../../elasticsearch';
 export interface PulseDocument {
   _id?: string;
   hash?: string;
-  // items needed for PulseErrorPayloadRecord
-  status?: 'new' | 'seen';
-  timestamp?: Date;
-  fixedVersion?: string;
-  message?: string;
-  currentKibanaVersion?: string;
 }
 
 export class PulseElasticsearchClient {
@@ -55,7 +49,7 @@ export class PulseElasticsearchClient {
     }
   }
 
-  public async index(channel: string, doc: PulseDocument | PulseDocument[]) {
+  public async index<T extends PulseDocument>(channel: string, doc: T | T[]) {
     const records = Array.isArray(doc) ? doc : [doc];
     await this.elasticsearch.callAsInternalUser<any>('bulk', {
       body: records.reduce((acc, record) => {
