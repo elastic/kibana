@@ -79,7 +79,7 @@ export function Settings({
             <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
               <CodeEditor
                 languageId="javascript"
-                height={100}
+                height={150}
                 value={contextSetup.params}
                 onChange={(value: string) => setContextSetup({ params: value })}
                 options={{

@@ -30,7 +30,7 @@ export function buildRequestPayload(
     request.context = context;
     request.context_setup = {
       index: contextSetup.index,
-      document: parseJSON(contextSetup.doc),
+      document: parseJSON(contextSetup.document),
     };
     return request;
   }

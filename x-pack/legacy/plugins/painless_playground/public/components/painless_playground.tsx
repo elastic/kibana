@@ -113,7 +113,7 @@ export function PainlessPlayground({
             ]}
           />
         </EuiFlexItem>
-        {response.error || response.result ? (
+        {response.error || typeof response.result !== 'undefined' ? (
           <EuiFlexItem>
             <Output response={response} />
           </EuiFlexItem>
