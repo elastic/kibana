@@ -13,4 +13,4 @@ export const setup = (props: any) =>
       wrapComponent: false,
     },
     defaultProps: props,
-  });
+  })();

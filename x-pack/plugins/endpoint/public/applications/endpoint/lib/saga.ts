@@ -5,7 +5,7 @@
  */
 
 import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux';
-import { GlobalState } from '../store';
+import { GlobalState } from '../types';
 
 interface QueuedAction<TAction = AnyAction> {
   /**
