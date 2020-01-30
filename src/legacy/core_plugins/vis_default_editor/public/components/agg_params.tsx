@@ -219,34 +219,36 @@ function DefaultEditorAggParams({
       })}
 
       {params.advanced.length ? (
-        <EuiAccordion
-          className="visEditorAggParams__advanced"
-          id="advancedAccordion"
-          data-test-subj={`advancedParams-${agg.id}`}
-          buttonContent={i18n.translate('visDefaultEditor.advancedToggle.advancedLinkLabel', {
-            defaultMessage: 'Advanced',
-          })}
-        >
-          <EuiSpacer size="s" />
-          {params.advanced.map(param => {
-            const model = paramsState[param.aggParam.name] || {
-              touched: false,
-              valid: true,
-            };
+        <>
+          <EuiSpacer size="m" />
+          <EuiAccordion
+            id="advancedAccordion"
+            data-test-subj={`advancedParams-${agg.id}`}
+            buttonContent={i18n.translate('visDefaultEditor.advancedToggle.advancedLinkLabel', {
+              defaultMessage: 'Advanced',
+            })}
+          >
+            <EuiSpacer size="s" />
+            {params.advanced.map(param => {
+              const model = paramsState[param.aggParam.name] || {
+                touched: false,
+                valid: true,
+              };
 
-            return (
-              <DefaultEditorAggParam
-                key={`${param.aggParam.name}${agg.type ? agg.type.name : ''}`}
-                disabled={disabledParams && disabledParams.includes(param.aggParam.name)}
-                formIsTouched={formIsTouched}
-                showValidation={formIsTouched || model.touched}
-                setAggParamValue={setAggParamValue}
-                onChangeParamsState={onChangeParamsState}
-                {...param}
-              />
-            );
-          })}
-        </EuiAccordion>
+              return (
+                <DefaultEditorAggParam
+                  key={`${param.aggParam.name}${agg.type ? agg.type.name : ''}`}
+                  disabled={disabledParams && disabledParams.includes(param.aggParam.name)}
+                  formIsTouched={formIsTouched}
+                  showValidation={formIsTouched || model.touched}
+                  setAggParamValue={setAggParamValue}
+                  onChangeParamsState={onChangeParamsState}
+                  {...param}
+                />
+              );
+            })}
+          </EuiAccordion>
+        </>
       ) : null}
     </EuiForm>
   );
