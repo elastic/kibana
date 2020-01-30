@@ -1,7 +1,7 @@
 {
   "paths": {
     "common.ui": "src/legacy/ui",
-    "console": "src/legacy/core_plugins/console",
+    "console": "src/plugins/console",
     "core": "src/core",
     "dashboardEmbeddableContainer": "src/plugins/dashboard_embeddable_container",
     "data": [
