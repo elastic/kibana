@@ -96,6 +96,7 @@ function VisualizeAppController(
     core: { docLinks },
     savedQueryService,
     uiSettings,
+    I18nContext,
   } = getServices();
 
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
@@ -194,7 +195,7 @@ function VisualizeAppController(
                   description={savedVis.description}
                 />
               );
-              showSaveModal(saveModal);
+              showSaveModal(saveModal, I18nContext);
             },
           },
         ]
