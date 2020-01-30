@@ -49,7 +49,7 @@ export class PulseElasticsearchClient {
     }
   }
 
-  public async index(channel: string, doc: PulseDocument | PulseDocument[]) {
+  public async index<T extends PulseDocument>(channel: string, doc: T | T[]) {
     const records = Array.isArray(doc) ? doc : [doc];
     await this.elasticsearch.callAsInternalUser<any>('bulk', {
       body: records.reduce((acc, record) => {
