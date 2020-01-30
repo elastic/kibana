@@ -17,12 +17,6 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { once } from 'lodash';
-
-import { EuiCallOut } from '@elastic/eui';
-
 import {
   CoreSetup,
   CoreStart,
