@@ -73,4 +73,10 @@ describe('input to expression', () => {
       expect(timerangeExpression.chain[0].arguments.to[0]).toEqual(input.timeRange?.to);
     });
   });
+
+  describe('Lens Embeddable', () => {
+    it('converts to a savedLens expression', () => {
+      expect('foo').toBe('bar');
+    });
+  });
 });
