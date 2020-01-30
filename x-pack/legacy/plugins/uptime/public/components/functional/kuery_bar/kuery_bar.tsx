@@ -11,14 +11,12 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Typeahead } from './typeahead';
 import { useUrlParams } from '../../../hooks';
-import { toStaticIndexPattern } from '../../../lib/helper';
 import {
   esKuery,
   IIndexPattern,
   autocomplete,
   DataPublicPluginStart,
 } from '../../../../../../../../src/plugins/data/public';
-import { useIndexPattern } from '../../../hooks';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -36,19 +34,28 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 
 interface Props {
   autocomplete: DataPublicPluginStart['autocomplete'];
+  loadIndexPattern: any;
+  indexPattern: any;
 }
 
-export function KueryBar({ autocomplete: autocompleteService }: Props) {
+export function KueryBarComponent({
+  autocomplete: autocompleteService,
+  loadIndexPattern,
+  indexPattern,
+}: Props) {
+  useEffect(() => {
+    if (!indexPattern) {
+      loadIndexPattern();
+    }
+  }, [indexPattern, loadIndexPattern]);
+
   const [state, setState] = useState<State>({
     suggestions: [],
     isLoadingIndexPattern: true,
   });
-  const [indexPattern, setIndexPattern] = useState<any | undefined>(undefined);
   const [isLoadingIndexPattern, setIsLoadingIndexPattern] = useState<boolean>(true);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState<boolean>(false);
   let currentRequestCheck: string;
-
-  useIndexPattern((result: any) => setIndexPattern(toStaticIndexPattern(result)));
 
   useEffect(() => {
     if (indexPattern !== undefined) {
