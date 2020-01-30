@@ -3,37 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { npStart } from 'ui/new_platform';
-
 import { setupGetValueSuggestions } from './value';
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { autocomplete, esKuery } from '../../../../../../src/plugins/data/public';
-
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    plugins: {
-      data: {
-        autocomplete: {
-          getValueSuggestions: jest.fn(({ field }) => {
-            let res: any[];
-
-            if (field.type === 'boolean') {
-              res = [true, false];
-            } else if (field.name === 'machine.os') {
-              res = ['Windo"ws', "Mac'", 'Linux'];
-            } else if (field.name === 'nestedField.child') {
-              res = ['foo'];
-            } else {
-              res = [];
-            }
-            return Promise.resolve(res);
-          }),
-        },
-      },
-    },
-  },
-}));
+import { setAutocompleteService } from '../services';
 
 const mockKueryNode = (kueryNode: Partial<esKuery.KueryNode>) =>
   (kueryNode as unknown) as esKuery.KueryNode;
@@ -41,12 +15,31 @@ const mockKueryNode = (kueryNode: Partial<esKuery.KueryNode>) =>
 describe('Kuery value suggestions', () => {
   let getSuggestions: ReturnType<typeof setupGetValueSuggestions>;
   let querySuggestionsArgs: autocomplete.QuerySuggestionsGetFnArgs;
+  let autocompleteServiceMock: any;
 
   beforeEach(() => {
     getSuggestions = setupGetValueSuggestions(coreMock.createSetup());
     querySuggestionsArgs = ({
       indexPatterns: [indexPatternResponse],
     } as unknown) as autocomplete.QuerySuggestionsGetFnArgs;
+
+    autocompleteServiceMock = {
+      getValueSuggestions: jest.fn(({ field }) => {
+        let res: any[];
+
+        if (field.type === 'boolean') {
+          res = [true, false];
+        } else if (field.name === 'machine.os') {
+          res = ['Windo"ws', "Mac'", 'Linux'];
+        } else if (field.name === 'nestedField.child') {
+          res = ['foo'];
+        } else {
+          res = [];
+        }
+        return Promise.resolve(res);
+      }),
+    };
+    setAutocompleteService(autocompleteServiceMock);
 
     jest.clearAllMocks();
   });
@@ -66,7 +59,7 @@ describe('Kuery value suggestions', () => {
     );
 
     expect(suggestions.map(({ text }) => text)).toEqual([]);
-    expect(npStart.plugins.data.autocomplete.getValueSuggestions).toHaveBeenCalledTimes(0);
+    expect(autocompleteServiceMock.getValueSuggestions).toHaveBeenCalledTimes(0);
   });
 
   test('should format suggestions', async () => {
@@ -115,7 +108,7 @@ describe('Kuery value suggestions', () => {
       );
 
       expect(suggestions.map(({ text }) => text)).toEqual(['true ', 'false ']);
-      expect(npStart.plugins.data.autocomplete.getValueSuggestions).toHaveBeenCalledTimes(1);
+      expect(autocompleteServiceMock.getValueSuggestions).toHaveBeenCalledTimes(1);
     });
 
     test('should filter out boolean suggestions', async () => {
@@ -146,8 +139,8 @@ describe('Kuery value suggestions', () => {
         })
       );
 
-      expect(npStart.plugins.data.autocomplete.getValueSuggestions).toHaveBeenCalledTimes(1);
-      expect(npStart.plugins.data.autocomplete.getValueSuggestions).toBeCalledWith(
+      expect(autocompleteServiceMock.getValueSuggestions).toHaveBeenCalledTimes(1);
+      expect(autocompleteServiceMock.getValueSuggestions).toBeCalledWith(
         expect.objectContaining({
           field: expect.any(Object),
           query: prefix + suffix,

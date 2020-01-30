@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { npStart } from 'ui/new_platform';
+
 import { flatten } from 'lodash';
 import { escapeQuotes } from './lib/escape_kuery';
 import { KqlQuerySuggestionProvider } from './types';
+import { getAutocompleteService } from '../services';
 import { autocomplete } from '../../../../../../src/plugins/data/public';
 
 const wrapAsSuggestions = (start: number, end: number, query: string, values: string[]) =>
@@ -19,7 +20,7 @@ const wrapAsSuggestions = (start: number, end: number, query: string, values: st
       end,
     }));
 
-export const setupGetValueSuggestions: KqlQuerySuggestionProvider = () => {
+export const setupGetValueSuggestions: KqlQuerySuggestionProvider = core => {
   return async (
     { indexPatterns, boolFilter, signal },
     { start, end, prefix, suffix, fieldName, nestedPath }
@@ -36,9 +37,7 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = () => {
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
     const fields = allFields.filter(field => field.name === fullFieldName);
     const query = `${prefix}${suffix}`.trim();
-
-    // TODO: refactoring;
-    const { getValueSuggestions } = npStart.plugins.data.autocomplete;
+    const { getValueSuggestions } = getAutocompleteService();
 
     const data = await Promise.all(
       fields.map(field =>
