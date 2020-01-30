@@ -941,6 +941,15 @@ function discoverController(
     $scope.minimumVisibleRows = $scope.hits;
   };
 
+  $scope.updateSavedQueryState = savedQuery => {
+    if (savedQuery) {
+      $state.savedQuery = savedQuery;
+    } else {
+      delete $state.savedQuery;
+    }
+    $state.save();
+  };
+
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
     if (!$scope.opts.timefield) return;

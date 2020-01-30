@@ -8,10 +8,15 @@
     screen-title="screenTitle"
     show-search-bar="true"
     show-date-picker="enableTimeRangeSelector"
-    show-save-query="showSaveQuery"
-    on-query-submit="updateQuery"
     index-patterns="[indexPattern]"
+
     query="state.query"
+    on-query-submit="updateQuery"
+	
+    show-save-query="showSaveQuery"
+    on-saved="updateSavedQueryState"	
+    on-saved-query-updated="updateSavedQueryState"	
+    on-clear-saved-query="updateSavedQueryState"
 
     use-default-behaviors="true"
   >
