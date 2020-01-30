@@ -5,9 +5,9 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { timefilter } from 'ui/timefilter';
-
 import { IUiSettingsClient } from 'src/core/public';
+
+import { getTimefilter } from '../../util/dependency_cache';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { getIndexPatternsContract } from '../../util/index_utils';
 
@@ -19,6 +19,7 @@ export interface FileDataVisualizerPageProps {
 }
 
 export const FileDataVisualizerPage: FC<FileDataVisualizerPageProps> = ({ kibanaConfig }) => {
+  const timefilter = getTimefilter();
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
   const indexPatterns = getIndexPatternsContract();

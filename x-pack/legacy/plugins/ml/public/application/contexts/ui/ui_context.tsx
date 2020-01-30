@@ -6,8 +6,15 @@
 
 import React from 'react';
 
-import chrome from 'ui/chrome';
-import { timefilter, timeHistory } from 'ui/timefilter';
+import { IUiSettingsClient, ChromeStart } from 'src/core/public';
+import { TimefilterContract, TimeHistoryContract } from 'src/plugins/data/public';
+
+interface UiContextValue {
+  chrome: ChromeStart;
+  timefilter: TimefilterContract;
+  timeHistory: TimeHistoryContract;
+  uiSettings: IUiSettingsClient;
+}
 
 // This provides ui/* based imports via React Context.
 // Because these dependencies can use regular imports,
@@ -19,8 +26,4 @@ import { timefilter, timeHistory } from 'ui/timefilter';
 // tests because we rely on the properly set up default value.
 // Different custom hooks can be created to access parts only
 // from the full context value, see useUiChromeContext() as an example.
-export const UiContext = React.createContext({
-  chrome,
-  timefilter,
-  timeHistory,
-});
+export const UiContext = React.createContext<Partial<UiContextValue>>({});

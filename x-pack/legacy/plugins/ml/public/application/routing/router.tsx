@@ -9,10 +9,12 @@ import { HashRouter, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 import { I18nContext } from 'ui/i18n';
 
-import { IUiSettingsClient } from 'src/core/public';
+import { IUiSettingsClient, ChromeStart } from 'src/core/public';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { IndexPatternsContract, TimefilterSetup } from 'src/plugins/data/public';
 import { MlContext, MlContextValue } from '../contexts/ml';
+import { useDependencyCache } from '../util/dependency_cache';
+import { UiContext } from '../contexts/ui';
 
 import * as routes from './routes';
 import { useMlKibana } from '../contexts/kibana';
@@ -37,6 +39,7 @@ export interface PageDependencies {
   config: IUiSettingsClient;
   indexPatterns: IndexPatternsContract;
   timefilter: TimefilterSetup;
+  chrome: ChromeStart;
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
@@ -50,27 +53,40 @@ export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children 
 export const MlRouter: FC = () => {
   const { services } = useMlKibana();
   const setBreadcrumbs = services.chrome!.setBreadcrumbs;
-  const indexPatterns = services.data.indexPatterns;
-  const timefilter = services.data.query.timefilter;
-  const config = services.uiSettings!;
+  const deps: PageDependencies = {
+    indexPatterns: services.data.indexPatterns,
+    timefilter: services.data.query.timefilter,
+    config: services.uiSettings!,
+    chrome: services.chrome!,
+  };
+  const ui = {
+    chrome: deps.chrome,
+    timefilter: deps.timefilter.timefilter,
+    timeHistory: deps.timefilter.history,
+    uiSettings: deps.config,
+  };
 
+  useDependencyCache(deps);
+  // is UiContext needed? uiSettingsContext inherit from kibanaContext?
   return (
-    <HashRouter>
-      <div>
-        {Object.entries(routes).map(([name, route]) => (
-          <Route
-            key={name}
-            path={route.path}
-            exact
-            render={props => {
-              window.setTimeout(() => {
-                setBreadcrumbs(route.breadcrumbs);
-              });
-              return route.render(props, { config, indexPatterns, timefilter });
-            }}
-          />
-        ))}
-      </div>
-    </HashRouter>
+    <UiContext.Provider value={ui}>
+      <HashRouter>
+        <div>
+          {Object.entries(routes).map(([name, route]) => (
+            <Route
+              key={name}
+              path={route.path}
+              exact
+              render={props => {
+                window.setTimeout(() => {
+                  setBreadcrumbs(route.breadcrumbs);
+                });
+                return route.render(props, deps);
+              }}
+            />
+          ))}
+        </div>
+      </HashRouter>
+    </UiContext.Provider>
   );
 };

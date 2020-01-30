@@ -6,7 +6,6 @@
 
 import React, { Component, Fragment } from 'react';
 import { PropTypes } from 'prop-types';
-import { timefilter } from 'ui/timefilter';
 
 import { injectI18n } from '@kbn/i18n/react';
 
@@ -21,6 +20,7 @@ import { CalendarForm } from './calendar_form';
 import { NewEventModal } from './new_event_modal';
 import { ImportModal } from './import_modal';
 import { ml } from '../../../services/ml_api_service';
+import { getTimefilter } from '../../../util/dependency_cache';
 
 export const NewCalendar = injectI18n(
   class NewCalendar extends Component {
@@ -53,6 +53,7 @@ export const NewCalendar = injectI18n(
     }
 
     componentDidMount() {
+      const timefilter = getTimefilter();
       timefilter.disableTimeRangeSelector();
       timefilter.disableAutoRefreshSelector();
       this.formSetup();

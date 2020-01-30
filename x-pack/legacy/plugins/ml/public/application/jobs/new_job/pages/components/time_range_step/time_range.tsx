@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { timefilter } from 'ui/timefilter';
 import moment from 'moment';
 import { WizardNav } from '../wizard_nav';
 import { StepProps, WIZARD_STEPS } from '../step_types';
@@ -21,6 +20,7 @@ import { LineChartPoint } from '../../../common/chart_loader';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { GetTimeFieldRangeResponse } from '../../../../../services/ml_api_service';
 import { TimeRangePicker, TimeRange } from '../../../common/components';
+import { getTimefilter } from '../../../../../util/dependency_cache';
 
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const mlContext = useMlContext();
@@ -63,6 +63,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       max: moment(end),
     });
     // update the timefilter, to keep the URL in sync
+    const timefilter = getTimefilter();
     timefilter.setTime({
       from: moment(start).toISOString(),
       to: moment(end).toISOString(),

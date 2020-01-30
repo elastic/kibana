@@ -6,7 +6,7 @@
 
 import React, { useEffect } from 'react';
 
-import { timefilter } from 'ui/timefilter';
+import { getTimefilter } from '../../../../../util/dependency_cache';
 
 import {
   DEFAULT_REFRESH_INTERVAL_MS,
@@ -18,6 +18,7 @@ import { useRefreshAnalyticsList } from '../../../../common';
 export const useRefreshInterval = (
   setBlockRefresh: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
+  const timefilter = getTimefilter();
   const { refresh } = useRefreshAnalyticsList();
   useEffect(() => {
     let analyticsRefreshInterval: null | number = null;

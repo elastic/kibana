@@ -5,12 +5,11 @@
  */
 
 import { loadIndexPatterns, loadSavedSearches } from '../util/index_utils';
-import { cacheTimefilter } from '../util/timefilter_cache';
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 import { loadMlServerInfo } from '../services/ml_server_info';
-import { PageDependencies } from './router';
+import { PageDependencies } from '../routing/router';
 
 export interface Resolvers {
   [name: string]: () => Promise<any>;
@@ -18,12 +17,11 @@ export interface Resolvers {
 export interface ResolverResults {
   [name: string]: any;
 }
-export const basicResolvers = ({ indexPatterns, timefilter }: PageDependencies): Resolvers => ({
+export const basicResolvers = (deps: PageDependencies): Resolvers => ({
   checkFullLicense,
   getMlNodeCount,
   loadMlServerInfo,
-  loadIndexPatterns: () => loadIndexPatterns(indexPatterns),
+  loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
   checkGetJobsPrivilege,
   loadSavedSearches,
-  cacheTimefilter: () => cacheTimefilter(timefilter),
 });

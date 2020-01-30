@@ -22,8 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { timefilter } from 'ui/timefilter';
 import { isFullLicense } from '../license/check_license';
+import { getTimefilter } from '../util/dependency_cache';
 
 import { NavigationMenu } from '../components/navigation_menu';
 
@@ -49,6 +49,7 @@ function startTrialDescription() {
 }
 
 export const DatavisualizerSelector: FC = () => {
+  const timefilter = getTimefilter();
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
 

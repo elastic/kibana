@@ -8,8 +8,6 @@ import React, { FC, Fragment, useEffect, useState } from 'react';
 import { merge } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
-import { timefilter } from 'ui/timefilter';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -39,6 +37,7 @@ import { FullTimeRangeSelector } from '../../components/full_time_range_selector
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useMlContext, SavedSearchQuery } from '../../contexts/ml';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
+import { getTimefilter } from '../../util/dependency_cache';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { TimeBuckets } from '../../util/time_buckets';
 import { useUrlState } from '../../util/url_state';
@@ -102,7 +101,7 @@ export const Page: FC = () => {
   const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = mlContext;
 
   const dataLoader = new DataLoader(currentIndexPattern, kibanaConfig);
-
+  const timefilter = getTimefilter();
   const [globalState, setGlobalState] = useUrlState('_g');
   useEffect(() => {
     if (globalState?.time !== undefined) {

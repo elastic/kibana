@@ -78,8 +78,8 @@ import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_conta
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 
 import { ResizeChecker } from '../../../../../../../src/plugins/kibana_utils/public';
-import { timefilter } from 'ui/timefilter';
 import { toastNotifications } from 'ui/notify';
+import { getTimefilter } from '../util/dependency_cache';
 
 function mapSwimlaneOptionsToEuiOptions(options) {
   return options.map(option => ({
@@ -351,6 +351,7 @@ export class Explorer extends React.Component {
       viewBySwimlaneData.laneLabels &&
       viewBySwimlaneData.laneLabels.length > 0;
 
+    const timefilter = getTimefilter();
     const bounds = timefilter.getActiveBounds();
 
     return (

@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 
 import { npStart } from 'ui/new_platform';
-import { timefilter } from 'ui/timefilter';
 
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
@@ -31,6 +30,7 @@ import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from '../services/results_service';
 import { getBoundsRoundedToInterval, TimeBuckets } from '../util/time_buckets';
+import { getTimefilter } from '../util/dependency_cache';
 
 import {
   MAX_CATEGORY_EXAMPLES,
@@ -238,6 +238,7 @@ export function getSelectionJobIds(selectedCells, selectedJobs) {
 export function getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth) {
   // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
   // and the max bucket span for the jobs shown in the chart.
+  const timefilter = getTimefilter();
   const bounds = timefilter.getActiveBounds();
   const buckets = new TimeBuckets();
   buckets.setInterval('auto');
@@ -816,6 +817,7 @@ export function loadViewBySwimlane(
     } else {
       // Ensure the search bounds align to the bucketing interval used in the swimlane so
       // that the first and last buckets are complete.
+      const timefilter = getTimefilter();
       const timefilterBounds = timefilter.getActiveBounds();
       const searchBounds = getBoundsRoundedToInterval(
         timefilterBounds,

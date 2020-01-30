@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { Query } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
-import { getTimefilter } from '../../util/timefilter_cache';
+import { getTimefilter } from '../../util/dependency_cache';
 import { ml, GetTimeFieldRangeResponse } from '../../services/ml_api_service';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 

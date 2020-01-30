@@ -9,8 +9,6 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
 
-import { timefilter } from 'ui/timefilter';
-
 import { MlJobWithTimeRange } from '../../../../common/types/jobs';
 
 import { MlRoute, PageLoader, PageProps } from '../router';
@@ -31,6 +29,7 @@ import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
 import { useUrlState } from '../../util/url_state';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+import { getTimefilter } from '../../util/dependency_cache';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
@@ -71,6 +70,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [appState, setAppState] = useUrlState('_a');
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
+  const timefilter = getTimefilter();
 
   const { jobIds } = useJobSelection(jobsWithTimeRange, getDateFormatTz());
 

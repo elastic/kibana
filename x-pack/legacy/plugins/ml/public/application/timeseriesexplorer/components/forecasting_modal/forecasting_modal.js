@@ -15,8 +15,6 @@ import React, { Component } from 'react';
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 
-import { timefilter } from 'ui/timefilter';
-
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
 import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../../../common/constants/states';
@@ -29,6 +27,7 @@ import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
 import { mlForecastService } from '../../../services/forecast_service';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { getTimefilter } from '../../../util/dependency_cache';
 
 export const FORECAST_DURATION_MAX_DAYS = 3650; // Max forecast duration allowed by analytics.
 
@@ -368,6 +367,7 @@ export const ForecastingModal = injectI18n(
 
       if (typeof job === 'object') {
         // Get the list of all the finished forecasts for this job with results at or later than the dashboard 'from' time.
+        const timefilter = getTimefilter();
         const bounds = timefilter.getActiveBounds();
         const statusFinishedQuery = {
           term: {

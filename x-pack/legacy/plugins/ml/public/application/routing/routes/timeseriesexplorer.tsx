@@ -13,8 +13,6 @@ import queryString from 'query-string';
 
 import { i18n } from '@kbn/i18n';
 
-import { timefilter } from 'ui/timefilter';
-
 import { MlJobWithTimeRange } from '../../../../common/types/jobs';
 
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
@@ -39,6 +37,7 @@ import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+import { getTimefilter } from '../../util/dependency_cache';
 
 export const timeSeriesExplorerRoute: MlRoute = {
   path: '/timeseriesexplorer',
@@ -91,6 +90,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const [lastRefresh, setLastRefresh] = useState(0);
   const previousRefresh = usePrevious(lastRefresh);
   const [selectedJobId, setSelectedJobId] = useState<string>();
+  const timefilter = getTimefilter();
 
   const refresh = useRefresh();
   useEffect(() => {

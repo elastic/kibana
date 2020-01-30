@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import queryString from 'query-string';
@@ -18,6 +18,7 @@ import { mlJobService } from '../../../services/job_service';
 import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
 import { checkCreateJobsPrivilege } from '../../../privilege/check_privilege';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
+// import { useDependencyCache } from '../../../util/dependency_cache';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;
@@ -121,7 +122,7 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
   });
 
-  useClearCache();
+  // useDependencyCache(deps);
 
   return (
     <PageLoader context={context}>
@@ -129,11 +130,3 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
     </PageLoader>
   );
 };
-
-function useClearCache() {
-  useEffect(() => {
-    return () => {
-      // console.log('goodbye');
-    };
-  }, []);
-}
