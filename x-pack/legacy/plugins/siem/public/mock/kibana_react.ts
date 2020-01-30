@@ -25,7 +25,11 @@ import {
   DEFAULT_BYTES_FORMAT,
 } from '../../common/constants';
 import { defaultIndexPattern } from '../../default_index_pattern';
-import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kibana_core';
+import {
+  createKibanaCoreStartMock,
+  createKibanaPluginsStartMock,
+  createHttpServiceMock,
+} from './kibana_core';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const mockUiSettings: Record<string, any> = {
@@ -74,10 +78,12 @@ export const createUseKibanaMock = () => {
   const core = createKibanaCoreStartMock();
   const plugins = createKibanaPluginsStartMock();
   const useUiSetting = createUseUiSettingMock();
+  const http = createHttpServiceMock();
 
   const services = {
     ...core,
     ...plugins,
+    http,
     uiSettings: {
       ...core.uiSettings,
       get: useUiSetting,

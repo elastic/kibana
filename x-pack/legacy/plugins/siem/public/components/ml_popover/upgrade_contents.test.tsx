@@ -8,6 +8,8 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { UpgradeContentsComponent } from './upgrade_contents';
 
+jest.mock('../../lib/kibana');
+
 describe('JobsTableFilters', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<UpgradeContentsComponent />);

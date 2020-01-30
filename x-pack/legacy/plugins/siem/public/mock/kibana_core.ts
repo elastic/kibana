@@ -11,3 +11,9 @@ export const createKibanaPluginsSetupMock = () => createUiNewPlatformMock().npSe
 
 export const createKibanaCoreStartMock = () => createUiNewPlatformMock().npStart.core;
 export const createKibanaPluginsStartMock = () => createUiNewPlatformMock().npStart.plugins;
+
+export const createHttpServiceMock = () => ({
+  basePath: {
+    get: () => '/test/base/path',
+  },
+});
