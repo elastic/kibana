@@ -381,6 +381,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
               setIsAddActionPanelOpen(
                 updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length === 0
               );
+              setActiveActionItem(undefined);
             }}
           />
         }
@@ -495,6 +496,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
               setIsAddActionPanelOpen(
                 updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length === 0
               );
+              setActiveActionItem(undefined);
             }}
           />
         }
