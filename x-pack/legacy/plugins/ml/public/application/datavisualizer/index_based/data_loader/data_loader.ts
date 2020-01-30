@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
-import { SavedSearchQuery } from '../../../contexts/kibana';
+import { SavedSearchQuery } from '../../../contexts/ml';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
 
 import { ml } from '../../../services/ml_api_service';

@@ -7,50 +7,49 @@
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 
-import 'uiExports/savedObjectTypes';
-
-import 'ui/autoload/all';
-
 // needed to make syntax highlighting work in ace editors
 import 'ace';
-import { AppMountParameters, CoreStart } from 'kibana/public';
 import {
-  IndexPatternsContract,
-  Plugin as DataPlugin,
-} from '../../../../../../src/plugins/data/public';
-
-import { KibanaConfigTypeFix } from './contexts/kibana';
+  AppMountParameters,
+  CoreStart,
+  // AppMountContext,
+  // ChromeStart,
+  // LegacyCoreStart,
+  // SavedObjectsClientContract,
+  // ToastsStart,
+  // IUiSettingsClient,
+} from 'kibana/public';
+import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 import { MlRouter } from './routing';
+export { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export interface MlDependencies extends AppMountParameters {
-  npData: ReturnType<DataPlugin['start']>;
-  indexPatterns: IndexPatternsContract;
+  data: DataPublicPluginStart;
 }
 
 interface AppProps {
   coreStart: CoreStart;
-  indexPatterns: IndexPatternsContract;
+  deps: MlDependencies;
 }
 
-const App: FC<AppProps> = ({ coreStart, indexPatterns }) => {
-  const config = (coreStart.uiSettings as never) as KibanaConfigTypeFix; // TODO - make this UiSettingsClientContract, get rid of KibanaConfigTypeFix
-
+const App: FC<AppProps> = ({ coreStart, deps }) => {
   return (
-    <MlRouter
-      config={config}
-      setBreadcrumbs={coreStart.chrome.setBreadcrumbs}
-      indexPatterns={indexPatterns}
-    />
+    <KibanaContextProvider
+      services={{
+        appName: 'ML',
+        data: deps.data,
+        ...coreStart,
+      }}
+    >
+      <MlRouter />
+    </KibanaContextProvider>
   );
 };
 
-export const renderApp = (
-  coreStart: CoreStart,
-  depsStart: object,
-  { element, indexPatterns }: MlDependencies
-) => {
-  ReactDOM.render(<App coreStart={coreStart} indexPatterns={indexPatterns} />, element);
+export const renderApp = (coreStart: CoreStart, depsStart: object, deps: MlDependencies) => {
+  ReactDOM.render(<App coreStart={coreStart} deps={deps} />, deps.element);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => ReactDOM.unmountComponentAtNode(deps.element);
 };

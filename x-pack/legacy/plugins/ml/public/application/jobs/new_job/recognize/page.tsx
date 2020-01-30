@@ -23,7 +23,7 @@ import {
 import { toastNotifications } from 'ui/notify';
 import { merge } from 'lodash';
 import { ml } from '../../../services/ml_api_service';
-import { useKibanaContext } from '../../../contexts/kibana';
+import { useMlContext } from '../../../contexts/ml';
 import {
   DatafeedResponse,
   DataRecognizerConfigResponse,
@@ -84,7 +84,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     currentSavedSearch: savedSearch,
     currentIndexPattern: indexPattern,
     combinedQuery,
-  } = useKibanaContext();
+  } = useMlContext();
   const pageTitle =
     savedSearch !== null
       ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {

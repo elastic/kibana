@@ -37,7 +37,7 @@ import { checkPermission } from '../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
-import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
+import { useMlContext, SavedSearchQuery } from '../../contexts/ml';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { TimeBuckets } from '../../util/time_buckets';
@@ -97,9 +97,9 @@ function getDefaultPageState(): DataVisualizerPageState {
 }
 
 export const Page: FC = () => {
-  const kibanaContext = useKibanaContext();
+  const mlContext = useMlContext();
 
-  const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = kibanaContext;
+  const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = mlContext;
 
   const dataLoader = new DataLoader(currentIndexPattern, kibanaConfig);
 

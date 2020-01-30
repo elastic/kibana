@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import { Plugin, CoreStart, CoreSetup } from '../../../../../src/core/public';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+// import { DataStart } from '../../../../../src/legacy/core_plugins/data/public';
 
 export interface MlSetupDependencies {
-  npData: ReturnType<DataPlugin['start']>;
+  data: DataPublicPluginStart;
+  // dataShim: DataStart;
 }
 
-export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
-  setup(core: CoreSetup, { npData }: MlSetupDependencies) {
+export class MlPlugin implements Plugin<Setup, Start> {
+  setup(core: CoreSetup, { data }: MlSetupDependencies) {
     core.application.register({
       id: 'ml',
       title: 'Machine learning',
@@ -20,9 +22,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./application/app');
         return renderApp(coreStart, depsStart, {
-          ...params,
-          indexPatterns: npData.indexPatterns,
-          npData,
+          element: params.element,
+          appBasePath: params.appBasePath,
+          onAppLeave: params.onAppLeave,
+          data,
         });
       },
     });
@@ -30,11 +33,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     return {};
   }
 
-  start(core: CoreStart, deps: {}) {
+  start(core: CoreStart, deps: any) {
     return {};
   }
   public stop() {}
 }
 
-export type MlPluginSetup = ReturnType<MlPlugin['setup']>;
-export type MlPluginStart = ReturnType<MlPlugin['start']>;
+export type Setup = ReturnType<MlPlugin['setup']>;
+export type Start = ReturnType<MlPlugin['start']>;

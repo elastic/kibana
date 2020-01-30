@@ -9,11 +9,13 @@ import { HashRouter, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 import { I18nContext } from 'ui/i18n';
 
-import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
-import { KibanaContext, KibanaConfigTypeFix, KibanaContextValue } from '../contexts/kibana';
-import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
+import { IUiSettingsClient } from 'src/core/public';
+import { ChromeBreadcrumb } from 'kibana/public';
+import { IndexPatternsContract, TimefilterSetup } from 'src/plugins/data/public';
+import { MlContext, MlContextValue } from '../contexts/ml';
 
 import * as routes from './routes';
+import { useMlKibana } from '../contexts/kibana';
 
 // custom RouteProps making location non-optional
 interface MlRouteProps extends RouteProps {
@@ -22,33 +24,36 @@ interface MlRouteProps extends RouteProps {
 
 export interface MlRoute {
   path: string;
-  render(props: MlRouteProps, config: KibanaConfigTypeFix, deps: PageDependencies): JSX.Element;
+  render(props: MlRouteProps, deps: PageDependencies): JSX.Element;
   breadcrumbs: ChromeBreadcrumb[];
 }
 
 export interface PageProps {
   location: Location;
-  config: KibanaConfigTypeFix;
   deps: PageDependencies;
 }
 
 export interface PageDependencies {
+  config: IUiSettingsClient;
   indexPatterns: IndexPatternsContract;
+  timefilter: TimefilterSetup;
 }
 
-export const PageLoader: FC<{ context: KibanaContextValue }> = ({ context, children }) => {
+export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
   return context === null ? null : (
     <I18nContext>
-      <KibanaContext.Provider value={context}>{children}</KibanaContext.Provider>
+      <MlContext.Provider value={context}>{children}</MlContext.Provider>
     </I18nContext>
   );
 };
 
-export const MlRouter: FC<{
-  config: KibanaConfigTypeFix;
-  setBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[]) => void;
-  indexPatterns: IndexPatternsContract;
-}> = ({ config, setBreadcrumbs, indexPatterns }) => {
+export const MlRouter: FC = () => {
+  const { services } = useMlKibana();
+  const setBreadcrumbs = services.chrome!.setBreadcrumbs;
+  const indexPatterns = services.data.indexPatterns;
+  const timefilter = services.data.query.timefilter;
+  const config = services.uiSettings!;
+
   return (
     <HashRouter>
       <div>
@@ -61,7 +66,7 @@ export const MlRouter: FC<{
               window.setTimeout(() => {
                 setBreadcrumbs(route.breadcrumbs);
               });
-              return route.render(props, config, { indexPatterns });
+              return route.render(props, { config, indexPatterns, timefilter });
             }}
           />
         ))}

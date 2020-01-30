@@ -25,7 +25,7 @@ import { metadata } from 'ui/metadata';
 import { ml } from '../../../../../services/ml_api_service';
 import { Field } from '../../../../../../../common/types/fields';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
-import { useKibanaContext } from '../../../../../contexts/kibana';
+import { useMlContext } from '../../../../../contexts/ml';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
   JOB_TYPES,
@@ -46,7 +46,7 @@ import { shouldAddAsDepVarOption, OMIT_FIELDS } from './form_options_validation'
 
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setFormState } = actions;
-  const kibanaContext = useKibanaContext();
+  const mlContext = useMlContext();
   const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
 
   const {
@@ -92,7 +92,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   // that an analytics jobs is not able to identify outliers if there are no numeric fields present.
   const validateSourceIndexFields = async () => {
     try {
-      const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
+      const indexPattern: IndexPattern = await mlContext.indexPatterns.get(
         indexPatternsMap[sourceIndex].value
       );
       const containsNumericalFields: boolean = indexPattern.fields.some(
@@ -207,7 +207,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       sourceIndexContainsNumericalFields: true,
     });
     try {
-      const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
+      const indexPattern: IndexPattern = await mlContext.indexPatterns.get(
         indexPatternsMap[sourceIndex].value
       );
 

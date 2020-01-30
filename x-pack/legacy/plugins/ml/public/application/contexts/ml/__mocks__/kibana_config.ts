@@ -7,5 +7,5 @@
 export const kibanaConfigMock = {
   get: <T>(key: string): T => ({} as T),
   has: (key: string) => false,
-  set: (key: string, value: any) => {},
+  // set: (key: string, value: any) => {},
 };

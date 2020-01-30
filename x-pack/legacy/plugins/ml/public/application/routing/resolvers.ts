@@ -5,6 +5,7 @@
  */
 
 import { loadIndexPatterns, loadSavedSearches } from '../util/index_utils';
+import { cacheTimefilter } from '../util/timefilter_cache';
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
@@ -17,11 +18,12 @@ export interface Resolvers {
 export interface ResolverResults {
   [name: string]: any;
 }
-export const basicResolvers = (deps: PageDependencies): Resolvers => ({
+export const basicResolvers = ({ indexPatterns, timefilter }: PageDependencies): Resolvers => ({
   checkFullLicense,
   getMlNodeCount,
   loadMlServerInfo,
-  loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
+  loadIndexPatterns: () => loadIndexPatterns(indexPatterns),
   checkGetJobsPrivilege,
   loadSavedSearches,
+  cacheTimefilter: () => cacheTimefilter(timefilter),
 });

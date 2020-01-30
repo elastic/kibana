@@ -45,12 +45,12 @@ const breadcrumbs = [
 
 export const explorerRoute: MlRoute = {
   path: '/explorer',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ config, deps }) => {
-  const { context, results } = useResolver(undefined, undefined, config, {
+const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { context, results } = useResolver(undefined, undefined, deps.config, {
     ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
     jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),

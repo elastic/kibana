@@ -33,7 +33,7 @@ import {
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
-import { useKibanaContext } from '../../../../contexts/kibana';
+import { useMlContext } from '../../../../contexts/ml';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { TimeBuckets } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
@@ -52,11 +52,11 @@ export interface PageProps {
 }
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
-  const kibanaContext = useKibanaContext();
+  const mlContext = useMlContext();
   const jobCreator = jobCreatorFactory(jobType)(
-    kibanaContext.currentIndexPattern,
-    kibanaContext.currentSavedSearch,
-    kibanaContext.combinedQuery
+    mlContext.currentIndexPattern,
+    mlContext.currentSavedSearch,
+    mlContext.combinedQuery
   );
 
   const { from, to } = getTimeFilterRange();
@@ -124,7 +124,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       jobCreator.modelPlot = true;
     }
 
-    if (kibanaContext.currentSavedSearch !== null) {
+    if (mlContext.currentSavedSearch !== null) {
       // Jobs created from saved searches cannot be cloned in the wizard as the
       // ML job config holds no reference to the saved search ID.
       jobCreator.createdBy = null;
@@ -175,10 +175,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   chartInterval.setMaxBars(MAX_BARS);
   chartInterval.setInterval('auto');
 
-  const chartLoader = new ChartLoader(
-    kibanaContext.currentIndexPattern,
-    kibanaContext.combinedQuery
-  );
+  const chartLoader = new ChartLoader(mlContext.currentIndexPattern, mlContext.combinedQuery);
 
   const jobValidator = new JobValidator(jobCreator, existingJobsAndGroups);
 
