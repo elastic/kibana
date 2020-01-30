@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { StateContainer, createStateContainer } from '../../../kibana_utils/public';
+import {
+  StateContainer,
+  createStateContainer,
+} from '../../../kibana_utils/common/state_containers';
 import { ExpressionFunction } from '../expression_functions';
 import { ExpressionType } from '../expression_types';
 

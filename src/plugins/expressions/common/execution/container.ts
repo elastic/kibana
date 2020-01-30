@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { StateContainer, createStateContainer } from '../../../kibana_utils/public';
+import {
+  StateContainer,
+  createStateContainer,
+} from '../../../kibana_utils/common/state_containers';
 import { ExecutorState, defaultState as executorDefaultState } from '../executor';
 import { ExpressionAstExpression } from '../parser';
 import { ExpressionValue } from '../expression_types';
