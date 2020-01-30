@@ -163,7 +163,7 @@ export const setupGetOperatorSuggestions: KqlQuerySuggestionProvider = () => {
         });
 
         const suggestions = matchingOperators.map(operator => ({
-          type: autocomplete.QuerySuggestionsTypes.operator,
+          type: autocomplete.QuerySuggestionsTypes.Operator,
           text: operator + ' ',
           description: getDescription(operator),
           start: end,

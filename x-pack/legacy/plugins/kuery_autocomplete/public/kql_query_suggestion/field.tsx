@@ -73,7 +73,7 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<autocomplete.F
           : text.length;
 
       return {
-        type: autocomplete.QuerySuggestionsTypes.field,
+        type: autocomplete.QuerySuggestionsTypes.Field,
         text,
         description,
         start,

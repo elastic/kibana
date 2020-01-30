@@ -62,7 +62,7 @@ export const setupGetConjunctionSuggestions: KqlQuerySuggestionProvider = core =
 
     if (text.endsWith(' ')) {
       suggestions = Object.keys(conjunctions).map((key: $Keys<typeof conjunctions>) => ({
-        type: autocomplete.QuerySuggestionsTypes.conjunction,
+        type: autocomplete.QuerySuggestionsTypes.Conjunction,
         text: `${key} `,
         description: conjunctions[key],
         start: end,

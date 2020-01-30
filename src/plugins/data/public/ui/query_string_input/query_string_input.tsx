@@ -191,7 +191,7 @@ export class QueryStringInputUI extends Component<Props, State> {
       const text = toUser(recentSearch);
       const start = 0;
       const end = query.length;
-      return { type: autocomplete.QuerySuggestionsTypes.recentSearch, text, start, end };
+      return { type: autocomplete.QuerySuggestionsTypes.RecentSearch, text, start, end };
     });
   };
 
@@ -341,7 +341,7 @@ export class QueryStringInputUI extends Component<Props, State> {
       selectionEnd: start + (cursorIndex ? cursorIndex : text.length),
     });
 
-    if (type === autocomplete.QuerySuggestionsTypes.recentSearch) {
+    if (type === autocomplete.QuerySuggestionsTypes.RecentSearch) {
       this.setState({ isSuggestionsVisible: false, index: null });
       this.onSubmit({ query: newQueryString, language: this.props.query.language });
     }

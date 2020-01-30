@@ -20,11 +20,11 @@
 import { IFieldType, IIndexPattern } from '../../../common/index_patterns';
 
 export enum QuerySuggestionsTypes {
-  field = 'field',
-  value = 'value',
-  operator = 'operator',
-  conjunction = 'conjunction',
-  recentSearch = 'recentSearch',
+  Field = 'field',
+  Value = 'value',
+  Operator = 'operator',
+  Conjunction = 'conjunction',
+  RecentSearch = 'recentSearch',
 }
 
 export type QuerySuggestionsGetFn = (
@@ -54,7 +54,7 @@ export interface BasicQuerySuggestion {
 
 /** @public **/
 export interface FieldQuerySuggestion extends BasicQuerySuggestion {
-  type: QuerySuggestionsTypes.field;
+  type: QuerySuggestionsTypes.Field;
   field: IFieldType;
 }
 

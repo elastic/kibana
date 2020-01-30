@@ -13,7 +13,7 @@ const wrapAsSuggestions = (start: number, end: number, query: string, values: st
   values
     .filter(value => value.toLowerCase().includes(query.toLowerCase()))
     .map(value => ({
-      type: autocomplete.QuerySuggestionsTypes.value,
+      type: autocomplete.QuerySuggestionsTypes.Value,
       text: `${value} `,
       start,
       end,

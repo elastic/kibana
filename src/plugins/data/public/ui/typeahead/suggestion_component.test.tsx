@@ -31,7 +31,7 @@ const mockSuggestion: autocomplete.QuerySuggestion = {
   end: 0,
   start: 42,
   text: 'as promised, not helpful',
-  type: autocomplete.QuerySuggestionsTypes.value,
+  type: autocomplete.QuerySuggestionsTypes.Value,
 };
 
 describe('SuggestionComponent', () => {
