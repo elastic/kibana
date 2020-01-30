@@ -36,6 +36,7 @@ export interface ErrorInstruction extends PulseInstruction {
   id: string;
   pulseMessage: string;
   sendTo: 'toasts' | 'newsfeed';
+  fixedVersion?: string;
 }
 export interface Payload {
   deploymentId: string;

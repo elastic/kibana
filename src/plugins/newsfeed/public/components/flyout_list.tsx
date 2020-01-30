@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useState, useEffect } from 'react';
 import {
   EuiIcon,
   EuiFlyout,
@@ -45,17 +45,20 @@ import { NewsfeedItem } from '../../types';
 import { NewsEmptyPrompt } from './empty_news';
 import { NewsLoadingPrompt } from './loading_news';
 
+const fixedVersionsSeen: Set<string> = new Set();
+
+function addNewInstructionsToSeenSet(entries: string[]): void {
+  entries.forEach(entry => fixedVersionsSeen.add(entry));
+}
 interface Props {
   notificationsChannel: PulseChannel<NotificationInstruction>;
-  errorsInstructions: ErrorInstruction[];
+  errorsChannel: PulseChannel<ErrorInstruction>;
 }
 
-export const NewsfeedFlyout = ({ notificationsChannel, errorsInstructions }: Props) => {
+export const NewsfeedFlyout = ({ notificationsChannel, errorsChannel }: Props) => {
   const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
-  const [errorsInstructionsToShow, setErrorsInstructionsToShow] = useState<ErrorInstruction[]>(
-    errorsInstructions
-  );
+  const [errorsInstructionsToShow, setErrorsInstructionsToShow] = useState<ErrorInstruction[]>([]);
 
   if (newsFetchResult && newsFetchResult.feedItems.length) {
     const lastNotificationHash = getLastItemHash(newsFetchResult.feedItems);
@@ -75,6 +78,25 @@ export const NewsfeedFlyout = ({ notificationsChannel, errorsInstructions }: Pro
       );
     }
   }
+  const errorsInstructions$ = errorsChannel.instructions$();
+  useEffect(() => {
+    function handleIncommingErrorsInstructions(instructions: ErrorInstruction[]) {
+      if (instructions.length) {
+        setErrorsInstructionsToShow(instructions);
+        addNewInstructionsToSeenSet(instructions.map(instruction => instruction.hash));
+      }
+    }
+    const subscription = errorsInstructions$.subscribe(instructions => {
+      if (instructions && instructions.length) {
+        const thoseToShow = instructions.filter(
+          instruction =>
+            instruction.sendTo === 'newsfeed' && !fixedVersionsSeen.has(instruction.hash)
+        );
+        handleIncommingErrorsInstructions(thoseToShow);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [errorsInstructions$]);
 
   return (
     <EuiFlyout
@@ -116,7 +138,24 @@ export const NewsfeedFlyout = ({ notificationsChannel, errorsInstructions }: Pro
         ) : (
           <NewsEmptyPrompt />
         )}
-        {errorsInstructionsToShow && errorsInstructionsToShow.length && <div>We have stuff!</div>}
+        {errorsInstructionsToShow &&
+          errorsInstructionsToShow.length > 0 &&
+          errorsInstructionsToShow.map((item: ErrorInstruction, index: number) => {
+            return (
+              <EuiHeaderAlert
+                key={index}
+                title={item.hash}
+                text={item.pulseMessage}
+                action={
+                  <EuiLink target="_blank" href="#">
+                    {item.fixedVersion}
+                  </EuiLink>
+                }
+                date={moment(item.timestamp).format('DD MMMM YYYY HH:MM:SS')}
+                badge={<EuiBadge color="hollow">{item.fixedVersion}</EuiBadge>}
+              />
+            );
+          })}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

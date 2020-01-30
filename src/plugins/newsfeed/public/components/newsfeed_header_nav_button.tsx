@@ -43,6 +43,7 @@ export interface Props {
   apiFetchResult: NewsfeedApiFetchResult;
   notificationsChannel: PulseChannel<NotificationInstruction>;
   errorsChannel: PulseChannel<ErrorInstruction>;
+  fixedVersionsSeen: Set<string>; // I'll also need to pass a callback to update this from the flyout
 }
 
 const NEWSFEED_LAST_HASH = 'pulse_news_last_hash';
@@ -82,18 +83,19 @@ export const NewsfeedNavButton = ({
   apiFetchResult,
   notificationsChannel,
   errorsChannel,
+  fixedVersionsSeen,
 }: Props) => {
   const [showBadge, setShowBadge] = useState<boolean>(false);
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
-  const [errorsInstructions, setErrorsInstructions] = useState<ErrorInstruction[]>([]);
+  const [showPulseBadge, setShowPulseBadge] = useState<boolean>(false);
+  const [instructionsNumber, setInstructionsNumber] = useState<number | null>(null);
   // hack to test updating news;
   (window as any).moment = moment;
   (window as any).notificationsChannel = notificationsChannel;
   // Pulse notifications
   const notificationsInstructions$ = notificationsChannel.instructions$();
   const errorsInstructions$ = errorsChannel.instructions$();
-  const fixedVersionsSeen: Set<string> = new Set();
 
   useEffect(() => {
     function handleStatusChange(instructions: NotificationInstruction[]) {
@@ -130,23 +132,21 @@ export const NewsfeedNavButton = ({
   useEffect(() => {
     function handleErrorsInstructionsChange(instructions: ErrorInstruction[]) {
       if (instructions.length) {
-        setShowBadge(instructions.length > 0);
-        setErrorsInstructions(instructions);
+        setShowPulseBadge(instructions.length > 0);
+        setInstructionsNumber(instructions.length);
       }
       // updateRecordsToSeen(instructions); TODO: implement me
-      // do stuff
     }
     const subscription = errorsInstructions$.subscribe(instructions => {
       if (instructions && instructions.length) {
         const newInstructions = instructions.filter(
-          instruction =>
-            instruction.sendTo === 'newsfeed' && !fixedVersionsSeen.has(instruction.hash)
+          instruction => instruction.sendTo === 'newsfeed'
         );
         handleErrorsInstructionsChange(newInstructions);
       }
     });
     return () => subscription.unsubscribe();
-  }, [errorsInstructions$, fixedVersionsSeen]);
+  }, [errorsInstructions$]);
   // FOR THE POC: JUST USE PULSE AS THE SOURCE OF TRUTH FOR NEWS!
   // useEffect(() => {
   //   function handleStatusChange(fetchResult: FetchResult | void | null) {
@@ -178,7 +178,7 @@ export const NewsfeedNavButton = ({
           onClick={showFlyout}
         >
           <EuiIcon type="email" size="m" />
-          {showBadge ? (
+          {showBadge || showPulseBadge ? (
             <EuiNotificationBadge className="euiHeaderNotification" data-test-subj="showBadgeNews">
               &#9642;
             </EuiNotificationBadge>
@@ -187,7 +187,7 @@ export const NewsfeedNavButton = ({
         {flyoutVisible ? (
           <NewsfeedFlyout
             notificationsChannel={notificationsChannel}
-            errorsInstructions={errorsInstructions}
+            errorsChannel={errorsChannel}
           />
         ) : null}
       </Fragment>

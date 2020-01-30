@@ -22,26 +22,50 @@ import moment from 'moment';
 import { PulseErrorPayloadRecord } from 'src/core/server/pulse/collectors/errors';
 
 export const errorChannelPayloads: PulseErrorPayloadRecord[] = [
-  {
-    channel_id: 'errors',
-    deployment_id: '123',
-    message: 'The index [pulse-poc-raw-default/1234567890]',
-    hash: '[xpack][plugins][pulse] index [pulse-poc-raw-default/1234567890]',
-    status: 'new',
-    currentKibanaVersion: 'v7.x',
-    timestamp: moment().toDate(),
-  },
-  {
-    channel_id: 'errors',
-    deployment_id: '123',
-    message: 'The index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg] already exists',
-    hash: '[xpack][plugins][pulse] index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg]',
-    status: 'new',
-    currentKibanaVersion: 'v7.x',
-    timestamp: moment()
-      .add(30, 'seconds')
-      .toDate(),
-  },
+  // {
+  //   channel_id: 'errors',
+  //   deployment_id: '123',
+  //   message: 'The index [pulse-poc-raw-default/1234567890]',
+  //   hash: '[xpack][plugins][pulse] index [pulse-poc-raw-default/1234567890]',
+  //   status: 'new',
+  //   currentKibanaVersion: 'v7.x',
+  //   timestamp: moment().toDate(),
+  // },
+  // {
+  //   channel_id: 'errors',
+  //   deployment_id: '123',
+  //   message: 'The index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg] already exists',
+  //   hash: '[xpack][plugins][pulse] index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg]',
+  //   status: 'new',
+  //   currentKibanaVersion: 'v7.x',
+  //   timestamp: moment()
+  //     .add(30, 'seconds')
+  //     .toDate(),
+  // },
+  // {
+  //   channel_id: 'errors',
+  //   deployment_id: '123',
+  //   message: 'The SampleDataSetCard [key=ecommerce] component failed to mount',
+  //   hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 1',
+  //   status: 'new',
+  //   fixedVersion: 'v7.5.2',
+  //   currentKibanaVersion: 'v7.x',
+  //   timestamp: moment()
+  //     .add(60, 'seconds')
+  //     .toDate(),
+  // },
+  // {
+  //   channel_id: 'errors',
+  //   deployment_id: '123',
+  //   message: '[Error]: Test',
+  //   hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 2',
+  //   status: 'new',
+  //   fixedVersion: 'v7.5.2',
+  //   currentKibanaVersion: 'v7.x',
+  //   timestamp: moment()
+  //     .add(90, 'seconds')
+  //     .toDate(),
+  // },
   {
     channel_id: 'errors',
     deployment_id: '123',
@@ -51,7 +75,7 @@ export const errorChannelPayloads: PulseErrorPayloadRecord[] = [
     fixedVersion: 'v7.5.2',
     currentKibanaVersion: 'v7.x',
     timestamp: moment()
-      .add(60, 'seconds')
+      .add(20, 'seconds')
       .toDate(),
   },
   {
@@ -63,7 +87,7 @@ export const errorChannelPayloads: PulseErrorPayloadRecord[] = [
     fixedVersion: 'v7.5.2',
     currentKibanaVersion: 'v7.x',
     timestamp: moment()
-      .add(90, 'seconds')
+      .add(10, 'seconds')
       .toDate(),
   },
 ];
