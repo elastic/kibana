@@ -39,7 +39,7 @@ export interface OutputSpec {
   [key: string]: PropertySpec;
 }
 
-export interface EmbeddableFactoryOptions<T extends SavedObjectAttributes> {
+export interface EmbeddableFactoryOptions<T> {
   savedObjectMetaData?: SavedObjectMetaData<T>;
 }
 
