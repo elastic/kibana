@@ -9,21 +9,15 @@ import expect from '@kbn/expect';
 export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['header', 'common', 'settings', 'visualize', 'visChart']);
   const retry = getService('retry');
-  const log = getService('log');
 
   describe('check winlogbeat', function() {
-    it('winlogbeat- should have ServiceControlManager label in PieChart', async function() {
-      await PageObjects.common.navigateToApp('visualize');
-      //await PageObjects.visualize.filterVisByName('Sources');
-      await PageObjects.visualize.openSavedVisualization('Sources');
-      await PageObjects.common.sleep(1000);
-      await PageObjects.header.setQuickSpan('Last 7 days');
-      await PageObjects.common.sleep(1000);
-      await retry.tryForTime(40000, async () => {
-        const pieChart = await PageObjects.visChart.getLegendEntries();
-        log.debug('Pie Chart labels = ' + pieChart);
-        // we should always have Service Control Manager events in the windows event viewer on our test machine.
-        expect(pieChart).to.contain('Service Control Manager');
+    it('winlogbeat- should have hit count GT 0', async function() {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectIndexPattern('winlogbeat-*');
+      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Today');
+      await retry.try(async function() {
+        const hitCount = parseInt(await PageObjects.discover.getHitCount());
+        expect(hitCount).to.be.greaterThan(0);
       });
     });
   });

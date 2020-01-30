@@ -37,8 +37,9 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async isTimepickerOpen() {
-      const el = await find.byCssSelector('QuickSelectPopover').getAttribute('class');
-      return el.toString().includes('euiPopover-isOpen');
+      const el = await find.byCssSelector('QuickSelectPopover');
+      const elClass = await el.getAttribute('class');
+      return elClass.toString().includes('euiPopover-isOpen');
     }
 
     async clickTimespan(timespan) {

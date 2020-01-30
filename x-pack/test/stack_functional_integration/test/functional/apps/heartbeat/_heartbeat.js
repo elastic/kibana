@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['common', 'discover', 'header']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timepicker']);
   const log = getService('log');
   const retry = getService('retry');
 
@@ -26,9 +26,7 @@ export default function({ getService, getPageObjects }) {
       //  await PageObjects.header.clickDiscover();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('heartbeat-*');
-      await retry.tryForTime(40000, async () => {
-        await PageObjects.header.setQuickSpan('Today');
-      });
+      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Today');
       await retry.tryForTime(40000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         expect(hitCount).to.be.greaterThan('0');
