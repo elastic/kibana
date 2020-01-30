@@ -17,12 +17,10 @@
  * under the License.
  */
 
+import { ComponentRegistry } from './component_registry';
+
 export const componentRegistryMock = {
   register: jest.fn(),
   get: jest.fn(),
-  componentType: {
-    PAGE_TITLE_COMPONENT: 'page_title_component',
-    PAGE_SUBTITLE_COMPONENT: 'page_subtitle_component',
-    PAGE_FOOTER_COMPONENT: 'page_footer_component',
-  },
+  componentType: ComponentRegistry.componentType,
 };

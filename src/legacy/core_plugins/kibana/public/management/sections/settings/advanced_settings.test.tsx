@@ -217,7 +217,7 @@ function mockConfig() {
     },
     plugins: {
       advancedSettings: {
-        componentRegistry: {
+        component: {
           get: () => <div>Hello</div>,
           componentType: {
             PAGE_TITLE_COMPONENT: 'page_title_component',

@@ -27,7 +27,7 @@ routes.defaults(/\/management/, {
   resolve: {
     telemetryManagementSection: function(Private) {
       const telemetryOptInProvider = Private(TelemetryOptInProvider);
-      const componentRegistry = npSetup.plugins.advancedSettings.componentRegistry;
+      const componentRegistry = npSetup.plugins.advancedSettings.component;
 
       const Component = props => (
         <TelemetryForm
