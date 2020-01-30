@@ -4,7 +4,10 @@ import './index.scss';
 
 import { <%= upperCamelCaseName %>Plugin } from './plugin';
 
-// These exports are the public contract for your static code and types.
+/**
+ * This exports static code and TypeScript types, 
+ * as well as, Kibana Platform `plugin()` initializer.
+ **/ 
 export function plugin() {
   return new <%= upperCamelCaseName %>Plugin();
 }

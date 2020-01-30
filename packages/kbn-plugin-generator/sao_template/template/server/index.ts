@@ -1,8 +1,11 @@
 import { PluginInitializerContext } from '<%= relRoot %>/src/core/server';
 import { <%= upperCamelCaseName %>Plugin } from './plugin';
 
-// These exports are the server side contract for your static code and types.
-export function plugin(initializerContext: PluginInitializerContext) {
+/**
+ * This exports static code and TypeScript types, 
+ * as well as, Kibana Platform `plugin()` initializer.
+ **/ 
+ export function plugin(initializerContext: PluginInitializerContext) {
   return new <%= upperCamelCaseName %>Plugin(initializerContext);
 }
 
