@@ -47,7 +47,7 @@ export const AnalyticsViewAction = {
         aria-label={i18n.translate('xpack.ml.dataframe.analyticsList.viewAriaLabel', {
           defaultMessage: 'View',
         })}
-        data-test-sub="mlAnalyticsJobViewButton"
+        data-test-subj="mlAnalyticsJobViewButton"
       >
         {i18n.translate('xpack.ml.dataframe.analyticsList.viewActionName', {
           defaultMessage: 'View',

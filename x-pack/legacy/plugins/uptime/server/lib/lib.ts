@@ -9,7 +9,7 @@ import {
   UMMonitorsAdapter,
   UMMonitorStatesAdapter,
   UMPingsAdapter,
-  UMSavedObjectsAdapter,
+  StubIndexPatternAdapter,
 } from './adapters';
 import { UMLicenseCheck } from './domains';
 
@@ -18,7 +18,7 @@ export interface UMDomainLibs {
   monitors: UMMonitorsAdapter;
   monitorStates: UMMonitorStatesAdapter;
   pings: UMPingsAdapter;
-  savedObjects: UMSavedObjectsAdapter;
+  stubIndexPattern: StubIndexPatternAdapter;
 }
 
 export interface UMServerLibs extends UMDomainLibs {
