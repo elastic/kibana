@@ -5,21 +5,24 @@
  */
 
 import _ from 'lodash';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
+import uuid from 'uuid/v4';
 
 import { EuiFieldText, EuiPopover, EuiLoadingSpinner, EuiText, EuiSelectable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class StopInput extends Component {
+
   state = {
-    isPopoverOpen: false,
-    localValue: '',
-    suggestionOptions: [],
+    suggestions: [],
     isLoadingSuggestions: false,
+    hasPrevFocus: false,
   };
 
+  _datalistId = uuid();
+
   static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.value === prevState.prevValue) {
+    if (nextProps.value === prevState.prevValue || nextProps.value === prevState.localValue) {
       return null;
     }
 
@@ -35,40 +38,40 @@ export class StopInput extends Component {
 
   componentWillUnmount() {
     this._isMounted = false;
+    this._debouncedOnChange.cancel();
   }
-
-  _closePopover = () => {
-    this.setState({ isPopoverOpen: false });
-  };
-
-  _openPopover = () => {
-    this.setState({ isPopoverOpen: true });
-  };
-
-  _togglePopover = () => {
-    this.setState(prevState => ({
-      isPopoverOpen: !prevState.isPopoverOpen,
-    }));
-  };
 
   _onChange = e => {
     this.setState(
       {
         localValue: e.target.value,
-        isPopoverOpen: true,
+        suggestionsFilter: e.target.value,
+        isLoadingSuggestions: true,
       },
       this._debouncedOnChange
     );
   };
 
   _debouncedOnChange = _.debounce(() => {
-    this._loadSuggestions();
+    this._loadSuggestions(this.state.suggestionsFilter);
     this.props.onChange(this.state.localValue);
   }, 300);
 
-  _loadSuggestions = async () => {
-    this.setState({ isLoadingSuggestions: true });
+  _onFocus = () => {
+    // populate suggestions on initial focus
+    if (!this.state.hasPrevFocus) {
+      this.setState(
+        {
+          hasPrevFocus: true,
+          isLoadingSuggestions: true,
+          suggestionsFilter: '',
+        },
+        () => { this._loadSuggestions(this.state.suggestionsFilter); }
+      );
+    }
+  }
 
+  _loadSuggestions = async (filter) => {
     let suggestions = [];
     try {
       suggestions = await this.props.getValueSuggestions(this.state.localValue);
@@ -76,49 +79,25 @@ export class StopInput extends Component {
       // ignore suggestions error
     }
 
-    if (this._isMounted) {
+    if (this._isMounted && filter === this.state.suggestionsFilter) {
       this.setState({
         isLoadingSuggestions: false,
-        suggestionOptions: suggestions.map(suggestion => {
-          return {
-            value: suggestion,
-            label: suggestion,
-          };
-        }),
+        suggestions,
       });
     }
   };
 
-  _onSuggestionSelection = options => {
-    const selectedOption = options.find(option => {
-      return option.checked === 'on';
-    });
-
-    if (selectedOption) {
-      this.props.onChange(selectedOption.value);
-    }
-    this._closePopover();
-  };
-
   _renderSuggestions() {
-    if (this.state.isLoadingSuggestions) {
-      <EuiText>
-        <EuiLoadingSpinner size="m" />
-        <FormattedMessage
-          id="xpack.maps.stopInput.loadingSuggestionsMsg"
-          defaultMessage="Loading suggestions"
-        />
-      </EuiText>;
-    }
-
-    if (this.state.suggestionOptions.length === 0) {
+    if (this.state.isLoadingSuggestions|| this.state.suggestions.length === 0) {
       return null;
     }
 
     return (
-      <EuiSelectable options={this.state.suggestionOptions} onChange={this._onSuggestionSelection}>
-        {list => list}
-      </EuiSelectable>
+      <datalist id={this._datalistId}>
+        {this.state.suggestions.map(suggestion => {
+          return <option key={suggestion} value={suggestion}/>;
+        })}
+      </datalist>
     );
   }
 
@@ -130,26 +109,18 @@ export class StopInput extends Component {
       ...rest
     } = this.props;
 
-    const input = (
-      <EuiFieldText
-        {...rest}
-        onFocus={this._loadSuggestions}
-        onChange={this._onChange}
-        value={this.state.localValue}
-      />
-    );
-
     return (
-      <EuiPopover
-        ownFocus
-        button={input}
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this._closePopover}
-        attachToAnchor
-        panelPaddingSize="none"
-      >
+      <Fragment>
+        <EuiFieldText
+          {...rest}
+          list={this._datalistId}
+          onChange={this._onChange}
+          value={this.state.localValue}
+          isLoading={this.state.isLoadingSuggestions}
+          onFocus={this._onFocus}
+        />
         {this._renderSuggestions()}
-      </EuiPopover>
+      </Fragment>
     );
   }
 }
