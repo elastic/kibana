@@ -53,7 +53,7 @@ export class Plugin {
       /*
        * End-user-facing services
        */
-      const uiEnabled = config.get('xpack.monitoring.ui.enabled');
+      const uiEnabled = config.get('monitoring.ui.enabled');
 
       if (uiEnabled) {
         await instantiateClient({
@@ -103,7 +103,7 @@ export class Plugin {
       kbnServerStatus: kbnServer.status,
       kbnServerVersion: kbnServer.version,
     });
-    const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
+    const kibanaCollectionEnabled = config.get('monitoring.kibana.collection.enabled');
 
     if (kibanaCollectionEnabled) {
       /*
@@ -130,14 +130,12 @@ export class Plugin {
     core.injectUiAppVars('monitoring', () => {
       const config = core.config();
       return {
-        maxBucketSize: config.get('xpack.monitoring.max_bucket_size'),
-        minIntervalSeconds: config.get('xpack.monitoring.min_interval_seconds'),
+        maxBucketSize: config.get('monitoring.ui.max_bucket_size'),
+        minIntervalSeconds: config.get('monitoring.ui.min_interval_seconds'),
         kbnIndex: config.get('kibana.index'),
-        showLicenseExpiration: config.get('xpack.monitoring.show_license_expiration'),
-        showCgroupMetricsElasticsearch: config.get(
-          'xpack.monitoring.ui.container.elasticsearch.enabled'
-        ),
-        showCgroupMetricsLogstash: config.get('xpack.monitoring.ui.container.logstash.enabled'), // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
+        showLicenseExpiration: config.get('monitoring.ui.show_license_expiration'),
+        showCgroupMetricsElasticsearch: config.get('monitoring.ui.container.elasticsearch.enabled'),
+        showCgroupMetricsLogstash: config.get('monitoring.ui.container.logstash.enabled'), // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
       };
     });
 

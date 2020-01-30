@@ -10,6 +10,7 @@ import { merge } from 'lodash';
 
 import { Plugin } from './plugin';
 import { EsContext } from './es';
+import { EventLogService } from './event_log_service';
 import {
   IEvent,
   IValidatedEvent,
@@ -28,14 +29,14 @@ interface Doc {
 
 interface IEventLoggerCtorParams {
   esContext: EsContext;
-  eventLogService: IEventLogService;
+  eventLogService: EventLogService;
   initialProperties: IEvent;
   systemLogger: SystemLogger;
 }
 
 export class EventLogger implements IEventLogger {
   private esContext: EsContext;
-  private eventLogService: IEventLogService;
+  private eventLogService: EventLogService;
   private initialProperties: IEvent;
   private systemLogger: SystemLogger;
 
@@ -69,17 +70,18 @@ export class EventLogger implements IEventLogger {
     if (!this.eventLogService.isEnabled()) return;
 
     const event: IEvent = {};
+    const fixedProperties = {
+      '@timestamp': new Date().toISOString(),
+      ecs: {
+        version: ECS_VERSION,
+      },
+      kibana: {
+        server_uuid: this.eventLogService.kibanaUUID,
+      },
+    };
 
     // merge the initial properties and event properties
-    merge(event, this.initialProperties, eventProperties);
-
-    // add fixed properties
-    event['@timestamp'] = new Date().toISOString();
-    event.ecs = event.ecs || {};
-    event.ecs.version = ECS_VERSION;
-
-    // TODO add kibana server uuid
-    // event.kibana.server_uuid = NP version of config.get('server.uuid');
+    merge(event, this.initialProperties, eventProperties, fixedProperties);
 
     let validatedEvent: IValidatedEvent;
     try {
@@ -138,9 +140,11 @@ function validateEvent(eventLogService: IEventLogService, event: IEvent): IValid
   return EventSchema.validate(event);
 }
 
+export const EVENT_LOGGED_PREFIX = `event logged: `;
+
 function logEventDoc(logger: Logger, doc: Doc): void {
   setImmediate(() => {
-    logger.info(`event logged ${JSON.stringify(doc.body)}`);
+    logger.info(`${EVENT_LOGGED_PREFIX}${JSON.stringify(doc.body)}`);
   });
 }
 

@@ -18,7 +18,9 @@ export default function({ getService, getPageObjects }) {
   const esSupertest = getService('esSupertest');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'settings', 'watcher']);
 
-  // Failing: https://github.com/elastic/kibana/issues/56014
+  // Still flaky test :c
+  // https://github.com/elastic/kibana/pull/56361
+  // https://github.com/elastic/kibana/pull/56304
   describe.skip('watcher_test', function() {
     before('initialize tests', async () => {
       // There may be system watches if monitoring was previously enabled
@@ -34,7 +36,11 @@ export default function({ getService, getPageObjects }) {
       }
 
       await browser.setWindowSize(1600, 1000);
-      await PageObjects.common.navigateToApp('watcher');
+      // TODO: Remove the retry.try wrapper once https://github.com/elastic/kibana/issues/55985 is resolved
+      retry.try(async () => {
+        await PageObjects.common.navigateToApp('watcher');
+        await testSubjects.find('createWatchButton');
+      });
     });
 
     it('create and save a new watch', async () => {
