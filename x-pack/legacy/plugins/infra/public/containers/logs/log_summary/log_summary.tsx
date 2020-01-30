@@ -9,6 +9,7 @@ import { useState, useMemo } from 'react';
 import { useCancellableEffect } from '../../../utils/cancellable_effect';
 import { fetchLogSummary } from './api/fetch_log_summary';
 import { LogEntriesSummaryResponse } from '../../../../common/http_api';
+import { useBucketSize } from './bucket_size';
 
 export type LogSummaryBuckets = LogEntriesSummaryResponse['data']['buckets'];
 
@@ -19,12 +20,8 @@ export const useLogSummary = (
   filterQuery: string | null
 ) => {
   const [logSummaryBuckets, setLogSummaryBuckets] = useState<LogSummaryBuckets>([]);
-  const bucketSize = useMemo(() => {
-    if (!startTimestamp || !endTimestamp) {
-      return null;
-    }
-    return (endTimestamp - startTimestamp) / 100;
-  }, [startTimestamp, endTimestamp]);
+
+  const bucketSize = useBucketSize(startTimestamp, endTimestamp);
 
   useCancellableEffect(
     getIsCancelled => {
