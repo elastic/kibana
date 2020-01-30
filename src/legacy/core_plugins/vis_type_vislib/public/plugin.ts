@@ -39,6 +39,7 @@ import {
   createGoalVisTypeDefinition,
 } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
+import { ConfigShema as VisTypeXyConfigShema } from '../../vis_type_xy';
 
 export interface VisTypeVislibDependencies {
   uiSettings: IUiSettingsClient;
@@ -73,19 +74,28 @@ export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
       charts,
     };
 
-    expressions.registerFunction(createVisTypeVislibVisFn);
-    expressions.registerFunction(createPieVisFn);
+    const visTypeXy = core.injectedMetadata.getInjectedVar('visTypeXy') as
+      | VisTypeXyConfigShema['visTypeXy']
+      | undefined;
 
-    [
-      createHistogramVisTypeDefinition,
-      createLineVisTypeDefinition,
-      createPieVisTypeDefinition,
-      createAreaVisTypeDefinition,
-      createHeatmapVisTypeDefinition,
-      createHorizontalBarVisTypeDefinition,
-      createGaugeVisTypeDefinition,
-      createGoalVisTypeDefinition,
-    ].forEach(vis => visualizations.types.createBaseVisualization(vis(visualizationDependencies)));
+    // if visTypeXy plugin is disabled it's config will be undefined
+    if (!visTypeXy || !visTypeXy.enabled) {
+      expressions.registerFunction(createVisTypeVislibVisFn);
+      expressions.registerFunction(createPieVisFn);
+
+      [
+        createHistogramVisTypeDefinition,
+        createLineVisTypeDefinition,
+        createPieVisTypeDefinition,
+        createAreaVisTypeDefinition,
+        createHeatmapVisTypeDefinition,
+        createHorizontalBarVisTypeDefinition,
+        createGaugeVisTypeDefinition,
+        createGoalVisTypeDefinition,
+      ].forEach(vis =>
+        visualizations.types.createBaseVisualization(vis(visualizationDependencies))
+      );
+    }
   }
 
   public start(core: CoreStart, deps: VisTypeVislibPluginStartDependencies) {
