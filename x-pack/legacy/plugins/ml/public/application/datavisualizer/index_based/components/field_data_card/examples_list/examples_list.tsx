@@ -22,7 +22,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
   const examplesContent = examples.map((example, i) => {
     return (
       <EuiListGroupItem
-        style={{ padding: 0 }}
+        style={{ padding: 0, justifyContent: 'center' }}
         size="xs"
         key={`example_${i}`}
         label={typeof example === 'string' ? example : JSON.stringify(example)}
