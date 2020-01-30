@@ -5,14 +5,9 @@
  */
 
 import crypto from 'crypto';
-import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
-
-export type ConfigType = ReturnType<typeof createConfig$> extends Observable<infer P>
-  ? P
-  : ReturnType<typeof createConfig$>;
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -30,6 +25,7 @@ export function createConfig$(context: PluginInitializerContext) {
       const logger = context.logger.get('config');
 
       let encryptionKey = config.encryptionKey;
+      const encryptionKeyRandomlyGenerated = encryptionKey === undefined;
       if (encryptionKey === undefined) {
         logger.warn(
           'Generating a random key for xpack.encryptedSavedObjects.encryptionKey. ' +
@@ -40,7 +36,10 @@ export function createConfig$(context: PluginInitializerContext) {
         encryptionKey = crypto.randomBytes(16).toString('hex');
       }
 
-      return { ...config, encryptionKey };
+      return {
+        config: { ...config, encryptionKey },
+        encryptionKeyRandomlyGenerated,
+      };
     })
   );
 }

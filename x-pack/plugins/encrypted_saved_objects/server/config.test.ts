@@ -49,7 +49,7 @@ describe('config schema', () => {
 });
 
 describe('createConfig$()', () => {
-  it('should log a warning and set xpack.encryptedSavedObjects.encryptionKey if not set', async () => {
+  it('should log a warning, set xpack.encryptedSavedObjects.encryptionKey and encryptionKeyRandomlyGenerated=true when encryptionKey is not set', async () => {
     const mockRandomBytes = jest.requireMock('crypto').randomBytes;
     mockRandomBytes.mockReturnValue('ab'.repeat(16));
 
@@ -57,7 +57,10 @@ describe('createConfig$()', () => {
     const config = await createConfig$(contextMock)
       .pipe(first())
       .toPromise();
-    expect(config).toEqual({ encryptionKey: 'ab'.repeat(16) });
+    expect(config).toEqual({
+      config: { encryptionKey: 'ab'.repeat(16) },
+      encryptionKeyRandomlyGenerated: true,
+    });
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
       Array [
@@ -66,5 +69,20 @@ describe('createConfig$()', () => {
         ],
       ]
     `);
+  });
+
+  it('should not log a warning and set encryptionKeyRandomlyGenerated=false when encryptionKey is set', async () => {
+    const contextMock = coreMock.createPluginInitializerContext({
+      encryptionKey: 'supersecret',
+    });
+    const config = await createConfig$(contextMock)
+      .pipe(first())
+      .toPromise();
+    expect(config).toEqual({
+      config: { encryptionKey: 'supersecret' },
+      encryptionKeyRandomlyGenerated: false,
+    });
+
+    expect(loggingServiceMock.collect(contextMock.logger).warn).toEqual([]);
   });
 });
