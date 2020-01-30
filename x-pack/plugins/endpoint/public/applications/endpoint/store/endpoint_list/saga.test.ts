@@ -3,29 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { CoreStart, HttpSetup } from 'kibana/public';
-import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
+import { applyMiddleware, combineReducers, createStore, Dispatch, Store } from 'redux';
 import { createSagaMiddleware, SagaContext } from '../../lib';
 import { endpointListSaga } from './saga';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import {
-  EndpointData,
-  EndpointListAction,
-  EndpointListData,
-  endpointListReducer,
-  EndpointListState,
-} from './index';
+import { EndpointData, EndpointListData, endpointListReducer, EndpointListState } from './index';
+import { AppAction } from '../action';
 import { endpointListData } from './selectors';
-
 describe('endpoint list saga', () => {
   const sleep = (ms = 100) => new Promise(wakeup => setTimeout(wakeup, ms));
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
-  let store: Store<EndpointListState>;
-  let dispatch: Dispatch<EndpointListAction>;
+  let store: Store<{ endpointList: EndpointListState }>;
+  let dispatch: Dispatch<AppAction>;
   let stopSagas: () => void;
-
+  const globalStoreReducer = combineReducers({
+    endpointList: endpointListReducer,
+  });
   // TODO: consolidate the below ++ helpers in `index.test.ts` into a `test_helpers.ts`??
   const generateEndpoint = (): EndpointData => {
     return {
@@ -76,7 +71,6 @@ describe('endpoint list saga', () => {
       total: 10,
     };
   };
-
   const endpointListSagaFactory = () => {
     return async (sagaContext: SagaContext) => {
       await endpointListSaga(sagaContext, fakeCoreStart).catch((e: Error) => {
@@ -86,33 +80,29 @@ describe('endpoint list saga', () => {
       });
     };
   };
-
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
-
     const sagaMiddleware = createSagaMiddleware(endpointListSagaFactory());
-    store = createStore(endpointListReducer, applyMiddleware(sagaMiddleware));
-
+    store = createStore(globalStoreReducer, applyMiddleware(sagaMiddleware));
     sagaMiddleware.start();
     stopSagas = sagaMiddleware.stop;
     dispatch = store.dispatch;
   });
-
   afterEach(() => {
     stopSagas();
   });
-
-  test('it handles `userEnteredEndpointListPage`', async () => {
+  test('it handles `userNavigatedToPage`', async () => {
     const apiResponse = getEndpointListApiResponse();
-
     fakeHttpServices.post.mockResolvedValue(apiResponse);
     expect(fakeHttpServices.post).not.toHaveBeenCalled();
-
-    dispatch({ type: 'userEnteredEndpointListPage' });
+    dispatch({ type: 'userNavigatedToPage', payload: 'managementPage' });
     await sleep();
-
-    expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/endpoints');
-    expect(endpointListData(store.getState())).toEqual(apiResponse.endpoints);
+    expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/endpoints', {
+      body: JSON.stringify({
+        paging_properties: [{ page_index: 0 }, { page_size: 10 }],
+      }),
+    });
+    expect(endpointListData(store.getState().endpointList)).toEqual(apiResponse.endpoints);
   });
 });

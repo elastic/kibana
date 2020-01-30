@@ -95,4 +95,4 @@ export interface AlertData {
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */
-export type PageId = 'alertsPage' | 'endpointListPage';
+export type PageId = 'alertsPage' | 'managementPage';

@@ -6,18 +6,18 @@
 
 import { CoreStart } from 'kibana/public';
 import { SagaContext } from '../../lib';
-import { EndpointListAction } from './action';
+import { AppAction } from '../action';
 import { endpointListPageIndex, endpointListPageSize } from './selectors';
 
 export const endpointListSaga = async (
-  { actionsAndState, dispatch }: SagaContext<EndpointListAction>,
+  { actionsAndState, dispatch }: SagaContext<AppAction>,
   coreStart: CoreStart
 ) => {
   const { post: httpPost } = coreStart.http;
 
   for await (const { action, state } of actionsAndState()) {
     if (
-      action.type === 'userEnteredEndpointListPage' ||
+      (action.type === 'userNavigatedToPage' && action.payload === 'managementPage') ||
       action.type === 'userPaginatedEndpointListTable'
     ) {
       const pageIndex = endpointListPageIndex(state.endpointList);

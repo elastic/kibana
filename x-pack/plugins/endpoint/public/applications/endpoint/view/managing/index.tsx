@@ -18,16 +18,18 @@ import {
   EuiTitle,
   EuiBasicTable,
 } from '@elastic/eui';
-import { useEndpointListSelector } from '../store/hooks';
 import {
   endpointListData,
   endpointListPageIndex,
   endpointListPageSize,
   endpointTotalHits,
-} from '../store/endpoint_list/selectors';
-import { EndpointListAction } from '../store/endpoint_list/action';
+} from '../../store/endpoint_list/selectors';
+import { EndpointListAction } from '../../store/endpoint_list/action';
+import { useEndpointListSelector } from './hooks';
+import { usePageId } from '../use_page_id';
 
 export const EndpointList = () => {
+  usePageId('managementPage');
   const dispatch = useDispatch<(a: EndpointListAction) => void>();
   const endpointListResults = useEndpointListSelector(endpointListData);
   const pageIndex = useEndpointListSelector(endpointListPageIndex);
