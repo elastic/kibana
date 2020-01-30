@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { CalendarManager } from './calendar_manager';
+export { CalendarManager, Calendar, FormCalendar } from './calendar_manager';
