@@ -28,11 +28,13 @@ export const WithLogPositionUrlState = () => {
     startLiveStreaming,
     stopLiveStreaming,
   } = useContext(LogPositionState.Context);
-  const urlState = useMemo(() => {
-    const position = visibleMidpoint ? pickTimeKey(visibleMidpoint) : null;
-    if (isAutoReloading) return { position, streamLive: true };
-    return { position };
-  }, [visibleMidpoint, isAutoReloading]);
+  const urlState = useMemo(
+    () => ({
+      position: visibleMidpoint ? pickTimeKey(visibleMidpoint) : null,
+      streamLive: isAutoReloading,
+    }),
+    [visibleMidpoint, isAutoReloading]
+  );
   return (
     <UrlStateContainer
       urlState={urlState}
@@ -70,7 +72,7 @@ const mapToUrlState = (value: any): LogPositionUrlState | undefined =>
   value
     ? {
         position: mapToPositionUrlState(value.position),
-        ...(value.streamLive ? { streamLive: true } : {}),
+        streamLive: mapToStreamLiveUrlState(value.streamLive),
       }
     : undefined;
 
@@ -78,6 +80,8 @@ const mapToPositionUrlState = (value: any) =>
   value && typeof value.time === 'number' && typeof value.tiebreaker === 'number'
     ? pickTimeKey(value)
     : undefined;
+
+const mapToStreamLiveUrlState = (value: any) => (typeof value === 'boolean' ? value : false);
 
 export const replaceLogPositionInQueryString = (time: number) =>
   Number.isNaN(time)
@@ -87,4 +91,5 @@ export const replaceLogPositionInQueryString = (time: number) =>
           time,
           tiebreaker: 0,
         },
+        streamLive: false,
       });
