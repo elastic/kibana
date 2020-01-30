@@ -10,6 +10,7 @@ import { Redirect } from 'react-router-dom';
 
 import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
 import {
+  DETECTION_ENGINE_PAGE_NAME,
   getDetectionEngineUrl,
   getCreateRuleUrl,
 } from '../../../components/link_to/redirect_to_detection_engine';
@@ -22,7 +23,7 @@ import { AllRules } from './all';
 import { ImportRuleModal } from './components/import_rule_modal';
 import { ReadOnlyCallOut } from './components/read_only_callout';
 import { UpdatePrePackagedRulesCallOut } from './components/pre_packaged_rules/update_callout';
-import { getPrePackagedRuleStatus } from './helpers';
+import { getPrePackagedRuleStatus, redirectToDetections } from './helpers';
 import * as i18n from './translations';
 
 type Func = () => void;
@@ -35,6 +36,7 @@ const RulesPageComponent: React.FC = () => {
     loading,
     isSignalIndexExists,
     isAuthenticated,
+    isEncryptionKey,
     canUserCRUD,
     hasIndexWrite,
     hasManageApiKey,
@@ -54,6 +56,7 @@ const RulesPageComponent: React.FC = () => {
     hasManageApiKey,
     isSignalIndexExists,
     isAuthenticated,
+    isEncryptionKey,
   });
   const prePackagedRuleStatus = getPrePackagedRuleStatus(
     rulesInstalled,
@@ -83,12 +86,8 @@ const RulesPageComponent: React.FC = () => {
     refreshRulesData.current = refreshRule;
   }, []);
 
-  if (
-    isSignalIndexExists != null &&
-    isAuthenticated != null &&
-    (!isSignalIndexExists || !isAuthenticated)
-  ) {
-    return <Redirect to={getDetectionEngineUrl()} />;
+  if (redirectToDetections(isSignalIndexExists, isAuthenticated, isEncryptionKey)) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
   }
 
   return (

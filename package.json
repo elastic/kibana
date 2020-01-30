@@ -17,7 +17,8 @@
   "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {
     "number": 8467,
-    "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
+    "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9",
+    "distributable": true
   },
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {

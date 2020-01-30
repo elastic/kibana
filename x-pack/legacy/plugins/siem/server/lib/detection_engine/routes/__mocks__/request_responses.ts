@@ -390,6 +390,7 @@ export const getMockPrivileges = () => ({
   },
   application: {},
   is_authenticated: false,
+  is_encryptionKey: false,
 });
 
 export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({

@@ -14,6 +14,7 @@ import * as i18n from './translations';
 interface Return {
   loading: boolean;
   isAuthenticated: boolean | null;
+  isEncryptionKey: boolean | null;
   hasIndexManage: boolean | null;
   hasManageApiKey: boolean | null;
   hasIndexWrite: boolean | null;
@@ -25,9 +26,13 @@ interface Return {
 export const usePrivilegeUser = (): Return => {
   const [loading, setLoading] = useState(true);
   const [privilegeUser, setPrivilegeUser] = useState<
-    Pick<Return, 'isAuthenticated' | 'hasIndexManage' | 'hasManageApiKey' | 'hasIndexWrite'>
+    Pick<
+      Return,
+      'isAuthenticated' | 'isEncryptionKey' | 'hasIndexManage' | 'hasManageApiKey' | 'hasIndexWrite'
+    >
   >({
     isAuthenticated: null,
+    isEncryptionKey: null,
     hasIndexManage: null,
     hasManageApiKey: null,
     hasIndexWrite: null,
@@ -50,6 +55,7 @@ export const usePrivilegeUser = (): Return => {
             const indexName = Object.keys(privilege.index)[0];
             setPrivilegeUser({
               isAuthenticated: privilege.is_authenticated,
+              isEncryptionKey: privilege.is_encryption_key,
               hasIndexManage: privilege.index[indexName].manage,
               hasIndexWrite:
                 privilege.index[indexName].create ||
@@ -67,6 +73,7 @@ export const usePrivilegeUser = (): Return => {
         if (isSubscribed) {
           setPrivilegeUser({
             isAuthenticated: false,
+            isEncryptionKey: false,
             hasIndexManage: false,
             hasManageApiKey: false,
             hasIndexWrite: false,
