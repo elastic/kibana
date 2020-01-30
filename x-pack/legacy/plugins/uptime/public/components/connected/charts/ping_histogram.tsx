@@ -26,7 +26,8 @@ const PingHistogramContainer: React.FC<Props> = ({
   loadData,
   monitorId,
   lastRefresh,
-  ...props
+  height,
+  loading,
 }) => {
   const [getUrlParams] = useUrlParams();
   const {
@@ -46,7 +47,8 @@ const PingHistogramContainer: React.FC<Props> = ({
       data={data}
       absoluteStartDate={absoluteDateRangeStart}
       absoluteEndDate={absoluteDateRangeEnd}
-      {...props}
+      height={height}
+      loading={loading}
     />
   );
 };
