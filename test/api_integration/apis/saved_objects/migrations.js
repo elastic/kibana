@@ -385,7 +385,7 @@ function migrationsToTypes(migrations) {
     hidden: false,
     namespaceAgnostic: false,
     mappings: { properties: {} },
-    migrations,
+    migrations: { ...migrations },
   }));
 }
 
