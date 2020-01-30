@@ -61,6 +61,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     expect(stats.isDirectory()).toBe(true);
   });
 
+  // skipped until internationalization is re-introduced
   it.skip(`should create an internationalization config file with a blank line appended to satisfy the parser`, async () => {
     // Link to the error that happens when the blank line is not there:
     // https://github.com/elastic/kibana/pull/45044#issuecomment-530092627
@@ -71,15 +72,6 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
   describe(`then running`, () => {
     it(`'yarn test:browser' should exit 0`, async () => {
       await execa('yarn', ['test:browser'], {
-        cwd: generatedPath,
-        env: {
-          DISABLE_JUNIT_REPORTER: '1',
-        },
-      });
-    });
-
-    it.skip(`'yarn test:server' should exit 0`, async () => {
-      await execa('yarn', ['test:server'], {
         cwd: generatedPath,
         env: {
           DISABLE_JUNIT_REPORTER: '1',
@@ -98,7 +90,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       beforeAll(es.start);
       afterAll(es.stop);
 
-      it.skip(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
+      it(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
         await withProcRunner(log, async proc => {
           await proc.run('kibana', {
             cmd: 'yarn',
@@ -109,7 +101,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
               '--migrations.skip=true',
             ],
             cwd: generatedPath,
-            wait: /ispec_plugin.+Status changed from uninitialized to green - Ready/,
+            wait: /ispec_plugin.+Setting up plugin/,
           });
           await proc.stop('kibana');
         });
