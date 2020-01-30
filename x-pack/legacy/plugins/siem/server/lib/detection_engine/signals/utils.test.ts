@@ -123,9 +123,9 @@ describe('utils', () => {
       expect(drift?.asMilliseconds()).toEqual(moment.duration(10, 'minutes').asMilliseconds());
     });
 
-    test('returns a drift tolerance of 5 minutes when "from" is invalid and defaults to "now-6m" and interval is 1 minutes', () => {
+    test('returns a drift tolerance of 1 minute when "from" is invalid and defaults to "now-6m" and interval is 5 minutes', () => {
       const drift = getDriftTolerance({
-        from: 'yo',
+        from: 'invalid',
         to: 'now',
         interval: moment.duration(5, 'minutes'),
       });
@@ -133,7 +133,17 @@ describe('utils', () => {
       expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
     });
 
-    test('returns a drift tolerance of 4 minutes when "to" is "now-x" and interval is 5 minute', () => {
+    test('returns a drift tolerance of 1 minute when "from" does not include `now` and defaults to "now-6m" and interval is 5 minutes', () => {
+      const drift = getDriftTolerance({
+        from: '10m',
+        to: 'now',
+        interval: moment.duration(5, 'minutes'),
+      });
+      expect(drift).not.toBeNull();
+      expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
+    });
+
+    test('returns a drift tolerance of 4 minutes when "to" is "now-x", from is a valid input and interval is 5 minute', () => {
       const drift = getDriftTolerance({
         from: 'now-10m',
         to: 'now-1m',
