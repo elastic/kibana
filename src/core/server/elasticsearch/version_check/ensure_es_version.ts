@@ -22,7 +22,7 @@
  * that defined in Kibana's package.json.
  */
 
-import { interval } from 'rxjs';
+import { timer } from 'rxjs';
 import { map, switchMap, distinctUntilChanged, catchError, startWith } from 'rxjs/operators';
 import {
   esVersionCompatibleWithKibana,
@@ -136,7 +136,7 @@ export const pollEsNodesVersion = ({
 }: PollEsNodesVersionOptions) => {
   log.debug('Checking Elasticsearch version');
 
-  return interval(healthCheckInterval).pipe(
+  return timer(0, healthCheckInterval).pipe(
     switchMap(() => {
       return callWithInternalUser('nodes.info', {
         filterPath: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
