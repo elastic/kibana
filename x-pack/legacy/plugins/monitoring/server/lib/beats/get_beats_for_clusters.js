@@ -34,7 +34,7 @@ export function getBeatsForClusters(req, beatsIndexPattern, clusters) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
   const config = req.server.config();
-  const maxBucketSize = config.get('xpack.monitoring.max_bucket_size');
+  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
 
   return Promise.all(
     clusters.map(async cluster => {
