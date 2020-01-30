@@ -184,14 +184,16 @@ function validateMigrationDefinition(registry: SavedObjectTypeRegistry) {
   }
 
   registry.getAllTypes().forEach(type => {
-    assertObject(
-      type.migrations,
-      `Migration for type ${type.name} should be an object like { '2.0.0': (doc) => doc }.`
-    );
-    Object.entries(type.migrations).forEach(([version, fn]) => {
-      assertValidSemver(version, type.name);
-      assertValidTransform(fn, version, type.name);
-    });
+    if (type.migrations) {
+      assertObject(
+        type.migrations,
+        `Migration for type ${type.name} should be an object like { '2.0.0': (doc) => doc }.`
+      );
+      Object.entries(type.migrations).forEach(([version, fn]) => {
+        assertValidSemver(version, type.name);
+        assertValidTransform(fn, version, type.name);
+      });
+    }
   });
 }
 
@@ -209,7 +211,7 @@ function buildActiveMigrations(
     .getAllTypes()
     .filter(type => type.migrations && Object.keys(type.migrations).length > 0)
     .reduce((migrations, type) => {
-      const transforms = Object.entries(type.migrations)
+      const transforms = Object.entries(type.migrations!)
         .map(([version, transform]) => ({
           version,
           transform: wrapWithTry(version, type.name, transform, log),

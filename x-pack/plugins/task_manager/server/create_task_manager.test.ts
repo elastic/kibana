@@ -6,8 +6,11 @@
 
 import { createTaskManager, LegacyDeps } from './create_task_manager';
 import { mockLogger } from './test_utils';
-import { CoreSetup, UuidServiceSetup } from 'kibana/server';
-import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
+import { CoreSetup, SavedObjectsSerializer, UuidServiceSetup } from '../../../../src/core/server';
+import {
+  savedObjectsRepositoryMock,
+  savedObjectsTypeRegistryMock,
+} from '../../../../src/core/server/mocks';
 
 jest.mock('./task_manager');
 
@@ -23,7 +26,7 @@ describe('createTaskManager', () => {
 
   const getMockLegacyDeps = (): LegacyDeps => ({
     config: {},
-    savedObjectSchemas: {},
+    savedObjectsSerializer: new SavedObjectsSerializer(savedObjectsTypeRegistryMock.create()),
     elasticsearch: {
       callAsInternalUser: jest.fn(),
     },

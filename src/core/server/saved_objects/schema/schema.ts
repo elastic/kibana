@@ -19,23 +19,30 @@
 
 import { LegacyConfig } from '../../legacy';
 
+/**
+ * @deprecated
+ * @internal
+ **/
 interface SavedObjectsSchemaTypeDefinition {
-  // TODO: remove
   isNamespaceAgnostic: boolean;
   hidden?: boolean;
   indexPattern?: ((config: LegacyConfig) => string) | string;
   convertToAliasScript?: string;
 }
 
-/** @internal */
+/**
+ * @deprecated
+ * @internal
+ **/
 export interface SavedObjectsSchemaDefinition {
-  // TODO: remove
   [key: string]: SavedObjectsSchemaTypeDefinition;
 }
 
-/** @internal */
+/**
+ * @deprecated This is only used by the {@link SavedObjectsLegacyService | legacy savedObjects service}
+ * @internal
+ **/
 export class SavedObjectsSchema {
-  // TODO: remove
   private readonly definition?: SavedObjectsSchemaDefinition;
   constructor(schemaDefinition?: SavedObjectsSchemaDefinition) {
     this.definition = schemaDefinition;
@@ -49,7 +56,6 @@ export class SavedObjectsSchema {
     return false;
   }
 
-  // TODO: Remove dependency on config when we move SavedObjectsSchema to NP
   public getIndexForType(config: LegacyConfig, type: string): string | undefined {
     if (this.definition != null && this.definition.hasOwnProperty(type)) {
       const { indexPattern } = this.definition[type];
@@ -78,4 +84,6 @@ export class SavedObjectsSchema {
     }
     return Boolean(typeSchema.isNamespaceAgnostic);
   }
+
+  // These are methods required to implements SavedObjectTypeProvider during transition period
 }

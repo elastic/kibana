@@ -205,6 +205,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       getScopedClient: deps.savedObjects.getScopedClient,
       createInternalRepository: deps.savedObjects.createInternalRepository,
       createScopedRepository: deps.savedObjects.createScopedRepository,
+      createSerializer: deps.savedObjects.createSerializer,
     },
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,

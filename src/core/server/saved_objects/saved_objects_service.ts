@@ -44,6 +44,7 @@ import { Logger } from '../logging';
 import { convertLegacyTypes } from './utils';
 import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { PropertyValidators } from './validation';
+import { SavedObjectsSerializer } from './serialization';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -187,6 +188,10 @@ export interface SavedObjectsServiceStart {
    * @param extraTypes - A list of additional hidden types the repository should have access to.
    */
   createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+  /**
+   * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types
+   */
+  createSerializer: () => SavedObjectsSerializer;
 }
 
 export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceStart {
@@ -198,6 +203,10 @@ export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceSta
    * @deprecated Exposed only for injecting into Legacy
    */
   clientProvider: ISavedObjectsClientProvider;
+  /**
+   * @deprecated Exposed only for injecting into Legacy
+   */
+  typeRegistry: SavedObjectTypeRegistry;
 }
 
 /**
@@ -368,9 +377,11 @@ export class SavedObjectsService
     return {
       migrator,
       clientProvider,
+      typeRegistry: this.typeRegistry,
       getScopedClient: clientProvider.getClient.bind(clientProvider),
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
+      createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
     };
   }
 

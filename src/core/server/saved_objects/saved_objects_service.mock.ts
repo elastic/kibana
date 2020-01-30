@@ -26,6 +26,7 @@ import { mockKibanaMigrator } from './migrations/kibana/kibana_migrator.mock';
 import { savedObjectsClientProviderMock } from './service/lib/scoped_client_provider.mock';
 import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';
+import { typeRegistryMock } from './saved_objects_type_registry.mock';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
@@ -35,7 +36,9 @@ const createStartContractMock = () => {
     getScopedClient: jest.fn(),
     createInternalRepository: jest.fn(),
     createScopedRepository: jest.fn(),
+    createSerializer: jest.fn(),
     migrator: mockKibanaMigrator.create(),
+    typeRegistry: typeRegistryMock.create(),
   };
 
   startContract.getScopedClient.mockReturnValue(savedObjectsClientMock.create());

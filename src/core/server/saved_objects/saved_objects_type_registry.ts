@@ -20,6 +20,9 @@
 import { deepFreeze } from '../../utils';
 import { SavedObjectsType } from './types';
 
+/**
+ * @internal
+ */
 export class SavedObjectTypeRegistry {
   private types = new Map<string, SavedObjectsType>();
 

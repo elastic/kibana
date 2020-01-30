@@ -216,6 +216,7 @@ export {
   SavedObjectsTypeMappingDefinitions,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
+  SavedObjectTypeRegistry,
 } from './saved_objects';
 
 export {

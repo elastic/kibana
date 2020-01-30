@@ -20,7 +20,7 @@ import { StoreOpts, OwnershipClaimingOpts, TaskStore, SearchOpts } from './task_
 import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
 import {
   SavedObjectsSerializer,
-  SavedObjectsSchema,
+  SavedObjectTypeRegistry,
   SavedObjectAttributes,
 } from '../../../../src/core/server';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server/saved_objects/service/lib/errors';
@@ -46,7 +46,7 @@ const taskDefinitions: TaskDictionary<TaskDefinition> = {
 };
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
-const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
 
 beforeEach(() => jest.resetAllMocks());
 
