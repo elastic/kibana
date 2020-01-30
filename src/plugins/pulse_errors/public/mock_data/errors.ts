@@ -19,7 +19,7 @@
 
 import moment from 'moment';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { PulseErrorPayloadRecord } from 'src/core/server/pulse/channel';
+import { PulseErrorPayloadRecord } from 'src/core/server/pulse/collectors/errors';
 
 export const errorChannelPayloads: PulseErrorPayloadRecord[] = [
   {
