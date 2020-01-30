@@ -7,14 +7,10 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { CoreStart, StartPlugins, AppMountParameters } from '../plugin';
+import { AppMountParameters } from '../plugin';
 import { SiemApp } from './app';
 
-export const renderApp = (
-  core: CoreStart,
-  plugins: StartPlugins,
-  { element }: AppMountParameters
-) => {
-  render(<SiemApp core={core} plugins={plugins} />, element);
+export const renderApp = ({ element }: AppMountParameters) => {
+  render(<SiemApp />, element);
   return () => unmountComponentAtNode(element);
 };

@@ -18,14 +18,13 @@ import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { I18nContext } from 'ui/i18n';
 
-import { KibanaContextProvider, useUiSetting$ } from '../lib/kibana';
+import { KibanaContextProvider, useUiSetting$, services } from '../lib/kibana';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { DEFAULT_DARK_MODE } from '../../common/constants';
 import { ErrorToastDispatcher } from '../components/error_toast_dispatcher';
 import { compose } from '../lib/compose/kibana_compose';
 import { AppFrontendLibs, AppApolloClient } from '../lib/lib';
-import { CoreStart, StartPlugins } from '../plugin';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
@@ -89,21 +88,15 @@ const StartAppComponent: FC<AppFrontendLibs> = libs => {
 
 const StartApp = memo(StartAppComponent);
 
-interface SiemAppComponentProps {
-  core: CoreStart;
-  plugins: StartPlugins;
-}
-
-const SiemAppComponent: React.FC<SiemAppComponentProps> = ({ core, plugins }) => (
+const SiemAppComponent: FC = () => (
   <KibanaContextProvider
     services={{
       appName: 'siem',
       storage: new Storage(localStorage),
-      ...core,
-      ...plugins,
+      ...services,
     }}
   >
-    <StartApp {...compose(core)} />
+    <StartApp {...compose()} />
   </KibanaContextProvider>
 );
 

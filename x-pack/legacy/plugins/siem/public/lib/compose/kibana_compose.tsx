@@ -9,18 +9,18 @@ import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 
 import introspectionQueryResultData from '../../graphql/introspection.json';
-import { CoreStart } from '../../plugin';
+import { services } from '../../lib/kibana';
 import { AppFrontendLibs } from '../lib';
 import { getLinks } from './helpers';
 
-export function compose(core: CoreStart): AppFrontendLibs {
+export function compose(): AppFrontendLibs {
   const cache = new InMemoryCache({
     dataIdFromObject: () => null,
     fragmentMatcher: new IntrospectionFragmentMatcher({
       introspectionQueryResultData,
     }),
   });
-  const basePath = core.http.basePath.get();
+  const basePath = services.http.basePath.get();
 
   const apolloClient = new ApolloClient({
     connectToDevTools: process.env.NODE_ENV !== 'production',
