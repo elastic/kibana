@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// service for interacting with the server
-
-import { addSystemApiHeader } from 'ui/system_api';
 import { i18n } from '@kbn/i18n';
-import { kbnVersion, kbnFetch } from '../kibana_services';
+import { kbnFetch } from '../kibana_services';
 
 export async function http(options) {
   if (!(options && options.url)) {
@@ -17,11 +14,10 @@ export async function http(options) {
     });
   }
   const url = options.url || '';
-  const headers = addSystemApiHeader({
+  const headers = {
     'Content-Type': 'application/json',
-    'kbn-version': kbnVersion,
     ...options.headers,
-  });
+  };
 
   const allHeaders = options.headers === undefined ? headers : { ...options.headers, ...headers };
   const body = options.data === undefined ? null : JSON.stringify(options.data);
@@ -30,7 +26,7 @@ export async function http(options) {
     method: options.method || 'GET',
     headers: allHeaders,
     credentials: 'same-origin',
-    query: options.query
+    query: options.query,
   };
 
   if (body !== null) {
