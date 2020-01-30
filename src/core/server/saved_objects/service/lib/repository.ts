@@ -110,7 +110,6 @@ const DEFAULT_REFRESH_SETTING = 'wait_for';
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
 
 /**
- * // TODO: should probably be internal.
  * @public
  */
 export class SavedObjectsRepository {

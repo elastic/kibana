@@ -81,10 +81,13 @@ function assertNonEmptyString(value: string, name: string) {
   }
 }
 
-/** @internal */
+/** @public */
 export class SavedObjectsSerializer {
   private readonly registry: SavedObjectTypeRegistry;
 
+  /**
+   * @internal
+   */
   constructor(registry: SavedObjectTypeRegistry) {
     this.registry = registry;
   }

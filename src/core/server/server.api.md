@@ -1422,6 +1422,12 @@ export interface SavedObjectReference {
     type: string;
 }
 
+// Warning: (ae-forgotten-export) The symbol "SavedObjectDoc" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "Referencable" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type SavedObjectSanitizedDoc = SavedObjectDoc & Referencable;
+
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
     namespace?: string;
@@ -1835,8 +1841,6 @@ export interface SavedObjectsMigrationVersion {
     [pluginName: string]: string;
 }
 
-// Warning: (ae-missing-release-tag) "RawDoc" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export interface SavedObjectsRawDoc {
     // (undocumented)
@@ -1860,7 +1864,7 @@ export class SavedObjectsRepository {
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: KibanaMigrator, schema: SavedObjectsSchema, config: LegacyConfig, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     // (undocumented)
@@ -1899,7 +1903,7 @@ export interface SavedObjectsResolveImportErrorsOptions {
     supportedTypes: string[];
 }
 
-// @internal (undocumented)
+// @internal @deprecated (undocumented)
 export class SavedObjectsSchema {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsSchemaDefinition" needs to be exported by the entry point index.d.ts
     constructor(schemaDefinition?: SavedObjectsSchemaDefinition);
@@ -1913,20 +1917,19 @@ export class SavedObjectsSchema {
     isNamespaceAgnostic(type: string): boolean;
 }
 
-// @internal (undocumented)
+// @public (undocumented)
 export class SavedObjectsSerializer {
-    constructor(schema: SavedObjectsSchema);
+    // @internal
+    constructor(registry: SavedObjectTypeRegistry);
     generateRawId(namespace: string | undefined, type: string, id?: string): string;
     isRawSavedObject(rawDoc: SavedObjectsRawDoc): any;
-    // Warning: (ae-forgotten-export) The symbol "SanitizedSavedObjectDoc" needs to be exported by the entry point index.d.ts
-    rawToSavedObject(doc: SavedObjectsRawDoc): SanitizedSavedObjectDoc;
-    savedObjectToRaw(savedObj: SanitizedSavedObjectDoc): SavedObjectsRawDoc;
+    rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc;
+    savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc;
     }
 
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
-    registerMappings: (mappings: SavedObjectsTypeMappingDefinitions) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
 
@@ -1934,7 +1937,28 @@ export interface SavedObjectsServiceSetup {
 export interface SavedObjectsServiceStart {
     createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
     createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+    createSerializer: () => SavedObjectsSerializer;
     getScopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+}
+
+// @internal (undocumented)
+export interface SavedObjectsType {
+    // (undocumented)
+    convertToAliasScript?: string;
+    // (undocumented)
+    hidden: boolean;
+    // (undocumented)
+    indexPattern?: string;
+    // (undocumented)
+    mappings: SavedObjectsTypeMappingDefinition;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectMigrationMap" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    migrations?: SavedObjectMigrationMap;
+    // (undocumented)
+    name: string;
+    // (undocumented)
+    namespaceAgnostic: boolean;
 }
 
 // @public
@@ -1963,6 +1987,22 @@ export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = an
     // (undocumented)
     references: SavedObjectReference[] | undefined;
 }
+
+// @internal (undocumented)
+export class SavedObjectTypeRegistry {
+    // (undocumented)
+    getAllTypes(): SavedObjectsType[];
+    // (undocumented)
+    getIndex(type: string): string | undefined;
+    // (undocumented)
+    getType(type: string): SavedObjectsType | undefined;
+    // (undocumented)
+    isHidden(type: string): boolean;
+    // (undocumented)
+    isNamespaceAgnostic(type: string): boolean;
+    // (undocumented)
+    registerType(type: SavedObjectsType): void;
+    }
 
 // @public
 export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
