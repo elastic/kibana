@@ -41,48 +41,17 @@ function animationIsActive(animation: CameraAnimationState, time: Date): boolean
 
 /**
  * The scale by which world values are scaled when rendered.
+ * TODO fix comments
  */
 export const scale: (state: CameraState) => (time: Date) => Vector2 = createSelector(
   state => state.scalingFactor,
   state => state.animation,
-  (scalingFactor, animation) => time => {
-    // TODO, move most of this out of the `time` function, and refactor it so that `time` is the dependent variable.
+  (scalingFactor, animation) => {
     const scaleNotCountingAnimation = scaleFromScalingFactor(scalingFactor);
-
-    if (animation !== undefined && animationIsActive(animation, time)) {
-      /**
-       *   When the camera position (translation) is changed programatically, it may be animated.
-       *   The duration of the animation is generally fixed for a given type of interaction. This way
-       *   the user won't have to wait for a variable amount of time to complete their interaction.
-       *
-       *   Since the duration is fixed and the amount of camera change is variable, the speed of the
-       *   camera is variable. If the distance the camera moves is very far, the camera will move
-       *   very fast.
-       *
-       *   When the camera moves fast, elements of Resolver move across the camera fast as well. These
-       *   quick moving elements can be distracting to the user. They may hinder the quality of
-       *   animation as well.
-       *
-       *   The speed with which objects move across the screen is dependent on the speed of the camera
-       *   as well as the scale. If the scale is high, the camera is zoomed in, objects look closer,
-       *   and so they move across the screen faster at a given camera speed. If the scale is low, the camera is
-       *   zoomed out, objects look further away, and so they move across the screen slower at a given camera
-       *   speed. Therefore we can control the speed at which objects move across the screen without changing
-       *   the camera speed. We do this by changing scale.
-       *
-       *   Changing the scale abruptly isn't acceptable because it would be visually jarring. Also, the
-       *   change in scale should be temporary, and the original scale should be resumed after the animation.
-       *
-       *   In order to change the scale to lower value, and then back, without being jarring to the user,
-       *   we calculate a temporary target scale and animate to it.
-       *
-       *   Animation is defined by a starting time, duration, starting position, and ending position. The amount of time
-       *   which has passed since the start time, compared to the duration, defines the progress of the animation.
-       *   We represent this process with a number between 0 and 1. As the animation progresses, the value changes from 0
-       *   to 1, linearly.
-       */
-      const x = animationProgress(animation, time);
-
+    /**
+     * If `animation` is defined, an animation may be in progress when the returned function is called
+     */
+    if (animation !== undefined) {
       /**
        * The distance the camera will move during the animation is used to determine the camera speed.
        */
@@ -90,72 +59,17 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
         animation.targetTranslation,
         animation.initialTranslation
       );
-
       // TODO, make scale a number
       const speed = (panningDistance * scaleNotCountingAnimation[0]) / animation.duration;
-
-      /**
-       * The change in scale over the duration of the animation should not be linear. It should grow to the target value,
-       * then shrink back down to the original value. We adjust the animation progress so that it reaches its peak
-       * halfway through the animation. Then we ease the value, so that the change from not-animating-at-all to animating
-       * at full speed isn't abrupt, and so that the change from growing-to-changing isn't abrupt. See the graph:
-       *
-       *  gnuplot> plot [x=-0:1][x=0:1.2] eased(t)=t<.5? 4*t**3 : (t-1)*(2*t-2)**2+1, progress(t)=-abs(2*t-1)+1, eased(progress(x))
-       *
-       *
-       *   1.2 +--------------------------------------------------------------------------------------+
-       *       |                +                 +                +                 +                |
-       *       |          e(t)=t<.5? 4*t**3 : (t-1)*(2*t-2)**2+1, t(x)=-abs(2*x-1)+1, e(t(x)) ******* |
-       *       |                                                                                      |
-       *       |                                                                                      |
-       *       |                                                                                      |
-       *     1 |-+                                 ****************                                 +-|
-       *       |                                ***                ***                                |
-       *       |                               **                    **                               |
-       *       |                             **                        **                             |
-       *       |                            *                            *                            |
-       *       |                           *                              *                           |
-       *   0.8 |-+                        *                                *                        +-|
-       *       |                         *                                  *                         |
-       *       |                        *                                    *                        |
-       *       |                        *                                    *                        |
-       *       |                        *                                     *                       |
-       *   0.6 |-+                     *                                      *                     +-|
-       *       |                      *                                        *                      |
-       *       |                      *                                         *                     |
-       *       |                     *                                          *                     |
-       *       |                     *                                           *                    |
-       *       |                    *                                            *                    |
-       *   0.4 |-+                 *                                              *                 +-|
-       *       |                   *                                               *                  |
-       *       |                  *                                                *                  |
-       *       |                 *                                                  *                 |
-       *       |                 *                                                  *                 |
-       *       |                *                                                    *                |
-       *   0.2 |-+             *                                                      *             +-|
-       *       |              *                                                        *              |
-       *       |             *                                                          *             |
-       *       |           **                                                            **           |
-       *       |          *                                                                *          |
-       *       |       ***      +                 +                +                 +      ***       |
-       *     0 +--------------------------------------------------------------------------------------+
-       *       0               0.2               0.4              0.6               0.8               1
-       *                                         animation progress
-       *
-       */
-      const easedInOutAnimationProgress = easing.inOutCubic(-Math.abs(2 * x - 1) + 1);
-
       /**
        * If the camera isn't moving very fast, no change in scale is necessary. The speed at which an animation is triggered
        * is a constant:
        */
       const speedThreshold = 0.4;
-
       /**
        * Growth in speed beyond the threshold is controlled by a constant.
        */
       const speedGrowthFactor = 0.4;
-
       /*
        * When the camera is moving faster than the threshold, additional growth is taken to the power of the `speedGrowthFactor`.
        *
@@ -206,7 +120,6 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
         speed < speedThreshold
           ? speed
           : speed ** speedGrowthFactor - (speedThreshold ** speedGrowthFactor - speedThreshold);
-
       /**
        * The scale, adjusted to match the target speed if possible, is clamped within an upper
        * and lower bound. Without these, the visualization would have to support an unbounded
@@ -217,19 +130,107 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
         scalingConstants.minimum,
         scalingConstants.maximum
       );
-
-      /**
-       * TODO, explain
-       * Linearly interpolate between these, using the bell-shaped easing value
-       */
-      return vector2.lerp(
-        scaleNotCountingAnimation,
-        [adjustedScale, adjustedScale],
-        easedInOutAnimationProgress
-      );
+      return time => {
+        if (animationIsActive(animation, time)) {
+          /**
+           *   When the camera position (translation) is changed programatically, it may be animated.
+           *   The duration of the animation is generally fixed for a given type of interaction. This way
+           *   the user won't have to wait for a variable amount of time to complete their interaction.
+           *
+           *   Since the duration is fixed and the amount of camera change is variable, the speed of the
+           *   camera is variable. If the distance the camera moves is very far, the camera will move
+           *   very fast.
+           *
+           *   When the camera moves fast, elements of Resolver move across the camera fast as well. These
+           *   quick moving elements can be distracting to the user. They may hinder the quality of
+           *   animation as well.
+           *
+           *   The speed with which objects move across the screen is dependent on the speed of the camera
+           *   as well as the scale. If the scale is high, the camera is zoomed in, objects look closer,
+           *   and so they move across the screen faster at a given camera speed. If the scale is low, the camera is
+           *   zoomed out, objects look further away, and so they move across the screen slower at a given camera
+           *   speed. Therefore we can control the speed at which objects move across the screen without changing
+           *   the camera speed. We do this by changing scale.
+           *
+           *   Changing the scale abruptly isn't acceptable because it would be visually jarring. Also, the
+           *   change in scale should be temporary, and the original scale should be resumed after the animation.
+           *
+           *   In order to change the scale to lower value, and then back, without being jarring to the user,
+           *   we calculate a temporary target scale and animate to it.
+           *
+           *   Animation is defined by a starting time, duration, starting position, and ending position. The amount of time
+           *   which has passed since the start time, compared to the duration, defines the progress of the animation.
+           *   We represent this process with a number between 0 and 1. As the animation progresses, the value changes from 0
+           *   to 1, linearly.
+           */
+          const x = animationProgress(animation, time);
+          /**
+           * The change in scale over the duration of the animation should not be linear. It should grow to the target value,
+           * then shrink back down to the original value. We adjust the animation progress so that it reaches its peak
+           * halfway through the animation. Then we ease the value, so that the change from not-animating-at-all to animating
+           * at full speed isn't abrupt, and so that the change from growing-to-changing isn't abrupt. See the graph:
+           *
+           *  gnuplot> plot [x=-0:1][x=0:1.2] eased(t)=t<.5? 4*t**3 : (t-1)*(2*t-2)**2+1, progress(t)=-abs(2*t-1)+1, eased(progress(x))
+           *
+           *
+           *   1.2 +--------------------------------------------------------------------------------------+
+           *       |                +                 +                +                 +                |
+           *       |          e(t)=t<.5? 4*t**3 : (t-1)*(2*t-2)**2+1, t(x)=-abs(2*x-1)+1, e(t(x)) ******* |
+           *       |                                                                                      |
+           *       |                                                                                      |
+           *       |                                                                                      |
+           *     1 |-+                                 ****************                                 +-|
+           *       |                                ***                ***                                |
+           *       |                               **                    **                               |
+           *       |                             **                        **                             |
+           *       |                            *                            *                            |
+           *       |                           *                              *                           |
+           *   0.8 |-+                        *                                *                        +-|
+           *       |                         *                                  *                         |
+           *       |                        *                                    *                        |
+           *       |                        *                                    *                        |
+           *       |                        *                                     *                       |
+           *   0.6 |-+                     *                                      *                     +-|
+           *       |                      *                                        *                      |
+           *       |                      *                                         *                     |
+           *       |                     *                                          *                     |
+           *       |                     *                                           *                    |
+           *       |                    *                                            *                    |
+           *   0.4 |-+                 *                                              *                 +-|
+           *       |                   *                                               *                  |
+           *       |                  *                                                *                  |
+           *       |                 *                                                  *                 |
+           *       |                 *                                                  *                 |
+           *       |                *                                                    *                |
+           *   0.2 |-+             *                                                      *             +-|
+           *       |              *                                                        *              |
+           *       |             *                                                          *             |
+           *       |           **                                                            **           |
+           *       |          *                                                                *          |
+           *       |       ***      +                 +                +                 +      ***       |
+           *     0 +--------------------------------------------------------------------------------------+
+           *       0               0.2               0.4              0.6               0.8               1
+           *                                         animation progress
+           *
+           */
+          const easedInOutAnimationProgress = easing.inOutCubic(-Math.abs(2 * x - 1) + 1);
+          /**
+           * TODO, explain
+           * Linearly interpolate between these, using the bell-shaped easing value
+           */
+          return vector2.lerp(
+            scaleNotCountingAnimation,
+            [adjustedScale, adjustedScale],
+            easedInOutAnimationProgress
+          );
+        } else {
+          return scaleNotCountingAnimation;
+        }
+      };
     } else {
-      return scaleNotCountingAnimation;
+      return () => scaleNotCountingAnimation;
     }
+
     function scaleFromScalingFactor(factor: number): Vector2 {
       const delta = scalingConstants.maximum - scalingConstants.minimum;
       const value =
