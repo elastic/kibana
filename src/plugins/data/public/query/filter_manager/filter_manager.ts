@@ -136,8 +136,6 @@ export class FilterManager {
       return;
     }
 
-    // Set the store of all filters. For now.
-    // In the future, all filters should come in with filter state store already set.
     const store = pinFilterStatus
       ? esFilters.FilterStateStore.GLOBAL_STATE
       : esFilters.FilterStateStore.APP_STATE;
