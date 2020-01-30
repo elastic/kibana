@@ -27,6 +27,12 @@ import { IClusterClient } from '../../elasticsearch';
 export interface PulseDocument {
   _id?: string;
   hash?: string;
+  // items needed for PulseErrorPayloadRecord
+  status?: 'new' | 'seen';
+  timestamp?: Date;
+  fixedVersion?: string;
+  message?: string;
+  currentKibanaVersion?: string;
 }
 
 export class PulseElasticsearchClient {

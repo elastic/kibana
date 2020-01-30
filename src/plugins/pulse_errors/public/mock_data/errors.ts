@@ -51,7 +51,7 @@ export const errorChannelPayloads: PulseErrorPayloadRecord[] = [
     fixedVersion: 'v7.5.2',
     currentKibanaVersion: 'v7.x',
     timestamp: moment()
-      .add(10, 'seconds')
+      .add(60, 'seconds')
       .toDate(),
   },
   {
@@ -63,7 +63,7 @@ export const errorChannelPayloads: PulseErrorPayloadRecord[] = [
     fixedVersion: 'v7.5.2',
     currentKibanaVersion: 'v7.x',
     timestamp: moment()
-      .add(20, 'seconds')
+      .add(90, 'seconds')
       .toDate(),
   },
 ];

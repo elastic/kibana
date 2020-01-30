@@ -39,20 +39,24 @@ export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseEr
       .instructions$()
       .pipe(takeUntil(this.stop$))
       .subscribe(instructions => {
+        // TODO: clean up all these nested if statements, they're not pretty
+        // general check on if we have any instructions
         if (instructions && instructions.length) {
           instructions.forEach((instruction: any) => {
-            // @ts-ignore-next-line this should be refering to the instruction, not the raw es document
-            if (
-              instruction &&
-              instruction.status === 'new' &&
-              !this.instructionsSeen.has(instruction.hash)
-            )
-              core.notifications.toasts.addError(new Error(JSON.stringify(instruction)), {
-                // @ts-ignore-next-line
-                title: `Error:${instruction.hash}`,
-                toastMessage: `An error occurred: ${instruction.message}. Pulse message:${instruction.pulseMessage}`,
-              });
-            this.instructionsSeen.add(instruction.hash);
+            // see if the array actually contains a doc and isn't null, I'll remove the status check when we can dynamically change that in es once seen
+            if (instruction && instruction.status === 'new') {
+              // check specifically for toast notifications -> this will mvoe to a switch later
+              if (instruction.sendTo === 'toasts' && !this.instructionsSeen.has(instruction.hash)) {
+                // show the instruction as a toast
+                core.notifications.toasts.addError(new Error(JSON.stringify(instruction)), {
+                  // @ts-ignore-next-line
+                  title: `Error:${instruction.hash}`,
+                  toastMessage: `An error occurred: ${instruction.message}. Pulse message:${instruction.pulseMessage}`,
+                });
+                // add it to the 'seen' Set
+                this.instructionsSeen.add(instruction.hash);
+              }
+            }
           });
         }
       });
