@@ -23,8 +23,9 @@
 // by the service
 import moment from 'moment';
 import { PulseCollector, CollectorSetupContext } from '../types';
+import { PulseInstruction } from '../channel';
 
-export interface ErrorInstruction {
+export interface ErrorInstruction extends PulseInstruction {
   channel_id?: string;
   deployment_id?: string;
   message: string;

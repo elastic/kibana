@@ -22,6 +22,7 @@ import * as Rx from 'rxjs';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiNotificationBadge } from '@elastic/eui';
 // eslint-disable-next-line
 import { PulseChannel } from 'src/core/public/pulse/channel';
+
 // eslint-disable-next-line
 import { NotificationInstruction } from 'src/core/server/pulse/collectors/notifications';
 // eslint-disable-next-line
@@ -78,7 +79,11 @@ window.notificationsChannel.sendPulse([{
 // on every fresh page reload, fetch news all over again.
 updateLastHash('');
 
-export const NewsfeedNavButton = ({ apiFetchResult, notificationsChannel }: Props) => {
+export const NewsfeedNavButton = ({
+  apiFetchResult,
+  notificationsChannel,
+  errorsChannel,
+}: Props) => {
   const [showBadge, setShowBadge] = useState<boolean>(false);
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);

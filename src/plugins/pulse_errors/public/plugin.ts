@@ -26,7 +26,7 @@ import { errorChannelPayloads } from './mock_data/errors';
 export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseErrorsPluginStart> {
   private readonly stop$ = new Subject();
   private instructionsSubscription?: Subscription;
-  private instructionsSeen: Set<string> = new Set(); // TODO: possibly change this to a map later to store more detailed info.
+  private noFxedVersionsSeen: Set<string> = new Set(); // TODO: possibly change this to a map later to store more detailed info.
   constructor() {}
 
   public async setup(core: CoreSetup) {
@@ -43,10 +43,13 @@ export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseEr
         // general check on if we have any instructions
         if (instructions && instructions.length) {
           instructions.forEach((instruction: any) => {
-            // see if the array actually contains a doc and isn't null, I'll remove the status check when we can dynamically change that in es once seen
-            if (instruction && instruction.status === 'new') {
-              // check specifically for toast notifications -> this will mvoe to a switch later
-              if (instruction.sendTo === 'toasts' && !this.instructionsSeen.has(instruction.hash)) {
+            // see if the array actually contains a doc and isn't null
+            if (instruction) {
+              // No fixed versions yet: check specifically for toast notifications -> this will move to a switch later
+              if (
+                instruction.sendTo === 'toasts' &&
+                !this.noFxedVersionsSeen.has(instruction.hash)
+              ) {
                 // show the instruction as a toast
                 core.notifications.toasts.addError(new Error(JSON.stringify(instruction)), {
                   // @ts-ignore-next-line
@@ -54,7 +57,7 @@ export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseEr
                   toastMessage: `An error occurred: ${instruction.message}. Pulse message:${instruction.pulseMessage}`,
                 });
                 // add it to the 'seen' Set
-                this.instructionsSeen.add(instruction.hash);
+                this.noFxedVersionsSeen.add(instruction.hash);
               }
             }
           });
