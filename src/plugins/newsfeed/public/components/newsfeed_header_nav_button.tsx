@@ -24,6 +24,8 @@ import { EuiHeaderSectionItemButton, EuiIcon, EuiNotificationBadge } from '@elas
 import { PulseChannel } from 'src/core/public/pulse/channel';
 // eslint-disable-next-line
 import { NotificationInstruction } from 'src/core/server/pulse/collectors/notifications';
+// eslint-disable-next-line
+import { ErrorInstruction } from 'src/core/server/pulse/collectors/errors';
 import moment from 'moment';
 import { NewsfeedFlyout } from './flyout_list';
 import { FetchResult } from '../../types';
@@ -39,6 +41,7 @@ export type NewsfeedApiFetchResult = Rx.Observable<void | FetchResult | null>;
 export interface Props {
   apiFetchResult: NewsfeedApiFetchResult;
   notificationsChannel: PulseChannel<NotificationInstruction>;
+  errorsChannel: PulseChannel<ErrorInstruction>;
 }
 
 const NEWSFEED_LAST_HASH = 'pulse_news_last_hash';

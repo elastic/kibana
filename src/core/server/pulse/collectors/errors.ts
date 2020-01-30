@@ -24,6 +24,18 @@
 import moment from 'moment';
 import { PulseCollector, CollectorSetupContext } from '../types';
 
+export interface ErrorInstruction {
+  channel_id?: string;
+  deployment_id?: string;
+  message: string;
+  hash: string;
+  status: 'new' | 'seen';
+  currentKibanaVersion: string;
+  timestamp: Date;
+  id: string;
+  pulseMessage: string;
+  sendTo: 'toasts' | 'newsfeed';
+}
 export interface Payload {
   deploymentId: string;
   records: Array<Omit<PulseErrorPayloadRecord, 'channel_id' | 'deployment_id'>>;
