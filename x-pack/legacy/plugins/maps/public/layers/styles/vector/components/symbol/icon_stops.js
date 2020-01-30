@@ -98,12 +98,7 @@ export function IconStops({
           compressed
         />
       ) : (
-        <StopInput
-          getValueSuggestions={getValueSuggestions}
-          value={stop}
-          onChange={onStopChange}
-          compressed
-        />
+        <StopInput getValueSuggestions={getValueSuggestions} value={stop} onChange={onStopChange} />
       );
 
     return (

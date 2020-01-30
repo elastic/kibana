@@ -69,13 +69,6 @@ export class StopInput extends Component {
   }, 300);
 
   render() {
-    const {
-      onChange, // eslint-disable-line no-unused-vars
-      getValueSuggestions, // eslint-disable-line no-unused-vars
-      value, // eslint-disable-line no-unused-vars
-      ...rest
-    } = this.props;
-
     const suggestionOptions = this.state.suggestions.map(suggestion => {
       return { label: suggestion };
     });
@@ -94,7 +87,6 @@ export class StopInput extends Component {
 
     return (
       <EuiComboBox
-        {...rest}
         options={suggestionOptions}
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
@@ -104,6 +96,7 @@ export class StopInput extends Component {
         isClearable={false}
         isLoading={this.state.isLoadingSuggestions}
         onFocus={this._onFocus}
+        compressed
       />
     );
   }
