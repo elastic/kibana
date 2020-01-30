@@ -24,7 +24,7 @@ const getKueryString = (urlFilters: string): string => {
   let kueryString = '';
   // We are using try/catch here because this is user entered value
   // and JSON.parse and stringifyKueries can have hard time parsing
-  // all possible scenarios
+  // all possible scenarios, we can safely ignore if we can't parse them
   try {
     if (urlFilters !== '') {
       const filterMap = new Map<string, Array<string | number>>(JSON.parse(urlFilters));
@@ -46,6 +46,8 @@ export const useUpdateKueryString = (
   const combinedFilterString = combineFiltersAndUserSearch(filterQueryString, kueryString);
 
   let esFilters: string | undefined;
+  // this try catch is necessary to evaluate user input in kuery bar,
+  // this error will be actually shown in UI for user to see
   try {
     if ((filterQueryString || urlFilters) && indexPattern) {
       const ast = esKuery.fromKueryExpression(combinedFilterString);
