@@ -45,20 +45,19 @@ import { NewsfeedItem } from '../../types';
 import { NewsEmptyPrompt } from './empty_news';
 import { NewsLoadingPrompt } from './loading_news';
 
-const fixedVersionsSeen: Set<string> = new Set();
-
-function addNewInstructionsToSeenSet(entries: string[]): void {
-  entries.forEach(entry => fixedVersionsSeen.add(entry));
-}
 interface Props {
   notificationsChannel: PulseChannel<NotificationInstruction>;
   errorsChannel: PulseChannel<ErrorInstruction>;
+  errorsInstructionsToShow: ErrorInstruction[];
 }
 
-export const NewsfeedFlyout = ({ notificationsChannel, errorsChannel }: Props) => {
+export const NewsfeedFlyout = ({
+  notificationsChannel,
+  errorsChannel,
+  errorsInstructionsToShow,
+}: Props) => {
   const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
-  const [errorsInstructionsToShow, setErrorsInstructionsToShow] = useState<ErrorInstruction[]>([]);
 
   if (newsFetchResult && newsFetchResult.feedItems.length) {
     const lastNotificationHash = getLastItemHash(newsFetchResult.feedItems);
@@ -78,25 +77,6 @@ export const NewsfeedFlyout = ({ notificationsChannel, errorsChannel }: Props) =
       );
     }
   }
-  const errorsInstructions$ = errorsChannel.instructions$();
-  useEffect(() => {
-    function handleIncommingErrorsInstructions(instructions: ErrorInstruction[]) {
-      if (instructions.length) {
-        setErrorsInstructionsToShow(instructions);
-        addNewInstructionsToSeenSet(instructions.map(instruction => instruction.hash));
-      }
-    }
-    const subscription = errorsInstructions$.subscribe(instructions => {
-      if (instructions && instructions.length) {
-        const thoseToShow = instructions.filter(
-          instruction =>
-            instruction.sendTo === 'newsfeed' && !fixedVersionsSeen.has(instruction.hash)
-        );
-        handleIncommingErrorsInstructions(thoseToShow);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [errorsInstructions$]);
 
   return (
     <EuiFlyout

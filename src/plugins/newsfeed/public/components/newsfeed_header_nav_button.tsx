@@ -79,6 +79,11 @@ window.notificationsChannel.sendPulse([{
 
 // on every fresh page reload, fetch news all over again.
 updateLastHash('');
+
+function addNewInstructionsToSeenSet(fixedVersionsSeen: Set<string>, entries: string[]): void {
+  entries.forEach(entry => fixedVersionsSeen.add(entry));
+}
+
 export const NewsfeedNavButton = ({
   apiFetchResult,
   notificationsChannel,
@@ -89,7 +94,7 @@ export const NewsfeedNavButton = ({
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
   const [showPulseBadge, setShowPulseBadge] = useState<boolean>(false);
-  const [instructionsNumber, setInstructionsNumber] = useState<number | null>(null);
+  const [errorsInstructionsToShow, setErrorsInstructionsToShow] = useState<ErrorInstruction[]>([]);
   // hack to test updating news;
   (window as any).moment = moment;
   (window as any).notificationsChannel = notificationsChannel;
@@ -133,20 +138,26 @@ export const NewsfeedNavButton = ({
     function handleErrorsInstructionsChange(instructions: ErrorInstruction[]) {
       if (instructions.length) {
         setShowPulseBadge(instructions.length > 0);
-        setInstructionsNumber(instructions.length);
+        setErrorsInstructionsToShow(instructions);
+        addNewInstructionsToSeenSet(
+          fixedVersionsSeen,
+          instructions.map(instruction => instruction.hash)
+        );
       }
       // updateRecordsToSeen(instructions); TODO: implement me
     }
     const subscription = errorsInstructions$.subscribe(instructions => {
       if (instructions && instructions.length) {
         const newInstructions = instructions.filter(
-          instruction => instruction.sendTo === 'newsfeed'
+          instruction =>
+            // instruction.sendTo === 'newsfeed' && !fixedVersionsSeen.has(instruction.hash) --> removes these items from the list. We can still use the hash list to change the status of the messages shown in teh channel.
+            instruction.sendTo === 'newsfeed'
         );
         handleErrorsInstructionsChange(newInstructions);
       }
     });
     return () => subscription.unsubscribe();
-  }, [errorsInstructions$]);
+  }, [errorsInstructions$, fixedVersionsSeen]);
   // FOR THE POC: JUST USE PULSE AS THE SOURCE OF TRUTH FOR NEWS!
   // useEffect(() => {
   //   function handleStatusChange(fetchResult: FetchResult | void | null) {
@@ -188,6 +199,7 @@ export const NewsfeedNavButton = ({
           <NewsfeedFlyout
             notificationsChannel={notificationsChannel}
             errorsChannel={errorsChannel}
+            errorsInstructionsToShow={errorsInstructionsToShow}
           />
         ) : null}
       </Fragment>
