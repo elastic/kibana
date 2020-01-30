@@ -308,6 +308,7 @@ export class CoreSystem {
   public stop() {
     this.legacy.stop();
     this.plugins.stop();
+    this.pulse.stop();
     this.notifications.stop();
     this.http.stop();
     this.integrations.stop();

@@ -1,0 +1,11 @@
+{
+  "id": "pulse_errors",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": [
+    "core",
+    "pulse_errors"
+  ],
+  "server": true,
+  "ui": true
+}

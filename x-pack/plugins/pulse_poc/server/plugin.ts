@@ -92,7 +92,7 @@ export class PulsePocPlugin {
           for (const record of channel.records) {
             await es.callAsInternalUser('index', {
               index,
-              id: record.hash,
+              id: (record as any).hash,
               body: {
                 ...record,
                 timestamp: new Date(),

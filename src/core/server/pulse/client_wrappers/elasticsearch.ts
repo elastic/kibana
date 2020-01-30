@@ -46,7 +46,9 @@ export class PulseElasticsearchClient implements IPulseElasticsearchClient {
   }
 
   public async index(channel: string, doc: any) {
-    const id = uuid.v4();
+    // if the document has an id, use that, otherwise general a unique id.
+    const providedDocumentId = doc._id || doc.hash || null;
+    const id = providedDocumentId ? providedDocumentId : uuid.v4();
     await this.elasticsearch!.callAsInternalUser('index', {
       index: this.buildIndex(channel),
       id: `${id}`,

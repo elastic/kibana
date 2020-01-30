@@ -26,12 +26,11 @@ import { channelNames } from './config';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Fetcher, sendPulse, sendUsageFrom } from '../../server/pulse/send_pulse';
 
-export interface PulseServiceSetup {
+export interface PulseServiceContext {
   getChannel: (id: string) => PulseChannel;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PulseServiceStart {}
+export type PulseServiceSetup = PulseServiceContext;
+export type PulseServiceStart = PulseServiceContext;
 
 const logger = {
   ...console,
@@ -58,6 +57,20 @@ export class PulseService {
 
   public async setup(): Promise<PulseServiceSetup> {
     // poll for instructions every second for this deployment
+
+    return {
+      getChannel: (id: string) => {
+        const channel = this.channels.get(id);
+        if (!channel) {
+          throw new Error(`Unknown channel: ${id}`);
+        }
+        return channel;
+      },
+    };
+  }
+
+  public async start(): Promise<PulseServiceStart> {
+    // poll for instructions every second for this deployment
     setInterval(() => {
       // eslint-disable-next-line no-console
       this.loadInstructions().catch(err => console.error(err.stack));
@@ -83,6 +96,11 @@ export class PulseService {
         return channel;
       },
     };
+  }
+
+  public stop() {
+    this.channels.forEach(channel => channel.stop());
+    // TODO: Stop Instructions and SendTelemetry timers
   }
 
   private async sendTelemetry() {
@@ -148,12 +166,5 @@ export class PulseService {
     } else if (this.retriableErrors > 120) {
       this.retriableErrors = 0;
     }
-  }
-
-  async start(): Promise<PulseServiceStart> {
-    return {};
-  }
-  public stop() {
-    // nothing to do here currently
   }
 }
