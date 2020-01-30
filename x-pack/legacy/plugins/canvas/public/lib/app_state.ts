@@ -13,7 +13,7 @@ import { getWindow } from './get_window';
 import { historyProvider } from './history_provider';
 // @ts-ignore untyped local
 import { routerProvider } from './router_provider';
-import { createTimeInterval, isValidTimeInterval } from './time_interval';
+import { createTimeInterval, isValidTimeInterval, getTimeInterval } from './time_interval';
 import { AppState, AppStateKeys } from '../../types';
 
 export function getDefaultAppState(): AppState {
@@ -112,7 +112,12 @@ export function setRefreshInterval(payload: string) {
   const appValue = appState[AppStateKeys.REFRESH_INTERVAL];
 
   if (payload !== appValue) {
-    appState[AppStateKeys.REFRESH_INTERVAL] = payload;
-    routerProvider().updateAppState(appState);
+    if (getTimeInterval(payload)) {
+      appState[AppStateKeys.REFRESH_INTERVAL] = payload;
+      routerProvider().updateAppState(appState);
+    } else {
+      delete appState[AppStateKeys.REFRESH_INTERVAL];
+      routerProvider().updateAppState(appState);
+    }
   }
 }
