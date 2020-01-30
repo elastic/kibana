@@ -113,8 +113,8 @@ export const getLocationStatus = (checks: Check[], status: string, showIcon = fa
   if (showIcon) {
     return (
       <FormattedMessage
-        id={'xpack.uptime.monitorList.statusColumn.locStatusMessage.icon'}
-        defaultMessage={'in {noLoc} {icon}'}
+        id="xpack.uptime.monitorList.statusColumn.locStatusMessage.icon"
+        defaultMessage="in {noLoc} {icon}"
         values={{ noLoc: statusMessage, icon: <EuiIcon type={'visMapCoordinate'} /> }}
       />
     );
