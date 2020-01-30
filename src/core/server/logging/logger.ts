@@ -136,12 +136,12 @@ export class BaseLogger implements Logger {
   }
 
   public log(record: LogRecord) {
-    if (!this.level.supports(record.level)) {
-      return;
-    }
+    const supportedLevel = this.level.supports(record.level);
 
     for (const appender of this.appenders) {
-      appender.append(record);
+      if (supportedLevel || appender.receiveAllLevels) {
+        appender.append(record);
+      }
     }
   }
 

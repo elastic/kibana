@@ -12,3 +12,5 @@ export interface BaseParams {
   statusFilter?: string;
   location?: string;
 }
+
+export type APIFn<P, R = any> = (params: { basePath: string } & P) => Promise<R>;

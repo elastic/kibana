@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { isFunction } from 'lodash';
 import { AggConfig } from '../agg_config';
 import { SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
-import { FieldParamEditor } from '../../vis/editors/default/controls/field';
 import { BaseParamType } from './base';
 import { toastNotifications } from '../../notify';
 import { propFilter } from '../filter';
@@ -35,7 +34,6 @@ type FieldTypes = KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
 export type FilterFieldTypes = ((aggConfig: IMetricAggConfig) => FieldTypes) | FieldTypes;
 
 export class FieldParamType extends BaseParamType {
-  editorComponent = FieldParamEditor;
   required = true;
   scriptable = true;
   filterFieldTypes: FilterFieldTypes;

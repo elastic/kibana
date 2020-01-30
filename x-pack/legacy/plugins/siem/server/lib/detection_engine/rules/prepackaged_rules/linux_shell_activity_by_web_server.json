@@ -32,7 +32,7 @@
         {
           "id": "T1100",
           "name": "Web Shell",
-          "reference": "https://attack.mitre.org/techniques/T1215/"
+          "reference": "https://attack.mitre.org/techniques/T1100/"
         }
       ]
     }
