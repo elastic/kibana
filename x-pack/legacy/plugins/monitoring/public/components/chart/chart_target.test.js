@@ -51,6 +51,7 @@ jest.mock('../../np_imports/ui/chrome', () => {
   };
 });
 
+// TODO: Skipping for now, seems flaky in New Platform (needs more investigation)
 describe.skip('Test legends to toggle series: ', () => {
   beforeEach(async () => {
     jest.doMock('ui/new_platform', () => ({

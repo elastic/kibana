@@ -8,9 +8,20 @@ import angular from 'angular';
 import { npStart, npSetup } from '../legacy_imports';
 
 class Chrome {
-  public dangerouslyGetActiveInjector = (): Promise<angular.auto.IInjectorService> => {
-    const targetDomElement: HTMLElement | null = document.getElementById('monitoring-angular-app');
-    const $injector = angular.element(targetDomElement!).injector();
+  private getRootElement = (): Promise<HTMLElement> => {
+    return new Promise(resolve => {
+      const element = document.getElementById('monitoring-angular-app');
+      if (element) {
+        resolve(element);
+      } else {
+        setTimeout(() => resolve(this.getRootElement()), 100);
+      }
+    });
+  };
+
+  public dangerouslyGetActiveInjector = async (): Promise<angular.auto.IInjectorService> => {
+    const targetDomElement: HTMLElement = await this.getRootElement();
+    const $injector = angular.element(targetDomElement).injector();
     if (!$injector) {
       return Promise.reject('targetDomElement had no angular context after bootstrapping');
     }

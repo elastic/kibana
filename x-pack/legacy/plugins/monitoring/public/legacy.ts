@@ -13,8 +13,7 @@ import 'plugins/monitoring/services/title';
 import 'plugins/monitoring/services/breadcrumbs';
 import 'plugins/monitoring/directives/all';
 import 'plugins/monitoring/views/all';
-import { npSetup, npStart } from 'ui/new_platform';
-import { configureAppAngularModule } from 'ui/legacy_compat';
+import { npSetup, npStart } from '../public/np_imports/legacy_imports';
 import { plugin } from './np_ready';
 import { localApplicationService } from '../../../../../src/legacy/core_plugins/kibana/public/local_application_service';
 
@@ -24,6 +23,5 @@ pluginInstance.start(npStart.core, {
   ...npStart.plugins,
   __LEGACY: {
     localApplicationService,
-    configureAppAngularModule,
   },
 });

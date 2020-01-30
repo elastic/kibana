@@ -9,8 +9,6 @@
  */
 
 export { npSetup, npStart } from 'ui/new_platform';
-
-export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
@@ -25,12 +23,7 @@ export { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 // @ts-ignore
-
 export { PromiseServiceCreator } from 'ui/promises/promises';
 // @ts-ignore
-
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
-
-export { configureAppAngularModule } from 'ui/legacy_compat';
-
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';

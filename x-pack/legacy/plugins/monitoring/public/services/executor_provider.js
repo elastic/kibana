@@ -5,7 +5,7 @@
  */
 
 import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
-import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
+import { subscribeWithScope } from 'plugins/monitoring/np_imports/ui/utils';
 import { Subscription } from 'rxjs';
 export function executorProvider(Promise, $timeout) {
   const queue = [];

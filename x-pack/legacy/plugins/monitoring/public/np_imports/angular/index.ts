@@ -14,24 +14,21 @@ import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
 import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
 // @ts-ignore TODO: change to absolute path
 import { registerTimefilterWithGlobalState } from 'plugins/monitoring/np_imports/ui/timefilter';
-import { configureAppAngularModule } from '../legacy_imports';
+import { configureAppAngularModule } from './angular_config';
 
 import { localAppModule, appModuleName } from './modules';
 
 export class AngularApp {
   private injector?: angular.auto.IInjectorService;
 
-  constructor(
-    { core }: AppMountContext,
-    { appBasePath, element }: { appBasePath: string; element: HTMLElement }
-  ) {
+  constructor({ core }: AppMountContext, { element }: { element: HTMLElement }) {
     uiModules.addToModule();
     const app: IModule = localAppModule(core);
     app.config(($routeProvider: any) => {
       $routeProvider.eagerInstantiationEnabled(false);
       uiRoutes.addToProvider($routeProvider);
     });
-    configureAppAngularModule(app, core as LegacyCoreStart, true);
+    configureAppAngularModule(app, core as LegacyCoreStart);
     registerTimefilterWithGlobalState(app);
     const appElement = document.createElement('div');
     appElement.setAttribute('style', 'height: 100%');

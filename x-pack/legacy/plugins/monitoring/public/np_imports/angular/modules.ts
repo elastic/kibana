@@ -117,7 +117,8 @@ function createLocalStorage() {
   angular
     .module('monitoring/Storage', [])
     .service('localStorage', ($window: IWindowService) => new Storage($window.localStorage))
-    .service('sessionStorage', ($window: IWindowService) => new Storage($window.sessionStorage));
+    .service('sessionStorage', ($window: IWindowService) => new Storage($window.sessionStorage))
+    .service('sessionTimeout', () => {});
 }
 
 function createLocalPrivateModule() {
