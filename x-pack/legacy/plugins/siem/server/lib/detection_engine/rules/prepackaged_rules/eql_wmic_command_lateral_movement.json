@@ -1,20 +1,23 @@
 {
   "description": "Identifies use of wmic.exe to run commands on remote hosts. This could be indicative of adversary lateral movement but will be noisy if commonly done by admins.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "false_positives": [
+    "The WMIC utility provides a command-line interface for WMI, which can be used for an array of administrative capabilities. It's important to baseline your environment to determine any abnormal use of this tool."
+  ],
+  "index": [
+    "winlogbeat-*"
+  ],
   "language": "kuery",
+  "max_signals": 33,
   "name": "WMIC Command Lateral Movement",
   "query": "   event.action:\"Process Create (rule: ProcessCreate)\" and  process.name:\"wmic.exe\" and process.args:(\"/node\" or \"-node\") and process.args:(\"call\" or \"set\")",
-  "risk_score": 25,
+  "risk_score": 21,
   "rule_id": "9616587f-6396-42d0-bd31-ef8dbd806210",
   "severity": "low",
   "tags": [
-    "EIA"
+    "Elastic",
+    "Windows"
   ],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -22,7 +25,7 @@
         "name": "Lateral Movement",
         "reference": "https://attack.mitre.org/tactics/TA0008/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1047",
           "name": "Windows Management Instrumentation",
@@ -31,7 +34,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }
