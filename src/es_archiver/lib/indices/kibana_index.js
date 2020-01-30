@@ -26,8 +26,8 @@ import { toArray } from 'rxjs/operators';
 import { deleteIndex } from './delete_index';
 import { collectUiExports } from '../../../legacy/ui/ui_exports';
 import { KibanaMigrator } from '../../../core/server/saved_objects/migrations';
-import { convertLegacyMappings } from '../../../core/server/saved_objects/utils';
-import { SavedObjectsSchema } from '../../../core/server/saved_objects';
+import { convertLegacyTypes } from '../../../core/server/saved_objects/utils';
+import { SavedObjectTypeRegistry } from '../../../core/server/saved_objects';
 import { findPluginSpecs } from '../../../legacy/plugin_discovery';
 
 /**
@@ -81,12 +81,16 @@ export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
   const uiExports = await getUiExports(kibanaPluginIds);
   const kibanaVersion = await loadKibanaVersion();
 
-  const config = {
+  const configKeys = {
     'xpack.task_manager.index': '.kibana_task_manager',
   };
+  const config = { get: path => configKeys[path] };
+
+  const savedObjectTypes = convertLegacyTypes(uiExports, config);
+  const typeRegistry = new SavedObjectTypeRegistry();
+  savedObjectTypes.forEach(typeRegistry.registerType);
 
   const migratorOptions = {
-    config: { get: path => config[path] },
     savedObjectsConfig: {
       scrollDuration: '5m',
       batchSize: 100,
@@ -102,10 +106,8 @@ export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
       warn: log.warning.bind(log),
       error: log.error.bind(log),
     },
-    version: kibanaVersion,
-    savedObjectSchemas: new SavedObjectsSchema(uiExports.savedObjectSchemas),
-    savedObjectMappings: convertLegacyMappings(uiExports.savedObjectMappings),
-    savedObjectMigrations: uiExports.savedObjectMigrations,
+    kibanaVersion,
+    typeRegistry,
     savedObjectValidations: uiExports.savedObjectValidations,
     callCluster: (path, ...args) => _.get(client, path).call(client, ...args),
   };
