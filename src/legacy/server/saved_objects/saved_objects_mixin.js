@@ -100,7 +100,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createResolveImportErrorsRoute(prereqs, server, importableAndExportableTypes));
   server.route(createLogLegacyImportRoute());
 
-  const serializer = kbnServer.newPlatform.startDeps.core.savedObjects.createSerializer();
+  const serializer = kbnServer.newPlatform.start.core.savedObjects.createSerializer();
 
   const createRepository = (callCluster, extraTypes = []) => {
     if (typeof callCluster !== 'function') {
