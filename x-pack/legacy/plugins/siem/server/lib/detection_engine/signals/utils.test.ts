@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
+import sinon from 'sinon';
 
 import {
   generateId,
@@ -16,10 +16,18 @@ import {
 } from './utils';
 
 describe('utils', () => {
+  const anchor = '2020-01-01T06:06:06.666Z';
+  const unix = moment(anchor).valueOf();
   let nowDate = moment('2020-01-01T00:00:00.000Z');
+  let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
     nowDate = moment('2020-01-01T00:00:00.000Z');
+    clock = sinon.useFakeTimers(unix);
+  });
+
+  afterEach(function() {
+    clock.restore();
   });
 
   describe('generateId', () => {
