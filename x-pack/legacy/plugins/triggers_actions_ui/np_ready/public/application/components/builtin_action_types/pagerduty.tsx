@@ -58,6 +58,20 @@ export function getActionType(): ActionTypeModel {
     },
     validateParams: (actionParams: any): ValidationResult => {
       const validationResult = { errors: {} };
+      const errors = {
+        summary: new Array<string>(),
+      };
+      validationResult.errors = errors;
+      if (!actionParams.summary || actionParams.summary.length === 0) {
+        errors.summary.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredSummaryText',
+            {
+              defaultMessage: 'Summary is required.',
+            }
+          )
+        );
+      }
       return validationResult;
     },
     actionConnectorFields: PagerDutyActionConnectorFields,

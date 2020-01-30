@@ -12,6 +12,9 @@ import {
   EuiButtonIcon,
   EuiFormRow,
   EuiLink,
+  EuiSpacer,
+  EuiTextColor,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -143,15 +146,15 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
 
   return (
     <Fragment>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiButtonIcon
-            onClick={() => window.alert('Button clicked')}
-            iconType="indexOpen"
-            aria-label="Add variable"
+      <EuiText>
+        <EuiTextColor color="subdued">
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.composeMessageTitle"
+            defaultMessage="Compose Message:"
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </EuiTextColor>
+      </EuiText>
+      <EuiSpacer size="m" />
       <EuiFormRow
         id="slackMessage"
         fullWidth
@@ -163,6 +166,13 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             defaultMessage: 'Message',
           }
         )}
+        labelAppend={
+          <EuiButtonIcon
+            onClick={() => window.alert('Button clicked')}
+            iconType="indexOpen"
+            aria-label="Add variable"
+          />
+        }
       >
         <EuiTextArea
           fullWidth

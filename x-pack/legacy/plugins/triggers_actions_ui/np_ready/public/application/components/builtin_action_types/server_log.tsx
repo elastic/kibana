@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiSelect, EuiTextArea, EuiFormRow } from '@elastic/eui';
+import { EuiSelect, EuiTextArea, EuiFormRow, EuiTextColor, EuiSpacer, EuiText } from '@elastic/eui';
 import { ActionTypeModel, ValidationResult, ActionParamsProps } from '../../../types';
 
 export function getActionType(): ActionTypeModel {
@@ -73,6 +74,15 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
 
   return (
     <Fragment>
+      <EuiText>
+        <EuiTextColor color="subdued">
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.composeMessageTitle"
+            defaultMessage="Compose Message:"
+          />
+        </EuiTextColor>
+      </EuiText>
+      <EuiSpacer size="m" />
       <EuiFormRow
         id="loggingLevel"
         fullWidth

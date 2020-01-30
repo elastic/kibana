@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiFieldText, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -73,15 +73,12 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   action,
   index,
   editAction,
-  errors,
 }) => {
   const { refresh } = action;
   return (
     <Fragment>
       <EuiFormRow
         fullWidth
-        error={errors.index}
-        isInvalid={errors.index.length > 0 && action.index !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indexFieldLabel',
           {
@@ -91,7 +88,6 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiFieldText
           fullWidth
-          isInvalid={errors.index.length > 0 && action.index !== undefined}
           name="index"
           data-test-subj="indexInput"
           value={action.index || ''}
@@ -105,9 +101,10 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           }}
         />
       </EuiFormRow>
+      <EuiSpacer color="subdued" size="m" />
       <EuiSwitch
         data-test-subj="indexRefreshCheckbox"
-        checked={refresh}
+        checked={refresh || false}
         onChange={(e: any) => {
           editAction('refresh', e.target.checked, index);
         }}

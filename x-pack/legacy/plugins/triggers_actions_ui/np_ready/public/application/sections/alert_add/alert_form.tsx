@@ -374,31 +374,36 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
         }
         paddingSize="l"
       >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertForm.actionIdLabel"
-              defaultMessage="{connectorInstance} instance"
-              values={{
-                connectorInstance: actionTypesIndex
-                  ? actionTypesIndex[actionConnector.actionTypeId].name
-                  : actionConnector.actionTypeId,
-              }}
-            />
-          }
-        >
-          <EuiComboBox
-            fullWidth
-            singleSelection={{ asPlainText: true }}
-            options={optionsList}
-            selectedOptions={getSelectedOptions(actionItem.id)}
-            onChange={selectedOptions => {
-              setActionProperty('id', selectedOptions[0].id, index);
-            }}
-            isClearable={false}
-          />
-        </EuiFormRow>
-        <EuiSpacer size="s" />
+        <EuiFlexGroup component="div">
+          <EuiFlexItem>
+            <EuiFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertForm.actionIdLabel"
+                  defaultMessage="{connectorInstance} instance"
+                  values={{
+                    connectorInstance: actionTypesIndex
+                      ? actionTypesIndex[actionConnector.actionTypeId].name
+                      : actionConnector.actionTypeId,
+                  }}
+                />
+              }
+            >
+              <EuiComboBox
+                fullWidth
+                singleSelection={{ asPlainText: true }}
+                options={optionsList}
+                selectedOptions={getSelectedOptions(actionItem.id)}
+                onChange={selectedOptions => {
+                  setActionProperty('id', selectedOptions[0].id, index);
+                }}
+                isClearable={false}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="xl" />
         {ParamsFieldsComponent ? (
           <ParamsFieldsComponent
             action={actionItem.params}

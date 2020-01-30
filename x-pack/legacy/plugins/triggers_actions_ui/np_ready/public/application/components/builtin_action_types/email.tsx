@@ -391,7 +391,6 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
 
   return (
     <Fragment>
-      <EuiSpacer color="subdued" size="m" />
       <EuiText>
         <EuiTextColor color="subdued">
           <FormattedMessage
