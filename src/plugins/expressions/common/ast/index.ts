@@ -18,4 +18,6 @@
  */
 
 export * from './types';
+export * from './parse';
 export * from './parse_expression';
+export * from './format';

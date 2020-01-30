@@ -17,12 +17,23 @@
  * under the License.
  */
 
-export * from './types';
-export * from './ast';
-export * from './expression_types';
-export * from './expression_functions';
-export * from './expression_renderers';
-export * from './executor';
-export * from './execution';
-export * from './fonts';
-export * from './util';
+import { formatExpression } from './format';
+
+describe('formatExpression()', () => {
+  test('converts expression AST to string', () => {
+    const str = formatExpression({
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          arguments: {
+            bar: ['baz'],
+          },
+          function: 'foo',
+        },
+      ],
+    });
+
+    expect(str).toMatchInlineSnapshot(`"foo bar=\\"baz\\""`);
+  });
+});
