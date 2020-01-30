@@ -371,7 +371,7 @@ class ManageSpacePageUI extends Component<Props, State> {
             }
           )
         );
-        window.location.hash = `#/management/spaces/list`;
+        window.location.hash = `#/management/kibana/spaces`;
         if (requireRefresh) {
           setTimeout(() => {
             window.location.reload();
@@ -398,7 +398,7 @@ class ManageSpacePageUI extends Component<Props, State> {
   };
 
   private backToSpacesList = () => {
-    window.location.hash = `#/management/spaces/list`;
+    window.location.hash = `#/management/kibana/spaces`;
   };
 
   private editingExistingSpace = () => !!this.props.spaceId;

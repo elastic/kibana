@@ -45,9 +45,8 @@ describe('SpacesGridPage', () => {
 
     expect(
       shallowWithIntl(
-        <SpacesGridPage.WrappedComponent
+        <SpacesGridPage
           spacesManager={(spacesManager as unknown) as SpacesManager}
-          intl={null as any}
           http={httpStart}
           notifications={notificationServiceMock.createStartContract()}
           securityEnabled={true}
@@ -67,9 +66,8 @@ describe('SpacesGridPage', () => {
     httpStart.get.mockResolvedValue([]);
 
     const wrapper = mountWithIntl(
-      <SpacesGridPage.WrappedComponent
+      <SpacesGridPage
         spacesManager={(spacesManager as unknown) as SpacesManager}
-        intl={null as any}
         http={httpStart}
         notifications={notificationServiceMock.createStartContract()}
         securityEnabled={true}

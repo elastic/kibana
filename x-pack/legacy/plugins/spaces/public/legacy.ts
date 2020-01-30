@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './management/legacy_page_routes';
-
 import { SavedObjectsManagementAction } from 'src/legacy/core_plugins/management/public';
 import { registerSettingsComponent } from 'ui/management';
 import { npSetup } from 'ui/new_platform';

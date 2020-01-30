@@ -17,10 +17,20 @@
  * under the License.
  */
 
+const createSetupContract = () => ({
+  sections: {
+    register: jest.fn(),
+    getSection: jest.fn(),
+    getSectionsEnabled: jest.fn(),
+    getAllSections: jest.fn(),
+  },
+});
+
 const createStartContract = () => ({
   legacy: {},
 });
 
 export const managementPluginMock = {
+  createSetupContract,
   createStartContract,
 };

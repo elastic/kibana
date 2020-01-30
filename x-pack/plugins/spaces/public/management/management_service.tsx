@@ -3,81 +3,40 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { ManagementStart } from 'src/plugins/management/public';
-import { CoreStart } from 'src/core/public';
-import { SecurityPluginStart } from '../../../security/public';
-import { SpacesGridPage } from './spaces_grid';
+
+import { ManagementSetup, ManagementSection } from 'src/plugins/management/public';
+import { CoreSetup } from 'src/core/public';
+import { SecurityPluginSetup } from '../../../security/public';
 import { SpacesManager } from '../spaces_manager';
-import { ManageSpacePage } from './edit_space';
-import { Space } from '../../common/model/space';
+import { PluginsStart } from '../plugin';
+import { spacesManagementApp } from './spaces_management_app';
 
-interface StartDeps {
-  coreStart: Pick<CoreStart, 'application' | 'http' | 'notifications' | 'i18n'>;
-  managementStart?: ManagementStart;
-  securityLicense?: SecurityPluginStart['securityLicense'];
+interface SetupDeps {
+  management: ManagementSetup;
+  getStartServices: CoreSetup<PluginsStart>['getStartServices'];
   spacesManager: SpacesManager;
+  securityLicense?: SecurityPluginSetup['license'];
 }
-
-const MANAGE_SPACES_KEY = 'spaces';
-
 export class ManagementService {
-  private kibanaSection!: any;
+  private kibanaSection?: ManagementSection;
 
-  public start({ coreStart, managementStart, securityLicense, spacesManager }: StartDeps) {
-    this.kibanaSection = managementStart?.legacy.getSection('kibana');
-    if (this.kibanaSection && !this.kibanaSection.hasItem(MANAGE_SPACES_KEY)) {
-      this.kibanaSection.register(MANAGE_SPACES_KEY, {
-        name: 'spacesManagementLink',
-        order: 10,
-        display: i18n.translate('xpack.spaces.displayName', {
-          defaultMessage: 'Spaces',
-        }),
-        url: `#/management/spaces/list`,
-      });
+  public setup({ getStartServices, management, spacesManager, securityLicense }: SetupDeps) {
+    this.kibanaSection = management.sections.getSection('kibana');
+    if (this.kibanaSection) {
+      this.kibanaSection.registerApp(
+        spacesManagementApp.create({ getStartServices, spacesManager, securityLicense })
+      );
     }
-
-    return {
-      __legacyCompat: {
-        urls: {},
-        SpacesGridPage: () => (
-          <coreStart.i18n.Context>
-            <SpacesGridPage
-              capabilities={coreStart.application.capabilities}
-              http={coreStart.http}
-              notifications={coreStart.notifications}
-              spacesManager={spacesManager}
-              securityEnabled={Boolean(securityLicense && securityLicense.getFeatures().showLinks)}
-            />
-          </coreStart.i18n.Context>
-        ),
-        ManageSpacePage: ({
-          spaceId,
-          onLoadSpace,
-        }: {
-          spaceId?: string;
-          onLoadSpace?: (space: Space) => void;
-        }) => (
-          <coreStart.i18n.Context>
-            <ManageSpacePage
-              capabilities={coreStart.application.capabilities}
-              http={coreStart.http}
-              notifications={coreStart.notifications}
-              spacesManager={spacesManager}
-              spaceId={spaceId}
-              onLoadSpace={onLoadSpace}
-              securityEnabled={Boolean(securityLicense && securityLicense.getFeatures().showLinks)}
-            />
-          </coreStart.i18n.Context>
-        ),
-      },
-    };
   }
 
+  public start() {}
+
   public stop() {
-    if (this.kibanaSection && this.kibanaSection.hasItem(MANAGE_SPACES_KEY)) {
-      this.kibanaSection.deregister(MANAGE_SPACES_KEY);
+    if (this.kibanaSection) {
+      const spacesApp = this.kibanaSection.getApp(spacesManagementApp.id);
+      if (spacesApp) {
+        spacesApp.disable();
+      }
     }
   }
 }

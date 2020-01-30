@@ -18,7 +18,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Capabilities, HttpStart, NotificationsStart } from 'src/core/public';
 import { Feature } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
@@ -36,7 +37,6 @@ interface Props {
   spacesManager: SpacesManager;
   notifications: NotificationsStart;
   http: HttpStart;
-  intl: InjectedIntl;
   capabilities: Capabilities;
   securityEnabled: boolean;
 }
@@ -50,7 +50,7 @@ interface State {
   error: Error | null;
 }
 
-class SpacesGridPageUI extends Component<Props, State> {
+export class SpacesGridPage extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -80,8 +80,6 @@ class SpacesGridPageUI extends Component<Props, State> {
   }
 
   public getPageContent() {
-    const { intl } = this.props;
-
     if (!this.props.capabilities.spaces.manage) {
       return <UnauthorizedPrompt />;
     }
@@ -115,10 +113,12 @@ class SpacesGridPageUI extends Component<Props, State> {
           sorting={true}
           search={{
             box: {
-              placeholder: intl.formatMessage({
-                id: 'xpack.spaces.management.spacesGridPage.searchPlaceholder',
-                defaultMessage: 'Search',
-              }),
+              placeholder: i18n.translate(
+                'xpack.spaces.management.spacesGridPage.searchPlaceholder',
+                {
+                  defaultMessage: 'Search',
+                }
+              ),
             },
           }}
           loading={this.state.loading}
@@ -139,12 +139,7 @@ class SpacesGridPageUI extends Component<Props, State> {
 
   public getPrimaryActionButton() {
     return (
-      <EuiButton
-        fill
-        onClick={() => {
-          window.location.hash = `#/management/spaces/create`;
-        }}
-      >
+      <EuiButton fill href={`#/management/kibana/spaces/create`}>
         <FormattedMessage
           id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
           defaultMessage="Create a space"
@@ -175,7 +170,6 @@ class SpacesGridPageUI extends Component<Props, State> {
   };
 
   public deleteSpace = async () => {
-    const { intl } = this.props;
     const { spacesManager } = this.props;
 
     const space = this.state.selectedSpace;
@@ -190,15 +184,12 @@ class SpacesGridPageUI extends Component<Props, State> {
       const { message: errorMessage = '' } = error.data || {};
 
       this.props.notifications.toasts.addDanger(
-        intl.formatMessage(
-          {
-            id: 'xpack.spaces.management.spacesGridPage.errorDeletingSpaceErrorMessage',
-            defaultMessage: 'Error deleting space: {errorMessage}',
-          },
-          {
+        i18n.translate('xpack.spaces.management.spacesGridPage.errorDeletingSpaceErrorMessage', {
+          defaultMessage: 'Error deleting space: {errorMessage}',
+          values: {
             errorMessage,
-          }
-        )
+          },
+        })
       );
     }
 
@@ -208,13 +199,11 @@ class SpacesGridPageUI extends Component<Props, State> {
 
     this.loadGrid();
 
-    const message = intl.formatMessage(
+    const message = i18n.translate(
+      'xpack.spaces.management.spacesGridPage.spaceSuccessfullyDeletedNotificationMessage',
       {
-        id: 'xpack.spaces.management.spacesGridPage.spaceSuccessfullyDeletedNotificationMessage',
         defaultMessage: 'Deleted "{spaceName}" space.',
-      },
-      {
-        spaceName: space.name,
+        values: { spaceName: space.name },
       }
     );
 
@@ -249,51 +238,37 @@ class SpacesGridPageUI extends Component<Props, State> {
   };
 
   public getColumnConfig() {
-    const { intl } = this.props;
     return [
       {
         field: 'initials',
         name: '',
         width: '50px',
         render: (value: string, record: Space) => (
-          <EuiLink
-            onClick={() => {
-              this.onEditSpaceClick(record);
-            }}
-          >
+          <EuiLink href={this.getEditSpacePath(record)}>
             <SpaceAvatar space={record} size="s" />
           </EuiLink>
         ),
       },
       {
         field: 'name',
-        name: intl.formatMessage({
-          id: 'xpack.spaces.management.spacesGridPage.spaceColumnName',
+        name: i18n.translate('xpack.spaces.management.spacesGridPage.spaceColumnName', {
           defaultMessage: 'Space',
         }),
         sortable: true,
         render: (value: string, record: Space) => (
-          <EuiLink
-            onClick={() => {
-              this.onEditSpaceClick(record);
-            }}
-          >
-            {value}
-          </EuiLink>
+          <EuiLink href={this.getEditSpacePath(record)}>{value}</EuiLink>
         ),
       },
       {
         field: 'description',
-        name: intl.formatMessage({
-          id: 'xpack.spaces.management.spacesGridPage.descriptionColumnName',
+        name: i18n.translate('xpack.spaces.management.spacesGridPage.descriptionColumnName', {
           defaultMessage: 'Description',
         }),
         sortable: true,
       },
       {
         field: 'disabledFeatures',
-        name: intl.formatMessage({
-          id: 'xpack.spaces.management.spacesGridPage.featuresColumnName',
+        name: i18n.translate('xpack.spaces.management.spacesGridPage.featuresColumnName', {
           defaultMessage: 'Features',
         }),
         sortable: (space: Space) => {
@@ -333,8 +308,7 @@ class SpacesGridPageUI extends Component<Props, State> {
       },
       {
         field: 'id',
-        name: intl.formatMessage({
-          id: 'xpack.spaces.management.spacesGridPage.identifierColumnName',
+        name: i18n.translate('xpack.spaces.management.spacesGridPage.identifierColumnName', {
           defaultMessage: 'Identifier',
         }),
         sortable: true,
@@ -346,26 +320,23 @@ class SpacesGridPageUI extends Component<Props, State> {
         },
       },
       {
-        name: intl.formatMessage({
-          id: 'xpack.spaces.management.spacesGridPage.actionsColumnName',
+        name: i18n.translate('xpack.spaces.management.spacesGridPage.actionsColumnName', {
           defaultMessage: 'Actions',
         }),
         actions: [
           {
             render: (record: Space) => (
               <EuiButtonIcon
-                aria-label={intl.formatMessage(
+                aria-label={i18n.translate(
+                  'xpack.spaces.management.spacesGridPage.editSpaceActionName',
                   {
-                    id: 'xpack.spaces.management.spacesGridPage.editSpaceActionName',
                     defaultMessage: `Edit {spaceName}.`,
-                  },
-                  {
-                    spaceName: record.name,
+                    values: { spaceName: record.name },
                   }
                 )}
                 color={'primary'}
                 iconType={'pencil'}
-                onClick={() => this.onEditSpaceClick(record)}
+                href={this.getEditSpacePath(record)}
               />
             ),
           },
@@ -373,13 +344,11 @@ class SpacesGridPageUI extends Component<Props, State> {
             available: (record: Space) => !isReservedSpace(record),
             render: (record: Space) => (
               <EuiButtonIcon
-                aria-label={intl.formatMessage(
+                aria-label={i18n.translate(
+                  'xpack.spaces.management.spacesGridPage.deleteActionName',
                   {
-                    id: 'xpack.spaces.management.spacesGridPage.deleteActionName',
                     defaultMessage: `Delete {spaceName}.`,
-                  },
-                  {
-                    spaceName: record.name,
+                    values: { spaceName: record.name },
                   }
                 )}
                 color={'danger'}
@@ -393,8 +362,8 @@ class SpacesGridPageUI extends Component<Props, State> {
     ];
   }
 
-  private onEditSpaceClick = (space: Space) => {
-    window.location.hash = `#/management/spaces/edit/${encodeURIComponent(space.id)}`;
+  private getEditSpacePath = (space: Space) => {
+    return `#/management/kibana/spaces/edit/${encodeURIComponent(space.id)}`;
   };
 
   private onDeleteSpaceClick = (space: Space) => {
@@ -404,5 +373,3 @@ class SpacesGridPageUI extends Component<Props, State> {
     });
   };
 }
-
-export const SpacesGridPage = injectI18n(SpacesGridPageUI);

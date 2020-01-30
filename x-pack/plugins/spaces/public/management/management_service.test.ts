@@ -7,127 +7,81 @@
 import { ManagementService } from '.';
 import { coreMock } from 'src/core/public/mocks';
 import { spacesManagerMock } from '../spaces_manager/mocks';
-
-const mockSections = {
-  getSection: jest.fn(),
-  getAllSections: jest.fn(),
-  navigateToApp: jest.fn(),
-};
+import { managementPluginMock } from '../../../../../src/plugins/management/public/mocks';
+import { ManagementSection } from 'src/plugins/management/public';
 
 describe('ManagementService', () => {
-  describe('#start', () => {
+  describe('#setup', () => {
     it('registers the spaces management page under the kibana section', () => {
-      const mockKibanaSection = {
-        hasItem: jest.fn().mockReturnValue(false),
-        register: jest.fn(),
-      };
-
-      const managementStart = {
-        legacy: {
-          getSection: jest.fn().mockReturnValue(mockKibanaSection),
-        },
-        sections: mockSections,
-      };
-
+      const mockKibanaSection = ({
+        registerApp: jest.fn(),
+      } as unknown) as ManagementSection;
       const deps = {
-        managementStart,
-        coreStart: coreMock.createStart(),
+        management: managementPluginMock.createSetupContract(),
+        getStartServices: coreMock.createSetup().getStartServices,
         spacesManager: spacesManagerMock.create(),
       };
 
+      deps.management.sections.getSection.mockImplementation(id => {
+        if (id === 'kibana') return mockKibanaSection;
+        throw new Error(`unexpected getSection call: ${id}`);
+      });
+
       const service = new ManagementService();
-      service.start(deps);
+      service.setup(deps);
 
-      expect(deps.managementStart.legacy.getSection).toHaveBeenCalledTimes(1);
-      expect(deps.managementStart.legacy.getSection).toHaveBeenCalledWith('kibana');
+      expect(deps.management.sections.getSection).toHaveBeenCalledTimes(1);
+      expect(deps.management.sections.getSection).toHaveBeenCalledWith('kibana');
 
-      expect(mockKibanaSection.register).toHaveBeenCalledTimes(1);
-      expect(mockKibanaSection.register).toHaveBeenCalledWith('spaces', {
-        name: 'spacesManagementLink',
+      expect(mockKibanaSection.registerApp).toHaveBeenCalledTimes(1);
+      expect(mockKibanaSection.registerApp).toHaveBeenCalledWith({
+        id: 'spaces',
+        title: 'Spaces',
         order: 10,
-        display: 'Spaces',
-        url: `#/management/spaces/list`,
+        mount: expect.any(Function),
       });
     });
 
-    it('will not register the spaces management page twice', () => {
-      const mockKibanaSection = {
-        hasItem: jest.fn().mockReturnValue(true),
-        register: jest.fn(),
-      };
-
-      const managementStart = {
-        legacy: {
-          getSection: jest.fn().mockReturnValue(mockKibanaSection),
-        },
-        sections: mockSections,
-      };
-
+    it('will not crash if the kibana section is missing', () => {
       const deps = {
-        managementStart,
-        coreStart: coreMock.createStart(),
+        management: managementPluginMock.createSetupContract(),
+        getStartServices: coreMock.createSetup().getStartServices,
         spacesManager: spacesManagerMock.create(),
       };
 
       const service = new ManagementService();
-      service.start(deps);
-
-      expect(mockKibanaSection.register).toHaveBeenCalledTimes(0);
-    });
-
-    it('will not register the spaces management page if the kibana section is missing', () => {
-      const managementStart = {
-        legacy: {
-          getSection: jest.fn().mockReturnValue(undefined),
-        },
-        sections: mockSections,
-      };
-
-      const deps = {
-        managementStart,
-        coreStart: coreMock.createStart(),
-        spacesManager: spacesManagerMock.create(),
-      };
-
-      const service = new ManagementService();
-      service.start(deps);
-
-      expect(deps.managementStart.legacy.getSection).toHaveBeenCalledTimes(1);
+      service.setup(deps);
     });
   });
 
   describe('#stop', () => {
-    it('deregisters the spaces management page', () => {
-      const mockKibanaSection = {
-        hasItem: jest
+    it('disables the spaces management page', () => {
+      const mockSpacesManagementPage = { disable: jest.fn() };
+      const mockKibanaSection = ({
+        registerApp: jest.fn(),
+        getApp: jest
           .fn()
-          .mockReturnValueOnce(false)
-          .mockReturnValueOnce(true),
-        register: jest.fn(),
-        deregister: jest.fn(),
-      };
-
-      const managementStart = {
-        legacy: {
-          getSection: jest.fn().mockReturnValue(mockKibanaSection),
-        },
-        sections: mockSections,
-      };
+          .mockImplementation(id => (id === 'spaces' ? mockSpacesManagementPage : undefined)),
+      } as unknown) as ManagementSection;
 
       const deps = {
-        managementStart,
-        coreStart: coreMock.createStart(),
+        management: managementPluginMock.createSetupContract(),
+        getStartServices: coreMock.createSetup().getStartServices,
         spacesManager: spacesManagerMock.create(),
       };
 
+      deps.management.sections.getSection.mockImplementation(id => {
+        if (id === 'kibana') return mockKibanaSection;
+        throw new Error(`unexpected getSection call: ${id}`);
+      });
+
       const service = new ManagementService();
-      service.start(deps);
+      service.setup(deps);
 
       service.stop();
 
-      expect(mockKibanaSection.register).toHaveBeenCalledTimes(1);
-      expect(mockKibanaSection.deregister).toHaveBeenCalledTimes(1);
-      expect(mockKibanaSection.deregister).toHaveBeenCalledWith('spaces');
+      expect(mockKibanaSection.registerApp).toHaveBeenCalledTimes(1);
+      expect(mockSpacesManagementPage.disable).toHaveBeenCalledTimes(1);
     });
   });
 });

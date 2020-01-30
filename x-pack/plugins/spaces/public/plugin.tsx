@@ -6,13 +6,10 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import {
-  ManagementSetup,
-  SavedObjectsManagementAction,
-} from 'src/legacy/core_plugins/management/public';
-import { ManagementStart } from 'src/plugins/management/public';
+import { SavedObjectsManagementAction } from 'src/legacy/core_plugins/management/public';
+import { ManagementStart, ManagementSetup } from 'src/plugins/management/public';
 import React from 'react';
-import { SecurityPluginStart } from '../../security/public';
+import { SecurityPluginStart, SecurityPluginSetup } from '../../security/public';
 import { SpacesManager } from './spaces_manager';
 import { initSpacesNavControl } from './nav_control';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
@@ -24,6 +21,7 @@ import { SpaceSelector } from './space_selector';
 export interface PluginsSetup {
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
+  security?: SecurityPluginSetup;
 }
 
 export interface PluginsStart {
@@ -54,6 +52,16 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register(createSpacesFeatureCatalogueEntry());
+    }
+
+    if (plugins.management) {
+      this.managementService = new ManagementService();
+      this.managementService.setup({
+        management: plugins.management,
+        getStartServices: core.getStartServices,
+        spacesManager: this.spacesManager,
+        securityLicense: plugins.security && plugins.security.license,
+      });
     }
 
     return {
@@ -89,14 +97,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   public start(core: CoreStart, plugins: PluginsStart) {
     initSpacesNavControl(this.spacesManager, core);
 
-    this.managementService = new ManagementService();
-    const managementStart = this.managementService.start({
-      managementStart: plugins.management,
-      coreStart: core,
-      spacesManager: this.spacesManager,
-      securityLicense: plugins.security && plugins.security.securityLicense,
-    });
-
     return {
       activeSpace$: this.spacesManager.onActiveSpaceChange$,
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
@@ -107,7 +107,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
           </core.i18n.Context>
         ),
         spacesManager: this.spacesManager,
-        management: managementStart.__legacyCompat,
       },
     };
   }
