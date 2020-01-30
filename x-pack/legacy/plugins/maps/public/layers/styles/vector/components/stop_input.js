@@ -5,32 +5,16 @@
  */
 
 import _ from 'lodash';
-import React, { Component, Fragment } from 'react';
-import uuid from 'uuid/v4';
+import React, { Component } from 'react';
 
-import { EuiFieldText, EuiPopover, EuiLoadingSpinner, EuiText, EuiSelectable } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiComboBox } from '@elastic/eui';
 
 export class StopInput extends Component {
-
   state = {
     suggestions: [],
     isLoadingSuggestions: false,
     hasPrevFocus: false,
   };
-
-  _datalistId = uuid();
-
-  static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.value === prevState.prevValue || nextProps.value === prevState.localValue) {
-      return null;
-    }
-
-    return {
-      prevValue: nextProps.value,
-      localValue: nextProps.value,
-    };
-  }
 
   componentDidMount() {
     this._isMounted = true;
@@ -38,68 +22,51 @@ export class StopInput extends Component {
 
   componentWillUnmount() {
     this._isMounted = false;
-    this._debouncedOnChange.cancel();
+    this._loadSuggestions.cancel();
   }
 
-  _onChange = e => {
+  _onFocus = () => {
+    if (!this.state.hasPrevFocus) {
+      this.setState({ hasPrevFocus: true });
+      this._onSearchChange('');
+    }
+  };
+
+  _onChange = selectedOptions => {
+    this.props.onChange(_.get(selectedOptions, '[0].label', ''));
+  };
+
+  _onCreateOption = newValue => {
+    this.props.onChange(newValue);
+  };
+
+  _onSearchChange = async searchValue => {
     this.setState(
       {
-        localValue: e.target.value,
-        suggestionsFilter: e.target.value,
         isLoadingSuggestions: true,
+        searchValue,
       },
-      this._debouncedOnChange
+      () => {
+        this._loadSuggestions(searchValue);
+      }
     );
   };
 
-  _debouncedOnChange = _.debounce(() => {
-    this._loadSuggestions(this.state.suggestionsFilter);
-    this.props.onChange(this.state.localValue);
-  }, 300);
-
-  _onFocus = () => {
-    // populate suggestions on initial focus
-    if (!this.state.hasPrevFocus) {
-      this.setState(
-        {
-          hasPrevFocus: true,
-          isLoadingSuggestions: true,
-          suggestionsFilter: '',
-        },
-        () => { this._loadSuggestions(this.state.suggestionsFilter); }
-      );
-    }
-  }
-
-  _loadSuggestions = async (filter) => {
+  _loadSuggestions = _.debounce(async searchValue => {
     let suggestions = [];
     try {
-      suggestions = await this.props.getValueSuggestions(this.state.localValue);
+      suggestions = await this.props.getValueSuggestions(searchValue);
     } catch (error) {
       // ignore suggestions error
     }
 
-    if (this._isMounted && filter === this.state.suggestionsFilter) {
+    if (this._isMounted && searchValue === this.state.searchValue) {
       this.setState({
         isLoadingSuggestions: false,
         suggestions,
       });
     }
-  };
-
-  _renderSuggestions() {
-    if (this.state.isLoadingSuggestions|| this.state.suggestions.length === 0) {
-      return null;
-    }
-
-    return (
-      <datalist id={this._datalistId}>
-        {this.state.suggestions.map(suggestion => {
-          return <option key={suggestion} value={suggestion}/>;
-        })}
-      </datalist>
-    );
-  }
+  }, 300);
 
   render() {
     const {
@@ -109,18 +76,35 @@ export class StopInput extends Component {
       ...rest
     } = this.props;
 
+    const suggestionOptions = this.state.suggestions.map(suggestion => {
+      return { label: suggestion };
+    });
+
+    const selectedOptions = [];
+    if (this.props.value) {
+      let option = suggestionOptions.find(({ label }) => {
+        return label === this.props.value;
+      });
+      if (!option) {
+        option = { label: this.props.value };
+        suggestionOptions.unshift(option);
+      }
+      selectedOptions.push(option);
+    }
+
     return (
-      <Fragment>
-        <EuiFieldText
-          {...rest}
-          list={this._datalistId}
-          onChange={this._onChange}
-          value={this.state.localValue}
-          isLoading={this.state.isLoadingSuggestions}
-          onFocus={this._onFocus}
-        />
-        {this._renderSuggestions()}
-      </Fragment>
+      <EuiComboBox
+        {...rest}
+        options={suggestionOptions}
+        selectedOptions={selectedOptions}
+        singleSelection={{ asPlainText: true }}
+        onChange={this._onChange}
+        onSearchChange={this._onSearchChange}
+        onCreateOption={this._onCreateOption}
+        isClearable={false}
+        isLoading={this.state.isLoadingSuggestions}
+        onFocus={this._onFocus}
+      />
     );
   }
 }

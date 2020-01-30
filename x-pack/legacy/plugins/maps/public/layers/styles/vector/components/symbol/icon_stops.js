@@ -8,7 +8,7 @@ import React from 'react';
 import { DEFAULT_ICON } from '../../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getOtherCategoryLabel } from '../../style_util';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { IconSelect } from './icon_select';
 import { StopInput } from '../stop_input';
 
@@ -89,7 +89,23 @@ export function IconStops({
     const errors = [];
     // TODO check for duplicate values and add error messages here
 
-    const isOtherCategoryRow = index === 0;
+    const stopInput =
+      index === 0 ? (
+        <EuiFieldText
+          aria-label={getOtherCategoryLabel()}
+          placeholder={getOtherCategoryLabel()}
+          disabled
+          compressed
+        />
+      ) : (
+        <StopInput
+          getValueSuggestions={getValueSuggestions}
+          value={stop}
+          onChange={onStopChange}
+          compressed
+        />
+      );
+
     return (
       <EuiFormRow
         key={index}
@@ -100,19 +116,7 @@ export function IconStops({
       >
         <div>
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-            <EuiFlexItem>
-              <StopInput
-                getValueSuggestions={getValueSuggestions}
-                aria-label={i18n.translate('xpack.maps.styles.iconStops.stopInputAriaLabel', {
-                  defaultMessage: 'Icon stop',
-                })}
-                value={isOtherCategoryRow ? null : stop}
-                placeholder={isOtherCategoryRow ? getOtherCategoryLabel() : null}
-                disabled={isOtherCategoryRow}
-                onChange={onStopChange}
-                compressed
-              />
-            </EuiFlexItem>
+            <EuiFlexItem>{stopInput}</EuiFlexItem>
             <EuiFlexItem>
               <IconSelect
                 isDarkMode={isDarkMode}
