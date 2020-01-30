@@ -5,8 +5,11 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { map, filter } from 'rxjs/operators';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { PulseInstruction } from 'src/core/public/pulse/channel';
 import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
-import { PLUGIN } from '../../common/constants';
+import { PLUGIN, HOURLY_COST } from '../../common/constants';
 import { Breadcrumb } from './application/breadcrumbs';
 
 export interface Plugins {
@@ -17,8 +20,25 @@ export interface Plugins {
   };
 }
 
+interface CloudCosts extends PulseInstruction {
+  cloudCosts: { hourlyCost: number };
+}
+
 export class LicenseManagementUIPlugin implements Plugin<void, void, any, any> {
-  setup({ application, notifications, http }: CoreSetup, { __LEGACY }: Plugins) {
+  setup({ application, notifications, http, pulse }: CoreSetup, { __LEGACY }: Plugins) {
+    pulse
+      .getChannel('deployment')
+      .instructions$()
+      .pipe(
+        map(instructions =>
+          instructions.find(instruction => !!(instruction as CloudCosts).cloudCosts)
+        ),
+        filter((instruction): instruction is CloudCosts => Boolean(instruction))
+      )
+      .subscribe(({ cloudCosts }) => {
+        localStorage.setItem(HOURLY_COST, `${cloudCosts.hourlyCost}`);
+      });
+
     application.register({
       id: PLUGIN.ID,
       title: PLUGIN.TITLE,

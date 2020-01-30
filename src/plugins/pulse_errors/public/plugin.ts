@@ -19,7 +19,7 @@
 
 import { Plugin, CoreSetup, CoreStart } from 'kibana/public';
 import { Subject, Subscription } from 'rxjs';
-
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { takeUntil } from 'rxjs/operators';
 import { errorChannelPayloads } from './mock_data/errors';
 

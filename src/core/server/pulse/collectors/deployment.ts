@@ -17,8 +17,16 @@
  * under the License.
  */
 
-export interface IPulseElasticsearchClient {
-  createIndexIfNotExist?: (channel: string, mappings: Record<string, any>) => Promise<void>;
-  index: (channel: string, doc: Record<string, any>) => Promise<void>;
-  search: <T>(channel: string, query: Record<string, any>) => Promise<T[]>;
+import { PulseCollector } from '../types';
+
+export class Collector extends PulseCollector {
+  private readonly channelName = 'deployment';
+
+  // We don't need to store any record for this channel
+  public async putRecord() {}
+
+  public async getRecords() {
+    const stats = await this.rawElasticsearch?.callAsInternalUser('cluster.stats', {});
+    return [{ hash: stats.cluster_uuid, stats }];
+  }
 }
