@@ -7,6 +7,17 @@
 import { SavedObjectsBaseOptions } from 'kibana/server';
 export { Direction } from '../../graphql/types';
 
+interface Case {
+  case_type: string;
+  created_at: number;
+  created_by: ElasticUser;
+  description: string;
+  state: string;
+  tags: string[] | [];
+  title: string;
+  updated_at: number;
+}
+
 export interface CasesSavedObjects {
   saved_objects: CaseSavedObject[] | [];
   page: number;
