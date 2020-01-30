@@ -26,10 +26,10 @@ import {
 } from '../common/types';
 import { ReturnTypeList } from '../../ingest/common/types/std_return_format';
 
-const defaultClient: HttpHandler = (path: string, options?: HttpFetchOptions) =>
+const defaultClient = (path: string, options?: HttpFetchOptions) =>
   fetch(path, options).then(res => res.json());
 
-let _fetch: HttpHandler = defaultClient;
+let _fetch = defaultClient;
 
 export function setClient(client: HttpHandler): void {
   _fetch = client;
