@@ -7,12 +7,14 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, EuiPopover, EuiLoadingSpinner, EuiText, EuiSelectable } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class StopInput extends Component {
   state = {
+    isPopoverOpen: false,
     localValue: '',
-    suggestions: [],
+    suggestionOptions: [],
     isLoadingSuggestions: false,
   };
 
@@ -24,8 +26,6 @@ export class StopInput extends Component {
     return {
       prevValue: nextProps.value,
       localValue: nextProps.value,
-      suggestions: [],
-      isLoadingSuggestions: false,
     };
   }
 
@@ -37,8 +37,28 @@ export class StopInput extends Component {
     this._isMounted = false;
   }
 
+  _closePopover = () => {
+    this.setState({ isPopoverOpen: false });
+  };
+
+  _openPopover = () => {
+    this.setState({ isPopoverOpen: true });
+  };
+
+  _togglePopover = () => {
+    this.setState(prevState => ({
+      isPopoverOpen: !prevState.isPopoverOpen,
+    }));
+  };
+
   _onChange = e => {
-    this.setState({ localValue: e.target.value }, this._debouncedOnChange);
+    this.setState(
+      {
+        localValue: e.target.value,
+        isPopoverOpen: true,
+      },
+      this._debouncedOnChange
+    );
   };
 
   _debouncedOnChange = _.debounce(() => {
@@ -46,7 +66,7 @@ export class StopInput extends Component {
     this.props.onChange(this.state.localValue);
   }, 300);
 
-  async _loadSuggestions() {
+  _loadSuggestions = async () => {
     this.setState({ isLoadingSuggestions: true });
 
     let suggestions = [];
@@ -57,9 +77,49 @@ export class StopInput extends Component {
     }
 
     if (this._isMounted) {
-      console.log(suggestions);
-      this.setState({ isLoadingSuggestions: false, suggestions });
+      this.setState({
+        isLoadingSuggestions: false,
+        suggestionOptions: suggestions.map(suggestion => {
+          return {
+            value: suggestion,
+            label: suggestion,
+          };
+        }),
+      });
     }
+  };
+
+  _onSuggestionSelection = options => {
+    const selectedOption = options.find(option => {
+      return option.checked === 'on';
+    });
+
+    if (selectedOption) {
+      this.props.onChange(selectedOption.value);
+    }
+    this._closePopover();
+  };
+
+  _renderSuggestions() {
+    if (this.state.isLoadingSuggestions) {
+      <EuiText>
+        <EuiLoadingSpinner size="m" />
+        <FormattedMessage
+          id="xpack.maps.stopInput.loadingSuggestionsMsg"
+          defaultMessage="Loading suggestions"
+        />
+      </EuiText>;
+    }
+
+    if (this.state.suggestionOptions.length === 0) {
+      return null;
+    }
+
+    return (
+      <EuiSelectable options={this.state.suggestionOptions} onChange={this._onSuggestionSelection}>
+        {list => list}
+      </EuiSelectable>
+    );
   }
 
   render() {
@@ -70,6 +130,26 @@ export class StopInput extends Component {
       ...rest
     } = this.props;
 
-    return <EuiFieldText {...rest} onChange={this._onChange} value={this.state.localValue} />;
+    const input = (
+      <EuiFieldText
+        {...rest}
+        onFocus={this._loadSuggestions}
+        onChange={this._onChange}
+        value={this.state.localValue}
+      />
+    );
+
+    return (
+      <EuiPopover
+        ownFocus
+        button={input}
+        isOpen={this.state.isPopoverOpen}
+        closePopover={this._closePopover}
+        attachToAnchor
+        panelPaddingSize="none"
+      >
+        {this._renderSuggestions()}
+      </EuiPopover>
+    );
   }
 }
