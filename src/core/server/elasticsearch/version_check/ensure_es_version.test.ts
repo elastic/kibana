@@ -110,7 +110,8 @@ describe('mapNodesVersionCompatibility', () => {
 
 describe('pollEsNodesVersion', () => {
   const callWithInternalUser = jest.fn();
-  it('keeps polling when a poll request throws', done => {
+  const expectedCompatibilityResults = [false, false, true];
+  it('returns iscCompatible=false and keeps polling when a poll request throws', done => {
     expect.assertions(3);
     callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
     callWithInternalUser.mockRejectedValueOnce(new Error('mock request error'));
@@ -124,7 +125,9 @@ describe('pollEsNodesVersion', () => {
     })
       .pipe(take(3))
       .subscribe({
-        next: result => expect(result.isCompatible).toBeDefined(),
+        next: result => {
+          expect(result.isCompatible).toBe(expectedCompatibilityResults.shift());
+        },
         complete: done,
         error: done,
       });
