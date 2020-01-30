@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { parse } from 'url';
 import { createHashHistory, History } from 'history';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AppBase } from 'kibana/public';
@@ -126,13 +125,14 @@ export function createKbnUrlTracker({
       if (appIsMounted) {
         return;
       }
-      const updatedAbsoluteUrl = setStateToKbnUrl(
+      const updatedUrl = setStateToKbnUrl(
         kbnUrlKey,
         state,
         { useHash: useHash() },
         baseUrl + (activeUrl || defaultSubUrl)
       );
-      activeUrl = parse(updatedAbsoluteUrl).hash!;
+      // remove baseUrl prefix (just storing the sub url part)
+      activeUrl = updatedUrl.substr(baseUrl.length);
       storageInstance.setItem(storageKey, activeUrl);
       setNavLink(activeUrl);
     })
