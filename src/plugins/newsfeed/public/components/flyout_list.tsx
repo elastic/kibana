@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import {
   EuiIcon,
   EuiFlyout,
@@ -37,6 +37,8 @@ import { PulseChannel } from 'src/core/public/pulse/channel';
 // eslint-disable-next-line
 import { NotificationInstruction } from 'src/core/server/pulse/collectors/notifications';
 import moment from 'moment';
+// eslint-disable-next-line
+import { ErrorInstruction } from 'src/core/server/pulse/collectors/errors';
 import { EuiHeaderAlert } from '../../../../legacy/core_plugins/newsfeed/public/np_ready/components/header_alert/header_alert';
 import { NewsfeedContext, shouldUpdateHash, getLastItemHash } from './newsfeed_header_nav_button';
 import { NewsfeedItem } from '../../types';
@@ -45,11 +47,15 @@ import { NewsLoadingPrompt } from './loading_news';
 
 interface Props {
   notificationsChannel: PulseChannel<NotificationInstruction>;
+  errorsInstructions: ErrorInstruction[];
 }
 
-export const NewsfeedFlyout = ({ notificationsChannel }: Props) => {
+export const NewsfeedFlyout = ({ notificationsChannel, errorsInstructions }: Props) => {
   const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
+  const [errorsInstructionsToShow, setErrorsInstructionsToShow] = useState<ErrorInstruction[]>(
+    errorsInstructions
+  );
 
   if (newsFetchResult && newsFetchResult.feedItems.length) {
     const lastNotificationHash = getLastItemHash(newsFetchResult.feedItems);
@@ -110,6 +116,7 @@ export const NewsfeedFlyout = ({ notificationsChannel }: Props) => {
         ) : (
           <NewsEmptyPrompt />
         )}
+        {errorsInstructionsToShow && errorsInstructionsToShow.length && <div>We have stuff!</div>}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
