@@ -6,14 +6,24 @@
 
 import Boom from 'boom';
 
+export interface CalendarEvent {
+  calendar_id?: string;
+  event_id?: string;
+  description: string;
+  start_time: number;
+  end_time: number;
+}
+
 export class EventManager {
-  constructor(callWithRequest) {
-    this.callWithRequest = callWithRequest;
+  private _client: any;
+  constructor(client: any) {
+    this._client = client;
   }
 
-  async getCalendarEvents(calendarId) {
+  async getCalendarEvents(calendarId: string) {
     try {
-      const resp = await this.callWithRequest('ml.events', { calendarId });
+      const resp = await this._client('ml.events', { calendarId });
+
       return resp.events;
     } catch (error) {
       throw Boom.badRequest(error);
@@ -21,31 +31,38 @@ export class EventManager {
   }
 
   // jobId is optional
-  async getAllEvents(jobId) {
+  async getAllEvents(jobId?: string) {
     const calendarId = '_all';
     try {
-      const resp = await this.callWithRequest('ml.events', { calendarId, jobId });
+      const resp = await this._client('ml.events', {
+        calendarId,
+        jobId,
+      });
+
       return resp.events;
     } catch (error) {
       throw Boom.badRequest(error);
     }
   }
 
-  async addEvents(calendarId, events) {
+  async addEvents(calendarId: string, events: CalendarEvent[]) {
     const body = { events };
 
     try {
-      return await this.callWithRequest('ml.addEvent', { calendarId, body });
+      return await this._client('ml.addEvent', {
+        calendarId,
+        body,
+      });
     } catch (error) {
       throw Boom.badRequest(error);
     }
   }
 
-  async deleteEvent(calendarId, eventId) {
-    return this.callWithRequest('ml.deleteEvent', { calendarId, eventId });
+  async deleteEvent(calendarId: string, eventId: string) {
+    return this._client('ml.deleteEvent', { calendarId, eventId });
   }
 
-  isEqual(ev1, ev2) {
+  isEqual(ev1: CalendarEvent, ev2: CalendarEvent) {
     return (
       ev1.event_id === ev2.event_id &&
       ev1.description === ev2.description &&
