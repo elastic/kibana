@@ -52,6 +52,13 @@ export const renderRuleName = ({
   );
 };
 
+const canYouAddEndpointLogo = (moduleName: string, endpointUrl: string | null | undefined) =>
+  moduleName.trim().toLocaleLowerCase() === 'endgame' &&
+  endpointUrl != null &&
+  !isEmpty(endpointUrl) &&
+  !isUrlInvalid(endpointUrl) &&
+  endpointUrl.includes('/alerts/');
+
 export const renderEventModule = ({
   contextId,
   eventId,
@@ -90,26 +97,23 @@ export const renderEventModule = ({
           {content}
         </DefaultDraggable>
       </EuiFlexItem>
-      {endpointRefUrl != null &&
-        !isEmpty(endpointRefUrl) &&
-        !isUrlInvalid(endpointRefUrl) &&
-        endpointRefUrl.includes('/alerts/') && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              data-test-subj="event-module-link-to-elastic-endpoint-security"
-              content={
-                <>
-                  <p>{i18n.LINK_ELASTIC_ENDPOINT_SECURITY}</p>
-                  <p>{endpointRefUrl}</p>
-                </>
-              }
-            >
-              <EuiLink href={endpointRefUrl} target="_blank">
-                <EuiIcon type={endPointSvg} size="m" />
-              </EuiLink>
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
+      {endpointRefUrl != null && canYouAddEndpointLogo(moduleName, endpointRefUrl) && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            data-test-subj="event-module-link-to-elastic-endpoint-security"
+            content={
+              <>
+                <p>{i18n.LINK_ELASTIC_ENDPOINT_SECURITY}</p>
+                <p>{endpointRefUrl}</p>
+              </>
+            }
+          >
+            <EuiLink href={endpointRefUrl} target="_blank">
+              <EuiIcon type={endPointSvg} size="m" />
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   ) : (
     getEmptyTagValue()

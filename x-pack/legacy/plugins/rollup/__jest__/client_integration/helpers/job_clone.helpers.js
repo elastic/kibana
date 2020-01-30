@@ -10,8 +10,10 @@ import { JobCreate } from '../../../public/crud_app/sections';
 import { JOB_TO_CLONE } from './constants';
 import { deserializeJob } from '../../../public/crud_app/services';
 
+import { wrapComponent } from './setup_context';
+
 export const setup = props => {
-  const initTestBed = registerTestBed(JobCreate, {
+  const initTestBed = registerTestBed(wrapComponent(JobCreate), {
     store: createRollupJobsStore({
       cloneJob: { job: deserializeJob(JOB_TO_CLONE.jobs[0]) },
     }),
