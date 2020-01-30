@@ -123,13 +123,13 @@ export function App({
             core.notifications
           )
             .then(indexPatterns => {
+              data.query.filterManager.setFilters(doc.state.filters);
               setState(s => ({
                 ...s,
                 isLoading: false,
                 persistedDoc: doc,
                 lastKnownDoc: doc,
                 query: doc.state.query,
-                filters: doc.state.filters,
                 indexPatternsForTopNav: indexPatterns,
               }));
             })

@@ -60,10 +60,10 @@ function createMockFilterManager() {
         return unsubscribe;
       },
     }),
-    setFilters: (newFilters: unknown[]) => {
+    setFilters: jest.fn((newFilters: unknown[]) => {
       filters = newFilters;
       subscriber();
-    },
+    }),
     getFilters: () => filters,
     getGlobalFilters: () => {
       // @ts-ignore
@@ -226,7 +226,7 @@ describe('Lens App', () => {
       expect(args.docStorage.load).not.toHaveBeenCalled();
     });
 
-    it('loads a document and uses query if there is a document id', async () => {
+    it('loads a document and uses query and filters if there is a document id', async () => {
       const args = makeDefaultArgs();
       args.editorFrame = frame;
       (args.docStorage.load as jest.Mock).mockResolvedValue({
@@ -234,6 +234,7 @@ describe('Lens App', () => {
         expression: 'valid expression',
         state: {
           query: 'fake query',
+          filters: [{ query: { match_phrase: { src: 'test' } } }],
           datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
         },
       });
@@ -245,6 +246,9 @@ describe('Lens App', () => {
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
       expect(args.data.indexPatterns.get).toHaveBeenCalledWith('1');
+      expect(args.data.query.filterManager.setFilters).toHaveBeenCalledWith([
+        { query: { match_phrase: { src: 'test' } } },
+      ]);
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'fake query',
@@ -260,6 +264,7 @@ describe('Lens App', () => {
             expression: 'valid expression',
             state: {
               query: 'fake query',
+              filters: [{ query: { match_phrase: { src: 'test' } } }],
               datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
             },
           },
