@@ -4,35 +4,12 @@ exports[`trace queries fetches a trace 1`] = `
 Object {
   "body": Object {
     "aggs": Object {
-      "errors": Object {
-        "aggs": Object {
-          "transactions": Object {
-            "aggs": Object {
-              "top_transactions_errors_hits": Object {
-                "top_hits": Object {
-                  "size": 100,
-                },
-              },
-            },
-            "terms": Object {
-              "execution_hint": "map",
-              "field": "transaction.id",
-            },
-          },
+      "by_transaction_id": Object {
+        "terms": Object {
+          "execution_hint": "map",
+          "field": "transaction.id",
+          "size": "myIndex",
         },
-        "filter": Object {
-          "term": Object {
-            "processor.event": "error",
-          },
-        },
-      },
-    },
-    "post_filter": Object {
-      "terms": Object {
-        "processor.event": Array [
-          "span",
-          "transaction",
-        ],
       },
     },
     "query": Object {
@@ -44,12 +21,8 @@ Object {
             },
           },
           Object {
-            "terms": Object {
-              "processor.event": Array [
-                "span",
-                "transaction",
-                "error",
-              ],
+            "term": Object {
+              "processor.event": "error",
             },
           },
           Object {
@@ -71,37 +44,10 @@ Object {
             ],
           },
         },
-        "should": Object {
-          "exists": Object {
-            "field": "parent.id",
-          },
-        },
       },
     },
     "size": "myIndex",
-    "sort": Array [
-      Object {
-        "_score": Object {
-          "order": "asc",
-        },
-      },
-      Object {
-        "transaction.duration.us": Object {
-          "order": "desc",
-        },
-      },
-      Object {
-        "span.duration.us": Object {
-          "order": "desc",
-        },
-      },
-    ],
-    "track_total_hits": true,
   },
-  "index": Array [
-    "myIndex",
-    "myIndex",
-    "myIndex",
-  ],
+  "index": "myIndex",
 }
 `;

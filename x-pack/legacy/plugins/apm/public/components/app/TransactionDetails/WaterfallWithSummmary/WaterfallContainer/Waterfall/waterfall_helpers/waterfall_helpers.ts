@@ -24,6 +24,8 @@ interface IWaterfallGroup {
   [key: string]: IWaterfallItem[];
 }
 
+const ROOT_ID = 'root';
+
 export interface IWaterfall {
   entryTransaction?: Transaction;
   rootTransaction?: Transaction;
@@ -104,17 +106,22 @@ function getErrorItem(
 ): IWaterfallError {
   const entryTimestamp = entryWaterfallTransaction?.doc.timestamp.us ?? 0;
   const parent = items.find(
-    waterfallItem => waterfallItem.id === error?.parent?.id
+    waterfallItem => waterfallItem.id === error.parent?.id
   );
-  return {
+  const errorItem: IWaterfallError = {
     docType: 'error',
     doc: error,
     id: error.error.id,
     parent,
     parentId: parent?.id,
     offset: error.timestamp.us - entryTimestamp,
-    skew: getClockSkew((error as unknown) as IWaterfallItem, parent),
+    skew: 0,
     duration: 0
+  };
+
+  return {
+    ...errorItem,
+    skew: getClockSkew(errorItem, parent)
   };
 }
 
@@ -229,7 +236,7 @@ const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
   });
 
 const getChildrenGroupedByParentId = (waterfallItems: IWaterfallItem[]) =>
-  groupBy(waterfallItems, item => (item.parentId ? item.parentId : 'root'));
+  groupBy(waterfallItems, item => (item.parentId ? item.parentId : ROOT_ID));
 
 const getEntryWaterfallTransaction = (
   entryTransactionId: string,
@@ -238,6 +245,48 @@ const getEntryWaterfallTransaction = (
   waterfallItems.find(
     item => item.docType === 'transaction' && item.id === entryTransactionId
   ) as IWaterfallTransaction;
+
+function isInEntryTransaction(
+  parentIdLookup: Map<string, string>,
+  entryTransactionId: string,
+  currentId: string
+): boolean {
+  if (currentId === entryTransactionId) {
+    return true;
+  }
+  const parentId = parentIdLookup.get(currentId);
+  if (parentId) {
+    return isInEntryTransaction(parentIdLookup, entryTransactionId, parentId);
+  }
+  return false;
+}
+
+function getWaterfallErrors(
+  errorDocs: TraceAPIResponse['trace']['errorDocs'],
+  items: IWaterfallItem[],
+  entryWaterfallTransaction?: IWaterfallTransaction
+) {
+  const errorItems = errorDocs.map(errorDoc =>
+    getErrorItem(errorDoc, items, entryWaterfallTransaction)
+  );
+  if (!entryWaterfallTransaction) {
+    return errorItems;
+  }
+  const parentIdLookup = [...items, ...errorItems].reduce(
+    (map, { id, parentId }) => {
+      map.set(id, parentId ?? ROOT_ID);
+      return map;
+    },
+    new Map<string, string>()
+  );
+  return errorItems.filter(errorItem =>
+    isInEntryTransaction(
+      parentIdLookup,
+      entryWaterfallTransaction?.id,
+      errorItem.id
+    )
+  );
+}
 
 export function getWaterfall(
   { trace, errorsPerTransaction }: TraceAPIResponse,
@@ -267,36 +316,11 @@ export function getWaterfall(
     childrenByParentId,
     entryWaterfallTransaction
   );
-
-  function isAncestor(
-    waterfallItemsList: IWaterfallItem[],
-    ancestorTransactionId: string,
-    currentItem: IWaterfallError | IWaterfallItem
-  ): boolean {
-    if (!currentItem.parentId) {
-      return false;
-    }
-    if (currentItem.parentId === ancestorTransactionId) {
-      return true;
-    }
-
-    const parentItem: IWaterfallItem | undefined = waterfallItemsList.find(
-      ({ id }) => id === currentItem.parentId
-    );
-
-    if (parentItem) {
-      return isAncestor(waterfallItemsList, ancestorTransactionId, parentItem);
-    }
-    return false;
-  }
-
-  const errorItems: IWaterfallError[] = trace.errorDocs
-    .map(errorDoc =>
-      getErrorItem(errorDoc as APMError, items, entryWaterfallTransaction)
-    )
-    .filter(errorItem => {
-      return isAncestor(items, entryTransactionId, errorItem);
-    });
+  const errorItems = getWaterfallErrors(
+    trace.errorDocs,
+    items,
+    entryWaterfallTransaction
+  );
 
   const rootTransaction = getRootTransaction(childrenByParentId);
   const duration = getWaterfallDuration(items);

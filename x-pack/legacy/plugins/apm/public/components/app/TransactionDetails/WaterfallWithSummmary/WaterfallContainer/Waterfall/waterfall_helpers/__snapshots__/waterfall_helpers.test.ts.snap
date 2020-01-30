@@ -92,7 +92,7 @@ Object {
         "skew": 0,
       },
       "parentId": "myTransactionId1",
-      "skew": undefined,
+      "skew": 0,
     },
   ],
   "errorsCount": 1,
