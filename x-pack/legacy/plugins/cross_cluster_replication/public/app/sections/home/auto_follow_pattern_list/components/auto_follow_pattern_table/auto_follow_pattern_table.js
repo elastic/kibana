@@ -16,6 +16,7 @@ import {
   EuiLoadingKibana,
   EuiToolTip,
   EuiOverlayMask,
+  EuiHealth,
 } from '@elastic/eui';
 import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import { AutoFollowPatternDeleteProvider } from '../../../../../components';
@@ -132,6 +133,19 @@ export class AutoFollowPatternTable extends PureComponent {
             defaultMessage: 'Follower index suffix',
           }
         ),
+        sortable: true,
+      },
+      {
+        field: 'active',
+        dataType: 'boolean',
+        align: 'center',
+        name: i18n.translate(
+          'xpack.crossClusterReplication.autoFollowPatternList.table.activeTitle',
+          {
+            defaultMessage: 'Active',
+          }
+        ),
+        render: active => <EuiHealth color={active ? 'success' : 'danger'} />,
         sortable: true,
       },
       {
