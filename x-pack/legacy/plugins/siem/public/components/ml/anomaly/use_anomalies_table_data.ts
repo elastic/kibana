@@ -14,9 +14,8 @@ import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../api/error_to_toaster';
 
 import * as i18n from './translations';
-import { useUiSetting$ } from '../../../lib/kibana';
+import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
-import { useTimeZone } from '../../../hooks';
 
 interface Args {
   influencers?: InfluencerInput[];

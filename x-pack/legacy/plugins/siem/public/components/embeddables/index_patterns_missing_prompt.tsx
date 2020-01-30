@@ -8,12 +8,12 @@ import { EuiButton, EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { useKibana } from '../../lib/kibana';
+import { useKibana, useBasePath } from '../../lib/kibana';
 import * as i18n from './translations';
 
 export const IndexPatternsMissingPromptComponent = () => {
-  const { http, docLinks } = useKibana().services;
-  const kibanaBasePath = `${http.basePath.get()}/app/kibana`;
+  const { docLinks } = useKibana().services;
+  const kibanaBasePath = `${useBasePath()}/app/kibana`;
 
   return (
     <EuiEmptyPrompt

@@ -6,8 +6,8 @@
 
 import moment from 'moment-timezone';
 
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../common/constants';
-import { useUiSetting } from '../lib/kibana';
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
+import { useUiSetting, useKibana } from './kibana_react';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
 
@@ -15,3 +15,5 @@ export const useTimeZone = (): string => {
   const timeZone = useUiSetting<string>(DEFAULT_DATE_FORMAT_TZ);
   return timeZone === 'Browser' ? moment.tz.guess() : timeZone;
 };
+
+export const useBasePath = (): string => useKibana().services.http.basePath.get();

@@ -9,7 +9,7 @@ import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
 
-import { useTimeZone } from '../../hooks';
+import { useTimeZone } from '../../lib/kibana';
 import { AutoSizer } from '../auto_sizer';
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
