@@ -20,7 +20,6 @@
 export * from './save_modal';
 export {
   SavedObjectMetaData,
-  SavedObjectFinderProps,
   SavedObjectFinderUi,
   getSavedObjectFinder,
 } from './saved_object_finder';
