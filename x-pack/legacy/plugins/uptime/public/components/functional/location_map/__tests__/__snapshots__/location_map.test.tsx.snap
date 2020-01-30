@@ -143,6 +143,45 @@ exports[`LocationMap component renders correctly against snapshot 1`] = `
 </EuiErrorBoundary>
 `;
 
+exports[`LocationMap component renders named locations that have missing geo data 1`] = `
+<EuiErrorBoundary>
+  <EuiFlexGroup>
+    <EuiFlexItem
+      grow={false}
+    >
+      <LocationStatusTags
+        locations={
+          Array [
+            Object {
+              "geo": Object {
+                "location": undefined,
+                "name": "New York",
+              },
+              "summary": Object {
+                "down": 0,
+                "up": 4,
+              },
+              "timestamp": "2020-01-13T22:50:06.536Z",
+            },
+          ]
+        }
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={true}
+    >
+      <LocationMissingWarning />
+      <styled.div>
+        <EmbeddedMap
+          downPoints={Array []}
+          upPoints={Array []}
+        />
+      </styled.div>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiErrorBoundary>
+`;
+
 exports[`LocationMap component shows warning if geo information is missing 1`] = `
 <EuiErrorBoundary>
   <EuiFlexGroup>
