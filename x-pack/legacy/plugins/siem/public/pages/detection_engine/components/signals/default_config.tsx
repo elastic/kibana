@@ -114,13 +114,13 @@ export const signalsHeaders: ColumnHeader[] = [
     columnHeaderType: defaultColumnHeaderType,
     id: 'signal.rule.severity',
     label: i18n.SIGNALS_HEADERS_SEVERITY,
-    width: 100,
+    width: 105,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'signal.rule.risk_score',
     label: i18n.SIGNALS_HEADERS_RISK_SCORE,
-    width: 120,
+    width: 115,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
