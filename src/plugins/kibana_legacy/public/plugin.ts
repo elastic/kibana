@@ -26,15 +26,17 @@ interface ForwardDefinition {
   keepPrefix: boolean;
 }
 
+export type AngularRenderedAppUpdater = (
+  app: AppBase
+) => Partial<AppUpdatableFields & { activeUrl: string }> | undefined;
+
 export interface AngularRenderedApp extends App {
   /**
    * Angular rendered apps are able to update the active url in the nav link (which is currently not
    * possible for actual NP apps). When regular applications have the same functionality, this type
    * override can be removed.
    */
-  updater$?: Observable<
-    (app: AppBase) => Partial<AppUpdatableFields & { activeUrl: string }> | undefined
-  >;
+  updater$?: Observable<AngularRenderedAppUpdater>;
   /**
    * If the active url is updated via the updater$ subject, the app id is assumed to be identical with
    * the nav link id. If this is not the case, it is possible to provide another nav link id here.

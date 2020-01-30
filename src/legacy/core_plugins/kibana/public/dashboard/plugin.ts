@@ -20,7 +20,6 @@
 import { BehaviorSubject } from 'rxjs';
 import {
   App,
-  AppUpdater,
   CoreSetup,
   CoreStart,
   LegacyCoreStart,
@@ -43,7 +42,10 @@ import {
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
-import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
+import {
+  AngularRenderedAppUpdater,
+  KibanaLegacySetup,
+} from '../../../../../plugins/kibana_legacy/public';
 import { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public/state_management/url/kbn_url_tracker';
 import { getQueryStateContainer } from '../../../../../plugins/data/public/query/state_sync/sync_query';
@@ -78,7 +80,7 @@ export class DashboardPlugin implements Plugin {
     share: SharePluginStart;
   } | null = null;
 
-  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
 
   public setup(
