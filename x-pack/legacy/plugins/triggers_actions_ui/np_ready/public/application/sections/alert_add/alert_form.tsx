@@ -149,6 +149,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
           id: 'threshold',
           actionGroups: ['Alert', 'Warning', 'If unacknowledged'],
           name: 'threshold',
+          actionVariables: ['ctx.metadata.name', 'ctx.metadata.test'],
         });
         const index: AlertTypeIndex = {};
         for (const alertTypeItem of alertTypes) {
@@ -437,6 +438,10 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
             index={index}
             errors={actionParamsErrors.errors}
             editAction={setActionParamsProperty}
+            messageVariables={
+              alertTypesIndex ? alertTypesIndex[alert.alertTypeId].actionVariables : undefined
+            }
+            defaultMessage={alertTypeModel?.defaultActionMessage ?? undefined}
           />
         ) : null}
       </EuiAccordion>

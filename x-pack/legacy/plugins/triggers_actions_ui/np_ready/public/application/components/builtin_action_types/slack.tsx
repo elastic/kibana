@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import {
   EuiFieldText,
   EuiTextArea,
@@ -13,6 +13,9 @@ import {
   EuiSpacer,
   EuiTextColor,
   EuiText,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -139,9 +142,29 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   editAction,
   index,
   errors,
+  messageVariables,
+  defaultMessage,
 }) => {
   const { message } = action;
-
+  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
+  useEffect(() => {
+    if (defaultMessage && defaultMessage.length > 0) {
+      editAction('message', defaultMessage, index);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const messageVariablesItems = messageVariables?.map((variable: string) => (
+    <EuiContextMenuItem
+      key={variable}
+      icon="empty"
+      onClick={() => {
+        editAction('message', (message ?? '').concat(` {{${variable}}}`), index);
+        setIsVariablesPopoverOpen(false);
+      }}
+    >
+      {`{{${variable}}}`}
+    </EuiContextMenuItem>
+  ));
   return (
     <Fragment>
       <EuiText>
@@ -165,11 +188,27 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           }
         )}
         labelAppend={
-          <EuiButtonIcon
-            onClick={() => window.alert('Button clicked')}
-            iconType="indexOpen"
-            aria-label="Add variable"
-          />
+          <EuiPopover
+            id="singlePanel"
+            button={
+              <EuiButtonIcon
+                onClick={() => setIsVariablesPopoverOpen(true)}
+                iconType="indexOpen"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.addVariablePopoverButton',
+                  {
+                    defaultMessage: 'Add variable',
+                  }
+                )}
+              />
+            }
+            isOpen={isVariablesPopoverOpen}
+            closePopover={() => setIsVariablesPopoverOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel items={messageVariablesItems} />
+          </EuiPopover>
         }
       >
         <EuiTextArea

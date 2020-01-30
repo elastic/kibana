@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFieldText,
@@ -19,6 +19,10 @@ import {
   EuiTextColor,
   EuiSpacer,
   EuiText,
+  EuiContextMenuItem,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -381,6 +385,8 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   editAction,
   index,
   errors,
+  messageVariables,
+  defaultMessage,
 }) => {
   const { to, cc, bcc, subject, message } = action;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
@@ -389,6 +395,25 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   const [addCC, setAddCC] = useState<boolean>(false);
   const [addBCC, setAddBCC] = useState<boolean>(false);
 
+  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
+  useEffect(() => {
+    if (defaultMessage && defaultMessage.length > 0) {
+      editAction('message', defaultMessage, index);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const messageVariablesItems = messageVariables?.map((variable: string) => (
+    <EuiContextMenuItem
+      key={variable}
+      icon="empty"
+      onClick={() => {
+        editAction('message', (message ?? '').concat(` {{${variable}}}`), index);
+        setIsVariablesPopoverOpen(false);
+      }}
+    >
+      {`{{${variable}}}`}
+    </EuiContextMenuItem>
+  ));
   return (
     <Fragment>
       <EuiText>
@@ -582,6 +607,29 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             defaultMessage: 'Message:',
           }
         )}
+        labelAppend={
+          <EuiPopover
+            id="singlePanel"
+            button={
+              <EuiButtonIcon
+                onClick={() => setIsVariablesPopoverOpen(true)}
+                iconType="indexOpen"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.addVariablePopoverButton',
+                  {
+                    defaultMessage: 'Add variable',
+                  }
+                )}
+              />
+            }
+            isOpen={isVariablesPopoverOpen}
+            closePopover={() => setIsVariablesPopoverOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel items={messageVariablesItems} />
+          </EuiPopover>
+        }
       >
         <EuiTextArea
           fullWidth

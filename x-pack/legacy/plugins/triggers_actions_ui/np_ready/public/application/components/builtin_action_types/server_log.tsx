@@ -3,10 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiSelect, EuiTextArea, EuiFormRow, EuiTextColor, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiSelect,
+  EuiTextArea,
+  EuiFormRow,
+  EuiTextColor,
+  EuiSpacer,
+  EuiText,
+  EuiContextMenuItem,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+} from '@elastic/eui';
 import { ActionTypeModel, ValidationResult, ActionParamsProps } from '../../../types';
 
 export function getActionType(): ActionTypeModel {
@@ -56,6 +67,8 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
   editAction,
   index,
   errors,
+  messageVariables,
+  defaultMessage,
 }) => {
   const { message, level } = action;
   const levelOptions = [
@@ -66,12 +79,27 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
     { value: 'error', text: 'Error' },
     { value: 'fatal', text: 'Fatal' },
   ];
+  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
 
   useEffect(() => {
     editAction('level', 'info', index);
+    if (defaultMessage && defaultMessage.length > 0) {
+      editAction('message', defaultMessage, index);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+  const messageVariablesItems = messageVariables?.map((variable: string) => (
+    <EuiContextMenuItem
+      key={variable}
+      icon="empty"
+      onClick={() => {
+        editAction('message', (message ?? '').concat(` {{${variable}}}`), index);
+        setIsVariablesPopoverOpen(false);
+      }}
+    >
+      {`{{${variable}}}`}
+    </EuiContextMenuItem>
+  ));
   return (
     <Fragment>
       <EuiText>
@@ -116,6 +144,29 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
             defaultMessage: 'Message',
           }
         )}
+        labelAppend={
+          <EuiPopover
+            id="singlePanel"
+            button={
+              <EuiButtonIcon
+                onClick={() => setIsVariablesPopoverOpen(true)}
+                iconType="indexOpen"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.addVariablePopoverButton',
+                  {
+                    defaultMessage: 'Add variable',
+                  }
+                )}
+              />
+            }
+            isOpen={isVariablesPopoverOpen}
+            closePopover={() => setIsVariablesPopoverOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel items={messageVariablesItems} />
+          </EuiPopover>
+        }
       >
         <EuiTextArea
           fullWidth

@@ -17,7 +17,6 @@ export interface ActionConnectorFieldsProps {
   editActionConfig: (property: string, value: any) => void;
   editActionSecrets: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
-  hasErrors?: boolean;
 }
 
 export interface ActionParamsProps {
@@ -25,7 +24,8 @@ export interface ActionParamsProps {
   index: number;
   editAction: (property: string, value: any, index: number) => void;
   errors: { [key: string]: string[] };
-  hasErrors?: boolean;
+  messageVariables?: string[];
+  defaultMessage?: string;
 }
 
 export interface Pagination {
@@ -72,6 +72,7 @@ export interface AlertType {
   id: string;
   name: string;
   actionGroups: string[];
+  actionVariables: string[];
 }
 
 export type AlertWithoutId = Omit<Alert, 'id'>;
@@ -87,6 +88,7 @@ export interface AlertTypeModel {
   iconClass: string;
   validate: (alert: Alert) => ValidationResult;
   alertParamsExpression: React.FunctionComponent<any>;
+  defaultActionMessage?: string;
 }
 
 export interface IErrorObject {
