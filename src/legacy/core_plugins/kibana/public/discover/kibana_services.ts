@@ -72,7 +72,6 @@ export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 export { formatMsg, formatStack } from 'ui/notify/lib/index';
 
 // EXPORT types
-export { Vis } from 'ui/vis';
 export {
   IndexPatternsContract,
   IIndexPattern,
