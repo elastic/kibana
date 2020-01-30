@@ -230,6 +230,11 @@ export class UpdateSourceEditor extends Component {
   }
 
   _renderSortPanel() {
+
+    if (!this.props.showSorting) {
+      return null;
+    }
+
     return (
       <EuiPanel>
         <EuiTitle size="xs">

@@ -18,6 +18,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {loadIndexSettings} from "../es_search_source/load_index_settings";
 import  rison from 'rison-node';
+import {UpdateSourceEditor} from "../es_search_source/update_source_editor";
 
 export class ESMVTSearchSource extends ESSearchSource {
   static type = ES_MVT_SEARCH;
@@ -58,10 +59,11 @@ export class ESMVTSearchSource extends ESSearchSource {
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
-    const searchSource = await this._makeSearchSource(searchFilters, indexSettings.maxResultWindow);
     console.log('sf', searchFilters);
-    console.log('ss', searchSource);
 
+    const searchSource = await this._makeSearchSource(searchFilters, indexSettings.maxResultWindow);
+    searchSource.setField('fields', searchFilters.fieldNames);
+    console.log('ss', searchSource);
     window._ss = searchSource;
 
 
@@ -94,7 +96,20 @@ export class ESMVTSearchSource extends ESSearchSource {
   }
 
   renderSourceSettingsEditor({ onChange }) {
-    return null;
+    return (
+      <UpdateSourceEditor
+        source={this}
+        indexPatternId={this._descriptor.indexPatternId}
+        onChange={onChange}
+        tooltipFields={this._tooltipFields}
+        sortField={this._descriptor.sortField}
+        sortOrder={this._descriptor.sortOrder}
+        useTopHits={this._descriptor.useTopHits}
+        topHitsSplitField={this._descriptor.topHitsSplitField}
+        topHitsSize={this._descriptor.topHitsSize}
+        showSorting={false}
+      />
+    );
   }
 
   isFilterByMapBounds() {

@@ -713,7 +713,7 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  _setMbSymbolProperties(mbMap, {mvtSourceLayer}) {
+  _setMbSymbolProperties(mbMap, { mvtSourceLayer }) {
     const sourceId = this.getId();
     const symbolLayerId = this._getMbSymbolLayerId();
     const symbolLayer = mbMap.getLayer(symbolLayerId);
@@ -897,5 +897,31 @@ export class VectorLayer extends AbstractLayer {
     return featureCollection.features.find(feature => {
       return feature.properties[FEATURE_ID_PROPERTY_NAME] === id;
     });
+  }
+
+  getGeometryByFeatureId(featureId) {
+    const targetFeature = this.getFeatureById(featureId);
+    if (!targetFeature) {
+      return null;
+    }
+
+    return targetFeature.geometry;
+  }
+
+  async getFeaturePropertiesByFeatureId(featureId) {
+    const targetFeature = this.getFeatureById(featureId);
+    if (!targetFeature) {
+      return [];
+    }
+    return await this.getPropertiesForTooltip(targetFeature.properties);
+  }
+
+  async loadPreIndexedShapeByFeatureId(featureId) {
+    const targetFeature = this.getFeatureById(featureId);
+    if (!targetFeature) {
+      return null;
+    }
+
+    return await this.getSource().getPreIndexedShape(targetFeature.properties);
   }
 }

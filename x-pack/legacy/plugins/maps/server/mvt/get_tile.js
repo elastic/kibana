@@ -7,6 +7,7 @@
 import geojsonvt from 'geojson-vt';
 import vtpbf from 'vt-pbf';
 import _ from 'lodash';
+import { FEATURE_ID_PROPERTY_NAME } from '../../common/constants';
 
 export async function getTile({
   esClient,
@@ -26,7 +27,6 @@ export async function getTile({
   try {
     let result;
     try {
-
       const geoShapeFilter = {
         geo_shape: {
           [geometryFieldName]: {
@@ -38,33 +38,15 @@ export async function getTile({
 
       requestBody.query.bool.filter.push(geoShapeFilter);
 
-      // const esQuery = {
-      //   index: indexPattern,
-      //   body: {
-      //     size: requestBody.size,
-      //     _source: requestBody._source,
-      //     stored_fields: requestBody.stored_fields,
-      //     query: {
-      //       bool: {
-      //         must: [],
-      //         filter: requestBody.query.bool.filter.concat(geoShapeFilter),
-      //         should: [],
-      //         must_not: [],
-      //       },
-      //     },
-      //   },
-      // };
-
-
       const esQuery = {
         index: indexPattern,
         body: requestBody,
-      }
+      };
       server.log('info', JSON.stringify(esQuery));
       result = await esClient.search(esQuery);
       server.log('result', JSON.stringify(result));
     } catch (e) {
-      server.log('error',e.message);
+      server.log('error', e.message);
       throw e;
     }
 
@@ -88,10 +70,16 @@ export async function getTile({
         coordinates: geometry.coordinates,
       };
 
-      const properties = { ...hit._source };
+      const properties = {
+        ...hit._source,
+        _id: hit._id,
+        _index: hit._index,
+        [FEATURE_ID_PROPERTY_NAME]: hit._id,
+      };
       delete properties[geometryFieldName];
 
       return {
+        type: 'Feature',
         id: hit._id,
         geometry: geometryGeoJson,
         properties: properties,

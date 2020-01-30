@@ -6,7 +6,11 @@
 
 import React from 'react';
 import { VectorStyle } from './styles/vector/vector_style';
-import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
+import {
+  SOURCE_DATA_ID_ORIGIN,
+  LAYER_TYPE,
+  FEATURE_ID_PROPERTY_NAME,
+} from '../../common/constants';
 import { VectorLayer } from './vector_layer';
 import { EuiIcon } from '@elastic/eui';
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
@@ -38,10 +42,6 @@ export class TiledVectorLayer extends VectorLayer {
     }
   }
 
-  getLayerTypeIconName() {
-    return 'vector';
-  }
-
   getCustomIconAndTooltipContent() {
     return {
       icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
@@ -50,6 +50,8 @@ export class TiledVectorLayer extends VectorLayer {
 
   _getSearchFilters(dataFilters) {
     const fieldNames = [...this._source.getFieldNames(), ...this._style.getSourceFieldNames()];
+
+    console.log('fn', fieldNames);
 
     return {
       ...dataFilters,
@@ -156,7 +158,7 @@ export class TiledVectorLayer extends VectorLayer {
   syncLayerWithMB(mbMap) {
     const requiresCleanup = this._requiresPrevSourceCleanup(mbMap);
     if (requiresCleanup) {
-      console.log('requires cleanup, source changed')
+      console.log('requires cleanup, source changed');
       const mbStyle = mbMap.getStyle();
       mbStyle.layers.forEach(mbLayer => {
         if (this.ownsMbLayerId(mbLayer.id)) {
@@ -176,5 +178,21 @@ export class TiledVectorLayer extends VectorLayer {
 
   getJoins() {
     return [];
+  }
+
+  getGeometryByFeatureId(featureId, meta) {
+    return null;
+  }
+
+  async getFeaturePropertiesByFeatureId(featureId, meta) {
+    const test = await this._source.filterAndFormatPropertiesToHtml({
+      _id: meta.docId,
+      _index: meta.indexName,
+    });
+    return test;
+  }
+
+  async loadPreIndexedShapeByFeatureId(featureId, meta) {
+    return null;
   }
 }

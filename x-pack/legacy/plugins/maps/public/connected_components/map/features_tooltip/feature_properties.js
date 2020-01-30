@@ -35,10 +35,11 @@ export class FeatureProperties extends React.Component {
     this._fetchProperties({
       nextFeatureId: this.props.featureId,
       nextLayerId: this.props.layerId,
+      meta: this.props.meta
     });
   };
 
-  _fetchProperties = async ({ nextLayerId, nextFeatureId }) => {
+  _fetchProperties = async ({ nextLayerId, nextFeatureId, meta }) => {
     if (this.prevLayerId === nextLayerId && this.prevFeatureId === nextFeatureId) {
       // do not reload same feature properties
       return;
@@ -64,6 +65,7 @@ export class FeatureProperties extends React.Component {
       properties = await this.props.loadFeatureProperties({
         layerId: nextLayerId,
         featureId: nextFeatureId,
+        meta: meta,
       });
     } catch (error) {
       if (this._isMounted) {

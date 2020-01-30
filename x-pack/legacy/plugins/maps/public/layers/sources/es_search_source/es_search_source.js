@@ -101,6 +101,7 @@ export class ESSearchSource extends AbstractESSource {
         useTopHits={this._descriptor.useTopHits}
         topHitsSplitField={this._descriptor.topHitsSplitField}
         topHitsSize={this._descriptor.topHitsSize}
+        showSorting={true}
       />
     );
   }
