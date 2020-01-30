@@ -264,6 +264,8 @@ export interface ChromeNavLink {
     readonly category?: AppCategory;
     // @deprecated
     readonly disabled?: boolean;
+    // @deprecated
+    readonly disableSubUrlTracking?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
     readonly icon?: string;

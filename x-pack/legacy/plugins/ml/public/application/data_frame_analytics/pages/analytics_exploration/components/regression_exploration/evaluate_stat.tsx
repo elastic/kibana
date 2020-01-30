@@ -12,6 +12,7 @@ interface Props {
   isLoading: boolean;
   title: number | string;
   isMSE: boolean;
+  dataTestSubj: string;
 }
 
 const meanSquaredErrorText = i18n.translate(
@@ -41,8 +42,8 @@ const rSquaredTooltipContent = i18n.translate(
   }
 );
 
-export const EvaluateStat: FC<Props> = ({ isLoading, isMSE, title }) => (
-  <EuiFlexGroup gutterSize="xs">
+export const EvaluateStat: FC<Props> = ({ isLoading, isMSE, title, dataTestSubj }) => (
+  <EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
     <EuiFlexItem grow={false}>
       <EuiStat
         reverse
