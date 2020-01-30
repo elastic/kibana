@@ -535,8 +535,7 @@ export class DashboardAppController {
 
     $scope.onSavedQueryUpdated = savedQuery => {
       $scope.savedQuery = { ...savedQuery };
-      updateState();
-      updateNavBar();
+      updateStateFromSavedQuery(savedQuery);
     };
 
     $scope.onClearSavedQuery = () => {
@@ -574,16 +573,13 @@ export class DashboardAppController {
       }
       // Making this method sync broke the updates.
       // Temporary fix, until we fix the complex state in this file.
-      setTimeout(() => {
-        queryFilter.setFilters(allFilters);
-      }, 0);
+      queryFilter.setFilters(allFilters);
       updateNavBar();
     };
 
     $scope.$watch('savedQuery', (newSavedQuery: SavedQuery) => {
       if (!newSavedQuery) return;
       dashboardStateManager.setSavedQueryId(newSavedQuery.id);
-
       updateStateFromSavedQuery(newSavedQuery);
     });
 
