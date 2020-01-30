@@ -16,7 +16,7 @@ import {
 } from '../../../../../../common/log_analysis';
 import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { AnomaliesTableExpandedRow } from './expanded_row';
-import { euiStyled } from '../../../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../../../observability/public';
 
 interface TableItem {
   id: string;

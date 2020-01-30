@@ -7,7 +7,7 @@
 import { darken, transparentize } from 'polished';
 import React, { memo } from 'react';
 
-import { euiStyled, css } from '../../../utils/eui_styled_components';
+import { euiStyled, css } from '../../../../../observability/public';
 import { useFormattedTime } from '../../formatted_time';
 import { LogEntryColumnContent } from './log_entry_column';
 

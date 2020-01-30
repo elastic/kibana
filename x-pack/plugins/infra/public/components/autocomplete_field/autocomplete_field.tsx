@@ -14,7 +14,7 @@ import React from 'react';
 
 import { AutocompleteSuggestion } from '../../../../../../src/plugins/data/public';
 
-import { euiStyled } from '../../utils/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';
 

@@ -7,7 +7,7 @@
 import { darken, transparentize } from 'polished';
 import React, { useMemo, useState, useCallback } from 'react';
 
-import { euiStyled, css } from '../../../utils/eui_styled_components';
+import { euiStyled, css } from '../../../../../observability/public';
 import { TextScale } from '../../../../common/log_text_scale';
 
 export const monospaceTextStyle = (scale: TextScale) => css`

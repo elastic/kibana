@@ -16,7 +16,7 @@ import { GaugesSectionVis } from '../../../../public/pages/metrics/components/ga
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChartSectionVis } from '../../../../public/pages/metrics/components/chart_section_vis';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { withTheme } from '../../../../public/utils/eui_styled_components';
+import { withTheme } from '../../../../../observability/public';
 
 export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
   <React.Fragment>

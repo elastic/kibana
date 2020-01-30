@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { LogColumnConfiguration } from '../../utils/source_configuration';
 import { useVisibilityState } from '../../utils/use_visibility_state';
-import { euiStyled } from '../../utils/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
 
 interface SelectableColumnOption {
   optionProps: Option;

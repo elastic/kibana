@@ -6,7 +6,7 @@
 
 import React, { memo, useMemo } from 'react';
 
-import { euiStyled, css } from '../../../utils/eui_styled_components';
+import { euiStyled, css } from '../../../../../observability/public';
 import {
   isConstantSegment,
   isFieldSegment,

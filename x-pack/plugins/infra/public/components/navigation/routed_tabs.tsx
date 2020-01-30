@@ -8,7 +8,7 @@ import { EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
 import { Route } from 'react-router-dom';
 
-import { euiStyled } from '../../utils/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
 
 interface TabConfiguration {
   title: string | React.ReactNode;

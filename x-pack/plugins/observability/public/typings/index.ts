@@ -4,9 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPageContent } from '@elastic/eui';
-import { euiStyled } from '../../../../../observability/public';
-
-export const LayoutContent = euiStyled(EuiPageContent)`
-  position: relative;
-`;
+export * from './eui_draggable';
+export * from './eui_styled_components';

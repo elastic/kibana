@@ -7,7 +7,7 @@
 import React, { useContext } from 'react';
 import { transparentize } from 'polished';
 
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 import {
   LogColumnConfiguration,
   isTimestampLogColumnConfiguration,

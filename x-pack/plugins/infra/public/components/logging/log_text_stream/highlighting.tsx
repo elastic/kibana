@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 import { chooseLightOrDarkColor, tintOrShade } from '../../../utils/styles';
 
 export const ActiveHighlightMarker = euiStyled.mark`

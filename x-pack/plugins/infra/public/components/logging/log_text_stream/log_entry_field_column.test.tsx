@@ -7,7 +7,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { EuiThemeProvider } from '../../../utils/eui_styled_components';
+import { EuiThemeProvider } from '../../../../../observability/public';
 import { LogEntryColumn } from '../../../utils/log_entry';
 import { LogEntryFieldColumn } from './log_entry_field_column';
 

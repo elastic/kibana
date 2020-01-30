@@ -21,7 +21,7 @@ import { AutoSizer } from '../../../components/auto_sizer';
 import { MetricsTimeControls } from './time_controls';
 import { SideNavContext, NavItem } from '../lib/side_nav_context';
 import { PageBody } from './page_body';
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 import { MetricsTimeInput } from '../containers/with_metrics_time';
 import { InfraMetadata } from '../../../../common/http_api/metadata_api';
 import { PageError } from './page_error';

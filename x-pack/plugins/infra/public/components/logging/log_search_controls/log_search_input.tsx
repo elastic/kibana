@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import * as React from 'react';
 
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 
 interface LogSearchInputProps {
   className?: string;

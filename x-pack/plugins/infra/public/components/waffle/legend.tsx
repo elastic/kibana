@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { euiStyled } from '../../utils/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
 import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
 import { InfraFormatter, InfraWaffleMapBounds, InfraWaffleMapLegend } from '../../lib/lib';
 import { GradientLegend } from './gradient_legend';

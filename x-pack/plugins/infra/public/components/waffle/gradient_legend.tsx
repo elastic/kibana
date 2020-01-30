@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { euiStyled } from '../../utils/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
 import {
   InfraFormatter,
   InfraWaffleMapBounds,

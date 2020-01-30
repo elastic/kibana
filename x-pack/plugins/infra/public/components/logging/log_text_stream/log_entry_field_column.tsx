@@ -8,7 +8,7 @@ import stringify from 'json-stable-stringify';
 import { darken, transparentize } from 'polished';
 import React, { useMemo } from 'react';
 
-import { euiStyled, css } from '../../../utils/eui_styled_components';
+import { euiStyled, css } from '../../../../../observability/public';
 import {
   isFieldColumn,
   isHighlightFieldColumn,

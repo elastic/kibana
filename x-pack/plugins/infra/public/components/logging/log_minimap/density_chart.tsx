@@ -9,7 +9,7 @@ import { area, curveMonotoneY } from 'd3-shape';
 import { max } from 'lodash';
 import * as React from 'react';
 
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 import { SummaryBucket } from './types';
 
 interface DensityChartProps {

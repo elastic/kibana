@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 
 export const LogAnalysisSetupPage: React.FunctionComponent<CommonProps> = ({
   children,

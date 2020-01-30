@@ -7,7 +7,7 @@
 import { scaleLinear } from 'd3-scale';
 import * as React from 'react';
 
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 import { LogEntryTime } from '../../../../common/log_entry';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
