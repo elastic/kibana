@@ -34,7 +34,7 @@ export interface ExecutionParams<
 > {
   executor: Executor<any>;
   ast: ExpressionAstExpression;
-  context: ExtraContext;
+  context?: ExtraContext;
 }
 
 export class Execution<ExtraContext extends Record<string, unknown> = Record<string, unknown>> {
@@ -78,7 +78,7 @@ export class Execution<ExtraContext extends Record<string, unknown> = Record<str
       types: executor.getTypes(),
     };
     this.context = {
-      ...params.context,
+      ...(params.context || ({} as ExtraContext)),
       ...executionContext,
     };
   }

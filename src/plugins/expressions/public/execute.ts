@@ -60,7 +60,7 @@ export class ExpressionDataHandler {
 
     const interpreter = getInterpreter();
     this.promise = interpreter
-      .interpretAst(this.ast, params.context || defaultContext, {
+      .interpretAst<any, IInterpreterResult>(this.ast, params.context || defaultContext, {
         getInitialContext,
         inspectorAdapters: this.inspectorAdapters,
         abortSignal: this.abortController.signal,
@@ -74,7 +74,7 @@ export class ExpressionDataHandler {
         () => {
           this.isPending = false;
         }
-      );
+      ) as Promise<IInterpreterResult>;
   }
 
   cancel = () => {

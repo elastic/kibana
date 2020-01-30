@@ -22,7 +22,7 @@ import {
   createStateContainer,
 } from '../../../kibana_utils/common/state_containers';
 import { ExecutorState, defaultState as executorDefaultState } from '../executor';
-import { ExpressionAstExpression } from '../parser';
+import { ExpressionAstExpression } from '../ast';
 import { ExpressionValue } from '../expression_types';
 
 export interface ExecutionState extends ExecutorState {

@@ -168,14 +168,14 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    * @param context Extra global context object that will be merged into the
    *    expression global context object that is provided to each function to allow side-effects.
    */
-  public async run<Input, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(
-    ast: string | ExpressionAstExpression,
-    input: Input,
-    context?: ExtraContext
-  ) {
+  public async run<
+    Input,
+    Output,
+    ExtraContext extends Record<string, unknown> = Record<string, unknown>
+  >(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext) {
     const execution = this.createExecution(ast, context);
     execution.start(input);
-    return await execution.result;
+    return (await execution.result) as Output;
   }
 
   public createExecution<ExtraContext extends Record<string, unknown> = Record<string, unknown>>(

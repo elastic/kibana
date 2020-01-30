@@ -34,6 +34,8 @@ const createSetupContract = (): Setup => {
     registerFunction: jest.fn(),
     registerRenderer: jest.fn(),
     registerType: jest.fn(),
+    getFunctions: jest.fn(),
+    run: jest.fn(),
     __LEGACY: {
       functions: {
         register: () => {},
@@ -46,7 +48,7 @@ const createSetupContract = (): Setup => {
       } as any,
       getExecutor: () => ({
         interpreter: {
-          interpretAst: () => {},
+          interpretAst: (() => {}) as any,
         },
       }),
       loadLegacyServerFunctionWrappers: () => Promise.resolve(),
@@ -64,6 +66,8 @@ const createStartContract = (): Start => {
     ExpressionRenderHandler: jest.fn(),
     loader: jest.fn(),
     render: jest.fn(),
+    getFunctions: jest.fn(),
+    run: jest.fn(),
   };
 };
 

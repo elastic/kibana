@@ -18,7 +18,7 @@
  */
 
 import { Execution } from './execution';
-import { parseExpression } from '../parser';
+import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
 
 const createExecution = (expression: string = 'foo bar=123') => {
