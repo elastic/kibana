@@ -69,8 +69,8 @@ describe('query builder', () => {
       });
       expect(query).toEqual({
         body: {
-          query: { match: { machine_id: mockID } },
-          sort: [{ created_at: { order: 'desc' } }],
+          query: { match: { 'host.id.keyword': mockID } },
+          sort: [{ 'event.created': { order: 'desc' } }],
           size: 1,
         },
         index: 'endpoint-agent*',

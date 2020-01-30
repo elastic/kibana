@@ -74,12 +74,12 @@ export const kibanaRequestToEndpointFetchQuery = (
     body: {
       query: {
         match: {
-          machine_id: request.params.id,
+          'host.id.keyword': request.params.id,
         },
       },
       sort: [
         {
-          created_at: {
+          'event.created': {
             order: 'desc',
           },
         },
