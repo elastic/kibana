@@ -5,9 +5,7 @@
  */
 
 import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
-import chrome from 'ui/chrome';
 
-import { throwIfNotOk } from '../../hooks/api/api';
 import {
   DEFAULT_TABLE_ACTIVE_PAGE,
   DEFAULT_TABLE_LIMIT,
@@ -22,6 +20,7 @@ import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { flattenSavedObjects } from './utils';
+import { fetchCases } from './api';
 
 const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
   switch (action.type) {
@@ -68,6 +67,11 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
     isLoading: false,
     isError: false,
     data: initialData,
+    filterOptions: {
+      filter: '',
+      sortField: 'enabled',
+      sortOrder: 'desc',
+    },
     pagination: {
       page: DEFAULT_TABLE_ACTIVE_PAGE,
       perPage: DEFAULT_TABLE_LIMIT,
@@ -87,27 +91,16 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
     const fetchData = async () => {
       dispatch({ type: FETCH_INIT });
       try {
-        const queryParams = Object.entries(state.pagination).reduce(
-          (acc, [key, value]) => `${acc}${key}=${value}&`,
-          '?'
-        );
-        const response = await fetch(`${chrome.getBasePath()}/api/cases${queryParams}`, {
-          method: 'GET',
-          credentials: 'same-origin',
-          headers: {
-            'content-type': 'application/json',
-            'kbn-system-api': 'true',
-            'kbn-xsrf': 'true',
-          },
+        const response = await fetchCases({
+          filterOptions: state.filterOptions,
+          pagination: state.pagination,
         });
         if (!didCancel) {
-          await throwIfNotOk(response);
-          const responseJson = await response.json();
           dispatch({
             type: FETCH_SUCCESS,
             payload: {
-              ...responseJson,
-              saved_objects: flattenSavedObjects(responseJson.saved_objects),
+              ...response,
+              saved_objects: flattenSavedObjects(response.saved_objects),
             },
           });
         }
