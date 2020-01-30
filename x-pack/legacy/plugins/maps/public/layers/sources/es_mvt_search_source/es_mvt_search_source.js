@@ -93,6 +93,11 @@ export class ESMVTSearchSource extends ESSearchSource {
   getMvtSourceLayer() {
     return 'geojsonLayer';
   }
+
+  isTileSource() {
+    return true;
+  }
+
   _createDefaultLayerDescriptor(options) {
     const tvl = TiledVectorLayer.createDescriptor({
       sourceDescriptor: this._descriptor,

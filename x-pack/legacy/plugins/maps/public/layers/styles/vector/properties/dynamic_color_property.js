@@ -53,6 +53,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
   syncFillColorWithMb(mbLayerId, mbMap, alpha) {
     const color = this._getMbColor();
+    console.log('color ul', color);
     mbMap.setPaintProperty(mbLayerId, 'fill-color', color);
     mbMap.setPaintProperty(mbLayerId, 'fill-opacity', alpha);
   }
@@ -115,11 +116,11 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     if (this.isCategorical()) {
       return this._getMbDataDrivenCategoricalColor({ targetName });
     } else {
-      return this._getMbDataDrivenOrdinalColor({ targetName });
+      return this._getMbDataDrivenOrdinalColor({ targetName, fieldName: this._options.field.name });
     }
   }
 
-  _getMbDataDrivenOrdinalColor({ targetName }) {
+  _getMbDataDrivenOrdinalColor({ targetName, fieldName }) {
     if (
       this._options.useCustomColorRamp &&
       (!this._options.customColorRamp || !this._options.customColorRamp.length)
@@ -127,7 +128,35 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return null;
     }
 
-    const colorStops = this._getMbOrdinalColorStops();
+    let colorStops;
+    let getFunction;
+    let propFieldName;
+    if (this._style.isBackedByTileSource()) {
+      console.log(
+        'This style is backed by a tilesource, need to do some fuzzy shiat for ',
+        targetName,
+        fieldName
+      );
+
+      const fieldMeta = this._getFieldMeta(fieldName);
+      if (!fieldMeta) {
+        console.log('no field meta');
+        return null;
+      }
+
+
+      colorStops = this._getMbOrdinalColorStops(fieldMeta.max, fieldMeta.min);
+      console.log('cs', colorStops);
+      getFunction = 'get';
+      propFieldName = fieldName;
+    } else {
+      colorStops = this._getMbOrdinalColorStops();
+      getFunction = 'feature-state';
+      propFieldName = targetName;
+    }
+
+    console.log('cs', colorStops);
+
     if (!colorStops) {
       return null;
     }
@@ -137,7 +166,8 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       const lessThenFirstStopValue = firstStopValue - 1;
       return [
         'step',
-        ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
+        // ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
+        ['coalesce', [getFunction, propFieldName], lessThenFirstStopValue],
         'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
         ...colorStops,
       ];
@@ -145,7 +175,8 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return [
       'interpolate',
       ['linear'],
-      ['coalesce', ['feature-state', targetName], -1],
+      // ['coalesce', ['feature-state', targetName], -1],
+      ['coalesce', [getFunction, propFieldName], -1],
       -1,
       'rgba(0,0,0,0)',
       ...colorStops,
@@ -230,13 +261,13 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return ['match', ['to-string', ['get', this._options.field.name]], ...mbStops];
   }
 
-  _getMbOrdinalColorStops() {
+  _getMbOrdinalColorStops(scale, offset) {
     if (this._options.useCustomColorRamp) {
       return this._options.customColorRamp.reduce((accumulatedStops, nextStop) => {
         return [...accumulatedStops, nextStop.stop, nextStop.color];
       }, []);
     } else {
-      return getOrdinalColorRampStops(this._options.color);
+      return getOrdinalColorRampStops(this._options.color, scale, offset);
     }
   }
 

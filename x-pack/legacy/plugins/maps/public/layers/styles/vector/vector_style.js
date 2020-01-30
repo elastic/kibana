@@ -127,6 +127,10 @@ export class VectorStyle extends AbstractStyle {
     ];
   }
 
+  isBackedByTileSource() {
+    return this._source.isTileSource();
+  }
+
   renderEditor({ layer, onStyleDescriptorChange }) {
     const rawProperties = this.getRawProperties();
     const handlePropertyChange = (propertyName, settings) => {
@@ -367,8 +371,10 @@ export class VectorStyle extends AbstractStyle {
 
     const data = styleMetaDataRequest.getData();
     const fieldMeta = dynamicProp.pluckStyleMetaFromFieldMetaData(data);
+    console.log('fm', fieldMeta);
     return fieldMeta ? fieldMeta : fieldMetaFromLocalFeatures;
   };
+
 
   _getFieldFormatter = fieldName => {
     const dynamicProp = this._getDynamicPropertyByFieldName(fieldName);
@@ -622,7 +628,8 @@ export class VectorStyle extends AbstractStyle {
         styleName,
         field,
         this._getFieldMeta,
-        this._getFieldFormatter
+        this._getFieldFormatter,
+        this
       );
     } else {
       throw new Error(`${descriptor} not implemented`);

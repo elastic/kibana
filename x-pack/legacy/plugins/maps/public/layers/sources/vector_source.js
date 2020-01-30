@@ -160,6 +160,10 @@ export class AbstractVectorSource extends AbstractSource {
     return true;
   }
 
+  isTileSource() {
+    return false;
+  }
+
   async getSupportedShapeTypes() {
     return [VECTOR_SHAPE_TYPES.POINT, VECTOR_SHAPE_TYPES.LINE, VECTOR_SHAPE_TYPES.POLYGON];
   }
