@@ -74,8 +74,6 @@ class AgentConfigService {
       await this.create(soClient, newDefaultAgentConfig, {
         id: DEFAULT_AGENT_CONFIG_ID,
       });
-
-      await this.triggerAgentConfigUpdatedEvent('created', DEFAULT_AGENT_CONFIG_ID);
     }
   }
 
