@@ -123,7 +123,6 @@ export const spaces = (kibana: Record<string, any>) =>
           create: (pluginId: string) =>
             new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),
         },
-        xpackMain: server.plugins.xpack_main,
       });
 
       initEnterSpaceView(server);

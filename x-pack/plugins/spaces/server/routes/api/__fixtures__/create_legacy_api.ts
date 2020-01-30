@@ -104,7 +104,6 @@ export const createLegacyAPI = ({
       kibanaIndex: '',
     },
     auditLogger: {} as any,
-    xpackMain: {} as any,
     savedObjects: savedObjectsService,
   };
 
