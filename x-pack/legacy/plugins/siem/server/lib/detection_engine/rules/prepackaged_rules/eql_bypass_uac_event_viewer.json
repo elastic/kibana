@@ -1,20 +1,20 @@
 {
-  "description": "Identifies User Account Control (UAC) bypass via eventvwr.  Attackers bypass UAC to stealthily execute code with elevated permissions.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "Identifies User Account Control (UAC) bypass via eventvwr.exe.  Attackers bypass UAC to stealthily execute code with elevated permissions.",
+  "index": [
+    "winlogbeat-*"
+  ],
   "language": "kuery",
+  "max_signals": 33,
   "name": "Bypass UAC via Event Viewer",
   "query": "process.parent.name:eventvwr.exe and event.action:\"Process Create (rule: ProcessCreate)\" and not process.executable:(\"C:\\Windows\\System32\\mmc.exe\" or \"C:\\Windows\\SysWOW64\\mmc.exe\")",
-  "risk_score": 25,
+  "risk_score": 21,
   "rule_id": "59547add-a400-4baa-aa0c-66c72efdb77f",
   "severity": "low",
   "tags": [
-    "EIA"
+    "Elastic",
+    "Windows"
   ],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -22,7 +22,7 @@
         "name": "Privilege Escalation",
         "reference": "https://attack.mitre.org/tactics/TA0004/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1088",
           "name": "Bypass User Account Control",
@@ -31,7 +31,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

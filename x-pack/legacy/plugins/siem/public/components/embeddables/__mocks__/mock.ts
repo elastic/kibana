@@ -51,8 +51,12 @@ export const mockSourceLayer = {
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbol: {
-        options: { symbolizeAs: 'icon', symbolId: 'home' },
+      symbolizeAs: {
+        options: { value: 'icon' },
+      },
+      icon: {
+        type: 'STATIC',
+        options: { value: 'home' },
       },
     },
   },
@@ -103,8 +107,12 @@ export const mockDestinationLayer = {
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbol: {
-        options: { symbolizeAs: 'icon', symbolId: 'marker' },
+      symbolizeAs: {
+        options: { value: 'icon' },
+      },
+      icon: {
+        type: 'STATIC',
+        options: { value: 'marker' },
       },
     },
   },
@@ -154,8 +162,12 @@ export const mockClientLayer = {
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbol: {
-        options: { symbolizeAs: 'icon', symbolId: 'home' },
+      symbolizeAs: {
+        options: { value: 'icon' },
+      },
+      icon: {
+        type: 'STATIC',
+        options: { value: 'home' },
       },
     },
   },
@@ -206,8 +218,12 @@ export const mockServerLayer = {
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbol: {
-        options: { symbolizeAs: 'icon', symbolId: 'marker' },
+      symbolizeAs: {
+        options: { value: 'icon' },
+      },
+      icon: {
+        type: 'STATIC',
+        options: { value: 'marker' },
       },
     },
   },
@@ -266,8 +282,12 @@ export const mockLineLayer = {
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbol: {
-        options: { symbolizeAs: 'circle', symbolId: 'airfield' },
+      symbolizeAs: {
+        options: { value: 'icon' },
+      },
+      icon: {
+        type: 'STATIC',
+        options: { value: 'airfield' },
       },
     },
   },
@@ -326,8 +346,12 @@ export const mockClientServerLineLayer = {
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbol: {
-        options: { symbolizeAs: 'circle', symbolId: 'airfield' },
+      symbolizeAs: {
+        options: { value: 'icon' },
+      },
+      icon: {
+        type: 'STATIC',
+        options: { value: 'airfield' },
       },
     },
   },

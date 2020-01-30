@@ -22,7 +22,7 @@ import { last } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { RangeValues, RangesParamEditor } from '../../legacy_imports';
+import { RangeValues, RangesParamEditor } from '../../../../vis_default_editor/public';
 
 export type SetColorRangeValue = (paramName: string, value: RangeValues[]) => void;
 

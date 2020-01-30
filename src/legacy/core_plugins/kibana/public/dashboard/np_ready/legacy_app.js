@@ -21,21 +21,19 @@ import { i18n } from '@kbn/i18n';
 
 import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
+import { createHashHistory } from 'history';
 
-import {
-  ensureDefaultIndexPattern,
-  registerTimefilterWithGlobalStateFactory,
-} from '../legacy_imports';
+import { ensureDefaultIndexPattern } from '../legacy_imports';
 import { initDashboardAppDirective } from './dashboard_app';
-import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
+import { createDashboardEditUrl, DashboardConstants } from './dashboard_constants';
 import {
+  createKbnUrlStateStorage,
   InvalidJSONProperty,
   SavedObjectNotFound,
 } from '../../../../../../plugins/kibana_utils/public';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
-import { syncOnMount } from './global_state_sync';
-import { createHashHistory } from 'history';
+import { syncQuery } from '../../../../../../plugins/data/public';
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
@@ -61,17 +59,18 @@ export function initDashboardApp(app, deps) {
     addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
   }
 
-  app.run(globalState => {
-    syncOnMount(globalState, deps.npDataStart);
+  app.config(stateManagementConfigProvider => {
+    // Dashboard state management is handled by state containers and state_sync utilities
+    stateManagementConfigProvider.disable();
   });
 
-  app.run((globalState, $rootScope) => {
-    registerTimefilterWithGlobalStateFactory(
-      deps.npDataStart.query.timefilter.timefilter,
-      globalState,
-      $rootScope
-    );
-  });
+  app.factory('history', () => createHashHistory());
+  app.factory('kbnUrlStateStorage', history =>
+    createKbnUrlStateStorage({
+      history,
+      useHash: deps.uiSettings.get('state:storeInSessionStorage'),
+    })
+  );
 
   app.config(function($routeProvider) {
     const defaults = {
@@ -98,11 +97,16 @@ export function initDashboardApp(app, deps) {
       .when(DashboardConstants.LANDING_PAGE_PATH, {
         ...defaults,
         template: dashboardListingTemplate,
-        controller($injector, $location, $scope) {
+        controller($injector, $location, $scope, kbnUrlStateStorage) {
           const service = deps.savedDashboards;
-
           const kbnUrl = $injector.get('kbnUrl');
           const dashboardConfig = deps.dashboardConfig;
+
+          // syncs `_g` portion of url with query services
+          const { stop: stopSyncingGlobalStateWithUrl } = syncQuery(
+            deps.npDataStart.query,
+            kbnUrlStateStorage
+          );
 
           $scope.listingLimit = deps.uiSettings.get('savedObjects:listingLimit');
           $scope.create = () => {
@@ -131,6 +135,10 @@ export function initDashboardApp(app, deps) {
           ]);
           addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
           $scope.core = deps.core;
+
+          $scope.$on('$destroy', () => {
+            stopSyncingGlobalStateWithUrl();
+          });
         },
         resolve: {
           dash: function($rootScope, $route, redirectWhenMissing, kbnUrl) {
@@ -191,7 +199,7 @@ export function initDashboardApp(app, deps) {
         template: dashboardTemplate,
         controller: createNewDashboardCtrl,
         resolve: {
-          dash: function($rootScope, $route, redirectWhenMissing, kbnUrl) {
+          dash: function($rootScope, $route, redirectWhenMissing, kbnUrl, history) {
             const id = $route.current.params.id;
 
             return ensureDefaultIndexPattern(deps.core, deps.npDataStart, $rootScope, kbnUrl)
@@ -218,7 +226,6 @@ export function initDashboardApp(app, deps) {
                 // See https://github.com/elastic/kibana/issues/10951 for more context.
                 if (error instanceof SavedObjectNotFound && id === 'create') {
                   // Note preserve querystring part is necessary so the state is preserved through the redirect.
-                  const history = createHashHistory();
                   history.replace({
                     ...history.location, // preserve query,
                     pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
