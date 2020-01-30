@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SavedObjectFinderCreateNew renders correctly with items 1`] = `
+<EuiPopover
+  anchorPosition="upLeft"
+  button={
+    <EuiButton
+      data-test-subj="createNew"
+      fill={true}
+      iconSide="right"
+      iconType="arrowDown"
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Create new"
+        id="embeddableApi.addPanel.createNewDefaultOption"
+        values={Object {}}
+      />
+    </EuiButton>
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="createNew"
+  isOpen={false}
+  ownFocus={false}
+  panelPaddingSize="none"
+>
+  <EuiContextMenuPanel
+    hasFocus={true}
+    items={
+      Array [
+        <EuiContextMenuItem
+          data-test-subj="item1"
+          onClick={[MockFunction]}
+        >
+          item1
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          data-test-subj="item2"
+          onClick={[MockFunction]}
+        >
+          item2
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          data-test-subj="item3"
+          onClick={[MockFunction]}
+        >
+          item3
+        </EuiContextMenuItem>,
+      ]
+    }
+  />
+</EuiPopover>
+`;

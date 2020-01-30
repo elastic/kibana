@@ -29,10 +29,6 @@ import { ContactCardEmbeddable } from '../../../../test_samples/embeddables/cont
 import { ContainerInput } from '../../../../containers';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
-
-// @ts-ignore
-import { findTestSubject } from '@elastic/eui/lib/test';
-
 // eslint-disable-next-line
 import { coreMock } from '../../../../../../../../core/public/mocks';
 
@@ -79,46 +75,4 @@ test('createNewEmbeddable() add embeddable to container', async () => {
     firstName: 'foo',
     lastName: 'bar',
   });
-});
-
-test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()', async () => {
-  const core = coreMock.createStart();
-  const { overlays } = core;
-  const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
-    {},
-    (() => null) as any,
-    overlays
-  );
-  contactCardEmbeddableFactory.getExplicitInput = () =>
-    ({
-      firstName: 'foo',
-      lastName: 'bar',
-    } as any);
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => contactCardEmbeddableFactory;
-  const input: ContainerInput<{ firstName: string; lastName: string }> = {
-    id: '1',
-    panels: {},
-  };
-  const container = new HelloWorldContainer(input, { getEmbeddableFactory } as any);
-  const onClose = jest.fn();
-  const component = mount<AddPanelFlyout>(
-    <AddPanelFlyout
-      container={container}
-      onClose={onClose}
-      getFactory={getEmbeddableFactory}
-      getAllFactories={() => new Set<any>([contactCardEmbeddableFactory]).values()}
-      notifications={core.notifications}
-      SavedObjectFinder={() => null}
-    />
-  ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
-
-  const spy = jest.fn();
-  component.instance().createNewEmbeddable = spy;
-
-  expect(spy).toHaveBeenCalledTimes(0);
-
-  findTestSubject(component, 'createNew').simulate('click');
-  findTestSubject(component, `createNew-${CONTACT_CARD_EMBEDDABLE}`).simulate('click');
-
-  expect(spy).toHaveBeenCalledTimes(1);
 });
