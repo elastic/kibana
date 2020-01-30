@@ -238,6 +238,7 @@ describe('filter_manager', () => {
 
       filterManager.setFilters([f1], true);
       expect(filterManager.getGlobalFilters()).toHaveLength(1);
+      expect(filterManager.getAppFilters()).toHaveLength(0);
     });
 
     test('set filter with no state, and no pin', async () => {
@@ -245,6 +246,7 @@ describe('filter_manager', () => {
       f1.$state = undefined;
 
       filterManager.setFilters([f1], false);
+      expect(filterManager.getGlobalFilters()).toHaveLength(0);
       expect(filterManager.getAppFilters()).toHaveLength(1);
     });
 
@@ -255,6 +257,7 @@ describe('filter_manager', () => {
 
       filterManager.setFilters([f1]);
       expect(filterManager.getGlobalFilters()).toHaveLength(1);
+      expect(filterManager.getAppFilters()).toHaveLength(0);
     });
 
     test('set filters without default pin', async () => {
@@ -263,6 +266,7 @@ describe('filter_manager', () => {
 
       setupMock.uiSettings.get.mockImplementationOnce(uiSettingsMock(false));
       filterManager.setFilters([f1]);
+      expect(filterManager.getGlobalFilters()).toHaveLength(0);
       expect(filterManager.getAppFilters()).toHaveLength(1);
     });
   });
