@@ -1,5 +1,5 @@
 def base(Map params, Closure closure) {
-  def config = [label: '', ramDisk: true, bootstrapped: true, name: 'unnamed-worker', scm: scm].putAll(params)
+  def config = [label: '', ramDisk: true, bootstrapped: true, name: 'unnamed-worker', scm: scm] + params
   if (!config.label) {
     error "You must specify an agent label, such as 'tests-xl' or 'linux && immutable', when using withWorker()"
   }
@@ -60,7 +60,7 @@ def base(Map params, Closure closure) {
 }
 
 def ci(Map params, Closure closure) {
-  def config = [ramDisk: true, bootstrapped: true].putAll(params)
+  def config = [ramDisk: true, bootstrapped: true] + params
 
   return base(config) {
     kibanaPipeline.withGcsArtifactUpload(config.name) {
@@ -90,7 +90,7 @@ def functional(name, Closure setup, Map processes) {
 }
 
 def parallelProcesses(Map params) {
-  def config = [name: 'parallel-worker', setup: {}, processes: [:], delayBetweenProcesses: 0, label: 'tests-xl'].putAll(params)
+  def config = [name: 'parallel-worker', setup: {}, processes: [:], delayBetweenProcesses: 0, label: 'tests-xl'] + params
 
   ci(label: config.label, name: config.name) {
     config.setup()
