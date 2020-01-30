@@ -70,8 +70,20 @@ export async function getTile({
         coordinates: geometry.coordinates,
       };
 
+      const firstFields = {};
+      const fields = hit.fields;
+      Object.keys(fields).forEach(key => {
+        const value = fields[key];
+        if (Array.isArray(value)) {
+          firstFields[key] = value[0];
+        } else {
+          firstFields[key] = value;
+        }
+      });
+
       const properties = {
         ...hit._source,
+        ...firstFields,
         _id: hit._id,
         _index: hit._index,
         [FEATURE_ID_PROPERTY_NAME]: hit._id,

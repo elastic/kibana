@@ -37,7 +37,7 @@ export class VectorStyleEditor extends Component {
     defaultDynamicProperties: getDefaultDynamicProperties(),
     defaultStaticProperties: getDefaultStaticProperties(),
     supportedFeatures: undefined,
-    selectedFeatureType: undefined,
+    selectedFeature: undefined,
   };
 
   componentWillUnmount() {
@@ -96,15 +96,22 @@ export class VectorStyleEditor extends Component {
 
   async _loadSupportedFeatures() {
     const supportedFeatures = await this.props.layer.getSource().getSupportedShapeTypes();
+    console.log('sp', supportedFeatures);
     if (!this._isMounted) {
       return;
     }
 
-    let selectedFeature = VECTOR_SHAPE_TYPES.POLYGON;
+    let selectedFeature;
     if (this.props.isPointsOnly) {
       selectedFeature = VECTOR_SHAPE_TYPES.POINT;
     } else if (this.props.isLinesOnly) {
       selectedFeature = VECTOR_SHAPE_TYPES.LINE;
+    } else {
+      if (this.state.selectedFeature !== undefined) {
+        selectedFeature = this.state.selectedFeature;
+      } else {
+        selectedFeature = VECTOR_SHAPE_TYPES.POLYGON;
+      }
     }
 
     if (
@@ -124,6 +131,7 @@ export class VectorStyleEditor extends Component {
   }
 
   _handleSelectedFeatureChange = selectedFeature => {
+    console.log('selected fea', selectedFeature);
     this.setState({ selectedFeature });
   };
 
@@ -364,6 +372,8 @@ export class VectorStyleEditor extends Component {
   _renderProperties() {
     const { supportedFeatures, selectedFeature } = this.state;
 
+    console.log('rp', supportedFeatures, selectedFeature);
+
     if (!supportedFeatures) {
       return null;
     }
@@ -407,6 +417,7 @@ export class VectorStyleEditor extends Component {
       styleProperties = this._renderPointProperties();
     }
 
+    console.log('idsel', selectedFeature);
     return (
       <Fragment>
         <EuiButtonGroup

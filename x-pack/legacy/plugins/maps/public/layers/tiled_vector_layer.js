@@ -51,8 +51,6 @@ export class TiledVectorLayer extends VectorLayer {
   _getSearchFilters(dataFilters) {
     const fieldNames = [...this._source.getFieldNames(), ...this._style.getSourceFieldNames()];
 
-    console.log('fn', fieldNames);
-
     return {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),

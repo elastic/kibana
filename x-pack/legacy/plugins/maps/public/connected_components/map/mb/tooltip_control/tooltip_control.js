@@ -148,7 +148,6 @@ export class TooltipControl extends React.Component {
       }
     }
 
-    console.log('uf', uniqueFeatures);
     return uniqueFeatures;
   }
 
@@ -203,7 +202,6 @@ export class TooltipControl extends React.Component {
     }
 
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
-    console.log('features under point', mbFeatures);
     const features = this._getIdsForFeatures(mbFeatures);
     this.props.setTooltipState({
       type: TOOLTIP_TYPE.HOVER,

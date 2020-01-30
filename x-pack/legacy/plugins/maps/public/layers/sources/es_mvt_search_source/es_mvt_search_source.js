@@ -16,9 +16,9 @@ import uuid from 'uuid/v4';
 import { CreateSourceEditor } from '../es_search_source/create_source_editor';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {loadIndexSettings} from "../es_search_source/load_index_settings";
-import  rison from 'rison-node';
-import {UpdateSourceEditor} from "../es_search_source/update_source_editor";
+import { loadIndexSettings } from '../es_search_source/load_index_settings';
+import rison from 'rison-node';
+import { UpdateSourceEditor } from '../es_search_source/update_source_editor';
 
 export class ESMVTSearchSource extends ESSearchSource {
   static type = ES_MVT_SEARCH;
@@ -49,23 +49,36 @@ export class ESMVTSearchSource extends ESSearchSource {
       onPreviewSource(source);
     };
     return (
-      <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} showBoundsFilter={false} geoTypes={[ES_GEO_FIELD_TYPE.GEO_SHAPE]}/>
+      <CreateSourceEditor
+        onSourceConfigChange={onSourceConfigChange}
+        showBoundsFilter={false}
+        geoTypes={[ES_GEO_FIELD_TYPE.GEO_SHAPE]}
+      />
     );
   }
 
   async getUrlTemplate(searchFilters) {
-
-
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
-    console.log('sf', searchFilters);
+    //assuming only geo_shape fields for now
+    const initialSearchContext = {
+      docvalue_fields: await this._getDateDocvalueFields(searchFilters.fieldNames),
+    };
+    const geoField = await this._getGeoField();
+    const docValueFields = await this._excludeDateFields(searchFilters.fieldNames);
+    const withoutGeoField = docValueFields.filter(field => field !== geoField.name);
 
-    const searchSource = await this._makeSearchSource(searchFilters, indexSettings.maxResultWindow);
+    console.log('wg', withoutGeoField, geoField.name);
+    initialSearchContext.docvalue_fields.push(...withoutGeoField);
+
+    const searchSource = await this._makeSearchSource(
+      searchFilters,
+      indexSettings.maxResultWindow,
+      initialSearchContext
+    );
     searchSource.setField('fields', searchFilters.fieldNames);
-    console.log('ss', searchSource);
     window._ss = searchSource;
-
 
     const ipTitle = indexPattern.title;
     const geometryFieldBame = this._descriptor.geoField;
@@ -73,12 +86,8 @@ export class ESMVTSearchSource extends ESSearchSource {
     const fieldsParam = fields.join(',');
 
     const dsl = await searchSource.getSearchRequestBody();
-    const dslString = JSON.stringify(dsl);
-    const urlEncode = encodeURI(dslString);
-
     const risonDsl = rison.encode(dsl);
-    console.log(risonDsl);
-    console.log(urlEncode);
+    console.log(dsl);
 
     return `../${GIS_API_PATH}/${MVT_GETTILE_API_PATH}?x={x}&y={y}&z={z}&geometryFieldName=${geometryFieldBame}&indexPattern=${ipTitle}&fields=${fieldsParam}&requestBody=${risonDsl}`;
   }
@@ -144,17 +153,17 @@ export class ESMVTSearchSource extends ESSearchSource {
     return [];
   }
 
-  async getDateFields() {
-    return [];
-  }
-
-  async getNumberFields() {
-    return [];
-  }
-
-  async getCategoricalFields() {
-    return [];
-  }
+  // async getDateFields() {
+  //   return [];
+  // }
+  //
+  // async getNumberFields() {
+  //   return [];
+  // }
+  //
+  // async getCategoricalFields() {
+  //   return [];
+  // }
 
   async getImmutableProperties() {
     const ip = await super.getImmutableProperties();
