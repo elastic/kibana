@@ -7,7 +7,7 @@ Click the *Options* tab to display the font size slider.
 [[metric-aggregation]]
 ==== Supported aggregations
 
-Metric support the following aggregations:
+Metric supports the following aggregations:
 
 * <<visualize-metric-aggregations,Metric>>
 

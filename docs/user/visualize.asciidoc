@@ -7,77 +7,84 @@ _Visualize_ enables you to create visualizations of the data from your {es} indi
 
 {kib} visualizations are based on {es} queries. By using a series of {es} {ref}/search-aggregations.html[aggregations] to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
 
+To begin, open *Visualize*, then click *Create new visualization*.
+
 [float]
-[[create-a-visualization]]
-== Create visualizations
+[[visualization-type]]
+== Types of visualizations
 
-. Open *Visualize*.
-. Click *Create new visualization*.
-. Choose the visualization type:
-+
-* Basic charts
-[horizontal]
+To help you choose the best visualization for you data, {kib} supports many types of visualizations.
+
 <<lens,Lens>>::
-Quickly build several types of basic visualizations by simply dragging and dropping the data fields you want to display.
+Quickly build several types of visualizations by simply dragging and dropping the data fields you want to display.
 
-* *<<most-frequent,Most frequently used visualizations>>*
-[horizontal]
-Line&comma; area, and bar charts:: Compare different series in X/Y charts.
+<<most-frequent,Basic visualizations>>::
+* Line, area, and bar charts - Compare different series in X/Y charts.
 
-Pie chart:: Display each source contribution to a total.
+* Pie chart - Display each source contribution to a total.
 
-Data table:: Flattens aggregations into table format.
+* Data table - Flattens aggregations into a table format.
 
-Metric:: Display a single number.
+* Metric - Display a single number.
 
-Goal and gauge:: Display a number with progress indicators.
+* Goal and gauge - Display a number with progress indicators.
 
-Tag cloud:: Display words in a cloud, where the size of the word corresponds to its importance.
+* Tag cloud - Display words in a cloud, where the size of the word corresponds to its importance.
 
-* *Time series optimized*
-[horizontal]
-<<TSVB,TSVB>>:: Visualize time series data using pipeline aggregations.
+<<TSVB,TSVB>>::
+Visualize time series data using pipeline aggregations.
 
-<<timelion,Timelion>>:: Compute and combine data from multiple time series
-data sets.
+<<timelion,Timelion>>::
+Compute and combine data from multiple time series data sets.
 
-* *Maps*
-[horizontal]
-<<maps,Elastic Maps>>:: The most powerful way of visualizing map data in {kib}.
+<<maps,Maps>>::
+* <<maps,Elastic Maps>> - The most powerful way to visualize map data in {kib}.
 
-<<tilemap,Coordinate map>>:: Displays points on a map using a geohash aggregation.
+* Coordinate map - Displays points on a map using a geohash aggregation.
 
-<<regionmap,Region map>>:: Merge any structured map data onto a shape.
+* Region map - Merge any structured map data onto a shape.
 
-<<heatmap,Heat map>>:: Display shaded cells within a matrix.
+* Heat map - Display shaded cells within a matrix.
 
-* *<<for-dashboard,Dashboard tools>>*
-[horizontal]
-<<for-dashboard,Controls>>:: Provides the ability to add interactive inputs to a Dashboard.
+<<for-dashboard,Dashboard tools>>::
+* Markdown widget - Display free-form information or instructions.
 
-<<for-dashboard,Markdown widget>>:: Display free-form information or instructions.
+* Controls widget - Add interactive inputs to a dashboard.
 
-* *For developers*
-[horizontal]
-<<vega-graph,Vega>>:: Complete control over query and display.
+<<vega-graph,Vega>>::
+Provides complete control over query and display.
 
-. Specify a search query to retrieve the data for your visualization:
-** To enter new search criteria, select the <<index-patterns, index pattern>> for the indices that
+[float]
+[[choose-your-data]]
+== Choose your data
+
+Specify a search query to retrieve the data for your visualization, or used rolled up data.
+
+* To enter new search criteria, select the <<index-patterns, index pattern>> for the indices that
 contain the data you want to visualize. The visualization builder opens
 with a wildcard query that matches all of the documents in the selected
 indices.
-** To build a visualization from a saved search, click the name of the saved
+
+* To build a visualization from a saved search, click the name of the saved
 search you want to use. The visualization builder opens and loads the
 selected query.
 +
 NOTE: When you build a visualization from a saved search, any subsequent
-modifications to the saved search are automatically reflected in the
-visualization. To disable automatic updates, you can disconnect a visualization
+modifications to the saved search are reflected in the
+visualization. To disable automatic updates, disconnect the visualization
 from the saved search.
 
+* [beta] Visualize rolled up data in a variety of visualization.
+
+** For specific fields, the data in a rollup index includes only summarized metrics.
+From the original raw data, you are unable to search any other field.
+
+** Data is summarized into time buckets that might be split into sub buckets for
+numeric field values or terms. To lower granularity, you can use a time aggregation that takes
+several time buckets and combines them. For example,
+if the rollup job was aggregated by hours, you use buckets of days.
 
 --
-include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
 
 include::{kib-repo-dir}/visualize/aggregations.asciidoc[]
 
@@ -86,11 +93,10 @@ include::{kib-repo-dir}/visualize/lens.asciidoc[]
 include::{kib-repo-dir}/visualize/most-frequent.asciidoc[]
 
 include::{kib-repo-dir}/visualize/tsvb.asciidoc[]
+
 include::{kib-repo-dir}/visualize/timelion.asciidoc[]
 
-include::{kib-repo-dir}/visualize/tilemap.asciidoc[]
-include::{kib-repo-dir}/visualize/regionmap.asciidoc[]
-include::{kib-repo-dir}/visualize/heatmap.asciidoc[]
+include::{kib-repo-dir}/visualize/maps.asciidoc[]
 
 include::{kib-repo-dir}/visualize/for-dashboard.asciidoc[]
 

@@ -1,9 +1,7 @@
 [[most-frequent]]
-== Most frequently used visualizations
+== Basic visualizations
 
-The most frequently used visualizations allow you to plot aggregated data from a <<save-open-search, saved search>> or <<index-patterns, index pattern>>.
-
-The most frequently used visualizations include:
+Basic visualizations include:
 
 * Line, area, and bar charts
 * Pie chart
@@ -15,7 +13,7 @@ The most frequently used visualizations include:
 [[frequently-used-viz-aggregation]]
 === Supported aggregations
 
-The most frequently used visualizations support the following aggregations:
+Basic visualizations support the following aggregations:
 
 * <<visualize-metric-aggregations,Metric>>
 
@@ -28,7 +26,7 @@ The most frequently used visualizations support the following aggregations:
 [float]
 === Configure your visualization
 
-You configure visualizations using the default editor. Each visualization supports different configurations of the metrics and buckets.
+To configure basic visualizations, use the default editor. Each visualization supports different configurations of metric and bucket aggregations.
 
 For example, a bar chart allows you to add an x-axis:
 
@@ -42,30 +40,27 @@ image::images/visualize-date-histogram.png[]
 
 To see your changes, click *Apply changes* image:images/apply-changes-button.png[]
 
-If it's supported by the visualization, you can add more buckets. In this example we have
-added a
-{es} {ref}/search-aggregations-bucket-terms-aggregation.html[terms] aggregation on the field
-`geo.src` to show the top 5 sources of log traffic.
+If supported by the visualization, you can add more buckets. In this example, the
+{es} {ref}/search-aggregations-bucket-terms-aggregation.html[terms] aggregation is added on the `geo.src` field
+to show the top five sources of log traffic.
 
 [role="screenshot"]
 image::images/visualize-date-histogram-split-1.png[]
 
-The new aggregation is added after the first one, so the result shows
-the top 5 sources of traffic per 3 hours. If you want to change the aggregation order, you can do
-so by dragging:
+{kib} adds the aggregation after the first one, so the result shows
+the top five sources of traffic for every three hours. To change the aggregation order, drag the aggregation:
 
 [role="screenshot"]
 image::images/visualize-drag-reorder.png["",width=366]
 
-The visualization
-now shows the top 5 sources of traffic overall, and compares them in 3 hour increments:
+The visualization shows the top five sources of traffic overall, and compares them in three hour increments:
 
 [role="screenshot"]
 image::images/visualize-date-histogram-split-2.png[]
 
-For more information about how aggregations are used in visualizations, see <<supported-aggregations, supported aggregations>>.
+For more information about aggregations, refer to <<supported-aggregations, supported aggregations>>.
 
-Each visualization also has its own customization options. Most visualizations allow you to customize the color of a specific series:
+Each visualization has its own customization options. Most visualizations allow you to customize the color of a specific series:
 
 [role="screenshot"]
 image::images/color-picker.png[An array of color dots that users can select,height=267]
