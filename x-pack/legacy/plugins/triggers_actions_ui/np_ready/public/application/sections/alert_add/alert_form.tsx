@@ -26,6 +26,7 @@ import {
   EuiAccordion,
   EuiButtonIcon,
   EuiEmptyPrompt,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { useAppDependencies } from '../../app_context';
 import { loadAlertTypes } from '../../lib/alert_api';
@@ -87,6 +88,11 @@ interface AlertFormProps {
   } | null;
 }
 
+interface ActiveActionConnectorState {
+  actionTypeId: string;
+  index: number;
+}
+
 export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormProps) => {
   const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = useAppDependencies();
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
@@ -104,6 +110,9 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
   const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
   const [defaultActionGroup, setDefaultActionGroup] = useState<string | undefined>(undefined);
+  const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
+    undefined
+  );
 
   // load action types
   useEffect(() => {
@@ -219,23 +228,24 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
     const actionTypeConnectors = connectors.filter(
       field => field.actionTypeId === actionTypeModel.id
     );
-    let isActionExists;
+    let freeConnectors;
     if (actionTypeConnectors.length > 0) {
       // Should we allow adding multiple actions to the same connector under the alert?
-      isActionExists = alert.actions.find(
-        (action: AlertAction) => action.id === actionTypeConnectors[0].id
+      freeConnectors = actionTypeConnectors.filter(
+        (actionConnector: ActionConnector) =>
+          !alert.actions.find((actionItem: AlertAction) => actionItem.id === actionConnector.id)
       );
-      if (!isActionExists) {
+      if (freeConnectors.length > 0) {
         alert.actions.push({
           id: '',
           actionTypeId: actionTypeModel.id,
           group: defaultActionGroup ?? 'Alert',
           params: {},
         });
-        setActionProperty('id', actionTypeConnectors[0].id, alert.actions.length - 1);
+        setActionProperty('id', freeConnectors[0].id, alert.actions.length - 1);
       }
     }
-    if (actionTypeConnectors.length === 0 || isActionExists) {
+    if (actionTypeConnectors.length === 0 || !freeConnectors || freeConnectors.length === 0) {
       // if no connectors exists or all connectors is already assigned an action under current alert
       // set actionType as id to be able to create new connector within the alert form
       alert.actions.push({
@@ -305,11 +315,13 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
   ) => {
     const optionsList = connectors
       .filter(
-        field =>
-          field.actionTypeId === actionConnector.actionTypeId &&
-          !alert.actions.find(
-            (existingAction: AlertAction) => existingAction.id === field.actionTypeId
-          )
+        connectorItem =>
+          connectorItem.actionTypeId === actionItem.actionTypeId &&
+          (connectorItem.id === actionItem.id ||
+            !alert.actions.find(
+              (existingAction: AlertAction) =>
+                existingAction.id === connectorItem.id && existingAction.group === actionItem.group
+            ))
       )
       .map(({ name, id }) => ({
         label: name,
@@ -388,6 +400,20 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
                       : actionConnector.actionTypeId,
                   }}
                 />
+              }
+              labelAppend={
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => {
+                    setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+                    setAddModalVisibility(true);
+                  }}
+                >
+                  <FormattedMessage
+                    defaultMessage="Add new"
+                    id="xpack.triggersActionsUI.sections.alertForm.addNewConnectorEmptyButton"
+                  />
+                </EuiButtonEmpty>
               }
             >
               <EuiComboBox
@@ -490,6 +516,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
               fill
               data-test-subj="createActionConnectorButton"
               onClick={() => {
+                setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
                 setAddModalVisibility(true);
               }}
             >
@@ -503,18 +530,6 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
             </EuiButton>,
           ]}
         />
-        {actionTypesIndex ? (
-          <ConnectorAddModal
-            key={index}
-            actionType={actionTypesIndex[actionItem.actionTypeId]}
-            addModalVisible={addModalVisible}
-            setAddModalVisibility={setAddModalVisibility}
-            postSaveEventHandler={(savedAction: ActionConnector) => {
-              connectors.push(savedAction);
-              setActionProperty('id', savedAction.id, index);
-            }}
-          />
-        ) : null}
       </EuiAccordion>
     );
   };
@@ -802,6 +817,18 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
           </EuiFlexGroup>
         </Fragment>
       )}
+      {actionTypesIndex && activeActionItem ? (
+        <ConnectorAddModal
+          key={activeActionItem.index}
+          actionType={actionTypesIndex[activeActionItem.actionTypeId]}
+          addModalVisible={addModalVisible}
+          setAddModalVisibility={setAddModalVisibility}
+          postSaveEventHandler={(savedAction: ActionConnector) => {
+            connectors.push(savedAction);
+            setActionProperty('id', savedAction.id, activeActionItem.index);
+          }}
+        />
+      ) : null}
     </EuiForm>
   );
 };

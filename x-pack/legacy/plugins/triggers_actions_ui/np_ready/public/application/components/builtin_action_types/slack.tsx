@@ -7,8 +7,6 @@ import React, { Fragment } from 'react';
 import {
   EuiFieldText,
   EuiTextArea,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButtonIcon,
   EuiFormRow,
   EuiLink,

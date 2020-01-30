@@ -43,13 +43,19 @@ export const ConnectorAddModal = ({
   } as ActionConnector;
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  const closeModal = useCallback(() => {
-    setAddModalVisibility(false);
-  }, [setAddModalVisibility]);
   const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialConnector });
+  const setConnector = (value: any) => {
+    dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
+  };
   const [serverError, setServerError] = useState<{
     body: { message: string; error: string };
   } | null>(null);
+
+  const closeModal = useCallback(() => {
+    setAddModalVisibility(false);
+    setConnector(initialConnector);
+    setServerError(null);
+  }, [initialConnector, setAddModalVisibility]);
 
   if (!addModalVisible) {
     return null;
