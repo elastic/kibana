@@ -20,11 +20,13 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionExecutor } from './types';
 import {
-  Executor,
   ExpressionRendererRegistry,
   FunctionsRegistry,
   serializeProvider,
   TypesRegistry,
+  ExpressionsService,
+  ExpressionsServiceSetup,
+  ExpressionsServiceStart,
 } from '../common';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../bfetch/public';
@@ -51,12 +53,7 @@ export interface ExpressionsStartDeps {
   inspector: InspectorStart;
 }
 
-export interface ExpressionsSetup {
-  getFunctions: Executor['getFunctions'];
-  registerFunction: Executor['registerFunction'];
-  registerRenderer: ExpressionRendererRegistry['register'];
-  registerType: Executor['registerType'];
-  run: Executor['run'];
+export interface ExpressionsSetup extends ExpressionsServiceSetup {
   __LEGACY: {
     types: TypesRegistry;
     functions: FunctionsRegistry;
@@ -66,9 +63,7 @@ export interface ExpressionsSetup {
   };
 }
 
-export interface ExpressionsStart {
-  getFunctions: Executor['getFunctions'];
-  run: Executor['run'];
+export interface ExpressionsStart extends ExpressionsServiceStart {
   execute: typeof execute;
   ExpressionDataHandler: typeof ExpressionDataHandler;
   ExpressionLoader: typeof ExpressionLoader;
@@ -81,13 +76,13 @@ export interface ExpressionsStart {
 export class ExpressionsPublicPlugin
   implements
     Plugin<ExpressionsSetup, ExpressionsStart, ExpressionsSetupDeps, ExpressionsStartDeps> {
-  private readonly executor: Executor = Executor.createWithDefaults();
-  private readonly renderers: ExpressionRendererRegistry = new ExpressionRendererRegistry();
+  private readonly expressions: ExpressionsService = new ExpressionsService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { inspector, bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
-    const { executor, renderers } = this;
+    const { expressions } = this;
+    const { executor, renderers } = expressions;
 
     executor.extendContext({
       environment: 'client',
@@ -96,15 +91,11 @@ export class ExpressionsPublicPlugin
 
     setRenderersRegistry(renderers);
 
-    const getFunctions = executor.getFunctions.bind(executor);
-    const registerFunction = executor.registerFunction.bind(executor);
-    const registerRenderer = renderers.register.bind(renderers);
-    const registerType = executor.registerType.bind(executor);
-    const run = executor.run.bind(executor);
+    const expressionsSetup = expressions.setup();
 
     // This is legacy. Should go away when we get rid of __LEGACY.
     const getExecutor = (): ExpressionExecutor => {
-      return { interpreter: { interpretAst: run } };
+      return { interpreter: { interpretAst: expressionsSetup.run } };
     };
 
     setInterpreter(getExecutor().interpreter);
@@ -127,7 +118,7 @@ export class ExpressionsPublicPlugin
                 return batchedFunction({ functionName, args, context: serialize(context) });
               },
             });
-            registerFunction(fn);
+            expressionsSetup.registerFunction(fn);
           });
         })();
       }
@@ -135,11 +126,7 @@ export class ExpressionsPublicPlugin
     };
 
     const setup: ExpressionsSetup = {
-      getFunctions,
-      registerFunction,
-      registerRenderer,
-      registerType,
-      run,
+      ...expressionsSetup,
       __LEGACY: {
         types: executor.types,
         functions: executor.functions,
@@ -157,21 +144,18 @@ export class ExpressionsPublicPlugin
     setInspector(inspector);
     setNotifications(core.notifications);
 
-    const { executor } = this;
-
-    const getFunctions = executor.getFunctions.bind(executor);
-    const run = executor.run.bind(executor);
+    const { expressions } = this;
+    const expressionsStart = expressions.start();
 
     return {
+      ...expressionsStart,
       execute,
       ExpressionDataHandler,
       ExpressionLoader,
       ExpressionRenderer: ExpressionRendererImplementation,
       ExpressionRenderHandler,
-      getFunctions,
       loader,
       render,
-      run,
     };
   }
 
