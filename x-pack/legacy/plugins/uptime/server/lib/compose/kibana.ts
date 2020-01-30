@@ -10,7 +10,7 @@ import { elasticsearchPingsAdapter } from '../adapters/pings';
 import { licenseCheck } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
 import { elasticsearchMonitorStatesAdapter } from '../adapters/monitor_states';
-import { savedObjectsAdapter } from '../adapters/saved_objects';
+import { stubIndexPatternAdapter } from '../adapters/stub_index_pattern';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters/framework';
 
 export function compose(server: UptimeCoreSetup, plugins: UptimeCorePlugins): UMServerLibs {
@@ -21,7 +21,7 @@ export function compose(server: UptimeCoreSetup, plugins: UptimeCorePlugins): UM
     monitors: elasticsearchMonitorsAdapter,
     monitorStates: elasticsearchMonitorStatesAdapter,
     pings: elasticsearchPingsAdapter,
-    savedObjects: savedObjectsAdapter,
+    stubIndexPattern: stubIndexPatternAdapter,
   };
 
   return {
