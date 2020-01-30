@@ -7,9 +7,19 @@
 import React from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { capitalize } from 'lodash';
 import styled from 'styled-components';
-import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiHealth,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiToolTip,
+  EuiHideFor,
+  EuiShowFor,
+  EuiIcon,
+} from '@elastic/eui';
 import { parseTimestamp } from './parse_timestamp';
 import { Check } from '../../../../common/graphql/types';
 import {
@@ -75,7 +85,7 @@ const getRelativeShortTimeStamp = (timeStamp: any) => {
   return shortTimestamp;
 };
 
-export const getLocationStatus = (checks: Check[], status: string) => {
+export const getLocationStatus = (checks: Check[], status: string, showIcon = false) => {
   const upChecks: Set<string> = new Set();
   const downChecks: Set<string> = new Set();
 
@@ -100,6 +110,16 @@ export const getLocationStatus = (checks: Check[], status: string) => {
     statusMessage = `${absUpChecks.size}/${totalLocations}`;
   }
 
+  if (showIcon) {
+    return (
+      <FormattedMessage
+        id={'xpack.uptime.monitorList.statusColumn.locStatusMessage.icon'}
+        defaultMessage={'in {noLoc} {icon}'}
+        values={{ noLoc: statusMessage, icon: <EuiIcon type={'visMapCoordinate'} /> }}
+      />
+    );
+  }
+
   if (totalLocations > 1) {
     return i18n.translate('xpack.uptime.monitorList.statusColumn.locStatusMessage.multiple', {
       defaultMessage: 'in {noLoc} Locations',
@@ -121,7 +141,7 @@ export const MonitorListStatusColumn = ({
   const timestamp = parseTimestamp(tsString);
   return (
     <StatusColumnFlexG alignItems="center" gutterSize="none" wrap={false} responsive={false}>
-      <EuiFlexItem grow={1}>
+      <EuiFlexItem grow={1} style={{ flexBasis: 40 }}>
         <EuiHealth color={getHealthColor(status)} style={{ display: 'block' }}>
           {getHealthMessage(status)}
         </EuiHealth>
@@ -140,7 +160,12 @@ export const MonitorListStatusColumn = ({
         </PaddedSpan>
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <EuiText size="s">{getLocationStatus(checks, status)}</EuiText>
+        <EuiHideFor sizes={['m']}>
+          <EuiText size="s">{getLocationStatus(checks, status)}</EuiText>
+        </EuiHideFor>
+        <EuiShowFor sizes={['m']}>
+          <EuiText size="s">{getLocationStatus(checks, status, true)}</EuiText>
+        </EuiShowFor>
       </EuiFlexItem>
     </StatusColumnFlexG>
   );
