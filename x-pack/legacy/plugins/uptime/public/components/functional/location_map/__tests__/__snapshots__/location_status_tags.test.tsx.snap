@@ -100,7 +100,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
 @media (max-width:830px) {
   .c1 {
     display: inline-block;
-    margin-right: 2px;
+    margin-right: 16px;
   }
 }
 
@@ -214,7 +214,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
 @media (max-width:830px) {
   .c1 {
     display: inline-block;
-    margin-right: 2px;
+    margin-right: 16px;
   }
 }
 
@@ -329,7 +329,7 @@ Array [
 @media (max-width:830px) {
   .c1 {
     display: inline-block;
-    margin-right: 2px;
+    margin-right: 16px;
   }
 }
 

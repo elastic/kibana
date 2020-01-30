@@ -25,7 +25,7 @@ const BadgeItem = styled.div`
   margin-bottom: 5px;
   @media (max-width: 830px) {
     display: inline-block;
-    margin-right: 2px;
+    margin-right: 16px;
   }
 `;
 
