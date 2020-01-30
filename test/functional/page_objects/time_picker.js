@@ -51,7 +51,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
      * @param {String} commonlyUsedOption 'superDatePickerCommonlyUsed_This_week'
      */
     async setCommonlyUsedTime(commonlyUsedOption) {
-      await testSubjects.click('superDatePickerToggleQuickMenuButton');
+      await this.openQuickSelectTimeMenu();
       await testSubjects.click(commonlyUsedOption);
     }
 
