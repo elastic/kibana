@@ -19,7 +19,7 @@
 
 import { mapValues } from 'lodash';
 import { AnyExpressionFunctionDefinition } from '../../types';
-import { ExecutionContext } from '../../../types';
+import { ExecutionContext } from '../../../execution/types';
 
 /**
  * Takes a function spec and passes in default args,

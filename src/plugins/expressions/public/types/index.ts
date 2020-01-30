@@ -20,8 +20,12 @@
 import { ExpressionInterpret } from '../interpreter_provider';
 import { TimeRange, Query, esFilters } from '../../../data/public';
 import { Adapters } from '../../../inspector/public';
-import { ExpressionRenderDefinition } from '../../common/registries';
 
+/**
+ * @deprecated
+ *
+ * This type if remainder from legacy platform, will be deleted going further.
+ */
 export type ExpressionInterpretWithHandlers = (
   ast: Parameters<ExpressionInterpret>[0],
   context: Parameters<ExpressionInterpret>[1],
@@ -32,6 +36,11 @@ export interface ExpressionInterpreter {
   interpretAst: ExpressionInterpretWithHandlers;
 }
 
+/**
+ * @deprecated
+ *
+ * This type if remainder from legacy platform, will be deleted going further.
+ */
 export interface ExpressionExecutor {
   interpreter: ExpressionInterpreter;
 }
@@ -102,8 +111,6 @@ export interface IInterpreterSuccessResult {
 }
 
 export type IInterpreterResult = IInterpreterSuccessResult & IInterpreterErrorResult;
-
-export { ExpressionRenderDefinition };
 
 export interface RenderError extends Error {
   type?: string;

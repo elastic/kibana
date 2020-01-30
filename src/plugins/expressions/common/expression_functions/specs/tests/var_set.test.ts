@@ -19,7 +19,7 @@
 
 import { functionWrapper } from './utils';
 import { variableSet } from '../var_set';
-import { ExecutionContext } from '../../../types';
+import { ExecutionContext } from '../../../execution/types';
 import { KibanaContext } from '../../../expression_types';
 
 describe('expression_functions', () => {

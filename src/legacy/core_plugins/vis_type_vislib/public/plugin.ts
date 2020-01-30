@@ -83,7 +83,7 @@ export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
       createGaugeVisTypeDefinition,
       createGoalVisTypeDefinition,
     ];
-    const vislibFns = [createVisTypeVislibVisFn, createPieVisFn];
+    const vislibFns = [createVisTypeVislibVisFn(), createPieVisFn()];
 
     const visTypeXy = core.injectedMetadata.getInjectedVar('visTypeXy') as
       | VisTypeXyConfigSchema['visTypeXy']

@@ -113,7 +113,10 @@ export class ExpressionRenderHandler {
       // Rendering is asynchronous, completed by handlers.done()
       await getRenderersRegistry()
         .get(data.as)!
-        .render(this.element, data.value, { ...this.handlers, ...extraHandlers });
+        .render(this.element, data.value, {
+          ...this.handlers,
+          ...extraHandlers,
+        } as any);
     } catch (e) {
       return this.handleRenderError(e);
     }

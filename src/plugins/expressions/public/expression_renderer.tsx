@@ -45,7 +45,7 @@ interface State {
   error: null | RenderError;
 }
 
-export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
+export type ExpressionRendererComponent = React.FC<ExpressionRendererProps>;
 
 const defaultState: State = {
   isEmpty: true,

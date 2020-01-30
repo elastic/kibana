@@ -45,9 +45,12 @@ interface RenderValue {
 
 type Return = Render<RenderValue>;
 
-export const createKbnVislibVisTypesFn = (
-  deps: KbnVislibVisTypesDependencies
-) => (): ExpressionFunctionDefinition<typeof name, Context, Arguments, Return> => ({
+export const createVisTypeVislibVisFn = (): ExpressionFunctionDefinition<
+  typeof name,
+  Context,
+  Arguments,
+  Return
+> => ({
   name: 'vislib',
   type: 'render',
   context: {

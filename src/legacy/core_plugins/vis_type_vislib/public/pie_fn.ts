@@ -43,9 +43,12 @@ interface RenderValue {
 
 type Return = Render<RenderValue>;
 
-export const createPieVisFn = (
-  deps: KbnVislibVisTypesDependencies
-) => (): ExpressionFunctionDefinition<typeof name, Context, Arguments, Return> => ({
+export const createPieVisFn = (): ExpressionFunctionDefinition<
+  typeof name,
+  Context,
+  Arguments,
+  Return
+> => ({
   name: 'kibana_pie',
   type: 'render',
   context: {

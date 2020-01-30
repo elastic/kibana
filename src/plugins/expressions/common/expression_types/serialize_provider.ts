@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType } from './type';
+import { ExpressionType } from './expression_type';
 import { ExpressionValue } from './types';
 import { getType } from './get_type';
 

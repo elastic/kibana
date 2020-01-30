@@ -6,7 +6,7 @@
 
 import React, { useEffect, useReducer } from 'react';
 import { CoreSetup, CoreStart } from 'src/core/public';
-import { ExpressionRenderer } from '../../../../../../../src/plugins/expressions/public';
+import { ExpressionRendererComponent } from '../../../../../../../src/plugins/expressions/public';
 import {
   Datasource,
   DatasourcePublicAPI,
@@ -33,7 +33,7 @@ export interface EditorFrameProps {
   visualizationMap: Record<string, Visualization>;
   initialDatasourceId: string | null;
   initialVisualizationId: string | null;
-  ExpressionRenderer: ExpressionRenderer;
+  ExpressionRenderer: ExpressionRendererComponent;
   onError: (e: { message: string }) => void;
   core: CoreSetup | CoreStart;
   dateRange: {

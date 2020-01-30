@@ -21,7 +21,7 @@ import { createTableVisFn } from './table_vis_fn';
 import { tableVisResponseHandler } from './table_vis_response_handler';
 
 // eslint-disable-next-line
-import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
+import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
 
 jest.mock('./table_vis_response_handler', () => ({
   tableVisResponseHandler: jest.fn().mockReturnValue({
@@ -30,7 +30,7 @@ jest.mock('./table_vis_response_handler', () => ({
 }));
 
 describe('interpreter/functions#table', () => {
-  const fn = functionWrapper(createTableVisFn);
+  const fn = functionWrapper(createTableVisFn());
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],

@@ -283,7 +283,7 @@ export const esaggs = (): ExpressionFunctionDefinition<
       forceFetch: true,
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
-      inspectorAdapters,
+      inspectorAdapters: inspectorAdapters as Adapters,
       filterManager,
       abortSignal: (abortSignal as unknown) as AbortSignal,
     });

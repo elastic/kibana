@@ -19,7 +19,7 @@
 
 import { functionWrapper } from './utils';
 import { kibana } from '../kibana';
-import { ExecutionContext } from '../../../types';
+import { ExecutionContext } from '../../../execution/types';
 import { KibanaContext } from '../../../expression_types';
 
 describe('interpreter/functions#kibana', () => {
