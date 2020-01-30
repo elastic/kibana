@@ -22,9 +22,10 @@ import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { Defer } from '../../../kibana_utils/common';
+import { RequestAdapter, DataAdapter } from '../../../inspector/common';
 import { isExpressionValueError } from '../expression_types/specs/error';
 import { ExpressionAstExpression, ExpressionAstFunction, parse } from '../ast';
-import { ExecutionContext } from './types';
+import { ExecutionContext, DefaultInspectorAdapters } from './types';
 import { getType } from '../expression_types';
 import { ArgumentType, ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
@@ -37,11 +38,23 @@ export interface ExecutionParams<
   context?: ExtraContext;
 }
 
-export class Execution<ExtraContext extends Record<string, unknown> = Record<string, unknown>> {
+const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
+  requests: new RequestAdapter(),
+  data: new DataAdapter(),
+});
+
+export class Execution<
+  ExtraContext extends Record<string, unknown> = Record<string, unknown>,
+  Input = unknown,
+  Output = unknown,
+  InspectorAdapters = ExtraContext['inspectorAdapters'] extends object
+    ? ExtraContext['inspectorAdapters']
+    : DefaultInspectorAdapters
+> {
   /**
    * Dynamic state of the execution.
    */
-  state: ExecutionContainer;
+  public readonly state: ExecutionContainer;
 
   /**
    * Initial input of the execution.
@@ -49,19 +62,35 @@ export class Execution<ExtraContext extends Record<string, unknown> = Record<str
    * N.B. It is initialized to `null` rather than `undefined` for legacy reasons,
    * because in legacy interpreter it was set to `null` by default.
    */
-  input: unknown = null;
+  private input: Input = null as any;
 
   /**
-   * Execution context - object that allows to do side-effects, which is passed
+   * Execution context - object that allows to do side-effects. Context is passed
    * to every function.
    */
-  context: ExecutionContext & ExtraContext;
+  private readonly context: ExecutionContext<Input, InspectorAdapters> & ExtraContext;
 
+  /**
+   * AbortController to cancel this Execution.
+   */
+  private readonly abortController = new AbortController();
+
+  /**
+   * Whether .start() method has been called.
+   */
   private hasStarted: boolean = false;
-  private firstResultFuture: Defer<unknown> = new Defer<unknown>();
+
+  /**
+   * Future that tracks result or error of this execution.
+   */
+  private readonly firstResultFuture = new Defer<Output>();
 
   public get result(): Promise<unknown> {
     return this.firstResultFuture.promise;
+  }
+
+  public get inspectorAdapters(): InspectorAdapters {
+    return this.context.inspectorAdapters;
   }
 
   constructor(public readonly params: ExecutionParams<ExtraContext>) {
@@ -71,23 +100,24 @@ export class Execution<ExtraContext extends Record<string, unknown> = Record<str
       ast,
     });
 
-    const executionContext: ExecutionContext = {
+    this.context = {
       getInitialInput: () => this.input,
       getInitialContext: () => this.input,
       variables: {},
       types: executor.getTypes(),
-    };
-    this.context = {
+      abortSignal: this.abortController.signal,
       ...(params.context || ({} as ExtraContext)),
-      ...executionContext,
+      inspectorAdapters: (params.context && params.context.inspectorAdapters
+        ? params.context.inspectorAdapters
+        : createDefaultInspectorAdapters()) as InspectorAdapters,
     };
   }
 
-  public extendContext(extraContext: Record<string, unknown>) {
-    this.context = {
-      ...this.context,
-      ...extraContext,
-    };
+  /**
+   * Stop execution of expression.
+   */
+  cancel() {
+    this.abortController.abort();
   }
 
   /**
@@ -96,7 +126,7 @@ export class Execution<ExtraContext extends Record<string, unknown> = Record<str
    * N.B. `input` is initialized to `null` rather than `undefined` for legacy reasons,
    * because in legacy interpreter it was set to `null` by default.
    */
-  public start(input: unknown = null) {
+  public start(input: Input = null as any) {
     if (this.hasStarted) throw new Error('Execution already started.');
     this.hasStarted = true;
 

@@ -18,12 +18,13 @@
  */
 
 import { ExpressionType } from '../expression_types';
+import { DataAdapter, RequestAdapter } from '../../../inspector/common';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;
  * it provides various methods to perform side-effects.
  */
-export interface ExecutionContext<Input = unknown> {
+export interface ExecutionContext<Input = unknown, InspectorAdapters = DefaultInspectorAdapters> {
   /**
    * Get initial input with which execution started.
    */
@@ -49,10 +50,18 @@ export interface ExecutionContext<Input = unknown> {
   /**
    * Adds ability to abort current execution.
    */
-  abortSignal?: AbortSignal;
+  abortSignal: AbortSignal;
 
   /**
    * Adapters for `inspector` plugin.
    */
-  inspectorAdapters?: unknown;
+  inspectorAdapters: InspectorAdapters;
+}
+
+/**
+ * Default inspector adapters created if inspector adapters are not set explicitly.
+ */
+export interface DefaultInspectorAdapters {
+  requests: RequestAdapter;
+  data: DataAdapter;
 }
