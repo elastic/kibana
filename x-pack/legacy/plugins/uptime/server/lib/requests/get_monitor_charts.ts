@@ -136,7 +136,7 @@ export const getMonitorCharts: UMElasticsearchQueryFn<
         resultLocations.add(locationName);
 
         // create a new line for this location if it doesn't exist
-        let currentLine: LocationDurationLine = linesByLocation?.locationName;
+        let currentLine: LocationDurationLine = linesByLocation?.[locationName] ?? undefined;
         if (!currentLine) {
           currentLine = { name: locationName, line: [] };
           linesByLocation[locationName] = currentLine;
