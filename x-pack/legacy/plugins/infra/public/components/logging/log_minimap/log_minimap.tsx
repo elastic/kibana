@@ -150,7 +150,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
             start={minTime}
             end={maxTime}
             width={width}
-            height={overscanHeight}
+            height={height}
             jumpToTarget={jumpToTarget}
           />
         </g>
