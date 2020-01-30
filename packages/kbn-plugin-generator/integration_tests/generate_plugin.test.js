@@ -101,7 +101,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
               '--migrations.skip=true',
             ],
             cwd: generatedPath,
-            wait: /ispec_plugin.+Setting up plugin/,
+            wait: new RegExp('\\[ispecPlugin\\]\\[plugins\\] Setting up plugin'),
           });
           await proc.stop('kibana');
         });
