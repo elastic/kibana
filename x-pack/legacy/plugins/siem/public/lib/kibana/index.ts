@@ -13,6 +13,7 @@ import {
   withKibana,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { StartServices } from '../../plugin';
+export * from './services';
 
 export type KibanaContext = KibanaReactContextValue<StartServices>;
 export interface WithKibanaProps {
