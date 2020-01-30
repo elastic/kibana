@@ -156,7 +156,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
 
   render() {
     const { filteredSettings, query, footerQueryMatched } = this.state;
-    const componentRegistry = npStart.plugins.advancedSettings.componentRegistry;
+    const componentRegistry = npStart.plugins.advancedSettings.component;
 
     const PageTitle = componentRegistry.get(componentRegistry.componentType.PAGE_TITLE_COMPONENT);
     const PageSubtitle = componentRegistry.get(
