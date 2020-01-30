@@ -20,13 +20,13 @@ describe('Advanced Settings Service', () => {
 
       expect(deps.componentRegistry.register).toHaveBeenCalledTimes(2);
       expect(deps.componentRegistry.register).toHaveBeenCalledWith(
-        'page_title_component',
+        componentRegistryMock.componentType.PAGE_TITLE_COMPONENT,
         expect.any(Function),
         true
       );
 
       expect(deps.componentRegistry.register).toHaveBeenCalledWith(
-        'page_subtitle_component',
+        componentRegistryMock.componentType.PAGE_SUBTITLE_COMPONENT,
         expect.any(Function),
         true
       );
