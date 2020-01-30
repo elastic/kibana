@@ -24,8 +24,7 @@ import { SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public'
 import { BaseParamType } from './base';
 import { toastNotifications } from '../../notify';
 import { propFilter } from '../filter';
-import { Field, IFieldList, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
-import { isNestedField } from '../../../../../plugins/data/public';
+import { Field, KBN_FIELD_TYPES, isNestedField } from '../../../../../plugins/data/public';
 import { IMetricAggConfig } from '../metrics/metric_agg_type';
 
 const filterByType = propFilter('type');
@@ -122,10 +121,6 @@ export class FieldParamType extends BaseParamType {
         (!scriptable && field.scripted)
       ) {
         return false;
-      }
-
-      if (!filterFieldTypes) {
-        return true;
       }
 
       if (isFunction(filterFieldTypes)) {
