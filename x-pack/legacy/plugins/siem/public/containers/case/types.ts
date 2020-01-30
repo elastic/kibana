@@ -79,3 +79,10 @@ export interface ElasticUser {
   username: string;
   full_name?: string;
 }
+
+export interface PaginationOptions {
+  page: number;
+  perPage: number;
+  total: number;
+}
+
