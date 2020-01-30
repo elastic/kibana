@@ -3,7 +3,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '
 import { <%= upperCamelCaseName %>PluginSetup, <%= upperCamelCaseName %>PluginStart } from './types';
 import { defineRoutes } from './routes';
 
-export class <%= upperCamelCaseName %>ServerPlugin
+export class <%= upperCamelCaseName %>Plugin
   implements Plugin<<%= upperCamelCaseName %>PluginSetup, <%= upperCamelCaseName %>PluginStart> {
   private readonly logger: Logger;
 
@@ -12,7 +12,7 @@ export class <%= upperCamelCaseName %>ServerPlugin
   }
   
   public setup(core: CoreSetup) {
-    this.logger.debug('<%= name %>: Ssetup');
+    this.logger.debug('<%= name %>: Setup');
     const router = core.http.createRouter();
 
     // Register server side APIs
@@ -28,5 +28,3 @@ export class <%= upperCamelCaseName %>ServerPlugin
 
   public stop() {}
 }
-
-export { <%= upperCamelCaseName %>ServerPlugin as Plugin };

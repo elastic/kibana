@@ -103,7 +103,7 @@ export const <%= upperCamelCaseName %>App = ({ basename, notifications, http, na
                     <p>
                       <FormattedMessage
                         id="<%= camelCase(name) %>.content"
-                        defaultMessage="Look through the generated code and checkout the plugin development documentation."
+                        defaultMessage="Look through the generated code and check out the plugin development documentation."
                       />
                     </p>
                     <EuiHorizontalRule/>
