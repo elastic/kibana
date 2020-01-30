@@ -12,9 +12,9 @@ import debounce from 'lodash/function/debounce';
 import first from 'lodash/array/first';
 
 import { i18n } from '@kbn/i18n';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
-import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
 
 import {
   EuiCallOut,
@@ -26,8 +26,6 @@ import {
   EuiStepsHorizontal,
   EuiTitle,
 } from '@elastic/eui';
-
-import { fatalError } from 'ui/notify';
 
 import {
   validateIndexPattern,
@@ -58,6 +56,8 @@ import {
   getAffectedStepsFields,
   hasErrors,
 } from './steps_config';
+
+import { getFatalErrors } from '../../../kibana_services';
 
 const stepIdToTitleMap = {
   [STEP_LOGISTICS]: i18n.translate('xpack.rollupJobs.create.steps.stepLogisticsTitle', {
@@ -92,7 +92,7 @@ export class JobCreateUi extends Component {
   constructor(props) {
     super(props);
 
-    chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb, createBreadcrumb]);
+    props.kibana.services.setBreadcrumbs([listBreadcrumb, createBreadcrumb]);
     const { jobToClone: stepDefaultOverrides } = props;
     const stepsFields = mapValues(stepIdToStepConfigMap, step =>
       cloneDeep(step.getDefaultFields(stepDefaultOverrides))
@@ -181,7 +181,7 @@ export class JobCreateUi extends Component {
           dateFields: indexPatternDateFields,
           numericFields,
           keywordFields,
-        } = response.data;
+        } = response;
 
         let indexPatternAsyncErrors;
 
@@ -298,9 +298,9 @@ export class JobCreateUi extends Component {
           return;
         }
 
-        // Expect an error in the shape provided by Angular's $http service.
-        if (error && error.data) {
-          const { error: errorString, statusCode } = error.data;
+        // Expect an error in the shape provided by http service.
+        if (error && error.body) {
+          const { error: errorString, statusCode } = error.body;
 
           const indexPatternAsyncErrors = [
             <FormattedMessage
@@ -324,7 +324,7 @@ export class JobCreateUi extends Component {
 
         // This error isn't an HTTP error, so let the fatal error screen tell the user something
         // unexpected happened.
-        fatalError(
+        getFatalErrors().add(
           error,
           i18n.translate('xpack.rollupJobs.create.errors.indexPatternValidationFatalErrorTitle', {
             defaultMessage: 'Rollup Job Wizard index pattern validation',
@@ -689,4 +689,4 @@ export class JobCreateUi extends Component {
   }
 }
 
-export const JobCreate = injectI18n(JobCreateUi);
+export const JobCreate = withKibana(JobCreateUi);
