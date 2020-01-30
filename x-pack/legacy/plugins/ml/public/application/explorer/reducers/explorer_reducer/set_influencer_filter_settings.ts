@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EXPLORER_ACTION, VIEW_BY_JOB_LABEL } from '../../explorer_constants';
+import { VIEW_BY_JOB_LABEL } from '../../explorer_constants';
 import { ActionPayload } from '../../explorer_dashboard_service';
-
-import { appStateReducer } from '../app_state_reducer';
 
 import { ExplorerState } from './state';
 
@@ -25,17 +23,20 @@ export function setInfluencerFilterSettings(
 
   const { selectedCells, viewBySwimlaneOptions } = state;
   let selectedViewByFieldName = state.viewBySwimlaneFieldName;
+  const filteredViewBySwimlaneOptions = viewBySwimlaneOptions.filter(d =>
+    filteredFields.includes(d)
+  );
 
   // if it's an AND filter set view by swimlane to job ID as the others will have no results
-  if (isAndOperator && selectedCells === null) {
+  if (isAndOperator && selectedCells === undefined) {
     selectedViewByFieldName = VIEW_BY_JOB_LABEL;
   } else {
     // Set View by dropdown to first relevant fieldName based on incoming filter if there's no cell selection already
     // or if selected cell is from overall swimlane as this won't include an additional influencer filter
     for (let i = 0; i < filteredFields.length; i++) {
       if (
-        viewBySwimlaneOptions.includes(filteredFields[i]) &&
-        (selectedCells === null || (selectedCells && selectedCells.type === 'overall'))
+        filteredViewBySwimlaneOptions.includes(filteredFields[i]) &&
+        (selectedCells === undefined || (selectedCells && selectedCells.type === 'overall'))
       ) {
         selectedViewByFieldName = filteredFields[i];
         break;
@@ -43,21 +44,8 @@ export function setInfluencerFilterSettings(
     }
   }
 
-  const appState = appStateReducer(state.appState, {
-    type: EXPLORER_ACTION.APP_STATE_SAVE_INFLUENCER_FILTER_SETTINGS,
-    payload: {
-      influencersFilterQuery,
-      filterActive: true,
-      filteredFields,
-      queryString,
-      tableQueryString,
-      isAndOperator,
-    },
-  });
-
   return {
     ...state,
-    appState,
     filterActive: true,
     filteredFields,
     influencersFilterQuery,
@@ -68,5 +56,6 @@ export function setInfluencerFilterSettings(
       selectedViewByFieldName === VIEW_BY_JOB_LABEL ||
       filteredFields.includes(selectedViewByFieldName) === false,
     viewBySwimlaneFieldName: selectedViewByFieldName,
+    viewBySwimlaneOptions: filteredViewBySwimlaneOptions,
   };
 }

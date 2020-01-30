@@ -6,18 +6,33 @@
 
 import { useEffect, useState } from 'react';
 
+import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
+import { useStateToaster } from '../../../components/toasters';
 import { getUserPrivilege } from './api';
+import * as i18n from './translations';
 
-type Return = [boolean, boolean | null, boolean | null];
-
+interface Return {
+  loading: boolean;
+  isAuthenticated: boolean | null;
+  hasIndexManage: boolean | null;
+  hasManageApiKey: boolean | null;
+  hasIndexWrite: boolean | null;
+}
 /**
  * Hook to get user privilege from
  *
  */
 export const usePrivilegeUser = (): Return => {
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setAuthenticated] = useState<boolean | null>(null);
-  const [hasWrite, setHasWrite] = useState<boolean | null>(null);
+  const [privilegeUser, setPrivilegeUser] = useState<
+    Pick<Return, 'isAuthenticated' | 'hasIndexManage' | 'hasManageApiKey' | 'hasIndexWrite'>
+  >({
+    isAuthenticated: null,
+    hasIndexManage: null,
+    hasManageApiKey: null,
+    hasIndexWrite: null,
+  });
+  const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -31,16 +46,32 @@ export const usePrivilegeUser = (): Return => {
         });
 
         if (isSubscribed && privilege != null) {
-          setAuthenticated(privilege.isAuthenticated);
           if (privilege.index != null && Object.keys(privilege.index).length > 0) {
             const indexName = Object.keys(privilege.index)[0];
-            setHasWrite(privilege.index[indexName].create_index);
+            setPrivilegeUser({
+              isAuthenticated: privilege.is_authenticated,
+              hasIndexManage: privilege.index[indexName].manage,
+              hasIndexWrite:
+                privilege.index[indexName].create ||
+                privilege.index[indexName].create_doc ||
+                privilege.index[indexName].index ||
+                privilege.index[indexName].write,
+              hasManageApiKey:
+                privilege.cluster.manage_security ||
+                privilege.cluster.manage_api_key ||
+                privilege.cluster.manage_own_api_key,
+            });
           }
         }
       } catch (error) {
         if (isSubscribed) {
-          setAuthenticated(false);
-          setHasWrite(false);
+          setPrivilegeUser({
+            isAuthenticated: false,
+            hasIndexManage: false,
+            hasManageApiKey: false,
+            hasIndexWrite: false,
+          });
+          errorToToaster({ title: i18n.PRIVILEGE_FETCH_FAILURE, error, dispatchToaster });
         }
       }
       if (isSubscribed) {
@@ -55,5 +86,5 @@ export const usePrivilegeUser = (): Return => {
     };
   }, []);
 
-  return [loading, isAuthenticated, hasWrite];
+  return { loading, ...privilegeUser };
 };

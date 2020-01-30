@@ -11,6 +11,7 @@ import { ManageSpacesButton } from './manage_spaces_button';
 import { getSpacesFeatureDescription } from '../../constants';
 
 interface Props {
+  id: string;
   onManageSpacesClick: () => void;
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
@@ -18,6 +19,7 @@ interface Props {
 
 export const SpacesDescription: FC<Props> = (props: Props) => {
   const panelProps = {
+    id: props.id,
     className: 'spcDescription',
     title: 'Spaces',
   };

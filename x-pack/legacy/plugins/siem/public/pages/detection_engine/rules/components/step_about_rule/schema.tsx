@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 
-import * as RuleI18n from '../../translations';
 import { IMitreEnterpriseAttack } from '../../types';
 import {
   FIELD_TYPES,
@@ -18,6 +15,7 @@ import {
   ERROR_CODE,
 } from '../shared_imports';
 import { isMitreAttackInvalid } from '../mitre/helpers';
+import { OptionalFieldLabel } from '../optional_field_label';
 import { isUrlInvalid } from './helpers';
 import * as I18n from './translations';
 
@@ -97,7 +95,7 @@ export const schema: FormSchema = {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateLabel',
       {
-        defaultMessage: 'Timeline template',
+        defaultMessage: 'Investigate detections using this timeline template',
       }
     ),
   },
@@ -108,7 +106,7 @@ export const schema: FormSchema = {
         defaultMessage: 'Reference URLs',
       }
     ),
-    labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
+    labelAppend: OptionalFieldLabel,
     validations: [
       {
         validator: (
@@ -136,19 +134,19 @@ export const schema: FormSchema = {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldFalsePositiveLabel',
       {
-        defaultMessage: 'False positives',
+        defaultMessage: 'False positive examples',
       }
     ),
-    labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
+    labelAppend: OptionalFieldLabel,
   },
-  threats: {
+  threat: {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldMitreThreatLabel',
       {
-        defaultMessage: 'MITRE ATT&CK',
+        defaultMessage: 'MITRE ATT&CK\\u2122',
       }
     ),
-    labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
+    labelAppend: OptionalFieldLabel,
     validations: [
       {
         validator: (
@@ -157,7 +155,7 @@ export const schema: FormSchema = {
           const [{ value, path }] = args;
           let hasError = false;
           (value as IMitreEnterpriseAttack[]).forEach(v => {
-            if (isMitreAttackInvalid(v.tactic.name, v.techniques)) {
+            if (isMitreAttackInvalid(v.tactic.name, v.technique)) {
               hasError = true;
             }
           });
@@ -184,6 +182,6 @@ export const schema: FormSchema = {
           'Type one or more custom identifying tags for this rule. Press enter after each tag to begin a new one.',
       }
     ),
-    labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
+    labelAppend: OptionalFieldLabel,
   },
 };

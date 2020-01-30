@@ -11,10 +11,8 @@ export default function({ loadTestFile }) {
     // verifying the pre-loaded documents are returned in a way that
     // matches the snapshots contained in './fixtures'
     loadTestFile(require.resolve('./doc_count'));
-    loadTestFile(require.resolve('./filter_bar'));
     loadTestFile(require.resolve('./monitor_charts'));
     loadTestFile(require.resolve('./monitor_states'));
     loadTestFile(require.resolve('./ping_list'));
-    loadTestFile(require.resolve('./snapshot_histogram'));
   });
 }

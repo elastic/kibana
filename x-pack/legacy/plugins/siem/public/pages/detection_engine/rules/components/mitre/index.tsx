@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFormRow,
   EuiSuperSelect,
@@ -16,14 +15,15 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { isEmpty, kebabCase, camelCase } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../translations';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
-import { threatsDefault } from '../step_about_rule/default_value';
+import { threatDefault } from '../step_about_rule/default_value';
 import { IMitreEnterpriseAttack } from '../../types';
+import { MyAddItemButton } from '../add_item_form';
 import { isMitreAttackInvalid } from './helpers';
 import * as i18n from './translations';
 
@@ -41,6 +41,7 @@ interface AddItemProps {
 }
 
 export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddItemProps) => {
+  const [showValidation, setShowValidation] = useState(false);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const removeItem = useCallback(
@@ -48,7 +49,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
       const values = field.value as string[];
       const newValues = [...values.slice(0, index), ...values.slice(index + 1)];
       if (isEmpty(newValues)) {
-        field.setValue(threatsDefault);
+        field.setValue(threatDefault);
       } else {
         field.setValue(newValues);
       }
@@ -61,10 +62,10 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
     if (!isEmpty(values[values.length - 1])) {
       field.setValue([
         ...values,
-        { tactic: { id: 'none', name: 'none', reference: 'none' }, techniques: [] },
+        { tactic: { id: 'none', name: 'none', reference: 'none' }, technique: [] },
       ]);
     } else {
-      field.setValue([{ tactic: { id: 'none', name: 'none', reference: 'none' }, techniques: [] }]);
+      field.setValue([{ tactic: { id: 'none', name: 'none', reference: 'none' }, technique: [] }]);
     }
   }, [field]);
 
@@ -81,7 +82,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
         {
           ...values[index],
           tactic: { id, reference, name },
-          techniques: [],
+          technique: [],
         },
         ...values.slice(index + 1),
       ]);
@@ -95,7 +96,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
         ...values.slice(0, index),
         {
           ...values[index],
-          techniques: selectedOptions,
+          technique: selectedOptions,
         },
         ...values.slice(index + 1),
       ]);
@@ -132,20 +133,27 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
   );
 
   const getSelectTechniques = (item: IMitreEnterpriseAttack, index: number, disabled: boolean) => {
-    const invalid = isMitreAttackInvalid(item.tactic.name, item.techniques);
+    const invalid = isMitreAttackInvalid(item.tactic.name, item.technique);
+    const options = techniquesOptions.filter(t => t.tactics.includes(kebabCase(item.tactic.name)));
+    const selectedOptions = item.technique.map(technic => ({
+      ...technic,
+      label: `${technic.name} (${technic.id})`, // API doesn't allow for label field
+    }));
+
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow>
           <EuiComboBox
-            placeholder={i18n.TECHNIQUES_PLACEHOLDER}
-            options={techniquesOptions.filter(t => t.tactics.includes(kebabCase(item.tactic.name)))}
-            selectedOptions={item.techniques}
+            placeholder={item.tactic.name === 'none' ? '' : i18n.TECHNIQUES_PLACEHOLDER}
+            options={options}
+            selectedOptions={selectedOptions}
             onChange={updateTechniques.bind(null, index)}
-            isDisabled={disabled}
+            isDisabled={disabled || item.tactic.name === 'none'}
             fullWidth={true}
-            isInvalid={invalid}
+            isInvalid={showValidation && invalid}
+            onBlur={() => setShowValidation(true)}
           />
-          {invalid && (
+          {showValidation && invalid && (
             <EuiText color="danger" size="xs">
               <p>{errorMessage}</p>
             </EuiText>
@@ -155,7 +163,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
           <EuiButtonIcon
             color="danger"
             iconType="trash"
-            isDisabled={disabled}
+            isDisabled={disabled || item.tactic.name === 'none'}
             onClick={() => removeItem(index)}
             aria-label={Rulei18n.DELETE}
           />
@@ -186,7 +194,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
               {index === 0 ? (
                 <EuiFormRow
                   label={`${field.label} ${i18n.TECHNIQUE}`}
-                  isInvalid={isInvalid}
+                  isInvalid={showValidation && isInvalid}
                   fullWidth
                   describedByIds={idAria ? [`${idAria} ${i18n.TECHNIQUE}`] : undefined}
                 >
@@ -200,9 +208,9 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
           {values.length - 1 !== index && <EuiSpacer size="s" />}
         </div>
       ))}
-      <EuiButtonEmpty size="xs" onClick={addItem} isDisabled={isDisabled} iconType="plusInCircle">
+      <MyAddItemButton onClick={addItem} isDisabled={isDisabled}>
         {i18n.ADD_MITRE_ATTACK}
-      </EuiButtonEmpty>
+      </MyAddItemButton>
     </MitreContainer>
   );
 };

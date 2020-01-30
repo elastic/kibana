@@ -7,22 +7,13 @@
 import { IRouter } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { EndpointAppContext, EndpointData } from '../types';
+
 import { kibanaRequestToEndpointListQuery } from '../services/endpoint/endpoint_query_builders';
+import { EndpointMetadata, EndpointResultList } from '../../common/types';
+import { EndpointAppContext } from '../types';
 
 interface HitSource {
-  _source: EndpointData;
-}
-
-export interface EndpointResultList {
-  // the endpoint restricted by the page size
-  endpoints: EndpointData[];
-  // the total number of unique endpoints in the index
-  total: number;
-  // the page size requested
-  request_page_size: number;
-  // the index requested
-  request_index: number;
+  _source: EndpointMetadata;
 }
 
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
@@ -53,7 +44,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           queryParams
-        )) as SearchResponse<EndpointData>;
+        )) as SearchResponse<EndpointMetadata>;
         return res.ok({ body: mapToEndpointResultList(queryParams, response) });
       } catch (err) {
         return res.internalError({ body: err });
@@ -64,23 +55,24 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
 
 function mapToEndpointResultList(
   queryParams: Record<string, any>,
-  searchResponse: SearchResponse<EndpointData>
+  searchResponse: SearchResponse<EndpointMetadata>
 ): EndpointResultList {
+  const totalNumberOfEndpoints = searchResponse?.aggregations?.total?.value || 0;
   if (searchResponse.hits.hits.length > 0) {
     return {
       request_page_size: queryParams.size,
-      request_index: queryParams.from,
+      request_page_index: queryParams.from,
       endpoints: searchResponse.hits.hits
         .map(response => response.inner_hits.most_recent.hits.hits)
         .flatMap(data => data as HitSource)
         .map(entry => entry._source),
-      total: searchResponse.aggregations.total.value,
+      total: totalNumberOfEndpoints,
     };
   } else {
     return {
       request_page_size: queryParams.size,
-      request_index: queryParams.from,
-      total: 0,
+      request_page_index: queryParams.from,
+      total: totalNumberOfEndpoints,
       endpoints: [],
     };
   }

@@ -18,24 +18,42 @@
  */
 
 import { createElement } from 'react';
-import { Subject } from 'rxjs';
-import { bufferCount, skip, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { bufferCount, take, takeUntil } from 'rxjs/operators';
 import { shallow } from 'enzyme';
 
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
+import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { MockCapabilitiesService, MockHistory } from './application_service.test.mocks';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
+import { App, AppNavLinkStatus, AppStatus, AppUpdater, LegacyApp } from './types';
 
-function mount() {}
+const createApp = (props: Partial<App>): App => {
+  return {
+    id: 'some-id',
+    title: 'some-title',
+    mount: () => () => undefined,
+    ...props,
+  };
+};
+
+const createLegacyApp = (props: Partial<LegacyApp>): LegacyApp => {
+  return {
+    id: 'some-id',
+    title: 'some-title',
+    appUrl: '/my-url',
+    ...props,
+  };
+};
+
+let setupDeps: MockLifecycle<'setup'>;
+let startDeps: MockLifecycle<'start'>;
+let service: ApplicationService;
 
 describe('#setup()', () => {
-  let setupDeps: MockLifecycle<'setup'>;
-  let startDeps: MockLifecycle<'start'>;
-  let service: ApplicationService;
-
   beforeEach(() => {
     const http = httpServiceMock.createSetupContract({ basePath: '/test' });
     setupDeps = {
@@ -44,7 +62,7 @@ describe('#setup()', () => {
       injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
     };
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
-    startDeps = { http, injectedMetadata: setupDeps.injectedMetadata };
+    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();
   });
 
@@ -52,9 +70,9 @@ describe('#setup()', () => {
     it('throws an error if two apps with the same id are registered', () => {
       const { register } = service.setup(setupDeps);
 
-      register(Symbol(), { id: 'app1', mount } as any);
+      register(Symbol(), createApp({ id: 'app1' }));
       expect(() =>
-        register(Symbol(), { id: 'app1', mount } as any)
+        register(Symbol(), createApp({ id: 'app1' }))
       ).toThrowErrorMatchingInlineSnapshot(
         `"An application is already registered with the id \\"app1\\""`
       );
@@ -65,37 +83,91 @@ describe('#setup()', () => {
 
       await service.start(startDeps);
       expect(() =>
-        register(Symbol(), { id: 'app1', mount } as any)
+        register(Symbol(), createApp({ id: 'app1' }))
       ).toThrowErrorMatchingInlineSnapshot(`"Applications cannot be registered after \\"setup\\""`);
+    });
+
+    it('allows to register a statusUpdater for the application', async () => {
+      const setup = service.setup(setupDeps);
+
+      const pluginId = Symbol('plugin');
+      const updater$ = new BehaviorSubject<AppUpdater>(app => ({}));
+      setup.register(pluginId, createApp({ id: 'app1', updater$ }));
+      setup.register(pluginId, createApp({ id: 'app2' }));
+      const { applications$ } = await service.start(startDeps);
+
+      let applications = await applications$.pipe(take(1)).toPromise();
+      expect(applications.size).toEqual(2);
+      expect(applications.get('app1')).toEqual(
+        expect.objectContaining({
+          id: 'app1',
+          legacy: false,
+          navLinkStatus: AppNavLinkStatus.default,
+          status: AppStatus.accessible,
+        })
+      );
+      expect(applications.get('app2')).toEqual(
+        expect.objectContaining({
+          id: 'app2',
+          legacy: false,
+          navLinkStatus: AppNavLinkStatus.default,
+          status: AppStatus.accessible,
+        })
+      );
+
+      updater$.next(app => ({
+        status: AppStatus.inaccessible,
+        tooltip: 'App inaccessible due to reason',
+      }));
+
+      applications = await applications$.pipe(take(1)).toPromise();
+      expect(applications.size).toEqual(2);
+      expect(applications.get('app1')).toEqual(
+        expect.objectContaining({
+          id: 'app1',
+          legacy: false,
+          navLinkStatus: AppNavLinkStatus.default,
+          status: AppStatus.inaccessible,
+          tooltip: 'App inaccessible due to reason',
+        })
+      );
+      expect(applications.get('app2')).toEqual(
+        expect.objectContaining({
+          id: 'app2',
+          legacy: false,
+          navLinkStatus: AppNavLinkStatus.default,
+          status: AppStatus.accessible,
+        })
+      );
     });
 
     it('throws an error if an App with the same appRoute is registered', () => {
       const { register, registerLegacyApp } = service.setup(setupDeps);
 
-      register(Symbol(), { id: 'app1', mount } as any);
+      register(Symbol(), createApp({ id: 'app1' }));
 
       expect(() =>
-        register(Symbol(), { id: 'app2', mount, appRoute: '/app/app1' } as any)
+        register(Symbol(), createApp({ id: 'app2', appRoute: '/app/app1' }))
       ).toThrowErrorMatchingInlineSnapshot(
         `"An application is already registered with the appRoute \\"/app/app1\\""`
       );
-      expect(() => registerLegacyApp({ id: 'app1' } as any)).not.toThrow();
+      expect(() => registerLegacyApp(createLegacyApp({ id: 'app1' }))).toThrow();
 
-      register(Symbol(), { id: 'app-next', mount, appRoute: '/app/app3' } as any);
+      register(Symbol(), createApp({ id: 'app-next', appRoute: '/app/app3' }));
 
       expect(() =>
-        register(Symbol(), { id: 'app2', mount, appRoute: '/app/app3' } as any)
+        register(Symbol(), createApp({ id: 'app2', appRoute: '/app/app3' }))
       ).toThrowErrorMatchingInlineSnapshot(
         `"An application is already registered with the appRoute \\"/app/app3\\""`
       );
-      expect(() => registerLegacyApp({ id: 'app3' } as any)).not.toThrow();
+      expect(() => registerLegacyApp(createLegacyApp({ id: 'app3' }))).not.toThrow();
     });
 
     it('throws an error if an App starts with the HTTP base path', () => {
       const { register } = service.setup(setupDeps);
 
       expect(() =>
-        register(Symbol(), { id: 'app2', mount, appRoute: '/test/app2' } as any)
+        register(Symbol(), createApp({ id: 'app2', appRoute: '/test/app2' }))
       ).toThrowErrorMatchingInlineSnapshot(
         `"Cannot register an application route that includes HTTP base path"`
       );
@@ -106,9 +178,11 @@ describe('#setup()', () => {
     it('throws an error if two apps with the same id are registered', () => {
       const { registerLegacyApp } = service.setup(setupDeps);
 
-      registerLegacyApp({ id: 'app2' } as any);
-      expect(() => registerLegacyApp({ id: 'app2' } as any)).toThrowErrorMatchingInlineSnapshot(
-        `"A legacy application is already registered with the id \\"app2\\""`
+      registerLegacyApp(createLegacyApp({ id: 'app2' }));
+      expect(() =>
+        registerLegacyApp(createLegacyApp({ id: 'app2' }))
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"An application is already registered with the id \\"app2\\""`
       );
     });
 
@@ -116,22 +190,228 @@ describe('#setup()', () => {
       const { registerLegacyApp } = service.setup(setupDeps);
 
       await service.start(startDeps);
-      expect(() => registerLegacyApp({ id: 'app2' } as any)).toThrowErrorMatchingInlineSnapshot(
-        `"Applications cannot be registered after \\"setup\\""`
-      );
+      expect(() =>
+        registerLegacyApp(createLegacyApp({ id: 'app2' }))
+      ).toThrowErrorMatchingInlineSnapshot(`"Applications cannot be registered after \\"setup\\""`);
     });
 
     it('throws an error if a LegacyApp with the same appRoute is registered', () => {
       const { register, registerLegacyApp } = service.setup(setupDeps);
 
-      registerLegacyApp({ id: 'app1' } as any);
+      registerLegacyApp(createLegacyApp({ id: 'app1' }));
 
       expect(() =>
-        register(Symbol(), { id: 'app2', mount, appRoute: '/app/app1' } as any)
+        register(Symbol(), createApp({ id: 'app2', appRoute: '/app/app1' }))
       ).toThrowErrorMatchingInlineSnapshot(
         `"An application is already registered with the appRoute \\"/app/app1\\""`
       );
-      expect(() => registerLegacyApp({ id: 'app1:other' } as any)).not.toThrow();
+      expect(() => registerLegacyApp(createLegacyApp({ id: 'app1:other' }))).not.toThrow();
+    });
+  });
+
+  describe('registerAppStatusUpdater', () => {
+    it('updates status fields', async () => {
+      const setup = service.setup(setupDeps);
+
+      const pluginId = Symbol('plugin');
+      setup.register(pluginId, createApp({ id: 'app1' }));
+      setup.register(pluginId, createApp({ id: 'app2' }));
+      setup.registerAppUpdater(
+        new BehaviorSubject<AppUpdater>(app => {
+          if (app.id === 'app1') {
+            return {
+              status: AppStatus.inaccessible,
+              navLinkStatus: AppNavLinkStatus.disabled,
+              tooltip: 'App inaccessible due to reason',
+            };
+          }
+          return {
+            tooltip: 'App accessible',
+          };
+        })
+      );
+      const start = await service.start(startDeps);
+      const applications = await start.applications$.pipe(take(1)).toPromise();
+
+      expect(applications.size).toEqual(2);
+      expect(applications.get('app1')).toEqual(
+        expect.objectContaining({
+          id: 'app1',
+          legacy: false,
+          navLinkStatus: AppNavLinkStatus.disabled,
+          status: AppStatus.inaccessible,
+          tooltip: 'App inaccessible due to reason',
+        })
+      );
+      expect(applications.get('app2')).toEqual(
+        expect.objectContaining({
+          id: 'app2',
+          legacy: false,
+          navLinkStatus: AppNavLinkStatus.default,
+          status: AppStatus.accessible,
+          tooltip: 'App accessible',
+        })
+      );
+    });
+
+    it(`properly combine with application's updater$`, async () => {
+      const setup = service.setup(setupDeps);
+      const pluginId = Symbol('plugin');
+      const appStatusUpdater$ = new BehaviorSubject<AppUpdater>(app => ({
+        status: AppStatus.inaccessible,
+        navLinkStatus: AppNavLinkStatus.disabled,
+      }));
+      setup.register(pluginId, createApp({ id: 'app1', updater$: appStatusUpdater$ }));
+      setup.register(pluginId, createApp({ id: 'app2' }));
+
+      setup.registerAppUpdater(
+        new BehaviorSubject<AppUpdater>(app => {
+          if (app.id === 'app1') {
+            return {
+              status: AppStatus.accessible,
+              tooltip: 'App inaccessible due to reason',
+            };
+          }
+          return {
+            status: AppStatus.inaccessible,
+            navLinkStatus: AppNavLinkStatus.hidden,
+          };
+        })
+      );
+
+      const { applications$ } = await service.start(startDeps);
+      const applications = await applications$.pipe(take(1)).toPromise();
+
+      expect(applications.size).toEqual(2);
+      expect(applications.get('app1')).toEqual(
+        expect.objectContaining({
+          id: 'app1',
+          legacy: false,
+          navLinkStatus: AppNavLinkStatus.disabled,
+          status: AppStatus.inaccessible,
+          tooltip: 'App inaccessible due to reason',
+        })
+      );
+      expect(applications.get('app2')).toEqual(
+        expect.objectContaining({
+          id: 'app2',
+          legacy: false,
+          status: AppStatus.inaccessible,
+          navLinkStatus: AppNavLinkStatus.hidden,
+        })
+      );
+    });
+
+    it('applies the most restrictive status in case of multiple updaters', async () => {
+      const setup = service.setup(setupDeps);
+
+      const pluginId = Symbol('plugin');
+      setup.register(pluginId, createApp({ id: 'app1' }));
+      setup.registerAppUpdater(
+        new BehaviorSubject<AppUpdater>(app => {
+          return {
+            status: AppStatus.inaccessible,
+            navLinkStatus: AppNavLinkStatus.disabled,
+          };
+        })
+      );
+      setup.registerAppUpdater(
+        new BehaviorSubject<AppUpdater>(app => {
+          return {
+            status: AppStatus.accessible,
+            navLinkStatus: AppNavLinkStatus.default,
+          };
+        })
+      );
+
+      const start = await service.start(startDeps);
+      const applications = await start.applications$.pipe(take(1)).toPromise();
+
+      expect(applications.size).toEqual(1);
+      expect(applications.get('app1')).toEqual(
+        expect.objectContaining({
+          id: 'app1',
+          legacy: false,
+          navLinkStatus: AppNavLinkStatus.disabled,
+          status: AppStatus.inaccessible,
+        })
+      );
+    });
+
+    it('emits on applications$ when a status updater changes', async () => {
+      const setup = service.setup(setupDeps);
+
+      const pluginId = Symbol('plugin');
+      setup.register(pluginId, createApp({ id: 'app1' }));
+
+      const statusUpdater = new BehaviorSubject<AppUpdater>(app => {
+        return {
+          status: AppStatus.inaccessible,
+          navLinkStatus: AppNavLinkStatus.disabled,
+        };
+      });
+      setup.registerAppUpdater(statusUpdater);
+
+      const start = await service.start(startDeps);
+      let latestValue: ReadonlyMap<string, App | LegacyApp> = new Map<string, App | LegacyApp>();
+      start.applications$.subscribe(apps => {
+        latestValue = apps;
+      });
+
+      expect(latestValue.get('app1')).toEqual(
+        expect.objectContaining({
+          id: 'app1',
+          legacy: false,
+          status: AppStatus.inaccessible,
+          navLinkStatus: AppNavLinkStatus.disabled,
+        })
+      );
+
+      statusUpdater.next(app => {
+        return {
+          status: AppStatus.accessible,
+          navLinkStatus: AppNavLinkStatus.hidden,
+        };
+      });
+
+      expect(latestValue.get('app1')).toEqual(
+        expect.objectContaining({
+          id: 'app1',
+          legacy: false,
+          status: AppStatus.accessible,
+          navLinkStatus: AppNavLinkStatus.hidden,
+        })
+      );
+    });
+
+    it('also updates legacy apps', async () => {
+      const setup = service.setup(setupDeps);
+
+      setup.registerLegacyApp(createLegacyApp({ id: 'app1' }));
+
+      setup.registerAppUpdater(
+        new BehaviorSubject<AppUpdater>(app => {
+          return {
+            status: AppStatus.inaccessible,
+            navLinkStatus: AppNavLinkStatus.hidden,
+            tooltip: 'App inaccessible due to reason',
+          };
+        })
+      );
+
+      const start = await service.start(startDeps);
+      const applications = await start.applications$.pipe(take(1)).toPromise();
+
+      expect(applications.size).toEqual(1);
+      expect(applications.get('app1')).toEqual(
+        expect.objectContaining({
+          id: 'app1',
+          legacy: true,
+          status: AppStatus.inaccessible,
+          navLinkStatus: AppNavLinkStatus.hidden,
+          tooltip: 'App inaccessible due to reason',
+        })
+      );
     });
   });
 
@@ -140,18 +420,16 @@ describe('#setup()', () => {
     const container = setupDeps.context.createContextContainer.mock.results[0].value;
     const pluginId = Symbol();
 
-    registerMountContext(pluginId, 'test' as any, mount as any);
+    const mount = () => () => undefined;
+    registerMountContext(pluginId, 'test' as any, mount);
     expect(container.registerContext).toHaveBeenCalledWith(pluginId, 'test', mount);
   });
 });
 
 describe('#start()', () => {
-  let setupDeps: MockLifecycle<'setup'>;
-  let startDeps: MockLifecycle<'start'>;
-  let service: ApplicationService;
-
   beforeEach(() => {
     MockHistory.push.mockReset();
+
     const http = httpServiceMock.createSetupContract({ basePath: '/test' });
     setupDeps = {
       http,
@@ -159,7 +437,7 @@ describe('#start()', () => {
       injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
     };
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
-    startDeps = { http, injectedMetadata: setupDeps.injectedMetadata };
+    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();
   });
 
@@ -173,35 +451,40 @@ describe('#start()', () => {
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
     const { register, registerLegacyApp } = service.setup(setupDeps);
 
-    register(Symbol(), { id: 'app1', mount } as any);
-    registerLegacyApp({ id: 'app2' } as any);
+    register(Symbol(), createApp({ id: 'app1' }));
+    registerLegacyApp(createLegacyApp({ id: 'app2' }));
 
-    const { availableApps, availableLegacyApps } = await service.start(startDeps);
+    const { applications$ } = await service.start(startDeps);
+    const availableApps = await applications$.pipe(take(1)).toPromise();
 
-    expect(availableApps).toMatchInlineSnapshot(`
-      Map {
-        "app1" => Object {
-          "appRoute": "/app/app1",
-          "id": "app1",
-          "mount": [Function],
-        },
-      }
-    `);
-    expect(availableLegacyApps).toMatchInlineSnapshot(`
-      Map {
-        "app2" => Object {
-          "id": "app2",
-        },
-      }
-    `);
+    expect(availableApps.size).toEqual(2);
+    expect([...availableApps.keys()]).toEqual(['app1', 'app2']);
+    expect(availableApps.get('app1')).toEqual(
+      expect.objectContaining({
+        appRoute: '/app/app1',
+        id: 'app1',
+        legacy: false,
+        navLinkStatus: AppNavLinkStatus.default,
+        status: AppStatus.accessible,
+      })
+    );
+    expect(availableApps.get('app2')).toEqual(
+      expect.objectContaining({
+        appUrl: '/my-url',
+        id: 'app2',
+        legacy: true,
+        navLinkStatus: AppNavLinkStatus.default,
+        status: AppStatus.accessible,
+      })
+    );
   });
 
   it('passes appIds to capabilities', async () => {
     const { register } = service.setup(setupDeps);
 
-    register(Symbol(), { id: 'app1', mount } as any);
-    register(Symbol(), { id: 'app2', mount } as any);
-    register(Symbol(), { id: 'app3', mount } as any);
+    register(Symbol(), createApp({ id: 'app1' }));
+    register(Symbol(), createApp({ id: 'app2' }));
+    register(Symbol(), createApp({ id: 'app3' }));
     await service.start(startDeps);
 
     expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
@@ -224,29 +507,31 @@ describe('#start()', () => {
 
     const { register, registerLegacyApp } = service.setup(setupDeps);
 
-    register(Symbol(), { id: 'app1', mount } as any);
-    registerLegacyApp({ id: 'legacyApp1' } as any);
-    register(Symbol(), { id: 'app2', mount } as any);
-    registerLegacyApp({ id: 'legacyApp2' } as any);
+    register(Symbol(), createApp({ id: 'app1' }));
+    registerLegacyApp(createLegacyApp({ id: 'legacyApp1' }));
+    register(Symbol(), createApp({ id: 'app2' }));
+    registerLegacyApp(createLegacyApp({ id: 'legacyApp2' }));
 
-    const { availableApps, availableLegacyApps } = await service.start(startDeps);
+    const { applications$ } = await service.start(startDeps);
+    const availableApps = await applications$.pipe(take(1)).toPromise();
 
-    expect(availableApps).toMatchInlineSnapshot(`
-      Map {
-        "app1" => Object {
-          "appRoute": "/app/app1",
-          "id": "app1",
-          "mount": [Function],
+    expect([...availableApps.keys()]).toEqual(['app1', 'legacyApp1']);
+  });
+
+  describe('currentAppId$', () => {
+    it('emits the legacy app id when in legacy mode', async () => {
+      setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
+      setupDeps.injectedMetadata.getLegacyMetadata.mockReturnValue({
+        app: {
+          id: 'legacy',
+          title: 'Legacy App',
         },
-      }
-    `);
-    expect(availableLegacyApps).toMatchInlineSnapshot(`
-      Map {
-        "legacyApp1" => Object {
-          "id": "legacyApp1",
-        },
-      }
-    `);
+      } as any);
+      await service.setup(setupDeps);
+      const { currentAppId$ } = await service.start(startDeps);
+
+      expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('legacy');
+    });
   });
 
   describe('getComponent', () => {
@@ -256,16 +541,7 @@ describe('#start()', () => {
       const { getComponent } = await service.start(startDeps);
 
       expect(() => shallow(createElement(getComponent))).not.toThrow();
-      expect(getComponent()).toMatchInlineSnapshot(`
-        <AppRouter
-          history={
-            Object {
-              "push": [MockFunction],
-            }
-          }
-          mounters={Map {}}
-        />
-      `);
+      expect(getComponent()).toMatchSnapshot();
     });
 
     it('renders null when in legacy mode', async () => {
@@ -291,9 +567,9 @@ describe('#start()', () => {
     it('creates URL for registered appId', async () => {
       const { register, registerLegacyApp } = service.setup(setupDeps);
 
-      register(Symbol(), { id: 'app1', mount } as any);
-      registerLegacyApp({ id: 'legacyApp1' } as any);
-      register(Symbol(), { id: 'app2', mount, appRoute: '/custom/path' } as any);
+      register(Symbol(), createApp({ id: 'app1' }));
+      registerLegacyApp(createLegacyApp({ id: 'legacyApp1' }));
+      register(Symbol(), createApp({ id: 'app2', appRoute: '/custom/path' }));
 
       const { getUrlForApp } = await service.start(startDeps);
 
@@ -320,41 +596,41 @@ describe('#start()', () => {
 
       const { navigateToApp } = await service.start(startDeps);
 
-      navigateToApp('myTestApp');
+      await navigateToApp('myTestApp');
       expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp', undefined);
 
-      navigateToApp('myOtherApp');
+      await navigateToApp('myOtherApp');
       expect(MockHistory.push).toHaveBeenCalledWith('/app/myOtherApp', undefined);
     });
 
     it('changes the browser history for custom appRoutes', async () => {
       const { register } = service.setup(setupDeps);
 
-      register(Symbol(), { id: 'app2', mount, appRoute: '/custom/path' } as any);
+      register(Symbol(), createApp({ id: 'app2', appRoute: '/custom/path' }));
 
       const { navigateToApp } = await service.start(startDeps);
 
-      navigateToApp('myTestApp');
+      await navigateToApp('myTestApp');
       expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp', undefined);
 
-      navigateToApp('app2');
+      await navigateToApp('app2');
       expect(MockHistory.push).toHaveBeenCalledWith('/custom/path', undefined);
     });
 
     it('appends a path if specified', async () => {
       const { register } = service.setup(setupDeps);
 
-      register(Symbol(), { id: 'app2', mount, appRoute: '/custom/path' } as any);
+      register(Symbol(), createApp({ id: 'app2', appRoute: '/custom/path' }));
 
       const { navigateToApp } = await service.start(startDeps);
 
-      navigateToApp('myTestApp', { path: 'deep/link/to/location/2' });
+      await navigateToApp('myTestApp', { path: 'deep/link/to/location/2' });
       expect(MockHistory.push).toHaveBeenCalledWith(
         '/app/myTestApp/deep/link/to/location/2',
         undefined
       );
 
-      navigateToApp('app2', { path: 'deep/link/to/location/2' });
+      await navigateToApp('app2', { path: 'deep/link/to/location/2' });
       expect(MockHistory.push).toHaveBeenCalledWith(
         '/custom/path/deep/link/to/location/2',
         undefined
@@ -364,14 +640,14 @@ describe('#start()', () => {
     it('includes state if specified', async () => {
       const { register } = service.setup(setupDeps);
 
-      register(Symbol(), { id: 'app2', mount, appRoute: '/custom/path' } as any);
+      register(Symbol(), createApp({ id: 'app2', appRoute: '/custom/path' }));
 
       const { navigateToApp } = await service.start(startDeps);
 
-      navigateToApp('myTestApp', { state: 'my-state' });
+      await navigateToApp('myTestApp', { state: 'my-state' });
       expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp', 'my-state');
 
-      navigateToApp('app2', { state: 'my-state' });
+      await navigateToApp('app2', { state: 'my-state' });
       expect(MockHistory.push).toHaveBeenCalledWith('/custom/path', 'my-state');
     });
 
@@ -382,7 +658,7 @@ describe('#start()', () => {
 
       const { navigateToApp } = await service.start(startDeps);
 
-      navigateToApp('myTestApp');
+      await navigateToApp('myTestApp');
       expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/myTestApp');
     });
 
@@ -391,7 +667,7 @@ describe('#start()', () => {
 
       const { currentAppId$, navigateToApp } = await service.start(startDeps);
       const stop$ = new Subject();
-      const promise = currentAppId$.pipe(skip(1), bufferCount(4), takeUntil(stop$)).toPromise();
+      const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
 
       await navigateToApp('alpha');
       await navigateToApp('beta');
@@ -430,12 +706,48 @@ describe('#start()', () => {
 
       const { registerLegacyApp } = service.setup(setupDeps);
 
-      registerLegacyApp({ id: 'baseApp:legacyApp1' } as any);
+      registerLegacyApp(createLegacyApp({ id: 'baseApp:legacyApp1' }));
 
       const { navigateToApp } = await service.start(startDeps);
 
       await navigateToApp('baseApp:legacyApp1');
       expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/baseApp');
     });
+  });
+});
+
+describe('#stop()', () => {
+  let addListenerSpy: jest.SpyInstance;
+  let removeListenerSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    addListenerSpy = jest.spyOn(window, 'addEventListener');
+    removeListenerSpy = jest.spyOn(window, 'removeEventListener');
+
+    MockHistory.push.mockReset();
+    const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+    setupDeps = {
+      http,
+      context: contextServiceMock.createSetupContract(),
+      injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+    };
+    setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
+    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    service = new ApplicationService();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('removes the beforeunload listener', async () => {
+    service.setup(setupDeps);
+    await service.start(startDeps);
+    expect(addListenerSpy).toHaveBeenCalledTimes(1);
+    expect(addListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+    const handler = addListenerSpy.mock.calls[0][1];
+    service.stop();
+    expect(removeListenerSpy).toHaveBeenCalledTimes(1);
+    expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
   });
 });

@@ -11,17 +11,18 @@ import {
   isWaffleMapGroupWithGroups,
   isWaffleMapGroupWithNodes,
 } from '../../containers/waffle/type_guards';
-import { InfraSnapshotNode, InfraNodeType } from '../../graphql/types';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../lib/lib';
 import { AutoSizer } from '../auto_sizer';
 import { GroupOfGroups } from './group_of_groups';
 import { GroupOfNodes } from './group_of_nodes';
 import { Legend } from './legend';
 import { applyWaffleMapLayout } from './lib/apply_wafflemap_layout';
+import { SnapshotNode } from '../../../common/http_api/snapshot_api';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 interface Props {
-  nodes: InfraSnapshotNode[];
-  nodeType: InfraNodeType;
+  nodes: SnapshotNode[];
+  nodeType: InventoryItemType;
   options: InfraWaffleMapOptions;
   formatter: (subject: string | number) => string;
   currentTime: number;

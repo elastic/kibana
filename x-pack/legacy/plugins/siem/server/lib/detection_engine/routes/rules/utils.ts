@@ -6,10 +6,25 @@
 
 import Boom from 'boom';
 import { pickBy } from 'lodash/fp';
+import { SavedObject } from 'kibana/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import { RuleAlertType, isAlertType, isAlertTypes } from '../../rules/types';
+import {
+  RuleAlertType,
+  isAlertType,
+  isAlertTypes,
+  IRuleSavedAttributesSavedObjectAttributes,
+  isRuleStatusFindType,
+  isRuleStatusFindTypes,
+  isRuleStatusSavedObjectType,
+} from '../../rules/types';
 import { OutputRuleAlertRest } from '../../types';
-import { createBulkErrorObject, BulkError } from '../utils';
+import {
+  createBulkErrorObject,
+  BulkError,
+  createSuccessObject,
+  ImportSuccessError,
+  createImportErrorObject,
+} from '../utils';
 
 export const getIdError = ({
   id,
@@ -19,11 +34,11 @@ export const getIdError = ({
   ruleId: string | undefined | null;
 }) => {
   if (id != null) {
-    return new Boom(`id: "${id}" not found`, { statusCode: 404 });
+    return Boom.notFound(`id: "${id}" not found`);
   } else if (ruleId != null) {
-    return new Boom(`rule_id: "${ruleId}" not found`, { statusCode: 404 });
+    return Boom.notFound(`rule_id: "${ruleId}" not found`);
   } else {
-    return new Boom(`id or rule_id should have been defined`, { statusCode: 404 });
+    return Boom.notFound('id or rule_id should have been defined');
   }
 };
 
@@ -61,10 +76,13 @@ export const transformTags = (tags: string[]): string[] => {
 
 // Transforms the data but will remove any null or undefined it encounters and not include
 // those on the export
-export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAlertRest> => {
+export const transformAlertToRule = (
+  alert: RuleAlertType,
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
-    created_at: alert.params.createdAt,
-    updated_at: alert.params.updatedAt,
+    created_at: alert.createdAt.toISOString(),
+    updated_at: alert.updatedAt.toISOString(),
     created_by: alert.createdBy,
     description: alert.params.description,
     enabled: alert.enabled,
@@ -92,23 +110,61 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     tags: transformTags(alert.tags),
     to: alert.params.to,
     type: alert.params.type,
-    threats: alert.params.threats,
+    threat: alert.params.threat,
     version: alert.params.version,
+    status: ruleStatus?.attributes.status,
+    status_date: ruleStatus?.attributes.statusDate,
+    last_failure_at: ruleStatus?.attributes.lastFailureAt,
+    last_success_at: ruleStatus?.attributes.lastSuccessAt,
+    last_failure_message: ruleStatus?.attributes.lastFailureMessage,
+    last_success_message: ruleStatus?.attributes.lastSuccessMessage,
   });
 };
 
-export const transformFindAlertsOrError = (findResults: { data: unknown[] }): unknown | Boom => {
-  if (isAlertTypes(findResults.data)) {
+export const transformRulesToNdjson = (rules: Array<Partial<OutputRuleAlertRest>>): string => {
+  if (rules.length !== 0) {
+    const rulesString = rules.map(rule => JSON.stringify(rule)).join('\n');
+    return `${rulesString}\n`;
+  } else {
+    return '';
+  }
+};
+
+export const transformAlertsToRules = (
+  alerts: RuleAlertType[]
+): Array<Partial<OutputRuleAlertRest>> => {
+  return alerts.map(alert => transformAlertToRule(alert));
+};
+
+export const transformFindAlertsOrError = (
+  findResults: { data: unknown[] },
+  ruleStatuses?: unknown[]
+): unknown | Boom => {
+  if (!ruleStatuses && isAlertTypes(findResults.data)) {
     findResults.data = findResults.data.map(alert => transformAlertToRule(alert));
+    return findResults;
+  }
+  if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {
+    findResults.data = findResults.data.map((alert, idx) =>
+      transformAlertToRule(alert, ruleStatuses[idx].saved_objects[0])
+    );
     return findResults;
   } else {
     return new Boom('Internal error transforming', { statusCode: 500 });
   }
 };
 
-export const transformOrError = (alert: unknown): Partial<OutputRuleAlertRest> | Boom => {
-  if (isAlertType(alert)) {
+export const transformOrError = (
+  alert: unknown,
+  ruleStatus?: unknown
+): Partial<OutputRuleAlertRest> | Boom => {
+  if (!ruleStatus && isAlertType(alert)) {
     return transformAlertToRule(alert);
+  }
+  if (isAlertType(alert) && isRuleStatusFindType(ruleStatus)) {
+    return transformAlertToRule(alert, ruleStatus.saved_objects[0]);
+  } else if (isAlertType(alert) && isRuleStatusSavedObjectType(ruleStatus)) {
+    return transformAlertToRule(alert, ruleStatus);
   } else {
     return new Boom('Internal error transforming', { statusCode: 500 });
   }
@@ -116,15 +172,37 @@ export const transformOrError = (alert: unknown): Partial<OutputRuleAlertRest> |
 
 export const transformOrBulkError = (
   ruleId: string,
-  alert: unknown
+  alert: unknown,
+  ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | BulkError => {
   if (isAlertType(alert)) {
-    return transformAlertToRule(alert);
+    if (isRuleStatusFindType(ruleStatus)) {
+      return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
+    } else {
+      return transformAlertToRule(alert);
+    }
   } else {
     return createBulkErrorObject({
       ruleId,
       statusCode: 500,
       message: 'Internal error transforming',
+    });
+  }
+};
+
+export const transformOrImportError = (
+  ruleId: string,
+  alert: unknown,
+  existingImportSuccessError: ImportSuccessError
+): ImportSuccessError => {
+  if (isAlertType(alert)) {
+    return createSuccessObject(existingImportSuccessError);
+  } else {
+    return createImportErrorObject({
+      ruleId,
+      statusCode: 500,
+      message: 'Internal error transforming',
+      existingImportSuccessError,
     });
   }
 };

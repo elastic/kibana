@@ -77,25 +77,21 @@ module.exports = {
       },
     },
     {
-      files: ['src/legacy/core_plugins/kbn_vislib_vis_types/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/core_plugins/tile_map/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/core_plugins/vis_type_markdown/**/*.{js,ts,tsx}'],
+      files: ['src/legacy/core_plugins/vis_type_vislib/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
     },
     {
       files: ['src/legacy/core_plugins/vis_type_table/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: [
+        'src/legacy/core_plugins/vis_default_editor/public/components/controls/**/*.{ts,tsx}',
+      ],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -256,15 +252,15 @@ module.exports = {
               {
                 target: [
                   '(src|x-pack)/plugins/**/*',
-                  '!(src|x-pack)/plugins/*/server/**/*',
+                  '!(src|x-pack)/plugins/**/server/**/*',
 
                   'src/legacy/core_plugins/**/*',
-                  '!src/legacy/core_plugins/*/server/**/*',
-                  '!src/legacy/core_plugins/*/index.{js,ts,tsx}',
+                  '!src/legacy/core_plugins/**/server/**/*',
+                  '!src/legacy/core_plugins/**/index.{js,ts,tsx}',
 
                   'x-pack/legacy/plugins/**/*',
-                  '!x-pack/legacy/plugins/*/server/**/*',
-                  '!x-pack/legacy/plugins/*/index.{js,ts,tsx}',
+                  '!x-pack/legacy/plugins/**/server/**/*',
+                  '!x-pack/legacy/plugins/**/index.{js,ts,tsx}',
 
                   'examples/**/*',
                   '!examples/**/server/**/*',
@@ -274,6 +270,8 @@ module.exports = {
                   'src/core/server/**/*',
                   '(src|x-pack)/plugins/*/server/**/*',
                   'examples/**/server/**/*',
+                  // TODO: Remove the 'joi' eslint rule once IE11 support is dropped
+                  'joi',
                 ],
                 errorMessage:
                   'Server modules cannot be imported into client modules or shared modules.',
@@ -353,9 +351,8 @@ module.exports = {
         'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
       ],
       settings: {
-        // instructs import/no-extraneous-dependencies to treat modules
-        // in plugins/ or ui/ namespace as "core modules" so they don't
-        // trigger failures for not being listed in package.json
+        // instructs import/no-extraneous-dependencies to treat certain modules
+        // as core modules, even if they aren't listed in package.json
         'import/core-modules': [
           'plugins',
           'legacy/ui',

@@ -1,0 +1,10 @@
+{
+  "objects": [
+    {
+      "rule_id": "query-rule-id-1"
+    },
+    {
+      "rule_id": "query-rule-id-2"
+    }
+  ]
+}

@@ -5,7 +5,7 @@
  */
 
 import { AlertsOverTimeData } from '../../graphql/types';
-import { FrameworkRequest, RequestBasicOptions } from '../framework';
+import { FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
 
 export interface AlertsBucket {
   key: number;
@@ -22,6 +22,6 @@ export interface AlertsGroupData {
 export interface AlertsAdapter {
   getAlertsHistogramData(
     request: FrameworkRequest,
-    options: RequestBasicOptions
+    options: MatrixHistogramRequestOptions
   ): Promise<AlertsOverTimeData>;
 }

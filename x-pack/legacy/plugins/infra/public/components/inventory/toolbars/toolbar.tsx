@@ -7,13 +7,9 @@
 import React, { FunctionComponent } from 'react';
 import { Action } from 'typescript-fsa';
 import { EuiFlexItem } from '@elastic/eui';
+import { SnapshotMetricInput, SnapshotGroupBy } from '../../../../common/http_api/snapshot_api';
 import { InventoryCloudAccount } from '../../../../common/http_api/inventory_meta_api';
 import { findToolbar } from '../../../../common/inventory_models/toolbars';
-import {
-  InfraNodeType,
-  InfraSnapshotMetricInput,
-  InfraSnapshotGroupbyInput,
-} from '../../../graphql/types';
 import { ToolbarWrapper } from './toolbar_wrapper';
 
 import { waffleOptionsSelectors } from '../../../store';
@@ -22,11 +18,12 @@ import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view
 import { SavedViewsToolbarControls } from '../../saved_views/toolbar_control';
 import { inventoryViewSavedObjectType } from '../../../../common/saved_objects/inventory_view';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export interface ToolbarProps {
   createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => IIndexPattern;
-  changeMetric: (payload: InfraSnapshotMetricInput) => Action<InfraSnapshotMetricInput>;
-  changeGroupBy: (payload: InfraSnapshotGroupbyInput[]) => Action<InfraSnapshotGroupbyInput[]>;
+  changeMetric: (payload: SnapshotMetricInput) => Action<SnapshotMetricInput>;
+  changeGroupBy: (payload: SnapshotGroupBy) => Action<SnapshotGroupBy>;
   changeCustomOptions: (payload: InfraGroupByOptions[]) => Action<InfraGroupByOptions[]>;
   changeAccount: (id: string) => Action<string>;
   changeRegion: (name: string) => Action<string>;
@@ -70,7 +67,7 @@ const wrapToolbarItems = (
 };
 
 interface Props {
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
   regions: string[];
   accounts: InventoryCloudAccount[];
 }

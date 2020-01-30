@@ -13,12 +13,12 @@ export const TACTIC = i18n.translate('xpack.siem.detectionEngine.mitreAttack.tac
 export const TECHNIQUE = i18n.translate(
   'xpack.siem.detectionEngine.mitreAttack.techniquesDescription',
   {
-    defaultMessage: 'technique',
+    defaultMessage: 'techniques',
   }
 );
 
 export const ADD_MITRE_ATTACK = i18n.translate('xpack.siem.detectionEngine.mitreAttack.addTitle', {
-  defaultMessage: 'Add MITRE ATT&CK threat',
+  defaultMessage: 'Add MITRE ATT&CK\\u2122 threat',
 });
 
 export const TECHNIQUES_PLACEHOLDER = i18n.translate(

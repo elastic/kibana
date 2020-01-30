@@ -73,6 +73,11 @@ export const MinAgeInput = props => {
 
   let daysOptionLabel;
   let hoursOptionLabel;
+  let minutesOptionLabel;
+  let secondsOptionLabel;
+  let millisecondsOptionLabel;
+  let microsecondsOptionLabel;
+  let nanosecondsOptionLabel;
 
   if (rolloverEnabled) {
     daysOptionLabel = i18n.translate(
@@ -86,6 +91,39 @@ export const MinAgeInput = props => {
       'xpack.indexLifecycleMgmt.editPolicy.rolloverHoursOptionLabel',
       {
         defaultMessage: 'hours from rollover',
+      }
+    );
+    minutesOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.rolloverMinutesOptionLabel',
+      {
+        defaultMessage: 'minutes from rollover',
+      }
+    );
+
+    secondsOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.rolloverSecondsOptionLabel',
+      {
+        defaultMessage: 'seconds from rollover',
+      }
+    );
+    millisecondsOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.rolloverMilliSecondsOptionLabel',
+      {
+        defaultMessage: 'milliseconds from rollover',
+      }
+    );
+
+    microsecondsOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.rolloverMicroSecondsOptionLabel',
+      {
+        defaultMessage: 'microseconds from rollover',
+      }
+    );
+
+    nanosecondsOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.rolloverNanoSecondsOptionLabel',
+      {
+        defaultMessage: 'nanoseconds from rollover',
       }
     );
   } else {
@@ -131,7 +169,7 @@ export const MinAgeInput = props => {
             onChange={async e => {
               setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE, e.target.value);
             }}
-            min={1}
+            min={0}
           />
         </ErrableFormRow>
       </EuiFlexItem>
@@ -149,6 +187,26 @@ export const MinAgeInput = props => {
               {
                 value: 'h',
                 text: hoursOptionLabel,
+              },
+              {
+                value: 'm',
+                text: minutesOptionLabel,
+              },
+              {
+                value: 's',
+                text: secondsOptionLabel,
+              },
+              {
+                value: 'ms',
+                text: millisecondsOptionLabel,
+              },
+              {
+                value: 'micros',
+                text: microsecondsOptionLabel,
+              },
+              {
+                value: 'nanos',
+                text: nanosecondsOptionLabel,
               },
             ]}
           />

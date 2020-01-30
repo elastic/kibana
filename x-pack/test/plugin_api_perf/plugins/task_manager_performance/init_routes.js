@@ -9,7 +9,10 @@ import { range, chunk } from 'lodash';
 
 const scope = 'perf-testing';
 export function initRoutes(server, performanceState) {
-  const taskManager = server.plugins.task_manager;
+  const taskManager = {
+    ...server.newPlatform.setup.plugins.taskManager,
+    ...server.newPlatform.start.plugins.taskManager,
+  };
 
   server.route({
     path: '/api/perf_tasks',

@@ -9,18 +9,46 @@ import { AlertsClient } from '../../../../../alerting';
 import { RuleAlertType, isAlertTypes } from './types';
 import { findRules } from './find_rules';
 
-export const DEFAULT_PER_PAGE: number = 100;
+export const DEFAULT_PER_PAGE = 100;
+export const FILTER_NON_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:false"`;
+export const FILTER_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`;
 
-export const getExistingPrepackagedRules = async ({
+export const getNonPackagedRulesCount = async ({
+  alertsClient,
+}: {
+  alertsClient: AlertsClient;
+}): Promise<number> => {
+  return getRulesCount({ alertsClient, filter: FILTER_NON_PREPACKED_RULES });
+};
+
+export const getRulesCount = async ({
+  alertsClient,
+  filter,
+}: {
+  alertsClient: AlertsClient;
+  filter: string;
+}): Promise<number> => {
+  const firstRule = await findRules({
+    alertsClient,
+    filter,
+    perPage: 1,
+    page: 1,
+  });
+  return firstRule.total;
+};
+
+export const getRules = async ({
   alertsClient,
   perPage = DEFAULT_PER_PAGE,
+  filter,
 }: {
   alertsClient: AlertsClient;
   perPage?: number;
+  filter: string;
 }): Promise<RuleAlertType[]> => {
   const firstPrepackedRules = await findRules({
     alertsClient,
-    filter: `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`,
+    filter,
     perPage,
     page: 1,
   });
@@ -40,7 +68,7 @@ export const getExistingPrepackagedRules = async ({
         // page index starts at 2 as we already got the first page and we have more pages to go
         return findRules({
           alertsClient,
-          filter: `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`,
+          filter,
           perPage,
           page: page + 2,
         });
@@ -57,4 +85,32 @@ export const getExistingPrepackagedRules = async ({
       return [];
     }
   }
+};
+
+export const getNonPackagedRules = async ({
+  alertsClient,
+  perPage = DEFAULT_PER_PAGE,
+}: {
+  alertsClient: AlertsClient;
+  perPage?: number;
+}): Promise<RuleAlertType[]> => {
+  return getRules({
+    alertsClient,
+    perPage,
+    filter: FILTER_NON_PREPACKED_RULES,
+  });
+};
+
+export const getExistingPrepackagedRules = async ({
+  alertsClient,
+  perPage = DEFAULT_PER_PAGE,
+}: {
+  alertsClient: AlertsClient;
+  perPage?: number;
+}): Promise<RuleAlertType[]> => {
+  return getRules({
+    alertsClient,
+    perPage,
+    filter: FILTER_PREPACKED_RULES,
+  });
 };

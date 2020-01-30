@@ -4,36 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFilterGroup } from '@elastic/eui';
 import React from 'react';
-import { get } from 'lodash';
+import { EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FilterBar as FilterBarType } from '../../../../common/graphql/types';
-import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
-import { filterBarQuery } from '../../../queries';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
 import { FilterStatusButton } from './filter_status_button';
+import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
 
-interface FilterBarQueryResult {
-  filters?: FilterBarType;
-}
-
-interface FilterBarDropdownsProps {
+interface PresentationalComponentProps {
+  loading: boolean;
+  overviewFilters: OverviewFilters;
   currentFilter: string;
-  onFilterUpdate: (kuery: string) => void;
+  onFilterUpdate: (filtersKuery: string) => void;
 }
 
-type Props = UptimeGraphQLQueryProps<FilterBarQueryResult> & FilterBarDropdownsProps;
-
-export const FilterGroupComponent = ({
-  loading: isLoading,
+export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
   currentFilter,
-  data,
+  overviewFilters,
+  loading,
   onFilterUpdate,
-}: Props) => {
-  const locations = get<string[]>(data, 'filterBar.locations', []);
-  const ports = get<string[]>(data, 'filterBar.ports', []);
-  const schemes = get<string[]>(data, 'filterBar.schemes', []);
+}) => {
+  const { locations, ports, schemes, tags } = overviewFilters;
 
   let filterKueries: Map<string, string[]>;
   try {
@@ -67,34 +58,48 @@ export const FilterGroupComponent = ({
 
   const filterPopoverProps: FilterPopoverProps[] = [
     {
+      loading,
+      onFilterFieldChange,
       fieldName: 'observer.geo.name',
       id: 'location',
-      isLoading,
       items: locations,
-      onFilterFieldChange,
       selectedItems: getSelectedItems('observer.geo.name'),
       title: i18n.translate('xpack.uptime.filterBar.options.location.name', {
         defaultMessage: 'Location',
       }),
     },
     {
+      loading,
+      onFilterFieldChange,
       fieldName: 'url.port',
       id: 'port',
-      isLoading,
-      items: ports,
-      onFilterFieldChange,
+      disabled: ports.length === 0,
+      items: ports.map((p: number) => p.toString()),
       selectedItems: getSelectedItems('url.port'),
       title: i18n.translate('xpack.uptime.filterBar.options.portLabel', { defaultMessage: 'Port' }),
     },
     {
+      loading,
+      onFilterFieldChange,
       fieldName: 'monitor.type',
       id: 'scheme',
-      isLoading,
+      disabled: schemes.length === 0,
       items: schemes,
-      onFilterFieldChange,
       selectedItems: getSelectedItems('monitor.type'),
       title: i18n.translate('xpack.uptime.filterBar.options.schemeLabel', {
         defaultMessage: 'Scheme',
+      }),
+    },
+    {
+      loading,
+      onFilterFieldChange,
+      fieldName: 'tags',
+      id: 'tags',
+      disabled: tags.length === 0,
+      items: tags,
+      selectedItems: getSelectedItems('tags'),
+      title: i18n.translate('xpack.uptime.filterBar.options.tagsLabel', {
+        defaultMessage: 'Tags',
       }),
     },
   ];
@@ -123,8 +128,3 @@ export const FilterGroupComponent = ({
     </EuiFilterGroup>
   );
 };
-
-export const FilterGroup = withUptimeGraphQL<FilterBarQueryResult, FilterBarDropdownsProps>(
-  FilterGroupComponent,
-  filterBarQuery
-);

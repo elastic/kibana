@@ -25,7 +25,7 @@
     'Team:Operations',
     'renovate',
     'v8.0.0',
-    'v7.6.0',
+    'v7.7.0',
   ],
   major: {
     labels: [
@@ -33,7 +33,7 @@
       'Team:Operations',
       'renovate',
       'v8.0.0',
-      'v7.6.0',
+      'v7.7.0',
       'renovate:major',
     ],
   },
@@ -211,6 +211,14 @@
         ],
       },
       {
+        groupSlug: 'deep-freeze-strict',
+        groupName: 'deep-freeze-strict related packages',
+        packageNames: [
+          'deep-freeze-strict',
+          '@types/deep-freeze-strict',
+        ],
+      },
+      {
         groupSlug: 'delete-empty',
         groupName: 'delete-empty related packages',
         packageNames: [
@@ -230,7 +238,7 @@
           'Team:Operations',
           'renovate',
           'v8.0.0',
-          'v7.6.0',
+          'v7.7.0',
           ':ml',
         ],
       },
@@ -271,6 +279,14 @@
         packageNames: [
           'file-saver',
           '@types/file-saver',
+        ],
+      },
+      {
+        groupSlug: 'flot',
+        groupName: 'flot related packages',
+        packageNames: [
+          'flot',
+          '@types/flot',
         ],
       },
       {
@@ -639,6 +655,14 @@
         packageNames: [
           'nodemailer',
           '@types/nodemailer',
+        ],
+      },
+      {
+        groupSlug: 'numeral',
+        groupName: 'numeral related packages',
+        packageNames: [
+          'numeral',
+          '@types/numeral',
         ],
       },
       {

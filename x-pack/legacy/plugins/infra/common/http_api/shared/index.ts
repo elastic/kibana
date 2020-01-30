@@ -7,3 +7,4 @@
 export * from './errors';
 export * from './metric_statistics';
 export * from './time_range';
+export * from './timing';

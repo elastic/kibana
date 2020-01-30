@@ -55,6 +55,7 @@
     - [Provide Legacy Platform API to the New platform plugin](#provide-legacy-platform-api-to-the-new-platform-plugin)
       - [On the server side](#on-the-server-side)
       - [On the client side](#on-the-client-side)
+    - [Updates an application navlink at runtime](#updates-an-app-navlink-at-runtime)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -1130,6 +1131,7 @@ import { npStart: { core } } from 'ui/new_platform';
 | Legacy Platform                                       | New Platform                                                                                                                                                                               | Notes                                                                                                                                          |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `chrome.addBasePath`                                  | [`core.http.basePath.prepend`](/docs/development/core/public/kibana-plugin-public.httpservicebase.basepath.md)                                                                             |                                                                                                                                                |
+| `chrome.navLinks.update`                              | [`core.appbase.updater`](/docs/development/core/public/kibana-plugin-public.appbase.updater_.md)                                                                                           | Use the `updater$` property when registering your application via `core.application.register`                                                  |
 | `chrome.breadcrumbs.set`                              | [`core.chrome.setBreadcrumbs`](/docs/development/core/public/kibana-plugin-public.chromestart.setbreadcrumbs.md)                                                                           |                                                                                                                                                |
 | `chrome.getUiSettingsClient`                          | [`core.uiSettings`](/docs/development/core/public/kibana-plugin-public.uisettingsclient.md)                                                                                                |                                                                                                                                                |
 | `chrome.helpExtension.set`                            | [`core.chrome.setHelpExtension`](/docs/development/core/public/kibana-plugin-public.chromestart.sethelpextension.md)                                                                       |                                                                                                                                                |
@@ -1191,10 +1193,11 @@ In server code, `core` can be accessed from either `server.newPlatform` or `kbnS
 | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | `server.config()`                                                             | [`initializerContext.config.create()`](/docs/development/core/server/kibana-plugin-server.plugininitializercontext.config.md)                                                                                                                                                                               | Must also define schema. See _[how to configure plugin](#configure-plugin)_ |
 | `server.route`                                                                | [`core.http.createRouter`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.createrouter.md)                                                                                                                                                                                             | [Examples](./MIGRATION_EXAMPLES.md#route-registration)                      |
+| `server.renderApp()` / `server.renderAppWithDefaultConfig()`                  | [`context.rendering.render()`](/docs/development/core/server/kibana-plugin-server.iscopedrenderingclient.render.md)                                                                                                                                                                                         | [Examples](./MIGRATION_EXAMPLES.md#render-html-content)                     |
 | `request.getBasePath()`                                                       | [`core.http.basePath.get`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.basepath.md)                                                                                                                                                                                                 |                                                                             |
 | `server.plugins.elasticsearch.getCluster('data')`                             | [`context.elasticsearch.dataClient`](/docs/development/core/server/kibana-plugin-server.iscopedclusterclient.md)                                                                                                                                                                                            |                                                                             |
 | `server.plugins.elasticsearch.getCluster('admin')`                            | [`context.elasticsearch.adminClient`](/docs/development/core/server/kibana-plugin-server.iscopedclusterclient.md)                                                                                                                                                                                           |                                                                             |
-| `server.plugins.elasticsearch.createCluster(...)`                            | [`core.elasticsearch.createClient`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.createclient.md)                                                                                                                                                                                           |                                                                             |
+| `server.plugins.elasticsearch.createCluster(...)`                             | [`core.elasticsearch.createClient`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.createclient.md)                                                                                                                                                                           |                                                                             |
 | `server.savedObjects.setScopedSavedObjectsClientFactory`                      | [`core.savedObjects.setClientFactory`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.setclientfactory.md)                                                                                                                                                                     |                                                                             |
 | `server.savedObjects.addScopedSavedObjectsClientWrapperFactory`               | [`core.savedObjects.addClientWrapper`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.addclientwrapper.md)                                                                                                                                                                     |                                                                             |
 | `server.savedObjects.getSavedObjectsRepository`                               | [`core.savedObjects.createInternalRepository`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.createinternalrepository.md) [`core.savedObjects.createScopedRepository`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.createscopedrepository.md) |                                                                             |
@@ -1228,8 +1231,8 @@ This table shows where these uiExports have moved to in the New Platform. In mos
 | `docViews`                   |                                                                                                                           |                                                                                                                                       |
 | `embeddableActions`          |                                                                                                                           | Should be an API on the embeddables plugin.                                                                                           |
 | `embeddableFactories`        |                                                                                                                           | Should be an API on the embeddables plugin.                                                                                           |
-| `fieldFormatEditors`         |                                                                                                                           |                                                                                                                                       |
-| `fieldFormats`               |                                                                                                                           |                                                                                                                                       |
+| `fieldFormatEditors`         |                                                                                                                          |                                                                                                                                       |
+| `fieldFormats`               | [`plugins.data.fieldFormats`](./src/plugins/data/public/field_formats)                                                                                                                          |                                                                                                                                       |
 | `hacks`                      | n/a                                                                                                                       | Just run the code in your plugin's `start` method.                                                                                    |
 | `home`                       | [`plugins.home.featureCatalogue.register`](./src/plugins/home/public/feature_catalogue)                                   | Must add `home` as a dependency in your kibana.json.                                                                                  |
 | `indexManagement`            |                                                                                                                           | Should be an API on the indexManagement plugin.                                                                                       |
@@ -1624,3 +1627,31 @@ class MyPlugin {
 It's not currently possible to use a similar pattern on the client-side.
 Because Legacy platform plugins heavily rely on global angular modules, which aren't available on the new platform.
 So you can utilize the same approach for only *stateless Angular components*, as long as they are not consumed by a New Platform application. When New Platform applications are on the page, no legacy code is executed, so the `registerLegacyAPI` function would not be called.
+
+### Updates an application navlink at runtime
+
+The application API now provides a way to updates some of a registered application's properties after registration.
+
+```typescript
+// inside your plugin's setup function
+export class MyPlugin implements Plugin {
+  private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  setup({ application }) {
+    application.register({
+      id: 'my-app',
+      title: 'My App',
+      updater$: this.appUpdater,
+      async mount(params) {
+        const { renderApp } = await import('./application');
+        return renderApp(params);
+      },
+    });
+  }
+  start() {
+     // later, when the navlink needs to be updated
+     appUpdater.next(() => {
+       navLinkStatus: AppNavLinkStatus.disabled,
+       tooltip: 'Application disabled',
+     })
+  }
+```

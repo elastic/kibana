@@ -43,9 +43,8 @@ import {
   getLayerListRaw,
 } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
-import { Inspector } from 'ui/inspector';
 import { docTitle } from 'ui/doc_title';
-import { indexPatternService } from '../kibana_services';
+import { indexPatternService, getInspector } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { toastNotifications } from 'ui/notify';
@@ -153,7 +152,7 @@ app.controller(
       delete $scope.savedQuery;
       delete $state.savedQuery;
       onQueryChange({
-        filters: [],
+        filters: filterManager.getGlobalFilters(),
         query: {
           query: '',
           language: localStorage.get('kibana.userQueryLanguage'),
@@ -162,6 +161,10 @@ app.controller(
     };
 
     function updateStateFromSavedQuery(savedQuery) {
+      const savedQueryFilters = savedQuery.attributes.filters || [];
+      const globalFilters = filterManager.getGlobalFilters();
+      const allFilters = [...savedQueryFilters, ...globalFilters];
+
       if (savedQuery.attributes.timefilter) {
         if (savedQuery.attributes.timefilter.refreshInterval) {
           $scope.onRefreshChange({
@@ -170,13 +173,13 @@ app.controller(
           });
         }
         onQueryChange({
-          filters: savedQuery.attributes.filters || [],
+          filters: allFilters,
           query: savedQuery.attributes.query,
           time: savedQuery.attributes.timefilter,
         });
       } else {
         onQueryChange({
-          filters: savedQuery.attributes.filters || [],
+          filters: allFilters,
           query: savedQuery.attributes.query,
         });
       }
@@ -367,7 +370,9 @@ app.controller(
       if (prevIndexPatternIds !== nextIndexPatternIds) {
         return;
       }
-      $scope.indexPatterns = indexPatterns;
+      $scope.$evalAsync(() => {
+        $scope.indexPatterns = indexPatterns;
+      });
     }
 
     $scope.isFullScreen = false;
@@ -504,7 +509,7 @@ app.controller(
         testId: 'openInspectorButton',
         run() {
           const inspectorAdapters = getInspectorAdapters(store.getState());
-          Inspector.open(inspectorAdapters, {});
+          getInspector().open(inspectorAdapters, {});
         },
       },
       ...(capabilities.get().maps.save

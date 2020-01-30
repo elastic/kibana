@@ -1,0 +1,171 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateFilterAggs generates expected aggregations object 1`] = `
+Object {
+  "locations": Object {
+    "aggs": Object {
+      "term": Object {
+        "terms": Object {
+          "field": "observer.geo.name",
+        },
+      },
+    },
+    "filter": Object {
+      "bool": Object {
+        "should": Array [
+          Object {
+            "term": Object {
+              "url.port": "80",
+            },
+          },
+          Object {
+            "term": Object {
+              "url.port": "5601",
+            },
+          },
+          Object {
+            "term": Object {
+              "tags": "api",
+            },
+          },
+          Object {
+            "term": Object {
+              "monitor.type": "http",
+            },
+          },
+          Object {
+            "term": Object {
+              "monitor.type": "tcp",
+            },
+          },
+        ],
+      },
+    },
+  },
+  "ports": Object {
+    "aggs": Object {
+      "term": Object {
+        "terms": Object {
+          "field": "url.port",
+        },
+      },
+    },
+    "filter": Object {
+      "bool": Object {
+        "should": Array [
+          Object {
+            "term": Object {
+              "observer.geo.name": "fairbanks",
+            },
+          },
+          Object {
+            "term": Object {
+              "observer.geo.name": "us-east-2",
+            },
+          },
+          Object {
+            "term": Object {
+              "tags": "api",
+            },
+          },
+          Object {
+            "term": Object {
+              "monitor.type": "http",
+            },
+          },
+          Object {
+            "term": Object {
+              "monitor.type": "tcp",
+            },
+          },
+        ],
+      },
+    },
+  },
+  "schemes": Object {
+    "aggs": Object {
+      "term": Object {
+        "terms": Object {
+          "field": "monitor.type",
+        },
+      },
+    },
+    "filter": Object {
+      "bool": Object {
+        "should": Array [
+          Object {
+            "term": Object {
+              "observer.geo.name": "fairbanks",
+            },
+          },
+          Object {
+            "term": Object {
+              "observer.geo.name": "us-east-2",
+            },
+          },
+          Object {
+            "term": Object {
+              "url.port": "80",
+            },
+          },
+          Object {
+            "term": Object {
+              "url.port": "5601",
+            },
+          },
+          Object {
+            "term": Object {
+              "tags": "api",
+            },
+          },
+        ],
+      },
+    },
+  },
+  "tags": Object {
+    "aggs": Object {
+      "term": Object {
+        "terms": Object {
+          "field": "tags",
+        },
+      },
+    },
+    "filter": Object {
+      "bool": Object {
+        "should": Array [
+          Object {
+            "term": Object {
+              "observer.geo.name": "fairbanks",
+            },
+          },
+          Object {
+            "term": Object {
+              "observer.geo.name": "us-east-2",
+            },
+          },
+          Object {
+            "term": Object {
+              "url.port": "80",
+            },
+          },
+          Object {
+            "term": Object {
+              "url.port": "5601",
+            },
+          },
+          Object {
+            "term": Object {
+              "monitor.type": "http",
+            },
+          },
+          Object {
+            "term": Object {
+              "monitor.type": "tcp",
+            },
+          },
+        ],
+      },
+    },
+  },
+}
+`;

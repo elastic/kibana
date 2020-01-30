@@ -15,6 +15,7 @@ describe('ui reducer', () => {
       uiReducer(
         {
           basePath: 'abc',
+          esKuery: '',
           integrationsPopoverOpen: null,
           lastRefresh: 125,
         },
@@ -32,6 +33,7 @@ describe('ui reducer', () => {
       uiReducer(
         {
           basePath: '',
+          esKuery: '',
           integrationsPopoverOpen: null,
           lastRefresh: 125,
         },
@@ -46,6 +48,7 @@ describe('ui reducer', () => {
       uiReducer(
         {
           basePath: 'abc',
+          esKuery: '',
           integrationsPopoverOpen: null,
           lastRefresh: 125,
         },

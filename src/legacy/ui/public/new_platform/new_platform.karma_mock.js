@@ -102,6 +102,12 @@ export const npSetup = {
           getSavedQueryCount: sinon.fake(),
         },
       },
+      __LEGACY: {
+        esClient: {
+          search: sinon.fake(),
+          msearch: sinon.fake(),
+        },
+      },
       fieldFormats: getFieldFormatsRegistry(mockCore),
     },
     share: {
@@ -131,6 +137,22 @@ export const npSetup = {
       featureCatalogue: {
         register: sinon.fake(),
       },
+      environment: {
+        update: sinon.fake(),
+      },
+    },
+    charts: {
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
+      },
+    },
+    management: {
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
+        }),
+      },
     },
     spaces: {
       registerLegacyAPI: sinon.fake(),
@@ -153,6 +175,11 @@ export const npStart = {
           register: sinon.fake(),
           deregister: sinon.fake(),
           hasItem: sinon.fake(),
+        }),
+      },
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
         }),
       },
     },
@@ -236,6 +263,14 @@ export const npStart = {
           history: sinon.fake(),
         },
       },
+      search: {
+        __LEGACY: {
+          esClient: {
+            search: sinon.fake(),
+            msearch: sinon.fake(),
+          },
+        },
+      },
       fieldFormats: getFieldFormatsRegistry(mockCore),
     },
     share: {
@@ -262,10 +297,19 @@ export const npStart = {
       featureCatalogue: {
         register: sinon.fake(),
       },
+      environment: {
+        get: sinon.fake(),
+      },
     },
     navigation: {
       ui: {
         TopNavMenu: mockComponent,
+      },
+    },
+    charts: {
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
       },
     },
   },

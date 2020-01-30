@@ -136,6 +136,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
   description: unionWithNullType(runtimeTypes.string),
+  eventType: unionWithNullType(runtimeTypes.string),
   favorite: unionWithNullType(runtimeTypes.array(SavedFavoriteRuntimeType)),
   filters: unionWithNullType(runtimeTypes.array(SavedFilterRuntimeType)),
   kqlMode: unionWithNullType(runtimeTypes.string),

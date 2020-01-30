@@ -30,6 +30,7 @@ export function Listing(props: ListingProps) {
   return (
     <I18nProvider>
       <TableListView
+        headingId="graphListingHeading"
         createItem={props.capabilities.save ? props.createItem : undefined}
         findItems={props.findItems}
         deleteItems={props.capabilities.delete ? props.deleteItems : undefined}
@@ -67,14 +68,14 @@ function getNoItemsMessage(
     return (
       <div>
         <EuiEmptyPrompt
-          iconType="visualizeApp"
+          iconType="graphApp"
           title={
-            <h2>
+            <h1 id="graphListingHeading">
               <FormattedMessage
                 id="xpack.graph.listing.noItemsMessage"
                 defaultMessage="Looks like you don't have any graphs."
               />
-            </h2>
+            </h1>
           }
         />
       </div>
@@ -88,12 +89,12 @@ function getNoItemsMessage(
       <EuiEmptyPrompt
         iconType="graphApp"
         title={
-          <h2>
+          <h1 id="graphListingHeading">
             <FormattedMessage
               id="xpack.graph.listing.createNewGraph.title"
               defaultMessage="Create your first graph"
             />
-          </h2>
+          </h1>
         }
         body={
           <Fragment>

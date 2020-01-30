@@ -18,17 +18,18 @@ interface CreateTestConfigOptions {
 
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
-  '.server-log',
-  '.slack',
   '.email',
   '.index',
   '.pagerduty',
+  '.server-log',
+  '.servicenow',
+  '.slack',
   '.webhook',
-  'test.noop',
-  'test.index-record',
-  'test.failing',
-  'test.rate-limit',
   'test.authorization',
+  'test.failing',
+  'test.index-record',
+  'test.noop',
+  'test.rate-limit',
 ];
 
 // eslint-disable-next-line import/no-default-export
@@ -74,6 +75,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.alerting.enabled=true',
+          '--xpack.event_log.logEntries=true',
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,

@@ -6,15 +6,12 @@
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
-import { Token } from '../../../../../../common/types/categories';
 import { CategorizationJobCreator } from '../job_creator';
 import { ml } from '../../../../services/ml_api_service';
-import { NUMBER_OF_CATEGORY_EXAMPLES } from '../../../../../../common/constants/new_job';
-
-export interface CategoryExample {
-  text: string;
-  tokens: Token[];
-}
+import {
+  NUMBER_OF_CATEGORY_EXAMPLES,
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
+} from '../../../../../../common/constants/new_job';
 
 export class CategorizationExamplesLoader {
   private _jobCreator: CategorizationJobCreator;
@@ -36,20 +33,22 @@ export class CategorizationExamplesLoader {
     const analyzer = this._jobCreator.categorizationAnalyzer;
     const categorizationFieldName = this._jobCreator.categorizationFieldName;
     if (categorizationFieldName === null) {
-      return { valid: 0, examples: [] };
+      return {
+        examples: [],
+        sampleSize: 0,
+        overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID,
+        validationChecks: [],
+      };
     }
 
-    const start = Math.floor(
-      this._jobCreator.start + (this._jobCreator.end - this._jobCreator.start) / 2
-    );
     const resp = await ml.jobs.categorizationFieldExamples(
       this._indexPatternTitle,
       this._query,
       NUMBER_OF_CATEGORY_EXAMPLES,
       categorizationFieldName,
       this._timeFieldName,
-      start,
-      0,
+      this._jobCreator.start,
+      this._jobCreator.end,
       analyzer
     );
     return resp;

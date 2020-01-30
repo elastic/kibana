@@ -125,23 +125,33 @@ the {reporting} endpoints to authorized users. This requires that you:
 
 . Enable {security} on your {es} cluster. For more information,
 see {ref}/security-getting-started.html[Getting Started with Security].
-. Configure an SSL certificate for Kibana. For more information, see
-<<using-kibana-with-security>>.
-. Configure {watcher} to trust the Kibana server's certificate by adding it to
-the {watcher} truststore on each node:
-.. Import the {kib} server certificate into the {watcher} truststore using
-Java Keytool:
+. Configure TLS/SSL encryption for the {kib} server. For more information, see
+<<configuring-tls>>.
+. Specify the {kib} server's CA certificate chain in `elasticsearch.yml`:
 +
-[source,shell]
----------------------------------------------------------
-keytool -importcert -keystore watcher-truststore.jks -file server.crt
----------------------------------------------------------
-+
-NOTE: If the truststore doesn't already exist, it is created.
+--
+If you are using your own CA to sign the {kib} server certificate, then you need
+to specify the CA certificate chain in {es} to properly establish trust in TLS
+connections between {watcher} and {kib}. If your CA certificate chain is
+contained in a PKCS #12 trust store, specify it like so:
 
-.. Make sure the `xpack.http.ssl.truststore.path` setting in
-`elasticsearch.yml` specifies the location of the {watcher}
-truststore.
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.http.ssl.truststore.path: "/path/to/your/truststore.p12"
+xpack.http.ssl.truststore.type: "PKCS12"
+xpack.http.ssl.truststore.password: "optional decryption password"
+--------------------------------------------------------------------------------
+
+Otherwise, if your CA certificate chain is in PEM format, specify it like so:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.http.ssl.certificate_authorities: ["/path/to/your/cacert1.pem", "/path/to/your/cacert2.pem"]
+--------------------------------------------------------------------------------
+
+For more information, see {ref}/notification-settings.html#ssl-notification-settings[the {watcher} HTTP TLS/SSL Settings].
+--
+
 . Add one or more users who have the permissions
 necessary to use {kib} and {reporting}. For more information, see
 <<secure-reporting>>.

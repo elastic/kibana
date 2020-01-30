@@ -48,6 +48,8 @@ export const CleanClientModulesOnDLLTask = {
     ];
     const discoveredLegacyCorePluginEntries = await globby([
       `${baseDir}/src/legacy/core_plugins/*/index.js`,
+      // Small exception to load dynamically discovered functions for timelion plugin
+      `${baseDir}/src/legacy/core_plugins/timelion/server/*_functions/**/*.js`,
       `!${baseDir}/src/legacy/core_plugins/**/public`,
     ]);
     const discoveredPluginEntries = await globby([
@@ -96,12 +98,16 @@ export const CleanClientModulesOnDLLTask = {
     // Consider this as our whiteList for the modules we can't delete
     const whiteListedModules = [...serverDependencies, ...kbnWebpackLoaders, ...manualExceptions];
 
-    // Resolve the client vendors dll manifest path
-    const dllManifestPath = `${baseDir}/built_assets/dlls/vendors.manifest.dll.json`;
+    // Resolve the client vendors dll manifest paths
+    // excluding the runtime one
+    const dllManifestPaths = await globby([
+      `${baseDir}/built_assets/dlls/vendors_*.manifest.dll.json`,
+      `!${baseDir}/built_assets/dlls/vendors_runtime.manifest.dll.json`,
+    ]);
 
     // Get dll entries filtering out the ones
     // from any whitelisted module
-    const dllEntries = await getDllEntries(dllManifestPath, whiteListedModules, baseDir);
+    const dllEntries = await getDllEntries(dllManifestPaths, whiteListedModules, baseDir);
 
     for (const relativeEntryPath of dllEntries) {
       const entryPath = `${baseDir}/${relativeEntryPath}`;

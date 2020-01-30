@@ -33,6 +33,8 @@ interface State {
   spaces: Space[];
 }
 
+const popoutContentId = 'headerSpacesMenuContent';
+
 export class NavControlPopover extends Component<Props, State> {
   private activeSpace$?: Subscription;
 
@@ -72,6 +74,7 @@ export class NavControlPopover extends Component<Props, State> {
     if (!this.state.loading && this.state.spaces.length < 2) {
       element = (
         <SpacesDescription
+          id={popoutContentId}
           onManageSpacesClick={this.toggleSpaceSelector}
           capabilities={this.props.capabilities}
           navigateToApp={this.props.navigateToApp}
@@ -80,6 +83,7 @@ export class NavControlPopover extends Component<Props, State> {
     } else {
       element = (
         <SpacesMenu
+          id={popoutContentId}
           spaces={this.state.spaces}
           isLoading={this.state.loading}
           onSelectSpace={this.onSelectSpace}
@@ -143,7 +147,7 @@ export class NavControlPopover extends Component<Props, State> {
   private getButton = (linkIcon: JSX.Element, linkTitle: string) => {
     return (
       <EuiHeaderSectionItemButton
-        aria-controls="headerSpacesMenuList"
+        aria-controls={popoutContentId}
         aria-expanded={this.state.showSpaceSelector}
         aria-haspopup="true"
         aria-label={linkTitle}

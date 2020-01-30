@@ -27,7 +27,7 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       return url.indexOf(expected) >= 0;
     },
     async navigateToMonitorWithId(monitorId: string) {
-      await testSubjects.click(`monitor-page-link-${monitorId}`);
+      await testSubjects.click(`monitor-page-link-${monitorId}`, 5000);
     },
     async getMonitorNameDisplayedOnPageTitle() {
       return await testSubjects.getVisibleText('monitor-page-title');
@@ -49,11 +49,25 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
     async setStatusFilterDown() {
       await testSubjects.click('xpack.uptime.filterBar.filterStatusDown');
     },
+    async selectFilterItem(filterType: string, option: string) {
+      const popoverId = `filter-popover_${filterType}`;
+      const optionId = `filter-popover-item_${option}`;
+      await testSubjects.existOrFail(popoverId);
+      await testSubjects.click(popoverId);
+      await testSubjects.existOrFail(optionId);
+      await testSubjects.click(optionId);
+      await testSubjects.click(popoverId);
+    },
     async getSnapshotCount() {
       return {
         up: await testSubjects.getVisibleText('xpack.uptime.snapshot.donutChart.up'),
         down: await testSubjects.getVisibleText('xpack.uptime.snapshot.donutChart.down'),
       };
+    },
+    async locationMissingExists() {
+      return await testSubjects.existOrFail('xpack.uptime.locationMap.locationMissing', {
+        timeout: 3000,
+      });
     },
   };
 }

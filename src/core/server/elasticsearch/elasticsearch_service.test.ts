@@ -21,7 +21,7 @@ import { first } from 'rxjs/operators';
 
 import { MockClusterClient } from './elasticsearch_service.test.mocks';
 
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
@@ -89,44 +89,6 @@ describe('#setup', () => {
     expect(mockDataClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
     await dataClient.callAsInternalUser('any');
     expect(mockDataClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
-  });
-
-  it('returns data and admin client observables as a part of the contract', async () => {
-    const mockAdminClusterClientInstance = { close: jest.fn() };
-    const mockDataClusterClientInstance = { close: jest.fn() };
-    MockClusterClient.mockImplementationOnce(
-      () => mockAdminClusterClientInstance
-    ).mockImplementationOnce(() => mockDataClusterClientInstance);
-
-    const setupContract = await elasticsearchService.setup(deps);
-
-    const [esConfig, adminClient, dataClient] = await combineLatest(
-      setupContract.legacy.config$,
-      setupContract.adminClient$,
-      setupContract.dataClient$
-    )
-      .pipe(first())
-      .toPromise();
-
-    expect(adminClient).toBe(mockAdminClusterClientInstance);
-    expect(dataClient).toBe(mockDataClusterClientInstance);
-
-    expect(MockClusterClient).toHaveBeenCalledTimes(2);
-    expect(MockClusterClient).toHaveBeenNthCalledWith(
-      1,
-      esConfig,
-      expect.objectContaining({ context: ['elasticsearch', 'admin'] }),
-      undefined
-    );
-    expect(MockClusterClient).toHaveBeenNthCalledWith(
-      2,
-      esConfig,
-      expect.objectContaining({ context: ['elasticsearch', 'data'] }),
-      expect.any(Function)
-    );
-
-    expect(mockAdminClusterClientInstance.close).not.toHaveBeenCalled();
-    expect(mockDataClusterClientInstance.close).not.toHaveBeenCalled();
   });
 
   describe('#createClient', () => {

@@ -164,6 +164,7 @@ class SavedObjectFinderUi extends React.Component<
     if (query === this.state.query) {
       this.setState({
         isFetchingItems: false,
+        page: 0,
         items: resp.savedObjects.map(savedObject => {
           const {
             attributes: { title },
@@ -344,6 +345,9 @@ class SavedObjectFinderUi extends React.Component<
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
             placeholder={i18n.translate('kibana-react.savedObjects.finder.searchPlaceholder', {
+              defaultMessage: 'Search…',
+            })}
+            aria-label={i18n.translate('kibana-react.savedObjects.finder.searchPlaceholder', {
               defaultMessage: 'Search…',
             })}
             fullWidth

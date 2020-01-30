@@ -20,92 +20,120 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
+import { ConfigDeprecationProvider } from 'src/core/server';
 import { readPkcs12Keystore, readPkcs12Truststore } from '../../utils';
-import { Logger } from '../logging';
+import { ServiceConfigDescriptor } from '../internal_types';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
 export const DEFAULT_API_VERSION = 'master';
 
-export type ElasticsearchConfigType = TypeOf<typeof config.schema>;
+export type ElasticsearchConfigType = TypeOf<typeof configSchema>;
 type SslConfigSchema = ElasticsearchConfigType['ssl'];
 
-export const config = {
-  path: 'elasticsearch',
-  schema: schema.object({
-    sniffOnStart: schema.boolean({ defaultValue: false }),
-    sniffInterval: schema.oneOf([schema.duration(), schema.literal(false)], {
-      defaultValue: false,
-    }),
-    sniffOnConnectionFault: schema.boolean({ defaultValue: false }),
-    hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
-      defaultValue: 'http://localhost:9200',
-    }),
-    preserveHost: schema.boolean({ defaultValue: true }),
-    username: schema.maybe(
-      schema.conditional(
-        schema.contextRef('dist'),
-        false,
-        schema.string({
-          validate: rawConfig => {
-            if (rawConfig === 'elastic') {
-              return (
-                'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
-                'privilege-related issues. You should use the "kibana" user instead.'
-              );
-            }
-          },
-        }),
-        schema.string()
-      )
-    ),
-    password: schema.maybe(schema.string()),
-    requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-      defaultValue: ['authorization'],
-    }),
-    customHeaders: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
-    shardTimeout: schema.duration({ defaultValue: '30s' }),
-    requestTimeout: schema.duration({ defaultValue: '30s' }),
-    pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
-    startupTimeout: schema.duration({ defaultValue: '5s' }),
-    logQueries: schema.boolean({ defaultValue: false }),
-    ssl: schema.object(
-      {
-        verificationMode: schema.oneOf(
-          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-          { defaultValue: 'full' }
-        ),
-        certificateAuthorities: schema.maybe(
-          schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
-        ),
-        certificate: schema.maybe(schema.string()),
-        key: schema.maybe(schema.string()),
-        keyPassphrase: schema.maybe(schema.string()),
-        keystore: schema.object({
-          path: schema.maybe(schema.string()),
-          password: schema.maybe(schema.string()),
-        }),
-        truststore: schema.object({
-          path: schema.maybe(schema.string()),
-          password: schema.maybe(schema.string()),
-        }),
-        alwaysPresentCertificate: schema.boolean({ defaultValue: false }),
-      },
-      {
+const configSchema = schema.object({
+  sniffOnStart: schema.boolean({ defaultValue: false }),
+  sniffInterval: schema.oneOf([schema.duration(), schema.literal(false)], {
+    defaultValue: false,
+  }),
+  sniffOnConnectionFault: schema.boolean({ defaultValue: false }),
+  hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
+    defaultValue: 'http://localhost:9200',
+  }),
+  preserveHost: schema.boolean({ defaultValue: true }),
+  username: schema.maybe(
+    schema.conditional(
+      schema.contextRef('dist'),
+      false,
+      schema.string({
         validate: rawConfig => {
-          if (rawConfig.key && rawConfig.keystore.path) {
-            return 'cannot use [key] when [keystore.path] is specified';
-          }
-          if (rawConfig.certificate && rawConfig.keystore.path) {
-            return 'cannot use [certificate] when [keystore.path] is specified';
+          if (rawConfig === 'elastic') {
+            return (
+              'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
+              'privilege-related issues. You should use the "kibana" user instead.'
+            );
           }
         },
-      }
-    ),
-    apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
-    healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
-    ignoreVersionMismatch: schema.boolean({ defaultValue: false }),
+      }),
+      schema.string()
+    )
+  ),
+  password: schema.maybe(schema.string()),
+  requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+    defaultValue: ['authorization'],
   }),
+  customHeaders: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
+  shardTimeout: schema.duration({ defaultValue: '30s' }),
+  requestTimeout: schema.duration({ defaultValue: '30s' }),
+  pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
+  startupTimeout: schema.duration({ defaultValue: '5s' }),
+  logQueries: schema.boolean({ defaultValue: false }),
+  ssl: schema.object(
+    {
+      verificationMode: schema.oneOf(
+        [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+        { defaultValue: 'full' }
+      ),
+      certificateAuthorities: schema.maybe(
+        schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+      ),
+      certificate: schema.maybe(schema.string()),
+      key: schema.maybe(schema.string()),
+      keyPassphrase: schema.maybe(schema.string()),
+      keystore: schema.object({
+        path: schema.maybe(schema.string()),
+        password: schema.maybe(schema.string()),
+      }),
+      truststore: schema.object({
+        path: schema.maybe(schema.string()),
+        password: schema.maybe(schema.string()),
+      }),
+      alwaysPresentCertificate: schema.boolean({ defaultValue: false }),
+    },
+    {
+      validate: rawConfig => {
+        if (rawConfig.key && rawConfig.keystore.path) {
+          return 'cannot use [key] when [keystore.path] is specified';
+        }
+        if (rawConfig.certificate && rawConfig.keystore.path) {
+          return 'cannot use [certificate] when [keystore.path] is specified';
+        }
+      },
+    }
+  ),
+  apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
+  healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
+  ignoreVersionMismatch: schema.boolean({ defaultValue: false }),
+});
+
+const deprecations: ConfigDeprecationProvider = () => [
+  (settings, fromPath, log) => {
+    const es = settings[fromPath];
+    if (!es) {
+      return settings;
+    }
+    if (es.username === 'elastic') {
+      log(
+        `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana" user instead.`
+      );
+    }
+    if (es.ssl?.key !== undefined && es.ssl?.certificate === undefined) {
+      log(
+        `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
+      );
+    } else if (es.ssl?.certificate !== undefined && es.ssl?.key === undefined) {
+      log(
+        `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
+      );
+    }
+    return settings;
+  },
+];
+
+export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
+  path: 'elasticsearch',
+  schema: configSchema,
+  deprecations,
 };
 
 export class ElasticsearchConfig {
@@ -205,7 +233,7 @@ export class ElasticsearchConfig {
    */
   public readonly customHeaders: ElasticsearchConfigType['customHeaders'];
 
-  constructor(rawConfig: ElasticsearchConfigType, log: Logger) {
+  constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
     this.logQueries = rawConfig.logQueries;
@@ -226,12 +254,6 @@ export class ElasticsearchConfig {
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);
-
-    if (key && !certificate) {
-      log.warn(`Detected a key without a certificate; mutual TLS authentication is disabled.`);
-    } else if (certificate && !key) {
-      log.warn(`Detected a certificate without a key; mutual TLS authentication is disabled.`);
-    }
 
     this.ssl = {
       alwaysPresentCertificate,
@@ -261,8 +283,10 @@ const readKeyAndCerts = (rawConfig: ElasticsearchConfigType) => {
       rawConfig.ssl.keystore.path,
       rawConfig.ssl.keystore.password
     );
-    if (!keystore.key && !keystore.cert) {
-      throw new Error(`Did not find key or certificate in Elasticsearch keystore.`);
+    if (!keystore.key) {
+      throw new Error(`Did not find key in Elasticsearch keystore.`);
+    } else if (!keystore.cert) {
+      throw new Error(`Did not find certificate in Elasticsearch keystore.`);
     }
     key = keystore.key;
     certificate = keystore.cert;

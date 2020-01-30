@@ -35,9 +35,15 @@ import {
   GetVisData,
   GetVisDataOptions,
 } from '../../../legacy/core_plugins/vis_type_timeseries/server';
+import { ValidationTelemetryService } from './validation_telemetry/validation_telemetry_service';
+import { UsageCollectionSetup } from '../../usage_collection/server';
 
 export interface LegacySetup {
   server: Server;
+}
+
+interface VisTypeTimeseriesPluginSetupDependencies {
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface VisTypeTimeseriesSetup {
@@ -61,11 +67,14 @@ export interface Framework {
 }
 
 export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
+  private validationTelementryService: ValidationTelemetryService;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
+    this.validationTelementryService = new ValidationTelemetryService();
   }
 
-  public setup(core: CoreSetup, plugins: any) {
+  public setup(core: CoreSetup, plugins: VisTypeTimeseriesPluginSetupDependencies) {
     const logger = this.initializerContext.logger.get('visTypeTimeseries');
     const config$ = this.initializerContext.config.create<VisTypeTimeseriesConfig>();
     // Global config contains things like the ES shard timeout
@@ -82,8 +91,13 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     return {
       __legacy: {
         config$,
-        registerLegacyAPI: once((__LEGACY: LegacySetup) => {
-          init(framework, __LEGACY);
+        registerLegacyAPI: once(async (__LEGACY: LegacySetup) => {
+          const validationTelemetrySetup = await this.validationTelementryService.setup(core, {
+            ...plugins,
+            globalConfig$,
+          });
+
+          await init(framework, __LEGACY, validationTelemetrySetup);
         }),
       },
       getVisData: async (requestContext: RequestHandlerContext, options: GetVisDataOptions) => {

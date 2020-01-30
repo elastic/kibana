@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
 import {
@@ -48,7 +47,7 @@ import { config as uiSettingsConfig } from './ui_settings';
 import { mapToObject } from '../utils';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
-import { InternalCoreSetup } from './internal_types';
+import { InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { CapabilitiesService } from './capabilities';
 import { UuidService } from './uuid';
 
@@ -68,6 +67,8 @@ export class Server {
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
   private readonly uuid: UuidService;
+
+  private coreStart?: InternalCoreStart;
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
@@ -175,21 +176,24 @@ export class Server {
       uiSettings: uiSettingsStart,
     });
 
-    const coreStart = {
+    this.coreStart = {
       capabilities: capabilitiesStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
-      plugins: pluginsStart,
     };
+
     await this.legacy.start({
-      core: coreStart,
+      core: {
+        ...this.coreStart,
+        plugins: pluginsStart,
+      },
       plugins: mapToObject(pluginsStart.contracts),
     });
 
     await this.http.start();
     await this.rendering.start();
 
-    return coreStart;
+    return this.coreStart;
   }
 
   public async stop() {
@@ -216,22 +220,23 @@ export class Server {
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
-        // it consumes elasticsearch observables to provide the same client throughout the context lifetime.
-        const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
-        const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
-        const savedObjectsClient = coreSetup.savedObjects.getScopedClient(req);
+        const savedObjectsClient = this.coreStart!.savedObjects.getScopedClient(req);
         const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
 
         return {
           rendering: {
-            render: rendering.render.bind(rendering, req, uiSettingsClient),
+            render: async (options = {}) =>
+              rendering.render(req, uiSettingsClient, {
+                ...options,
+                vars: await this.legacy.legacyInternals!.getVars('core', req),
+              }),
           },
           savedObjects: {
             client: savedObjectsClient,
           },
           elasticsearch: {
-            adminClient: adminClient.asScoped(req),
-            dataClient: dataClient.asScoped(req),
+            adminClient: coreSetup.elasticsearch.adminClient.asScoped(req),
+            dataClient: coreSetup.elasticsearch.dataClient.asScoped(req),
           },
           uiSettings: {
             client: uiSettingsClient,
@@ -256,6 +261,10 @@ export class Server {
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
+    this.configService.addDeprecationProvider(
+      elasticsearchConfig.path,
+      elasticsearchConfig.deprecations!
+    );
     this.configService.addDeprecationProvider(
       uiSettingsConfig.path,
       uiSettingsConfig.deprecations!
