@@ -365,7 +365,6 @@ export class ESSearchSource extends AbstractESSource {
       // geo_shape fields do not support docvalue_fields yet, so still have to be pulled from _source
       const fields = await this._excludeDateFields(searchFilters.fieldNames);
       const withoutGeoField = fields.filter(field => field !== geoField.name);
-      console.log('wg', withoutGeoField, geoField.name);
       initialSearchContext.docvalue_fields.push(
         ...(withoutGeoField)
       );
@@ -430,7 +429,6 @@ export class ESSearchSource extends AbstractESSource {
       return !['_id', '_index'].includes(metaField);
     });
     const flattenHit = hit => {
-      console.log(hit, hit.fields);
       const properties = indexPattern.flattenHit(hit);
       // remove metaFields
       unusedMetaFields.forEach(metaField => {

@@ -69,7 +69,6 @@ export class ESMVTSearchSource extends ESSearchSource {
     const docValueFields = await this._excludeDateFields(searchFilters.fieldNames);
     const withoutGeoField = docValueFields.filter(field => field !== geoField.name);
 
-    console.log('wg', withoutGeoField, geoField.name);
     initialSearchContext.docvalue_fields.push(...withoutGeoField);
 
     const searchSource = await this._makeSearchSource(
@@ -87,7 +86,6 @@ export class ESMVTSearchSource extends ESSearchSource {
 
     const dsl = await searchSource.getSearchRequestBody();
     const risonDsl = rison.encode(dsl);
-    console.log(dsl);
 
     return `../${GIS_API_PATH}/${MVT_GETTILE_API_PATH}?x={x}&y={y}&z={z}&geometryFieldName=${geometryFieldBame}&indexPattern=${ipTitle}&fields=${fieldsParam}&requestBody=${risonDsl}`;
   }

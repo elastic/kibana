@@ -156,7 +156,6 @@ export class TiledVectorLayer extends VectorLayer {
   syncLayerWithMB(mbMap) {
     const requiresCleanup = this._requiresPrevSourceCleanup(mbMap);
     if (requiresCleanup) {
-      console.log('requires cleanup, source changed');
       const mbStyle = mbMap.getStyle();
       mbStyle.layers.forEach(mbLayer => {
         if (this.ownsMbLayerId(mbLayer.id)) {

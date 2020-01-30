@@ -96,7 +96,6 @@ export class VectorStyleEditor extends Component {
 
   async _loadSupportedFeatures() {
     const supportedFeatures = await this.props.layer.getSource().getSupportedShapeTypes();
-    console.log('sp', supportedFeatures);
     if (!this._isMounted) {
       return;
     }
@@ -131,7 +130,6 @@ export class VectorStyleEditor extends Component {
   }
 
   _handleSelectedFeatureChange = selectedFeature => {
-    console.log('selected fea', selectedFeature);
     this.setState({ selectedFeature });
   };
 
@@ -372,8 +370,6 @@ export class VectorStyleEditor extends Component {
   _renderProperties() {
     const { supportedFeatures, selectedFeature } = this.state;
 
-    console.log('rp', supportedFeatures, selectedFeature);
-
     if (!supportedFeatures) {
       return null;
     }
@@ -417,7 +413,6 @@ export class VectorStyleEditor extends Component {
       styleProperties = this._renderPointProperties();
     }
 
-    console.log('idsel', selectedFeature);
     return (
       <Fragment>
         <EuiButtonGroup

@@ -53,7 +53,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
   syncFillColorWithMb(mbLayerId, mbMap, alpha) {
     const color = this._getMbColor();
-    console.log('set color', color);
     mbMap.setPaintProperty(mbLayerId, 'fill-color', color);
     mbMap.setPaintProperty(mbLayerId, 'fill-opacity', alpha);
   }
@@ -208,7 +207,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
 
     const { stops, defaultColor } = this._getColorPaletteStops();
-    console.log(stops, defaultColor);
     if (stops.length < 1) {
       //occurs when no data
       return null;

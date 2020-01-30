@@ -60,7 +60,6 @@ export class StylePropEditor extends Component {
       },
     ];
 
-    console.log('f', this.props.fields);
     return (
       <EuiSelect
         options={options}
