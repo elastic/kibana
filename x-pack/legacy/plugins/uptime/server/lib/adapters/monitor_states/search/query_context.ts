@@ -9,16 +9,6 @@ import { CursorPagination } from '../adapter_types';
 import { INDEX_NAMES } from '../../../../../common/constants';
 import { parseRelativeEndDate } from '../../../helper/get_histogram_interval';
 
-export const parseRelativeDates = (
-  startDate: string,
-  endDate: string
-): { tsStart: any; tsEnd: any } => {
-  const tsStart = parseRelativeEndDate(endDate)!.subtract(5, 'minutes');
-  const tsEnd = parseRelativeEndDate(endDate)!;
-
-  return { tsStart, tsEnd };
-};
-
 export class QueryContext {
   callES: APICaller;
   dateRangeStart: string;
@@ -106,7 +96,8 @@ export class QueryContext {
     // only slower, but only marginally so, and prevents people from seeing weird
     // behavior.
 
-    const { tsStart, tsEnd } = parseRelativeDates(this.dateRangeStart, this.dateRangeEnd);
+    const tsStart = parseRelativeEndDate(this.dateRangeEnd)!.subtract(5, 'minutes');
+    const tsEnd = parseRelativeEndDate(this.dateRangeEnd)!;
 
     return {
       range: {
