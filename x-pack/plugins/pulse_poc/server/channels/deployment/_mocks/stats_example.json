@@ -1,0 +1,183 @@
+{
+  "stats": {
+    "_nodes": {
+      "total": 1,
+      "successful": 1,
+      "failed": 0
+    },
+    "cluster_name": "elasticsearch",
+    "cluster_uuid": "6oMktiIeSN-xJqkpm5TkwA",
+    "timestamp": 1580308047707,
+    "status": "yellow",
+    "indices": {
+      "count": 5,
+      "shards": {
+        "total": 5,
+        "primaries": 5,
+        "replication": 0,
+        "index": {
+          "shards": {
+            "min": 1,
+            "max": 1,
+            "avg": 1
+          },
+          "primaries": {
+            "min": 1,
+            "max": 1,
+            "avg": 1
+          },
+          "replication": {
+            "min": 0,
+            "max": 0,
+            "avg": 0
+          }
+        }
+      },
+      "docs": {
+        "count": 4,
+        "deleted": 6
+      },
+      "store": {
+        "size_in_bytes": 60128
+      },
+      "fielddata": {
+        "memory_size_in_bytes": 2336,
+        "evictions": 0
+      },
+      "query_cache": {
+        "memory_size_in_bytes": 0,
+        "total_count": 0,
+        "hit_count": 0,
+        "miss_count": 0,
+        "cache_size": 0,
+        "cache_count": 0,
+        "evictions": 0
+      },
+      "completion": {
+        "size_in_bytes": 0
+      },
+      "segments": {
+        "count": 8,
+        "memory_in_bytes": 20488,
+        "terms_memory_in_bytes": 15048,
+        "stored_fields_memory_in_bytes": 2496,
+        "term_vectors_memory_in_bytes": 0,
+        "norms_memory_in_bytes": 1344,
+        "points_memory_in_bytes": 0,
+        "doc_values_memory_in_bytes": 1600,
+        "index_writer_memory_in_bytes": 0,
+        "version_map_memory_in_bytes": 0,
+        "fixed_bit_set_memory_in_bytes": 384,
+        "max_unsafe_auto_id_timestamp": -1,
+        "file_sizes": {}
+      }
+    },
+    "nodes": {
+      "count": {
+        "total": 1,
+        "coordinating_only": 0,
+        "data": 1,
+        "ingest": 1,
+        "master": 1,
+        "ml": 1,
+        "voting_only": 0
+      },
+      "versions": [
+        "8.0.0"
+      ],
+      "os": {
+        "available_processors": 16,
+        "allocated_processors": 16,
+        "names": [
+          {
+            "name": "Mac OS X",
+            "count": 1
+          }
+        ],
+        "pretty_names": [
+          {
+            "pretty_name": "Mac OS X",
+            "count": 1
+          }
+        ],
+        "mem": {
+          "total_in_bytes": 34359738368,
+          "free_in_bytes": 3301933056,
+          "used_in_bytes": 31057805312,
+          "free_percent": 10,
+          "used_percent": 90
+        }
+      },
+      "process": {
+        "cpu": {
+          "percent": 0
+        },
+        "open_file_descriptors": {
+          "min": 413,
+          "max": 413,
+          "avg": 413
+        }
+      },
+      "jvm": {
+        "max_uptime_in_millis": 266307,
+        "versions": [
+          {
+            "version": "13.0.1",
+            "vm_name": "OpenJDK 64-Bit Server VM",
+            "vm_version": "13.0.1+9",
+            "vm_vendor": "AdoptOpenJDK",
+            "bundled_jdk": true,
+            "using_bundled_jdk": false,
+            "count": 1
+          }
+        ],
+        "mem": {
+          "heap_used_in_bytes": 92481040,
+          "heap_max_in_bytes": 1037959168
+        },
+        "threads": 166
+      },
+      "fs": {
+        "total_in_bytes": 250685575168,
+        "free_in_bytes": 181715709952,
+        "available_in_bytes": 166919454720
+      },
+      "plugins": [],
+      "network_types": {
+        "transport_types": {
+          "netty4": 1
+        },
+        "http_types": {
+          "netty4": 1
+        }
+      },
+      "discovery_types": {
+        "zen": 1
+      },
+      "packaging_types": [
+        {
+          "flavor": "default",
+          "type": "tar",
+          "count": 1
+        }
+      ],
+      "ingest": {
+        "number_of_pipelines": 1,
+        "processor_stats": {
+          "gsub": {
+            "count": 0,
+            "failed": 0,
+            "current": 0,
+            "time_in_millis": 0
+          },
+          "script": {
+            "count": 0,
+            "failed": 0,
+            "current": 0,
+            "time_in_millis": 0
+          }
+        }
+      }
+    }
+  }
+}

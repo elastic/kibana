@@ -9,19 +9,30 @@ import { resolve } from 'path';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { take } from 'rxjs/operators';
+import { PulsePOCCheckFunction, PulsePOCSetupFunction } from './types';
+
+interface PulsePOCChannel {
+  check?: PulsePOCCheckFunction;
+  setup?: PulsePOCSetupFunction;
+}
 
 export class PulsePocPlugin {
+  public static getIndexName(channelId: string) {
+    return `pulse-poc-raw-${channelId}`;
+  }
+
   private channels = readdirSync(resolve(__dirname, 'channels'))
-    .filter((fileName: string) => !fileName.startsWith('.'))
-    .map((channelName: string) => {
+    .filter(fileName => !fileName.startsWith('.'))
+    .map(channelName => {
       const channelPath = resolve(__dirname, 'channels', channelName);
       const checks = readdirSync(channelPath)
-        .filter((fileName: string) => fileName.startsWith('check_'))
-        .map((fileName: string) => {
+        .filter(fileName => fileName.startsWith('check_'))
+        .map(fileName => {
           const id = fileName.slice(6, -3);
           const checkFilePath = resolve(channelPath, fileName);
-          const check = require(checkFilePath).check;
-          return { id, check };
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const { check, setup }: PulsePOCChannel = require(checkFilePath);
+          return { id, check, setup };
         });
       return {
         id: channelName,
@@ -40,7 +51,7 @@ export class PulsePocPlugin {
     await esClient.callAsInternalUser('indices.putTemplate', {
       name: 'pulse-poc-raw-template',
       body: {
-        index_patterns: ['pulse-poc-raw*'],
+        index_patterns: [PulsePocPlugin.getIndexName('*')],
         settings: {
           number_of_shards: 1,
         },
@@ -75,7 +86,14 @@ export class PulsePocPlugin {
                     }
                   },
                 }),
-                records: schema.arrayOf(schema.object({}, { allowUnknowns: true })),
+                records: schema.arrayOf(
+                  schema.object(
+                    {
+                      hash: schema.string(), // TODO: Remove if we add any logic to calculate the hash in the remote channel
+                    },
+                    { allowUnknowns: true }
+                  )
+                ),
               })
             ),
           }),
@@ -87,7 +105,7 @@ export class PulsePocPlugin {
         const es = context.core.elasticsearch.adminClient;
 
         for (const channel of channels) {
-          const index = `pulse-poc-raw-${channel.channel_id}`;
+          const index = PulsePocPlugin.getIndexName(channel.channel_id);
 
           for (const record of channel.records) {
             await es.callAsInternalUser('index', {
@@ -120,9 +138,9 @@ export class PulsePocPlugin {
         const { deploymentId } = request.params;
         const es = context.core.elasticsearch.adminClient;
         const allChannelCheckResults = this.channels.map(async channel => {
-          const indexName = `pulse-poc-raw-${channel.id}`;
-          const channelChecks = channel.checks.map(check =>
-            check.check(es, { deploymentId, indexName })
+          const indexName = PulsePocPlugin.getIndexName(channel.id);
+          const channelChecks = channel.checks.map(
+            ({ check }) => check && check(es, { deploymentId, indexName })
           );
           const checkResults = await Promise.all(channelChecks);
           const instructions = checkResults.filter((value: any) => Boolean(value));

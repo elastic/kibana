@@ -8,3 +8,5 @@ export { PLUGIN } from './plugin';
 export { BASE_PATH } from './base_path';
 export { EXTERNAL_LINKS } from './external_links';
 export { APP_PERMISSION } from './permissions';
+
+export const HOURLY_COST = 'hourly-cost';

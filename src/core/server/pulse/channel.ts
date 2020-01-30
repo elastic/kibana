@@ -21,8 +21,8 @@ import { Subject } from 'rxjs';
 import { PulseCollectorConstructor } from './types';
 // import { SavedObjectsServiceSetup } from '../saved_objects';
 import { Logger } from '../logging';
-
-import { IPulseElasticsearchClient } from './client_wrappers/types';
+import { PulseElasticsearchClient } from './client_wrappers/elasticsearch';
+import { IClusterClient } from '../elasticsearch';
 
 export interface PulseInstruction {
   owner: string;
@@ -37,8 +37,8 @@ export interface ChannelConfig<I = PulseInstruction> {
 }
 
 export interface ChannelSetupContext {
-  rawElasticsearch: any;
-  elasticsearch: IPulseElasticsearchClient;
+  rawElasticsearch: IClusterClient;
+  elasticsearch: PulseElasticsearchClient;
   // savedObjects: SavedObjectsServiceSetup;
 }
 
