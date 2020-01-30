@@ -7,18 +7,27 @@
 import DateMath from '@elastic/datemath';
 import { QUERY } from '../../../common/constants';
 
+export const parseRelativeEndDate = (_dateEnd: string) => {
+  // We need this this parsing because if user selects This week or this date
+  // That represents end date in future, if week or day is still in the middle
+  // Uptime data can never be collected in future, so we will reset end date to now
+  // in That case. Example case we select this week range will be to='now/w' and from = 'now/w'debugger;
+  const dateEnd = DateMath.parse(_dateEnd, { roundUp: true });
+  const dateNowTimestamp = Date.now();
+  const dateEndTimestamp = dateEnd?.valueOf() ?? 0;
+  if (dateEndTimestamp > dateNowTimestamp) {
+    return DateMath.parse('now');
+  }
+  return dateEnd;
+};
+
 export const getHistogramInterval = (
   dateRangeStart: string,
   dateRangeEnd: string,
   bucketCount?: number
 ): number => {
-  let endDate = dateRangeEnd;
-  if (dateRangeStart === dateRangeEnd && endDate.includes('now')) {
-    endDate = 'now';
-  }
-
   const from = DateMath.parse(dateRangeStart);
-  const to = DateMath.parse(endDate);
+  const to = parseRelativeEndDate(dateRangeEnd);
   if (from === undefined) {
     throw Error('Invalid dateRangeStart value');
   }

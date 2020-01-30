@@ -4,19 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import DateMath from '@elastic/datemath';
 import { APICaller } from 'kibana/server';
 import { CursorPagination } from '../adapter_types';
 import { INDEX_NAMES } from '../../../../../common/constants';
+import { parseRelativeEndDate } from '../../../helper/get_histogram_interval';
 
-const parseRelativeDates = (startDate: string, _endDate: string): { tsStart: any; tsEnd: any } => {
-  let endDate: string = _endDate ?? '';
-  if (startDate === endDate && endDate.includes('now')) {
-    endDate = 'now';
-  }
-
-  const tsStart = DateMath.parse(endDate)?.subtract(10, 'seconds');
-  const tsEnd = DateMath.parse(endDate);
+export const parseRelativeDates = (
+  startDate: string,
+  endDate: string
+): { tsStart: any; tsEnd: any } => {
+  const tsStart = parseRelativeEndDate(endDate)!.subtract(5, 'minutes');
+  const tsEnd = parseRelativeEndDate(endDate)!;
 
   return { tsStart, tsEnd };
 };
