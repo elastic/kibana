@@ -18,8 +18,10 @@ import {
   EuiTitle,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
+import ReactDOM from 'react-dom';
 import { Space } from '../../common/model/space';
 import { SpaceCards } from './components';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
@@ -27,7 +29,6 @@ import { SpacesManager } from '../spaces_manager';
 
 interface Props {
   spacesManager: SpacesManager;
-  intl: InjectedIntl;
 }
 
 interface State {
@@ -36,7 +37,7 @@ interface State {
   spaces: Space[];
 }
 
-class SpaceSelectorUI extends Component<Props, State> {
+export class SpaceSelector extends Component<Props, State> {
   private headerRef?: HTMLElement | null;
   constructor(props: Props) {
     super(props);
@@ -152,7 +153,6 @@ class SpaceSelectorUI extends Component<Props, State> {
   }
 
   public getSearchField = () => {
-    const { intl } = this.props;
     if (!this.state.spaces || this.state.spaces.length < SPACE_SEARCH_COUNT_THRESHOLD) {
       return null;
     }
@@ -162,8 +162,7 @@ class SpaceSelectorUI extends Component<Props, State> {
           // @ts-ignore onSearch doesn't exist on EuiFieldSearch
           <EuiFieldSearch
             className="spcSpaceSelector__searchField"
-            placeholder={intl.formatMessage({
-              id: 'xpack.spaces.spaceSelector.findSpacePlaceholder',
+            placeholder={i18n.translate('xpack.spaces.spaceSelector.findSpacePlaceholder', {
               defaultMessage: 'Find a space',
             })}
             incremental={true}
@@ -185,4 +184,7 @@ class SpaceSelectorUI extends Component<Props, State> {
   };
 }
 
-export const SpaceSelector = injectI18n(SpaceSelectorUI);
+export const renderSpaceSelectorApp = (el: Element, props: Props) => {
+  ReactDOM.render(<SpaceSelector {...props} />, el);
+  return () => ReactDOM.unmountComponentAtNode(el);
+};

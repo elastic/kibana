@@ -16,7 +16,7 @@ import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_en
 import { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space';
 import { AdvancedSettingsService } from './advanced_settings';
 import { ManagementService } from './management';
-import { SpaceSelector } from './space_selector';
+import { SpaceSelector, spaceSelectorApp } from './space_selector';
 
 export interface PluginsSetup {
   home?: HomePublicPluginSetup;
@@ -63,6 +63,8 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
         securityLicense: plugins.security && plugins.security.license,
       });
     }
+
+    spaceSelectorApp.create({ application: core.application, spacesManager: this.spacesManager });
 
     return {
       registerLegacyAPI: (legacyAPI: LegacyAPI) => {

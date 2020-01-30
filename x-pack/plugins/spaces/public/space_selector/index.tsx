@@ -5,3 +5,4 @@
  */
 
 export { SpaceSelector } from './space_selector';
+export { spaceSelectorApp } from './space_selector_app';

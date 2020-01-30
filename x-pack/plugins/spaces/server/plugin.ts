@@ -31,6 +31,7 @@ import { toggleUICapabilities } from './lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
+import { initSpacesViewsRoutes } from './routes/views';
 
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
@@ -107,6 +108,12 @@ export class Plugin {
       authorization: plugins.security ? plugins.security.authz : null,
       getSpacesAuditLogger: this.getSpacesAuditLogger,
       config$: this.config$,
+    });
+
+    const viewRouter = core.http.createRouter();
+    initSpacesViewsRoutes({
+      viewRouter,
+      cspHeader: core.http.csp.header,
     });
 
     const externalRouter = core.http.createRouter();
