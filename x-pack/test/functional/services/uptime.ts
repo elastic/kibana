@@ -27,7 +27,7 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       return url.indexOf(expected) >= 0;
     },
     async navigateToMonitorWithId(monitorId: string) {
-      await testSubjects.click(`monitor-page-link-${monitorId}`);
+      await testSubjects.click(`monitor-page-link-${monitorId}`, 5000);
     },
     async getMonitorNameDisplayedOnPageTitle() {
       return await testSubjects.getVisibleText('monitor-page-title');
@@ -63,6 +63,11 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
         up: await testSubjects.getVisibleText('xpack.uptime.snapshot.donutChart.up'),
         down: await testSubjects.getVisibleText('xpack.uptime.snapshot.donutChart.down'),
       };
+    },
+    async locationMissingExists() {
+      return await testSubjects.existOrFail('xpack.uptime.locationMap.locationMissing', {
+        timeout: 3000,
+      });
     },
   };
 }
