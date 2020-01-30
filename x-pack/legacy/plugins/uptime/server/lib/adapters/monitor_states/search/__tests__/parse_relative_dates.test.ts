@@ -19,7 +19,7 @@ describe('Parsing a relative date into time span timestamps', () => {
     const { tsEnd: tsEnd1, tsStart: tsStart1 } = parseRelativeDates(startDate, endDate);
     expect(Date.now() - new Date(tsEnd1).getTime()).toBeLessThan(20);
 
-    expect((new Date(tsStart1).getTime() - startDateStamp) as number).toBeLessThan(20);
+    expect(new Date(tsStart1).getTime() - (startDateStamp as number)).toBeLessThan(20);
 
     startDate = 'now/d';
     endDate = 'now/d';
@@ -32,6 +32,6 @@ describe('Parsing a relative date into time span timestamps', () => {
 
     expect(Date.now() - new Date(tsEnd2).getTime()).toBeLessThan(20);
 
-    expect((new Date(tsStart2).getTime() - startDateStamp) as number).toBeLessThan(20);
+    expect(new Date(tsStart2).getTime() - (startDateStamp as number)).toBeLessThan(20);
   });
 });
