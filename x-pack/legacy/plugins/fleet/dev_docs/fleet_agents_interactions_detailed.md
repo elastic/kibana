@@ -9,14 +9,14 @@ Fleet workflow:
 
 ### Agent enrollment
 
-An agent can enroll using the REST Api provided by fleet.
+An agent must enroll using the REST Api provided by fleet.
 When an agent enroll Fleet:
 
 - verify the API Key is a valid ES API key
-- retrieve the SO associated to this api key id (this SO contains the configuration|policy id)
-- create an ES ApiKey for accessing kibana during checkin
-- create an ES ApiKey to send logs and metrics to the defalt output
-- Save the new agent in a SO with keys encrypted inside the agent
+- retrieve the Saved Object (SO) associated to this api key id (this SO contains the configuration|policy id)
+- create an ES ApiKey unique to the agent for accessing kibana during checkin
+- create an ES ApiKey per output to send logs and metrics to the output
+- Save the new agent in a SO with keys encrypted inside the agent SO object
 
 ![](schema/agent_enroll.png)
 
