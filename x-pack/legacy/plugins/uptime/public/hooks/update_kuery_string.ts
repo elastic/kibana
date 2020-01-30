@@ -55,9 +55,10 @@ export const useUpdateKueryString = (
       const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, indexPattern);
 
       esFilters = JSON.stringify(elasticsearchQuery);
-
-      updateEsQueryForFilterGroup(filterQueryString, indexPattern);
     }
+    // update redux store
+    updateEsQueryForFilterGroup(filterQueryString, indexPattern);
+
     return [esFilters];
   } catch (err) {
     return [urlFilters, err];

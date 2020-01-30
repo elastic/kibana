@@ -18,8 +18,6 @@ import { useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { AutocompleteProviderRegister } from '../../../../../../src/plugins/data/public';
-import { store } from '../state';
-import { setEsKueryString } from '../state/actions';
 import { PageHeader } from './page_header';
 import { IIndexPattern } from '../../../../../../src/plugins/data/public';
 import { UptimeThemeContext } from '../contexts';
