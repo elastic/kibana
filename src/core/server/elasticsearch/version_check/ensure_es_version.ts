@@ -88,6 +88,8 @@ export function mapNodesVersionCompatibility(
   // Ignore version qualifiers https://github.com/elastic/elasticsearch/issues/36859
   const warningNodes = nodes.filter(node => !esVersionEqualsKibana(node.version, kibanaVersion));
 
+  // Note: If incompatible and warning nodes are present `message` only contains
+  // an incompatibility notice.
   let message;
   if (incompatibleNodes.length > 0) {
     const incompatibleNodeNames = incompatibleNodes.map(node => node.name).join(', ');
