@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import moment from 'moment';
+
 import {
   getDefaultFromString,
   DefaultTimeRangeSetting,
@@ -28,8 +29,8 @@ import {
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_INTERVAL_TYPE,
 } from '../../common/constants';
+import { getServices } from '../lib/kibana';
 import { Policy } from '../store/inputs/model';
-import moment from 'moment';
 
 // Change the constants to be static values so we can test against those instead of
 // relative sliding date times. Jest cannot access these outer scoped variables so
@@ -46,6 +47,9 @@ jest.mock('../../common/constants', () => ({
   DEFAULT_SIEM_TIME_RANGE: 'siem:timeDefaults',
 }));
 
+jest.mock('../lib/kibana');
+const mockGetServices = getServices as jest.Mock;
+
 /**
  * We utilize the internal chrome mocking that is built in to be able to mock different time range
  * scenarios here or the absence of a time range setting.
@@ -59,16 +63,20 @@ const mockTimeRange = (
     value: DEFAULT_INTERVAL_VALUE,
   }
 ) => {
-  chrome.getUiSettingsClient().get.mockImplementation((key: string) => {
-    switch (key) {
-      case DEFAULT_SIEM_TIME_RANGE:
-        return timeRange;
-      case DEFAULT_SIEM_REFRESH_INTERVAL:
-        return interval;
-      default:
-        throw new Error(`Unexpected config key: ${key}`);
-    }
-  });
+  mockGetServices.mockImplementation(() => ({
+    uiSettings: {
+      get: (key: string) => {
+        switch (key) {
+          case DEFAULT_SIEM_TIME_RANGE:
+            return timeRange;
+          case DEFAULT_SIEM_REFRESH_INTERVAL:
+            return interval;
+          default:
+            throw new Error(`Unexpected config key: ${key}`);
+        }
+      },
+    },
+  }));
 };
 
 /**
@@ -88,10 +96,6 @@ const isMalformedInterval = (interval: unknown): interval is DefaultIntervalSett
   typeof interval === 'object';
 
 describe('default_date_settings', () => {
-  beforeEach(() => {
-    chrome.getUiSettingsClient().get.mockClear();
-  });
-
   describe('#getDefaultFromString', () => {
     test('should return the DEFAULT_FROM constant by default', () => {
       mockTimeRange();

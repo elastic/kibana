@@ -6,8 +6,18 @@
 
 import { StartServices } from '../../plugin';
 
-export let services: StartServices;
+let _services: StartServices | null = null;
 
-export const initServices = (startServices: StartServices) => {
-  services = startServices;
+export const initServices = (services: StartServices) => {
+  _services = services;
+};
+
+export const getServices = (): StartServices => {
+  if (!_services) {
+    throw new Error(
+      'Kibana services not set - are you trying to import this module from outside of the siem app?'
+    );
+  }
+
+  return _services;
 };

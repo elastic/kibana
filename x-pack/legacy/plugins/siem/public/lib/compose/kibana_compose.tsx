@@ -9,7 +9,7 @@ import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 
 import introspectionQueryResultData from '../../graphql/introspection.json';
-import { services } from '../../lib/kibana';
+import { getServices } from '../../lib/kibana';
 import { AppFrontendLibs } from '../lib';
 import { getLinks } from './helpers';
 
@@ -20,7 +20,7 @@ export function compose(): AppFrontendLibs {
       introspectionQueryResultData,
     }),
   });
-  const basePath = services.http.basePath.get();
+  const basePath = getServices().http.basePath.get();
 
   const apolloClient = new ApolloClient({
     connectToDevTools: process.env.NODE_ENV !== 'production',

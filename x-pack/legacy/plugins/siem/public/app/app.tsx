@@ -18,7 +18,7 @@ import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { I18nContext } from 'ui/i18n';
 
-import { KibanaContextProvider, useUiSetting$, services } from '../lib/kibana';
+import { KibanaContextProvider, useUiSetting$, getServices } from '../lib/kibana';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { DEFAULT_DARK_MODE } from '../../common/constants';
@@ -93,7 +93,7 @@ const SiemAppComponent: FC = () => (
     services={{
       appName: 'siem',
       storage: new Storage(localStorage),
-      ...services,
+      ...getServices(),
     }}
   >
     <StartApp {...compose()} />

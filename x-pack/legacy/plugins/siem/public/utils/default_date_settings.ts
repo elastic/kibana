@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import { isString, isBoolean, isNumber } from 'lodash/fp';
@@ -16,6 +15,7 @@ import {
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
 } from '../../common/constants';
+import { getServices } from '../lib/kibana';
 import { Policy } from '../store/inputs/model';
 
 interface DefaultTimeRange {
@@ -37,14 +37,19 @@ export type DefaultIntervalSetting = DefaultInterval | null | undefined;
 const DEFAULT_FROM_MOMENT = moment().subtract(24, 'hours');
 const DEFAULT_TO_MOMENT = moment();
 
+const getDefaultTimeRange = (): DefaultTimeRangeSetting =>
+  getServices().uiSettings.get<DefaultTimeRangeSetting>(DEFAULT_SIEM_TIME_RANGE);
+
+const getDefaultInterval = (): DefaultIntervalSetting =>
+  getServices().uiSettings.get<DefaultIntervalSetting>(DEFAULT_SIEM_REFRESH_INTERVAL);
+
 /**
  * Returns the default SIEM time range "from" string. This should be used only in
  * non-ReactJS code. For ReactJS code, use the settings context hook instead
  */
 export const getDefaultFromString = (): string => {
-  const defaultTimeRange: DefaultTimeRangeSetting = chrome
-    .getUiSettingsClient()
-    .get(DEFAULT_SIEM_TIME_RANGE);
+  const defaultTimeRange = getDefaultTimeRange();
+
   if (defaultTimeRange != null && isString(defaultTimeRange.from)) {
     return defaultTimeRange.from;
   } else {
@@ -57,9 +62,8 @@ export const getDefaultFromString = (): string => {
  * non-ReactJS code. For ReactJS code, use the settings context hook instead
  */
 export const getDefaultToString = (): string => {
-  const defaultTimeRange: DefaultTimeRangeSetting = chrome
-    .getUiSettingsClient()
-    .get(DEFAULT_SIEM_TIME_RANGE);
+  const defaultTimeRange = getDefaultTimeRange();
+
   if (defaultTimeRange != null && isString(defaultTimeRange.to)) {
     return defaultTimeRange.to;
   } else {
@@ -78,9 +82,8 @@ export const getDefaultFromValue = (): number => getDefaultFromMoment().valueOf(
  * non-ReactJS code. For ReactJS code, use the settings context hook instead
  */
 export const getDefaultFromMoment = (): moment.Moment => {
-  const defaultTimeRange: DefaultTimeRangeSetting = chrome
-    .getUiSettingsClient()
-    .get(DEFAULT_SIEM_TIME_RANGE);
+  const defaultTimeRange = getDefaultTimeRange();
+
   if (defaultTimeRange != null && isString(defaultTimeRange.from)) {
     return parseDateString(defaultTimeRange.from, DEFAULT_FROM, DEFAULT_FROM_MOMENT);
   } else {
@@ -99,9 +102,8 @@ export const getDefaultToValue = (): number => getDefaultToMoment().valueOf();
  * non-ReactJS code. For ReactJS code, use the settings context hook instead
  */
 export const getDefaultToMoment = (): moment.Moment => {
-  const defaultTimeRange: DefaultTimeRangeSetting = chrome
-    .getUiSettingsClient()
-    .get(DEFAULT_SIEM_TIME_RANGE);
+  const defaultTimeRange = getDefaultTimeRange();
+
   if (defaultTimeRange != null && isString(defaultTimeRange.to)) {
     return parseDateString(defaultTimeRange.to, DEFAULT_TO, DEFAULT_TO_MOMENT);
   } else {
@@ -114,9 +116,8 @@ export const getDefaultToMoment = (): moment.Moment => {
  * non-ReactJS code. For ReactJS code, use the settings context hook instead
  */
 export const getDefaultIntervalKind = (): Policy['kind'] => {
-  const defaultInterval: DefaultIntervalSetting = chrome
-    .getUiSettingsClient()
-    .get(DEFAULT_SIEM_REFRESH_INTERVAL);
+  const defaultInterval = getDefaultInterval();
+
   if (defaultInterval != null && isBoolean(defaultInterval.pause)) {
     return defaultInterval.pause ? 'manual' : 'interval';
   } else {
@@ -129,9 +130,8 @@ export const getDefaultIntervalKind = (): Policy['kind'] => {
  * non-ReactJS code. For ReactJS code, use the settings context hook instead
  */
 export const getDefaultIntervalDuration = (): Policy['duration'] => {
-  const defaultInterval: DefaultIntervalSetting = chrome
-    .getUiSettingsClient()
-    .get(DEFAULT_SIEM_REFRESH_INTERVAL);
+  const defaultInterval = getDefaultInterval();
+
   if (defaultInterval != null && isNumber(defaultInterval.value)) {
     return defaultInterval.value;
   } else {

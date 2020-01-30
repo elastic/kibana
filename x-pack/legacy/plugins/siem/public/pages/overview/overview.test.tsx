@@ -22,9 +22,6 @@ jest.mock('ui/chrome', () => ({
   breadcrumbs: {
     set: jest.fn(),
   },
-  getUiSettingsClient: () => ({
-    get: jest.fn(),
-  }),
 }));
 
 // Test will fail because we will to need to mock some core services to make the test work
