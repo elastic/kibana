@@ -21,7 +21,7 @@ describe('getIndexTemplate()', () => {
   const esNames = getEsNames('XYZ');
 
   test('returns the correct details of the index template', () => {
-    const indexTemplate = getIndexTemplate(esNames, true);
+    const indexTemplate = getIndexTemplate(esNames);
     expect(indexTemplate.index_patterns).toEqual([esNames.indexPattern]);
     expect(indexTemplate.aliases[esNames.alias]).toEqual({});
     expect(indexTemplate.settings.number_of_shards).toBeGreaterThanOrEqual(0);
@@ -30,13 +30,13 @@ describe('getIndexTemplate()', () => {
   });
 
   test('returns correct index template bits for ilm when ilm is supported', () => {
-    const indexTemplate = getIndexTemplate(esNames, true);
+    const indexTemplate = getIndexTemplate(esNames);
     expect(indexTemplate.settings['index.lifecycle.name']).toBe(esNames.ilmPolicy);
     expect(indexTemplate.settings['index.lifecycle.rollover_alias']).toBe(esNames.alias);
   });
 
   test('returns correct index template bits for ilm when ilm is not supported', () => {
-    const indexTemplate = getIndexTemplate(esNames, false);
+    const indexTemplate = getIndexTemplate(esNames);
     expect(indexTemplate.settings['index.lifecycle.name']).toBeUndefined();
     expect(indexTemplate.settings['index.lifecycle.rollover_alias']).toBeUndefined();
   });

@@ -13,7 +13,7 @@ import { IEvent } from '../generated/schemas';
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   logEntries: schema.boolean({ defaultValue: false }),
-  indexEntries: schema.boolean({ defaultValue: false }),
+  indexEntries: schema.boolean({ defaultValue: true }),
 });
 
 export type IEventLogConfig = TypeOf<typeof ConfigSchema>;

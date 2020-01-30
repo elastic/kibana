@@ -23,25 +23,19 @@ export async function initializeEs(esContext: EsContext): Promise<boolean> {
 
 async function initializeEsResources(esContext: EsContext) {
   const steps = new EsInitializationSteps(esContext);
-  let ilmExists: boolean;
 
-  // create the ilm policy, if required
-  ilmExists = await steps.doesIlmPolicyExist();
-  if (!ilmExists) {
-    ilmExists = await steps.createIlmPolicy();
+  // create the ilm policy, if it doesn't exist
+  if (!(await steps.doesIlmPolicyExist())) {
+    await steps.createIlmPolicy();
   }
 
   if (!(await steps.doesIndexTemplateExist())) {
-    await steps.createIndexTemplate({ ilmExists });
+    await steps.createIndexTemplate();
   }
 
   if (!(await steps.doesInitialIndexExist())) {
     await steps.createInitialIndex();
   }
-}
-
-interface AddTemplateOpts {
-  ilmExists: boolean;
 }
 
 class EsInitializationSteps {
@@ -58,15 +52,12 @@ class EsInitializationSteps {
       await this.esContext.callEs('transport.request', request);
     } catch (err) {
       if (err.statusCode === 404) return false;
-      // TODO: remove following once kibana user can access ilm
-      if (err.statusCode === 403) return false;
-
       throw new Error(`error checking existance of ilm policy: ${err.message}`);
     }
     return true;
   }
 
-  async createIlmPolicy(): Promise<boolean> {
+  async createIlmPolicy(): Promise<void> {
     const request = {
       method: 'PUT',
       path: `_ilm/policy/${this.esContext.esNames.ilmPolicy}`,
@@ -75,11 +66,8 @@ class EsInitializationSteps {
     try {
       await this.esContext.callEs('transport.request', request);
     } catch (err) {
-      // TODO: remove following once kibana user can access ilm
-      if (err.statusCode === 403) return false;
       throw new Error(`error creating ilm policy: ${err.message}`);
     }
-    return true;
   }
 
   async doesIndexTemplateExist(): Promise<boolean> {
@@ -93,8 +81,8 @@ class EsInitializationSteps {
     return result as boolean;
   }
 
-  async createIndexTemplate(opts: AddTemplateOpts): Promise<void> {
-    const templateBody = getIndexTemplate(this.esContext.esNames, opts.ilmExists);
+  async createIndexTemplate(): Promise<void> {
+    const templateBody = getIndexTemplate(this.esContext.esNames);
     const addTemplateParams = {
       create: true,
       name: this.esContext.esNames.indexTemplate,
