@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useMemo, useState, useCallback, ReactNode } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonToggle,
@@ -211,6 +211,9 @@ export function DiscoverGrid({
    * Visibility and order
    */
   const [visibleColumns, setVisibleColumns] = useState(dataGridColumns.map(obj => obj.id));
+  useEffect(() => {
+    setVisibleColumns(dataGridColumns.map(obj => obj.id));
+  }, [dataGridColumns.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Cell rendering
@@ -326,10 +329,9 @@ export function DiscoverGrid({
           onChangePage,
           pageSizeOptions: [lowestPageSize, 100, 500],
         }}
-        // TODO - EUI feature: disable visibility but keep ability to reorder
-        // toolbarVisibility={{
-        //   showColumnSelector: false,
-        // }}
+        toolbarVisibility={{
+          showColumnSelector: false,
+        }}
         gridStyle={{
           border: 'horizontal',
         }}
