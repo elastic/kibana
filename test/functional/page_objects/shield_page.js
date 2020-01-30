@@ -23,7 +23,6 @@ export function ShieldPageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const find = getService('find');
-  const provisionedEnv = getService('provisionedEnv');
 
   const regularLogin = async (user, pwd) => {
     await testSubjects.setValue('loginUsername', user);
@@ -46,10 +45,10 @@ export function ShieldPageProvider({ getService }) {
   class ShieldPage {
     async login(user, pwd) {
       if (
-        provisionedEnv.VM === 'ubuntu18_deb_oidc' ||
-        provisionedEnv.VM === 'ubuntu16_deb_desktop_saml'
+        process.env.VM === 'ubuntu18_deb_oidc' ||
+        process.env.VM === 'ubuntu16_deb_desktop_saml'
       ) {
-        const [samlUser, samlPass] = parse(provisionedEnv.KIBANAURL);
+        const [samlUser, samlPass] = parse(process.env.KIBANAURL);
         await samlLogin(samlUser, samlPass);
         return;
       }

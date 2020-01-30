@@ -6,16 +6,16 @@
 
 export default ({ getService, getPageObjects }) => {
   describe('monitoring app', () => {
-    const provisionedEnv = getService('provisionedEnv');
+    // const provisionedEnv = getService('provisionedEnv');
     const browser = getService('browser');
     const PageObjects = getPageObjects(['security', 'monitoring', 'common']);
     const monitoringNoData = getService('monitoringNoData');
     const log = getService('log');
-    const isSaml = !!provisionedEnv.VM.includes('saml') || !!provisionedEnv.VM.includes('oidc');
+    const isSaml = !!process.env.VM.includes('saml') || !!process.env.VM.includes('oidc');
 
     before(async () => {
       await browser.setWindowSize(1200, 800);
-      if ((provisionedEnv.SECURITY === 'YES') && !isSaml) {
+      if (process.env.SECURITY === 'YES' && !isSaml) {
         await PageObjects.security.logout();
         log.debug('### log in as elastic superuser to enable monitoring');
         // Tests may be running as a non-superuser like `power` but that user
@@ -32,7 +32,7 @@ export default ({ getService, getPageObjects }) => {
     });
 
     after(async () => {
-      if ((provisionedEnv.SECURITY === 'YES') && !isSaml) {
+      if (process.env.SECURITY === 'YES' && !isSaml) {
         await PageObjects.security.forceLogout(isSaml);
       }
     });

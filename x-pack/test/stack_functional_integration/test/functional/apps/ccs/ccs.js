@@ -12,14 +12,13 @@ export default ({ getService, getPageObjects }) => {
     const retry = getService('retry');
     const log = getService('log');
     const browser = getService('browser');
-    const provisionedEnv = getService('provisionedEnv');
 
     before(async () => {
       await browser.setWindowSize(1200, 800);
     });
 
     before(async () => {
-      if (provisionedEnv.SECURITY === 'YES') {
+      if (process.env.SECURITY === 'YES') {
         log.debug(
           '### provisionedEnv.SECURITY === YES so log in as elastic superuser to create cross cluster indices'
         );

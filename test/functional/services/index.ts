@@ -47,7 +47,6 @@ import { SnapshotsProvider } from './snapshots';
 import { TableProvider } from './table';
 import { TestSubjectsProvider } from './test_subjects';
 import { ToastsProvider } from './toasts';
-import { ProvisionedEnvProvider } from './provisioned_env';
 // @ts-ignore not TS yet
 import { PieChartProvider } from './visualizations';
 import { ListingTableProvider } from './listing_table';
@@ -83,6 +82,5 @@ export const services = {
   globalNav: GlobalNavProvider,
   toasts: ToastsProvider,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
-  provisionedEnv: ProvisionedEnvProvider,
   elasticChart: ElasticChartProvider,
 };
