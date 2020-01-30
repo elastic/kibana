@@ -16,7 +16,7 @@ import { LogPositionState, LogPositionStateParams } from './log_position_state';
 
 interface LogPositionUrlState {
   position: LogPositionStateParams['visibleMidpoint'] | undefined;
-  streamLive?: boolean | undefined;
+  streamLive: boolean;
 }
 
 export const WithLogPositionUrlState = () => {
