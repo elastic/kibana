@@ -72,8 +72,7 @@ export default function({ getService, getPageObjects }) {
 
       it('should have index pattern in page header', async function() {
         const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
-        const patternName = await indexPageHeading.getVisibleText();
-        expect(patternName).to.be('logstash-*');
+        expect(indexPageHeading).to.be('logstash-*');
       });
 
       it('should have index pattern in url', function url() {

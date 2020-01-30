@@ -55,8 +55,7 @@ export default function({ getService, getPageObjects }) {
       log.debug('Create shakespeare index pattern');
       await PageObjects.settings.createIndexPattern('shakes', null);
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
-      const patternName = await indexPageHeading.getVisibleText();
-      expect(patternName).to.be('shakes*');
+      expect(indexPageHeading).to.be('shakes*');
     });
 
     // https://www.elastic.co/guide/en/kibana/current/tutorial-visualizing.html
