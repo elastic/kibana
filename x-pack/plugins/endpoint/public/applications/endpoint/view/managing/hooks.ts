@@ -5,8 +5,8 @@
  */
 
 import { useSelector } from 'react-redux';
-import { GlobalState } from './reducer';
-import { EndpointListState } from './endpoint_list';
+import { GlobalState } from '../../types';
+import { EndpointListState } from '../../store/endpoint_list';
 
 export function useEndpointListSelector<TSelected>(
   selector: (state: EndpointListState) => TSelected

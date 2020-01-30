@@ -19,7 +19,7 @@ export const appStoreFactory = (coreStart: CoreStart): [Store, () => void] => {
   const store = createStore(
     appReducer,
     composeWithReduxDevTools(
-      applyMiddleware(alertMiddlewareFactory(coreStart), appSagaFactory(coreStart))
+      applyMiddleware(alertMiddlewareFactory(coreStart), sagaReduxMiddleware)
     )
   );
 

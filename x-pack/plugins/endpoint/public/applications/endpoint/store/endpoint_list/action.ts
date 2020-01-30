@@ -11,10 +11,6 @@ interface ServerReturnedEndpointList {
   payload: EndpointListData;
 }
 
-interface UserEnteredEndpointListPage {
-  type: 'userEnteredEndpointListPage';
-}
-
 interface UserExitedEndpointListPage {
   type: 'userExitedEndpointListPage';
 }
@@ -26,6 +22,5 @@ interface UserPaginatedEndpointListTable {
 
 export type EndpointListAction =
   | ServerReturnedEndpointList
-  | UserEnteredEndpointListPage
   | UserExitedEndpointListPage
   | UserPaginatedEndpointListTable;
