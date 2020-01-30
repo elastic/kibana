@@ -9,8 +9,6 @@ import { useState, useContext } from 'react';
 import { useLogEntryHighlights } from './log_entry_highlights';
 import { useLogSummaryHighlights } from './log_summary_highlights';
 import { useNextAndPrevious } from './next_and_previous';
-import { useLogSummaryBufferInterval } from '../log_summary';
-import { LogViewConfiguration } from '../log_view_configuration';
 import { LogPositionState } from '../log_position';
 import { TimeKey } from '../../../../common/time';
 
@@ -28,15 +26,8 @@ export const useLogHighlightsState = ({
   filterQuery: string | null;
 }) => {
   const [highlightTerms, setHighlightTerms] = useState<string[]>([]);
-  const { visibleMidpoint, jumpToTargetPosition } = useContext(LogPositionState.Context);
-  const { intervalSize: summaryIntervalSize } = useContext(LogViewConfiguration.Context);
-  const {
-    start: summaryStart,
-    end: summaryEnd,
-    bucketSize: summaryBucketSize,
-  } = useLogSummaryBufferInterval(
-    visibleMidpoint ? visibleMidpoint.time : null,
-    summaryIntervalSize
+  const { visibleMidpoint, jumpToTargetPosition, startTimestamp, endTimestamp } = useContext(
+    LogPositionState.Context
   );
 
   const {
@@ -55,9 +46,8 @@ export const useLogHighlightsState = ({
   const { logSummaryHighlights, loadLogSummaryHighlightsRequest } = useLogSummaryHighlights(
     sourceId,
     sourceVersion,
-    summaryStart,
-    summaryEnd,
-    summaryBucketSize,
+    startTimestamp,
+    endTimestamp,
     filterQuery,
     highlightTerms
   );
