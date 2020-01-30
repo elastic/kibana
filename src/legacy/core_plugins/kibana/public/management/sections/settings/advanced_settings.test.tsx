@@ -28,6 +28,7 @@ import {
 } from '../../../../../../../core/public';
 import { FieldSetting } from './types';
 import { AdvancedSettings } from './advanced_settings';
+import { componentRegistryMock } from '../../../../../../../plugins/advanced_settings/public/mocks';
 
 jest.mock('ui/new_platform', () => ({
   npStart: mockConfig(),
@@ -218,11 +219,9 @@ function mockConfig() {
     plugins: {
       advancedSettings: {
         component: {
+          register: componentRegistryMock.register,
           get: () => <div>Hello</div>,
-          componentType: {
-            PAGE_TITLE_COMPONENT: 'page_title_component',
-            PAGE_SUBTITLE_COMPONENT: 'page_subtitle_component',
-          },
+          componentType: componentRegistryMock.componentType,
         },
       },
     },
