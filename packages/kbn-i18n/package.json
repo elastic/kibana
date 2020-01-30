@@ -8,8 +8,8 @@
   "private": true,
   "scripts": {
     "build": "node scripts/build",
-    "kbn:bootstrap": "node scripts/build --source-maps",
-    "kbn:watch": "node scripts/build --watch --source-maps"
+    "kbn:bootstrap": "node scripts/build",
+    "kbn:watch": "node scripts/build --watch"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",

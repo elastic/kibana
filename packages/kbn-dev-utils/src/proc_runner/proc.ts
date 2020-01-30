@@ -1,4 +1,10 @@
 /*
+ * Copyright 2019 LogRhythm, Inc
+ * Licensed under the LogRhythm Global End User License Agreement,
+ * which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -100,6 +106,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
   const outcome$: Rx.Observable<number | null> = Rx.race(
     // observe first exit event
     Rx.fromEvent(childProcess, 'exit').pipe(
+      // @ts-ignore
       take(1),
       map(([code]: [number]) => {
         if (stopCalled) {
@@ -119,6 +126,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
       take(1),
       mergeMap(err => Rx.throwError(err))
     )
+    // @ts-ignore
   ).pipe(share());
 
   const lines$ = Rx.merge(
@@ -141,6 +149,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     await withTimeout(
       async () => {
         log.debug(`Sending "${signal}" to proc "${name}"`);
+        // @ts-ignore
         await treeKillAsync(childProcess.pid, signal);
         await outcomePromise;
       },
@@ -149,6 +158,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
         log.warning(
           `Proc "${name}" was sent "${signal}" didn't emit the "exit" or "error" events after ${STOP_TIMEOUT} ms, sending SIGKILL`
         );
+        // @ts-ignore
         await treeKillAsync(childProcess.pid, 'SIGKILL');
       }
     );
