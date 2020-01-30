@@ -29,14 +29,15 @@ When an agent checkin fleet:
 - verify the access API Key is a valid ES API key
 - retrieve the agent (SO associated to this api key id)
 - Insert events SO
-- create an ES ApiKey to send logs and metrics to the defalt output
-- Save the new agent in a SO with keys encrypted inside the agent
+- Save the new agent (with last checkin date) in a SavedObject with keys encrypted inside the agent
 
 ![](schema/agent_checkin.png)
 
 ### Agent acknowledgement
 
-This is really similar to the checkin (same auth mecanism) and it's used for agent to acknowlege action received during checkin
+This is really similar to the checkin (same auth mecanism) and it's used for agent to acknowlege action received during checkin.
+
+An agent can acknowledge one or multiple actions by calling `POST /api/fleet/agents/{agentId}/acks`
 
 ## Other interactions
 
