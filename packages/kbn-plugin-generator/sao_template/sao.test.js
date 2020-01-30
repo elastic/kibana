@@ -19,8 +19,6 @@
 
 const sao = require('sao');
 
-const templatePkg = require('../package.json');
-
 const template = {
   fromPath: __dirname,
   configOptions: {
@@ -32,29 +30,16 @@ function getFileContents(file) {
   return file.contents.toString();
 }
 
-function getConfig(file) {
-  const contents = getFileContents(file).replace(/\r?\n/gm, '');
-  return contents.split('kibana.Plugin(')[1];
-}
-
 describe('plugin generator sao integration', () => {
-  test.skip('skips files when answering no', async () => {
+  test('skips files when answering no', async () => {
     const res = await sao.mockPrompt(template, {
       generateApp: false,
       generateApi: false,
     });
 
-    expect(res.fileList).not.toContain('public/app.js');
-    expect(res.fileList).not.toContain('public/__tests__/index.js');
-    expect(res.fileList).not.toContain('public/hack.js');
-    expect(res.fileList).not.toContain('server/routes/example.js');
-    expect(res.fileList).not.toContain('server/__tests__/index.js');
-
-    const uiExports = getConfig(res.files['index.js']);
-    expect(uiExports).not.toContain('app:');
-    expect(uiExports).not.toContain('hacks:');
-    expect(uiExports).not.toContain('init(server, options)');
-    expect(uiExports).not.toContain('registerFeature(');
+    expect(res.fileList).toContain('common/index.ts');
+    expect(res.fileList).not.toContain('public/index.ts');
+    expect(res.fileList).not.toContain('server/index.ts');
   });
 
   it('includes app when answering yes', async () => {
@@ -69,26 +54,21 @@ describe('plugin generator sao integration', () => {
     expect(res.fileList).toContain('public/plugin.ts');
     expect(res.fileList).toContain('public/types.ts');
     expect(res.fileList).toContain('public/components/app.tsx');
+    expect(res.fileList).not.toContain('server/index.ts');
   });
 
-  it.skip('includes server api when answering yes', async () => {
+  it('includes server api when answering yes', async () => {
     const res = await sao.mockPrompt(template, {
       generateApp: true,
       generateApi: true,
     });
 
     // check output files
-    expect(res.fileList).toContain('public/app.js');
-    expect(res.fileList).toContain('public/__tests__/index.js');
-    expect(res.fileList).toContain('public/hack.js');
-    expect(res.fileList).toContain('server/routes/example.js');
-    expect(res.fileList).toContain('server/__tests__/index.js');
-
-    const uiExports = getConfig(res.files['index.js']);
-    expect(uiExports).toContain('app:');
-    expect(uiExports).toContain('hacks:');
-    expect(uiExports).toContain('init(server, options)');
-    expect(uiExports).toContain('registerFeature(');
+    expect(res.fileList).toContain('public/plugin.ts');
+    expect(res.fileList).toContain('server/plugin.ts');
+    expect(res.fileList).toContain('server/index.ts');
+    expect(res.fileList).toContain('server/types.ts');
+    expect(res.fileList).toContain('server/routes/index.ts');
   });
 
   it('plugin package has correct title', async () => {
@@ -125,17 +105,6 @@ describe('plugin generator sao integration', () => {
     expect(pkg.version).toBe('v6.0.0');
   });
 
-  it.skip('package has correct templateVersion', async () => {
-    const res = await sao.mockPrompt(template, {
-      kbnVersion: 'master',
-    });
-
-    const packageContents = getFileContents(res.files['kibana.json']);
-    const pkg = JSON.parse(packageContents);
-
-    expect(pkg.kibana.templateVersion).toBe(templatePkg.version);
-  });
-
   it('sample app has correct values', async () => {
     const res = await sao.mockPrompt(template, {
       generateApp: true,
@@ -148,9 +117,8 @@ describe('plugin generator sao integration', () => {
     expect(controllerLine).toContain('someFancyPlugin');
   });
 
-  it.skip('includes dotfiles', async () => {
+  it('includes dotfiles', async () => {
     const res = await sao.mockPrompt(template);
-    expect(res.files['.gitignore']).toBeTruthy();
     expect(res.files['.eslintrc.js']).toBeTruthy();
   });
 });
