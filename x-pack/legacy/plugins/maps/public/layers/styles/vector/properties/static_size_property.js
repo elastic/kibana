@@ -24,12 +24,14 @@ export class StaticSizeProperty extends StaticStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', this._options.size);
   }
 
-  syncIconImageAndSizeWithMb(symbolLayerId, mbMap, symbolId) {
-    const iconPixels =
-      this._options.size >= HALF_LARGE_MAKI_ICON_SIZE ? LARGE_MAKI_ICON_SIZE : SMALL_MAKI_ICON_SIZE;
+  getIconPixelSize() {
+    return this._options.size >= HALF_LARGE_MAKI_ICON_SIZE
+      ? LARGE_MAKI_ICON_SIZE
+      : SMALL_MAKI_ICON_SIZE;
+  }
 
-    mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
-    const halfIconPixels = iconPixels / 2;
+  syncIconSizeWithMb(symbolLayerId, mbMap) {
+    const halfIconPixels = this.getIconPixelSize() / 2;
     mbMap.setLayoutProperty(symbolLayerId, 'icon-size', this._options.size / halfIconPixels);
   }
 

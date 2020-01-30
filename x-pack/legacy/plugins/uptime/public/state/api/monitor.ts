@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { getApiPath } from '../../lib/helper';
 import { BaseParams } from './types';
 import {
@@ -41,7 +41,7 @@ export const fetchMonitorDetails = async ({
     throw new Error(response.statusText);
   }
   return response.json().then(data => {
-    ThrowReporter.report(MonitorDetailsType.decode(data));
+    PathReporter.report(MonitorDetailsType.decode(data));
     return data;
   });
 };
@@ -68,7 +68,7 @@ export const fetchMonitorLocations = async ({
     throw new Error(response.statusText);
   }
   return response.json().then(data => {
-    ThrowReporter.report(MonitorLocationsType.decode(data));
+    PathReporter.report(MonitorLocationsType.decode(data));
     return data;
   });
 };
