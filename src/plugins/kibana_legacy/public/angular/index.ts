@@ -16,13 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { PluginInitializerContext } from 'kibana/public';
-import { KibanaLegacyPlugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new KibanaLegacyPlugin();
-}
-
-export * from './plugin';
-export * from './angular';
+export * from './promises/promises';

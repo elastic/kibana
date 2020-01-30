@@ -53,8 +53,7 @@ export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { EventsProvider } from 'ui/events';
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
-// @ts-ignore
-export { PromiseServiceCreator } from 'ui/promises/promises';
+
 // @ts-ignore
 export { confirmModalFactory } from 'ui/modals/confirm_modal';
 export { configureAppAngularModule, ensureDefaultIndexPattern } from 'ui/legacy_compat';
@@ -71,3 +70,4 @@ export { wrapInI18nContext } from 'ui/i18n';
 export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
 export { VisSavedObject } from '../../../visualizations/public/embeddable/visualize_embeddable';
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
+export { PromiseServiceCreator } from '../../../../../plugins/kibana_legacy/public';

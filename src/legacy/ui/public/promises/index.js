@@ -17,5 +17,12 @@
  * under the License.
  */
 
-import './promises';
+import { PromiseServiceCreator } from '../../../../plugins/kibana_legacy/public';
 export { createDefer } from './defer';
+
+import { uiModules } from '../modules';
+
+const module = uiModules.get('kibana');
+// Provides a tiny subset of the excellent API from
+// bluebird, reimplemented using the $q service
+module.service('Promise', PromiseServiceCreator);

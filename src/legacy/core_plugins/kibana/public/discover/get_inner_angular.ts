@@ -29,8 +29,7 @@ import { StateProvider } from 'ui/state_management/state';
 // @ts-ignore
 import { EventsProvider } from 'ui/events';
 import { PersistedState } from 'ui/persisted_state';
-// @ts-ignore
-import { PromiseServiceCreator } from 'ui/promises/promises';
+
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
 import { PrivateProvider } from 'ui/private/private';
@@ -86,6 +85,7 @@ import { createFieldChooserDirective } from './np_ready/components/field_chooser
 // @ts-ignore
 import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
 import { DiscoverStartPlugins } from './plugin';
+import { PromiseServiceCreator } from '../../../../../plugins/kibana_legacy/public';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover

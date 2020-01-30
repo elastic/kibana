@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export interface PromiseService {
+export interface PromiseServiceCreator {
   resolve: <T>(value: T | PromiseLike<T>) => ng.IPromise<T>;
 
   // TODO: add additional typing

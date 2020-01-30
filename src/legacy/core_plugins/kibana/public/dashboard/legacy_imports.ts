@@ -49,7 +49,7 @@ export { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 // @ts-ignore
-export { PromiseServiceCreator } from 'ui/promises/promises';
+export { PromiseServiceCreator } from '../../../../../plugins/kibana_legacy/public';
 // @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url/index';
 // @ts-ignore
