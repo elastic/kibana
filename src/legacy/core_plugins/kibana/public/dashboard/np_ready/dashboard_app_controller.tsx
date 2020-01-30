@@ -121,6 +121,7 @@ export class DashboardAppController {
     kbnUrlStateStorage,
   }: DashboardAppControllerDependencies) {
     const filterManager = queryService.filterManager;
+    const queryFilter = filterManager;
     const timefilter = queryService.timefilter.timefilter;
 
     // starts syncing `_g` portion of url with query services
@@ -241,7 +242,7 @@ export class DashboardAppController {
       const isEmptyInReadonlyMode = getIsEmptyInReadonlyMode();
       return {
         id: dashboardStateManager.savedDashboard.id || '',
-        filters: filterManager.getFilters(),
+        filters: queryFilter.getFilters(),
         hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
         query: $scope.model.query,
         timeRange: {
@@ -265,7 +266,7 @@ export class DashboardAppController {
       // https://github.com/angular/angular.js/wiki/Understanding-Scopes
       $scope.model = {
         query: dashboardStateManager.getQuery(),
-        filters: filterManager.getFilters(),
+        filters: queryFilter.getFilters(),
         timeRestore: dashboardStateManager.getTimeRestore(),
         title: dashboardStateManager.getTitle(),
         description: dashboardStateManager.getDescription(),
@@ -319,12 +320,12 @@ export class DashboardAppController {
             if (
               !compareFilters(
                 container.getInput().filters,
-                filterManager.getFilters(),
+                queryFilter.getFilters(),
                 COMPARE_ALL_OPTIONS
               )
             ) {
               // Add filters modifies the object passed to it, hence the clone deep.
-              filterManager.addFilters(_.cloneDeep(container.getInput().filters));
+              queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
 
               dashboardStateManager.applyFilters($scope.model.query, container.getInput().filters);
               dirty = true;
@@ -377,7 +378,7 @@ export class DashboardAppController {
         language:
           localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
       },
-      filterManager.getFilters()
+      queryFilter.getFilters()
     );
 
     timefilter.disableTimeRangeSelector();
@@ -473,8 +474,8 @@ export class DashboardAppController {
     };
 
     $scope.onFiltersUpdated = filters => {
-      // The filters will automatically be set when the filterManager emits an update event (see below)
-      filterManager.setFilters(filters);
+      // The filters will automatically be set when the queryFilter emits an update event (see below)
+      queryFilter.setFilters(filters);
     };
 
     $scope.onQuerySaved = savedQuery => {
@@ -494,18 +495,18 @@ export class DashboardAppController {
           language:
             localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
         },
-        filterManager.getGlobalFilters()
+        queryFilter.getGlobalFilters()
       );
       // Making this method sync broke the updates.
       // Temporary fix, until we fix the complex state in this file.
       setTimeout(() => {
-        filterManager.setFilters(filterManager.getGlobalFilters());
+        queryFilter.setFilters(queryFilter.getGlobalFilters());
       }, 0);
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
       const savedQueryFilters = savedQuery.attributes.filters || [];
-      const globalFilters = filterManager.getGlobalFilters();
+      const globalFilters = queryFilter.getGlobalFilters();
       const allFilters = [...globalFilters, ...savedQueryFilters];
 
       dashboardStateManager.applyFilters(savedQuery.attributes.query, allFilters);
@@ -521,7 +522,7 @@ export class DashboardAppController {
       // Making this method sync broke the updates.
       // Temporary fix, until we fix the complex state in this file.
       setTimeout(() => {
-        filterManager.setFilters(allFilters);
+        queryFilter.setFilters(allFilters);
       }, 0);
     };
 
@@ -865,9 +866,9 @@ export class DashboardAppController {
     updateViewMode(dashboardStateManager.getViewMode());
 
     // update root source when filters update
-    const updateSubscription = filterManager.getUpdates$().subscribe({
+    const updateSubscription = queryFilter.getUpdates$().subscribe({
       next: () => {
-        $scope.model.filters = filterManager.getFilters();
+        $scope.model.filters = queryFilter.getFilters();
         dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
         if (dashboardContainer) {
           dashboardContainer.updateInput({ filters: $scope.model.filters });
