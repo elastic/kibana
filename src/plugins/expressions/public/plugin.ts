@@ -25,6 +25,7 @@ import {
   FunctionsRegistry,
   serializeProvider,
   TypesRegistry,
+  ExpressionFunction,
 } from '../common';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../bfetch/public';
@@ -57,6 +58,7 @@ export interface ExpressionsSetup {
   registerType: Executor['registerType'];
   registerFunction: Executor['registerFunction'];
   registerRenderer: ExpressionRendererRegistry['register'];
+  getFunctions: () => Record<string, ExpressionFunction>;
   __LEGACY: {
     types: TypesRegistry;
     functions: FunctionsRegistry;
@@ -94,6 +96,8 @@ export class ExpressionsPublicPlugin
     const registerFunction = executor.registerFunction.bind(executor);
     const registerType = executor.registerType.bind(executor);
     const registerRenderer = renderers.register.bind(renderers);
+
+    const getFunctions: ExpressionsSetup['getFunctions'] = () => executor.getFunctions();
 
     // TODO: Refactor this function.
     const getExecutor = () => {
@@ -139,6 +143,7 @@ export class ExpressionsPublicPlugin
       registerFunction,
       registerRenderer,
       registerType,
+      getFunctions,
       __LEGACY: {
         types: executor.types,
         functions: executor.functions,
@@ -151,7 +156,7 @@ export class ExpressionsPublicPlugin
     return setup;
   }
 
-  public start(core: CoreStart, { inspector }: ExpressionsStartDeps): ExpressionsStart {
+  public start(core: CoreStart, { inspector, bfetch }: ExpressionsStartDeps): ExpressionsStart {
     setCoreStart(core);
     setInspector(inspector);
     setNotifications(core.notifications);
