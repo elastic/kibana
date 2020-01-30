@@ -22,7 +22,7 @@ import { SavedObjectsMigrationLogger } from './core/migration_logger';
 
 export type SavedObjectMigrationFn = (
   doc: RawSavedObjectDoc,
-  log: SavedObjectsMigrationLogger // TODO: use plain Logger interface instead
+  log: SavedObjectsMigrationLogger
 ) => RawSavedObjectDoc;
 
 export interface SavedObjectMigrationMap {

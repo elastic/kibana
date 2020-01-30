@@ -31,7 +31,11 @@ export {
   SavedObjectsExportResultDetails,
 } from './export';
 
-export { SavedObjectsSerializer, RawDoc as SavedObjectsRawDoc } from './serialization';
+export {
+  SavedObjectsSerializer,
+  RawDoc as SavedObjectsRawDoc,
+  SanitizedSavedObjectDoc as SavedObjectSanitizedDoc,
+} from './serialization';
 
 export { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
 

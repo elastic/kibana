@@ -31,6 +31,8 @@ import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 
 /**
  * A raw document as represented directly in the saved object index.
+ *
+ * @public
  */
 export interface RawDoc {
   _id: string;
@@ -69,6 +71,8 @@ interface Referencable {
  * the scenarios where it may be missing (ex migrations).
  */
 export type RawSavedObjectDoc = SavedObjectDoc & Partial<Referencable>;
+
+/** @public */
 export type SanitizedSavedObjectDoc = SavedObjectDoc & Referencable;
 
 function assertNonEmptyString(value: string, name: string) {

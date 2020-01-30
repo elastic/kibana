@@ -209,9 +209,9 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
 /**
- * // TODO: documentation
+ * @remarks This is only internal for now, and will only be public when we expose the registerType API
  *
- * @public
+ * @internal
  */
 export interface SavedObjectsType {
   name: string;
@@ -222,7 +222,6 @@ export interface SavedObjectsType {
 
   mappings: SavedObjectsTypeMappingDefinition;
   migrations?: SavedObjectMigrationMap;
-  // validations
 }
 
 /**
@@ -253,6 +252,10 @@ export interface SavedObjectsLegacyMigrationDefinitions {
   [type: string]: SavedObjectMigrationMap;
 }
 
+/**
+ * @internal
+ * @deprecated
+ */
 interface SavedObjectsLegacyTypeSchema {
   isNamespaceAgnostic?: boolean;
   hidden?: boolean;
@@ -260,7 +263,10 @@ interface SavedObjectsLegacyTypeSchema {
   convertToAliasScript?: string;
 }
 
-/** @internal */
+/**
+ * @internal
+ * @deprecated
+ */
 export interface SavedObjectsLegacySchemaDefinitions {
   [type: string]: SavedObjectsLegacyTypeSchema;
 }
