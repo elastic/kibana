@@ -143,7 +143,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsServiceSetup](./kibana-plugin-server.savedobjectsservicesetup.md) | Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for creating and registering Saved Object client wrappers. |
 |  [SavedObjectsServiceStart](./kibana-plugin-server.savedobjectsservicestart.md) | Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceStart API provides a scoped Saved Objects client for interacting with Saved Objects. |
 |  [SavedObjectsTypeMappingDefinition](./kibana-plugin-server.savedobjectstypemappingdefinition.md) | Describe a saved object type mapping. |
-|  [SavedObjectsTypeMappingDefinitions](./kibana-plugin-server.savedobjectstypemappingdefinitions.md) | A map of [saved object type mappings](./kibana-plugin-server.savedobjectstypemappingdefinition.md) |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-server.savedobjectsupdateoptions.md) |  |
 |  [SavedObjectsUpdateResponse](./kibana-plugin-server.savedobjectsupdateresponse.md) |  |
 |  [SessionCookieValidationResult](./kibana-plugin-server.sessioncookievalidationresult.md) | Return type from a function to validate cookie contents. |

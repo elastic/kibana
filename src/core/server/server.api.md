@@ -1967,7 +1967,7 @@ export interface SavedObjectsTypeMappingDefinition {
     properties: SavedObjectsMappingProperties;
 }
 
-// @public
+// @internal
 export interface SavedObjectsTypeMappingDefinitions {
     // (undocumented)
     [type: string]: SavedObjectsTypeMappingDefinition;

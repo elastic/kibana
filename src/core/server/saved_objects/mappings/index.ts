@@ -20,7 +20,6 @@ export { getTypes, getProperty, getRootProperties, getRootPropertiesObjects } fr
 export {
   SavedObjectsComplexFieldMapping,
   SavedObjectsCoreFieldMapping,
-  SavedObjectsTypeMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsTypeMappingDefinitions,
   SavedObjectsMappingProperties,

@@ -18,17 +18,6 @@
  */
 
 /**
- * Internal representation of a saved object type mapping definition.
- *
- * @internal
- */
-export interface SavedObjectsTypeMapping {
-  pluginId: string;
-  type: string;
-  definition: SavedObjectsTypeMappingDefinition;
-}
-
-/**
  * Describe a saved object type mapping.
  *
  * @example
@@ -90,10 +79,9 @@ export interface SavedObjectsTypeMappingDefinition {
  * ```
  * @remark This is the format for a `mappings.json` savedObject mapping file.
  *
- * @public
+ * @internal
  */
 export interface SavedObjectsTypeMappingDefinitions {
-  // TODO: move to internalm remove doc.
   [type: string]: SavedObjectsTypeMappingDefinition;
 }
 
