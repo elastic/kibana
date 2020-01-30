@@ -7,7 +7,14 @@
 import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['header', 'common', 'settings', 'visualize', 'visChart']);
+  const PageObjects = getPageObjects([
+    'header',
+    'discover',
+    'common',
+    'settings',
+    'visualize',
+    'visChart',
+  ]);
   const retry = getService('retry');
 
   describe('check winlogbeat', function() {

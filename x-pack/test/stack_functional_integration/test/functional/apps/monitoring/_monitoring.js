@@ -9,8 +9,8 @@ export default ({ getService, getPageObjects }) => {
     // const provisionedEnv = getService('provisionedEnv');
     const browser = getService('browser');
     const PageObjects = getPageObjects(['security', 'monitoring', 'common']);
-    const monitoringNoData = getService('monitoringNoData');
     const log = getService('log');
+    const testSubjects = getService('testSubjects');
     const isSaml = !!process.env.VM.includes('saml') || !!process.env.VM.includes('oidc');
 
     before(async () => {
@@ -28,7 +28,8 @@ export default ({ getService, getPageObjects }) => {
     });
 
     it('should enable Monitoring', async () => {
-      await monitoringNoData.enableMonitoring();
+      await testSubjects.click('useInternalCollection');
+      await testSubjects.click('enableCollectionEnabled');
     });
 
     after(async () => {
