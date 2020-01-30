@@ -43,6 +43,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     it('create and save a new watch', async () => {
+      await PageObjects.common.sleep(500);
       await PageObjects.watcher.createWatch(watchID, watchName);
       const watch = await PageObjects.watcher.getWatch(watchID);
       expect(watch.id).to.be(watchID);
