@@ -29,15 +29,16 @@ import {
   MonitorLocations,
   Snapshot,
 } from '../../../common/runtime_types';
-import { HistogramResult } from '../../../common/domain_types';
 import { GetMonitorStatesResult } from './get_monitor_states';
 import { GetSnapshotCountParams } from './get_snapshot_counts';
+import { HistogramResult } from '../../../common/types';
 
 type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;
 
 export interface UptimeRequests {
   getDocCount: ESQ<{}, DocCount>;
   getFilterBar: ESQ<GetFilterBarParams, OverviewFilters>;
+  getIndexPattern: ESQ<any, {}>;
   getLatestMonitor: ESQ<GetLatestMonitorParams, Ping>;
   getMonitor: ESQ<GetMonitorParams, Ping>;
   getMonitorCharts: ESQ<GetMonitorChartsParams, MonitorChart>;

@@ -5,5 +5,4 @@
  */
 
 export * from './framework';
-export * from './saved_objects';
 export * from './telemetry';

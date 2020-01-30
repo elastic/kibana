@@ -22,7 +22,7 @@ Object {
       "y": 1,
     },
   ],
-  "interval": 36000,
+  "interval": "1m",
 }
 `;
 
@@ -48,7 +48,7 @@ Object {
       "y": 1,
     },
   ],
-  "interval": 5609564928000,
+  "interval": "1h",
 }
 `;
 
@@ -68,7 +68,7 @@ Object {
       "y": 1,
     },
   ],
-  "interval": 5609564928000,
+  "interval": "1d",
 }
 `;
 
@@ -88,7 +88,7 @@ Object {
       "y": 1,
     },
   ],
-  "interval": 5609564928000,
+  "interval": "1s",
 }
 `;
 
@@ -102,7 +102,7 @@ Object {
       "y": 1,
     },
   ],
-  "interval": 36000,
+  "interval": "10s",
 }
 `;
 
@@ -122,6 +122,6 @@ Object {
       "y": 1,
     },
   ],
-  "interval": 36000,
+  "interval": "1m",
 }
 `;

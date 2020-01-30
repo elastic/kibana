@@ -5,20 +5,16 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { HistogramResult } from '../../../common/domain_types';
-import {
-  getHistogramInterval,
-  parseFilterQuery,
-  getFilterClause,
-  getHistogramIntervalFormatted,
-} from '../helper';
-import { INDEX_NAMES } from '../../../common/constants';
+import { parseFilterQuery, getFilterClause } from '../helper';
+import { INDEX_NAMES, QUERY } from '../../../common/constants';
+import { HistogramQueryResult } from './types';
+import { HistogramResult } from '../../../common/types';
 
 export interface GetPingHistogramParams {
   /** @member dateRangeStart timestamp bounds */
-  dateRangeStart: string;
+  from: string;
   /** @member dateRangeEnd timestamp bounds */
-  dateRangeEnd: string;
+  to: string;
   /** @member filters user-defined filters */
   filters?: string | null;
   /** @member monitorId optional limit to monitorId */
@@ -30,7 +26,7 @@ export interface GetPingHistogramParams {
 export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,
   HistogramResult
-> = async ({ callES, dateRangeStart, dateRangeEnd, filters, monitorId, statusFilter }) => {
+> = async ({ callES, from, to, filters, monitorId, statusFilter }) => {
   const boolFilters = parseFilterQuery(filters);
   const additionalFilters = [];
   if (monitorId) {
@@ -39,9 +35,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   if (boolFilters) {
     additionalFilters.push(boolFilters);
   }
-  const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionalFilters);
-  const interval = getHistogramInterval(dateRangeStart, dateRangeEnd);
-  const intervalFormatted = getHistogramIntervalFormatted(dateRangeStart, dateRangeEnd);
+  const filter = getFilterClause(from, to, additionalFilters);
 
   const params = {
     index: INDEX_NAMES.HEARTBEAT,
@@ -54,9 +48,9 @@ export const getPingHistogram: UMElasticsearchQueryFn<
       size: 0,
       aggs: {
         timeseries: {
-          date_histogram: {
+          auto_date_histogram: {
             field: '@timestamp',
-            fixed_interval: intervalFormatted,
+            buckets: QUERY.DEFAULT_BUCKET_COUNT,
           },
           aggs: {
             down: {
@@ -80,7 +74,8 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   };
 
   const result = await callES('search', params);
-  const buckets: any[] = result?.aggregations?.timeseries?.buckets ?? [];
+  const interval = result.aggregations.timeseries?.interval;
+  const buckets: HistogramQueryResult[] = result?.aggregations?.timeseries?.buckets ?? [];
   const histogram = buckets.map(bucket => {
     const x: number = bucket.key;
     const downCount: number = bucket.down.doc_count;

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { assertCloseTo } from '../../helper';
 import { getPingHistogram } from '../get_ping_histogram';
 
 describe('getPingHistogram', () => {
@@ -52,19 +51,18 @@ describe('getPingHistogram', () => {
               },
             },
           ],
+          interval: '10s',
         },
       },
     });
 
     const result = await getPingHistogram({
       callES: mockEsClient,
-      dateRangeStart: 'now-15m',
-      dateRangeEnd: 'now',
+      from: 'now-15m',
+      to: 'now',
       filters: null,
     });
 
-    assertCloseTo(result.interval, 36000, 100);
-    result.interval = 36000;
     expect(mockEsClient).toHaveBeenCalledTimes(1);
     expect(result).toMatchSnapshot();
   });
@@ -73,17 +71,16 @@ describe('getPingHistogram', () => {
     expect.assertions(2);
     const mockEsClient = jest.fn();
 
+    standardMockResponse.aggregations.timeseries.interval = '1m';
     mockEsClient.mockReturnValue(standardMockResponse);
 
     const result = await getPingHistogram({
       callES: mockEsClient,
-      dateRangeStart: 'now-15m',
-      dateRangeEnd: 'now',
+      from: 'now-15m',
+      to: 'now',
       filters: null,
     });
 
-    assertCloseTo(result.interval, 36000, 100);
-    result.interval = 36000;
     expect(mockEsClient).toHaveBeenCalledTimes(1);
     expect(result).toMatchSnapshot();
   });
@@ -124,6 +121,7 @@ describe('getPingHistogram', () => {
               },
             },
           ],
+          interval: '1h',
         },
       },
     });
@@ -139,15 +137,13 @@ describe('getPingHistogram', () => {
 
     const result = await getPingHistogram({
       callES: mockEsClient,
-      dateRangeStart: '1234',
-      dateRangeEnd: '5678',
+      from: '1234',
+      to: '5678',
       filters: JSON.stringify(searchFilter),
       monitorId: undefined,
       statusFilter: 'down',
     });
 
-    assertCloseTo(result.interval, 5609564928000, 1000);
-    result.interval = 5609564928000;
     expect(mockEsClient).toHaveBeenCalledTimes(1);
     expect(result).toMatchSnapshot();
   });
@@ -188,6 +184,7 @@ describe('getPingHistogram', () => {
               },
             },
           ],
+          interval: '1m',
         },
       },
     });
@@ -195,13 +192,11 @@ describe('getPingHistogram', () => {
     const filters = `{"bool":{"must":[{"simple_query_string":{"query":"http"}}]}}`;
     const result = await getPingHistogram({
       callES: mockEsClient,
-      dateRangeStart: 'now-15m',
-      dateRangeEnd: 'now',
+      from: 'now-15m',
+      to: 'now',
       filters,
     });
 
-    assertCloseTo(result.interval, 36000, 100);
-    result.interval = 36000;
     expect(mockEsClient).toHaveBeenCalledTimes(1);
     expect(result).toMatchSnapshot();
   });
@@ -209,18 +204,16 @@ describe('getPingHistogram', () => {
   it('returns a down-filtered array for when filtered by down status', async () => {
     expect.assertions(2);
     const mockEsClient = jest.fn();
+    standardMockResponse.aggregations.timeseries.interval = '1d';
     mockEsClient.mockReturnValue(standardMockResponse);
     const result = await getPingHistogram({
       callES: mockEsClient,
-      dateRangeStart: '1234',
-      dateRangeEnd: '5678',
+      from: '1234',
+      to: '5678',
       filters: '',
       monitorId: undefined,
       statusFilter: 'down',
     });
-
-    assertCloseTo(result.interval, 5609564928000, 1000);
-    result.interval = 5609564928000;
 
     expect(mockEsClient).toHaveBeenCalledTimes(1);
     expect(result).toMatchSnapshot();
@@ -230,12 +223,13 @@ describe('getPingHistogram', () => {
     expect.assertions(2);
     const mockEsClient = jest.fn();
 
+    standardMockResponse.aggregations.timeseries.interval = '1s';
     mockEsClient.mockReturnValue(standardMockResponse);
 
     const result = await getPingHistogram({
       callES: mockEsClient,
-      dateRangeStart: '1234',
-      dateRangeEnd: '5678',
+      from: '1234',
+      to: '5678',
       filters: '',
       monitorId: undefined,
       statusFilter: 'up',

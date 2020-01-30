@@ -5,7 +5,7 @@
  */
 
 import DateMath from '@elastic/datemath';
-import { APICaller } from 'kibana/server';
+import { APICaller } from 'src/core/server';
 import { CursorPagination } from './types';
 import { INDEX_NAMES } from '../../../../common/constants';
 

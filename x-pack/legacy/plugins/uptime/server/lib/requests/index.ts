@@ -6,6 +6,7 @@
 
 export { getDocCount } from './get_doc_count';
 export { getFilterBar, GetFilterBarParams } from './get_filter_bar';
+export { getUptimeIndexPattern as getIndexPattern } from './get_index_pattern';
 export { getLatestMonitor, GetLatestMonitorParams } from './get_latest_monitor';
 export { getMonitor, GetMonitorParams } from './get_monitor';
 export { getMonitorCharts, GetMonitorChartsParams } from './get_monitor_charts';
