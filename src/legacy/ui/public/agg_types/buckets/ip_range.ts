@@ -21,8 +21,6 @@ import { noop, map, omit, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { BucketAggType } from './_bucket_agg_type';
-import { IpRangeTypeParamEditor } from '../../vis/editors/default/controls/ip_range_type';
-import { IpRangesParamEditor } from '../../vis/editors/default/controls/ip_ranges';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 // @ts-ignore
@@ -74,7 +72,6 @@ export const ipRangeBucketAgg = new BucketAggType({
     },
     {
       name: 'ipRangeType',
-      editorComponent: IpRangeTypeParamEditor,
       default: 'fromTo',
       write: noop,
     },
@@ -87,7 +84,6 @@ export const ipRangeBucketAgg = new BucketAggType({
         ],
         mask: [{ mask: '0.0.0.0/1' }, { mask: '128.0.0.0/2' }],
       },
-      editorComponent: IpRangesParamEditor,
       write(aggConfig, output) {
         const ipRangeType = aggConfig.params.ipRangeType;
         let ranges = aggConfig.params.ranges[ipRangeType];

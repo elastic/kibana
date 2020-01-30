@@ -250,59 +250,45 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
   constructor(opts) {
     super({
       ...opts,
-      derivative: false,
+      derivative: true,
     });
 
-    this.getDateHistogramSubAggs = ({ pageOfPipelines }) => ({
-      pipelines_nested: {
-        nested: {
-          path: 'logstash_stats.pipelines',
+    this.getDateHistogramSubAggs = ({ pipeline }) => {
+      return {
+        metric_deriv: {
+          derivative: {
+            buckets_path: 'sum',
+            gap_policy: 'skip',
+            unit: NORMALIZED_DERIVATIVE_UNIT,
+          },
         },
-        aggs: {
-          by_pipeline_id: {
-            terms: {
-              field: 'logstash_stats.pipelines.id',
-              size: 1000,
-              include: pageOfPipelines.map(pipeline => pipeline.id),
-            },
-            aggs: {
-              throughput: {
-                sum_bucket: {
-                  buckets_path: 'by_pipeline_hash>throughput',
-                },
+        sum: {
+          sum_bucket: {
+            buckets_path: 'by_node_id>nest>pipeline>events_stats',
+          },
+        },
+        by_node_id: {
+          terms: {
+            field: 'logstash_stats.logstash.uuid',
+            size: 1000,
+            include: pipeline.uuids,
+          },
+          aggs: {
+            nest: {
+              nested: {
+                path: 'logstash_stats.pipelines',
               },
-              by_pipeline_hash: {
-                terms: {
-                  field: 'logstash_stats.pipelines.hash',
-                  size: 1000,
-                  include: pageOfPipelines.map(pipeline => pipeline.hash),
-                },
-                aggs: {
-                  throughput: {
-                    sum_bucket: {
-                      buckets_path: 'by_ephemeral_id>throughput',
+              aggs: {
+                pipeline: {
+                  filter: {
+                    term: {
+                      'logstash_stats.pipelines.id': pipeline.id,
                     },
                   },
-                  by_ephemeral_id: {
-                    terms: {
-                      field: 'logstash_stats.pipelines.ephemeral_id',
-                      size: 1000,
-                      include: pageOfPipelines.map(pipeline => pipeline.ephemeral_id),
-                    },
-                    aggs: {
-                      events_stats: {
-                        stats: {
-                          field: this.field,
-                        },
-                      },
-                      throughput: {
-                        bucket_script: {
-                          script: 'params.max - params.min',
-                          buckets_path: {
-                            min: 'events_stats.min',
-                            max: 'events_stats.max',
-                          },
-                        },
+                  aggs: {
+                    events_stats: {
+                      max: {
+                        field: this.field,
                       },
                     },
                   },
@@ -311,19 +297,7 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
             },
           },
         },
-      },
-    });
-
-    this.calculation = (bucket, _key, _metric, bucketSizeInSeconds) => {
-      const pipelineThroughputs = {};
-      const pipelineBuckets = _.get(bucket, 'pipelines_nested.by_pipeline_id.buckets', []);
-      pipelineBuckets.forEach(pipelineBucket => {
-        pipelineThroughputs[pipelineBucket.key] = bucketSizeInSeconds
-          ? _.get(pipelineBucket, 'throughput.value') / bucketSizeInSeconds
-          : undefined;
-      });
-
-      return pipelineThroughputs;
+      };
     };
   }
 }

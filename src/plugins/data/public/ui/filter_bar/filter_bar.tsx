@@ -96,6 +96,7 @@ function FilterBarUI(props: Props) {
           withTitle
           panelPaddingSize="none"
           ownFocus={true}
+          initialFocus=".filterEditor__hiddenItem"
         >
           <EuiFlexItem grow={false}>
             <div style={{ width: 400 }}>
