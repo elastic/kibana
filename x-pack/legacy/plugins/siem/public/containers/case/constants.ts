@@ -10,3 +10,5 @@ export const FETCH_FAILURE = 'FETCH_FAILURE';
 export const UPDATE_PAGINATION = 'UPDATE_PAGINATION';
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
 export const DEFAULT_TABLE_LIMIT = 5;
+
+export const CASES_URL = `/api/cases`;
