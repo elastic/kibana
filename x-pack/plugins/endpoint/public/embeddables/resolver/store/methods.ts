@@ -8,6 +8,8 @@ import { animatePanning } from './camera/methods';
 import { processNodePositionsAndEdgeLineSegments } from './selectors';
 import { ResolverState, ProcessEvent } from '../types';
 
+const animationDuration = 1000;
+
 /**
  * Return new `ResolverState` with the camera animating to focus on `process`.
  */
@@ -21,7 +23,7 @@ export function animateProcessIntoView(
   if (position) {
     return {
       ...state,
-      camera: animatePanning(state.camera, startTime, position, 1000),
+      camera: animatePanning(state.camera, startTime, position, animationDuration),
     };
   }
   return state;
