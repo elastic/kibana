@@ -24,10 +24,6 @@ import { toastNotifications } from 'ui/notify';
 import { npStart } from 'ui/new_platform';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
-import { NumberIntervalParamEditor } from '../../vis/editors/default/controls/number_interval';
-import { MinDocCountParamEditor } from '../../vis/editors/default/controls/min_doc_count';
-import { HasExtendedBoundsParamEditor } from '../../vis/editors/default/controls/has_extended_bounds';
-import { ExtendedBoundsParamEditor } from '../../vis/editors/default/controls/extended_bounds';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
@@ -88,7 +84,6 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
     },
     {
       name: 'interval',
-      editorComponent: NumberIntervalParamEditor,
       modifyAggConfigOnSearchRequestStart(
         aggConfig: IBucketHistogramAggConfig,
         searchSource: any,
@@ -174,7 +169,6 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
     {
       name: 'min_doc_count',
       default: false,
-      editorComponent: MinDocCountParamEditor,
       write(aggConfig, output) {
         if (aggConfig.params.min_doc_count) {
           output.params.min_doc_count = 0;
@@ -186,7 +180,6 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
     {
       name: 'has_extended_bounds',
       default: false,
-      editorComponent: HasExtendedBoundsParamEditor,
       write: () => {},
     },
     {
@@ -195,7 +188,6 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
         min: '',
         max: '',
       },
-      editorComponent: ExtendedBoundsParamEditor,
       write(aggConfig, output) {
         const { min, max } = aggConfig.params.extended_bounds;
 

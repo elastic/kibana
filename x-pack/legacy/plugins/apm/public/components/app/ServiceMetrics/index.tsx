@@ -43,24 +43,27 @@ export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
   );
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <LocalUIFilters {...localFiltersConfig} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={7}>
-        <ChartsSyncContextProvider>
-          <EuiFlexGrid columns={2} gutterSize="s">
-            {data.charts.map(chart => (
-              <EuiFlexItem key={chart.key}>
-                <EuiPanel>
-                  <MetricsChart start={start} end={end} chart={chart} />
-                </EuiPanel>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
-          <EuiSpacer size="xxl" />
-        </ChartsSyncContextProvider>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <LocalUIFilters {...localFiltersConfig} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={7}>
+          <ChartsSyncContextProvider>
+            <EuiFlexGrid columns={2} gutterSize="s">
+              {data.charts.map(chart => (
+                <EuiFlexItem key={chart.key}>
+                  <EuiPanel>
+                    <MetricsChart start={start} end={end} chart={chart} />
+                  </EuiPanel>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGrid>
+            <EuiSpacer size="xxl" />
+          </ChartsSyncContextProvider>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }
