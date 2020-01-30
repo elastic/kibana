@@ -26,7 +26,6 @@ import {
   SavedObjectsClientProviderOptions,
 } from './';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
-import { SavedObjectsTypeMappingDefinitions } from './mappings';
 import { CoreContext } from '../core_context';
 import { LegacyServiceDiscoverPlugins } from '../legacy';
 import { InternalElasticsearchServiceSetup, APICaller } from '../elasticsearch';
@@ -34,7 +33,7 @@ import { KibanaConfigType } from '../kibana_config';
 import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { SavedObjectsConfigType } from './saved_objects_config';
 import { KibanaRequest } from '../http';
-import { SavedObjectsClientContract } from './types';
+import { SavedObjectsClientContract, SavedObjectsType } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,
@@ -99,51 +98,13 @@ export interface SavedObjectsServiceSetup {
     id: string,
     factory: SavedObjectsClientWrapperFactory
   ) => void;
-
-  /**
-   * Register {@link SavedObjectsTypeMappingDefinitions | saved object type mappings}
-   *
-   * @example
-   *
-   * ```ts
-   * // my-plugin/server/mappings.ts
-   * import { SavedObjectsTypeMappingDefinitions } from 'src/core/server';
-   *
-   * export const mappings: SavedObjectsTypeMappingDefinitions = {
-   *   'my-type': {
-   *     properties: {
-   *       afield: {
-   *         type: "text"
-   *       }
-   *     }
-   *   }
-   * }
-   * ```
-   *
-   * ```ts
-   * // my-plugin/server/plugin.ts
-   * import { mappings } from './mappings';
-   *
-   * export class MyPlugin implements Plugin {
-   *   setup({ savedObjects }) {
-   *     savedObjects.registerMappings(mappings);
-   *   }
-   * }
-   * ```
-   *
-   * @remarks
-   * It's possible to directly use an imported json mappings file to call this API. However, as typescript
-   * ensure type validation of the mappings, it's strongly encouraged to use a typescript definition instead.
-   */
-  registerMappings: (mappings: SavedObjectsTypeMappingDefinitions) => void;
 }
 
 /**
  * @internal
  */
-export interface InternalSavedObjectsServiceSetup
-  extends Omit<SavedObjectsServiceSetup, 'registerMappings'> {
-  registerMappings: (pluginId: string, mappings: SavedObjectsTypeMappingDefinitions) => void;
+export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSetup {
+  registerType: (type: SavedObjectsType) => void;
 }
 
 /**
@@ -290,17 +251,8 @@ export class SavedObjectsService
           factory,
         });
       },
-      registerMappings: (pluginId, mappings) => {
-        // TODO: hide for now.
-        /*
-        this.mappings.push(
-          ...Object.entries(mappings).map(([type, definition]) => ({
-            pluginId,
-            type,
-            definition,
-          }))
-        );
-        */
+      registerType: type => {
+        this.typeRegistry.registerType(type);
       },
     };
   }

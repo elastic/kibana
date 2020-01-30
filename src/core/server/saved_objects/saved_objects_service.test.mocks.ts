@@ -19,6 +19,7 @@
 
 import { mockKibanaMigrator } from './migrations/kibana/kibana_migrator.mock';
 import { savedObjectsClientProviderMock } from './service/lib/scoped_client_provider.mock';
+import { typeRegistryMock } from './saved_objects_type_registry.mock';
 
 export const migratorInstanceMock = mockKibanaMigrator.create();
 export const KibanaMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
@@ -29,4 +30,9 @@ jest.doMock('./migrations/kibana/kibana_migrator', () => ({
 export const clientProviderInstanceMock = savedObjectsClientProviderMock.create();
 jest.doMock('./service/lib/scoped_client_provider', () => ({
   SavedObjectsClientProvider: jest.fn().mockImplementation(() => clientProviderInstanceMock),
+}));
+
+export const typeRegistryInstanceMock = typeRegistryMock.create();
+jest.doMock('./saved_objects_type_registry', () => ({
+  SavedObjectTypeRegistry: jest.fn().mockImplementation(() => typeRegistryInstanceMock),
 }));

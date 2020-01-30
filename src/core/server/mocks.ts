@@ -117,7 +117,6 @@ function createCoreSetupMock() {
   const savedObjectMock: jest.Mocked<CoreSetup['savedObjects']> = {
     addClientWrapper: savedObjectsService.addClientWrapper,
     setClientFactoryProvider: savedObjectsService.setClientFactoryProvider,
-    registerMappings: jest.fn(),
   };
 
   const mock: CoreSetupMockType = {
