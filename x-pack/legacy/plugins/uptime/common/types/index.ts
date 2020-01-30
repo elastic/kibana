@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SYMBOLIZE_AS_CIRCLE = 'circle';
-export const SYMBOLIZE_AS_ICON = 'icon';
-
-export const DEFAULT_ICON_SIZE = 6;
+export * from './ping/histogram';
