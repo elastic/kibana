@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
 import { HelpCenterContent } from '../../components/help_center_content';
