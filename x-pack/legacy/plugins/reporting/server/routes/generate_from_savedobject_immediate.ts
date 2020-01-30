@@ -36,7 +36,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
   parentLogger: Logger
 ) {
   const routeOptions = getRouteOptionsCsv(server, plugins, parentLogger);
-  const { elasticsearch } = plugins.core;
+  const { elasticsearch } = plugins;
 
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:

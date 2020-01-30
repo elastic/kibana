@@ -5,7 +5,13 @@
  */
 
 import { Legacy } from 'kibana';
-import { CoreSetup, CoreStart, LoggerFactory, Plugin } from 'src/core/server';
+import {
+  CoreSetup,
+  CoreStart,
+  ElasticsearchServiceSetup,
+  LoggerFactory,
+  Plugin,
+} from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { PluginSetupContract as SecurityPluginSetup } from '../../../../plugins/security/server';
@@ -29,7 +35,7 @@ export type ReportingSetup = object;
 export type ReportingStart = object;
 
 export interface ReportingSetupDeps {
-  core: CoreSetup;
+  elasticsearch: ElasticsearchServiceSetup;
   usageCollection: UsageCollectionSetup;
   security: SecurityPluginSetup;
 }
@@ -70,10 +76,7 @@ export function reportingPluginFactory(
 
     public async setup(core: CoreSetup, plugins: ReportingSetupDeps): Promise<ReportingSetup> {
       const exportTypesRegistry = getExportTypesRegistry();
-      const {
-        usageCollection,
-        core: { elasticsearch },
-      } = plugins;
+      const { usageCollection, elasticsearch } = plugins;
 
       let isCollectorReady = false;
       // Register a function with server to manage the collection of usage stats

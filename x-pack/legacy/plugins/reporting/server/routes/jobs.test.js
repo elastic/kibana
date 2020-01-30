@@ -46,10 +46,8 @@ beforeEach(() => {
 });
 
 const mockPlugins = {
-  core: {
-    elasticsearch: {
-      adminClient: { callAsInternalUser: jest.fn() },
-    },
+  elasticsearch: {
+    adminClient: { callAsInternalUser: jest.fn() },
   },
   security: null,
 };
@@ -63,7 +61,7 @@ const getHits = (...sources) => {
 };
 
 test(`returns 404 if job not found`, async () => {
-  mockPlugins.core.elasticsearch.adminClient = {
+  mockPlugins.elasticsearch.adminClient = {
     callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(getHits())),
   };
 
@@ -80,7 +78,7 @@ test(`returns 404 if job not found`, async () => {
 });
 
 test(`returns 401 if not valid job type`, async () => {
-  mockPlugins.core.elasticsearch.adminClient = {
+  mockPlugins.elasticsearch.adminClient = {
     callAsInternalUser: jest
       .fn()
       .mockReturnValue(Promise.resolve(getHits({ jobtype: 'invalidJobType' }))),
@@ -99,7 +97,7 @@ test(`returns 401 if not valid job type`, async () => {
 
 describe(`when job is incomplete`, () => {
   const getIncompleteResponse = async () => {
-    mockPlugins.core.elasticsearch.adminClient = {
+    mockPlugins.elasticsearch.adminClient = {
       callAsInternalUser: jest
         .fn()
         .mockReturnValue(
@@ -145,7 +143,7 @@ describe(`when job is failed`, () => {
       status: 'failed',
       output: { content: 'job failure message' },
     });
-    mockPlugins.core.elasticsearch.adminClient = {
+    mockPlugins.elasticsearch.adminClient = {
       callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
     };
 
@@ -190,7 +188,7 @@ describe(`when job is completed`, () => {
         title,
       },
     });
-    mockPlugins.core.elasticsearch.adminClient = {
+    mockPlugins.elasticsearch.adminClient = {
       callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
     };
 

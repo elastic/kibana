@@ -12,12 +12,7 @@ import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/ser
 import { PluginSetupContract as SecurityPluginSetup } from '../../../plugins/security/server';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { config as reportingConfig } from './config';
-import {
-  LegacySetup,
-  ReportingPlugin,
-  reportingPluginFactory,
-  ReportingSetupDeps,
-} from './server/plugin';
+import { LegacySetup, ReportingPlugin, reportingPluginFactory } from './server/plugin';
 import { ReportingConfigOptions, ReportingPluginSpecOptions } from './types.d';
 
 const kbToBase64Length = (kb: number) => {
@@ -74,11 +69,6 @@ export const reporting = (kibana: any) => {
 
     async init(server: Legacy.Server) {
       const coreSetup = server.newPlatform.setup.core;
-      const pluginsSetup: ReportingSetupDeps = {
-        core: coreSetup,
-        security: server.newPlatform.setup.plugins.security as SecurityPluginSetup,
-        usageCollection: server.newPlatform.setup.plugins.usageCollection,
-      };
 
       const fieldFormatServiceFactory = async (uiSettings: IUiSettingsClient) => {
         const [, plugins] = await coreSetup.getStartServices();
@@ -97,9 +87,16 @@ export const reporting = (kibana: any) => {
         uiSettingsServiceFactory: server.uiSettingsServiceFactory,
       };
 
-      const initializerContext = server.newPlatform.coreContext;
-      const plugin: ReportingPlugin = reportingPluginFactory(initializerContext, __LEGACY, this);
-      await plugin.setup(coreSetup, pluginsSetup);
+      const plugin: ReportingPlugin = reportingPluginFactory(
+        server.newPlatform.coreContext,
+        __LEGACY,
+        this
+      );
+      await plugin.setup(coreSetup, {
+        elasticsearch: coreSetup.elasticsearch,
+        security: server.newPlatform.setup.plugins.security as SecurityPluginSetup,
+        usageCollection: server.newPlatform.setup.plugins.usageCollection,
+      });
     },
 
     deprecations({ unused }: any) {
