@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertListState } from './types';
+import { AlertResultList } from '../../../../../common/types';
 
-export const alertListData = (state: AlertListState) => state.alerts;
+export type AlertListData = AlertResultList;
+export type AlertListState = AlertResultList;

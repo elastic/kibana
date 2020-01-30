@@ -6,7 +6,7 @@
 
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { CoreStart } from 'kibana/public';
-import { Immutable, AlertData } from '../../../common/types';
+import { AlertListState } from './store/alerts';
 import { EndpointListState } from './store/endpoint_list';
 import { AppAction } from './store/action';
 
@@ -15,10 +15,6 @@ export type MiddlewareFactory = (
 ) => (
   api: MiddlewareAPI<Dispatch<AppAction>, GlobalState>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
-
-export type AlertListState = Immutable<{
-  alerts: AlertData[];
-}>;
 
 export interface GlobalState {
   readonly endpointList: EndpointListState;
