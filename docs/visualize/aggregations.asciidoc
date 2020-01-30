@@ -1,7 +1,7 @@
 [[supported-aggregations]]
 == Supported aggregations
 
-Use the supported aggregations to build your visualizations.
+To extract and process your data, use the supported aggregations. Each visualization uses different aggregation configurations.
 
 [float]
 [[visualize-metric-aggregations]]

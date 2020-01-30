@@ -138,10 +138,7 @@ is `rollup_logstash,kibana_sample_data_logs`.
 image::images/management_rollup_job_vis.png[][Visualization of rolled up data]
 
 You can then create a dashboard that contains visualizations of the rolled up
-data, raw data, or both. For more information, refer to <<visualize-rollup-data, Using rolled up data in a visualization>>
-for more information.
-
-Dashboards can have a mixture of rollup visualizations and regular visualizations.
+data, raw data, or both. For more information, refer to <<rollup-index-pattern, Rollup index pattern>>.
 
 NOTE: Some queries and filters do not support rollups.
 

@@ -3,6 +3,7 @@
 
 NOTE: Coordinate, region, and heat maps have been replaced with <<maps>>, which offers more functionality and is easier to use.
 
+[float]
 [[tilemap]]
 === Coordinate map
 
@@ -49,6 +50,7 @@ Use the following navigation options:
 * To automatically crop the map boundaries to the
 geohash buckets that have at least one result, click *Fit Data Bounds* image:images/viz-fit-bounds.png[].
 
+[float]
 [[regionmap]]
 == Region Maps
 
@@ -89,6 +91,7 @@ to make self-hosted layers available, see the <<regionmap-settings,regionmap set
 When terms cannot be joined to any of the shapes in the vector layer because there is no exact match in the vector layer, Kibana will display a warning.
 To turn of these warnings, go to *Management/Kibana/Advanced Settings* and set `visualization:regionmap:showWarnings` to `false`.
 
+[float]
 [[heatmap]]
 == Heat map
 

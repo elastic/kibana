@@ -3,9 +3,8 @@
 
 [partintro]
 --
-_Visualize_ enables you to create visualizations of the data from your {es} indices, which you can then add to dashboards for analysis.
 
-{kib} visualizations are based on {es} queries. By using a series of {es} {ref}/search-aggregations.html[aggregations] to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
+_Visualize_ enables you to create visualizations of the data from your {es} indices. To extract and process your data, you use a series of {es} {ref}/search-aggregations.html[aggregations], then create meaningful visualizations that show you the trends, spikes, and dips you need to know about.
 
 To begin, open *Visualize*, then click *Create new visualization*.
 
@@ -74,7 +73,7 @@ modifications to the saved search are reflected in the
 visualization. To disable automatic updates, disconnect the visualization
 from the saved search.
 
-* [beta] Visualize rolled up data in a variety of visualization.
+* [beta] Visualize <<rollup-index-pattern,rolled up data>> in a variety of visualizations.
 
 ** For specific fields, the data in a rollup index includes only summarized metrics.
 From the original raw data, you are unable to search any other field.
@@ -82,7 +81,7 @@ From the original raw data, you are unable to search any other field.
 ** Data is summarized into time buckets that might be split into sub buckets for
 numeric field values or terms. To lower granularity, you can use a time aggregation that takes
 several time buckets and combines them. For example,
-if the rollup job was aggregated by hours, you use buckets of days.
+if the rollup job is aggregated by hours, use buckets of days.
 
 --
 
