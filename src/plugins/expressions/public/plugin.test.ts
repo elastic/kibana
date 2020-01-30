@@ -44,4 +44,27 @@ describe('ExpressionsPublicPlugin', () => {
       });
     });
   });
+
+  describe('start contract', () => {
+    describe('.execute()', () => {
+      test('can parse a single function expression', async () => {
+        const { doStart } = await expressionsPluginMock.createPlugin();
+        const start = await doStart();
+
+        const handler = start.execute('clog');
+        expect(handler.getAst()).toMatchInlineSnapshot(`
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {},
+                "function": "clog",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          }
+        `);
+      });
+    });
+  });
 });
