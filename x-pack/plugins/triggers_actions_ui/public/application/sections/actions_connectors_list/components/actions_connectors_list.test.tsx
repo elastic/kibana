@@ -6,11 +6,13 @@
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ActionsConnectorsList } from './actions_connectors_list';
-import { coreMock } from '../../../../../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { AppContextProvider } from '../../../app_context';
+import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
+
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
@@ -52,6 +54,7 @@ describe('actions_connectors_list component empty', () => {
     const deps = {
       chrome,
       docLinks,
+      charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
@@ -64,9 +67,7 @@ describe('actions_connectors_list component empty', () => {
           'actions:delete': true,
         },
       },
-      legacy: {
-        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
-      },
+      setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
     };
@@ -149,6 +150,7 @@ describe('actions_connectors_list component with items', () => {
     const deps = {
       chrome,
       docLinks,
+      charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
@@ -161,9 +163,7 @@ describe('actions_connectors_list component with items', () => {
           'actions:delete': true,
         },
       },
-      legacy: {
-        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
-      },
+      setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
           return null;
@@ -233,6 +233,7 @@ describe('actions_connectors_list component empty with show only capability', ()
     const deps = {
       chrome,
       docLinks,
+      charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
@@ -245,9 +246,7 @@ describe('actions_connectors_list component empty with show only capability', ()
           'actions:delete': false,
         },
       },
-      legacy: {
-        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
-      },
+      setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
           return null;
@@ -322,6 +321,7 @@ describe('actions_connectors_list with show only capability', () => {
     const deps = {
       chrome,
       docLinks,
+      charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
@@ -334,9 +334,7 @@ describe('actions_connectors_list with show only capability', () => {
           'actions:delete': false,
         },
       },
-      legacy: {
-        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
-      },
+      setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
           return null;

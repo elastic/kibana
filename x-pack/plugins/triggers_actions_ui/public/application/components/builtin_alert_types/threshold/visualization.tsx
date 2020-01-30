@@ -19,12 +19,13 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
+/* TODO: When this file is used / enabled we'll need to fix this */
+/* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
 import { TimeBuckets } from 'ui/time_buckets';
 import dateMath from '@elastic/datemath';
 import moment from 'moment-timezone';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { npStart } from 'ui/new_platform';
 import { getThresholdAlertVisualizationData } from './lib/api';
 import { comparators, aggregationTypes } from './expression';
 import { useAppDependencies } from '../../../app_context';
@@ -95,12 +96,12 @@ interface Props {
 }
 
 export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }) => {
-  const { http, uiSettings, toastNotifications } = useAppDependencies();
+  const { http, uiSettings, toastNotifications, charts } = useAppDependencies();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<undefined | any>(undefined);
   const [visualizationData, setVisualizationData] = useState<Record<string, any>>([]);
 
-  const chartsTheme = npStart.plugins.charts.theme.useChartsTheme();
+  const chartsTheme = charts.theme.useChartsTheme();
   const {
     index,
     timeField,

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeRegistry } from './application/type_registry';
-import { SanitizedAlert as Alert } from '../../../alerting/common';
-export { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
+import { SanitizedAlert as Alert } from '../../../legacy/plugins/alerting/common';
+export { SanitizedAlert as Alert, AlertAction } from '../../../legacy/plugins/alerting/common';
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Record<string, AlertType>;
@@ -89,8 +89,4 @@ export interface AlertTypeModel {
 
 export interface IErrorObject {
   [key: string]: string[];
-}
-
-export interface LegacyDependencies {
-  MANAGEMENT_BREADCRUMB: { text: string; href?: string };
 }

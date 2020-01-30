@@ -10,23 +10,21 @@ import { SavedObjectsClientContract } from 'src/core/public';
 
 import { App, AppDeps } from './app';
 import { setSavedObjectsClient } from '../application/components/builtin_alert_types/threshold/lib/api';
-import { LegacyDependencies } from '../types';
 
 interface BootDeps extends AppDeps {
   element: HTMLElement;
   savedObjects: SavedObjectsClientContract;
   I18nContext: any;
-  legacy: LegacyDependencies;
 }
 
 export const boot = (bootDeps: BootDeps) => {
-  const { I18nContext, element, legacy, savedObjects, ...appDeps } = bootDeps;
+  const { I18nContext, element, savedObjects, ...appDeps } = bootDeps;
 
   setSavedObjectsClient(savedObjects);
 
   render(
     <I18nContext>
-      <App {...appDeps} legacy={legacy} />
+      <App {...appDeps} />
     </I18nContext>,
     element
   );

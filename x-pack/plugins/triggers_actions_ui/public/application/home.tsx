@@ -37,11 +37,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const {
-    chrome,
-    capabilities,
-    legacy: { MANAGEMENT_BREADCRUMB },
-  } = useAppDependencies();
+  const { chrome, capabilities, setBreadcrumbs } = useAppDependencies();
 
   const canShowActions = hasShowActionsCapability(capabilities);
   const canShowAlerts = hasShowAlertsCapability(capabilities);
@@ -80,9 +76,9 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
   // Set breadcrumb and page title
   useEffect(() => {
-    chrome.setBreadcrumbs([MANAGEMENT_BREADCRUMB, getCurrentBreadcrumb(section || 'home')]);
+    setBreadcrumbs([getCurrentBreadcrumb(section || 'home')]);
     chrome.docTitle.change(getCurrentDocTitle(section || 'home'));
-  }, [section, chrome, MANAGEMENT_BREADCRUMB]);
+  }, [section, chrome, setBreadcrumbs]);
 
   return (
     <EuiPageBody>

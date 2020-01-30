@@ -5,18 +5,18 @@
  */
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { coreMock } from '../../../../../../../../../src/core/public/mocks';
-import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
-import { ConnectorAddFlyout } from './connector_add_flyout';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import { ActionTypeMenu } from './action_type_menu';
 import { ValidationResult } from '../../../types';
 import { AppContextProvider } from '../../app_context';
+import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
+
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('connector_add_flyout', () => {
-  let wrapper: ReactWrapper<any>;
+  let deps: any;
 
   beforeAll(async () => {
     const mockes = coreMock.createSetup();
@@ -27,9 +27,10 @@ describe('connector_add_flyout', () => {
         application: { capabilities },
       },
     ] = await mockes.getStartServices();
-    const deps = {
+    deps = {
       chrome,
       docLinks,
+      charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
@@ -42,38 +43,14 @@ describe('connector_add_flyout', () => {
           show: true,
         },
       },
-      legacy: {
-        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
-      },
+      setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
     };
-
-    await act(async () => {
-      wrapper = mountWithIntl(
-        <AppContextProvider appDeps={deps}>
-          <ActionsConnectorsContextProvider
-            value={{
-              addFlyoutVisible: true,
-              setAddFlyoutVisibility: state => {},
-              editFlyoutVisible: false,
-              setEditFlyoutVisibility: state => {},
-              actionTypesIndex: { 'my-action-type': { id: 'my-action-type', name: 'test' } },
-              reloadConnectors: () => {
-                return new Promise<void>(() => {});
-              },
-            }}
-          >
-            <ConnectorAddFlyout />
-          </ActionsConnectorsContextProvider>
-        </AppContextProvider>
-      );
-    });
-
-    await waitForRender(wrapper);
   });
 
-  it('renders action type menu on flyout open', () => {
+  it('renders action type menu with proper EuiCards for registered action types', () => {
+    const onActionTypeChange = jest.fn();
     const actionType = {
       id: 'my-action-type',
       iconClass: 'test',
@@ -89,15 +66,30 @@ describe('connector_add_flyout', () => {
       actionParamsFields: null,
     };
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
-    actionTypeRegistry.has.mockReturnValue(true);
 
-    expect(wrapper.find('ActionTypeMenu')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeTruthy();
+    const wrapper = mountWithIntl(
+      <AppContextProvider appDeps={deps}>
+        <ActionsConnectorsContextProvider
+          value={{
+            addFlyoutVisible: true,
+            setAddFlyoutVisibility: state => {},
+            editFlyoutVisible: false,
+            setEditFlyoutVisibility: state => {},
+            actionTypesIndex: {
+              'first-action-type': { id: 'first-action-type', name: 'first' },
+              'second-action-type': { id: 'second-action-type', name: 'second' },
+            },
+            reloadConnectors: () => {
+              return new Promise<void>(() => {});
+            },
+          }}
+        >
+          <ActionTypeMenu onActionTypeChange={onActionTypeChange} />
+        </ActionsConnectorsContextProvider>
+      </AppContextProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="first-action-type-card"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="second-action-type-card"]').exists()).toBeTruthy();
   });
 });
-
-async function waitForRender(wrapper: ReactWrapper<any, any>) {
-  await Promise.resolve();
-  await Promise.resolve();
-  wrapper.update();
-}

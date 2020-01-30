@@ -12,22 +12,25 @@ import {
   HttpSetup,
   IUiSettingsClient,
   ApplicationStart,
+  ChromeBreadcrumb,
 } from 'kibana/public';
 import { BASE_PATH, Section } from './constants';
 import { TriggersActionsUIHome } from './home';
 import { AppContextProvider, useAppDependencies } from './app_context';
 import { hasShowAlertsCapability } from './lib/capabilities';
-import { LegacyDependencies, ActionTypeModel, AlertTypeModel } from '../types';
+import { ActionTypeModel, AlertTypeModel } from '../types';
 import { TypeRegistry } from './type_registry';
+import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 
 export interface AppDeps {
+  charts: ChartsPluginStart;
   chrome: ChromeStart;
   docLinks: DocLinksStart;
   toastNotifications: ToastsSetup;
   injectedMetadata: any;
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
-  legacy: LegacyDependencies;
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   capabilities: ApplicationStart['capabilities'];
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;

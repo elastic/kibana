@@ -5,7 +5,7 @@
  */
 
 import { Alert, AlertType } from '../../types';
-import { httpServiceMock } from '../../../../../../../../src/core/public/mocks';
+import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import {
   createAlert,
   deleteAlerts,

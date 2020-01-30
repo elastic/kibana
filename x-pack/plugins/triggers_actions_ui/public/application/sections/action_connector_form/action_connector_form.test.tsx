@@ -5,7 +5,7 @@
  */
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { coreMock } from '../../../../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
@@ -13,6 +13,8 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, ActionConnector } from '../../../types';
 import { ActionConnectorForm } from './action_connector_form';
 import { AppContextProvider } from '../../app_context';
+import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
+
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('action_connector_form', () => {
@@ -30,6 +32,7 @@ describe('action_connector_form', () => {
     const deps = {
       chrome,
       docLinks,
+      charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
@@ -42,9 +45,7 @@ describe('action_connector_form', () => {
           show: true,
         },
       },
-      legacy: {
-        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
-      },
+      setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
     };

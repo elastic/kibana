@@ -5,12 +5,14 @@
  */
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { coreMock } from '../../../../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
 import { ConnectorEditFlyout } from './connector_edit_flyout';
 import { AppContextProvider } from '../../app_context';
+import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
+
 const actionTypeRegistry = actionTypeRegistryMock.create();
 let deps: any;
 
@@ -27,6 +29,7 @@ describe('connector_edit_flyout', () => {
     deps = {
       chrome,
       docLinks,
+      charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
@@ -39,9 +42,7 @@ describe('connector_edit_flyout', () => {
           show: true,
         },
       },
-      legacy: {
-        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
-      },
+      setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
     };
