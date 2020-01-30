@@ -8,7 +8,6 @@ exports[`LocationMissingWarning component renders correctly against snapshot 1`]
 
 <div
   class="euiFlexGroup euiFlexGroup--directionRow"
-  class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
   data-test-subj="xpack.uptime.locationMap.locationMissing"
 >
   <div

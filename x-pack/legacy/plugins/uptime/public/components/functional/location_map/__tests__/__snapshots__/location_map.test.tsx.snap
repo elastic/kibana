@@ -165,10 +165,12 @@ exports[`LocationMap component renders correctly against snapshot 1`] = `
 
 exports[`LocationMap component renders named locations that have missing geo data 1`] = `
 <EuiErrorBoundary>
-  <EuiFlexGroup>
-    <EuiFlexItem
-      grow={false}
-    >
+  <EuiFlexGroup
+    alignItems="stretch"
+    gutterSize="none"
+    wrap={true}
+  >
+    <Styled(EuiFlexItem)>
       <LocationStatusTags
         locations={
           Array [
@@ -186,17 +188,25 @@ exports[`LocationMap component renders named locations that have missing geo dat
           ]
         }
       />
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
-      grow={true}
+      grow={false}
     >
-      <LocationMissingWarning />
-      <styled.div>
-        <EmbeddedMap
-          downPoints={Array []}
-          upPoints={Array []}
-        />
-      </styled.div>
+      <EuiHideFor
+        sizes={
+          Array [
+            "xs",
+          ]
+        }
+      >
+        <LocationMissingWarning />
+        <styled.div>
+          <EmbeddedMap
+            downPoints={Array []}
+            upPoints={Array []}
+          />
+        </styled.div>
+      </EuiHideFor>
     </EuiFlexItem>
   </EuiFlexGroup>
 </EuiErrorBoundary>
