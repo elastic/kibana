@@ -7,8 +7,6 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { Plugin as DataPublicPlugin } from '../../../../../src/plugins/data/public';
 import { setAutocompleteService } from './services';
-
-// @ts-ignore
 import { setupKqlQuerySuggestionProvider } from './kql_query_suggestion';
 
 /** @internal */
