@@ -30,6 +30,7 @@ const waterfall = getWaterfall(response, entryTransactionId);
 
 const data = waterfall.items.map((item, index) => ({
   ...item,
+  min: item.offset + item.skew,
   max: item.offset + item.duration,
   x: index
 }));
@@ -39,14 +40,14 @@ const chartTheme: Partial<Theme> = {
   chartMargins: { left: 0, top: 0, bottom: 0, right: 0 },
   scales: { barsPadding: 0, histogramPadding: 0 }
 };
+const maxY = Math.max(...data.map(item => item.max));
 
 function SelectionAnnotation({ selection }: { selection: Selection }) {
   const x0 = 0;
-  let x1 = waterfall.items.length - 1;
-  if (!selection[0]) {
-    x1 = 0;
-  }
-  const maxY = 21000;
+  const x1 = selection[0] ? waterfall.items.length - 1 : 0;
+  const y1left = (selection[0] ?? 0) * 100;
+  const y0right = (selection[1] ?? 0) * 100;
+
   return (
     <RectAnnotation
       dataValues={[
@@ -55,14 +56,14 @@ function SelectionAnnotation({ selection }: { selection: Selection }) {
             x0,
             x1,
             y0: 0,
-            y1: 9000
+            y1: y1left
           }
         },
         {
           coordinates: {
             x0,
             x1,
-            y0: 10000,
+            y0: y0right,
             y1: maxY
           }
         }
@@ -82,6 +83,32 @@ function SelectionAnnotation({ selection }: { selection: Selection }) {
 
 type Selection = [number, number] | [undefined, undefined];
 
+interface SelectionTextProps {
+  selection: Selection;
+  resetSelection: () => void;
+}
+
+function SelectionText({ selection, resetSelection }: SelectionTextProps) {
+  return (
+    <div
+      style={{
+        visibility: selection[0] ? 'visible' : 'hidden',
+        fontSize: '11px',
+        color: 'grey',
+        textAlign: 'right',
+        marginBottom: 16
+      }}
+    >
+      Selected {selection[0] && (selection[0] / 100).toFixed(0)}
+      &thinsp;&ndash;&thinsp;
+      {selection[1] && (selection[1] / 100).toFixed(0)} ms |{' '}
+      <button onClick={resetSelection} style={{ color: 'blue' }}>
+        Reset
+      </button>
+    </div>
+  );
+}
+
 function TimelineScrubber() {
   const [selection, setSelection] = React.useState<Selection>([
     undefined,
@@ -93,30 +120,13 @@ function TimelineScrubber() {
     console.log(y1, y2);
   };
 
+  function resetSelection() {
+    setSelection([undefined, undefined]);
+  }
+
   return (
     <>
-      <div
-        style={{
-          visibility: selection[0] ? 'visible' : 'hidden',
-          fontSize: '11px',
-          color: 'grey',
-          textAlign: 'right',
-          marginBottom: 16
-        }}
-      >
-        Selected {selection[0] && selection[0].toFixed(0)}
-        &thinsp;&ndash;&thinsp;
-        {selection[1] && selection[1].toFixed(0)} ms |{' '}
-        <a
-          href="#"
-          onClick={event => {
-            event.preventDefault();
-            setSelection([undefined, undefined]);
-          }}
-        >
-          Reset
-        </a>
-      </div>
+      <SelectionText selection={selection} resetSelection={resetSelection} />
       <div style={{ height: 60 }}>
         <Chart>
           <Settings
@@ -133,7 +143,7 @@ function TimelineScrubber() {
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['max']}
-            y0Accessors={['offset']}
+            y0Accessors={['min']}
             styleAccessor={value => {
               return waterfall.serviceColors[value.datum.doc.service.name];
             }}
