@@ -23,16 +23,10 @@ const ALLOWED_FIELD_PROPERTIES = [
 
 const DEFAULT_FIELD_TYPE = 'object';
 
-export type MappingsValidationError =
+type MappingsValidationError =
   | { code: 'ERR_CONFIG'; configName: string }
   | { code: 'ERR_FIELD'; fieldPath: string }
   | { code: 'ERR_PARAMETER'; paramName: string; fieldPath: string };
-
-export interface MappingsValidatorResponse {
-  /* The parsed mappings object without any error */
-  value: GenericObject;
-  errors?: MappingsValidationError[];
-}
 
 interface PropertiesValidatorResponse {
   /* The parsed "properties" object without any error */
@@ -172,35 +166,10 @@ const parseFields = (
 };
 
 /**
- * Utility function that reads a mappings "properties" object and validate its fields by
- * - Removing unknown field types
- * - Removing unknown field parameters or field parameters that don't have the correct format.
- *
- * This method does not mutate the original properties object. It returns an object with
- * the parsed properties and an array of field paths that have been removed.
- * This allows us to display a warning in the UI and let the user correct the fields that we
- * are about to remove.
- *
- * NOTE: The Joi Schema that we defined for each parameter (in "parameters_definition".tsx)
- * does not do an exhaustive validation of the parameter value.
- * It's main purpose is to prevent the UI from blowing up.
- *
- * @param properties A mappings "properties" object
- */
-export const validateProperties = (properties = {}): PropertiesValidatorResponse => {
-  // Sanitize the input to make sure we are working with an object
-  if (!isPlainObject(properties)) {
-    return { value: {}, errors: [] };
-  }
-
-  return parseFields(properties);
-};
-
-/**
  * Single source of truth to validate the *configuration* of the mappings.
  * Whenever a user loads a JSON object it will be validate against this Joi schema.
  */
-export const mappingsConfigurationSchema = t.exact(
+const mappingsConfigurationSchema = t.exact(
   t.partial({
     dynamic: t.union([t.literal(true), t.literal(false), t.literal('strict')]),
     date_detection: t.boolean,
@@ -277,31 +246,6 @@ export const validateMappingsConfiguration = (
     .sort((a, b) => a.configName.localeCompare(b.configName)) as MappingsValidationError[];
 
   return { value: copyOfMappingsConfig, errors };
-};
-
-export const validateMappings = (mappings: any = {}): MappingsValidatorResponse => {
-  if (!isPlainObject(mappings)) {
-    return { value: {} };
-  }
-
-  const { properties, dynamic_templates: dynamicTemplates, ...mappingsConfiguration } = mappings;
-
-  const { value: parsedConfiguration, errors: configurationErrors } = validateMappingsConfiguration(
-    mappingsConfiguration
-  );
-  const { value: parsedProperties, errors: propertiesErrors } = validateProperties(properties);
-
-  const errors = [...configurationErrors, ...propertiesErrors];
-
-  return {
-    value: {
-      ...parsedConfiguration,
-      properties: parsedProperties,
-      dynamic_templates:
-        dynamicTemplates !== undefined && dynamicTemplates !== null ? dynamicTemplates : [],
-    },
-    errors: errors.length ? errors : undefined,
-  };
 };
 
 export const VALID_MAPPINGS_PARAMETERS = [
