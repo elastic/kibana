@@ -33,6 +33,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return this._field;
   }
 
+  getFieldName() {
+    return this._field ? this._field.getName() : '';
+  }
+
   getComputedFieldName() {
     if (!this.isComplete()) {
       return null;

@@ -19,6 +19,7 @@
 
 import moment from 'moment';
 import { Subscription } from 'rxjs';
+import { History } from 'history';
 
 import { IInjector } from '../legacy_imports';
 
@@ -35,6 +36,7 @@ import {
 
 import { DashboardAppController } from './dashboard_app_controller';
 import { RenderDeps } from './application';
+import { IKbnUrlStateStorage } from '../../../../../../plugins/kibana_utils/public/';
 
 export interface DashboardAppScope extends ng.IScope {
   dash: SavedObjectDashboard;
@@ -97,16 +99,18 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
         $routeParams: {
           id?: string;
         },
-        globalState: any
+        kbnUrlStateStorage: IKbnUrlStateStorage,
+        history: History
       ) =>
         new DashboardAppController({
           $route,
           $scope,
           $routeParams,
-          globalState,
           config,
           confirmModal,
           indexPatterns: deps.npDataStart.indexPatterns,
+          kbnUrlStateStorage,
+          history,
           ...deps,
         }),
     };
