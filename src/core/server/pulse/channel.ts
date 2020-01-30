@@ -19,8 +19,7 @@
 
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { PulseErrorPayloadRecord } from 'src/core/server/pulse/collectors/errors';
+
 import { PulseCollectorConstructor } from './types';
 // import { SavedObjectsServiceSetup } from '../saved_objects';
 import { Logger } from '../logging';
