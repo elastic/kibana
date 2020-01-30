@@ -230,8 +230,3 @@ export type ProcessWithWidthMetadata = {
       firstChildWidth: null;
     }
 );
-
-/**
- * String that represents the direction in which Resolver can be panned
- */
-export type CardinalDirection = 'north' | 'south' | 'east' | 'west';
