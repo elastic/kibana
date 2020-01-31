@@ -97,7 +97,6 @@ export default function({ getService }: FtrProviderContext) {
         expect(featureIds.sort()).to.eql(
           [
             'discover',
-            'fleet',
             'visualize',
             'dashboard',
             'dev_tools',
@@ -111,7 +110,6 @@ export default function({ getService }: FtrProviderContext) {
             'apm',
             'canvas',
             'infrastructure',
-            'epm',
             'logs',
             'maps',
             'uptime',

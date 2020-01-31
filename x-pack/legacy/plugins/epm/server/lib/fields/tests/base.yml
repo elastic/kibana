@@ -1,7 +1,0 @@
-- name: user
-  type: group
-  fields:
-    - name: auid
-    - name: euid
-- name: long.nested.foo
-- name: nested.bar

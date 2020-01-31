@@ -65,7 +65,10 @@
 
 # Logs & Metrics UI
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
-/x-pack/legacy/plugins/epm/ @elastic/epm
+
+# Ingest Manager
+/x-pack/plugins/ingest_manager/ @elastic/ingest
+/x-pack/legacy/plugins/ingest_manager/ @elastic/ingest
 
 # Machine Learning
 /x-pack/legacy/plugins/ml/  @elastic/ml-ui
