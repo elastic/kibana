@@ -8,10 +8,10 @@ import { once } from 'lodash';
 import { elasticsearchJsPlugin } from '../../client/elasticsearch_rollup';
 
 const callWithRequest = once(server => {
-  const config = { plugins: [elasticsearchJsPlugin] };
-  const cluster = server.plugins.elasticsearch.createCluster('rollup', config);
-
-  return cluster.callWithRequest;
+  const client = server.coreElasticsearch.createClient('rollup', {
+    plugins: [elasticsearchJsPlugin],
+  });
+  return (request, ...args) => client.asScoped(request).callAsCurrentUser(...args);
 });
 
 export const callWithRequestFactory = (server, request) => {
