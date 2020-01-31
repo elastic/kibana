@@ -5,7 +5,7 @@
  */
 
 import { EuiPageContent } from '@elastic/eui';
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 
 export const LayoutContent = euiStyled(EuiPageContent)`
   position: relative;

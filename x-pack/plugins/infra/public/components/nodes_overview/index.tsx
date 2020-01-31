@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { get, max, min } from 'lodash';
 import React from 'react';
 
-import { euiStyled } from '../../utils/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
 import { InfraFormatterType, InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../lib/lib';
 import { KueryFilterQuery } from '../../store/local/waffle_filter';
 import { createFormatter } from '../../utils/formatters';

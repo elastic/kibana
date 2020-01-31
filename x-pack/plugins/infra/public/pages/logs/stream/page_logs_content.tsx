@@ -6,7 +6,7 @@
 
 import React, { useContext } from 'react';
 
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 import { AutoSizer } from '../../../components/auto_sizer';
 import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
 import { LogMinimap } from '../../../components/logging/log_minimap';
@@ -82,6 +82,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
             items,
             lastLoadedTime,
             fetchNewerEntries,
+            checkForNewEntries,
           }) => (
             <ScrollableLogTextStreamView
               columnConfigurations={(source && source.configuration.logColumns) || []}
@@ -94,6 +95,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
               jumpToTarget={jumpToTargetPosition}
               lastLoadedTime={lastLoadedTime}
               loadNewerItems={fetchNewerEntries}
+              reloadItems={checkForNewEntries}
               reportVisibleInterval={reportVisiblePositions}
               scale={textScale}
               target={targetPosition}

@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { identity } from 'fp-ts/lib/function';
 import React from 'react';
 
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 import {
   ViewSourceConfigurationButton,
   ViewSourceConfigurationButtonHrefBase,

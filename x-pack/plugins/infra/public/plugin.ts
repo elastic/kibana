@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { merge } from 'lodash';
 import {
   Plugin as PluginClass,
   CoreSetup,
@@ -23,8 +24,8 @@ import { InfraKibanaObservableApiAdapter } from './lib/adapters/observable_api/k
 import { registerStartSingleton } from './legacy_singletons';
 import { registerFeatures } from './register_feature';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../src/plugins/home/public';
-import { DataPublicPluginStart, DataPublicPluginSetup } from '../../../../src/plugins/data/public';
-// @ts-ignore
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { setupKqlQuerySuggestionProvider } from '../../../legacy/plugins/kuery_autocomplete/public/kql_query_suggestion';
 
 export type ClientSetup = void;
@@ -33,6 +34,7 @@ export type ClientStart = void;
 export interface ClientPluginsSetup {
   home: HomePublicPluginSetup;
   data: DataPublicPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface ClientPluginsStart {
@@ -40,12 +42,18 @@ export interface ClientPluginsStart {
   data: DataPublicPluginStart;
 }
 
+export type InfraPlugins = ClientPluginsSetup & ClientPluginsStart;
+
+const getMergedPlugins = (setup: ClientPluginsSetup, start: ClientPluginsStart): InfraPlugins => {
+  return merge({}, setup, start);
+};
+
 export class Plugin
   implements PluginClass<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
   constructor(context: PluginInitializerContext) {}
 
-  setup(core: CoreSetup, plugins: ClientPluginsSetup) {
-    registerFeatures(plugins.home);
+  setup(core: CoreSetup, pluginsSetup: ClientPluginsSetup) {
+    registerFeatures(pluginsSetup.home);
 
     const kueryProvider = setupKqlQuerySuggestionProvider(core);
     plugins.data.autocomplete.addQuerySuggestionProvider('kuery', kueryProvider);
@@ -61,13 +69,9 @@ export class Plugin
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
+        const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
         const { startApp } = await import('./apps/start_app');
-        return startApp(
-          this.composeLibs(coreStart, pluginsStart as ClientPluginsStart),
-          coreStart,
-          pluginsStart,
-          params
-        );
+        return startApp(this.composeLibs(coreStart, plugins), coreStart, plugins, params);
       },
     });
 
@@ -82,13 +86,9 @@ export class Plugin
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
+        const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
         const { startApp } = await import('./apps/start_app');
-        return startApp(
-          this.composeLibs(coreStart, pluginsStart as ClientPluginsStart),
-          coreStart,
-          pluginsStart,
-          params
-        );
+        return startApp(this.composeLibs(coreStart, plugins), coreStart, plugins, params);
       },
     });
   }

@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 
 interface HighlightedIntervalProps {
   className?: string;

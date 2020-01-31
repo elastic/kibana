@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { euiStyled } from '../../utils/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
 import { useVisibilityState } from '../../utils/use_visibility_state';
 
 interface LogHighlightsMenuProps {

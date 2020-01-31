@@ -10,7 +10,7 @@ import { EuiButtonEmpty, EuiIcon, EuiProgress, EuiText } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
 
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 
 interface LogTextStreamLoadingItemViewProps {
   alignment: 'top' | 'bottom';

@@ -14,6 +14,7 @@ export const plugin: PluginInitializer<ClientSetup, ClientStart> = (
 };
 
 export * from './components/action_menu';
+
 export {
   useTrackPageview,
   useUiTracker,
@@ -21,3 +22,5 @@ export {
   TrackMetricOptions,
   METRIC_TYPE,
 } from './hooks/use_track_metric';
+
+export * from './typings';

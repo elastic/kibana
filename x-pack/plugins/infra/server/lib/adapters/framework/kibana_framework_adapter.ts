@@ -238,6 +238,7 @@ export class KibanaFramework {
 
   public async makeTSVBRequest(
     requestContext: RequestHandlerContext,
+    rawRequest: KibanaRequest,
     model: TSVBMetricModel,
     timerange: { min: number; max: number },
     filters: any[]
@@ -251,6 +252,6 @@ export class KibanaFramework {
       panels: [model],
       filters,
     };
-    return getVisData(requestContext, options);
+    return getVisData(requestContext, rawRequest, options);
   }
 }

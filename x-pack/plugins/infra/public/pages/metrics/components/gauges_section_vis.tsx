@@ -16,7 +16,7 @@ import {
 import { get, last, max } from 'lodash';
 import React, { ReactText } from 'react';
 
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 import { createFormatter } from '../../../utils/formatters';
 import { InventoryFormatterType } from '../../../../common/inventory_models/types';
 import { SeriesOverrides, VisSectionProps } from '../types';

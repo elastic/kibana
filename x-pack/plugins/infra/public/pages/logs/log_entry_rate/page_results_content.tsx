@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { LoadingOverlayWrapper } from '../../../components/loading_overlay_wrapper';

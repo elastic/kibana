@@ -7,7 +7,7 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 
-import { euiStyled, keyframes } from '../../../utils/eui_styled_components';
+import { euiStyled, keyframes } from '../../../../../observability/public';
 import { LogEntryTime } from '../../../../common/log_entry';
 import { SearchMarkerTooltip } from './search_marker_tooltip';
 import { SummaryHighlightBucket } from './types';

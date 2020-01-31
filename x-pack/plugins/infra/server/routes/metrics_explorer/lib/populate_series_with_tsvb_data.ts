@@ -76,7 +76,13 @@ export const populateSeriesWithTSVBData = (
   }
 
   // Get TSVB results using the model, timerange and filters
-  const tsvbResults = await framework.makeTSVBRequest(requestContext, model, timerange, filters);
+  const tsvbResults = await framework.makeTSVBRequest(
+    requestContext,
+    request,
+    model,
+    timerange,
+    filters
+  );
 
   // If there is no data `custom` will not exist.
   if (!tsvbResults.custom) {

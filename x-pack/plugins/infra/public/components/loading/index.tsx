@@ -7,7 +7,7 @@
 import { EuiLoadingChart, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
 
-import { euiStyled } from '../../utils/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
 
 interface InfraLoadingProps {
   text: string | JSX.Element;

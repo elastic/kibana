@@ -6,7 +6,7 @@
 
 import { EuiPage } from '@elastic/eui';
 
-import { euiStyled } from '../utils/eui_styled_components';
+import { euiStyled } from '../../../observability/public';
 
 export const ColumnarPage = euiStyled.div`
   display: flex;

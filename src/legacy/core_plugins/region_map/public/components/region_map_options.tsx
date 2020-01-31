@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FileLayerField, VectorLayer, ServiceSettings } from 'ui/vis/map/service_settings';
-import { VisOptionsProps } from 'ui/vis/editors/default';
+import { VisOptionsProps } from 'src/legacy/core_plugins/vis_default_editor/public';
 import { NumberInputOption, SelectOption, SwitchOption } from '../../../vis_type_vislib/public';
 import { WmsOptions } from '../../../tile_map/public/components/wms_options';
 import { RegionMapVisParams } from '../types';

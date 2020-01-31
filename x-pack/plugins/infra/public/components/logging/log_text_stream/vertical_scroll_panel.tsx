@@ -9,7 +9,7 @@ import { sortBy } from 'lodash';
 import { throttle } from 'lodash';
 import * as React from 'react';
 
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 import { Rect } from './measurable_item_view';
 
 interface VerticalScrollPanelProps<Child> {

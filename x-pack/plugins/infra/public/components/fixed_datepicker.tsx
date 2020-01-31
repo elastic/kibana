@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { EuiDatePicker, EuiDatePickerProps } from '@elastic/eui';
-import { euiStyled } from '../utils/eui_styled_components';
+import { euiStyled } from '../../../observability/public';
 
 export const FixedDatePicker = euiStyled(
   ({

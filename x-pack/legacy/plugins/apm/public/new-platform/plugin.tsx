@@ -41,7 +41,7 @@ import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_reac
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
-const MainContainer = styled.main`
+const MainContainer = styled.div`
   min-width: ${px(unit * 50)};
   padding: ${px(units.plus)};
   height: 100%;
@@ -49,7 +49,7 @@ const MainContainer = styled.main`
 
 const App = () => {
   return (
-    <MainContainer data-test-subj="apmMainContainer">
+    <MainContainer data-test-subj="apmMainContainer" role="main">
       <UpdateBreadcrumbs routes={routes} />
       <Route component={ScrollToTopOnPathChange} />
       <Switch>

@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useState } from 'react';
-import { euiStyled, EuiTheme, withTheme } from '../../utils/eui_styled_components';
+import { euiStyled, EuiTheme, withTheme } from '../../../../observability/public';
 import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
 import { ColumnarPage, PageContent } from '../../components/page';

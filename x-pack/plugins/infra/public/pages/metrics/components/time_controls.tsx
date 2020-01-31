@@ -6,7 +6,7 @@
 
 import { EuiSuperDatePicker, OnRefreshChangeProps, OnTimeChangeProps } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '../../../utils/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 import { MetricsTimeInput } from '../containers/with_metrics_time';
 
 interface MetricsTimeControlsProps {

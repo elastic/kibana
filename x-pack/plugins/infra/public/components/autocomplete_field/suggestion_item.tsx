@@ -9,7 +9,7 @@ import { transparentize } from 'polished';
 import React from 'react';
 
 import { AutocompleteSuggestion } from '../../../../../../src/plugins/data/public';
-import { euiStyled } from '../../utils/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
 
 interface Props {
   isSelected?: boolean;

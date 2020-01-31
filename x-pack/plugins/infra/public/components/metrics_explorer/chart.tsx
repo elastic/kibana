@@ -17,7 +17,7 @@ import {
   MetricsExplorerYAxisMode,
   MetricsExplorerChartOptions,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
-import { euiStyled } from '../../utils/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
 import { createFormatterForMetric } from './helpers/create_formatter_for_metric';
 import { MetricExplorerSeriesChart } from './series_chart';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
@@ -86,7 +86,7 @@ export const MetricsExplorerChart = ({
         <EuiTitle size="xs">
           <EuiFlexGroup alignItems="center">
             <ChartTitle>
-              <EuiToolTip content={title}>
+              <EuiToolTip content={title} anchorClassName="metricsExplorerTitleAnchor">
                 <span>{title}</span>
               </EuiToolTip>
             </ChartTitle>
@@ -159,7 +159,7 @@ export const MetricsExplorerChart = ({
 };
 
 const ChartTitle = euiStyled.div`
-  width: 100%
+  width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

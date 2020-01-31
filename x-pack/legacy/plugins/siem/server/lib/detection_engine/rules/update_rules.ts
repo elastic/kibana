@@ -5,6 +5,7 @@
  */
 
 import { defaults, pickBy, isEmpty } from 'lodash/fp';
+import { PartialAlert } from '../../../../../alerting/server/types';
 import { readRules } from './read_rules';
 import { UpdateRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './types';
 import { addTags } from './add_tags';
@@ -108,7 +109,7 @@ export const updateRules = async ({
   type,
   references,
   version,
-}: UpdateRuleParams) => {
+}: UpdateRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
     return null;
@@ -164,12 +165,23 @@ export const updateRules = async ({
       threat,
       to,
       type,
-      updatedAt: new Date().toISOString(),
       references,
       version: calculatedVersion,
     }
   );
 
+  const update = await alertsClient.update({
+    id: rule.id,
+    data: {
+      tags: addTags(tags ?? rule.tags, rule.params.ruleId, immutable ?? rule.params.immutable),
+      name: calculateName({ updatedName: name, originalName: rule.name }),
+      schedule: {
+        interval: calculateInterval(interval, rule.schedule.interval),
+      },
+      actions: rule.actions,
+      params: nextParams,
+    },
+  });
   if (rule.enabled && enabled === false) {
     await alertsClient.disable({ id: rule.id });
   } else if (!rule.enabled && enabled === true) {
@@ -195,20 +207,10 @@ export const updateRules = async ({
   } else {
     // enabled is null or undefined and we do not touch the rule
   }
-  return alertsClient.update({
-    id: rule.id,
-    data: {
-      tags: addTags(
-        tags != null ? tags : rule.tags, // Add tags as an update if it exists, otherwise re-use the older tags
-        rule.params.ruleId,
-        immutable != null ? immutable : rule.params.immutable // Add new one if it exists, otherwise re-use old one
-      ),
-      name: calculateName({ updatedName: name, originalName: rule.name }),
-      schedule: {
-        interval: calculateInterval(interval, rule.schedule.interval),
-      },
-      actions: rule.actions,
-      params: nextParams,
-    },
-  });
+
+  if (enabled != null) {
+    return { ...update, enabled };
+  } else {
+    return update;
+  }
 };

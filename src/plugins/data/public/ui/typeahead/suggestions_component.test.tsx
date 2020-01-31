@@ -33,14 +33,14 @@ const mockSuggestions: autocomplete.QuerySuggestion[] = [
     end: 0,
     start: 42,
     text: 'as promised, not helpful',
-    type: 'value',
+    type: autocomplete.QuerySuggestionsTypes.Value,
   },
   {
     description: 'This is another unhelpful suggestion',
     end: 0,
     start: 42,
     text: 'yep',
-    type: 'field',
+    type: autocomplete.QuerySuggestionsTypes.Field,
   },
 ];
 
