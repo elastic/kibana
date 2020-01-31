@@ -31,7 +31,7 @@ import {
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../util/dependency_cache';
 import { ResizeChecker } from '../../../../../../../src/plugins/kibana_utils/public';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
@@ -815,6 +815,7 @@ export class TimeSeriesExplorer extends React.Component {
           },
         }
       );
+      const toastNotifications = getToastNotifications();
       toastNotifications.addWarning(warningText);
       detectorIndex = detectors[0].index;
     }

@@ -16,10 +16,9 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 
-import { toastNotifications } from 'ui/notify';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getToastNotifications } from '../../../util/dependency_cache';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
 
@@ -106,6 +105,8 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
         .catch(resp => {
           // eslint-disable-next-line no-console
           console.error('Error obtaining URL for test:', resp);
+
+          const toastNotifications = getToastNotifications();
           toastNotifications.addDanger(
             i18n.translate(
               'xpack.ml.customUrlEditorList.obtainingUrlToTestConfigurationErrorMessage',

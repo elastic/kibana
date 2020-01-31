@@ -9,7 +9,7 @@ import { HashRouter, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 
 import { IUiSettingsClient, ChromeStart } from 'src/core/public';
-import { ChromeBreadcrumb, DocLinksStart } from 'kibana/public';
+import { ChromeBreadcrumb, DocLinksStart, ToastsStart, OverlayStart } from 'kibana/public';
 import { IndexPatternsContract, TimefilterSetup } from 'src/plugins/data/public';
 import { MlContext, MlContextValue } from '../contexts/ml';
 
@@ -37,6 +37,8 @@ export interface PageDependencies {
   timefilter: TimefilterSetup;
   chrome: ChromeStart;
   docLinks: DocLinksStart;
+  toastNotifications: ToastsStart;
+  overlays: OverlayStart;
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {

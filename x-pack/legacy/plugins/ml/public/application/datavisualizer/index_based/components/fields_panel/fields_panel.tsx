@@ -23,8 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { toastNotifications } from 'ui/notify';
-
+import { getToastNotifications } from '../../../../util/dependency_cache';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { FieldDataCard } from '../field_data_card';
 import { FieldTypesSelect } from '../field_types_select';
@@ -68,6 +67,7 @@ export const FieldsPanel: FC<Props> = ({
 
   function onSearchBarChange(query: SearchBarQuery) {
     if (query.error) {
+      const toastNotifications = getToastNotifications();
       toastNotifications.addWarning(
         i18n.translate('xpack.ml.datavisualizer.fieldsPanel.searchBarError', {
           defaultMessage: `An error occurred running the search. {message}.`,

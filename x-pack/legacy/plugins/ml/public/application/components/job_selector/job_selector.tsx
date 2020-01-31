@@ -22,8 +22,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { toastNotifications } from 'ui/notify';
-
+import { getToastNotifications } from '../../util/dependency_cache';
 import { Dictionary } from '../../../../common/types/common';
 import { MlJobWithTimeRange } from '../../../../common/types/jobs';
 import { ml } from '../../services/ml_api_service';
@@ -178,6 +177,7 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
       })
       .catch((err: any) => {
         console.error('Error fetching jobs with time range', err); // eslint-disable-line
+        const toastNotifications = getToastNotifications();
         toastNotifications.addDanger({
           title: i18n.translate('xpack.ml.jobSelector.jobFetchErrorMessage', {
             defaultMessage: 'An error occurred fetching jobs. Refresh and try again.',

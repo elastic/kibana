@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../../../util/dependency_cache';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
@@ -114,6 +114,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
 
       setGroups(tempGroups);
     } catch (e) {
+      const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate(
           'xpack.ml.overview.anomalyDetection.errorWithFetchingAnomalyScoreNotificationErrorMessage',

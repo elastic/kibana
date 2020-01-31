@@ -7,10 +7,9 @@
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
 import { Query } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
-import { getTimefilter } from '../../util/dependency_cache';
+import { getTimefilter, getToastNotifications } from '../../util/dependency_cache';
 import { ml, GetTimeFieldRangeResponse } from '../../services/ml_api_service';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 
@@ -36,6 +35,7 @@ export async function setFullTimeRange(
     });
     return resp;
   } catch (resp) {
+    const toastNotifications = getToastNotifications();
     toastNotifications.addDanger(
       i18n.translate('xpack.ml.fullTimeRangeSelector.errorSettingTimeRangeNotification', {
         defaultMessage: 'An error occurred setting the time range.',

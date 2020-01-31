@@ -20,7 +20,6 @@ import {
   EuiModalHeaderTitle,
   EuiModalFooter,
 } from '@elastic/eui';
-import { toastNotifications } from 'ui/notify';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
@@ -33,6 +32,7 @@ import {
   getTestUrl,
   CustomUrlSettings,
 } from '../../../../components/custom_url_editor/utils';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { loadSavedDashboards, loadIndexPatterns } from '../edit_utils';
 import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
 import { Job } from '../../../../new_job/common/job_creator/configs';
@@ -80,6 +80,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
   }
 
   componentDidMount() {
+    const toastNotifications = getToastNotifications();
     loadSavedDashboards(MAX_NUMBER_DASHBOARDS)
       .then(dashboards => {
         this.setState({ dashboards });
@@ -143,6 +144,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       .catch((error: any) => {
         // eslint-disable-next-line no-console
         console.error('Error building custom URL from settings:', error);
+        const toastNotifications = getToastNotifications();
         toastNotifications.addDanger(
           i18n.translate(
             'xpack.ml.jobsList.editJobFlyout.customUrls.addNewUrlErrorNotificationMessage',
@@ -156,6 +158,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
   };
 
   onTestButtonClick = () => {
+    const toastNotifications = getToastNotifications();
     const job = this.props.job;
     buildCustomUrlFromSettings(this.state.editorSettings as CustomUrlSettings)
       .then(customUrl => {

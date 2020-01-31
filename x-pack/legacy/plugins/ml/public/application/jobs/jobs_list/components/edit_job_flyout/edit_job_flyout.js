@@ -27,7 +27,7 @@ import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
 import { validateModelMemoryLimit, validateGroupNames, isValidCustomUrls } from '../validate_job';
 import { mlMessageBarService } from '../../../../components/messagebar';
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../../../../util/dependency_cache';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 class EditJobFlyoutUI extends Component {
@@ -229,6 +229,7 @@ class EditJobFlyoutUI extends Component {
       customUrls: this.state.jobCustomUrls,
     };
 
+    const toastNotifications = getToastNotifications();
     saveJob(this.state.job, newJobData)
       .then(() => {
         toastNotifications.addSuccess(

@@ -42,6 +42,8 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
     config: coreStart.uiSettings!,
     chrome: coreStart.chrome!,
     docLinks: coreStart.docLinks!,
+    toastNotifications: coreStart.notifications.toasts,
+    overlays: coreStart.overlays,
   };
 
   const services = {
@@ -49,10 +51,10 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
     data: deps.data,
     ...coreStart,
   };
-  const I18nContext = coreStart.i18n.Context;
 
   useDependencyCache(pageDeps);
 
+  const I18nContext = coreStart.i18n.Context;
   return (
     <I18nContext>
       <KibanaContextProvider services={services}>

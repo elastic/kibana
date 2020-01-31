@@ -20,7 +20,7 @@ import { NavigationMenu } from '../../../components/navigation_menu';
 import { CalendarsListHeader } from './header';
 import { CalendarsListTable } from './table';
 import { ml } from '../../../services/ml_api_service';
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../../../util/dependency_cache';
 import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { deleteCalendars } from './delete_calendars';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -58,6 +58,7 @@ export const CalendarsList = injectI18n(
       } catch (error) {
         console.log(error);
         this.setState({ loading: false });
+        const toastNotifications = getToastNotifications();
         toastNotifications.addDanger(
           this.props.intl.formatMessage({
             id: 'xpack.ml.calendarsList.errorWithLoadingListOfCalendarsErrorMessage',

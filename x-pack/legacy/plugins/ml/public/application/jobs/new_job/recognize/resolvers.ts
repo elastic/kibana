@@ -6,7 +6,7 @@
 
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../../../util/dependency_cache';
 import { mlJobService } from '../../../services/job_service';
 import { ml } from '../../../services/ml_api_service';
 import { KibanaObjects } from './page';
@@ -36,6 +36,7 @@ export function checkViewOrCreateJobs(moduleId: string, indexPatternId: string):
       .catch((err: Error) => {
         // eslint-disable-next-line no-console
         console.error(`Error checking whether jobs in module ${moduleId} exists`, err);
+        const toastNotifications = getToastNotifications();
         toastNotifications.addWarning({
           title: i18n.translate('xpack.ml.newJob.recognize.moduleCheckJobsExistWarningTitle', {
             defaultMessage: 'Error checking module {moduleId}',

@@ -6,7 +6,6 @@
 
 import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import moment from 'moment';
@@ -20,7 +19,7 @@ import { LineChartPoint } from '../../../common/chart_loader';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { GetTimeFieldRangeResponse } from '../../../../../services/ml_api_service';
 import { TimeRangePicker, TimeRange } from '../../../common/components';
-import { getTimefilter } from '../../../../../util/dependency_cache';
+import { getTimefilter, getToastNotifications } from '../../../../../util/dependency_cache';
 
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const mlContext = useMlContext();
@@ -87,6 +86,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
         end: range.end.epoch,
       });
     } else {
+      const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.newJob.wizard.timeRangeStep.fullTimeRangeError', {
           defaultMessage: 'An error occurred obtaining the time range for the index',

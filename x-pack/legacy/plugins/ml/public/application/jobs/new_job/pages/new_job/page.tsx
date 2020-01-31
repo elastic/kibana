@@ -14,12 +14,12 @@ import {
   EuiTitle,
   EuiPageContentBody,
 } from '@elastic/eui';
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { getJobCreatorTitle } from '../../common/job_creator/util/general';
+import { getToastNotifications } from '../../../../util/dependency_cache';
 import {
   jobCreatorFactory,
   isAdvancedJobCreator,
@@ -147,6 +147,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     try {
       jobCreator.autoSetTimeRange();
     } catch (error) {
+      const toastNotifications = getToastNotifications();
       toastNotifications.addDanger({
         title: i18n.translate('xpack.ml.newJob.wizard.autoSetJobCreatorTimeRange.error', {
           defaultMessage: `Error retrieving beginning and end times of index`,

@@ -15,8 +15,7 @@ import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 
 import { injectI18n } from '@kbn/i18n/react';
 
-import { toastNotifications } from 'ui/notify';
-
+import { getToastNotifications } from '../../../util/dependency_cache';
 import { NavigationMenu } from '../../../components/navigation_menu';
 
 import { FilterListsHeader } from './header';
@@ -73,6 +72,7 @@ export const FilterLists = injectI18n(
         })
         .catch(resp => {
           console.log('Error loading list of filters:', resp);
+          const toastNotifications = getToastNotifications();
           toastNotifications.addDanger(
             intl.formatMessage({
               id: 'xpack.ml.settings.filterLists.filterLists.loadingFilterListsErrorMessage',

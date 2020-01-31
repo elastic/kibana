@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { Query } from 'src/plugins/data/public';
@@ -13,6 +12,7 @@ import {
   IIndexPattern,
   IndexPatternsContract,
 } from '../../../../../../../src/plugins/data/public';
+import { getToastNotifications } from './dependency_cache';
 import { IndexPatternSavedObject, SavedSearchSavedObject } from '../../../common/types/kibana';
 
 let indexPatternCache: IndexPatternSavedObject[] = [];
@@ -122,6 +122,7 @@ export function getSavedSearchById(id: string): SavedSearchSavedObject | undefin
 export function timeBasedIndexCheck(indexPattern: IndexPattern, showNotification = false) {
   if (!indexPattern.isTimeBased()) {
     if (showNotification) {
+      const toastNotifications = getToastNotifications();
       toastNotifications.addWarning({
         title: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationTitle', {
           defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',

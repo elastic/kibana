@@ -5,11 +5,11 @@
  */
 
 import React, { FC, Fragment, useContext, useState } from 'react';
-import { toastNotifications } from 'ui/notify';
 import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { JobRunner } from '../../../../../common/job_runner';
+import { getToastNotifications } from '../../../../../../../util/dependency_cache';
 
 // @ts-ignore
 import { CreateWatchFlyout } from '../../../../../../jobs_list/components/create_watch_flyout/index';
@@ -42,6 +42,7 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
   }
 
   async function startJobInRealTime() {
+    const toastNotifications = getToastNotifications();
     setDatafeedState(DATAFEED_STATE.STARTING);
     if (jobRunner !== null) {
       try {

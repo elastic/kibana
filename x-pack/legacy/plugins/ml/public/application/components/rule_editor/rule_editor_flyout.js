@@ -28,8 +28,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { toastNotifications } from 'ui/notify';
-
 import { DetectorDescriptionList } from './components/detector_description_list';
 import { ActionsSection } from './actions_section';
 import { checkPermission } from '../../privilege/check_privilege';
@@ -52,7 +50,7 @@ import {
 import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
-import { getDocLinks } from '../../util/dependency_cache';
+import { getDocLinks, getToastNotifications } from '../../util/dependency_cache';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 export const RuleEditorFlyout = injectI18n(
@@ -100,6 +98,7 @@ export const RuleEditorFlyout = injectI18n(
       if (job === undefined) {
         // No details found for this job, display an error and
         // don't open the Flyout as no edits can be made without the job.
+        const toastNotifications = getToastNotifications();
         toastNotifications.addDanger(
           intl.formatMessage(
             {
@@ -154,6 +153,7 @@ export const RuleEditorFlyout = injectI18n(
           })
           .catch(resp => {
             console.log('Error loading list of filters:', resp);
+            const toastNotifications = getToastNotifications();
             toastNotifications.addDanger(
               intl.formatMessage({
                 id:
@@ -331,6 +331,7 @@ export const RuleEditorFlyout = injectI18n(
     };
 
     updateRuleAtIndex = (ruleIndex, editedRule) => {
+      const toastNotifications = getToastNotifications();
       const { intl } = this.props;
       const { job, anomaly } = this.state;
 
@@ -387,6 +388,7 @@ export const RuleEditorFlyout = injectI18n(
     };
 
     deleteRuleAtIndex = index => {
+      const toastNotifications = getToastNotifications();
       const { intl } = this.props;
       const { job, anomaly } = this.state;
       const jobId = job.job_id;
@@ -437,6 +439,7 @@ export const RuleEditorFlyout = injectI18n(
     };
 
     addItemToFilterList = (item, filterId, closeFlyoutOnAdd) => {
+      const toastNotifications = getToastNotifications();
       const { intl } = this.props;
       addItemToFilter(item, filterId)
         .then(() => {

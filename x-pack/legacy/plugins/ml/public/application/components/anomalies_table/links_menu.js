@@ -14,7 +14,7 @@ import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } fr
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import chrome from 'ui/chrome';
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../../util/dependency_cache';
 
 import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
 import { checkPermission } from '../../privilege/check_privilege';
@@ -123,6 +123,7 @@ export const LinksMenu = injectI18n(
           })
           .catch(resp => {
             console.log('openCustomUrl(): error loading categoryDefinition:', resp);
+            const toastNotifications = getToastNotifications();
             toastNotifications.addDanger(
               intl.formatMessage(
                 {
@@ -221,6 +222,7 @@ export const LinksMenu = injectI18n(
       const job = mlJobService.getJob(this.props.anomaly.jobId);
       if (job === undefined) {
         console.log(`viewExamples(): no job found with ID: ${this.props.anomaly.jobId}`);
+        const toastNotifications = getToastNotifications();
         toastNotifications.addDanger(
           intl.formatMessage(
             {
@@ -336,6 +338,7 @@ export const LinksMenu = injectI18n(
           })
           .catch(resp => {
             console.log('viewExamples(): error loading categoryDefinition:', resp);
+            const toastNotifications = getToastNotifications();
             toastNotifications.addDanger(
               intl.formatMessage(
                 {
@@ -356,6 +359,7 @@ export const LinksMenu = injectI18n(
           `viewExamples(): error finding type of field ${categorizationFieldName} in indices:`,
           datafeedIndices
         );
+        const toastNotifications = getToastNotifications();
         toastNotifications.addDanger(
           intl.formatMessage(
             {

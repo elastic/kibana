@@ -26,8 +26,7 @@ import {
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-import { toastNotifications } from 'ui/notify';
-
+import { getToastNotifications } from '../../../util/dependency_cache';
 import { EditFilterListHeader } from './header';
 import { EditFilterListToolbar } from './toolbar';
 import { ItemsGrid } from '../../../components/items_grid';
@@ -116,6 +115,7 @@ export const EditFilterList = injectI18n(
         })
         .catch(resp => {
           console.log(`Error loading filter ${filterId}:`, resp);
+          const toastNotifications = getToastNotifications();
           toastNotifications.addDanger(
             intl.formatMessage(
               {
@@ -183,6 +183,7 @@ export const EditFilterList = injectI18n(
         });
 
         if (alreadyInFilter.length > 0) {
+          const toastNotifications = getToastNotifications();
           toastNotifications.addWarning(
             intl.formatMessage(
               {
@@ -289,6 +290,7 @@ export const EditFilterList = injectI18n(
         })
         .catch(resp => {
           console.log(`Error saving filter ${filterId}:`, resp);
+          const toastNotifications = getToastNotifications();
           toastNotifications.addDanger(
             intl.formatMessage(
               {

@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { PreviousButton } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
@@ -67,6 +67,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       setJobRunner(jr);
     } catch (error) {
       // catch and display all job creation errors
+      const toastNotifications = getToastNotifications();
       toastNotifications.addDanger({
         title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
           defaultMessage: `Job creation error`,
@@ -85,6 +86,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       advancedStartDatafeed(jobCreator);
     } catch (error) {
       // catch and display all job creation errors
+      const toastNotifications = getToastNotifications();
       toastNotifications.addDanger({
         title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
           defaultMessage: `Job creation error`,

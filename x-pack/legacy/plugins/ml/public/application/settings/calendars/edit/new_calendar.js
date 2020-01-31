@@ -11,8 +11,6 @@ import { injectI18n } from '@kbn/i18n/react';
 
 import { EuiPage, EuiPageBody, EuiPageContent, EuiOverlayMask } from '@elastic/eui';
 
-import { toastNotifications } from 'ui/notify';
-
 import { NavigationMenu } from '../../../components/navigation_menu';
 
 import { getCalendarSettingsData, validateCalendarId } from './utils';
@@ -20,7 +18,7 @@ import { CalendarForm } from './calendar_form';
 import { NewEventModal } from './new_event_modal';
 import { ImportModal } from './import_modal';
 import { ml } from '../../../services/ml_api_service';
-import { getTimefilter } from '../../../util/dependency_cache';
+import { getTimefilter, getToastNotifications } from '../../../util/dependency_cache';
 
 export const NewCalendar = injectI18n(
   class NewCalendar extends Component {
@@ -106,6 +104,7 @@ export const NewCalendar = injectI18n(
       } catch (error) {
         console.log(error);
         this.setState({ loading: false });
+        const toastNotifications = getToastNotifications();
         toastNotifications.addDanger(
           this.props.intl.formatMessage({
             id: 'xpack.ml.calendarsEdit.errorWithLoadingCalendarFromDataErrorMessage',
@@ -133,6 +132,7 @@ export const NewCalendar = injectI18n(
       const { intl } = this.props;
 
       if (this.isDuplicateId()) {
+        const toastNotifications = getToastNotifications();
         toastNotifications.addDanger(
           intl.formatMessage(
             {
@@ -153,6 +153,7 @@ export const NewCalendar = injectI18n(
         } catch (error) {
           console.log('Error saving calendar', error);
           this.setState({ saving: false });
+          const toastNotifications = getToastNotifications();
           toastNotifications.addDanger(
             intl.formatMessage(
               {
@@ -176,6 +177,7 @@ export const NewCalendar = injectI18n(
       } catch (error) {
         console.log('Error saving calendar', error);
         this.setState({ saving: false });
+        const toastNotifications = getToastNotifications();
         toastNotifications.addDanger(
           this.props.intl.formatMessage(
             {

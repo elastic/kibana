@@ -19,11 +19,11 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { toastNotifications } from 'ui/notify';
 import { loadFullJob } from '../utils';
 import { mlCreateWatchService } from './create_watch_service';
 import { CreateWatch } from './create_watch_view';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { getToastNotifications } from '../../../../util/dependency_cache';
 
 function getSuccessToast(id, url, intl) {
   return {
@@ -100,6 +100,7 @@ class CreateWatchFlyoutUI extends Component {
   };
 
   save = () => {
+    const toastNotifications = getToastNotifications();
     const { intl } = this.props;
     mlCreateWatchService
       .createNewWatch(this.state.jobId)

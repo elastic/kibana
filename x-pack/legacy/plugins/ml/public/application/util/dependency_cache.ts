@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import { TimefilterSetup } from 'src/plugins/data/public';
 import { IUiSettingsClient, ChromeStart } from 'src/core/public';
 import { IndexPatternsContract } from 'src/plugins/data/public';
-import { DocLinksStart } from 'kibana/public';
+import { DocLinksStart, ToastsStart, OverlayStart } from 'kibana/public';
 import { PageDependencies } from '../routing/router';
 
 interface DependencyCache {
@@ -17,6 +17,8 @@ interface DependencyCache {
   indexPatterns: IndexPatternsContract | null;
   chrome: ChromeStart | null;
   docLinks: DocLinksStart | null;
+  toastNotifications: ToastsStart | null;
+  overlays: OverlayStart | null;
 }
 
 const cache: DependencyCache = {
@@ -25,15 +27,20 @@ const cache: DependencyCache = {
   indexPatterns: null,
   chrome: null,
   docLinks: null,
+  toastNotifications: null,
+  overlays: null,
 };
 
 export function useDependencyCache(dep: PageDependencies) {
+  cache.timefilter = dep.timefilter;
+  cache.config = dep.config;
+  cache.chrome = dep.chrome;
+  cache.indexPatterns = dep.indexPatterns;
+  cache.docLinks = dep.docLinks;
+  cache.toastNotifications = dep.toastNotifications;
+  cache.overlays = dep.overlays;
+
   useEffect(() => {
-    cache.timefilter = dep.timefilter;
-    cache.config = dep.config;
-    cache.chrome = dep.chrome;
-    cache.indexPatterns = dep.indexPatterns;
-    cache.docLinks = dep.docLinks;
     return () => {
       clearCache();
     };
@@ -46,7 +53,9 @@ export function getDependencyCache(): Readonly<PageDependencies> {
     cache.config === null ||
     cache.chrome === null ||
     cache.indexPatterns === null ||
-    cache.docLinks === null
+    cache.docLinks === null ||
+    cache.toastNotifications === null ||
+    cache.overlays === null
   ) {
     throw new Error();
   }
@@ -56,6 +65,8 @@ export function getDependencyCache(): Readonly<PageDependencies> {
     chrome: cache.chrome,
     indexPatterns: cache.indexPatterns,
     docLinks: cache.docLinks,
+    toastNotifications: cache.toastNotifications,
+    overlays: cache.overlays,
   };
 }
 
@@ -77,6 +88,20 @@ export function getDocLinks() {
     throw new Error();
   }
   return cache.docLinks;
+}
+
+export function getToastNotifications() {
+  if (cache.toastNotifications === null) {
+    throw new Error();
+  }
+  return cache.toastNotifications;
+}
+
+export function getOverlays() {
+  if (cache.overlays === null) {
+    throw new Error();
+  }
+  return cache.overlays;
 }
 
 export function clearCache() {
