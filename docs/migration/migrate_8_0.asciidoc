@@ -85,9 +85,9 @@ specified explicitly.
 === User role changes
 
 [float]
-==== `kibana_user` role renamed to `kibana_admin`
+==== `kibana_user` role has been removed and `kibana_admin` has been added.
 
-*Details:* The `kibana_user` role has been renamed to `kibana_admin` to better
+*Details:* The `kibana_user` role has been removed and `kibana_admin` has been added to better
 reflect its intended use. This role continues to grant all access to every
 {kib} feature. If you wish to restrict access to specific features, create
 custom roles with {kibana-ref}/kibana-privileges.html[{kib} privileges].
