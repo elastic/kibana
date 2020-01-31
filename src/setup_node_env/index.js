@@ -17,7 +17,7 @@
  * under the License.
  */
 
-require('./harden');
+require('./harden'); // this require MUST be executed before any others
 require('symbol-observable');
 require('./root');
 require('./node_version_validator');
