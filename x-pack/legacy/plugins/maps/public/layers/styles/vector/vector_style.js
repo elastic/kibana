@@ -160,8 +160,6 @@ export class VectorStyle extends AbstractStyle {
       styleProperties[styleProperty.getStyleName()] = styleProperty;
     });
 
-    this._source.getValueSuggestions('machine.os.keyword', '');
-
     return (
       <VectorStyleEditor
         handlePropertyChange={handlePropertyChange}
