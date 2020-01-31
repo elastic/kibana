@@ -13,8 +13,16 @@ import {
   FETCH_INIT,
   FETCH_SUCCESS,
   UPDATE_PAGINATION,
+  UPDATE_FILTER_OPTIONS,
 } from './constants';
-import { FlattenedCasesSavedObjects, SortFieldCase, CasesState, QueryArgs, Action } from './types';
+import {
+  FlattenedCasesSavedObjects,
+  SortFieldCase,
+  CasesState,
+  QueryArgs,
+  Action,
+  FilterOptions,
+} from './types';
 import { Direction } from '../../graphql/types';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../components/toasters';
@@ -51,6 +59,11 @@ const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
           ...state.pagination,
           ...action.payload,
         },
+      };
+    case UPDATE_FILTER_OPTIONS:
+      return {
+        ...state,
+        filterOptions: action.payload,
       };
     default:
       throw new Error();
