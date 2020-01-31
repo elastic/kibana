@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector } from '../../../types';
+import { ActionTypeModel, ActionConnector, ActionParamsProps } from '../../../types';
+import { PagerDutyActionParams, EventActionOptions, SeverityActionOptions } from './types';
 
 const ACTION_TYPE_ID = '.pagerduty';
 let actionTypeModel: ActionTypeModel;
@@ -141,13 +142,15 @@ describe('PagerDutyParamsFields renders', () => {
     if (!actionTypeModel.actionParamsFields) {
       return;
     }
-    const ParamsFields = actionTypeModel.actionParamsFields;
+    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
+      ActionParamsProps<PagerDutyActionParams>
+    >;
     const actionParams = {
-      eventAction: 'trigger',
+      eventAction: EventActionOptions.TRIGGER,
       dedupKey: 'test',
       summary: '2323',
       source: 'source',
-      severity: 'critical',
+      severity: SeverityActionOptions.CRITICAL,
       timestamp: '234654564654',
       component: 'test',
       group: 'group',
@@ -155,7 +158,7 @@ describe('PagerDutyParamsFields renders', () => {
     };
     const wrapper = mountWithIntl(
       <ParamsFields
-        action={actionParams}
+        actionParams={actionParams}
         errors={{ summary: [] }}
         editAction={() => {}}
         index={0}
@@ -174,6 +177,6 @@ describe('PagerDutyParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="componentInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="groupInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="sourceInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="pagerdutyDescriptionInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="pagerdutySummaryInput"]').length > 0).toBeTruthy();
   });
 });

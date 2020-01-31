@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector } from '../../../types';
+import { ActionTypeModel, ActionConnector, ActionParamsProps } from '../../../types';
+import { ServerLogActionParams, ServerLogLevelOptions } from './types';
 
 const ACTION_TYPE_ID = '.server-log';
 let actionTypeModel: ActionTypeModel;
@@ -63,13 +64,16 @@ describe('ServerLogParamsFields renders', () => {
     if (!actionTypeModel.actionParamsFields) {
       return;
     }
-    const ParamsFields = actionTypeModel.actionParamsFields;
+    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
+      ActionParamsProps<ServerLogActionParams>
+    >;
     const actionParams = {
-      level: 'trace',
+      level: ServerLogLevelOptions.TRACE,
+      message: 'test',
     };
     const wrapper = mountWithIntl(
       <ParamsFields
-        action={actionParams}
+        actionParams={actionParams}
         errors={{ message: [] }}
         editAction={() => {}}
         index={0}
@@ -91,14 +95,16 @@ describe('ServerLogParamsFields renders', () => {
     if (!actionTypeModel.actionParamsFields) {
       return;
     }
-    const ParamsFields = actionTypeModel.actionParamsFields;
+    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
+      ActionParamsProps<ServerLogActionParams>
+    >;
     const actionParams = {
       message: 'test message',
-      level: 'info',
+      level: ServerLogLevelOptions.INFO,
     };
     const wrapper = mountWithIntl(
       <ParamsFields
-        action={actionParams}
+        actionParams={actionParams}
         errors={{ message: [] }}
         editAction={() => {}}
         index={0}

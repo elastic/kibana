@@ -211,14 +211,17 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
     }
   }
 
-  const actionsErrors = alert.actions.reduce((acc: any, alertAction: AlertAction) => {
-    const actionType = actionTypeRegistry.get(alertAction.actionTypeId);
-    if (!actionType) {
-      return { ...acc };
-    }
-    const actionValidationErrors = actionType.validateParams(alertAction.params);
-    return { ...acc, [alertAction.id]: actionValidationErrors };
-  }, {});
+  const actionsErrors = alert.actions.reduce(
+    (acc: Record<string, { errors: IErrorObject }>, alertAction: AlertAction) => {
+      const actionType = actionTypeRegistry.get(alertAction.actionTypeId);
+      if (!actionType) {
+        return { ...acc };
+      }
+      const actionValidationErrors = actionType.validateParams(alertAction.params);
+      return { ...acc, [alertAction.id]: actionValidationErrors };
+    },
+    {}
+  );
 
   const AlertParamsExpressionComponent = alertTypeModel
     ? alertTypeModel.alertParamsExpression
@@ -332,8 +335,8 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
     const actionTypeRegisterd = actionTypeRegistry.get(actionConnector.actionTypeId);
     if (actionTypeRegisterd === null || actionItem.group !== defaultActionGroup) return null;
     const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
-    const actionParamsErrors =
-      Object.keys(actionsErrors).length > 0 ? actionsErrors[actionItem.id] : {};
+    const actionParamsErrors: { errors: IErrorObject } =
+      Object.keys(actionsErrors).length > 0 ? actionsErrors[actionItem.id] : { errors: {} };
 
     return (
       <EuiAccordion
@@ -434,7 +437,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
         <EuiSpacer size="xl" />
         {ParamsFieldsComponent ? (
           <ParamsFieldsComponent
-            action={actionItem.params}
+            actionParams={actionItem.params as any}
             index={index}
             errors={actionParamsErrors.errors}
             editAction={setActionParamsProperty}
@@ -763,7 +766,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
                   compressed
                   value={alertIntervalUnit}
                   options={getTimeOptions((alertInterval ? alertInterval : 1).toString())}
-                  onChange={(e: any) => {
+                  onChange={e => {
                     setAlertIntervalUnit(e.target.value);
                     setScheduleProperty('interval', `${alertInterval}${e.target.value}`);
                   }}
@@ -795,7 +798,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
                   compressed
                   value={alertThrottleUnit}
                   options={getTimeOptions((alertThrottle ? alertThrottle : 1).toString())}
-                  onChange={(e: any) => {
+                  onChange={e => {
                     setAlertThrottleUnit(e.target.value);
                     setAlertProperty('throttle', `${alertThrottle}${e.target.value}`);
                   }}

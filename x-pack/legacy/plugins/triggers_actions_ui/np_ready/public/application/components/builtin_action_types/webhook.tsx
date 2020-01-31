@@ -31,6 +31,7 @@ import {
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
+import { WebhookActionParams } from './types';
 
 const HTTP_VERBS = ['post', 'put'];
 
@@ -101,7 +102,7 @@ export function getActionType(): ActionTypeModel {
         body: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (!actionParams.body || actionParams.body.length === 0) {
+      if (!actionParams.body?.length) {
         errors.body.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredWebhookBodyText',
@@ -453,13 +454,13 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   );
 };
 
-const WebhookParamsFields: React.FunctionComponent<ActionParamsProps> = ({
-  action,
+const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActionParams>> = ({
+  actionParams,
   editAction,
   index,
   errors,
 }) => {
-  const { body } = action;
+  const { body } = actionParams;
 
   return (
     <Fragment>

@@ -32,6 +32,7 @@ import {
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
+import { EmailActionParams } from './types';
 
 export function getActionType(): ActionTypeModel {
   const mailformat = /^[^@\s]+@[^@\s]+$/;
@@ -133,7 +134,7 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    validateParams: (actionParams: any): ValidationResult => {
+    validateParams: (actionParams: EmailActionParams): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         to: new Array<string>(),
@@ -158,7 +159,7 @@ export function getActionType(): ActionTypeModel {
         errors.cc.push(errorText);
         errors.bcc.push(errorText);
       }
-      if (!actionParams.message || actionParams.message.length === 0) {
+      if (!actionParams.message?.length) {
         errors.message.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredMessageText',
@@ -168,7 +169,7 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
-      if (!actionParams.subject || actionParams.subject.length === 0) {
+      if (!actionParams.subject?.length) {
         errors.subject.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredSubjectText',
@@ -380,15 +381,15 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
   );
 };
 
-const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
-  action,
+const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionParams>> = ({
+  actionParams,
   editAction,
   index,
   errors,
   messageVariables,
   defaultMessage,
 }) => {
-  const { to, cc, bcc, subject, message } = action;
+  const { to, cc, bcc, subject, message } = actionParams;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
   const ccOptions = cc ? cc.map((label: string) => ({ label })) : [];
   const bccOptions = bcc ? bcc.map((label: string) => ({ label })) : [];

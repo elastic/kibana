@@ -13,6 +13,7 @@ import {
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
+import { IndexActionParams } from './types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -29,9 +30,8 @@ export function getActionType(): ActionTypeModel {
     },
     actionConnectorFields: IndexActionConnectorFields,
     actionParamsFields: IndexParamsFields,
-    validateParams: (actionParams: any): ValidationResult => {
-      const validationResult = { errors: {} };
-      return validationResult;
+    validateParams: (): ValidationResult => {
+      return { errors: {} };
     },
   };
 }
@@ -69,12 +69,12 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
   );
 };
 
-const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
-  action,
+const IndexParamsFields: React.FunctionComponent<ActionParamsProps<IndexActionParams>> = ({
+  actionParams,
   index,
   editAction,
 }) => {
-  const { refresh } = action;
+  const { refresh } = actionParams;
   return (
     <Fragment>
       <EuiFormRow
@@ -90,12 +90,12 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           fullWidth
           name="index"
           data-test-subj="indexInput"
-          value={action.index || ''}
+          value={actionParams.index || ''}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             editAction('index', e.target.value, index);
           }}
           onBlur={() => {
-            if (!action.index) {
+            if (!actionParams.index) {
               editAction('index', '', index);
             }
           }}
@@ -105,7 +105,7 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       <EuiSwitch
         data-test-subj="indexRefreshCheckbox"
         checked={refresh || false}
-        onChange={(e: any) => {
+        onChange={e => {
           editAction('refresh', e.target.checked, index);
         }}
         label={
