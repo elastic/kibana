@@ -93,7 +93,7 @@ reflect its intended use. This role continues to grant all access to every
 custom roles with {kibana-ref}/kibana-privileges.html[{kib} privileges].
 
 *Impact:* Any users currently assigned the `kibana_user` role will need to
-instead be assigned the `kibana_admin` role in order to maintain their current
+instead be assigned the `kibana_admin` role to maintain their current
 access level.
 
 [float]
