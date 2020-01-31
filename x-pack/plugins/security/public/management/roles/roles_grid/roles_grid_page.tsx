@@ -19,6 +19,8 @@ import {
   EuiTitle,
   EuiButtonIcon,
   EuiBasicTableColumn,
+  EuiSwitchEvent,
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -45,6 +47,7 @@ interface State {
   filter: string;
   showDeleteConfirmation: boolean;
   permissionDenied: boolean;
+  includeReservedRoles: boolean;
 }
 
 const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
@@ -60,6 +63,7 @@ export class RolesGridPage extends Component<Props, State> {
       filter: '',
       showDeleteConfirmation: false,
       permissionDenied: false,
+      includeReservedRoles: true,
     };
   }
 
@@ -135,6 +139,7 @@ export class RolesGridPage extends Component<Props, State> {
               loading={roles.length === 0}
               search={{
                 toolsLeft: this.renderToolsLeft(),
+                toolsRight: this.renderToolsRight(),
                 box: {
                   incremental: true,
                 },
@@ -276,15 +281,22 @@ export class RolesGridPage extends Component<Props, State> {
   };
 
   private getVisibleRoles = () => {
-    const { roles, filter } = this.state;
+    const { roles, filter = '', includeReservedRoles } = this.state;
 
-    return filter
-      ? roles.filter(({ name }) => {
-          const normalized = `${name}`.toLowerCase();
-          const normalizedQuery = filter.toLowerCase();
-          return normalized.indexOf(normalizedQuery) !== -1;
-        })
-      : roles;
+    return roles.filter(role => {
+      const normalized = `${role.name}`.toLowerCase();
+      const normalizedQuery = filter.toLowerCase();
+      return (
+        normalized.indexOf(normalizedQuery) !== -1 &&
+        (includeReservedRoles || !isReservedRole(role))
+      );
+    });
+  };
+
+  private onIncludeReservedRolesChange = (e: EuiSwitchEvent) => {
+    this.setState({
+      includeReservedRoles: e.target.checked,
+    });
   };
 
   private handleDelete = () => {
@@ -334,6 +346,20 @@ export class RolesGridPage extends Component<Props, State> {
           }}
         />
       </EuiButton>
+    );
+  }
+  private renderToolsRight() {
+    return (
+      <EuiSwitch
+        label={
+          <FormattedMessage
+            id="xpack.security.management.roles.showReservedRolesLabel"
+            defaultMessage="Show reserved roles"
+          />
+        }
+        checked={this.state.includeReservedRoles}
+        onChange={this.onIncludeReservedRolesChange}
+      />
     );
   }
   private onCancelDelete = () => {
