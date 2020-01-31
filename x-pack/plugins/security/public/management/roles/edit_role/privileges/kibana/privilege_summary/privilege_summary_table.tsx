@@ -96,7 +96,7 @@ export const PrivilegeSummaryTable = (props: Props) => {
         }
         return (
           <span>
-            {iconTip} {primary?.name ?? 'NO SOUP!'}
+            {iconTip} {primary?.name ?? 'None'}
           </span>
         );
       },

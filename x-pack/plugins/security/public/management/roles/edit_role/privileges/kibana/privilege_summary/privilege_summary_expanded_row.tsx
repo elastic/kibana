@@ -97,6 +97,6 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
       effectivePrivileges.includes(p.id)
     );
 
-    return <EuiText size="s">{firstSelectedPrivilege?.name ?? 'NO SOUP!!!'}</EuiText>;
+    return <EuiText size="s">{firstSelectedPrivilege?.name ?? 'None'}</EuiText>;
   }
 };

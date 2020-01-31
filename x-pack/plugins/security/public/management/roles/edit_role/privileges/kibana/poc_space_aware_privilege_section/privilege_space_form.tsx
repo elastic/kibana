@@ -111,7 +111,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               this.props.kibanaPrivileges,
               this.state.role,
               this.state.editingIndex
-            ).hasSupersededPrivileges() && (
+            ).hasSupersededInheritedPrivileges() && (
               <Fragment>
                 <EuiCallOut color="warning" iconType="alert">
                   This is a warning message explaining how global privileges are more permissive

@@ -21,13 +21,13 @@ import { PrivilegeDisplay } from './privilege_display';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
-import { PrivilegeCalculator } from '../privilege_calculator';
+import { PrivilegeTableCalculator } from '../privilege_calculator';
 
 const SPACES_DISPLAY_COUNT = 4;
 
 interface Props {
   role: Role;
-  privilegeCalculator: PrivilegeCalculator;
+  privilegeCalculator: PrivilegeTableCalculator;
   onChange: (role: Role) => void;
   onEdit: (spacesIndex: number) => void;
   displaySpaces: Space[];
@@ -116,7 +116,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           if (record.isGlobal) {
             button = (
               <SpacesPopoverList
-                spaces={this.props.displaySpaces}
+                spaces={this.props.displaySpaces.filter(s => s.id !== '*')}
                 buttonText={this.props.intl.formatMessage({
                   id: 'xpack.security.management.editRole.spacePrivilegeTable.showAllSpacesLink',
                   defaultMessage: 'show spaces',
@@ -170,26 +170,12 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         field: 'privileges',
         name: 'Privileges',
         render: (privileges: TableRow['privileges'], record: TableRow) => {
-          const scopedCalculator = privilegeCalculator.getScopedInstance(
-            this.props.role,
-            record.spacesIndex
-          );
-          const basePrivilege = Object.values(scopedCalculator.describeBasePrivileges()).find(
-            bp => bp.selected
-          );
-
           if (privileges.reserved.length > 0) {
             return <PrivilegeDisplay privilege={privileges.reserved} />;
           }
 
-          const showCustom = scopedCalculator.hasNonSupersededFeaturePrivileges();
-
           return (
-            <PrivilegeDisplay
-              privilege={
-                showCustom ? CUSTOM_PRIVILEGE_VALUE : basePrivilege ? basePrivilege.id : 'OH NOES'
-              }
-            />
+            <PrivilegeDisplay privilege={privilegeCalculator.getDisplayedPrivilege(privileges)} />
           );
         },
       },

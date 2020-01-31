@@ -174,7 +174,7 @@ export class PrivilegeFormCalculator {
     return nextPrivileges;
   }
 
-  public hasSupersededPrivileges() {
+  public hasSupersededInheritedPrivileges() {
     const global = this.locateGlobalPrivilege(this.role);
 
     if (this.privilegeScope === 'global' || !global) {
