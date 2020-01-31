@@ -29,18 +29,6 @@ import {
 
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
-import { createVisTypeXyVisFn } from './vis_type_vislib_vis_fn';
-import { createPieVisFn } from './pie_fn';
-import {
-  createHistogramVisTypeDefinition,
-  createLineVisTypeDefinition,
-  createPieVisTypeDefinition,
-  createAreaVisTypeDefinition,
-  createHeatmapVisTypeDefinition,
-  createHorizontalBarVisTypeDefinition,
-  createGaugeVisTypeDefinition,
-  createGoalVisTypeDefinition,
-} from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 
 export interface VisTypeXyDependencies {
@@ -81,19 +69,13 @@ export class VisTypeXyPlugin implements Plugin<Promise<void>, void> {
       charts,
     };
 
-    expressions.registerFunction(createVisTypeXyVisFn);
-    expressions.registerFunction(createPieVisFn);
+    const visTypeDefinitions: any[] = [];
+    const visFunctions: any = [];
 
-    [
-      createHistogramVisTypeDefinition,
-      createLineVisTypeDefinition,
-      createPieVisTypeDefinition,
-      createAreaVisTypeDefinition,
-      createHeatmapVisTypeDefinition,
-      createHorizontalBarVisTypeDefinition,
-      createGaugeVisTypeDefinition,
-      createGoalVisTypeDefinition,
-    ].forEach(vis => visualizations.types.createBaseVisualization(vis(visualizationDependencies)));
+    visFunctions.forEach((fn: any) => expressions.registerFunction(fn));
+    visTypeDefinitions.forEach((vis: any) =>
+      visualizations.types.createBaseVisualization(vis(visualizationDependencies))
+    );
   }
 
   public start(core: CoreStart, deps: VisTypeXyPluginStartDependencies) {
