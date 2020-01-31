@@ -15,7 +15,7 @@ import { fetchDynamicSettings } from '../api';
 
 export function* fetchDynamicSettingsEffect() {
   yield takeLatest(
-    getDynamicSettings,
+    String(getDynamicSettings),
     fetchEffectFactory(fetchDynamicSettings, getDynamicSettingsSuccess, getDynamicSettingsFail)
   );
 }

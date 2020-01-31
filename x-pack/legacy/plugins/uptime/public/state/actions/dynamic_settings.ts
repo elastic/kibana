@@ -6,12 +6,12 @@
 import { createAction } from 'redux-actions';
 import { DynamicSettings } from '../../../common/runtime_types';
 
-export const getDynamicSettings = createAction('GET_DYNAMIC_SETTINGS');
+export const getDynamicSettings = createAction<{}>('GET_DYNAMIC_SETTING');
 export const getDynamicSettingsSuccess = createAction<DynamicSettings>(
   'GET_DYNAMIC_SETTINGS_SUCCESS'
 );
-export const getDynamicSettingsFail = createAction<{ error: Error }>('GET_DYNAMIC_SETTINGS_FAIL');
+export const getDynamicSettingsFail = createAction<Error>('GET_DYNAMIC_SETTINGS_FAIL');
 
 export const setDynamicSettings = createAction<DynamicSettings>('SET_DYNAMIC_SETTINGS');
 export const setDynamicSettingsSuccess = createAction('SET_DYNAMIC_SETTINGS_SUCCESS');
-export const setDynamicSettingsFail = createAction<{ error: Error }>('SET_DYNAMIC_SETTINGS_FAIL');
+export const setDynamicSettingsFail = createAction<Error>('SET_DYNAMIC_SETTINGS_FAIL');

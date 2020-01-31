@@ -17,10 +17,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { connect } from 'react-redux';
-import { AppState, store } from '../state';
+import { AppState } from '../state';
 import { selectDynamicSettings } from '../state/selectors';
 import { DynamicSettingsState } from '../state/reducers/dynamic_settings';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
@@ -29,7 +30,22 @@ interface Props {
   dynamicSettingsState: DynamicSettingsState;
 }
 
-export const SettingsPageComponent = ({ dynamicSettingsState: dss }: Props) => {
+interface DispatchProps {
+  loadDynamicSettings: typeof getDynamicSettings;
+}
+
+export const SettingsPageComponent = ({
+  dynamicSettingsState: dss,
+  loadDynamicSettings,
+}: Props & DispatchProps) => {
+  useEffect(() => {
+    loadDynamicSettings({});
+  }, [loadDynamicSettings]);
+
+  if (dss.loading) {
+    return <EuiText>Loading...</EuiText>;
+  }
+
   return (
     <>
       <EuiPanel>
@@ -89,6 +105,7 @@ export const SettingsPageComponent = ({ dynamicSettingsState: dss }: Props) => {
                 fullWidth
                 disabled={dss.loading}
                 isLoading={dss.loading}
+                defaultValue={dss.settings?.heartbeatIndexName}
                 // readOnly={readOnly}
                 // {...uptimeAliasFieldProps}
               />
@@ -139,4 +156,10 @@ const mapStateToProps = (state: AppState) => ({
   dynamicSettingsState: selectDynamicSettings(state),
 });
 
-export const SettingsPage = connect(mapStateToProps, null)(SettingsPageComponent);
+const mapDispatchToProps = (dispatch: any) => ({
+  loadDynamicSettings: (): DispatchProps => {
+    return dispatch(getDynamicSettings({}));
+  },
+});
+
+export const SettingsPage = connect(mapStateToProps, mapDispatchToProps)(SettingsPageComponent);

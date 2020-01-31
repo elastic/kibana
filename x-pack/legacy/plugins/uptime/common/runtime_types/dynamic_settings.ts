@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 
 export const DynamicSettingsType = t.type({
-  indexPattern: t.string,
+  heartbeatIndexName: t.string,
 });
 
 export type DynamicSettings = t.TypeOf<typeof DynamicSettingsType>;

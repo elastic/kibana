@@ -19,9 +19,7 @@ export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSer
   },
   handler: async ({ dynamicSettings }, _context, _request, response): Promise<any> => {
     return response.ok({
-      body: {
-        dynamic_settings: dynamicSettings,
-      },
+      body: dynamicSettings,
     });
   },
 });
