@@ -9,7 +9,7 @@ import {
   ES_MVT_SEARCH,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
-  ES_GEO_FIELD_TYPE,
+  ES_GEO_FIELD_TYPE, MVT_SOURCE_ID,
 } from '../../../../common/constants';
 import { TiledVectorLayer } from '../../tiled_vector_layer';
 import uuid from 'uuid/v4';
@@ -91,7 +91,7 @@ export class ESMVTSearchSource extends ESSearchSource {
   }
 
   getMvtSourceLayer() {
-    return 'geojsonLayer';
+    return MVT_SOURCE_ID;
   }
 
   isTileSource() {

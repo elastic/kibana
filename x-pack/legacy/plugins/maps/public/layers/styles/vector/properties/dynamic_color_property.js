@@ -141,7 +141,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       }
 
 
-      colorStops = this._getMbOrdinalColorStops(fieldMeta.max, fieldMeta.min);
+      colorStops = this._getMbOrdinalColorStops((fieldMeta.max - fieldMeta.min), fieldMeta.min);
       console.log('cs', colorStops);
       getFunction = 'get';
       propFieldName = fieldName;

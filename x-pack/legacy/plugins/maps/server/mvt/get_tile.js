@@ -7,7 +7,7 @@
 import geojsonvt from 'geojson-vt';
 import vtpbf from 'vt-pbf';
 import _ from 'lodash';
-import { FEATURE_ID_PROPERTY_NAME } from '../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME, MVT_SOURCE_ID } from '../../common/constants';
 
 export async function getTile({
   esClient,
@@ -124,10 +124,89 @@ export async function getTile({
     const tile = tileIndex.getTile(z, x, y);
 
     if (tile) {
-      const pbf = vtpbf.fromGeojsonVt({ geojsonLayer: tile }, { version: 2 });
+      const pbf = vtpbf.fromGeojsonVt({ [MVT_SOURCE_ID]: tile }, { version: 2 });
       const buffer = Buffer.from(pbf);
 
       // server.log('info', `bytelength: ${buffer.byteLength}`);
+
+      return buffer;
+    } else {
+      return null;
+    }
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function getGridTile({
+  esClient,
+  server,
+  indexPattern,
+  size,
+  geometryFieldName,
+  x,
+  y,
+  z,
+  fields = [],
+  requestBody = {},
+}) {
+  // server.log('info', { indexPattern, size, geometryFieldName, x, y, z, fields });
+  const polygon = toBoundingBox(x, y, z);
+
+  try {
+    let result;
+    try {
+      const geoShapeFilter = {
+        geo_shape: {
+          [geometryFieldName]: {
+            shape: polygon,
+            relation: 'INTERSECTS',
+          },
+        },
+      };
+
+      requestBody.query.bool.filter.push(geoShapeFilter);
+
+      const esQuery = {
+        index: indexPattern,
+        body: requestBody,
+      };
+      server.log('info', JSON.stringify(esQuery));
+      result = await esClient.search(esQuery);
+      server.log('result', JSON.stringify(result));
+    } catch (e) {
+      server.log('error', e.message);
+      throw e;
+    }
+
+    server.log('info', `result length ${result.body.hits.hits.length}`);
+
+    const ffeats = [];
+
+    const featureCollection = {
+      features: ffeats,
+      type: 'FeatureCollection',
+    };
+
+    // server.log('info', `feature length ${featureCollection.features.length}`);
+
+    const tileIndex = geojsonvt(featureCollection, {
+      maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24
+      tolerance: 3, // simplification tolerance (higher means simpler)
+      extent: 4096, // tile extent (both width and height)
+      buffer: 64, // tile buffer on each side
+      debug: 0, // logging level (0 to disable, 1 or 2)
+      lineMetrics: false, // whether to enable line metrics tracking for LineString/MultiLineString features
+      promoteId: null, // name of a feature property to promote to feature.id. Cannot be used with `generateId`
+      generateId: false, // whether to generate feature ids. Cannot be used with `promoteId`
+      indexMaxZoom: 5, // max zoom in the initial tile index
+      indexMaxPoints: 100000, // max number of points per tile in the index
+    });
+    const tile = tileIndex.getTile(z, x, y);
+
+    if (tile) {
+      const pbf = vtpbf.fromGeojsonVt({ [MVT_SOURCE_ID]: tile }, { version: 2 });
+      const buffer = Buffer.from(pbf);
 
       return buffer;
     } else {

@@ -158,40 +158,6 @@ export class MBMapContainer extends React.Component {
         resolve(mbMap);
 
 
-        // try {
-        //   mbMap.addLayer({
-        //     "id": 'foobar_line',
-        //     "type": "line",
-        //     "source": {
-        //       "type": "vector",
-        //       // "tiles": ["https://d25uarhxywzl1j.cloudfront.net/v0.1/{z}/{x}/{y}.mvt"],
-        //       "tiles": [`http://localhost:5601/jco/api/maps/mvt/getTile?x={x}&y={y}&z={z}&geometryFieldName=geometry&indexPattern=ky_roads&fields=fclass,_id`],
-        //       // "tiles": [`http://localhost:8080/?x={x}&y={y}&z={z}&index=ky_roads&geometry=geometry&size=10000&fields=fclass`],
-        //
-        //
-        //       // "minzoom": 6,
-        //       // "maxzoom": 14
-        //       "tileSize": 512
-        //     },
-        //     "source-layer": "geojsonLayer",
-        //     "layout": {
-        //       "line-cap": "round",
-        //       "line-join": "round"
-        //     },
-        //     "paint": {
-        //       "line-opacity": 0.6,
-        //       // "line-color": "rgb(53, 175, 109)",
-        //       "line-color": ["match", ['get', 'fclass'], "residential", "#00FF00", "#FF0000"],
-        //       "line-width": 2
-        //     }
-        //   });
-        // }catch(e){
-        //   console.error(e);
-        // }
-
-
-
-
       });
 
 

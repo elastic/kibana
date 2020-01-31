@@ -25,6 +25,12 @@ const { IndexPatternSelect } = npStart.plugins.data.ui;
 
 const requestTypeOptions = [
   {
+    label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
+      defaultMessage: 'clusters',
+    }),
+    value: RENDER_AS.POINT,
+  },
+  {
     label: i18n.translate('xpack.maps.source.esGeoGrid.gridRectangleDropdownOption', {
       defaultMessage: 'grid rectangles',
     }),
@@ -35,12 +41,6 @@ const requestTypeOptions = [
       defaultMessage: 'heat map',
     }),
     value: RENDER_AS.HEATMAP,
-  },
-  {
-    label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
-      defaultMessage: 'clusters',
-    }),
-    value: RENDER_AS.POINT,
   },
 ];
 
@@ -184,6 +184,8 @@ export class CreateSourceEditor extends Component {
       return null;
     }
 
+    const options = this.props.clustersOnly ? requestTypeOptions.slice(0, 1) : requestTypeOptions;
+
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.source.esGeoGrid.showAsLabel', {
@@ -195,7 +197,7 @@ export class CreateSourceEditor extends Component {
             defaultMessage: 'Select a single option',
           })}
           singleSelection={{ asPlainText: true }}
-          options={requestTypeOptions}
+          options={options}
           selectedOptions={[this.state.requestType]}
           onChange={this._onRequestTypeSelect}
           isClearable={false}

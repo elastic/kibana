@@ -28,6 +28,7 @@ export const APP_ICON = 'gisApp';
 export const TELEMETRY_TYPE = 'maps-telemetry';
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
+export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 
 export const MAP_APP_PATH = `app/${APP_ID}`;
 export const GIS_API_PATH = `api/${APP_ID}`;
@@ -38,6 +39,8 @@ export const MAP_BASE_URL = `/${MAP_APP_PATH}#/${MAP_SAVED_OBJECT_TYPE}`;
 export function createMapPath(id) {
   return `${MAP_BASE_URL}/${id}`;
 }
+
+export const MVT_SOURCE_ID = 'geojsonLayer';
 
 export const LAYER_TYPE = {
   TILE: 'TILE',

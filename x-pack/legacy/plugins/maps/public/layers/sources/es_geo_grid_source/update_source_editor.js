@@ -91,12 +91,14 @@ export class UpdateSourceEditor extends Component {
     );
   }
 
-  render() {
+  _renderResolutionEditor() {
+    if (this.props.showResolution === false) {
+      return null;
+    }
+
     return (
       <Fragment>
-        {this._renderMetricsPanel()}
         <EuiSpacer size="s" />
-
         <EuiPanel>
           <EuiTitle size="xs">
             <h6>
@@ -112,6 +114,15 @@ export class UpdateSourceEditor extends Component {
             onChange={this._onResolutionChange}
           />
         </EuiPanel>
+      </Fragment>
+    );
+  }
+
+  render() {
+    return (
+      <Fragment>
+        {this._renderMetricsPanel()}
+        {this._renderResolutionEditor()}
         <EuiSpacer size="s" />
       </Fragment>
     );
