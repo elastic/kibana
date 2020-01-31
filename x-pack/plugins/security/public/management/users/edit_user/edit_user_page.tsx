@@ -28,13 +28,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
-import { User, EditUser, Role } from '../../../../common/model';
+import { User, EditUser, Role, isDeprecatedRole } from '../../../../common/model';
 import { AuthenticationServiceSetup } from '../../../authentication';
 import { USERS_PATH } from '../../management_urls';
 import { RolesAPIClient } from '../../roles';
 import { ConfirmDeleteUsers, ChangePasswordForm } from '../components';
 import { UserValidator, UserValidationResult } from './validate_user';
-import { RoleComboBox } from './role_combo_box';
+import { RoleComboBox } from '../../role_combo_box';
 import { UserAPIClient } from '..';
 
 interface Props {
@@ -376,9 +376,10 @@ export class EditUserPage extends Component<Props, State> {
       return null;
     }
 
-    const hasAnyDeprecatedRolesAssigned = roles.filter(
-      role => isDeprecatedRole(role) && selectedRoles.includes(role.name)
-    );
+    const hasAnyDeprecatedRolesAssigned = selectedRoles.some(selected => {
+      const role = roles.find(r => r.name === selected);
+      return role && isDeprecatedRole(role);
+    });
 
     const roleHelpText = hasAnyDeprecatedRolesAssigned ? (
       <FormattedMessage
@@ -501,6 +502,7 @@ export class EditUserPage extends Component<Props, State> {
                   'xpack.security.management.users.editUser.rolesFormRowLabel',
                   { defaultMessage: 'Roles' }
                 )}
+                helpText={roleHelpText}
               >
                 <RoleComboBox
                   availableRoles={roles}

@@ -15,6 +15,7 @@ export {
   RoleIndexPrivilege,
   RoleKibanaPrivilege,
   copyRole,
+  isDeprecatedRole,
   isReadOnlyRole,
   isReservedRole,
   isRoleEnabled,

@@ -7,8 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiText } from '@elastic/eui';
-import { isDeprecatedRole } from '../../../../lib/role_utils';
-import { Role } from '../../../../../common/model';
+import { Role, isDeprecatedRole } from '../../common/model';
 
 interface Props {
   availableRoles: Role[];

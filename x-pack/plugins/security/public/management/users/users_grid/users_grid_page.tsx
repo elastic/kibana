@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
-import { User } from '../../../../common/model';
+import { User, isDeprecatedRole, Role } from '../../../../common/model';
 import { ConfirmDeleteUsers } from '../components';
 import { UserAPIClient } from '..';
 
@@ -147,8 +147,7 @@ export class UsersGridPage extends Component<Props, State> {
                   color={isDeprecated ? 'warning' : 'primary'}
                   title={
                     isDeprecated
-                      ? intl.formatMessage({
-                          id: 'xpack.security.management.users.deprecatedRoleTitle',
+                      ? i18n.translate('xpack.security.management.users.deprecatedRoleTitle', {
                           defaultMessage: 'This role is deprecated, and should no longer be used.',
                         })
                       : undefined

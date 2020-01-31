@@ -23,7 +23,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
-import { Role, isRoleEnabled, isReadOnlyRole, isReservedRole } from '../../../../common/model';
+import {
+  Role,
+  isRoleEnabled,
+  isReadOnlyRole,
+  isReservedRole,
+  isDeprecatedRole,
+} from '../../../../common/model';
 import { RolesAPIClient } from '../roles_api_client';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
@@ -192,11 +198,11 @@ export class RolesGridPage extends Component<Props, State> {
         name: i18n.translate('xpack.security.management.roles.reservedColumnName', {
           defaultMessage: 'Reserved',
         }),
-        sortable: ({ metadata }: Role) => Boolean(metadata && metadata._reserved),
+        sortable: (role: Role) => isReservedRole(role),
         dataType: 'boolean',
         align: 'right',
         description: reservedRoleDesc,
-        render: (reserved: boolean | undefined, record: Role) => {
+        render: (metadata: Role['metadata'], record: Role) => {
           const isDeprecated = isDeprecatedRole(record);
 
           const label = isDeprecated
@@ -207,7 +213,7 @@ export class RolesGridPage extends Component<Props, State> {
                 defaultMessage: 'Reserved role',
               });
 
-          return metadata && metadata._reserved ? (
+          return isReservedRole(record) ? (
             <span title={label}>
               <EuiIcon
                 aria-label={label}
