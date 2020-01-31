@@ -19,8 +19,9 @@
 
 import { createHashHistory, History } from 'history';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { AppBase } from 'kibana/public';
+import { AppBase, ToastsSetup } from 'kibana/public';
 import { setStateToKbnUrl } from './kbn_url_storage';
+import { unhashUrl } from './hash_unhash_url';
 
 export interface KbnUrlTracker {
   /**
@@ -53,6 +54,7 @@ export function createKbnUrlTracker({
   storageKey,
   stateParams,
   navLinkUpdater$,
+  toastNotifications,
   history,
   storage,
 }: {
@@ -70,10 +72,6 @@ export function createKbnUrlTracker({
    */
   stateParams: Array<{
     /**
-     * Function that returns a flag whether to store the state directly in the URL or whether to reference them from session storage via a hash value
-     */
-    useHash: () => boolean;
-    /**
      * Key of the query parameter containing the state
      */
     kbnUrlKey: string;
@@ -90,6 +88,10 @@ export function createKbnUrlTracker({
    * App updater subject passed into the application definition to change nav link url.
    */
   navLinkUpdater$: BehaviorSubject<(app: AppBase) => { activeUrl?: string } | undefined>;
+  /**
+   * Toast notifications service to show toasts in error cases.
+   */
+  toastNotifications: ToastsSetup;
   /**
    * History object to use to track url changes. If this isn't provided, a local history instance will be created.
    */
@@ -110,17 +112,30 @@ export function createKbnUrlTracker({
     navLinkUpdater$.next(() => ({ activeUrl: baseUrl + hash }));
   }
 
+  function getActiveSubUrl(url: string) {
+    // remove baseUrl prefix (just storing the sub url part)
+    return url.substr(baseUrl.length);
+  }
+
   // track current hash when within app
   const stopHistory = historyInstance.listen(location => {
     if (!appIsMounted) {
       return;
     }
-    activeUrl = '#' + location.pathname + location.search;
+    const urlWithHashes = baseUrl + '#' + location.pathname + location.search;
+    let urlWithStates = '';
+    try {
+      urlWithStates = unhashUrl(urlWithHashes);
+    } catch (e) {
+      toastNotifications.addDanger(e.message);
+    }
+
+    activeUrl = getActiveSubUrl(urlWithStates || urlWithHashes);
     storageInstance.setItem(storageKey, activeUrl);
   });
 
   // propagate state updates when in other apps
-  const subs = stateParams.map(({ stateUpdate$, kbnUrlKey, useHash }) =>
+  const subs = stateParams.map(({ stateUpdate$, kbnUrlKey }) =>
     stateUpdate$.subscribe(state => {
       if (appIsMounted) {
         return;
@@ -128,11 +143,11 @@ export function createKbnUrlTracker({
       const updatedUrl = setStateToKbnUrl(
         kbnUrlKey,
         state,
-        { useHash: useHash() },
+        { useHash: false },
         baseUrl + (activeUrl || defaultSubUrl)
       );
       // remove baseUrl prefix (just storing the sub url part)
-      activeUrl = updatedUrl.substr(baseUrl.length);
+      activeUrl = getActiveSubUrl(updatedUrl);
       storageInstance.setItem(storageKey, activeUrl);
       setNavLink(activeUrl);
     })

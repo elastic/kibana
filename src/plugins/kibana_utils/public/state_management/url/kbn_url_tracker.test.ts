@@ -21,13 +21,12 @@ import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { createMemoryHistory, History } from 'history';
 import { createKbnUrlTracker, KbnUrlTracker } from './kbn_url_tracker';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { AppBase } from 'kibana/public';
+import { AppBase, ToastsSetup } from 'kibana/public';
+import { coreMock } from '../../../../../core/public/mocks';
+import { unhashUrl } from './hash_unhash_url';
 
-jest.mock('../../storage/hashed_item_store', () => ({
-  hashedItemStore: {
-    getItem: () => null,
-    setItem: () => true,
-  },
+jest.mock('./hash_unhash_url', () => ({
+  unhashUrl: jest.fn(x => x),
 }));
 
 describe('kbnUrlTracker', () => {
@@ -37,6 +36,7 @@ describe('kbnUrlTracker', () => {
   let state1Subject: Subject<{ key1: string }>;
   let state2Subject: Subject<{ key2: string }>;
   let navLinkUpdaterSubject: BehaviorSubject<(app: AppBase) => { activeUrl?: string } | undefined>;
+  let toastService: jest.Mocked<ToastsSetup>;
 
   function createTracker() {
     urlTracker = createKbnUrlTracker({
@@ -48,16 +48,15 @@ describe('kbnUrlTracker', () => {
       stateParams: [
         {
           kbnUrlKey: 'state1',
-          useHash: () => false,
           stateUpdate$: state1Subject.asObservable(),
         },
         {
           kbnUrlKey: 'state2',
-          useHash: () => true,
           stateUpdate$: state2Subject.asObservable(),
         },
       ],
       navLinkUpdater$: navLinkUpdaterSubject,
+      toastNotifications: toastService,
     });
   }
 
@@ -66,6 +65,8 @@ describe('kbnUrlTracker', () => {
   }
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    toastService = coreMock.createSetup().notifications.toasts;
     storage = new StubBrowserStorage();
     history = createMemoryHistory();
     state1Subject = new Subject<{ key1: string }>();
@@ -110,6 +111,29 @@ describe('kbnUrlTracker', () => {
     expect(getActiveNavLinkUrl()).toEqual('/app/test#/deep/path/3');
   });
 
+  test('unhash all urls that are recorded while app is mounted', () => {
+    (unhashUrl as jest.Mock).mockImplementation(x => x + '?unhashed');
+    createTracker();
+    urlTracker.appMounted();
+    history.push('/deep/path/2');
+    history.push('/deep/path/3');
+    urlTracker.appUnMounted();
+    expect(unhashUrl).toHaveBeenCalledTimes(2);
+    expect(getActiveNavLinkUrl()).toEqual('/app/test#/deep/path/3?unhashed');
+  });
+
+  test('show warning and use hashed url if unhashing does not work', () => {
+    (unhashUrl as jest.Mock).mockImplementation(() => {
+      throw new Error('unhash broke');
+    });
+    createTracker();
+    urlTracker.appMounted();
+    history.push('/deep/path/2');
+    urlTracker.appUnMounted();
+    expect(getActiveNavLinkUrl()).toEqual('/app/test#/deep/path/2');
+    expect(toastService.addDanger).toHaveBeenCalledWith('unhash broke');
+  });
+
   test('change nav link back to default if app gets mounted again', () => {
     createTracker();
     urlTracker.appMounted();
@@ -149,18 +173,12 @@ describe('kbnUrlTracker', () => {
     expect(getActiveNavLinkUrl()).toMatchInlineSnapshot(`"/app/test#/start?state1=(key1:def)"`);
   });
 
-  test('update hashed state param when app is not mounted', () => {
-    createTracker();
-    state2Subject.next({ key2: 'abc' });
-    expect(getActiveNavLinkUrl()).toMatchInlineSnapshot(`"/app/test#/start?state2=h@556a7ad"`);
-  });
-
   test('update multiple state params when app is not mounted', () => {
     createTracker();
     state1Subject.next({ key1: 'abc' });
     state2Subject.next({ key2: 'def' });
     expect(getActiveNavLinkUrl()).toMatchInlineSnapshot(
-      `"/app/test#/start?state1=(key1:abc)&state2=h@5e90465"`
+      `"/app/test#/start?state1=(key1:abc)&state2=(key2:def)"`
     );
   });
 });

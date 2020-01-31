@@ -100,9 +100,9 @@ export class DashboardPlugin implements Plugin {
       defaultSubUrl: '#/dashboards',
       storageKey: 'lastUrl:dashboard',
       navLinkUpdater$: this.appStateUpdater,
+      toastNotifications: core.notifications.toasts,
       stateParams: [
         {
-          useHash: () => core.uiSettings.get('state:storeInSessionStorage', false),
           kbnUrlKey: '_g',
           stateUpdate$: querySyncStateContainer.state$,
         },
