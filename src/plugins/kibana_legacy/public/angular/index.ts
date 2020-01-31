@@ -17,6 +17,6 @@
  * under the License.
  */
 // @ts-ignore
-export { PromiseServiceCreator } from './promises/promises';
+export { PromiseServiceCreator } from './promises';
 // @ts-ignore
-export { watchMultiDecorator } from './watch_multi/watch_multi';
+export { watchMultiDecorator } from './watch_multi';
