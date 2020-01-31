@@ -49,7 +49,7 @@ export function compose(server?: any): FleetServerLib {
     encryptedObjectAdapter
   );
 
-  const policies = new PolicyLib(policyRepository);
+  const policies = new PolicyLib(policyRepository, soDatabaseAdapter);
   // TODO will fix need to figure what to do with contract tests
   // @ts-ignore
   const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, framework);

@@ -5,7 +5,6 @@
  */
 
 import {
-  ReturnTypeList,
   ReturnTypeCreate,
   ReturnTypeGet,
   ReturnTypeUpdate,
@@ -22,7 +21,8 @@ export class RestPolicyAdapter extends PolicyAdapter {
 
   public async get(id: string): Promise<Policy | null> {
     try {
-      return (await this.REST.get<ReturnTypeGet<Policy>>(`/api/ingest/policies/${id}`)).item;
+      return (await this.REST.get<ReturnTypeGet<Policy>>(`/api/ingest_manager/agent_configs/${id}`))
+        .item;
     } catch (e) {
       return null;
     }
@@ -30,7 +30,7 @@ export class RestPolicyAdapter extends PolicyAdapter {
 
   public async getAll(page: number, perPage: number, kuery?: string) {
     try {
-      return await this.REST.get<ReturnTypeList<Policy>>(`/api/ingest/policies`, {
+      return await this.REST.get<any>(`/api/ingest_manager/agent_configs`, {
         query: {
           page,
           perPage,
@@ -39,7 +39,7 @@ export class RestPolicyAdapter extends PolicyAdapter {
       });
     } catch (e) {
       return {
-        list: [],
+        items: [],
         success: false,
         page,
         total: 0,
@@ -49,13 +49,18 @@ export class RestPolicyAdapter extends PolicyAdapter {
   }
 
   public async create(policy: Partial<Policy>) {
-    return await this.REST.post<ReturnTypeCreate<Policy>>(`/api/ingest/policies`, { body: policy });
+    return await this.REST.post<ReturnTypeCreate<Policy>>(`/api/ingest_manager/agent_configs`, {
+      body: { ...policy },
+    });
   }
 
   public async update(id: string, policy: Partial<Policy>) {
-    return await this.REST.put<ReturnTypeUpdate<Policy>>(`/api/ingest/policies/${id}`, {
-      body: policy,
-    });
+    return await this.REST.put<ReturnTypeUpdate<Policy>>(
+      `/api/ingest_manager/agent_configs/${id}`,
+      {
+        body: { ...policy },
+      }
+    );
   }
 
   public async getAgentStatus(policyId: string) {

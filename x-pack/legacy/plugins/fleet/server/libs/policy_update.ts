@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkUser } from '../adapters/framework/adapter_types';
 import { FleetServerLib } from './types';
 
 export function makePolicyUpdateHandler(libs: FleetServerLib) {
-  return async function policyUpdateHandler(user: FrameworkUser, action: string, policyId: string) {
+  return async function policyUpdateHandler(action: string, policyId: string) {
     const internalUser = libs.framework.getInternalUser();
 
     if (action === 'created') {

@@ -24,14 +24,12 @@ import { InstallLib } from '../install';
 import { AgentPolicyLib } from '../agent_policy';
 import { AgentEventLib } from '../agent_event';
 import { makePolicyUpdateHandler } from '../policy_update';
+import { agentConfigService, outputService } from '../../../../../../plugins/ingest_manager/server';
 import { FleetPluginsStart } from '../../shim';
 
 export function compose(server: any, pluginsStart: FleetPluginsStart): FleetServerLib {
   const frameworkAdapter = new FrameworkAdapter(server);
-  const policyAdapter = new PoliciesRepository(
-    server.plugins.ingest.policy,
-    server.plugins.ingest.outputs
-  );
+  const policyAdapter = new PoliciesRepository(agentConfigService, outputService);
 
   const framework = new FrameworkLib(frameworkAdapter);
   const soDatabaseAdapter = new SODatabaseAdapter(
@@ -49,7 +47,7 @@ export function compose(server: any, pluginsStart: FleetPluginsStart): FleetServ
   );
 
   const libs: FleetServerLib = ({} as any) as FleetServerLib;
-  const policies = new PolicyLib(policyAdapter);
+  const policies = new PolicyLib(policyAdapter, soDatabaseAdapter);
   const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, libs, pluginsStart);
   const agentsPolicy = new AgentPolicyLib(agentsRepository, policies);
   const agentEvents = new AgentEventLib(agentEventsRepository);
@@ -72,7 +70,7 @@ export function compose(server: any, pluginsStart: FleetPluginsStart): FleetServ
   });
 
   const policyUpdateHandler = makePolicyUpdateHandler(libs);
-  server.plugins.ingest.policy.registerPolicyUpdateHandler(policyUpdateHandler);
+  agentConfigService.registerAgentConfigUpdateHandler(policyUpdateHandler);
 
   return libs;
 }

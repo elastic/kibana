@@ -79,7 +79,7 @@ export const PolicyDetailsPage: React.FC<Props> = ({
   const unassignSelectedDatasources = async () => {
     setIsUnassignLoading(true);
     const { error: unassignError } = await sendRequest(httpClient, {
-      path: `/api/ingest/policies/${policyId}/removeDatasources`,
+      path: `/api/ingest_manager/agent_configs/${policyId}/removeDatasources`,
       method: 'post',
       body: {
         datasources: selectedDatasources,

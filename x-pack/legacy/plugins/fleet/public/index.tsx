@@ -38,14 +38,6 @@ async function startApp(libs: FrontendLibs) {
       }),
       basePath: `/ingest/agents`,
     });
-    libs.framework.registerManagementUI({
-      sectionId: 'ingest',
-      id: 'ingest_policies',
-      name: i18n.translate('xpack.fleet.policyManagementLinkLabel', {
-        defaultMessage: 'Policies',
-      }),
-      basePath: `/ingest/policies`,
-    });
   }
 }
 

@@ -102,7 +102,7 @@ export const AgentListPage: React.FC<{}> = () => {
   // Fetch policies method
   const fetchPolicies = async () => {
     setIsPoliciesLoading(true);
-    setPolicies((await libs.policies.getAll(1, 10000)).list);
+    setPolicies((await libs.policies.getAll(1, 10000)).items);
     setIsPoliciesLoading(false);
   };
 

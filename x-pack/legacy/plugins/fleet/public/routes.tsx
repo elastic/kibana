@@ -36,7 +36,7 @@ function useWaitUntilFrameworkReady() {
 export const AppRoutes: React.FC = () => {
   const setupRequest = useRequest({
     method: 'get',
-    path: '/api/ingest/internals/setup',
+    path: '/api/ingest_manager/fleet/setup',
   });
   const { isLoading } = useWaitUntilFrameworkReady();
   const libs = useLibs();

@@ -6,24 +6,23 @@
 
 import KbnServer from 'src/legacy/server/kbn_server';
 import { PluginSetupContract as SecurityPlugin } from '../../../../plugins/security/server';
-import { OutputsLib as IngestOutputLib } from '../../ingest/server/libs/outputs';
-import { PolicyLib as IngestPolicyLib } from '../../ingest/server/libs/policy';
+import {
+  outputService as IngestOutputLib,
+  agentConfigService as IngestPolicyLib,
+} from '../../../../plugins/ingest_manager/server';
 import {
   PluginSetupContract as EncryptedSavedObjectsSetupContract,
   PluginStartContract as EncryptedSavedObjectsStartContract,
 } from '../../../../plugins/encrypted_saved_objects/server';
 
 export interface IngestPluginStartContract {
-  outputs: IngestOutputLib;
-  policies: IngestPolicyLib;
+  outputs: typeof IngestOutputLib;
+  policies: typeof IngestPolicyLib;
 }
 
 export interface FleetPluginsStart {
   security: SecurityPluginStartContract;
-  ingest: {
-    outputs: IngestOutputLib;
-    policies: IngestPolicyLib;
-  };
+  ingest: IngestPluginStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsStartContract;
 }
 
@@ -38,7 +37,10 @@ export function shim(server: any) {
   const newPlatform = ((server as unknown) as KbnServer).newPlatform;
   const pluginsStart: FleetPluginsStart = {
     security: newPlatform.setup.plugins.security as SecurityPluginStartContract,
-    ingest: server.plugins.ingest,
+    ingest: {
+      outputs: IngestOutputLib,
+      policies: IngestPolicyLib,
+    },
     encryptedSavedObjects: newPlatform.start.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsStartContract,
   };

@@ -3,12 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  ReturnTypeList,
-  ReturnTypeCreate,
-  ReturnTypeUpdate,
-  ReturnTypeAction,
-} from '../../common/return_types';
+import { ReturnTypeCreate, ReturnTypeUpdate, ReturnTypeAction } from '../../common/return_types';
 import { Policy } from '../../common/types/domain_data';
 import { PolicyAdapter } from './adapters/policy/memory_policy_adapter';
 
@@ -24,11 +19,7 @@ export class PoliciesLib {
   }
 
   /** Get an array of all policies */
-  public getAll = async (
-    page: number,
-    perPage: number,
-    kuery?: string
-  ): Promise<ReturnTypeList<Policy>> => {
+  public getAll = async (page: number, perPage: number, kuery?: string): Promise<any> => {
     return await this.adapter.getAll(page, perPage, kuery);
   };
 
