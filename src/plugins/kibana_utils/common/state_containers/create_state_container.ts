@@ -31,14 +31,18 @@ import {
 const $$observable = (typeof Symbol === 'function' && (Symbol as any).observable) || '@@observable';
 const $$setActionType = '@@SET';
 
-const freeze: <T>(value: T) => T =
-  process.env.NODE_ENV !== 'production'
-    ? <T>(value: T): T => {
-        const isFreezable = value !== null && typeof value === 'object';
-        if (isFreezable) return deepFreeze(value) as T;
-        return value as T;
-      }
-    : <T>(value: T) => value as T;
+const isProduction =
+  typeof window === 'object'
+    ? process.env.NODE_ENV === 'production'
+    : !process.env.NODE_ENV || process.env.NODE_ENV === 'production';
+
+const freeze: <T>(value: T) => T = isProduction
+  ? <T>(value: T) => value as T
+  : <T>(value: T): T => {
+      const isFreezable = value !== null && typeof value === 'object';
+      if (isFreezable) return deepFreeze(value) as T;
+      return value as T;
+    };
 
 export function createStateContainer<State extends BaseState>(
   defaultState: State
