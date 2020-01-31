@@ -53,11 +53,22 @@ export const readRawTags = async ({
   alertsClient: AlertsClient;
   perPage?: number;
 }): Promise<string[]> => {
-  const firstTags = await findRules({ alertsClient, fields: ['tags'], perPage: 1, page: 1 });
+  // Get just one record so we can get the total count
+  const firstTags = await findRules({
+    alertsClient,
+    fields: ['tags'],
+    perPage: 1,
+    page: 1,
+    sortField: 'createdAt',
+    sortOrder: 'desc',
+  });
+  // Get all the rules to aggregate over all the tags of the rules
   const rules = await findRules({
     alertsClient,
     fields: ['tags'],
     perPage: firstTags.total,
+    sortField: 'createdAt',
+    sortOrder: 'desc',
     page: 1,
   });
   const tagSet = convertTagsToSet(rules.data);

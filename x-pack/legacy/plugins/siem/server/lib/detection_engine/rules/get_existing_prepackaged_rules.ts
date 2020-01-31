@@ -32,6 +32,8 @@ export const getRulesCount = async ({
     filter,
     perPage: 1,
     page: 1,
+    sortField: 'createdAt',
+    sortOrder: 'desc',
   });
   return firstRule.total;
 };
@@ -43,19 +45,14 @@ export const getRules = async ({
   alertsClient: AlertsClient;
   filter: string;
 }): Promise<RuleAlertType[]> => {
-  const firstPrepackedRules = await findRules({
-    alertsClient,
-    filter,
-    perPage: 1,
-    page: 1,
-  });
+  const count = await getRulesCount({ alertsClient, filter });
   const rules = await findRules({
     alertsClient,
     filter,
-    perPage: firstPrepackedRules.total,
+    perPage: count,
+    page: 1,
     sortField: 'createdAt',
     sortOrder: 'desc',
-    page: 1,
   });
 
   if (isAlertTypes(rules.data)) {
