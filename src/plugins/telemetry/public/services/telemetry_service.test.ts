@@ -90,27 +90,27 @@ describe('TelemetryService', () => {
     it('does not call reportOptInStatus if reportOptInStatusChange is false', async () => {
       const telemetryService = mockTelemetryService({ reportOptInStatusChange: false });
       telemetryService.getCanChangeOptInStatus = jest.fn().mockReturnValue(true);
-      telemetryService.reportOptInStatus = jest.fn();
+      telemetryService['reportOptInStatus'] = jest.fn();
       await telemetryService.setOptIn(true);
 
-      expect(telemetryService.reportOptInStatus).toBeCalledTimes(0);
+      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(0);
       expect(telemetryService['http'].post).toBeCalledTimes(1);
     });
 
     it('calls reportOptInStatus if reportOptInStatusChange is true', async () => {
       const telemetryService = mockTelemetryService({ reportOptInStatusChange: true });
       telemetryService.getCanChangeOptInStatus = jest.fn().mockReturnValue(true);
-      telemetryService.reportOptInStatus = jest.fn();
+      telemetryService['reportOptInStatus'] = jest.fn();
       await telemetryService.setOptIn(true);
 
-      expect(telemetryService.reportOptInStatus).toBeCalledTimes(1);
+      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(1);
       expect(telemetryService['http'].post).toBeCalledTimes(1);
     });
 
     it('adds an error toast on api error', async () => {
       const telemetryService = mockTelemetryService({ reportOptInStatusChange: false });
       telemetryService.getCanChangeOptInStatus = jest.fn().mockReturnValue(true);
-      telemetryService.reportOptInStatus = jest.fn();
+      telemetryService['reportOptInStatus'] = jest.fn();
       telemetryService['http'].post = jest.fn().mockImplementation((url: string) => {
         if (url === '/api/telemetry/v2/optIn') {
           throw Error('failed to update opt in.');
@@ -119,21 +119,21 @@ describe('TelemetryService', () => {
 
       await telemetryService.setOptIn(true);
       expect(telemetryService['http'].post).toBeCalledTimes(1);
-      expect(telemetryService.reportOptInStatus).toBeCalledTimes(0);
-      expect(telemetryService.notifications.toasts.addError).toBeCalledTimes(1);
+      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(0);
+      expect(telemetryService['notifications'].toasts.addError).toBeCalledTimes(1);
     });
 
     it('adds an error toast on reportOptInStatus error', async () => {
       const telemetryService = mockTelemetryService({ reportOptInStatusChange: true });
       telemetryService.getCanChangeOptInStatus = jest.fn().mockReturnValue(true);
-      telemetryService.reportOptInStatus = jest.fn().mockImplementation(() => {
+      telemetryService['reportOptInStatus'] = jest.fn().mockImplementation(() => {
         throw Error('failed to report OptIn Status.');
       });
 
       await telemetryService.setOptIn(true);
       expect(telemetryService['http'].post).toBeCalledTimes(1);
-      expect(telemetryService.reportOptInStatus).toBeCalledTimes(1);
-      expect(telemetryService.notifications.toasts.addError).toBeCalledTimes(1);
+      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(1);
+      expect(telemetryService['notifications'].toasts.addError).toBeCalledTimes(1);
     });
   });
 });

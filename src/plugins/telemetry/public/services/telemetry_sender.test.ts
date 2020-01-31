@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/* eslint-disable dot-notation */
 import { TelemetrySender } from './telemetry_sender';
 import { mockTelemetryService } from '../telemetry.mock';
 import { REPORT_INTERVAL_MS, LOCALSTORAGE_KEY } from '../../common/constants';
@@ -42,7 +43,7 @@ describe('TelemetrySender', () => {
     it('defaults lastReport if unset', () => {
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService);
-      expect(telemetrySender.lastReported).toBeUndefined();
+      expect(telemetrySender['lastReported']).toBeUndefined();
       expect(mockLocalStorage.getItem).toBeCalledTimes(1);
       expect(mockLocalStorage.getItem).toHaveBeenCalledWith(LOCALSTORAGE_KEY);
     });
@@ -52,7 +53,7 @@ describe('TelemetrySender', () => {
       mockLocalStorage.getItem.mockReturnValueOnce(JSON.stringify({ lastReport }));
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService);
-      expect(telemetrySender.lastReported).toBe(lastReport);
+      expect(telemetrySender['lastReported']).toBe(lastReport);
     });
   });
 
@@ -61,8 +62,8 @@ describe('TelemetrySender', () => {
       const lastReport = `${Date.now()}`;
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService);
-      telemetrySender.lastReported = lastReport;
-      telemetrySender.saveToBrowser();
+      telemetrySender['lastReported'] = lastReport;
+      telemetrySender['saveToBrowser']();
 
       expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(1);
       expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
@@ -77,7 +78,7 @@ describe('TelemetrySender', () => {
       const telemetryService = mockTelemetryService();
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
       const telemetrySender = new TelemetrySender(telemetryService);
-      const shouldSendRerpot = telemetrySender.shouldSendReport();
+      const shouldSendRerpot = telemetrySender['shouldSendReport']();
 
       expect(telemetryService.getIsOptedIn).toBeCalledTimes(1);
       expect(shouldSendRerpot).toBe(false);
@@ -87,9 +88,9 @@ describe('TelemetrySender', () => {
       const telemetryService = mockTelemetryService();
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService);
-      const shouldSendRerpot = telemetrySender.shouldSendReport();
+      const shouldSendRerpot = telemetrySender['shouldSendReport']();
 
-      expect(telemetrySender.lastReported).toBeUndefined();
+      expect(telemetrySender['lastReported']).toBeUndefined();
       expect(shouldSendRerpot).toBe(true);
     });
 
@@ -99,8 +100,8 @@ describe('TelemetrySender', () => {
       const telemetryService = mockTelemetryService();
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService);
-      telemetrySender.lastReported = `${lastReported}`;
-      const shouldSendRerpot = telemetrySender.shouldSendReport();
+      telemetrySender['lastReported'] = `${lastReported}`;
+      const shouldSendRerpot = telemetrySender['shouldSendReport']();
       expect(shouldSendRerpot).toBe(true);
     });
 
@@ -110,8 +111,8 @@ describe('TelemetrySender', () => {
       const telemetryService = mockTelemetryService();
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService);
-      telemetrySender.lastReported = `${lastReported}`;
-      const shouldSendRerpot = telemetrySender.shouldSendReport();
+      telemetrySender['lastReported'] = `${lastReported}`;
+      const shouldSendRerpot = telemetrySender['shouldSendReport']();
       expect(shouldSendRerpot).toBe(false);
     });
 
@@ -119,8 +120,8 @@ describe('TelemetrySender', () => {
       const telemetryService = mockTelemetryService();
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService);
-      telemetrySender.lastReported = `random_malformed_string`;
-      const shouldSendRerpot = telemetrySender.shouldSendReport();
+      telemetrySender['lastReported'] = `random_malformed_string`;
+      const shouldSendRerpot = telemetrySender['shouldSendReport']();
       expect(shouldSendRerpot).toBe(true);
     });
 
@@ -140,22 +141,22 @@ describe('TelemetrySender', () => {
       it('does not send if already sending', async () => {
         const telemetryService = mockTelemetryService();
         const telemetrySender = new TelemetrySender(telemetryService);
-        telemetrySender.shouldSendReport = jest.fn();
-        telemetrySender.isSending = true;
-        await telemetrySender.sendIfDue();
+        telemetrySender['shouldSendReport'] = jest.fn();
+        telemetrySender['isSending'] = true;
+        await telemetrySender['sendIfDue']();
 
-        expect(telemetrySender.shouldSendReport).toBeCalledTimes(0);
+        expect(telemetrySender['shouldSendReport']).toBeCalledTimes(0);
         expect(mockFetch).toBeCalledTimes(0);
       });
 
       it('does not send if shouldSendReport returns false', async () => {
         const telemetryService = mockTelemetryService();
         const telemetrySender = new TelemetrySender(telemetryService);
-        telemetrySender.shouldSendReport = jest.fn().mockReturnValue(false);
-        telemetrySender.isSending = false;
-        await telemetrySender.sendIfDue();
+        telemetrySender['shouldSendReport'] = jest.fn().mockReturnValue(false);
+        telemetrySender['isSending'] = false;
+        await telemetrySender['sendIfDue']();
 
-        expect(telemetrySender.shouldSendReport).toBeCalledTimes(1);
+        expect(telemetrySender['shouldSendReport']).toBeCalledTimes(1);
         expect(mockFetch).toBeCalledTimes(0);
       });
 
@@ -167,9 +168,9 @@ describe('TelemetrySender', () => {
         const telemetrySender = new TelemetrySender(telemetryService);
         telemetryService.getTelemetryUrl = jest.fn().mockReturnValue(mockTelemetryUrl);
         telemetryService.fetchTelemetry = jest.fn().mockReturnValue(mockTelemetryPayload);
-        telemetrySender.shouldSendReport = jest.fn().mockReturnValue(true);
-        telemetrySender.isSending = false;
-        await telemetrySender.sendIfDue();
+        telemetrySender['shouldSendReport'] = jest.fn().mockReturnValue(true);
+        telemetrySender['isSending'] = false;
+        await telemetrySender['sendIfDue']();
 
         expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
         expect(mockFetch).toBeCalledTimes(1);
@@ -190,9 +191,9 @@ describe('TelemetrySender', () => {
         const telemetrySender = new TelemetrySender(telemetryService);
         telemetryService.getTelemetryUrl = jest.fn().mockReturnValue(mockTelemetryUrl);
         telemetryService.fetchTelemetry = jest.fn().mockReturnValue(mockTelemetryPayload);
-        telemetrySender.shouldSendReport = jest.fn().mockReturnValue(true);
-        telemetrySender.isSending = false;
-        await telemetrySender.sendIfDue();
+        telemetrySender['shouldSendReport'] = jest.fn().mockReturnValue(true);
+        telemetrySender['isSending'] = false;
+        await telemetrySender['sendIfDue']();
 
         expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
         expect(mockFetch).toBeCalledTimes(2);
@@ -206,15 +207,15 @@ describe('TelemetrySender', () => {
         const telemetrySender = new TelemetrySender(telemetryService);
         telemetryService.getTelemetryUrl = jest.fn().mockReturnValue(mockTelemetryUrl);
         telemetryService.fetchTelemetry = jest.fn().mockReturnValue(mockTelemetryPayload);
-        telemetrySender.shouldSendReport = jest.fn().mockReturnValue(true);
-        telemetrySender.saveToBrowser = jest.fn();
+        telemetrySender['shouldSendReport'] = jest.fn().mockReturnValue(true);
+        telemetrySender['saveToBrowser'] = jest.fn();
 
-        await telemetrySender.sendIfDue();
+        await telemetrySender['sendIfDue']();
 
         expect(mockFetch).toBeCalledTimes(1);
-        expect(telemetrySender.lastReported).toBeDefined();
-        expect(telemetrySender.saveToBrowser).toBeCalledTimes(1);
-        expect(telemetrySender.isSending).toBe(false);
+        expect(telemetrySender['lastReported']).toBeDefined();
+        expect(telemetrySender['saveToBrowser']).toBeCalledTimes(1);
+        expect(telemetrySender['isSending']).toBe(false);
       });
 
       it('catches fetchTelemetry errors and sets isSending to false', async () => {
@@ -224,10 +225,10 @@ describe('TelemetrySender', () => {
         telemetryService.fetchTelemetry = jest.fn().mockImplementation(() => {
           throw Error('Error fetching usage');
         });
-        await telemetrySender.sendIfDue();
+        await telemetrySender['sendIfDue']();
         expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
-        expect(telemetrySender.lastReported).toBeUndefined();
-        expect(telemetrySender.isSending).toBe(false);
+        expect(telemetrySender['lastReported']).toBeUndefined();
+        expect(telemetrySender['isSending']).toBe(false);
       });
 
       it('catches fetch errors and sets isSending to false', async () => {
@@ -239,11 +240,11 @@ describe('TelemetrySender', () => {
         mockFetch.mockImplementation(() => {
           throw Error('Error sending usage');
         });
-        await telemetrySender.sendIfDue();
+        await telemetrySender['sendIfDue']();
         expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
         expect(mockFetch).toBeCalledTimes(2);
-        expect(telemetrySender.lastReported).toBeUndefined();
-        expect(telemetrySender.isSending).toBe(false);
+        expect(telemetrySender['lastReported']).toBeUndefined();
+        expect(telemetrySender['isSending']).toBe(false);
       });
     });
   });
@@ -265,7 +266,7 @@ describe('TelemetrySender', () => {
       const telemetrySender = new TelemetrySender(telemetryService);
       telemetrySender.startChecking();
       expect(mockSetInterval).toBeCalledTimes(1);
-      expect(mockSetInterval).toBeCalledWith(telemetrySender.sendIfDue, 60000);
+      expect(mockSetInterval).toBeCalledWith(telemetrySender['sendIfDue'], 60000);
     });
   });
 });
