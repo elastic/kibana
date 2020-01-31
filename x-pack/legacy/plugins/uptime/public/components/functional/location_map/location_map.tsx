@@ -18,17 +18,27 @@ import { LocationMissingWarning } from './location_missing';
 const MapPanel = styled.div`
   height: 240px;
   width: 520px;
+  @media (min-width: 1300px) {
+    margin-right: 20px;
+  }
   @media (max-width: 574px) {
     height: 250px;
     width: 100%;
     margin-right: 0;
   }
-  margin-right: 20px;
 `;
 
 const EuiFlexItemTags = styled(EuiFlexItem)`
-  @media (max-width: 816px) {
+  padding-top: 5px;
+  @media (max-width: 850px) {
     order: 1;
+    text-align: center;
+  }
+`;
+
+const FlexGroup = styled(EuiFlexGroup)`
+  @media (max-width: 850px) {
+    justify-content: center;
   }
 `;
 
@@ -66,7 +76,7 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
 
   return (
     <EuiErrorBoundary>
-      <EuiFlexGroup wrap={true} gutterSize="none">
+      <FlexGroup wrap={true} gutterSize="none">
         <EuiFlexItemTags>
           <LocationStatusTags locations={monitorLocations?.locations || []} />
         </EuiFlexItemTags>
@@ -78,7 +88,7 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
             </MapPanel>
           </EuiHideFor>
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </FlexGroup>
     </EuiErrorBoundary>
   );
 };

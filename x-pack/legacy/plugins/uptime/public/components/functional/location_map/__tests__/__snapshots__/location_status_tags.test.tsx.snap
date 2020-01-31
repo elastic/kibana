@@ -89,6 +89,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
 
 .c1 {
   margin-bottom: 5px;
+  white-space: nowrap;
 }
 
 .c0 {
@@ -203,6 +204,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
 
 .c1 {
   margin-bottom: 5px;
+  white-space: nowrap;
 }
 
 .c0 {
@@ -318,6 +320,7 @@ Array [
 
 .c1 {
   margin-bottom: 5px;
+  white-space: nowrap;
 }
 
 .c0 {
