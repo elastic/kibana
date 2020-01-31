@@ -27,7 +27,7 @@ export const LicenseDashboard = ({ setBreadcrumb } = { setBreadcrumb: () => {} }
         <EuiFlexItem>
           <AddLicense />
         </EuiFlexItem>
-        <StartTrial telemetry={npStart.plugins.telemetry} shouldShowTelemetryOptIn={true} />
+        <StartTrial telemetry={npStart.plugins.telemetry} />
         <RequestTrialExtension />
         <RevertToBasic />
       </EuiFlexGroup>
