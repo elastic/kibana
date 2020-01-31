@@ -7,11 +7,12 @@
 import { Legacy } from 'kibana';
 import { get } from 'lodash';
 import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
-import { ServerFacade, ReportingResponseToolkit } from '../../types';
-import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
-import { getRouteOptionsCsv } from './lib/route_config_factories';
-import { makeRequestFacade } from './lib/make_request_facade';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
+import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
+import { ReportingSetupDeps } from '../plugin';
+import { makeRequestFacade } from './lib/make_request_facade';
+import { getRouteOptionsCsv } from './lib/route_config_factories';
+import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 
 /*
  * This function registers API Endpoints for queuing Reporting jobs. The API inputs are:
@@ -24,10 +25,12 @@ import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject
  */
 export function registerGenerateCsvFromSavedObject(
   server: ServerFacade,
+  plugins: ReportingSetupDeps,
   handleRoute: HandlerFunction,
-  handleRouteError: HandlerErrorFunction
+  handleRouteError: HandlerErrorFunction,
+  logger: Logger
 ) {
-  const routeOptions = getRouteOptionsCsv(server);
+  const routeOptions = getRouteOptionsCsv(server, plugins, logger);
 
   server.route({
     path: `${API_BASE_GENERATE_V1}/csv/saved-object/{savedObjectType}:{savedObjectId}`,

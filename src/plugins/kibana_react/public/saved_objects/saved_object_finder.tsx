@@ -161,6 +161,7 @@ class SavedObjectFinderUi extends React.Component<
     if (query === this.state.query) {
       this.setState({
         isFetchingItems: false,
+        page: 0,
         items: resp.savedObjects.map(savedObject => {
           const {
             attributes: { title },

@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 /**
  * Configuration of dependency objects for the UI, which are needed for the
@@ -26,11 +27,12 @@ export const getUiExports = () => ({
     euiIconType: 'monitoringApp',
     linkToLastSubUrl: false,
     main: 'plugins/monitoring/monitoring',
+    category: DEFAULT_APP_CATEGORIES.management,
   },
   injectDefaultVars(server) {
     const config = server.config();
     return {
-      monitoringUiEnabled: config.get('xpack.monitoring.ui.enabled'),
+      monitoringUiEnabled: config.get('monitoring.ui.enabled'),
     };
   },
   hacks: ['plugins/monitoring/hacks/toggle_app_link_in_nav'],

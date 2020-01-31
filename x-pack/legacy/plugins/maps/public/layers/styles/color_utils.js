@@ -5,14 +5,16 @@
  */
 
 import React from 'react';
-
-import { vislibColorMaps } from 'ui/color_maps';
-import { getLegendColors, getColor } from 'ui/vis/map/color_util';
-import { ColorGradient } from './components/color_gradient';
-import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import tinycolor from 'tinycolor2';
 import chroma from 'chroma-js';
+
+import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
+
+import { getLegendColors, getColor } from 'ui/vis/map/color_util';
+
+import { ColorGradient } from './components/color_gradient';
 import { COLOR_PALETTE_MAX_SIZE } from '../../../common/constants';
+import { vislibColorMaps } from '../../../../../../../src/plugins/charts/public';
 
 const GRADIENT_INTERVALS = 8;
 
@@ -113,7 +115,11 @@ export const COLOR_PALETTES = COLOR_PALETTES_CONFIGS.map(palette => {
       height: '100%',
       display: 'inline-block',
     };
-    return <div style={style}>&nbsp;</div>;
+    return (
+      <div style={style} key={color}>
+        &nbsp;
+      </div>
+    );
   });
   return {
     value: palette.id,

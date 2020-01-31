@@ -226,7 +226,7 @@ function filterByPanelType(panelType) {
 }
 
 function AggSelectUi(props) {
-  const { siblings, panelType, value, onChange, intl, uiRestrictions, ...rest } = props;
+  const { siblings, panelType, value, onChange, uiRestrictions, ...rest } = props;
 
   const selectedOptions = allAggOptions.filter(option => {
     return value === option.value && isMetricEnabled(option.value, uiRestrictions);
@@ -247,8 +247,7 @@ function AggSelectUi(props) {
 
     options = [
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.aggSelect.aggGroups.metricAggLabel',
+        label: i18n.translate('visTypeTimeseries.aggSelect.aggGroups.metricAggLabel', {
           defaultMessage: 'Metric Aggregations',
         }),
         options: metricAggs.map(agg => ({
@@ -257,22 +256,19 @@ function AggSelectUi(props) {
         })),
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.aggSelect.aggGroups.parentPipelineAggLabel',
+        label: i18n.translate('visTypeTimeseries.aggSelect.aggGroups.parentPipelineAggLabel', {
           defaultMessage: 'Parent Pipeline Aggregations',
         }),
         options: pipelineAggs.filter(filterByPanelType(panelType)).map(disableSiblingAggs),
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.aggSelect.aggGroups.siblingPipelineAggLabel',
+        label: i18n.translate('visTypeTimeseries.aggSelect.aggGroups.siblingPipelineAggLabel', {
           defaultMessage: 'Sibling Pipeline Aggregations',
         }),
         options: siblingAggs.map(disableSiblingAggs),
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.aggSelect.aggGroups.specialAggLabel',
+        label: i18n.translate('visTypeTimeseries.aggSelect.aggGroups.specialAggLabel', {
           defaultMessage: 'Special Aggregations',
         }),
         options: specialAggs.map(disableSiblingAggs),
@@ -289,8 +285,7 @@ function AggSelectUi(props) {
     <div data-test-subj="aggSelector">
       <EuiComboBox
         isClearable={false}
-        placeholder={intl.formatMessage({
-          id: 'visTypeTimeseries.aggSelect.selectAggPlaceholder',
+        placeholder={i18n.translate('visTypeTimeseries.aggSelect.selectAggPlaceholder', {
           defaultMessage: 'Select aggregation',
         })}
         options={options}

@@ -18,7 +18,7 @@
  */
 
 import { filter, find } from 'lodash';
-import { compareFilters } from './compare_filters';
+import { compareFilters, FilterCompareOptions } from './compare_filters';
 import { esFilters } from '../../../../common';
 
 /**
@@ -33,7 +33,7 @@ import { esFilters } from '../../../../common';
 export const dedupFilters = (
   existingFilters: esFilters.Filter[],
   filters: esFilters.Filter[],
-  comparatorOptions: any = {}
+  comparatorOptions: FilterCompareOptions = {}
 ) => {
   if (!Array.isArray(filters)) {
     filters = [filters];
