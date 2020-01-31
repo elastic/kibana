@@ -61,7 +61,6 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
       sendUsageFrom,
     });
 
-    // const isStatusPage = chrome.getApp().id === 'status_page';
     if (telemetryBanner) {
       this.maybeShowOptedInNotificationBanner({
         telemetryNotifications,
