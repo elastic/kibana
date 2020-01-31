@@ -18,6 +18,8 @@ import {
   EuiPageContentBody,
   EuiEmptyPrompt,
   EuiBasicTableColumn,
+  EuiSwitchEvent,
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -38,6 +40,7 @@ interface State {
   showDeleteConfirmation: boolean;
   permissionDenied: boolean;
   filter: string;
+  includeReservedUsers: boolean;
 }
 
 export class UsersGridPage extends Component<Props, State> {
@@ -50,6 +53,7 @@ export class UsersGridPage extends Component<Props, State> {
       showDeleteConfirmation: false,
       permissionDenied: false,
       filter: '',
+      includeReservedUsers: true,
     };
   }
 
@@ -194,6 +198,7 @@ export class UsersGridPage extends Component<Props, State> {
     };
     const search = {
       toolsLeft: this.renderToolsLeft(),
+      toolsRight: this.renderToolsRight(),
       box: {
         incremental: true,
       },
@@ -214,15 +219,17 @@ export class UsersGridPage extends Component<Props, State> {
         'data-test-subj': 'userRow',
       };
     };
-    const usersToShow = filter
-      ? users.filter(({ username, roles: userRoles, full_name: fullName = '', email = '' }) => {
-          const normalized = `${username} ${userRoles.join(
-            ' '
-          )} ${fullName} ${email}`.toLowerCase();
-          const normalizedQuery = filter.toLowerCase();
-          return normalized.indexOf(normalizedQuery) !== -1;
-        })
-      : users;
+    const usersToShow = users.filter(
+      ({ username, roles: userRoles, full_name: fullName = '', email = '', metadata = {} }) => {
+        const normalized = `${username} ${userRoles.join(' ')} ${fullName} ${email}`.toLowerCase();
+        const normalizedQuery = filter.toLowerCase();
+        return (
+          normalized.indexOf(normalizedQuery) !== -1 &&
+          (this.state.includeReservedUsers || !metadata._reserved)
+        );
+      }
+    );
+
     return (
       <div className="secUsersListingPage">
         <EuiPageContent className="secUsersListingPage__content">
@@ -326,6 +333,27 @@ export class UsersGridPage extends Component<Props, State> {
           }}
         />
       </EuiButton>
+    );
+  }
+
+  private onIncludeReservedUsersChange = (e: EuiSwitchEvent) => {
+    this.setState({
+      includeReservedUsers: e.target.checked,
+    });
+  };
+
+  private renderToolsRight() {
+    return (
+      <EuiSwitch
+        label={
+          <FormattedMessage
+            id="xpack.security.management.users.showReservedUsersLabel"
+            defaultMessage="Show reserved users"
+          />
+        }
+        checked={this.state.includeReservedUsers}
+        onChange={this.onIncludeReservedUsersChange}
+      />
     );
   }
 
