@@ -4,8 +4,10 @@
 
 ## HttpResponse.request property
 
+Raw request sent to Kibana server.
+
 <b>Signature:</b>
 
 ```typescript
-request: Readonly<Request>;
+readonly request: Readonly<Request>;
 ```

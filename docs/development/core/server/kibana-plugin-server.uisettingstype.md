@@ -9,5 +9,5 @@ UI element type to represent the settings.
 <b>Signature:</b>
 
 ```typescript
-export declare type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
+export declare type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image';
 ```

@@ -14,7 +14,7 @@ export interface AggListSummaryProps {
   list: PivotAggsConfigDict;
 }
 
-export const AggListSummary: React.SFC<AggListSummaryProps> = ({ list }) => {
+export const AggListSummary: React.FC<AggListSummaryProps> = ({ list }) => {
   const aggNames = Object.keys(list);
   return (
     <EuiForm>

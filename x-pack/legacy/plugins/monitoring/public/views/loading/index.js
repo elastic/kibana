@@ -14,40 +14,38 @@ import { CODE_PATH_LICENSE } from '../../../common/constants';
 
 const REACT_DOM_ID = 'monitoringLoadingReactApp';
 
-uiRoutes
-  .when('/loading', {
-    template,
-    controller: class {
-      constructor($injector, $scope) {
-        const monitoringClusters = $injector.get('monitoringClusters');
-        const kbnUrl = $injector.get('kbnUrl');
+uiRoutes.when('/loading', {
+  template,
+  controller: class {
+    constructor($injector, $scope) {
+      const monitoringClusters = $injector.get('monitoringClusters');
+      const kbnUrl = $injector.get('kbnUrl');
 
-        $scope.$on('$destroy', () => {
-          unmountComponentAtNode(document.getElementById(REACT_DOM_ID));
-        });
+      $scope.$on('$destroy', () => {
+        unmountComponentAtNode(document.getElementById(REACT_DOM_ID));
+      });
 
-        $scope.$$postDigest(() => {
-          this.renderReact();
-        });
+      $scope.$$postDigest(() => {
+        this.renderReact();
+      });
 
-        monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE])
-          .then(clusters => {
-            if (clusters && clusters.length) {
-              kbnUrl.changePath('/home');
-              return;
-            }
-            kbnUrl.changePath('/no-data');
-            return;
-          });
-      }
+      monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]).then(clusters => {
+        if (clusters && clusters.length) {
+          kbnUrl.changePath('/home');
+          return;
+        }
+        kbnUrl.changePath('/no-data');
+        return;
+      });
+    }
 
-      renderReact() {
-        render(
-          <I18nContext>
-            <PageLoading />
-          </I18nContext>,
-          document.getElementById(REACT_DOM_ID)
-        );
-      }
-    },
-  });
+    renderReact() {
+      render(
+        <I18nContext>
+          <PageLoading />
+        </I18nContext>,
+        document.getElementById(REACT_DOM_ID)
+      );
+    }
+  },
+});

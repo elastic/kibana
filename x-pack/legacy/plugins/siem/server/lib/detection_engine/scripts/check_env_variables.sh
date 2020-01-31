@@ -11,36 +11,31 @@
 set -e 
 
 if [ -z "${ELASTICSEARCH_USERNAME}" ]; then
-  echo "Set ELASTICSEARCH_USERNAME in your enviornment"
+  echo "Set ELASTICSEARCH_USERNAME in your environment"
   exit 1
 fi
 
 if [ -z "${ELASTICSEARCH_PASSWORD}" ]; then
-  echo "Set ELASTICSEARCH_PASSWORD in your enviornment"
+  echo "Set ELASTICSEARCH_PASSWORD in your environment"
   exit 1
 fi
 
 if [ -z "${ELASTICSEARCH_URL}" ]; then
-  echo "Set ELASTICSEARCH_URL in your enviornment"
+  echo "Set ELASTICSEARCH_URL in your environment"
   exit 1
 fi
 
 if [ -z "${KIBANA_URL}" ]; then
-  echo "Set KIBANA_URL in your enviornment"
-  exit 1
-fi
-
-if [ -z "${SIGNALS_INDEX}" ]; then
-  echo "Set SIGNALS_INDEX in your enviornment"
+  echo "Set KIBANA_URL in your environment"
   exit 1
 fi
 
 if [ -z "${TASK_MANAGER_INDEX}" ]; then
-  echo "Set TASK_MANAGER_INDEX in your enviornment"
+  echo "Set TASK_MANAGER_INDEX in your environment"
   exit 1
 fi
 
 if [ -z "${KIBANA_INDEX}" ]; then
-  echo "Set KIBANA_INDEX in your enviornment"
+  echo "Set KIBANA_INDEX in your environment"
   exit 1
 fi

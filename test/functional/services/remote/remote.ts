@@ -20,14 +20,11 @@
 import Fs from 'fs';
 import { resolve } from 'path';
 
-import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { logging } from 'selenium-webdriver';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { initWebDriver } from './webdriver';
 import { Browsers } from './browsers';
-import { pollForLogEntry$ } from './poll_for_log_entry';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
@@ -37,7 +34,26 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const collectCoverage: boolean = !!process.env.CODE_COVERAGE;
   const coveragePrefix = 'coveragejson:';
   const coverageDir = resolve(__dirname, '../../../../target/kibana-coverage/functional');
-  let logSubscription: undefined | Rx.Subscription;
+  let coverageCounter = 1;
+  type BrowserStorage = 'sessionStorage' | 'localStorage';
+
+  const clearBrowserStorage = async (storageType: BrowserStorage) => {
+    try {
+      await driver.executeScript(`window.${storageType}.clear();`);
+    } catch (error) {
+      if (!error.message.includes(`Failed to read the '${storageType}' property from 'Window'`)) {
+        throw error;
+      }
+    }
+  };
+
+  const writeCoverage = (coverageJson: string) => {
+    const id = coverageCounter++;
+    const timestamp = Date.now();
+    const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
+    log.info('writing coverage to', path);
+    Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
+  };
 
   const { driver, By, until, consoleLog$ } = await initWebDriver(
     log,
@@ -58,48 +74,39 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
         caps.get('chrome').chromedriverVersion
       }, w3c=${isW3CEnabled}, codeCoverage=${collectCoverage}`
     );
-
-    if (collectCoverage) {
-      let coverageCounter = 1;
-      // We are running xpack tests with different configs and cleanup will delete collected coverage
-      // del.sync(coverageDir);
-      Fs.mkdirSync(coverageDir, { recursive: true });
-
-      logSubscription = pollForLogEntry$(
-        driver,
-        logging.Type.BROWSER,
-        config.get('browser.logPollingMs'),
-        lifecycle.cleanup$ as any
-      )
-        .pipe(
-          mergeMap(logEntry => {
-            if (logEntry.message.includes(coveragePrefix)) {
-              const id = coverageCounter++;
-              const timestamp = Date.now();
-              const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
-              const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
-              const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
-
-              log.info('writing coverage to', path);
-              Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
-
-              // filter out this message
-              return [];
-            }
-
-            return [logEntry];
-          })
-        )
-        .subscribe({
-          next({ message, level: { name: level } }) {
-            const msg = message.replace(/\\n/g, '\n');
-            log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
-          },
-        });
-    }
+  }
+  // code coverage is supported only in Chrome browser
+  if (collectCoverage) {
+    // We are running xpack tests with different configs and cleanup will delete collected coverage
+    // del.sync(coverageDir);
+    Fs.mkdirSync(coverageDir, { recursive: true });
   }
 
-  lifecycle.on('beforeTests', async () => {
+  consoleLog$
+    .pipe(
+      mergeMap(logEntry => {
+        if (collectCoverage && logEntry.message.includes(coveragePrefix)) {
+          const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
+          const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
+          writeCoverage(coverageJson);
+
+          // filter out this message
+          return [];
+        }
+
+        return [logEntry];
+      })
+    )
+    .subscribe({
+      next({ message, level }) {
+        const msg = message.replace(/\\n/g, '\n');
+        log[level === 'SEVERE' || level === 'error' ? 'error' : 'debug'](
+          `browser[${level}] ${msg}`
+        );
+      },
+    });
+
+  lifecycle.beforeTests.add(async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite
     await driver
@@ -109,7 +116,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   });
 
   const windowSizeStack: Array<{ width: number; height: number }> = [];
-  lifecycle.on('beforeTestSuite', async () => {
+  lifecycle.beforeTestSuite.add(async () => {
     windowSizeStack.unshift(
       await driver
         .manage()
@@ -118,23 +125,30 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     );
   });
 
-  lifecycle.on('beforeEachTest', async () => {
+  lifecycle.beforeEachTest.add(async () => {
     await driver.manage().setTimeouts({ implicit: config.get('timeouts.find') });
   });
 
-  lifecycle.on('afterTestSuite', async () => {
+  lifecycle.afterTestSuite.add(async () => {
     const { width, height } = windowSizeStack.shift()!;
     await driver
       .manage()
       .window()
       .setRect({ width, height });
-    await driver.executeScript('window.sessionStorage.clear();');
-    await driver.executeScript('window.localStorage.clear();');
+    await clearBrowserStorage('sessionStorage');
+    await clearBrowserStorage('localStorage');
   });
 
-  lifecycle.on('cleanup', async () => {
-    if (logSubscription) {
-      await new Promise(r => logSubscription!.add(r));
+  lifecycle.cleanup.add(async () => {
+    // Getting the last piece of code coverage before closing browser
+    if (collectCoverage) {
+      const coverageJson = await driver
+        .executeScript('return window.__coverage__')
+        .catch(() => undefined)
+        .then(coverage => coverage && JSON.stringify(coverage));
+      if (coverageJson) {
+        writeCoverage(coverageJson);
+      }
     }
 
     await driver.quit();

@@ -59,14 +59,14 @@ image::user/graph/images/graph-read-only-badge.png[Example of Graph's read only 
 
 [discrete]
 [[disable-drill-down]]
-=== Disabling drill down configuration
+=== Disabling drilldown configuration
 
-By default, users can configure _drill down_ URLs to display additional
+By default, users can configure _drilldown_ URLs to display additional
 information about a selected vertex in a new browser window. For example,
-you could configure a drill down URL to perform a web search for the selected
+you could configure a drilldown URL to perform a web search for the selected
 vertex term.
 
-To prevent users from adding drill down URLs,  set
+To prevent users from adding drilldown URLs,  set
 `xpack.graph.canEditDrillDownUrls` to `false` in `kibana.yml`:
 
 [source,yaml]

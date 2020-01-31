@@ -6,8 +6,7 @@
 
 import createContainer from 'constate';
 import { useMemo, useState, useEffect } from 'react';
-import { kfetch } from 'ui/kfetch';
-
+import { npStart } from 'ui/new_platform';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
@@ -15,7 +14,7 @@ import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import {
   getMlCapabilitiesResponsePayloadRT,
   GetMlCapabilitiesResponsePayload,
-} from './ml_api_types';
+} from './api/ml_api_types';
 import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 
 export const useLogAnalysisCapabilities = () => {
@@ -27,10 +26,7 @@ export const useLogAnalysisCapabilities = () => {
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        const rawResponse = await kfetch({
-          method: 'GET',
-          pathname: '/api/ml/ml_capabilities',
-        });
+        const rawResponse = await npStart.core.http.fetch('/api/ml/ml_capabilities');
 
         return pipe(
           getMlCapabilitiesResponsePayloadRT.decode(rawResponse),
@@ -46,19 +42,28 @@ export const useLogAnalysisCapabilities = () => {
 
   useEffect(() => {
     fetchMlCapabilities();
-  }, []);
+  }, [fetchMlCapabilities]);
 
   const isLoading = useMemo(() => fetchMlCapabilitiesRequest.state === 'pending', [
     fetchMlCapabilitiesRequest.state,
   ]);
 
+  const hasLogAnalysisSetupCapabilities = mlCapabilities.capabilities.canCreateJob;
+  const hasLogAnalysisReadCapabilities = mlCapabilities.capabilities.canGetJobs;
+  const hasLogAnalysisCapabilites =
+    mlCapabilities.isPlatinumOrTrialLicense && mlCapabilities.mlFeatureEnabledInSpace;
+
   return {
-    hasLogAnalysisCapabilites: mlCapabilities.capabilities.canCreateJob,
+    hasLogAnalysisCapabilites,
+    hasLogAnalysisReadCapabilities,
+    hasLogAnalysisSetupCapabilities,
     isLoading,
   };
 };
 
-export const LogAnalysisCapabilities = createContainer(useLogAnalysisCapabilities);
+export const [LogAnalysisCapabilitiesProvider, useLogAnalysisCapabilitiesContext] = createContainer(
+  useLogAnalysisCapabilities
+);
 
 const initialMlCapabilities = {
   capabilities: {

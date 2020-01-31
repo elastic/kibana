@@ -5,13 +5,10 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import 'jest-styled-components';
-import * as React from 'react';
+import React from 'react';
 
-import { flyoutHeaderHeight } from '../';
 import { TestProviders } from '../../../mock';
-
+import { flyoutHeaderHeight } from '..';
 import { Pane } from '.';
 
 const testFlyoutHeight = 980;
@@ -34,7 +31,7 @@ describe('Pane', () => {
         </Pane>
       </TestProviders>
     );
-    expect(toJson(EmptyComponent)).toMatchSnapshot();
+    expect(EmptyComponent.find('Pane')).toMatchSnapshot();
   });
 
   test('it should NOT let the flyout expand to take up the full width of the element that contains it', () => {
@@ -53,7 +50,7 @@ describe('Pane', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="eui-flyout"]').get(0).props.maxWidth).toEqual('95%');
+    expect(wrapper.find('Resizable').get(0).props.maxWidth).toEqual('95vw');
   });
 
   test('it applies timeline styles to the EuiFlyout', () => {

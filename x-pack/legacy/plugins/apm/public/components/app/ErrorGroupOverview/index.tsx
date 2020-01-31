@@ -21,7 +21,7 @@ import { useTrackPageview } from '../../../../../infra/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 
-const ErrorGroupOverview: React.SFC = () => {
+const ErrorGroupOverview: React.FC = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { serviceName, start, end, sortField, sortDirection } = urlParams;
@@ -80,7 +80,7 @@ const ErrorGroupOverview: React.SFC = () => {
 
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
-      filterNames: ['host', 'containerId', 'podName'],
+      filterNames: ['host', 'containerId', 'podName', 'serviceVersion'],
       params: {
         serviceName
       },
@@ -95,39 +95,42 @@ const ErrorGroupOverview: React.SFC = () => {
   }
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <LocalUIFilters {...localUIFiltersConfig} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={7}>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiPanel>
-              <ErrorDistribution
-                distribution={errorDistributionData}
-                title={i18n.translate(
-                  'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                  {
-                    defaultMessage: 'Error occurrences'
-                  }
-                )}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+    <>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <LocalUIFilters {...localUIFiltersConfig} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={7}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiPanel>
+                <ErrorDistribution
+                  distribution={errorDistributionData}
+                  title={i18n.translate(
+                    'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                    {
+                      defaultMessage: 'Error occurrences'
+                    }
+                  )}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
-
-        <EuiPanel>
-          <EuiTitle size="xs">
-            <h3>Errors</h3>
-          </EuiTitle>
           <EuiSpacer size="s" />
 
-          <ErrorGroupList items={errorGroupListData} />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <EuiPanel>
+            <EuiTitle size="xs">
+              <h3>Errors</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+
+            <ErrorGroupList items={errorGroupListData} />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };
 

@@ -9,6 +9,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { gutterTimeline } from '../../lib/helpers';
+import { AppGlobalStyle } from '../page/index';
 
 const Wrapper = styled.div`
   ${({ theme }) => css`
@@ -26,36 +27,42 @@ const Wrapper = styled.div`
     }
   `}
 `;
+
 Wrapper.displayName = 'Wrapper';
 
-export interface WrapperPageProps {
+interface WrapperPageProps {
   children: React.ReactNode;
   className?: string;
   restrictWidth?: boolean | number | string;
   style?: Record<string, string>;
 }
 
-export const WrapperPage = React.memo<WrapperPageProps>(
-  ({ children, className, restrictWidth, style }) => {
-    const classes = classNames(className, {
-      siemWrapperPage: true,
-      'siemWrapperPage--restrictWidthDefault':
-        restrictWidth && typeof restrictWidth === 'boolean' && restrictWidth === true,
-      'siemWrapperPage--restrictWidthCustom': restrictWidth && typeof restrictWidth !== 'boolean',
-    });
+const WrapperPageComponent: React.FC<WrapperPageProps> = ({
+  children,
+  className,
+  restrictWidth,
+  style,
+}) => {
+  const classes = classNames(className, {
+    siemWrapperPage: true,
+    'siemWrapperPage--restrictWidthDefault':
+      restrictWidth && typeof restrictWidth === 'boolean' && restrictWidth === true,
+    'siemWrapperPage--restrictWidthCustom': restrictWidth && typeof restrictWidth !== 'boolean',
+  });
 
-    let customStyle: WrapperPageProps['style'];
+  let customStyle: WrapperPageProps['style'];
 
-    if (restrictWidth && typeof restrictWidth !== 'boolean') {
-      const value = typeof restrictWidth === 'number' ? `${restrictWidth}px` : restrictWidth;
-      customStyle = { ...style, maxWidth: value };
-    }
-
-    return (
-      <Wrapper className={classes} style={customStyle || style}>
-        {children}
-      </Wrapper>
-    );
+  if (restrictWidth && typeof restrictWidth !== 'boolean') {
+    const value = typeof restrictWidth === 'number' ? `${restrictWidth}px` : restrictWidth;
+    customStyle = { ...style, maxWidth: value };
   }
-);
-WrapperPage.displayName = 'WrapperPage';
+
+  return (
+    <Wrapper className={classes} style={customStyle || style}>
+      {children}
+      <AppGlobalStyle />
+    </Wrapper>
+  );
+};
+
+export const WrapperPage = React.memo(WrapperPageComponent);

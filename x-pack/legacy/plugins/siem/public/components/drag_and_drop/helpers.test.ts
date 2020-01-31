@@ -116,7 +116,7 @@ describe('helpers', () => {
     test('it returns false when the draggable is NOT content', () => {
       expect(
         draggableIsContent({
-          destination: null,
+          destination: undefined,
           draggableId: `${draggableIdPrefix}.timeline.timeline.dataProvider.685260508808089`,
           reason: 'DROP',
           source: {
@@ -230,10 +230,10 @@ describe('helpers', () => {
       ).toEqual(true);
     });
 
-    test('it returns false when the destination is null', () => {
+    test('it returns false when the destination is undefined', () => {
       expect(
         destinationIsTimelineProviders({
-          destination: null,
+          destination: undefined,
           draggableId: getDraggableId('685260508808089'),
           reason: 'DROP',
           source: {
@@ -286,10 +286,10 @@ describe('helpers', () => {
       ).toEqual(true);
     });
 
-    test('it returns returns false when the destination is null', () => {
+    test('it returns returns false when the destination is undefined', () => {
       expect(
         destinationIsTimelineColumns({
-          destination: null,
+          destination: undefined,
           draggableId: getDraggableFieldId({ contextId: 'test', fieldId: 'event.action' }),
           reason: 'DROP',
           source: {
@@ -342,10 +342,10 @@ describe('helpers', () => {
       ).toEqual(true);
     });
 
-    test('it returns false when the destination is null', () => {
+    test('it returns false when the destination is undefined', () => {
       expect(
         destinationIsTimelineButton({
-          destination: null,
+          destination: undefined,
           draggableId: getDraggableId('685260508808089'),
           reason: 'DROP',
           source: {
@@ -436,10 +436,10 @@ describe('helpers', () => {
       ).toEqual('timeline');
     });
 
-    test('it returns returns an empty string when the destination is null', () => {
+    test('it returns returns an empty string when the destination is undefined', () => {
       expect(
         getTimelineIdFromDestination({
-          destination: null,
+          destination: undefined,
           draggableId: `${draggableIdPrefix}.timeline.timeline.dataProvider.685260508808089`,
           reason: 'DROP',
           source: {
@@ -558,7 +558,7 @@ describe('helpers', () => {
     test('it returns false when the draggable is NOT content', () => {
       expect(
         providerWasDroppedOnTimeline({
-          destination: null,
+          destination: undefined,
           draggableId: `${draggableIdPrefix}.timeline.timeline.dataProvider.685260508808089`,
           reason: 'DROP',
           source: {

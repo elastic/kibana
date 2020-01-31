@@ -17,23 +17,50 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
-
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
+import { CoreStart } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public';
+import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
+import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
 import { QuerySetup, QueryStart } from './query';
+import { IndexPatternSelectProps } from './ui/index_pattern_select';
+import { IndexPatternsContract } from './index_patterns';
+import { StatefulSearchBarProps } from './ui/search_bar/create_search_bar';
+
+export interface DataSetupDependencies {
+  uiActions: IUiActionsSetup;
+}
+
+export interface DataStartDependencies {
+  uiActions: IUiActionsStart;
+}
+
 export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
+  autocomplete: AutocompleteSetup;
   search: ISearchSetup;
+  fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
 }
 
 export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
+  autocomplete: AutocompleteStart;
+  indexPatterns: IndexPatternsContract;
   search: ISearchStart;
+  fieldFormats: FieldFormatsStart;
   query: QueryStart;
+  ui: {
+    IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
+    SearchBar: React.ComponentType<StatefulSearchBarProps>;
+  };
 }
 
-export { IGetSuggestions } from './suggestions_provider/types';
+export interface IDataPluginServices extends Partial<CoreStart> {
+  appName: string;
+  uiSettings: CoreStart['uiSettings'];
+  savedObjects: CoreStart['savedObjects'];
+  notifications: CoreStart['notifications'];
+  http: CoreStart['http'];
+  storage: IStorageWrapper;
+  data: DataPublicPluginStart;
+}

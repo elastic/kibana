@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-import { npStart } from 'ui/new_platform';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import { ErrorGroupDetails } from '../../ErrorGroupDetails';
 import { ServiceDetails } from '../../ServiceDetails';
@@ -22,6 +21,7 @@ import { toQuery } from '../../../shared/Links/url_helpers';
 import { ServiceNodeMetrics } from '../../ServiceNodeMetrics';
 import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUrlParams';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
+import { TraceLink } from '../../TraceLink';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
   defaultMessage: 'Metrics'
@@ -186,28 +186,31 @@ export const routes: BreadcrumbRoute[] = [
       return query.transactionName as string;
     },
     name: RouteName.TRANSACTION_NAME
+  },
+  {
+    exact: true,
+    path: '/link-to/trace/:traceId',
+    component: TraceLink,
+    breadcrumb: null,
+    name: RouteName.LINK_TO_TRACE
+  },
+
+  {
+    exact: true,
+    path: '/service-map',
+    component: () => <Home tab="service-map" />,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
+      defaultMessage: 'Service Map'
+    }),
+    name: RouteName.SERVICE_MAP
+  },
+  {
+    exact: true,
+    path: '/services/:serviceName/service-map',
+    component: () => <ServiceDetails tab="service-map" />,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
+      defaultMessage: 'Service Map'
+    }),
+    name: RouteName.SINGLE_SERVICE_MAP
   }
 ];
-
-if (npStart.core.injectedMetadata.getInjectedVar('apmServiceMapEnabled')) {
-  routes.push(
-    {
-      exact: true,
-      path: '/service-map',
-      component: () => <Home tab="service-map" />,
-      breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
-        defaultMessage: 'Service Map'
-      }),
-      name: RouteName.SERVICE_MAP
-    },
-    {
-      exact: true,
-      path: '/services/:serviceName/service-map',
-      component: () => <ServiceDetails tab="service-map" />,
-      breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
-        defaultMessage: 'Service Map'
-      }),
-      name: RouteName.SINGLE_SERVICE_MAP
-    }
-  );
-}

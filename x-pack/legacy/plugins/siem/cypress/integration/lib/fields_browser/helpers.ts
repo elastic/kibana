@@ -4,22 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  FIELDS_BROWSER_CONTAINER,
-  FIELDS_BROWSER_FILTER_INPUT,
-  TIMELINE_FIELDS_BUTTON,
-} from './selectors';
+import { FIELDS_BROWSER_CONTAINER, FIELDS_BROWSER_FILTER_INPUT } from './selectors';
 import {
   assertAtLeastOneEventMatchesSearch,
   executeKQL,
   hostExistsQuery,
   toggleTimelineVisibility,
 } from '../timeline/helpers';
-import { TIMELINE_DATA_PROVIDERS } from '../timeline/selectors';
+import { TIMELINE_DATA_PROVIDERS, TIMELINE_FIELDS_BUTTON } from '../timeline/selectors';
 
 /** Opens the timeline's Field Browser */
 export const openTimelineFieldsBrowser = () => {
-  cy.get(TIMELINE_FIELDS_BUTTON).click();
+  cy.get(TIMELINE_FIELDS_BUTTON).click({ force: true });
 
   cy.get(FIELDS_BROWSER_CONTAINER).should('exist');
 };
@@ -41,4 +37,8 @@ export const clickOutsideFieldsBrowser = () => {
 /** Filters the Field Browser by typing `fieldName` in the input */
 export const filterFieldsBrowser = (fieldName: string) => {
   cy.get(FIELDS_BROWSER_FILTER_INPUT).type(fieldName);
+};
+
+export const clearFieldsBrowser = () => {
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{selectall}{backspace}');
 };

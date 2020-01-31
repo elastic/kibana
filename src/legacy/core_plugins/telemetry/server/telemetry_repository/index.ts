@@ -26,4 +26,5 @@ export interface TelemetrySavedObjectAttributes {
   sendUsageFrom?: 'browser' | 'server';
   lastReported?: number;
   telemetryAllowChangingOptInStatus?: boolean;
+  userHasSeenNotice?: boolean;
 }

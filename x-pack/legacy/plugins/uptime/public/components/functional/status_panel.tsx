@@ -6,13 +6,16 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { SnapshotHistogram } from './charts';
 import { Snapshot } from './snapshot';
+import { PingHistogram } from '../connected';
 
 interface StatusPanelProps {
   absoluteDateRangeStart: number;
   absoluteDateRangeEnd: number;
-  sharedProps: { [key: string]: any };
+  dateRangeStart: string;
+  dateRangeEnd: string;
+  filters?: string;
+  statusFilter?: string;
 }
 
 const STATUS_CHART_HEIGHT = '160px';
@@ -20,20 +23,32 @@ const STATUS_CHART_HEIGHT = '160px';
 export const StatusPanel = ({
   absoluteDateRangeStart,
   absoluteDateRangeEnd,
-  sharedProps,
+  dateRangeStart,
+  dateRangeEnd,
+  filters,
+  statusFilter,
 }: StatusPanelProps) => (
   <EuiPanel>
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem grow={2}>
-        <Snapshot variables={sharedProps} height={STATUS_CHART_HEIGHT} />
+        <Snapshot
+          dateRangeStart={dateRangeStart}
+          dateRangeEnd={dateRangeEnd}
+          filters={filters}
+          height={STATUS_CHART_HEIGHT}
+          statusFilter={statusFilter}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={10}>
-        <SnapshotHistogram
+        <PingHistogram
           absoluteStartDate={absoluteDateRangeStart}
           absoluteEndDate={absoluteDateRangeEnd}
+          dateStart={dateRangeStart}
+          dateEnd={dateRangeEnd}
+          filters={filters}
           height={STATUS_CHART_HEIGHT}
+          statusFilter={statusFilter}
           isResponsive={true}
-          variables={sharedProps}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

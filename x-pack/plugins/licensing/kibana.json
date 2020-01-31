@@ -2,7 +2,7 @@
   "id": "licensing",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
-  "configPath": ["x-pack", "licensing"],
+  "configPath": ["xpack", "licensing"],
   "server": true,
-  "ui": false
+  "ui": true
 }

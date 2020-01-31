@@ -18,7 +18,6 @@
  */
 
 export { ISearchSetup } from './i_search_setup';
-export * from '../../common';
 
 export { ISearchContext } from './i_search_context';
 

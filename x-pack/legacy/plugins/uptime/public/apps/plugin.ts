@@ -30,14 +30,8 @@ export class Plugin {
   }
 
   public start(start: StartObject): void {
-    const {
-      core,
-      plugins: {
-        data: { autocomplete },
-      },
-    } = start;
     const libs: UMFrontendLibs = {
-      framework: getKibanaFrameworkAdapter(core, autocomplete),
+      framework: getKibanaFrameworkAdapter(start.core, start.plugins),
     };
     // @ts-ignore improper type description
     this.chrome.setRootTemplate(template);

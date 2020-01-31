@@ -17,35 +17,57 @@
  * under the License.
  */
 
-import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects_service';
+import {
+  SavedObjectsService,
+  InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart,
+} from './saved_objects_service';
 import { mockKibanaMigrator } from './migrations/kibana/kibana_migrator.mock';
 import { savedObjectsClientProviderMock } from './service/lib/scoped_client_provider.mock';
+import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
+import { savedObjectsClientMock } from './service/saved_objects_client.mock';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<SavedObjectsServiceStart> = {
+  const startContract: jest.Mocked<InternalSavedObjectsServiceStart> = {
     clientProvider: savedObjectsClientProviderMock.create(),
+    getScopedClient: jest.fn(),
+    createInternalRepository: jest.fn(),
+    createScopedRepository: jest.fn(),
     migrator: mockKibanaMigrator.create(),
   };
+
+  startContract.getScopedClient.mockReturnValue(savedObjectsClientMock.create());
+  startContract.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
+  startContract.createScopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
 
   return startContract;
 };
 
-const createsavedObjectsServiceMock = () => {
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<InternalSavedObjectsServiceSetup> = {
+    setClientFactoryProvider: jest.fn(),
+    addClientWrapper: jest.fn(),
+  };
+  return setupContract;
+};
+
+const createSavedObjectsServiceMock = () => {
   const mocked: jest.Mocked<SavedObjectsServiceContract> = {
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };
 
-  mocked.setup.mockResolvedValue({ clientProvider: savedObjectsClientProviderMock.create() });
+  mocked.setup.mockResolvedValue(createSetupContractMock());
   mocked.start.mockResolvedValue(createStartContractMock());
   mocked.stop.mockResolvedValue();
   return mocked;
 };
 
 export const savedObjectsServiceMock = {
-  create: createsavedObjectsServiceMock,
+  create: createSavedObjectsServiceMock,
+  createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
 };

@@ -12,7 +12,7 @@ import { importTestSuiteFactory } from '../../common/suites/import';
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     importTest,

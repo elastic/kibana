@@ -19,7 +19,7 @@
 
 import { BaseParamType } from './base';
 import { FieldParamType } from './field';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 

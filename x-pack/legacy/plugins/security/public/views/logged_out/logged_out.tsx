@@ -31,7 +31,7 @@ chrome
             }
           >
             <EuiButton href={chrome.addBasePath('/')}>
-              <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Login" />
+              <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Log in" />
             </EuiButton>
           </AuthenticationStatePage>
         </I18nContext>,

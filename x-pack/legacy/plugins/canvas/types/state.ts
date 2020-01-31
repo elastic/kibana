@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import {
   Datatable,
   Filter,
@@ -13,7 +14,7 @@ import {
   Render,
   Style,
   Range,
-} from 'src/plugins/expressions/public';
+} from 'src/plugins/expressions/common';
 import { CanvasFunction } from './functions';
 import { AssetType } from './assets';
 import { CanvasWorkpad } from './canvas';
@@ -31,9 +32,7 @@ export interface AppState {
 }
 
 interface StoreAppState {
-  kbnVersion: string;
   basePath: string;
-  reportingBrowserType: string;
   // TODO: These server functions are actually missing the fn because they are serialized from the server
   serverFunctions: CanvasFunction[];
   ready: boolean;

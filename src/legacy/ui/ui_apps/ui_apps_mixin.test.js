@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { LegacyInternals } from '../../../core/server';
+
 import { uiAppsMixin } from './ui_apps_mixin';
 
 jest.mock('./ui_app', () => ({
@@ -31,29 +33,27 @@ jest.mock('./ui_app', () => ({
     isHidden() {
       return this._hidden;
     }
-  }
+  },
 }));
 
 describe('UiAppsMixin', () => {
   let kbnServer;
   let server;
+  let uiExports;
 
   beforeEach(() => {
-    kbnServer = {
-      uiExports: {
-        uiAppSpecs: [
-          {
-            id: 'foo',
-            hidden: true,
-          },
-          {
-            id: 'bar',
-            hidden: false,
-          },
-        ]
-      }
+    uiExports = {
+      uiAppSpecs: [
+        {
+          id: 'foo',
+          hidden: true,
+        },
+        {
+          id: 'bar',
+          hidden: false,
+        },
+      ],
     };
-
     server = {
       decorate: jest.fn((type, name, value) => {
         if (type !== 'server') {
@@ -62,6 +62,14 @@ describe('UiAppsMixin', () => {
 
         server[name] = value;
       }),
+    };
+    kbnServer = {
+      uiExports,
+      newPlatform: {
+        __internals: {
+          legacy: new LegacyInternals(uiExports, {}, server),
+        },
+      },
     };
 
     uiAppsMixin(kbnServer, server);
@@ -99,13 +107,12 @@ describe('UiAppsMixin', () => {
 
   describe('server.injectUiAppVars()/server.getInjectedUiAppVars()', () => {
     it('stored injectVars provider and returns provider result when requested', async () => {
-
       server.injectUiAppVars('foo', () => ({
-        thisIsFoo: true
+        thisIsFoo: true,
       }));
 
       server.injectUiAppVars('bar', async () => ({
-        thisIsFoo: false
+        thisIsFoo: false,
       }));
 
       await expect(server.getInjectedUiAppVars('foo')).resolves.toMatchSnapshot('foo');
@@ -122,7 +129,7 @@ describe('UiAppsMixin', () => {
 
       server.injectUiAppVars('foo', async () => ({
         bar: false,
-        box: true
+        box: true,
       }));
 
       server.injectUiAppVars('foo', async () => ({

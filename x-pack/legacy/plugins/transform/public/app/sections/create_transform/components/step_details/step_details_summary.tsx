@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC } from 'react';
+import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -12,7 +12,7 @@ import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { StepDetailsExposedState } from './step_details_form';
 
-export const StepDetailsSummary: SFC<StepDetailsExposedState> = React.memo(
+export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo(
   ({
     continuousModeDateField,
     createIndexPattern,
@@ -33,7 +33,7 @@ export const StepDetailsSummary: SFC<StepDetailsExposedState> = React.memo(
       : '';
 
     return (
-      <Fragment>
+      <div data-test-subj="transformStepDetailsSummary">
         <EuiFormRow
           label={i18n.translate('xpack.transform.stepDetailsSummary.transformIdLabel', {
             defaultMessage: 'Transform ID',
@@ -68,7 +68,7 @@ export const StepDetailsSummary: SFC<StepDetailsExposedState> = React.memo(
             <EuiFieldText defaultValue={continuousModeDateField} disabled={true} />
           </EuiFormRow>
         )}
-      </Fragment>
+      </div>
     );
   }
 );

@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Elements/ElementControls has two buttons 1`] = `
+<div
+  style={
+    Object {
+      "width": "50px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive canvasElementCard__controls"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <span
+        className="euiToolTipAnchor"
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
+        <button
+          aria-label="Edit element"
+          className="euiButtonIcon euiButtonIcon--primary"
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          type="button"
+        >
+          <svg
+            aria-hidden={true}
+            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+            focusable="false"
+            height={16}
+            role="img"
+            style={null}
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </button>
+      </span>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <span
+        className="euiToolTipAnchor"
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
+        <button
+          aria-label="Delete element"
+          className="euiButtonIcon euiButtonIcon--danger"
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          type="button"
+        >
+          <svg
+            aria-hidden={true}
+            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+            focusable="false"
+            height={16}
+            role="img"
+            style={null}
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </button>
+      </span>
+    </div>
+  </div>
+</div>
+`;

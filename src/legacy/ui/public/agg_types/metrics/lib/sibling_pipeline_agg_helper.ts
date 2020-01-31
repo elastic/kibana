@@ -19,13 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
-import { SubMetricParamEditor } from '../../../vis/editors/default/controls/sub_metric';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 
-import { IMetricAggConfig } from '../metric_agg_type';
-
-// @ts-ignore
-import { Schemas } from '../../../vis/editors/default/schemas';
+import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
+import { Schemas } from '../../schemas';
 
 const metricAggFilter: string[] = [
   '!top_hits',
@@ -68,10 +65,15 @@ const [bucketAggSchema] = new Schemas([
   },
 ]).all;
 
-const siblingPipelineAggHelper = {
-  subtype: i18n.translate('common.ui.aggTypes.metrics.siblingPipelineAggregationsSubtypeTitle', {
+const siblingPipelineType = i18n.translate(
+  'common.ui.aggTypes.metrics.siblingPipelineAggregationsSubtypeTitle',
+  {
     defaultMessage: 'Sibling pipeline aggregations',
-  }),
+  }
+);
+
+const siblingPipelineAggHelper = {
+  subtype: siblingPipelineType,
   params() {
     return [
       {
@@ -86,7 +88,6 @@ const siblingPipelineAggHelper = {
 
           return orderAgg;
         },
-        editorComponent: SubMetricParamEditor,
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
           'customBucket'
         ),
@@ -104,13 +105,12 @@ const siblingPipelineAggHelper = {
 
           return orderAgg;
         },
-        editorComponent: SubMetricParamEditor,
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
           'customMetric'
         ),
         write: siblingPipelineAggWriter,
       },
-    ];
+    ] as Array<MetricAggParam<IMetricAggConfig>>;
   },
 
   getFormat(agg: IMetricAggConfig) {
@@ -120,4 +120,4 @@ const siblingPipelineAggHelper = {
   },
 };
 
-export { siblingPipelineAggHelper };
+export { siblingPipelineAggHelper, siblingPipelineType };

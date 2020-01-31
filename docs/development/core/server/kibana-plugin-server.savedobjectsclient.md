@@ -4,18 +4,15 @@
 
 ## SavedObjectsClient class
 
-
 <b>Signature:</b>
 
 ```typescript
 export declare class SavedObjectsClient 
 ```
 
-## Constructors
+## Remarks
 
-|  Constructor | Modifiers | Description |
-|  --- | --- | --- |
-|  [(constructor)(repository)](./kibana-plugin-server.savedobjectsclient._constructor_.md) |  | Constructs a new instance of the <code>SavedObjectsClient</code> class |
+The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `SavedObjectsClient` class.
 
 ## Properties
 

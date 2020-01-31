@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { INDEX_META_DATA_CREATED_BY  } from '../../../common/constants/file_import';
+import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_import';
 import uuid from 'uuid';
 
 export function importDataProvider(callWithRequest) {
@@ -14,11 +14,7 @@ export function importDataProvider(callWithRequest) {
     const docCount = data.length;
 
     try {
-
-      const {
-        id: pipelineId,
-        pipeline,
-      } = ingestPipeline;
+      const { id: pipelineId, pipeline } = ingestPipeline;
 
       if (id === undefined) {
         // first chunk of data, create the index and id to return
@@ -35,7 +31,6 @@ export function importDataProvider(callWithRequest) {
           }
         }
         createdPipelineId = pipelineId;
-
       } else {
         createdIndex = index;
         createdPipelineId = pipelineId;
@@ -51,7 +46,7 @@ export function importDataProvider(callWithRequest) {
           } else {
             // some docs failed.
             // still report success but with a list of failures
-            failures = (resp.failures || []);
+            failures = resp.failures || [];
           }
         }
       }
@@ -70,10 +65,10 @@ export function importDataProvider(callWithRequest) {
         id,
         index: createdIndex,
         pipelineId: createdPipelineId,
-        error: (error.error !== undefined) ? error.error : error,
+        error: error.error !== undefined ? error.error : error,
         docCount,
         ingestError: error.ingestError,
-        failures: (error.failures || [])
+        failures: error.failures || [],
       };
     }
   }
@@ -82,10 +77,10 @@ export function importDataProvider(callWithRequest) {
     const body = {
       mappings: {
         _meta: {
-          created_by: INDEX_META_DATA_CREATED_BY
+          created_by: INDEX_META_DATA_CREATED_BY,
         },
-        properties: mappings
-      }
+        properties: mappings,
+      },
     };
 
     if (settings && Object.keys(settings).length) {
@@ -119,7 +114,6 @@ export function importDataProvider(callWithRequest) {
         };
       }
     } catch (error) {
-
       let failures = [];
       let ingestError = false;
       if (error.errors !== undefined && Array.isArray(error.items)) {
@@ -139,7 +133,6 @@ export function importDataProvider(callWithRequest) {
         ingestError,
       };
     }
-
   }
 
   async function createPipeline(id, pipeline) {

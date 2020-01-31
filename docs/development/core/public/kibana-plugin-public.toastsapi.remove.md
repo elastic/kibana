@@ -9,14 +9,14 @@ Removes a toast from the current array of toasts if present.
 <b>Signature:</b>
 
 ```typescript
-remove(toast: Toast): void;
+remove(toastOrId: Toast | string): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  toast | <code>Toast</code> | a  returned by  |
+|  toastOrId | <code>Toast &#124; string</code> | a [Toast](./kibana-plugin-public.toast.md) returned by [ToastsApi.add()](./kibana-plugin-public.toastsapi.add.md) or its id |
 
 <b>Returns:</b>
 

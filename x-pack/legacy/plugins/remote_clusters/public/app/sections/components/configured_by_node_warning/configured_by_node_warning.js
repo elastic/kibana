@@ -6,9 +6,7 @@
 
 import React from 'react';
 
-import {
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 

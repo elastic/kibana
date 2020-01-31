@@ -10,7 +10,11 @@ import {
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_PROCESS_CPU_PERCENT
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 
@@ -52,7 +56,7 @@ const chartBase: ChartBase = {
 };
 
 export async function getCPUChartData(
-  setup: Setup,
+  setup: Setup & SetupTimeRange & SetupUIFilters,
   serviceName: string,
   serviceNodeName?: string
 ) {

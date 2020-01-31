@@ -6,23 +6,16 @@
 
 import React from 'react';
 
-import { StaticDynamicStyleRow } from '../../../components/static_dynamic_style_row';
-import  { DynamicSizeSelection } from './dynamic_size_selection';
-import  { StaticSizeSelection } from './static_size_selection';
-import { getVectorStyleLabel } from '../get_vector_style_label';
+import { StylePropEditor } from '../style_prop_editor';
+import { DynamicSizeForm } from './dynamic_size_form';
+import { StaticSizeForm } from './static_size_form';
 
 export function VectorStyleSizeEditor(props) {
-  return (
-    <StaticDynamicStyleRow
-      ordinalFields={props.ordinalFields}
-      property={props.styleProperty}
-      label={getVectorStyleLabel(props.styleProperty)}
-      styleDescriptor={props.styleDescriptor}
-      handlePropertyChange={props.handlePropertyChange}
-      DynamicSelector={DynamicSizeSelection}
-      StaticSelector={StaticSizeSelection}
-      defaultDynamicStyleOptions={props.defaultDynamicStyleOptions}
-      defaultStaticStyleOptions={props.defaultStaticStyleOptions}
-    />
+  const sizeForm = props.styleProperty.isDynamic() ? (
+    <DynamicSizeForm {...props} />
+  ) : (
+    <StaticSizeForm {...props} />
   );
+
+  return <StylePropEditor {...props}>{sizeForm}</StylePropEditor>;
 }

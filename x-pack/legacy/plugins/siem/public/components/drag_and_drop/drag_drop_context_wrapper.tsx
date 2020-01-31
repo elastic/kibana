@@ -6,10 +6,11 @@
 
 import { defaultTo, noop } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { DragDropContext, DropResult, DragStart } from 'react-beautiful-dnd';
+import { DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 
+import { BeforeCapture } from './drag_drop_context';
 import { BrowserFields } from '../../containers/source';
 import { dragAndDropModel, dragAndDropSelectors } from '../../store';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
@@ -20,6 +21,7 @@ import {
   addProviderToTimeline,
   fieldWasDroppedOnTimelineColumns,
   IS_DRAGGING_CLASS_NAME,
+  IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
   providerWasDroppedOnTimeline,
   providerWasDroppedOnTimelineButton,
   draggableIsField,
@@ -75,11 +77,16 @@ export const DragDropContextWrapperComponent = React.memo<Props>(
         if (!draggableIsField(result)) {
           document.body.classList.remove(IS_DRAGGING_CLASS_NAME);
         }
+
+        if (draggableIsField(result)) {
+          document.body.classList.remove(IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME);
+        }
       },
       [browserFields, dataProviders]
     );
     return (
-      <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
+      // @ts-ignore
+      <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture}>
         {children}
       </DragDropContext>
     );
@@ -107,7 +114,9 @@ const mapStateToProps = (state: State) => {
 
 export const DragDropContextWrapper = connect(mapStateToProps)(DragDropContextWrapperComponent);
 
-const onDragStart = (initial: DragStart) => {
+DragDropContextWrapper.displayName = 'DragDropContextWrapper';
+
+const onBeforeCapture = (before: BeforeCapture) => {
   const x =
     window.pageXOffset !== undefined
       ? window.pageXOffset
@@ -120,8 +129,12 @@ const onDragStart = (initial: DragStart) => {
 
   window.onscroll = () => window.scrollTo(x, y);
 
-  if (!draggableIsField(initial)) {
+  if (!draggableIsField(before)) {
     document.body.classList.add(IS_DRAGGING_CLASS_NAME);
+  }
+
+  if (draggableIsField(before)) {
+    document.body.classList.add(IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME);
   }
 };
 

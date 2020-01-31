@@ -28,15 +28,16 @@ function getPageData($injector) {
 
   const timeBounds = timefilter.getBounds();
 
-  return $http.post(url, {
-    ccs: globalState.ccs,
-    timeRange: {
-      min: timeBounds.min.toISOString(),
-      max: timeBounds.max.toISOString()
-    }
-  })
+  return $http
+    .post(url, {
+      ccs: globalState.ccs,
+      timeRange: {
+        min: timeBounds.min.toISOString(),
+        max: timeBounds.max.toISOString(),
+      },
+    })
     .then(response => get(response, 'data', []))
-    .catch((err) => {
+    .catch(err => {
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
     });
@@ -49,7 +50,7 @@ uiRoutes.when('/alerts', {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_ALERTS] });
     },
-    alerts: getPageData
+    alerts: getPageData,
   },
   controllerAs: 'alerts',
   controller: class AlertsView extends MonitoringViewBaseEuiTableController {
@@ -59,29 +60,35 @@ uiRoutes.when('/alerts', {
       const kbnUrl = $injector.get('kbnUrl');
 
       // breadcrumbs + page title
-      $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
+      $scope.cluster = find($route.current.locals.clusters, {
+        cluster_uuid: globalState.cluster_uuid,
+      });
 
       super({
-        title: i18n.translate('xpack.monitoring.alerts.clusterAlertsTitle', { defaultMessage: 'Cluster Alerts' }),
+        title: i18n.translate('xpack.monitoring.alerts.clusterAlertsTitle', {
+          defaultMessage: 'Cluster Alerts',
+        }),
         getPageData,
         $scope,
         $injector,
         storageKey: 'alertsTable',
-        reactNodeId: 'monitoringAlertsApp'
+        reactNodeId: 'monitoringAlertsApp',
       });
 
       this.data = $route.current.locals.alerts;
 
       const renderReact = data => {
-        const app = data.message
-          ? (<p>{data.message}</p>)
-          : (<Alerts
+        const app = data.message ? (
+          <p>{data.message}</p>
+        ) : (
+          <Alerts
             alerts={data}
             angular={{ kbnUrl, scope: $scope }}
             sorting={this.sorting}
             pagination={this.pagination}
             onTableChange={this.onTableChange}
-          />);
+          />
+        );
 
         render(
           <I18nContext>
@@ -89,10 +96,8 @@ uiRoutes.when('/alerts', {
               <EuiPageBody>
                 <EuiPageContent>
                   {app}
-                  <EuiSpacer size="m"/>
-                  <EuiLink
-                    href="#/overview"
-                  >
+                  <EuiSpacer size="m" />
+                  <EuiLink href="#/overview">
                     <FormattedMessage
                       id="xpack.monitoring.alerts.clusterOverviewLinkLabel"
                       defaultMessage="« Cluster Overview"
@@ -105,7 +110,10 @@ uiRoutes.when('/alerts', {
           document.getElementById('monitoringAlertsApp')
         );
       };
-      $scope.$watch(() => this.data, data => renderReact(data));
+      $scope.$watch(
+        () => this.data,
+        data => renderReact(data)
+      );
     }
-  }
+  },
 });

@@ -19,18 +19,17 @@
 
 // @ts-ignore
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from '../../vis';
+import { AggConfig } from '../agg_config';
 import { SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
-import { FieldParamEditor } from '../../vis/editors/default/controls/field';
 import { BaseParamType } from './base';
 import { toastNotifications } from '../../notify';
 import { propFilter } from '../filter';
-import { Field, FieldListInterface } from '../../index_patterns';
+import { Field, IFieldList } from '../../../../../plugins/data/public';
+import { isNestedField } from '../../../../../plugins/data/public';
 
 const filterByType = propFilter('type');
 
 export class FieldParamType extends BaseParamType {
-  editorComponent = FieldParamEditor;
   required = true;
   scriptable = true;
   filterFieldTypes: string;
@@ -111,11 +110,14 @@ export class FieldParamType extends BaseParamType {
   /**
    * filter the fields to the available ones
    */
-  getAvailableFields = (fields: FieldListInterface) => {
+  getAvailableFields = (fields: IFieldList) => {
     const filteredFields = fields.filter((field: Field) => {
       const { onlyAggregatable, scriptable, filterFieldTypes } = this;
 
-      if ((onlyAggregatable && !field.aggregatable) || (!scriptable && field.scripted)) {
+      if (
+        (onlyAggregatable && (!field.aggregatable || isNestedField(field))) ||
+        (!scriptable && field.scripted)
+      ) {
         return false;
       }
 

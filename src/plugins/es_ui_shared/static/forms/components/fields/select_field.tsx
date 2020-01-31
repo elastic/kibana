@@ -17,26 +17,30 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { ReactNode, OptionHTMLAttributes } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { FieldHook } from '../../hook_form_lib';
-import { getFieldValidityAndErrorMessage } from '../helpers';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;
-  euiFieldProps?: Record<string, any>;
+  euiFieldProps: {
+    options: Array<
+      { text: string | ReactNode; [key: string]: any } & OptionHTMLAttributes<HTMLOptionElement>
+    >;
+    [key: string]: any;
+  };
   idAria?: string;
   [key: string]: any;
 }
 
-export const SelectField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
+export const SelectField = ({ field, euiFieldProps, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
     <EuiFormRow
       label={field.label}
-      helpText={field.helpText}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
@@ -49,10 +53,11 @@ export const SelectField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
         onChange={e => {
           field.setValue(e.target.value);
         }}
+        options={[]}
         hasNoInitialSelection={true}
         isInvalid={isInvalid}
         data-test-subj="select"
-        {...(euiFieldProps as { options: any; [key: string]: any })}
+        {...euiFieldProps}
       />
     </EuiFormRow>
   );

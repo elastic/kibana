@@ -10,7 +10,7 @@ import { PolicyValidation } from '../../../services/validation';
 export interface StepProps {
   policy: SlmPolicyPayload;
   indices: string[];
-  updatePolicy: (updatedSettings: Partial<SlmPolicyPayload>) => void;
+  updatePolicy: (updatedSettings: Partial<SlmPolicyPayload>, validationHelperData?: any) => void;
   isEditing: boolean;
   currentUrl: string;
   errors: PolicyValidation['errors'];

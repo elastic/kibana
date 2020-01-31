@@ -4,20 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
-import {
-  ServerFacade,
-  RequestFacade,
-  ResponseFacade,
-  ReportingResponseToolkit,
-  Logger,
-  JobDocPayload,
-  JobIDForImmediate,
-  JobDocOutputExecuted,
-} from '../../types';
-import { getRouteOptionsCsv } from './lib/route_config_factories';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
+import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
+import {
+  HeadlessChromiumDriverFactory,
+  JobDocOutput,
+  Logger,
+  ReportingResponseToolkit,
+  ResponseFacade,
+  ServerFacade,
+} from '../../types';
+import { ReportingSetupDeps } from '../plugin';
+import { makeRequestFacade } from './lib/make_request_facade';
+import { getRouteOptionsCsv } from './lib/route_config_factories';
 
 /*
  * This function registers API Endpoints for immediate Reporting jobs. The API inputs are:
@@ -30,9 +32,10 @@ import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
   server: ServerFacade,
+  plugins: ReportingSetupDeps,
   parentLogger: Logger
 ) {
-  const routeOptions = getRouteOptionsCsv(server);
+  const routeOptions = getRouteOptionsCsv(server, plugins, parentLogger);
 
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
@@ -43,21 +46,31 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     path: `${API_BASE_GENERATE_V1}/immediate/csv/saved-object/{savedObjectType}:{savedObjectId}`,
     method: 'POST',
     options: routeOptions,
-    handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
+      const request = makeRequestFacade(legacyRequest);
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
-      const createJobFn = createJobFactory(server);
-      const executeJobFn = executeJobFactory(server);
-      const jobDocPayload: JobDocPayload = await createJobFn(jobParams, request.headers, request);
+
+      /* TODO these functions should be made available in the export types registry:
+       *
+       *     const { createJobFn, executeJobFn } = exportTypesRegistry.getById(CSV_FROM_SAVEDOBJECT_JOB_TYPE)
+       *
+       * Calling an execute job factory requires passing a browserDriverFactory option, so we should not call the factory from here
+       */
+      const createJobFn = createJobFactory(server, logger);
+      const executeJobFn = executeJobFactory(server, logger, {
+        browserDriverFactory: {} as HeadlessChromiumDriverFactory,
+      });
+      const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
+        jobParams,
+        request.headers,
+        request
+      );
       const {
         content_type: jobOutputContentType,
         content: jobOutputContent,
         size: jobOutputSize,
-      }: JobDocOutputExecuted = await executeJobFn(
-        null as JobIDForImmediate,
-        jobDocPayload,
-        request
-      );
+      }: JobDocOutput = await executeJobFn(null, jobDocPayload, request);
 
       logger.info(`Job output size: ${jobOutputSize} bytes`);
 

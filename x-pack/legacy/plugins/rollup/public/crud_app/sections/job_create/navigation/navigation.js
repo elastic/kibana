@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -15,10 +15,10 @@ import {
   EuiFlexItem,
   EuiText,
   EuiLoadingSpinner,
-  EuiCheckbox
+  EuiCheckbox,
 } from '@elastic/eui';
 
-const NavigationUi = ({
+export const Navigation = ({
   isSaving,
   hasNextStep,
   hasPreviousStep,
@@ -33,7 +33,7 @@ const NavigationUi = ({
     return (
       <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l"/>
+          <EuiLoadingSpinner size="l" />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -55,10 +55,7 @@ const NavigationUi = ({
         onClick={goToPreviousStep}
         data-test-subj="rollupJobBackButton"
       >
-        <FormattedMessage
-          id="xpack.rollupJobs.create.backButton.label"
-          defaultMessage="Back"
-        />
+        <FormattedMessage id="xpack.rollupJobs.create.backButton.label" defaultMessage="Back" />
       </EuiButtonEmpty>
     </EuiFlexItem>
   );
@@ -73,10 +70,7 @@ const NavigationUi = ({
         fill
         data-test-subj="rollupJobNextButton"
       >
-        <FormattedMessage
-          id="xpack.rollupJobs.create.nextButton.label"
-          defaultMessage="Next"
-        />
+        <FormattedMessage id="xpack.rollupJobs.create.nextButton.label" defaultMessage="Next" />
       </EuiButton>
     </EuiFlexItem>
   );
@@ -90,14 +84,10 @@ const NavigationUi = ({
         fill
         data-test-subj="rollupJobSaveButton"
       >
-        <FormattedMessage
-          id="xpack.rollupJobs.create.saveButton.label"
-          defaultMessage="Save"
-        />
+        <FormattedMessage id="xpack.rollupJobs.create.saveButton.label" defaultMessage="Save" />
       </EuiButton>
     </EuiFlexItem>
   );
-
 
   const startAfterCreateCheckbox = (
     <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
@@ -130,7 +120,7 @@ const NavigationUi = ({
   );
 };
 
-NavigationUi.propTypes = {
+Navigation.propTypes = {
   hasNextStep: PropTypes.bool.isRequired,
   hasPreviousStep: PropTypes.bool.isRequired,
   isSaving: PropTypes.bool.isRequired,
@@ -139,5 +129,3 @@ NavigationUi.propTypes = {
   save: PropTypes.func.isRequired,
   canGoToNextStep: PropTypes.bool.isRequired,
 };
-
-export const Navigation = injectI18n(NavigationUi);

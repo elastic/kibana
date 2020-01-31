@@ -5,7 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { RequestAdapter } from 'ui/inspector/adapters';
+import { RequestAdapter } from '../../../../../../src/plugins/inspector/public';
 import { MapAdapter } from '../inspector/adapters/map_adapter';
 
 const REGISTER_CANCEL_CALLBACK = 'REGISTER_CANCEL_CALLBACK';
@@ -46,13 +46,11 @@ export function nonSerializableInstances(state, action = {}) {
     case SET_EVENT_HANDLERS: {
       return {
         ...state,
-        eventHandlers: action.eventHandlers
+        eventHandlers: action.eventHandlers,
       };
     }
     default:
       return state;
-
-
   }
 }
 
@@ -78,14 +76,14 @@ export const registerCancelCallback = (requestToken, callback) => {
   };
 };
 
-export const unregisterCancelCallback = (requestToken) => {
+export const unregisterCancelCallback = requestToken => {
   return {
     type: UNREGISTER_CANCEL_CALLBACK,
     requestToken,
   };
 };
 
-export const cancelRequest = (requestToken) => {
+export const cancelRequest = requestToken => {
   return (dispatch, getState) => {
     if (!requestToken) {
       return;

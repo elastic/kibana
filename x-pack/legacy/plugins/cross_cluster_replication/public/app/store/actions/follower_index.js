@@ -22,14 +22,14 @@ import { getSelectedFollowerIndexId } from '../selectors';
 
 const { FOLLOWER_INDEX: scope } = SECTIONS;
 
-export const selectDetailFollowerIndex = (id) => ({
+export const selectDetailFollowerIndex = id => ({
   type: t.FOLLOWER_INDEX_SELECT_DETAIL,
-  payload: id
+  payload: id,
 });
 
-export const selectEditFollowerIndex = (id) => ({
+export const selectEditFollowerIndex = id => ({
   type: t.FOLLOWER_INDEX_SELECT_EDIT,
-  payload: id
+  payload: id,
 });
 
 export const loadFollowerIndices = (isUpdating = false) =>
@@ -37,21 +37,17 @@ export const loadFollowerIndices = (isUpdating = false) =>
     label: t.FOLLOWER_INDEX_LOAD,
     scope,
     status: isUpdating ? API_STATUS.UPDATING : API_STATUS.LOADING,
-    handler: async () => (
-      await loadFollowerIndicesRequest()
-    ),
+    handler: async () => await loadFollowerIndicesRequest(),
   });
 
-export const getFollowerIndex = (id) =>
+export const getFollowerIndex = id =>
   sendApiRequest({
     label: t.FOLLOWER_INDEX_GET,
     scope: `${scope}-get`,
-    handler: async () => (
-      await getFollowerIndexRequest(id)
-    )
+    handler: async () => await getFollowerIndexRequest(id),
   });
 
-export const saveFollowerIndex = (name, followerIndex, isUpdating = false) => (
+export const saveFollowerIndex = (name, followerIndex, isUpdating = false) =>
   sendApiRequest({
     label: t.FOLLOWER_INDEX_CREATE,
     status: API_STATUS.SAVING,
@@ -64,31 +60,34 @@ export const saveFollowerIndex = (name, followerIndex, isUpdating = false) => (
     },
     onSuccess() {
       const successMessage = isUpdating
-        ? i18n.translate('xpack.crossClusterReplication.followerIndex.updateAction.successNotificationTitle', {
-          defaultMessage: `Follower index '{name}' updated successfully`,
-          values: { name },
-        })
-        : i18n.translate('xpack.crossClusterReplication.followerIndex.addAction.successNotificationTitle', {
-          defaultMessage: `Added follower index '{name}'`,
-          values: { name },
-        });
+        ? i18n.translate(
+            'xpack.crossClusterReplication.followerIndex.updateAction.successNotificationTitle',
+            {
+              defaultMessage: `Follower index '{name}' updated successfully`,
+              values: { name },
+            }
+          )
+        : i18n.translate(
+            'xpack.crossClusterReplication.followerIndex.addAction.successNotificationTitle',
+            {
+              defaultMessage: `Added follower index '{name}'`,
+              values: { name },
+            }
+          );
 
       toastNotifications.addSuccess(successMessage);
       routing.navigate(`/follower_indices`, undefined, {
         name: encodeURIComponent(name),
       });
     },
-  })
-);
+  });
 
-export const pauseFollowerIndex = (id) => (
+export const pauseFollowerIndex = id =>
   sendApiRequest({
     label: t.FOLLOWER_INDEX_PAUSE,
     status: API_STATUS.SAVING,
     scope,
-    handler: async () => (
-      pauseFollowerIndexRequest(id)
-    ),
+    handler: async () => pauseFollowerIndexRequest(id),
     onSuccess(response, dispatch) {
       /**
        * We can have 1 or more follower index pause operation
@@ -97,14 +96,20 @@ export const pauseFollowerIndex = (id) => (
       if (response.errors.length) {
         const hasMultipleErrors = response.errors.length > 1;
         const errorMessage = hasMultipleErrors
-          ? i18n.translate('xpack.crossClusterReplication.followerIndex.pauseAction.errorMultipleNotificationTitle', {
-            defaultMessage: `Error pausing {count} follower indices`,
-            values: { count: response.errors.length },
-          })
-          : i18n.translate('xpack.crossClusterReplication.followerIndex.pauseAction.errorSingleNotificationTitle', {
-            defaultMessage: `Error pausing follower index '{name}'`,
-            values: { name: response.errors[0].id },
-          });
+          ? i18n.translate(
+              'xpack.crossClusterReplication.followerIndex.pauseAction.errorMultipleNotificationTitle',
+              {
+                defaultMessage: `Error pausing {count} follower indices`,
+                values: { count: response.errors.length },
+              }
+            )
+          : i18n.translate(
+              'xpack.crossClusterReplication.followerIndex.pauseAction.errorSingleNotificationTitle',
+              {
+                defaultMessage: `Error pausing follower index '{name}'`,
+                values: { name: response.errors[0].id },
+              }
+            );
 
         toastNotifications.addDanger(errorMessage);
       }
@@ -113,32 +118,35 @@ export const pauseFollowerIndex = (id) => (
         const hasMultiplePaused = response.itemsPaused.length > 1;
 
         const successMessage = hasMultiplePaused
-          ? i18n.translate('xpack.crossClusterReplication.followerIndex.pauseAction.successMultipleNotificationTitle', {
-            defaultMessage: `{count} follower indices were paused`,
-            values: { count: response.itemsPaused.length },
-          })
-          : i18n.translate('xpack.crossClusterReplication.followerIndex.pauseAction.successSingleNotificationTitle', {
-            defaultMessage: `Follower index '{name}' was paused`,
-            values: { name: response.itemsPaused[0] },
-          });
+          ? i18n.translate(
+              'xpack.crossClusterReplication.followerIndex.pauseAction.successMultipleNotificationTitle',
+              {
+                defaultMessage: `{count} follower indices were paused`,
+                values: { count: response.itemsPaused.length },
+              }
+            )
+          : i18n.translate(
+              'xpack.crossClusterReplication.followerIndex.pauseAction.successSingleNotificationTitle',
+              {
+                defaultMessage: `Follower index '{name}' was paused`,
+                values: { name: response.itemsPaused[0] },
+              }
+            );
 
         toastNotifications.addSuccess(successMessage);
 
         // Refresh list
         dispatch(loadFollowerIndices(true));
       }
-    }
-  })
-);
+    },
+  });
 
-export const resumeFollowerIndex = (id) => (
+export const resumeFollowerIndex = id =>
   sendApiRequest({
     label: t.FOLLOWER_INDEX_RESUME,
     status: API_STATUS.SAVING,
     scope,
-    handler: async () => (
-      resumeFollowerIndexRequest(id)
-    ),
+    handler: async () => resumeFollowerIndexRequest(id),
     onSuccess(response, dispatch) {
       /**
        * We can have 1 or more follower index resume operation
@@ -147,14 +155,20 @@ export const resumeFollowerIndex = (id) => (
       if (response.errors.length) {
         const hasMultipleErrors = response.errors.length > 1;
         const errorMessage = hasMultipleErrors
-          ? i18n.translate('xpack.crossClusterReplication.followerIndex.resumeAction.errorMultipleNotificationTitle', {
-            defaultMessage: `Error resuming {count} follower indices`,
-            values: { count: response.errors.length },
-          })
-          : i18n.translate('xpack.crossClusterReplication.followerIndex.resumeAction.errorSingleNotificationTitle', {
-            defaultMessage: `Error resuming follower index '{name}'`,
-            values: { name: response.errors[0].id },
-          });
+          ? i18n.translate(
+              'xpack.crossClusterReplication.followerIndex.resumeAction.errorMultipleNotificationTitle',
+              {
+                defaultMessage: `Error resuming {count} follower indices`,
+                values: { count: response.errors.length },
+              }
+            )
+          : i18n.translate(
+              'xpack.crossClusterReplication.followerIndex.resumeAction.errorSingleNotificationTitle',
+              {
+                defaultMessage: `Error resuming follower index '{name}'`,
+                values: { name: response.errors[0].id },
+              }
+            );
 
         toastNotifications.addDanger(errorMessage);
       }
@@ -163,32 +177,35 @@ export const resumeFollowerIndex = (id) => (
         const hasMultipleResumed = response.itemsResumed.length > 1;
 
         const successMessage = hasMultipleResumed
-          ? i18n.translate('xpack.crossClusterReplication.followerIndex.resumeAction.successMultipleNotificationTitle', {
-            defaultMessage: `{count} follower indices were resumed`,
-            values: { count: response.itemsResumed.length },
-          })
-          : i18n.translate('xpack.crossClusterReplication.followerIndex.resumeAction.successSingleNotificationTitle', {
-            defaultMessage: `Follower index '{name}' was resumed`,
-            values: { name: response.itemsResumed[0] },
-          });
+          ? i18n.translate(
+              'xpack.crossClusterReplication.followerIndex.resumeAction.successMultipleNotificationTitle',
+              {
+                defaultMessage: `{count} follower indices were resumed`,
+                values: { count: response.itemsResumed.length },
+              }
+            )
+          : i18n.translate(
+              'xpack.crossClusterReplication.followerIndex.resumeAction.successSingleNotificationTitle',
+              {
+                defaultMessage: `Follower index '{name}' was resumed`,
+                values: { name: response.itemsResumed[0] },
+              }
+            );
 
         toastNotifications.addSuccess(successMessage);
       }
 
       // Refresh list
       dispatch(loadFollowerIndices(true));
-    }
-  })
-);
+    },
+  });
 
-export const unfollowLeaderIndex = (id) => (
+export const unfollowLeaderIndex = id =>
   sendApiRequest({
     label: t.FOLLOWER_INDEX_UNFOLLOW,
     status: API_STATUS.DELETING,
     scope: `${scope}-delete`,
-    handler: async () => (
-      unfollowLeaderIndexRequest(id)
-    ),
+    handler: async () => unfollowLeaderIndexRequest(id),
     onSuccess(response, dispatch, getState) {
       /**
        * We can have 1 or more follower index unfollow operation
@@ -197,14 +214,20 @@ export const unfollowLeaderIndex = (id) => (
       if (response.errors.length) {
         const hasMultipleErrors = response.errors.length > 1;
         const errorMessage = hasMultipleErrors
-          ? i18n.translate('xpack.crossClusterReplication.followerIndex.unfollowAction.errorMultipleNotificationTitle', {
-            defaultMessage: `Error unfollowing leader index of {count} follower indices`,
-            values: { count: response.errors.length },
-          })
-          : i18n.translate('xpack.crossClusterReplication.followerIndex.unfollowAction.errorSingleNotificationTitle', {
-            defaultMessage: `Error unfollowing leader index of follower index '{name}'`,
-            values: { name: response.errors[0].id },
-          });
+          ? i18n.translate(
+              'xpack.crossClusterReplication.followerIndex.unfollowAction.errorMultipleNotificationTitle',
+              {
+                defaultMessage: `Error unfollowing leader index of {count} follower indices`,
+                values: { count: response.errors.length },
+              }
+            )
+          : i18n.translate(
+              'xpack.crossClusterReplication.followerIndex.unfollowAction.errorSingleNotificationTitle',
+              {
+                defaultMessage: `Error unfollowing leader index of follower index '{name}'`,
+                values: { name: response.errors[0].id },
+              }
+            );
 
         toastNotifications.addDanger(errorMessage);
       }
@@ -213,14 +236,20 @@ export const unfollowLeaderIndex = (id) => (
         const hasMultipleUnfollow = response.itemsUnfollowed.length > 1;
 
         const successMessage = hasMultipleUnfollow
-          ? i18n.translate('xpack.crossClusterReplication.followerIndex.unfollowAction.successMultipleNotificationTitle', {
-            defaultMessage: `Leader indices of {count} follower indices were unfollowed`,
-            values: { count: response.itemsUnfollowed.length },
-          })
-          : i18n.translate('xpack.crossClusterReplication.followerIndex.unfollowAction.successSingleNotificationTitle', {
-            defaultMessage: `Leader index of follower index '{name}' was unfollowed`,
-            values: { name: response.itemsUnfollowed[0] },
-          });
+          ? i18n.translate(
+              'xpack.crossClusterReplication.followerIndex.unfollowAction.successMultipleNotificationTitle',
+              {
+                defaultMessage: `Leader indices of {count} follower indices were unfollowed`,
+                values: { count: response.itemsUnfollowed.length },
+              }
+            )
+          : i18n.translate(
+              'xpack.crossClusterReplication.followerIndex.unfollowAction.successSingleNotificationTitle',
+              {
+                defaultMessage: `Leader index of follower index '{name}' was unfollowed`,
+                values: { name: response.itemsUnfollowed[0] },
+              }
+            );
 
         toastNotifications.addSuccess(successMessage);
       }
@@ -229,14 +258,20 @@ export const unfollowLeaderIndex = (id) => (
         const hasMultipleNotOpen = response.itemsNotOpen.length > 1;
 
         const warningMessage = hasMultipleNotOpen
-          ? i18n.translate('xpack.crossClusterReplication.followerIndex.unfollowAction.notOpenWarningMultipleNotificationTitle', {
-            defaultMessage: `{count} indices could not be re-opened`,
-            values: { count: response.itemsNotOpen.length },
-          })
-          : i18n.translate('xpack.crossClusterReplication.followerIndex.unfollowAction.notOpenWarningSingleNotificationTitle', {
-            defaultMessage: `Index '{name}' could not be re-opened`,
-            values: { name: response.itemsNotOpen[0] },
-          });
+          ? i18n.translate(
+              'xpack.crossClusterReplication.followerIndex.unfollowAction.notOpenWarningMultipleNotificationTitle',
+              {
+                defaultMessage: `{count} indices could not be re-opened`,
+                values: { count: response.itemsNotOpen.length },
+              }
+            )
+          : i18n.translate(
+              'xpack.crossClusterReplication.followerIndex.unfollowAction.notOpenWarningSingleNotificationTitle',
+              {
+                defaultMessage: `Index '{name}' could not be re-opened`,
+                values: { name: response.itemsNotOpen[0] },
+              }
+            );
 
         toastNotifications.addWarning(warningMessage);
       }
@@ -246,6 +281,5 @@ export const unfollowLeaderIndex = (id) => (
       if (response.itemsUnfollowed.includes(followerIndexId)) {
         dispatch(selectDetailFollowerIndex(null));
       }
-    }
-  })
-);
+    },
+  });

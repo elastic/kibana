@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { Subject } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
 import { loadPluginBundle } from './plugin_loader';
@@ -33,7 +35,7 @@ export interface Plugin<
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
 > {
-  setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+  setup(core: CoreSetup<TPluginsStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
   stop?(): void;
 }
@@ -70,6 +72,9 @@ export class PluginWrapper<
   private initializer?: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
+  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart]>();
+  public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
+
   constructor(
     public readonly discoveredPlugin: DiscoveredPlugin,
     public readonly opaqueId: PluginOpaqueId,
@@ -100,7 +105,7 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public async setup(setupContext: CoreSetup, plugins: TPluginsSetup) {
+  public async setup(setupContext: CoreSetup<TPluginsStart>, plugins: TPluginsSetup) {
     this.instance = await this.createPluginInstance();
 
     return await this.instance.setup(setupContext, plugins);
@@ -118,7 +123,11 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    return await this.instance.start(startContext, plugins);
+    const startContract = await this.instance.start(startContext, plugins);
+
+    this.startDependencies$.next([startContext, plugins]);
+
+    return startContract;
   }
 
   /**

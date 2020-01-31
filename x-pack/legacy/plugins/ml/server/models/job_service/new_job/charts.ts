@@ -6,7 +6,7 @@
 
 import { newJobLineChartProvider } from './line_chart';
 import { newJobPopulationChartProvider } from './population_chart';
-export type callWithRequestType = (action: string, params: any) => Promise<any>;
+import { callWithRequestType } from '../../../../common/types/kibana';
 
 export function newJobChartsProvider(callWithRequest: callWithRequestType) {
   const { newJobLineChart } = newJobLineChartProvider(callWithRequest);

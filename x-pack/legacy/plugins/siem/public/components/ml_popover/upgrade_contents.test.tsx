@@ -5,13 +5,12 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { UpgradeContents } from './upgrade_contents';
+import React from 'react';
+import { UpgradeContentsComponent } from './upgrade_contents';
 
 describe('JobsTableFilters', () => {
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(<UpgradeContents />);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    const wrapper = shallow(<UpgradeContentsComponent />);
+    expect(wrapper).toMatchSnapshot();
   });
 });

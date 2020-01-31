@@ -4,18 +4,58 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, reduce } from 'lodash';
-import { INDEX_NAMES, QUERY } from '../../../../common/constants';
-import {
-  FilterBar,
-  MonitorChart,
-  MonitorPageTitle,
-  Ping,
-  LocationDurationLine,
-} from '../../../../common/graphql/types';
-import { getFilterClause, parseFilterQuery, getHistogramIntervalFormatted } from '../../helper';
-import { DatabaseAdapter } from '../database';
+import { get } from 'lodash';
+import { INDEX_NAMES, UNNAMED_LOCATION } from '../../../../common/constants';
+import { MonitorChart, LocationDurationLine } from '../../../../common/graphql/types';
+import { getHistogramIntervalFormatted } from '../../helper';
+import { MonitorError, MonitorLocation } from '../../../../common/runtime_types';
 import { UMMonitorsAdapter } from './adapter_types';
+import { generateFilterAggs } from './generate_filter_aggs';
+import { OverviewFilters } from '../../../../common/runtime_types';
+
+export const combineRangeWithFilters = (
+  dateRangeStart: string,
+  dateRangeEnd: string,
+  filters?: Record<string, any>
+) => {
+  const range = {
+    range: {
+      '@timestamp': {
+        gte: dateRangeStart,
+        lte: dateRangeEnd,
+      },
+    },
+  };
+  if (!filters) return range;
+  const clientFiltersList = Array.isArray(filters?.bool?.filter ?? {})
+    ? // i.e. {"bool":{"filter":{ ...some nested filter objects }}}
+      filters.bool.filter
+    : // i.e. {"bool":{"filter":[ ...some listed filter objects ]}}
+      Object.keys(filters?.bool?.filter ?? {}).map(key => ({
+        ...filters?.bool?.filter?.[key],
+      }));
+  filters.bool.filter = [...clientFiltersList, range];
+  return filters;
+};
+
+type SupportedFields = 'locations' | 'ports' | 'schemes' | 'tags';
+
+export const extractFilterAggsResults = (
+  responseAggregations: Record<string, any>,
+  keys: SupportedFields[]
+): OverviewFilters => {
+  const values: OverviewFilters = {
+    locations: [],
+    ports: [],
+    schemes: [],
+    tags: [],
+  };
+  keys.forEach(key => {
+    const buckets = responseAggregations[key]?.term?.buckets ?? [];
+    values[key] = buckets.map((item: { key: string | number }) => item.key);
+  });
+  return values;
+};
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
@@ -37,25 +77,8 @@ const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   };
 };
 
-export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
-  constructor(private readonly database: DatabaseAdapter) {
-    this.database = database;
-  }
-
-  /**
-   * Fetches data used to populate monitor charts
-   * @param request Kibana request
-   * @param monitorId ID value for the selected monitor
-   * @param dateRangeStart timestamp bounds
-   * @param dateRangeEnd timestamp bounds
-   */
-  public async getMonitorChartsData(
-    request: any,
-    monitorId: string,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    location?: string | null
-  ): Promise<MonitorChart> {
+export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
+  getMonitorChartsData: async ({ callES, dateRangeStart, dateRangeEnd, monitorId, location }) => {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -95,7 +118,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     };
 
-    const result = await this.database.search(request, params);
+    const result = await callES('search', params);
 
     const dateHistogramBuckets = get<any[]>(result, 'aggregations.timeseries.buckets', []);
     /**
@@ -181,221 +204,66 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     });
 
     return monitorChartsData;
-  }
+  },
 
-  /**
-   * Provides a count of the current monitors
-   * @param request Kibana request
-   * @param dateRangeStart timestamp bounds
-   * @param dateRangeEnd timestamp bounds
-   * @param filters filters defined by client
-   */
-  public async getSnapshotCount(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null,
-    statusFilter?: string | null
-  ): Promise<any> {
-    const query = parseFilterQuery(filters);
-    const additionalFilters = [{ exists: { field: 'summary.up' } }];
-    if (query) {
-      additionalFilters.push(query);
-    }
-    const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionalFilters);
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        query: {
-          bool: {
-            filter,
-          },
-        },
-        size: 0,
-        aggs: {
-          ids: {
-            composite: {
-              sources: [
-                {
-                  id: {
-                    terms: {
-                      field: 'monitor.id',
-                    },
-                  },
-                },
-                {
-                  location: {
-                    terms: {
-                      field: 'observer.geo.name',
-                      missing_bucket: true,
-                    },
-                  },
-                },
-              ],
-              size: QUERY.DEFAULT_AGGS_CAP,
-            },
-            aggs: {
-              latest: {
-                top_hits: {
-                  sort: [{ '@timestamp': { order: 'desc' } }],
-                  _source: {
-                    includes: ['summary.*', 'monitor.id', '@timestamp', 'observer.geo.name'],
-                  },
-                  size: 1,
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    let searchAfter: any = null;
-
-    const summaryByIdLocation: {
-      // ID
-      [key: string]: {
-        // Location
-        [key: string]: { up: number; down: number; timestamp: number };
-      };
-    } = {};
-
-    do {
-      if (searchAfter) {
-        set(params, 'body.aggs.ids.composite.after', searchAfter);
-      }
-
-      const queryResult = await this.database.search(request, params);
-      const idBuckets = get(queryResult, 'aggregations.ids.buckets', []);
-
-      idBuckets.forEach(bucket => {
-        // We only get the latest doc
-        const source: any = get(bucket, 'latest.hits.hits[0]._source');
-        const {
-          summary: { up, down },
-          monitor: { id },
-        } = source;
-        const timestamp = get(source, '@timestamp', 0);
-        const location = get(source, 'observer.geo.name', '');
-
-        let idSummary = summaryByIdLocation[id];
-        if (!idSummary) {
-          idSummary = {};
-          summaryByIdLocation[id] = idSummary;
-        }
-        const locationSummary = idSummary[location];
-        if (!locationSummary || locationSummary.timestamp < timestamp) {
-          idSummary[location] = { timestamp, up, down };
-        }
-      });
-
-      searchAfter = get(queryResult, 'aggregations.ids.after_key');
-    } while (searchAfter);
-
-    let up: number = 0;
-    let mixed: number = 0;
-    let down: number = 0;
-
-    for (const id in summaryByIdLocation) {
-      if (!summaryByIdLocation.hasOwnProperty(id)) {
-        continue;
-      }
-      const locationInfo = summaryByIdLocation[id];
-      const { up: locationUp, down: locationDown } = reduce(
-        locationInfo,
-        (acc, value, key) => {
-          acc.up += value.up;
-          acc.down += value.down;
-          return acc;
-        },
-        { up: 0, down: 0 }
-      );
-
-      if (locationDown === 0) {
-        up++;
-      } else if (locationUp > 0) {
-        mixed++;
-      } else {
-        down++;
-      }
-    }
-
-    const result: any = { up, down, mixed, total: up + down + mixed };
-    if (statusFilter) {
-      for (const status in result) {
-        if (status !== 'total' && status !== statusFilter) {
-          result[status] = 0;
-        }
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Fetch options for the filter bar.
-   * @param request Kibana request object
-   * @param dateRangeStart timestamp bounds
-   * @param dateRangeEnd timestamp bounds
-   */
-  public async getFilterBar(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string
-  ): Promise<FilterBar> {
-    const fields: { [key: string]: string } = {
-      ids: 'monitor.id',
-      schemes: 'monitor.type',
-      urls: 'url.full',
-      ports: 'url.port',
-      locations: 'observer.geo.name',
-    };
+  getFilterBar: async ({ callES, dateRangeStart, dateRangeEnd, search, filterOptions }) => {
+    const aggs = generateFilterAggs(
+      [
+        { aggName: 'locations', filterName: 'locations', field: 'observer.geo.name' },
+        { aggName: 'ports', filterName: 'ports', field: 'url.port' },
+        { aggName: 'schemes', filterName: 'schemes', field: 'monitor.type' },
+        { aggName: 'tags', filterName: 'tags', field: 'tags' },
+      ],
+      filterOptions
+    );
+    const filters = combineRangeWithFilters(dateRangeStart, dateRangeEnd, search);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         size: 0,
         query: {
-          range: {
-            '@timestamp': {
-              gte: dateRangeStart,
-              lte: dateRangeEnd,
-            },
-          },
+          ...filters,
         },
-        aggs: Object.values(fields).reduce((acc: { [key: string]: any }, field) => {
-          acc[field] = { terms: { field, size: 20 } };
-          return acc;
-        }, {}),
+        aggs,
       },
     };
-    const { aggregations } = await this.database.search(request, params);
 
-    return Object.keys(fields).reduce((acc: { [key: string]: any[] }, field) => {
-      const bucketName = fields[field];
-      acc[field] = aggregations[bucketName].buckets.map((b: { key: string | number }) => b.key);
-      return acc;
-    }, {});
-  }
+    const { aggregations } = await callES('search', params);
+    return extractFilterAggsResults(aggregations, ['tags', 'locations', 'ports', 'schemes']);
+  },
 
-  /**
-   * Fetch data for the monitor page title.
-   * @param request Kibana server request
-   * @param monitorId the ID to query
-   */
-  public async getMonitorPageTitle(
-    request: any,
-    monitorId: string
-  ): Promise<MonitorPageTitle | null> {
+  getMonitorDetails: async ({ callES, monitorId, dateStart, dateEnd }) => {
+    const queryFilters: any = [
+      {
+        range: {
+          '@timestamp': {
+            gte: dateStart,
+            lte: dateEnd,
+          },
+        },
+      },
+      {
+        term: {
+          'monitor.id': monitorId,
+        },
+      },
+    ];
+
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
+        size: 1,
+        _source: ['error', '@timestamp'],
         query: {
           bool: {
-            filter: {
-              term: {
-                'monitor.id': monitorId,
+            must: [
+              {
+                exists: {
+                  field: 'error',
+                },
               },
-            },
+            ],
+            filter: queryFilters,
           },
         },
         sort: [
@@ -405,19 +273,113 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             },
           },
         ],
-        size: 1,
       },
     };
 
-    const result = await this.database.search(request, params);
-    const pageTitle: Ping | null = get(result, 'hits.hits[0]._source', null);
-    if (pageTitle === null) {
-      return null;
-    }
+    const result = await callES('search', params);
+
+    const data = result.hits.hits[0]?._source;
+
+    const monitorError: MonitorError | undefined = data?.error;
+    const errorTimeStamp: string | undefined = data?.['@timestamp'];
+
     return {
-      id: get(pageTitle, 'monitor.id', null) || monitorId,
-      url: get(pageTitle, 'url.full', null),
-      name: get(pageTitle, 'monitor.name', null),
+      monitorId,
+      error: monitorError,
+      timestamp: errorTimeStamp,
     };
-  }
-}
+  },
+
+  getMonitorLocations: async ({ callES, monitorId, dateStart, dateEnd }) => {
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                match: {
+                  'monitor.id': monitorId,
+                },
+              },
+              {
+                exists: {
+                  field: 'summary',
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: dateStart,
+                    lte: dateEnd,
+                  },
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          location: {
+            terms: {
+              field: 'observer.geo.name',
+              missing: '__location_missing__',
+            },
+            aggs: {
+              most_recent: {
+                top_hits: {
+                  size: 1,
+                  sort: {
+                    '@timestamp': {
+                      order: 'desc',
+                    },
+                  },
+                  _source: ['monitor', 'summary', 'observer', '@timestamp'],
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const result = await callES('search', params);
+    const locations = result?.aggregations?.location?.buckets ?? [];
+
+    const getGeo = (locGeo: { name: string; location?: string }) => {
+      if (locGeo) {
+        const { name, location } = locGeo;
+        const latLon = location?.trim().split(',');
+        return {
+          name,
+          location: latLon
+            ? {
+                lat: latLon[0],
+                lon: latLon[1],
+              }
+            : undefined,
+        };
+      } else {
+        return {
+          name: UNNAMED_LOCATION,
+        };
+      }
+    };
+
+    const monLocs: MonitorLocation[] = [];
+    locations.forEach((loc: any) => {
+      const mostRecentLocation = loc.most_recent.hits.hits[0]._source;
+      const location: MonitorLocation = {
+        summary: mostRecentLocation?.summary,
+        geo: getGeo(mostRecentLocation?.observer?.geo),
+        timestamp: mostRecentLocation['@timestamp'],
+      };
+      monLocs.push(location);
+    });
+
+    return {
+      monitorId,
+      locations: monLocs,
+    };
+  },
+};

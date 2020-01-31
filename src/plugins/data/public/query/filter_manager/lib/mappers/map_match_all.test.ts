@@ -18,7 +18,7 @@
  */
 
 import { mapMatchAll } from './map_match_all';
-import { esFilters } from '../../../../../common/es_query';
+import { esFilters } from '../../../../../common';
 
 describe('filter_manager/lib', () => {
   describe('mapMatchAll()', () => {

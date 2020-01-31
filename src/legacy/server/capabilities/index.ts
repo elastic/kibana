@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { CapabilitiesModifier, capabilitiesMixin } from './capabilities_mixin';
+export { capabilitiesMixin } from './capabilities_mixin';

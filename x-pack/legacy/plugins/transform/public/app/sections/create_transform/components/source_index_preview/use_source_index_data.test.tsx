@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
 
@@ -22,7 +22,7 @@ interface TestHookProps {
   callback: Callback;
 }
 
-const TestHook: SFC<TestHookProps> = ({ callback }) => {
+const TestHook: FC<TestHookProps> = ({ callback }) => {
   callback();
   return null;
 };

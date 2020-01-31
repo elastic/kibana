@@ -5,20 +5,20 @@
  */
 
 import {
+  EuiButtonIcon,
   EuiBasicTable,
   EuiFlexGroup,
-  EuiPanel,
-  EuiTitle,
-  EuiButtonIcon,
+  EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiFlexItem,
+  EuiPanel,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React, { useState, Fragment } from 'react';
+import styled from 'styled-components';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { monitorStatesQuery } from '../../../queries/monitor_states_query';
 import {
@@ -30,11 +30,10 @@ import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { ExpandedRowMap } from './types';
 import { MonitorListDrawer } from './monitor_list_drawer';
-import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import { MonitorBarSeries } from '../charts';
-import { MonitorPageLink } from '../monitor_page_link';
-import { MonitorListActionsPopover } from './monitor_list_actions_popover';
-import { OverviewPageLink } from '../overview_page_link';
+import { MonitorPageLink } from './monitor_page_link';
+import { OverviewPageLink } from './overview_page_link';
+import * as labels from './translations';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -51,12 +50,17 @@ interface MonitorListProps {
 
 type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
 
+const TruncatedEuiLink = styled(EuiLink)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
 export const MonitorListComponent = (props: Props) => {
   const {
     absoluteStartDate,
     absoluteEndDate,
     dangerColor,
-    successColor,
     data,
     errors,
     hasActiveFilters,
@@ -68,6 +72,91 @@ export const MonitorListComponent = (props: Props) => {
 
   const nextPagePagination = get<string>(data, 'monitorStates.nextPagePagination');
   const prevPagePagination = get<string>(data, 'monitorStates.prevPagePagination');
+
+  const getExpandedRowMap = () => {
+    return drawerIds.reduce((map: ExpandedRowMap, id: string) => {
+      return {
+        ...map,
+        [id]: (
+          <MonitorListDrawer
+            summary={items.find(({ monitor_id: monitorId }) => monitorId === id)}
+          />
+        ),
+      };
+    }, {});
+  };
+
+  const columns = [
+    {
+      align: 'left' as const,
+      width: '20%',
+      field: 'state.monitor.status',
+      name: labels.STATUS_COLUMN_LABEL,
+      render: (status: string, { state: { timestamp } }: MonitorSummary) => {
+        return <MonitorListStatusColumn status={status} timestamp={timestamp} />;
+      },
+    },
+    {
+      align: 'left' as const,
+      width: '30%',
+      field: 'state.monitor.name',
+      name: labels.NAME_COLUMN_LABEL,
+      render: (name: string, summary: MonitorSummary) => (
+        <MonitorPageLink monitorId={summary.monitor_id} linkParameters={linkParameters}>
+          {name ? name : `Unnamed - ${summary.monitor_id}`}
+        </MonitorPageLink>
+      ),
+      sortable: true,
+    },
+    {
+      aligh: 'left' as const,
+      field: 'state.url.full',
+      name: labels.URL,
+      render: (url: string, summary: MonitorSummary) => (
+        <TruncatedEuiLink href={url} target="_blank" color="text">
+          {url} <EuiIcon size="s" type="popout" color="subbdued" />
+        </TruncatedEuiLink>
+      ),
+    },
+    {
+      align: 'center' as const,
+      field: 'histogram.points',
+      name: labels.HISTORY_COLUMN_LABEL,
+      mobileOptions: {
+        show: false,
+      },
+      render: (histogramSeries: SummaryHistogramPoint[] | null) => (
+        <MonitorBarSeries
+          absoluteStartDate={absoluteStartDate}
+          absoluteEndDate={absoluteEndDate}
+          dangerColor={dangerColor}
+          histogramSeries={histogramSeries}
+        />
+      ),
+    },
+    {
+      align: 'right' as const,
+      field: 'monitor_id',
+      name: '',
+      sortable: true,
+      isExpander: true,
+      render: (id: string) => {
+        return (
+          <EuiButtonIcon
+            aria-label={labels.getExpandDrawerLabel(id)}
+            iconType={drawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
+            onClick={() => {
+              if (drawerIds.includes(id)) {
+                updateDrawerIds(drawerIds.filter(p => p !== id));
+              } else {
+                updateDrawerIds([...drawerIds, id]);
+              }
+            }}
+          />
+        );
+      },
+    },
+  ];
 
   return (
     <Fragment>
@@ -82,11 +171,7 @@ export const MonitorListComponent = (props: Props) => {
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiBasicTable
-          aria-label={i18n.translate('xpack.uptime.monitorList.table.description', {
-            defaultMessage:
-              'Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying {length} items.',
-            values: { length: items.length },
-          })}
+          aria-label={labels.getDescriptionLabel(items.length)}
           error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
           // Only set loading to true when there are no items present to prevent the bug outlined in
           // in https://github.com/elastic/eui/issues/2393 . Once that is fixed we can simply set the value here to
@@ -95,158 +180,21 @@ export const MonitorListComponent = (props: Props) => {
           isExpandable={true}
           hasActions={true}
           itemId="monitor_id"
-          itemIdToExpandedRowMap={drawerIds.reduce((map: ExpandedRowMap, id: string) => {
-            return {
-              ...map,
-              [id]: (
-                <MonitorListDrawer
-                  condensedCheckLimit={CLIENT_DEFAULTS.CONDENSED_CHECK_LIMIT}
-                  summary={
-                    items ? items.find(({ monitor_id: monitorId }) => monitorId === id) : undefined
-                  }
-                  successColor={successColor}
-                  dangerColor={dangerColor}
-                />
-              ),
-            };
-          }, {})}
+          itemIdToExpandedRowMap={getExpandedRowMap()}
           items={items}
           // TODO: not needed without sorting and pagination
           // onChange={onChange}
           noItemsMessage={
-            hasActiveFilters
-              ? i18n.translate('xpack.uptime.monitorList.noItemForSelectedFiltersMessage', {
-                  defaultMessage: 'No monitors found for selected filter criteria',
-                  description:
-                    'This message is show if there are no monitors in the table and some filter or search criteria exists',
-                })
-              : i18n.translate('xpack.uptime.monitorList.noItemMessage', {
-                  defaultMessage: 'No uptime monitors found',
-                  description:
-                    'This message is shown if the monitors table is rendered but has no items.',
-                })
+            hasActiveFilters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE
           }
           // TODO: reintegrate pagination in future release
           // pagination={pagination}
           // TODO: reintegrate sorting in future release
           // sorting={sorting}
-          columns={[
-            {
-              align: 'left',
-              field: 'state.monitor.status',
-              name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
-                defaultMessage: 'Status',
-              }),
-              render: (status: string, { state: { timestamp } }: MonitorSummary) => {
-                return <MonitorListStatusColumn status={status} timestamp={timestamp} />;
-              },
-            },
-            {
-              align: 'left',
-              field: 'state.monitor.name',
-              name: i18n.translate('xpack.uptime.monitorList.nameColumnLabel', {
-                defaultMessage: 'Name',
-              }),
-              render: (name: string, summary: MonitorSummary) => (
-                <MonitorPageLink
-                  id={summary.monitor_id}
-                  linkParameters={linkParameters}
-                  location={undefined}
-                >
-                  {name ? name : `Unnamed - ${summary.monitor_id}`}
-                </MonitorPageLink>
-              ),
-              sortable: true,
-            },
-            {
-              align: 'left',
-              field: 'state.url.full',
-              name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
-                defaultMessage: 'URL',
-              }),
-              render: (url: string, summary: MonitorSummary) => (
-                <Fragment>
-                  <EuiLink href={url} target="_blank" color="text">
-                    {url} <EuiIcon size="s" type="popout" color="subbdued" />
-                  </EuiLink>
-                </Fragment>
-              ),
-              sortable: true,
-            },
-            {
-              field: 'histogram.points',
-              name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
-                defaultMessage: 'Downtime history',
-              }),
-              mobileOptions: {
-                show: false,
-              },
-              render: (histogramSeries: SummaryHistogramPoint[] | null) => (
-                <MonitorBarSeries
-                  absoluteStartDate={absoluteStartDate}
-                  absoluteEndDate={absoluteEndDate}
-                  dangerColor={dangerColor}
-                  histogramSeries={histogramSeries}
-                />
-              ),
-            },
-            {
-              id: 'actions',
-              align: 'right',
-              field: 'state',
-              hasActions: true,
-              mobileOptions: {
-                header: false,
-              },
-              name: i18n.translate(
-                'xpack.uptime.monitorList.observabilityIntegrationsColumnLabel',
-                {
-                  defaultMessage: 'Integrations',
-                  description:
-                    'The heading column of some action buttons that will take users to other Observability apps',
-                }
-              ),
-              render: (state: any, summary: MonitorSummary) => (
-                <MonitorListActionsPopover summary={summary} />
-              ),
-            },
-            {
-              align: 'left',
-              field: 'monitor_id',
-              name: '',
-              sortable: true,
-              width: '40px',
-              isExpander: true,
-              render: (id: string) => {
-                return (
-                  <EuiButtonIcon
-                    aria-label={i18n.translate(
-                      'xpack.uptime.monitorList.expandDrawerButton.ariaLabel',
-                      {
-                        defaultMessage: 'Expand row for monitor with ID {id}',
-                        description:
-                          'The user can click a button on this table and expand further details.',
-                        values: {
-                          id,
-                        },
-                      }
-                    )}
-                    iconType={drawerIds.find(item => item === id) ? 'arrowUp' : 'arrowDown'}
-                    onClick={() => {
-                      if (drawerIds.find(i => id === i)) {
-                        updateDrawerIds(drawerIds.filter(p => p !== id));
-                      } else {
-                        updateDrawerIds([...drawerIds, id]);
-                      }
-                    }}
-                  />
-                );
-              },
-            },
-          ]}
+          columns={columns}
         />
-        <EuiSpacer size="s" />
-        <EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
             <OverviewPageLink
               dataTestSubj="xpack.uptime.monitorList.prevButton"

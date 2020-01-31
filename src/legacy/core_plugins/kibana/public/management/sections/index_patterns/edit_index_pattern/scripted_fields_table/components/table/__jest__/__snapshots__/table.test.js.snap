@@ -55,7 +55,6 @@ exports[`Table should render normally 1`] = `
       },
     ]
   }
-  executeQueryOptions={Object {}}
   items={
     Array [
       Object {
@@ -77,6 +76,7 @@ exports[`Table should render normally 1`] = `
   }
   responsive={true}
   sorting={true}
+  tableLayout="fixed"
 />
 `;
 

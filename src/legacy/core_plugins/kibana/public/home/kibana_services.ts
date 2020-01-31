@@ -25,11 +25,11 @@ import {
   NotificationsSetup,
   OverlayStart,
   SavedObjectsClientContract,
-  UiSettingsClientContract,
+  IUiSettingsClient,
   UiSettingsState,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
-import { FeatureCatalogueEntry } from '../../../../../plugins/feature_catalogue/public';
+import { Environment, FeatureCatalogueEntry } from '../../../../../plugins/home/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
@@ -50,17 +50,17 @@ export interface HomeKibanaServices {
   getInjected: (name: string, defaultValue?: any) => unknown;
   chrome: ChromeStart;
   telemetryOptInProvider: any;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];
   banners: OverlayStart['banners'];
-  METRIC_TYPE: any;
   trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
   getBasePath: () => string;
   shouldShowTelemetryOptIn: boolean;
   docLinks: DocLinksStart;
   addBasePath: (url: string) => string;
+  environment: Environment;
 }
 
 let services: HomeKibanaServices | null = null;

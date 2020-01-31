@@ -7,10 +7,7 @@
 import expect from '@kbn/expect';
 import { mapValues } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  GetUICapabilitiesFailureReason,
-  UICapabilitiesService,
-} from '../../common/services/ui_capabilities';
+import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
 
 export default function catalogueTests({ getService }: FtrProviderContext) {
@@ -58,15 +55,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
           case 'dual_privileges_all at nothing_space':
           case 'dual_privileges_read at nothing_space':
           case 'nothing_space_all at nothing_space':
-          case 'nothing_space_read at nothing_space': {
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything is disabled
-            const expected = mapValues(uiCapabilities.value!.catalogue, () => false);
-            expect(uiCapabilities.value!.catalogue).to.eql(expected);
-            break;
-          }
-          // if we don't have access at the space itself, security interceptor responds with 404.
+          case 'nothing_space_read at nothing_space':
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
           case 'legacy_all at everything_space':
@@ -74,10 +63,14 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
           case 'everything_space_all at nothing_space':
           case 'everything_space_read at nothing_space':
           case 'nothing_space_all at everything_space':
-          case 'nothing_space_read at everything_space':
-            expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
+          case 'nothing_space_read at everything_space': {
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // everything is disabled
+            const expected = mapValues(uiCapabilities.value!.catalogue, () => false);
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
+          }
           default:
             throw new UnreachableError(scenario);
         }

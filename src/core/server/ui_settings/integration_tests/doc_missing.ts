@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import sinon from 'sinon';
-
-import { getServices, chance, assertSinonMatch } from './lib';
+import { getServices, chance } from './lib';
 
 export function docMissingSuite() {
   // ensure the kibana index has no documents
@@ -52,11 +49,11 @@ export function docMissingSuite() {
         url: '/api/kibana/settings',
       });
 
-      expect(statusCode).to.be(200);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(200);
+      expect(result).toMatchObject({
         settings: {
           buildNum: {
-            userValue: sinon.match.number,
+            userValue: expect.any(Number),
           },
           foo: {
             userValue: 'bar',
@@ -78,11 +75,11 @@ export function docMissingSuite() {
         payload: { value: defaultIndex },
       });
 
-      expect(statusCode).to.be(200);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(200);
+      expect(result).toMatchObject({
         settings: {
           buildNum: {
-            userValue: sinon.match.number,
+            userValue: expect.any(Number),
           },
           defaultIndex: {
             userValue: defaultIndex,
@@ -109,11 +106,11 @@ export function docMissingSuite() {
         },
       });
 
-      expect(statusCode).to.be(200);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(200);
+      expect(result).toMatchObject({
         settings: {
           buildNum: {
-            userValue: sinon.match.number,
+            userValue: expect.any(Number),
           },
           defaultIndex: {
             userValue: defaultIndex,
@@ -136,11 +133,11 @@ export function docMissingSuite() {
         url: '/api/kibana/settings/defaultIndex',
       });
 
-      expect(statusCode).to.be(200);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(200);
+      expect(result).toMatchObject({
         settings: {
           buildNum: {
-            userValue: sinon.match.number,
+            userValue: expect.any(Number),
           },
           foo: {
             userValue: 'bar',

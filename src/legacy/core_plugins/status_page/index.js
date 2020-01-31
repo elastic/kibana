@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function (kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
     uiExports: {
       app: {
@@ -26,6 +26,11 @@ export default function (kibana) {
         hidden: true,
         url: '/status',
       },
-    }
+      injectDefaultVars(server) {
+        return {
+          isStatusPageAnonymous: server.config().get('status.allowAnonymous'),
+        };
+      },
+    },
   });
 }

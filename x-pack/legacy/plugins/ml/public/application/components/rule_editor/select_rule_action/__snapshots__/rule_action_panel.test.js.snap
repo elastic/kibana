@@ -1,0 +1,173 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
+<EuiPanel
+  className="select-rule-action-panel"
+  paddingSize="m"
+>
+  <EuiDescriptionList
+    listItems={
+      Array [
+        Object {
+          "description": "skip result when actual is less than 1",
+          "title": <FormattedMessage
+            defaultMessage="Rule"
+            id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle"
+            values={Object {}}
+          />,
+        },
+        Object {
+          "description": <InjectIntl(EditConditionLink)
+            anomaly={
+              Object {
+                "actual": Array [
+                  50,
+                ],
+                "detectorIndex": 0,
+                "source": Object {
+                  "airline": Array [
+                    "AAL",
+                  ],
+                  "function": "mean",
+                },
+                "typical": Array [
+                  1.23,
+                ],
+              }
+            }
+            appliesTo="actual"
+            conditionIndex={0}
+            conditionValue={1}
+            updateConditionValue={[Function]}
+          />,
+          "title": <FormattedMessage
+            defaultMessage="Actions"
+            id="xpack.ml.ruleEditor.ruleActionPanel.actionsTitle"
+            values={Object {}}
+          />,
+        },
+        Object {
+          "description": <ForwardRef
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Edit rule"
+              id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
+              values={Object {}}
+            />
+          </ForwardRef>,
+          "title": "",
+        },
+        Object {
+          "description": <DeleteRuleModal
+            deleteRuleAtIndex={[MockFunction]}
+            ruleIndex={0}
+          />,
+          "title": "",
+        },
+      ]
+    }
+    type="column"
+  />
+</EuiPanel>
+`;
+
+exports[`RuleActionPanel renders panel for rule with a condition and scope, value not in filter list 1`] = `
+<EuiPanel
+  className="select-rule-action-panel"
+  paddingSize="m"
+>
+  <EuiDescriptionList
+    listItems={
+      Array [
+        Object {
+          "description": "skip model update when airline is not in eu-airlines",
+          "title": <FormattedMessage
+            defaultMessage="Rule"
+            id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle"
+            values={Object {}}
+          />,
+        },
+        Object {
+          "description": <AddToFilterListLink
+            addItemToFilterList={[MockFunction]}
+            fieldValue="AAL"
+            filterId="eu-airlines"
+          />,
+          "title": <FormattedMessage
+            defaultMessage="Actions"
+            id="xpack.ml.ruleEditor.ruleActionPanel.actionsTitle"
+            values={Object {}}
+          />,
+        },
+        Object {
+          "description": <ForwardRef
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Edit rule"
+              id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
+              values={Object {}}
+            />
+          </ForwardRef>,
+          "title": "",
+        },
+        Object {
+          "description": <DeleteRuleModal
+            deleteRuleAtIndex={[MockFunction]}
+            ruleIndex={1}
+          />,
+          "title": "",
+        },
+      ]
+    }
+    type="column"
+  />
+</EuiPanel>
+`;
+
+exports[`RuleActionPanel renders panel for rule with scope, value in filter list 1`] = `
+<EuiPanel
+  className="select-rule-action-panel"
+  paddingSize="m"
+>
+  <EuiDescriptionList
+    listItems={
+      Array [
+        Object {
+          "description": "skip model update when airline is not in eu-airlines",
+          "title": <FormattedMessage
+            defaultMessage="Rule"
+            id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle"
+            values={Object {}}
+          />,
+        },
+        Object {
+          "description": <ForwardRef
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Edit rule"
+              id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
+              values={Object {}}
+            />
+          </ForwardRef>,
+          "title": <FormattedMessage
+            defaultMessage="Actions"
+            id="xpack.ml.ruleEditor.ruleActionPanel.actionsTitle"
+            values={Object {}}
+          />,
+        },
+        Object {
+          "description": <DeleteRuleModal
+            deleteRuleAtIndex={[MockFunction]}
+            ruleIndex={1}
+          />,
+          "title": "",
+        },
+      ]
+    }
+    type="column"
+  />
+</EuiPanel>
+`;

@@ -7,21 +7,19 @@
 import { KibanaTelemetryAdapter } from '../kibana_telemetry_adapter';
 
 describe('KibanaTelemetryAdapter', () => {
-  let telemetry: any;
+  let usageCollection: any;
   let collector: { type: string; fetch: () => Promise<any>; isReady: () => boolean };
   beforeEach(() => {
-    telemetry = {
-      collectorSet: {
-        makeUsageCollector: (val: any) => {
-          collector = val;
-        },
+    usageCollection = {
+      makeUsageCollector: (val: any) => {
+        collector = val;
       },
     };
   });
 
   it('collects monitor and overview data', async () => {
     expect.assertions(1);
-    KibanaTelemetryAdapter.initUsageCollector(telemetry);
+    KibanaTelemetryAdapter.initUsageCollector(usageCollection);
     KibanaTelemetryAdapter.countMonitor();
     KibanaTelemetryAdapter.countOverview();
     KibanaTelemetryAdapter.countOverview();
@@ -33,7 +31,7 @@ describe('KibanaTelemetryAdapter', () => {
     expect.assertions(1);
     // give a time of > 24 hours ago
     Date.now = jest.fn(() => 1559053560000);
-    KibanaTelemetryAdapter.initUsageCollector(telemetry);
+    KibanaTelemetryAdapter.initUsageCollector(usageCollection);
     KibanaTelemetryAdapter.countMonitor();
     KibanaTelemetryAdapter.countOverview();
     // give a time of now
@@ -47,7 +45,7 @@ describe('KibanaTelemetryAdapter', () => {
   });
 
   it('defaults ready to `true`', async () => {
-    KibanaTelemetryAdapter.initUsageCollector(telemetry);
+    KibanaTelemetryAdapter.initUsageCollector(usageCollection);
     expect(collector.isReady()).toBe(true);
   });
 });

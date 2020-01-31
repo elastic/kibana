@@ -7,12 +7,9 @@
 import DateMath from '@elastic/datemath';
 import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { SourceQuery } from '../../../common/graphql/types';
-import {
-  MetricsExplorerAggregation,
-  MetricsExplorerResponse,
-} from '../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerResponse } from '../../../server/routes/metrics_explorer/types';
 import { fetch } from '../../utils/fetch';
 import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
@@ -24,7 +21,7 @@ function isSameOptions(current: MetricsExplorerOptions, next: MetricsExplorerOpt
 export function useMetricsExplorerData(
   options: MetricsExplorerOptions,
   source: SourceQuery.Query['source']['configuration'],
-  derivedIndexPattern: StaticIndexPattern,
+  derivedIndexPattern: IIndexPattern,
   timerange: MetricsExplorerTimeOptions,
   afterKey: string | null,
   signal: any
@@ -48,8 +45,8 @@ export function useMetricsExplorerData(
           '../api/infra/metrics_explorer',
           {
             metrics:
-              options.aggregation === MetricsExplorerAggregation.count
-                ? [{ aggregation: MetricsExplorerAggregation.count }]
+              options.aggregation === 'count'
+                ? [{ aggregation: 'count' }]
                 : options.metrics.map(metric => ({
                     aggregation: metric.aggregation,
                     field: metric.field,
@@ -96,6 +93,9 @@ export function useMetricsExplorerData(
       }
       setLoading(false);
     })();
+
+    // TODO: fix this dependency list while preserving the semantics
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, source, timerange, signal, afterKey]);
   return { error, loading, data };
 }

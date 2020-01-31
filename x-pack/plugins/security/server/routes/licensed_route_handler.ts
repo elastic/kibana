@@ -4,23 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler } from 'src/core/server';
-import { ObjectType } from '@kbn/config-schema';
-import { LICENSE_STATUS } from '../../../licensing/server/constants';
+import { RequestHandler } from 'kibana/server';
+import { LICENSE_CHECK_STATE } from '../../../licensing/server';
 
-export const createLicensedRouteHandler = <
-  P extends ObjectType<any>,
-  Q extends ObjectType<any>,
-  B extends ObjectType<any>
->(
-  handler: RequestHandler<P, Q, B>
-) => {
+export const createLicensedRouteHandler = <P, Q, B>(handler: RequestHandler<P, Q, B>) => {
   const licensedRouteHandler: RequestHandler<P, Q, B> = (context, request, responseToolkit) => {
     const { license } = context.licensing;
     const licenseCheck = license.check('security', 'basic');
     if (
-      licenseCheck.check === LICENSE_STATUS.Unavailable ||
-      licenseCheck.check === LICENSE_STATUS.Invalid
+      licenseCheck.state === LICENSE_CHECK_STATE.Unavailable ||
+      licenseCheck.state === LICENSE_CHECK_STATE.Invalid
     ) {
       return responseToolkit.forbidden({ body: { message: licenseCheck.message! } });
     }

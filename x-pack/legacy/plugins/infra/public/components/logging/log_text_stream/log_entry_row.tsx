@@ -103,7 +103,7 @@ export const LogEntryRow = ({
   return (
     <LogEntryRowWrapper
       data-test-subj="streamEntry logTextStreamEntry"
-      innerRef={
+      ref={
         /* Workaround for missing RefObject support in styled-components */
         boundingBoxRef as any
       }
@@ -191,11 +191,13 @@ export const LogEntryRow = ({
   );
 };
 
-const LogEntryRowWrapper = euiStyled.div.attrs<{
+interface LogEntryRowWrapperProps {
   scale: TextScale;
-}>({
+}
+
+const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
   role: 'row',
-})`
+}))<LogEntryRowWrapperProps>`
   align-items: stretch;
   color: ${props => props.theme.eui.euiTextColor};
   display: flex;
@@ -204,5 +206,5 @@ const LogEntryRowWrapper = euiStyled.div.attrs<{
   justify-content: flex-start;
   overflow: hidden;
 
-  ${props => monospaceTextStyle(props.scale)}
+  ${props => monospaceTextStyle(props.scale)};
 `;

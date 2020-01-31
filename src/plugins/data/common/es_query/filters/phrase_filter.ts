@@ -19,18 +19,11 @@
 
 import { get, isPlainObject } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
-import { IndexPattern, Field } from '../../types';
+import { IIndexPattern, IFieldType } from '../../index_patterns';
 
 export type PhraseFilterMeta = FilterMeta & {
   params?: {
     query: string; // The unformatted value
-  };
-  script?: {
-    script: {
-      source?: any;
-      lang?: string;
-      params: any;
-    };
   };
   field?: any;
   index?: any;
@@ -38,6 +31,13 @@ export type PhraseFilterMeta = FilterMeta & {
 
 export type PhraseFilter = Filter & {
   meta: PhraseFilterMeta;
+  script?: {
+    script: {
+      source?: any;
+      lang?: string;
+      params: any;
+    };
+  };
 };
 
 type PhraseFilterValue = string | number | boolean;
@@ -51,7 +51,7 @@ export const isPhraseFilter = (filter: any): filter is PhraseFilter => {
     filter.query.match &&
     Object.values(filter.query.match).find((params: any) => params.type === 'phrase');
 
-  return !!(isMatchPhraseQuery || isDeprecatedMatchPhraseQuery);
+  return Boolean(isMatchPhraseQuery || isDeprecatedMatchPhraseQuery);
 };
 
 export const isScriptedPhraseFilter = (filter: any): filter is PhraseFilter =>
@@ -69,9 +69,9 @@ export const getPhraseFilterValue = (filter: PhraseFilter): PhraseFilterValue =>
 };
 
 export const buildPhraseFilter = (
-  field: Field,
+  field: IFieldType,
   value: any,
-  indexPattern: IndexPattern
+  indexPattern: IIndexPattern
 ): PhraseFilter => {
   const convertedValue = getConvertedValueForField(field, value);
 
@@ -79,7 +79,7 @@ export const buildPhraseFilter = (
     return {
       meta: { index: indexPattern.id, field: field.name } as PhraseFilterMeta,
       script: getPhraseScript(field, value),
-    } as PhraseFilter;
+    };
   } else {
     return {
       meta: { index: indexPattern.id },
@@ -92,7 +92,7 @@ export const buildPhraseFilter = (
   }
 };
 
-export const getPhraseScript = (field: Field, value: string) => {
+export const getPhraseScript = (field: IFieldType, value: string) => {
   const convertedValue = getConvertedValueForField(field, value);
   const script = buildInlineScriptForPhraseFilter(field);
 
@@ -110,7 +110,7 @@ export const getPhraseScript = (field: Field, value: string) => {
 // See https://github.com/elastic/elasticsearch/issues/20941 and https://github.com/elastic/kibana/issues/8677
 // and https://github.com/elastic/elasticsearch/pull/22201
 // for the reason behind this change. Aggs now return boolean buckets with a key of 1 or 0.
-export const getConvertedValueForField = (field: Field, value: any) => {
+export const getConvertedValueForField = (field: IFieldType, value: any) => {
   if (typeof value !== 'boolean' && field.type === 'boolean') {
     if ([1, 'true'].includes(value)) {
       return true;

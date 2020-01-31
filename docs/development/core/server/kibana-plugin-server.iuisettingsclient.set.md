@@ -9,5 +9,5 @@ Writes uiSettings value and marks it as set by the user.
 <b>Signature:</b>
 
 ```typescript
-set: <T extends SavedObjectAttribute = any>(key: string, value: T) => Promise<void>;
+set: (key: string, value: any) => Promise<void>;
 ```

@@ -6,11 +6,8 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import 'jest-styled-components';
 import React from 'react';
 
-import '../../../mock/ui_settings';
 import { TestProviders } from '../../../mock';
 import {
   UtilityBar,
@@ -19,8 +16,6 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from './index';
-
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
 describe('UtilityBar', () => {
   test('it renders', () => {
@@ -33,7 +28,7 @@ describe('UtilityBar', () => {
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction iconType="" popoverContent={<p>{'Test popover'}</p>}>
+              <UtilityBarAction iconType="" popoverContent={() => <p>{'Test popover'}</p>}>
                 {'Test action'}
               </UtilityBarAction>
             </UtilityBarGroup>
@@ -48,7 +43,7 @@ describe('UtilityBar', () => {
       </TestProviders>
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper.find('UtilityBar')).toMatchSnapshot();
   });
 
   test('it applies border styles when border is true', () => {
@@ -61,7 +56,7 @@ describe('UtilityBar', () => {
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction iconType="" popoverContent={<p>{'Test popover'}</p>}>
+              <UtilityBarAction iconType="" popoverContent={() => <p>{'Test popover'}</p>}>
                 {'Test action'}
               </UtilityBarAction>
             </UtilityBarGroup>
@@ -91,7 +86,7 @@ describe('UtilityBar', () => {
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction iconType="" popoverContent={<p>{'Test popover'}</p>}>
+              <UtilityBarAction iconType="" popoverContent={() => <p>{'Test popover'}</p>}>
                 {'Test action'}
               </UtilityBarAction>
             </UtilityBarGroup>

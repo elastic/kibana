@@ -19,18 +19,20 @@
 
 import moment from 'moment';
 import { createFilterDateRange } from './date_range';
-import { DateFormat } from '../../../../../../plugins/data/common';
+import { fieldFormats } from '../../../../../../plugins/data/public';
 import { AggConfigs } from '../../agg_configs';
 import { BUCKET_TYPES } from '../bucket_agg_types';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 
 jest.mock('ui/new_platform');
 
 describe('AggConfig Filters', () => {
   describe('Date range', () => {
+    const getConfig = (() => {}) as fieldFormats.GetConfigFn;
     const getAggConfigs = () => {
       const field = {
         name: '@timestamp',
-        format: new DateFormat({}, () => {}),
+        format: new fieldFormats.DateFormat({}, getConfig),
       };
 
       const indexPattern = {
@@ -61,7 +63,7 @@ describe('AggConfig Filters', () => {
       const aggConfigs = getAggConfigs();
       const from = new Date('1 Feb 2015');
       const to = new Date('7 Feb 2015');
-      const filter = createFilterDateRange(aggConfigs.aggs[0], {
+      const filter = createFilterDateRange(aggConfigs.aggs[0] as IBucketAggConfig, {
         from: from.valueOf(),
         to: to.valueOf(),
       });

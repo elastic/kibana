@@ -22,12 +22,13 @@ import { uiModules } from '../../modules';
 import { directivesProvider } from '../directives';
 import { registerSubUrlHooks } from './sub_url_hooks';
 import { configureAppAngularModule } from 'ui/legacy_compat';
+import { npStart } from '../../new_platform/new_platform';
 
 export function initAngularApi(chrome, internals) {
-  chrome.setupAngular = function () {
+  chrome.setupAngular = function() {
     const kibana = uiModules.get('kibana');
 
-    configureAppAngularModule(kibana);
+    configureAppAngularModule(kibana, npStart.core, false);
 
     kibana.value('chrome', chrome);
 
@@ -36,5 +37,4 @@ export function initAngularApi(chrome, internals) {
 
     uiModules.link(kibana);
   };
-
 }

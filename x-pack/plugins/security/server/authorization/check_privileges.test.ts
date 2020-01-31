@@ -48,7 +48,7 @@ describe('#atSpace', () => {
       const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
         mockActions,
         mockClusterClient,
-        () => application
+        application
       );
       const request = httpServerMock.createKibanaRequest();
       const checkPrivileges = checkPrivilegesWithRequest(request);
@@ -291,7 +291,7 @@ describe('#atSpaces', () => {
       const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
         mockActions,
         mockClusterClient,
-        () => application
+        application
       );
       const request = httpServerMock.createKibanaRequest();
       const checkPrivileges = checkPrivilegesWithRequest(request);
@@ -772,7 +772,7 @@ describe('#globally', () => {
       const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
         mockActions,
         mockClusterClient,
-        () => application
+        application
       );
       const request = httpServerMock.createKibanaRequest();
       const checkPrivileges = checkPrivilegesWithRequest(request);

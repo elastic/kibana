@@ -7,13 +7,13 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default ({ getPageObjects }: FtrProviderContext) => {
-  // TODO: add UI functional tests
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['uptime']);
+  const retry = getService('retry');
 
   describe('overview page', function() {
-    const DEFAULT_DATE_START = '2019-09-10 12:40:08.078';
-    const DEFAULT_DATE_END = '2019-09-11 19:40:08.078';
+    const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
+    const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
     it('loads and displays uptime data based on date range', async () => {
       await pageObjects.uptime.goToUptimeOverviewAndLoadData(
         DEFAULT_DATE_START,
@@ -29,12 +29,32 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       await pageObjects.uptime.pageHasExpectedIds(['0000-intermittent']);
     });
 
+    it('applies filters for multiple fields', async () => {
+      await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
+      await pageObjects.uptime.selectFilterItems({
+        location: ['mpls'],
+        port: ['5678'],
+        scheme: ['http'],
+      });
+      await pageObjects.uptime.pageHasExpectedIds([
+        '0000-intermittent',
+        '0001-up',
+        '0002-up',
+        '0003-up',
+        '0004-up',
+        '0005-up',
+        '0006-up',
+        '0007-up',
+        '0008-up',
+        '0009-up',
+      ]);
+    });
+
     it('pagination is cleared when filter criteria changes', async () => {
       await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
       await pageObjects.uptime.changePage('next');
       // there should now be pagination data in the URL
-      const contains = await pageObjects.uptime.pageUrlContains('pagination');
-      expect(contains).to.be(true);
+      await pageObjects.uptime.pageUrlContains('pagination');
       await pageObjects.uptime.pageHasExpectedIds([
         '0010-down',
         '0011-up',
@@ -49,8 +69,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       ]);
       await pageObjects.uptime.setStatusFilter('up');
       // ensure that pagination is removed from the URL
-      const doesNotContain = await pageObjects.uptime.pageUrlContains('pagination');
-      expect(doesNotContain).to.be(false);
+      await pageObjects.uptime.pageUrlContains('pagination', false);
       await pageObjects.uptime.pageHasExpectedIds([
         '0000-intermittent',
         '0001-up',
@@ -63,6 +82,33 @@ export default ({ getPageObjects }: FtrProviderContext) => {
         '0008-up',
         '0009-up',
       ]);
+    });
+
+    describe('snapshot counts', () => {
+      it('updates the snapshot count when status filter is set to down', async () => {
+        await pageObjects.uptime.goToUptimePageAndSetDateRange(
+          DEFAULT_DATE_START,
+          DEFAULT_DATE_END
+        );
+        await pageObjects.uptime.setStatusFilter('down');
+
+        await retry.tryForTime(12000, async () => {
+          const counts = await pageObjects.uptime.getSnapshotCount();
+          expect(counts).to.eql({ up: '0', down: '7' });
+        });
+      });
+
+      it('updates the snapshot count when status filter is set to up', async () => {
+        await pageObjects.uptime.goToUptimePageAndSetDateRange(
+          DEFAULT_DATE_START,
+          DEFAULT_DATE_END
+        );
+        await pageObjects.uptime.setStatusFilter('up');
+        await retry.tryForTime(12000, async () => {
+          const counts = await pageObjects.uptime.getSnapshotCount();
+          expect(counts).to.eql({ up: '93', down: '0' });
+        });
+      });
     });
   });
 };

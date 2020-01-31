@@ -18,17 +18,17 @@
  */
 
 import { each } from 'lodash';
-import { buildRangeFilter, RangeFilter } from './range_filter';
-import { IndexPattern, Field } from '../../types';
-import { getField } from '../__tests__/fields_mock';
+import { buildRangeFilter, getRangeFilterField, RangeFilter } from './range_filter';
+import { fields, getField } from '../../index_patterns/mocks';
+import { IIndexPattern, IFieldType } from '../../index_patterns';
 
 describe('Range filter builder', () => {
-  let indexPattern: IndexPattern;
+  let indexPattern: IIndexPattern;
 
   beforeEach(() => {
     indexPattern = {
       id: 'id',
-    };
+    } as IIndexPattern;
   });
 
   it('should be a function', () => {
@@ -118,7 +118,7 @@ describe('Range filter builder', () => {
   });
 
   describe('when given params where one side is infinite', () => {
-    let field: Field;
+    let field: IFieldType;
     let filter: RangeFilter;
 
     beforeEach(() => {
@@ -148,7 +148,7 @@ describe('Range filter builder', () => {
   });
 
   describe('when given params where both sides are infinite', () => {
-    let field: Field;
+    let field: IFieldType;
     let filter: RangeFilter;
 
     beforeEach(() => {
@@ -170,5 +170,18 @@ describe('Range filter builder', () => {
         expect(filter.meta.field).toEqual('script number');
       });
     });
+  });
+});
+
+describe('getRangeFilterField', function() {
+  const indexPattern: IIndexPattern = ({
+    fields,
+  } as unknown) as IIndexPattern;
+
+  test('should return the name of the field a range query is targeting', () => {
+    const field = indexPattern.fields.find(patternField => patternField.name === 'bytes');
+    const filter = buildRangeFilter(field!, {}, indexPattern);
+    const result = getRangeFilterField(filter);
+    expect(result).toBe('bytes');
   });
 });

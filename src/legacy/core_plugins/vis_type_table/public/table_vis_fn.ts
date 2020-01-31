@@ -18,13 +18,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { tableVisResponseHandler } from './table_vis_request_handler';
+import { tableVisResponseHandler, TableContext } from './table_vis_response_handler';
 
-import { ExpressionFunction, KibanaDatatable, Render } from '../../interpreter/types';
+import {
+  ExpressionFunction,
+  KibanaDatatable,
+  Render,
+} from '../../../../plugins/expressions/public';
 
 const name = 'kibana_table';
 
-type Context = KibanaDatatable;
+export type Context = KibanaDatatable;
 
 interface Arguments {
   visConfig: string | null;
@@ -33,7 +37,7 @@ interface Arguments {
 type VisParams = Required<Arguments>;
 
 interface RenderValue {
-  visData: Context;
+  visData: TableContext;
   visType: 'table';
   visConfig: VisParams;
   params: {
@@ -41,7 +45,7 @@ interface RenderValue {
   };
 }
 
-type Return = Promise<Render<RenderValue>>;
+type Return = Render<RenderValue>;
 
 export const createTableVisFn = (): ExpressionFunction<
   typeof name,
@@ -64,9 +68,9 @@ export const createTableVisFn = (): ExpressionFunction<
       help: '',
     },
   },
-  async fn(context, args) {
+  fn(context, args) {
     const visConfig = args.visConfig && JSON.parse(args.visConfig);
-    const convertedData = await tableVisResponseHandler(context, visConfig.dimensions);
+    const convertedData = tableVisResponseHandler(context, visConfig.dimensions);
 
     return {
       type: 'render',

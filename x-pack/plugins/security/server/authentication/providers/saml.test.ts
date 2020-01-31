@@ -1045,7 +1045,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('redirects to /logged_out if `redirect` field in SAML logout response is not defined.', async () => {
@@ -1069,7 +1069,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('relies on SAML logout if query string is not empty, but does not include SAMLRequest.', async () => {
@@ -1095,7 +1095,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('relies on SAML invalidate call even if access token is presented.', async () => {
@@ -1119,7 +1119,7 @@ describe('SAMLAuthenticationProvider', () => {
       );
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('redirects to /logged_out if `redirect` field in SAML invalidate response is null.', async () => {
@@ -1139,7 +1139,7 @@ describe('SAMLAuthenticationProvider', () => {
       );
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('redirects to /logged_out if `redirect` field in SAML invalidate response is not defined.', async () => {
@@ -1159,7 +1159,7 @@ describe('SAMLAuthenticationProvider', () => {
       );
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('redirects user to the IdP if SLO is supported by IdP in case of SP initiated logout.', async () => {

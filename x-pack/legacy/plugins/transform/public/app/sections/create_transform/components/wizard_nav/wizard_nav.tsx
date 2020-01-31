@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -17,7 +17,7 @@ interface StepsNavProps {
   next?(): void;
 }
 
-export const WizardNav: SFC<StepsNavProps> = ({
+export const WizardNav: FC<StepsNavProps> = ({
   previous,
   previousActive = true,
   next,
@@ -27,7 +27,13 @@ export const WizardNav: SFC<StepsNavProps> = ({
     <EuiFlexItem />
     {previous && (
       <EuiFlexItem grow={false}>
-        <EuiButton disabled={!previousActive} onClick={previous} iconType="arrowLeft" size="s">
+        <EuiButton
+          disabled={!previousActive}
+          onClick={previous}
+          iconType="arrowLeft"
+          size="s"
+          data-test-subj="transformWizardNavButtonPrevious"
+        >
           {i18n.translate('xpack.transform.wizard.previousStepButton', {
             defaultMessage: 'Previous',
           })}
@@ -36,7 +42,13 @@ export const WizardNav: SFC<StepsNavProps> = ({
     )}
     {next && (
       <EuiFlexItem grow={false}>
-        <EuiButton disabled={!nextActive} onClick={next} iconType="arrowRight" size="s">
+        <EuiButton
+          disabled={!nextActive}
+          onClick={next}
+          iconType="arrowRight"
+          size="s"
+          data-test-subj="transformWizardNavButtonNext"
+        >
           {i18n.translate('xpack.transform.wizard.nextStepButton', {
             defaultMessage: 'Next',
           })}

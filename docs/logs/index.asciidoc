@@ -27,3 +27,5 @@ include::getting-started.asciidoc[]
 include::using.asciidoc[]
 
 include::configuring.asciidoc[]
+
+include::log-rate.asciidoc[]

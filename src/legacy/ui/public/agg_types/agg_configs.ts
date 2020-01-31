@@ -27,12 +27,17 @@
  */
 
 import _ from 'lodash';
-import { TimeRange } from 'src/plugins/data/public';
-import { Schemas } from '../visualize/loader/pipeline_helpers/build_pipeline';
-import { Schema } from '../vis/editors/default/schemas';
 import { AggConfig, AggConfigOptions } from './agg_config';
-import { AggGroupNames } from '../vis/editors/default/agg_groups';
-import { IndexPattern } from '../../../core_plugins/data/public';
+import { Schema } from './schemas';
+import { AggGroupNames } from './agg_groups';
+import {
+  IndexPattern,
+  ISearchSource,
+  FetchOptions,
+  TimeRange,
+} from '../../../../plugins/data/public';
+
+type Schemas = Record<string, any>;
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -124,7 +129,10 @@ export class AggConfigs {
     return aggConfigs;
   }
 
-  createAggConfig(params: AggConfig | AggConfigOptions, { addToAggConfigs = true } = {}) {
+  createAggConfig = <T extends AggConfig = AggConfig>(
+    params: AggConfig | AggConfigOptions,
+    { addToAggConfigs = true } = {}
+  ) => {
     let aggConfig;
     if (params instanceof AggConfig) {
       aggConfig = params;
@@ -135,8 +143,8 @@ export class AggConfigs {
     if (addToAggConfigs) {
       this.aggs.push(aggConfig);
     }
-    return aggConfig;
-  }
+    return aggConfig as T;
+  };
 
   /**
    * Data-by-data comparison of this Aggregation
@@ -301,7 +309,7 @@ export class AggConfigs {
     return _.find(reqAgg.getResponseAggs(), { id });
   }
 
-  onSearchRequestStart(searchSource: any, options: any) {
+  onSearchRequestStart(searchSource: ISearchSource, options?: FetchOptions) {
     return Promise.all(
       // @ts-ignore
       this.getRequestAggs().map((agg: AggConfig) => agg.onSearchRequestStart(searchSource, options))

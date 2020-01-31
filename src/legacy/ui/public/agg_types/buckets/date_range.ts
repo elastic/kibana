@@ -23,14 +23,8 @@ import { npStart } from 'ui/new_platform';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
-import { FieldFormat } from '../../../../../plugins/data/common/field_formats';
-import { DateRangesParamEditor } from '../../vis/editors/default/controls/date_ranges';
 
-// @ts-ignore
-import { fieldFormats } from '../../registry/field_formats';
-// @ts-ignore
-import { dateRange } from '../../utils/date_range';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES, fieldFormats } from '../../../../../plugins/data/public';
 
 const dateRangeTitle = i18n.translate('common.ui.aggTypes.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',
@@ -49,9 +43,14 @@ export const dateRangeBucketAgg = new BucketAggType({
     return { from, to };
   },
   getFormat(agg) {
-    const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));
-    const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {
-      return dateRange.toString(range, formatter);
+    const fieldFormatsService = npStart.plugins.data.fieldFormats;
+
+    const formatter = agg.fieldOwnFormatter(
+      fieldFormats.TEXT_CONTEXT_TYPE,
+      fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.DATE)
+    );
+    const DateRangeFormat = fieldFormats.FieldFormat.from(function(range: DateRangeKey) {
+      return convertDateRangeToString(range, formatter);
     });
     return new DateRangeFormat();
   },
@@ -75,14 +74,13 @@ export const dateRangeBucketAgg = new BucketAggType({
           to: 'now',
         },
       ],
-      editorComponent: DateRangesParamEditor,
     },
     {
       name: 'time_zone',
       default: undefined,
       // Implimentation method is the same as that of date_histogram
       serialize: () => undefined,
-      write: (agg: IBucketAggConfig, output: Record<string, any>) => {
+      write: (agg, output) => {
         const field = agg.getParam('field');
         let tz = agg.getParam('time_zone');
 
@@ -108,3 +106,16 @@ export const dateRangeBucketAgg = new BucketAggType({
     },
   ],
 });
+
+export const convertDateRangeToString = (
+  { from, to }: DateRangeKey,
+  format: (val: any) => string
+) => {
+  if (!from) {
+    return 'Before ' + format(to);
+  } else if (!to) {
+    return 'After ' + format(from);
+  } else {
+    return format(from) + ' to ' + format(to);
+  }
+};

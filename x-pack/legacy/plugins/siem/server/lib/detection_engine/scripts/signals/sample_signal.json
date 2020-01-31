@@ -1,0 +1,178 @@
+{
+  "@timestamp": "2019-11-27T00:11:45.677Z",
+  "host": {
+    "architecture": "x86_64",
+    "os": {
+      "kernel": "5.0.0-1015-gcp",
+      "codename": "disco",
+      "platform": "ubuntu",
+      "version": "19.04 (Disco Dingo)",
+      "family": "debian",
+      "name": "Ubuntu"
+    },
+    "id": "e6f890af316a25920c951acefc46bfef",
+    "name": "suricata-iowa",
+    "containerized": false,
+    "ip": ["10.128.0.21", "fe80::4001:aff:fe80:15"],
+    "mac": ["42:01:0a:80:00:15"],
+    "hostname": "suricata-iowa"
+  },
+  "client": {
+    "ip": "10.128.0.21",
+    "port": 33814,
+    "packets": 2,
+    "bytes": 80
+  },
+  "user": {
+    "id": "0",
+    "name": "root"
+  },
+  "group": {
+    "id": "0",
+    "name": "root"
+  },
+  "server": {
+    "ip": "169.254.169.254",
+    "port": 80,
+    "packets": 3,
+    "bytes": 643
+  },
+  "system": {
+    "audit": {
+      "socket": {
+        "internal_version": "1.0.3",
+        "uid": 0,
+        "gid": 0,
+        "euid": 0,
+        "egid": 0,
+        "kernel_sock_address": "0xffff9e69fed14c80"
+      }
+    }
+  },
+  "network": {
+    "packets": 5,
+    "bytes": 723,
+    "community_id": "1:drz3M0ZoUnQI9BgaXVRhAwCGOsw=",
+    "direction": "outbound",
+    "type": "ipv4",
+    "transport": "tcp"
+  },
+  "flow": {
+    "final": true,
+    "complete": false
+  },
+  "source": {
+    "ip": "10.128.0.21",
+    "port": 33814,
+    "packets": 2,
+    "bytes": 80
+  },
+  "process": {
+    "args": ["/usr/bin/python3", "/usr/bin/google_network_daemon"],
+    "executable": "/usr/bin/python3.7",
+    "created": "2019-11-04T15:01:04.190Z",
+    "pid": 808,
+    "name": "google_network_"
+  },
+  "destination": {
+    "bytes": 643,
+    "ip": "169.254.169.254",
+    "port": 80,
+    "packets": 3
+  },
+  "agent": {
+    "version": "8.0.0",
+    "type": "auditbeat",
+    "ephemeral_id": "d59f3431-3d93-401f-b7f7-557184bbe9c6",
+    "hostname": "suricata-iowa",
+    "id": "d67ace4c-c168-4527-a349-7740d4e9dfaa"
+  },
+  "event": {
+    "module": "system",
+    "dataset": "socket",
+    "kind": "signal",
+    "action": "network_flow",
+    "category": "network_traffic",
+    "start": "2019-11-27T00:11:34.865Z",
+    "end": "2019-11-27T00:11:34.866Z",
+    "duration": 1042842
+  },
+  "service": {
+    "type": "system"
+  },
+  "ecs": {
+    "version": "1.1.0"
+  },
+  "cloud": {
+    "provider": "gcp",
+    "instance": {
+      "id": "8744816015462516945",
+      "name": "suricata-iowa"
+    },
+    "machine": {
+      "type": "n1-standard-2"
+    },
+    "availability_zone": "us-central1-a",
+    "project": {
+      "id": "elastic-siem"
+    }
+  },
+  "signal": {
+    "parent": {
+      "id": "0_Ezqm4BHe9nqdOiBktm",
+      "type": "event",
+      "index": "auditbeat-8.0.0-2019.09.06-000022",
+      "depth": 1
+    },
+    "original_time": "2019-11-27T00:11:40.012Z",
+    "status": "open",
+    "rule": {
+      "id": "8d9bb7f1-9d8a-4f13-ae18-ccaf4ff61893",
+      "rule_id": "rule-1",
+      "false_positives": [],
+      "max_signals": 100,
+      "risk_score": 1,
+      "description": "Detecting root and admin users",
+      "from": "now-6s",
+      "immutable": false,
+      "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
+      "interval": "5s",
+      "language": "kuery",
+      "name": "Detect Root/Admin Users",
+      "query": "user.name: root or user.name: admin",
+      "references": ["http://www.example.com", "https://ww.example.com"],
+      "severity": "high",
+      "tags": [],
+      "type": "query",
+      "to": "now",
+      "enabled": true,
+      "created_by": "elastic",
+      "updated_by": "elastic",
+      "threat": [
+        {
+          "framework": "fake",
+          "technique": {
+            "reference": "techniqueRef",
+            "name": "techniqueName",
+            "id": "techniqueId"
+          },
+          "tactic": {
+            "reference": "fakeRef",
+            "name": "fakeName",
+            "id": "fakeId"
+          }
+        }
+      ]
+    },
+    "original_event": {
+      "module": "system",
+      "dataset": "socket",
+      "kind": "event",
+      "action": "network_flow",
+      "category": "network_traffic",
+      "start": "2019-11-27T00:11:34.865Z",
+      "end": "2019-11-27T00:11:34.866Z",
+      "duration": 1042842
+    }
+  }
+}

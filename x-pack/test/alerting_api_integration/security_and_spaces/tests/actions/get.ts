@@ -27,7 +27,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -60,7 +60,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 id: createdAction.id,
                 actionTypeId: 'test.index-record',
-                description: 'My action',
+                name: 'My action',
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
@@ -76,7 +76,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,

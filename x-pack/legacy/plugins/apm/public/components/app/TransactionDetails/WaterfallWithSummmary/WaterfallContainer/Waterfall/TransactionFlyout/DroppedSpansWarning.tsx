@@ -7,7 +7,6 @@
 import { EuiCallOut, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { idx } from '@kbn/elastic-idx';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
 import { ElasticDocsLink } from '../../../../../../shared/Links/ElasticDocsLink';
 
@@ -16,7 +15,7 @@ export function DroppedSpansWarning({
 }: {
   transactionDoc: Transaction;
 }) {
-  const dropped = idx(transactionDoc, _ => _.transaction.span_count.dropped);
+  const dropped = transactionDoc.transaction.span_count?.dropped;
   if (!dropped) {
     return null;
   }

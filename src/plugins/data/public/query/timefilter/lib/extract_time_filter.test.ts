@@ -18,9 +18,17 @@
  */
 
 import { extractTimeFilter } from './extract_time_filter';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters, IIndexPattern, IFieldType } from '../../../../common';
 
 describe('filter manager utilities', () => {
+  let indexPattern: IIndexPattern;
+
+  beforeEach(() => {
+    indexPattern = {
+      id: 'logstash-*',
+    } as IIndexPattern;
+  });
+
   describe('extractTimeFilter()', () => {
     test('should detect timeFilter', async () => {
       const filters: esFilters.Filter[] = [
@@ -30,9 +38,9 @@ describe('filter manager utilities', () => {
           ''
         ),
         esFilters.buildRangeFilter(
-          { name: 'time' },
+          { name: 'time' } as IFieldType,
           { gt: 1388559600000, lt: 1388646000000 },
-          'logstash-*'
+          indexPattern
         ),
       ];
       const result = await extractTimeFilter('time', filters);
@@ -48,7 +56,12 @@ describe('filter manager utilities', () => {
           'logstash-*',
           ''
         ),
-        esFilters.buildRangeFilter({ name: '@timestamp' }, { from: 1, to: 2 }, 'logstash-*', ''),
+        esFilters.buildRangeFilter(
+          { name: '@timestamp' } as IFieldType,
+          { from: 1, to: 2 },
+          indexPattern,
+          ''
+        ),
       ];
       const result = await extractTimeFilter('time', filters);
 
@@ -63,7 +76,7 @@ describe('filter manager utilities', () => {
           'logstash-*',
           ''
         ),
-        esFilters.buildPhraseFilter({ name: 'time' }, 'banana', 'logstash-*'),
+        esFilters.buildPhraseFilter({ name: 'time' } as IFieldType, 'banana', indexPattern),
       ];
       const result = await extractTimeFilter('time', filters);
 

@@ -9,6 +9,7 @@ exports[`Transform: Transform List <TransformList /> Minimal initialization 1`] 
     actions={
       Array [
         <EuiButtonEmpty
+          data-test-subj="transformCreateFirstButton"
           isDisabled={true}
           onClick={[MockFunction]}
         >

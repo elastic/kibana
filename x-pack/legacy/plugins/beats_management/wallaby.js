@@ -6,7 +6,7 @@
 const path = require('path');
 process.env.NODE_PATH = path.resolve(__dirname, '..', '..', '..', 'node_modules');
 
-module.exports = function (wallaby) {
+module.exports = function(wallaby) {
   return {
     debug: true,
     files: [

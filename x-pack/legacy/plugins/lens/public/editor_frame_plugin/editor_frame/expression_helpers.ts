@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
 import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { Visualization, Datasource, FramePublicAPI } from '../../types';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { esFilters, TimeRange, Query } from '../../../../../../../src/plugins/data/public';
 
 export function prependDatasourceExpression(
   visualizationExpression: Ast | string | null,

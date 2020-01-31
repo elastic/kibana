@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
+import { DataPlugin as Plugin, DataStart } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -27,35 +27,14 @@ export function plugin() {
 // /// Export types & static code
 
 /** @public types */
-export { DataSetup, DataStart };
-
-export { FilterBar, ApplyFiltersPopover } from './filter';
+export { DataStart };
 export {
-  Field,
-  FieldType,
-  FieldListInterface,
-  IndexPattern,
-  IndexPatterns,
-  StaticIndexPattern,
-} from './index_patterns';
-export { Query, QueryBarInput } from './query';
-export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
+  SavedQueryAttributes,
+  SavedQuery,
+  SavedQueryTimeFilter,
+} from '../../../../plugins/data/public';
 
 /** @public static code */
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  isFilterable,
-  IndexPatternSelect,
-  validateIndexPattern,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-} from './index_patterns';
+export { getRequestInspectorStats, getResponseInspectorStats } from './search';

@@ -38,19 +38,23 @@ export default function apmOss(kibana) {
         spanIndices: Joi.string().default('apm-*'),
         metricsIndices: Joi.string().default('apm-*'),
         onboardingIndices: Joi.string().default('apm-*'),
-        apmAgentConfigurationIndex: Joi.string().default('.apm-agent-configuration'),
       }).default();
     },
 
     init(server) {
-      server.expose('indexPatterns', _.uniq([
-        'sourcemapIndices',
-        'errorIndices',
-        'transactionIndices',
-        'spanIndices',
-        'metricsIndices',
-        'onboardingIndices',
-      ].map(type => server.config().get(`apm_oss.${type}`))));
-    }
+      server.expose(
+        'indexPatterns',
+        _.uniq(
+          [
+            'sourcemapIndices',
+            'errorIndices',
+            'transactionIndices',
+            'spanIndices',
+            'metricsIndices',
+            'onboardingIndices',
+          ].map(type => server.config().get(`apm_oss.${type}`))
+        )
+      );
+    },
   });
 }

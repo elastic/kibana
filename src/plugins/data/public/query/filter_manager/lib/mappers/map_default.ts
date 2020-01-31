@@ -18,7 +18,7 @@
  */
 
 import { find, keys, get } from 'lodash';
-import { esFilters } from '../../../../../common/es_query';
+import { esFilters } from '../../../../../common';
 
 export const mapDefault = (filter: esFilters.Filter) => {
   const metaProperty = /(^\$|meta)/;

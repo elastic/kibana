@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters } from '../../../../common';
 
 const noop = () => {
   throw new Error('No mappings have been found for filter.');

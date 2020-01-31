@@ -8,6 +8,7 @@ import { EuiFilterButton } from '@elastic/eui';
 import React from 'react';
 
 interface UptimeFilterButtonProps {
+  isDisabled?: boolean;
   isSelected: boolean;
   numFilters: number;
   numActiveFilters: number;
@@ -16,6 +17,7 @@ interface UptimeFilterButtonProps {
 }
 
 export const UptimeFilterButton = ({
+  isDisabled,
   isSelected,
   numFilters,
   numActiveFilters,
@@ -25,6 +27,7 @@ export const UptimeFilterButton = ({
   <EuiFilterButton
     hasActiveFilters={numActiveFilters !== 0}
     iconType="arrowDown"
+    isDisabled={isDisabled}
     isSelected={isSelected}
     numActiveFilters={numActiveFilters}
     numFilters={numFilters}

@@ -32,6 +32,7 @@ export const ESIndexSelect = ({ value, loading, indices, onChange, onFocus, onBl
       singleSelection={{ asPlainText: true }}
       isClearable={false}
       onCreateOption={input => onChange(input || defaultIndex)}
+      compressed
     />
   );
 };

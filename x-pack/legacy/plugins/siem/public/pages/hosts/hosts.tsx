@@ -5,12 +5,12 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/es-query';
-import * as React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { compose } from 'redux';
 
+import { useParams } from 'react-router-dom';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -25,20 +25,23 @@ import { GlobalTimeArgs } from '../../containers/global_time';
 import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { useKibana } from '../../lib/kibana';
 import { convertToBuildEsQuery } from '../../lib/keury';
 import { inputsSelectors, State, hostsModel } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
 import { HostsComponentProps, HostsComponentReduxProps } from './types';
+import { filterHostData } from './navigation';
+import { HostsTableType } from '../../store/hosts/model';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
-const HostsComponent = React.memo<HostsComponentProps>(
+export const HostsComponent = React.memo<HostsComponentProps>(
   ({
     deleteQuery,
     isInitializing,
@@ -51,17 +54,36 @@ const HostsComponent = React.memo<HostsComponentProps>(
     hostsPagePath,
   }) => {
     const capabilities = React.useContext(MlCapabilitiesContext);
-    const core = useKibanaCore();
+    const kibana = useKibana();
+    const { tabName } = useParams();
+    const tabsFilters = React.useMemo(() => {
+      if (tabName === HostsTableType.alerts) {
+        return filters.length > 0 ? [...filters, ...filterHostData] : filterHostData;
+      }
+      return filters;
+    }, [tabName, filters]);
+    const narrowDateRange = useCallback(
+      (min: number, max: number) => {
+        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
 
     return (
       <>
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
-              config: getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
               indexPattern,
               queries: [query],
               filters,
+            });
+            const tabsFilterQuery = convertToBuildEsQuery({
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+              indexPattern,
+              queries: [query],
+              filters: tabsFilters,
             });
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
@@ -93,9 +115,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
                         refetch={refetch}
                         setQuery={setQuery}
                         to={to}
-                        narrowDateRange={(min: number, max: number) => {
-                          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                        }}
+                        narrowDateRange={narrowDateRange}
                       />
                     )}
                   </KpiHostsQuery>
@@ -109,7 +129,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
                   <HostsTabs
                     deleteQuery={deleteQuery}
                     to={to}
-                    filterQuery={filterQuery}
+                    filterQuery={tabsFilterQuery}
                     isInitializing={isInitializing}
                     setQuery={setQuery}
                     from={from}

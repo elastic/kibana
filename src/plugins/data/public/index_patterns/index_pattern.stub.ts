@@ -17,12 +17,27 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../common';
+import { IIndexPattern } from '../../common';
 import { stubFields } from './field.stub';
 
-export const stubIndexPattern: IndexPattern = {
+export const stubIndexPattern: IIndexPattern = {
   id: 'logstash-*',
   fields: stubFields,
   title: 'logstash-*',
   timeFieldName: '@timestamp',
+};
+
+export const stubIndexPatternWithFields: IIndexPattern = {
+  id: '1234',
+  title: 'logstash-*',
+  fields: [
+    {
+      name: 'response',
+      type: 'number',
+      esTypes: ['integer'],
+      aggregatable: true,
+      filterable: true,
+      searchable: true,
+    },
+  ],
 };

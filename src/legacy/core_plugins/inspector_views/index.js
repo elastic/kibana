@@ -19,10 +19,10 @@
 
 import { resolve } from 'path';
 
-export default function (kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
+    },
   });
 }

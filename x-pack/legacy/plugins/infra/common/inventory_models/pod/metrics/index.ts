@@ -25,4 +25,6 @@ export const metrics: InventoryMetrics = {
     podMemoryUsage,
   },
   snapshot: { cpu, memory, rx, tx },
+  defaultSnapshot: 'cpu',
+  defaultTimeRangeInSeconds: 3600, // 1 hour
 };

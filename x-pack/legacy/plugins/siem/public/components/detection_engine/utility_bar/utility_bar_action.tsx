@@ -5,7 +5,7 @@
  */
 
 import { EuiPopover } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { LinkIcon, LinkIconProps } from '../../link_icon';
 import { BarAction } from './styles';
@@ -13,6 +13,8 @@ import { BarAction } from './styles';
 const Popover = React.memo<UtilityBarActionProps>(
   ({ children, color, iconSide, iconSize, iconType, popoverContent }) => {
     const [popoverState, setPopoverState] = useState(false);
+
+    const closePopover = useCallback(() => setPopoverState(false), [setPopoverState]);
 
     return (
       <EuiPopover
@@ -30,19 +32,20 @@ const Popover = React.memo<UtilityBarActionProps>(
         closePopover={() => setPopoverState(false)}
         isOpen={popoverState}
       >
-        {popoverContent}
+        {popoverContent?.(closePopover)}
       </EuiPopover>
     );
   }
 );
+
 Popover.displayName = 'Popover';
 
 export interface UtilityBarActionProps extends LinkIconProps {
-  popoverContent?: React.ReactNode;
+  popoverContent?: (closePopover: () => void) => React.ReactNode;
 }
 
 export const UtilityBarAction = React.memo<UtilityBarActionProps>(
-  ({ children, color, href, iconSide, iconSize, iconType, onClick, popoverContent }) => (
+  ({ children, color, disabled, href, iconSide, iconSize, iconType, onClick, popoverContent }) => (
     <BarAction>
       {popoverContent ? (
         <Popover
@@ -57,6 +60,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
       ) : (
         <LinkIcon
           color={color}
+          disabled={disabled}
           href={href}
           iconSide={iconSide}
           iconSize={iconSize}
@@ -69,4 +73,5 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
     </BarAction>
   )
 );
+
 UtilityBarAction.displayName = 'UtilityBarAction';

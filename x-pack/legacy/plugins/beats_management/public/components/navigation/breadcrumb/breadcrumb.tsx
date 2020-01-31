@@ -48,7 +48,7 @@ interface BreadcrumbProps extends RouteProps {
   parentBreadcrumbs?: BreadcrumbData[];
 }
 
-export const Breadcrumb: React.SFC<BreadcrumbProps> = ({ title, path, parentBreadcrumbs }) => (
+export const Breadcrumb: React.FC<BreadcrumbProps> = ({ title, path, parentBreadcrumbs }) => (
   <BreadcrumbConsumer>
     {context => (
       <BreadcrumbManager

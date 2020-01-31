@@ -76,7 +76,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
     <div>
       {name !== 'defaultStyle' && (
         <Fragment>
-          <EuiFormRow label={strings.getSeriesIdentifierLabel()} display="rowCompressed">
+          <EuiFormRow label={strings.getSeriesIdentifierLabel()} display="columnCompressed">
             <EuiSelect
               compressed
               value={selectedSeries}

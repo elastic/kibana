@@ -10,12 +10,10 @@ import {
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_LOGSTASH,
   INDEX_PATTERN_BEATS,
-  INDEX_ALERTS
+  INDEX_ALERTS,
 } from '../../../common/constants';
 
-export function getIndexPatterns(server, additionalPatterns = {}) {
-  // wildcard means to search _all_ clusters
-  const ccs = '*';
+export function getIndexPatterns(server, additionalPatterns = {}, ccs = '*') {
   const config = server.config();
   const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
   const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
@@ -35,7 +33,7 @@ export function getIndexPatterns(server, additionalPatterns = {}) {
         ...accum,
         [varName]: prefixIndexPattern(config, additionalPatterns[varName], ccs),
       };
-    }, {})
+    }, {}),
   };
 
   return indexPatterns;

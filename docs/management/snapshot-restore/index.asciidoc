@@ -21,7 +21,7 @@ With this UI, you can:
 image:management/snapshot-restore/images/snapshot_list.png["Snapshot list"]
 
 Before using this feature, you should be familiar with how snapshots work.  
-{ref}/modules-snapshots.html[Snapshot and Restore] is a good source for 
+{ref}/snapshot-restore.html[Snapshot and Restore] is a good source for 
 more detailed information.
 
 [float]
@@ -35,9 +35,9 @@ registering one.
 {kib} supports three repository types
 out of the box: shared file system, read-only URL, and source-only.  
 For more information on these repositories and their settings, 
-see {ref}/modules-snapshots.html#snapshots-repositories[Repositories].
+see {ref}/snapshots-register-repository.html[Repositories].
 To use other repositories, such as S3, see  
-{ref}/modules-snapshots.html#_repository_plugins[Repository plugins].
+{ref}/snapshots-register-repository.html#snapshots-repository-plugins[Repository plugins].
 
 
 Once you create a repository, it is listed in the *Repositories* 
@@ -61,7 +61,7 @@ into each snapshot for further investigation.
 image:management/snapshot-restore/images/snapshot_details.png["Snapshot details"]
 
 If you don’t have any snapshots, you can create them from the {kib} <<console-kibana, Console>>. The 
-{ref}//modules-snapshots.html#snapshots-take-snapshot[snapshot API]
+{ref}/snapshots-take-snapshot.html[snapshot API]
 takes the current state and data in your index or cluster, and then saves it to a 
 shared repository. 
 
@@ -162,7 +162,7 @@ Ready to try *Snapshot and Restore*? In this tutorial, you'll learn to:
 This example shows you how to register a shared file system repository 
 and store snapshots.
 Before you begin, you must register the location of the repository in the 
-{ref}/modules-snapshots.html#_shared_file_system_repository[path.repo] setting on 
+{ref}/snapshots-register-repository.html#snapshots-filesystem-repository[path.repo] setting on 
 your master and data nodes.  You can do this in one of two ways:
 
 * Edit  your `elasticsearch.yml` to include the `path.repo` setting.
@@ -197,7 +197,7 @@ The repository currently doesn’t have any snapshots.
 
 [float]
 ==== Add a snapshot to the repository
-Use the {ref}//modules-snapshots.html#snapshots-take-snapshot[snapshot API] to create a snapshot.
+Use the {ref}/snapshots-take-snapshot.html[snapshot API] to create a snapshot.
 
 . Go to *Dev Tools > Console*.
 . Create the snapshot:
@@ -206,7 +206,7 @@ Use the {ref}//modules-snapshots.html#snapshots-take-snapshot[snapshot API] to c
 PUT /_snapshot/my_backup/2019-04-25_snapshot?wait_for_completion=true
 +
 In this example, the snapshot name is `2019-04-25_snapshot`. You can also 
-use {ref}//date-math-index-names.html[date math expression] for the snapshot name.
+use {ref}/date-math-index-names.html[date math expression] for the snapshot name.
 +
 [role="screenshot"]
 image:management/snapshot-restore/images/create_snapshot.png["Create snapshot"]

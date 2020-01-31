@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpInterceptor, HttpErrorResponse, HttpResponse, IAnonymousPaths } from 'src/core/public';
+import {
+  HttpInterceptor,
+  HttpInterceptorResponseError,
+  HttpResponse,
+  IAnonymousPaths,
+} from 'src/core/public';
 
 import { ISessionTimeout } from './session_timeout';
-
-const isSystemAPIRequest = (request: Request) => {
-  return request.headers.has('kbn-system-api');
-};
 
 export class SessionTimeoutHttpInterceptor implements HttpInterceptor {
   constructor(private sessionTimeout: ISessionTimeout, private anonymousPaths: IAnonymousPaths) {}
@@ -20,19 +21,19 @@ export class SessionTimeoutHttpInterceptor implements HttpInterceptor {
       return;
     }
 
-    if (isSystemAPIRequest(httpResponse.request)) {
+    if (httpResponse.fetchOptions.asSystemRequest) {
       return;
     }
 
-    this.sessionTimeout.extend();
+    this.sessionTimeout.extend(httpResponse.request.url);
   }
 
-  responseError(httpErrorResponse: HttpErrorResponse) {
+  responseError(httpErrorResponse: HttpInterceptorResponseError) {
     if (this.anonymousPaths.isAnonymous(window.location.pathname)) {
       return;
     }
 
-    if (isSystemAPIRequest(httpErrorResponse.request)) {
+    if (httpErrorResponse.fetchOptions.asSystemRequest) {
       return;
     }
 
@@ -45,6 +46,6 @@ export class SessionTimeoutHttpInterceptor implements HttpInterceptor {
       return;
     }
 
-    this.sessionTimeout.extend();
+    this.sessionTimeout.extend(httpErrorResponse.request.url);
   }
 }

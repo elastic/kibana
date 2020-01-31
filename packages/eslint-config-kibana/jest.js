@@ -16,7 +16,7 @@ module.exports = {
       rules: {
         'jest/no-focused-tests': 'error',
         'jest/no-identical-title': 'error',
-        'import/order': 'off'
+        'import/order': 'off',
       },
     }
   ]

@@ -48,7 +48,7 @@ export class MetricPanelConfig extends Component {
     this.state = { selectedTab: 'data' };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { model } = this.props;
     if (
       !model.background_color_rules ||
@@ -87,7 +87,10 @@ export class MetricPanelConfig extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage id="visTypeTimeseries.metric.optionsTab.dataLabel" defaultMessage="Data" />
+                <FormattedMessage
+                  id="visTypeTimeseries.metric.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -165,7 +168,10 @@ export class MetricPanelConfig extends Component {
       <div>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
-            <FormattedMessage id="visTypeTimeseries.metric.dataTab.dataButtonLabel" defaultMessage="Data" />
+            <FormattedMessage
+              id="visTypeTimeseries.metric.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
           </EuiTab>
           <EuiTab
             isSelected={selectedTab === 'options'}

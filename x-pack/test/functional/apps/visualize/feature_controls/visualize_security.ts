@@ -56,7 +56,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_visualize_all_user',
@@ -68,16 +68,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_visualize_all_role');
         await security.user.delete('global_visualize_all_user');
       });
 
       it('shows visualize navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Visualize', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Visualize', 'Stack Management']);
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
@@ -118,14 +116,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allow saving via the saved query management component popover with no saved query loaded', async () => {
+      // Flaky: https://github.com/elastic/kibana/issues/50018
+      it.skip('allow saving via the saved query management component popover with no saved query loaded', async () => {
         await queryBar.setQuery('response:200');
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
       });
 
-      it('allow saving a currently loaded saved query as a new query via the saved query management component ', async () => {
+      // Depends on skipped test above
+      it.skip('allow saving a currently loaded saved query as a new query via the saved query management component ', async () => {
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
           'foo2',
           'bar2',
@@ -136,7 +136,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
       });
 
-      it('allow saving changes to a currently loaded query via the saved query management component', async () => {
+      // Depends on skipped test above
+      it.skip('allow saving changes to a currently loaded query via the saved query management component', async () => {
         await savedQueryManagementComponent.loadSavedQuery('foo2');
         await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery('bar2', false, false);
@@ -146,7 +147,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(queryString).to.eql('response:404');
       });
 
-      it('allows deleting saved queries in the saved query management component ', async () => {
+      // Depends on skipped test above
+      it.skip('allows deleting saved queries in the saved query management component ', async () => {
         await savedQueryManagementComponent.deleteSavedQuery('foo2');
         await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
       });
@@ -184,16 +186,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_visualize_read_role');
         await security.user.delete('global_visualize_read_user');
       });
 
       it('shows visualize navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Visualize', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Visualize', 'Stack Management']);
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
@@ -294,7 +294,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('no_visualize_privileges_role');
         await security.user.delete('no_visualize_privileges_user');
       });

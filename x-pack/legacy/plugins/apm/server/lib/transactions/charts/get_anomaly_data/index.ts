@@ -5,7 +5,11 @@
  */
 
 import { getBucketSize } from '../../../helpers/get_bucket_size';
-import { Setup } from '../../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../../helpers/setup_request';
 import { anomalySeriesFetcher } from './fetcher';
 import { getMlBucketSize } from './get_ml_bucket_size';
 import { anomalySeriesTransform } from './transform';
@@ -21,7 +25,7 @@ export async function getAnomalySeries({
   transactionType: string | undefined;
   transactionName: string | undefined;
   timeSeriesDates: number[];
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   // don't fetch anomalies for transaction details page
   if (transactionName) {

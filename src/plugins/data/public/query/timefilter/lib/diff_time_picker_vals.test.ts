@@ -18,7 +18,6 @@
  */
 
 import moment from 'moment';
-import expect from '@kbn/expect';
 import { areTimeRangesDifferent } from './diff_time_picker_vals';
 
 describe('Diff Time Picker Values', () => {
@@ -35,7 +34,7 @@ describe('Diff Time Picker Values', () => {
         }
       );
 
-      expect(diff).to.be(false);
+      expect(diff).toBe(false);
     });
     test('knows a difference', () => {
       const diff = areTimeRangesDifferent(
@@ -49,7 +48,7 @@ describe('Diff Time Picker Values', () => {
         }
       );
 
-      expect(diff).to.be(true);
+      expect(diff).toBe(true);
     });
   });
 
@@ -66,7 +65,7 @@ describe('Diff Time Picker Values', () => {
         }
       );
 
-      expect(diff).to.be(true);
+      expect(diff).toBe(true);
     });
   });
 
@@ -86,7 +85,7 @@ describe('Diff Time Picker Values', () => {
         }
       );
 
-      expect(diff).to.be(false);
+      expect(diff).toBe(false);
     });
 
     test('fails if any to or from is different', () => {
@@ -105,7 +104,7 @@ describe('Diff Time Picker Values', () => {
         }
       );
 
-      expect(diff).to.be(true);
+      expect(diff).toBe(true);
     });
   });
 });

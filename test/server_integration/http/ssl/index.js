@@ -17,13 +17,12 @@
  * under the License.
  */
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
 
   describe('kibana server with ssl', () => {
     it('handles requests using ssl', async () => {
-      await supertest.get('/')
-        .expect(302);
+      await supertest.get('/').expect(302);
     });
   });
 }

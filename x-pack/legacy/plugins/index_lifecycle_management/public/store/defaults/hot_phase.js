@@ -11,7 +11,7 @@ import {
   PHASE_ROLLOVER_MAX_SIZE_STORED,
   PHASE_ROLLOVER_MAX_DOCUMENTS,
   PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
-  PHASE_INDEX_PRIORITY
+  PHASE_INDEX_PRIORITY,
 } from '../../constants';
 
 export const defaultHotPhase = {
@@ -22,7 +22,7 @@ export const defaultHotPhase = {
   [PHASE_ROLLOVER_MAX_SIZE_STORED]: 50,
   [PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]: 'gb',
   [PHASE_INDEX_PRIORITY]: 100,
-  [PHASE_ROLLOVER_MAX_DOCUMENTS]: ''
+  [PHASE_ROLLOVER_MAX_DOCUMENTS]: '',
 };
 export const defaultEmptyHotPhase = {
   ...defaultHotPhase,
@@ -31,5 +31,5 @@ export const defaultEmptyHotPhase = {
   [PHASE_ROLLOVER_MAX_AGE]: '',
   [PHASE_ROLLOVER_MAX_SIZE_STORED]: '',
   [PHASE_INDEX_PRIORITY]: '',
-  [PHASE_ROLLOVER_MAX_DOCUMENTS]: ''
+  [PHASE_ROLLOVER_MAX_DOCUMENTS]: '',
 };

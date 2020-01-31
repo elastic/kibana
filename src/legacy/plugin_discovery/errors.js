@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 const errorCodeProperty = Symbol('pluginDiscovery/errorCode');
 
 /**
@@ -33,7 +32,6 @@ export function createInvalidDirectoryError(sourceError, path) {
 export function isInvalidDirectoryError(error) {
   return error && error[errorCodeProperty] === ERROR_INVALID_DIRECTORY;
 }
-
 
 /**
  *  Thrown when trying to create a PluginPack for a path that
@@ -57,7 +55,9 @@ export function isInvalidPackError(error) {
  */
 const ERROR_INVALID_PLUGIN = 'ERROR_INVALID_PLUGIN';
 export function createInvalidPluginError(spec, reason) {
-  const error = new Error(`Plugin from ${spec.getId()} at ${spec.getPack().getPath()} is invalid because ${reason}`);
+  const error = new Error(
+    `Plugin from ${spec.getId()} at ${spec.getPack().getPath()} is invalid because ${reason}`
+  );
   error[errorCodeProperty] = ERROR_INVALID_PLUGIN;
   error.spec = spec;
   return error;
@@ -72,7 +72,9 @@ export function isInvalidPluginError(error) {
  */
 const ERROR_INCOMPATIBLE_PLUGIN_VERSION = 'ERROR_INCOMPATIBLE_PLUGIN_VERSION';
 export function createIncompatiblePluginVersionError(spec) {
-  const error = new Error(`Plugin ${spec.getId()} is only compatible with Kibana version ${spec.getExpectedKibanaVersion()}`);
+  const error = new Error(
+    `Plugin ${spec.getId()} is only compatible with Kibana version ${spec.getExpectedKibanaVersion()}`
+  );
   error[errorCodeProperty] = ERROR_INCOMPATIBLE_PLUGIN_VERSION;
   error.spec = spec;
   return error;

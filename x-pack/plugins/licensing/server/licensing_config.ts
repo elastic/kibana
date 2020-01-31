@@ -4,20 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { LicensingConfigType } from './types';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'kibana/server';
 
-export class LicensingConfig {
-  public isEnabled: boolean;
-  public clusterSource: string;
-  public pollingFrequency: number;
+const configSchema = schema.object({
+  api_polling_frequency: schema.duration({ defaultValue: '30s' }),
+});
 
-  /**
-   * @internal
-   */
-  constructor(rawConfig: LicensingConfigType, env: PluginInitializerContext['env']) {
-    this.isEnabled = rawConfig.isEnabled;
-    this.clusterSource = rawConfig.clusterSource;
-    this.pollingFrequency = rawConfig.pollingFrequency;
-  }
-}
+export type LicenseConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<LicenseConfigType> = {
+  schema: schema.object({
+    api_polling_frequency: schema.duration({ defaultValue: '30s' }),
+  }),
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot(
+      'xpack.xpack_main.xpack_api_polling_frequency_millis',
+      'xpack.licensing.api_polling_frequency'
+    ),
+  ],
+};

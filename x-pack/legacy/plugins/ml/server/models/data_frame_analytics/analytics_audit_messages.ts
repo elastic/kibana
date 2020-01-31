@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ML_DF_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { callWithRequestType } from '../../../common/types/kibana';
-import { AnalyticsMessage } from '../../../common/types/audit_message';
+import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { JobMessage } from '../../../common/types/audit_message';
 
 const SIZE = 50;
 
@@ -15,7 +15,7 @@ interface Message {
   _type: string;
   _id: string;
   _score: null | number;
-  _source: AnalyticsMessage;
+  _source: JobMessage;
   sort?: any;
 }
 
@@ -37,6 +37,11 @@ export function analyticsAuditMessagesProvider(callWithRequest: callWithRequestT
                   level: 'activity',
                 },
               },
+              must: {
+                term: {
+                  job_type: 'data_frame_analytics',
+                },
+              },
             },
           },
         ],
@@ -50,12 +55,12 @@ export function analyticsAuditMessagesProvider(callWithRequest: callWithRequestT
           should: [
             {
               term: {
-                analytics_id: '', // catch system messages
+                job_id: '', // catch system messages
               },
             },
             {
               term: {
-                analytics_id: analyticsId, // messages for specified analyticsId
+                job_id: analyticsId, // messages for specified analyticsId
               },
             },
           ],
@@ -65,12 +70,12 @@ export function analyticsAuditMessagesProvider(callWithRequest: callWithRequestT
 
     try {
       const resp = await callWithRequest('search', {
-        index: ML_DF_NOTIFICATION_INDEX_PATTERN,
+        index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
         rest_total_hits_as_int: true,
         size: SIZE,
         body: {
-          sort: [{ timestamp: { order: 'desc' } }, { analytics_id: { order: 'asc' } }],
+          sort: [{ timestamp: { order: 'desc' } }, { job_id: { order: 'asc' } }],
           query,
         },
       });

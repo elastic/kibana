@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { ActionCreator } from 'typescript-fsa';
-import { Query, esFilters } from 'src/plugins/data/public';
+import { IIndexPattern, Query, esFilters } from 'src/plugins/data/public';
 
 import { NetworkType } from '../../../store/network/model';
 import { ESTermQuery } from '../../../../common/typed_json';
@@ -68,5 +67,5 @@ export type TlsQueryTableComponentProps = OwnProps & {
 
 export type NetworkWithIndexComponentsQueryTableProps = OwnProps & {
   flowTarget: FlowTargetSourceDest;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
 };

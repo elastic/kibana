@@ -5,8 +5,7 @@
  */
 
 import qs from 'querystring';
-import { useContext } from 'react';
-import { UptimeRefreshContext } from '../contexts';
+import { useLocation, useHistory } from 'react-router-dom';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 
 type GetUrlParams = () => UptimeUrlParams;
@@ -15,12 +14,13 @@ type UpdateUrlParams = (updatedParams: { [key: string]: string | number | boolea
 export type UptimeUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 
 export const useUrlParams: UptimeUrlParamsHook = () => {
-  const refreshContext = useContext(UptimeRefreshContext);
+  const location = useLocation();
+  const history = useHistory();
 
   const getUrlParams: GetUrlParams = () => {
     let search: string | undefined;
-    if (refreshContext.location) {
-      search = refreshContext.location.search;
+    if (location) {
+      search = location.search;
     }
 
     const params = search ? { ...qs.parse(search[0] === '?' ? search.slice(1) : search) } : {};
@@ -28,11 +28,8 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
   };
 
   const updateUrlParams: UpdateUrlParams = updatedParams => {
-    if (!refreshContext.history || !refreshContext.location) return;
-    const {
-      history,
-      location: { pathname, search },
-    } = refreshContext;
+    if (!history || !location) return;
+    const { pathname, search } = location;
     const currentParams: any = qs.parse(search[0] === '?' ? search.slice(1) : search);
     const mergedParams = {
       ...currentParams,

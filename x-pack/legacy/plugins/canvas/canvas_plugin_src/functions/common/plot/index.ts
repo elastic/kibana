@@ -7,7 +7,7 @@
 // @ts-ignore no @typed def
 import keyBy from 'lodash.keyby';
 import { groupBy, get, set, map, sortBy } from 'lodash';
-import { ExpressionFunction, Style } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction, Style } from 'src/plugins/expressions/common/types';
 // @ts-ignore untyped local
 import { getColorsFromPalette } from '../../../../common/lib/get_colors_from_palette';
 // @ts-ignore untyped local

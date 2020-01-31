@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters } from '../../../../common';
 
 export function getFiltersArray(): esFilters.Filter[] {
   return [

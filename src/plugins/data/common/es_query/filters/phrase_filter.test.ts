@@ -17,17 +17,21 @@
  * under the License.
  */
 
-import { buildInlineScriptForPhraseFilter, buildPhraseFilter } from './phrase_filter';
-import { IndexPattern } from '../../types';
-import { getField } from '../__tests__/fields_mock';
+import {
+  buildInlineScriptForPhraseFilter,
+  buildPhraseFilter,
+  getPhraseFilterField,
+} from './phrase_filter';
+import { fields, getField } from '../../index_patterns/mocks';
+import { IIndexPattern } from '../../index_patterns';
 
 describe('Phrase filter builder', () => {
-  let indexPattern: IndexPattern;
+  let indexPattern: IIndexPattern;
 
   beforeEach(() => {
     indexPattern = {
       id: 'id',
-    };
+    } as IIndexPattern;
   });
 
   it('should be a function', () => {
@@ -93,5 +97,18 @@ describe('buildInlineScriptForPhraseFilter', () => {
     const expected = `(doc[bytes].value) == value`;
 
     expect(buildInlineScriptForPhraseFilter(field)).toBe(expected);
+  });
+});
+
+describe('getPhraseFilterField', function() {
+  const indexPattern: IIndexPattern = ({
+    fields,
+  } as unknown) as IIndexPattern;
+
+  it('should return the name of the field a phrase query is targeting', () => {
+    const field = indexPattern.fields.find(patternField => patternField.name === 'extension');
+    const filter = buildPhraseFilter(field!, 'jpg', indexPattern);
+    const result = getPhraseFilterField(filter);
+    expect(result).toBe('extension');
   });
 });

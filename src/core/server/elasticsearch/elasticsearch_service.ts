@@ -18,17 +18,18 @@
  */
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
-import { filter, first, map, publishReplay, switchMap } from 'rxjs/operators';
+import { filter, first, map, publishReplay, switchMap, take } from 'rxjs/operators';
 
 import { CoreService } from '../../types';
 import { merge } from '../../utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { ClusterClient } from './cluster_client';
+import { ClusterClient, ScopeableRequest } from './cluster_client';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
 import { InternalElasticsearchServiceSetup } from './types';
+import { CallAPIOptions } from './api_types';
 
 /** @internal */
 interface CoreClusterClients {
@@ -74,7 +75,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
             const coreClients = {
               config,
               adminClient: this.createClusterClient('admin', config),
-              dataClient: this.createClusterClient('data', config, deps.http.auth.getAuthHeaders),
+              dataClient: this.createClusterClient('data', config, deps.http.getAuthHeaders),
             };
 
             subscriber.next(coreClients);
@@ -94,15 +95,69 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
 
     const config = await this.config$.pipe(first()).toPromise();
 
+    const adminClient$ = clients$.pipe(map(clients => clients.adminClient));
+    const dataClient$ = clients$.pipe(map(clients => clients.dataClient));
+
+    const adminClient = {
+      async callAsInternalUser(
+        endpoint: string,
+        clientParams: Record<string, any> = {},
+        options?: CallAPIOptions
+      ) {
+        const client = await adminClient$.pipe(take(1)).toPromise();
+        return await client.callAsInternalUser(endpoint, clientParams, options);
+      },
+      asScoped(request: ScopeableRequest) {
+        return {
+          callAsInternalUser: adminClient.callAsInternalUser,
+          async callAsCurrentUser(
+            endpoint: string,
+            clientParams: Record<string, any> = {},
+            options?: CallAPIOptions
+          ) {
+            const client = await adminClient$.pipe(take(1)).toPromise();
+            return await client
+              .asScoped(request)
+              .callAsCurrentUser(endpoint, clientParams, options);
+          },
+        };
+      },
+    };
+    const dataClient = {
+      async callAsInternalUser(
+        endpoint: string,
+        clientParams: Record<string, any> = {},
+        options?: CallAPIOptions
+      ) {
+        const client = await dataClient$.pipe(take(1)).toPromise();
+        return await client.callAsInternalUser(endpoint, clientParams, options);
+      },
+      asScoped(request: ScopeableRequest) {
+        return {
+          callAsInternalUser: dataClient.callAsInternalUser,
+          async callAsCurrentUser(
+            endpoint: string,
+            clientParams: Record<string, any> = {},
+            options?: CallAPIOptions
+          ) {
+            const client = await dataClient$.pipe(take(1)).toPromise();
+            return await client
+              .asScoped(request)
+              .callAsCurrentUser(endpoint, clientParams, options);
+          },
+        };
+      },
+    };
+
     return {
       legacy: { config$: clients$.pipe(map(clients => clients.config)) },
 
-      adminClient$: clients$.pipe(map(clients => clients.adminClient)),
-      dataClient$: clients$.pipe(map(clients => clients.dataClient)),
+      adminClient,
+      dataClient,
 
       createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
         const finalConfig = merge({}, config, clientConfig);
-        return this.createClusterClient(type, finalConfig, deps.http.auth.getAuthHeaders);
+        return this.createClusterClient(type, finalConfig, deps.http.getAuthHeaders);
       },
     };
   }

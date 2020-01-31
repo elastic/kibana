@@ -39,18 +39,31 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       patch: () => {},
     },
     {
-      cloud: { config: { isCloudEnabled: false } },
+      cloud: { isCloudEnabled: false },
       elasticsearch: { getCluster: () => ({ callWithInternalUser: mockCallWithInternalUser }) },
     }
   );
 
   describe('getAllHandler()', () => {
     it('should arrify repositories returned from ES', async () => {
-      const mockEsResponse = {
+      const mockRepositoryEsResponse = {
         fooRepository: {},
         barRepository: {},
       };
-      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
+
+      const mockPolicyEsResponse = {
+        my_policy: {
+          policy: {
+            repository: 'found-snapshots',
+          },
+        },
+      };
+
+      const callWithRequest = jest
+        .fn()
+        .mockReturnValueOnce(mockRepositoryEsResponse)
+        .mockReturnValueOnce(mockPolicyEsResponse);
+
       const expectedResponse = {
         repositories: [
           {
@@ -64,7 +77,10 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
             settings: {},
           },
         ],
-        managedRepository: 'found-snapshots',
+        managedRepository: {
+          name: 'found-snapshots',
+          policy: 'my_policy',
+        },
       };
       await expect(
         getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
@@ -72,11 +88,26 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
     });
 
     it('should return empty array if no repositories returned from ES', async () => {
-      const mockEsResponse = {};
-      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
+      const mockRepositoryEsResponse = {};
+      const mockPolicyEsResponse = {
+        my_policy: {
+          policy: {
+            repository: 'found-snapshots',
+          },
+        },
+      };
+
+      const callWithRequest = jest
+        .fn()
+        .mockReturnValueOnce(mockRepositoryEsResponse)
+        .mockReturnValueOnce(mockPolicyEsResponse);
+
       const expectedResponse = {
         repositories: [],
-        managedRepository: 'found-snapshots',
+        managedRepository: {
+          name: 'found-snapshots',
+          policy: 'my_policy',
+        },
       };
       await expect(
         getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)

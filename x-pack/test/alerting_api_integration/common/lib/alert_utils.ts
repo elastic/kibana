@@ -17,11 +17,19 @@ export interface AlertUtilsOpts {
   objectRemover?: ObjectRemover;
 }
 
-export interface CreateAlwaysFiringActionOpts {
+export interface CreateAlertWithActionOpts {
   indexRecordActionId?: string;
   objectRemover?: ObjectRemover;
   overwrites?: Record<string, any>;
   reference: string;
+}
+
+interface UpdateAlwaysFiringAction {
+  alertId: string;
+  actionId: string | undefined;
+  reference: string;
+  user: User;
+  overwrites: Record<string, any>;
 }
 
 export class AlertUtils {
@@ -159,7 +167,64 @@ export class AlertUtils {
     overwrites = {},
     indexRecordActionId,
     reference,
-  }: CreateAlwaysFiringActionOpts) {
+  }: CreateAlertWithActionOpts) {
+    const objRemover = objectRemover || this.objectRemover;
+    const actionId = indexRecordActionId || this.indexRecordActionId;
+
+    if (!objRemover) {
+      throw new Error('objectRemover is required');
+    }
+    if (!actionId) {
+      throw new Error('indexRecordActionId is required ');
+    }
+
+    let request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/api/alert`)
+      .set('kbn-xsrf', 'foo');
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+    const alertBody = getDefaultAlwaysFiringAlertData(reference, actionId);
+    const response = await request.send({ ...alertBody, ...overwrites });
+    if (response.statusCode === 200) {
+      objRemover.add(this.space.id, response.body.id, 'alert');
+    }
+    return response;
+  }
+
+  public async updateAlwaysFiringAction({
+    alertId,
+    actionId,
+    reference,
+    user,
+    overwrites = {},
+  }: UpdateAlwaysFiringAction) {
+    actionId = actionId || this.indexRecordActionId;
+
+    if (!actionId) {
+      throw new Error('actionId is required ');
+    }
+
+    const request = this.supertestWithoutAuth
+      .put(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}`)
+      .set('kbn-xsrf', 'foo')
+      .auth(user.username, user.password);
+
+    const alertBody = getDefaultAlwaysFiringAlertData(reference, actionId);
+    delete alertBody.alertTypeId;
+    delete alertBody.enabled;
+    delete alertBody.consumer;
+
+    const response = await request.send({ ...alertBody, ...overwrites });
+    return response;
+  }
+
+  public async createAlwaysFailingAction({
+    objectRemover,
+    overwrites = {},
+    indexRecordActionId,
+    reference,
+  }: CreateAlertWithActionOpts) {
     const objRemover = objectRemover || this.objectRemover;
     const actionId = indexRecordActionId || this.indexRecordActionId;
 
@@ -178,26 +243,17 @@ export class AlertUtils {
     }
     const response = await request.send({
       enabled: true,
-      name: 'abc',
-      interval: '1m',
-      throttle: '1m',
-      alertTypeId: 'test.always-firing',
-      alertTypeParams: {
+      name: 'fail',
+      schedule: { interval: '30s' },
+      throttle: '30s',
+      tags: [],
+      alertTypeId: 'test.failing',
+      consumer: 'bar',
+      params: {
         index: ES_TEST_INDEX_NAME,
         reference,
       },
-      actions: [
-        {
-          group: 'default',
-          id: this.indexRecordActionId,
-          params: {
-            index: ES_TEST_INDEX_NAME,
-            reference,
-            message:
-              'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-          },
-        },
-      ],
+      actions: [],
       ...overwrites,
     });
     if (response.statusCode === 200) {
@@ -205,4 +261,32 @@ export class AlertUtils {
     }
     return response;
   }
+}
+
+function getDefaultAlwaysFiringAlertData(reference: string, actionId: string) {
+  return {
+    enabled: true,
+    name: 'abc',
+    schedule: { interval: '1m' },
+    throttle: '1m',
+    tags: [],
+    alertTypeId: 'test.always-firing',
+    consumer: 'bar',
+    params: {
+      index: ES_TEST_INDEX_NAME,
+      reference,
+    },
+    actions: [
+      {
+        group: 'default',
+        id: actionId,
+        params: {
+          index: ES_TEST_INDEX_NAME,
+          reference,
+          message:
+            'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
+        },
+      },
+    ],
+  };
 }

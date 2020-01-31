@@ -17,16 +17,16 @@
  * under the License.
  */
 
-
 import { uiModules } from '../../modules';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 
-const createService = function (type) {
-  return function ($window) {
+const createService = function(type) {
+  return function($window) {
     return new Storage($window[type]);
   };
 };
 
-uiModules.get('kibana/storage')
+uiModules
+  .get('kibana/storage')
   .service('localStorage', createService('localStorage'))
   .service('sessionStorage', createService('sessionStorage'));

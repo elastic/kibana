@@ -19,8 +19,8 @@
 
 import moment from 'moment';
 import { keys } from 'lodash';
-import { TimefilterContract } from '../timefilter';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { TimefilterContract } from '../../timefilter';
+import { esFilters } from '../../../../common';
 
 export function convertRangeFilterToTimeRange(filter: esFilters.RangeFilter) {
   const key = keys(filter.range)[0];

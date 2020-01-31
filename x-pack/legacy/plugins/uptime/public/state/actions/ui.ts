@@ -3,24 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-export const SET_INTEGRATION_POPOVER_STATE = 'SET_INTEGRATION_POPOVER_STATE';
+import { createAction } from 'redux-actions';
 
 export interface PopoverState {
   id: string;
   open: boolean;
 }
 
-interface SetIntegrationPopoverAction {
-  type: typeof SET_INTEGRATION_POPOVER_STATE;
-  payload: PopoverState;
-}
+export type UiPayload = PopoverState & string & number & Map<string, string[]>;
 
-export function toggleIntegrationsPopover(popoverState: PopoverState): SetIntegrationPopoverAction {
-  return {
-    type: SET_INTEGRATION_POPOVER_STATE,
-    payload: popoverState,
-  };
-}
+export const setBasePath = createAction<string>('SET BASE PATH');
 
-export type UiActionTypes = SetIntegrationPopoverAction;
+export const triggerAppRefresh = createAction<number>('REFRESH APP');
+
+export const setEsKueryString = createAction<string>('SET ES KUERY STRING');
+
+export const toggleIntegrationsPopover = createAction<PopoverState>(
+  'TOGGLE INTEGRATION POPOVER STATE'
+);

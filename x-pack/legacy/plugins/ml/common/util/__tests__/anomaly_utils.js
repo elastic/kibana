@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
 import {
   getSeverity,
@@ -18,170 +16,148 @@ import {
   showActualForFunction,
   showTypicalForFunction,
   isRuleSupported,
-  aggregationTypeTransform
+  aggregationTypeTransform,
 } from '../anomaly_utils';
 
 describe('ML - anomaly utils', () => {
-
   const partitionEntityRecord = {
-    'job_id': 'farequote',
-    'result_type': 'record',
-    'probability': 0.012818,
-    'record_score': 0.0162059,
-    'bucket_span': 300,
-    'detector_index': 0,
-    'timestamp': 1455047400000,
-    'partition_field_name': 'airline',
-    'partition_field_value': 'AAL',
-    'function': 'mean',
-    'function_description': 'mean',
-    'field_name': 'responsetime'
+    job_id: 'farequote',
+    result_type: 'record',
+    probability: 0.012818,
+    record_score: 0.0162059,
+    bucket_span: 300,
+    detector_index: 0,
+    timestamp: 1455047400000,
+    partition_field_name: 'airline',
+    partition_field_value: 'AAL',
+    function: 'mean',
+    function_description: 'mean',
+    field_name: 'responsetime',
   };
 
   const byEntityRecord = {
-    'job_id': 'farequote',
-    'result_type': 'record',
-    'probability': 0.012818,
-    'record_score': 0.0162059,
-    'bucket_span': 300,
-    'detector_index': 0,
-    'timestamp': 1455047400000,
-    'by_field_name': 'airline',
-    'by_field_value': 'JZA',
-    'function': 'mean',
-    'function_description': 'mean',
-    'field_name': 'responsetime'
+    job_id: 'farequote',
+    result_type: 'record',
+    probability: 0.012818,
+    record_score: 0.0162059,
+    bucket_span: 300,
+    detector_index: 0,
+    timestamp: 1455047400000,
+    by_field_name: 'airline',
+    by_field_value: 'JZA',
+    function: 'mean',
+    function_description: 'mean',
+    field_name: 'responsetime',
   };
 
   const overEntityRecord = {
-    'job_id': 'gallery',
-    'result_type': 'record',
-    'probability': 2.81806e-9,
-    'record_score': 59.055,
-    'bucket_span': 3600,
-    'detector_index': 4,
-    'timestamp': 1420552800000,
-    'function': 'sum',
-    'function_description': 'sum',
-    'field_name': 'bytes',
-    'by_field_name': 'method',
-    'over_field_name': 'clientip',
-    'over_field_value': '37.157.32.164'
+    job_id: 'gallery',
+    result_type: 'record',
+    probability: 2.81806e-9,
+    record_score: 59.055,
+    bucket_span: 3600,
+    detector_index: 4,
+    timestamp: 1420552800000,
+    function: 'sum',
+    function_description: 'sum',
+    field_name: 'bytes',
+    by_field_name: 'method',
+    over_field_name: 'clientip',
+    over_field_value: '37.157.32.164',
   };
 
   const noEntityRecord = {
-    'job_id': 'farequote_no_by',
-    'result_type': 'record',
-    'probability': 0.0191711,
-    'record_score': 4.38431,
-    'initial_record_score': 19.654,
-    'bucket_span': 300,
-    'detector_index': 0,
-    'timestamp': 1454890500000,
-    'function': 'mean',
-    'function_description': 'mean',
-    'field_name': 'responsetime'
+    job_id: 'farequote_no_by',
+    result_type: 'record',
+    probability: 0.0191711,
+    record_score: 4.38431,
+    initial_record_score: 19.654,
+    bucket_span: 300,
+    detector_index: 0,
+    timestamp: 1454890500000,
+    function: 'mean',
+    function_description: 'mean',
+    field_name: 'responsetime',
   };
 
   const metricNoEntityRecord = {
-    'job_id': 'farequote_metric',
-    'result_type': 'record',
-    'probability': 0.030133495093182184,
-    'record_score': 0.024881740359975164,
-    'initial_record_score': 0.024881740359975164,
-    'bucket_span': 900,
-    'detector_index': 0,
-    'is_interim': false,
-    'timestamp': 1486845000000,
-    'function': 'metric',
-    'function_description': 'mean',
-    'typical': [
-      545.7764658569108
-    ],
-    'actual': [
-      758.8220213274412
-    ],
-    'field_name': 'responsetime',
-    'influencers': [
+    job_id: 'farequote_metric',
+    result_type: 'record',
+    probability: 0.030133495093182184,
+    record_score: 0.024881740359975164,
+    initial_record_score: 0.024881740359975164,
+    bucket_span: 900,
+    detector_index: 0,
+    is_interim: false,
+    timestamp: 1486845000000,
+    function: 'metric',
+    function_description: 'mean',
+    typical: [545.7764658569108],
+    actual: [758.8220213274412],
+    field_name: 'responsetime',
+    influencers: [
       {
-        'influencer_field_name': 'airline',
-        'influencer_field_values': [
-          'NKS'
-        ]
-      }
+        influencer_field_name: 'airline',
+        influencer_field_values: ['NKS'],
+      },
     ],
-    'airline': [
-      'NKS'
-    ]
+    airline: ['NKS'],
   };
 
   const rareEntityRecord = {
-    'job_id': 'gallery',
-    'result_type': 'record',
-    'probability': 0.02277014211908481,
-    'record_score': 4.545378107075983,
-    'initial_record_score': 4.545378107075983,
-    'bucket_span': 3600,
-    'detector_index': 0,
-    'is_interim': false,
-    'timestamp': 1495879200000,
-    'by_field_name': 'status',
-    'function': 'rare',
-    'function_description': 'rare',
-    'over_field_name': 'clientip',
-    'over_field_value': '173.252.74.112',
-    'causes': [
+    job_id: 'gallery',
+    result_type: 'record',
+    probability: 0.02277014211908481,
+    record_score: 4.545378107075983,
+    initial_record_score: 4.545378107075983,
+    bucket_span: 3600,
+    detector_index: 0,
+    is_interim: false,
+    timestamp: 1495879200000,
+    by_field_name: 'status',
+    function: 'rare',
+    function_description: 'rare',
+    over_field_name: 'clientip',
+    over_field_value: '173.252.74.112',
+    causes: [
       {
-        'probability': 0.02277014211908481,
-        'by_field_name': 'status',
-        'by_field_value': '206',
-        'function': 'rare',
-        'function_description': 'rare',
-        'typical': [
-          0.00014832458182211878
-        ],
-        'actual': [
-          1
-        ],
-        'over_field_name': 'clientip',
-        'over_field_value': '173.252.74.112'
-      }
+        probability: 0.02277014211908481,
+        by_field_name: 'status',
+        by_field_value: '206',
+        function: 'rare',
+        function_description: 'rare',
+        typical: [0.00014832458182211878],
+        actual: [1],
+        over_field_name: 'clientip',
+        over_field_value: '173.252.74.112',
+      },
     ],
-    'influencers': [
+    influencers: [
       {
-        'influencer_field_name': 'uri',
-        'influencer_field_values': [
+        influencer_field_name: 'uri',
+        influencer_field_values: [
           '/wp-content/uploads/2013/06/dune_house_oil_on_canvas_24x20-298x298.jpg',
-          '/wp-content/uploads/2013/10/Case-dAste-1-11-298x298.png'
-        ]
+          '/wp-content/uploads/2013/10/Case-dAste-1-11-298x298.png',
+        ],
       },
       {
-        'influencer_field_name': 'status',
-        'influencer_field_values': [
-          '206'
-        ]
+        influencer_field_name: 'status',
+        influencer_field_values: ['206'],
       },
       {
-        'influencer_field_name': 'clientip',
-        'influencer_field_values': [
-          '173.252.74.112'
-        ]
-      }
+        influencer_field_name: 'clientip',
+        influencer_field_values: ['173.252.74.112'],
+      },
     ],
-    'clientip': [
-      '173.252.74.112'
-    ],
-    'uri': [
+    clientip: ['173.252.74.112'],
+    uri: [
       '/wp-content/uploads/2013/06/dune_house_oil_on_canvas_24x20-298x298.jpg',
-      '/wp-content/uploads/2013/10/Case-dAste-1-11-298x298.png'
+      '/wp-content/uploads/2013/10/Case-dAste-1-11-298x298.png',
     ],
-    'status': [
-      '206'
-    ]
+    status: ['206'],
   };
 
   describe('getSeverity', () => {
-
     it('returns warning for 0 <= score < 25', () => {
       expect(getSeverity(0).id).to.be('warning');
       expect(getSeverity(0.001).id).to.be('warning');
@@ -208,11 +184,9 @@ describe('ML - anomaly utils', () => {
       expect(getSeverity(-10).id).to.be('unknown');
       expect(getSeverity('value').id).to.be('unknown');
     });
-
   });
 
   describe('getSeverityWithLow', () => {
-
     it('returns low for 0 <= score < 3', () => {
       expect(getSeverityWithLow(0).id).to.be('low');
       expect(getSeverityWithLow(0.001).id).to.be('low');
@@ -244,11 +218,9 @@ describe('ML - anomaly utils', () => {
       expect(getSeverityWithLow(-10).id).to.be('unknown');
       expect(getSeverityWithLow('value').id).to.be('unknown');
     });
-
   });
 
   describe('getSeverityColor', () => {
-
     it('returns correct hex code for low for 0 <= score < 3', () => {
       expect(getSeverityColor(0)).to.be('#d2e9f7');
       expect(getSeverityColor(0.001)).to.be('#d2e9f7');
@@ -280,11 +252,9 @@ describe('ML - anomaly utils', () => {
       expect(getSeverityColor(-10)).to.be('#ffffff');
       expect(getSeverityColor('value')).to.be('#ffffff');
     });
-
   });
 
   describe('getMultiBucketImpactLabel', () => {
-
     it('returns high for 3 <= score <= 5', () => {
       expect(getMultiBucketImpactLabel(3)).to.be('high');
       expect(getMultiBucketImpactLabel(5)).to.be('high');
@@ -309,7 +279,6 @@ describe('ML - anomaly utils', () => {
       expect(getMultiBucketImpactLabel(10)).to.be('high');
       expect(getMultiBucketImpactLabel(-10)).to.be('none');
     });
-
   });
 
   describe('getEntityFieldName', () => {
@@ -328,7 +297,6 @@ describe('ML - anomaly utils', () => {
     it('returns undefined if no by, over or partition fields', () => {
       expect(getEntityFieldName(noEntityRecord)).to.be(undefined);
     });
-
   });
 
   describe('getEntityFieldValue', () => {
@@ -347,7 +315,6 @@ describe('ML - anomaly utils', () => {
     it('returns undefined if no by, over or partition fields', () => {
       expect(getEntityFieldValue(noEntityRecord)).to.be(undefined);
     });
-
   });
 
   describe('getEntityFieldList', () => {
@@ -360,8 +327,8 @@ describe('ML - anomaly utils', () => {
         {
           fieldName: 'airline',
           fieldValue: 'JZA',
-          fieldType: 'by'
-        }
+          fieldType: 'by',
+        },
       ]);
     });
 
@@ -370,8 +337,8 @@ describe('ML - anomaly utils', () => {
         {
           fieldName: 'airline',
           fieldValue: 'AAL',
-          fieldType: 'partition'
-        }
+          fieldType: 'partition',
+        },
       ]);
     });
 
@@ -380,8 +347,8 @@ describe('ML - anomaly utils', () => {
         {
           fieldName: 'clientip',
           fieldValue: '37.157.32.164',
-          fieldType: 'over'
-        }
+          fieldType: 'over',
+        },
       ]);
     });
 
@@ -390,8 +357,8 @@ describe('ML - anomaly utils', () => {
         {
           fieldName: 'clientip',
           fieldValue: '173.252.74.112',
-          fieldType: 'over'
-        }
+          fieldType: 'over',
+        },
       ]);
     });
   });
@@ -414,7 +381,6 @@ describe('ML - anomaly utils', () => {
     it('returns false for expected function descriptions', () => {
       expect(showActualForFunction('rare')).to.be(false);
     });
-
   });
 
   describe('showTypicalForFunction', () => {
@@ -435,7 +401,6 @@ describe('ML - anomaly utils', () => {
     it('returns false for expected function descriptions', () => {
       expect(showTypicalForFunction('rare')).to.be(false);
     });
-
   });
 
   describe('isRuleSupported', () => {
@@ -450,7 +415,6 @@ describe('ML - anomaly utils', () => {
     it('returns false for anomaly not supporting rules', () => {
       expect(isRuleSupported(metricNoEntityRecord)).to.be(false);
     });
-
   });
 
   describe('aggregationTypeTransform', () => {
@@ -475,8 +439,5 @@ describe('ML - anomaly utils', () => {
       expect(aggregationTypeTransform.toML('min')).to.be('min');
       expect(aggregationTypeTransform.toML('sum')).to.be('sum');
     });
-
   });
-
-
 });

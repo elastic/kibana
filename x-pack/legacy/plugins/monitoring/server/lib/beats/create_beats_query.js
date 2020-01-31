@@ -16,7 +16,7 @@ import { createQuery } from '../create_query';
  *
  * @param {Object} options The options to pass to {@code createQuery}
  */
-export function createBeatsQuery(options = { }) {
+export function createBeatsQuery(options = {}) {
   options = defaults(options, {
     filters: [],
     metric: BeatsMetric.getMetricFields(),
@@ -28,10 +28,10 @@ export function createBeatsQuery(options = { }) {
     bool: {
       must_not: {
         term: {
-          'beats_stats.beat.type': 'apm-server'
-        }
-      }
-    }
+          'beats_stats.beat.type': 'apm-server',
+        },
+      },
+    },
   });
 
   return createQuery(options);

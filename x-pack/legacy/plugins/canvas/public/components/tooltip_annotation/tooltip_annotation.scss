@@ -1,6 +1,3 @@
-@import '@elastic/eui/src/components/tool_tip/variables';
-@import '@elastic/eui/src/components/tool_tip/mixins';
-
 .tooltipAnnotation {
   @include euiToolTipStyle($size: 's');
   position: absolute;

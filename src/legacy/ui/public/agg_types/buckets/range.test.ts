@@ -19,7 +19,7 @@
 
 import { AggConfigs } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { NumberFormat } from '../../../../../plugins/data/common/';
+import { fieldFormats } from '../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 
@@ -44,14 +44,15 @@ const buckets = [
 ];
 
 describe('Range Agg', () => {
+  const getConfig = (() => {}) as fieldFormats.GetConfigFn;
   const getAggConfigs = () => {
     const field = {
       name: 'bytes',
-      format: new NumberFormat(
+      format: new fieldFormats.NumberFormat(
         {
           pattern: '0,0.[000] b',
         },
-        () => {}
+        getConfig
       ),
     };
 

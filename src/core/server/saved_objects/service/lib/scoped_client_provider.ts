@@ -18,33 +18,43 @@
  */
 import { PriorityCollection } from './priority_collection';
 import { SavedObjectsClientContract } from '../../types';
+import { SavedObjectsRepositoryFactory } from '../../saved_objects_service';
+import { KibanaRequest } from '../../../http';
 
 /**
  * Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.
  * @public
  */
-export interface SavedObjectsClientWrapperOptions<Request = unknown> {
+export interface SavedObjectsClientWrapperOptions {
   client: SavedObjectsClientContract;
-  request: Request;
+  request: KibanaRequest;
 }
 
 /**
  * Describes the factory used to create instances of Saved Objects Client Wrappers.
  * @public
  */
-export type SavedObjectsClientWrapperFactory<Request = unknown> = (
-  options: SavedObjectsClientWrapperOptions<Request>
+export type SavedObjectsClientWrapperFactory = (
+  options: SavedObjectsClientWrapperOptions
 ) => SavedObjectsClientContract;
 
 /**
  * Describes the factory used to create instances of the Saved Objects Client.
  * @public
  */
-export type SavedObjectsClientFactory<Request = unknown> = ({
+export type SavedObjectsClientFactory = ({
   request,
 }: {
-  request: Request;
+  request: KibanaRequest;
 }) => SavedObjectsClientContract;
+
+/**
+ * Provider to invoke to retrieve a {@link SavedObjectsClientFactory}.
+ * @public
+ */
+export type SavedObjectsClientFactoryProvider = (
+  repositoryFactory: SavedObjectsRepositoryFactory
+) => SavedObjectsClientFactory;
 
 /**
  * Options to control the creation of the Saved Objects Client.
@@ -55,43 +65,34 @@ export interface SavedObjectsClientProviderOptions {
 }
 
 /**
- * @public
- * See {@link SavedObjectsClientProvider}
+ * @internal
  */
-export type ISavedObjectsClientProvider<T = unknown> = Pick<
-  SavedObjectsClientProvider<T>,
+export type ISavedObjectsClientProvider = Pick<
+  SavedObjectsClientProvider,
   keyof SavedObjectsClientProvider
 >;
 
 /**
  * Provider for the Scoped Saved Objects Client.
  *
- * @internalRemarks Because `getClient` is synchronous the Client Provider does
- * not support creating factories that react to new ES clients emitted from
- * elasticsearch.adminClient$. The Client Provider therefore doesn't support
- * configuration changes to the Elasticsearch client. TODO: revisit once we've
- * closed https://github.com/elastic/kibana/pull/45796
+ * @internal
  */
-export class SavedObjectsClientProvider<Request = unknown> {
+export class SavedObjectsClientProvider {
   private readonly _wrapperFactories = new PriorityCollection<{
     id: string;
-    factory: SavedObjectsClientWrapperFactory<Request>;
+    factory: SavedObjectsClientWrapperFactory;
   }>();
-  private _clientFactory: SavedObjectsClientFactory<Request>;
-  private readonly _originalClientFactory: SavedObjectsClientFactory<Request>;
+  private _clientFactory: SavedObjectsClientFactory;
+  private readonly _originalClientFactory: SavedObjectsClientFactory;
 
-  constructor({
-    defaultClientFactory,
-  }: {
-    defaultClientFactory: SavedObjectsClientFactory<Request>;
-  }) {
+  constructor({ defaultClientFactory }: { defaultClientFactory: SavedObjectsClientFactory }) {
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
   }
 
   addClientWrapperFactory(
     priority: number,
     id: string,
-    factory: SavedObjectsClientWrapperFactory<Request>
+    factory: SavedObjectsClientWrapperFactory
   ): void {
     if (this._wrapperFactories.has(entry => entry.id === id)) {
       throw new Error(`wrapper factory with id ${id} is already defined`);
@@ -100,7 +101,7 @@ export class SavedObjectsClientProvider<Request = unknown> {
     this._wrapperFactories.add(priority, { id, factory });
   }
 
-  setClientFactory(customClientFactory: SavedObjectsClientFactory<Request>) {
+  setClientFactory(customClientFactory: SavedObjectsClientFactory) {
     if (this._clientFactory !== this._originalClientFactory) {
       throw new Error(`custom client factory is already set, unable to replace the current one`);
     }
@@ -109,7 +110,7 @@ export class SavedObjectsClientProvider<Request = unknown> {
   }
 
   getClient(
-    request: Request,
+    request: KibanaRequest,
     options: SavedObjectsClientProviderOptions = {}
   ): SavedObjectsClientContract {
     const client = this._clientFactory({

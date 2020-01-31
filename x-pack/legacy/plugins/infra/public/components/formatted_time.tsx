@@ -37,7 +37,6 @@ export const useFormattedTime = (
 
   const dateFormat = formatMap[format];
   const formattedTime = useMemo(() => getFormattedTime(time, dateFormat, fallbackFormat), [
-    getFormattedTime,
     time,
     dateFormat,
     fallbackFormat,

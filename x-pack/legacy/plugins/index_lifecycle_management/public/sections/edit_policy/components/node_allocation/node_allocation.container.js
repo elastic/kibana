@@ -4,21 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import { connect } from 'react-redux';
 import { NodeAllocation as PresentationComponent } from './node_allocation';
-import {
-  getNodeOptions,
-} from '../../../../store/selectors';
+import { getNodeOptions } from '../../../../store/selectors';
 import { fetchNodes } from '../../../../store/actions';
 
 export const NodeAllocation = connect(
-  (state) => ({
+  state => ({
     nodeOptions: getNodeOptions(state),
   }),
   {
-    fetchNodes
+    fetchNodes,
   }
 )(PresentationComponent);

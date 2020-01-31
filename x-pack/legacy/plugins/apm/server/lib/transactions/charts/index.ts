@@ -5,7 +5,11 @@
  */
 
 import { PromiseReturnType } from '../../../../typings/common';
-import { Setup } from '../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
 import { getAnomalySeries } from './get_anomaly_data';
 import { getApmTimeseriesData } from './get_timeseries_data';
 import { ApmTimeSeriesResponse } from './get_timeseries_data/transform';
@@ -21,7 +25,7 @@ export async function getTransactionCharts(options: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const apmTimeseries = await getApmTimeseriesData(options);
   const anomalyTimeseries = await getAnomalySeries({

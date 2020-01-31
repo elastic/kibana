@@ -5,27 +5,20 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import 'jest-styled-components';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
-import '../../mock/ui_settings';
 import { LinkIcon } from './index';
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('LinkIcon', () => {
   test('it renders', () => {
     const wrapper = shallow(
-      <TestProviders>
-        <LinkIcon href="#" iconSide="right" iconSize="xxl" iconType="alert">
-          {'Test link'}
-        </LinkIcon>
-      </TestProviders>
+      <LinkIcon href="#" iconSide="right" iconSize="xxl" iconType="alert">
+        {'Test link'}
+      </LinkIcon>
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders an action button when onClick is provided', () => {

@@ -17,13 +17,11 @@
  * under the License.
  */
 
-// @ts-ignore not TS yet
 import { CommonPageProvider } from './common_page';
 // @ts-ignore not TS yet
 import { ConsolePageProvider } from './console_page';
 // @ts-ignore not TS yet
 import { ContextPageProvider } from './context_page';
-// @ts-ignore not TS yet
 import { DashboardPageProvider } from './dashboard_page';
 // @ts-ignore not TS yet
 import { DiscoverPageProvider } from './discover_page';
@@ -40,7 +38,6 @@ import { NewsfeedPageProvider } from './newsfeed_page';
 import { PointSeriesPageProvider } from './point_series_page';
 // @ts-ignore not TS yet
 import { SettingsPageProvider } from './settings_page';
-// @ts-ignore not TS yet
 import { SharePageProvider } from './share_page';
 // @ts-ignore not TS yet
 import { ShieldPageProvider } from './shield_page';
@@ -49,8 +46,12 @@ import { TimePickerPageProvider } from './time_picker';
 // @ts-ignore not TS yet
 import { TimelionPageProvider } from './timelion_page';
 import { VisualBuilderPageProvider } from './visual_builder_page';
-// @ts-ignore not TS yet
 import { VisualizePageProvider } from './visualize_page';
+import { VisualizeEditorPageProvider } from './visualize_editor_page';
+import { VisualizeChartPageProvider } from './visualize_chart_page';
+import { TileMapPageProvider } from './tile_map_page';
+import { TagCloudPageProvider } from './tag_cloud_page';
+import { VegaChartPageProvider } from './vega_chart_page';
 
 export const pageObjects = {
   common: CommonPageProvider,
@@ -71,4 +72,9 @@ export const pageObjects = {
   timePicker: TimePickerPageProvider,
   visualBuilder: VisualBuilderPageProvider,
   visualize: VisualizePageProvider,
+  visEditor: VisualizeEditorPageProvider,
+  visChart: VisualizeChartPageProvider,
+  tileMap: TileMapPageProvider,
+  tagCloud: TagCloudPageProvider,
+  vegaChart: VegaChartPageProvider,
 };

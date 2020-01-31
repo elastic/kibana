@@ -24,7 +24,7 @@ describe('Relative Date Format', () => {
   let convert: Function;
 
   beforeEach(() => {
-    const relativeDate = new RelativeDateFormat({});
+    const relativeDate = new RelativeDateFormat({}, jest.fn());
     convert = relativeDate.convert.bind(relativeDate);
   });
 

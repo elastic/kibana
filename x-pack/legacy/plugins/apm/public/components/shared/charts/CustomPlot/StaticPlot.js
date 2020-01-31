@@ -158,12 +158,8 @@ class StaticPlot extends PureComponent {
   };
 
   render() {
-    const { width, series, tickFormatY, plotValues, noHits } = this.props;
+    const { series, tickFormatY, plotValues, noHits } = this.props;
     const { xTickValues, yTickValues } = plotValues;
-
-    // approximate number of x-axis ticks based on the width of the plot. There should by approx 1 tick per 100px
-    // d3 will determine the exact number of ticks based on the selected range
-    const xTickTotal = Math.floor(width / 100);
 
     const tickFormatX = this.props.tickFormatX || this.tickFormatXTime;
 
@@ -172,7 +168,6 @@ class StaticPlot extends PureComponent {
         <XAxis
           type="time-utc"
           tickSize={0}
-          tickTotal={xTickTotal}
           tickFormat={tickFormatX}
           tickValues={xTickValues}
         />

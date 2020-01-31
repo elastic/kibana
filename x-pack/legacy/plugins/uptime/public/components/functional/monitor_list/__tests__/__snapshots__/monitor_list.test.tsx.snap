@@ -26,6 +26,7 @@ exports[`MonitorList component renders a no items message when no data is provid
             "field": "state.monitor.status",
             "name": "Status",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "align": "left",
@@ -33,15 +34,16 @@ exports[`MonitorList component renders a no items message when no data is provid
             "name": "Name",
             "render": [Function],
             "sortable": true,
+            "width": "30%",
           },
           Object {
-            "align": "left",
+            "aligh": "left",
             "field": "state.url.full",
-            "name": "URL",
+            "name": "Url",
             "render": [Function],
-            "sortable": true,
           },
           Object {
+            "align": "center",
             "field": "histogram.points",
             "mobileOptions": Object {
               "show": false,
@@ -51,23 +53,11 @@ exports[`MonitorList component renders a no items message when no data is provid
           },
           Object {
             "align": "right",
-            "field": "state",
-            "hasActions": true,
-            "id": "actions",
-            "mobileOptions": Object {
-              "header": false,
-            },
-            "name": "Integrations",
-            "render": [Function],
-          },
-          Object {
-            "align": "left",
             "field": "monitor_id",
             "isExpander": true,
             "name": "",
             "render": [Function],
             "sortable": true,
-            "width": "40px",
           },
         ]
       }
@@ -79,11 +69,14 @@ exports[`MonitorList component renders a no items message when no data is provid
       loading={false}
       noItemsMessage="No uptime monitors found"
       responsive={true}
+      tableLayout="fixed"
     />
     <EuiSpacer
-      size="s"
+      size="m"
     />
-    <EuiFlexGroup>
+    <EuiFlexGroup
+      responsive={false}
+    >
       <EuiFlexItem
         grow={false}
       >
@@ -131,6 +124,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             "field": "state.monitor.status",
             "name": "Status",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "align": "left",
@@ -138,15 +132,16 @@ exports[`MonitorList component renders the monitor list 1`] = `
             "name": "Name",
             "render": [Function],
             "sortable": true,
+            "width": "30%",
           },
           Object {
-            "align": "left",
+            "aligh": "left",
             "field": "state.url.full",
-            "name": "URL",
+            "name": "Url",
             "render": [Function],
-            "sortable": true,
           },
           Object {
+            "align": "center",
             "field": "histogram.points",
             "mobileOptions": Object {
               "show": false,
@@ -156,23 +151,11 @@ exports[`MonitorList component renders the monitor list 1`] = `
           },
           Object {
             "align": "right",
-            "field": "state",
-            "hasActions": true,
-            "id": "actions",
-            "mobileOptions": Object {
-              "header": false,
-            },
-            "name": "Integrations",
-            "render": [Function],
-          },
-          Object {
-            "align": "left",
             "field": "monitor_id",
             "isExpander": true,
             "name": "",
             "render": [Function],
             "sortable": true,
-            "width": "40px",
           },
         ]
       }
@@ -246,11 +229,14 @@ exports[`MonitorList component renders the monitor list 1`] = `
       loading={false}
       noItemsMessage="No uptime monitors found"
       responsive={true}
+      tableLayout="fixed"
     />
     <EuiSpacer
-      size="s"
+      size="m"
     />
-    <EuiFlexGroup>
+    <EuiFlexGroup
+      responsive={false}
+    >
       <EuiFlexItem
         grow={false}
       >

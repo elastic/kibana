@@ -5,7 +5,7 @@ Object {
   "ENVgDIKRSdCVJo-YqY4kUQ": Object {
     "isOnline": true,
     "name": "node01",
-    "nodeTypeClass": "fa-star",
+    "nodeTypeClass": "starFilled",
     "nodeTypeLabel": "Master Node",
     "shardCount": 57,
     "transport_address": "127.0.0.1:9300",
@@ -14,7 +14,7 @@ Object {
   "t9J9jvHpQ2yDw9c1LJ0tHA": Object {
     "isOnline": false,
     "name": "node02",
-    "nodeTypeClass": "fa-server",
+    "nodeTypeClass": "storage",
     "nodeTypeLabel": "Node",
     "shardCount": 0,
     "transport_address": "127.0.0.1:9301",

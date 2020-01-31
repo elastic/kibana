@@ -19,20 +19,19 @@
 
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AggParam, initParams } from './agg_params';
+import { npStart } from 'ui/new_platform';
+import { initParams } from './agg_params';
 
-import { AggConfig } from '../vis';
+import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
-import { SearchSource } from '../courier';
-import { Adapters } from '../inspector';
+import { Adapters } from '../../../../plugins/inspector/public';
 import { BaseParamType } from './param_types/base';
-
-// @ts-ignore
-import { FieldFormat, fieldFormats } from '../registry/field_formats';
+import { AggParamType } from '../agg_types/param_types/agg';
+import { KBN_FIELD_TYPES, fieldFormats, ISearchSource } from '../../../../plugins/data/public';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
-  TParam extends AggParam = AggParam
+  TParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>
 > {
   name: string;
   title: string;
@@ -46,26 +45,31 @@ export interface AggTypeConfig<
   getRequestAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   getResponseAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   customLabels?: boolean;
-  decorateAggConfig?: () => Record<string, any>;
+  decorateAggConfig?: () => any;
   postFlightRequest?: (
     resp: any,
     aggConfigs: AggConfigs,
     aggConfig: TAggConfig,
-    searchSource: SearchSource,
+    searchSource: ISearchSource,
     inspectorAdapters: Adapters,
     abortSignal?: AbortSignal
   ) => Promise<any>;
-  getFormat?: (agg: TAggConfig) => FieldFormat;
+  getFormat?: (agg: TAggConfig) => fieldFormats.FieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 }
 
 const getFormat = (agg: AggConfig) => {
   const field = agg.getField();
-  return field ? field.format : fieldFormats.getDefaultInstance('string');
+  const fieldFormatsService = npStart.plugins.data.fieldFormats;
+
+  return field ? field.format : fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.STRING);
 };
 
-export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends AggParam = AggParam> {
+export class AggType<
+  TAggConfig extends AggConfig = AggConfig,
+  TParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>
+> {
   /**
    * the unique, unchanging, name that we have assigned this aggType
    *
@@ -75,6 +79,7 @@ export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends Ag
   name: string;
 
   type: string;
+  subtype?: string;
   /**
    * the name of the elasticsearch aggregation that this aggType represents. Usually just this.name
    *
@@ -160,7 +165,7 @@ export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends Ag
    * A function that will be called each time an aggConfig of this type
    * is created, giving the agg type a chance to modify the agg config
    */
-  decorateAggConfig: () => Record<string, any>;
+  decorateAggConfig: () => any;
   /**
    * A function that needs to be called after the main request has been made
    * and should return an updated response
@@ -175,7 +180,7 @@ export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends Ag
     resp: any,
     aggConfigs: AggConfigs,
     aggConfig: TAggConfig,
-    searchSource: SearchSource,
+    searchSource: ISearchSource,
     inspectorAdapters: Adapters,
     abortSignal?: AbortSignal
   ) => Promise<any>;
@@ -187,14 +192,14 @@ export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends Ag
    * @param  {agg} agg - the agg to pick a format for
    * @return {FieldFormat}
    */
-  getFormat: (agg: TAggConfig) => FieldFormat;
+  getFormat: (agg: TAggConfig) => fieldFormats.FieldFormat;
 
   getValue: (agg: TAggConfig, bucket: any) => any;
 
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 
   paramByName = (name: string) => {
-    return this.params.find((p: AggParam) => p.name === name);
+    return this.params.find((p: TParam) => p.name === name);
   };
 
   /**

@@ -28,6 +28,6 @@ export function getKibanaInfoForStats({ kbnServerStatus, kbnServerVersion, confi
     transport_address: `${config.get('server.host')}:${config.get('server.port')}`,
     version: kbnServerVersion.replace(snapshotRegex, ''),
     snapshot: snapshotRegex.test(kbnServerVersion),
-    status: get(status, 'overall.state')
+    status: get(status, 'overall.state'),
   };
 }

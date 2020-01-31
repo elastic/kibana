@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query } from 'src/plugins/data/common';
 import { TimeRange } from 'src/plugins/data/public';
 import {
   EmbeddableInput,
@@ -13,7 +12,7 @@ import {
   EmbeddableFactory,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { inputsModel } from '../../store/inputs';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 export interface MapEmbeddableInput extends EmbeddableInput {
   filters: esFilters.Filter[];
@@ -30,6 +29,22 @@ export type MapEmbeddable = IEmbeddable<MapEmbeddableInput, EmbeddableOutput>;
 export interface IndexPatternMapping {
   title: string;
   id: string;
+}
+
+export interface LayerMappingDetails {
+  metricField: string;
+  geoField: string;
+  tooltipProperties: string[];
+  label: string;
+}
+
+export interface LayerMapping {
+  source: LayerMappingDetails;
+  destination: LayerMappingDetails;
+}
+
+export interface LayerMappingCollection {
+  [indexPatternTitle: string]: LayerMapping;
 }
 
 export type SetQuery = (params: {

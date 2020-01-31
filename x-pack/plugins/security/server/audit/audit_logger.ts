@@ -7,7 +7,7 @@
 import { LegacyAPI } from '../plugin';
 
 export class SecurityAuditLogger {
-  constructor(private readonly auditLogger: LegacyAPI['auditLogger']) {}
+  constructor(private readonly getAuditLogger: () => LegacyAPI['auditLogger']) {}
 
   savedObjectsAuthorizationFailure(
     username: string,
@@ -16,7 +16,7 @@ export class SecurityAuditLogger {
     missing: string[],
     args?: Record<string, unknown>
   ) {
-    this.auditLogger.log(
+    this.getAuditLogger().log(
       'saved_objects_authorization_failure',
       `${username} unauthorized to ${action} ${types.join(',')}, missing ${missing.join(',')}`,
       {
@@ -35,7 +35,7 @@ export class SecurityAuditLogger {
     types: string[],
     args?: Record<string, unknown>
   ) {
-    this.auditLogger.log(
+    this.getAuditLogger().log(
       'saved_objects_authorization_success',
       `${username} authorized to ${action} ${types.join(',')}`,
       {

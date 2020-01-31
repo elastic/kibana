@@ -10,6 +10,8 @@ import { Route, Switch } from 'react-router-dom';
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 import { Anomaly } from '../../../components/ml/types';
 import { HostsTableType } from '../../../store/hosts/model';
+import { AnomaliesQueryTabBody } from '../../../containers/anomalies/anomalies_query_tab_body';
+import { AnomaliesHostTable } from '../../../components/ml/tables/anomalies_host_table';
 
 import { HostDetailsTabsProps } from './types';
 import { type } from './utils';
@@ -18,12 +20,13 @@ import {
   HostsQueryTabBody,
   AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
-  AnomaliesQueryTabBody,
   EventsQueryTabBody,
+  HostAlertsQueryTabBody,
 } from '../navigation';
 
 const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
+    pageFilters,
     deleteQuery,
     filterQuery,
     from,
@@ -44,14 +47,14 @@ const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
           to: fromTo.to,
         });
       },
-      [setAbsoluteRangeDatePicker, scoreIntervalToDateTime]
+      [setAbsoluteRangeDatePicker]
     );
 
     const updateDateRange = useCallback(
       (min: number, max: number) => {
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
       },
-      [setAbsoluteRangeDatePicker, scoreIntervalToDateTime]
+      [setAbsoluteRangeDatePicker]
     );
 
     const tabProps = {
@@ -84,11 +87,17 @@ const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
         />
         <Route
           path={`${hostDetailsPagePath}/:tabName(${HostsTableType.anomalies})`}
-          render={() => <AnomaliesQueryTabBody {...tabProps} />}
+          render={() => (
+            <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
+          )}
         />
         <Route
           path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}
           render={() => <EventsQueryTabBody {...tabProps} />}
+        />
+        <Route
+          path={`${hostDetailsPagePath}/:tabName(${HostsTableType.alerts})`}
+          render={() => <HostAlertsQueryTabBody {...tabProps} pageFilters={pageFilters} />}
         />
       </Switch>
     );

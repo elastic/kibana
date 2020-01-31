@@ -19,29 +19,32 @@
 
 import { resolve } from 'path';
 import { Legacy } from 'kibana';
-import { PluginInitializerContext } from 'src/core/server';
-import { CoreSetup } from 'src/core/server';
-
-import { plugin } from './server/';
-import { CustomCoreSetup } from './server/plugin';
 
 import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
 
 const metricsPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
     id: 'metrics',
-    require: ['kibana', 'elasticsearch', 'interpreter', 'expressions'],
+    require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
       injectDefaultVars: server => ({}),
-    },
-    init: (server: Legacy.Server) => {
-      const initializerContext = {} as PluginInitializerContext;
-      const core = { http: { server } } as CoreSetup & CustomCoreSetup;
-
-      plugin(initializerContext).setup(core);
+      mappings: {
+        'tsvb-validation-telemetry': {
+          properties: {
+            failedRequests: {
+              type: 'long',
+            },
+          },
+        },
+      },
+      savedObjectSchemas: {
+        'tsvb-validation-telemetry': {
+          isNamespaceAgnostic: true,
+        },
+      },
     },
     config(Joi: any) {
       return Joi.object({

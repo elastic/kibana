@@ -19,7 +19,7 @@
 import { registerTimefilterWithGlobalState } from './setup_router';
 
 jest.mock('ui/utils/subscribe_with_scope', () => ({
-  subscribeWithScope: jest.fn()
+  subscribeWithScope: jest.fn(),
 }));
 
 describe('registerTimefilterWithGlobalState()', () => {
@@ -29,7 +29,7 @@ describe('registerTimefilterWithGlobalState()', () => {
       setTime,
       setRefreshInterval: jest.fn(),
       getRefreshIntervalUpdate$: jest.fn(),
-      getTimeUpdate$: jest.fn()
+      getTimeUpdate$: jest.fn(),
     };
 
     const globalState = {
@@ -39,13 +39,14 @@ describe('registerTimefilterWithGlobalState()', () => {
       },
       on: (eventName, callback) => {
         callback();
-      }
+      },
     };
 
-    registerTimefilterWithGlobalState(
-      timefilter,
-      globalState
-    );
+    const rootScope = {
+      $on: jest.fn(),
+    };
+
+    registerTimefilterWithGlobalState(timefilter, globalState, rootScope);
 
     expect(setTime.mock.calls.length).toBe(2);
     expect(setTime.mock.calls[1][0]).toEqual(globalState.time);

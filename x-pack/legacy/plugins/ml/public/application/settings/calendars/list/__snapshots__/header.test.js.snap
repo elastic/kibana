@@ -1,0 +1,111 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CalendarListsHeader renders header 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="baseline"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFlexGroup
+        alignItems="baseline"
+        gutterSize="m"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiTitle>
+            <h1>
+              <FormattedMessage
+                defaultMessage="Calendars"
+                id="xpack.ml.settings.calendars.listHeader.calendarsTitle"
+                values={Object {}}
+              />
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiTextColor
+            color="subdued"
+          >
+            <p>
+              <FormattedMessage
+                defaultMessage="{totalCount} in total"
+                id="xpack.ml.settings.calendars.listHeader.calendarsListTotalCount"
+                values={
+                  Object {
+                    "totalCount": 3,
+                  }
+                }
+              />
+            </p>
+          </EuiTextColor>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFlexGroup
+        alignItems="baseline"
+        gutterSize="m"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            iconType="refresh"
+            onClick={[MockFunction]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Refresh"
+              id="xpack.ml.settings.calendars.listHeader.refreshButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiText>
+    <p>
+      <EuiTextColor
+        color="subdued"
+      >
+        <FormattedMessage
+          defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies, such as planned system outages or public holidays. The same calendar can be assigned to multiple jobs.{br}{learnMoreLink}"
+          id="xpack.ml.settings.calendars.listHeader.calendarsDescription"
+          values={
+            Object {
+              "br": <br />,
+              "learnMoreLink": <ForwardRef
+                href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/ml-calendars.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Learn more"
+                  id="xpack.ml.settings.calendars.listHeader.calendarsDescription.learnMoreLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>,
+            }
+          }
+        />
+      </EuiTextColor>
+    </p>
+  </EuiText>
+  <EuiSpacer
+    size="m"
+  />
+</Fragment>
+`;

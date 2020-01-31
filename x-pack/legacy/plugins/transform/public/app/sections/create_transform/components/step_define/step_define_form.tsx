@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -37,9 +37,8 @@ import { KqlFilterBar } from '../../../../../shared_imports';
 import { SwitchModal } from './switch_modal';
 
 import {
-  isKibanaContextInitialized,
-  KibanaContext,
-  KibanaContextValue,
+  useKibanaContext,
+  InitializedKibanaContextValue,
   SavedSearchQuery,
 } from '../../../../lib/kibana';
 
@@ -75,7 +74,7 @@ const defaultSearch = '*';
 const emptySearch = '';
 
 export function getDefaultStepDefineState(
-  kibanaContext: KibanaContextValue
+  kibanaContext: InitializedKibanaContextValue
 ): StepDefineExposedState {
   return {
     aggList: {} as PivotAggsConfigDict,
@@ -83,13 +82,9 @@ export function getDefaultStepDefineState(
     isAdvancedPivotEditorEnabled: false,
     isAdvancedSourceEditorEnabled: false,
     searchString:
-      isKibanaContextInitialized(kibanaContext) && kibanaContext.currentSavedSearch !== undefined
-        ? kibanaContext.combinedQuery
-        : defaultSearch,
+      kibanaContext.currentSavedSearch !== undefined ? kibanaContext.combinedQuery : defaultSearch,
     searchQuery:
-      isKibanaContextInitialized(kibanaContext) && kibanaContext.currentSavedSearch !== undefined
-        ? kibanaContext.combinedQuery
-        : defaultSearch,
+      kibanaContext.currentSavedSearch !== undefined ? kibanaContext.combinedQuery : defaultSearch,
     sourceConfigUpdated: false,
     valid: false,
   };
@@ -195,8 +190,8 @@ interface Props {
   onChange(s: StepDefineExposedState): void;
 }
 
-export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
-  const kibanaContext = useContext(KibanaContext);
+export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange }) => {
+  const kibanaContext = useKibanaContext();
 
   const defaults = { ...getDefaultStepDefineState(kibanaContext), ...overrides };
 
@@ -223,10 +218,6 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
 
   // The list of selected group by fields
   const [groupByList, setGroupByList] = useState(defaults.groupByList);
-
-  if (!isKibanaContextInitialized(kibanaContext)) {
-    return null;
-  }
 
   const indexPattern = kibanaContext.currentIndexPattern;
 
@@ -508,145 +499,318 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
-        <EuiForm>
-          {kibanaContext.currentSavedSearch === undefined && typeof searchString === 'string' && (
-            <Fragment>
-              <EuiFormRow
-                label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
-                  defaultMessage: 'Index pattern',
-                })}
-                helpText={
-                  disabledQuery
-                    ? i18n.translate('xpack.transform.stepDefineForm.indexPatternHelpText', {
-                        defaultMessage:
-                          'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
-                        values: {
-                          maxIndexFields,
-                          numIndexFields,
-                        },
-                      })
-                    : ''
-                }
-              >
-                <span>{indexPattern.title}</span>
-              </EuiFormRow>
-              {!disabledQuery && (
-                <Fragment>
-                  {!isAdvancedSourceEditorEnabled && (
-                    <EuiFormRow
-                      label={i18n.translate('xpack.transform.stepDefineForm.queryLabel', {
-                        defaultMessage: 'Query',
-                      })}
-                      helpText={i18n.translate('xpack.transform.stepDefineForm.queryHelpText', {
-                        defaultMessage: 'Use a query to filter the source data (optional).',
-                      })}
-                    >
-                      <KqlFilterBar
-                        indexPattern={indexPattern}
-                        onSubmit={searchHandler}
-                        initialValue={searchString === defaultSearch ? emptySearch : searchString}
-                        placeholder={i18n.translate(
-                          'xpack.transform.stepDefineForm.queryPlaceholder',
-                          {
-                            defaultMessage: 'e.g. {example}',
-                            values: { example: 'method : "GET" or status : "404"' },
-                          }
-                        )}
-                      />
-                    </EuiFormRow>
-                  )}
-                </Fragment>
-              )}
-            </Fragment>
-          )}
-
-          {isAdvancedSourceEditorEnabled && (
-            <Fragment>
-              <EuiFormRow
-                label={i18n.translate('xpack.transform.stepDefineForm.advancedSourceEditorLabel', {
-                  defaultMessage: 'Source query clause',
-                })}
-                helpText={advancedSourceEditorHelpText}
-              >
-                <EuiPanel grow={false} paddingSize="none">
-                  <EuiCodeEditor
-                    mode="json"
-                    width="100%"
-                    value={advancedEditorSourceConfig}
-                    onChange={(d: string) => {
-                      setAdvancedEditorSourceConfig(d);
-
-                      // Disable the "Apply"-Button if the config hasn't changed.
-                      if (advancedEditorSourceConfigLastApplied === d) {
-                        setAdvancedSourceEditorApplyButtonEnabled(false);
-                        return;
-                      }
-
-                      // Try to parse the string passed on from the editor.
-                      // If parsing fails, the "Apply"-Button will be disabled
-                      try {
-                        JSON.parse(d);
-                        setAdvancedSourceEditorApplyButtonEnabled(true);
-                      } catch (e) {
-                        setAdvancedSourceEditorApplyButtonEnabled(false);
-                      }
-                    }}
-                    setOptions={{
-                      fontSize: '12px',
-                    }}
-                    theme="textmate"
-                    aria-label={i18n.translate(
-                      'xpack.transform.stepDefineForm.advancedSourceEditorAriaLabel',
-                      {
-                        defaultMessage: 'Advanced query editor',
-                      }
+        <div data-test-subj="transformStepDefineForm">
+          <EuiForm>
+            {kibanaContext.currentSavedSearch === undefined && typeof searchString === 'string' && (
+              <Fragment>
+                <EuiFormRow
+                  label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
+                    defaultMessage: 'Index pattern',
+                  })}
+                  helpText={
+                    disabledQuery
+                      ? i18n.translate('xpack.transform.stepDefineForm.indexPatternHelpText', {
+                          defaultMessage:
+                            'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
+                          values: {
+                            maxIndexFields,
+                            numIndexFields,
+                          },
+                        })
+                      : ''
+                  }
+                >
+                  <span>{indexPattern.title}</span>
+                </EuiFormRow>
+                {!disabledQuery && (
+                  <Fragment>
+                    {!isAdvancedSourceEditorEnabled && (
+                      <EuiFormRow
+                        label={i18n.translate('xpack.transform.stepDefineForm.queryLabel', {
+                          defaultMessage: 'Query',
+                        })}
+                        helpText={i18n.translate('xpack.transform.stepDefineForm.queryHelpText', {
+                          defaultMessage: 'Use a query to filter the source data (optional).',
+                        })}
+                      >
+                        <KqlFilterBar
+                          indexPattern={indexPattern}
+                          onSubmit={searchHandler}
+                          initialValue={searchString === defaultSearch ? emptySearch : searchString}
+                          placeholder={i18n.translate(
+                            'xpack.transform.stepDefineForm.queryPlaceholder',
+                            {
+                              defaultMessage: 'e.g. {example}',
+                              values: { example: 'method : "GET" or status : "404"' },
+                            }
+                          )}
+                          testSubj="tarnsformQueryInput"
+                        />
+                      </EuiFormRow>
                     )}
-                  />
-                </EuiPanel>
+                  </Fragment>
+                )}
+              </Fragment>
+            )}
+
+            {isAdvancedSourceEditorEnabled && (
+              <Fragment>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.transform.stepDefineForm.advancedSourceEditorLabel',
+                    {
+                      defaultMessage: 'Source query clause',
+                    }
+                  )}
+                  helpText={advancedSourceEditorHelpText}
+                >
+                  <EuiPanel grow={false} paddingSize="none">
+                    <EuiCodeEditor
+                      mode="json"
+                      width="100%"
+                      value={advancedEditorSourceConfig}
+                      onChange={(d: string) => {
+                        setAdvancedEditorSourceConfig(d);
+
+                        // Disable the "Apply"-Button if the config hasn't changed.
+                        if (advancedEditorSourceConfigLastApplied === d) {
+                          setAdvancedSourceEditorApplyButtonEnabled(false);
+                          return;
+                        }
+
+                        // Try to parse the string passed on from the editor.
+                        // If parsing fails, the "Apply"-Button will be disabled
+                        try {
+                          JSON.parse(d);
+                          setAdvancedSourceEditorApplyButtonEnabled(true);
+                        } catch (e) {
+                          setAdvancedSourceEditorApplyButtonEnabled(false);
+                        }
+                      }}
+                      setOptions={{
+                        fontSize: '12px',
+                      }}
+                      theme="textmate"
+                      aria-label={i18n.translate(
+                        'xpack.transform.stepDefineForm.advancedSourceEditorAriaLabel',
+                        {
+                          defaultMessage: 'Advanced query editor',
+                        }
+                      )}
+                    />
+                  </EuiPanel>
+                </EuiFormRow>
+              </Fragment>
+            )}
+            {kibanaContext.currentSavedSearch === undefined && (
+              <EuiFormRow>
+                <EuiFlexGroup gutterSize="none">
+                  <EuiFlexItem>
+                    <EuiSwitch
+                      label={i18n.translate(
+                        'xpack.transform.stepDefineForm.advancedEditorSourceConfigSwitchLabel',
+                        {
+                          defaultMessage: 'Advanced query editor',
+                        }
+                      )}
+                      checked={isAdvancedSourceEditorEnabled}
+                      onChange={() => {
+                        if (isAdvancedSourceEditorEnabled && sourceConfigUpdated) {
+                          setAdvancedSourceEditorSwitchModalVisible(true);
+                          return;
+                        }
+
+                        toggleAdvancedSourceEditor();
+                      }}
+                      data-test-subj="transformAdvancedQueryEditorSwitch"
+                    />
+                    {isAdvancedSourceEditorSwitchModalVisible && (
+                      <SwitchModal
+                        onCancel={() => setAdvancedSourceEditorSwitchModalVisible(false)}
+                        onConfirm={() => {
+                          setAdvancedSourceEditorSwitchModalVisible(false);
+                          toggleAdvancedSourceEditor(true);
+                        }}
+                        type={'source'}
+                      />
+                    )}
+                  </EuiFlexItem>
+                  {isAdvancedSourceEditorEnabled && (
+                    <EuiButton
+                      size="s"
+                      fill
+                      onClick={applyAdvancedSourceEditorChanges}
+                      disabled={!isAdvancedSourceEditorApplyButtonEnabled}
+                    >
+                      {i18n.translate(
+                        'xpack.transform.stepDefineForm.advancedSourceEditorApplyButtonText',
+                        {
+                          defaultMessage: 'Apply changes',
+                        }
+                      )}
+                    </EuiButton>
+                  )}
+                </EuiFlexGroup>
               </EuiFormRow>
-            </Fragment>
-          )}
-          {kibanaContext.currentSavedSearch === undefined && (
+            )}
+            {kibanaContext.currentSavedSearch !== undefined &&
+              kibanaContext.currentSavedSearch.id !== undefined && (
+                <EuiFormRow
+                  label={i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
+                    defaultMessage: 'Saved search',
+                  })}
+                >
+                  <span>{kibanaContext.currentSavedSearch.title}</span>
+                </EuiFormRow>
+              )}
+
+            {!isAdvancedPivotEditorEnabled && (
+              <Fragment>
+                <EuiFormRow
+                  label={i18n.translate('xpack.transform.stepDefineForm.groupByLabel', {
+                    defaultMessage: 'Group by',
+                  })}
+                >
+                  <Fragment>
+                    <GroupByListForm
+                      list={groupByList}
+                      options={groupByOptionsData}
+                      onChange={updateGroupBy}
+                      deleteHandler={deleteGroupBy}
+                    />
+                    <DropDown
+                      changeHandler={addGroupBy}
+                      options={groupByOptions}
+                      placeholder={i18n.translate(
+                        'xpack.transform.stepDefineForm.groupByPlaceholder',
+                        {
+                          defaultMessage: 'Add a group by field ...',
+                        }
+                      )}
+                      testSubj="transformGroupBySelection"
+                    />
+                  </Fragment>
+                </EuiFormRow>
+
+                <EuiFormRow
+                  label={i18n.translate('xpack.transform.stepDefineForm.aggregationsLabel', {
+                    defaultMessage: 'Aggregations',
+                  })}
+                >
+                  <Fragment>
+                    <AggListForm
+                      list={aggList}
+                      options={aggOptionsData}
+                      onChange={updateAggregation}
+                      deleteHandler={deleteAggregation}
+                    />
+                    <DropDown
+                      changeHandler={addAggregation}
+                      options={aggOptions}
+                      placeholder={i18n.translate(
+                        'xpack.transform.stepDefineForm.aggregationsPlaceholder',
+                        {
+                          defaultMessage: 'Add an aggregation ...',
+                        }
+                      )}
+                      testSubj="transformAggregationSelection"
+                    />
+                  </Fragment>
+                </EuiFormRow>
+              </Fragment>
+            )}
+
+            {isAdvancedPivotEditorEnabled && (
+              <Fragment>
+                <EuiFormRow
+                  label={i18n.translate('xpack.transform.stepDefineForm.advancedEditorLabel', {
+                    defaultMessage: 'Pivot configuration object',
+                  })}
+                  helpText={advancedEditorHelpText}
+                >
+                  <EuiPanel grow={false} paddingSize="none">
+                    <EuiCodeEditor
+                      mode="json"
+                      width="100%"
+                      value={advancedEditorConfig}
+                      onChange={(d: string) => {
+                        setAdvancedEditorConfig(d);
+
+                        // Disable the "Apply"-Button if the config hasn't changed.
+                        if (advancedEditorConfigLastApplied === d) {
+                          setAdvancedPivotEditorApplyButtonEnabled(false);
+                          return;
+                        }
+
+                        // Try to parse the string passed on from the editor.
+                        // If parsing fails, the "Apply"-Button will be disabled
+                        try {
+                          JSON.parse(d);
+                          setAdvancedPivotEditorApplyButtonEnabled(true);
+                        } catch (e) {
+                          setAdvancedPivotEditorApplyButtonEnabled(false);
+                        }
+                      }}
+                      setOptions={{
+                        fontSize: '12px',
+                      }}
+                      theme="textmate"
+                      aria-label={i18n.translate(
+                        'xpack.transform.stepDefineForm.advancedEditorAriaLabel',
+                        {
+                          defaultMessage: 'Advanced pivot editor',
+                        }
+                      )}
+                    />
+                  </EuiPanel>
+                </EuiFormRow>
+              </Fragment>
+            )}
             <EuiFormRow>
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem>
                   <EuiSwitch
                     label={i18n.translate(
-                      'xpack.transform.stepDefineForm.advancedEditorSourceConfigSwitchLabel',
+                      'xpack.transform.stepDefineForm.advancedEditorSwitchLabel',
                       {
-                        defaultMessage: 'Advanced query editor',
+                        defaultMessage: 'Advanced pivot editor',
                       }
                     )}
-                    checked={isAdvancedSourceEditorEnabled}
+                    checked={isAdvancedPivotEditorEnabled}
                     onChange={() => {
-                      if (isAdvancedSourceEditorEnabled && sourceConfigUpdated) {
-                        setAdvancedSourceEditorSwitchModalVisible(true);
+                      if (
+                        isAdvancedPivotEditorEnabled &&
+                        (isAdvancedPivotEditorApplyButtonEnabled ||
+                          advancedEditorConfig !== advancedEditorConfigLastApplied)
+                      ) {
+                        setAdvancedEditorSwitchModalVisible(true);
                         return;
                       }
 
-                      toggleAdvancedSourceEditor();
+                      toggleAdvancedEditor();
                     }}
+                    data-test-subj="transformAdvancedPivotEditorSwitch"
                   />
-                  {isAdvancedSourceEditorSwitchModalVisible && (
+                  {isAdvancedEditorSwitchModalVisible && (
                     <SwitchModal
-                      onCancel={() => setAdvancedSourceEditorSwitchModalVisible(false)}
+                      onCancel={() => setAdvancedEditorSwitchModalVisible(false)}
                       onConfirm={() => {
-                        setAdvancedSourceEditorSwitchModalVisible(false);
-                        toggleAdvancedSourceEditor(true);
+                        setAdvancedEditorSwitchModalVisible(false);
+                        toggleAdvancedEditor();
                       }}
-                      type={'source'}
+                      type={'pivot'}
                     />
                   )}
                 </EuiFlexItem>
-                {isAdvancedSourceEditorEnabled && (
+                {isAdvancedPivotEditorEnabled && (
                   <EuiButton
                     size="s"
                     fill
-                    onClick={applyAdvancedSourceEditorChanges}
-                    disabled={!isAdvancedSourceEditorApplyButtonEnabled}
+                    onClick={applyAdvancedPivotEditorChanges}
+                    disabled={!isAdvancedPivotEditorApplyButtonEnabled}
                   >
                     {i18n.translate(
-                      'xpack.transform.stepDefineForm.advancedSourceEditorApplyButtonText',
+                      'xpack.transform.stepDefineForm.advancedEditorApplyButtonText',
                       {
                         defaultMessage: 'Apply changes',
                       }
@@ -655,179 +819,19 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                 )}
               </EuiFlexGroup>
             </EuiFormRow>
-          )}
-          {kibanaContext.currentSavedSearch !== undefined &&
-            kibanaContext.currentSavedSearch.id !== undefined && (
-              <EuiFormRow
-                label={i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
-                  defaultMessage: 'Saved search',
-                })}
-              >
-                <span>{kibanaContext.currentSavedSearch.title}</span>
-              </EuiFormRow>
-            )}
-
-          {!isAdvancedPivotEditorEnabled && (
-            <Fragment>
-              <EuiFormRow
-                label={i18n.translate('xpack.transform.stepDefineForm.groupByLabel', {
-                  defaultMessage: 'Group by',
-                })}
-              >
-                <Fragment>
-                  <GroupByListForm
-                    list={groupByList}
-                    options={groupByOptionsData}
-                    onChange={updateGroupBy}
-                    deleteHandler={deleteGroupBy}
-                  />
-                  <DropDown
-                    changeHandler={addGroupBy}
-                    options={groupByOptions}
-                    placeholder={i18n.translate(
-                      'xpack.transform.stepDefineForm.groupByPlaceholder',
-                      {
-                        defaultMessage: 'Add a group by field ...',
-                      }
-                    )}
-                  />
-                </Fragment>
-              </EuiFormRow>
-
-              <EuiFormRow
-                label={i18n.translate('xpack.transform.stepDefineForm.aggregationsLabel', {
-                  defaultMessage: 'Aggregations',
-                })}
-              >
-                <Fragment>
-                  <AggListForm
-                    list={aggList}
-                    options={aggOptionsData}
-                    onChange={updateAggregation}
-                    deleteHandler={deleteAggregation}
-                  />
-                  <DropDown
-                    changeHandler={addAggregation}
-                    options={aggOptions}
-                    placeholder={i18n.translate(
-                      'xpack.transform.stepDefineForm.aggregationsPlaceholder',
-                      {
-                        defaultMessage: 'Add an aggregation ...',
-                      }
-                    )}
-                  />
-                </Fragment>
-              </EuiFormRow>
-            </Fragment>
-          )}
-
-          {isAdvancedPivotEditorEnabled && (
-            <Fragment>
-              <EuiFormRow
-                label={i18n.translate('xpack.transform.stepDefineForm.advancedEditorLabel', {
-                  defaultMessage: 'Pivot configuration object',
-                })}
-                helpText={advancedEditorHelpText}
-              >
-                <EuiPanel grow={false} paddingSize="none">
-                  <EuiCodeEditor
-                    mode="json"
-                    width="100%"
-                    value={advancedEditorConfig}
-                    onChange={(d: string) => {
-                      setAdvancedEditorConfig(d);
-
-                      // Disable the "Apply"-Button if the config hasn't changed.
-                      if (advancedEditorConfigLastApplied === d) {
-                        setAdvancedPivotEditorApplyButtonEnabled(false);
-                        return;
-                      }
-
-                      // Try to parse the string passed on from the editor.
-                      // If parsing fails, the "Apply"-Button will be disabled
-                      try {
-                        JSON.parse(d);
-                        setAdvancedPivotEditorApplyButtonEnabled(true);
-                      } catch (e) {
-                        setAdvancedPivotEditorApplyButtonEnabled(false);
-                      }
-                    }}
-                    setOptions={{
-                      fontSize: '12px',
-                    }}
-                    theme="textmate"
-                    aria-label={i18n.translate(
-                      'xpack.transform.stepDefineForm.advancedEditorAriaLabel',
-                      {
-                        defaultMessage: 'Advanced pivot editor',
-                      }
-                    )}
-                  />
-                </EuiPanel>
-              </EuiFormRow>
-            </Fragment>
-          )}
-          <EuiFormRow>
-            <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem>
-                <EuiSwitch
-                  label={i18n.translate(
-                    'xpack.transform.stepDefineForm.advancedEditorSwitchLabel',
-                    {
-                      defaultMessage: 'Advanced pivot editor',
-                    }
-                  )}
-                  checked={isAdvancedPivotEditorEnabled}
-                  onChange={() => {
-                    if (
-                      isAdvancedPivotEditorEnabled &&
-                      (isAdvancedPivotEditorApplyButtonEnabled ||
-                        advancedEditorConfig !== advancedEditorConfigLastApplied)
-                    ) {
-                      setAdvancedEditorSwitchModalVisible(true);
-                      return;
-                    }
-
-                    toggleAdvancedEditor();
-                  }}
-                />
-                {isAdvancedEditorSwitchModalVisible && (
-                  <SwitchModal
-                    onCancel={() => setAdvancedEditorSwitchModalVisible(false)}
-                    onConfirm={() => {
-                      setAdvancedEditorSwitchModalVisible(false);
-                      toggleAdvancedEditor();
-                    }}
-                    type={'pivot'}
-                  />
-                )}
-              </EuiFlexItem>
-              {isAdvancedPivotEditorEnabled && (
-                <EuiButton
-                  size="s"
-                  fill
-                  onClick={applyAdvancedPivotEditorChanges}
-                  disabled={!isAdvancedPivotEditorApplyButtonEnabled}
-                >
-                  {i18n.translate('xpack.transform.stepDefineForm.advancedEditorApplyButtonText', {
-                    defaultMessage: 'Apply changes',
+            {!valid && (
+              <Fragment>
+                <EuiSpacer size="m" />
+                <EuiFormHelpText style={{ maxWidth: '320px' }}>
+                  {i18n.translate('xpack.transform.stepDefineForm.formHelp', {
+                    defaultMessage:
+                      'Transforms are scalable and automated processes for pivoting. Choose at least one group-by and aggregation to get started.',
                   })}
-                </EuiButton>
-              )}
-            </EuiFlexGroup>
-          </EuiFormRow>
-          {!valid && (
-            <Fragment>
-              <EuiSpacer size="m" />
-              <EuiFormHelpText style={{ maxWidth: '320px' }}>
-                {i18n.translate('xpack.transform.stepDefineForm.formHelp', {
-                  defaultMessage:
-                    'Transforms are scalable and automated processes for pivoting. Choose at least one group-by and aggregation to get started.',
-                })}
-              </EuiFormHelpText>
-            </Fragment>
-          )}
-        </EuiForm>
+                </EuiFormHelpText>
+              </Fragment>
+            )}
+          </EuiForm>
+        </div>
       </EuiFlexItem>
 
       <EuiFlexItem>

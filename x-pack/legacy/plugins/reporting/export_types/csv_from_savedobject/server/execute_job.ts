@@ -5,47 +5,45 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
+import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
+import { cryptoFactory } from '../../../server/lib';
 import {
-  JobDocOutputExecuted,
-  ServerFacade,
-  ExecuteImmediateJobFactory,
+  ExecuteJobFactory,
+  ImmediateExecuteFn,
+  JobDocOutput,
+  Logger,
   RequestFacade,
+  ServerFacade,
 } from '../../../types';
-import {
-  CONTENT_TYPE_CSV,
-  CSV_FROM_SAVEDOBJECT_JOB_TYPE,
-  PLUGIN_ID,
-} from '../../../common/constants';
-import { CsvResultFromSearch, JobDocPayloadPanelCsv, FakeRequest } from '../types';
+import { CsvResultFromSearch } from '../../csv/types';
+import { FakeRequest, JobDocPayloadPanelCsv, JobParamsPanelCsv, SearchPanel } from '../types';
 import { createGenerateCsv } from './lib';
 
-type ExecuteJobFn = (
-  jobId: string | null,
-  job: JobDocPayloadPanelCsv,
-  realRequest?: RequestFacade
-) => Promise<JobDocOutputExecuted>;
-
-function executeJobFactoryFn(server: ServerFacade): ExecuteJobFn {
+export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
+  JobParamsPanelCsv
+>> = function executeJobFactoryFn(server: ServerFacade, parentLogger: Logger) {
   const crypto = cryptoFactory(server);
-  const logger = LevelLogger.createForServer(server, [
-    PLUGIN_ID,
-    CSV_FROM_SAVEDOBJECT_JOB_TYPE,
-    'execute-job',
-  ]);
+  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
 
   return async function executeJob(
     jobId: string | null,
     job: JobDocPayloadPanelCsv,
     realRequest?: RequestFacade
-  ): Promise<JobDocOutputExecuted> {
+  ): Promise<JobDocOutput> {
     // There will not be a jobID for "immediate" generation.
     // jobID is only for "queued" jobs
     // Use the jobID as a logging tag or "immediate"
     const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
 
     const { jobParams } = job;
-    const { isImmediate, panel, visType } = jobParams;
+    const { isImmediate, panel, visType } = jobParams as JobParamsPanelCsv & { panel: SearchPanel };
+
+    if (!panel) {
+      i18n.translate(
+        'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.failedToAccessPanel',
+        { defaultMessage: 'Failed to access panel metadata for job execution' }
+      );
+    }
 
     jobLogger.debug(`Execute job generating [${visType}] csv`);
 
@@ -111,8 +109,4 @@ function executeJobFactoryFn(server: ServerFacade): ExecuteJobFn {
       size,
     };
   };
-}
-
-export const executeJobFactory: ExecuteImmediateJobFactory = oncePerServer(
-  executeJobFactoryFn as ExecuteImmediateJobFactory
-);
+};

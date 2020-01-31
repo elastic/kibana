@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
+import { SavedObjectsSchema } from '../../schema';
 
 describe('KibanaMigrator', () => {
   describe('getActiveMappings', () => {
@@ -112,12 +113,12 @@ function mockOptions({ configValues }: { configValues?: any } = {}): KibanaMigra
         },
       },
     ],
-    savedObjectSchemas: {
+    savedObjectSchemas: new SavedObjectsSchema({
       testtype2: {
         isNamespaceAgnostic: false,
         indexPattern: 'other-index',
       },
-    },
+    }),
     kibanaConfig: {
       enabled: true,
       index: '.my-index',

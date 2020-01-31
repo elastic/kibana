@@ -7,10 +7,10 @@
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
-import { KFetchError } from 'ui/kfetch/kfetch_error';
 import { toastNotifications } from 'ui/notify';
 import url from 'url';
-import { reportingClient } from '../lib/reporting_client';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import * as reportingClient from '../lib/reporting_client';
 
 interface Props {
   reportType: string;
@@ -126,12 +126,9 @@ class ReportingPanelContentUi extends Component<Props, State> {
         </EuiText>
         <EuiSpacer size="s" />
 
-        <EuiCopy
-          textToCopy={this.state.absoluteUrl}
-          anchorClassName="kbnShareContextMenu__copyAnchor"
-        >
+        <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
           {copy => (
-            <EuiButton className="kbnShareContextMenu__copyButton" onClick={copy} size="s">
+            <EuiButton fullWidth onClick={copy} size="s">
               <FormattedMessage
                 id="xpack.reporting.panelContent.copyUrlButtonLabel"
                 defaultMessage="Copy POST URL"
@@ -146,8 +143,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
   private renderGenerateReportButton = (isDisabled: boolean) => {
     return (
       <EuiButton
-        className="kbnShareContextMenu__copyButton"
         disabled={isDisabled}
+        fullWidth
         fill
         onClick={this.createReportingJob}
         data-test-subj="generateReportButton"
@@ -209,7 +206,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             },
             { objectType: this.props.objectType }
           ),
-          text: (
+          text: toMountPoint(
             <FormattedMessage
               id="xpack.reporting.panelContent.successfullyQueuedReportNotificationDescription"
               defaultMessage="Track its progress in Management"
@@ -219,8 +216,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
         });
         this.props.onClose();
       })
-      .catch((kfetchError: KFetchError) => {
-        if (kfetchError.message === 'not exportable') {
+      .catch((error: any) => {
+        if (error.message === 'not exportable') {
           return toastNotifications.addWarning({
             title: intl.formatMessage(
               {
@@ -229,7 +226,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
               },
               { objectType: this.props.objectType }
             ),
-            text: (
+            text: toMountPoint(
               <FormattedMessage
                 id="xpack.reporting.panelContent.whatCanBeExportedWarningDescription"
                 defaultMessage="Please save your work first"
@@ -239,7 +236,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
         }
 
         const defaultMessage =
-          kfetchError.res.status === 403 ? (
+          error?.res?.status === 403 ? (
             <FormattedMessage
               id="xpack.reporting.panelContent.noPermissionToGenerateReportDescription"
               defaultMessage="You don't have permission to generate this report."
@@ -256,7 +253,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
             defaultMessage: 'Reporting error',
           }),
-          text: kfetchError.message || defaultMessage,
+          text: toMountPoint(error.message || defaultMessage),
           'data-test-subj': 'queueReportError',
         });
       });

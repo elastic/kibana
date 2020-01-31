@@ -14,7 +14,9 @@ describe('calculateTimeseriesInterval', () => {
     const lowerBound = upperBound.clone().subtract(15, 'minutes');
     const minIntervalSeconds = 10;
 
-    expect(calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)).to.be(10);
+    expect(
+      calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)
+    ).to.be(10);
   });
 
   it('returns an interval of 30s when duration is 30m', () => {
@@ -22,7 +24,9 @@ describe('calculateTimeseriesInterval', () => {
     const lowerBound = upperBound.clone().subtract(30, 'minutes');
     const minIntervalSeconds = 10;
 
-    expect(calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)).to.be(30);
+    expect(
+      calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)
+    ).to.be(30);
   });
 
   it('returns an interval of 30s when duration is 1h', () => {
@@ -30,7 +34,9 @@ describe('calculateTimeseriesInterval', () => {
     const lowerBound = upperBound.clone().subtract(1, 'hour');
     const minIntervalSeconds = 10;
 
-    expect(calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)).to.be(30);
+    expect(
+      calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)
+    ).to.be(30);
   });
 
   it('returns an interval of 1m when duration is 4h', () => {
@@ -38,7 +44,9 @@ describe('calculateTimeseriesInterval', () => {
     const lowerBound = upperBound.clone().subtract(4, 'hours');
     const minIntervalSeconds = 10;
 
-    expect(calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)).to.be(60);
+    expect(
+      calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)
+    ).to.be(60);
   });
 
   it('returns an interval of 5m when duration is 12h', () => {
@@ -46,7 +54,9 @@ describe('calculateTimeseriesInterval', () => {
     const lowerBound = upperBound.clone().subtract(12, 'hours');
     const minIntervalSeconds = 10;
 
-    expect(calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)).to.be(5 * 60);
+    expect(
+      calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)
+    ).to.be(5 * 60);
   });
 
   it('returns an interval of 10m when duration is 24h', () => {
@@ -54,7 +64,9 @@ describe('calculateTimeseriesInterval', () => {
     const lowerBound = upperBound.clone().subtract(24, 'hours');
     const minIntervalSeconds = 10;
 
-    expect(calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)).to.be(10 * 60);
+    expect(
+      calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)
+    ).to.be(10 * 60);
   });
 
   it('returns an interval of 1h when duration is 7d', () => {
@@ -62,7 +74,9 @@ describe('calculateTimeseriesInterval', () => {
     const lowerBound = upperBound.clone().subtract(7, 'days');
     const minIntervalSeconds = 10;
 
-    expect(calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)).to.be(60 * 60);
+    expect(
+      calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)
+    ).to.be(60 * 60);
   });
 
   it('returns an interval of 12h when duration is 30d', () => {
@@ -70,7 +84,9 @@ describe('calculateTimeseriesInterval', () => {
     const lowerBound = upperBound.clone().subtract(30, 'days');
     const minIntervalSeconds = 10;
 
-    expect(calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)).to.be(12 * 60 * 60);
+    expect(
+      calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)
+    ).to.be(12 * 60 * 60);
   });
 
   it('returns an interval of 12h when duration is 60d', () => {
@@ -78,7 +94,9 @@ describe('calculateTimeseriesInterval', () => {
     const lowerBound = upperBound.clone().subtract(60, 'days');
     const minIntervalSeconds = 10;
 
-    expect(calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)).to.be(12 * 60 * 60);
+    expect(
+      calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)
+    ).to.be(12 * 60 * 60);
   });
 
   it('returns an interval of 12h when duration is 90d', () => {
@@ -86,7 +104,9 @@ describe('calculateTimeseriesInterval', () => {
     const lowerBound = upperBound.clone().subtract(90, 'days');
     const minIntervalSeconds = 10;
 
-    expect(calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)).to.be(12 * 60 * 60);
+    expect(
+      calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)
+    ).to.be(12 * 60 * 60);
   });
 
   it('returns an interval of 1d when duration is 6mo', () => {
@@ -94,7 +114,9 @@ describe('calculateTimeseriesInterval', () => {
     const lowerBound = upperBound.clone().subtract(6, 'months');
     const minIntervalSeconds = 10;
 
-    expect(calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)).to.be(24 * 60 * 60);
+    expect(
+      calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)
+    ).to.be(24 * 60 * 60);
   });
 
   it('returns an interval of 1d when duration is 1y', () => {
@@ -102,7 +124,9 @@ describe('calculateTimeseriesInterval', () => {
     const lowerBound = upperBound.clone().subtract(1, 'year');
     const minIntervalSeconds = 10;
 
-    expect(calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)).to.be(24 * 60 * 60);
+    expect(
+      calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)
+    ).to.be(24 * 60 * 60);
   });
 
   it('returns an interval of 7d when duration is 2y', () => {
@@ -110,7 +134,9 @@ describe('calculateTimeseriesInterval', () => {
     const lowerBound = upperBound.clone().subtract(2, 'years');
     const minIntervalSeconds = 10;
 
-    expect(calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)).to.be(7 * 24 * 60 * 60);
+    expect(
+      calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)
+    ).to.be(7 * 24 * 60 * 60);
   });
 
   it('returns an interval of 7d when duration is 5y', () => {
@@ -118,6 +144,8 @@ describe('calculateTimeseriesInterval', () => {
     const lowerBound = upperBound.clone().subtract(5, 'years');
     const minIntervalSeconds = 10;
 
-    expect(calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)).to.be(7 * 24 * 60 * 60);
+    expect(
+      calculateTimeseriesInterval(lowerBound.valueOf(), upperBound.valueOf(), minIntervalSeconds)
+    ).to.be(7 * 24 * 60 * 60);
   });
 });

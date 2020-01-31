@@ -20,16 +20,16 @@ export function apmInstanceRoute(server) {
       validate: {
         params: Joi.object({
           clusterUuid: Joi.string().required(),
-          apmUuid: Joi.string().required()
+          apmUuid: Joi.string().required(),
         }),
         payload: Joi.object({
           ccs: Joi.string().optional(),
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+            max: Joi.date().required(),
+          }).required(),
+        }),
+      },
     },
     async handler(req) {
       const apmUuid = req.params.apmUuid;
@@ -39,8 +39,10 @@ export function apmInstanceRoute(server) {
       const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 
       try {
-        const [ metrics, apmSummary ] = await Promise.all([
-          getMetrics(req, apmIndexPattern, metricSet, [{ term: { 'beats_stats.beat.uuid': apmUuid } }]),
+        const [metrics, apmSummary] = await Promise.all([
+          getMetrics(req, apmIndexPattern, metricSet, [
+            { term: { 'beats_stats.beat.uuid': apmUuid } },
+          ]),
           getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid }),
         ]);
 
@@ -51,6 +53,6 @@ export function apmInstanceRoute(server) {
       } catch (err) {
         return handleError(err, req);
       }
-    }
+    },
   });
 }

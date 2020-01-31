@@ -13,5 +13,5 @@ set -e
 # https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/alerting/README.md#get-apialert_find-find-alerts
 curl -s -k \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X GET ${KIBANA_URL}/api/alert/_find \
+  -X GET ${KIBANA_URL}${SPACE_URL}/api/alert/_find \
   | jq .

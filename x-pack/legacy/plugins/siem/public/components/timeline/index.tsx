@@ -5,14 +5,17 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { WithSource } from '../../containers/source';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions } from '../../store/actions';
-import { KqlMode, TimelineModel } from '../../store/timeline/model';
+import { EventType, KqlMode, timelineDefaults, TimelineModel } from '../../store/timeline/model';
+import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
 
 import { ColumnHeader } from './body/column_headers/column_header';
 import { DataProvider, QueryOperator } from './data_providers/data_provider';
@@ -39,7 +42,9 @@ interface StateReduxProps {
   activePage?: number;
   columns: ColumnHeader[];
   dataProviders?: DataProvider[];
+  eventType: EventType;
   end: number;
+  filters: esFilters.Filter[];
   isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
@@ -136,7 +141,9 @@ const StatefulTimelineComponent = React.memo<Props>(
     columns,
     createTimeline,
     dataProviders,
+    eventType,
     end,
+    filters,
     flyoutHeaderHeight,
     flyoutHeight,
     id,
@@ -159,6 +166,15 @@ const StatefulTimelineComponent = React.memo<Props>(
     updateItemsPerPage,
     upsertColumn,
   }) => {
+    const { loading, signalIndexExists, signalIndexName } = useSignalIndex();
+
+    const indexToAdd = useMemo<string[]>(() => {
+      if (signalIndexExists && signalIndexName != null && ['signal', 'all'].includes(eventType)) {
+        return [signalIndexName];
+      }
+      return [];
+    }, [eventType, signalIndexExists, signalIndexName]);
+
     const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
       (providerId: string, andProviderId?: string) =>
         removeProvider!({ id, providerId, andProviderId }),
@@ -245,22 +261,26 @@ const StatefulTimelineComponent = React.memo<Props>(
     }, []);
 
     return (
-      <WithSource sourceId="default">
+      <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indexPattern, browserFields }) => (
           <Timeline
             browserFields={browserFields}
             columns={columns}
             dataProviders={dataProviders!}
             end={end}
+            eventType={eventType}
+            filters={filters}
             flyoutHeaderHeight={flyoutHeaderHeight}
             flyoutHeight={flyoutHeight}
             id={id}
             indexPattern={indexPattern}
+            indexToAdd={indexToAdd}
             isLive={isLive}
             itemsPerPage={itemsPerPage!}
             itemsPerPageOptions={itemsPerPageOptions!}
             kqlMode={kqlMode}
             kqlQueryExpression={kqlQueryExpression}
+            loadingIndexName={loading}
             onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
             onChangeDroppableAndProvider={onChangeDroppableAndProvider}
             onChangeItemsPerPage={onChangeItemsPerPage}
@@ -281,6 +301,7 @@ const StatefulTimelineComponent = React.memo<Props>(
   (prevProps, nextProps) => {
     return (
       prevProps.activePage === nextProps.activePage &&
+      prevProps.eventType === nextProps.eventType &&
       prevProps.end === nextProps.end &&
       prevProps.flyoutHeaderHeight === nextProps.flyoutHeaderHeight &&
       prevProps.flyoutHeight === nextProps.flyoutHeight &&
@@ -295,6 +316,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.start === nextProps.start &&
       isEqual(prevProps.columns, nextProps.columns) &&
       isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      isEqual(prevProps.filters, nextProps.filters) &&
       isEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       isEqual(prevProps.sort, nextProps.sort)
     );
@@ -309,11 +331,13 @@ const makeMapStateToProps = () => {
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, id);
+    const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const {
       columns,
       dataProviders,
+      eventType,
+      filters,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
@@ -322,10 +346,14 @@ const makeMapStateToProps = () => {
     } = timeline;
     const kqlQueryExpression = getKqlQueryTimeline(state, id);
 
+    const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
+
     return {
       columns,
       dataProviders,
+      eventType,
       end: input.timerange.to,
+      filters: timelineFilter,
       id,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,

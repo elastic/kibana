@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { AutoSizer } from '../../components/auto_sizer';
@@ -20,7 +19,7 @@ import { MlNetworkConditionalContainer } from '../../components/ml/conditional_l
 import { StatefulTimeline } from '../../components/timeline';
 import { AutoSaveWarningMsg } from '../../components/timeline/auto_save_warning';
 import { UseUrlState } from '../../components/url_state';
-import { WithSource } from '../../containers/source';
+import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { NotFoundPage } from '../404';
 import { DetectionEngineContainer } from '../detection_engine';
@@ -56,36 +55,40 @@ const calculateFlyoutHeight = ({
   windowHeight: number;
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
-export const HomePage = pure(() => (
+export const HomePage: React.FC = () => (
   <AutoSizer detectAnyWindowResize={true} content>
     {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
-      <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" innerRef={measureRef}>
+      <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
         <HeaderGlobal />
 
         <main data-test-subj="pageContainer">
           <WithSource sourceId="default">
-            {({ browserFields, indexPattern }) => (
+            {({ browserFields, indexPattern, indicesExist }) => (
               <DragDropContextWrapper browserFields={browserFields}>
                 <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-                <AutoSaveWarningMsg />
-                <Flyout
-                  flyoutHeight={calculateFlyoutHeight({
-                    globalHeaderSize: globalHeaderHeightPx,
-                    windowHeight,
-                  })}
-                  headerHeight={flyoutHeaderHeight}
-                  timelineId="timeline-1"
-                  usersViewing={usersViewing}
-                >
-                  <StatefulTimeline
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    flyoutHeight={calculateFlyoutHeight({
-                      globalHeaderSize: globalHeaderHeightPx,
-                      windowHeight,
-                    })}
-                    id="timeline-1"
-                  />
-                </Flyout>
+                {indicesExistOrDataTemporarilyUnavailable(indicesExist) && (
+                  <>
+                    <AutoSaveWarningMsg />
+                    <Flyout
+                      flyoutHeight={calculateFlyoutHeight({
+                        globalHeaderSize: globalHeaderHeightPx,
+                        windowHeight,
+                      })}
+                      headerHeight={flyoutHeaderHeight}
+                      timelineId="timeline-1"
+                      usersViewing={usersViewing}
+                    >
+                      <StatefulTimeline
+                        flyoutHeaderHeight={flyoutHeaderHeight}
+                        flyoutHeight={calculateFlyoutHeight({
+                          globalHeaderSize: globalHeaderHeightPx,
+                          windowHeight,
+                        })}
+                        id="timeline-1"
+                      />
+                    </Flyout>
+                  </>
+                )}
 
                 <Switch>
                   <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
@@ -106,7 +109,7 @@ export const HomePage = pure(() => (
                     )}
                   />
                   <Route
-                    path={`/:pageName(${SiemPageName.detectionEngine})`}
+                    path={`/:pageName(${SiemPageName.detections})`}
                     render={({ location, match }) => (
                       <DetectionEngineContainer location={location} url={match.url} />
                     )}
@@ -115,7 +118,7 @@ export const HomePage = pure(() => (
                     path={`/:pageName(${SiemPageName.timelines})`}
                     render={() => <Timelines />}
                   />
-                  <Route path="/link-to" component={LinkToPage} />
+                  <Route path="/link-to" render={props => <LinkToPage {...props} />} />
                   <Route
                     path="/ml-hosts"
                     render={({ location, match }) => (
@@ -128,7 +131,7 @@ export const HomePage = pure(() => (
                       <MlNetworkConditionalContainer location={location} url={match.url} />
                     )}
                   />
-                  <Route component={NotFoundPage} />
+                  <Route render={() => <NotFoundPage />} />
                 </Switch>
               </DragDropContextWrapper>
             )}
@@ -141,5 +144,6 @@ export const HomePage = pure(() => (
       </WrappedByAutoSizer>
     )}
   </AutoSizer>
-));
+);
+
 HomePage.displayName = 'HomePage';

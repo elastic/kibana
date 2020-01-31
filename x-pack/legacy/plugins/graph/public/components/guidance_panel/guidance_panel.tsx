@@ -13,12 +13,13 @@ import {
   EuiText,
   EuiLink,
   EuiCallOut,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { connect } from 'react-redux';
-import { IDataPluginServices } from 'src/legacy/core_plugins/data/public/types';
+import { IDataPluginServices } from 'src/plugins/data/public';
 import {
   GraphState,
   hasDatasourceSelector,
@@ -53,6 +54,7 @@ function ListItem({
         'gphGuidancePanel__item--disabled': state === 'disabled',
       })}
       aria-disabled={state === 'disabled'}
+      aria-current={state === 'active' ? 'step' : undefined}
     >
       {state !== 'disabled' && (
         <span
@@ -80,7 +82,8 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
   } = props;
 
   const kibana = useKibana<IDataPluginServices>();
-  const { overlays, savedObjects, uiSettings, chrome, application } = kibana.services;
+  const { services, overlays } = kibana;
+  const { savedObjects, uiSettings, chrome, application } = services;
   if (!overlays || !chrome || !application) return null;
 
   const onOpenDatasourcePicker = () => {
@@ -95,7 +98,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>
-            <h1>
+            <h1 id="graphHeading">
               {i18n.translate('xpack.graph.guidancePanel.title', {
                 defaultMessage: 'Three steps to your graph',
               })}
@@ -103,7 +106,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ul className="gphGuidancePanel__list">
+          <ol className="gphGuidancePanel__list" aria-labelledby="graphHeading">
             <ListItem state={hasDatasource ? 'done' : 'active'}>
               <EuiLink onClick={onOpenDatasourcePicker}>
                 {i18n.translate(
@@ -115,7 +118,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
               </EuiLink>
             </ListItem>
             <ListItem state={hasFields ? 'done' : hasDatasource ? 'active' : 'disabled'}>
-              <EuiLink onClick={onOpenFieldPicker}>
+              <EuiLink onClick={onOpenFieldPicker} disabled={!hasFields && !hasDatasource}>
                 {i18n.translate('xpack.graph.guidancePanel.fieldsItem.fieldsButtonLabel', {
                   defaultMessage: 'Add fields.',
                 })}
@@ -127,7 +130,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
                 defaultMessage="Enter a query in the search bar to start exploring. Don't know where to start? {topTerms}."
                 values={{
                   topTerms: (
-                    <EuiLink onClick={onFillWorkspace}>
+                    <EuiLink onClick={onFillWorkspace} disabled={!hasFields}>
                       {i18n.translate('xpack.graph.guidancePanel.nodesItem.topTermsButtonLabel', {
                         defaultMessage: 'Graph the top terms',
                       })}
@@ -136,14 +139,14 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
                 }}
               />
             </ListItem>
-          </ul>
+          </ol>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
 
   if (noIndexPatterns) {
-    const managementUrl = chrome.navLinks.get('kibana:management')!.url;
+    const managementUrl = chrome.navLinks.get('kibana:stack_management')!.url;
     const indexPatternUrl = `${managementUrl}/kibana/index_patterns`;
     const sampleDataUrl = `${application.getUrlForApp(
       'kibana'
@@ -156,7 +159,15 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
           title={i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
             defaultMessage: 'No data source',
           })}
+          heading="h1"
         >
+          <EuiScreenReaderOnly>
+            <p id="graphHeading">
+              {i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
+                defaultMessage: 'No data source',
+              })}
+            </p>
+          </EuiScreenReaderOnly>
           <p>
             <FormattedMessage
               id="xpack.graph.noDataSourceNotificationMessageText"

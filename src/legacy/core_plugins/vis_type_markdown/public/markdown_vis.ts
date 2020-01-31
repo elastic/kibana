@@ -19,13 +19,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { visFactory, DefaultEditorSize } from '../../visualizations/public';
-
 import { MarkdownVisWrapper } from './markdown_vis_controller';
 import { MarkdownOptions } from './markdown_options';
 import { SettingsOptions } from './settings_options';
+import { DefaultEditorSize } from '../../vis_default_editor/public';
 
-export const markdownVis = visFactory.createReactVisualization({
+export const markdownVisDefinition = {
   name: 'markdown',
   title: 'Markdown',
   isAccessible: true,
@@ -67,4 +66,4 @@ export const markdownVis = visFactory.createReactVisualization({
   },
   requestHandler: 'none',
   responseHandler: 'none',
-});
+};

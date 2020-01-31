@@ -61,7 +61,7 @@ export interface CheckPrivileges {
 export function checkPrivilegesWithRequestFactory(
   actions: CheckPrivilegesActions,
   clusterClient: IClusterClient,
-  getApplicationName: () => string
+  applicationName: string
 ) {
   const hasIncompatibleVersion = (
     applicationPrivilegesResponse: HasPrivilegesResponseApplication
@@ -81,23 +81,24 @@ export function checkPrivilegesWithRequestFactory(
         : [privilegeOrPrivileges];
       const allApplicationPrivileges = uniq([actions.version, actions.login, ...privileges]);
 
-      const application = getApplicationName();
       const hasPrivilegesResponse = (await clusterClient
         .asScoped(request)
         .callAsCurrentUser('shield.hasPrivileges', {
           body: {
-            applications: [{ application, resources, privileges: allApplicationPrivileges }],
+            applications: [
+              { application: applicationName, resources, privileges: allApplicationPrivileges },
+            ],
           },
         })) as HasPrivilegesResponse;
 
       validateEsPrivilegeResponse(
         hasPrivilegesResponse,
-        application,
+        applicationName,
         allApplicationPrivileges,
         resources
       );
 
-      const applicationPrivilegesResponse = hasPrivilegesResponse.application[application];
+      const applicationPrivilegesResponse = hasPrivilegesResponse.application[applicationName];
 
       if (hasIncompatibleVersion(applicationPrivilegesResponse)) {
         throw new Error(

@@ -18,8 +18,8 @@
  */
 
 import { filter, find } from 'lodash';
-import { compareFilters } from './compare_filters';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { compareFilters, FilterCompareOptions } from './compare_filters';
+import { esFilters } from '../../../../common';
 
 /**
  * Combine 2 filter collections, removing duplicates
@@ -33,7 +33,7 @@ import { esFilters } from '../../../../../../plugins/data/public';
 export const dedupFilters = (
   existingFilters: esFilters.Filter[],
   filters: esFilters.Filter[],
-  comparatorOptions: any = {}
+  comparatorOptions: FilterCompareOptions = {}
 ) => {
   if (!Array.isArray(filters)) {
     filters = [filters];

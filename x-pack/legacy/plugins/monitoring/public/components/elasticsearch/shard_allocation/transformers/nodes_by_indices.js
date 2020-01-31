@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import _ from 'lodash';
 import { hasPrimaryChildren } from '../lib/has_primary_children';
 import { decorateShards } from '../lib/decorate_shards';
 
 export function nodesByIndices() {
   return function nodesByIndicesFn(shards, nodes) {
-
-    const getNodeType = function (node) {
+    const getNodeType = function(node) {
       const attrs = node.attributes || {};
       return attrs.master === 'true' ? 'master' : 'normal';
     };
@@ -41,7 +38,7 @@ export function nodesByIndices() {
           id: index,
           name: index,
           type: 'index',
-          children: []
+          children: [],
         };
         obj[node].children.push(indexObj);
       }
@@ -59,7 +56,7 @@ export function nodesByIndices() {
         name: 'Unassigned',
         master: false,
         type: 'node',
-        children: []
+        children: [],
       };
     }
 
@@ -67,10 +64,10 @@ export function nodesByIndices() {
 
     return _(data)
       .values()
-      .sortBy(function (node) {
-        return [ node.name !== 'Unassigned', !node.master, node.name ];
+      .sortBy(function(node) {
+        return [node.name !== 'Unassigned', !node.master, node.name];
       })
-      .map(function (node) {
+      .map(function(node) {
         if (node.name === 'Unassigned') {
           node.unassignedPrimaries = node.children.some(hasPrimaryChildren);
         }

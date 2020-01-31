@@ -7,9 +7,6 @@
 import React, { useState } from 'react';
 import { uniqueId, startsWith } from 'lodash';
 import styled from 'styled-components';
-import { npStart } from 'ui/new_platform';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 // @ts-ignore
@@ -18,53 +15,26 @@ import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
-import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
-import { useKueryBarIndexPattern } from '../../../hooks/useKueryBarIndexPattern';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
+import {
+  autocomplete,
+  esKuery,
+  IIndexPattern
+} from '../../../../../../../../src/plugins/data/public';
 
 const Container = styled.div`
   margin-bottom: 10px;
 `;
 
-const getAutocompleteProvider = (language: string) =>
-  npStart.plugins.data.autocomplete.getProvider(language);
-
 interface State {
-  suggestions: AutocompleteSuggestion[];
+  suggestions: autocomplete.QuerySuggestion[];
   isLoadingSuggestions: boolean;
 }
 
-function convertKueryToEsQuery(
-  kuery: string,
-  indexPattern: StaticIndexPattern
-) {
-  const ast = fromKueryExpression(kuery);
-  return toElasticsearchQuery(ast, indexPattern);
-}
-
-function getSuggestions(
-  query: string,
-  selectionStart: number,
-  indexPattern: StaticIndexPattern,
-  boolFilter: unknown
-) {
-  const autocompleteProvider = getAutocompleteProvider('kuery');
-  if (!autocompleteProvider) {
-    return [];
-  }
-  const config = {
-    get: () => true
-  };
-
-  const getAutocompleteSuggestions = autocompleteProvider({
-    config,
-    indexPatterns: [indexPattern],
-    boolFilter
-  });
-  return getAutocompleteSuggestions({
-    query,
-    selectionStart,
-    selectionEnd: selectionStart
-  });
+function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
+  const ast = esKuery.fromKueryExpression(kuery);
+  return esKuery.toElasticsearchQuery(ast, indexPattern);
 }
 
 export function KueryBar() {
@@ -74,6 +44,7 @@ export function KueryBar() {
   });
   const { urlParams } = useUrlParams();
   const location = useLocation();
+  const { data } = useApmPluginContext().plugins;
 
   let currentRequestCheck;
 
@@ -89,7 +60,7 @@ export function KueryBar() {
 
   const example = examples[processorEvent || 'defaults'];
 
-  const { indexPattern } = useKueryBarIndexPattern(processorEvent);
+  const { indexPattern } = useDynamicIndexPattern(processorEvent);
 
   async function onChange(inputValue: string, selectionStart: number) {
     if (indexPattern == null) {
@@ -101,15 +72,16 @@ export function KueryBar() {
     const currentRequest = uniqueId();
     currentRequestCheck = currentRequest;
 
-    const boolFilter = getBoolFilter(urlParams);
     try {
       const suggestions = (
-        await getSuggestions(
-          inputValue,
+        (await data.autocomplete.getQuerySuggestions({
+          language: 'kuery',
+          indexPatterns: [indexPattern],
+          boolFilter: getBoolFilter(urlParams),
+          query: inputValue,
           selectionStart,
-          indexPattern,
-          boolFilter
-        )
+          selectionEnd: selectionStart
+        })) || []
       )
         .filter(suggestion => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);

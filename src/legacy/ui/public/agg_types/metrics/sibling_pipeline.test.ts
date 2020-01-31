@@ -26,18 +26,12 @@ import { bucketMaxMetricAgg } from './bucket_max';
 import { AggConfigs } from '../agg_configs';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 
-jest.mock('../../vis/editors/default/schemas', () => {
+jest.mock('../schemas', () => {
   class MockedSchemas {
     all = [{}];
   }
   return {
     Schemas: jest.fn().mockImplementation(() => new MockedSchemas()),
-  };
-});
-
-jest.mock('../../vis/editors/default/controls/sub_metric', () => {
-  return {
-    SubMetricParamEditor() {},
   };
 });
 
@@ -107,7 +101,7 @@ describe('sibling pipeline aggs', () => {
 
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
         metricAgg = metric.provider;
-        aggConfig = aggConfigs.aggs[1];
+        aggConfig = aggConfigs.aggs[1] as IMetricAggConfig;
         aggDsl = aggConfig.toDsl(aggConfigs);
       };
 

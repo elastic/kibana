@@ -6,10 +6,10 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFormRow, EuiTextArea } from '@elastic/eui';
+import { EuiFormRow, EuiTextArea, EuiLink, EuiText } from '@elastic/eui';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { DataSourceStrings } from '../../../i18n';
+import { DataSourceStrings, SQL_URL } from '../../../i18n';
 
 const { Essql: strings } = DataSourceStrings;
 
@@ -59,13 +59,24 @@ class EssqlDatasource extends PureComponent {
     const { isInvalid } = this.props;
 
     return (
-      <EuiFormRow isInvalid={isInvalid} label={strings.getLabel()}>
+      <EuiFormRow
+        isInvalid={isInvalid}
+        label={strings.getLabel()}
+        labelAppend={
+          <EuiText size="xs">
+            <EuiLink href={SQL_URL} target="_blank">
+              {strings.getLabelAppend()}
+            </EuiLink>
+          </EuiText>
+        }
+      >
         <EuiTextArea
           placeholder={this.defaultQuery}
           isInvalid={isInvalid}
           className="canvasTextArea__code"
           value={this.getQuery()}
           onChange={this.onChange}
+          rows={15}
         />
       </EuiFormRow>
     );

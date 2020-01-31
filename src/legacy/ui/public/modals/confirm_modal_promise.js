@@ -32,17 +32,18 @@ const module = uiModules.get('kibana');
  * A "promisified" version of ConfirmModal that binds onCancel and onConfirm to
  * Resolve and Reject methods.
  */
-module.factory('confirmModalPromise', function (Promise, confirmModal) {
+module.factory('confirmModalPromise', function(Promise, confirmModal) {
   /**
    * @param {String} message
    * @param {PromisifiedConfirmOptions} customOptions
    */
-  return (message, customOptions) => new Promise((resolve, reject) => {
-    const defaultOptions = {
-      onConfirm: resolve,
-      onCancel: reject
-    };
-    const confirmOptions = Object.assign(defaultOptions, customOptions);
-    confirmModal(message, confirmOptions);
-  });
+  return (message, customOptions) =>
+    new Promise((resolve, reject) => {
+      const defaultOptions = {
+        onConfirm: resolve,
+        onCancel: reject,
+      };
+      const confirmOptions = Object.assign(defaultOptions, customOptions);
+      confirmModal(message, confirmOptions);
+    });
 });

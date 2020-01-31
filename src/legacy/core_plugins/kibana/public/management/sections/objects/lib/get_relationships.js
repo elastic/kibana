@@ -20,20 +20,21 @@
 import { get } from 'lodash';
 
 export async function getRelationships(type, id, savedObjectTypes, $http, basePath) {
-  const url = `${basePath}/api/kibana/management/saved_objects/relationships/${encodeURIComponent(type)}/${encodeURIComponent(id)}`;
+  const url = `${basePath}/api/kibana/management/saved_objects/relationships/${encodeURIComponent(
+    type
+  )}/${encodeURIComponent(id)}`;
   const options = {
     method: 'GET',
     url,
     params: {
-      savedObjectTypes: savedObjectTypes
-    }
+      savedObjectTypes: savedObjectTypes,
+    },
   };
 
   try {
     const response = await $http(options);
     return response ? response.data : undefined;
-  }
-  catch (resp) {
+  } catch (resp) {
     const respBody = get(resp, 'data', {});
     const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
 

@@ -19,11 +19,12 @@
 
 import { getTelemetrySavedObject } from '../telemetry_repository';
 import { getTelemetryOptIn } from './get_telemetry_opt_in';
-import { getTelemetryUsageFetcher } from './get_telemetry_usage_fetcher';
+import { getTelemetrySendUsageFrom } from './get_telemetry_send_usage_from';
 import { getTelemetryAllowChangingOptInStatus } from './get_telemetry_allow_changing_opt_in_status';
+import { getNotifyUserAboutOptInDefault } from './get_telemetry_notify_user_about_optin_default';
 
-export async function replaceTelemetryInjectedVars(request: any) {
-  const config = request.server.config();
+export async function replaceTelemetryInjectedVars(request: any, server: any) {
+  const config = server.config();
   const configTelemetrySendUsageFrom = config.get('telemetry.sendUsageFrom');
   const configTelemetryOptIn = config.get('telemetry.optIn');
   const configTelemetryAllowChangingOptInStatus = config.get('telemetry.allowChangingOptInStatus');
@@ -37,7 +38,7 @@ export async function replaceTelemetryInjectedVars(request: any) {
   }
 
   const currentKibanaVersion = config.get('pkg.version');
-  const savedObjectsClient = request.getSavedObjectsClient();
+  const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(request);
   const telemetrySavedObject = await getTelemetrySavedObject(savedObjectsClient);
   const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
     configTelemetryAllowChangingOptInStatus,
@@ -51,13 +52,21 @@ export async function replaceTelemetryInjectedVars(request: any) {
     currentKibanaVersion,
   });
 
-  const telemetrySendUsageFrom = getTelemetryUsageFetcher({
+  const telemetrySendUsageFrom = getTelemetrySendUsageFrom({
     configTelemetrySendUsageFrom,
     telemetrySavedObject,
+  });
+
+  const telemetryNotifyUserAboutOptInDefault = getNotifyUserAboutOptInDefault({
+    telemetrySavedObject,
+    allowChangingOptInStatus,
+    configTelemetryOptIn,
+    telemetryOptedIn,
   });
 
   return {
     telemetryOptedIn,
     telemetrySendUsageFrom,
+    telemetryNotifyUserAboutOptInDefault,
   };
 }

@@ -33,7 +33,7 @@ export const AddFilterToGlobalSearchBar = React.memo<OwnProps>(
     return (
       <WithHoverActions
         hoverContent={
-          <HoverActionsContainer data-test-subj="hover-actions-container">
+          <HoverActionsContainer data-test-subj="hover-actions-container" paddingSize="none">
             <EuiToolTip content={i18n.FILTER_FOR_VALUE}>
               <EuiIcon data-test-subj="add-to-filter" type="filter" onClick={addToKql} />
             </EuiToolTip>
@@ -51,11 +51,11 @@ export const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
   display: flex;
   flex-direction: row;
-  height: 25px;
+  height: 34px;
   justify-content: center;
   left: 5px;
   position: absolute;
   top: -10px;
-  width: 30px;
+  width: 34px;
   cursor: pointer;
 `;

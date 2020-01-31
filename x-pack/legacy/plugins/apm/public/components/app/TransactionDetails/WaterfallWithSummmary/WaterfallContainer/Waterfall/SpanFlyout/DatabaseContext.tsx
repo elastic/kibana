@@ -33,7 +33,7 @@ registerLanguage('sql', sql);
 
 const DatabaseStatement = styled.div`
   padding: ${px(units.half)} ${px(unit)};
-  background: ${tint(0.1, theme.euiColorWarning)}
+  background: ${tint(0.1, theme.euiColorWarning)};
   border-radius: ${borderRadius};
   border: 1px solid ${theme.euiColorLightShade};
   font-family: ${fontFamilyCode};

@@ -18,7 +18,7 @@
  */
 
 import { keys, partition } from 'lodash';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters } from '../../../../common';
 
 export function extractTimeFilter(timeFieldName: string, filters: esFilters.Filter[]) {
   const [timeRangeFilter, restOfFilters] = partition(filters, (obj: esFilters.Filter) => {

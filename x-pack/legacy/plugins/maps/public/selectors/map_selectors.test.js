@@ -11,22 +11,20 @@ jest.mock('../layers/sources/all_sources', () => {});
 jest.mock('../reducers/non_serializable_instances', () => ({
   getInspectorAdapters: () => {
     return {};
-  }
+  },
 }));
 jest.mock('ui/timefilter', () => ({
   timefilter: {
     getTime: () => {
       return {
         to: 'now',
-        from: 'now-15m'
+        from: 'now-15m',
       };
-    }
-  }
+    },
+  },
 }));
 
-import {
-  getTimeFilters,
-} from './map_selectors';
+import { getTimeFilters } from './map_selectors';
 
 describe('getTimeFilters', () => {
   it('should return timeFilters when contained in state', () => {
@@ -35,10 +33,10 @@ describe('getTimeFilters', () => {
         mapState: {
           timeFilters: {
             to: '2001-01-01',
-            from: '2001-12-31'
-          }
-        }
-      }
+            from: '2001-12-31',
+          },
+        },
+      },
     };
     expect(getTimeFilters(state)).toEqual({ to: '2001-01-01', from: '2001-12-31' });
   });
@@ -47,9 +45,9 @@ describe('getTimeFilters', () => {
     const state = {
       map: {
         mapState: {
-          timeFilters: null
-        }
-      }
+          timeFilters: null,
+        },
+      },
     };
     expect(getTimeFilters(state)).toEqual({ to: 'now', from: 'now-15m' });
   });

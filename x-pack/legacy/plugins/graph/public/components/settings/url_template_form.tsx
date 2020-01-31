@@ -58,12 +58,17 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
 
   const [currentTemplate, setCurrentTemplate] = useState(getInitialTemplate);
 
+  const persistedTemplateState = isUpdateForm(props) && props.initialTemplate;
+
   // reset local form if template passed in from parent component changes
   useEffect(() => {
     if (isUpdateForm(props) && currentTemplate !== props.initialTemplate) {
       setCurrentTemplate(props.initialTemplate);
     }
-  }, [isUpdateForm(props) && props.initialTemplate]);
+    // this hook only updates on change of the prop
+    // it's meant to reset the internal state on changes outside of the component.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [persistedTemplateState]);
 
   const [touched, setTouched] = useState({
     description: false,

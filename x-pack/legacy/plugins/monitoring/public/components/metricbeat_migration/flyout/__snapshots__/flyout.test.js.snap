@@ -37,9 +37,7 @@ exports[`Flyout apm part one should render normally 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           fullWidth={true}
-          isLoading={false}
           onChange={[Function]}
           value="http://localhost:9200"
         />
@@ -378,9 +376,7 @@ exports[`Flyout beats part one should render normally 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           fullWidth={true}
-          isLoading={false}
           onChange={[Function]}
           value="http://localhost:9200"
         />
@@ -761,9 +757,7 @@ exports[`Flyout elasticsearch part one should render normally 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           fullWidth={true}
-          isLoading={false}
           onChange={[Function]}
           value="http://localhost:9200"
         />
@@ -1104,9 +1098,7 @@ exports[`Flyout kibana part one should render normally 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           fullWidth={true}
-          isLoading={false}
           onChange={[Function]}
           value="http://localhost:9200"
         />
@@ -1182,7 +1174,7 @@ exports[`Flyout kibana part two should show instructions to disable internal col
               isCopyable={true}
               language="bash"
             >
-              xpack.monitoring.kibana.collection.enabled: false
+              monitoring.kibana.collection.enabled: false
             </EuiCodeBlock>
             <EuiSpacer
               size="s"
@@ -1195,7 +1187,7 @@ exports[`Flyout kibana part two should show instructions to disable internal col
                   values={
                     Object {
                       "config": <Monospace>
-                        xpack.monitoring.enabled
+                        monitoring.enabled
                       </Monospace>,
                       "defaultValue": <Monospace>
                         true
@@ -1454,9 +1446,7 @@ exports[`Flyout logstash part one should render normally 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           fullWidth={true}
-          isLoading={false}
           onChange={[Function]}
           value="http://localhost:9200"
         />
@@ -2101,7 +2091,7 @@ exports[`Flyout should show a restart warning for restarting the primary Kibana 
               isCopyable={true}
               language="bash"
             >
-              xpack.monitoring.kibana.collection.enabled: false
+              monitoring.kibana.collection.enabled: false
             </EuiCodeBlock>
             <EuiSpacer
               size="s"
@@ -2114,7 +2104,7 @@ exports[`Flyout should show a restart warning for restarting the primary Kibana 
                   values={
                     Object {
                       "config": <Monospace>
-                        xpack.monitoring.enabled
+                        monitoring.enabled
                       </Monospace>,
                       "defaultValue": <Monospace>
                         true

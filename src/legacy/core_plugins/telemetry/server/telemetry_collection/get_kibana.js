@@ -21,7 +21,10 @@ import { get, omit } from 'lodash';
 
 export function handleKibanaStats(server, response) {
   if (!response) {
-    server.log(['warning', 'telemetry', 'local-stats'], 'No Kibana stats returned from usage collectors');
+    server.log(
+      ['warning', 'telemetry', 'local-stats'],
+      'No Kibana stats returned from usage collectors'
+    );
     return;
   }
 
@@ -30,7 +33,10 @@ export function handleKibanaStats(server, response) {
   const platform = get(kibanaStats, 'os.platform', 'unknown');
   const platformRelease = get(kibanaStats, 'os.platformRelease', 'unknown');
 
-  const version = server.config().get('pkg.version').replace(/-snapshot/i, '');
+  const version = server
+    .config()
+    .get('pkg.version')
+    .replace(/-snapshot/i, '');
 
   // combine core stats (os types, saved objects) with plugin usage stats
   // organize the object into the same format as monitoring-enabled telemetry
@@ -47,12 +53,7 @@ export function handleKibanaStats(server, response) {
   };
 }
 
-/*
- * Check user privileges for read access to monitoring
- * Pass callWithInternalUser to bulkFetchUsage
- */
-export async function getKibana(server, callWithInternalUser) {
-  const { collectorSet } = server.usage;
-  const usage = await collectorSet.bulkFetch(callWithInternalUser);
-  return collectorSet.toObject(usage);
+export async function getKibana(usageCollection, callWithInternalUser) {
+  const usage = await usageCollection.bulkFetch(callWithInternalUser);
+  return usageCollection.toObject(usage);
 }

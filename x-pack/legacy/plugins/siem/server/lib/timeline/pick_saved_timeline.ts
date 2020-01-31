@@ -4,24 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestAuth } from 'hapi';
-import { getOr } from 'lodash/fp';
+import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
+import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import { SavedTimeline } from './types';
 
 export const pickSavedTimeline = (
   timelineId: string | null,
   savedTimeline: SavedTimeline,
-  userInfo: RequestAuth
+  userInfo: AuthenticatedUser | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any => {
+  const dateNow = new Date().valueOf();
   if (timelineId == null) {
-    savedTimeline.created = new Date().valueOf();
-    savedTimeline.createdBy = getOr(null, 'credentials.username', userInfo);
-    savedTimeline.updated = new Date().valueOf();
-    savedTimeline.updatedBy = getOr(null, 'credentials.username', userInfo);
+    savedTimeline.created = dateNow;
+    savedTimeline.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
+    savedTimeline.updated = dateNow;
+    savedTimeline.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   } else if (timelineId != null) {
-    savedTimeline.updated = new Date().valueOf();
-    savedTimeline.updatedBy = getOr(null, 'credentials.username', userInfo);
+    savedTimeline.updated = dateNow;
+    savedTimeline.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }
   return savedTimeline;
 };

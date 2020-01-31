@@ -17,7 +17,4 @@
  * under the License.
  */
 
-export {
-  extendConfigService,
-  disableConfigExtension,
-} from './extend_config_service';
+export { extendConfigService, disableConfigExtension } from './extend_config_service';

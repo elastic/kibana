@@ -10,7 +10,7 @@ import { EuiBadge, EuiText } from '@elastic/eui';
 
 import { EsDoc } from '../../../../common';
 
-export const ExpandedRow: React.SFC<{ item: EsDoc }> = ({ item }) => (
+export const ExpandedRow: React.FC<{ item: EsDoc }> = ({ item }) => (
   <EuiText>
     {Object.entries(item._source).map(([k, value]) => (
       <span key={k}>

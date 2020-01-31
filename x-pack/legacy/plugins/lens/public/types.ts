@@ -7,13 +7,12 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'src/core/public';
-import { Query } from 'src/plugins/data/common';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
-import { KibanaDatatable } from '../../../../../src/legacy/core_plugins/interpreter/common';
+import { KibanaDatatable } from '../../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
-import { esFilters } from '../../../../../src/plugins/data/public';
+import { Query, esFilters } from '../../../../../src/plugins/data/public';
 
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
@@ -48,7 +47,7 @@ export interface EditorFrameInstance {
 
 export interface EditorFrameSetup {
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
-  registerDatasource: <T, P>(name: string, datasource: Datasource<T, P>) => void;
+  registerDatasource: <T, P>(datasource: Datasource<T, P>) => void;
   registerVisualization: <T, P>(visualization: Visualization<T, P>) => void;
 }
 
@@ -124,6 +123,8 @@ export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
  * Interface for the datasource registry
  */
 export interface Datasource<T = unknown, P = unknown> {
+  id: string;
+
   // For initializing, either from an empty state or from persisted state
   // Because this will be called at runtime, state might have a type of `any` and
   // datasources should validate their arguments
@@ -134,6 +135,7 @@ export interface Datasource<T = unknown, P = unknown> {
 
   insertLayer: (state: T, newLayerId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
+  clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
 
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
@@ -158,10 +160,6 @@ export interface DatasourcePublicAPI {
   // Render can be called many times
   renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => void;
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => void;
-
-  removeColumnInTableSpec: (columnId: string) => void;
-  moveColumnTo: (columnId: string, targetIndex: number) => void;
-  duplicateColumn: (columnId: string) => TableSpec;
 }
 
 export interface TableSpecColumn {
@@ -240,7 +238,8 @@ export interface LensMultiTable {
   };
 }
 
-export interface VisualizationProps<T = unknown> {
+export interface VisualizationLayerConfigProps<T = unknown> {
+  layerId: string;
   dragDropContext: DragContextState;
   frame: FramePublicAPI;
   state: T;
@@ -328,6 +327,18 @@ export interface Visualization<T = unknown, P = unknown> {
 
   visualizationTypes: VisualizationType[];
 
+  getLayerIds: (state: T) => string[];
+
+  clearLayer: (state: T, layerId: string) => T;
+
+  removeLayer?: (state: T, layerId: string) => T;
+
+  appendLayer?: (state: T, layerId: string) => T;
+
+  getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
+
+  renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerConfigProps<T>) => void;
+
   getDescription: (
     state: T
   ) => {
@@ -342,7 +353,7 @@ export interface Visualization<T = unknown, P = unknown> {
 
   getPersistableState: (state: T) => P;
 
-  renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
+  renderLayerConfigPanel: (domElement: Element, props: VisualizationLayerConfigProps<T>) => void;
 
   toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
 

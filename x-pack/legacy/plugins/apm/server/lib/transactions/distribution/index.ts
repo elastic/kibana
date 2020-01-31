@@ -5,19 +5,20 @@
  */
 
 import { PromiseReturnType } from '../../../../typings/common';
-import { Setup } from '../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
 import { getBuckets } from './get_buckets';
 import { getDistributionMax } from './get_distribution_max';
 import { roundToNearestFiveOrTen } from '../../helpers/round_to_nearest_five_or_ten';
+import { MINIMUM_BUCKET_SIZE, BUCKET_TARGET_COUNT } from '../constants';
 
-function getBucketSize(max: number, { config }: Setup) {
-  const minBucketSize: number = config.get<number>(
-    'xpack.apm.minimumBucketSize'
-  );
-  const bucketTargetCount = config.get<number>('xpack.apm.bucketTargetCount');
-  const bucketSize = max / bucketTargetCount;
+function getBucketSize(max: number) {
+  const bucketSize = max / BUCKET_TARGET_COUNT;
   return roundToNearestFiveOrTen(
-    bucketSize > minBucketSize ? bucketSize : minBucketSize
+    bucketSize > MINIMUM_BUCKET_SIZE ? bucketSize : MINIMUM_BUCKET_SIZE
   );
 }
 
@@ -37,7 +38,7 @@ export async function getTransactionDistribution({
   transactionType: string;
   transactionId: string;
   traceId: string;
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const distributionMax = await getDistributionMax(
     serviceName,
@@ -50,7 +51,7 @@ export async function getTransactionDistribution({
     return { noHits: true, buckets: [], bucketSize: 0 };
   }
 
-  const bucketSize = getBucketSize(distributionMax, setup);
+  const bucketSize = getBucketSize(distributionMax);
   const { buckets, noHits } = await getBuckets(
     serviceName,
     transactionName,

@@ -8,7 +8,15 @@ import { get } from 'lodash';
 
 import { parseNext } from '../../lib/parse_next';
 
-export function initLoginView({ __legacyCompat: { config: { cookieName }, license } }, server) {
+export function initLoginView(
+  {
+    __legacyCompat: {
+      config: { cookieName },
+      license,
+    },
+  },
+  server
+) {
   const config = server.config();
   const login = server.getHiddenUiAppById('login');
 
@@ -36,7 +44,7 @@ export function initLoginView({ __legacyCompat: { config: { cookieName }, licens
       return h.renderAppWithDefaultConfig(login);
     },
     config: {
-      auth: false
-    }
+      auth: false,
+    },
   });
 }

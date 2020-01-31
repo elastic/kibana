@@ -18,11 +18,26 @@
  */
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import 'ui/autoload/all';
+
+import 'uiExports/interpreter';
 import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
+import 'uiExports/contextMenuActions';
+import 'uiExports/devTools';
+import 'uiExports/docViews';
+import 'uiExports/embeddableActions';
+import 'uiExports/fieldFormatEditors';
+import 'uiExports/fieldFormats';
+import 'uiExports/home';
+import 'uiExports/indexManagement';
+import 'uiExports/inspectorViews';
+import 'uiExports/savedObjectTypes';
+import 'uiExports/search';
+import 'uiExports/shareContextMenuExtensions';
+import 'uiExports/visTypes';
+import 'uiExports/visualize';
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import { ExitFullScreenButton } from 'ui/exit_full_screen';
 import uiRoutes from 'ui/routes';
 // @ts-ignore
@@ -39,7 +54,6 @@ export const setup = pluginInstance.setup(npSetup.core, {
   embeddable: npSetup.plugins.embeddable,
   inspector: npSetup.plugins.inspector,
   __LEGACY: {
-    SavedObjectFinder,
     ExitFullScreenButton,
   },
 });
@@ -64,7 +78,6 @@ export const start = pluginInstance.start(npStart.core, {
   inspector: npStart.plugins.inspector,
   uiActions: npStart.plugins.uiActions,
   __LEGACY: {
-    SavedObjectFinder,
     ExitFullScreenButton,
     onRenderComplete: (renderCompleteListener: () => void) => {
       if (rendered) {

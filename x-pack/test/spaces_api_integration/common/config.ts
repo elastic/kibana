@@ -34,7 +34,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       testFiles: [require.resolve(`../${name}/apis/`)],
       servers: config.xpack.api.get('servers'),
       services: {
-        es: LegacyEsProvider,
+        legacyEs: LegacyEsProvider,
         esSupertestWithoutAuth: config.xpack.api.get('services.esSupertestWithoutAuth'),
         supertest: config.kibana.api.get('services.supertest'),
         supertestWithoutAuth: config.xpack.api.get('services.supertestWithoutAuth'),

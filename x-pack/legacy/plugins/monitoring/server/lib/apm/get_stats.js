@@ -7,11 +7,7 @@
 import moment from 'moment';
 import { checkParam } from '../error_missing_required';
 import { createApmQuery } from './create_apm_query';
-import {
-  apmAggFilterPath,
-  apmUuidsAgg,
-  apmAggResponseHandler,
-} from './_apm_stats';
+import { apmAggFilterPath, apmUuidsAgg, apmAggResponseHandler } from './_apm_stats';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
 
 export function handleResponse(...args) {
@@ -21,8 +17,8 @@ export function handleResponse(...args) {
     bytesSent,
     totalEvents,
     apms: {
-      total: apmTotal
-    }
+      total: apmTotal,
+    },
   };
 }
 
@@ -32,7 +28,7 @@ export async function getStats(req, apmIndexPattern, clusterUuid) {
   const config = req.server.config();
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
-  const maxBucketSize = config.get('xpack.monitoring.max_bucket_size');
+  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
 
   const params = {
     index: apmIndexPattern,
@@ -45,8 +41,8 @@ export async function getStats(req, apmIndexPattern, clusterUuid) {
         end,
         clusterUuid,
       }),
-      aggs: apmUuidsAgg(maxBucketSize)
-    }
+      aggs: apmUuidsAgg(maxBucketSize),
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
@@ -58,8 +54,8 @@ export async function getStats(req, apmIndexPattern, clusterUuid) {
       apmIndexPattern,
       start,
       end,
-      clusterUuid
-    })
+      clusterUuid,
+    }),
   ]);
 
   const formattedResponse = handleResponse(response, start, end);

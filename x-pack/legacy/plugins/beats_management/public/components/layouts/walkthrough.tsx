@@ -6,13 +6,7 @@
 
 import React from 'react';
 
-import {
-  EuiPageContent,
-  EuiPageContentBody,
-  // @ts-ignore
-  EuiStepsHorizontal,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPageContent, EuiPageContentBody, EuiStepsHorizontal, EuiTitle } from '@elastic/eui';
 
 interface LayoutProps {
   title: string;
@@ -24,7 +18,7 @@ interface LayoutProps {
   activePath: string;
 }
 
-export const WalkthroughLayout: React.SFC<LayoutProps> = ({
+export const WalkthroughLayout: React.FC<LayoutProps> = ({
   walkthroughSteps,
   title,
   activePath,

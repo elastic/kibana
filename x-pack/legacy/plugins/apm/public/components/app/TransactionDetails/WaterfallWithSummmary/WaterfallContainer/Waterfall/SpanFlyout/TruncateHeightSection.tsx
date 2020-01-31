@@ -19,7 +19,7 @@ interface Props {
   previewHeight: number;
 }
 
-export const TruncateHeightSection: React.SFC<Props> = ({
+export const TruncateHeightSection: React.FC<Props> = ({
   children,
   previewHeight
 }) => {

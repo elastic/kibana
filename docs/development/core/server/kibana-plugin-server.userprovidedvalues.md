@@ -9,7 +9,7 @@ Describes the values explicitly set by user.
 <b>Signature:</b>
 
 ```typescript
-export interface UserProvidedValues<T extends SavedObjectAttribute = any> 
+export interface UserProvidedValues<T = any> 
 ```
 
 ## Properties
