@@ -6,29 +6,29 @@
 
 import { flow } from 'lodash';
 
-export function escapeQuotes(string) {
-  return string.replace(/"/g, '\\"');
+export function escapeQuotes(str: string) {
+  return str.replace(/"/g, '\\"');
 }
 
 export const escapeKuery = flow(escapeSpecialCharacters, escapeAndOr, escapeNot, escapeWhitespace);
 
 // See the SpecialCharacter rule in kuery.peg
-function escapeSpecialCharacters(string) {
-  return string.replace(/[\\():<>"*]/g, '\\$&'); // $& means the whole matched string
+function escapeSpecialCharacters(str: string) {
+  return str.replace(/[\\():<>"*]/g, '\\$&'); // $& means the whole matched string
 }
 
 // See the Keyword rule in kuery.peg
-function escapeAndOr(string) {
-  return string.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2$3');
+function escapeAndOr(str: string) {
+  return str.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2$3');
 }
 
-function escapeNot(string) {
-  return string.replace(/not(\s+)/gi, '\\$&');
+function escapeNot(str: string) {
+  return str.replace(/not(\s+)/gi, '\\$&');
 }
 
 // See the Space rule in kuery.peg
-function escapeWhitespace(string) {
-  return string
+function escapeWhitespace(str: string) {
+  return str
     .replace(/\t/g, '\\t')
     .replace(/\r/g, '\\r')
     .replace(/\n/g, '\\n');
