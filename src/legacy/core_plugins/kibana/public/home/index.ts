@@ -47,5 +47,5 @@ let copiedLegacyCatalogue = false;
   });
   instance.start(npStart.core, {
     ...npStart.plugins,
-  });
+  } as any);
 })();

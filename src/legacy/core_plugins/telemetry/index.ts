@@ -22,12 +22,10 @@ import { resolve } from 'path';
 import JoiNamespace from 'joi';
 import { Server } from 'hapi';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getConfigPath } from '../../../core/server/path';
 // @ts-ignore
 import mappings from './mappings.json';
-import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
 import { getXpackConfigWithDeprecated } from './common/get_xpack_config_with_deprecated';
 import {
   telemetryPlugin,
