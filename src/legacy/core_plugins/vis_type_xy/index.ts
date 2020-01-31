@@ -33,9 +33,7 @@ const visTypeXyPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyP
     id: 'vis_type_xy',
     require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
     publicDir: resolve(__dirname, 'public'),
-    styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     uiExports: {
-      hacks: [resolve(__dirname, 'public/legacy')],
       injectDefaultVars(server): ConfigShema {
         const config = server.config();
 

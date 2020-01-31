@@ -77,10 +77,7 @@ module.exports = {
       },
     },
     {
-      files: [
-        'src/legacy/core_plugins/vis_type_vislib/**/*.{js,ts,tsx}',
-        'src/legacy/core_plugins/vis_type_xy/**/*.{js,ts,tsx}',
-      ],
+      files: ['src/legacy/core_plugins/vis_type_vislib/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },

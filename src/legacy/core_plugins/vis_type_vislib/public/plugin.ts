@@ -73,6 +73,17 @@ export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
       uiSettings: core.uiSettings,
       charts,
     };
+    const vislibTypes = [
+      createHistogramVisTypeDefinition,
+      createLineVisTypeDefinition,
+      createPieVisTypeDefinition,
+      createAreaVisTypeDefinition,
+      createHeatmapVisTypeDefinition,
+      createHorizontalBarVisTypeDefinition,
+      createGaugeVisTypeDefinition,
+      createGoalVisTypeDefinition,
+    ];
+    const vislibFns = [createVisTypeVislibVisFn, createPieVisFn];
 
     const visTypeXy = core.injectedMetadata.getInjectedVar('visTypeXy') as
       | VisTypeXyConfigShema['visTypeXy']
@@ -80,22 +91,21 @@ export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
 
     // if visTypeXy plugin is disabled it's config will be undefined
     if (!visTypeXy || !visTypeXy.enabled) {
-      expressions.registerFunction(createVisTypeVislibVisFn);
-      expressions.registerFunction(createPieVisFn);
+      const convertedTypes: any[] = [];
+      const convertedFns: any[] = [];
 
-      [
-        createHistogramVisTypeDefinition,
-        createLineVisTypeDefinition,
-        createPieVisTypeDefinition,
-        createAreaVisTypeDefinition,
-        createHeatmapVisTypeDefinition,
-        createHorizontalBarVisTypeDefinition,
-        createGaugeVisTypeDefinition,
-        createGoalVisTypeDefinition,
-      ].forEach(vis =>
+      // Register legacy vislib types that have been converted
+      convertedFns.forEach(expressions.registerFunction);
+      convertedTypes.forEach(vis =>
         visualizations.types.createBaseVisualization(vis(visualizationDependencies))
       );
     }
+
+    // Register non-converted types
+    vislibFns.forEach(expressions.registerFunction);
+    vislibTypes.forEach(vis =>
+      visualizations.types.createBaseVisualization(vis(visualizationDependencies))
+    );
   }
 
   public start(core: CoreStart, deps: VisTypeVislibPluginStartDependencies) {

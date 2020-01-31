@@ -124,7 +124,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/legacy/core_plugins/timelion/server/series_functions/__tests__/fixtures/tlConfig.js',
   'src/fixtures/config_upgrade_from_4.0.0_to_4.0.1-snapshot.json',
   'src/legacy/core_plugins/vis_type_vislib/public/vislib/__tests__/lib/fixtures/mock_data/terms/_seriesMultiple.js',
-  'src/legacy/core_plugins/vis_type_xy/public/vislib/__tests__/lib/fixtures/mock_data/terms/_seriesMultiple.js',
   'src/legacy/ui/public/angular-bootstrap/bindHtml/bindHtml.js',
   'src/legacy/ui/public/angular-bootstrap/tooltip/tooltip-html-unsafe-popup.html',
   'src/legacy/ui/public/angular-bootstrap/tooltip/tooltip-popup.html',
