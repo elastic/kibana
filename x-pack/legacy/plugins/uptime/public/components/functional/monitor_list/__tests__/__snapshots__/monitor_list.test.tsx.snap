@@ -24,20 +24,24 @@ exports[`MonitorList component renders a no items message when no data is provid
           Object {
             "align": "left",
             "field": "state.monitor.status",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Status",
             "render": [Function],
-            "width": "20%",
           },
           Object {
             "align": "left",
             "field": "state.monitor.name",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "30%",
           },
           Object {
-            "aligh": "left",
+            "align": "left",
             "field": "state.url.full",
             "name": "Url",
             "render": [Function],
@@ -58,6 +62,7 @@ exports[`MonitorList component renders a no items message when no data is provid
             "name": "",
             "render": [Function],
             "sortable": true,
+            "width": "24px",
           },
         ]
       }
@@ -83,6 +88,7 @@ exports[`MonitorList component renders a no items message when no data is provid
         <OverviewPageLink
           dataTestSubj="xpack.uptime.monitorList.prevButton"
           direction="prev"
+          pagination=""
         />
       </EuiFlexItem>
       <EuiFlexItem
@@ -91,6 +97,7 @@ exports[`MonitorList component renders a no items message when no data is provid
         <OverviewPageLink
           dataTestSubj="xpack.uptime.monitorList.nextButton"
           direction="next"
+          pagination=""
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -99,10 +106,20 @@ exports[`MonitorList component renders a no items message when no data is provid
 `;
 
 exports[`MonitorList component renders the monitor list 1`] = `
-.c0 {
+.c1 {
+  padding-left: 17px;
+}
+
+.c2 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+@media (max-width:574px) {
+  .c0 {
+    min-width: 230px;
+  }
 }
 
 <div
@@ -147,11 +164,10 @@ exports[`MonitorList component renders the monitor list 1`] = `
         <thead>
           <tr>
             <th
-              class="euiTableHeaderCell"
+              class="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
               data-test-subj="tableHeaderCell_state.monitor.status_0"
               role="columnheader"
               scope="col"
-              style="width:20%"
             >
               <div
                 class="euiTableCellContent"
@@ -164,11 +180,10 @@ exports[`MonitorList component renders the monitor list 1`] = `
               </div>
             </th>
             <th
-              class="euiTableHeaderCell"
+              class="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
               data-test-subj="tableHeaderCell_state.monitor.name_1"
               role="columnheader"
               scope="col"
-              style="width:30%"
             >
               <div
                 class="euiTableCellContent"
@@ -217,6 +232,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               data-test-subj="tableHeaderCell_monitor_id_4"
               role="columnheader"
               scope="col"
+              style="width:24px"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight"
@@ -233,8 +249,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
-              class="euiTableRowCell"
-              style="width:20%"
+              class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -245,10 +260,11 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c0"
                 >
                   <div
-                    class="euiFlexItem"
+                    class="euiFlexItem euiFlexItem--flexGrow1"
+                    style="flex-basis:40px"
                   >
                     <div
                       class="euiHealth"
@@ -277,25 +293,37 @@ exports[`MonitorList component renders the monitor list 1`] = `
                       </div>
                     </div>
                     <span
-                      class="euiToolTipAnchor"
+                      class="c1"
                     >
-                      <div
-                        class="euiText euiText--extraSmall"
+                      <span
+                        class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiTextColor euiTextColor--subdued"
+                          class="euiText euiText--extraSmall"
                         >
-                          1897 years ago
+                          <div
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            1897 Yr ago
+                          </div>
                         </div>
-                      </div>
+                      </span>
                     </span>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrow2"
+                  >
+                    <div
+                      class="euiText euiText--small"
+                    >
+                      in 0/1 Location
+                    </div>
                   </div>
                 </div>
               </div>
             </td>
             <td
-              class="euiTableRowCell"
-              style="width:30%"
+              class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -319,7 +347,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
               </div>
             </td>
             <td
-              aligh="left"
               class="euiTableRowCell"
             >
               <div
@@ -331,7 +358,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <button
-                  class="euiLink euiLink--text c0"
+                  class="euiLink euiLink--text c2"
                   type="button"
                 >
                    
@@ -372,6 +399,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width:24px"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -399,8 +427,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
-              class="euiTableRowCell"
-              style="width:20%"
+              class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -411,10 +438,11 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c0"
                 >
                   <div
-                    class="euiFlexItem"
+                    class="euiFlexItem euiFlexItem--flexGrow1"
+                    style="flex-basis:40px"
                   >
                     <div
                       class="euiHealth"
@@ -443,25 +471,37 @@ exports[`MonitorList component renders the monitor list 1`] = `
                       </div>
                     </div>
                     <span
-                      class="euiToolTipAnchor"
+                      class="c1"
                     >
-                      <div
-                        class="euiText euiText--extraSmall"
+                      <span
+                        class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiTextColor euiTextColor--subdued"
+                          class="euiText euiText--extraSmall"
                         >
-                          1895 years ago
+                          <div
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            1895 Yr ago
+                          </div>
                         </div>
-                      </div>
+                      </span>
                     </span>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrow2"
+                  >
+                    <div
+                      class="euiText euiText--small"
+                    >
+                      in 1/1 Location
+                    </div>
                   </div>
                 </div>
               </div>
             </td>
             <td
-              class="euiTableRowCell"
-              style="width:30%"
+              class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -485,7 +525,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
               </div>
             </td>
             <td
-              aligh="left"
               class="euiTableRowCell"
             >
               <div
@@ -497,7 +536,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <button
-                  class="euiLink euiLink--text c0"
+                  class="euiLink euiLink--text c2"
                   type="button"
                 >
                    
@@ -538,6 +577,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width:24px"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -643,20 +683,24 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
           Object {
             "align": "left",
             "field": "state.monitor.status",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Status",
             "render": [Function],
-            "width": "20%",
           },
           Object {
             "align": "left",
             "field": "state.monitor.name",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "30%",
           },
           Object {
-            "aligh": "left",
+            "align": "left",
             "field": "state.url.full",
             "name": "Url",
             "render": [Function],
@@ -677,6 +721,7 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
             "name": "",
             "render": [Function],
             "sortable": true,
+            "width": "24px",
           },
         ]
       }
@@ -764,6 +809,7 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
         <OverviewPageLink
           dataTestSubj="xpack.uptime.monitorList.prevButton"
           direction="prev"
+          pagination=""
         />
       </EuiFlexItem>
       <EuiFlexItem
@@ -772,6 +818,7 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
         <OverviewPageLink
           dataTestSubj="xpack.uptime.monitorList.nextButton"
           direction="next"
+          pagination=""
         />
       </EuiFlexItem>
     </EuiFlexGroup>

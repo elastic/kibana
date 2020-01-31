@@ -2,7 +2,7 @@
 
 exports[`MonitorBarSeries component renders if the data series is present 1`] = `
 <div
-  style="height:50px;width:100%;max-width:1200px"
+  style="height:50px;width:100%;max-width:1200px;margin-right:15px"
 >
   <div
     class="echChart"
