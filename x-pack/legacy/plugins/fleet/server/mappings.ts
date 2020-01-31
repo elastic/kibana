@@ -40,6 +40,9 @@ export const mappings = {
       last_checkin: {
         type: 'date',
       },
+      config_updated_at: {
+        type: 'date',
+      },
       updated_at: {
         type: 'date',
       },

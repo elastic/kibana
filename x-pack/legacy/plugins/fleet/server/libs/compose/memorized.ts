@@ -58,7 +58,7 @@ export function compose(server?: any): FleetServerLib {
 
   const artifactRepository = new FileSystemArtifactRepository(os.tmpdir());
   const artifacts = new ArtifactLib(artifactRepository, new HttpAdapter());
-  const agentsPolicy = new AgentPolicyLib(agentsRepository, policies);
+  const agentsPolicy = new AgentPolicyLib(agentsRepository);
   const install = new InstallLib(framework);
 
   return {
@@ -70,5 +70,6 @@ export function compose(server?: any): FleetServerLib {
     install,
     framework,
     agentsPolicy,
+    agentsRepository,
   };
 }

@@ -52,14 +52,6 @@ export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
       sharedId
     );
 
-    if (agent.policy_id) {
-      await libs.agentsPolicy.updateAgentForPolicyId(
-        { kind: 'internal' },
-        agent.policy_id,
-        agent.id
-      );
-    }
-
     return {
       action: 'created',
       success: true,

@@ -12,6 +12,7 @@ import { InstallLib } from './install';
 import { FrameworkLib } from './framework';
 import { AgentPolicyLib } from './agent_policy';
 import { AgentEventLib } from './agent_event';
+import { AgentsRepository } from '../repositories/agents/types';
 
 export interface FleetServerLib {
   apiKeys: ApiKeyLib;
@@ -22,4 +23,5 @@ export interface FleetServerLib {
   framework: FrameworkLib;
   agentsPolicy: AgentPolicyLib;
   agentEvents: AgentEventLib;
+  agentsRepository: AgentsRepository;
 }

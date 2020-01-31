@@ -116,6 +116,7 @@ export const RuntimeAgent = t.intersection([
   t.partial({
     last_updated: t.string,
     last_checkin: t.string,
+    config_updated_at: t.string,
   }),
   newAgentOptionalProperties,
 ]);

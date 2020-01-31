@@ -46,10 +46,12 @@ export function compose(server: any, pluginsStart: FleetPluginsStart): FleetServ
     encryptedObjectAdapter
   );
 
-  const libs: FleetServerLib = ({} as any) as FleetServerLib;
+  const libs: FleetServerLib = ({
+    agentsRepository,
+  } as any) as FleetServerLib;
   const policies = new PolicyLib(policyAdapter, soDatabaseAdapter);
   const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, libs, pluginsStart);
-  const agentsPolicy = new AgentPolicyLib(agentsRepository, policies);
+  const agentsPolicy = new AgentPolicyLib(agentsRepository);
   const agentEvents = new AgentEventLib(agentEventsRepository);
   const agents = new AgentLib(agentsRepository, apiKeys, agentEvents);
 

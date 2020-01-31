@@ -8,11 +8,10 @@ import Boom from 'boom';
 import uuid from 'uuid/v4';
 import { FrameworkUser } from '../adapters/framework/adapter_types';
 import { Agent, AgentAction, AgentsRepository, SortOptions } from '../repositories/agents/types';
-import { AgentPolicy } from '../repositories/policies/types';
 import { ApiKeyLib } from './api_keys';
 import { AgentStatusHelper } from './agent_status_helper';
 import { AgentEventLib } from './agent_event';
-import { AgentEvent, AgentType, NewAgent, AgentActionType } from '../../common/types/domain_data';
+import { AgentType, NewAgent, AgentActionType } from '../../common/types/domain_data';
 
 export class AgentLib {
   constructor(
@@ -199,47 +198,6 @@ export class AgentLib {
     await this.agentsRepository.update(this._getInternalUser(), agent.id, {
       actions: updatedActions,
     });
-  }
-
-  /**
-   * Agent checkin, update events, get new actions to perfomed.
-   * @param agent
-   * @param events
-   * @param metadata
-   */
-  public async checkin(
-    user: FrameworkUser,
-    agent: Agent,
-    events: AgentEvent[],
-    localMetadata?: any
-  ): Promise<{ actions: AgentAction[]; policy: AgentPolicy | null }> {
-    const internalUser = this._getInternalUser();
-
-    const actions = this._filterActionsForCheckin(agent);
-
-    const now = new Date().toISOString();
-
-    const updateData: Partial<Agent> = {
-      last_checkin: now,
-    };
-
-    if (localMetadata) {
-      updateData.local_metadata = localMetadata;
-    }
-
-    const { updatedErrorEvents } = await this.agentEvents.processEventsForCheckin(
-      internalUser,
-      agent,
-      events
-    );
-
-    if (updatedErrorEvents) {
-      updateData.current_error_events = updatedErrorEvents;
-    }
-
-    await this.agentsRepository.update(internalUser, agent.id, updateData);
-
-    return { actions, policy: null };
   }
 
   public async addAction(

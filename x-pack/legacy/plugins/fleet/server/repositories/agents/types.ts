@@ -19,6 +19,7 @@ export const RuntimeSavedObjectAgentAttributes = t.intersection([
     access_api_key_id: t.string,
     last_updated: t.string,
     last_checkin: t.string,
+    config_updated_at: t.string,
     parent_id: t.string,
     version: t.string,
     enrolled_at: t.string,
