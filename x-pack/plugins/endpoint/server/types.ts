@@ -27,4 +27,15 @@ export interface EndpointAppContext {
 export interface AlertRequestParams {
   page_index?: number;
   page_size?: number;
+  filters?: string;
+}
+
+/**
+ * Request metadata for additional context.
+ */
+export interface AlertRequestData {
+  pageSize: number;
+  pageIndex: number;
+  fromIndex: number;
+  filters: string;
 }
