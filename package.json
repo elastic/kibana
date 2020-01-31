@@ -27,7 +27,7 @@
     "clean": {
       "extraPatterns": [
         "build",
-        "optimize",
+        "data/optimize",
         "built_assets",
         ".eslintcache",
         ".node_binaries"
