@@ -22,6 +22,11 @@ export async function getPermissions(setup: Setup) {
     await client.search(params);
     return { hasPermission: true };
   } catch (e) {
-    return { hasPermission: false };
+    // If 403, it means the user doesnt have permission.
+    if (e.status === 403) {
+      return { hasPermission: false };
+    }
+    // if any other error happens, throw it.
+    throw e;
   }
 }

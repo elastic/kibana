@@ -6,24 +6,26 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiTitle
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { matchPath } from 'react-router-dom';
 import styled from 'styled-components';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { useLocation } from '../../../hooks/useLocation';
-import { pct, px, unit } from '../../../style/variables';
+import { fontSize, pct, px, units } from '../../../style/variables';
+import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { routes } from '../Main/route_config';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/useFetcher';
 
 export const Permission: React.FC = ({ children }) => {
-  const [isPermissionPageEnabled, touglePermissionPage] = useState(true);
+  const [isPermissionPageEnabled, setIsPermissionsPageEnabled] = useState(true);
 
   const { data, status } = useFetcher(callApmApi => {
     return callApmApi({
@@ -38,7 +40,9 @@ export const Permission: React.FC = ({ children }) => {
   // When the user doenst have permission and he didnt escape, show the Permission page
   if (!data?.hasPermission && isPermissionPageEnabled) {
     return (
-      <PermissionPage onEscapeHatchClick={() => touglePermissionPage(false)} />
+      <PermissionPage
+        onEscapeHatchClick={() => setIsPermissionsPageEnabled(false)}
+      />
     );
   }
 
@@ -46,17 +50,17 @@ export const Permission: React.FC = ({ children }) => {
 };
 
 const CentralizedContainer = styled.div`
-  height: 100%;
+  height: ${pct(100)};
   display: flex;
   justify-content: center;
   align-items: center;
 `;
 
-const EscapeHatch = styled(EuiButtonEmpty)`
-  display: block;
-  color: rgb(105, 112, 125);
+const EscapeHatch = styled.div`
   width: ${pct(100)};
-  margin-top: ${px(unit)};
+  margin-top: ${px(units.plus)};
+  justify-content: center;
+  display: flex;
 `;
 
 interface Props {
@@ -81,7 +85,11 @@ const PermissionPage: React.FC<Props> = ({ onEscapeHatchClick }) => {
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="l">
-            <h1>APM </h1>
+            <h1>
+              {i18n.translate('xpack.apm.permission.apm', {
+                defaultMessage: 'APM'
+              })}
+            </h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -93,27 +101,53 @@ const PermissionPage: React.FC<Props> = ({ onEscapeHatchClick }) => {
           <EuiPanel paddingSize="none">
             <EuiEmptyPrompt
               iconType="apmApp"
-              // @ts-ignore
-              iconColor={null}
-              title={<h2>Missing permissions to access APM</h2>}
+              iconColor={''}
+              title={
+                <h2>
+                  {i18n.translate('xpack.apm.permission.title', {
+                    defaultMessage: 'Missing permissions to access APM'
+                  })}
+                </h2>
+              }
               body={
                 <p>
-                  {`We've detected your current role in Kibana does not grant you access
-                      to the APM data. Please check with your Kibana administrator to get
-                      the proper priviledges granted in order to start using APM.`}
+                  {i18n.translate('xpack.apm.permission.description', {
+                    defaultMessage:
+                      "We've detected your current role in Kibana does not grant you access to the APM data. Please check with your Kibana administrator to get the proper privileges granted in order to start using APM."
+                  })}
                 </p>
               }
               actions={
                 <>
-                  <EuiButton
-                    color="primary"
-                    fill
-                    href="https://www.elastic.co/guide/en/apm/server/current/feature-roles.html"
+                  <ElasticDocsLink
+                    section="/apm/server"
+                    path="/feature-roles.html"
                   >
-                    Learn more about APM permissions
-                  </EuiButton>
-                  <EscapeHatch onClick={onEscapeHatchClick} size="xs">
-                    Skip and go to {route[0]?.breadcrumb} overview
+                    {(href: string) => (
+                      <EuiButton color="primary" fill href={href}>
+                        {i18n.translate('xpack.apm.permission.learnMore', {
+                          defaultMessage: 'Learn more about APM permissions'
+                        })}
+                      </EuiButton>
+                    )}
+                  </ElasticDocsLink>
+
+                  <EscapeHatch>
+                    <EuiLink
+                      color="subdued"
+                      onClick={onEscapeHatchClick}
+                      style={{ fontSize }}
+                    >
+                      {i18n.translate('xpack.apm.permission.escapeHatch', {
+                        defaultMessage: 'Skip and go to {pageName} overview',
+                        values: {
+                          pageName:
+                            typeof route[0]?.breadcrumb === 'string'
+                              ? route[0]?.breadcrumb
+                              : ''
+                        }
+                      })}
+                    </EuiLink>
                   </EscapeHatch>
                 </>
               }
