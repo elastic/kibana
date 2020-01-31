@@ -4958,7 +4958,7 @@ ajv-keywords@^3.1.0, ajv-keywords@^3.4.1:
 
 ajv@^4.7.0, ajv@^4.9.1:
   version "4.11.8"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/ajv/-/ajv-4.11.8.tgz#82ffb02b29e662ae53bdc20af15947706739c536"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-4.11.8.tgz#82ffb02b29e662ae53bdc20af15947706739c536"
   integrity sha1-gv+wKynmYq5TvcIK8VlHcGc5xTY=
   dependencies:
     co "^4.6.0"
@@ -5728,7 +5728,7 @@ assert-plus@1.0.0, assert-plus@^1.0.0:
 
 assert-plus@^0.2.0:
   version "0.2.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/assert-plus/-/assert-plus-0.2.0.tgz#d74e1b87e7affc0db8aadb7021f3fe48101ab234"
+  resolved "https://registry.yarnpkg.com/assert-plus/-/assert-plus-0.2.0.tgz#d74e1b87e7affc0db8aadb7021f3fe48101ab234"
   integrity sha1-104bh+ev/A24qttwIfP+SBAasjQ=
 
 assert@^1.1.1:
@@ -5985,7 +5985,7 @@ autoprefixer@^9.7.2:
 
 aws-sign2@~0.6.0:
   version "0.6.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/aws-sign2/-/aws-sign2-0.6.0.tgz#14342dd38dbcc94d0e5b87d763cd63612c0e794f"
+  resolved "https://registry.yarnpkg.com/aws-sign2/-/aws-sign2-0.6.0.tgz#14342dd38dbcc94d0e5b87d763cd63612c0e794f"
   integrity sha1-FDQt0428yU0OW4fXY81jYSwOeU8=
 
 aws-sign2@~0.7.0:
@@ -6790,7 +6790,7 @@ boolbase@^1.0.0, boolbase@~1.0.0:
 
 boom@2.x.x:
   version "2.10.1"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/boom/-/boom-2.10.1.tgz#39c8918ceff5799f83f9492a848f625add0c766f"
+  resolved "https://registry.yarnpkg.com/boom/-/boom-2.10.1.tgz#39c8918ceff5799f83f9492a848f625add0c766f"
   integrity sha1-OciRjO/1eZ+D+UkqhI9iWt0Mdm8=
   dependencies:
     hoek "2.x.x"
@@ -8934,7 +8934,7 @@ crypt@~0.0.1:
 
 cryptiles@2.x.x:
   version "2.0.5"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/cryptiles/-/cryptiles-2.0.5.tgz#3bdfecdc608147c1c67202fa291e7dca59eaa3b8"
+  resolved "https://registry.yarnpkg.com/cryptiles/-/cryptiles-2.0.5.tgz#3bdfecdc608147c1c67202fa291e7dca59eaa3b8"
   integrity sha1-O9/s3GCBR8HGcgL6KR59ylnqo7g=
   dependencies:
     boom "2.x.x"
@@ -12582,7 +12582,7 @@ form-data@^2.3.1, form-data@^2.3.3, form-data@^2.5.0:
 
 form-data@~2.1.1:
   version "2.1.4"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/form-data/-/form-data-2.1.4.tgz#33c183acf193276ecaa98143a69e94bfee1750d1"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-2.1.4.tgz#33c183acf193276ecaa98143a69e94bfee1750d1"
   integrity sha1-M8GDrPGTJ27KqYFDpp6Uv+4XUNE=
   dependencies:
     asynckit "^0.4.0"
@@ -14189,7 +14189,7 @@ hapi@^17.5.3:
 
 har-schema@^1.0.5:
   version "1.0.5"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/har-schema/-/har-schema-1.0.5.tgz#d263135f43307c02c602afc8fe95970c0151369e"
+  resolved "https://registry.yarnpkg.com/har-schema/-/har-schema-1.0.5.tgz#d263135f43307c02c602afc8fe95970c0151369e"
   integrity sha1-0mMTX0MwfALGAq/I/pWXDAFRNp4=
 
 har-schema@^2.0.0:
@@ -14199,7 +14199,7 @@ har-schema@^2.0.0:
 
 har-validator@~4.2.1:
   version "4.2.1"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/har-validator/-/har-validator-4.2.1.tgz#33481d0f1bbff600dd203d75812a6a5fba002e2a"
+  resolved "https://registry.yarnpkg.com/har-validator/-/har-validator-4.2.1.tgz#33481d0f1bbff600dd203d75812a6a5fba002e2a"
   integrity sha1-M0gdDxu/9gDdID11gSpqX7oALio=
   dependencies:
     ajv "^4.9.1"
@@ -14376,7 +14376,7 @@ hat@0.0.3:
 
 hawk@~3.1.3:
   version "3.1.3"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/hawk/-/hawk-3.1.3.tgz#078444bd7c1640b0fe540d2c9b73d59678e8e1c4"
+  resolved "https://registry.yarnpkg.com/hawk/-/hawk-3.1.3.tgz#078444bd7c1640b0fe540d2c9b73d59678e8e1c4"
   integrity sha1-B4REvXwWQLD+VA0sm3PVlnjo4cQ=
   dependencies:
     boom "2.x.x"
@@ -14751,7 +14751,7 @@ http-proxy@^1.13.0, http-proxy@^1.17.0:
 
 http-signature@~1.1.0:
   version "1.1.1"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/http-signature/-/http-signature-1.1.1.tgz#df72e267066cd0ac67fb76adf8e134a8fbcf91bf"
+  resolved "https://registry.yarnpkg.com/http-signature/-/http-signature-1.1.1.tgz#df72e267066cd0ac67fb76adf8e134a8fbcf91bf"
   integrity sha1-33LiZwZs0Kxn+3at+OE0qPvPkb8=
   dependencies:
     assert-plus "^0.2.0"
@@ -14906,7 +14906,7 @@ image-diff@1.6.3:
 
 image-size@~0.5.0:
   version "0.5.5"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/image-size/-/image-size-0.5.5.tgz#09dfd4ab9d20e29eb1c3e80b8990378df9e3cb9c"
+  resolved "https://registry.yarnpkg.com/image-size/-/image-size-0.5.5.tgz#09dfd4ab9d20e29eb1c3e80b8990378df9e3cb9c"
   integrity sha1-Cd/Uq50g4p6xw+gLiZA3jfnjy5w=
 
 immediate@~3.0.5:
@@ -17559,17 +17559,17 @@ left-pad@^1.3.0:
 
 less-loader@5.0.0:
   version "5.0.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/less-loader/-/less-loader-5.0.0.tgz#498dde3a6c6c4f887458ee9ed3f086a12ad1b466"
-  integrity sha1-SY3eOmxsT4h0WO6e0/CGoSrRtGY=
+  resolved "https://registry.yarnpkg.com/less-loader/-/less-loader-5.0.0.tgz#498dde3a6c6c4f887458ee9ed3f086a12ad1b466"
+  integrity sha512-bquCU89mO/yWLaUq0Clk7qCsKhsF/TZpJUzETRvJa9KSVEL9SO3ovCvdEHISBhrC81OwC8QSVX7E0bzElZj9cg==
   dependencies:
     clone "^2.1.1"
     loader-utils "^1.1.0"
     pify "^4.0.1"
 
-less@^2.7.3:
+less@^2.5.1:
   version "2.7.3"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/less/-/less-2.7.3.tgz#cc1260f51c900a9ec0d91fb6998139e02507b63b"
-  integrity sha1-zBJg9RyQCp7A2R+2mYE54CUHtjs=
+  resolved "https://registry.yarnpkg.com/less/-/less-2.7.3.tgz#cc1260f51c900a9ec0d91fb6998139e02507b63b"
+  integrity sha512-KPdIJKWcEAb02TuJtaLrhue0krtRLoRoo7x6BNJIBelO00t/CCdJQUnHW5V34OnHMWzIktSalJxRO+FvytQlCQ==
   optionalDependencies:
     errno "^0.1.1"
     graceful-fs "^4.1.2"
@@ -20076,7 +20076,7 @@ nyc@^14.1.1:
 
 oauth-sign@~0.8.1:
   version "0.8.2"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/oauth-sign/-/oauth-sign-0.8.2.tgz#46a6ab7f0aead8deae9ec0565780b7d4efeb9d43"
+  resolved "https://registry.yarnpkg.com/oauth-sign/-/oauth-sign-0.8.2.tgz#46a6ab7f0aead8deae9ec0565780b7d4efeb9d43"
   integrity sha1-Rqarfwrq2N6unsBWV4C31O/rnUM=
 
 oauth-sign@~0.9.0:
@@ -22106,7 +22106,7 @@ qs@^6.4.0, qs@^6.5.1, qs@^6.6.0:
 
 qs@~6.4.0:
   version "6.4.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/qs/-/qs-6.4.0.tgz#13e26d28ad6b0ffaa91312cd3bf708ed351e7233"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.4.0.tgz#13e26d28ad6b0ffaa91312cd3bf708ed351e7233"
   integrity sha1-E+JtKK1rD/qpExLNO/cI7TUecjM=
 
 qs@~6.5.2:
@@ -23786,7 +23786,7 @@ request-promise@^4.2.2:
 
 request@2.81.0:
   version "2.81.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/request/-/request-2.81.0.tgz#c6928946a0e06c5f8d6f8a9333469ffda46298a0"
+  resolved "https://registry.yarnpkg.com/request/-/request-2.81.0.tgz#c6928946a0e06c5f8d6f8a9333469ffda46298a0"
   integrity sha1-xpKJRqDgbF+Nb4qTM0af/aRimKA=
   dependencies:
     aws-sign2 "~0.6.0"
@@ -24957,7 +24957,7 @@ snapdragon@^0.8.1:
 
 sntp@1.x.x:
   version "1.0.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/sntp/-/sntp-1.0.9.tgz#6541184cc90aeea6c6e7b35e2659082443c66198"
+  resolved "https://registry.yarnpkg.com/sntp/-/sntp-1.0.9.tgz#6541184cc90aeea6c6e7b35e2659082443c66198"
   integrity sha1-ZUEYTMkK7qbG57NeJlkIJEPGYZg=
   dependencies:
     hoek "2.x.x"
@@ -25170,7 +25170,15 @@ spdx-compare@^0.1.2:
     spdx-expression-parse "^1.0.0"
     spdx-ranges "^1.0.0"
 
-spdx-correct@^2.0.3, spdx-correct@^3.0.0:
+spdx-correct@^2.0.3:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/spdx-correct/-/spdx-correct-2.0.4.tgz#d1652ad2ebc516f656f66ea93398558065f1b4a4"
+  integrity sha512-c+4gPpt9YDhz7cHlz5UrsHzxxRi4ksclxnEEKsuGT9JdwSC+ZNmsGbYRzzgxyZaBYpcWnlu+4lPcdLKx4DOCmA==
+  dependencies:
+    spdx-expression-parse "^2.0.1"
+    spdx-license-ids "^2.0.1"
+
+spdx-correct@^3.0.0:
   version "3.1.0"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/spdx-correct/-/spdx-correct-3.1.0.tgz#fb83e504445268f154b074e218c87c003cd31df4"
   integrity sha1-+4PlBERSaPFUsHTiGMh8ADzTHfQ=
@@ -25178,12 +25186,30 @@ spdx-correct@^2.0.3, spdx-correct@^3.0.0:
     spdx-expression-parse "^3.0.0"
     spdx-license-ids "^3.0.0"
 
-spdx-exceptions@^1.0.0, spdx-exceptions@^2.0.0, spdx-exceptions@^2.1.0:
+spdx-exceptions@^1.0.0:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/spdx-exceptions/-/spdx-exceptions-1.0.5.tgz#9d21ac4da4bdb71d060fb74e5a67531d032cbba6"
+  integrity sha1-nSGsTaS9tx0GD7dOWmdTHQMsu6Y=
+
+spdx-exceptions@^2.0.0, spdx-exceptions@^2.1.0:
   version "2.2.0"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/spdx-exceptions/-/spdx-exceptions-2.2.0.tgz#2ea450aee74f2a89bfb94519c07fcd6f41322977"
   integrity sha1-LqRQrudPKom/uUUZwH/Nb0EyKXc=
 
-spdx-expression-parse@^1.0.0, spdx-expression-parse@^2.0.1, spdx-expression-parse@^3.0.0:
+spdx-expression-parse@^1.0.0:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/spdx-expression-parse/-/spdx-expression-parse-1.0.4.tgz#9bdf2f20e1f40ed447fbe273266191fced51626c"
+  integrity sha1-m98vIOH0DtRH++JzJmGR/O1RYmw=
+
+spdx-expression-parse@^2.0.1:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/spdx-expression-parse/-/spdx-expression-parse-2.0.2.tgz#e2e0f229c057eac704c5a6d1c687eed66aca034b"
+  integrity sha512-oFxOkWCfFS0ltNp0H66gXlU4NF6bxg7RkoTYR0413t+yTY9zyj+AIWsjtN8dcVp6703ijDYBWBIARlJ7DkyP9Q==
+  dependencies:
+    spdx-exceptions "^2.0.0"
+    spdx-license-ids "^2.0.1"
+
+spdx-expression-parse@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/spdx-expression-parse/-/spdx-expression-parse-3.0.0.tgz#99e119b7a5da00e05491c9fa338b7904823b41d0"
   integrity sha512-Yg6D3XpRD4kkOmTpdgbUiEJFKghJH03fiC1OPll5h/0sO6neh2jqRDVHOQ4o/LMea0tgCkbMgea5ip/e+MkWyg==
@@ -25191,7 +25217,17 @@ spdx-expression-parse@^1.0.0, spdx-expression-parse@^2.0.1, spdx-expression-pars
     spdx-exceptions "^2.1.0"
     spdx-license-ids "^3.0.0"
 
-spdx-license-ids@^1.0.0, spdx-license-ids@^2.0.1, spdx-license-ids@^3.0.0:
+spdx-license-ids@^1.0.0:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-1.2.2.tgz#c9df7a3424594ade6bd11900d596696dc06bac57"
+  integrity sha1-yd96NCRZSt5r0RkA1ZZpbcBrrFc=
+
+spdx-license-ids@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-2.0.1.tgz#02017bcc3534ee4ffef6d58d20e7d3e9a1c3c8ec"
+  integrity sha1-AgF7zDU07k/+9tWNIOfT6aHDyOw=
+
+spdx-license-ids@^3.0.0:
   version "3.0.5"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/spdx-license-ids/-/spdx-license-ids-3.0.5.tgz#3694b5804567a458d3c8045842a6358632f62654"
   integrity sha1-NpS1gEVnpFjTyARYQqY1hjL2JlQ=
@@ -25655,8 +25691,8 @@ stringify-object@^3.2.1:
 
 stringstream@~0.0.4:
   version "0.0.6"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/stringstream/-/stringstream-0.0.6.tgz#7880225b0d4ad10e30927d167a1d6f2fd3b33a72"
-  integrity sha1-eIAiWw1K0Q4wkn0Weh1vL9OzOnI=
+  resolved "https://registry.yarnpkg.com/stringstream/-/stringstream-0.0.6.tgz#7880225b0d4ad10e30927d167a1d6f2fd3b33a72"
+  integrity sha512-87GEBAkegbBcweToUrdzf3eLhWNg06FJTebl4BVJz/JgWy8CvEr9dRtX5qWphiynMSQlxxi+QqN0z5T32SLlhA==
 
 strip-ansi@*, strip-ansi@^6.0.0:
   version "6.0.0"
@@ -26732,8 +26768,8 @@ tough-cookie@^2.0.0, tough-cookie@^2.3.3, tough-cookie@^2.3.4, tough-cookie@^2.4
 
 tough-cookie@~2.3.0:
   version "2.3.4"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/tough-cookie/-/tough-cookie-2.3.4.tgz#ec60cee38ac675063ffc97a5c18970578ee83655"
-  integrity sha1-7GDO44rGdQY//JelwYlwV47oNlU=
+  resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-2.3.4.tgz#ec60cee38ac675063ffc97a5c18970578ee83655"
+  integrity sha512-TZ6TTfI5NtZnuyy/Kecv+CnoROnyXn2DN97LontgQpCwsX2XyLYCC0ENhYkehSOwAp8rTQKc/NUIF7BkQ5rKLA==
   dependencies:
     punycode "^1.4.1"
 

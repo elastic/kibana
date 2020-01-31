@@ -6,7 +6,8 @@
 
 @import '~@logrhythm/icons/icons.css';
 
-@import '~@logrhythm/webui/styles.css';
+// @logrhythm/webui styles
+@import (inline) './netmon/styles.css';
 
 html {
   font-size: 14px;
@@ -21,5 +22,5 @@ html {
     margin-left: 3px;
   }
 
-  @import (less) '~lr-style/dist/lr-style.min.css';
+  @import (css) '~lr-style/dist/lr-style.min.css';
 }

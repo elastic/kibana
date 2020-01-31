@@ -32166,6 +32166,13 @@ exports.isCliError = isCliError;
 "use strict";
 
 /*
+ * Copyright 2019 LogRhythm, Inc
+ * Licensed under the LogRhythm Global End User License Agreement,
+ * which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = __webpack_require__(36);
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -32183,8 +32190,6 @@ exports.isCliError = isCliError;
  * specific language governing permissions and limitations
  * under the License.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = __webpack_require__(36);
 const execa_1 = tslib_1.__importDefault(__webpack_require__(351));
 const fs_1 = __webpack_require__(23);
 const Rx = tslib_1.__importStar(__webpack_require__(384));
