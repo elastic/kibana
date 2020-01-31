@@ -19,14 +19,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import { MetricAggParamEditor } from '../../../vis/editors/default/controls/metric_agg';
-import { SubAggParamEditor } from '../../../vis/editors/default/controls/sub_agg';
+
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 
-// @ts-ignore
-import { Schemas } from '../../../vis/editors/default/schemas';
+import { Schemas } from '../../schemas';
 
 const metricAggFilter = [
   '!top_hits',
@@ -42,13 +40,6 @@ const metricAggTitle = i18n.translate('common.ui.aggTypes.metrics.metricAggTitle
   defaultMessage: 'Metric agg',
 });
 
-const subtypeLabel = i18n.translate(
-  'common.ui.aggTypes.metrics.parentPipelineAggregationsSubtypeTitle',
-  {
-    defaultMessage: 'Parent Pipeline Aggregations',
-  }
-);
-
 const [metricAggSchema] = new Schemas([
   {
     group: 'none',
@@ -59,20 +50,24 @@ const [metricAggSchema] = new Schemas([
   },
 ]).all;
 
-export const parentPipelineAggHelper = {
-  subtype: subtypeLabel,
+const parentPipelineType = i18n.translate(
+  'common.ui.aggTypes.metrics.parentPipelineAggregationsSubtypeTitle',
+  {
+    defaultMessage: 'Parent Pipeline Aggregations',
+  }
+);
 
+const parentPipelineAggHelper = {
+  subtype: parentPipelineType,
   params() {
     return [
       {
         name: 'metricAgg',
-        editorComponent: MetricAggParamEditor,
         default: 'custom',
         write: parentPipelineAggWriter,
       },
       {
         name: 'customMetric',
-        editorComponent: SubAggParamEditor,
         type: 'agg',
         makeAgg(termsAgg, state: any) {
           state = state || { type: 'count' };
@@ -108,3 +103,5 @@ export const parentPipelineAggHelper = {
     return subAgg.type.getFormat(subAgg);
   },
 };
+
+export { parentPipelineAggHelper, parentPipelineType };
