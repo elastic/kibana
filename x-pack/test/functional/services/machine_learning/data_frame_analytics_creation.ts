@@ -58,6 +58,10 @@ export function MachineLearningDataFrameAnalyticsCreationProvider({
       await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutJobIdInput');
     },
 
+    async assertJobDescriptionInputExists() {
+      await testSubjects.existOrFail('mlDFAnalyticsJobCreationJobDescription');
+    },
+
     async assertJobIdValue(expectedValue: string) {
       const actualJobId = await testSubjects.getAttribute(
         'mlAnalyticsCreateJobFlyoutJobIdInput',
@@ -69,11 +73,29 @@ export function MachineLearningDataFrameAnalyticsCreationProvider({
       );
     },
 
+    async assertJobDescriptionValue(expectedValue: string) {
+      const actualJobDescription = await testSubjects.getAttribute(
+        'mlDFAnalyticsJobCreationJobDescription',
+        'value'
+      );
+      expect(actualJobDescription).to.eql(
+        expectedValue,
+        `Job description should be '${expectedValue}' (got '${actualJobDescription}')`
+      );
+    },
+
     async setJobId(jobId: string) {
       await testSubjects.setValue('mlAnalyticsCreateJobFlyoutJobIdInput', jobId, {
         clearWithKeyboard: true,
       });
       await this.assertJobIdValue(jobId);
+    },
+
+    async setJobDescription(jobDescription: string) {
+      await testSubjects.setValue('mlDFAnalyticsJobCreationJobDescription', jobDescription, {
+        clearWithKeyboard: true,
+      });
+      await this.assertJobDescriptionValue(jobDescription);
     },
 
     async assertSourceIndexInputExists() {
