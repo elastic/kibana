@@ -35,7 +35,7 @@ export const ActionTypeMenu = ({ onActionTypeChange }: Props) => {
 
   const cardNodes = actionTypes
     .sort((a, b) => a.name.localeCompare(b.name))
-    .map((item, index): any => {
+    .map((item, index) => {
       return (
         <EuiFlexItem key={index}>
           <EuiCard

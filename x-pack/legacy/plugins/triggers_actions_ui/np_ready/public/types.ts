@@ -5,6 +5,14 @@
  */
 import { TypeRegistry } from './application/type_registry';
 import { SanitizedAlert as Alert } from '../../../alerting/common';
+import {
+  EmailActionParams,
+  PagerDutyActionParams,
+  IndexActionParams,
+  ServerLogActionParams,
+  WebhookActionParams,
+  SlackActionParams,
+} from './application/components/builtin_action_types/types';
 export { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
 
 export type ActionTypeIndex = Record<string, ActionType>;
@@ -19,8 +27,8 @@ export interface ActionConnectorFieldsProps {
   errors: { [key: string]: string[] };
 }
 
-export interface ActionParamsProps {
-  action: any;
+export interface ActionParamsProps<TParams> {
+  actionParams: TParams;
   index: number;
   editAction: (property: string, value: any, index: number) => void;
   errors: { [key: string]: string[] };
@@ -41,7 +49,14 @@ export interface ActionTypeModel {
   validateConnector: (action: ActionConnector) => ValidationResult;
   validateParams: (actionParams: any) => ValidationResult;
   actionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> | null;
-  actionParamsFields: React.FunctionComponent<ActionParamsProps> | null;
+  actionParamsFields:
+    | React.FunctionComponent<ActionParamsProps<EmailActionParams>>
+    | React.FunctionComponent<ActionParamsProps<IndexActionParams>>
+    | React.FunctionComponent<ActionParamsProps<PagerDutyActionParams>>
+    | React.FunctionComponent<ActionParamsProps<ServerLogActionParams>>
+    | React.FunctionComponent<ActionParamsProps<SlackActionParams>>
+    | React.FunctionComponent<ActionParamsProps<WebhookActionParams>>
+    | null;
 }
 
 export interface ValidationResult {

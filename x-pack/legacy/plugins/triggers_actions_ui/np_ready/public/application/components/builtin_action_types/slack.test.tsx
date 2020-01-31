@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector } from '../../../types';
+import { ActionTypeModel, ActionConnector, ActionParamsProps } from '../../../types';
+import { SlackActionParams } from './types';
 
 const ACTION_TYPE_ID = '.slack';
 let actionTypeModel: ActionTypeModel;
@@ -116,13 +117,15 @@ describe('SlackParamsFields renders', () => {
     if (!actionTypeModel.actionParamsFields) {
       return;
     }
-    const ParamsFields = actionTypeModel.actionParamsFields;
+    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
+      ActionParamsProps<SlackActionParams>
+    >;
     const actionParams = {
       message: 'test message',
     };
     const wrapper = mountWithIntl(
       <ParamsFields
-        action={actionParams}
+        actionParams={actionParams}
         errors={{ message: [] }}
         editAction={() => {}}
         index={0}

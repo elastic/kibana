@@ -71,24 +71,27 @@ export const AlertAdd = () => {
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
-  const actionsErrors = alert.actions.reduce((acc: any, alertAction: AlertAction) => {
-    const actionType = actionTypeRegistry.get(alertAction.actionTypeId);
-    if (!actionType) {
-      return { ...acc };
-    }
-    const actionValidationErrors = actionType.validateParams(alertAction.params);
-    return { ...acc, [alertAction.id]: actionValidationErrors };
-  }, {});
+  const actionsErrors = alert.actions.reduce(
+    (acc: Record<string, { errors: IErrorObject }>, alertAction: AlertAction) => {
+      const actionType = actionTypeRegistry.get(alertAction.actionTypeId);
+      if (!actionType) {
+        return { ...acc };
+      }
+      const actionValidationErrors = actionType.validateParams(alertAction.params);
+      return { ...acc, [alertAction.id]: actionValidationErrors };
+    },
+    {}
+  ) as Record<string, { errors: IErrorObject }>;
 
   const hasActionErrors = !!Object.entries(actionsErrors)
     .map(([, actionErrors]) => actionErrors)
-    .find((actionErrors: any) => {
+    .find((actionErrors: { errors: IErrorObject }) => {
       return !!Object.keys(actionErrors.errors).find(
         errorKey => actionErrors.errors[errorKey].length >= 1
       );
     });
 
-  async function onSaveAlert(): Promise<any> {
+  async function onSaveAlert(): Promise<Alert | null> {
     try {
       // remove actionTypeId for actions to valid save
       alert.actions.forEach((_alertAction: AlertAction, index: number) => {
@@ -106,9 +109,8 @@ export const AlertAdd = () => {
       );
       return newAlert;
     } catch (error) {
-      return {
-        error,
-      };
+      setServerError(error);
+      return null;
     }
   }
 
@@ -156,11 +158,10 @@ export const AlertAdd = () => {
                   setIsSaving(true);
                   const savedAlert = await onSaveAlert();
                   setIsSaving(false);
-                  if (savedAlert && savedAlert.error) {
-                    return setServerError(savedAlert.error);
+                  if (savedAlert) {
+                    closeFlyout();
+                    reloadAlerts();
                   }
-                  closeFlyout();
-                  reloadAlerts();
                 }}
               >
                 <FormattedMessage

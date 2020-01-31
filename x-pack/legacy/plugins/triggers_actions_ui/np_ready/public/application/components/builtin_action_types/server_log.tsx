@@ -19,6 +19,7 @@ import {
   EuiContextMenuPanel,
 } from '@elastic/eui';
 import { ActionTypeModel, ValidationResult, ActionParamsProps } from '../../../types';
+import { ServerLogActionParams } from './types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -45,7 +46,7 @@ export function getActionType(): ActionTypeModel {
         message: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (!actionParams.message || actionParams.message.length === 0) {
+      if (!actionParams.message?.length) {
         errors.message.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredServerLogMessageText',
@@ -62,15 +63,10 @@ export function getActionType(): ActionTypeModel {
   };
 }
 
-export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> = ({
-  action,
-  editAction,
-  index,
-  errors,
-  messageVariables,
-  defaultMessage,
-}) => {
-  const { message, level } = action;
+export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
+  ServerLogActionParams
+>> = ({ actionParams, editAction, index, errors, messageVariables, defaultMessage }) => {
+  const { message, level } = actionParams;
   const levelOptions = [
     { value: 'trace', text: 'Trace' },
     { value: 'debug', text: 'Debug' },

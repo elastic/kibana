@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector } from '../../../types';
+import { ActionTypeModel, ActionConnector, ActionParamsProps } from '../../../types';
+import { WebhookActionParams } from './types';
 
 const ACTION_TYPE_ID = '.webhook';
 let actionTypeModel: ActionTypeModel;
@@ -138,12 +139,19 @@ describe('WebhookParamsFields renders', () => {
     if (!actionTypeModel.actionParamsFields) {
       return;
     }
-    const ParamsFields = actionTypeModel.actionParamsFields;
+    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
+      ActionParamsProps<WebhookActionParams>
+    >;
     const actionParams = {
       body: 'test message',
     };
     const wrapper = mountWithIntl(
-      <ParamsFields action={actionParams} errors={{ body: [] }} editAction={() => {}} index={0} />
+      <ParamsFields
+        actionParams={actionParams}
+        errors={{ body: [] }}
+        editAction={() => {}}
+        index={0}
+      />
     );
     expect(wrapper.find('[data-test-subj="webhookBodyEditor"]').length > 0).toBeTruthy();
     expect(

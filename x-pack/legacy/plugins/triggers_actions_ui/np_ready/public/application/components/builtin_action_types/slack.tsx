@@ -26,6 +26,7 @@ import {
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
+import { SlackActionParams } from './types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -67,7 +68,7 @@ export function getActionType(): ActionTypeModel {
         message: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (!actionParams.message || actionParams.message.length === 0) {
+      if (!actionParams.message?.length) {
         errors.message.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredSlackMessageText',
@@ -137,15 +138,15 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
   );
 };
 
-const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
-  action,
+const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionParams>> = ({
+  actionParams,
   editAction,
   index,
   errors,
   messageVariables,
   defaultMessage,
 }) => {
-  const { message } = action;
+  const { message } = actionParams;
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
   useEffect(() => {
     if (defaultMessage && defaultMessage.length > 0) {

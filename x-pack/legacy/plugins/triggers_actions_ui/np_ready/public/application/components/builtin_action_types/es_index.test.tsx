@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector } from '../../../types';
+import { ActionTypeModel, ActionConnector, ActionParamsProps } from '../../../types';
+import { IndexActionParams } from './types';
 
 const ACTION_TYPE_ID = '.index';
 let actionTypeModel: ActionTypeModel;
@@ -112,14 +113,21 @@ describe('IndexParamsFields renders', () => {
     if (!actionTypeModel.actionParamsFields) {
       return;
     }
-    const ParamsFields = actionTypeModel.actionParamsFields;
+    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
+      ActionParamsProps<IndexActionParams>
+    >;
     const actionParams = {
       index: 'test_index',
       refresh: false,
       documents: ['test'],
     };
     const wrapper = mountWithIntl(
-      <ParamsFields action={actionParams} errors={{ index: [] }} editAction={() => {}} index={0} />
+      <ParamsFields
+        actionParams={actionParams}
+        errors={{ index: [] }}
+        editAction={() => {}}
+        index={0}
+      />
     );
     expect(wrapper.find('[data-test-subj="indexInput"]').length > 0).toBeTruthy();
     expect(
