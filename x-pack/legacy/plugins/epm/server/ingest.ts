@@ -46,9 +46,9 @@ export async function createDatasource({
   datasource: Omit<Datasource, 'id'>;
 }) {
   const result: ReturnTypeCreate<Datasource> = await ingestAPI({
-    path: '/api/ingest_manager/agent_configs',
+    path: '/api/ingest_manager/datasources',
     method: 'post',
-    body: { ...datasource },
+    body: datasource,
     request,
   });
 
