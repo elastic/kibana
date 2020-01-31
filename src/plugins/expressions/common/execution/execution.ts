@@ -297,9 +297,9 @@ export class Execution<
       return asts.map((item: ExpressionAstExpression) => {
         return async (subInput = input) => {
           const output = await this.params.executor.interpret(item, subInput);
-          // This is why when any sub-expression errors, the entire thing errors
           if (isExpressionValueError(output)) throw output.error;
-          return this.cast(output, argDefs[argName as any].types);
+          const casted = this.cast(output, argDefs[argName as any].types);
+          return casted;
         };
       });
     });

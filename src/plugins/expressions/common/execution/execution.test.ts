@@ -20,6 +20,7 @@
 import { Execution } from './execution';
 import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
+import { ExpressionFunctionDefinition } from '../../public';
 
 const createExecution = (
   expression: string = 'foo bar=123',
@@ -34,9 +35,13 @@ const createExecution = (
   return execution;
 };
 
-const run = async (expression: string = 'foo bar=123', context?: Record<string, unknown>) => {
+const run = async (
+  expression: string = 'foo bar=123',
+  context?: Record<string, unknown>,
+  input: any = null
+) => {
   const execution = createExecution(expression, context);
-  execution.start(null);
+  execution.start(input);
   return await execution.result;
 };
 
@@ -208,6 +213,77 @@ describe('Execution', () => {
       const res = await run('sleep 10 | sleep 10');
       expect(res).toBe(null);
     });
+
+    test('result is undefined until execution completes', async () => {
+      const execution = createExecution('sleep 10');
+      expect(execution.state.get().result).toBe(undefined);
+      execution.start(null);
+      expect(execution.state.get().result).toBe(undefined);
+      await new Promise(r => setTimeout(r, 1));
+      expect(execution.state.get().result).toBe(undefined);
+      await new Promise(r => setTimeout(r, 11));
+      expect(execution.state.get().result).toBe(null);
+    });
+  });
+
+  describe('when function throws', () => {
+    test('error is reported in output object', async () => {
+      const result = await run('error "foobar"');
+
+      expect(result).toMatchObject({
+        type: 'error',
+      });
+    });
+
+    test('error message is prefixed with function name', async () => {
+      const result = await run('error "foobar"');
+
+      expect(result).toMatchObject({
+        error: {
+          message: `[error] > foobar`,
+        },
+      });
+    });
+
+    test('returns error of the first function that throws', async () => {
+      const result = await run('error "foo" | error "bar"');
+
+      expect(result).toMatchObject({
+        error: {
+          message: `[error] > foo`,
+        },
+      });
+    });
+
+    test('when function throws, execution still succeeds', async () => {
+      const execution = await createExecution('error "foo"');
+      execution.start(null);
+
+      const result = await execution.result;
+
+      expect(result).toMatchObject({
+        type: 'error',
+      });
+      expect(execution.state.get().state).toBe('result');
+      expect(execution.state.get().result).toMatchObject({
+        type: 'error',
+      });
+    });
+
+    test('does not execute remaining functions in pipeline', async () => {
+      const spy: ExpressionFunctionDefinition<'spy', any, {}, any> = {
+        name: 'spy',
+        args: {},
+        help: '',
+        fn: jest.fn(),
+      };
+      const executor = createUnitTestExecutor();
+      executor.registerFunction(spy);
+
+      await executor.run('error "..." | spy', null);
+
+      expect(spy.fn).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe('state', () => {
@@ -230,9 +306,9 @@ describe('Execution', () => {
     });
 
     test('execution state is "result" when execution successfully completes', async () => {
-      const execution = createExecution('sleep 20');
+      const execution = createExecution('sleep 1');
       execution.start(null);
-      await new Promise(r => setTimeout(r, 21));
+      await new Promise(r => setTimeout(r, 30));
       expect(execution.state.get().state).toBe('result');
     });
 
@@ -241,6 +317,17 @@ describe('Execution', () => {
       execution.start(null);
       await execution.result;
       expect(execution.state.get().state).toBe('result');
+    });
+  });
+
+  describe('sub-expressions', () => {
+    test('executes sub-expressions', async () => {
+      const res = await run('add val={add 5 | access "value"}', {}, null);
+
+      expect(res).toMatchObject({
+        type: 'num',
+        value: 5,
+      });
     });
   });
 });
