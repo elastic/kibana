@@ -16,9 +16,6 @@ import {
   EuiButtonEmpty,
   EuiSwitch,
   EuiFormRow,
-  EuiTextColor,
-  EuiSpacer,
-  EuiText,
   EuiContextMenuItem,
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -564,7 +561,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
       <EuiFormRow
         fullWidth
         error={errors.subject}
-        isInvalid={errors.subject.length > 0 && message !== undefined}
+        isInvalid={errors.subject.length > 0 && subject !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.subjectTextFieldLabel',
           {
@@ -574,7 +571,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
       >
         <EuiFieldText
           fullWidth
-          isInvalid={errors.subject.length > 0 && message !== undefined}
+          isInvalid={errors.subject.length > 0 && subject !== undefined}
           name="subject"
           data-test-subj="emailSubjectInput"
           value={subject || ''}

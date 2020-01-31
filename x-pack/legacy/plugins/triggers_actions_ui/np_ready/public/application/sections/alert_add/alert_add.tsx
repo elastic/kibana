@@ -91,26 +91,21 @@ export const AlertAdd = () => {
       );
     });
 
-  async function onSaveAlert(): Promise<Alert | null> {
+  async function onSaveAlert(): Promise<Alert | undefined> {
     try {
-      // remove actionTypeId for actions to valid save
-      alert.actions.forEach((_alertAction: AlertAction, index: number) => {
-        setActionProperty('actionTypeId', undefined, index);
-      });
-
       const newAlert = await createAlert({ http, alert });
       toastNotifications.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.alertForm.saveSuccessNotificationText', {
           defaultMessage: "Saved '{alertName}'",
           values: {
-            alertName: newAlert.id,
+            alertName: newAlert.name,
           },
         })
       );
       return newAlert;
-    } catch (error) {
-      setServerError(error);
-      return null;
+    } catch (errorRes) {
+      setServerError(errorRes);
+      return undefined;
     }
   }
 

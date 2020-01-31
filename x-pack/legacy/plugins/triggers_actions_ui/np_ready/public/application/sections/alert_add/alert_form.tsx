@@ -81,6 +81,7 @@ export function validateBaseProperties(alertObject: Alert) {
 
 interface AlertFormProps {
   alert: Alert;
+  canChangeTrigger?: boolean; // to hide Change trigger button
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
   serverError: {
@@ -93,7 +94,13 @@ interface ActiveActionConnectorState {
   index: number;
 }
 
-export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormProps) => {
+export const AlertForm = ({
+  alert,
+  canChangeTrigger = true,
+  dispatch,
+  errors,
+  serverError,
+}: AlertFormProps) => {
   const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = useAppDependencies();
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
     alertTypeRegistry.get(alert.alertTypeId)
@@ -584,19 +591,21 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
             </h5>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            onClick={() => {
-              setAlertProperty('alertTypeId', null);
-              setAlertTypeModel(null);
-            }}
-          >
-            <FormattedMessage
-              defaultMessage="Change"
-              id="xpack.triggersActionsUI.sections.alertForm.changeAlertTypeLink"
-            />
-          </EuiLink>
-        </EuiFlexItem>
+        {canChangeTrigger ? (
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              onClick={() => {
+                setAlertProperty('alertTypeId', null);
+                setAlertTypeModel(null);
+              }}
+            >
+              <FormattedMessage
+                defaultMessage="Change"
+                id="xpack.triggersActionsUI.sections.alertForm.changeAlertTypeLink"
+              />
+            </EuiLink>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
       {AlertParamsExpressionComponent ? (
         <AlertParamsExpressionComponent
