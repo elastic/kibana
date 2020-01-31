@@ -98,12 +98,12 @@ export class PulseService {
         // savedObjects: deps.savedObjects,
       })
     );
-    if (sendUsageFrom === 'server') {
-      // poll for instructions every second for this deployment
-      setInterval(() => {
-        this.loadInstructions().catch(err => this.log.error(err.stack));
-      }, 10000);
+    // poll for instructions every second for this deployment
+    setInterval(() => {
+      this.loadInstructions().catch(err => this.log.error(err.stack));
+    }, 10000);
 
+    if (sendUsageFrom === 'server') {
       this.log.debug('Will attempt first telemetry collection in 5 seconds...');
 
       setTimeout(() => {

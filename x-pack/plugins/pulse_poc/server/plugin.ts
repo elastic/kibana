@@ -8,7 +8,6 @@ import { readdirSync } from 'fs';
 import { resolve } from 'path';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { take } from 'rxjs/operators';
 import { PulsePOCCheckFunction, PulsePOCSetupFunction } from './types';
 
 interface PulsePOCChannel {
@@ -47,7 +46,7 @@ export class PulsePocPlugin {
     logger.info(
       `Starting up POC pulse service, which wouldn't actually be part of Kibana in reality`
     );
-    const esClient = await core.elasticsearch.adminClient$.pipe(take(1)).toPromise();
+    const esClient = core.elasticsearch.createClient('xpack-pulse_poc');
     await esClient.callAsInternalUser('indices.putTemplate', {
       name: 'pulse-poc-raw-template',
       body: {
@@ -152,6 +151,16 @@ export class PulsePocPlugin {
         const channels = await Promise.all(allChannelCheckResults);
         return response.ok({ body: { channels } });
       }
+    );
+
+    await Promise.all(
+      this.channels.reduce((promises, { id, checks }) => {
+        const index = PulsePocPlugin.getIndexName(id);
+        return [
+          ...checks.map(async ({ setup }) => setup && (await setup(esClient, index))),
+          ...promises,
+        ];
+      }, [] as Array<Promise<void>>)
     );
   }
 

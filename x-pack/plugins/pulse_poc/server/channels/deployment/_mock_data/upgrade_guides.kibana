@@ -1,0 +1,57 @@
+POST pulse-upgrade-assistant-guides/_doc
+{
+  "fromVersion": "8.0.0",
+  "targetVersion": "8.1.0",
+  "guide": [
+    {
+      "description": "Prepare to upgrade to 8.1",
+      "substeps": [
+        {
+          "description": "Backup your data",
+          "docLink": "https://www.elastic.co/guide/en/elasticsearch/reference/current/snapshot-restore.html"
+        }
+      ]
+    },
+    {
+      "description": "Upgrade the stack to 8.1",
+      "substeps": [
+        {
+          "description": "Rolling upgrade to Elasticsearch 8.1",
+          "docLink": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rolling-upgrades.html"
+        },
+        {
+          "description": "Upgrade to Kibana 8.1",
+          "docLink": "https://www.elastic.co/guide/en/kibana/master/upgrade.html",
+          "checks": [
+            {
+              "method": "indices.exists",
+              "options": {
+                "index": ".kibana"
+              },
+              "path": "",
+              "value": {
+                "eq": true
+              }
+            }
+          ]
+        },
+        {
+          "description": "Upgrade to Logstash 8.1",
+          "docLink": "https://www.elastic.co/guide/en/logstash/master/upgrade.html",
+          "checks": [
+            {
+              "method": "indices.exists",
+              "options": {
+                "index": ".logstash"
+              },
+              "path": "",
+              "value": {
+                "eq": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

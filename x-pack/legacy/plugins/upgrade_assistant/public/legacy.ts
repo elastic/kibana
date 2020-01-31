@@ -69,7 +69,7 @@ function startApp() {
               management.getSection('elasticsearch').register('upgrade_assistant', {
                 visible: true,
                 display: i18n.translate('xpack.upgradeAssistant.appTitle', {
-                  defaultMessage: '{version} Upgrade Assistant',
+                  defaultMessage: 'Upgrade Assistant',
                   values: { version: `${NEXT_MAJOR_VERSION}.0` },
                 }),
                 order: 100,
