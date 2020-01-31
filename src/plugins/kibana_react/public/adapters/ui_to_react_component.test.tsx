@@ -22,17 +22,14 @@ import * as ReactDOM from 'react-dom';
 import { UiComponent } from '../../../kibana_utils/common';
 import { uiToReactComponent } from './ui_to_react_component';
 
-const createUiComponent = (): UiComponent<{ cnt?: number }> => {
-  return () => ({
-    render: (el, { cnt = 0 }) => {
-      el.innerHTML = `cnt: ${cnt}`;
-    },
-  });
-};
+const UiComp: UiComponent<{ cnt?: number }> = () => ({
+  render: (el, { cnt = 0 }) => {
+    el.innerHTML = `cnt: ${cnt}`;
+  },
+});
 
 describe('uiToReactComponent', () => {
   test('can render React component', () => {
-    const UiComp = createUiComponent();
     const ReactComp = uiToReactComponent(UiComp);
     const div = document.createElement('div');
 
@@ -42,7 +39,6 @@ describe('uiToReactComponent', () => {
   });
 
   test('can pass in props', async () => {
-    const UiComp = createUiComponent();
     const ReactComp = uiToReactComponent(UiComp);
     const div = document.createElement('div');
 
@@ -52,7 +48,6 @@ describe('uiToReactComponent', () => {
   });
 
   test('re-renders when React component is re-rendered', async () => {
-    const UiComp = createUiComponent();
     const ReactComp = uiToReactComponent(UiComp);
     const div = document.createElement('div');
 
@@ -66,12 +61,12 @@ describe('uiToReactComponent', () => {
   });
 
   test('does not crash if .unmount() not provided', () => {
-    const UiComp: UiComponent<{ cnt?: number }> = () => ({
+    const UiComp2: UiComponent<{ cnt?: number }> = () => ({
       render: (el, { cnt = 0 }) => {
         el.innerHTML = `cnt: ${cnt}`;
       },
     });
-    const ReactComp = uiToReactComponent(UiComp);
+    const ReactComp = uiToReactComponent(UiComp2);
     const div = document.createElement('div');
 
     ReactDOM.render(<ReactComp cnt={1} />, div);
@@ -82,13 +77,13 @@ describe('uiToReactComponent', () => {
 
   test('calls .unmount() method once when component un-mounts', () => {
     const unmount = jest.fn();
-    const UiComp: UiComponent<{ cnt?: number }> = () => ({
+    const UiComp2: UiComponent<{ cnt?: number }> = () => ({
       render: (el, { cnt = 0 }) => {
         el.innerHTML = `cnt: ${cnt}`;
       },
       unmount,
     });
-    const ReactComp = uiToReactComponent(UiComp);
+    const ReactComp = uiToReactComponent(UiComp2);
     const div = document.createElement('div');
 
     expect(unmount).toHaveBeenCalledTimes(0);
@@ -106,10 +101,10 @@ describe('uiToReactComponent', () => {
     const render = jest.fn((el, { cnt = 0 }) => {
       el.innerHTML = `cnt: ${cnt}`;
     });
-    const UiComp: UiComponent<{ cnt?: number }> = () => ({
+    const UiComp2: UiComponent<{ cnt?: number }> = () => ({
       render,
     });
-    const ReactComp = uiToReactComponent(UiComp);
+    const ReactComp = uiToReactComponent(UiComp2);
     const div = document.createElement('div');
 
     expect(render).toHaveBeenCalledTimes(0);
