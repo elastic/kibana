@@ -17,13 +17,13 @@ def withPostBuildReporting(Closure closure) {
 }
 
 def functionalTestProcess(String name, Closure closure) {
-  return { workerNumber ->
-    def kibanaPort = "61${workerNumber}1"
-    def esPort = "61${workerNumber}2"
-    def esTransportPort = "61${workerNumber}3"
+  return { processNumber ->
+    def kibanaPort = "61${processNumber}1"
+    def esPort = "61${processNumber}2"
+    def esTransportPort = "61${processNumber}3"
 
     withEnv([
-      "CI_WORKER_NUMBER=${workerNumber}",
+      "CI_PARALLEL_PROCESS_NUMBER=${processNumber}",
       "TEST_KIBANA_HOST=localhost",
       "TEST_KIBANA_PORT=${kibanaPort}",
       "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
