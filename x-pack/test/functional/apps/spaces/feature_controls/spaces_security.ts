@@ -140,7 +140,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`doesn't display Spaces management section`, async () => {
         await PageObjects.settings.navigateTo();
-        await testSubjects.existOrFail('objects'); // this ensures we've gotten to the management page
+        await testSubjects.existOrFail('management-landing'); // this ensures we've gotten to the management page
         await testSubjects.missingOrFail('spaces');
       });
 
@@ -150,7 +150,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         });
 
-        await testSubjects.existOrFail('homeApp');
+        await testSubjects.existOrFail('management-landing');
       });
 
       it(`can't navigate to create new space page`, async () => {
@@ -159,7 +159,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         });
 
-        await testSubjects.existOrFail('homeApp');
+        await testSubjects.existOrFail('management-landing');
       });
 
       it(`can't navigate to edit space page`, async () => {
@@ -172,7 +172,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           }
         );
 
-        await testSubjects.existOrFail('homeApp');
+        await testSubjects.existOrFail('management-landing');
       });
     });
   });

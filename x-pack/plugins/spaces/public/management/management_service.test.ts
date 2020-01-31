@@ -9,6 +9,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { managementPluginMock } from '../../../../../src/plugins/management/public/mocks';
 import { ManagementSection } from 'src/plugins/management/public';
+import { Capabilities } from 'kibana/public';
 
 describe('ManagementService', () => {
   describe('#setup', () => {
@@ -51,6 +52,68 @@ describe('ManagementService', () => {
 
       const service = new ManagementService();
       service.setup(deps);
+    });
+  });
+
+  describe('#start', () => {
+    it('disables the spaces management page if the user is not authorized', () => {
+      const mockSpacesManagementPage = { disable: jest.fn() };
+      const mockKibanaSection = ({
+        registerApp: jest.fn(),
+        getApp: jest
+          .fn()
+          .mockImplementation(id => (id === 'spaces' ? mockSpacesManagementPage : undefined)),
+      } as unknown) as ManagementSection;
+
+      const deps = {
+        management: managementPluginMock.createSetupContract(),
+        getStartServices: coreMock.createSetup().getStartServices,
+        spacesManager: spacesManagerMock.create(),
+      };
+
+      deps.management.sections.getSection.mockImplementation(id => {
+        if (id === 'kibana') return mockKibanaSection;
+        throw new Error(`unexpected getSection call: ${id}`);
+      });
+
+      const service = new ManagementService();
+      service.setup(deps);
+
+      const capabilities = ({ spaces: { manage: false } } as unknown) as Capabilities;
+      service.start({ capabilities });
+
+      expect(mockKibanaSection.registerApp).toHaveBeenCalledTimes(1);
+      expect(mockSpacesManagementPage.disable).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not disable the spaces management page if the user is authorized', () => {
+      const mockSpacesManagementPage = { disable: jest.fn() };
+      const mockKibanaSection = ({
+        registerApp: jest.fn(),
+        getApp: jest
+          .fn()
+          .mockImplementation(id => (id === 'spaces' ? mockSpacesManagementPage : undefined)),
+      } as unknown) as ManagementSection;
+
+      const deps = {
+        management: managementPluginMock.createSetupContract(),
+        getStartServices: coreMock.createSetup().getStartServices,
+        spacesManager: spacesManagerMock.create(),
+      };
+
+      deps.management.sections.getSection.mockImplementation(id => {
+        if (id === 'kibana') return mockKibanaSection;
+        throw new Error(`unexpected getSection call: ${id}`);
+      });
+
+      const service = new ManagementService();
+      service.setup(deps);
+
+      const capabilities = ({ spaces: { manage: true } } as unknown) as Capabilities;
+      service.start({ capabilities });
+
+      expect(mockKibanaSection.registerApp).toHaveBeenCalledTimes(1);
+      expect(mockSpacesManagementPage.disable).toHaveBeenCalledTimes(0);
     });
   });
 
