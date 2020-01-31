@@ -5,9 +5,16 @@
  */
 const SEARCH_METHOD = 'rollup.search';
 
-export const getRollupSearchRequest = AbstractSearchRequest =>
+interface Search {
+  index: string;
+  body: {
+    [key: string]: any;
+  };
+}
+
+export const getRollupSearchRequest = (AbstractSearchRequest: any) =>
   class RollupSearchRequest extends AbstractSearchRequest {
-    async search(searches) {
+    async search(searches: Search[]) {
       const requests = searches.map(({ body, index }) =>
         this.callWithRequest(SEARCH_METHOD, {
           body,

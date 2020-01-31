@@ -11,22 +11,19 @@ import {
   DefaultSearchCapabilities,
   AbstractSearchStrategy,
 } from '../../../../../../../src/plugins/vis_type_timeseries/server';
+import { RouteDependencies } from '../../types';
 
-export const registerRollupSearchStrategy = kbnServer =>
-  kbnServer.afterPluginsInit(() => {
-    if (!kbnServer.newPlatform.setup.plugins.metrics) {
-      return;
-    }
+export const registerRollupSearchStrategy = (
+  { elasticsearchService }: RouteDependencies,
+  addSearchStrategy: (searchStrategy: any) => void
+) => {
+  const RollupSearchRequest = getRollupSearchRequest(AbstractSearchRequest);
+  const RollupSearchCapabilities = getRollupSearchCapabilities(DefaultSearchCapabilities);
+  const RollupSearchStrategy = getRollupSearchStrategy(
+    AbstractSearchStrategy,
+    RollupSearchRequest,
+    RollupSearchCapabilities
+  );
 
-    const { addSearchStrategy } = kbnServer.newPlatform.setup.plugins.metrics;
-
-    const RollupSearchRequest = getRollupSearchRequest(AbstractSearchRequest);
-    const RollupSearchCapabilities = getRollupSearchCapabilities(DefaultSearchCapabilities);
-    const RollupSearchStrategy = getRollupSearchStrategy(
-      AbstractSearchStrategy,
-      RollupSearchRequest,
-      RollupSearchCapabilities
-    );
-
-    addSearchStrategy(new RollupSearchStrategy(kbnServer));
-  });
+  addSearchStrategy(new RollupSearchStrategy(elasticsearchService));
+};

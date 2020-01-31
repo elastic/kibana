@@ -39,8 +39,8 @@ export function rollup(kibana: any) {
       search: ['plugins/rollup/legacy'],
     },
     init(server: any) {
-      const { core, plugins } = server.newPlatform.setup;
-      const { usageCollection } = plugins;
+      const { core: coreSetup, plugins } = server.newPlatform.setup;
+      const { usageCollection, metrics } = plugins;
 
       const rollupSetup = (plugins.rollup as unknown) as RollupSetup;
 
@@ -48,8 +48,11 @@ export function rollup(kibana: any) {
         config: rollupSetup.__legacy.config,
       } as unknown) as PluginInitializerContext;
 
-      plugin(initContext).setup(core, {
+      const rollupPluginInstance = plugin(initContext);
+
+      rollupPluginInstance.setup(coreSetup, {
         usageCollection,
+        metrics,
         __LEGACY: {
           route: server.route.bind(server),
           plugins: {

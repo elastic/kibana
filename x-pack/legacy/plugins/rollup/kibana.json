@@ -3,7 +3,8 @@
   "version": "kibana",
   "requiredPlugins": [
     "home",
-    "index_management"
+    "index_management",
+    "metrics"
   ],
   "optionalPlugins": [
     "usageCollection"

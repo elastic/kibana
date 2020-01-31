@@ -8,6 +8,7 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { VisTypeTimeseriesSetup } from 'src/plugins/vis_type_timeseries/server';
 import { registerLicenseChecker } from '../../../server/lib/register_license_checker';
 import { PLUGIN } from '../common';
 import { ServerShim, RouteDependencies } from './types';
@@ -22,6 +23,7 @@ import {
 import { registerRollupUsageCollector } from './collectors';
 
 import { rollupDataEnricher } from './rollup_data_enricher';
+import { registerRollupSearchStrategy } from './lib/search_strategies';
 
 export class RollupsServerPlugin implements Plugin<void, void, any, any> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
@@ -31,7 +33,12 @@ export class RollupsServerPlugin implements Plugin<void, void, any, any> {
     {
       __LEGACY: serverShim,
       usageCollection,
-    }: { __LEGACY: ServerShim; usageCollection?: UsageCollectionSetup }
+      metrics,
+    }: {
+      __LEGACY: ServerShim;
+      usageCollection?: UsageCollectionSetup;
+      metrics?: VisTypeTimeseriesSetup;
+    }
   ) {
     const elasticsearch = await elasticsearchService.adminClient;
     const router = http.createRouter();
@@ -41,7 +48,6 @@ export class RollupsServerPlugin implements Plugin<void, void, any, any> {
       router,
     };
 
-    // Register license checker
     registerLicenseChecker(
       serverShim as any,
       PLUGIN.ID,
@@ -74,7 +80,14 @@ export class RollupsServerPlugin implements Plugin<void, void, any, any> {
     ) {
       serverShim.plugins.index_management.addIndexManagementDataEnricher(rollupDataEnricher);
     }
+
+    if (metrics) {
+      const { addSearchStrategy } = metrics;
+      registerRollupSearchStrategy(routeDependencies, addSearchStrategy);
+    }
   }
+
   start() {}
+
   stop() {}
 }

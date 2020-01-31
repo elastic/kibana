@@ -4,24 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get, has } from 'lodash';
+import { KibanaRequest } from 'kibana/server';
 import { leastCommonInterval, isCalendarInterval } from './lib/interval_helper';
 
-export const getRollupSearchCapabilities = DefaultSearchCapabilities =>
+export const getRollupSearchCapabilities = (DefaultSearchCapabilities: any) =>
   class RollupSearchCapabilities extends DefaultSearchCapabilities {
-    constructor(req, fieldsCapabilities, rollupIndex) {
+    constructor(
+      req: KibanaRequest,
+      fieldsCapabilities: { [key: string]: any },
+      rollupIndex: string
+    ) {
       super(req, fieldsCapabilities);
 
       this.rollupIndex = rollupIndex;
       this.availableMetrics = get(fieldsCapabilities, `${rollupIndex}.aggs`, {});
     }
 
-    get dateHistogram() {
+    public get dateHistogram() {
       const [dateHistogram] = Object.values(this.availableMetrics.date_histogram);
 
       return dateHistogram;
     }
 
-    get defaultTimeInterval() {
+    public get defaultTimeInterval() {
       return (
         this.dateHistogram.fixed_interval ||
         this.dateHistogram.calendar_interval ||
@@ -34,16 +39,16 @@ export const getRollupSearchCapabilities = DefaultSearchCapabilities =>
       );
     }
 
-    get searchTimezone() {
+    public get searchTimezone() {
       return get(this.dateHistogram, 'time_zone', null);
     }
 
-    get whiteListedMetrics() {
+    public get whiteListedMetrics() {
       const baseRestrictions = this.createUiRestriction({
         count: this.createUiRestriction(),
       });
 
-      const getFields = fields =>
+      const getFields = (fields: { [key: string]: any }) =>
         Object.keys(fields).reduce(
           (acc, item) => ({
             ...acc,
@@ -61,20 +66,20 @@ export const getRollupSearchCapabilities = DefaultSearchCapabilities =>
       );
     }
 
-    get whiteListedGroupByFields() {
+    public get whiteListedGroupByFields() {
       return this.createUiRestriction({
         everything: true,
         terms: has(this.availableMetrics, 'terms'),
       });
     }
 
-    get whiteListedTimerangeModes() {
+    public get whiteListedTimerangeModes() {
       return this.createUiRestriction({
         last_value: true,
       });
     }
 
-    getValidTimeInterval(userIntervalString) {
+    getValidTimeInterval(userIntervalString: string) {
       const parsedRollupJobInterval = this.parseInterval(this.defaultTimeInterval);
       const inRollupJobUnit = this.convertIntervalToUnit(
         userIntervalString,
