@@ -17,27 +17,11 @@
  * under the License.
  */
 
-module.exports = function(grunt) {
-  grunt.registerTask('jenkins:docs', ['docker:docs']);
+var execFileSync = require('child_process').execFileSync;
+var basename = require('path').basename;
 
-  grunt.registerTask('jenkins:unit', [
-    'run:eslint',
-    'run:sasslint',
-    'run:checkTsProjects',
-    'run:checkCoreApiChanges',
-    'run:typeCheck',
-    'run:i18nCheck',
-    'run:checkFileCasing',
-    'run:checkLockfileSymlinks',
-    'run:licenses',
-    'run:verifyDependencyVersions',
-    'run:verifyNotice',
-    'run:mocha',
-    'run:test_jest',
-    'run:test_jest_integration',
-    'run:test_projects',
-    'run:test_karma_ci',
-    'run:test_hardening',
-    'run:apiIntegrationTests',
-  ]);
-};
+process.argv.slice(2).forEach(function(file) {
+  if (basename(file)[0] === '_') return;
+  console.log(process.argv[0], file);
+  execFileSync(process.argv[0], [file], { stdio: 'inherit' });
+});

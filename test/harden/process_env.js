@@ -17,27 +17,26 @@
  * under the License.
  */
 
-module.exports = function(grunt) {
-  grunt.registerTask('jenkins:docs', ['docker:docs']);
+require('../../src/setup_node_env');
 
-  grunt.registerTask('jenkins:unit', [
-    'run:eslint',
-    'run:sasslint',
-    'run:checkTsProjects',
-    'run:checkCoreApiChanges',
-    'run:typeCheck',
-    'run:i18nCheck',
-    'run:checkFileCasing',
-    'run:checkLockfileSymlinks',
-    'run:licenses',
-    'run:verifyDependencyVersions',
-    'run:verifyNotice',
-    'run:mocha',
-    'run:test_jest',
-    'run:test_jest_integration',
-    'run:test_projects',
-    'run:test_karma_ci',
-    'run:test_hardening',
-    'run:apiIntegrationTests',
-  ]);
-};
+const test = require('tape');
+const { ObjectPrototype } = require('object-prototype');
+
+test('process.env prototype', t => {
+  t.equal(Object.prototype.isPrototypeOf(process.env), false);
+  t.equal(ObjectPrototype.isPrototypeOf(process.env), true);
+  t.end();
+});
+
+test('prototype pollution', t => {
+  Object.prototype.foo = 42; // eslint-disable-line no-extend-native
+  t.equal(process.env.foo, undefined);
+  delete Object.prototype.foo;
+  t.end();
+});
+
+test('Object.prototype functions', t => {
+  t.equal(typeof process.env.hasOwnProperty, 'function');
+  t.equal(process.env.hasOwnProperty('HOME'), true);
+  t.end();
+});
