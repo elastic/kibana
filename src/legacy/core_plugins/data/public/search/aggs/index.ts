@@ -23,7 +23,8 @@ export { AggConfig } from './agg_config';
 export { AggConfigs } from './agg_configs';
 export { FieldParamType } from './param_types';
 export { MetricAggType } from './metrics/metric_agg_type';
-export { aggTypeFieldFilters } from './param_types/filter';
+export { AggTypeFilters } from './filter';
+export { aggTypeFieldFilters, AggTypeFieldFilters } from './param_types/filter';
 export {
   parentPipelineAggHelper,
   parentPipelineType,

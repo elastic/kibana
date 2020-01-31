@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-<<<<<<< HEAD
 export function initAggTypeFilter(aggTypeFilters) {
-=======
-import { aggTypeFilters } from 'ui/agg_types';
-
-export function initAggTypeFilter() {
->>>>>>> Remove nested ui/agg_types/* items and only use ui/agg_types
   /**
    * If rollup index pattern, check its capabilities
    * and limit available aggregations based on that.

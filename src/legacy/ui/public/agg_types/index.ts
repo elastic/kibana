@@ -61,7 +61,9 @@ export {
 // static code
 export {
   AggParamType,
+  AggTypeFilters,
   aggTypeFilters,
+  AggTypeFieldFilters,
   AggGroupNames,
   aggGroupNamesMap,
   CidrMask,

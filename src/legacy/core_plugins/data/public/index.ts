@@ -55,7 +55,9 @@ export { FilterStateManager } from './filter/filter_manager';
 export {
   // agg_types TODO need to group these under a namespace or prefix
   AggParamType,
+  AggTypeFilters, // TODO convert to interface
   aggTypeFilters,
+  AggTypeFieldFilters, // TODO convert to interface
   AggGroupNames,
   aggGroupNamesMap,
   BUCKET_TYPES,
