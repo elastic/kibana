@@ -8,62 +8,50 @@ import { applyMiddleware, combineReducers, createStore, Dispatch, Store } from '
 import { createSagaMiddleware, SagaContext } from '../../lib';
 import { endpointListSaga } from './saga';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { EndpointData, EndpointListData, endpointListReducer, EndpointListState } from './index';
+import { endpointListReducer } from './index';
+import { EndpointMetadata, EndpointResultList } from '../../../../../common/types';
+import { ManagementState } from '../../types';
 import { AppAction } from '../action';
 import { endpointListData } from './selectors';
 describe('endpoint list saga', () => {
   const sleep = (ms = 100) => new Promise(wakeup => setTimeout(wakeup, ms));
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
-  let store: Store<{ endpointList: EndpointListState }>;
+  let store: Store<{ endpointList: ManagementState }>;
   let dispatch: Dispatch<AppAction>;
   let stopSagas: () => void;
   const globalStoreReducer = combineReducers({
     endpointList: endpointListReducer,
   });
   // TODO: consolidate the below ++ helpers in `index.test.ts` into a `test_helpers.ts`??
-  const generateEndpoint = (): EndpointData => {
+  const generateEndpoint = (): EndpointMetadata => {
     return {
-      machine_id: Math.random()
-        .toString(16)
-        .substr(2),
-      created_at: new Date(),
+      event: {
+        created: new Date(),
+      },
+      endpoint: {
+        policy: {
+          id: '',
+        },
+      },
+      agent: {
+        version: '',
+        id: '',
+      },
       host: {
-        name: '',
+        id: '',
         hostname: '',
-        ip: '',
-        mac_address: '',
+        ip: [''],
+        mac: [''],
         os: {
           name: '',
           full: '',
-        },
-      },
-      endpoint: {
-        domain: '',
-        is_base_image: true,
-        active_directory_distinguished_name: '',
-        active_directory_hostname: '',
-        upgrade: {
-          status: '',
-          updated_at: new Date(),
-        },
-        isolation: {
-          status: false,
-          request_status: true,
-          updated_at: new Date(),
-        },
-        policy: {
-          name: '',
-          id: '',
-        },
-        sensor: {
-          persistence: true,
-          status: {},
+          version: '',
         },
       },
     };
   };
-  const getEndpointListApiResponse = (): EndpointListData => {
+  const getEndpointListApiResponse = (): EndpointResultList => {
     return {
       endpoints: [generateEndpoint()],
       request_page_size: 1,

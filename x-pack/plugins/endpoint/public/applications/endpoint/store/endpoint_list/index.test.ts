@@ -5,53 +5,41 @@
  */
 
 import { createStore, Dispatch, Store } from 'redux';
-import { EndpointListAction, EndpointData, endpointListReducer, EndpointListState } from './index';
+import { EndpointListAction, endpointListReducer } from './index';
+import { EndpointMetadata } from '../../../../../common/types';
+import { ManagementState } from '../../types';
 import { endpointListData } from './selectors';
 
 describe('endpoint_list store concerns', () => {
-  let store: Store<EndpointListState>;
+  let store: Store<ManagementState>;
   let dispatch: Dispatch<EndpointListAction>;
   const createTestStore = () => {
     store = createStore(endpointListReducer);
     dispatch = store.dispatch;
   };
-  const generateEndpoint = (): EndpointData => {
+  const generateEndpoint = (): EndpointMetadata => {
     return {
-      machine_id: Math.random()
-        .toString(16)
-        .substr(2),
-      created_at: new Date(),
+      event: {
+        created: new Date(),
+      },
+      endpoint: {
+        policy: {
+          id: '',
+        },
+      },
+      agent: {
+        version: '',
+        id: '',
+      },
       host: {
-        name: '',
+        id: '',
         hostname: '',
-        ip: '',
-        mac_address: '',
+        ip: [''],
+        mac: [''],
         os: {
           name: '',
           full: '',
-        },
-      },
-      endpoint: {
-        domain: '',
-        is_base_image: true,
-        active_directory_distinguished_name: '',
-        active_directory_hostname: '',
-        upgrade: {
-          status: '',
-          updated_at: new Date(),
-        },
-        isolation: {
-          status: false,
-          request_status: true,
-          updated_at: new Date(),
-        },
-        policy: {
-          name: '',
-          id: '',
-        },
-        sensor: {
-          persistence: true,
-          status: {},
+          version: '',
         },
       },
     };
@@ -96,8 +84,8 @@ describe('endpoint_list store concerns', () => {
 
       const currentState = store.getState();
       expect(currentState.endpoints).toEqual(payload.endpoints);
-      expect(currentState.request_page_size).toEqual(payload.request_page_size);
-      expect(currentState.request_page_index).toEqual(payload.request_page_index);
+      expect(currentState.pageSize).toEqual(payload.request_page_size);
+      expect(currentState.pageIndex).toEqual(payload.request_page_index);
       expect(currentState.total).toEqual(payload.total);
     });
 
@@ -108,7 +96,7 @@ describe('endpoint_list store concerns', () => {
 
       dispatch({ type: 'userExitedEndpointListPage' });
       expect(store.getState().endpoints.length).toEqual(0);
-      expect(store.getState().request_page_index).toEqual(0);
+      expect(store.getState().pageIndex).toEqual(0);
     });
   });
 

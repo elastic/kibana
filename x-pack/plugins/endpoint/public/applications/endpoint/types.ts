@@ -6,8 +6,7 @@
 
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { CoreStart } from 'kibana/public';
-import { Immutable, AlertData } from '../../../common/types';
-import { EndpointListState } from './store/endpoint_list';
+import { Immutable, AlertData, EndpointMetadata } from '../../../common/types';
 import { AppAction } from './store/action';
 
 export type MiddlewareFactory = (
@@ -20,7 +19,19 @@ export type AlertListState = Immutable<{
   alerts: AlertData[];
 }>;
 
+export interface ManagementState {
+  endpoints: EndpointMetadata[];
+  total: number;
+  pageSize: number;
+  pageIndex: number;
+}
+
+export interface ManagementPagination {
+  pageIndex: number;
+  pageSize: number;
+}
+
 export interface GlobalState {
-  readonly endpointList: EndpointListState;
+  readonly endpointList: ManagementState;
   readonly alertList: AlertListState;
 }

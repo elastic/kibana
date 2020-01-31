@@ -5,26 +5,35 @@
  */
 
 import { Reducer } from 'redux';
-import { EndpointListState } from './types';
+import { ManagementState } from '../../types';
 import { AppAction } from '../action';
 
-const initialState = (): EndpointListState => {
+const initialState = (): ManagementState => {
   return {
     endpoints: [],
-    request_page_size: 10,
-    request_page_index: 0,
+    pageSize: 10,
+    pageIndex: 0,
     total: 0,
   };
 };
 
-export const endpointListReducer: Reducer<EndpointListState, AppAction> = (
+export const endpointListReducer: Reducer<ManagementState, AppAction> = (
   state = initialState(),
   action
 ) => {
   if (action.type === 'serverReturnedEndpointList') {
+    const {
+      endpoints,
+      total,
+      request_page_size: pageSize,
+      request_page_index: pageIndex,
+    } = action.payload;
     return {
       ...state,
-      ...action.payload,
+      endpoints,
+      total,
+      pageSize,
+      pageIndex,
     };
   }
 
@@ -33,11 +42,9 @@ export const endpointListReducer: Reducer<EndpointListState, AppAction> = (
   }
 
   if (action.type === 'userPaginatedEndpointListTable') {
-    const { pageIndex, pageSize } = action.payload;
     return {
       ...state,
-      request_page_size: pageSize,
-      request_page_index: pageIndex,
+      ...action.payload,
     };
   }
 
