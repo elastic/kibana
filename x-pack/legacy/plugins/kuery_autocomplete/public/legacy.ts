@@ -8,13 +8,20 @@ import { PluginInitializerContext } from 'src/core/public';
 import { npSetup, npStart } from 'ui/new_platform';
 
 import { plugin } from './index';
-import { KueryAutocompletePluginSetupDependencies } from './plugin';
+import {
+  KueryAutocompletePluginSetupDependencies,
+  KueryAutocompletePluginStartDependencies,
+} from './plugin';
 
-const plugins: Readonly<KueryAutocompletePluginSetupDependencies> = {
+const pluginsSetup: Readonly<KueryAutocompletePluginSetupDependencies> = {
   data: npSetup.plugins.data,
+};
+
+const pluginsStart: Readonly<KueryAutocompletePluginStartDependencies> = {
+  data: npStart.plugins.data,
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core);
+export const setup = pluginInstance.setup(npSetup.core, pluginsSetup);
+export const start = pluginInstance.start(npStart.core, pluginsStart);

@@ -30,6 +30,32 @@ cd apm-integration-testing/
 
 _Docker Compose is required_
 
+### Setup default APM users
+
+APM behaves differently depending on which the role and permissions a logged in user has.
+For testing purposes APM uses 3 custom users:
+
+**apm_read_user**: Apps: read. Indices: read (`apm-*`)
+
+**apm_write_user**: Apps: read/write. Indices: read (`apm-*`)
+
+**kibana_write_user** Apps: read/write. Indices: None
+
+To create the users with the correct roles run the following script:
+
+```sh
+node x-pack/legacy/plugins/apm/scripts/setup-kibana-security.js --role-suffix <github-username-or-something-unique>
+```
+
+The users will be created with the password specified in kibana.dev.yml for `elasticsearch.password`
+
+### Debugging Elasticsearch queries
+
+All APM api endpoints accept `_debug=true` as a query param that will result in the underlying ES query being outputted in the Kibana backend process.
+
+Example:
+`/api/apm/services/my_service?_debug=true`
+
 ### Unit testing
 
 Note: Run the following commands from `kibana/x-pack`.
@@ -117,5 +143,13 @@ To make the [VSCode debugger](https://vscode.readthedocs.io/en/latest/editor/deb
   "runtimeVersion": "10.15.2"
 }
 ```
+
+#### Storybook
+
+Start the [Storybook](https://storybook.js.org/) development environment with
+`yarn storybook apm`. All files with a .stories.tsx extension will be loaded.
+You can access the development environment at http://localhost:9001.
+
+#### Further resources
 
 (you'll want `runtimeVersion` to match what's in the Kibana root .nvmrc. Depending on your setup, you might be able to remove this line.)

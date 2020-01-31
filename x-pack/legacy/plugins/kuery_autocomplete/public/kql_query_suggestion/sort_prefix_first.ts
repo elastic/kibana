@@ -14,7 +14,9 @@ export function sortPrefixFirst(array: any[], prefix?: string | number, property
 
   const partitions = partition(array, entry => {
     const value = ('' + (property ? entry[property] : entry)).toLowerCase();
+
     return value.startsWith(lowerCasePrefix);
   });
+
   return [...partitions[0], ...partitions[1]];
 }
