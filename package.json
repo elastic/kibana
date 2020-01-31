@@ -72,6 +72,7 @@
     "spec_to_console": "node scripts/spec_to_console",
     "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
     "storybook": "node scripts/storybook",
+    "percy-storybook": "percy-storybook --build_dir=./storybook-build --widths=320,1280 --debug",
     "cover:report": "nyc report --temp-dir target/kibana-coverage/functional --report-dir target/coverage/report --reporter=lcov && open ./target/coverage/report/lcov-report/index.html"
   },
   "repository": {
@@ -301,6 +302,7 @@
     "@microsoft/api-documenter": "7.7.2",
     "@microsoft/api-extractor": "7.7.0",
     "@percy/agent": "^0.11.0",
+    "@percy/storybook": "^3.2.0",
     "@testing-library/react": "^9.3.2",
     "@testing-library/react-hooks": "^3.2.1",
     "@types/angular": "^1.6.56",

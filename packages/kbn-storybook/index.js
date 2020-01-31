@@ -62,21 +62,25 @@ exports.runStorybookCli = config => {
         // route errors
         subj.toPromise(),
 
-        new Promise(() => {
+        new Promise(async () => {
           // storybook never completes, so neither will this promise
           const configDir = join(__dirname, 'storybook_config');
           log.debug('Config dir:', configDir);
-          storybook({
-            mode: 'dev',
+          await storybook({
+            mode: flags.site ? 'static' : 'dev',
             port: 9001,
             configDir,
+            outputDir: flags.site ? `${REPO_ROOT}/storybook-build` : undefined,
           });
+
+          // Line is only reached when building the static version
+          process.exit();
         }),
       ]);
     },
     {
       flags: {
-        boolean: ['rebuildDll'],
+        boolean: ['rebuildDll', 'site'],
       },
       description: `
         Run the storybook examples for ${name}
