@@ -35,6 +35,7 @@ export default function({ getService, getPageObjects }) {
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
+        'doc_table:legacyTable': true,
       });
 
       await PageObjects.common.navigateToApp('discover');

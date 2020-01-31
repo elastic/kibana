@@ -22,6 +22,7 @@ import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
+  const testSubjects = getService('testSubjects');
   const pieChart = getService('pieChart');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'timePicker']);
@@ -30,7 +31,6 @@ export default function({ getService, getPageObjects }) {
 
   describe('dashboard time picker', function describeIndexTests() {
     before(async function() {
-      await PageObjects.settings.toggleDiscoverDataGrid();
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
     });
@@ -56,13 +56,16 @@ export default function({ getService, getPageObjects }) {
         name: 'saved search',
         fields: ['bytes', 'agent'],
       });
-      await dashboardExpect.docTableFieldCount(150);
+
+      const tableFields = await testSubjects.findAll('docTableField', 2500);
+      expect(tableFields).to.greaterThan(0);
 
       // Set to time range with no data
       await PageObjects.timePicker.setAbsoluteRange(
         'Jan 1, 2000 @ 00:00:00.000',
         'Jan 1, 2000 @ 01:00:00.000'
       );
+
       await dashboardExpect.docTableFieldCount(0);
     });
 

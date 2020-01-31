@@ -187,8 +187,11 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('time zone switch', () => {
-      it('should show bars in the correct time zone after switching', async function() {
-        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
+      it('should show bars in the correct time zone after switching failing', async function() {
+        await kibanaServer.uiSettings.replace({
+          'dateFormat:tz': 'America/Phoenix',
+          'doc_table:legacyTable': true,
+        });
         await browser.refresh();
         await PageObjects.header.awaitKibanaChrome();
         await PageObjects.timePicker.setDefaultAbsoluteRange();

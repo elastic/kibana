@@ -30,7 +30,10 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('security/discover');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+        'doc_table:legacyTable': true,
+      });
       await PageObjects.settings.navigateTo();
     });
 
