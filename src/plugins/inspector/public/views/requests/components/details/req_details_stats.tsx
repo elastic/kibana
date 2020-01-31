@@ -28,7 +28,7 @@ import {
   EuiTableRowCell,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Request, RequestStatistic } from '../../../../adapters/request/types';
+import { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
 import { RequestDetailsProps } from '../types';
 
 // TODO: Replace by property once available

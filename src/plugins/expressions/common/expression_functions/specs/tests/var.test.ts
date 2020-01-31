@@ -51,6 +51,8 @@ describe('expression_functions', () => {
         getInitialContext: () => initialInput,
         types: {},
         variables: { test: 1 },
+        abortSignal: {} as any,
+        inspectorAdapters: {} as any,
       };
     });
 

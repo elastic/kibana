@@ -50,6 +50,8 @@ describe('interpreter/functions#kibana', () => {
       getInitialContext: () => initialInput,
       types: {},
       variables: {},
+      abortSignal: {} as any,
+      inspectorAdapters: {} as any,
     };
   });
 
