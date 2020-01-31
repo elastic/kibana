@@ -12,8 +12,6 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
-import { AutocompleteSuggestion } from '../../../../../../src/plugins/data/public';
-
 import { euiStyled } from '../../../../observability/public';
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';
@@ -25,7 +23,7 @@ interface AutocompleteFieldProps {
   onSubmit?: (value: string) => void;
   onChange?: (value: string) => void;
   placeholder?: string;
-  suggestions: autocomplete.QuerySuggestion[];
+  suggestions: any[];
   value: string;
   autoFocus?: boolean;
   'aria-label'?: string;
