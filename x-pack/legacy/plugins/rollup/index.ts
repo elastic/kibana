@@ -19,7 +19,7 @@ export function rollup(kibana: any) {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      managementSections: ['plugins/rollup/crud_app'],
+      managementSections: ['plugins/rollup/legacy'],
       uiSettingDefaults: {
         [CONFIG_ROLLUPS]: {
           name: i18n.translate('xpack.rollupJobs.rollupIndexPatternsTitle', {
@@ -34,13 +34,9 @@ export function rollup(kibana: any) {
           category: ['rollups'],
         },
       },
-      indexManagement: [
-        'plugins/rollup/index_pattern_creation',
-        'plugins/rollup/index_pattern_list',
-        'plugins/rollup/extend_index_management',
-      ],
-      visualize: ['plugins/rollup/visualize'],
-      search: ['plugins/rollup/search'],
+      indexManagement: ['plugins/rollup/legacy'],
+      visualize: ['plugins/rollup/legacy'],
+      search: ['plugins/rollup/legacy'],
     },
     init(server: any) {
       const { core, plugins } = server.newPlatform.setup;

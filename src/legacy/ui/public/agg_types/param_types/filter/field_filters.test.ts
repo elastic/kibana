@@ -19,7 +19,7 @@
 
 import { IndexedArray } from 'ui/indexed_array';
 import { AggTypeFieldFilters } from './field_filters';
-import { AggConfig } from 'ui/vis';
+import { AggConfig } from '../../agg_config';
 import { Field } from '../../../../../../plugins/data/public';
 
 describe('AggTypeFieldFilters', () => {

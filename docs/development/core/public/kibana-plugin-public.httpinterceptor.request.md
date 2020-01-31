@@ -9,17 +9,17 @@ Define an interceptor to be executed before a request is sent.
 <b>Signature:</b>
 
 ```typescript
-request?(request: Request, controller: IHttpInterceptController): Promise<Request> | Request | void;
+request?(fetchOptions: Readonly<HttpFetchOptionsWithPath>, controller: IHttpInterceptController): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  request | <code>Request</code> |  |
+|  fetchOptions | <code>Readonly&lt;HttpFetchOptionsWithPath&gt;</code> |  |
 |  controller | <code>IHttpInterceptController</code> |  |
 
 <b>Returns:</b>
 
-`Promise<Request> | Request | void`
+`MaybePromise<Partial<HttpFetchOptionsWithPath>> | void`
 
