@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['header', 'common', 'visualize']);
   const log = getService('log');
   const visName1 = 'Connections over time';
@@ -21,7 +20,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show toast messages when report is queued', async () => {
-      const reportQueued = 'Reporting: Visualization generation has been queued. You can track its progress under Management.';
+      const reportQueued =
+        'Reporting: Visualization generation has been queued. You can track its progress under Management.';
       log.debug('click Reporting button');
       await PageObjects.header.clickReporting();
       // PageObjects.common.saveScreenshot('Reportingstep-1');
@@ -37,14 +37,15 @@ export default function ({ getService, getPageObjects }) {
 
   it('Management - Reporting - click the button should download the PDF', () => {
     let windowHandles;
-    return PageObjects.settings.clickDownloadPdf()
+    return PageObjects.settings
+      .clickDownloadPdf()
       .then(() => {
         return PageObjects.common.sleep(5000);
       })
       .then(() => {
         return this.remote.getAllWindowHandles();
       })
-      .then((handles) => {
+      .then(handles => {
         windowHandles = handles;
         this.remote.switchToWindow(windowHandles[1]);
       })
@@ -57,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
       .then(() => {
         return this.remote.getCurrentUrl();
       })
-      .then((url) => {
+      .then(url => {
         PageObjects.common.debug('URL = ' + url);
         expect(url).to.contain('/jobs/download/');
       });

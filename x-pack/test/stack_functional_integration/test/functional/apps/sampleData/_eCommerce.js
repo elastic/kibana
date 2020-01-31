@@ -1,7 +1,13 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
-  describe('eCommerce Sample Data', function sampleData () {
+  describe('eCommerce Sample Data', function sampleData() {
     const browser = getService('browser');
     const PageObjects = getPageObjects(['common']);
     const testSubjects = getService('testSubjects');
@@ -12,12 +18,11 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.common.sleep(3000);
     });
 
-    it('install eCommerce sample data', async function installECommerceData () {
+    it('install eCommerce sample data', async function installECommerceData() {
       await testSubjects.click('addSampleDataSetecommerce');
       await PageObjects.common.sleep(5000);
       // verify it's installed by finding the remove link
       await testSubjects.find('removeSampleDataSetecommerce');
     });
-
   });
 }

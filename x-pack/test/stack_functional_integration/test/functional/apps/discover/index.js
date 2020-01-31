@@ -4,18 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export default function ({ loadTestFile, getService }) {
+export default function({ loadTestFile, getService }) {
   const browser = getService('browser');
 
   before(async () => {
     await browser.setWindowSize(1200, 800);
   });
 
-  describe('discover app', function () {
+  describe('discover app', function() {
     loadTestFile(require.resolve('./discover'));
     loadTestFile(require.resolve('./field_data'));
     loadTestFile(require.resolve('./shared_links'));
     loadTestFile(require.resolve('./collapse_expand'));
   });
-};
+}

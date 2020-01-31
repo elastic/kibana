@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import expect from '@kbn/expect';
 
 export default ({ getService, getPageObjects }) => {
@@ -8,7 +14,7 @@ export default ({ getService, getPageObjects }) => {
 
   const repo = 'elastic/code-examples_empty-file';
 
-  describe('Manage Repositories', function manageRepositoryTest () {
+  describe('Manage Repositories', function manageRepositoryTest() {
     before(() => {
       log.debug('navigate to code app');
       return PageObjects.common.navigateToApp('code');
@@ -52,4 +58,4 @@ export default ({ getService, getPageObjects }) => {
       });
     });
   });
-}
+};

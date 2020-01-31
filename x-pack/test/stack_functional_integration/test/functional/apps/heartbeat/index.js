@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('heartbeat app', function () {
-
+export default function({ loadTestFile }) {
+  describe('heartbeat app', function() {
     require('./_heartbeat');
     loadTestFile(require.resolve('./_heartbeat'));
-
   });
-};
+}

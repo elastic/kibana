@@ -7,7 +7,6 @@
 import expect from '@kbn/expect';
 
 export default ({ getService, getPageObjects }) => {
-
   describe('console app', function describeIndexTests() {
     const PageObjects = getPageObjects(['common', 'settings']);
     const retry = getService('retry');
@@ -27,7 +26,7 @@ export default ({ getService, getPageObjects }) => {
         '    "match_all": {}',
         '  }',
         '}',
-        ''
+        '',
       ];
       await screenshot.take('Console-help-expanded');
       // collapse the help pane because we only get the VISIBLE TEXT, not the part that is scrolled

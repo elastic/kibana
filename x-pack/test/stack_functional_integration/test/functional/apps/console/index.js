@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export default function ({ loadTestFile, getService }) {
-
+export default function({ loadTestFile, getService }) {
   const browser = getService('browser');
 
   before(async () => {
     await browser.setWindowSize(1200, 800);
   });
-  describe('console app', function () {
+  describe('console app', function() {
     loadTestFile(require.resolve('./console'));
   });
 }

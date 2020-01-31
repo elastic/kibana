@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export default function ({ loadTestFile }) {
-  describe('settings / management app', function () {
+export default function({ loadTestFile }) {
+  describe('settings / management app', function() {
     loadTestFile(require.resolve('./_get_version_info'));
     loadTestFile(require.resolve('./_index_pattern_create_delete'));
   });

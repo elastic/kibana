@@ -6,19 +6,20 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'settings', 'visualize']);
   const log = getService('log');
   const screenshot = getService('screenshots');
 
   describe('visualize app', function describeIndexTests() {
-    before(function () {
+    before(function() {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
 
       log.debug('navigateToApp visualize');
-      return PageObjects.common.navigateToApp('visualize')
-        .then(function () {
+      return PageObjects.common
+        .navigateToApp('visualize')
+        .then(function() {
           log.debug('clickLineChart');
           return PageObjects.visualize.clickLineChart();
         })
@@ -26,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.visualize.clickNewSearch();
         })
         .then(function setAbsoluteRange() {
-          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+          log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
           return PageObjects.header.setAbsoluteRange(fromTime, toTime);
         })
         .then(function clickBucket() {
@@ -48,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
         .then(function clickGo() {
           return PageObjects.visualize.clickGo();
         })
-        .then(function () {
+        .then(function() {
           return PageObjects.header.getSpinnerDone(); // only matches the hidden spinner
         });
     });
@@ -57,16 +58,16 @@ export default function ({ getService, getPageObjects }) {
       const vizName1 = 'Visualization LineChart';
 
       it('should be able to save and load', function pageHeader() {
-
-        return PageObjects.visualize.saveVisualization(vizName1)
-          .then(function (message) {
+        return PageObjects.visualize
+          .saveVisualization(vizName1)
+          .then(function(message) {
             log.debug('Saved viz message = ' + message);
-            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+            expect(message).to.be('Visualization Editor: Saved Visualization "' + vizName1 + '"');
           })
           .then(function testVisualizeWaitForToastMessageGone() {
             return PageObjects.visualize.waitForToastMessageGone();
           })
-          .then(function () {
+          .then(function() {
             return PageObjects.visualize.loadSavedVisualization(vizName1);
           })
           .then(function waitForVisualization() {
@@ -80,30 +81,39 @@ export default function ({ getService, getPageObjects }) {
         const expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
 
         // sleep a bit before trying to get the chart data
-        return PageObjects.common.sleep(3000)
-          .then(function () {
-            return PageObjects.visualize.getLineChartData('fill="#57c17b"')
-              .then(function showData(data) {
-                return screenshot.take('Visualize-line-chart')
-                  .then(() => {
-                    const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
-                    for (let x = 0; x < data.length; x++) {
-                      log.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
-                        (expectedChartData[x].split(' ')[1]).replace(',', '') + '  data[x]=' + data[x] +
-                        ' diff=' + Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]));
-                      expect(Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance).to.be.ok();
-                    }
-                    log.debug('Done');
-                  });
-
+        return PageObjects.common.sleep(3000).then(function() {
+          return PageObjects.visualize
+            .getLineChartData('fill="#57c17b"')
+            .then(function showData(data) {
+              return screenshot.take('Visualize-line-chart').then(() => {
+                const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
+                for (let x = 0; x < data.length; x++) {
+                  log.debug(
+                    'x=' +
+                      x +
+                      " expectedChartData[x].split(' ')[1] = " +
+                      expectedChartData[x].split(' ')[1].replace(',', '') +
+                      '  data[x]=' +
+                      data[x] +
+                      ' diff=' +
+                      Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x])
+                  );
+                  expect(
+                    Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) <
+                      tolerance
+                  ).to.be.ok();
+                }
+                log.debug('Done');
               });
-          });
+            });
+        });
       });
 
       it('should show correct data', function pageHeader() {
         const expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
 
-        return PageObjects.visualize.collapseChart()
+        return PageObjects.visualize
+          .collapseChart()
           .then(function getDataTableData() {
             return PageObjects.visualize.getDataTableData();
           })
@@ -112,7 +122,6 @@ export default function ({ getService, getPageObjects }) {
             expect(data.trim().split('\n')).to.eql(expectedChartData);
           });
       });
-
     });
   });
-};
+}

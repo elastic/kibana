@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export default function ({ loadTestFile }) {
-  describe('apm-server app', function () {
+export default function({ loadTestFile }) {
+  describe('apm-server app', function() {
     loadTestFile(require.resolve('./apm_server'));
   });
 }

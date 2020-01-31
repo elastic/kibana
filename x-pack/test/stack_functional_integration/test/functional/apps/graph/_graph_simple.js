@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'graph']);
   const log = getService('log');
   const screenshot = getService('screenshots');
@@ -34,4 +34,4 @@ export default function ({ getService, getPageObjects }) {
       expect(circles.length > 0).to.be(true);
     });
   });
-};
+}

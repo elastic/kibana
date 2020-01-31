@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'settings', 'discover']);
   const log = getService('log');
   const screenshot = getService('screenshots');
@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     });
 
-    describe('field data', function () {
+    describe('field data', function() {
       it('should initially be expanded', async () => {
         screenshot.take('Discover-sidebar-expanded');
         const width = await PageObjects.discover.getSidebarWidth();
@@ -49,4 +49,4 @@ export default function ({ getService, getPageObjects }) {
       });
     });
   });
-};
+}
