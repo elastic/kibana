@@ -38,6 +38,7 @@ import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { trackUiMetric, METRIC_TYPE } from './track_ui_metric';
 import { useRequest, sendRequest } from './use_request';
 import { Template } from '../../common/types';
+import { doMappingsHaveType } from '../components/mappings_editor';
 
 let httpClient: ng.IHttpService;
 
@@ -225,8 +226,9 @@ export function loadIndexTemplate(name: Template['name']) {
 }
 
 export async function saveTemplate(template: Template, isClone?: boolean) {
+  const includeTypeName = doMappingsHaveType(template.mappings);
   const result = sendRequest({
-    path: `${apiPrefix}/templates`,
+    path: `${apiPrefix}/templates?include_type_name=${includeTypeName}`,
     method: 'put',
     body: template,
   });
@@ -239,9 +241,10 @@ export async function saveTemplate(template: Template, isClone?: boolean) {
 }
 
 export async function updateTemplate(template: Template) {
+  const includeTypeName = doMappingsHaveType(template.mappings);
   const { name } = template;
   const result = sendRequest({
-    path: `${apiPrefix}/templates/${encodeURIComponent(name)}`,
+    path: `${apiPrefix}/templates/${encodeURIComponent(name)}?include_type_name=${includeTypeName}`,
     method: 'put',
     body: template,
   });
