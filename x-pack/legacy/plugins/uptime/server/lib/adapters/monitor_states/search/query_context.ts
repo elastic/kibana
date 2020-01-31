@@ -96,8 +96,8 @@ export class QueryContext {
     // only slower, but only marginally so, and prevents people from seeing weird
     // behavior.
 
-    const tsStart = parseRelativeEndDate(this.dateRangeEnd)!.subtract(5, 'minutes');
     const tsEnd = parseRelativeEndDate(this.dateRangeEnd)!;
+    const tsStart = tsEnd.subtract(5, 'minutes');
 
     return {
       range: {
