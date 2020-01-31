@@ -43,7 +43,6 @@ export interface Props {
   apiFetchResult: NewsfeedApiFetchResult;
   notificationsChannel: PulseChannel<NotificationInstruction>;
   errorsChannel: PulseChannel<ErrorInstruction>;
-  fixedVersionsSeen: Set<string>; // I'll also need to pass a callback to update this from the flyout
 }
 
 const NEWSFEED_LAST_HASH = 'pulse_news_last_hash';
@@ -80,15 +79,10 @@ window.notificationsChannel.sendPulse([{
 // on every fresh page reload, fetch news all over again.
 updateLastHash('');
 
-function addNewInstructionsToSeenSet(fixedVersionsSeen: Set<string>, entries: string[]): void {
-  entries.forEach(entry => fixedVersionsSeen.add(entry));
-}
-
 export const NewsfeedNavButton = ({
   apiFetchResult,
   notificationsChannel,
   errorsChannel,
-  fixedVersionsSeen,
 }: Props) => {
   const [showBadge, setShowBadge] = useState<boolean>(false);
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
@@ -139,10 +133,6 @@ export const NewsfeedNavButton = ({
       if (instructions.length) {
         setShowPulseBadge(instructions.length > 0);
         setErrorsInstructionsToShow(instructions);
-        addNewInstructionsToSeenSet(
-          fixedVersionsSeen,
-          instructions.map(instruction => instruction.hash)
-        );
       }
       // updateRecordsToSeen(instructions); TODO: implement me
     }
@@ -157,7 +147,7 @@ export const NewsfeedNavButton = ({
       }
     });
     return () => subscription.unsubscribe();
-  }, [errorsInstructions$, fixedVersionsSeen]);
+  }, [errorsInstructions$]);
   // FOR THE POC: JUST USE PULSE AS THE SOURCE OF TRUTH FOR NEWS!
   // useEffect(() => {
   //   function handleStatusChange(fetchResult: FetchResult | void | null) {

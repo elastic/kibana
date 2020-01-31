@@ -22,15 +22,11 @@ export async function check(es: IScopedClusterClient, { deploymentId, indexName 
             {
               term: { deployment_id: deploymentId },
             },
-          ],
-          filter: {
-            range: {
-              timestamp: {
-                gte: 'now-10s',
-                lte: 'now',
-              },
+            {
+              term: { status: 'new' },
             },
-          },
+          ],
+          must_not: { exists: { field: 'seenOn' } },
         },
       },
     },

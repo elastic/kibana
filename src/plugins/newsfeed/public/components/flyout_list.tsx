@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import {
   EuiIcon,
   EuiFlyout,
@@ -58,7 +58,6 @@ export const NewsfeedFlyout = ({
 }: Props) => {
   const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
-
   if (newsFetchResult && newsFetchResult.feedItems.length) {
     const lastNotificationHash = getLastItemHash(newsFetchResult.feedItems);
     const hasNew = newsFetchResult.feedItems.some(item => item.status === 'new');
@@ -70,6 +69,20 @@ export const NewsfeedFlyout = ({
             ...feedItem,
             publishOn: feedItem.publishOn.format('x'),
             expireOn: feedItem.expireOn.format('x'),
+            status: 'seen',
+            seenOn: moment().format('x'),
+          };
+        })
+      );
+    }
+  }
+  if (errorsInstructionsToShow && errorsInstructionsToShow.length > 0) {
+    const hasNew = errorsInstructionsToShow.some(instructions => instructions.status === 'new');
+    if (hasNew) {
+      errorsChannel.sendPulse(
+        errorsInstructionsToShow.map(item => {
+          return {
+            ...item,
             status: 'seen',
             seenOn: moment().format('x'),
           };

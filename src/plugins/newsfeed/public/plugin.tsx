@@ -41,7 +41,6 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
   private readonly stop$ = new Rx.ReplaySubject(1);
   private notificationsChannel?: PulseChannel<NotificationInstruction>;
   private errorsChannel?: PulseChannel<ErrorInstruction>;
-  private fixedVersionsSeen: Set<string> = new Set();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
@@ -88,7 +87,6 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
           apiFetchResult={api$}
           notificationsChannel={this.notificationsChannel}
           errorsChannel={this.errorsChannel!}
-          fixedVersionsSeen={this.fixedVersionsSeen}
         />
       </I18nProvider>,
       targetDomElement

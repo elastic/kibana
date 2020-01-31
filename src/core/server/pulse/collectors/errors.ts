@@ -40,7 +40,12 @@ export interface ErrorInstruction extends PulseInstruction {
 }
 export interface Payload {
   deploymentId: string;
-  records: Array<Omit<PulseErrorPayloadRecord, 'channel_id' | 'deployment_id'>>;
+  records: Array<
+    Omit<
+      PulseErrorPayloadRecord,
+      'channel_id' | 'deployment_id' | 'fixedVersion' | 'sendTo' | 'pulseMessage' | 'seenOn'
+    >
+  >;
 }
 export interface PulseErrorPayloadRecord {
   channel_id: string;
@@ -51,6 +56,7 @@ export interface PulseErrorPayloadRecord {
   message: string;
   status?: 'new' | 'seen';
   timestamp?: Date;
+  seenOn?: Date;
 }
 
 export class Collector extends PulseCollector<Payload> {
