@@ -16,8 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { get } from 'lodash';
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { monitorStatesQuery } from '../../../queries/monitor_states_query';
@@ -68,10 +67,11 @@ export const MonitorListComponent = (props: Props) => {
     loading,
   } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
-  const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
 
-  const nextPagePagination = get<string>(data, 'monitorStates.nextPagePagination');
-  const prevPagePagination = get<string>(data, 'monitorStates.prevPagePagination');
+  const items = data?.monitorStates?.summaries ?? [];
+
+  const nextPagePagination = data?.monitorStates?.nextPagePagination ?? '';
+  const prevPagePagination = data?.monitorStates?.prevPagePagination ?? '';
 
   const getExpandedRowMap = () => {
     return drawerIds.reduce((map: ExpandedRowMap, id: string) => {
@@ -89,18 +89,24 @@ export const MonitorListComponent = (props: Props) => {
   const columns = [
     {
       align: 'left' as const,
-      width: '20%',
       field: 'state.monitor.status',
       name: labels.STATUS_COLUMN_LABEL,
-      render: (status: string, { state: { timestamp } }: MonitorSummary) => {
-        return <MonitorListStatusColumn status={status} timestamp={timestamp} />;
+      mobileOptions: {
+        fullWidth: true,
+      },
+      render: (status: string, { state: { timestamp, checks } }: MonitorSummary) => {
+        return (
+          <MonitorListStatusColumn status={status} timestamp={timestamp} checks={checks ?? []} />
+        );
       },
     },
     {
       align: 'left' as const,
-      width: '30%',
       field: 'state.monitor.name',
       name: labels.NAME_COLUMN_LABEL,
+      mobileOptions: {
+        fullWidth: true,
+      },
       render: (name: string, summary: MonitorSummary) => (
         <MonitorPageLink monitorId={summary.monitor_id} linkParameters={linkParameters}>
           {name ? name : `Unnamed - ${summary.monitor_id}`}
@@ -109,7 +115,7 @@ export const MonitorListComponent = (props: Props) => {
       sortable: true,
     },
     {
-      aligh: 'left' as const,
+      align: 'left' as const,
       field: 'state.url.full',
       name: labels.URL,
       render: (url: string, summary: MonitorSummary) => (
@@ -140,6 +146,7 @@ export const MonitorListComponent = (props: Props) => {
       name: '',
       sortable: true,
       isExpander: true,
+      width: '24px',
       render: (id: string) => {
         return (
           <EuiButtonIcon
@@ -159,7 +166,7 @@ export const MonitorListComponent = (props: Props) => {
   ];
 
   return (
-    <Fragment>
+    <>
       <EuiPanel>
         <EuiTitle size="xs">
           <h5>
@@ -211,7 +218,7 @@ export const MonitorListComponent = (props: Props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-    </Fragment>
+    </>
   );
 };
 
