@@ -6,6 +6,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getIndexListUri } from '../../../../../../../../index_management/public/app/services/navigation';
 
@@ -27,6 +28,8 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  EuiPopover,
+  EuiContextMenu,
 } from '@elastic/eui';
 
 import {
@@ -315,6 +318,19 @@ export class DetailPanel extends Component {
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    button={
+                      <EuiButton>
+                        { i18n.translate(
+                        'xpack.crossClusterReplication.autoFollowPatternDetailPanel.manageButtonLabel', {defaultMessage: 'Manage'})
+                        }
+                      </EuiButton>}
+                    panelPaddingSize="none"
+                    withTitle
+                    repositionOnScroll
+                  >
+                    <EuiContextMenu panels={[]} />
+                  </EuiPopover>
                   <EuiButton
                     fill
                     color="primary"
