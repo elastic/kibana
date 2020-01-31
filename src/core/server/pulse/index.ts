@@ -28,7 +28,7 @@ import { Logger } from '../logging';
 import { ElasticsearchServiceSetup, IClusterClient } from '../elasticsearch';
 import { PulseChannel, PulseInstruction } from './channel';
 import { sendUsageFrom, sendPulse, Fetcher } from './send_pulse';
-import { SavedObjectsServiceSetup } from '../saved_objects';
+// import { SavedObjectsServiceSetup } from '../saved_objects';
 import { InternalHttpServiceSetup } from '../http';
 import { PulseElasticsearchClient } from './client_wrappers/elasticsearch';
 import { registerPulseRoutes } from './routes';
@@ -39,7 +39,7 @@ export interface InternalPulseService {
 
 export interface PulseSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
-  savedObjects: SavedObjectsServiceSetup;
+  // savedObjects: SavedObjectsServiceSetup;
   http: InternalHttpServiceSetup;
 }
 
@@ -122,6 +122,11 @@ export class PulseService {
         return channel;
       },
     };
+  }
+
+  public async stop() {
+    this.channels.forEach(channel => channel.stop());
+    // TODO: Stop Instructions and SendTelemetry timers
   }
 
   private async loadInstructions() {

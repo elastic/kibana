@@ -136,7 +136,7 @@ export class Server {
 
     const pulseSetup = await this.pulse.setup({
       elasticsearch: elasticsearchServiceSetup,
-      savedObjects: savedObjectsSetup,
+      // savedObjects: savedObjectsSetup,
       http: httpSetup,
     });
 
@@ -197,9 +197,9 @@ export class Server {
   public async stop() {
     this.log.debug('stopping server');
 
-    // await this.pulse.stop();
     await this.legacy.stop();
     await this.plugins.stop();
+    await this.pulse.stop();
     await this.savedObjects.stop();
     await this.elasticsearch.stop();
     await this.http.stop();

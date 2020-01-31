@@ -47,7 +47,6 @@ export class NotificationsService {
 
   public setup({ uiSettings }: SetupDeps): NotificationsSetup {
     const notificationSetup = { toasts: this.toasts.setup({ uiSettings }) };
-
     this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error: Error) => {
       notificationSetup.toasts.addDanger({
         title: i18n.translate('core.notifications.unableUpdateUISettingNotificationMessageTitle', {

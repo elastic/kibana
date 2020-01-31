@@ -20,7 +20,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
 import { PulseChannel } from '../channel';
 import { RegisterRoute } from './types';
-
+// we need the current Kibana Version to send in all of the payloads
 const validate = {
   params: schema.object({
     channelId: schema.string(),
@@ -28,11 +28,23 @@ const validate = {
   body: schema.object({
     payload: schema.object(
       {
-        // error specific schema, we should remove this into `records`
-        message: schema.maybe(schema.string()),
-        errorId: schema.maybe(schema.string()),
+        channelId: schema.maybe(schema.string()),
+        deploymentId: schema.maybe(schema.string()),
         // generic records (array of objects, each channel processes the records differently)
-        records: schema.arrayOf(schema.object({}, { allowUnknowns: true })),
+        records: schema.arrayOf(
+          schema.object(
+            {
+              hash: schema.string(),
+              message: schema.maybe(schema.string()),
+              status: schema.maybe(schema.string()),
+              currentKibanaVersion: schema.maybe(schema.string()),
+              timestamp: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
+              errorId: schema.maybe(schema.string()),
+              fixedVersion: schema.maybe(schema.string()),
+            },
+            { allowUnknowns: true }
+          )
+        ),
       },
       { allowUnknowns: true }
     ),

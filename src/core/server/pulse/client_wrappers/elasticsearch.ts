@@ -25,6 +25,7 @@ import uuid from 'uuid';
 import { IClusterClient } from '../../elasticsearch';
 
 export interface PulseDocument {
+  _id?: string;
   hash?: string;
 }
 
@@ -48,13 +49,18 @@ export class PulseElasticsearchClient {
     }
   }
 
-  public async index(channel: string, doc: PulseDocument | PulseDocument[]) {
+  public async index<T extends PulseDocument>(channel: string, doc: T | T[]) {
     const records = Array.isArray(doc) ? doc : [doc];
     await this.elasticsearch.callAsInternalUser<any>('bulk', {
       body: records.reduce((acc, record) => {
         return [
           ...acc,
-          { update: { _index: this.buildIndex(channel), _id: record.hash || uuid.v4() } },
+          {
+            update: {
+              _index: this.buildIndex(channel),
+              _id: record._id || record.hash || uuid.v4(),
+            },
+          },
           { doc: record, doc_as_upsert: true },
         ];
       }, [] as object[]),

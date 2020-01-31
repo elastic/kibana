@@ -25,7 +25,18 @@ import moment from 'moment';
 import { PulseCollector, CollectorSetupContext } from '../types';
 
 export interface Payload {
-  errorId: string;
+  deploymentId: string;
+  records: Array<Omit<PulseErrorPayloadRecord, 'channel_id' | 'deployment_id'>>;
+}
+export interface PulseErrorPayloadRecord {
+  channel_id: string;
+  currentKibanaVersion?: string;
+  deployment_id: string;
+  hash: string;
+  fixedVersion?: string;
+  message: string;
+  status: 'new' | 'seen';
+  timestamp: Date;
 }
 
 export class Collector extends PulseCollector<Payload> {
@@ -36,11 +47,38 @@ export class Collector extends PulseCollector<Payload> {
     if (this.elasticsearch?.createIndexIfNotExist) {
       const mappings = {
         properties: {
-          timestamp: {
-            type: 'date',
-          },
-          errorId: {
+          channel_id: {
             type: 'keyword',
+          },
+          currentKibanaVersion: {
+            type: 'text',
+            fields: {
+              keyword: {
+                type: 'keyword',
+                ignore_above: 256,
+              },
+            },
+          },
+          deployment_id: {
+            type: 'keyword',
+          },
+          hash: {
+            type: 'text',
+            fields: {
+              keyword: {
+                type: 'keyword',
+                ignore_above: 256,
+              },
+            },
+          },
+          id: {
+            type: 'text',
+            fields: {
+              keyword: {
+                type: 'keyword',
+                ignore_above: 256,
+              },
+            },
           },
           message: {
             type: 'text',
@@ -50,24 +88,55 @@ export class Collector extends PulseCollector<Payload> {
               },
             },
           },
+          status: {
+            type: 'keyword',
+          },
+          timestamp: {
+            type: 'date',
+          },
+          fixedVersion: {
+            type: 'keyword',
+          },
         },
       };
       await this.elasticsearch!.createIndexIfNotExist(this.channelName, mappings);
     }
   }
-  public async putRecord(originalPayload: Payload) {
-    const payload = { timestamp: moment.utc().toISOString(), ...originalPayload };
-    if (this.elasticsearch) await this.elasticsearch.index(this.channelName, payload);
+  public async putRecord(originalPayload: Payload | Payload[]) {
+    const payloads = Array.isArray(originalPayload) ? originalPayload : [originalPayload];
+    await Promise.all(
+      payloads.reduce((promises, payload) => {
+        return [
+          ...promises,
+          ...payload.records.map(async record => {
+            if (!record.hash) {
+              throw Error(`error payload does not contain hash: ${JSON.stringify(record)}.`);
+            }
+            if (this.elasticsearch) {
+              await this.elasticsearch.index(this.channelName, {
+                ...record,
+                channel_id: 'errors',
+                deployment_id: '123',
+                status: record.status || 'new',
+                id: record.hash,
+                timestamp: record.timestamp || moment(),
+              });
+            }
+          }),
+        ];
+      }, [] as Array<Promise<void>>)
+    );
   }
 
   public async getRecords() {
     if (this.elasticsearch) {
       const results = await this.elasticsearch.search(this.channelName, {
         bool: {
+          should: [{ match: { status: 'new' } }],
           filter: {
             range: {
               timestamp: {
-                gte: 'now-10s',
+                gte: 'now-20s',
                 lte: 'now',
               },
             },
