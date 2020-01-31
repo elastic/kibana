@@ -1,6 +1,6 @@
 # Session Storage
 
-To sync state from state containers to session storage use `sessionStorageStateStorage`.
+To sync state from state containers to `sessionStorage` use `sessionStorageStateStorage`.
 
 ```ts
 import {

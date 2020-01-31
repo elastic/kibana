@@ -1,7 +1,7 @@
 # Sync states utility
 
-In case you need to sync multiple states or a state to multiple storages, there is a handy util for that.
-It saves a bit of boilerplate by returning `start` and `stop` functions for all `stateSync` configs at once.
+In case you need to sync multiple states or one state to multiple storages, there is a handy util for that.
+It saves a bit of boilerplate by returning `start` and `stop` functions for all `syncState` configs at once.
 
 ```ts
 import {

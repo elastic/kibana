@@ -2,15 +2,17 @@
 
 `KbnUrlStateStorage` is a state storage for `syncState` utility which:
 
-- Keeps state in sync with the url
-- Serialises data and stores data in url in 2 different formats:
+- Keeps state in sync with the URL.
+- Serializes data and stores it in the URL in 2 different formats:
   1. [Rison](https://github.com/w33ble/rison-node) encoded.
-  2. Hashed url. In url we store only the hash from the serialized state, but the state itself is stored in sessionStorage.
+  2. Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in `sessionStorage`.
      See kibana's advanced option for more context `state:storeInSessionStorage`
-- Takes care of listening to url updates and notifies state about updates
-- Takes care of batching url updates to prevent redundant browser history records
+- Takes care of listening to the URL updates and notifies state about the updates.
+- Takes care of batching URL updates to prevent redundant browser history records.
 
 ### Basic Example
+
+With state sync utility:
 
 ```ts
 import {
@@ -31,24 +33,34 @@ const { start, stop } = syncState({
 start();
 
 // state container change is synced to state storage
-// in this case, kbnUrlStateStorage updates the url to "/#?_a=(count:2)"
+// in this case, kbnUrlStateStorage updates the URL to "/#?_a=(count:2)"
 stateContainer.set({ count: 2 });
 
 stop();
 ```
 
-### Setting up url format option
+Or just by itself:
+
+```ts
+// assuming url is "/#?_a=(count:2)"
+const stateStorage = createKbnUrlStateStorage();
+
+stateStorage.get('_a'); // returns {count: a}
+stateStorage.set('_a', { count: 0 }); // updates url to "/#?_a=(count:0)"
+```
+
+### Setting URL format option
 
 ```ts
 const stateStorage = createKbnUrlStateStorage({
-  useHash: core.uiSettings.get('state:storeInSessionStorage'), // put full encoded rison or just the hash into the url
+  useHash: core.uiSettings.get('state:storeInSessionStorage'), // put the complete encoded rison or just the hash into the URL
 });
 ```
 
 ### Passing [history](https://github.com/ReactTraining/history) instance
 
-Under the hood `kbnUrlStateStorage` uses [history](https://github.com/ReactTraining/history) for updating the url and for listening for url updates.
-To prevent bugs caused by missing history updates, make sure your app uses 1 instance of history for url changes which may interfere with each other.
+Under the hood `kbnUrlStateStorage` uses [history](https://github.com/ReactTraining/history) for updating the URL and for listening to the URL updates.
+To prevent bugs caused by missing history updates, make sure your app uses one instance of history for URL changes which may interfere with each other.
 
 For example, if you use `react-router`:
 
@@ -77,23 +89,23 @@ const urlStateStorage = createKbnUrlStateStorage();
 urlStateStorage.set('_a', { state: 1 });
 urlStateStorage.set('_b', { state: 2 });
 
-// url hasn't been updated yet
+// URL hasn't been updated yet
 setTimeout(() => {
-  // now url is actually "/#?_a=(state:1)&_b=(state:2)"
+  // now URL is actually "/#?_a=(state:1)&_b=(state:2)"
   // and 2 updates were batched into 1 history.push() call
 }, 0);
 ```
 
-For cases, where granular control over url updates is needed, `kbnUrlStateStorage` supports these advanced apis:
+For cases, where granular control over URL updates is needed, `kbnUrlStateStorage` provides these advanced apis:
 
 - `kbnUrlStateStorage.flush({replace: boolean})` - allows to synchronously apply any pending updates.
-  `replace` option allows to use `history.replace()` instead of `history.push()`. Returned boolean indicates if any update happened.
+  `replace` option allows to use `history.replace()` instead of `history.push()`. Returned boolean indicates if any update happened
 - `kbnUrlStateStorage.cancel()` - cancels any pending updates
 
-### Sharing one instance of `kbnUrlStateStorage`
+### Sharing one `kbnUrlStateStorage` instance
 
 `kbnUrlStateStorage` is stateful, as it keeps track of pending updates.
-So if there are multiple state syncs happening in the time, then one instance of `kbnUrlStateStorage` should be used to make sure the same update queue is used.
+So if there are multiple state syncs happening in the same time, then one instance of `kbnUrlStateStorage` should be used to make sure, that the same update queue is used.
 Otherwise it could cause redundant browser history records.
 
 ```ts
@@ -128,7 +140,7 @@ const { start, stop } = syncStates([
   },
 ]);
 
-// correct:
+// the best:
 
 import { createBrowserHistory } from 'history';
 const history = createBrowserHistory();

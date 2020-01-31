@@ -11,9 +11,9 @@ State syncing utilities include:
   - Subscribes to state changes and pushes them to state storage.
   - Optionally subscribes to state storage changes and pushes them to state.
 - 2 storage types for `syncState` util:
-  - [KbnUrlStateStorage](./storages/kbn_url_storage.md) - Serialises state and persists it to url's query param in rison or hashed format (similar to what AppState & GlobalState did in legacy world).
-    Listens for state updates in the url and pushes updates back to state.
-  - [SessionStorageStateStorage](./storages/session_storage.md) - Serialises state and persists it to session storage.
+  - [KbnUrlStateStorage](./storages/kbn_url_storage.md) - Serializes state and persists it to URL's query param in rison or hashed format (similar to what `AppState` & `GlobalState` did in legacy world).
+    Listens for state updates in the URL and pushes them back to state.
+  - [SessionStorageStateStorage](./storages/session_storage.md) - Serializes state and persists it to session storage.
 
 ## Example
 
@@ -35,8 +35,8 @@ const { start, stop } = syncState({
 
 start();
 
-// state container change is synced to state storage
-// in this case, kbnUrlStateStorage updates the url to "/#?_a=(count:2)"
+// state container change is synched to state storage
+// kbnUrlStateStorage updates the URL to "/#?_a=(count:2)"
 stateContainer.set({ count: 2 });
 
 stop();
@@ -44,9 +44,9 @@ stop();
 
 ## Demos Plugins
 
-See demos [here](../../../../../examples/state_containers_examples).
+See demos plugins [here](../../../../../examples/state_containers_examples).
 
-To run them, start kibana with `--run-examples` flag
+To run them, start kibana with `--run-examples` flag.
 
 ## Reference
 
