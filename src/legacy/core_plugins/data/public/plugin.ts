@@ -18,16 +18,26 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { SearchService, SearchStart } from './search';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import {
+  DataPublicPluginStart,
+  addSearchStrategy,
+  defaultSearchStrategy,
+} from '../../../../plugins/data/public';
+import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
 import {
-  setFieldFormats,
-  setNotifications,
   setIndexPatterns,
   setQueryService,
+  setUiSettings,
+  setInjectedMetadata,
+  setFieldFormats,
+  setSearchService,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
+
+export interface DataPluginSetupDependencies {
+  expressions: ExpressionsSetup;
+}
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -38,9 +48,7 @@ export interface DataPluginStartDependencies {
  *
  * @public
  */
-export interface DataStart {
-  search: SearchStart;
-}
+export interface DataStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 /**
  * Data Plugin - public
@@ -54,25 +62,24 @@ export interface DataStart {
  * or static code.
  */
 
-export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDependencies> {
-  private readonly search = new SearchService();
+export class DataPlugin
+  implements Plugin<void, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
+  public setup(core: CoreSetup) {
+    setInjectedMetadata(core.injectedMetadata);
 
-  public setup(core: CoreSetup) {}
+    // This is to be deprecated once we switch to the new search service fully
+    addSearchStrategy(defaultSearchStrategy);
+  }
 
   public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
-    // This is required for when Angular code uses Field and FieldList.
-    setFieldFormats(data.fieldFormats);
+    setUiSettings(core.uiSettings);
     setQueryService(data.query);
     setIndexPatterns(data.indexPatterns);
     setFieldFormats(data.fieldFormats);
-    setNotifications(core.notifications);
+    setSearchService(data.search);
 
-    return {
-      search: this.search.start(core),
-    };
+    return {};
   }
 
-  public stop() {
-    this.search.stop();
-  }
+  public stop() {}
 }

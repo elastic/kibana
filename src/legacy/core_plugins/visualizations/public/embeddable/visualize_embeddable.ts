@@ -23,13 +23,10 @@ import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
 import { SavedObject } from 'ui/saved_objects/types';
-import { Vis } from 'ui/vis';
-import { queryGeohashBounds } from 'ui/visualize/loader/utils';
 import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
-import { ISearchSource } from 'ui/courier';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -38,6 +35,7 @@ import {
   onlyDisabledFiltersChanged,
   esFilters,
   mapAndFlattenFilters,
+  ISearchSource,
 } from '../../../../../plugins/data/public';
 import {
   EmbeddableInput,
@@ -48,6 +46,8 @@ import {
 } from '../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
+import { Vis } from '../np_ready/public';
+import { queryGeohashBounds } from './query_geohash_bounds';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 

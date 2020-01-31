@@ -28,7 +28,7 @@ export async function getMetrics(
   // TODO: Pass in req parameters as explicit function parameters
   let min = moment.utc(req.payload.timeRange.min).valueOf();
   const max = moment.utc(req.payload.timeRange.max).valueOf();
-  const minIntervalSeconds = config.get('xpack.monitoring.min_interval_seconds');
+  const minIntervalSeconds = config.get('monitoring.ui.min_interval_seconds');
   const bucketSize = calculateTimeseriesInterval(min, max, minIntervalSeconds);
   const timezone = await getTimezone(req);
 

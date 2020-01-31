@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PackageInfo,
+} from 'src/core/public';
 import { Storage, IStorageWrapper } from '../../kibana_utils/public';
 import {
   DataPublicPluginSetup,
@@ -27,11 +33,17 @@ import {
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
-import { FieldFormatsService } from './field_formats_provider';
+import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
 import { IndexPatterns } from './index_patterns';
-import { setNotifications, setFieldFormats, setOverlays, setIndexPatterns } from './services';
+import {
+  setNotifications,
+  setFieldFormats,
+  setOverlays,
+  setIndexPatterns,
+  setUiSettings,
+} from './services';
 import { createFilterAction, GLOBAL_APPLY_FILTER_ACTION } from './actions';
 import { APPLY_FILTER_TRIGGER } from '../../embeddable/public';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
@@ -42,12 +54,14 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
+  private readonly packageInfo: PackageInfo;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
     this.storage = new Storage(window.localStorage);
+    this.packageInfo = initializerContext.env.packageInfo;
   }
 
   public setup(core: CoreSetup, { uiActions }: DataSetupDependencies): DataPublicPluginSetup {
@@ -62,7 +76,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     return {
       autocomplete: this.autocomplete.setup(core),
-      search: this.searchService.setup(core),
+      search: this.searchService.setup(core, this.packageInfo),
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
     };
@@ -74,6 +88,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     setNotifications(notifications);
     setFieldFormats(fieldFormats);
     setOverlays(overlays);
+    setUiSettings(core.uiSettings);
 
     const indexPatternsService = new IndexPatterns(uiSettings, savedObjects.client, http);
     setIndexPatterns(indexPatternsService);
