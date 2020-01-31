@@ -5,24 +5,30 @@
  */
 
 import { Legacy } from 'kibana';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
+import {
+  CoreSetup,
+  CoreStart,
+  ElasticsearchServiceSetup,
+  Plugin,
+  PluginInitializerContext,
+} from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { PluginSetupContract as SecurityPluginSetup } from '../../../../plugins/security/server';
-import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
+import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import { PLUGIN_ID } from '../common/constants';
-import { registerRoutes } from './routes';
-import { checkLicenseFactory, getExportTypesRegistry, runValidations, LevelLogger } from './lib';
-import { createBrowserDriverFactory } from './browsers';
-import { registerReportingUsageCollector } from './usage';
 import { logConfiguration } from '../log_configuration';
-import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
-
+import { ReportingPluginSpecOptions } from '../types.d';
+import { createBrowserDriverFactory } from './browsers';
+import { checkLicenseFactory, getExportTypesRegistry, LevelLogger, runValidations } from './lib';
+import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
-import { ReportingPluginSpecOptions } from '../types';
+import { registerReportingUsageCollector } from './usage';
 
 export interface ReportingSetupDeps {
+  elasticsearch: ElasticsearchServiceSetup;
   usageCollection: UsageCollectionSetup;
   security: SecurityPluginSetup;
   __LEGACY: LegacySetup;
@@ -51,7 +57,7 @@ export class ReportingPlugin implements Plugin<void, void, ReportingSetupDeps, R
   constructor(private context: PluginInitializerContext) {}
 
   public async setup(core: CoreSetup, plugins: ReportingSetupDeps) {
-    const { usageCollection, __LEGACY } = plugins;
+    const { elasticsearch, usageCollection, __LEGACY } = plugins;
     const exportTypesRegistry = getExportTypesRegistry();
 
     let isCollectorReady = false;
@@ -68,7 +74,7 @@ export class ReportingPlugin implements Plugin<void, void, ReportingSetupDeps, R
     const browserDriverFactory = await createBrowserDriverFactory(__LEGACY, logger);
 
     logConfiguration(__LEGACY, logger);
-    runValidations(__LEGACY, logger, browserDriverFactory);
+    runValidations(__LEGACY, elasticsearch, logger, browserDriverFactory);
 
     const { xpack_main: xpackMainPlugin, reporting } = __LEGACY.plugins;
     mirrorPluginStatus(xpackMainPlugin, reporting);

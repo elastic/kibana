@@ -38,8 +38,14 @@ describe('CSV Execute Job', function() {
   let cancellationToken;
   let mockServer;
   let clusterStub;
-  let callWithRequestStub;
+  let callAsCurrentUserStub;
   let uiSettingsGetStub;
+
+  const mockElasticsearch = {
+    dataClient: {
+      asScoped: () => clusterStub,
+    },
+  };
 
   beforeAll(async function() {
     const crypto = nodeCrypto({ encryptionKey });
@@ -56,11 +62,11 @@ describe('CSV Execute Job', function() {
       _scroll_id: 'defaultScrollId',
     };
     clusterStub = {
-      callWithRequest: function() {},
+      callAsCurrentUser: function() {},
     };
 
-    callWithRequestStub = sinon
-      .stub(clusterStub, 'callWithRequest')
+    callAsCurrentUserStub = sinon
+      .stub(clusterStub, 'callAsCurrentUser')
       .resolves(defaultElasticsearchResponse);
 
     const configGetStub = sinon.stub();
@@ -121,7 +127,7 @@ describe('CSV Execute Job', function() {
 
   describe('calls getScopedSavedObjectsClient with request', function() {
     it('containing decrypted headers', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -139,7 +145,7 @@ describe('CSV Execute Job', function() {
         .config()
         .get.withArgs('server.basePath')
         .returns(serverBasePath);
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -157,7 +163,7 @@ describe('CSV Execute Job', function() {
         .config()
         .get.withArgs('server.basePath')
         .returns(serverBasePath);
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobBasePath = 'foo-job/basePath/';
       await executeJob(
         'job789',
@@ -180,7 +186,7 @@ describe('CSV Execute Job', function() {
     it('passed scoped SavedObjectsClient to uiSettingsServiceFactory', async function() {
       const returnValue = Symbol();
       mockServer.savedObjects.getScopedSavedObjectsClient.returns(returnValue);
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -194,15 +200,15 @@ describe('CSV Execute Job', function() {
   });
 
   describe('basic Elasticsearch call behavior', function() {
-    it('should decrypt encrypted headers and pass to callWithRequest', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+    it('should decrypt encrypted headers and pass to callAsCurrentUser', async function() {
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
         cancellationToken
       );
-      expect(callWithRequestStub.called).toBe(true);
-      expect(callWithRequestStub.firstCall.args[0].headers).toEqual(headers);
+      expect(callAsCurrentUserStub.called).toBe(true);
+      expect(callAsCurrentUserStub.firstCall.args[0]).toEqual('search');
     });
 
     it('should pass the index and body to execute the initial search', async function() {
@@ -211,7 +217,7 @@ describe('CSV Execute Job', function() {
         testBody: true,
       };
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const job = {
         headers: encryptedHeaders,
         fields: [],
@@ -223,115 +229,115 @@ describe('CSV Execute Job', function() {
 
       await executeJob('job777', job, cancellationToken);
 
-      const searchCall = callWithRequestStub.firstCall;
-      expect(searchCall.args[1]).toBe('search');
-      expect(searchCall.args[2].index).toBe(index);
-      expect(searchCall.args[2].body).toBe(body);
+      const searchCall = callAsCurrentUserStub.firstCall;
+      expect(searchCall.args[0]).toBe('search');
+      expect(searchCall.args[1].index).toBe(index);
+      expect(searchCall.args[1].body).toBe(body);
     });
 
     it('should pass the scrollId from the initial search to the subsequent scroll', async function() {
       const scrollId = getRandomScrollId();
-      callWithRequestStub.onFirstCall().resolves({
+      callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{}],
         },
         _scroll_id: scrollId,
       });
-      callWithRequestStub.onSecondCall().resolves(defaultElasticsearchResponse);
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      callAsCurrentUserStub.onSecondCall().resolves(defaultElasticsearchResponse);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
         cancellationToken
       );
 
-      const scrollCall = callWithRequestStub.secondCall;
+      const scrollCall = callAsCurrentUserStub.secondCall;
 
-      expect(scrollCall.args[1]).toBe('scroll');
-      expect(scrollCall.args[2].scrollId).toBe(scrollId);
+      expect(scrollCall.args[0]).toBe('scroll');
+      expect(scrollCall.args[1].scrollId).toBe(scrollId);
     });
 
     it('should not execute scroll if there are no hits from the search', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
         cancellationToken
       );
 
-      expect(callWithRequestStub.callCount).toBe(2);
+      expect(callAsCurrentUserStub.callCount).toBe(2);
 
-      const searchCall = callWithRequestStub.firstCall;
-      expect(searchCall.args[1]).toBe('search');
+      const searchCall = callAsCurrentUserStub.firstCall;
+      expect(searchCall.args[0]).toBe('search');
 
-      const clearScrollCall = callWithRequestStub.secondCall;
-      expect(clearScrollCall.args[1]).toBe('clearScroll');
+      const clearScrollCall = callAsCurrentUserStub.secondCall;
+      expect(clearScrollCall.args[0]).toBe('clearScroll');
     });
 
     it('should stop executing scroll if there are no hits', async function() {
-      callWithRequestStub.onFirstCall().resolves({
+      callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{}],
         },
         _scroll_id: 'scrollId',
       });
-      callWithRequestStub.onSecondCall().resolves({
+      callAsCurrentUserStub.onSecondCall().resolves({
         hits: {
           hits: [],
         },
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
         cancellationToken
       );
 
-      expect(callWithRequestStub.callCount).toBe(3);
+      expect(callAsCurrentUserStub.callCount).toBe(3);
 
-      const searchCall = callWithRequestStub.firstCall;
-      expect(searchCall.args[1]).toBe('search');
+      const searchCall = callAsCurrentUserStub.firstCall;
+      expect(searchCall.args[0]).toBe('search');
 
-      const scrollCall = callWithRequestStub.secondCall;
-      expect(scrollCall.args[1]).toBe('scroll');
+      const scrollCall = callAsCurrentUserStub.secondCall;
+      expect(scrollCall.args[0]).toBe('scroll');
 
-      const clearScroll = callWithRequestStub.thirdCall;
-      expect(clearScroll.args[1]).toBe('clearScroll');
+      const clearScroll = callAsCurrentUserStub.thirdCall;
+      expect(clearScroll.args[0]).toBe('clearScroll');
     });
 
     it('should call clearScroll with scrollId when there are no more hits', async function() {
       const lastScrollId = getRandomScrollId();
-      callWithRequestStub.onFirstCall().resolves({
+      callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{}],
         },
         _scroll_id: 'scrollId',
       });
 
-      callWithRequestStub.onSecondCall().resolves({
+      callAsCurrentUserStub.onSecondCall().resolves({
         hits: {
           hits: [],
         },
         _scroll_id: lastScrollId,
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
         cancellationToken
       );
 
-      const lastCall = callWithRequestStub.getCall(callWithRequestStub.callCount - 1);
-      expect(lastCall.args[1]).toBe('clearScroll');
-      expect(lastCall.args[2].scrollId).toEqual([lastScrollId]);
+      const lastCall = callAsCurrentUserStub.getCall(callAsCurrentUserStub.callCount - 1);
+      expect(lastCall.args[0]).toBe('clearScroll');
+      expect(lastCall.args[1].scrollId).toEqual([lastScrollId]);
     });
 
     it('calls clearScroll when there is an error iterating the hits', async function() {
       const lastScrollId = getRandomScrollId();
-      callWithRequestStub.onFirstCall().resolves({
+      callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [
             {
@@ -345,7 +351,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: lastScrollId,
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -356,9 +362,9 @@ describe('CSV Execute Job', function() {
         executeJob('job123', jobParams, cancellationToken)
       ).rejects.toMatchInlineSnapshot(`[TypeError: Cannot read property 'indexOf' of undefined]`);
 
-      const lastCall = callWithRequestStub.getCall(callWithRequestStub.callCount - 1);
-      expect(lastCall.args[1]).toBe('clearScroll');
-      expect(lastCall.args[2].scrollId).toEqual([lastScrollId]);
+      const lastCall = callAsCurrentUserStub.getCall(callAsCurrentUserStub.callCount - 1);
+      expect(lastCall.args[0]).toBe('clearScroll');
+      expect(lastCall.args[1].scrollId).toEqual([lastScrollId]);
     });
   });
 
@@ -368,14 +374,14 @@ describe('CSV Execute Job', function() {
         .config()
         .get.withArgs('xpack.reporting.csv.checkForFormulas')
         .returns(true);
-      callWithRequestStub.onFirstCall().returns({
+      callAsCurrentUserStub.onFirstCall().returns({
         hits: {
           hits: [{ _source: { one: '=SUM(A1:A2)', two: 'bar' } }],
         },
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -396,14 +402,14 @@ describe('CSV Execute Job', function() {
         .config()
         .get.withArgs('xpack.reporting.csv.checkForFormulas')
         .returns(true);
-      callWithRequestStub.onFirstCall().returns({
+      callAsCurrentUserStub.onFirstCall().returns({
         hits: {
           hits: [{ _source: { '=SUM(A1:A2)': 'foo', two: 'bar' } }],
         },
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['=SUM(A1:A2)', 'two'],
@@ -424,14 +430,14 @@ describe('CSV Execute Job', function() {
         .config()
         .get.withArgs('xpack.reporting.csv.checkForFormulas')
         .returns(true);
-      callWithRequestStub.onFirstCall().returns({
+      callAsCurrentUserStub.onFirstCall().returns({
         hits: {
           hits: [{ _source: { one: 'foo', two: 'bar' } }],
         },
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -452,14 +458,14 @@ describe('CSV Execute Job', function() {
         .config()
         .get.withArgs('xpack.reporting.csv.checkForFormulas')
         .returns(false);
-      callWithRequestStub.onFirstCall().returns({
+      callAsCurrentUserStub.onFirstCall().returns({
         hits: {
           hits: [{ _source: { one: '=SUM(A1:A2)', two: 'bar' } }],
         },
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -478,8 +484,8 @@ describe('CSV Execute Job', function() {
 
   describe('Elasticsearch call errors', function() {
     it('should reject Promise if search call errors out', async function() {
-      callWithRequestStub.rejects(new Error());
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      callAsCurrentUserStub.rejects(new Error());
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -491,14 +497,14 @@ describe('CSV Execute Job', function() {
     });
 
     it('should reject Promise if scroll call errors out', async function() {
-      callWithRequestStub.onFirstCall().resolves({
+      callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{}],
         },
         _scroll_id: 'scrollId',
       });
-      callWithRequestStub.onSecondCall().rejects(new Error());
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      callAsCurrentUserStub.onSecondCall().rejects(new Error());
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -512,14 +518,14 @@ describe('CSV Execute Job', function() {
 
   describe('invalid responses', function() {
     it('should reject Promise if search returns hits but no _scroll_id', async function() {
-      callWithRequestStub.resolves({
+      callAsCurrentUserStub.resolves({
         hits: {
           hits: [{}],
         },
         _scroll_id: undefined,
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -533,14 +539,14 @@ describe('CSV Execute Job', function() {
     });
 
     it('should reject Promise if search returns no hits and no _scroll_id', async function() {
-      callWithRequestStub.resolves({
+      callAsCurrentUserStub.resolves({
         hits: {
           hits: [],
         },
         _scroll_id: undefined,
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -554,21 +560,21 @@ describe('CSV Execute Job', function() {
     });
 
     it('should reject Promise if scroll returns hits but no _scroll_id', async function() {
-      callWithRequestStub.onFirstCall().resolves({
+      callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{}],
         },
         _scroll_id: 'scrollId',
       });
 
-      callWithRequestStub.onSecondCall().resolves({
+      callAsCurrentUserStub.onSecondCall().resolves({
         hits: {
           hits: [{}],
         },
         _scroll_id: undefined,
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -582,21 +588,21 @@ describe('CSV Execute Job', function() {
     });
 
     it('should reject Promise if scroll returns no hits and no _scroll_id', async function() {
-      callWithRequestStub.onFirstCall().resolves({
+      callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{}],
         },
         _scroll_id: 'scrollId',
       });
 
-      callWithRequestStub.onSecondCall().resolves({
+      callAsCurrentUserStub.onSecondCall().resolves({
         hits: {
           hits: [],
         },
         _scroll_id: undefined,
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -614,23 +620,25 @@ describe('CSV Execute Job', function() {
     const scrollId = getRandomScrollId();
 
     beforeEach(function() {
-      // We have to "re-stub" the callWithRequest stub here so that we can use the fakeFunction
+      // We have to "re-stub" the callAsCurrentUser stub here so that we can use the fakeFunction
       // that delays the Promise resolution so we have a chance to call cancellationToken.cancel().
       // Otherwise, we get into an endless loop, and don't have a chance to call cancel
-      callWithRequestStub.restore();
-      callWithRequestStub = sinon.stub(clusterStub, 'callWithRequest').callsFake(async function() {
-        await delay(1);
-        return {
-          hits: {
-            hits: [{}],
-          },
-          _scroll_id: scrollId,
-        };
-      });
+      callAsCurrentUserStub.restore();
+      callAsCurrentUserStub = sinon
+        .stub(clusterStub, 'callAsCurrentUser')
+        .callsFake(async function() {
+          await delay(1);
+          return {
+            hits: {
+              hits: [{}],
+            },
+            _scroll_id: scrollId,
+          };
+        });
     });
 
     it('should stop calling Elasticsearch when cancellationToken.cancel is called', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       executeJob(
         'job345',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -638,14 +646,14 @@ describe('CSV Execute Job', function() {
       );
 
       await delay(250);
-      const callCount = callWithRequestStub.callCount;
+      const callCount = callAsCurrentUserStub.callCount;
       cancellationToken.cancel();
       await delay(250);
-      expect(callWithRequestStub.callCount).toBe(callCount + 1); // last call is to clear the scroll
+      expect(callAsCurrentUserStub.callCount).toBe(callCount + 1); // last call is to clear the scroll
     });
 
     it(`shouldn't call clearScroll if it never got a scrollId`, async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       executeJob(
         'job345',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -653,13 +661,13 @@ describe('CSV Execute Job', function() {
       );
       cancellationToken.cancel();
 
-      for (let i = 0; i < callWithRequestStub.callCount; ++i) {
-        expect(callWithRequestStub.getCall(i).args[1]).to.not.be('clearScroll');
+      for (let i = 0; i < callAsCurrentUserStub.callCount; ++i) {
+        expect(callAsCurrentUserStub.getCall(i).args[1]).to.not.be('clearScroll');
       }
     });
 
     it('should call clearScroll if it got a scrollId', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       executeJob(
         'job345',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -669,15 +677,15 @@ describe('CSV Execute Job', function() {
       cancellationToken.cancel();
       await delay(100);
 
-      const lastCall = callWithRequestStub.getCall(callWithRequestStub.callCount - 1);
-      expect(lastCall.args[1]).toBe('clearScroll');
-      expect(lastCall.args[2].scrollId).toEqual([scrollId]);
+      const lastCall = callAsCurrentUserStub.getCall(callAsCurrentUserStub.callCount - 1);
+      expect(lastCall.args[0]).toBe('clearScroll');
+      expect(lastCall.args[1].scrollId).toEqual([scrollId]);
     });
   });
 
   describe('csv content', function() {
     it('should write column headers to output, even if there are no results', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -689,7 +697,7 @@ describe('CSV Execute Job', function() {
 
     it('should use custom uiSettings csv:separator for header', async function() {
       uiSettingsGetStub.withArgs('csv:separator').returns(';');
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -701,7 +709,7 @@ describe('CSV Execute Job', function() {
 
     it('should escape column headers if uiSettings csv:quoteValues is true', async function() {
       uiSettingsGetStub.withArgs('csv:quoteValues').returns(true);
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one and a half', 'two', 'three-and-four', 'five & six'],
@@ -713,7 +721,7 @@ describe('CSV Execute Job', function() {
 
     it(`shouldn't escape column headers if uiSettings csv:quoteValues is false`, async function() {
       uiSettingsGetStub.withArgs('csv:quoteValues').returns(false);
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one and a half', 'two', 'three-and-four', 'five & six'],
@@ -724,8 +732,8 @@ describe('CSV Execute Job', function() {
     });
 
     it('should write column headers to output, when there are results', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
-      callWithRequestStub.onFirstCall().resolves({
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
+      callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{ one: '1', two: '2' }],
         },
@@ -744,8 +752,8 @@ describe('CSV Execute Job', function() {
     });
 
     it('should use comma separated values of non-nested fields from _source', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
-      callWithRequestStub.onFirstCall().resolves({
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
+      callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{ _source: { one: 'foo', two: 'bar' } }],
         },
@@ -765,14 +773,14 @@ describe('CSV Execute Job', function() {
     });
 
     it('should concatenate the hits from multiple responses', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
-      callWithRequestStub.onFirstCall().resolves({
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
+      callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{ _source: { one: 'foo', two: 'bar' } }],
         },
         _scroll_id: 'scrollId',
       });
-      callWithRequestStub.onSecondCall().resolves({
+      callAsCurrentUserStub.onSecondCall().resolves({
         hits: {
           hits: [{ _source: { one: 'baz', two: 'qux' } }],
         },
@@ -793,8 +801,8 @@ describe('CSV Execute Job', function() {
     });
 
     it('should use field formatters to format fields', async function() {
-      const executeJob = executeJobFactory(mockServer, mockLogger);
-      callWithRequestStub.onFirstCall().resolves({
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
+      callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{ _source: { one: 'foo', two: 'bar' } }],
         },
@@ -838,7 +846,7 @@ describe('CSV Execute Job', function() {
           .get.withArgs('xpack.reporting.csv.maxSizeBytes')
           .returns(1);
 
-        const executeJob = executeJobFactory(mockServer, mockLogger);
+        const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
         const jobParams = {
           headers: encryptedHeaders,
           fields: ['one', 'two'],
@@ -871,7 +879,7 @@ describe('CSV Execute Job', function() {
           .get.withArgs('xpack.reporting.csv.maxSizeBytes')
           .returns(9);
 
-        const executeJob = executeJobFactory(mockServer, mockLogger);
+        const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
         const jobParams = {
           headers: encryptedHeaders,
           fields: ['one', 'two'],
@@ -904,14 +912,14 @@ describe('CSV Execute Job', function() {
           .get.withArgs('xpack.reporting.csv.maxSizeBytes')
           .returns(9);
 
-        callWithRequestStub.onFirstCall().returns({
+        callAsCurrentUserStub.onFirstCall().returns({
           hits: {
             hits: [{ _source: { one: 'foo', two: 'bar' } }],
           },
           _scroll_id: 'scrollId',
         });
 
-        const executeJob = executeJobFactory(mockServer, mockLogger);
+        const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
         const jobParams = {
           headers: encryptedHeaders,
           fields: ['one', 'two'],
@@ -945,14 +953,14 @@ describe('CSV Execute Job', function() {
           .get.withArgs('xpack.reporting.csv.maxSizeBytes')
           .returns(18);
 
-        callWithRequestStub.onFirstCall().returns({
+        callAsCurrentUserStub.onFirstCall().returns({
           hits: {
             hits: [{ _source: { one: 'foo', two: 'bar' } }],
           },
           _scroll_id: 'scrollId',
         });
 
-        const executeJob = executeJobFactory(mockServer, mockLogger);
+        const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
         const jobParams = {
           headers: encryptedHeaders,
           fields: ['one', 'two'],
@@ -985,14 +993,14 @@ describe('CSV Execute Job', function() {
         .get.withArgs('xpack.reporting.csv.scroll')
         .returns({ duration: scrollDuration });
 
-      callWithRequestStub.onFirstCall().returns({
+      callAsCurrentUserStub.onFirstCall().returns({
         hits: {
           hits: [{}],
         },
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -1002,9 +1010,9 @@ describe('CSV Execute Job', function() {
 
       await executeJob('job123', jobParams, cancellationToken);
 
-      const searchCall = callWithRequestStub.firstCall;
-      expect(searchCall.args[1]).toBe('search');
-      expect(searchCall.args[2].scroll).toBe(scrollDuration);
+      const searchCall = callAsCurrentUserStub.firstCall;
+      expect(searchCall.args[0]).toBe('search');
+      expect(searchCall.args[1].scroll).toBe(scrollDuration);
     });
 
     it('passes scroll size to initial search call', async function() {
@@ -1014,14 +1022,14 @@ describe('CSV Execute Job', function() {
         .get.withArgs('xpack.reporting.csv.scroll')
         .returns({ size: scrollSize });
 
-      callWithRequestStub.onFirstCall().resolves({
+      callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{}],
         },
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -1031,9 +1039,9 @@ describe('CSV Execute Job', function() {
 
       await executeJob('job123', jobParams, cancellationToken);
 
-      const searchCall = callWithRequestStub.firstCall;
-      expect(searchCall.args[1]).toBe('search');
-      expect(searchCall.args[2].size).toBe(scrollSize);
+      const searchCall = callAsCurrentUserStub.firstCall;
+      expect(searchCall.args[0]).toBe('search');
+      expect(searchCall.args[1].size).toBe(scrollSize);
     });
 
     it('passes scroll duration to subsequent scroll call', async function() {
@@ -1043,14 +1051,14 @@ describe('CSV Execute Job', function() {
         .get.withArgs('xpack.reporting.csv.scroll')
         .returns({ duration: scrollDuration });
 
-      callWithRequestStub.onFirstCall().resolves({
+      callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{}],
         },
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = executeJobFactory(mockServer, mockLogger);
+      const executeJob = executeJobFactory(mockServer, mockElasticsearch, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -1060,9 +1068,9 @@ describe('CSV Execute Job', function() {
 
       await executeJob('job123', jobParams, cancellationToken);
 
-      const scrollCall = callWithRequestStub.secondCall;
-      expect(scrollCall.args[1]).toBe('scroll');
-      expect(scrollCall.args[2].scroll).toBe(scrollDuration);
+      const scrollCall = callAsCurrentUserStub.secondCall;
+      expect(scrollCall.args[0]).toBe('scroll');
+      expect(scrollCall.args[1].scroll).toBe(scrollDuration);
     });
   });
 });

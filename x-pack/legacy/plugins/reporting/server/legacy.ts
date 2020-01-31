@@ -5,11 +5,10 @@
  */
 import { Legacy } from 'kibana';
 import { PluginInitializerContext } from 'src/core/server';
-import { plugin } from './index';
-import { LegacySetup, ReportingSetupDeps, ReportingStartDeps } from './plugin';
 import { PluginSetupContract as SecurityPluginSetup } from '../../../../plugins/security/server';
-import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { ReportingPluginSpecOptions } from '../types';
+import { plugin } from './index';
+import { LegacySetup, ReportingStartDeps } from './plugin';
 
 const buildLegacyDependencies = (
   server: Legacy.Server,
@@ -35,15 +34,16 @@ export const legacyInit = async (
   const pluginInstance = plugin(server.newPlatform.coreContext as PluginInitializerContext);
 
   await pluginInstance.setup(coreSetup, {
+    elasticsearch: coreSetup.elasticsearch,
     security: server.newPlatform.setup.plugins.security as SecurityPluginSetup,
     usageCollection: server.newPlatform.setup.plugins.usageCollection,
     __LEGACY: buildLegacyDependencies(server, reportingPlugin),
-  } as ReportingSetupDeps);
+  });
 
   // Schedule to call the "start" hook only after start dependencies are ready
   coreSetup.getStartServices().then(([core, plugins]) =>
     pluginInstance.start(core, {
-      data: (plugins as any).data as DataPluginStart,
-    } as ReportingStartDeps)
+      data: (plugins as ReportingStartDeps).data,
+    })
   );
 };
