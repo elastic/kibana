@@ -6,7 +6,6 @@
 
 import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
-import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { Query, esFilters } from 'src/plugins/data/public';
 
 import { inputsActions } from '../../store/actions';
@@ -17,7 +16,7 @@ import {
   AbsoluteTimeRange,
   RelativeTimeRange,
 } from '../../store/inputs/model';
-import { savedQueryService, siemFilterManager } from '../search_bar';
+import { getServices } from '../../lib/kibana';
 
 import { CONSTANTS } from './constants';
 import { decodeRisonUrlState } from './helpers';
@@ -36,6 +35,8 @@ export const dispatchSetInitialStateFromUrl = (
   updateTimelineIsLoading,
   urlStateToUpdate,
 }: SetInitialStateFromUrl<unknown>): (() => void) => () => {
+  const { filterManager, savedQueries } = getServices().data.query;
+
   urlStateToUpdate.forEach(({ urlKey, newUrlStateString }) => {
     if (urlKey === CONSTANTS.timerange) {
       const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
@@ -125,14 +126,14 @@ export const dispatchSetInitialStateFromUrl = (
 
     if (urlKey === CONSTANTS.filters) {
       const filters: esFilters.Filter[] = decodeRisonUrlState(newUrlStateString);
-      siemFilterManager.setFilters(filters || []);
+      filterManager.setFilters(filters || []);
     }
 
     if (urlKey === CONSTANTS.savedQuery) {
       const savedQueryId: string = decodeRisonUrlState(newUrlStateString);
       if (savedQueryId !== '') {
-        savedQueryService.getSavedQuery(savedQueryId).then((savedQueryData: SavedQuery) => {
-          siemFilterManager.setFilters(savedQueryData.attributes.filters || []);
+        savedQueries.getSavedQuery(savedQueryId).then(savedQueryData => {
+          filterManager.setFilters(savedQueryData.attributes.filters || []);
           dispatch(
             inputsActions.setFilterQuery({
               id: 'global',
