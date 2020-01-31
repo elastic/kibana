@@ -56,9 +56,10 @@ export class Plugin implements IPlugin<Setup, Start> {
       id: this.id,
       title: this.name,
       async mount(context, params) {
+        const [coreStart, startPlugins] = await core.getStartServices();
         const { renderApp } = await import('./app');
 
-        return renderApp(params);
+        return renderApp(coreStart, startPlugins as StartPlugins, params);
       },
     });
 
