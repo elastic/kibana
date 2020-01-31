@@ -137,18 +137,6 @@ type FieldParams = {
 
 export type Field = FieldBasic & Partial<FieldParams>;
 
-export interface FieldMeta {
-  childFieldsName: ChildFieldName | undefined;
-  canHaveChildFields: boolean;
-  canHaveMultiFields: boolean;
-  hasChildFields: boolean;
-  hasMultiFields: boolean;
-  childFields?: string[];
-  isExpanded: boolean;
-}
-
-export type ChildFieldName = 'properties' | 'fields';
-
 export interface GenericObject {
   [key: string]: any;
 }

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './utils';
-
 export * from './mappings_validator';
 
 export * from './extract_mappings_definition';
