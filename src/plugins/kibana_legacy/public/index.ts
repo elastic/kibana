@@ -26,3 +26,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export * from './plugin';
 export { PromiseServiceCreator } from './angular';
+export { migrateLegacyQuery } from './utils/migrate_legacy_query';

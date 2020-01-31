@@ -35,7 +35,7 @@ export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
 export { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
-export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
+export { migrateLegacyQuery } from '../../../../../plugins/kibana_legacy/public/utils/migrate_legacy_query';
 export { KbnUrl } from 'ui/url/kbn_url';
 // @ts-ignore
 export { GlobalStateProvider } from 'ui/state_management/global_state';

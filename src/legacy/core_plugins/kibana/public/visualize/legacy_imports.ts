@@ -48,7 +48,7 @@ export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
+export { migrateLegacyQuery } from '../../../../../plugins/kibana_legacy/public/utils/migrate_legacy_query';
 // @ts-ignore
 export { EventsProvider } from 'ui/events';
 // @ts-ignore
