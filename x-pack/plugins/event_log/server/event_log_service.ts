@@ -20,19 +20,23 @@ type SystemLogger = Plugin['systemLogger'];
 interface EventLogServiceCtorParams {
   config: IEventLogConfig;
   esContext: EsContext;
+  kibanaUUID: string;
   systemLogger: SystemLogger;
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
 export class EventLogService implements IEventLogService {
   private config: IEventLogConfig;
-  private systemLogger: SystemLogger;
   private esContext: EsContext;
+  private systemLogger: SystemLogger;
   private registeredProviderActions: Map<string, Set<string>>;
 
-  constructor({ config, systemLogger, esContext }: EventLogServiceCtorParams) {
+  public readonly kibanaUUID: string;
+
+  constructor({ config, esContext, kibanaUUID, systemLogger }: EventLogServiceCtorParams) {
     this.config = config;
     this.esContext = esContext;
+    this.kibanaUUID = kibanaUUID;
     this.systemLogger = systemLogger;
     this.registeredProviderActions = new Map<string, Set<string>>();
   }

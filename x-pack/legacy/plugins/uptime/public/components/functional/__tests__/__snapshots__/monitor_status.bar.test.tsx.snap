@@ -2,7 +2,7 @@
 
 exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+  class="euiFlexGroup euiFlexGroup--directionColumn"
 >
   <div
     class="euiFlexItem euiFlexItem--flexGrowZero"

@@ -139,7 +139,7 @@ export const schema: FormSchema = {
     ),
     labelAppend: OptionalFieldLabel,
   },
-  threats: {
+  threat: {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldMitreThreatLabel',
       {
@@ -155,7 +155,7 @@ export const schema: FormSchema = {
           const [{ value, path }] = args;
           let hasError = false;
           (value as IMitreEnterpriseAttack[]).forEach(v => {
-            if (isMitreAttackInvalid(v.tactic.name, v.techniques)) {
+            if (isMitreAttackInvalid(v.tactic.name, v.technique)) {
               hasError = true;
             }
           });

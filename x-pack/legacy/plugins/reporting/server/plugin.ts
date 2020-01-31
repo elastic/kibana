@@ -6,8 +6,8 @@
 
 import { Legacy } from 'kibana';
 import { CoreSetup, CoreStart, Plugin, LoggerFactory } from 'src/core/server';
-import { IUiSettingsClient } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { PluginSetupContract as SecurityPluginSetup } from '../../../../plugins/security/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
@@ -18,6 +18,7 @@ import { checkLicenseFactory, getExportTypesRegistry, runValidations, LevelLogge
 import { createBrowserDriverFactory } from './browsers';
 import { registerReportingUsageCollector } from './usage';
 import { logConfiguration } from '../log_configuration';
+import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 
 export interface ReportingInitializerContext {
   logger: LoggerFactory;
@@ -29,6 +30,7 @@ export type ReportingStart = object;
 
 export interface ReportingSetupDeps {
   usageCollection: UsageCollectionSetup;
+  security: SecurityPluginSetup;
 }
 export type ReportingStartDeps = object;
 
@@ -39,7 +41,6 @@ export interface LegacySetup {
   info: Legacy.Server['info'];
   plugins: {
     elasticsearch: LegacyPlugins['elasticsearch'];
-    security: LegacyPlugins['security'];
     xpack_main: XPackMainPlugin & {
       status?: any;
     };
@@ -47,7 +48,7 @@ export interface LegacySetup {
   route: Legacy.Server['route'];
   savedObjects: Legacy.Server['savedObjects'];
   uiSettingsServiceFactory: Legacy.Server['uiSettingsServiceFactory'];
-  fieldFormatServiceFactory: (uiConfig: IUiSettingsClient) => unknown;
+  fieldFormatServiceFactory: DataPluginStart['fieldFormats']['fieldFormatServiceFactory'];
 }
 
 export type ReportingPlugin = Plugin<
@@ -105,7 +106,7 @@ export function reportingPluginFactory(
       isCollectorReady = true;
 
       // Reporting routes
-      registerRoutes(__LEGACY, exportTypesRegistry, browserDriverFactory, logger);
+      registerRoutes(__LEGACY, plugins, exportTypesRegistry, browserDriverFactory, logger);
 
       return {};
     }
