@@ -35,8 +35,6 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { PrivateProvider } from 'ui/private/private';
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
-import { watchMultiDecorator } from 'ui/directives/watch_multi/watch_multi';
-// @ts-ignore
 import { registerListenEventListener } from 'ui/directives/listen/listen';
 // @ts-ignore
 import { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
@@ -86,6 +84,8 @@ import { createFieldChooserDirective } from './np_ready/components/field_chooser
 import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
 import { DiscoverStartPlugins } from './plugin';
 import { PromiseServiceCreator } from '../../../../../plugins/kibana_legacy/public';
+// @ts-ignore
+import { watchMultiDecorator } from '../../../../../plugins/kibana_legacy/public';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover

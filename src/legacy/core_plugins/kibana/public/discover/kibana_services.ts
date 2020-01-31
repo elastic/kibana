@@ -60,8 +60,6 @@ export { callAfterBindingsWorkaround } from 'ui/compat';
 export { getRequestInspectorStats, getResponseInspectorStats } from '../../../data/public';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
-// @ts-ignore
-export { migrateLegacyQuery } from '../../../../../plugins/kibana_legac/public';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
@@ -74,6 +72,8 @@ export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 // @ts-ignore
 export { formatMsg, formatStack } from 'ui/notify/lib/index';
+// @ts-ignore
+export { migrateLegacyQuery } from '../../../../../plugins/kibana_legacy/public';
 
 // EXPORT types
 export {

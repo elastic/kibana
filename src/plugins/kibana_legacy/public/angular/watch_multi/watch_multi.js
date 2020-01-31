@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import { uiModules } from '../../modules';
 
 export function watchMultiDecorator($provide) {
   $provide.decorator('$rootScope', function($delegate) {
@@ -147,5 +146,3 @@ export function watchMultiDecorator($provide) {
     return $delegate;
   });
 }
-
-uiModules.get('kibana').config(watchMultiDecorator);

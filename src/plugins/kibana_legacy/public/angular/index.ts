@@ -18,3 +18,5 @@
  */
 // @ts-ignore
 export { PromiseServiceCreator } from './promises/promises';
+// @ts-ignore
+export { watchMultiDecorator } from './watch_multi/watch_multi';
