@@ -298,4 +298,61 @@ def runErrorReporter() {
   )
 }
 
+def getFunctionalQueueWorker(queue, finishedSuites, ciGroup) {
+  return getPostBuildWorker("xpack-ciGroup" + ciGroup, {
+    while(!queue.isEmpty()) {
+      def testSuite
+      try {
+        testSuite = queue.pop()
+      } catch (ex) {
+        print ex.toString()
+        continue
+      }
+
+      withEnv([
+        "CI_GROUP=${ciGroup}",
+        "JOB=xpack-kibana-ciGroup${ciGroup}",
+        "REMOVE_KIBANA_INSTALL_DIR=1",
+      ]) {
+        catchError {
+          retryable("xpack-kibana-ciGroup${ciGroup}") {
+            testSuite.startTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+            testSuite.success = null
+            def tagString = testSuite.tags.collect { "--include-tag '${it}'" }.join(' ')
+
+            try {
+              // runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${ciGroup}")
+              bash(
+                """
+                  source test/scripts/jenkins_test_setup_xpack.sh
+                  node scripts/functional_tests \
+                    --config '${testSuite.config}' \
+                    --debug --bail \
+                    --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
+                    ${tagString}
+                """, "Execute x-pack tests"
+              )
+              testSuite.success = true
+            } catch (ex) {
+              testSuite.success = false
+              throw ex
+            } finally {
+              testSuite.endTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+            }
+          }
+        }
+      }
+      catchError {
+        print testSuite
+        finishedSuites << testSuite
+      }
+    }
+  })
+}
+
+def prepareXpackTestQueue(queue) {
+  def items = toJSON(readFile(file: 'test-suites-for-ci.json'))
+  queue.addAll(items.xpack.reverse()) // .reverse() is used here because an older version of groovy, .pop() removes from the end instead of the beginning
+}
+
 return this
