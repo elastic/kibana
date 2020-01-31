@@ -47,6 +47,6 @@ In this case, app will not get into state, which is not shaped as app expects.
 
 To help application developers to not forget about such edge cases,
 `syncState` util sets a constraint,
-that setter to state container should be able to handle "null" value (see [IStateSyncConfig](../../public/state_sync/types.ts)).
-Incoming `null` value from state storage usually means empty state (e.g. URL without `storageKey` query param) or corrupted state which can't be parsed.
+that setter to state container should be able to handle `null` value (see [IStateSyncConfig](../../public/state_sync/types.ts)).
+Incoming `null` value from state storage usually means that state is empty (e.g. URL without `storageKey` query param).
 So when using `syncState` util applications are required to at least handle incoming `null`.
