@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart } from 'ui/new_platform';
-
 import { InfluencerInput, MlCapabilities } from '../types';
 import { throwIfNotOk } from '../../../hooks/api/api';
+import { getServices } from '../../../lib/kibana';
 
 export interface Body {
   jobIds: string[];
@@ -23,7 +22,7 @@ export interface Body {
 }
 
 export const getMlCapabilities = async (signal: AbortSignal): Promise<MlCapabilities> => {
-  const response = await npStart.core.http.fetch<MlCapabilities>('/api/ml/ml_capabilities', {
+  const response = await getServices().http.fetch<MlCapabilities>('/api/ml/ml_capabilities', {
     method: 'GET',
     asResponse: true,
     asSystemRequest: true,

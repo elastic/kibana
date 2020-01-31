@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart } from 'ui/new_platform';
-
 import {
   CheckRecognizerProps,
   CloseJobsResponse,
@@ -21,6 +19,7 @@ import {
 } from './types';
 import { throwIfErrorAttached, throwIfErrorAttachedToSetup } from '../ml/api/throw_if_not_ok';
 import { throwIfNotOk } from '../../hooks/api/api';
+import { getServices } from '../../lib/kibana';
 
 /**
  * Checks the ML Recognizer API to see if a given indexPattern has any compatible modules
@@ -32,7 +31,7 @@ export const checkRecognizer = async ({
   indexPatternName,
   signal,
 }: CheckRecognizerProps): Promise<RecognizerModule[]> => {
-  const response = await npStart.core.http.fetch<RecognizerModule[]>(
+  const response = await getServices().http.fetch<RecognizerModule[]>(
     `/api/ml/modules/recognize/${indexPatternName}`,
     {
       method: 'GET',
@@ -53,7 +52,7 @@ export const checkRecognizer = async ({
  * @param signal to cancel request
  */
 export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Promise<Module[]> => {
-  const response = await npStart.core.http.fetch<Module[]>(
+  const response = await getServices().http.fetch<Module[]>(
     `/api/ml/modules/get_module/${moduleId}`,
     {
       method: 'GET',
@@ -83,7 +82,7 @@ export const setupMlJob = async ({
   groups = ['siem'],
   prefix = '',
 }: MlSetupArgs): Promise<SetupMlResponse> => {
-  const response = await npStart.core.http.fetch<SetupMlResponse>(
+  const response = await getServices().http.fetch<SetupMlResponse>(
     `/api/ml/modules/setup/${configTemplate}`,
     {
       method: 'POST',
@@ -119,7 +118,7 @@ export const startDatafeeds = async ({
   datafeedIds: string[];
   start: number;
 }): Promise<StartDatafeedResponse> => {
-  const response = await npStart.core.http.fetch<StartDatafeedResponse>(
+  const response = await getServices().http.fetch<StartDatafeedResponse>(
     '/api/ml/jobs/force_start_datafeeds',
     {
       method: 'POST',
@@ -149,7 +148,7 @@ export const stopDatafeeds = async ({
 }: {
   datafeedIds: string[];
 }): Promise<[StopDatafeedResponse | ErrorResponse, CloseJobsResponse]> => {
-  const stopDatafeedsResponse = await npStart.core.http.fetch<StopDatafeedResponse>(
+  const stopDatafeedsResponse = await getServices().http.fetch<StopDatafeedResponse>(
     '/api/ml/jobs/stop_datafeeds',
     {
       method: 'POST',
@@ -165,7 +164,7 @@ export const stopDatafeeds = async ({
   const stopDatafeedsResponseJson = stopDatafeedsResponse.body!;
 
   const datafeedPrefix = 'datafeed-';
-  const closeJobsResponse = await npStart.core.http.fetch<CloseJobsResponse>(
+  const closeJobsResponse = await getServices().http.fetch<CloseJobsResponse>(
     '/api/ml/jobs/close_jobs',
     {
       method: 'POST',
@@ -194,7 +193,7 @@ export const stopDatafeeds = async ({
  * @param signal to cancel request
  */
 export const getJobsSummary = async (signal: AbortSignal): Promise<JobSummary[]> => {
-  const response = await npStart.core.http.fetch<JobSummary[]>('/api/ml/jobs/jobs_summary', {
+  const response = await getServices().http.fetch<JobSummary[]>('/api/ml/jobs/jobs_summary', {
     method: 'POST',
     body: JSON.stringify({}),
     asResponse: true,
