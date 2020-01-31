@@ -7,13 +7,52 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandler } from 'src/core/server';
 
 import { indexBy } from 'lodash';
-import { getFieldsForWildcard } from '../../shared_imports';
+import { IndexPatternsFetcher } from '../../shared_imports';
 import { RouteDependencies, ServerShim } from '../../types';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsError } from '../../lib/is_es_error';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { getCapabilitiesForRollupIndices } from '../../lib/map_capabilities';
 import { mergeCapabilitiesWithFields, Field } from '../../lib/merge_capabilities_with_fields';
+
+const parseMetaFields = (metaFields: string | string[]) => {
+  let parsedFields: string[] = [];
+  if (typeof metaFields === 'string') {
+    parsedFields = JSON.parse(metaFields);
+  } else {
+    parsedFields = metaFields;
+  }
+  return parsedFields;
+};
+
+const getFieldsForWildcardRequest = async (context: any, request: any, response: any) => {
+  const { callAsCurrentUser } = context.core.elasticsearch.dataClient;
+  const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
+  const { pattern, meta_fields: metaFields } = request.query;
+
+  let parsedFields: string[] = [];
+  try {
+    parsedFields = parseMetaFields(metaFields);
+  } catch (error) {
+    return response.badRequest();
+  }
+
+  try {
+    const fields = await indexPatterns.getFieldsForWildcard({
+      pattern,
+      metaFields: parsedFields,
+    });
+
+    return response.ok({
+      body: { fields },
+      headers: {
+        'content-type': 'application/json',
+      },
+    });
+  } catch (error) {
+    return response.notFound();
+  }
+};
 
 /**
  * Get list of fields for rollup index pattern, in the format of regular index pattern fields
@@ -24,7 +63,7 @@ export function registerFieldsForWildcardRoute(deps: RouteDependencies, legacy: 
 
     try {
       // Make call and use field information from response
-      const { payload } = await getFieldsForWildcard(ctx, request, response);
+      const { payload } = await getFieldsForWildcardRequest(ctx, request, response);
       const fields = payload.fields;
       const parsedParams = JSON.parse(params);
       const rollupIndex = parsedParams.rollup_index;
@@ -36,19 +75,16 @@ export function registerFieldsForWildcardRoute(deps: RouteDependencies, legacy: 
           indexPattern: rollupIndex,
         })
       )[rollupIndex].aggs;
-
       // Keep meta fields
       metaFields.forEach(
         (field: string) =>
           fieldsFromFieldCapsApi[field] && rollupFields.push(fieldsFromFieldCapsApi[field])
       );
-
       const mergedRollupFields = mergeCapabilitiesWithFields(
         rollupIndexCapabilities,
         fieldsFromFieldCapsApi,
         rollupFields
       );
-
       return response.ok({ body: { fields: mergedRollupFields } });
     } catch (err) {
       if (isEsError(err)) {

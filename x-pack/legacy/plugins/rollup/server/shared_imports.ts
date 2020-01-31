@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getFieldsForWildcard } from '../../../../../src/plugins/data/server';
+export { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';

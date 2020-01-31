@@ -45,13 +45,3 @@ export const findIndexPatternById = async (
     return (savedObjectsResponse.saved_objects[0] as unknown) as IIndexPattern;
   }
 };
-
-export const parseMetaFields = (metaFields: string | string[]) => {
-  let parsedFields: string[] = [];
-  if (typeof metaFields === 'string') {
-    parsedFields = JSON.parse(metaFields);
-  } else {
-    parsedFields = metaFields;
-  }
-  return parsedFields;
-};
