@@ -21,7 +21,8 @@ import { FC, createElement as h, useRef, useLayoutEffect, useMemo } from 'react'
 import { UiComponent, UiComponentInstance } from '../../../kibana_utils/common';
 
 export const uiToReactComponent = <Props extends object>(
-  Comp: UiComponent<Props>
+  Comp: UiComponent<Props>,
+  as: string = 'div'
 ): FC<Props> => props => {
   const ref = useRef<HTMLDivElement>();
   const comp = useMemo<UiComponentInstance<Props>>(() => Comp(), [Comp]);
@@ -38,7 +39,7 @@ export const uiToReactComponent = <Props extends object>(
     };
   }, [comp]);
 
-  return h('div', {
+  return h(as, {
     ref,
   });
 };

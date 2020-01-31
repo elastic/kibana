@@ -21,6 +21,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { UiComponent } from '../../../kibana_utils/common';
 import { uiToReactComponent } from './ui_to_react_component';
+import { reactToUiComponent } from './react_to_ui_component';
 
 const UiComp: UiComponent<{ cnt?: number }> = () => ({
   render: (el, { cnt = 0 }) => {
@@ -121,4 +122,28 @@ describe('uiToReactComponent', () => {
 
     expect(render).toHaveBeenCalledTimes(3);
   });
+
+  test('can specify wrapper element', async () => {
+    const ReactComp = uiToReactComponent(UiComp, 'span');
+    const div = document.createElement('div');
+
+    ReactDOM.render(<ReactComp cnt={5} />, div);
+
+    expect(div.innerHTML).toBe('<span>cnt: 5</span>');
+  });
+});
+
+test('can adapt component many times', () => {
+  const ReactComp = uiToReactComponent(
+    reactToUiComponent(uiToReactComponent(reactToUiComponent(uiToReactComponent(UiComp))))
+  );
+  const div = document.createElement('div');
+
+  ReactDOM.render(<ReactComp />, div);
+
+  expect(div.textContent).toBe('cnt: 0');
+
+  ReactDOM.render(<ReactComp cnt={123} />, div);
+
+  expect(div.textContent).toBe('cnt: 123');
 });
