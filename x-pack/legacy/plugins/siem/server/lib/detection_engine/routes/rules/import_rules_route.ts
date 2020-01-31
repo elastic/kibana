@@ -6,8 +6,9 @@
 
 import Boom from 'boom';
 import Hapi from 'hapi';
-import { extname } from 'path';
 import { chunk, isEmpty, isFunction } from 'lodash/fp';
+import { extname } from 'path';
+import uuid from 'uuid';
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
@@ -19,7 +20,7 @@ import {
   callWithRequestFactory,
   getIndex,
   createBulkErrorObject,
-  ImportRuleResponses,
+  ImportRuleResponse,
 } from '../utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../types';
@@ -29,6 +30,12 @@ import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
+/*
+ * We were getting some error like that possible EventEmitter memory leak detected
+ * So we decide to batch the update by 10 to avoid any complication in the node side
+ * https://nodejs.org/docs/latest/api/events.html#events_emitter_setmaxlisteners_n
+ *
+ */
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
 export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
@@ -71,14 +78,35 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       const readStream = createRulesStreamFromNdJson(request.payload.file, objectLimit);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([readStream]);
 
-      const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedObjects);
-      let importRuleResponse: ImportRuleResponses[] = [];
+      const uniqueParsedObjects = Array.from(
+        parsedObjects
+          .reduce(
+            (acc, parsedRule) => {
+              if (parsedRule instanceof Error) {
+                acc.set(uuid.v4(), parsedRule);
+              } else {
+                const { rule_id: ruleId } = parsedRule;
+                if (ruleId != null) {
+                  acc.set(ruleId, parsedRule);
+                } else {
+                  acc.set(uuid.v4(), parsedRule);
+                }
+              }
+              return acc;
+            }, // using map (preserves ordering)
+            new Map()
+          )
+          .values()
+      );
+
+      const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
+      let importRuleResponse: ImportRuleResponse[] = [];
 
       while (chunkParseObjects.length) {
         const batchParseObjects = chunkParseObjects.shift() ?? [];
         const newImportRuleResponse = await Promise.all(
-          batchParseObjects.reduce<Array<Promise<ImportRuleResponses>>>((accum, parsedRule) => {
-            const importsWorkerPromise = new Promise<ImportRuleResponses>(
+          batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
+            const importsWorkerPromise = new Promise<ImportRuleResponse>(
               async (resolve, reject) => {
                 if (parsedRule instanceof Error) {
                   // If the JSON object had a validation or parse error then we return
@@ -94,7 +122,6 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                 }
                 const {
                   description,
-                  enabled = false,
                   false_positives: falsePositives,
                   from,
                   immutable,
@@ -121,7 +148,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                   version,
                 } = parsedRule;
                 try {
-                  const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
+                  const finalIndex = getIndex(request, server);
                   const callWithRequest = callWithRequestFactory(request, server);
                   const indexExists = await getIndexExists(callWithRequest, finalIndex);
                   if (!indexExists) {
@@ -139,7 +166,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                       alertsClient,
                       actionsClient,
                       description,
-                      enabled,
+                      enabled: false,
                       falsePositives,
                       from,
                       immutable,
@@ -172,7 +199,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                       actionsClient,
                       savedObjectsClient,
                       description,
-                      enabled,
+                      enabled: false,
                       falsePositives,
                       from,
                       immutable,

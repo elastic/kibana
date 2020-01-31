@@ -52,7 +52,7 @@ export const createBulkErrorObject = ({
   };
 };
 
-export interface ImportRuleResponses {
+export interface ImportRuleResponse {
   rule_id: string;
   status_code?: number;
   message?: string;
