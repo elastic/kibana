@@ -29,7 +29,7 @@ interface UsePrePackagedRuleProps {
   hasIndexWrite: boolean | null;
   hasManageApiKey: boolean | null;
   isAuthenticated: boolean | null;
-  isEncryptionKey: boolean | null;
+  hasEncryptionKey: boolean | null;
   isSignalIndexExists: boolean | null;
 }
 
@@ -39,7 +39,7 @@ interface UsePrePackagedRuleProps {
  * @param hasIndexWrite boolean
  * @param hasManageApiKey boolean
  * @param isAuthenticated boolean
- * @param isEncryptionKey boolean
+ * @param hasEncryptionKey boolean
  * @param isSignalIndexExists boolean
  *
  */
@@ -48,7 +48,7 @@ export const usePrePackagedRules = ({
   hasIndexWrite,
   hasManageApiKey,
   isAuthenticated,
-  isEncryptionKey,
+  hasEncryptionKey,
   isSignalIndexExists,
 }: UsePrePackagedRuleProps): Return => {
   const [rulesStatus, setRuleStatus] = useState<
@@ -120,7 +120,7 @@ export const usePrePackagedRules = ({
             hasIndexWrite &&
             hasManageApiKey &&
             isAuthenticated &&
-            isEncryptionKey &&
+            hasEncryptionKey &&
             isSignalIndexExists
           ) {
             setLoadingCreatePrePackagedRules(true);
@@ -189,7 +189,7 @@ export const usePrePackagedRules = ({
     hasIndexWrite,
     hasManageApiKey,
     isAuthenticated,
-    isEncryptionKey,
+    hasEncryptionKey,
     isSignalIndexExists,
   ]);
 

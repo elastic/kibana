@@ -142,9 +142,9 @@ export const setFieldValue = (
 export const redirectToDetections = (
   isSignalIndexExists: boolean | null,
   isAuthenticated: boolean | null,
-  isEncryptionKey: boolean | null
+  hasEncryptionKey: boolean | null
 ) =>
   isSignalIndexExists != null &&
   isAuthenticated != null &&
-  isEncryptionKey != null &&
-  (!isSignalIndexExists || !isAuthenticated || !isEncryptionKey);
+  hasEncryptionKey != null &&
+  (!isSignalIndexExists || !isAuthenticated || !hasEncryptionKey);

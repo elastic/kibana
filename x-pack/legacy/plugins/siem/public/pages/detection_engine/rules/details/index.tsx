@@ -25,7 +25,6 @@ import { connect } from 'react-redux';
 import { FiltersGlobal } from '../../../../components/filters_global';
 import { FormattedDate } from '../../../../components/formatted_date';
 import {
-  getDetectionEngineUrl,
   getEditRuleUrl,
   getRulesUrl,
   DETECTION_ENGINE_PAGE_NAME,
@@ -114,7 +113,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     loading,
     isSignalIndexExists,
     isAuthenticated,
-    isEncryptionKey,
+    hasEncryptionKey,
     canUserCRUD,
     hasManageApiKey,
     hasIndexWrite,
@@ -238,7 +237,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     [ruleEnabled, setRuleEnabled]
   );
 
-  if (redirectToDetections(isSignalIndexExists, isAuthenticated, isEncryptionKey)) {
+  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
   }
 

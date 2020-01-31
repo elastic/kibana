@@ -83,7 +83,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
     loading,
     isSignalIndexExists,
     isAuthenticated: isUserAuthenticated,
-    isEncryptionKey,
+    hasEncryptionKey,
     canUserCRUD,
     signalIndexName,
     hasIndexWrite,
@@ -139,7 +139,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
 
   return (
     <>
-      {isEncryptionKey != null && !isEncryptionKey && <NoApiIntegrationKeyCallOut />}
+      {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
       <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indicesExist, indexPattern }) => {
@@ -190,7 +190,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
                           <SignalsTable
                             loading={loading}
                             hasIndexWrite={hasIndexWrite ?? false}
-                            canUserCRUD={(canUserCRUD ?? false) || (isEncryptionKey ?? false)}
+                            canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}
                             from={from}
                             signalsIndex={signalIndexName ?? ''}
                             to={to}

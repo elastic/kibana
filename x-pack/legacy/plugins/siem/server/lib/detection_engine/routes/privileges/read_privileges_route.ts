@@ -29,17 +29,10 @@ export const createReadPrivilegesRulesRoute = (server: ServerFacade): Hapi.Serve
         const callWithRequest = callWithRequestFactory(request, server);
         const index = getIndex(request, server);
         const permissions = await readPrivileges(callWithRequest, index);
-        /* ******* ATTENTION *******
-         *
-         * DO NOT LEAK THIS ENCRYPTION KEY
-         *
-         */
-        const encryptionKey = server.config().has('xpack.encryptedSavedObjects.encryptionKey')
-          ? server.config().get('xpack.encryptedSavedObjects.encryptionKey')
-          : '';
+        const encryptionKeyRandomlyGenerated = server.encryptionKeyRandomlyGenerated;
         return merge(permissions, {
           is_authenticated: request?.auth?.isAuthenticated ?? false,
-          is_encryption_key: encryptionKey !== '',
+          has_encryption_key: !encryptionKeyRandomlyGenerated,
         });
       } catch (err) {
         return transformError(err);

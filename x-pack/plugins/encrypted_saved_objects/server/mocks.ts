@@ -10,6 +10,7 @@ function createEncryptedSavedObjectsSetupMock() {
   return {
     registerType: jest.fn(),
     __legacyCompat: { registerLegacyAPI: jest.fn() },
+    encryptionKeyRandomlyGenerated: true,
   } as jest.Mocked<PluginSetupContract>;
 }
 

@@ -36,7 +36,7 @@ const RulesPageComponent: React.FC = () => {
     loading,
     isSignalIndexExists,
     isAuthenticated,
-    isEncryptionKey,
+    hasEncryptionKey,
     canUserCRUD,
     hasIndexWrite,
     hasManageApiKey,
@@ -56,7 +56,7 @@ const RulesPageComponent: React.FC = () => {
     hasManageApiKey,
     isSignalIndexExists,
     isAuthenticated,
-    isEncryptionKey,
+    hasEncryptionKey,
   });
   const prePackagedRuleStatus = getPrePackagedRuleStatus(
     rulesInstalled,
@@ -86,7 +86,7 @@ const RulesPageComponent: React.FC = () => {
     refreshRulesData.current = refreshRule;
   }, []);
 
-  if (redirectToDetections(isSignalIndexExists, isAuthenticated, isEncryptionKey)) {
+  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
   }
 

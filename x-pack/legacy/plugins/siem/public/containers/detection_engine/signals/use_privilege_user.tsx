@@ -14,7 +14,7 @@ import * as i18n from './translations';
 interface Return {
   loading: boolean;
   isAuthenticated: boolean | null;
-  isEncryptionKey: boolean | null;
+  hasEncryptionKey: boolean | null;
   hasIndexManage: boolean | null;
   hasManageApiKey: boolean | null;
   hasIndexWrite: boolean | null;
@@ -28,11 +28,15 @@ export const usePrivilegeUser = (): Return => {
   const [privilegeUser, setPrivilegeUser] = useState<
     Pick<
       Return,
-      'isAuthenticated' | 'isEncryptionKey' | 'hasIndexManage' | 'hasManageApiKey' | 'hasIndexWrite'
+      | 'isAuthenticated'
+      | 'hasEncryptionKey'
+      | 'hasIndexManage'
+      | 'hasManageApiKey'
+      | 'hasIndexWrite'
     >
   >({
     isAuthenticated: null,
-    isEncryptionKey: null,
+    hasEncryptionKey: null,
     hasIndexManage: null,
     hasManageApiKey: null,
     hasIndexWrite: null,
@@ -55,7 +59,7 @@ export const usePrivilegeUser = (): Return => {
             const indexName = Object.keys(privilege.index)[0];
             setPrivilegeUser({
               isAuthenticated: privilege.is_authenticated,
-              isEncryptionKey: privilege.is_encryption_key,
+              hasEncryptionKey: privilege.has_encryption_key,
               hasIndexManage: privilege.index[indexName].manage,
               hasIndexWrite:
                 privilege.index[indexName].create ||
@@ -73,7 +77,7 @@ export const usePrivilegeUser = (): Return => {
         if (isSubscribed) {
           setPrivilegeUser({
             isAuthenticated: false,
-            isEncryptionKey: false,
+            hasEncryptionKey: false,
             hasIndexManage: false,
             hasManageApiKey: false,
             hasIndexWrite: false,

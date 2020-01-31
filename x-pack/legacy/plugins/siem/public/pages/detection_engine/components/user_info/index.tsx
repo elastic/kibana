@@ -18,7 +18,7 @@ export interface State {
   hasManageApiKey: boolean | null;
   isSignalIndexExists: boolean | null;
   isAuthenticated: boolean | null;
-  isEncryptionKey: boolean | null;
+  hasEncryptionKey: boolean | null;
   loading: boolean;
   signalIndexName: string | null;
 }
@@ -30,7 +30,7 @@ const initialState: State = {
   hasManageApiKey: null,
   isSignalIndexExists: null,
   isAuthenticated: null,
-  isEncryptionKey: null,
+  hasEncryptionKey: null,
   loading: true,
   signalIndexName: null,
 };
@@ -58,8 +58,8 @@ export type Action =
       isAuthenticated: boolean | null;
     }
   | {
-      type: 'updateIsEncryptionKey';
-      isEncryptionKey: boolean | null;
+      type: 'updatehasEncryptionKey';
+      hasEncryptionKey: boolean | null;
     }
   | {
       type: 'updateCanUserCRUD';
@@ -108,10 +108,10 @@ export const userInfoReducer = (state: State, action: Action): State => {
         isAuthenticated: action.isAuthenticated,
       };
     }
-    case 'updateIsEncryptionKey': {
+    case 'updatehasEncryptionKey': {
       return {
         ...state,
-        isEncryptionKey: action.isEncryptionKey,
+        hasEncryptionKey: action.hasEncryptionKey,
       };
     }
     case 'updateCanUserCRUD': {
@@ -154,7 +154,7 @@ export const useUserInfo = (): State => {
       hasManageApiKey,
       isSignalIndexExists,
       isAuthenticated,
-      isEncryptionKey,
+      hasEncryptionKey,
       loading,
       signalIndexName,
     },
@@ -163,7 +163,7 @@ export const useUserInfo = (): State => {
   const {
     loading: privilegeLoading,
     isAuthenticated: isApiAuthenticated,
-    isEncryptionKey: isApiEncryptionKey,
+    hasEncryptionKey: isApiEncryptionKey,
     hasIndexManage: hasApiIndexManage,
     hasIndexWrite: hasApiIndexWrite,
     hasManageApiKey: hasApiManageApiKey,
@@ -220,10 +220,10 @@ export const useUserInfo = (): State => {
   }, [loading, isAuthenticated, isApiAuthenticated]);
 
   useEffect(() => {
-    if (!loading && isEncryptionKey !== isApiEncryptionKey && isApiEncryptionKey != null) {
-      dispatch({ type: 'updateIsEncryptionKey', isEncryptionKey: isApiEncryptionKey });
+    if (!loading && hasEncryptionKey !== isApiEncryptionKey && isApiEncryptionKey != null) {
+      dispatch({ type: 'updatehasEncryptionKey', hasEncryptionKey: isApiEncryptionKey });
     }
-  }, [loading, isEncryptionKey, isApiEncryptionKey]);
+  }, [loading, hasEncryptionKey, isApiEncryptionKey]);
 
   useEffect(() => {
     if (!loading && canUserCRUD !== capabilitiesCanUserCRUD && capabilitiesCanUserCRUD != null) {
@@ -240,7 +240,7 @@ export const useUserInfo = (): State => {
   useEffect(() => {
     if (
       isAuthenticated &&
-      isEncryptionKey &&
+      hasEncryptionKey &&
       hasIndexManage &&
       isSignalIndexExists != null &&
       !isSignalIndexExists &&
@@ -248,13 +248,13 @@ export const useUserInfo = (): State => {
     ) {
       createSignalIndex();
     }
-  }, [createSignalIndex, isAuthenticated, isEncryptionKey, isSignalIndexExists, hasIndexManage]);
+  }, [createSignalIndex, isAuthenticated, hasEncryptionKey, isSignalIndexExists, hasIndexManage]);
 
   return {
     loading,
     isSignalIndexExists,
     isAuthenticated,
-    isEncryptionKey,
+    hasEncryptionKey,
     canUserCRUD,
     hasIndexManage,
     hasIndexWrite,

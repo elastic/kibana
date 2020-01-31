@@ -56,7 +56,7 @@ const EditRulePageComponent: FC = () => {
     loading: initLoading,
     isSignalIndexExists,
     isAuthenticated,
-    isEncryptionKey,
+    hasEncryptionKey,
     canUserCRUD,
     hasManageApiKey,
   } = useUserInfo();
@@ -271,7 +271,7 @@ const EditRulePageComponent: FC = () => {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
   }
 
-  if (redirectToDetections(isSignalIndexExists, isAuthenticated, isEncryptionKey)) {
+  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
   } else if (userHasNoPermissions) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;

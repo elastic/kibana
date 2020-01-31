@@ -70,7 +70,7 @@ const CreateRulePageComponent: React.FC = () => {
     loading,
     isSignalIndexExists,
     isAuthenticated,
-    isEncryptionKey,
+    hasEncryptionKey,
     canUserCRUD,
     hasManageApiKey,
   } = useUserInfo();
@@ -241,7 +241,7 @@ const CreateRulePageComponent: React.FC = () => {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
   }
 
-  if (redirectToDetections(isSignalIndexExists, isAuthenticated, isEncryptionKey)) {
+  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
   } else if (userHasNoPermissions) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
