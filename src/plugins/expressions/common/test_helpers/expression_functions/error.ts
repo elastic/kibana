@@ -17,15 +17,26 @@
  * under the License.
  */
 
-import { Executor } from '../executor';
-import { functionTestSpecs } from './expression_functions';
+import { ExpressionFunctionDefinition } from '../../expression_functions';
+import { ExpressionValueNum } from '../../expression_types';
 
-export const createUnitTestExecutor = () => {
-  const executor = Executor.createWithDefaults();
-
-  for (const func of functionTestSpecs) {
-    executor.registerFunction(func);
-  }
-
-  return executor;
+export const error: ExpressionFunctionDefinition<
+  'error',
+  ExpressionValueNum,
+  { message: string },
+  ExpressionValueNum
+> = {
+  name: 'error',
+  help: 'This function always throws an error',
+  args: {
+    message: {
+      default: 'Unknown',
+      aliases: ['_'],
+      help: 'Number to add to input',
+      types: ['string'],
+    },
+  },
+  fn: (input, args, context) => {
+    throw new Error(args.message);
+  },
 };

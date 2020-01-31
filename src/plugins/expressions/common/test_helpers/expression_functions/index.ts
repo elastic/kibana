@@ -17,15 +17,19 @@
  * under the License.
  */
 
-import { Executor } from '../executor';
-import { functionTestSpecs } from './expression_functions';
+import { access } from './access';
+import { add } from './add';
+import { error } from './error';
+import { introspectContext } from './introspect_context';
+import { mult } from './mult';
+import { sleep } from './sleep';
+import { AnyExpressionFunctionDefinition } from '../../expression_functions';
 
-export const createUnitTestExecutor = () => {
-  const executor = Executor.createWithDefaults();
-
-  for (const func of functionTestSpecs) {
-    executor.registerFunction(func);
-  }
-
-  return executor;
-};
+export const functionTestSpecs: AnyExpressionFunctionDefinition[] = [
+  access,
+  add,
+  error,
+  introspectContext,
+  mult,
+  sleep,
+];

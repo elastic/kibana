@@ -17,15 +17,19 @@
  * under the License.
  */
 
-import { Executor } from '../executor';
-import { functionTestSpecs } from './expression_functions';
+import { ExpressionFunctionDefinition } from '../../expression_functions';
 
-export const createUnitTestExecutor = () => {
-  const executor = Executor.createWithDefaults();
-
-  for (const func of functionTestSpecs) {
-    executor.registerFunction(func);
-  }
-
-  return executor;
+export const access: ExpressionFunctionDefinition<'access', any, { key: string }, any> = {
+  name: 'access',
+  help: 'Access key on input object or return the input, if it is not an object',
+  args: {
+    key: {
+      aliases: ['_'],
+      help: 'Key on input object',
+      types: ['string'],
+    },
+  },
+  fn: (input, { key }, context) => {
+    return !input ? input : typeof input === 'object' ? input[key] : input;
+  },
 };

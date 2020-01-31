@@ -23,7 +23,7 @@ import { ExpressionValueNum } from '../../expression_types';
 export const add: ExpressionFunctionDefinition<
   'add',
   ExpressionValueNum,
-  { val: number },
+  { val: number | null | string },
   ExpressionValueNum
 > = {
   name: 'add',
@@ -33,13 +33,20 @@ export const add: ExpressionFunctionDefinition<
       default: 0,
       aliases: ['_'],
       help: 'Number to add to input',
-      types: ['number'],
+      types: ['null', 'number', 'string'],
     },
   },
-  fn: ({ value }, args, context) => {
+  fn: (input1, { val: input2 }, context) => {
+    const value1 = !input1 ? 0 : typeof input1 === 'object' ? input1.value : Number(input1);
+    const value2 = !input2
+      ? 0
+      : typeof input2 === 'object'
+      ? (input2 as any).value
+      : Number(input2);
+
     return {
       type: 'num',
-      value: value + args.val,
+      value: value1 + value2,
     };
   },
 };

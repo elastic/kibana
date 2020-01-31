@@ -57,6 +57,10 @@ export const num: ExpressionTypeDefinition<'num', ExpressionValueNum> = {
         value,
       };
     },
+    '*': value => ({
+      type: 'num',
+      value: Number(value),
+    }),
   },
   to: {
     render: ({ value }): Render<{ text: string }> => {
