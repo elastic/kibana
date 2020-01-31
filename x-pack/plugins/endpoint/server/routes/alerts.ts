@@ -8,34 +8,34 @@ import { IRouter, KibanaRequest, RequestHandler } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 
-import {
-  getPagingProperties,
-  buildAlertListESQuery,
-} from '../services/endpoint/alert_query_builders';
-
+import { getRequestData, buildAlertListESQuery } from '../services/endpoint/alert_query_builders';
 import { AlertData, AlertResultList } from '../../common/types';
-import { AlertRequestParams, EndpointAppContext } from '../types';
+import { AlertRequestParams, AlertRequestData, EndpointAppContext } from '../types';
 
 const ALERTS_ROUTE = '/api/endpoint/alerts';
 
 export const reqSchema = schema.object({
   page_size: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
   page_index: schema.number({ defaultValue: 0, min: 0 }),
+  filters: schema.string({ defaultValue: '' }),
 });
 
 export function registerAlertRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const alertsHandler: RequestHandler<unknown, AlertRequestParams> = async (ctx, req, res) => {
     try {
-      const queryParams = await getPagingProperties(
+      const reqData = await getRequestData(
         req as KibanaRequest<unknown, AlertRequestParams, AlertRequestParams, any>,
         endpointAppContext
       );
-      const reqBody = await buildAlertListESQuery(queryParams);
+
+      const reqBody = await buildAlertListESQuery(reqData);
+      endpointAppContext.logFactory.get('alerts').debug('ES query: ' + JSON.stringify(reqBody));
+
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
         'search',
         reqBody
       )) as SearchResponse<AlertData>;
-      return res.ok({ body: mapToAlertResultList(endpointAppContext, queryParams, response) });
+      return res.ok({ body: mapToAlertResultList(endpointAppContext, reqData, response) });
     } catch (err) {
       return res.internalError({ body: err });
     }
@@ -66,7 +66,7 @@ export function registerAlertRoutes(router: IRouter, endpointAppContext: Endpoin
 
 function mapToAlertResultList(
   endpointAppContext: EndpointAppContext,
-  queryParams: Record<string, any>,
+  reqData: AlertRequestData,
   searchResponse: SearchResponse<AlertData>
 ): AlertResultList {
   interface Total {
@@ -89,14 +89,14 @@ function mapToAlertResultList(
   if (totalIsLowerBound) {
     // This shouldn't happen, as we always try to fetch enough hits to satisfy the current request and the next page.
     endpointAppContext.logFactory
-      .get('endpoint')
+      .get('alerts')
       .warn('Total hits not counted accurately. Pagination numbers may be inaccurate.');
   }
 
   return {
-    request_page_size: queryParams.pageSize,
-    request_page_index: queryParams.pageIndex,
-    result_from_index: queryParams.fromIndex,
+    request_page_size: reqData.pageSize,
+    request_page_index: reqData.pageIndex,
+    result_from_index: reqData.fromIndex,
     alerts: searchResponse?.hits?.hits?.map(entry => entry._source),
     total: totalNumberOfAlerts,
   };
