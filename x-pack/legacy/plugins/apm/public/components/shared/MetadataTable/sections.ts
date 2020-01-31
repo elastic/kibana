@@ -38,7 +38,8 @@ export const CLIENT: Section = {
   key: 'client',
   label: i18n.translate('xpack.apm.metadataTable.section.clientLabel', {
     defaultMessage: 'Client'
-  })
+  }),
+  properties: ['ip']
 };
 
 export const CONTAINER: Section = {
