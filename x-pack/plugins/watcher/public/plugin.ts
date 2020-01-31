@@ -76,18 +76,17 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       }),
       icon: 'watchesApp',
       path: '/app/kibana#/management/elasticsearch/watcher/watches',
-      showOnHomePage: true,
+      showOnHomePage: false,
     };
 
     home.featureCatalogue.register(watcherHome);
 
     licensing.license$.pipe(first(), map(licenseToLicenseStatus)).subscribe(({ valid }) => {
+      // eslint-disable-next-line no-console
+      console.error('Got license', valid);
       if (valid) {
         watcherESApp.enable();
         watcherHome.showOnHomePage = true;
-      } else {
-        watcherESApp.disable();
-        watcherHome.showOnHomePage = false;
       }
     });
   }
