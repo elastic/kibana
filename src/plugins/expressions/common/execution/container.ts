@@ -25,14 +25,33 @@ import { ExecutorState, defaultState as executorDefaultState } from '../executor
 import { ExpressionAstExpression } from '../ast';
 import { ExpressionValue } from '../expression_types';
 
-export interface ExecutionState extends ExecutorState {
+export interface ExecutionState<Output = ExpressionValue> extends ExecutorState {
   ast: ExpressionAstExpression;
-  result?: ExpressionValue;
+
+  /**
+   * Tracks state of execution.
+   *
+   * - `not-started` - before .start() method was called.
+   * - `pending` - immediately after .start() method is called.
+   * - `result` - when expression execution completed.
+   * - `error` - when execution failed with error.
+   */
+  state: 'not-started' | 'pending' | 'result' | 'error';
+
+  /**
+   * Result of the expression execution.
+   */
+  result?: Output;
+
+  /**
+   * Error happened during the execution.
+   */
   error?: Error;
 }
 
 const executionDefaultState: ExecutionState = {
   ...executorDefaultState,
+  state: 'not-started',
   ast: {
     type: 'expression',
     chain: [],
@@ -40,16 +59,38 @@ const executionDefaultState: ExecutionState = {
 };
 
 // eslint-disable-next-line
-export interface ExecutionPureTransitions {}
+export interface ExecutionPureTransitions<Output = ExpressionValue> {
+  start: (state: ExecutionState<Output>) => () => ExecutionState<Output>;
+  setResult: (state: ExecutionState<Output>) => (result: Output) => ExecutionState<Output>;
+  setError: (state: ExecutionState<Output>) => (error: Error) => ExecutionState<Output>;
+}
 
-export const executionPureTransitions: ExecutionPureTransitions = {};
+export const executionPureTransitions: ExecutionPureTransitions = {
+  start: state => () => ({
+    ...state,
+    state: 'pending',
+  }),
+  setResult: state => result => ({
+    ...state,
+    state: 'result',
+    result,
+  }),
+  setError: state => error => ({
+    ...state,
+    state: 'error',
+    error,
+  }),
+};
 
-export type ExecutionContainer = StateContainer<ExecutionState, ExecutionPureTransitions>;
+export type ExecutionContainer<Output = ExpressionValue> = StateContainer<
+  ExecutionState<Output>,
+  ExecutionPureTransitions<Output>
+>;
 
-export const createExecutionContainer = (
-  state: ExecutionState = executionDefaultState
-): ExecutionContainer => {
-  const container = createStateContainer<ExecutionState, ExecutionPureTransitions>(
+export const createExecutionContainer = <Output = ExpressionValue>(
+  state: ExecutionState<Output> = executionDefaultState
+): ExecutionContainer<Output> => {
+  const container = createStateContainer<ExecutionState<Output>, ExecutionPureTransitions<Output>>(
     state,
     executionPureTransitions
   );

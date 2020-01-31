@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
+import { each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
@@ -54,7 +54,7 @@ export class Execution<
   /**
    * Dynamic state of the execution.
    */
-  public readonly state: ExecutionContainer;
+  public readonly state: ExecutionContainer<Output>;
 
   /**
    * Initial input of the execution.
@@ -62,13 +62,13 @@ export class Execution<
    * N.B. It is initialized to `null` rather than `undefined` for legacy reasons,
    * because in legacy interpreter it was set to `null` by default.
    */
-  private input: Input = null as any;
+  public input: Input = null as any;
 
   /**
    * Execution context - object that allows to do side-effects. Context is passed
    * to every function.
    */
-  private readonly context: ExecutionContext<Input, InspectorAdapters> & ExtraContext;
+  public readonly context: ExecutionContext<Input, InspectorAdapters> & ExtraContext;
 
   /**
    * AbortController to cancel this Execution.
@@ -95,8 +95,9 @@ export class Execution<
 
   constructor(public readonly params: ExecutionParams<ExtraContext>) {
     const { executor, ast } = params;
-    this.state = createExecutionContainer({
+    this.state = createExecutionContainer<Output>({
       ...executor.state.get(),
+      state: 'not-started',
       ast,
     });
 
@@ -131,33 +132,55 @@ export class Execution<
     this.hasStarted = true;
 
     this.input = input;
+    this.state.transitions.start();
+
     const { resolve, reject } = this.firstResultFuture;
     this.invokeChain(this.state.get().ast.chain, input).then(resolve, reject);
+
+    this.firstResultFuture.promise.then(
+      result => {
+        this.state.transitions.setResult(result);
+      },
+      error => {
+        this.state.transitions.setError(error);
+      }
+    );
   }
 
-  public cast(node: any, toTypeNames: any) {
-    // If you don't give us anything to cast to, you'll get your input back
-    if (!toTypeNames || toTypeNames.length === 0) return node;
+  async invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Promise<any> {
+    if (!chainArr.length) return input;
 
-    // No need to cast if node is already one of the valid types
-    const fromTypeName = getType(node);
-    if (toTypeNames.includes(fromTypeName)) return node;
-
-    const { types } = this.state.get();
-    const fromTypeDef = types[fromTypeName];
-
-    for (let i = 0; i < toTypeNames.length; i++) {
-      // First check if the current type can cast to this type
-      if (fromTypeDef && fromTypeDef.castsTo(toTypeNames[i])) {
-        return fromTypeDef.to(node, toTypeNames[i], types);
+    for (const link of chainArr) {
+      // if execution was aborted return error
+      if (this.context.abortSignal && this.context.abortSignal.aborted) {
+        return createError({
+          message: 'The expression was aborted.',
+          name: 'AbortError',
+        });
       }
 
-      // If that isn't possible, check if this type can cast from the current type
-      const toTypeDef = types[toTypeNames[i]];
-      if (toTypeDef && toTypeDef.castsFrom(fromTypeName)) return toTypeDef.from(node, types);
+      const { function: fnName, arguments: fnArgs } = link;
+      const fnDef = getByAlias(this.state.get().functions, fnName);
+
+      if (!fnDef) {
+        return createError({ message: `Function ${fnName} could not be found.` });
+      }
+
+      try {
+        // Resolve arguments before passing to function
+        // resolveArgs returns an object because the arguments themselves might
+        // actually have a 'then' function which would be treated as a promise
+        const { resolvedArgs } = await this.resolveArgs(fnDef, input, fnArgs);
+        const output = await this.invokeFunction(fnDef, input, resolvedArgs);
+        if (getType(output) === 'error') return output;
+        input = output;
+      } catch (e) {
+        e.message = `[${fnName}] > ${e.message}`;
+        return createError(e);
+      }
     }
 
-    throw new Error(`Can not cast '${fromTypeName}' to any of '${toTypeNames.join(', ')}'`);
+    return input;
   }
 
   async invokeFunction(
@@ -165,13 +188,12 @@ export class Execution<
     input: unknown,
     args: Record<string, unknown>
   ): Promise<any> {
-    // Check function input.
     const castedInput = this.cast(input, fnDef.context ? fnDef.context.types : undefined);
-    const fnOutput = await fnDef.fn(castedInput, args, this.context);
+    const output = await fnDef.fn(castedInput, args, this.context);
 
     // Validate that the function returned the type it said it would.
-    // This isn't really required, but it keeps function developers honest.
-    const returnType = getType(fnOutput);
+    // This isn't required, but it keeps function developers honest.
+    const returnType = getType(output);
     const expectedType = fnDef.type;
     if (expectedType && returnType !== expectedType) {
       throw new Error(
@@ -180,17 +202,42 @@ export class Execution<
       );
     }
 
-    // Validate the function output against the type definition's validate function
+    // Validate the function output against the type definition's validate function.
     const type = this.context.types[fnDef.type];
     if (type && type.validate) {
       try {
-        type.validate(fnOutput);
+        type.validate(output);
       } catch (e) {
         throw new Error(`Output of '${fnDef.name}' is not a valid type '${fnDef.type}': ${e}`);
       }
     }
 
-    return fnOutput;
+    return output;
+  }
+
+  public cast(value: any, toTypeNames?: string[]) {
+    // If you don't give us anything to cast to, you'll get your input back
+    if (!toTypeNames || toTypeNames.length === 0) return value;
+
+    // No need to cast if node is already one of the valid types
+    const fromTypeName = getType(value);
+    if (toTypeNames.includes(fromTypeName)) return value;
+
+    const { types } = this.state.get();
+    const fromTypeDef = types[fromTypeName];
+
+    for (const toTypeName of toTypeNames) {
+      // First check if the current type can cast to this type
+      if (fromTypeDef && fromTypeDef.castsTo(toTypeName)) {
+        return fromTypeDef.to(value, toTypeName, types);
+      }
+
+      // If that isn't possible, check if this type can cast from the current type
+      const toTypeDef = types[toTypeName];
+      if (toTypeDef && toTypeDef.castsFrom(fromTypeName)) return toTypeDef.from(value, types);
+    }
+
+    throw new Error(`Can not cast '${fromTypeName}' to any of '${toTypeNames.join(', ')}'`);
   }
 
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
@@ -279,44 +326,5 @@ export class Execution<
     // Return an object here because the arguments themselves might actually have a 'then'
     // function which would be treated as a promise
     return { resolvedArgs };
-  }
-
-  async invokeChain(chainArr: ExpressionAstFunction[], context: any): Promise<any> {
-    if (!chainArr.length) return context;
-    // if execution was aborted return error
-    if (this.context.abortSignal && this.context.abortSignal.aborted) {
-      return createError({
-        message: 'The expression was aborted.',
-        name: 'AbortError',
-      });
-    }
-    const chain = clone(chainArr);
-    const link = chain.shift(); // Every thing in the chain will always be a function right?
-    if (!link) throw Error('Function chain is empty.');
-    const { function: fnName, arguments: fnArgs } = link;
-    const fnDef = getByAlias(this.state.get().functions, fnName);
-
-    if (!fnDef) {
-      return createError({ message: `Function ${fnName} could not be found.` });
-    }
-
-    try {
-      // Resolve arguments before passing to function
-      // resolveArgs returns an object because the arguments themselves might
-      // actually have a 'then' function which would be treated as a promise
-      const { resolvedArgs } = await this.resolveArgs(fnDef, context, fnArgs);
-      const newContext = await this.invokeFunction(fnDef, context, resolvedArgs);
-
-      // if something failed, just return the failure
-      if (getType(newContext) === 'error') return newContext;
-
-      // Continue re-invoking chain until it's empty
-      return this.invokeChain(chain, newContext);
-    } catch (e) {
-      // Everything that throws from a function will hit this
-      // The interpreter should *never* fail. It should always return a `{type: error}` on failure
-      e.message = `[${fnName}] > ${e.message}`;
-      return createError(e);
-    }
   }
 }
