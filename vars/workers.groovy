@@ -92,7 +92,7 @@ def ci(Map params, Closure closure) {
 // Worker for running the current intake jobs. Just runs a single script after bootstrap.
 def intake(jobName, String script) {
   return {
-    ci(name: jobName, label: 'linux && immutable') {
+    ci(name: jobName, label: 'linux && immutable', ramDisk: false) {
       runbld(script, "Execute ${jobName}")
     }
   }
