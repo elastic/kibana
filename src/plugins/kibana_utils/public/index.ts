@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { defer, Defer, of } from '../common';
+export { defer, Defer, of, UiComponent, UiComponentInstance } from '../common';
 export * from './core';
 export * from './errors';
 export * from './field_mapping';

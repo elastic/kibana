@@ -17,7 +17,4 @@
  * under the License.
  */
 
-export * from './defer';
-export * from './of';
-export * from './ui';
-export { distinctUntilChangedWithInitialValue } from './distinct_until_changed_with_initial_value';
+export * from './ui_component';
