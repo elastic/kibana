@@ -23,13 +23,16 @@ import { InfraKibanaObservableApiAdapter } from './lib/adapters/observable_api/k
 import { registerStartSingleton } from './legacy_singletons';
 import { registerFeatures } from './register_feature';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../src/plugins/home/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { DataPublicPluginStart, DataPublicPluginSetup } from '../../../../src/plugins/data/public';
+// @ts-ignore
+import { setupKqlQuerySuggestionProvider } from '../../../legacy/plugins/kuery_autocomplete/public/kql_query_suggestion';
 
 export type ClientSetup = void;
 export type ClientStart = void;
 
 export interface ClientPluginsSetup {
   home: HomePublicPluginSetup;
+  data: DataPublicPluginSetup;
 }
 
 export interface ClientPluginsStart {
@@ -43,6 +46,9 @@ export class Plugin
 
   setup(core: CoreSetup, plugins: ClientPluginsSetup) {
     registerFeatures(plugins.home);
+
+    const kueryProvider = setupKqlQuerySuggestionProvider(core);
+    plugins.data.autocomplete.addQuerySuggestionProvider('kuery', kueryProvider);
 
     core.application.register({
       id: 'infra:logs',
