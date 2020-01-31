@@ -63,6 +63,8 @@ export const LogsToolbar = () => {
     startDate,
     endDate,
     updateDateRange,
+    liveStreamingInterval,
+    setLiveStreamingInterval,
   } = useContext(LogPositionState.Context);
 
   const handleTimeChange = useCallback(
@@ -134,8 +136,23 @@ export const LogsToolbar = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiSuperDatePicker start={startDate} end={endDate} onTimeChange={handleTimeChange} />
-          <LogTimeControls
+          <EuiSuperDatePicker
+            start={startDate}
+            end={endDate}
+            onTimeChange={handleTimeChange}
+            isPaused={!isAutoReloading}
+            refreshInterval={liveStreamingInterval}
+            onRefresh={() => {}}
+            onRefreshChange={({ refreshInterval, isPaused }) => {
+              if (isPaused) {
+                stopLiveStreaming();
+              } else {
+                startLiveStreaming();
+              }
+              setLiveStreamingInterval(refreshInterval);
+            }}
+          />
+          {/* <LogTimeControls
             currentTime={visibleMidpointTime}
             isLiveStreaming={isAutoReloading}
             jumpToTime={jumpToTargetPositionTime}
@@ -144,7 +161,7 @@ export const LogsToolbar = () => {
               setSurroundingLogsId(null);
             }}
             stopLiveStreaming={stopLiveStreaming}
-          />
+          /> */}
         </EuiFlexItem>
       </EuiFlexGroup>
     </Toolbar>
