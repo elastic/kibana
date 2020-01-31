@@ -31,6 +31,7 @@ export const add: ExpressionFunctionDefinition<
   args: {
     val: {
       default: 0,
+      aliases: ['_'],
       help: 'Number to add to input',
       types: ['number'],
     },

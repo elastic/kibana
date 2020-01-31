@@ -17,17 +17,20 @@
  * under the License.
  */
 
-import { Executor } from '../executor';
-import { add } from './expression_functions/add';
-import { introspectContext } from './expression_functions/introspect_context';
-import { mult } from './expression_functions/mult';
-import { sleep } from './expression_functions/sleep';
+import { ExpressionFunctionDefinition } from '../../expression_functions';
 
-export const createUnitTestExecutor = () => {
-  const executor = Executor.createWithDefaults();
-  executor.registerFunction(add);
-  executor.registerFunction(introspectContext);
-  executor.registerFunction(mult);
-  executor.registerFunction(sleep);
-  return executor;
+export const sleep: ExpressionFunctionDefinition<'sleep', any, { time: number }, any> = {
+  name: 'sleep',
+  args: {
+    time: {
+      aliases: ['_'],
+      help: 'Time in milliseconds for how long to sleep',
+      types: ['number'],
+    },
+  },
+  help: '',
+  fn: async (input, args, context) => {
+    await new Promise(r => setTimeout(r, args.time));
+    return input;
+  },
 };

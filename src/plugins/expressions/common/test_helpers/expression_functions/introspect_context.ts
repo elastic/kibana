@@ -17,17 +17,26 @@
  * under the License.
  */
 
-import { Executor } from '../executor';
-import { add } from './expression_functions/add';
-import { introspectContext } from './expression_functions/introspect_context';
-import { mult } from './expression_functions/mult';
-import { sleep } from './expression_functions/sleep';
+import { ExpressionFunctionDefinition } from '../../expression_functions';
 
-export const createUnitTestExecutor = () => {
-  const executor = Executor.createWithDefaults();
-  executor.registerFunction(add);
-  executor.registerFunction(introspectContext);
-  executor.registerFunction(mult);
-  executor.registerFunction(sleep);
-  return executor;
+export const introspectContext: ExpressionFunctionDefinition<
+  'introspectContext',
+  any,
+  { key: string },
+  any
+> = {
+  name: 'introspectContext',
+  args: {
+    key: {
+      help: 'Context key to introspect',
+      types: ['string'],
+    },
+  },
+  help: '',
+  fn: (input, args, context) => {
+    return {
+      type: 'any',
+      result: (context as any)[args.key],
+    };
+  },
 };
