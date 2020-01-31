@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -15,6 +15,8 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
+  EuiEmptyPrompt,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { AlertsContextProvider } from '../../../context/alerts_context';
@@ -228,10 +230,47 @@ export const AlertsList: React.FunctionComponent = () => {
     );
   }
 
-  return (
-    <section data-test-subj="alertsList">
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
+  const emptyPrompt = (
+    <EuiEmptyPrompt
+      iconType="watchesApp"
+      data-test-subj="createFirstConnectorEmptyPrompt"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertsList.emptyTitle"
+            defaultMessage="Create your first alert"
+          />
+        </h2>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertsList.emptyDesc"
+            defaultMessage="Recieve an alert through email, slack or other connectors when a certain trigger is hit"
+          />
+        </p>
+      }
+      actions={
+        <EuiButton
+          data-test-subj="createFirstActionButton"
+          key="create-action"
+          fill
+          iconType="plusInCircle"
+          iconSide="left"
+          onClick={() => setAlertFlyoutVisibility(true)}
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertsList.emptyButton"
+            defaultMessage="Create alert"
+          />
+        </EuiButton>
+      }
+    />
+  );
+
+  const table = (
+    <Fragment>
+      <EuiFlexGroup gutterSize="s">
         {selectedIds.length > 0 && canDelete && (
           <EuiFlexItem grow={false}>
             <BulkActionPopover
@@ -260,12 +299,12 @@ export const AlertsList: React.FunctionComponent = () => {
             }}
             placeholder={i18n.translate(
               'xpack.triggersActionsUI.sections.alertsList.searchPlaceholderTitle',
-              { defaultMessage: 'Search...' }
+              { defaultMessage: 'Search' }
             )}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s">
             {toolsRight.map((tool, index: number) => (
               <EuiFlexItem key={index} grow={false}>
                 {tool}
@@ -314,6 +353,15 @@ export const AlertsList: React.FunctionComponent = () => {
           setPage(changedPage);
         }}
       />
+    </Fragment>
+  );
+
+  return (
+    <section data-test-subj="alertsList">
+      <EuiSpacer size="m" />
+      {convertAlertsToTableItems(alertsState.data, alertTypesState.data).length !== 0 && table}
+      {convertAlertsToTableItems(alertsState.data, alertTypesState.data).length === 0 &&
+        emptyPrompt}
       <AlertsContextProvider
         value={{
           addFlyoutVisible: alertFlyoutVisible,
