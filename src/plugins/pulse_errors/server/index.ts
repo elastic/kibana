@@ -24,7 +24,6 @@ import { CoreSetup, CoreStart, Logger, PluginInitializerContext } from 'kibana/s
 import { PulseChannel } from 'src/core/server/pulse/channel';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { PulseErrorPayloadRecord } from 'src/core/server/pulse/collectors/errors';
-import moment from 'moment';
 
 class Plugin {
   private readonly log: Logger;
@@ -54,12 +53,6 @@ class Plugin {
       deployment_id: '123',
       hash: error.message, // TODO: Find a way to hash the message
       message: error.message,
-      status: 'new',
-      timestamp: moment()
-        .add(300, 'seconds')
-        .toDate(),
-      //   },
-      // ],
     };
     try {
       await errorsChannel.sendPulse(errorPayload);
