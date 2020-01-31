@@ -75,7 +75,11 @@ const initialData: FlattenedCasesSavedObjects = {
   total: 0,
   saved_objects: [],
 };
-export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>] => {
+export const useGetCases = (): [
+  CasesState,
+  Dispatch<SetStateAction<QueryArgs>>,
+  Dispatch<SetStateAction<FilterOptions>>
+] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -93,11 +97,16 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
     },
   });
   const [query, setQuery] = useState(state.pagination as QueryArgs);
+  const [filterQuery, setFilters] = useState(state.filterOptions as FilterOptions);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
     dispatch({ type: UPDATE_PAGINATION, payload: query });
   }, [query]);
+
+  useEffect(() => {
+    dispatch({ type: UPDATE_FILTER_OPTIONS, payload: filterQuery });
+  }, [filterQuery]);
 
   useEffect(() => {
     let didCancel = false;
@@ -128,6 +137,6 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
     return () => {
       didCancel = true;
     };
-  }, [state.pagination]);
-  return [state, setQuery];
+  }, [state.pagination, state.filterOptions]);
+  return [state, setQuery, setFilters];
 };
