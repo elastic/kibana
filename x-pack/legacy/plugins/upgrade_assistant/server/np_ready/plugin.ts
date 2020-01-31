@@ -98,10 +98,10 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   private async validateSteps(
     elasticsearch: CoreSetup['elasticsearch'],
-    step: UpgradeAssistantRecipeEntry
+    { checks, ...step }: UpgradeAssistantRecipeEntry
   ) {
-    if (step.checks && step.checks.length > 0) {
-      for (const check of step.checks) {
+    if (checks && checks.length > 0) {
+      for (const check of checks) {
         const { method, options, path, value } = check;
         const esClient = await elasticsearch.adminClient$.pipe(take(1)).toPromise();
         const result = await esClient.callAsInternalUser(method, options);
