@@ -416,15 +416,6 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   ));
   return (
     <Fragment>
-      <EuiText>
-        <EuiTextColor color="subdued">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.composeMessageTitle"
-            defaultMessage="Compose Message:"
-          />
-        </EuiTextColor>
-      </EuiText>
-      <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
         error={errors.to}

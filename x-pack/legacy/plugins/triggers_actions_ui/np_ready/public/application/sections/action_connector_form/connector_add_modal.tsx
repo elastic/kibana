@@ -89,7 +89,7 @@ export const ConnectorAddModal = ({
       });
 
   return (
-    <EuiOverlayMask>
+    <EuiOverlayMask className="actConnectorModal">
       <EuiModal onClose={closeModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
