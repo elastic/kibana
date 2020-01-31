@@ -62,23 +62,23 @@ export const getRules = async ({
       return [];
     }
   } else {
-    const returnPrepackagedRules = await Promise.all(
-      Array.from(
-        Array(totalPages - 1)
-          .fill({})
-          .map((_, page) =>
-            findRules({
-              alertsClient,
-              filter,
-              perPage,
-              page: page + 2,
-            })
-          )
-      )
-    );
-    const dataPrepackagedRules = returnPrepackagedRules.map(dt => dt.data);
-    if (isAlertTypes(dataPrepackagedRules)) {
-      return dataPrepackagedRules;
+    const returnPrepackagedRules = await Array(totalPages - 1)
+      .fill({})
+      .map((_, page) => {
+        // page index starts at 2 as we already got the first page and we have more pages to go
+        return findRules({
+          alertsClient,
+          filter,
+          perPage,
+          page: page + 2,
+        });
+      })
+      .reduce<Promise<object[]>>(async (accum, nextPage) => {
+        return [...(await accum), ...(await nextPage).data];
+      }, Promise.resolve(firstPrepackedRules.data));
+
+    if (isAlertTypes(returnPrepackagedRules)) {
+      return returnPrepackagedRules;
     } else {
       // If this was ever true, you have a really messed up system.
       // This is keep typescript happy since we have an unknown with data
