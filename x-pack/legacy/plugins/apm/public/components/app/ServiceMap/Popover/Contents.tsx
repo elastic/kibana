@@ -12,7 +12,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import cytoscape from 'cytoscape';
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, MutableRefObject } from 'react';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceMetricList } from './ServiceMetricList';
@@ -27,6 +27,7 @@ interface ContentsProps {
   isService: boolean;
   label: string;
   onFocusClick: () => void;
+  popoverRef: MutableRefObject<EuiPopover | null>;
   selectedNodeServiceName: string;
   style: CSSProperties;
 }
@@ -39,6 +40,7 @@ export function Contents({
   isService,
   label,
   onFocusClick,
+  popoverRef,
   selectedNodeServiceName,
   style
 }: ContentsProps) {
@@ -48,6 +50,7 @@ export function Contents({
       button={button}
       closePopover={() => {}}
       isOpen={isOpen}
+      ref={popoverRef}
       style={style}
     >
       <EuiFlexGroup
