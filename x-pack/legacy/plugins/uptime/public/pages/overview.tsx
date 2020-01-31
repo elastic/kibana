@@ -83,12 +83,7 @@ export const OverviewPageComponent = ({ autocomplete, setBreadcrumbs, indexPatte
           {error && <OverviewPageParsingErrorCallout error={error} />}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <StatusPanel
-          dateRangeStart={dateRangeStart}
-          dateRangeEnd={dateRangeEnd}
-          filters={esFilters}
-          statusFilter={statusFilter}
-        />
+        <StatusPanel />
         <EuiSpacer size="s" />
         <MonitorList
           dangerColor={colors.danger}

@@ -12,8 +12,8 @@ import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../infra/public';
-import { MonitorStatusDetails } from '../components/functional/monitor_status_details';
 import { PageHeader } from './page_header';
+import { MonitorStatusDetails } from '../components/connected';
 
 interface MonitorPageProps {
   setBreadcrumbs: UMUpdateBreadcrumbs;
@@ -49,12 +49,7 @@ export const MonitorPage = ({ setBreadcrumbs }: MonitorPageProps) => {
     <Fragment>
       <PageHeader setBreadcrumbs={setBreadcrumbs} />
       <EuiSpacer size="s" />
-      <MonitorStatusDetails
-        monitorId={monitorId}
-        variables={sharedVariables}
-        dateStart={absoluteDateRangeStart}
-        dateEnd={absoluteDateRangeEnd}
-      />
+      <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />
       <MonitorCharts {...colors} monitorId={monitorId} variables={sharedVariables} />
       <EuiSpacer size="s" />

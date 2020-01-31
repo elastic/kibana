@@ -9,3 +9,5 @@ export { Snapshot } from './charts/snapshot_container';
 export { KueryBar } from './kuerybar/kuery_bar_container';
 export { OverviewPage } from './pages/overview_container';
 export { FilterGroup } from './filter_group/filter_group_container';
+export { MonitorStatusDetails } from './monitor/status_details_container';
+export { MonitorStatusBar } from './monitor/status_bar_container';

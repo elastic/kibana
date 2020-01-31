@@ -7,14 +7,12 @@
 import moment from 'moment';
 import React from 'react';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
-import { Ping } from '../../../../common/graphql/types';
-import { MonitorStatusBarComponent } from '../monitor_status_details/monitor_status_bar';
+import { MonitorStatusBarComponent } from '../monitor_status_bar';
+import { Ping } from '../../../../../common/graphql/types';
 
 describe('MonitorStatusBar component', () => {
   let monitorStatus: Ping;
   let monitorLocations: any;
-  let dateStart: string;
-  let dateEnd: string;
 
   beforeEach(() => {
     monitorStatus = {
@@ -46,9 +44,6 @@ describe('MonitorStatusBar component', () => {
         },
       ],
     };
-
-    dateStart = moment('01-01-2010').toString();
-    dateEnd = moment('10-10-2010').toString();
   });
 
   it('renders duration in ms, not us', () => {
@@ -56,10 +51,7 @@ describe('MonitorStatusBar component', () => {
       <MonitorStatusBarComponent
         monitorStatus={monitorStatus}
         monitorId="id1"
-        dateStart={dateStart}
-        dateEnd={dateEnd}
         monitorLocations={monitorLocations}
-        loadMonitorStatus={jest.fn()}
       />
     );
     expect(component).toMatchSnapshot();
