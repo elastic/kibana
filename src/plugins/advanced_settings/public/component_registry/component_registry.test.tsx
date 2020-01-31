@@ -69,4 +69,23 @@ describe('ComponentRegistry', () => {
       );
     });
   });
+
+  it('should set a displayName for the component if one does not exist', () => {
+    const component: React.ComponentType = () => <div />;
+    // component.displayName = ComponentRegistry.componentType.PAGE_TITLE_COMPONENT;
+    const registry = new ComponentRegistry();
+    registry.setup.register(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT, component);
+
+    expect(component.displayName).toEqual(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT);
+  });
+
+  it('should not set a displayName for the component if one already exists', () => {
+    const component: React.ComponentType = () => <div />;
+    component.displayName = '<AwesomeComponent>';
+    const registry = new ComponentRegistry();
+
+    registry.setup.register(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT, component);
+
+    expect(component.displayName).toEqual('<AwesomeComponent>');
+  });
 });

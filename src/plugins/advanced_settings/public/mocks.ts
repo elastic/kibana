@@ -19,8 +19,15 @@
 
 import { ComponentRegistry } from './component_registry';
 
-export const componentRegistryMock = {
-  register: jest.fn(),
-  get: jest.fn(),
-  componentType: ComponentRegistry.componentType,
+const register = jest.fn();
+const get = jest.fn();
+const componentType = ComponentRegistry.componentType;
+
+export const advancedSettingsMock = {
+  createSetupContract() {
+    return { register, componentType };
+  },
+  createStartContract() {
+    return { get, componentType };
+  },
 };

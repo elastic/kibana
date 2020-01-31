@@ -22,20 +22,25 @@ import { PageTitle } from './page_title';
 import { PageSubtitle } from './page_subtitle';
 import { PageFooter } from './page_footer';
 
-enum Id {
-  PAGE_TITLE_COMPONENT,
-  PAGE_SUBTITLE_COMPONENT,
-  PAGE_FOOTER_COMPONENT,
-}
+type Id =
+  | 'advanced_settings_page_title'
+  | 'advanced_settings_page_subtitle'
+  | 'advanced_settings_page_footer';
+
+const componentType: { [key: string]: Id } = {
+  PAGE_TITLE_COMPONENT: 'advanced_settings_page_title' as Id,
+  PAGE_SUBTITLE_COMPONENT: 'advanced_settings_page_subtitle' as Id,
+  PAGE_FOOTER_COMPONENT: 'advanced_settings_page_footer' as Id,
+};
 
 type RegistryComponent = ComponentType<Record<string, any> | undefined>;
 
 export class ComponentRegistry {
-  static readonly componentType = Id;
+  static readonly componentType = componentType;
   static readonly defaultRegistry: Record<Id, RegistryComponent> = {
-    [Id.PAGE_TITLE_COMPONENT]: PageTitle,
-    [Id.PAGE_SUBTITLE_COMPONENT]: PageSubtitle,
-    [Id.PAGE_FOOTER_COMPONENT]: PageFooter,
+    advanced_settings_page_title: PageTitle,
+    advanced_settings_page_subtitle: PageSubtitle,
+    advanced_settings_page_footer: PageFooter,
   };
 
   registry: { [key in Id]?: RegistryComponent } = {};
@@ -53,6 +58,12 @@ export class ComponentRegistry {
   private register(id: Id, component: RegistryComponent, allowOverride = false) {
     if (!allowOverride && id in this.registry) {
       throw new Error(`Component with id ${id} is already registered.`);
+    }
+
+    // Setting a display name if one does not already exist.
+    // This enhances the snapshots, as well as the debugging experience.
+    if (!component.displayName) {
+      component.displayName = id;
     }
 
     this.registry[id] = component;
