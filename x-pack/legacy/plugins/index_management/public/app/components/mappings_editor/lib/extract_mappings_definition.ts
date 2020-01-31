@@ -6,15 +6,10 @@
 import { isPlainObject } from 'lodash';
 
 import { GenericObject } from '../types';
-import {
-  validateMappingsConfiguration,
-  mappingsConfigurationSchemaKeys,
-} from './mappings_validator';
-
-const ALLOWED_PARAMETERS = [...mappingsConfigurationSchemaKeys, 'dynamic_templates', 'properties'];
+import { validateMappingsConfiguration, VALID_MAPPINGS_PARAMETERS } from './mappings_validator';
 
 const isMappingDefinition = (obj: GenericObject): boolean => {
-  const areAllKeysValid = Object.keys(obj).every(key => ALLOWED_PARAMETERS.includes(key));
+  const areAllKeysValid = Object.keys(obj).every(key => VALID_MAPPINGS_PARAMETERS.includes(key));
 
   if (!areAllKeysValid) {
     return false;

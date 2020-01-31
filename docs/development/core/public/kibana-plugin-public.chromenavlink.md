@@ -19,6 +19,7 @@ export interface ChromeNavLink
 |  [baseUrl](./kibana-plugin-public.chromenavlink.baseurl.md) | <code>string</code> | The base route used to open the root of an application. |
 |  [category](./kibana-plugin-public.chromenavlink.category.md) | <code>AppCategory</code> | The category the app lives in |
 |  [disabled](./kibana-plugin-public.chromenavlink.disabled.md) | <code>boolean</code> | Disables a link from being clickable. |
+|  [disableSubUrlTracking](./kibana-plugin-public.chromenavlink.disablesuburltracking.md) | <code>boolean</code> | A flag that tells legacy chrome to ignore the link when tracking sub-urls |
 |  [euiIconType](./kibana-plugin-public.chromenavlink.euiicontype.md) | <code>string</code> | A EUI iconType that will be used for the app's icon. This icon takes precendence over the <code>icon</code> property. |
 |  [hidden](./kibana-plugin-public.chromenavlink.hidden.md) | <code>boolean</code> | Hides a link from the navigation. |
 |  [icon](./kibana-plugin-public.chromenavlink.icon.md) | <code>string</code> | A URL to an image file used as an icon. Used as a fallback if <code>euiIconType</code> is not provided. |

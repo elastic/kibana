@@ -28,8 +28,6 @@ export function plugin() {
 
 /** @public types */
 export { DataStart };
-export { EsQuerySortValue, FetchOptions, ISearchSource, SortDirection } from './search/types';
-export { SearchSourceFields } from './search/types';
 export {
   SavedQueryAttributes,
   SavedQuery,
