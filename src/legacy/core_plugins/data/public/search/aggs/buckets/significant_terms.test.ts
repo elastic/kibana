@@ -18,6 +18,7 @@
  */
 
 import { AggConfigs } from '../index';
+import { IAggConfigs } from '../types';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { significantTermsBucketAgg } from './significant_terms';
 import { IBucketAggConfig } from './_bucket_agg_type';
@@ -56,7 +57,7 @@ describe('Significant Terms Agg', () => {
         );
       };
 
-      const testSerializeAndWrite = (aggs: AggConfigs) => {
+      const testSerializeAndWrite = (aggs: IAggConfigs) => {
         const agg = aggs.aggs[0];
         const { [BUCKET_TYPES.SIGNIFICANT_TERMS]: params } = agg.toDsl();
 

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { parentPipelineAggHelper } from '../../index';
+export { parentPipelineAggHelper, parentPipelineType } from '../../index';

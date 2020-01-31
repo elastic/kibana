@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { AggConfigs } from '../../agg_configs';
+import { IAggConfigs } from '../../agg_configs';
 import { IMetricAggConfig } from '../metric_agg_type';
 
 export const parentPipelineAggWriter = (
   agg: IMetricAggConfig,
   output: Record<string, any>,
-  aggConfigs?: AggConfigs
+  aggConfigs?: IAggConfigs
 ): void => {
   const customMetric = agg.getParam('customMetric');
   const metricAgg = agg.getParam('metricAgg');

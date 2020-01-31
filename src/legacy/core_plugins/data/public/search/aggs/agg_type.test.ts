@@ -18,7 +18,7 @@
  */
 
 import { AggType, AggTypeConfig } from './agg_type';
-import { AggConfig } from './agg_config';
+import { IAggConfig } from './agg_config';
 import { npStart } from 'ui/new_platform';
 
 jest.mock('ui/new_platform');
@@ -48,7 +48,7 @@ describe('AggType Class', () => {
       describe('makeLabel', () => {
         it('makes a function when the makeLabel config is not specified', () => {
           const makeLabel = () => 'label';
-          const aggConfig = {} as AggConfig;
+          const aggConfig = {} as IAggConfig;
           const config: AggTypeConfig = {
             name: 'name',
             title: 'title',
@@ -64,7 +64,7 @@ describe('AggType Class', () => {
 
       describe('getResponseAggs/getRequestAggs', () => {
         it('copies the value', () => {
-          const testConfig = (aggConfig: AggConfig) => [aggConfig];
+          const testConfig = (aggConfig: IAggConfig) => [aggConfig];
 
           const aggType = new AggType({
             name: 'name',
@@ -78,7 +78,7 @@ describe('AggType Class', () => {
         });
 
         it('defaults to noop', () => {
-          const aggConfig = {} as AggConfig;
+          const aggConfig = {} as IAggConfig;
           const aggType = new AggType({
             name: 'name',
             title: 'title',
@@ -130,13 +130,13 @@ describe('AggType Class', () => {
     });
 
     describe('getFormat', function() {
-      let aggConfig: AggConfig;
+      let aggConfig: IAggConfig;
       let field: any;
 
       beforeEach(() => {
         aggConfig = ({
           getField: jest.fn(() => field),
-        } as unknown) as AggConfig;
+        } as unknown) as IAggConfig;
       });
 
       it('returns the formatter for the aggConfig', () => {

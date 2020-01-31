@@ -27,10 +27,10 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
-import { AggType } from './agg_type';
+import { IAggType } from './agg_type';
 import { AggGroupNames } from './agg_groups';
 import { writeParams } from './agg_params';
-import { AggConfigs } from './agg_configs';
+import { IAggConfigs } from './agg_configs';
 import { Schema } from './schemas';
 import {
   ISearchSource,
@@ -60,13 +60,13 @@ const unknownSchema: Schema = {
   group: AggGroupNames.Metrics,
 };
 
-const getTypeFromRegistry = (type: string): AggType => {
+const getTypeFromRegistry = (type: string): IAggType => {
   // We need to inline require here, since we're having a cyclic dependency
   // from somewhere inside agg_types back to AggConfig.
   const aggTypes = require('../aggs').aggTypes;
   const registeredType =
-    aggTypes.metrics.find((agg: AggType) => agg.name === type) ||
-    aggTypes.buckets.find((agg: AggType) => agg.name === type);
+    aggTypes.metrics.find((agg: IAggType) => agg.name === type) ||
+    aggTypes.buckets.find((agg: IAggType) => agg.name === type);
 
   if (!registeredType) {
     throw new Error('unknown type');
@@ -84,6 +84,9 @@ const getSchemaFromRegistry = (schemas: any, schema: string): Schema => {
 
   return registeredSchema;
 };
+
+// TODO need to make a more explicit interface for this
+export type IAggConfig = AggConfig;
 
 export class AggConfig {
   /**
@@ -122,19 +125,19 @@ export class AggConfig {
     );
   }
 
-  public aggConfigs: AggConfigs;
+  public aggConfigs: IAggConfigs;
   public id: string;
   public enabled: boolean;
   public params: any;
-  public parent?: AggConfigs;
+  public parent?: IAggConfigs;
   public brandNew?: boolean;
 
   private __schema: Schema;
-  private __type: AggType;
+  private __type: IAggType;
   private __typeDecorations: any;
   private subAggs: AggConfig[] = [];
 
-  constructor(aggConfigs: AggConfigs, opts: AggConfigOptions) {
+  constructor(aggConfigs: IAggConfigs, opts: AggConfigOptions) {
     this.aggConfigs = aggConfigs;
     this.id = String(opts.id || AggConfig.nextId(aggConfigs.aggs as any));
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
@@ -207,7 +210,7 @@ export class AggConfig {
     return _.get(this.params, key);
   }
 
-  write(aggs?: AggConfigs) {
+  write(aggs?: IAggConfigs) {
     return writeParams<AggConfig>(this.type.params, this, aggs);
   }
 
@@ -262,7 +265,7 @@ export class AggConfig {
    * @return {void|Object} - if the config has a dsl representation, it is
    *                         returned, else undefined is returned
    */
-  toDsl(aggConfigs?: AggConfigs) {
+  toDsl(aggConfigs?: IAggConfigs) {
     if (this.type.hasNoDsl) return;
     const output = this.write(aggConfigs) as any;
 
@@ -448,7 +451,7 @@ export class AggConfig {
     });
   }
 
-  public setType(type: string | AggType) {
+  public setType(type: string | IAggType) {
     this.type = typeof type === 'string' ? getTypeFromRegistry(type) : type;
   }
 

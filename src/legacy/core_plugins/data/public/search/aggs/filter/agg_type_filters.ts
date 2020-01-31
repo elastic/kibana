@@ -17,12 +17,12 @@
  * under the License.
  */
 import { IndexPattern } from 'src/plugins/data/public';
-import { AggType, AggConfig } from '..';
+import { IAggConfig, IAggType } from '../types';
 
 type AggTypeFilter = (
-  aggType: AggType,
+  aggType: IAggType,
   indexPattern: IndexPattern,
-  aggConfig: AggConfig
+  aggConfig: IAggConfig
 ) => boolean;
 
 /**
@@ -49,7 +49,7 @@ class AggTypeFilters {
    * @param aggConfig The aggConfig for which the returning list will be used.
    * @return A filtered list of the passed aggTypes.
    */
-  public filter(aggTypes: AggType[], indexPattern: IndexPattern, aggConfig: AggConfig) {
+  public filter(aggTypes: IAggType[], indexPattern: IndexPattern, aggConfig: IAggConfig) {
     const allFilters = Array.from(this.filters);
     const allowedAggTypes = aggTypes.filter(aggType => {
       const isAggTypeAllowed = allFilters.every(filter => filter(aggType, indexPattern, aggConfig));

@@ -22,8 +22,16 @@ export { AggType } from './agg_type';
 export { AggConfig } from './agg_config';
 export { AggConfigs } from './agg_configs';
 export { FieldParamType } from './param_types';
+export { MetricAggType } from './metrics/metric_agg_type';
 export { aggTypeFieldFilters } from './param_types/filter';
-export { parentPipelineAggHelper } from './metrics/lib/parent_pipeline_agg_helper';
+export {
+  parentPipelineAggHelper,
+  parentPipelineType,
+} from './metrics/lib/parent_pipeline_agg_helper';
+export {
+  siblingPipelineAggHelper,
+  siblingPipelineType,
+} from './metrics/lib/sibling_pipeline_agg_helper';
 
 // static code
 export { AggParamType } from './param_types/agg';

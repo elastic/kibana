@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AggConfigs } from '../agg_configs';
+import { IAggConfigs } from '../agg_configs';
 import { AggConfig } from '../agg_config';
 import { FetchOptions, ISearchSource } from '../../../../../../../plugins/data/public';
 
@@ -31,7 +31,7 @@ export class BaseParamType<TAggConfig extends AggConfig = AggConfig> {
   write: (
     aggConfig: TAggConfig,
     output: Record<string, any>,
-    aggConfigs?: AggConfigs,
+    aggConfigs?: IAggConfigs,
     locals?: Record<string, any>
   ) => void;
   serialize: (value: any, aggConfig?: TAggConfig) => any;

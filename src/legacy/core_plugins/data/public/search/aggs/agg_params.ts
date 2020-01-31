@@ -25,7 +25,7 @@ import { JsonParamType } from './param_types/json';
 import { BaseParamType } from './param_types/base';
 
 import { AggConfig } from './agg_config';
-import { AggConfigs } from './agg_configs';
+import { IAggConfigs } from './agg_configs';
 
 const paramTypeMap = {
   field: FieldParamType,
@@ -73,7 +73,7 @@ export const writeParams = <
 >(
   params: Array<Partial<TAggParam>> = [],
   aggConfig: TAggConfig,
-  aggs?: AggConfigs,
+  aggs?: IAggConfigs,
   locals?: Record<string, any>
 ) => {
   const output = { params: {} as Record<string, any> };

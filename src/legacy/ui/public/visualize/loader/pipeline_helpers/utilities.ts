@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
-import { AggConfig } from 'ui/agg_types';
+import { IAggConfig } from 'ui/agg_types';
 import { npStart } from 'ui/new_platform';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 import { fieldFormats } from '../../../../../../plugins/data/public';
@@ -62,7 +62,7 @@ const getFieldFormat = (
   return new DefaultFieldFormat();
 };
 
-export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
+export const createFormat = (agg: IAggConfig): SerializedFieldFormat => {
   const format: SerializedFieldFormat = agg.params.field ? agg.params.field.format.toJSON() : {};
   const formats: Record<string, () => SerializedFieldFormat> = {
     date_range: () => ({ id: 'date_range', params: format }),
@@ -155,7 +155,7 @@ export const getFormat: FormatFactory = mapping => {
   }
 };
 
-export const getTableAggs = (vis: Vis): AggConfig[] => {
+export const getTableAggs = (vis: Vis): IAggConfig[] => {
   if (!vis.aggs || !vis.aggs.getResponseAggs) {
     return [];
   }

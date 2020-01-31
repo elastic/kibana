@@ -43,6 +43,9 @@ interface MetricAggTypeConfig<TMetricAggConfig extends AggConfig>
   subtype?: string;
 }
 
+// TODO need to make a more explicit interface for this
+export type IMetricAggType = MetricAggType;
+
 export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig> extends AggType<
   TMetricAggConfig,
   MetricAggParam<TMetricAggConfig>

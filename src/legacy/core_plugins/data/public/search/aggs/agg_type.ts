@@ -23,7 +23,7 @@ import { npStart } from 'ui/new_platform';
 import { initParams } from './agg_params';
 
 import { AggConfig } from './agg_config';
-import { AggConfigs } from './agg_configs';
+import { IAggConfigs } from './agg_configs';
 import { Adapters } from '../../../../../../plugins/inspector/public';
 import { BaseParamType } from './param_types/base';
 import { AggParamType } from './param_types/agg';
@@ -52,7 +52,7 @@ export interface AggTypeConfig<
   decorateAggConfig?: () => any;
   postFlightRequest?: (
     resp: any,
-    aggConfigs: AggConfigs,
+    aggConfigs: IAggConfigs,
     aggConfig: TAggConfig,
     searchSource: ISearchSource,
     inspectorAdapters: Adapters,
@@ -69,6 +69,9 @@ const getFormat = (agg: AggConfig) => {
 
   return field ? field.format : fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.STRING);
 };
+
+// TODO need to make a more explicit interface for this
+export type IAggType = AggType;
 
 export class AggType<
   TAggConfig extends AggConfig = AggConfig,
@@ -182,7 +185,7 @@ export class AggType<
    */
   postFlightRequest: (
     resp: any,
-    aggConfigs: AggConfigs,
+    aggConfigs: IAggConfigs,
     aggConfig: TAggConfig,
     searchSource: ISearchSource,
     inspectorAdapters: Adapters,

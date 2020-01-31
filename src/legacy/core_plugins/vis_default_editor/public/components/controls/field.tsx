@@ -24,7 +24,7 @@ import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Field } from 'src/plugins/data/public';
-import { AggConfig, AggParam, FieldParamType } from '../../legacy_imports';
+import { AggParam, IAggConfig, IFieldParamType } from '../../legacy_imports';
 import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 import { ComboBoxGroupedOptions } from '../../utils';
@@ -126,9 +126,9 @@ function FieldParamEditor({
   );
 }
 
-function getFieldTypesString(agg: AggConfig) {
+function getFieldTypesString(agg: IAggConfig) {
   const param =
-    get(agg, 'type.params', []).find((p: AggParam) => p.name === 'field') || ({} as FieldParamType);
+    get(agg, 'type.params', []).find((p: AggParam) => p.name === 'field') || ({} as IFieldParamType);
   return formatListAsProse(parseCommaSeparatedList(param.filterFieldTypes), { inclusive: false });
 }
 

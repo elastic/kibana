@@ -28,6 +28,9 @@ import { Field, IFieldList, isNestedField } from '../../../../../../../plugins/d
 
 const filterByType = propFilter('type');
 
+// TODO need to make a more explicit interface for this
+export type IFieldParamType = FieldParamType;
+
 export class FieldParamType extends BaseParamType {
   required = true;
   scriptable = true;

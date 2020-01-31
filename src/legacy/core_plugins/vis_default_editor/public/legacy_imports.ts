@@ -20,13 +20,16 @@
 /* `ui/agg_types` dependencies */
 export {
   AggType,
-  AggConfig,
+  IAggType,
+  IAggConfig,
   AggConfigs,
+  IAggConfigs,
   AggParam,
   AggGroupNames,
   aggGroupNamesMap,
   aggTypes,
   FieldParamType,
+  IFieldParamType,
   BUCKET_TYPES,
   METRIC_TYPES,
   ISchemas,
@@ -36,7 +39,7 @@ export {
 export { aggTypeFilters, propFilter } from 'ui/agg_types/filter';
 export { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
 export { AggParamType } from 'ui/agg_types/param_types/agg';
-export { MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
+export { MetricAggType, IMetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
 export { parentPipelineType } from 'ui/agg_types/metrics/lib/parent_pipeline_agg_helper';
 export { siblingPipelineType } from 'ui/agg_types/metrics/lib/sibling_pipeline_agg_helper';
 export { isType, isStringType } from 'ui/agg_types/buckets/migrate_include_exclude_format';

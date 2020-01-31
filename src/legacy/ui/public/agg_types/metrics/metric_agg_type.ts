@@ -17,15 +17,4 @@
  * under the License.
  */
 
-export { PersistedState } from '../../../ui/public/persisted_state';
-export { IAggConfig } from '../../../ui/public/agg_types/agg_config';
-export { IAggConfigs } from '../../../ui/public/agg_types/agg_configs';
-export {
-  isDateHistogramBucketAggConfig,
-  setBounds,
-} from '../../../ui/public/agg_types/buckets/date_histogram';
-export { createFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
-export { I18nContext } from '../../../ui/public/i18n';
-import chrome from '../../../ui/public/chrome';
-export { chrome as legacyChrome };
-import '../../../ui/public/directives/bind';
+export { MetricAggType, IMetricAggType } from '../index';

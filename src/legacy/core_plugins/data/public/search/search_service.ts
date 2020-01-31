@@ -24,9 +24,11 @@ import {
   AggConfig,
   AggConfigs,
   FieldParamType,
+  MetricAggType,
   aggTypeFieldFilters,
   setBounds,
   parentPipelineAggHelper,
+  siblingPipelineAggHelper,
 } from './aggs';
 
 interface AggsSetup {
@@ -40,7 +42,9 @@ interface AggsStart {
   AggType: typeof AggType;
   aggTypeFieldFilters: typeof aggTypeFieldFilters;
   FieldParamType: typeof FieldParamType;
+  MetricAggType: typeof MetricAggType;
   parentPipelineAggHelper: typeof parentPipelineAggHelper;
+  siblingPipelineAggHelper: typeof siblingPipelineAggHelper;
   setBounds: typeof setBounds;
 }
 
@@ -77,7 +81,9 @@ export class SearchService implements Plugin<SearchSetup, SearchStart> {
         AggType,
         aggTypeFieldFilters,
         FieldParamType,
-        parentPipelineAggHelper,
+        MetricAggType,
+        parentPipelineAggHelper, // TODO make static
+        siblingPipelineAggHelper, // TODO make static
         setBounds, // TODO make static
       },
     };

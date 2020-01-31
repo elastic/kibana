@@ -18,7 +18,7 @@
  */
 
 import { geoHashBucketAgg, IBucketGeoHashGridAggConfig } from './geo_hash';
-import { AggConfigs } from '../agg_configs';
+import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 jest.mock('ui/new_platform');
@@ -121,7 +121,7 @@ describe('Geohash Agg', () => {
 
   describe('getRequestAggs', () => {
     describe('initial aggregation creation', () => {
-      let aggConfigs: AggConfigs;
+      let aggConfigs: IAggConfigs;
       let geoHashGridAgg: IBucketGeoHashGridAggConfig;
 
       beforeEach(() => {

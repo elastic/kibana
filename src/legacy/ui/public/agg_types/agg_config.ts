@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { AggConfig } from './index';
+export { AggConfig, IAggConfig } from './index';

@@ -55,6 +55,9 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
   }
 }
 
+// TODO need to make a more explicit interface for this
+export type IAggConfigs = AggConfigs;
+
 export class AggConfigs {
   public indexPattern: IndexPattern;
   public schemas: any;

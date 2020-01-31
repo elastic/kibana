@@ -21,7 +21,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { AggConfig, AggConfigs, AggGroupNames, Schemas } from '../../agg_types';
+import { IAggConfig, AggConfig, AggConfigs, AggGroupNames, Schemas } from '../../agg_types';
 import { Vis } from '../../../../core_plugins/visualizations/public';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 

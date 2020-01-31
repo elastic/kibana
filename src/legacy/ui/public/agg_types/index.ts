@@ -34,12 +34,19 @@ export const {
   AggType,
   aggTypeFieldFilters,
   FieldParamType,
+  MetricAggType,
   parentPipelineAggHelper,
+  siblingPipelineAggHelper,
   setBounds,
 } = dataStart.search.aggs;
 
 // types
 export {
+  IAggConfig,
+  IAggConfigs,
+  IAggType,
+  IFieldParamType,
+  IMetricAggType,
   AggParam,
   AggParamOption,
   BUCKET_TYPES,
@@ -67,8 +74,10 @@ export {
   isValidInterval,
   isValidJson,
   OptionedParamType,
+  parentPipelineType,
   propFilter,
   Schema,
   Schemas,
+  siblingPipelineType,
   termsAggFilter,
 } from '../../../core_plugins/data/public';
