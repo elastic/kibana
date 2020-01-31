@@ -41,7 +41,7 @@
     "visTypeMetric": "src/legacy/core_plugins/vis_type_metric",
     "visTypeTable": "src/legacy/core_plugins/vis_type_table",
     "visTypeTagCloud": "src/legacy/core_plugins/vis_type_tagcloud",
-    "visTypeTimeseries": "src/legacy/core_plugins/vis_type_timeseries",
+    "visTypeTimeseries": ["src/legacy/core_plugins/vis_type_timeseries", "src/plugins/vis_type_timeseries"],
     "visTypeVega": "src/legacy/core_plugins/vis_type_vega",
     "visTypeVislib": "src/legacy/core_plugins/vis_type_vislib",
     "visualizations": [
