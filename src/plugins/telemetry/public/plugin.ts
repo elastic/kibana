@@ -34,7 +34,6 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
 
   public start({
     injectedMetadata,
-    application,
     http,
     notifications,
     overlays,

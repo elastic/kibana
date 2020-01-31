@@ -25,10 +25,13 @@ import { httpServiceMock } from '../../../core/public/http/http_service.mock';
 import { notificationServiceMock } from '../../../core/public/notifications/notifications_service.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { injectedMetadataServiceMock } from '../../../core/public/injected_metadata/injected_metadata_service.mock';
-import { TelemetryService, TelemetryNotifications } from './services';
+import { TelemetryService } from './services/telemetry_service';
+import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
 import { TelemetryPluginStart } from './plugin';
 
-export function mockTelemetryService() {
+export function mockTelemetryService({
+  reportOptInStatusChange,
+}: { reportOptInStatusChange?: boolean } = {}) {
   const injectedMetadata = injectedMetadataServiceMock.createStartContract();
   injectedMetadata.getInjectedVar.mockImplementation((key: string) => {
     switch (key) {
@@ -48,6 +51,7 @@ export function mockTelemetryService() {
     injectedMetadata,
     http: httpServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
+    reportOptInStatusChange,
   });
 }
 

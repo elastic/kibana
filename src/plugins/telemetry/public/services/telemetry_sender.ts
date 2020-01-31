@@ -37,29 +37,29 @@ export class TelemetrySender {
     }
   }
 
-  private saveToBrowser() {
+  private saveToBrowser = () => {
     // we are the only code that manipulates this key, so it's safe to blindly overwrite the whole object
     this.storage.set(LOCALSTORAGE_KEY, { lastReport: this.lastReported });
-  }
+  };
 
-  private shouldSendReport(): boolean {
+  private shouldSendReport = (): boolean => {
     // check if opt-in for telemetry is enabled
     if (this.telemetryService.getIsOptedIn()) {
       if (!this.lastReported) {
         return true;
       }
       // returns NaN for any malformed or unset (null/undefined) value
-      const lastReport = parseInt(this.lastReported, 10);
+      const lastReported = parseInt(this.lastReported, 10);
       // If it's been a day since we last sent telemetry
-      if (isNaN(lastReport) || Date.now() - lastReport > REPORT_INTERVAL_MS) {
+      if (isNaN(lastReported) || Date.now() - lastReported > REPORT_INTERVAL_MS) {
         return true;
       }
     }
 
     return false;
-  }
+  };
 
-  private async sendIfDue() {
+  private sendIfDue = async (): Promise<void> => {
     if (this.isSending || !this.shouldSendReport()) {
       return;
     }
@@ -89,9 +89,9 @@ export class TelemetrySender {
     } finally {
       this.isSending = false;
     }
-  }
+  };
 
-  public startChecking() {
-    return setInterval(() => this.sendIfDue(), 60000);
-  }
+  public startChecking = () => {
+    return setInterval(this.sendIfDue, 60000);
+  };
 }

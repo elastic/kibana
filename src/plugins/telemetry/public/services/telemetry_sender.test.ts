@@ -21,287 +21,261 @@ import { TelemetrySender } from './telemetry_sender';
 import { mockTelemetryService } from '../telemetry.mock';
 import { REPORT_INTERVAL_MS, LOCALSTORAGE_KEY } from '../../common/constants';
 
+class LocalStorageMock implements Partial<Storage> {
+  getItem = jest.fn();
+  setItem = jest.fn();
+}
+
 describe('TelemetrySender', () => {
-  const clusters = [{ cluster_uuid: 'fake-123' }, { cluster_uuid: 'fake-456' }];
-  const telemetryUrl = 'https://not.a.valid.url.0';
-  const mockFetchTelemetry = () => Promise.resolve({ data: clusters });
-  // returns a function that behaves like the injector by fetching the requested key from the object directly
-  // for example:
-  // { '$http': jest.fn() } would be how to mock the '$http' injector value
-  const mockInjectorFromObject = object => {
-    return { get: key => object[key] };
-  };
+  let originalLocalStorage: Storage;
+  let mockLocalStorage: LocalStorageMock;
+  beforeAll(() => {
+    originalLocalStorage = window.localStorage;
+  });
+
+  // @ts-ignore
+  beforeEach(() => (window.localStorage = mockLocalStorage = new LocalStorageMock()));
+  // @ts-ignore
+  afterAll(() => (window.localStorage = originalLocalStorage));
+
+  // const clusters = [{ cluster_uuid: 'fake-123' }, { cluster_uuid: 'fake-456' }];
+  // const telemetryUrl = 'https://not.a.valid.url.0';
+  // const mockFetchTelemetry = () => Promise.resolve({ data: clusters });
+  // // returns a function that behaves like the injector by fetching the requested key from the object directly
+  // // for example:
+  // // { '$http': jest.fn() } would be how to mock the '$http' injector value
+  // const mockInjectorFromObject = object => {
+  //   return { get: key => object[key] };
+  // };
 
   describe('constructor', () => {
-    test('defaults lastReport if unset', () => {
-      const injector = {
-        localStorage: {
-          get: jest.fn().mockReturnValueOnce(undefined),
-        },
-        $http: jest.fn(),
-        telemetryOptedIn: true,
-        telemetryUrl,
-      };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
-
-      expect(telemetry._storage).toBe(injector.localStorage);
-      expect(telemetry._$http).toBe(injector.$http);
-      expect(telemetry._telemetryOptedIn).toBe(injector.telemetryOptedIn);
-      expect(telemetry._telemetryUrl).toBe(injector.telemetryUrl);
-      expect(telemetry._fetchTelemetry).toBe(mockFetchTelemetry);
-      expect(telemetry._sending).toBe(false);
-      expect(telemetry._lastReport).toBeUndefined();
-
-      expect(injector.localStorage.get).toHaveBeenCalledTimes(1);
-      expect(injector.localStorage.get).toHaveBeenCalledWith(LOCALSTORAGE_KEY);
+    it('defaults lastReport if unset', () => {
+      const telemetryService = mockTelemetryService();
+      const telemetrySender = new TelemetrySender(telemetryService);
+      expect(telemetrySender.lastReported).toBeUndefined();
+      expect(mockLocalStorage.getItem).toBeCalledTimes(1);
+      expect(mockLocalStorage.getItem).toHaveBeenCalledWith(LOCALSTORAGE_KEY);
     });
 
-    test('uses lastReport if set', () => {
-      const lastReport = Date.now();
-      const injector = {
-        localStorage: {
-          get: jest.fn().mockReturnValueOnce({ lastReport }),
-        },
-        $http: jest.fn(),
-        telemetryOptedIn: true,
-        telemetryUrl,
-      };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
-
-      expect(telemetry._storage).toBe(injector.localStorage);
-      expect(telemetry._$http).toBe(injector.$http);
-      expect(telemetry._telemetryOptedIn).toBe(injector.telemetryOptedIn);
-      expect(telemetry._telemetryUrl).toBe(injector.telemetryUrl);
-      expect(telemetry._fetchTelemetry).toBe(mockFetchTelemetry);
-      expect(telemetry._sending).toBe(false);
-      expect(telemetry._lastReport).toBe(lastReport);
-
-      expect(injector.localStorage.get).toHaveBeenCalledTimes(1);
-      expect(injector.localStorage.get).toHaveBeenCalledWith(LOCALSTORAGE_KEY);
+    it('uses lastReport if set', () => {
+      const lastReport = `${Date.now()}`;
+      mockLocalStorage.getItem.mockReturnValueOnce(JSON.stringify({ lastReport }));
+      const telemetryService = mockTelemetryService();
+      const telemetrySender = new TelemetrySender(telemetryService);
+      expect(telemetrySender.lastReported).toBe(lastReport);
     });
   });
 
-  test('_saveToBrowser uses _lastReport', () => {
-    const injector = {
-      localStorage: {
-        get: jest.fn().mockReturnValueOnce({ random: 'junk', gets: 'thrown away' }),
-        set: jest.fn(),
-      },
-    };
-    const lastReport = Date.now();
-    const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
-    telemetry._lastReport = lastReport;
+  describe('saveToBrowser', () => {
+    it('uses lastReport', () => {
+      const lastReport = `${Date.now()}`;
+      const telemetryService = mockTelemetryService();
+      const telemetrySender = new TelemetrySender(telemetryService);
+      telemetrySender.lastReported = lastReport;
+      telemetrySender.saveToBrowser();
 
-    telemetry._saveToBrowser();
-
-    expect(injector.localStorage.set).toHaveBeenCalledTimes(1);
-    expect(injector.localStorage.set).toHaveBeenCalledWith(LOCALSTORAGE_KEY, { lastReport });
-  });
-
-  describe('_checkReportStatus', () => {
-    // send the report if we get to check the time
-    const lastReportShouldSendNow = Date.now() - REPORT_INTERVAL_MS - 1;
-
-    test('returns false whenever telemetryOptedIn is null', () => {
-      const injector = {
-        localStorage: {
-          get: jest.fn().mockReturnValueOnce({ lastReport: lastReportShouldSendNow }),
-        },
-        telemetryOptedIn: null, // not yet opted in
-      };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
-
-      expect(telemetry._checkReportStatus()).toBe(false);
-    });
-
-    test('returns false whenever telemetryOptedIn is false', () => {
-      const injector = {
-        localStorage: {
-          get: jest.fn().mockReturnValueOnce({ lastReport: lastReportShouldSendNow }),
-        },
-        telemetryOptedIn: false, // opted out explicitly
-      };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
-
-      expect(telemetry._checkReportStatus()).toBe(false);
-    });
-
-    // FLAKY: https://github.com/elastic/kibana/issues/27922
-    test.skip('returns false if last report is too recent', () => {
-      const injector = {
-        localStorage: {
-          // we expect '>', not '>='
-          get: jest.fn().mockReturnValueOnce({ lastReport: Date.now() - REPORT_INTERVAL_MS }),
-        },
-        telemetryOptedIn: true,
-      };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
-
-      expect(telemetry._checkReportStatus()).toBe(false);
-    });
-
-    test('returns true if last report is not defined', () => {
-      const injector = {
-        localStorage: {
-          get: jest.fn().mockReturnValueOnce({}),
-        },
-        telemetryOptedIn: true,
-      };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
-
-      expect(telemetry._checkReportStatus()).toBe(true);
-    });
-
-    test('returns true if last report is defined and old enough', () => {
-      const injector = {
-        localStorage: {
-          get: jest.fn().mockReturnValueOnce({ lastReport: lastReportShouldSendNow }),
-        },
-        telemetryOptedIn: true,
-      };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
-
-      expect(telemetry._checkReportStatus()).toBe(true);
-    });
-
-    test('returns true if last report is defined and old enough as a string', () => {
-      const injector = {
-        localStorage: {
-          get: jest.fn().mockReturnValueOnce({ lastReport: lastReportShouldSendNow.toString() }),
-        },
-        telemetryOptedIn: true,
-      };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
-
-      expect(telemetry._checkReportStatus()).toBe(true);
-    });
-
-    test('returns true if last report is defined and malformed', () => {
-      const injector = {
-        localStorage: {
-          get: jest.fn().mockReturnValueOnce({ lastReport: { not: { a: 'number' } } }),
-        },
-        telemetryOptedIn: true,
-      };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
-
-      expect(telemetry._checkReportStatus()).toBe(true);
+      expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(1);
+      expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+        LOCALSTORAGE_KEY,
+        JSON.stringify({ lastReport })
+      );
     });
   });
 
-  describe('_sendIfDue', () => {
-    test('ignores and returns false if already sending', () => {
-      const injector = {
-        localStorage: {
-          get: jest.fn().mockReturnValueOnce(undefined), // never sent
-        },
-        telemetryOptedIn: true,
-      };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
-      telemetry._sending = true;
+  describe('shouldSendReport', () => {
+    it('returns false whenever optIn is false', () => {
+      const telemetryService = mockTelemetryService();
+      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
+      const telemetrySender = new TelemetrySender(telemetryService);
+      const shouldSendRerpot = telemetrySender.shouldSendReport();
 
-      return expect(telemetry._sendIfDue()).resolves.toBe(false);
+      expect(telemetryService.getIsOptedIn).toBeCalledTimes(1);
+      expect(shouldSendRerpot).toBe(false);
     });
 
-    test('ignores and returns false if _checkReportStatus says so', () => {
-      const injector = {
-        localStorage: {
-          get: jest.fn().mockReturnValueOnce(undefined), // never sent, so it would try if opted in
-        },
-        telemetryOptedIn: false, // opted out
-      };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+    it('returns true if lastReported is undefined', () => {
+      const telemetryService = mockTelemetryService();
+      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
+      const telemetrySender = new TelemetrySender(telemetryService);
+      const shouldSendRerpot = telemetrySender.shouldSendReport();
 
-      return expect(telemetry._sendIfDue()).resolves.toBe(false);
+      expect(telemetrySender.lastReported).toBeUndefined();
+      expect(shouldSendRerpot).toBe(true);
     });
 
-    test('sends telemetry when requested', () => {
-      const now = Date.now();
-      const injector = {
-        $http: jest.fn().mockResolvedValue({}), // ignored response
-        localStorage: {
-          get: jest.fn().mockReturnValueOnce({ lastReport: now - REPORT_INTERVAL_MS - 1 }),
-          set: jest.fn(),
-        },
-        telemetryOptedIn: true,
-        telemetryUrl,
-      };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+    it('returns true if lastReported passed REPORT_INTERVAL_MS', () => {
+      const lastReported = Date.now() - (REPORT_INTERVAL_MS + 1000);
 
-      expect.hasAssertions();
+      const telemetryService = mockTelemetryService();
+      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
+      const telemetrySender = new TelemetrySender(telemetryService);
+      telemetrySender.lastReported = `${lastReported}`;
+      const shouldSendRerpot = telemetrySender.shouldSendReport();
+      expect(shouldSendRerpot).toBe(true);
+    });
 
-      return telemetry._sendIfDue().then(result => {
-        expect(result).toBe(true);
-        expect(telemetry._sending).toBe(false);
+    it('returns false if lastReported is within REPORT_INTERVAL_MS', () => {
+      const lastReported = Date.now() + 1000;
 
-        // should be updated
-        const lastReport = telemetry._lastReport;
+      const telemetryService = mockTelemetryService();
+      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
+      const telemetrySender = new TelemetrySender(telemetryService);
+      telemetrySender.lastReported = `${lastReported}`;
+      const shouldSendRerpot = telemetrySender.shouldSendReport();
+      expect(shouldSendRerpot).toBe(false);
+    });
 
-        // if the test runs fast enough it should be exactly equal, but probably a few ms greater
-        expect(lastReport).toBeGreaterThanOrEqual(now);
+    it('returns true if lastReported is malformed', () => {
+      const telemetryService = mockTelemetryService();
+      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
+      const telemetrySender = new TelemetrySender(telemetryService);
+      telemetrySender.lastReported = `random_malformed_string`;
+      const shouldSendRerpot = telemetrySender.shouldSendReport();
+      expect(shouldSendRerpot).toBe(true);
+    });
 
-        expect(injector.$http).toHaveBeenCalledTimes(2);
-        // assert that it sent every cluster's telemetry
-        clusters.forEach(cluster => {
-          expect(injector.$http).toHaveBeenCalledWith({
-            method: 'POST',
-            url: telemetryUrl,
-            data: cluster,
-            kbnXsrfToken: false,
-          });
-        });
+    describe('sendIfDue', () => {
+      let originalFetch: typeof window['fetch'];
+      let mockFetch: jest.Mock<typeof window['fetch']>;
 
-        expect(injector.localStorage.set).toHaveBeenCalledTimes(1);
-        expect(injector.localStorage.set).toHaveBeenCalledWith(LOCALSTORAGE_KEY, { lastReport });
+      beforeAll(() => {
+        originalFetch = window.fetch;
       });
-    });
 
-    test('sends telemetry when requested and catches exceptions', () => {
-      const lastReport = Date.now() - REPORT_INTERVAL_MS - 1;
-      const injector = {
-        $http: jest.fn().mockRejectedValue(new Error('TEST - expected')), // caught failure
-        localStorage: {
-          get: jest.fn().mockReturnValueOnce({ lastReport }),
-          set: jest.fn(),
-        },
-        telemetryOptedIn: true,
-        telemetryUrl,
-      };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+      // @ts-ignore
+      beforeEach(() => (window.fetch = mockFetch = jest.fn()));
+      // @ts-ignore
+      afterAll(() => (window.fetch = originalFetch));
 
-      expect.hasAssertions();
+      it('does not send if already sending', async () => {
+        const telemetryService = mockTelemetryService();
+        const telemetrySender = new TelemetrySender(telemetryService);
+        telemetrySender.shouldSendReport = jest.fn();
+        telemetrySender.isSending = true;
+        await telemetrySender.sendIfDue();
 
-      return telemetry._sendIfDue().then(result => {
-        expect(result).toBe(true); // attempted to send
-        expect(telemetry._sending).toBe(false);
+        expect(telemetrySender.shouldSendReport).toBeCalledTimes(0);
+        expect(mockFetch).toBeCalledTimes(0);
+      });
 
-        // should be unchanged
-        expect(telemetry._lastReport).toBe(lastReport);
-        expect(injector.localStorage.set).toHaveBeenCalledTimes(0);
+      it('does not send if shouldSendReport returns false', async () => {
+        const telemetryService = mockTelemetryService();
+        const telemetrySender = new TelemetrySender(telemetryService);
+        telemetrySender.shouldSendReport = jest.fn().mockReturnValue(false);
+        telemetrySender.isSending = false;
+        await telemetrySender.sendIfDue();
 
-        expect(injector.$http).toHaveBeenCalledTimes(2);
-        // assert that it sent every cluster's telemetry
-        clusters.forEach(cluster => {
-          expect(injector.$http).toHaveBeenCalledWith({
-            method: 'POST',
-            url: telemetryUrl,
-            data: cluster,
-            kbnXsrfToken: false,
-          });
+        expect(telemetrySender.shouldSendReport).toBeCalledTimes(1);
+        expect(mockFetch).toBeCalledTimes(0);
+      });
+
+      it('sends report if due', async () => {
+        const mockTelemetryUrl = 'telemetry_cluster_url';
+        const mockTelemetryPayload = ['hashed_cluster_usage_data1'];
+
+        const telemetryService = mockTelemetryService();
+        const telemetrySender = new TelemetrySender(telemetryService);
+        telemetryService.getTelemetryUrl = jest.fn().mockReturnValue(mockTelemetryUrl);
+        telemetryService.fetchTelemetry = jest.fn().mockReturnValue(mockTelemetryPayload);
+        telemetrySender.shouldSendReport = jest.fn().mockReturnValue(true);
+        telemetrySender.isSending = false;
+        await telemetrySender.sendIfDue();
+
+        expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
+        expect(mockFetch).toBeCalledTimes(1);
+        expect(mockFetch).toBeCalledWith(mockTelemetryUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: mockTelemetryPayload[0],
         });
+      });
+
+      it('sends report separately for every cluster', async () => {
+        const mockTelemetryUrl = 'telemetry_cluster_url';
+        const mockTelemetryPayload = ['hashed_cluster_usage_data1', 'hashed_cluster_usage_data2'];
+
+        const telemetryService = mockTelemetryService();
+        const telemetrySender = new TelemetrySender(telemetryService);
+        telemetryService.getTelemetryUrl = jest.fn().mockReturnValue(mockTelemetryUrl);
+        telemetryService.fetchTelemetry = jest.fn().mockReturnValue(mockTelemetryPayload);
+        telemetrySender.shouldSendReport = jest.fn().mockReturnValue(true);
+        telemetrySender.isSending = false;
+        await telemetrySender.sendIfDue();
+
+        expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
+        expect(mockFetch).toBeCalledTimes(2);
+      });
+
+      it('updates last lastReported and calls saveToBrowser', async () => {
+        const mockTelemetryUrl = 'telemetry_cluster_url';
+        const mockTelemetryPayload = ['hashed_cluster_usage_data1'];
+
+        const telemetryService = mockTelemetryService();
+        const telemetrySender = new TelemetrySender(telemetryService);
+        telemetryService.getTelemetryUrl = jest.fn().mockReturnValue(mockTelemetryUrl);
+        telemetryService.fetchTelemetry = jest.fn().mockReturnValue(mockTelemetryPayload);
+        telemetrySender.shouldSendReport = jest.fn().mockReturnValue(true);
+        telemetrySender.saveToBrowser = jest.fn();
+
+        await telemetrySender.sendIfDue();
+
+        expect(mockFetch).toBeCalledTimes(1);
+        expect(telemetrySender.lastReported).toBeDefined();
+        expect(telemetrySender.saveToBrowser).toBeCalledTimes(1);
+        expect(telemetrySender.isSending).toBe(false);
+      });
+
+      it('catches fetchTelemetry errors and sets isSending to false', async () => {
+        const telemetryService = mockTelemetryService();
+        const telemetrySender = new TelemetrySender(telemetryService);
+        telemetryService.getTelemetryUrl = jest.fn();
+        telemetryService.fetchTelemetry = jest.fn().mockImplementation(() => {
+          throw Error('Error fetching usage');
+        });
+        await telemetrySender.sendIfDue();
+        expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
+        expect(telemetrySender.lastReported).toBeUndefined();
+        expect(telemetrySender.isSending).toBe(false);
+      });
+
+      it('catches fetch errors and sets isSending to false', async () => {
+        const mockTelemetryPayload = ['hashed_cluster_usage_data1', 'hashed_cluster_usage_data2'];
+        const telemetryService = mockTelemetryService();
+        const telemetrySender = new TelemetrySender(telemetryService);
+        telemetryService.getTelemetryUrl = jest.fn();
+        telemetryService.fetchTelemetry = jest.fn().mockReturnValue(mockTelemetryPayload);
+        mockFetch.mockImplementation(() => {
+          throw Error('Error sending usage');
+        });
+        await telemetrySender.sendIfDue();
+        expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
+        expect(mockFetch).toBeCalledTimes(2);
+        expect(telemetrySender.lastReported).toBeUndefined();
+        expect(telemetrySender.isSending).toBe(false);
       });
     });
   });
+  describe('startChecking', () => {
+    let originalSetInterval: typeof window['setInterval'];
+    let mockSetInterval: jest.Mock<typeof window['setInterval']>;
 
-  test('start', () => {
-    const injector = {
-      localStorage: {
-        get: jest.fn().mockReturnValueOnce(undefined),
-      },
-      telemetryOptedIn: false, // opted out
-    };
-    const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+    beforeAll(() => {
+      originalSetInterval = window.setInterval;
+    });
 
-    clearInterval(telemetry.start());
+    // @ts-ignore
+    beforeEach(() => (window.setInterval = mockSetInterval = jest.fn()));
+    // @ts-ignore
+    afterAll(() => (window.setInterval = originalSetInterval));
+
+    it('calls sendIfDue every 60000 ms', () => {
+      const telemetryService = mockTelemetryService();
+      const telemetrySender = new TelemetrySender(telemetryService);
+      telemetrySender.startChecking();
+      expect(mockSetInterval).toBeCalledTimes(1);
+      expect(mockSetInterval).toBeCalledWith(telemetrySender.sendIfDue, 60000);
+    });
   });
 });
