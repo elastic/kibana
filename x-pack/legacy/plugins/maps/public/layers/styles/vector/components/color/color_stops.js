@@ -59,26 +59,23 @@ export const ColorStops = ({
   onChange,
   colorStops,
   isStopsInvalid,
-  sanitizeStopInput,
   getStopError,
   renderStopInput,
   addNewRow,
   canDeleteStop,
 }) => {
   function getStopInput(stop, index) {
-    const onStopChange = e => {
+    const onStopChange = newStopValue => {
       const newColorStops = _.cloneDeep(colorStops);
-      newColorStops[index].stop = sanitizeStopInput(e.target.value);
-      const invalid = isStopsInvalid(newColorStops);
+      newColorStops[index].stop = newStopValue;
       onChange({
         colorStops: newColorStops,
-        isInvalid: invalid,
+        isInvalid: isStopsInvalid(newColorStops),
       });
     };
 
-    const error = getStopError(stop, index);
     return {
-      stopError: error,
+      stopError: getStopError(stop, index),
       stopInput: renderStopInput(stop, onStopChange, index),
     };
   }
