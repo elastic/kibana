@@ -55,6 +55,11 @@ import { getInitialRefreshConfig } from './get_initial_refresh_config';
 import { MAP_SAVED_OBJECT_TYPE, MAP_APP_PATH } from '../../common/constants';
 import { npStart } from 'ui/new_platform';
 import { esFilters } from '../../../../../../src/plugins/data/public';
+import { createHashHistory } from 'history';
+import { createKbnUrlStateStorage } from '../../../../../../src/plugins/kibana_utils/public';
+import { createStateContainer, syncState } from '../../../../../../src/plugins/kibana_utils/public';
+
+const MAP_STATE_STORAGE_KEY = '_a';
 
 const savedQueryService = npStart.plugins.data.query.savedQueries;
 
@@ -65,16 +70,45 @@ const app = uiModules.get(MAP_APP_PATH, []);
 app.controller(
   'GisMapController',
   ($scope, $route, kbnUrl, localStorage, AppState, globalState) => {
+
     const { filterManager } = npStart.plugins.data.query;
     const savedMap = $route.current.locals.map;
     $scope.screenTitle = savedMap.title;
-    let unsubscribe;
+    let unsubscribeFromReduxStore;
     let initialLayerListConfig;
+
+    const history = createHashHistory();
+    const kbnUrlStateStorage = createKbnUrlStateStorage({
+      history,
+      useHash: chrome.getUiSettingsClient().get('state:storeInSessionStorage'),
+    });
+    const initialState = {
+      ...kbnUrlStateStorage.get(MAP_STATE_STORAGE_KEY),
+    };
+    const transitions = {
+      setQuery: state => query => ({ ...state, query }),
+      setFilters: state => filters => ({ ...state, filters }),
+      setSavedQueryId: state => savedQueryId => ({ ...state, savedQuery: savedQueryId }),
+    };
+    const stateContainer = createStateContainer(initialState, transitions);
+    const stateContainerChangeSub = stateContainer.state$.subscribe((newState) => {
+      console.log(`new: `, newState);
+    });
+    const stateSyncRef = syncState({
+      storageKey: MAP_STATE_STORAGE_KEY,
+      stateContainer: {
+        ...stateContainer,
+      },
+      stateStorage: kbnUrlStateStorage,
+    });
+    stateSyncRef.start();
+
     const $state = new AppState();
+
     const store = createMapStore();
 
     function getAppStateFilters() {
-      return _.get($state, 'filters', []);
+      return _.get(stateContainer.get(), 'filters', []);
     }
 
     $scope.$listen(globalState, 'fetch_with_changes', diff => {
@@ -101,9 +135,8 @@ app.controller(
     function syncAppAndGlobalState() {
       $scope.$evalAsync(() => {
         // appState
-        $state.query = $scope.query;
-        $state.filters = filterManager.getAppFilters();
-        $state.save();
+        stateContainer.transitions.setQuery($scope.query);
+        stateContainer.transitions.setFilters(filterManager.getAppFilters());
 
         // globalState
         globalState.time = $scope.time;
@@ -118,7 +151,7 @@ app.controller(
 
     $scope.query = getInitialQuery({
       mapStateJSON: savedMap.mapStateJSON,
-      appState: $state,
+      appState: stateContainer.get(),
       userQueryLanguage: localStorage.get('kibana.userQueryLanguage'),
     });
     $scope.time = getInitialTimeFilters({
@@ -188,7 +221,7 @@ app.controller(
     $scope.$watch('savedQuery', newSavedQuery => {
       if (!newSavedQuery) return;
 
-      $state.savedQuery = newSavedQuery.id;
+      stateContainer.transitions.setSavedQueryId(newSavedQuery.id);
       updateStateFromSavedQuery(newSavedQuery);
     });
 
@@ -301,7 +334,7 @@ app.controller(
       store.dispatch(setReadOnly(!capabilities.get().maps.save));
 
       handleStoreChanges(store);
-      unsubscribe = store.subscribe(() => {
+      unsubscribeFromReduxStore = store.subscribe(() => {
         handleStoreChanges(store);
       });
 
@@ -401,10 +434,15 @@ app.controller(
     }
 
     $scope.$on('$destroy', () => {
+      stateContainerChangeSub.unsubscribe();
+      if (stateSyncRef) {
+        stateSyncRef.stop();
+      }
+
       window.removeEventListener('beforeunload', beforeUnload);
 
-      if (unsubscribe) {
-        unsubscribe();
+      if (unsubscribeFromReduxStore) {
+        unsubscribeFromReduxStore();
       }
       const node = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
       if (node) {
