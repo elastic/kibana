@@ -67,21 +67,11 @@ export function isReservedRole(role: Partial<Role>) {
  * @param {role} the Role as returned by roles API
  */
 export function isDeprecatedRole(role: Partial<Role>) {
-  // TODO: Remove demo code
-  return role.name === 'kibana_user' || role.name === 'kibana_dashboard_only_user';
-  // return get(role, 'metadata._deprecated', false);
+  return role.metadata?._deprecated ?? false;
 }
 
 export function getDeprecatedReason(role: Partial<Role>) {
-  // TODO: Remove demo code
-  if (role.name === 'kibana_user') {
-    return 'Please use kibana_admin instead.';
-  }
-  if (role.name === 'kibana_dashboard_only_user') {
-    return 'Please use Kibana feature controls instead.';
-  }
-  return '';
-  // return get(role, 'metadata._deprecated_reason', '');
+  return role.metadata?._deprecated_reason ?? '';
 }
 
 /**

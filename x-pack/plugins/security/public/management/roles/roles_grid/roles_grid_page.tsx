@@ -8,7 +8,6 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import {
   EuiButton,
-  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
@@ -21,10 +20,12 @@ import {
   EuiBasicTableColumn,
   EuiSwitchEvent,
   EuiSwitch,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
+import { getDeprecatedReason } from '../../../../common/model/role';
 import {
   Role,
   isRoleEnabled,
@@ -212,20 +213,23 @@ export class RolesGridPage extends Component<Props, State> {
 
           const label = isDeprecated
             ? i18n.translate('xpack.security.management.roles.reservedDeprecatedRoleIconLabel', {
-                defaultMessage: 'Deprecated reserved role',
+                defaultMessage:
+                  'This role has been deprecated, and should no longer be assigned to users. {reason}',
+                values: {
+                  reason: getDeprecatedReason(record),
+                },
               })
             : i18n.translate('xpack.security.management.roles.reservedRoleIconLabel', {
-                defaultMessage: 'Reserved role',
+                defaultMessage: 'Reserved roles are built-in and cannot be removed or modified.',
               });
 
           return isReservedRole(record) ? (
-            <span title={label}>
-              <EuiIcon
-                aria-label={label}
-                data-test-subj="reservedRole"
-                type={isDeprecated ? 'alert' : 'check'}
-              />
-            </span>
+            <EuiIconTip
+              aria-label={label}
+              content={label}
+              data-test-subj="reservedRole"
+              type={isDeprecated ? 'alert' : 'check'}
+            />
           ) : null;
         },
       },
