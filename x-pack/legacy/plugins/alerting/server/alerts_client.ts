@@ -236,14 +236,16 @@ export class AlertsClient {
         .getDecryptedAsInternalUser<RawAlert>('alert', id, { namespace: this.namespace })
         .then(result => result.attributes.apiKey)
         .catch(e =>
-          this.logger.error(`delete(): Failed to load API key to invalidate: ${e.message}`)
+          this.logger.error(
+            `delete(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
+          )
         ),
     ]);
 
     const removeResult = await this.savedObjectsClient.delete('alert', id);
 
     await Promise.all([
-      taskIdToRemove ? this.taskManager.remove(taskIdToRemove) : null,
+      taskIdToRemove && this.taskManager.remove(taskIdToRemove),
       apiKeyToInvalidate && this.invalidateApiKey({ apiKey: apiKeyToInvalidate }),
     ]);
 

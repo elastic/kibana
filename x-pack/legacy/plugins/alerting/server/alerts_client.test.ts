@@ -1531,7 +1531,7 @@ describe('delete()', () => {
     await alertsClient.delete({ id: '1' });
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
-      'delete(): Failed to load API key to invalidate: Fail'
+      'delete(): Failed to load API key to invalidate on alert 1: Fail'
     );
   });
 
