@@ -55,8 +55,6 @@ import 'ui/directives/field_name';
 export { angular };
 export { wrapInI18nContext } from 'ui/i18n';
 export { buildVislibDimensions } from '../../../visualizations/public';
-// @ts-ignore
-export { callAfterBindingsWorkaround } from 'ui/compat';
 export { getRequestInspectorStats, getResponseInspectorStats } from '../../../data/public';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';

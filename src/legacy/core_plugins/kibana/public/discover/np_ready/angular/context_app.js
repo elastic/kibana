@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { getServices, callAfterBindingsWorkaround, getAngularModule } from '../../kibana_services';
+import { getServices, getAngularModule } from '../../kibana_services';
 import contextAppTemplate from './context_app.html';
 import './context/components/action_bar';
 import { getFirstSortableField } from './context/api/utils/sorting';
@@ -33,6 +33,7 @@ import {
   LOADING_STATUS,
   QueryActionsProvider,
 } from './context/query';
+import { callAfterBindingsWorkaround } from './context/helpers/call_after_bindings_workaround';
 
 const { timefilter } = getServices();
 
