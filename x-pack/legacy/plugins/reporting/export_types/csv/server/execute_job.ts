@@ -12,6 +12,7 @@ import { ESQueueWorkerExecuteFn, ExecuteJobFactory, Logger, ServerFacade } from 
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { fieldFormatMapFactory } from './lib/field_format_map';
 import { createGenerateCsv } from './lib/generate_csv';
+import { getFieldFormats } from '../../../server/services';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
@@ -87,7 +88,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
 
     const [formatsMap, uiSettings] = await Promise.all([
       (async () => {
-        const fieldFormats = await server.fieldFormatServiceFactory(uiConfig);
+        const fieldFormats = await getFieldFormats().fieldFormatServiceFactory(uiConfig);
         return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
       })(),
       (async () => {
