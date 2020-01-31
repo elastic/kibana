@@ -5,6 +5,7 @@
  */
 
 export { PingHistogram } from './charts/ping_histogram';
+export { Snapshot } from './charts/snapshot_container';
 export { KueryBar } from './kuerybar/kuery_bar_container';
 export { OverviewPage } from './pages/overview_container';
 export { FilterGroup } from './filter_group/filter_group_container';
