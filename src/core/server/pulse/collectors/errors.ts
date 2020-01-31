@@ -35,8 +35,8 @@ export interface PulseErrorPayloadRecord {
   hash: string;
   fixedVersion?: string;
   message: string;
-  status: 'new' | 'seen';
-  timestamp: Date;
+  status?: 'new' | 'seen';
+  timestamp?: Date;
 }
 
 export class Collector extends PulseCollector<Payload> {
