@@ -21,7 +21,7 @@ import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { metadata } from 'ui/metadata';
+import { getDocLinks } from '../../../../../util/dependency_cache';
 import { ml } from '../../../../../services/ml_api_service';
 import { Field } from '../../../../../../../common/types/fields';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
@@ -298,6 +298,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     };
   }, [jobType, sourceIndex, sourceIndexNameEmpty, dependentVariable, trainingPercent]);
 
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
       <Messages messages={requestMessages} />
@@ -456,7 +458,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   )}
                   <br />
                   <EuiLink
-                    href={`https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/indices-create-index.html#indices-create-index`}
+                    href={`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/indices-create-index.html#indices-create-index`}
                     target="_blank"
                   >
                     {i18n.translate(

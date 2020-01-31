@@ -23,12 +23,11 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { metadata } from 'ui/metadata';
-
-// metadata.branch corresponds to the version used in documentation links.
-const docsUrl = `https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-rules.html`;
+import { getDocLinks } from '../../../util/dependency_cache';
 
 export function FilterListsHeader({ totalCount, refreshFilterLists }) {
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+  const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-rules.html`;
   return (
     <React.Fragment>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">

@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import { TimefilterSetup } from 'src/plugins/data/public';
 import { IUiSettingsClient, ChromeStart } from 'src/core/public';
 import { IndexPatternsContract } from 'src/plugins/data/public';
+import { DocLinksStart } from 'kibana/public';
 import { PageDependencies } from '../routing/router';
 
 interface DependencyCache {
@@ -15,6 +16,7 @@ interface DependencyCache {
   config: IUiSettingsClient | null;
   indexPatterns: IndexPatternsContract | null;
   chrome: ChromeStart | null;
+  docLinks: DocLinksStart | null;
 }
 
 const cache: DependencyCache = {
@@ -22,6 +24,7 @@ const cache: DependencyCache = {
   config: null,
   indexPatterns: null,
   chrome: null,
+  docLinks: null,
 };
 
 export function useDependencyCache(dep: PageDependencies) {
@@ -30,6 +33,7 @@ export function useDependencyCache(dep: PageDependencies) {
     cache.config = dep.config;
     cache.chrome = dep.chrome;
     cache.indexPatterns = dep.indexPatterns;
+    cache.docLinks = dep.docLinks;
     return () => {
       clearCache();
     };
@@ -41,7 +45,8 @@ export function getDependencyCache(): Readonly<PageDependencies> {
     cache.timefilter === null ||
     cache.config === null ||
     cache.chrome === null ||
-    cache.indexPatterns === null
+    cache.indexPatterns === null ||
+    cache.docLinks === null
   ) {
     throw new Error();
   }
@@ -50,6 +55,7 @@ export function getDependencyCache(): Readonly<PageDependencies> {
     config: cache.config,
     chrome: cache.chrome,
     indexPatterns: cache.indexPatterns,
+    docLinks: cache.docLinks,
   };
 }
 
@@ -64,6 +70,13 @@ export function getTimeHistory() {
     throw new Error();
   }
   return cache.timefilter.history;
+}
+
+export function getDocLinks() {
+  if (cache.docLinks === null) {
+    throw new Error();
+  }
+  return cache.docLinks;
 }
 
 export function clearCache() {

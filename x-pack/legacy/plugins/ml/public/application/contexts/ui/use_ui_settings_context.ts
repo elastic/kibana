@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext } from 'react';
-
-import { UiContext } from './ui_context';
+import { useMlKibana } from '../kibana/kibana_context';
 
 export const useUiSettingsContext = () => {
-  return useContext(UiContext).uiSettings!; // is there a better way to force this to be not be undefined?
+  return useMlKibana().services.uiSettings;
 };

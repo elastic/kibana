@@ -52,11 +52,8 @@ import {
 import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
-import { metadata } from 'ui/metadata';
+import { getDocLinks } from '../../util/dependency_cache';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-
-// metadata.branch corresponds to the version used in documentation links.
-const docsUrl = `https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-rules.html`;
 
 export const RuleEditorFlyout = injectI18n(
   class RuleEditorFlyout extends Component {
@@ -480,6 +477,8 @@ export const RuleEditorFlyout = injectI18n(
     };
 
     render() {
+      const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+      const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-rules.html`;
       const { intl } = this.props;
       const {
         isFlyoutVisible,

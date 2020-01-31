@@ -8,6 +8,7 @@ import { useContext } from 'react';
 
 import { UiContext } from './ui_context';
 
+// NOT USED, IS IT NEEDED?
 export const useUiContext = () => {
   return useContext(UiContext);
 };

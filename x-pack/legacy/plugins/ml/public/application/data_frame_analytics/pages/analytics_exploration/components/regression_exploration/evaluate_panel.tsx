@@ -16,7 +16,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { metadata } from 'ui/metadata';
+import { getDocLinks } from '../../../../../util/dependency_cache';
 import { ErrorCallout } from '../error_callout';
 import {
   getValuesFromResponse,
@@ -228,6 +228,8 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     loadData({ isTrainingClause });
   }, [JSON.stringify(searchQuery)]);
 
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+
   return (
     <EuiPanel data-test-subj="mlDFAnalyticsRegressionExplorationEvaluatePanel">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -256,7 +258,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             iconType="help"
             iconSide="left"
             color="primary"
-            href={`https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`}
+            href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`}
           >
             {i18n.translate(
               'xpack.ml.dataframe.analytics.classificationExploration.regressionDocsLink',

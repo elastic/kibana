@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreStart, CoreSetup } from '../../../../../src/core/public';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-// import { DataStart } from '../../../../../src/legacy/core_plugins/data/public';
+import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 
 export interface MlSetupDependencies {
   data: DataPublicPluginStart;
-  // dataShim: DataStart;
 }
 
 export class MlPlugin implements Plugin<Setup, Start> {

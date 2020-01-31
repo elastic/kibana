@@ -7,7 +7,6 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
-import { metadata } from 'ui/metadata';
 
 import {
   EuiComboBox,
@@ -31,6 +30,7 @@ import {
   // getCharsetOptions,
 } from './options';
 import { isTimestampFormatValid } from './overrides_validation';
+import { getDocLinks } from '../../../../util/dependency_cache';
 
 import { TIMESTAMP_OPTIONS, CUSTOM_DROPDOWN_OPTION } from './options/option_lists';
 
@@ -268,8 +268,8 @@ export class Overrides extends Component {
 
     const fieldOptions = getSortedFields(fields);
     const timestampFormatErrorsList = [this.customTimestampFormatErrors, timestampFormatError];
-    // metadata.branch corresponds to the version used in documentation links.
-    const docsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/search-aggregations-bucket-daterange-aggregation.html#date-format-pattern`;
+    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+    const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/search-aggregations-bucket-daterange-aggregation.html#date-format-pattern`;
 
     const timestampFormatHelp = (
       <EuiText size="xs">

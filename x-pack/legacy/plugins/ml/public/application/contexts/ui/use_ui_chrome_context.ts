@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext } from 'react';
-
-import { UiContext } from './ui_context';
+import { useMlKibana } from '../kibana/kibana_context';
 
 export const useUiChromeContext = () => {
-  return useContext(UiContext).chrome;
+  return useMlKibana().services.chrome;
 };

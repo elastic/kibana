@@ -18,12 +18,13 @@ import {
   // SavedObjectsClientContract,
   // ToastsStart,
   // IUiSettingsClient,
+  // DocLinksStart,
 } from 'kibana/public';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { useDependencyCache } from './util/dependency_cache';
 
-import { MlRouter } from './routing';
-export { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { MlRouter, PageDependencies } from './routing';
 
 export interface MlDependencies extends AppMountParameters {
   data: DataPublicPluginStart;
@@ -35,16 +36,29 @@ interface AppProps {
 }
 
 const App: FC<AppProps> = ({ coreStart, deps }) => {
+  const pageDeps: PageDependencies = {
+    indexPatterns: deps.data.indexPatterns,
+    timefilter: deps.data.query.timefilter,
+    config: coreStart.uiSettings!,
+    chrome: coreStart.chrome!,
+    docLinks: coreStart.docLinks!,
+  };
+
+  const services = {
+    appName: 'ML',
+    data: deps.data,
+    ...coreStart,
+  };
+  const I18nContext = coreStart.i18n.Context;
+
+  useDependencyCache(pageDeps);
+
   return (
-    <KibanaContextProvider
-      services={{
-        appName: 'ML',
-        data: deps.data,
-        ...coreStart,
-      }}
-    >
-      <MlRouter />
-    </KibanaContextProvider>
+    <I18nContext>
+      <KibanaContextProvider services={services}>
+        <MlRouter pageDeps={pageDeps} />
+      </KibanaContextProvider>
+    </I18nContext>
   );
 };
 
