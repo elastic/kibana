@@ -30,10 +30,6 @@ export interface PluginsSetup {
   kibana: {
     injectedUiAppVars: ReturnType<Legacy.Server['getInjectedUiAppVars']>;
   };
-  sampleData: {
-    addSavedObjectsToSampleDataset: any;
-    addAppLinksToSampleDataset: any;
-  };
   usageCollection: UsageCollectionSetup;
 }
 
