@@ -37,11 +37,6 @@ export type DefaultIntervalSetting = DefaultInterval | null | undefined;
 const DEFAULT_FROM_MOMENT = moment().subtract(24, 'hours');
 const DEFAULT_TO_MOMENT = moment();
 
-export const getStaticDefaultFromValue = (): number =>
-  parseDateWithDefault(DEFAULT_FROM, DEFAULT_FROM_MOMENT).valueOf();
-export const getStaticDefaultToValue = (): number =>
-  parseDateWithDefault(DEFAULT_FROM, DEFAULT_FROM_MOMENT).valueOf();
-
 /**
  * Retrieves timeRange settings to populate filters
  *

@@ -7,18 +7,7 @@
 import { get } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import {
-  DEFAULT_FROM,
-  DEFAULT_TO,
-  DEFAULT_INTERVAL_TYPE,
-  DEFAULT_INTERVAL_VALUE,
-} from '../../../common/constants';
-import {
-  getIntervalSettings,
-  getTimeRangeSettings,
-  getStaticDefaultFromValue,
-  getStaticDefaultToValue,
-} from '../../utils/default_date_settings';
+import { getIntervalSettings, getTimeRangeSettings } from '../../utils/default_date_settings';
 import {
   deleteAllQuery,
   setAbsoluteRangeDatePicker,
@@ -58,16 +47,10 @@ export const initialInputsState: InputsState = {
   global: {
     timerange: {
       kind: 'relative',
-      fromStr: DEFAULT_FROM,
-      toStr: DEFAULT_TO,
-      from: getStaticDefaultFromValue(),
-      to: getStaticDefaultToValue(),
+      ...getTimeRangeSettings(false),
     },
     queries: [],
-    policy: {
-      kind: DEFAULT_INTERVAL_TYPE,
-      duration: DEFAULT_INTERVAL_VALUE,
-    },
+    policy: getIntervalSettings(false),
     linkTo: ['timeline'],
     query: {
       query: '',
@@ -78,16 +61,10 @@ export const initialInputsState: InputsState = {
   timeline: {
     timerange: {
       kind: 'relative',
-      fromStr: DEFAULT_FROM,
-      toStr: DEFAULT_TO,
-      from: getStaticDefaultFromValue(),
-      to: getStaticDefaultToValue(),
+      ...getTimeRangeSettings(false),
     },
     queries: [],
-    policy: {
-      kind: DEFAULT_INTERVAL_TYPE,
-      duration: DEFAULT_INTERVAL_VALUE,
-    },
+    policy: getIntervalSettings(false),
     linkTo: ['global'],
     query: {
       query: '',

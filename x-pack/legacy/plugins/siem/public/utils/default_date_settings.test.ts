@@ -136,6 +136,19 @@ describe('getTimeRangeSettings', () => {
         throw Error('Was expecting an object to be used for the malformed time range');
       }
     });
+
+    describe('without UISettings', () => {
+      beforeEach(() => {
+        mockGetServices.mockImplementation(() => {
+          throw new Error('should not have been called');
+        });
+      });
+
+      it('is DEFAULT_FROM', () => {
+        const { fromStr } = getTimeRangeSettings(false);
+        expect(fromStr).toBe(DEFAULT_FROM);
+      });
+    });
   });
 
   describe('toStr', () => {
@@ -184,6 +197,19 @@ describe('getTimeRangeSettings', () => {
       } else {
         throw Error('Was expecting an object to be used for the malformed time range');
       }
+    });
+
+    describe('without UISettings', () => {
+      beforeEach(() => {
+        mockGetServices.mockImplementation(() => {
+          throw new Error('should not have been called');
+        });
+      });
+
+      it('is DEFAULT_TO', () => {
+        const { toStr } = getTimeRangeSettings(false);
+        expect(toStr).toBe(DEFAULT_TO);
+      });
     });
   });
 
@@ -235,6 +261,19 @@ describe('getTimeRangeSettings', () => {
         throw Error('Was expecting an object to be used for the malformed time range');
       }
     });
+
+    describe('without UISettings', () => {
+      beforeEach(() => {
+        mockGetServices.mockImplementation(() => {
+          throw new Error('should not have been called');
+        });
+      });
+
+      it('is DEFAULT_FROM in epoch', () => {
+        const { from } = getTimeRangeSettings(false);
+        expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
+      });
+    });
   });
 
   describe('to', () => {
@@ -284,6 +323,19 @@ describe('getTimeRangeSettings', () => {
       } else {
         throw Error('Was expecting an object to be used for the malformed time range');
       }
+    });
+
+    describe('without UISettings', () => {
+      beforeEach(() => {
+        mockGetServices.mockImplementation(() => {
+          throw new Error('should not have been called');
+        });
+      });
+
+      it('is DEFAULT_TO in epoch', () => {
+        const { to } = getTimeRangeSettings(false);
+        expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
+      });
     });
   });
 });
@@ -346,6 +398,19 @@ describe('getIntervalSettings', () => {
         throw Error('Was expecting an object to be used for the malformed interval');
       }
     });
+
+    describe('without UISettings', () => {
+      beforeEach(() => {
+        mockGetServices.mockImplementation(() => {
+          throw new Error('should not have been called');
+        });
+      });
+
+      it('is DEFAULT_INTERVAL_TYPE', () => {
+        const { kind } = getIntervalSettings(false);
+        expect(kind).toBe(DEFAULT_INTERVAL_TYPE);
+      });
+    });
   });
 
   describe('duration', () => {
@@ -396,6 +461,19 @@ describe('getIntervalSettings', () => {
       } else {
         throw Error('Was expecting an object to be used for the malformed interval');
       }
+    });
+
+    describe('without UISettings', () => {
+      beforeEach(() => {
+        mockGetServices.mockImplementation(() => {
+          throw new Error('should not have been called');
+        });
+      });
+
+      it('is DEFAULT_INTERVAL_VALUE', () => {
+        const { duration } = getIntervalSettings(false);
+        expect(duration).toBe(DEFAULT_INTERVAL_VALUE);
+      });
     });
   });
 
