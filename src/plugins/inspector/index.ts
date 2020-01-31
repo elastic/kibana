@@ -17,12 +17,4 @@
  * under the License.
  */
 
-import {
-  ExpressionsStart,
-  ExpressionRenderHandler,
-  ExpressionDataHandler,
-} from 'src/plugins/expressions/public';
-
-import { Adapters } from 'src/plugins/inspector/public';
-
-export { ExpressionsStart, ExpressionRenderHandler, ExpressionDataHandler, Adapters };
+export * from './common';
