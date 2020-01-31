@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+/* eslint-disable dot-notation */
 import { mockTelemetryService } from '../telemetry.mock';
 
 const mockSubtract = jest.fn().mockImplementation(() => {
@@ -38,7 +40,7 @@ describe('TelemetryService', () => {
     it('calls expected URL with 20 minutes - now', async () => {
       const telemetryService = mockTelemetryService();
       await telemetryService.fetchTelemetry();
-      expect(telemetryService.http.post).toBeCalledWith('/api/telemetry/v2/clusters/_stats', {
+      expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/clusters/_stats', {
         body: JSON.stringify({ unencrypted: false, timeRange: {} }),
       });
       expect(mockSubtract).toBeCalledWith(20, 'minutes');
@@ -60,7 +62,7 @@ describe('TelemetryService', () => {
       telemetryService.getCanChangeOptInStatus = jest.fn().mockReturnValue(true);
       await telemetryService.setOptIn(true);
 
-      expect(telemetryService.http.post).toBeCalledTimes(1);
+      expect(telemetryService['http'].post).toBeCalledTimes(1);
     });
 
     it('sends enabled true if optedIn: true', async () => {
@@ -69,7 +71,7 @@ describe('TelemetryService', () => {
       const optedIn = true;
       await telemetryService.setOptIn(optedIn);
 
-      expect(telemetryService.http.post).toBeCalledWith('/api/telemetry/v2/optIn', {
+      expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/optIn', {
         body: JSON.stringify({ enabled: optedIn }),
       });
     });
@@ -80,7 +82,7 @@ describe('TelemetryService', () => {
       const optedIn = false;
       await telemetryService.setOptIn(optedIn);
 
-      expect(telemetryService.http.post).toBeCalledWith('/api/telemetry/v2/optIn', {
+      expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/optIn', {
         body: JSON.stringify({ enabled: optedIn }),
       });
     });
@@ -92,7 +94,7 @@ describe('TelemetryService', () => {
       await telemetryService.setOptIn(true);
 
       expect(telemetryService.reportOptInStatus).toBeCalledTimes(0);
-      expect(telemetryService.http.post).toBeCalledTimes(1);
+      expect(telemetryService['http'].post).toBeCalledTimes(1);
     });
 
     it('calls reportOptInStatus if reportOptInStatusChange is true', async () => {
@@ -102,21 +104,21 @@ describe('TelemetryService', () => {
       await telemetryService.setOptIn(true);
 
       expect(telemetryService.reportOptInStatus).toBeCalledTimes(1);
-      expect(telemetryService.http.post).toBeCalledTimes(1);
+      expect(telemetryService['http'].post).toBeCalledTimes(1);
     });
 
     it('adds an error toast on api error', async () => {
       const telemetryService = mockTelemetryService({ reportOptInStatusChange: false });
       telemetryService.getCanChangeOptInStatus = jest.fn().mockReturnValue(true);
       telemetryService.reportOptInStatus = jest.fn();
-      telemetryService.http.post = jest.fn().mockImplementation((url: string) => {
+      telemetryService['http'].post = jest.fn().mockImplementation((url: string) => {
         if (url === '/api/telemetry/v2/optIn') {
           throw Error('failed to update opt in.');
         }
       });
 
       await telemetryService.setOptIn(true);
-      expect(telemetryService.http.post).toBeCalledTimes(1);
+      expect(telemetryService['http'].post).toBeCalledTimes(1);
       expect(telemetryService.reportOptInStatus).toBeCalledTimes(0);
       expect(telemetryService.notifications.toasts.addError).toBeCalledTimes(1);
     });
@@ -129,7 +131,7 @@ describe('TelemetryService', () => {
       });
 
       await telemetryService.setOptIn(true);
-      expect(telemetryService.http.post).toBeCalledTimes(1);
+      expect(telemetryService['http'].post).toBeCalledTimes(1);
       expect(telemetryService.reportOptInStatus).toBeCalledTimes(1);
       expect(telemetryService.notifications.toasts.addError).toBeCalledTimes(1);
     });
