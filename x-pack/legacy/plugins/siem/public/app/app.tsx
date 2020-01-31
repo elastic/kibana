@@ -26,7 +26,7 @@ import { compose } from '../lib/compose/kibana_compose';
 import { AppFrontendLibs, AppApolloClient } from '../lib/lib';
 import { CoreStart, StartPlugins } from '../plugin';
 import { PageRouter } from '../routes';
-import { createStore } from '../store';
+import { createStore, createInitialState } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
 import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
 
@@ -65,10 +65,10 @@ const AppPluginRootComponent: React.FC<AppPluginRootComponentProps> = ({
 const AppPluginRoot = memo(AppPluginRootComponent);
 
 const StartAppComponent: FC<AppFrontendLibs> = libs => {
+  const { i18n } = useKibana().services;
   const history = createHashHistory();
   const libs$ = new BehaviorSubject(libs);
-  const store = createStore(undefined, libs$.pipe(pluck('apolloClient')));
-  const I18nContext = useKibana().services.i18n.Context;
+  const store = createStore(createInitialState(), libs$.pipe(pluck('apolloClient')));
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
   const theme = useMemo(
     () => ({
@@ -80,14 +80,14 @@ const StartAppComponent: FC<AppFrontendLibs> = libs => {
 
   return (
     <EuiErrorBoundary>
-      <I18nContext>
+      <i18n.Context>
         <AppPluginRoot
           store={store}
           apolloClient={libs.apolloClient}
           history={history}
           theme={theme}
         />
-      </I18nContext>
+      </i18n.Context>
     </EuiErrorBoundary>
   );
 };

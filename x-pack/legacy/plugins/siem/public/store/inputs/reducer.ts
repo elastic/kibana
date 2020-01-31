@@ -8,6 +8,18 @@ import { get } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
+  DEFAULT_FROM,
+  DEFAULT_TO,
+  DEFAULT_INTERVAL_TYPE,
+  DEFAULT_INTERVAL_VALUE,
+} from '../../../common/constants';
+import {
+  getIntervalSettings,
+  getTimeRangeSettings,
+  getStaticDefaultFromValue,
+  getStaticDefaultToValue,
+} from '../../utils/default_date_settings';
+import {
   deleteAllQuery,
   setAbsoluteRangeDatePicker,
   setDuration,
@@ -39,14 +51,6 @@ import {
   deleteOneQuery as helperDeleteOneQuery,
 } from './helpers';
 import { InputsModel, TimeRange } from './model';
-import {
-  getDefaultFromValue,
-  getDefaultToValue,
-  getDefaultFromString,
-  getDefaultToString,
-  getDefaultIntervalKind,
-  getDefaultIntervalDuration,
-} from '../../utils/default_date_settings';
 
 export type InputsState = InputsModel;
 
@@ -54,15 +58,15 @@ export const initialInputsState: InputsState = {
   global: {
     timerange: {
       kind: 'relative',
-      fromStr: getDefaultFromString(),
-      toStr: getDefaultToString(),
-      from: getDefaultFromValue(),
-      to: getDefaultToValue(),
+      fromStr: DEFAULT_FROM,
+      toStr: DEFAULT_TO,
+      from: getStaticDefaultFromValue(),
+      to: getStaticDefaultToValue(),
     },
     queries: [],
     policy: {
-      kind: getDefaultIntervalKind(),
-      duration: getDefaultIntervalDuration(),
+      kind: DEFAULT_INTERVAL_TYPE,
+      duration: DEFAULT_INTERVAL_VALUE,
     },
     linkTo: ['timeline'],
     query: {
@@ -74,15 +78,15 @@ export const initialInputsState: InputsState = {
   timeline: {
     timerange: {
       kind: 'relative',
-      fromStr: getDefaultFromString(),
-      toStr: getDefaultToString(),
-      from: getDefaultFromValue(),
-      to: getDefaultToValue(),
+      fromStr: DEFAULT_FROM,
+      toStr: DEFAULT_TO,
+      from: getStaticDefaultFromValue(),
+      to: getStaticDefaultToValue(),
     },
     queries: [],
     policy: {
-      kind: getDefaultIntervalKind(),
-      duration: getDefaultIntervalDuration(),
+      kind: DEFAULT_INTERVAL_TYPE,
+      duration: DEFAULT_INTERVAL_VALUE,
     },
     linkTo: ['global'],
     query: {
@@ -91,6 +95,54 @@ export const initialInputsState: InputsState = {
     },
     filters: [],
   },
+};
+
+export const createInitialInputsState = (): InputsState => {
+  const { from, fromStr, to, toStr } = getTimeRangeSettings();
+  const { kind, duration } = getIntervalSettings();
+
+  return {
+    global: {
+      timerange: {
+        kind: 'relative',
+        fromStr,
+        toStr,
+        from,
+        to,
+      },
+      queries: [],
+      policy: {
+        kind,
+        duration,
+      },
+      linkTo: ['timeline'],
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
+    },
+    timeline: {
+      timerange: {
+        kind: 'relative',
+        fromStr,
+        toStr,
+        from,
+        to,
+      },
+      queries: [],
+      policy: {
+        kind,
+        duration,
+      },
+      linkTo: ['global'],
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
+    },
+  };
 };
 
 export const inputsReducer = reducerWithInitialState(initialInputsState)
