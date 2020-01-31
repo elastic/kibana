@@ -26,8 +26,8 @@ import { fieldFormats } from '../../../../../../plugins/data/public';
 import { Vis } from '../../../../../core_plugins/visualizations/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
-import { DateRangeKey, convertDateRangeToString } from '../../../agg_types/buckets/date_range';
-import { IpRangeKey, convertIPRangeToString } from '../../../agg_types/buckets/ip_range';
+import { DateRangeKey, convertDateRangeToString } from '../../../agg_types';
+import { IpRangeKey, convertIPRangeToString } from '../../../agg_types';
 
 interface TermsFieldFormatParams {
   otherBucketLabel: string;

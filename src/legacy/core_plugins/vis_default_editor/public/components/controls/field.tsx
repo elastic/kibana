@@ -128,7 +128,8 @@ function FieldParamEditor({
 
 function getFieldTypesString(agg: IAggConfig) {
   const param =
-    get(agg, 'type.params', []).find((p: AggParam) => p.name === 'field') || ({} as IFieldParamType);
+    get(agg, 'type.params', []).find((p: AggParam) => p.name === 'field') ||
+    ({} as IFieldParamType);
   return formatListAsProse(parseCommaSeparatedList(param.filterFieldTypes), { inclusive: false });
 }
 

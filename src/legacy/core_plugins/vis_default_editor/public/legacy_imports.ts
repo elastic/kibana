@@ -36,21 +36,17 @@ export {
   Schema,
   termsAggFilter,
 } from 'ui/agg_types';
-export { aggTypeFilters, propFilter } from 'ui/agg_types/filter';
-export { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
-export { AggParamType } from 'ui/agg_types/param_types/agg';
-export { MetricAggType, IMetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
-export { parentPipelineType } from 'ui/agg_types/metrics/lib/parent_pipeline_agg_helper';
-export { siblingPipelineType } from 'ui/agg_types/metrics/lib/sibling_pipeline_agg_helper';
-export { isType, isStringType } from 'ui/agg_types/buckets/migrate_include_exclude_format';
-export {
-  OptionedValueProp,
-  OptionedParamEditorProps,
-  OptionedParamType,
-} from 'ui/agg_types/param_types/optioned';
-export { isValidJson, isValidInterval } from 'ui/agg_types/utils';
-export { AggParamOption } from 'ui/agg_types/agg_params';
-export { CidrMask } from 'ui/agg_types/buckets/lib/cidr_mask';
+export { aggTypeFilters, propFilter } from 'ui/agg_types';
+export { aggTypeFieldFilters } from 'ui/agg_types';
+export { AggParamType } from 'ui/agg_types';
+export { MetricAggType, IMetricAggType } from 'ui/agg_types';
+export { parentPipelineType } from 'ui/agg_types';
+export { siblingPipelineType } from 'ui/agg_types';
+export { isType, isStringType } from 'ui/agg_types';
+export { OptionedValueProp, OptionedParamEditorProps, OptionedParamType } from 'ui/agg_types';
+export { isValidJson, isValidInterval } from 'ui/agg_types';
+export { AggParamOption } from 'ui/agg_types';
+export { CidrMask } from 'ui/agg_types';
 
 export { PersistedState } from 'ui/persisted_state';
 export { IndexedArray } from 'ui/indexed_array';

@@ -19,7 +19,7 @@
 
 import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AggConfigs, IAggConfigs } from 'ui/agg_types/agg_configs';
+import { AggConfigs, IAggConfigs } from 'ui/agg_types';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import {
   KibanaContext,

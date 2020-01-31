@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+<<<<<<< HEAD
 export function initAggTypeFieldFilter(aggTypeFieldFilters) {
+=======
+import { aggTypeFieldFilters } from 'ui/agg_types';
+
+export function initAggTypeFieldFilter() {
+>>>>>>> Remove nested ui/agg_types/* items and only use ui/agg_types
   /**
    * If rollup index pattern, check its capabilities
    * and limit available fields for a given aggType based on that.
