@@ -25,4 +25,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export * from './plugin';
-export * from './angular';
+export { PromiseServiceCreator } from './angular';

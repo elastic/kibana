@@ -17,9 +17,12 @@
  * under the License.
  */
 
-export interface PromiseServiceCreator {
-  resolve: <T>(value: T | PromiseLike<T>) => ng.IPromise<T>;
+import { PromiseServiceCreator } from '../../../../plugins/kibana_legacy/public';
+export { createDefer } from './defer';
+// @ts-ignore
+import { uiModules } from '../modules';
 
-  // TODO: add additional typing
-  [key: string]: any;
-}
+const module = uiModules.get('kibana');
+// Provides a tiny subset of the excellent API from
+// bluebird, reimplemented using the $q service
+module.service('Promise', PromiseServiceCreator);
