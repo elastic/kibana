@@ -17,6 +17,11 @@
  * under the License.
  */
 
+var op = require('object-prototype');
+
+var create = op.create;
+var assign = op.assign;
+
 // Ensure, when spawning a new child process, that the `options` and the
 // `options.env` object passed to the child process function doesn't inherit
 // from `Object.prototype`. This protects against similar RCE vulnerabilities
@@ -37,7 +42,7 @@ function patchOptions(hasArgs) {
     var pos = 1;
     if (pos === args.length) {
       // fn(arg1)
-      args[pos] = Object.create(null);
+      args[pos] = create();
     } else if (pos < args.length) {
       if (hasArgs && (Array.isArray(args[pos]) || args[pos] == null)) {
         // fn(arg1, args, ...)
@@ -51,11 +56,11 @@ function patchOptions(hasArgs) {
       } else if (pos < args.length && args[pos] == null) {
         // fn(arg1, null, ...)
         // fn(arg1, args, null, ...)
-        args[pos] = Object.create(null);
+        args[pos] = create();
       } else if (pos < args.length && typeof args[pos] === 'function') {
         // fn(arg1, callback)
         // fn(arg1, args, callback)
-        args.splice(pos, 0, Object.create(null));
+        args.splice(pos, 0, create());
       }
     }
 
@@ -64,12 +69,12 @@ function patchOptions(hasArgs) {
 }
 
 function prototypelessSpawnOpts(obj) {
-  var prototypelessObj = Object.assign(Object.create(null), obj);
+  var prototypelessObj = assign(obj);
 
   // The `process.env` fallback has been hardened elsewhere, so here we only
   // care about the case where an `env` option is provided.
   if (prototypelessObj.env) {
-    prototypelessObj.env = Object.assign(Object.create(null), prototypelessObj.env);
+    prototypelessObj.env = assign(prototypelessObj.env);
   }
 
   return prototypelessObj;
