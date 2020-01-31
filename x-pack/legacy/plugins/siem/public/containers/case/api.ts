@@ -24,10 +24,19 @@ export const fetchCases = async ({
     sortOrder: Direction.desc,
   },
 }: FetchCasesProps): Promise<FetchCasesResponse> => {
-  const queryParams = Object.entries(pagination).reduce(
+  let queryParams = Object.entries(pagination).reduce(
     (acc, [key, value]) => `${acc}${key}=${value}&`,
     '?'
   );
+
+  const filters = [
+    ...(filterOptions.tags?.map(t => `case-workflow.attributes.tags:${encodeURIComponent(t)}`) ??
+      []),
+  ];
+
+  const filterParams = `filter=${filters.join('%20AND%20')}`;
+  queryParams = `${queryParams}${filterParams}`;
+
   const response = await fetch(`${chrome.getBasePath()}${CASES_URL}${queryParams}`, {
     method: 'GET',
     credentials: 'same-origin',
