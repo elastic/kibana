@@ -57,7 +57,7 @@ export class Plugin {
       /*
        * End-user-facing services
        */
-      const uiEnabled = config.get('xpack.monitoring.ui.enabled');
+      const uiEnabled = config.get('monitoring.ui.enabled');
 
       if (uiEnabled) {
         await instantiateClient({
@@ -107,7 +107,7 @@ export class Plugin {
       kbnServerStatus: kbnServer.status,
       kbnServerVersion: kbnServer.version,
     });
-    const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
+    const kibanaCollectionEnabled = config.get('monitoring.kibana.collection.enabled');
 
     if (kibanaCollectionEnabled) {
       /*
