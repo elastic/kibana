@@ -25,7 +25,7 @@ export function createConfig$(context: PluginInitializerContext) {
       const logger = context.logger.get('config');
 
       let encryptionKey = config.encryptionKey;
-      const encryptionKeyRandomlyGenerated = encryptionKey === undefined;
+      const usingEphemeralEncryptionKey = encryptionKey === undefined;
       if (encryptionKey === undefined) {
         logger.warn(
           'Generating a random key for xpack.encryptedSavedObjects.encryptionKey. ' +
@@ -38,7 +38,7 @@ export function createConfig$(context: PluginInitializerContext) {
 
       return {
         config: { ...config, encryptionKey },
-        encryptionKeyRandomlyGenerated,
+        usingEphemeralEncryptionKey,
       };
     })
   );

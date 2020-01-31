@@ -17,7 +17,7 @@ describe('EncryptedSavedObjects Plugin', () => {
                 "__legacyCompat": Object {
                   "registerLegacyAPI": [Function],
                 },
-                "encryptionKeyRandomlyGenerated": true,
+                "usingEphemeralEncryptionKey": true,
                 "registerType": [Function],
               }
             `);

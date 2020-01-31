@@ -23,7 +23,7 @@ import { SavedObjectsSetup, setupSavedObjects } from './saved_objects';
 export interface PluginSetupContract {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => void };
-  encryptionKeyRandomlyGenerated: boolean;
+  usingEphemeralEncryptionKey: boolean;
 }
 
 export interface PluginStartContract extends SavedObjectsSetup {
@@ -60,7 +60,7 @@ export class Plugin {
   }
 
   public async setup(core: CoreSetup): Promise<PluginSetupContract> {
-    const { config, encryptionKeyRandomlyGenerated } = await createConfig$(this.initializerContext)
+    const { config, usingEphemeralEncryptionKey } = await createConfig$(this.initializerContext)
       .pipe(first())
       .toPromise();
 
@@ -82,7 +82,7 @@ export class Plugin {
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
       __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI) },
-      encryptionKeyRandomlyGenerated,
+      usingEphemeralEncryptionKey,
     };
   }
 

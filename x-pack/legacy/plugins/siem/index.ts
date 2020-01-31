@@ -156,8 +156,8 @@ export const siem = (kibana: any) => {
       const initializerContext = { ...coreContext, env } as PluginInitializerContext;
       const serverFacade = {
         config,
-        encryptionKeyRandomlyGenerated:
-          get('encryptionKeyRandomlyGenerated', newPlatform.setup.plugins.encryptedSavedObjects) ??
+        usingEphemeralEncryptionKey:
+          get('usingEphemeralEncryptionKey', newPlatform.setup.plugins.encryptedSavedObjects) ??
           false,
         plugins: {
           alerting: plugins.alerting,
