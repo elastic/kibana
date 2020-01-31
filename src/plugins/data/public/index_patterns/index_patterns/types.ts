@@ -17,16 +17,21 @@
  * under the License.
  */
 
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { AggConfig, AggParam } from '../../legacy_imports';
-import { EditorConfig } from '../utils';
+export type AggregationRestrictions = Record<
+  string,
+  {
+    agg?: string;
+    interval?: number;
+    fixed_interval?: string;
+    calendar_interval?: string;
+    delay?: string;
+    time_zone?: string;
+  }
+>;
 
-export const aggParamCommonPropsMock = {
-  agg: {} as AggConfig,
-  aggParam: {} as AggParam,
-  editorConfig: {} as EditorConfig,
-  formIsTouched: false,
-  metricAggs: [] as AggConfig[],
-  state: {} as VisState,
-  showValidation: false,
-};
+export interface TypeMeta {
+  aggs?: Record<string, AggregationRestrictions>;
+  params?: {
+    [key: string]: any;
+  };
+}

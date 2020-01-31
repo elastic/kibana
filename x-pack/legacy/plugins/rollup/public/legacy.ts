@@ -5,7 +5,6 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { editorConfigProviders } from 'ui/vis/config';
 import { aggTypeFilters } from 'ui/agg_types/filter';
 import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
 import { addSearchStrategy } from '../../../../../src/plugins/data/public';
@@ -20,7 +19,6 @@ export const setup = plugin.setup(npSetup.core, {
   __LEGACY: {
     aggTypeFilters,
     aggTypeFieldFilters,
-    editorConfigProviders,
     addSearchStrategy,
     addBadgeExtension,
     addToggleExtension,

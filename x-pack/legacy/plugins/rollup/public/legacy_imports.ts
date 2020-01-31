@@ -9,4 +9,3 @@ export { findIllegalCharactersInIndexName, INDEX_ILLEGAL_CHARACTERS_VISIBLE } fr
 
 export { AggTypeFilters } from 'ui/agg_types/filter';
 export { AggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
-export { EditorConfigProviderRegistry } from 'ui/vis/config';
