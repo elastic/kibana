@@ -110,15 +110,17 @@ export class TelemetryManagementSection extends Component<Props, State> {
             {this.maybeGetAppliesSettingMessage()}
             <EuiSpacer size="s" />
             <Field
-              setting={{
-                type: 'boolean',
-                value: telemetryService.getIsOptedIn(),
-                description: this.renderDescription(),
-                defVal: true,
-                ariaName: i18n.translate('telemetry.provideUsageStatisticsLabel', {
-                  defaultMessage: 'Provide usage statistics',
-                }),
-              }}
+              setting={
+                {
+                  type: 'boolean',
+                  value: telemetryService.getIsOptedIn(),
+                  description: this.renderDescription(),
+                  defVal: true,
+                  ariaName: i18n.translate('telemetry.provideUsageStatisticsLabel', {
+                    defaultMessage: 'Provide usage statistics',
+                  }),
+                } as any
+              }
               save={this.toggleOptIn}
               clear={this.toggleOptIn}
               enableSaving={this.props.enableSaving}
