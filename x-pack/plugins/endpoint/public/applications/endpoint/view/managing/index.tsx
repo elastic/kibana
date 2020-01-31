@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   EuiPage,
@@ -36,21 +36,26 @@ export const EndpointList = () => {
   const pageSize = useEndpointListSelector(endpointListPageSize);
   const totalItemCount = useEndpointListSelector(endpointTotalHits);
 
-  const paginationSetup = {
-    pageIndex,
-    pageSize,
-    totalItemCount,
-    pageSizeOptions: [10, 20, 50],
-    hidePerPageOptions: false,
-  };
+  const paginationSetup = useMemo(() => {
+    return {
+      pageIndex,
+      pageSize,
+      totalItemCount,
+      pageSizeOptions: [10, 20, 50],
+      hidePerPageOptions: false,
+    };
+  }, [pageIndex, pageSize, totalItemCount]);
 
-  const onTableChange = ({ page }: { page: { index: number; size: number } }) => {
-    const { index, size } = page;
-    dispatch({
-      type: 'userPaginatedEndpointListTable',
-      payload: { pageIndex: index, pageSize: size },
-    });
-  };
+  const onTableChange = useCallback(
+    ({ page }: { page: { index: number; size: number } }) => {
+      const { index, size } = page;
+      dispatch({
+        type: 'userPaginatedEndpointListTable',
+        payload: { pageIndex: index, pageSize: size },
+      });
+    },
+    [dispatch]
+  );
 
   const columns = [
     {

@@ -6,7 +6,7 @@
 
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { CoreStart } from 'kibana/public';
-import { EndpointListState } from './store/endpoint_list';
+import { EndpointMetadata } from '../../../common/types';
 import { AppAction } from './store/action';
 import { AlertResultList } from '../../../common/types';
 
@@ -16,8 +16,20 @@ export type MiddlewareFactory = (
   api: MiddlewareAPI<Dispatch<AppAction>, GlobalState>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
 
+export interface ManagementState {
+  endpoints: EndpointMetadata[];
+  total: number;
+  pageSize: number;
+  pageIndex: number;
+}
+
+export interface ManagementPagination {
+  pageIndex: number;
+  pageSize: number;
+}
+
 export interface GlobalState {
-  readonly endpointList: EndpointListState;
+  readonly endpointList: ManagementState;
   readonly alertList: AlertListState;
 }
 

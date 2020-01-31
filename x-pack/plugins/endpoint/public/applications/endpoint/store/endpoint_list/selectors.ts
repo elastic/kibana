@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointListState } from './types';
+import { ManagementState } from '../../types';
 
-export const endpointListData = (state: EndpointListState) => state.endpoints;
+export const endpointListData = (state: ManagementState) => state.endpoints;
 
-export const endpointListPageIndex = (state: EndpointListState) => state.request_page_index;
+export const endpointListPageIndex = (state: ManagementState) => state.pageIndex;
 
-export const endpointListPageSize = (state: EndpointListState) => state.request_page_size;
+export const endpointListPageSize = (state: ManagementState) => state.pageSize;
 
-export const endpointTotalHits = (state: EndpointListState) => state.total;
+export const endpointTotalHits = (state: ManagementState) => state.total;
