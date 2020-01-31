@@ -16,9 +16,7 @@ export const NO_API_INTEGRATION_KEY_CALLOUT_TITLE = i18n.translate(
 export const NO_API_INTEGRATION_KEY_CALLOUT_MSG = i18n.translate(
   'xpack.siem.detectionEngine.noApiIntegrationKeyCallOutMsg',
   {
-    defaultMessage: `Generating a random key for xpack.encryptedSavedObjects.encryptionKey.
-      To be able to decrypt encrypted saved objects attributes after restart,
-      please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`,
+    defaultMessage: `A new encryption key is generated for saved objects each time you start Kibana. Without a persistent key, you cannot delete or modify rules after Kibana restarts. To set a persistent key, add the xpack.encryptedSavedObjects.encryptionKey setting with any text value to the kibana.yml file.`,
   }
 );
 
