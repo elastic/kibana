@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK, VIS_USAGE_TYPE } from '../../../../constants';
-import { TaskManagerStartContract } from '../../../../../../../plugins/task_manager/server';
+import { TaskManagerStartContract } from '../../../../../task_manager/server';
 
 async function isTaskManagerReady(taskManager?: TaskManagerStartContract) {
   const result = await fetch(taskManager);
@@ -38,12 +38,12 @@ async function fetch(taskManager?: TaskManagerStartContract) {
   return docs;
 }
 
-export function getUsageCollector(taskManager?: TaskManagerStartContract) {
+export function getUsageCollector(taskManager: Promise<TaskManagerStartContract>) {
   let isCollectorReady = false;
   async function determineIfTaskManagerIsReady() {
     let isReady = false;
     try {
-      isReady = await isTaskManagerReady(taskManager);
+      isReady = await isTaskManagerReady(await taskManager);
     } catch (err) {} // eslint-disable-line
 
     if (isReady) {
@@ -58,7 +58,7 @@ export function getUsageCollector(taskManager?: TaskManagerStartContract) {
     type: VIS_USAGE_TYPE,
     isReady: () => isCollectorReady,
     fetch: async () => {
-      const docs = await fetch(taskManager);
+      const docs = await fetch(await taskManager);
       // get the accumulated state from the recurring task
       return get(docs, '[0].state.stats');
     },

@@ -6,12 +6,13 @@
 
 import { APICaller, CoreSetup } from 'kibana/server';
 
+import { of } from 'rxjs';
 import {
   ConcreteTaskInstance,
   TaskStatus,
   TaskManagerStartContract,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../plugins/task_manager/server';
+} from '../../task_manager/server';
 
 export const getMockTaskInstance = (
   overrides: Partial<ConcreteTaskInstance> = {}
@@ -74,9 +75,7 @@ export const getMockThrowingTaskFetch = (
 };
 
 export const getMockConfig = () => {
-  return {
-    get: () => '',
-  };
+  return of({ kibana: { index: '' } });
 };
 
 export const getCluster = () => ({

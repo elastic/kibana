@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
 import _, { countBy, groupBy, mapValues } from 'lodash';
 import { APICaller, CoreSetup } from 'kibana/server';
 import { getNextMidnight } from '../../get_next_midnight';
-import { VisState } from '../../../../../../../../src/legacy/core_plugins/visualizations/public';
-import { TaskInstance } from '../../../../../../../plugins/task_manager/server';
-import { ESSearchHit } from '../../../../../apm/typings/elasticsearch';
-import { LegacyConfig } from '../../../plugin';
+import { VisState } from '../../../../../../../src/legacy/core_plugins/visualizations/public';
+import { TaskInstance } from '../../../../../task_manager/server';
+import { ESSearchHit } from '../../../../../../legacy/plugins/apm/typings/elasticsearch';
 
 interface VisSummary {
   type: string;
@@ -73,17 +73,17 @@ async function getStats(callCluster: APICaller, index: string) {
 
 export function visualizationsTaskRunner(
   taskInstance: TaskInstance,
-  config: LegacyConfig,
+  config: Observable<{ kibana: { index: string } }>,
   es: CoreSetup['elasticsearch']
 ) {
   const { callAsInternalUser: callCluster } = es.createClient('data');
-  const index = config.get('kibana.index').toString(); // cast to string for TypeScript
 
   return async () => {
     let stats;
     let error;
 
     try {
+      const index = (await config.toPromise()).kibana.index;
       stats = await getStats(callCluster, index);
     } catch (err) {
       if (err.constructor === Error) {
