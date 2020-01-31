@@ -61,7 +61,6 @@ export interface IndexPatternField {
   enabled?: boolean;
   script?: string;
   lang?: string;
-  readFromDocValues: boolean;
 }
 interface KibanaIndexPattern {
   [key: string]: string;
@@ -180,7 +179,6 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
     searchable: field.searchable ?? true,
     aggregatable: field.aggregatable ?? true,
     doc_values: field.doc_values ?? true,
-    readFromDocValues: true,
   };
 
   // if type exists, check if it exists in the map
