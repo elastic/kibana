@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const supertest = getService('supertest');
   const retry = getService('retry');
+  const find = getService('find');
 
   async function createAlert() {
     const { body: createdAlert } = await supertest
@@ -41,6 +42,49 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
+    });
+
+    it('should create an alert', async () => {
+      const alertName = generateUniqueKey();
+
+      await pageObjects.triggersActionsUI.clickCreateAlertButton();
+
+      const nameInput = await testSubjects.find('alertNameInput');
+      await nameInput.click();
+      await nameInput.clearValue();
+      await nameInput.type(alertName);
+
+      await testSubjects.click('threshold-SelectOption');
+
+      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await testSubjects.click('createActionConnectorButton');
+      const connectorNameInput = await testSubjects.find('nameInput');
+      await connectorNameInput.click();
+      await connectorNameInput.clearValue();
+      const connectorName = generateUniqueKey();
+      await connectorNameInput.type(connectorName);
+
+      const slackWebhookUrlInput = await testSubjects.find('slackWebhookUrlInput');
+      await slackWebhookUrlInput.click();
+      await slackWebhookUrlInput.clearValue();
+      await slackWebhookUrlInput.type('https://test');
+
+      await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
+
+      const loggingMessageInput = await testSubjects.find('slackMessageTextArea');
+      await loggingMessageInput.click();
+      await loggingMessageInput.clearValue();
+      await loggingMessageInput.type('test message');
+
+      await testSubjects.click('slackAddVariableButton');
+      const variableMenuButton = await testSubjects.find('variableMenuButton-0');
+      await variableMenuButton.click();
+
+      await testSubjects.click('selectIndexExpression');
+
+      await find.clickByCssSelector('[data-test-subj="cancelSaveAlertButton"]');
+
+      // TODO: implement saving to the server, when threshold API will be ready
     });
 
     it('should search for alert', async () => {

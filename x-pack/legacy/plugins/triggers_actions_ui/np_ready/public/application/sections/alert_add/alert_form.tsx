@@ -263,7 +263,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
     return (
       <EuiKeyPadMenuItem
         key={index}
-        data-test-subj="alertTypeSelectOption"
+        data-test-subj={`${item.id}-SelectOption`}
         label={item.name}
         onClick={() => {
           setAlertProperty('alertTypeId', item.id);
@@ -286,7 +286,7 @@ export const AlertForm = ({ alert, dispatch, errors, serverError }: AlertFormPro
     return (
       <EuiKeyPadMenuItem
         key={index}
-        data-test-subj="actionTypeSelectOption"
+        data-test-subj={`${item.id}-ActionTypeSelectOption`}
         label={actionTypesIndex ? actionTypesIndex[item.id].name : item.id}
         onClick={() => addActionType(item)}
       >

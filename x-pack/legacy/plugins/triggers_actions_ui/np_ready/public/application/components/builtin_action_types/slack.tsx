@@ -153,9 +153,10 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const messageVariablesItems = messageVariables?.map((variable: string) => (
+  const messageVariablesItems = messageVariables?.map((variable: string, i: number) => (
     <EuiContextMenuItem
       key={variable}
+      data-test-subj={`variableMenuButton-${i}`}
       icon="empty"
       onClick={() => {
         editAction('message', (message ?? '').concat(` {{${variable}}}`), index);
@@ -192,6 +193,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             id="singlePanel"
             button={
               <EuiButtonIcon
+                data-test-subj="slackAddVariableButton"
                 onClick={() => setIsVariablesPopoverOpen(true)}
                 iconType="indexOpen"
                 aria-label={i18n.translate(
@@ -216,7 +218,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           isInvalid={errors.message.length > 0 && message !== undefined}
           name="message"
           value={message || ''}
-          data-test-subj="slackMessageTextarea"
+          data-test-subj="slackMessageTextArea"
           onChange={e => {
             editAction('message', e.target.value, index);
           }}

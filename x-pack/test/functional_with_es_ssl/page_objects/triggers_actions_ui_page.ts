@@ -105,5 +105,9 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         expect(valueAfter).not.to.eql(valueBefore);
       });
     },
+    async clickCreateAlertButton() {
+      const createBtn = await find.byCssSelector('[data-test-subj="createAlertButton"]');
+      await createBtn.click();
+    },
   };
 }

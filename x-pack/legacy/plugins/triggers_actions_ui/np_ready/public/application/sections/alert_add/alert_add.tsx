@@ -129,7 +129,7 @@ export const AlertAdd = () => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout}>
+            <EuiButtonEmpty data-test-subj="cancelSaveAlertButton" onClick={closeFlyout}>
               {i18n.translate('xpack.triggersActionsUI.sections.alertAdd.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}

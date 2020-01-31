@@ -396,7 +396,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow
-            id="timeField"
+            id="thresholdTimeField"
             fullWidth
             label={
               <FormattedMessage
@@ -411,8 +411,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
               options={timeFieldOptions}
               isInvalid={errors.timeField.length > 0 && timeField !== undefined}
               fullWidth
-              name="watchTimeField"
-              data-test-subj="watchTimeFieldSelect"
+              name="thresholdTimeField"
+              data-test-subj="thresholdAlertTimeFieldSelect"
               value={timeField}
               onChange={e => {
                 setAlertParams('timeField', e.target.value);
@@ -445,6 +445,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             id="indexPopover"
             button={
               <EuiExpression
+                data-test-subj="selectIndexExpression"
                 description={i18n.translate(
                   'xpack.triggersActionsUI.sections.alertAdd.threshold.indexLabel',
                   {

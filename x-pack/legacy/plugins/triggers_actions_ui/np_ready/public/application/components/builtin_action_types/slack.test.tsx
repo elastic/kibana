@@ -128,10 +128,10 @@ describe('SlackParamsFields renders', () => {
         index={0}
       />
     );
-    expect(wrapper.find('[data-test-subj="slackMessageTextarea"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="slackMessageTextArea"]').length > 0).toBeTruthy();
     expect(
       wrapper
-        .find('[data-test-subj="slackMessageTextarea"]')
+        .find('[data-test-subj="slackMessageTextArea"]')
         .first()
         .prop('value')
     ).toStrictEqual('test message');

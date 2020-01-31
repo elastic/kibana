@@ -120,12 +120,14 @@ describe('alert_form', () => {
     });
 
     it('renders registered selected alert type', () => {
-      const alertTypeSelectOptions = wrapper.find('[data-test-subj="alertTypeSelectOption"]');
+      const alertTypeSelectOptions = wrapper.find('[data-test-subj="my-alert-type-SelectOption"]');
       expect(alertTypeSelectOptions.exists()).toBeTruthy();
     });
 
     it('renders registered action types', () => {
-      const alertTypeSelectOptions = wrapper.find('[data-test-subj="actionTypeSelectOption"]');
+      const alertTypeSelectOptions = wrapper.find(
+        '[data-test-subj=".server-log-ActionTypeSelectOption"]'
+      );
       expect(alertTypeSelectOptions.exists()).toBeFalsy();
     });
   });
@@ -183,8 +185,10 @@ describe('alert_form', () => {
     });
 
     it('renders registered action types', () => {
-      const alertTypeSelectOptions = wrapper.find('[data-test-subj="actionTypeSelectOption"]');
-      expect(alertTypeSelectOptions.exists()).toBeTruthy();
+      const actionTypeSelectOptions = wrapper.find(
+        '[data-test-subj="my-action-type-ActionTypeSelectOption"]'
+      );
+      expect(actionTypeSelectOptions.exists()).toBeTruthy();
     });
   });
 

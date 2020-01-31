@@ -65,7 +65,6 @@ describe('ServerLogParamsFields renders', () => {
     }
     const ParamsFields = actionTypeModel.actionParamsFields;
     const actionParams = {
-      message: 'test message',
       level: 'trace',
     };
     const wrapper = mountWithIntl(
@@ -74,7 +73,7 @@ describe('ServerLogParamsFields renders', () => {
         errors={{ message: [] }}
         editAction={() => {}}
         index={0}
-        hasErrors={false}
+        defaultMessage={'test default message'}
       />
     );
     expect(wrapper.find('[data-test-subj="loggingLevelSelect"]').length > 0).toBeTruthy();
@@ -103,7 +102,6 @@ describe('ServerLogParamsFields renders', () => {
         errors={{ message: [] }}
         editAction={() => {}}
         index={0}
-        hasErrors={false}
       />
     );
     expect(wrapper.find('[data-test-subj="loggingLevelSelect"]').length > 0).toBeTruthy();
