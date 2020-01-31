@@ -258,25 +258,26 @@ export class Execution<
       {} as any
     );
 
-    // Check for missing required arguments
-    each(argDefs, argDef => {
+    // Check for missing required arguments.
+    for (const argDef of Object.values(argDefs)) {
       const { aliases, default: argDefault, name: argName, required } = argDef as ArgumentType<
         any
       > & { name: string };
       if (
-        typeof argDefault === 'undefined' &&
-        required &&
-        typeof dealiasedArgAsts[argName] === 'undefined'
-      ) {
-        if (!aliases || aliases.length === 0) {
-          throw new Error(`${fnDef.name} requires an argument`);
-        } else {
-          // use an alias if _ is the missing arg
-          const errorArg = argName === '_' ? aliases[0] : argName;
-          throw new Error(`${fnDef.name} requires an "${errorArg}" argument`);
-        }
+        typeof argDefault !== 'undefined' ||
+        !required ||
+        typeof dealiasedArgAsts[argName] !== 'undefined'
+      )
+        continue;
+
+      if (!aliases || aliases.length === 0) {
+        throw new Error(`${fnDef.name} requires an argument`);
       }
-    });
+
+      // use an alias if _ is the missing arg
+      const errorArg = argName === '_' ? aliases[0] : argName;
+      throw new Error(`${fnDef.name} requires an "${errorArg}" argument`);
+    }
 
     // Fill in default values from argument definition
     const argAstsWithDefaults = reduce(

@@ -322,11 +322,48 @@ describe('Execution', () => {
 
   describe('sub-expressions', () => {
     test('executes sub-expressions', async () => {
-      const res = await run('add val={add 5 | access "value"}', {}, null);
+      const result = await run('add val={add 5 | access "value"}', {}, null);
 
-      expect(res).toMatchObject({
+      expect(result).toMatchObject({
         type: 'num',
         value: 5,
+      });
+    });
+  });
+
+  describe('when arguments are missing', () => {
+    test('when required argument is missing and has not alias, returns error', async () => {
+      const requiredArg: ExpressionFunctionDefinition<'requiredArg', any, { arg: any }, any> = {
+        name: 'requiredArg',
+        args: {
+          arg: {
+            help: '',
+            required: true,
+          },
+        },
+        help: '',
+        fn: jest.fn(),
+      };
+      const executor = createUnitTestExecutor();
+      executor.registerFunction(requiredArg);
+      const result = await executor.run('requiredArg', null, {});
+
+      expect(result).toMatchObject({
+        type: 'error',
+        error: {
+          message: '[requiredArg] > requiredArg requires an argument',
+        },
+      });
+    });
+
+    test('when required argument is missing and has alias, returns error', async () => {
+      const result = await run('var_set', {});
+
+      expect(result).toMatchObject({
+        type: 'error',
+        error: {
+          message: '[var_set] > var_set requires an "name" argument',
+        },
       });
     });
   });
