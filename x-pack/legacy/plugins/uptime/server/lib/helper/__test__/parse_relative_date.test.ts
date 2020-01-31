@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parseRelativeEndDate } from '../get_histogram_interval';
+import { parseRelativeDate } from '../get_histogram_interval';
 import { Moment } from 'moment';
 
 describe('Parsing a relative end date properly', () => {
   it('converts the upper range of relative end dates to now', async () => {
     const thisWeekEndDate = 'now/w';
 
-    let endDate = parseRelativeEndDate(thisWeekEndDate);
+    let endDate = parseRelativeDate(thisWeekEndDate);
     expect(Date.now() - (endDate as Moment).valueOf()).toBeLessThan(1000);
 
     const todayEndDate = 'now/d';
 
-    endDate = parseRelativeEndDate(todayEndDate);
+    endDate = parseRelativeDate(todayEndDate);
 
     expect(Date.now() - (endDate as Moment).valueOf()).toBeLessThan(1000);
   });

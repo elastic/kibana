@@ -7,7 +7,7 @@
 import { APICaller } from 'kibana/server';
 import { CursorPagination } from '../adapter_types';
 import { INDEX_NAMES } from '../../../../../common/constants';
-import { parseRelativeEndDate } from '../../../helper/get_histogram_interval';
+import { parseRelativeDate } from '../../../helper/get_histogram_interval';
 
 export class QueryContext {
   callES: APICaller;
@@ -96,7 +96,7 @@ export class QueryContext {
     // only slower, but only marginally so, and prevents people from seeing weird
     // behavior.
 
-    const tsEnd = parseRelativeEndDate(this.dateRangeEnd)!;
+    const tsEnd = parseRelativeDate(this.dateRangeEnd, { roundUp: true })!;
     const tsStart = tsEnd.subtract(5, 'minutes');
 
     return {
