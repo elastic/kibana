@@ -85,7 +85,7 @@ Many visualizations allow you to inspect the query and data behind the visualiza
 . To download the data, click *Download CSV*, then choose one of the following options:
 * *Formatted CSV* - Downloads the data in table format.
 * *Raw CSV* - Downloads the data as provided.
-. To view the data collection requests, select *Requests* from the *View*
+. To view the requests for collecting data, select *Requests* from the *View*
 dropdown.
 
 [float]
@@ -104,10 +104,10 @@ To access the saved visualization, go to *Management > {kib} > Saved Objects*.
 When you have insufficient privileges to save visualizations, the following indicator is
 displayed and the *Save* button is not visible.
 
+For more information, refer to <<xpack-security-authorization>>.
+
 [role="screenshot"]
 image::visualize/images/read-only-badge.png[Example of Visualize's read only access indicator in Kibana's header]
-
-For more information, see <<xpack-security-authorization>>.
 
 [float]
 [[visualize-share-options]]
@@ -118,10 +118,10 @@ When you've finished your visualization, you can share it outside of {kib}.
 From the *Share* menu, you can:
 
 * Embed the code in a web page. Users must have {kib} access
-to view an embedded visualization
-* Share a direct link to a {kib} visualization
-* Generate a PDF report
-* Generate a PNG report
+to view an embedded visualization.
+* Share a direct link to a {kib} visualization.
+* Generate a PDF report.
+* Generate a PNG report.
 
 --
 include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
