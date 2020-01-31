@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { Datatable } from './datatable';
-import { Render } from './render';
+import { ExpressionValueRender } from './render';
 
 export type ExpressionValueNum = ExpressionValueBoxed<
   'num',
@@ -63,7 +63,7 @@ export const num: ExpressionTypeDefinition<'num', ExpressionValueNum> = {
     }),
   },
   to: {
-    render: ({ value }): Render<{ text: string }> => {
+    render: ({ value }): ExpressionValueRender<{ text: string }> => {
       const text = `${value}`;
       return {
         type: 'render',

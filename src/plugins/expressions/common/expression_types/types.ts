@@ -17,11 +17,22 @@
  * under the License.
  */
 
+import { TimeRange, Query, esFilters } from '../../../data/common';
+
 export type ExpressionValueUnboxed = any;
 
 export type ExpressionValueBoxed<Type extends string = string, Value extends object = object> = {
   type: Type;
 } & Value;
+
+export type ExpressionValueKibanaContext = ExpressionValueBoxed<
+  'kibana_context',
+  {
+    filters?: esFilters.Filter[];
+    query?: Query;
+    timeRange?: TimeRange;
+  }
+>;
 
 export type ExpressionValue = ExpressionValueUnboxed | ExpressionValueBoxed;
 

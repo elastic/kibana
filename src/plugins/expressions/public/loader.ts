@@ -22,9 +22,11 @@ import { filter, map } from 'rxjs/operators';
 import { Adapters, InspectorSession } from '../../inspector/public';
 import { ExpressionDataHandler } from './execute';
 import { ExpressionRenderHandler } from './render';
-import { Data, IExpressionLoaderParams } from './types';
+import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
 import { getInspector } from './services';
+
+type Data = any;
 
 export class ExpressionLoader {
   data$: Observable<Data>;

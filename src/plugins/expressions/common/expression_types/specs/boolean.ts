@@ -19,7 +19,7 @@
 
 import { ExpressionTypeDefinition } from '../types';
 import { Datatable } from './datatable';
-import { Render } from './render';
+import { ExpressionValueRender } from './render';
 
 const name = 'boolean';
 
@@ -31,7 +31,7 @@ export const boolean: ExpressionTypeDefinition<'boolean', boolean> = {
     string: s => Boolean(s),
   },
   to: {
-    render: (value): Render<{ text: string }> => {
+    render: (value): ExpressionValueRender<{ text: string }> => {
       const text = `${value}`;
       return {
         type: 'render',

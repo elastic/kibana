@@ -18,7 +18,7 @@
  */
 
 import { ExpressionTypeDefinition } from '../types';
-import { Render } from './render';
+import { ExpressionValueRender } from './render';
 
 const name = 'image';
 
@@ -31,7 +31,7 @@ export interface ExpressionImage {
 export const image: ExpressionTypeDefinition<typeof name, ExpressionImage> = {
   name,
   to: {
-    render: (input): Render<Pick<ExpressionImage, 'mode' | 'dataurl'>> => {
+    render: (input): ExpressionValueRender<Pick<ExpressionImage, 'mode' | 'dataurl'>> => {
       return {
         type: 'render',
         as: 'image',

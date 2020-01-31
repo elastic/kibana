@@ -19,7 +19,7 @@
 
 import { ExpressionType } from './expression_type';
 import { ExpressionTypeDefinition } from './types';
-import { Render } from './specs';
+import { ExpressionValueRender } from './specs';
 
 export const boolean: ExpressionTypeDefinition<'boolean', boolean> = {
   name: 'boolean',
@@ -29,7 +29,7 @@ export const boolean: ExpressionTypeDefinition<'boolean', boolean> = {
     string: s => Boolean(s),
   },
   to: {
-    render: (value): Render<{ text: string }> => {
+    render: (value): ExpressionValueRender<{ text: string }> => {
       const text = `${value}`;
       return {
         type: 'render',
@@ -40,10 +40,10 @@ export const boolean: ExpressionTypeDefinition<'boolean', boolean> = {
   },
 };
 
-export const render: ExpressionTypeDefinition<'render', Render<unknown>> = {
+export const render: ExpressionTypeDefinition<'render', ExpressionValueRender<unknown>> = {
   name: 'render',
   from: {
-    '*': <T>(v: T): Render<T> => ({
+    '*': <T>(v: T): ExpressionValueRender<T> => ({
       type: name,
       as: 'debug',
       value: v,

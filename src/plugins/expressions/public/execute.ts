@@ -19,8 +19,13 @@
 
 import { DataAdapter, RequestAdapter, Adapters } from '../../inspector/public';
 import { getInterpreter } from './services';
-import { IExpressionLoaderParams, IInterpreterResult } from './types';
-import { ExpressionAstExpression, parseExpression, formatExpression } from '../common';
+import { IExpressionLoaderParams } from './types';
+import {
+  ExpressionAstExpression,
+  parseExpression,
+  formatExpression,
+  ExpressionValue,
+} from '../common';
 
 /**
  * The search context describes a specific context (filters, time range and query)
@@ -36,7 +41,7 @@ export class ExpressionDataHandler {
   private ast: ExpressionAstExpression;
 
   private inspectorAdapters: Adapters;
-  private promise: Promise<IInterpreterResult>;
+  private promise: Promise<ExpressionValue>;
 
   public isPending: boolean = true;
   constructor(expression: string | ExpressionAstExpression, params: IExpressionLoaderParams) {
@@ -60,21 +65,21 @@ export class ExpressionDataHandler {
 
     const interpreter = getInterpreter();
     this.promise = interpreter
-      .interpretAst<any, IInterpreterResult>(this.ast, params.context || defaultContext, {
+      .interpretAst<any, ExpressionValue>(this.ast, params.context || defaultContext, {
         getInitialContext,
         inspectorAdapters: this.inspectorAdapters,
         abortSignal: this.abortController.signal,
         variables: params.variables,
       })
       .then(
-        (v: IInterpreterResult) => {
+        (v: ExpressionValue) => {
           this.isPending = false;
           return v;
         },
         () => {
           this.isPending = false;
         }
-      ) as Promise<IInterpreterResult>;
+      ) as Promise<ExpressionValue>;
   }
 
   cancel = () => {

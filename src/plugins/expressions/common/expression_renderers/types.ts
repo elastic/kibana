@@ -17,12 +17,7 @@
  * under the License.
  */
 
-import { ExecutionContext } from '../execution';
-
-export interface ExpressionRenderDefinition<
-  Config = any,
-  Context extends ExecutionContext = ExecutionContext
-> {
+export interface ExpressionRenderDefinition<Config = unknown> {
   /**
    * Name of the renderer.
    */
@@ -41,5 +36,20 @@ export interface ExpressionRenderDefinition<
   validate?: () => undefined | Error;
   reuseDomNode: boolean;
 
-  render: (domNode: HTMLElement, config: Config, context: Context) => Promise<void>;
+  render: (
+    domNode: HTMLElement,
+    config: Config,
+    handlers: IInterpreterRenderHandlers
+  ) => Promise<void>;
+}
+
+export interface IInterpreterRenderHandlers {
+  /**
+   * Done increments the number of rendering successes
+   */
+  done: () => void;
+  onDestroy: (fn: () => void) => void;
+  reload: () => void;
+  update: (params: any) => void;
+  event: (event: any) => void;
 }

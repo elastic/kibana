@@ -18,11 +18,11 @@
  */
 
 import { ExpressionTypeDefinition } from '../types';
-import { Render } from './render';
+import { ExpressionValueRender } from './render';
 
 const name = 'shape';
 
-export const shape: ExpressionTypeDefinition<typeof name, Render<any>> = {
+export const shape: ExpressionTypeDefinition<typeof name, ExpressionValueRender<any>> = {
   name: 'shape',
   to: {
     render: input => {

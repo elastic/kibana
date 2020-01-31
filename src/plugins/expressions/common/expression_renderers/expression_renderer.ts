@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { ExpressionRenderDefinition } from './types';
-import { ExecutionContext } from '../execution';
+import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from './types';
 
-export class ExpressionRenderer {
+export class ExpressionRenderer<Config = unknown> {
   /**
    * This must match the name of the function that is used to create the `type: render` object.
    */
@@ -49,9 +48,9 @@ export class ExpressionRenderer {
   /**
    * The function called to render the data.
    */
-  render: (el: HTMLElement, config: any, context: ExecutionContext) => Promise<void>;
+  render: (el: HTMLElement, config: Config, handlers: IInterpreterRenderHandlers) => Promise<void>;
 
-  constructor(config: ExpressionRenderDefinition) {
+  constructor(config: ExpressionRenderDefinition<Config>) {
     const { name, displayName, help, validate, reuseDomNode, render } = config;
 
     this.name = name;

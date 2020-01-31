@@ -19,7 +19,7 @@
 
 import { ExpressionTypeDefinition } from '../types';
 import { Datatable } from './datatable';
-import { Render } from './render';
+import { ExpressionValueRender } from './render';
 
 const name = 'string';
 
@@ -31,7 +31,7 @@ export const string: ExpressionTypeDefinition<typeof name, string> = {
     number: n => String(n),
   },
   to: {
-    render: <T>(text: T): Render<{ text: T }> => {
+    render: <T>(text: T): ExpressionValueRender<{ text: T }> => {
       return {
         type: 'render',
         as: 'text',

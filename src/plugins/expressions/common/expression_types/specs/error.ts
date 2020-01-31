@@ -18,7 +18,7 @@
  */
 
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
-import { Render } from './render';
+import { ExpressionValueRender } from './render';
 import { getType } from '../get_type';
 
 const name = 'error';
@@ -26,7 +26,11 @@ const name = 'error';
 export type ExpressionValueError = ExpressionValueBoxed<
   'error',
   {
-    error: unknown;
+    error: {
+      message: string;
+      name?: string;
+      stack?: string;
+    };
     info: unknown;
   }
 >;
@@ -44,7 +48,7 @@ export type InterpreterErrorType = ExpressionValueError;
 export const error: ExpressionTypeDefinition<'error', ExpressionValueError> = {
   name,
   to: {
-    render: (input): Render<Pick<InterpreterErrorType, 'error' | 'info'>> => {
+    render: (input): ExpressionValueRender<Pick<InterpreterErrorType, 'error' | 'info'>> => {
       return {
         type: 'render',
         as: name,

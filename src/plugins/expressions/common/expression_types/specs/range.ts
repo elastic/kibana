@@ -18,7 +18,7 @@
  */
 
 import { ExpressionTypeDefinition } from '../types';
-import { Render } from '.';
+import { ExpressionValueRender } from '.';
 
 const name = 'range';
 
@@ -40,7 +40,7 @@ export const range: ExpressionTypeDefinition<typeof name, Range> = {
     },
   },
   to: {
-    render: (value: Range): Render<{ text: string }> => {
+    render: (value: Range): ExpressionValueRender<{ text: string }> => {
       const text = `from ${value.from} to ${value.to}`;
       return {
         type: 'render',

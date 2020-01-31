@@ -25,8 +25,8 @@ import { filter } from 'rxjs/operators';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { IExpressionLoaderParams, IInterpreterRenderHandlers, RenderError } from './types';
-import { ExpressionAstExpression } from '../common';
+import { IExpressionLoaderParams, RenderError } from './types';
+import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../common';
 import { ExpressionLoader } from './loader';
 
 // Accept all options of the runner as props except for the

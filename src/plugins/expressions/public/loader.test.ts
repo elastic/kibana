@@ -20,9 +20,8 @@
 import { first, skip, toArray } from 'rxjs/operators';
 import { loader, ExpressionLoader } from './loader';
 import { ExpressionDataHandler } from './execute';
-import { IInterpreterRenderHandlers } from './types';
 import { Observable } from 'rxjs';
-import { ExpressionAstExpression, parseExpression } from '../common';
+import { ExpressionAstExpression, parseExpression, IInterpreterRenderHandlers } from '../common';
 
 const element: HTMLElement = null as any;
 

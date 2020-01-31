@@ -21,7 +21,7 @@ import { map, pick, zipObject } from 'lodash';
 
 import { ExpressionTypeDefinition } from '../types';
 import { PointSeries } from './pointseries';
-import { Render } from './render';
+import { ExpressionValueRender } from './render';
 
 const name = 'datatable';
 
@@ -115,7 +115,7 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
     }),
   },
   to: {
-    render: (table): Render<RenderedDatatable> => ({
+    render: (table): ExpressionValueRender<RenderedDatatable> => ({
       type: 'render',
       as: 'table',
       value: {

@@ -19,7 +19,7 @@
 
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { Datatable } from './datatable';
-import { Render } from './render';
+import { ExpressionValueRender } from './render';
 
 const name = 'pointseries';
 
@@ -70,7 +70,7 @@ export const pointseries: ExpressionTypeDefinition<'pointseries', PointSeries> =
     render: (
       pseries: PointSeries,
       types
-    ): Render<{ datatable: Datatable; showHeader: boolean }> => {
+    ): ExpressionValueRender<{ datatable: Datatable; showHeader: boolean }> => {
       const datatable: Datatable = types.datatable.from(pseries, types);
       return {
         type: 'render',

@@ -20,16 +20,10 @@
 import * as Rx from 'rxjs';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import {
-  Data,
-  event,
-  IInterpreterRenderHandlers,
-  RenderError,
-  RenderErrorHandlerFnType,
-  RenderId,
-} from './types';
+import { RenderError, RenderErrorHandlerFnType } from './types';
 import { getRenderersRegistry } from './services';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
+import { IInterpreterRenderHandlers } from '../common';
 
 export type IExpressionRendererExtraHandlers = Record<string, any>;
 
@@ -38,14 +32,14 @@ export interface ExpressionRenderHandlerParams {
 }
 
 export class ExpressionRenderHandler {
-  render$: Observable<RenderId>;
+  render$: Observable<any>;
   update$: Observable<any>;
-  events$: Observable<event>;
+  events$: Observable<any>;
 
   private element: HTMLElement;
   private destroyFn?: any;
   private renderCount: number = 0;
-  private renderSubject: Rx.BehaviorSubject<RenderId | null>;
+  private renderSubject: Rx.BehaviorSubject<any | null>;
   private eventsSubject: Rx.Subject<unknown>;
   private updateSubject: Rx.Subject<unknown>;
   private handlers: IInterpreterRenderHandlers;
@@ -62,9 +56,9 @@ export class ExpressionRenderHandler {
 
     this.onRenderError = onRenderError || defaultRenderErrorHandler;
 
-    this.renderSubject = new Rx.BehaviorSubject(null as RenderId | null);
+    this.renderSubject = new Rx.BehaviorSubject(null as any | null);
     this.render$ = this.renderSubject.asObservable().pipe(filter(_ => _ !== null)) as Observable<
-      RenderId
+      any
     >;
 
     this.updateSubject = new Rx.Subject();
@@ -90,7 +84,7 @@ export class ExpressionRenderHandler {
     };
   }
 
-  render = async (data: Data, extraHandlers: IExpressionRendererExtraHandlers = {}) => {
+  render = async (data: any, extraHandlers: IExpressionRendererExtraHandlers = {}) => {
     if (!data || typeof data !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
@@ -142,7 +136,7 @@ export class ExpressionRenderHandler {
 
 export function render(
   element: HTMLElement,
-  data: Data,
+  data: any,
   options?: Partial<ExpressionRenderHandlerParams>
 ): ExpressionRenderHandler {
   const handler = new ExpressionRenderHandler(element, options);

@@ -24,7 +24,7 @@ const name = 'render';
 /**
  * Represents an object that is intended to be rendered.
  */
-export type Render<T> = ExpressionValueBoxed<
+export type ExpressionValueRender<T> = ExpressionValueBoxed<
   typeof name,
   {
     as: string;
@@ -32,10 +32,17 @@ export type Render<T> = ExpressionValueBoxed<
   }
 >;
 
-export const render: ExpressionTypeDefinition<typeof name, Render<unknown>> = {
+/**
+ * @deprecated
+ *
+ * Use `ExpressionValueRender` instead.
+ */
+export type Render<T> = ExpressionValueRender<T>;
+
+export const render: ExpressionTypeDefinition<typeof name, ExpressionValueRender<unknown>> = {
   name,
   from: {
-    '*': <T>(v: T): Render<T> => ({
+    '*': <T>(v: T): ExpressionValueRender<T> => ({
       type: name,
       as: 'debug',
       value: v,

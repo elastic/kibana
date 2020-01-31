@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionTypeDefinition } from '../types';
 import { Datatable } from './datatable';
-import { Render } from './render';
+import { ExpressionValueRender } from './render';
 
 const name = 'number';
 
@@ -45,7 +45,7 @@ export const number: ExpressionTypeDefinition<typeof name, number> = {
     },
   },
   to: {
-    render: (value: number): Render<{ text: string }> => {
+    render: (value: number): ExpressionValueRender<{ text: string }> => {
       const text = `${value}`;
       return {
         type: 'render',
