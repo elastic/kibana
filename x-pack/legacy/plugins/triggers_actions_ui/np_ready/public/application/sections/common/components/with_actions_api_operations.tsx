@@ -8,7 +8,7 @@ import React from 'react';
 
 import { ActionType } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
-import { loadActionTypes } from '../../../lib/action_api';
+import { loadActionTypes } from '../../../lib/action_connector_api';
 
 export interface ComponentOpts {
   loadActionTypes: () => Promise<ActionType[]>;

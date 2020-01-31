@@ -6,10 +6,10 @@
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
 import { withActionOperations, ComponentOpts } from './with_actions_api_operations';
-import * as actionApis from '../../../lib/action_api';
+import * as actionApis from '../../../lib/action_connector_api';
 import { useAppDependencies } from '../../../app_context';
 
-jest.mock('../../../lib/action_api');
+jest.mock('../../../lib/action_connector_api');
 
 jest.mock('../../../app_context', () => {
   const http = jest.fn();

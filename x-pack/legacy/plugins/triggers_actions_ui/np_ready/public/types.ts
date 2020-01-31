@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeRegistry } from './application/type_registry';
-import { SanitizedAlert as Alert } from '../../../alerting/common';
-export { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
-
+import { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
 import { ActionType } from '../../../../../plugins/actions/common';
-export { ActionType } from '../../../../../plugins/actions/common';
+
+export { Alert, AlertAction };
+export { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Record<string, AlertType>;
