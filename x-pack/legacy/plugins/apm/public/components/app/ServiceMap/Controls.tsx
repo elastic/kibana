@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState, useEffect } from 'react';
 import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import React, { useContext, useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { CytoscapeContext } from './Cytoscape';
+import { animationOptions, nodeHeight } from './cytoscapeOptions';
 import { FullscreenPanel } from './FullscreenPanel';
 
 const ControlsContainer = styled('div')`
@@ -58,6 +59,17 @@ export function Controls() {
     }
   }, [cy]);
 
+  function center() {
+    if (cy) {
+      const eles = cy.nodes();
+      cy.animate({
+        ...animationOptions,
+        center: { eles },
+        fit: { eles, padding: nodeHeight }
+      });
+    }
+  }
+
   function zoomIn() {
     doZoom(cy, increment);
   }
@@ -82,6 +94,9 @@ export function Controls() {
   const zoomOutLabel = i18n.translate('xpack.apm.serviceMap.zoomOut', {
     defaultMessage: 'Zoom out'
   });
+  const centerLabel = i18n.translate('xpack.apm.serviceMap.center', {
+    defaultMessage: 'Center'
+  });
 
   return (
     <ControlsContainer>
@@ -103,6 +118,15 @@ export function Controls() {
           title={zoomOutLabel}
         />
       </ZoomPanel>
+      <EuiPanel hasShadow={true} paddingSize="none">
+        <Button
+          aria-label={centerLabel}
+          color="text"
+          iconType="crosshairs"
+          onClick={center}
+          title={centerLabel}
+        />
+      </EuiPanel>
       <FullscreenPanel element={mapDomElement} />
     </ControlsContainer>
   );
