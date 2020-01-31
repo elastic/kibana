@@ -60,7 +60,7 @@ export interface HomePluginSetupDependencies {
 export class HomePlugin implements Plugin {
   private dataStart: DataPublicPluginStart | null = null;
   private savedObjectsClient: any = null;
-  private telemetry: any = null;
+  private telemetry: TelemetryPluginStart | null = null;
   private environment: Environment | null = null;
 
   setup(

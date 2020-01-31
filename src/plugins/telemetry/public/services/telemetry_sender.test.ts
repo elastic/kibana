@@ -38,16 +38,6 @@ describe('TelemetrySender', () => {
   // @ts-ignore
   afterAll(() => (window.localStorage = originalLocalStorage));
 
-  // const clusters = [{ cluster_uuid: 'fake-123' }, { cluster_uuid: 'fake-456' }];
-  // const telemetryUrl = 'https://not.a.valid.url.0';
-  // const mockFetchTelemetry = () => Promise.resolve({ data: clusters });
-  // // returns a function that behaves like the injector by fetching the requested key from the object directly
-  // // for example:
-  // // { '$http': jest.fn() } would be how to mock the '$http' injector value
-  // const mockInjectorFromObject = object => {
-  //   return { get: key => object[key] };
-  // };
-
   describe('constructor', () => {
     it('defaults lastReport if unset', () => {
       const telemetryService = mockTelemetryService();

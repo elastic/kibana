@@ -31,7 +31,7 @@ export class OptInMessage extends React.PureComponent {
           defaultMessage="Want to help us improve the Elastic Stack? Data usage collection is currently disabled. Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
           values={{
             privacyStatementLink: (
-              <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
+              <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank" rel="noopener">
                 <FormattedMessage
                   id="telemetry.welcomeBanner.telemetryConfigDetailsDescription.telemetryPrivacyStatementLinkText"
                   defaultMessage="Privacy Statement"

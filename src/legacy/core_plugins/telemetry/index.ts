@@ -104,7 +104,6 @@ const telemetry = (kibana: any) => {
           allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
           telemetrySendUsageFrom: config.get('telemetry.sendUsageFrom'),
           telemetryNotifyUserAboutOptInDefault: false,
-          telemetryBanner1: 'lol',
         };
       },
       mappings,
