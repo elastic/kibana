@@ -56,7 +56,7 @@ export class Plugin
     registerFeatures(pluginsSetup.home);
 
     const kueryProvider = setupKqlQuerySuggestionProvider(core);
-    plugins.data.autocomplete.addQuerySuggestionProvider('kuery', kueryProvider);
+    pluginsSetup.data.autocomplete.addQuerySuggestionProvider('kuery', kueryProvider);
 
     core.application.register({
       id: 'infra:logs',
