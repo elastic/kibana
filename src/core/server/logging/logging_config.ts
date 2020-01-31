@@ -118,10 +118,17 @@ export class LoggingConfig {
    */
   public readonly appenders: Map<string, AppenderConfigType> = new Map([
     [
-      DEFAULT_APPENDER_NAME,
+      'console',
       {
         kind: 'console',
         layout: { kind: 'pattern', highlight: true },
+      } as AppenderConfigType,
+    ],
+    [
+      'file',
+      {
+        kind: 'file',
+        layout: { kind: 'pattern', highlight: false },
       } as AppenderConfigType,
     ],
   ]);
