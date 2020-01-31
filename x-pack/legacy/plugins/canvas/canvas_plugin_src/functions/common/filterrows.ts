@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datatable, ExpressionFunction } from '../../../types';
+import { Datatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   fn: (datatable: Datatable) => Promise<boolean>;
 }
 
-export function filterrows(): ExpressionFunction<
+export function filterrows(): ExpressionFunctionDefinition<
   'filterrows',
   Datatable,
   Arguments,

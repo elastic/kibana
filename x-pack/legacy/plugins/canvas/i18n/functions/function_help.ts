@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { CanvasFunction } from '../../types';
 import { UnionToIntersection } from '../../types';
 
@@ -109,7 +109,7 @@ import { help as urlparam } from './dict/urlparam';
  * This allows one to ensure each argument is present, and no extraneous arguments
  * remain.
  */
-export type FunctionHelp<T> = T extends ExpressionFunction<
+export type FunctionHelp<T> = T extends ExpressionFunctionDefinition<
   infer Name,
   infer Context,
   infer Arguments,
@@ -137,7 +137,7 @@ export type FunctionHelp<T> = T extends ExpressionFunction<
 //
 // Given a collection of functions, the map would contain each entry.
 //
-type FunctionHelpMap<T> = T extends ExpressionFunction<
+type FunctionHelpMap<T> = T extends ExpressionFunctionDefinition<
   infer Name,
   infer Context,
   infer Arguments,

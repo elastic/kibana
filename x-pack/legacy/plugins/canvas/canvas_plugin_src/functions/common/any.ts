@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   condition: boolean[];
 }
 
-export function any(): ExpressionFunction<'any', null, Arguments, boolean> {
+export function any(): ExpressionFunctionDefinition<'any', null, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().any;
 
   return {

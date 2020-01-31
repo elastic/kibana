@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 const name = 'seriesStyle';
@@ -24,7 +24,12 @@ interface Return extends Arguments {
   type: 'seriesStyle';
 }
 
-export function seriesStyle(): ExpressionFunction<'seriesStyle', null, Arguments, Return> {
+export function seriesStyle(): ExpressionFunctionDefinition<
+  'seriesStyle',
+  null,
+  Arguments,
+  Return
+> {
   const { help, args: argHelp } = getFunctionHelp().seriesStyle;
 
   return {

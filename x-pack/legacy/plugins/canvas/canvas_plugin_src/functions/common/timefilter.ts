@@ -5,7 +5,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { Filter, ExpressionFunction } from '../../../types';
+import { Filter, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
@@ -15,7 +15,12 @@ interface Arguments {
   filterGroup: string;
 }
 
-export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments, Filter> {
+export function timefilter(): ExpressionFunctionDefinition<
+  'timefilter',
+  Filter,
+  Arguments,
+  Filter
+> {
   const { help, args: argHelp } = getFunctionHelp().timefilter;
   const errors = getFunctionErrors().timefilter;
 

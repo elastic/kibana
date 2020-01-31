@@ -7,7 +7,7 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { ExpressionAST } from '../../../../../types';
+import { ExpressionAstExpression as ExpressionAST } from '../../../../../types';
 
 import { ExtendedTemplate } from '../extended_template';
 

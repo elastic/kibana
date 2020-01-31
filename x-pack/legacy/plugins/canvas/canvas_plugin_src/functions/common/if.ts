@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -12,7 +12,7 @@ interface Arguments {
   else: () => Promise<any>;
 }
 
-export function ifFn(): ExpressionFunction<'if', any, Arguments, any> {
+export function ifFn(): ExpressionFunctionDefinition<'if', any, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().if;
 
   return {

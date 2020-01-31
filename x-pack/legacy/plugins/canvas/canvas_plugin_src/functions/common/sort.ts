@@ -5,7 +5,7 @@
  */
 
 import { sortBy } from 'lodash';
-import { ExpressionFunction, Datatable } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -13,7 +13,7 @@ interface Arguments {
   reverse: boolean;
 }
 
-export function sort(): ExpressionFunction<'sort', Datatable, Arguments, Datatable> {
+export function sort(): ExpressionFunctionDefinition<'sort', Datatable, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().sort;
 
   return {

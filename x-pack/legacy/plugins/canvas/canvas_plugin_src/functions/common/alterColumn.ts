@@ -6,7 +6,7 @@
 
 import { omit } from 'lodash';
 import { Datatable } from 'src/plugins/expressions/common';
-import { DatatableColumn, DatatableColumnType, ExpressionFunction } from '../../../types';
+import { DatatableColumn, DatatableColumnType, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
@@ -15,7 +15,12 @@ interface Arguments {
   name: string;
 }
 
-export function alterColumn(): ExpressionFunction<'alterColumn', Datatable, Arguments, Datatable> {
+export function alterColumn(): ExpressionFunctionDefinition<
+  'alterColumn',
+  Datatable,
+  Arguments,
+  Datatable
+> {
   const { help, args: argHelp } = getFunctionHelp().alterColumn;
   const errors = getFunctionErrors().alterColumn;
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datatable, ExpressionFunction, getType } from '../../../types';
+import { Datatable, ExpressionFunctionDefinition, getType } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -13,7 +13,7 @@ interface Arguments {
 
 type Context = string | boolean | number | null;
 
-export function asFn(): ExpressionFunction<'as', Context, Arguments, Datatable> {
+export function asFn(): ExpressionFunctionDefinition<'as', Context, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().as;
 
   return {

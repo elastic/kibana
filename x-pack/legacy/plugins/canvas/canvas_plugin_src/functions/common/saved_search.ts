@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { SearchInput } from 'src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable';
 import {
   EmbeddableTypes,
@@ -22,7 +22,12 @@ interface Arguments {
 
 type Return = EmbeddableExpression<Partial<SearchInput> & { id: SearchInput['id'] }>;
 
-export function savedSearch(): ExpressionFunction<'savedSearch', Filter | null, Arguments, Return> {
+export function savedSearch(): ExpressionFunctionDefinition<
+  'savedSearch',
+  Filter | null,
+  Arguments,
+  Return
+> {
   const { help, args: argHelp } = getFunctionHelp().savedSearch;
   return {
     name: 'savedSearch',

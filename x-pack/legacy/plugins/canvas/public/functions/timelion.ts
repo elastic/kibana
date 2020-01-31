@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import chrome from 'ui/chrome';
 import { npStart } from 'ui/new_platform';
 import { TimeRange } from 'src/plugins/data/common';
-import { ExpressionFunction, DatatableRow } from 'src/plugins/expressions/public';
+import { ExpressionFunctionDefinition, DatatableRow } from 'src/plugins/expressions/public';
 import { fetch } from '../../common/lib/fetch';
 // @ts-ignore untyped local
 import { buildBoolArray } from '../../server/lib/build_bool_array';
@@ -44,7 +44,12 @@ function parseDateMath(timeRange: TimeRange, timeZone: string) {
   return parsedRange;
 }
 
-export function timelion(): ExpressionFunction<'timelion', Filter, Arguments, Promise<Datatable>> {
+export function timelion(): ExpressionFunctionDefinition<
+  'timelion',
+  Filter,
+  Arguments,
+  Promise<Datatable>
+> {
   const { help, args: argHelp } = getFunctionHelp().timelion;
 
   return {

@@ -5,7 +5,7 @@
  */
 
 import { Embeddable } from './embeddable';
-import { ExpressionRendererProps } from 'src/plugins/expressions/public';
+import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
 import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
 import { Document } from '../../persistence';
 
@@ -31,7 +31,7 @@ const savedVis: Document = {
 
 describe('embeddable', () => {
   let mountpoint: HTMLDivElement;
-  let expressionRenderer: jest.Mock<null, [ExpressionRendererProps]>;
+  let expressionRenderer: jest.Mock<null, [ReactExpressionRendererProps]>;
 
   beforeEach(() => {
     mountpoint = document.createElement('div');

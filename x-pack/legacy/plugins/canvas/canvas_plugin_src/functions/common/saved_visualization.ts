@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 import { VisualizeInput } from 'src/legacy/core_plugins/visualizations/public/embeddable';
 import {
   EmbeddableTypes,
@@ -21,7 +21,7 @@ interface Arguments {
 
 type Return = EmbeddableExpression<VisualizeInput>;
 
-export function savedVisualization(): ExpressionFunction<
+export function savedVisualization(): ExpressionFunctionDefinition<
   'savedVisualization',
   Filter | null,
   Arguments,

@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
@@ -13,7 +13,7 @@ interface Arguments {
   format: string;
 }
 
-export function date(): ExpressionFunction<'date', null, Arguments, number> {
+export function date(): ExpressionFunctionDefinition<'date', null, Arguments, number> {
   const { help, args: argHelp } = getFunctionHelp().date;
   const errors = getFunctionErrors().date;
 

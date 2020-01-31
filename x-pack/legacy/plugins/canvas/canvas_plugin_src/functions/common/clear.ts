@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
-export function clear(): ExpressionFunction<'clear', any, {}, null> {
+export function clear(): ExpressionFunctionDefinition<'clear', any, {}, null> {
   const { help } = getFunctionHelp().clear;
 
   return {

@@ -5,14 +5,19 @@
  */
 
 import moment from 'moment';
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 export interface Arguments {
   format: string;
 }
 
-export function formatdate(): ExpressionFunction<'formatdate', number | string, Arguments, string> {
+export function formatdate(): ExpressionFunctionDefinition<
+  'formatdate',
+  number | string,
+  Arguments,
+  string
+> {
   const { help, args: argHelp } = getFunctionHelp().formatdate;
 
   return {

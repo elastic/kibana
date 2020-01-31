@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -12,7 +12,7 @@ interface Arguments {
   flags: string;
   replacement: string;
 }
-export function replace(): ExpressionFunction<'replace', string, Arguments, string> {
+export function replace(): ExpressionFunctionDefinition<'replace', string, Arguments, string> {
   const { help, args: argHelp } = getFunctionHelp().replace;
 
   return {

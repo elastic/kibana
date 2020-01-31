@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/public';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 // @ts-ignore unconverted local lib
 import { getState } from '../state/store';
 import { getAssetById } from '../state/selectors/assets';
@@ -14,7 +14,7 @@ interface Arguments {
   id: string;
 }
 
-export function asset(): ExpressionFunction<'asset', null, Arguments, string> {
+export function asset(): ExpressionFunctionDefinition<'asset', null, Arguments, string> {
   const { help, args: argHelp } = getFunctionHelp().asset;
   const errors = getFunctionErrors().asset;
 

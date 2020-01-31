@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from './types';
+import { ExpressionRenderDefinition } from './types';
 
 export class ExpressionRenderer<Config = unknown> {
   /**
@@ -48,7 +48,7 @@ export class ExpressionRenderer<Config = unknown> {
   /**
    * The function called to render the data.
    */
-  render: (el: HTMLElement, config: Config, handlers: IInterpreterRenderHandlers) => Promise<void>;
+  render: ExpressionRenderDefinition<Config>['render'];
 
   constructor(config: ExpressionRenderDefinition<Config>) {
     const { name, displayName, help, validate, reuseDomNode, render } = config;

@@ -40,8 +40,10 @@ export interface ExpressionRenderDefinition<Config = unknown> {
     domNode: HTMLElement,
     config: Config,
     handlers: IInterpreterRenderHandlers
-  ) => Promise<void>;
+  ) => void | Promise<void>;
 }
+
+export type AnyExpressionRenderDefinition = ExpressionRenderDefinition<any>;
 
 export interface IInterpreterRenderHandlers {
   /**

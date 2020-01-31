@@ -5,7 +5,7 @@
  */
 
 import { omit, pick, find } from 'lodash';
-import { Datatable, DatatableColumn, ExpressionFunction } from '../../../types';
+import { Datatable, DatatableColumn, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -13,7 +13,12 @@ interface Arguments {
   exclude: string;
 }
 
-export function columns(): ExpressionFunction<'columns', Datatable, Arguments, Datatable> {
+export function columns(): ExpressionFunctionDefinition<
+  'columns',
+  Datatable,
+  Arguments,
+  Datatable
+> {
   const { help, args: argHelp } = getFunctionHelp().columns;
 
   return {

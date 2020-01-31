@@ -5,7 +5,7 @@
  */
 
 import { uniq } from 'lodash';
-import { Datatable, Render, ExpressionFunction } from '../../../types';
+import { Datatable, Render, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -19,7 +19,7 @@ interface Return {
   choices: any;
 }
 
-export function dropdownControl(): ExpressionFunction<
+export function dropdownControl(): ExpressionFunctionDefinition<
   'dropdownControl',
   Datatable,
   Arguments,

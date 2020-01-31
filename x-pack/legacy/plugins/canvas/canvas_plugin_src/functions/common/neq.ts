@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 type Context = boolean | number | string | null;
@@ -13,7 +13,7 @@ interface Arguments {
   value: Context;
 }
 
-export function neq(): ExpressionFunction<'neq', Context, Arguments, boolean> {
+export function neq(): ExpressionFunctionDefinition<'neq', Context, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().neq;
 
   return {

@@ -6,10 +6,10 @@
 
 import { SearchParams } from 'elasticsearch';
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
-import { fromExpression } from '@kbn/interpreter/common';
 import { CANVAS_TYPE } from '../../../../legacy/plugins/canvas/common/lib/constants';
 import { collectFns } from './collector_helpers';
-import { ExpressionAST, TelemetryCollector, CanvasWorkpad } from '../../types';
+import { TelemetryCollector, CanvasWorkpad } from '../../types';
+import { parseExpression } from '../../../../../src/plugins/expressions/common';
 
 interface WorkpadSearch {
   [CANVAS_TYPE]: CanvasWorkpad;
@@ -73,7 +73,7 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
     );
     const functionCounts = workpad.pages.reduce<number[]>((accum, page) => {
       return page.elements.map(element => {
-        const ast: ExpressionAST = fromExpression(element.expression) as ExpressionAST; // TODO: Remove once fromExpression is properly typed
+        const ast = parseExpression(element.expression);
         collectFns(ast, cFunction => {
           functionSet.add(cFunction);
         });

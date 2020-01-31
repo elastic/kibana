@@ -10,13 +10,13 @@ import { get } from 'lodash';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import { SimpleTemplate } from './simple_template';
 import { ExtendedTemplate, Props as ExtendedTemplateProps } from './extended_template';
-import { ExpressionAST } from '../../../../types';
+import { ExpressionAstExpression } from '../../../../types';
 import { ArgTypesStrings } from '../../../../i18n';
 
 const { SeriesStyle: strings } = ArgTypesStrings;
 
 interface Props {
-  argValue: ExpressionAST;
+  argValue: ExpressionAstExpression;
   renderError: Function;
   setLabel: Function;
   label: string;

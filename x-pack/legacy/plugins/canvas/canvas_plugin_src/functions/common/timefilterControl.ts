@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Render } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
@@ -13,7 +13,7 @@ interface Arguments {
   compact: boolean;
   filterGroup: string;
 }
-export function timefilterControl(): ExpressionFunction<
+export function timefilterControl(): ExpressionFunctionDefinition<
   'timefilterControl',
   null,
   Arguments,

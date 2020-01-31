@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { TimeRange } from 'src/plugins/data/public';
 import { EmbeddableInput } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { getQueryFilters } from '../../../server/lib/build_embeddable_filters';
@@ -52,7 +52,12 @@ const defaultTimeRange = {
 
 type Return = EmbeddableExpression<SavedMapInput>;
 
-export function savedMap(): ExpressionFunction<'savedMap', Filter | null, Arguments, Return> {
+export function savedMap(): ExpressionFunctionDefinition<
+  'savedMap',
+  Filter | null,
+  Arguments,
+  Return
+> {
   const { help, args: argHelp } = getFunctionHelp().savedMap;
   return {
     name: 'savedMap',

@@ -6,7 +6,7 @@
 
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction, ArgumentType } from 'src/plugins/expressions/common';
+import { ArgumentType, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import chartAreaSVG from '../assets/chart_area.svg';
 import chartAreaStackedSVG from '../assets/chart_area_stacked.svg';
 import chartBarSVG from '../assets/chart_bar.svg';
@@ -24,7 +24,7 @@ export interface LegendConfig {
 
 type LegendConfigResult = LegendConfig & { type: 'lens_xy_legendConfig' };
 
-export const legendConfig: ExpressionFunction<
+export const legendConfig: ExpressionFunctionDefinition<
   'lens_xy_legendConfig',
   null,
   LegendConfig,
@@ -89,7 +89,12 @@ export interface XConfig extends AxisConfig {
 
 type XConfigResult = XConfig & { type: 'lens_xy_xConfig' };
 
-export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConfigResult> = {
+export const xConfig: ExpressionFunctionDefinition<
+  'lens_xy_xConfig',
+  null,
+  XConfig,
+  XConfigResult
+> = {
   name: 'lens_xy_xConfig',
   aliases: [],
   type: 'lens_xy_xConfig',
@@ -114,7 +119,7 @@ export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConf
 
 type LayerConfigResult = LayerArgs & { type: 'lens_xy_layer' };
 
-export const layerConfig: ExpressionFunction<
+export const layerConfig: ExpressionFunctionDefinition<
   'lens_xy_layer',
   null,
   LayerArgs,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 // @ts-ignore untyped local
 import { palettes } from '../../../common/lib/palettes';
 import { getFunctionHelp } from '../../../i18n';
@@ -21,7 +21,7 @@ interface Return {
   gradient: boolean;
 }
 
-export function palette(): ExpressionFunction<'palette', null, Arguments, Return> {
+export function palette(): ExpressionFunctionDefinition<'palette', null, Arguments, Return> {
   const { help, args: argHelp } = getFunctionHelp().palette;
 
   return {

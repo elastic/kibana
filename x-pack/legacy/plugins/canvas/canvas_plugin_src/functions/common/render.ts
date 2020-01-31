@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Render, ContainerStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 // @ts-ignore unconverted local file
@@ -19,7 +19,12 @@ interface Arguments {
   css: string;
   containerStyle: ContainerStyleArgument;
 }
-export function render(): ExpressionFunction<'render', Render<any>, Arguments, Render<Arguments>> {
+export function render(): ExpressionFunctionDefinition<
+  'render',
+  Render<any>,
+  Arguments,
+  Render<Arguments>
+> {
   const { help, args: argHelp } = getFunctionHelp().render;
 
   return {

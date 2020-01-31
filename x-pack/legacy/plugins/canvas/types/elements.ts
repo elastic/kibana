@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionAST } from 'src/plugins/expressions/common';
+import { ExpressionAstExpression as ExpressionAST } from 'src/plugins/expressions';
 import { CanvasElement } from '.';
 
 export interface ElementSpec {

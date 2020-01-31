@@ -5,14 +5,19 @@
  */
 
 import numeral from '@elastic/numeral';
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 export interface Arguments {
   format: string;
 }
 
-export function formatnumber(): ExpressionFunction<'formatnumber', number, Arguments, string> {
+export function formatnumber(): ExpressionFunctionDefinition<
+  'formatnumber',
+  number,
+  Arguments,
+  string
+> {
   const { help, args: argHelp } = getFunctionHelp().formatnumber;
 
   return {

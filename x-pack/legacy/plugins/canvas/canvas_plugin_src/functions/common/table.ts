@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Datatable, Render, Style } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
@@ -15,7 +15,12 @@ interface Arguments {
   showHeader: boolean;
 }
 
-export function table(): ExpressionFunction<'table', Datatable, Arguments, Render<Arguments>> {
+export function table(): ExpressionFunctionDefinition<
+  'table',
+  Datatable,
+  Arguments,
+  Render<Arguments>
+> {
   const { help, args: argHelp } = getFunctionHelp().table;
 
   return {

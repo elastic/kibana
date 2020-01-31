@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
-import { ExpressionAST } from '../../../../types';
+import { ExpressionAstExpression as ExpressionAST } from '../../../../types';
 import { ArgTypesStrings } from '../../../../i18n';
 
 const { set, del } = immutable;

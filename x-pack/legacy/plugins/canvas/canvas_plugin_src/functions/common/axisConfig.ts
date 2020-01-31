@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Position } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
@@ -21,7 +21,12 @@ interface AxisConfig extends Arguments {
   type: 'axisConfig';
 }
 
-export function axisConfig(): ExpressionFunction<'axisConfig', null, Arguments, AxisConfig> {
+export function axisConfig(): ExpressionFunctionDefinition<
+  'axisConfig',
+  null,
+  Arguments,
+  AxisConfig
+> {
   const { help, args: argHelp } = getFunctionHelp().axisConfig;
   const errors = getFunctionErrors().axisConfig;
 

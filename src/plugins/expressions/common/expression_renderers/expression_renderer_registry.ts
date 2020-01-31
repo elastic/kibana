@@ -19,7 +19,7 @@
 
 import { IRegistry } from '../types';
 import { ExpressionRenderer } from './expression_renderer';
-import { ExpressionRenderDefinition } from './types';
+import { AnyExpressionRenderDefinition } from './types';
 
 export class ExpressionRendererRegistry implements IRegistry<ExpressionRenderer> {
   private readonly renderers: Map<string, ExpressionRenderer> = new Map<
@@ -27,7 +27,7 @@ export class ExpressionRendererRegistry implements IRegistry<ExpressionRenderer>
     ExpressionRenderer
   >();
 
-  register(definition: ExpressionRenderDefinition | (() => ExpressionRenderDefinition)) {
+  register(definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)) {
     if (typeof definition === 'function') definition = definition();
     const renderer = new ExpressionRenderer(definition);
     this.renderers.set(renderer.name, renderer);

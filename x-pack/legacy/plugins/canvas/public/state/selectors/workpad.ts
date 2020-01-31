@@ -11,14 +11,12 @@ import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/comm
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 import { State, CanvasWorkpad, CanvasPage, CanvasElement, ResolvedArgType } from '../../../types';
+import { ExpressionContext, CanvasGroup, PositionedElement } from '../../../types';
 import {
-  ExpressionAST,
-  ExpressionFunctionAST,
-  ExpressionArgAST,
-  ExpressionContext,
-  CanvasGroup,
-  PositionedElement,
-} from '../../../types';
+  ExpressionAstArgument,
+  ExpressionAstFunction,
+  ExpressionAstExpression,
+} from '../../../../../../../src/plugins/expressions/common';
 
 type Modify<T, R> = Pick<T, Exclude<keyof T, keyof R>> & R;
 type WorkpadInfo = Modify<CanvasWorkpad, { pages: undefined }>;
@@ -27,7 +25,7 @@ const workpadRoot = 'persistent.workpad';
 
 const appendAst = (element: CanvasElement): PositionedElement => ({
   ...element,
-  ast: safeElementFromExpression(element.expression) as ExpressionAST,
+  ast: safeElementFromExpression(element.expression) as ExpressionAstExpression,
 });
 
 // workpad getters
@@ -188,33 +186,35 @@ export function getGlobalFilters(state: State): string[] {
 }
 
 type onValueFunction = (
-  argValue: ExpressionArgAST,
+  argValue: ExpressionAstArgument,
   argNames?: string,
-  args?: ExpressionFunctionAST['arguments']
-) => ExpressionArgAST | ExpressionArgAST[] | undefined;
+  args?: ExpressionAstFunction['arguments']
+) => ExpressionAstArgument | ExpressionAstArgument[] | undefined;
 
-function buildGroupValues(args: ExpressionFunctionAST['arguments'], onValue: onValueFunction) {
+function buildGroupValues(args: ExpressionAstFunction['arguments'], onValue: onValueFunction) {
   const argNames = Object.keys(args);
 
-  return argNames.reduce<ExpressionArgAST[]>((values, argName) => {
+  return argNames.reduce<ExpressionAstArgument[]>((values, argName) => {
     // we only care about group values
     if (argName !== '_' && argName !== 'group') {
       return values;
     }
 
-    return args[argName].reduce<ExpressionArgAST[]>((acc, argValue) => {
+    return args[argName].reduce<ExpressionAstArgument[]>((acc, argValue) => {
       // delegate to passed function to buyld list
       return acc.concat(onValue(argValue, argName, args) || []);
     }, values);
   }, []);
 }
 
-function extractFilterGroups(ast: ExpressionAST): ExpressionArgAST[] {
+function extractFilterGroups(
+  ast: ExpressionAstExpression | ExpressionAstFunction
+): ExpressionAstArgument[] {
   if (ast.type !== 'expression') {
     throw new Error('AST must be an expression');
   }
 
-  return ast.chain.reduce<ExpressionArgAST[]>((groups, item) => {
+  return ast.chain.reduce<ExpressionAstArgument[]>((groups, item) => {
     // TODO: we always get a function here, right?
     const { function: fn, arguments: args } = item;
 
@@ -247,8 +247,11 @@ export function getGlobalFilterGroups(state: State) {
     // check that a filter is defined
     if (el.filter != null && el.filter.length) {
       // extract the filter group
-      const filterAst = fromExpression(el.filter) as ExpressionAST;
-      const filterGroup: ExpressionArgAST = get(filterAst, `chain[0].arguments.filterGroup[0]`);
+      const filterAst = fromExpression(el.filter) as ExpressionAstExpression;
+      const filterGroup: ExpressionAstArgument = get(
+        filterAst,
+        `chain[0].arguments.filterGroup[0]`
+      );
 
       // add any new group to the array
       if (filterGroup && filterGroup !== '' && !acc.includes(String(filterGroup))) {
@@ -258,7 +261,9 @@ export function getGlobalFilterGroups(state: State) {
 
     // extract groups from all expressions that use filters function
     if (el.expression != null && el.expression.length) {
-      const expressionAst = fromExpression(el.expression) as ExpressionAST;
+      const expressionAst = fromExpression(el.expression) as
+        | ExpressionAstFunction
+        | ExpressionAstExpression;
       const groups = extractFilterGroups(expressionAst);
       groups.forEach(group => {
         if (!acc.includes(String(group))) {

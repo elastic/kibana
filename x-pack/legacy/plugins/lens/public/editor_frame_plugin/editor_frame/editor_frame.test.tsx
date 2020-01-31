@@ -18,7 +18,7 @@ import {
   createExpressionRendererMock,
   DatasourceMock,
 } from '../mocks';
-import { ExpressionRenderer } from 'src/plugins/expressions/public';
+import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
 import { FrameLayout } from './frame_layout';
 
@@ -66,7 +66,7 @@ describe('editor_frame', () => {
   let mockVisualization2: jest.Mocked<Visualization>;
   let mockDatasource2: DatasourceMock;
 
-  let expressionRendererMock: ExpressionRenderer;
+  let expressionRendererMock: ReactExpressionRendererType;
 
   beforeEach(() => {
     mockVisualization = {

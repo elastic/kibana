@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
 import { functions as browserFunctions } from '../canvas_plugin_src/functions/browser';
 import { functions as serverFunctions } from '../canvas_plugin_src/functions/server';
@@ -89,7 +89,7 @@ type ValuesOfUnion<T> = T extends any ? valueof<T> : never;
  */
 // prettier-ignore
 export type ExpressionFunctionFactory<Name extends string, Context, Arguments, Return> = 
-() => ExpressionFunction<Name, Context, Arguments, Return>;
+() => ExpressionFunctionDefinition<Name, Context, Arguments, Return>;
 
 /**
  * `FunctionFactory` exists as a name shim between the `ExpressionFunction` type and
@@ -100,7 +100,7 @@ export type ExpressionFunctionFactory<Name extends string, Context, Arguments, R
 // prettier-ignore
 export type FunctionFactory<FnFactory> = 
   FnFactory extends ExpressionFunctionFactory<infer Name, infer Context, infer Arguments, infer Return> ?
-    ExpressionFunction<Name, Context, Arguments, Return> :
+  ExpressionFunctionDefinition<Name, Context, Arguments, Return> :
     never;
 
 type CommonFunction = FunctionFactory<typeof commonFunctions[number]>;

@@ -5,7 +5,7 @@
  */
 
 import { parse } from 'url';
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -13,7 +13,12 @@ interface Arguments {
   default: string;
 }
 
-export function urlparam(): ExpressionFunction<'urlparam', null, Arguments, string | string[]> {
+export function urlparam(): ExpressionFunctionDefinition<
+  'urlparam',
+  null,
+  Arguments,
+  string | string[]
+> {
   const { help, args: argHelp } = getFunctionHelp().urlparam;
 
   return {

@@ -5,7 +5,7 @@
  */
 
 import { sortBy } from 'lodash';
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 // @ts-ignore unconverted lib file
 import { queryDatatable } from '../../../../common/lib/datatable/query';
 import { DemoRows, getDemoRows } from './get_demo_rows';
@@ -16,7 +16,7 @@ interface Arguments {
   type: string;
 }
 
-export function demodata(): ExpressionFunction<'demodata', Filter, Arguments, Datatable> {
+export function demodata(): ExpressionFunctionDefinition<'demodata', Filter, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().demodata;
 
   return {

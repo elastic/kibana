@@ -6,7 +6,7 @@
 
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
-import { ExpressionFunction, Datatable } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -14,7 +14,7 @@ interface Arguments {
   value: string | number | boolean | null;
 }
 
-export function staticColumn(): ExpressionFunction<
+export function staticColumn(): ExpressionFunctionDefinition<
   'staticColumn',
   Datatable,
   Arguments,

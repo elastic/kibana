@@ -31,7 +31,9 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { ExpressionExecutor, IExpressionLoaderParams } from './types';
 export {
   ExpressionRendererComponent,
+  ReactExpressionRenderer,
   ReactExpressionRendererProps,
+  ReactExpressionRendererType,
 } from './react_expression_renderer';
 export { ExpressionDataHandler } from './execute';
 export { ExpressionRenderHandler } from './render';

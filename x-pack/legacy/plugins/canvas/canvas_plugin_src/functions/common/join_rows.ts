@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datatable, ExpressionFunction } from '../../../types';
+import { Datatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
@@ -23,7 +23,7 @@ const escapeString = (data: string, quotechar: string): string => {
   }
 };
 
-export function joinRows(): ExpressionFunction<'joinRows', Datatable, Arguments, string> {
+export function joinRows(): ExpressionFunctionDefinition<'joinRows', Datatable, Arguments, string> {
   const { help, args: argHelp } = getFunctionHelp().joinRows;
   const errors = getFunctionErrors().joinRows;
   return {

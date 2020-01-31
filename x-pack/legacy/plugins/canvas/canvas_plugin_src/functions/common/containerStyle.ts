@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 // @ts-ignore untyped local
@@ -13,7 +13,7 @@ interface Return extends ContainerStyle {
   type: 'containerStyle';
 }
 
-export function containerStyle(): ExpressionFunction<
+export function containerStyle(): ExpressionFunctionDefinition<
   'containerStyle',
   null,
   ContainerStyle,

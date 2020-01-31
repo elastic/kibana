@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 import { getFunctionHelp } from '../../../i18n';
 
 type Context = number | string;
@@ -12,7 +12,7 @@ interface Arguments {
   value: Context;
 }
 
-export function lte(): ExpressionFunction<'lte', Context, Arguments, boolean> {
+export function lte(): ExpressionFunctionDefinition<'lte', Context, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().lte;
 
   return {

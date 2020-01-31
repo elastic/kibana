@@ -5,14 +5,14 @@
  */
 
 import { takeRight } from 'lodash';
-import { Datatable, ExpressionFunction } from '../../../types';
+import { Datatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   count: number;
 }
 
-export function tail(): ExpressionFunction<'tail', Datatable, Arguments, Datatable> {
+export function tail(): ExpressionFunctionDefinition<'tail', Datatable, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().tail;
 
   return {

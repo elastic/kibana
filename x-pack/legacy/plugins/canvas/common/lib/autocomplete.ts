@@ -8,9 +8,9 @@ import { uniq } from 'lodash';
 // @ts-ignore Untyped Library
 import { parse, getByAlias as untypedGetByAlias } from '@kbn/interpreter/common';
 import {
-  ExpressionAST,
-  ExpressionFunctionAST,
-  ExpressionArgAST,
+  ExpressionAstExpression as ExpressionAST,
+  ExpressionAstFunction as ExpressionFunctionAST,
+  ExpressionAstArgument as ExpressionArgAST,
   CanvasFunction,
   CanvasArg,
   CanvasArgValue,

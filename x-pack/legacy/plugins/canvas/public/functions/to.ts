@@ -6,7 +6,7 @@
 
 // @ts-ignore untyped Elastic library
 import { castProvider } from '@kbn/interpreter/common';
-import { ExpressionFunction } from 'src/plugins/expressions/public';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 // @ts-ignore untyped Elastic library
 import { registries } from 'plugins/interpreter/registries';
 import { getFunctionHelp, getFunctionErrors } from '../../i18n';
@@ -15,7 +15,7 @@ interface Arguments {
   type: string[];
 }
 
-export function to(): ExpressionFunction<'to', any, Arguments, any> {
+export function to(): ExpressionFunctionDefinition<'to', any, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().to;
   const errors = getFunctionErrors().to;
 

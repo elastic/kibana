@@ -5,7 +5,7 @@
  */
 
 import squel from 'squel';
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 // @ts-ignore untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
 import { Filter } from '../../../types';
@@ -20,7 +20,7 @@ interface Arguments {
   count: number;
 }
 
-export function esdocs(): ExpressionFunction<'esdocs', Filter, Arguments, any> {
+export function esdocs(): ExpressionFunctionDefinition<'esdocs', Filter, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().esdocs;
 
   return {
@@ -96,7 +96,7 @@ export function esdocs(): ExpressionFunction<'esdocs', Filter, Arguments, any> {
         }
       }
 
-      return queryEsSQL(handlers.elasticsearchClient, {
+      return queryEsSQL(((handlers as any) as { elasticsearchClient: any }).elasticsearchClient, {
         count,
         query: query.toString(),
         filter: context.and,

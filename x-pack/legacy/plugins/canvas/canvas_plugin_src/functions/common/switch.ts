@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Case } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
@@ -13,7 +13,7 @@ interface Arguments {
   default: () => any;
 }
 
-export function switchFn(): ExpressionFunction<'switch', any, Arguments, any> {
+export function switchFn(): ExpressionFunctionDefinition<'switch', any, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().switch;
 
   return {

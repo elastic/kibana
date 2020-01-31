@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -18,7 +18,7 @@ interface Case {
   result: any;
 }
 
-export function caseFn(): ExpressionFunction<'case', any, Arguments, Promise<Case>> {
+export function caseFn(): ExpressionFunctionDefinition<'case', any, Arguments, Promise<Case>> {
   const { help, args: argHelp } = getFunctionHelp().case;
 
   return {

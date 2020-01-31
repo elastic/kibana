@@ -19,7 +19,7 @@ import {
   Render,
   SeriesStyle,
   Style,
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
 } from '../../../types';
 
 interface PieSeriesOptions {
@@ -77,7 +77,7 @@ interface Arguments {
   tilt: number;
 }
 
-export function pie(): ExpressionFunction<'pie', PointSeries, Arguments, Render<Pie>> {
+export function pie(): ExpressionFunctionDefinition<'pie', PointSeries, Arguments, Render<Pie>> {
   const { help, args: argHelp } = getFunctionHelp().pie;
 
   return {

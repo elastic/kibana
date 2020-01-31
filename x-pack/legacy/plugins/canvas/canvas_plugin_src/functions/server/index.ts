@@ -9,5 +9,12 @@ import { escount } from './escount';
 import { esdocs } from './esdocs';
 import { pointseries } from './pointseries';
 import { essql } from './essql';
+import { AnyExpressionFunctionDefinition } from '../../../types';
 
-export const functions = [demodata, esdocs, escount, essql, pointseries];
+export const functions: Array<() => AnyExpressionFunctionDefinition> = [
+  demodata,
+  esdocs,
+  escount,
+  essql,
+  pointseries,
+];

@@ -63,8 +63,9 @@ import { timefilter } from './timefilter';
 import { timefilterControl } from './timefilterControl';
 import { switchFn } from './switch';
 import { caseFn } from './case';
+import { AnyExpressionFunctionDefinition } from '../../../types';
 
-export const functions = [
+export const functions: Array<() => AnyExpressionFunctionDefinition> = [
   all,
   alterColumn,
   any,

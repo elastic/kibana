@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 // @ts-ignore untyped local
@@ -28,7 +28,7 @@ interface Return {
   dataurl: string;
 }
 
-export function image(): ExpressionFunction<'image', null, Arguments, Return> {
+export function image(): ExpressionFunctionDefinition<'image', null, Arguments, Return> {
   const { help, args: argHelp } = getFunctionHelp().image;
   const errors = getFunctionErrors().image;
 

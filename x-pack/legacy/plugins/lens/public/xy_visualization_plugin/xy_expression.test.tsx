@@ -69,7 +69,10 @@ describe('xy_expression', () => {
         position: Position.Left,
       };
 
-      expect(legendConfig.fn(null, args, {})).toEqual({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = legendConfig.fn(null, args, {} as any);
+
+      expect(result).toEqual({
         type: 'lens_xy_legendConfig',
         ...args,
       });
@@ -87,7 +90,10 @@ describe('xy_expression', () => {
         isHistogram: false,
       };
 
-      expect(layerConfig.fn(null, args, {})).toEqual({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = layerConfig.fn(null, args, {} as any);
+
+      expect(result).toEqual({
         type: 'lens_xy_layer',
         ...args,
       });
@@ -98,7 +104,10 @@ describe('xy_expression', () => {
     test('it renders with the specified data and args', () => {
       const { data, args } = sampleArgs();
 
-      expect(xyChart.fn(data, args, {})).toEqual({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = xyChart.fn(data, args, {} as any);
+
+      expect(result).toEqual({
         type: 'render',
         as: 'lens_xy_chart_renderer',
         value: { data, args },

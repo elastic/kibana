@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datatable, ExpressionFunction } from '../../../types';
+import { Datatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 const noop = () => {};
@@ -14,7 +14,7 @@ interface Return extends Datatable {
   rows: [{ latitude: number; longitude: number }];
 }
 
-export function location(): ExpressionFunction<'location', null, {}, Promise<Return>> {
+export function location(): ExpressionFunctionDefinition<'location', null, {}, Promise<Return>> {
   const { help } = getFunctionHelp().location;
 
   return {

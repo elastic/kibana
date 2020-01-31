@@ -5,14 +5,14 @@
  */
 
 import { take } from 'lodash';
-import { Datatable, ExpressionFunction } from '../../../types';
+import { Datatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   count: number;
 }
 
-export function head(): ExpressionFunction<'head', Datatable, Arguments, Datatable> {
+export function head(): ExpressionFunctionDefinition<'head', Datatable, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().head;
 
   return {

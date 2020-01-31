@@ -8,13 +8,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable } from '@elastic/eui';
-import {
-  ExpressionFunction,
-  KibanaDatatable,
-} from '../../../../../../src/plugins/expressions/common';
 import { LensMultiTable } from '../types';
 import {
-  IInterpreterRenderFunction,
+  KibanaDatatable,
+  ExpressionFunctionDefinition,
+  ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../../src/plugins/expressions/public';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
@@ -39,7 +37,7 @@ export interface DatatableRender {
   value: DatatableProps;
 }
 
-export const datatable: ExpressionFunction<
+export const datatable: ExpressionFunctionDefinition<
   'lens_datatable',
   KibanaDatatable,
   Args,
@@ -76,11 +74,16 @@ export const datatable: ExpressionFunction<
     };
   },
   // TODO the typings currently don't support custom type args. As soon as they do, this can be removed
-} as unknown) as ExpressionFunction<'lens_datatable', KibanaDatatable, Args, DatatableRender>;
+} as unknown) as ExpressionFunctionDefinition<
+  'lens_datatable',
+  KibanaDatatable,
+  Args,
+  DatatableRender
+>;
 
 type DatatableColumnsResult = DatatableColumns & { type: 'lens_datatable_columns' };
 
-export const datatableColumns: ExpressionFunction<
+export const datatableColumns: ExpressionFunctionDefinition<
   'lens_datatable_columns',
   null,
   DatatableColumns,
@@ -110,13 +113,13 @@ export const datatableColumns: ExpressionFunction<
 
 export const getDatatableRenderer = (
   formatFactory: FormatFactory
-): IInterpreterRenderFunction<DatatableProps> => ({
+): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
     defaultMessage: 'Datatable',
   }),
   help: '',
-  validate: () => {},
+  validate: () => undefined,
   reuseDomNode: true,
   render: async (
     domNode: Element,

@@ -5,7 +5,7 @@
  */
 
 import Papa from 'papaparse';
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Datatable } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
@@ -15,7 +15,7 @@ interface Arguments {
   newline: string;
 }
 
-export function csv(): ExpressionFunction<'csv', null, Arguments, Datatable> {
+export function csv(): ExpressionFunctionDefinition<'csv', null, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().csv;
   const errorMessages = getFunctionErrors().csv;
 

@@ -34,7 +34,10 @@ describe('rename_columns', () => {
       },
     };
 
-    expect(renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {})).toMatchInlineSnapshot(`
+    // eslint-disable-next-line
+    const result = renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {} as any);
+
+    expect(result).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
           Object {
@@ -83,9 +86,10 @@ describe('rename_columns', () => {
       },
     };
 
-    expect(renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {}).rows[0].a).toEqual(
-      '(empty)'
-    );
+    // eslint-disable-next-line
+    const result = renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {} as any);
+
+    expect(result.rows[0].a).toEqual('(empty)');
   });
 
   it('should keep columns which are not mapped', () => {
@@ -107,7 +111,10 @@ describe('rename_columns', () => {
       b: { id: 'c', label: 'Catamaran' },
     };
 
-    expect(renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {})).toMatchInlineSnapshot(`
+    // eslint-disable-next-line
+    const result = renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {} as any);
+
+    expect(result).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
           Object {
@@ -161,7 +168,10 @@ describe('rename_columns', () => {
       b: { id: 'c', label: 'Apple', operationType: 'date_histogram', sourceField: 'banana' },
     };
 
-    expect(renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {})).toMatchInlineSnapshot(`
+    // eslint-disable-next-line
+    const result = renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {} as any);
+
+    expect(result).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
           Object {

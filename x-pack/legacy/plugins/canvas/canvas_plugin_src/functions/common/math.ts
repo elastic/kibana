@@ -8,7 +8,7 @@
 import { evaluate } from 'tinymath';
 // @ts-ignore untyped local
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
-import { Datatable, isDatatable, ExpressionFunction } from '../../../types';
+import { Datatable, isDatatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
@@ -17,7 +17,7 @@ interface Arguments {
 
 type Context = number | Datatable;
 
-export function math(): ExpressionFunction<'math', Context, Arguments, number> {
+export function math(): ExpressionFunctionDefinition<'math', Context, Arguments, number> {
   const { help, args: argHelp } = getFunctionHelp().math;
   const errors = getFunctionErrors().math;
 

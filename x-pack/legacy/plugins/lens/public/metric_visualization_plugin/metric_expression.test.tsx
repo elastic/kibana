@@ -42,7 +42,10 @@ describe('metric_expression', () => {
     test('it renders with the specified data and args', () => {
       const { data, args } = sampleArgs();
 
-      expect(metricChart.fn(data, args, {})).toEqual({
+      // eslint-disable-next-line
+      const result = metricChart.fn(data, args, {} as any);
+
+      expect(result).toEqual({
         type: 'render',
         as: 'lens_metric_chart_renderer',
         value: { data, args },

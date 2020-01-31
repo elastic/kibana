@@ -5,7 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction, KibanaContext, KibanaDatatable } from 'src/plugins/expressions/public';
+import {
+  ExpressionFunctionDefinition,
+  KibanaContext,
+  KibanaDatatable,
+} from 'src/plugins/expressions/public';
 import { LensMultiTable } from '../types';
 import { toAbsoluteDates } from '../indexpattern_plugin/auto_date';
 
@@ -14,7 +18,7 @@ interface MergeTables {
   tables: KibanaDatatable[];
 }
 
-export const mergeTables: ExpressionFunction<
+export const mergeTables: ExpressionFunctionDefinition<
   'lens_merge_tables',
   KibanaContext | null,
   MergeTables,

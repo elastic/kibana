@@ -39,6 +39,8 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
 }
 
+export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;
+
 interface State {
   isEmpty: boolean;
   isLoading: boolean;

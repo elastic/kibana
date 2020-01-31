@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datatable, ExpressionFunction, getType } from '../../../types';
+import { Datatable, ExpressionFunctionDefinition, getType } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -12,7 +12,7 @@ interface Arguments {
   expression: (datatable: Datatable) => Promise<boolean | number | string | null>;
 }
 
-export function mapColumn(): ExpressionFunction<
+export function mapColumn(): ExpressionFunctionDefinition<
   'mapColumn',
   Datatable,
   Arguments,

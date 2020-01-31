@@ -10,7 +10,7 @@ import uniqBy from 'lodash.uniqby';
 import { evaluate } from 'tinymath';
 import { groupBy, zipObject, omit } from 'lodash';
 import moment from 'moment';
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import {
   Datatable,
   DatatableRow,
@@ -39,7 +39,7 @@ function keysOf<T, K extends keyof T>(obj: T): K[] {
 
 type Arguments = { [key in PointSeriesColumnName]: string | null };
 
-export function pointseries(): ExpressionFunction<
+export function pointseries(): ExpressionFunctionDefinition<
   'pointseries',
   Datatable,
   Arguments,
