@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FC, createElement as h, useRef, useLayoutEffect, useMemo, useCallback } from 'react';
+import { FC, createElement as h, useRef, useLayoutEffect, useMemo } from 'react';
 import { UiComponent, UiComponentInstance } from '../../../kibana_utils/common';
 
 export const uiToReactComponent = <Props extends object>(
@@ -25,13 +25,10 @@ export const uiToReactComponent = <Props extends object>(
 ): FC<Props> => props => {
   const ref = useRef<HTMLDivElement>();
   const comp = useMemo<UiComponentInstance<Props>>(() => Comp(), [Comp]);
-  const render = useCallback(() => {
-    if (!ref.current) return;
-    comp.render(ref.current, props);
-  }, [comp]);
 
   useLayoutEffect(() => {
-    render();
+    if (!ref.current) return;
+    comp.render(ref.current, props);
   });
 
   useLayoutEffect(() => {
@@ -42,9 +39,6 @@ export const uiToReactComponent = <Props extends object>(
   }, [comp]);
 
   return h('div', {
-    ref: (el: HTMLDivElement) => {
-      ref.current = el;
-      if (el) render();
-    },
+    ref,
   });
 };

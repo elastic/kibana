@@ -29,12 +29,12 @@
  * implemented in any framework, but it maps easily to React components, i.e.
  * `UiComponent<Props>` is like `React.ComponentType<Props>`.
  */
-export type UiComponent<Props extends object> = () => UiComponentInstance<Props>;
+export type UiComponent<Props extends object = object> = () => UiComponentInstance<Props>;
 
 /**
  * Instance of an UiComponent, corresponds to React virtual DOM node.
  */
-export interface UiComponentInstance<Props extends object> {
+export interface UiComponentInstance<Props extends object = object> {
   /**
    * Call this method on initial render and on all subsequent updates.
    *
