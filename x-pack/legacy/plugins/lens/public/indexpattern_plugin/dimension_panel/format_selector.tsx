@@ -7,7 +7,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldNumber, EuiComboBox } from '@elastic/eui';
-import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from 'src/plugins/data/common';
 import { IndexPattern } from '../types';
 import { IndexPatternColumn } from '../indexpattern';
 import { IndexPatternDimensionPanelProps } from './dimension_panel';
@@ -15,7 +14,7 @@ import { IndexPatternDimensionPanelProps } from './dimension_panel';
 const supportedFormats: Record<string, { title: string }> = {
   number: {
     title: i18n.translate('xpack.lens.indexPattern.numberFormatLabel', {
-      defaultMessage: 'Custom number',
+      defaultMessage: 'Number',
     }),
   },
   percent: {
@@ -24,7 +23,9 @@ const supportedFormats: Record<string, { title: string }> = {
     }),
   },
   bytes: {
-    title: i18n.translate('xpack.lens.indexPattern.bytesFormatLabel', { defaultMessage: 'Bytes' }),
+    title: i18n.translate('xpack.lens.indexPattern.bytesFormatLabel', {
+      defaultMessage: 'Bytes (1024)',
+    }),
   },
 };
 
@@ -35,41 +36,26 @@ type FormatSelectorProps = Pick<IndexPatternDimensionPanelProps, 'data'> & {
 };
 
 export function FormatSelector(props: FormatSelectorProps) {
-  const { selectedColumn, data, onChange, currentIndexPattern } = props;
+  const { selectedColumn, onChange } = props;
 
-  const fieldFormats = data.fieldFormats;
   const selectedFormat = selectedColumn.format?.id
     ? supportedFormats[selectedColumn.format.id]
     : undefined;
 
-  let defaultFormatter;
-  const formatFromIndexpattern = currentIndexPattern.fieldFormatMap?.[selectedColumn.sourceField];
-  if (formatFromIndexpattern) {
-    defaultFormatter = fieldFormats.getType(formatFromIndexpattern.id);
-  } else {
-    // Look up the default formatter, such as number formatter
-    defaultFormatter = fieldFormats.getDefaultType(
-      selectedColumn.dataType as KBN_FIELD_TYPES,
-      (currentIndexPattern.fields.find(f => f.name === selectedColumn.sourceField)
-        ?.esTypes as ES_FIELD_TYPES[]) || []
-    );
-  }
-
   const defaultOption = {
     value: '',
     label: i18n.translate('xpack.lens.indexPattern.defaultFormatLabel', {
-      defaultMessage: 'Default format ({defaultTitle})',
-      values: { defaultTitle: defaultFormatter?.title || defaultFormatter?.id || '' },
+      defaultMessage: 'Default',
     }),
   };
 
-  const currentDecimals = selectedColumn.format?.params?.maxDecimals;
+  const currentDecimals = selectedColumn.format?.params?.decimals;
 
   return (
     <>
       <EuiFormRow
         label={i18n.translate('xpack.lens.indexPattern.columnFormatLabel', {
-          defaultMessage: 'Formatter',
+          defaultMessage: 'Display format',
         })}
         display="rowCompressed"
       >
@@ -106,7 +92,7 @@ export function FormatSelector(props: FormatSelectorProps) {
             }
             onChange({
               id: choices[0].value,
-              params: { maxDecimals: typeof currentDecimals === 'number' ? currentDecimals : 3 },
+              params: { decimals: typeof currentDecimals === 'number' ? currentDecimals : 3 },
             });
           }}
         />
@@ -115,7 +101,7 @@ export function FormatSelector(props: FormatSelectorProps) {
       {selectedColumn?.format ? (
         <EuiFormRow
           label={i18n.translate('xpack.lens.indexPattern.decimalPlacesLabel', {
-            defaultMessage: 'Maximum decimal places',
+            defaultMessage: 'Decimals',
           })}
           display="rowCompressed"
         >
@@ -128,7 +114,7 @@ export function FormatSelector(props: FormatSelectorProps) {
               onChange({
                 id: selectedColumn.format!.id,
                 params: {
-                  maxDecimals: Number(e.target.value),
+                  decimals: Number(e.target.value),
                 },
               });
             }}

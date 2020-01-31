@@ -44,8 +44,8 @@ function getExpressionForLayer(
       .filter(([id, col]) => !!col.format)
       .map(([id, col]) => {
         const base = `| lens_format_column format="${col.format!.id}" columnId="${id}"`;
-        if (typeof col.format?.params?.maxDecimals === 'number') {
-          return base + ` maxDecimals=${col.format?.params?.maxDecimals}`;
+        if (typeof col.format?.params?.decimals === 'number') {
+          return base + ` decimals=${col.format?.params?.decimals}`;
         }
         return base;
       })

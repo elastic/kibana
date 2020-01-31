@@ -10,7 +10,7 @@ import { ExpressionFunction, KibanaDatatable } from 'src/plugins/expressions/pub
 interface FormatColumn {
   format: string;
   columnId: string;
-  maxDecimals?: number;
+  decimals?: number;
 }
 
 const supportedFormats: Record<string, { decimalsToPattern: (decimals?: number) => string }> = {
@@ -19,7 +19,7 @@ const supportedFormats: Record<string, { decimalsToPattern: (decimals?: number) 
       if (decimals === 0) {
         return `0,0`;
       }
-      return `0,0.[${'0'.repeat(decimals)}]`;
+      return `0,0.${'0'.repeat(decimals)}`;
     },
   },
   percent: {
@@ -27,7 +27,7 @@ const supportedFormats: Record<string, { decimalsToPattern: (decimals?: number) 
       if (decimals === 0) {
         return `0,0%`;
       }
-      return `0,0.[${'0'.repeat(decimals)}]%`;
+      return `0,0.${'0'.repeat(decimals)}%`;
     },
   },
   bytes: {
@@ -35,7 +35,7 @@ const supportedFormats: Record<string, { decimalsToPattern: (decimals?: number) 
       if (decimals === 0) {
         return `0,0b`;
       }
-      return `0,0.[${'0'.repeat(decimals)}]b`;
+      return `0,0.${'0'.repeat(decimals)}b`;
     },
   },
 };
@@ -48,9 +48,7 @@ export const formatColumn: ExpressionFunction<
 > = {
   name: 'lens_format_column',
   type: 'kibana_datatable',
-  help: i18n.translate('xpack.lens.functions.mergeTables.help', {
-    defaultMessage: 'A helper to merge any number of kibana tables into a single table',
-  }),
+  help: '',
   args: {
     format: {
       types: ['string'],
@@ -60,7 +58,7 @@ export const formatColumn: ExpressionFunction<
       types: ['string'],
       help: '',
     },
-    maxDecimals: {
+    decimals: {
       types: ['number'],
       help: '',
     },
@@ -68,7 +66,7 @@ export const formatColumn: ExpressionFunction<
   context: {
     types: ['kibana_datatable'],
   },
-  fn(ctx, { format, columnId, maxDecimals }: FormatColumn) {
+  fn(ctx, { format, columnId, decimals }: FormatColumn) {
     return {
       ...ctx,
       columns: ctx.columns.map(col => {
@@ -78,7 +76,7 @@ export const formatColumn: ExpressionFunction<
               ...col,
               formatHint: {
                 id: format,
-                params: { pattern: supportedFormats[format].decimalsToPattern(maxDecimals) },
+                params: { pattern: supportedFormats[format].decimalsToPattern(decimals) },
               },
             };
           } else {
