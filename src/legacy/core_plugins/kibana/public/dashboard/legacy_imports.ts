@@ -38,14 +38,7 @@ export { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_sa
 export { migrateLegacyQuery } from '../../../../../plugins/kibana_legacy/public/utils/migrate_legacy_query';
 export { KbnUrl } from 'ui/url/kbn_url';
 // @ts-ignore
-export { GlobalStateProvider } from 'ui/state_management/global_state';
-// @ts-ignore
-export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-// @ts-ignore
 export { PrivateProvider } from 'ui/private/private';
-// @ts-ignore
-export { EventsProvider } from 'ui/events';
-export { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 // @ts-ignore
