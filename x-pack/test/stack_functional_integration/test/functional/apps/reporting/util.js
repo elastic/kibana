@@ -48,7 +48,7 @@ export const deleteWatcher = async (watch, id, client, log) => {
   expect(deleteResponse.body.found).to.eql(true);
   expect(deleteResponse.statusCode).to.eql('200');
 };
-const watcherHistory = async (watch_id, client, log) => {
+async function watcherHistory(watchId, client, log) {
   const { body } = await client.search({
     index: '.watcher-history*',
     body: {
@@ -60,7 +60,7 @@ const watcherHistory = async (watch_id, client, log) => {
                 should: [
                   {
                     match_phrase: {
-                      watch_id,
+                      watchId,
                     },
                   },
                 ],
@@ -73,4 +73,4 @@ const watcherHistory = async (watch_id, client, log) => {
     },
   });
   log.debug(`\nwatcherHistoryResponse \n${pretty(body)}\n`);
-};
+}
