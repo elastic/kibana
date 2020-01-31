@@ -139,7 +139,7 @@ export class BaseLogger implements Logger {
     const supportedLevel = this.level.supports(record.level);
 
     for (const appender of this.appenders) {
-      if (supportedLevel || appender.receiveAllLevels) {
+      if (supportedLevel) {
         appender.append(record);
       }
     }
