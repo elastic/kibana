@@ -37,7 +37,11 @@ import {
 } from '../../../../components/detection_engine/utility_bar';
 
 export const AllCases = React.memo(() => {
-  const [{ data, isLoading, isError, pagination }, doFetch] = useGetCases();
+  const [
+    { data, isLoading, isError, pagination, filterOptions },
+    doFetch,
+    setFilters,
+  ] = useGetCases();
 
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
@@ -75,14 +79,18 @@ export const AllCases = React.memo(() => {
     [doFetch, pagination]
   );
 
-  const sorting = {
+  const onFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
+    setFilters({ ...filterOptions, ...newFilterOptions });
+  }, []);
+
+  const sorting: EuiTableSortingType<FlattenedCaseSavedObject> = {
     sort: { field: pagination.sortField, direction: pagination.sortOrder },
-  } as EuiTableSortingType<FlattenedCaseSavedObject>;
+  };
 
   return (
     <Panel loading={isLoading}>
       <HeaderSection split title={i18n.ALL_CASES}>
-        <CasesTableFilters onFilterChanged={() => {}} />
+        <CasesTableFilters onFilterChanged={onFilterChangedCallback} />
       </HeaderSection>
       {isLoading && isEmpty(data.saved_objects) && (
         <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
