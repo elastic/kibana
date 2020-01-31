@@ -11,12 +11,12 @@ describe('Parsing a relative end date properly', () => {
   it('converts the upper range of relative end dates to now', async () => {
     const thisWeekEndDate = 'now/w';
 
-    let endDate = parseRelativeDate(thisWeekEndDate);
+    let endDate = parseRelativeDate(thisWeekEndDate, { roundUp: true });
     expect(Date.now() - (endDate as Moment).valueOf()).toBeLessThan(1000);
 
     const todayEndDate = 'now/d';
 
-    endDate = parseRelativeDate(todayEndDate);
+    endDate = parseRelativeDate(todayEndDate, { roundUp: true });
 
     expect(Date.now() - (endDate as Moment).valueOf()).toBeLessThan(1000);
   });
