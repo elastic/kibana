@@ -51,13 +51,13 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
   const maxDisplayedItems = Math.ceil(height / DEFAULT_ITEM_HEIGHT);
 
   const windowRef = useRef<VariableSizeList>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
   const {
     messageColumnWidth,
     characterDimensions,
     getLogEntryHeightFromMessageContent,
     recalculateColumnSize,
   } = useLogEntryMessageColumnWidthContext();
-  console.log(messageColumnWidth);
   const [scrollTop, setScrollTop] = useState(0);
 
   const [isScrollLocked, setIsScrollLocked] = useState(false);
@@ -154,9 +154,9 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
           boundingBoxes: childHeights.boundingBoxes,
           scrollTop: scrollOffset,
         });
-        if (!scrollUpdateWasRequested && isStreaming) {
-          setIsScrollLocked(pagesBelow > 0);
-        }
+        // if (!scrollUpdateWasRequested && isStreaming) {
+        //   setIsScrollLocked(pagesBelow > 0);
+        // }
       }
     ),
     [
@@ -167,6 +167,8 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
       visibleChildren.pagesBelow,
     ]
   );
+
+  // const handleScrollWhileStreaming = useCallback()
 
   const scrollEffect = useCallback(
     debounce(SCROLL_DEBOUNCE_INTERVAL, () => {
@@ -189,7 +191,7 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
 
   const streamUpdateEffect = useCallback(() => {
     if (isStreaming && !isScrollLocked) {
-      jumpToTail();
+      setScrollTop(childHeights.boundingBoxes.totalHeight);
     }
   }, [isStreaming, isScrollLocked]);
   useEffect(() => streamUpdateEffect, [
@@ -207,8 +209,27 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
         return;
       }
       recalculateColumnSize();
+
+      // if (isStreaming && !isScrollLocked) {
+      //   windowRef.current?.scrollTo(childHeights.boundingBoxes.totalHeight);
+      // }
     }
   }, [hasInitializedColumnWidth, messageColumnWidth, characterDimensions.width]);
+
+  useEffect(() => {
+    if (innerRef.current) {
+      const { current } = innerRef;
+      const handler = e => {
+        if (e.deltaY < 0) {
+          setIsScrollLocked(true);
+          windowRef.current?.scrollToItem(childrenArray[childrenArray.length - 1], 'smart');
+        }
+      };
+      current.addEventListener('wheel', handler);
+      return () => current.removeEventListener('wheel', handler);
+    }
+  }, [innerRef.current]);
+  console.log(isScrollLocked, scrollTop);
 
   return (
     <>
@@ -218,6 +239,7 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
         width={width}
         onScroll={handleScroll}
         ref={windowRef}
+        innerRef={innerRef}
         isHidden={!hasInitializedColumnWidth}
         itemCount={childrenArray.length}
         itemSize={index => childHeights.pxHeights[index]}
@@ -260,6 +282,7 @@ const getVisibleChildren = ({
 
 interface ScrollPanelWrapperProps {
   isHidden: boolean;
+  fixStreamToBottom: boolean;
 }
 
 const ScrollPanelWrapper = euiStyled(VariableSizeList)<ScrollPanelWrapperProps>`
