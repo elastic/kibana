@@ -31,7 +31,7 @@ import { ExpressionLoader } from './loader';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
-export interface ExpressionRendererProps extends IExpressionLoaderParams {
+export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   className?: string;
   dataAttrs?: string[];
   expression: string | ExpressionAstExpression;
@@ -45,7 +45,7 @@ interface State {
   error: null | RenderError;
 }
 
-export type ExpressionRendererComponent = React.FC<ExpressionRendererProps>;
+export type ExpressionRendererComponent = React.FC<ReactExpressionRendererProps>;
 
 const defaultState: State = {
   isEmpty: true,
@@ -53,14 +53,14 @@ const defaultState: State = {
   error: null,
 };
 
-export const ExpressionRendererImplementation = ({
+export const ReactExpressionRenderer = ({
   className,
   dataAttrs,
   padding,
   renderError,
   expression,
   ...expressionLoaderOptions
-}: ExpressionRendererProps) => {
+}: ReactExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
   const [state, setState] = useState<State>({ ...defaultState });
   const hasCustomRenderErrorHandler = !!renderError;

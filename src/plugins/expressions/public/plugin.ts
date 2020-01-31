@@ -38,7 +38,7 @@ import {
   setNotifications,
 } from './services';
 import { kibanaContext as kibanaContextFunction } from './expression_functions/kibana_context';
-import { ExpressionRendererImplementation } from './expression_renderer';
+import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader, loader } from './loader';
 import { ExpressionDataHandler, execute } from './execute';
 import { render, ExpressionRenderHandler } from './render';
@@ -67,9 +67,9 @@ export interface ExpressionsStart extends ExpressionsServiceStart {
   execute: typeof execute;
   ExpressionDataHandler: typeof ExpressionDataHandler;
   ExpressionLoader: typeof ExpressionLoader;
-  ExpressionRenderer: typeof ExpressionRendererImplementation;
   ExpressionRenderHandler: typeof ExpressionRenderHandler;
   loader: typeof loader;
+  ReactExpressionRenderer: typeof ReactExpressionRenderer;
   render: typeof render;
 }
 
@@ -152,9 +152,9 @@ export class ExpressionsPublicPlugin
       execute,
       ExpressionDataHandler,
       ExpressionLoader,
-      ExpressionRenderer: ExpressionRendererImplementation,
       ExpressionRenderHandler,
       loader,
+      ReactExpressionRenderer,
       render,
     };
   }

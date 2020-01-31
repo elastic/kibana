@@ -21,7 +21,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Subject } from 'rxjs';
 import { share } from 'rxjs/operators';
-import { ExpressionRendererImplementation } from './expression_renderer';
+import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader } from './loader';
 import { mount } from 'enzyme';
 import { EuiProgress } from '@elastic/eui';
@@ -54,7 +54,7 @@ describe('ExpressionRenderer', () => {
       };
     });
 
-    const instance = mount(<ExpressionRendererImplementation expression="" />);
+    const instance = mount(<ReactExpressionRenderer expression="" />);
 
     act(() => {
       loadingSubject.next();
@@ -108,7 +108,7 @@ describe('ExpressionRenderer', () => {
     });
 
     const instance = mount(
-      <ExpressionRendererImplementation
+      <ReactExpressionRenderer
         expression=""
         renderError={message => <div data-test-subj={'custom-error'}>{message}</div>}
       />
