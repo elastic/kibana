@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/* eslint-disable dot-notation */
 import { mockTelemetryNotifications, mockTelemetryService } from '../../telemetry.mock';
 
 describe('onSetOptInClick', () => {
@@ -27,11 +28,11 @@ describe('onSetOptInClick', () => {
     const telemetryService = mockTelemetryService();
     telemetryService.setOptIn = jest.fn();
     const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
-    telemetryNotifications.optInBannerId = bannerId;
+    telemetryNotifications['optInBannerId'] = bannerId;
 
-    await telemetryNotifications.onSetOptInClick(optIn);
-    expect(telemetryNotifications.overlays.banners.remove).toBeCalledTimes(1);
-    expect(telemetryNotifications.overlays.banners.remove).toBeCalledWith(bannerId);
+    await telemetryNotifications['onSetOptInClick'](optIn);
+    expect(telemetryNotifications['overlays'].banners.remove).toBeCalledTimes(1);
+    expect(telemetryNotifications['overlays'].banners.remove).toBeCalledWith(bannerId);
     expect(telemetryService.setOptIn).toBeCalledTimes(1);
     expect(telemetryService.setOptIn).toBeCalledWith(optIn);
   });
@@ -44,11 +45,11 @@ describe('setOptedInNoticeSeen', () => {
     const telemetryService = mockTelemetryService();
     telemetryService.setUserHasSeenNotice = jest.fn();
     const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
-    telemetryNotifications.optedInNoticeBannerId = bannerId;
+    telemetryNotifications['optedInNoticeBannerId'] = bannerId;
     await telemetryNotifications.setOptedInNoticeSeen();
 
-    expect(telemetryNotifications.overlays.banners.remove).toBeCalledTimes(1);
-    expect(telemetryNotifications.overlays.banners.remove).toBeCalledWith(bannerId);
+    expect(telemetryNotifications['overlays'].banners.remove).toBeCalledTimes(1);
+    expect(telemetryNotifications['overlays'].banners.remove).toBeCalledWith(bannerId);
     expect(telemetryService.setUserHasSeenNotice).toBeCalledTimes(1);
   });
 });
