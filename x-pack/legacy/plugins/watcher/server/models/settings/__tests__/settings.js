@@ -34,12 +34,12 @@ describe('settings module', () => {
                   email: {
                     account: {
                       foo: {},
-                      bar: {}
+                      bar: {},
                     },
-                    default_account: 'bar'
-                  }
-                }
-              }
+                    default_account: 'bar',
+                  },
+                },
+              },
             },
             defaults: {
               xpack: {
@@ -47,13 +47,13 @@ describe('settings module', () => {
                   email: {
                     account: {
                       scooby: {},
-                      scrappy: {}
+                      scrappy: {},
                     },
-                    default_account: 'scooby'
-                  }
-                }
-              }
-            }
+                    default_account: 'scooby',
+                  },
+                },
+              },
+            },
           };
           const settings = Settings.fromUpstreamJson(upstreamJson);
 
@@ -76,13 +76,13 @@ describe('settings module', () => {
                 email: {
                   account: {
                     scooby: {},
-                    scrappy: {}
+                    scrappy: {},
                   },
-                  default_account: 'scooby'
-                }
-              }
-            }
-          }
+                  default_account: 'scooby',
+                },
+              },
+            },
+          },
         };
         const settings = Settings.fromUpstreamJson(upstreamJson);
         const json = settings.downstreamJson;

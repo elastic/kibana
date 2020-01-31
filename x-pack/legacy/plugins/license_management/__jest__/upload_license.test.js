@@ -26,15 +26,15 @@ let store = null;
 let component = null;
 const services = {
   kbnUrl: {
-    change: jest.fn()
+    change: jest.fn(),
   },
   autoLogout: () => {},
   xPackInfo: {
     refresh: jest.fn(),
     get: () => {
       return { license: { type: 'basic' } };
-    }
-  }
+    },
+  },
 };
 
 describe('UploadLicense', () => {
@@ -77,14 +77,10 @@ describe('UploadLicense', () => {
   });
   it('should display a modal when license requires acknowledgement', async () => {
     const unacknowledgedLicense = JSON.stringify({
-      license: { type: 'basic' }
+      license: { type: 'basic' },
     });
     server.respond(UPLOAD_LICENSE_REQUIRES_ACK);
-    await uploadLicense(unacknowledgedLicense, 'trial')(
-      store.dispatch,
-      null,
-      services
-    );
+    await uploadLicense(unacknowledgedLicense, 'trial')(store.dispatch, null, services);
     const rendered = mountWithIntl(component);
     expect(rendered).toMatchSnapshot();
   });

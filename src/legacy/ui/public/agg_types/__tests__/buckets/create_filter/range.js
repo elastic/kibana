@@ -23,19 +23,20 @@ import { VisProvider } from '../../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { createFilterRange } from '../../../buckets/create_filter/range';
 
-describe('AggConfig Filters', function () {
-
-  describe('range', function () {
+describe('AggConfig Filters', function() {
+  describe('range', function() {
     let indexPattern;
     let Vis;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      Vis = Private(VisProvider);
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    }));
+    beforeEach(
+      ngMock.inject(function(Private) {
+        Vis = Private(VisProvider);
+        indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      })
+    );
 
-    it('should return a range filter for range agg', function () {
+    it('should return a range filter for range agg', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
@@ -44,12 +45,10 @@ describe('AggConfig Filters', function () {
             schema: 'segment',
             params: {
               field: 'bytes',
-              ranges: [
-                { from: 1024, to: 2048 }
-              ]
-            }
-          }
-        ]
+              ranges: [{ from: 1024, to: 2048 }],
+            },
+          },
+        ],
       });
 
       const aggConfig = vis.aggs.byName('range')[0];

@@ -6,7 +6,7 @@
 
 import { find } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import uiRoutes from'ui/routes';
+import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
@@ -20,7 +20,7 @@ import { CODE_PATH_BEATS, BEATS_SYSTEM_ID } from '../../../../common/constants';
 uiRoutes.when('/beats/beats', {
   template,
   resolve: {
-    clusters: function (Private) {
+    clusters: function(Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_BEATS] });
     },
@@ -32,7 +32,9 @@ uiRoutes.when('/beats/beats', {
       // breadcrumbs + page title
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
-      $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
+      $scope.cluster = find($route.current.locals.clusters, {
+        cluster_uuid: globalState.cluster_uuid,
+      });
 
       super({
         title: i18n.translate('xpack.monitoring.beats.routeTitle', { defaultMessage: 'Beats' }),
@@ -40,7 +42,7 @@ uiRoutes.when('/beats/beats', {
         getPageData,
         reactNodeId: 'monitoringBeatsInstancesApp',
         $scope,
-        $injector
+        $injector,
       });
 
       this.data = $route.current.locals.pageData;
@@ -84,5 +86,5 @@ uiRoutes.when('/beats/beats', {
         </I18nContext>
       );
     }
-  }
+  },
 });

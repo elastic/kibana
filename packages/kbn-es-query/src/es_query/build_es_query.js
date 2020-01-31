@@ -39,15 +39,29 @@ export function buildEsQuery(
     queryStringOptions: {},
     ignoreFilterIfFieldNotInIndex: false,
     dateFormatTZ: null,
-  }) {
+  }
+) {
   queries = Array.isArray(queries) ? queries : [queries];
   filters = Array.isArray(filters) ? filters : [filters];
 
-  const validQueries = queries.filter((query) => has(query, 'query'));
+  const validQueries = queries.filter(query => has(query, 'query'));
   const queriesByLanguage = groupBy(validQueries, 'language');
-  const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery, config.allowLeadingWildcards, config.dateFormatTZ);
-  const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, config.queryStringOptions, config.dateFormatTZ);
-  const filterQuery = buildQueryFromFilters(filters, indexPattern, config.ignoreFilterIfFieldNotInIndex);
+  const kueryQuery = buildQueryFromKuery(
+    indexPattern,
+    queriesByLanguage.kuery,
+    config.allowLeadingWildcards,
+    config.dateFormatTZ
+  );
+  const luceneQuery = buildQueryFromLucene(
+    queriesByLanguage.lucene,
+    config.queryStringOptions,
+    config.dateFormatTZ
+  );
+  const filterQuery = buildQueryFromFilters(
+    filters,
+    indexPattern,
+    config.ignoreFilterIfFieldNotInIndex
+  );
 
   return {
     bool: {
@@ -55,6 +69,6 @@ export function buildEsQuery(
       filter: [].concat(kueryQuery.filter, luceneQuery.filter, filterQuery.filter),
       should: [].concat(kueryQuery.should, luceneQuery.should, filterQuery.should),
       must_not: [].concat(kueryQuery.must_not, luceneQuery.must_not, filterQuery.must_not),
-    }
+    },
   };
 }

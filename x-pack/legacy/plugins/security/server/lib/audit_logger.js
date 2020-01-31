@@ -18,7 +18,7 @@ export class SecurityAuditLogger {
         action,
         types,
         missing,
-        args
+        args,
       }
     );
   }

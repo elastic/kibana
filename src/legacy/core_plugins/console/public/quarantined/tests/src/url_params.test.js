@@ -25,17 +25,11 @@ import { UrlParams } from '../../src/autocomplete/url_params';
 import { populateContext } from '../../src/autocomplete/engine';
 
 describe('Url params', () => {
-  function paramTest(
-    name,
-    description,
-    tokenPath,
-    expectedContext,
-    globalParams
-  ) {
-    test(name, function () {
+  function paramTest(name, description, tokenPath, expectedContext, globalParams) {
+    test(name, function() {
       const urlParams = new UrlParams(description, globalParams || {});
       if (typeof tokenPath === 'string') {
-        tokenPath = _.map(tokenPath.split('/'), function (p) {
+        tokenPath = _.map(tokenPath.split('/'), function(p) {
           p = p.split(',');
           if (p.length === 1) {
             return p[0];
@@ -45,19 +39,13 @@ describe('Url params', () => {
       }
 
       if (expectedContext.autoCompleteSet) {
-        expectedContext.autoCompleteSet = _.map(
-          expectedContext.autoCompleteSet,
-          function (t) {
-            if (_.isString(t)) {
-              t = { name: t };
-            }
-            return t;
+        expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function(t) {
+          if (_.isString(t)) {
+            t = { name: t };
           }
-        );
-        expectedContext.autoCompleteSet = _.sortBy(
-          expectedContext.autoCompleteSet,
-          'name'
-        );
+          return t;
+        });
+        expectedContext.autoCompleteSet = _.sortBy(expectedContext.autoCompleteSet, 'name');
       }
 
       const context = {};
@@ -95,7 +83,7 @@ describe('Url params', () => {
     return r;
   }
 
-  (function () {
+  (function() {
     const params = {
       a: ['1', '2'],
       b: '__flag__',
@@ -123,5 +111,5 @@ describe('Url params', () => {
     paramTest('autocomplete values flag', params, 'b', {
       autoCompleteSet: [t('true', 'b'), t('false', 'b')],
     });
-  }());
+  })();
 });

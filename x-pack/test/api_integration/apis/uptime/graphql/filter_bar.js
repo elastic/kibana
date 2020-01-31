@@ -7,7 +7,7 @@
 import { expectFixtureEql } from './helpers/expect_fixture_eql';
 import { filterBarQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   describe('filterBar query', () => {
     before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
     after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));

@@ -49,14 +49,17 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 jest.mock('ui/scripting_languages', () => ({
-  GetEnabledScriptingLanguagesProvider: jest.fn().mockImplementation(() => () => ['painless', 'testlang']),
+  GetEnabledScriptingLanguagesProvider: jest
+    .fn()
+    .mockImplementation(() => () => ['painless', 'testlang']),
   getSupportedScriptingLanguages: () => ['painless'],
   getDeprecatedScriptingLanguages: () => ['testlang'],
 }));
 
 jest.mock('ui/registry/field_formats', () => {
   class Format {
-    static id = 'test_format'; static title = 'Test format';
+    static id = 'test_format';
+    static title = 'Test format';
     params() {}
   }
 
@@ -65,23 +68,23 @@ jest.mock('ui/registry/field_formats', () => {
       getDefaultType: () => {
         return Format;
       },
-      getByFieldType: (fieldType) => {
-        if(fieldType === 'number') {
+      getByFieldType: fieldType => {
+        if (fieldType === 'number') {
           return [Format];
         }
-      }
+      },
     },
   };
 });
 
 jest.mock('ui/documentation_links', () => ({
-  getDocLink: (doc) => `(docLink for ${doc})`,
+  getDocLink: doc => `(docLink for ${doc})`,
 }));
 
 jest.mock('ui/notify', () => ({
   toastNotifications: {
     addSuccess: jest.fn(),
-  }
+  },
 }));
 
 jest.mock('./components/scripting_call_outs', () => ({
@@ -91,12 +94,14 @@ jest.mock('./components/scripting_call_outs', () => ({
 }));
 
 jest.mock('./components/field_format_editor', () => ({
-  FieldFormatEditor: 'field-format-editor'
+  FieldFormatEditor: 'field-format-editor',
 }));
 
-const fields = [{
-  name: 'foobar',
-}];
+const fields = [
+  {
+    name: 'foobar',
+  },
+];
 fields.getByName = name => {
   const fields = {
     foobar: {
@@ -107,7 +112,8 @@ fields.getByName = name => {
 };
 
 class Format {
-  static id = 'test_format'; static title = 'Test format';
+  static id = 'test_format';
+  static title = 'Test format';
   params() {}
 }
 
@@ -137,11 +143,7 @@ describe('FieldEditor', () => {
 
   it('should render create new scripted field correctly', async () => {
     const component = shallowWithIntl(
-      <FieldEditorComponent
-        indexPattern={indexPattern}
-        field={field}
-        helpers={helpers}
-      />
+      <FieldEditorComponent indexPattern={indexPattern} field={field} helpers={helpers} />
     );
 
     await new Promise(resolve => process.nextTick(resolve));
@@ -156,19 +158,15 @@ describe('FieldEditor', () => {
       script: 'doc.test.value',
     };
     indexPattern.fields.push(testField);
-    indexPattern.fields.getByName = (name) => {
+    indexPattern.fields.getByName = name => {
       const fields = {
-        [testField.name]: testField
+        [testField.name]: testField,
       };
       return fields[name];
     };
 
     const component = shallowWithIntl(
-      <FieldEditorComponent
-        indexPattern={indexPattern}
-        field={testField}
-        helpers={helpers}
-      />
+      <FieldEditorComponent indexPattern={indexPattern} field={testField} helpers={helpers} />
     );
 
     await new Promise(resolve => process.nextTick(resolve));
@@ -181,22 +179,18 @@ describe('FieldEditor', () => {
       ...field,
       name: 'test',
       script: 'doc.test.value',
-      lang: 'testlang'
+      lang: 'testlang',
     };
     indexPattern.fields.push(testField);
-    indexPattern.fields.getByName = (name) => {
+    indexPattern.fields.getByName = name => {
       const fields = {
-        [testField.name]: testField
+        [testField.name]: testField,
       };
       return fields[name];
     };
 
     const component = shallowWithIntl(
-      <FieldEditorComponent
-        indexPattern={indexPattern}
-        field={testField}
-        helpers={helpers}
-      />
+      <FieldEditorComponent indexPattern={indexPattern} field={testField} helpers={helpers} />
     );
 
     await new Promise(resolve => process.nextTick(resolve));
@@ -207,11 +201,7 @@ describe('FieldEditor', () => {
   it('should show conflict field warning', async () => {
     const testField = { ...field };
     const component = shallowWithIntl(
-      <FieldEditorComponent
-        indexPattern={indexPattern}
-        field={testField}
-        helpers={helpers}
-      />
+      <FieldEditorComponent indexPattern={indexPattern} field={testField} helpers={helpers} />
     );
 
     await new Promise(resolve => process.nextTick(resolve));
@@ -226,15 +216,11 @@ describe('FieldEditor', () => {
       name: 'test-conflict',
       conflictDescriptions: {
         long: ['index_name_1', 'index_name_2'],
-        text: ['index_name_3']
-      }
+        text: ['index_name_3'],
+      },
     };
     const component = shallowWithIntl(
-      <FieldEditorComponent
-        indexPattern={indexPattern}
-        field={testField}
-        helpers={helpers}
-      />
+      <FieldEditorComponent indexPattern={indexPattern} field={testField} helpers={helpers} />
     );
 
     await new Promise(resolve => process.nextTick(resolve));
@@ -242,5 +228,4 @@ describe('FieldEditor', () => {
     component.update();
     expect(component).toMatchSnapshot();
   });
-
 });

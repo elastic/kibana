@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import _ from 'lodash';
 
 import { mlFunctionToESAggregation } from '../../common/util/job_utils';
@@ -32,11 +30,11 @@ class FieldFormatService {
       // pattern with a title attribute which matches the index configured in the datafeed.
       // If a Kibana index pattern has not been created
       // for this index, then no custom field formatting will occur.
-      _.each(jobIds, (jobId) => {
+      _.each(jobIds, jobId => {
         const jobObj = mlJobService.getJob(jobId);
         const datafeedIndices = jobObj.datafeed_config.indices;
-        const indexPattern = _.find(indexPatterns, (index) => {
-          return _.find(datafeedIndices, (datafeedIndex) => {
+        const indexPattern = _.find(indexPatterns, index => {
+          return _.find(datafeedIndices, datafeedIndex => {
             return index.get('title') === datafeedIndex;
           });
         });
@@ -47,21 +45,20 @@ class FieldFormatService {
         }
       });
 
-      const promises = jobIds.map(jobId => Promise.all([
-        this.getFormatsForJob(jobId)
-      ]));
+      const promises = jobIds.map(jobId => Promise.all([this.getFormatsForJob(jobId)]));
 
-      Promise.all(promises).then((fmtsByJobByDetector) => {
-        _.each(fmtsByJobByDetector, (formatsByDetector, index) => {
-          this.formatsByJob[jobIds[index]] = formatsByDetector[0];
+      Promise.all(promises)
+        .then(fmtsByJobByDetector => {
+          _.each(fmtsByJobByDetector, (formatsByDetector, index) => {
+            this.formatsByJob[jobIds[index]] = formatsByDetector[0];
+          });
+
+          resolve(this.formatsByJob);
+        })
+        .catch(err => {
+          console.log('fieldFormatService error populating formats:', err);
+          reject({ formats: {}, err });
         });
-
-        resolve(this.formatsByJob);
-      }).catch(err => {
-        console.log('fieldFormatService error populating formats:', err);
-        reject({ formats: {}, err });
-      });
-
     });
   }
 
@@ -70,7 +67,6 @@ class FieldFormatService {
   getFieldFormat(jobId, detectorIndex) {
     return _.get(this.formatsByJob, [jobId, detectorIndex]);
   }
-
 
   // Utility for returning the FieldFormat from a full populated Kibana index pattern object
   // containing the list of fields by name with their formats.
@@ -91,7 +87,6 @@ class FieldFormatService {
 
   getFormatsForJob(jobId) {
     return new Promise((resolve, reject) => {
-
       const jobObj = mlJobService.getJob(jobId);
       const detectors = jobObj.analysis_config.detectors || [];
       const formatsByDetector = {};
@@ -100,10 +95,10 @@ class FieldFormatService {
       if (indexPatternId !== undefined) {
         // Load the full index pattern configuration to obtain the formats of each field.
         getIndexPatternById(indexPatternId)
-          .then((indexPatternData) => {
+          .then(indexPatternData => {
             // Store the FieldFormat for each job by detector_index.
             const fieldList = _.get(indexPatternData, 'fields', []);
-            _.each(detectors, (dtr) => {
+            _.each(detectors, dtr => {
               const esAgg = mlFunctionToESAggregation(dtr.function);
               // distinct_count detectors should fall back to the default
               // formatter as the values are just counts.
@@ -116,7 +111,8 @@ class FieldFormatService {
             });
 
             resolve(formatsByDetector);
-          }).catch(err => {
+          })
+          .catch(err => {
             reject(err);
           });
       } else {

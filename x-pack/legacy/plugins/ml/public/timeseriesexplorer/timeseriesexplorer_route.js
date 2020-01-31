@@ -16,15 +16,14 @@ import { loadIndexPatterns } from '../util/index_utils';
 
 import { getSingleMetricViewerBreadcrumbs } from './breadcrumbs';
 
-uiRoutes
-  .when('/timeseriesexplorer/?', {
-    template: '<ml-time-series-explorer data-test-subj="mlPageSingleMetricViewer" />',
-    k7Breadcrumbs: getSingleMetricViewerBreadcrumbs,
-    resolve: {
-      CheckLicense: checkFullLicense,
-      privileges: checkGetJobsPrivilege,
-      indexPatterns: loadIndexPatterns,
-      mlNodeCount: getMlNodeCount,
-      jobs: mlJobService.loadJobsWrapper
-    }
-  });
+uiRoutes.when('/timeseriesexplorer/?', {
+  template: '<ml-time-series-explorer data-test-subj="mlPageSingleMetricViewer" />',
+  k7Breadcrumbs: getSingleMetricViewerBreadcrumbs,
+  resolve: {
+    CheckLicense: checkFullLicense,
+    privileges: checkGetJobsPrivilege,
+    indexPatterns: loadIndexPatterns,
+    mlNodeCount: getMlNodeCount,
+    jobs: mlJobService.loadJobsWrapper,
+  },
+});

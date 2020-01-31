@@ -9,5 +9,5 @@ const ELASTIC_BASE_URL = 'https://www.elastic.co/';
 export const EXTERNAL_LINKS = {
   SUBSCRIPTIONS: `${ELASTIC_BASE_URL}subscriptions`,
   TRIAL_EXTENSION: `${ELASTIC_BASE_URL}trialextension`,
-  TRIAL_LICENSE: `${ELASTIC_BASE_URL}legal/trial_license`
+  TRIAL_LICENSE: `${ELASTIC_BASE_URL}legal/trial_license`,
 };

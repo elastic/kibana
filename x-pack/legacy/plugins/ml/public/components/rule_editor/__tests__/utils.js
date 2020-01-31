@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import expect from '@kbn/expect';
-import {
-  isValidRule,
-  buildRuleDescription,
-  getAppliesToValueFromAnomaly,
-} from '../utils';
+import { isValidRule, buildRuleDescription, getAppliesToValueFromAnomaly } from '../utils';
 import {
   ACTION,
   APPLIES_TO,
@@ -19,16 +14,15 @@ import {
 } from '../../../../common/constants/detector_rule';
 
 describe('ML - rule editor utils', () => {
-
   const ruleWithCondition = {
     actions: [ACTION.SKIP_RESULT],
     conditions: [
       {
         applies_to: APPLIES_TO.ACTUAL,
         operator: OPERATOR.GREATER_THAN,
-        value: 10
-      }
-    ]
+        value: 10,
+      },
+    ],
   };
 
   const ruleWithScope = {
@@ -37,9 +31,9 @@ describe('ML - rule editor utils', () => {
       instance: {
         filter_id: 'test_aws_instances',
         filter_type: FILTER_TYPE.INCLUDE,
-        enabled: true
-      }
-    }
+        enabled: true,
+      },
+    },
   };
 
   const ruleWithConditionAndScope = {
@@ -48,20 +42,19 @@ describe('ML - rule editor utils', () => {
       {
         applies_to: APPLIES_TO.TYPICAL,
         operator: OPERATOR.LESS_THAN,
-        value: 100
-      }
+        value: 100,
+      },
     ],
     scope: {
       instance: {
         filter_id: 'test_aws_instances',
         filter_type: FILTER_TYPE.EXCLUDE,
-        enabled: true
-      }
-    }
+        enabled: true,
+      },
+    },
   };
 
   describe('isValidRule', () => {
-
     it('returns true for a rule with an action and a condition', () => {
       expect(isValidRule(ruleWithCondition)).to.be(true);
     });
@@ -81,8 +74,8 @@ describe('ML - rule editor utils', () => {
           {
             applies_to: APPLIES_TO.TYPICAL,
             operator: OPERATOR.LESS_THAN,
-            value: 100
-          }
+            value: 100,
+          },
         ],
       };
 
@@ -96,23 +89,23 @@ describe('ML - rule editor utils', () => {
 
       expect(isValidRule(ruleWithNoScopeOrCondition)).to.be(false);
     });
-
   });
 
   describe('buildRuleDescription', () => {
-
     it('returns expected rule descriptions', () => {
       expect(buildRuleDescription(ruleWithCondition)).to.be(
-        'skip result when actual is greater than 10');
+        'skip result when actual is greater than 10'
+      );
       expect(buildRuleDescription(ruleWithScope)).to.be(
-        'skip result when instance is in test_aws_instances');
+        'skip result when instance is in test_aws_instances'
+      );
       expect(buildRuleDescription(ruleWithConditionAndScope)).to.be(
-        'skip result when typical is less than 100 AND instance is not in test_aws_instances');
+        'skip result when typical is less than 100 AND instance is not in test_aws_instances'
+      );
     });
   });
 
   describe('getAppliesToValueFromAnomaly', () => {
-
     const anomaly = {
       actual: [210],
       typical: [1.23],
@@ -130,5 +123,4 @@ describe('ML - rule editor utils', () => {
       expect(getAppliesToValueFromAnomaly(anomaly, APPLIES_TO.DIFF_FROM_TYPICAL)).to.be(208.77);
     });
   });
-
 });

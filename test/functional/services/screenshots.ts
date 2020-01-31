@@ -22,6 +22,7 @@ import { writeFile, readFileSync, mkdir } from 'fs';
 import { promisify } from 'util';
 
 import del from 'del';
+
 import { comparePngs } from './lib/compare_pngs';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
@@ -32,6 +33,7 @@ const writeFileAsync = promisify(writeFile);
 export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
+  const failureMetadata = getService('failureMetadata');
   const browser = getService('browser');
 
   const SESSION_DIRECTORY = resolve(config.get('screenshots.directory'), 'session');
@@ -68,11 +70,15 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
     }
 
     async take(name: string, el?: WebElementWrapper) {
-      return await this._take(resolve(SESSION_DIRECTORY, `${name}.png`), el);
+      const path = resolve(SESSION_DIRECTORY, `${name}.png`);
+      await this._take(path, el);
+      failureMetadata.addScreenshot(name, path);
     }
 
     async takeForFailure(name: string, el?: WebElementWrapper) {
-      await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`), el);
+      const path = resolve(FAILURE_DIRECTORY, `${name}.png`);
+      await this._take(path, el);
+      failureMetadata.addScreenshot(`failure[${name}]`, path);
     }
 
     async _take(path: string, el?: WebElementWrapper) {

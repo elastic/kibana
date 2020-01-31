@@ -24,12 +24,10 @@ import React from 'react';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
-import {
-  ControlsTab,
-} from './controls_tab';
+import { ControlsTab } from './controls_tab';
 
 const indexPatternsMock = {
-  get: getIndexPatternMock
+  get: getIndexPatternMock,
 };
 let props;
 
@@ -37,50 +35,49 @@ beforeEach(() => {
   props = {
     vis: {
       API: {
-        indexPatterns: indexPatternsMock
+        indexPatterns: indexPatternsMock,
       },
     },
     stateParams: {
       controls: [
         {
-          'id': '1',
-          'indexPattern': 'indexPattern1',
-          'fieldName': 'keywordField',
-          'label': 'custom label',
-          'type': 'list',
-          'options': {
-            'type': 'terms',
-            'multiselect': true,
-            'size': 5,
-            'order': 'desc'
-          }
+          id: '1',
+          indexPattern: 'indexPattern1',
+          fieldName: 'keywordField',
+          label: 'custom label',
+          type: 'list',
+          options: {
+            type: 'terms',
+            multiselect: true,
+            size: 5,
+            order: 'desc',
+          },
         },
         {
-          'id': '2',
-          'indexPattern': 'indexPattern1',
-          'fieldName': 'numberField',
-          'label': '',
-          'type': 'range',
-          'options': {
-            'step': 1
-          }
-        }
-      ]
+          id: '2',
+          indexPattern: 'indexPattern1',
+          fieldName: 'numberField',
+          label: '',
+          type: 'range',
+          options: {
+            step: 1,
+          },
+        },
+      ],
     },
     setValue: jest.fn(),
   };
 });
 
 test('renders ControlsTab', () => {
-  const component = shallowWithIntl(<ControlsTab.WrappedComponent {...props}/>);
+  const component = shallowWithIntl(<ControlsTab.WrappedComponent {...props} />);
 
   expect(component).toMatchSnapshot();
 });
 
 describe('behavior', () => {
-
   test('add control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props}/>);
+    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props} />);
 
     findTestSubject(component, 'inputControlEditorAddBtn').simulate('click');
 
@@ -93,83 +90,93 @@ describe('behavior', () => {
   });
 
   test('remove control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props}/>);
+    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props} />);
     findTestSubject(component, 'inputControlEditorRemoveControl0').simulate('click');
-    const expectedParams = ['controls', [{
-      'id': '2',
-      'indexPattern': 'indexPattern1',
-      'fieldName': 'numberField',
-      'label': '',
-      'type': 'range',
-      'options': {
-        'step': 1
-      }
-    }]];
+    const expectedParams = [
+      'controls',
+      [
+        {
+          id: '2',
+          indexPattern: 'indexPattern1',
+          fieldName: 'numberField',
+          label: '',
+          type: 'range',
+          options: {
+            step: 1,
+          },
+        },
+      ],
+    ];
 
     expect(props.setValue).toHaveBeenCalledWith(...expectedParams);
   });
 
-
   test('move down control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props}/>);
+    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props} />);
     findTestSubject(component, 'inputControlEditorMoveDownControl0').simulate('click');
-    const expectedParams = ['controls', [
-      {
-        'id': '2',
-        'indexPattern': 'indexPattern1',
-        'fieldName': 'numberField',
-        'label': '',
-        'type': 'range',
-        'options': {
-          'step': 1
-        }
-      },
-      {
-        'id': '1',
-        'indexPattern': 'indexPattern1',
-        'fieldName': 'keywordField',
-        'label': 'custom label',
-        'type': 'list',
-        'options': {
-          'type': 'terms',
-          'multiselect': true,
-          'size': 5,
-          'order': 'desc'
-        }
-      }
-    ]];
+    const expectedParams = [
+      'controls',
+      [
+        {
+          id: '2',
+          indexPattern: 'indexPattern1',
+          fieldName: 'numberField',
+          label: '',
+          type: 'range',
+          options: {
+            step: 1,
+          },
+        },
+        {
+          id: '1',
+          indexPattern: 'indexPattern1',
+          fieldName: 'keywordField',
+          label: 'custom label',
+          type: 'list',
+          options: {
+            type: 'terms',
+            multiselect: true,
+            size: 5,
+            order: 'desc',
+          },
+        },
+      ],
+    ];
 
     expect(props.setValue).toHaveBeenCalledWith(...expectedParams);
   });
 
   test('move up control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props}/>);
+    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props} />);
     findTestSubject(component, 'inputControlEditorMoveUpControl1').simulate('click');
-    const expectedParams = ['controls', [
-      {
-        'id': '2',
-        'indexPattern': 'indexPattern1',
-        'fieldName': 'numberField',
-        'label': '',
-        'type': 'range',
-        'options': {
-          'step': 1
-        }
-      },
-      {
-        'id': '1',
-        'indexPattern': 'indexPattern1',
-        'fieldName': 'keywordField',
-        'label': 'custom label',
-        'type': 'list',
-        'options': {
-          'type': 'terms',
-          'multiselect': true,
-          'size': 5,
-          'order': 'desc'
-        }
-      }
-    ]];
+    const expectedParams = [
+      'controls',
+      [
+        {
+          id: '2',
+          indexPattern: 'indexPattern1',
+          fieldName: 'numberField',
+          label: '',
+          type: 'range',
+          options: {
+            step: 1,
+          },
+        },
+        {
+          id: '1',
+          indexPattern: 'indexPattern1',
+          fieldName: 'keywordField',
+          label: 'custom label',
+          type: 'list',
+          options: {
+            type: 'terms',
+            multiselect: true,
+            size: 5,
+            order: 'desc',
+          },
+        },
+      ],
+    ];
 
     expect(props.setValue).toHaveBeenCalledWith(...expectedParams);
   });

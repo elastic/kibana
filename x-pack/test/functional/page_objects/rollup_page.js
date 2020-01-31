@@ -12,7 +12,6 @@ export function RollupPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['header', 'common']);
 
-
   class RollupJobPage {
     async createNewRollUpJob() {
       await testSubjects.click('createRollupJobButton');
@@ -56,13 +55,27 @@ export function RollupPageProvider({ getService, getPageObjects }) {
       const jobs = await testSubjects.findAll('jobTableRow');
       return mapAsync(jobs, async job => {
         const jobNameElement = await job.findByCssSelector('[data-test-subj="jobTableCell-id"]');
-        const jobStatusElement = await job.findByCssSelector('[data-test-subj="jobTableCell-status"]');
-        const jobIndexPatternElement = await job.findByCssSelector('[data-test-subj="jobTableCell-indexPattern"]');
-        const jobRollUpIndexPatternElement = await job.findByCssSelector('[data-test-subj="jobTableCell-rollupIndex"]');
-        const jobDelayElement = await job.findByCssSelector('[data-test-subj="jobTableCell-rollupDelay"]');
-        const jobIntervalElement = await job.findByCssSelector('[data-test-subj="jobTableCell-dateHistogramInterval"]');
-        const jobGroupElement = await job.findByCssSelector('[data-test-subj="jobTableCell-groups"]');
-        const jobMetricsElement = await job.findByCssSelector('[data-test-subj="jobTableCell-metrics"]');
+        const jobStatusElement = await job.findByCssSelector(
+          '[data-test-subj="jobTableCell-status"]'
+        );
+        const jobIndexPatternElement = await job.findByCssSelector(
+          '[data-test-subj="jobTableCell-indexPattern"]'
+        );
+        const jobRollUpIndexPatternElement = await job.findByCssSelector(
+          '[data-test-subj="jobTableCell-rollupIndex"]'
+        );
+        const jobDelayElement = await job.findByCssSelector(
+          '[data-test-subj="jobTableCell-rollupDelay"]'
+        );
+        const jobIntervalElement = await job.findByCssSelector(
+          '[data-test-subj="jobTableCell-dateHistogramInterval"]'
+        );
+        const jobGroupElement = await job.findByCssSelector(
+          '[data-test-subj="jobTableCell-groups"]'
+        );
+        const jobMetricsElement = await job.findByCssSelector(
+          '[data-test-subj="jobTableCell-metrics"]'
+        );
 
         return {
           jobName: await jobNameElement.getVisibleText(),
@@ -72,11 +85,10 @@ export function RollupPageProvider({ getService, getPageObjects }) {
           jobDelayElement: await jobDelayElement.getVisibleText(),
           jobInterval: await jobIntervalElement.getVisibleText(),
           jobGroup: await jobGroupElement.getVisibleText(),
-          jobMetrics: await jobMetricsElement.getVisibleText()
+          jobMetrics: await jobMetricsElement.getVisibleText(),
         };
       });
     }
-
   }
   return new RollupJobPage();
 }

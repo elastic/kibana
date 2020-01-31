@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * Formatter to abbreviate large whole numbers with metric prefixes.
  * Uses numeral.js to format numbers longer than the specified number of
  * digits with metric abbreviations e.g. 12345 as 12k, or 98000000 as 98m.
-*/
+ */
 import numeral from '@elastic/numeral';
 
 export function abbreviateWholeNumber(value, maxDigits = 3) {

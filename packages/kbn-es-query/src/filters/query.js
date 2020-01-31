@@ -23,7 +23,7 @@ export function buildQueryFilter(query, index, alias) {
     query: query,
     meta: {
       index,
-    }
+    },
   };
 
   if (alias) {

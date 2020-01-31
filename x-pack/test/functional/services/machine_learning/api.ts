@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { isEmpty } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { JOB_STATE, DATAFEED_STATE } from '../../../../legacy/plugins/ml/common/constants/states';
+
+export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');

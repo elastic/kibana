@@ -13,8 +13,8 @@ export const getLoggingContainerHref = (
   basePath: string
 ): string | undefined => {
   const getHref = (value: string | string[] | undefined) => {
-    if (value === undefined) {
-      return value;
+    if (!value) {
+      return undefined;
     }
     const ret = !Array.isArray(value) ? value : value[0];
     return addBasePath(
@@ -27,8 +27,8 @@ export const getLoggingContainerHref = (
 
 export const getLoggingKubernetesHref = (summary: MonitorSummary, basePath: string) => {
   const getHref = (value: string | string[] | undefined) => {
-    if (value === undefined) {
-      return value;
+    if (!value) {
+      return undefined;
     }
     const ret = !Array.isArray(value) ? value : value[0];
     return addBasePath(
@@ -41,8 +41,8 @@ export const getLoggingKubernetesHref = (summary: MonitorSummary, basePath: stri
 
 export const getLoggingIpHref = (summary: MonitorSummary, basePath: string) => {
   const getHref = (value: string | string[] | undefined) => {
-    if (value === undefined) {
-      return value;
+    if (!value) {
+      return undefined;
     }
     const ret = !Array.isArray(value) ? value : value[0];
     return addBasePath(

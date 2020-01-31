@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common']);
   const retry = getService('retry');
   const overview = getService('monitoringClusterOverview');
@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
         nodeCount: 'Nodes\n2',
         memoryUsed: 'Memory\n528.4 MB / 1.9 GB',
         eventsInTotal: 'Events Received\n117.9k',
-        eventsOutTotal: 'Events Emitted\n111.9k'
+        eventsOutTotal: 'Events Emitted\n111.9k',
       });
     });
 
@@ -57,7 +57,8 @@ export default function ({ getService, getPageObjects }) {
       ];
 
       // check the all data in the table
-      pipelinesAll.forEach((obj, index) => { // eslint-disable-line no-unused-vars
+      pipelinesAll.forEach((obj, index) => {
+        // eslint-disable-line no-unused-vars
         expect(pipelinesAll[index].id).to.be(tableData[index].id);
         expect(pipelinesAll[index].eventsEmittedRate).to.be(tableData[index].eventsEmittedRate);
         expect(pipelinesAll[index].nodeCount).to.be(tableData[index].nodeCount);
@@ -80,7 +81,8 @@ export default function ({ getService, getPageObjects }) {
       ];
 
       // check the all data in the table
-      pipelinesAll.forEach((obj, index) => { // eslint-disable-line no-unused-vars
+      pipelinesAll.forEach((obj, index) => {
+        // eslint-disable-line no-unused-vars
         expect(pipelinesAll[index].id).to.be(tableData[index].id);
         expect(pipelinesAll[index].eventsEmittedRate).to.be(tableData[index].eventsEmittedRate);
         expect(pipelinesAll[index].nodeCount).to.be(tableData[index].nodeCount);

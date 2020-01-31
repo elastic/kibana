@@ -26,13 +26,17 @@ import {
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
 import { Storage } from 'ui/storage';
-import { STORAGE_KEY, ELASTICSEARCH_SYSTEM_ID, KIBANA_SYSTEM_ID } from '../../../../common/constants';
+import {
+  STORAGE_KEY,
+  ELASTICSEARCH_SYSTEM_ID,
+  KIBANA_SYSTEM_ID,
+} from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   INSTRUCTION_STEP_SET_MONITORING_URL,
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
-  INSTRUCTION_STEP_DISABLE_INTERNAL
+  INSTRUCTION_STEP_DISABLE_INTERNAL,
 } from '../constants';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { getIdentifier, formatProductName } from '../../setup_mode/formatting';
@@ -47,7 +51,9 @@ export class Flyout extends Component {
 
     let esMonitoringUrl = storage.get(ES_MONITORING_URL_KEY);
     if (!esMonitoringUrl) {
-      esMonitoringUrl = props.monitoringHosts ? props.monitoringHosts[0] : DEFAULT_ES_MONITORING_URL;
+      esMonitoringUrl = props.monitoringHosts
+        ? props.monitoringHosts[0]
+        : DEFAULT_ES_MONITORING_URL;
     }
 
     this.checkInterval = null;
@@ -63,7 +69,7 @@ export class Flyout extends Component {
       checkedStatusByStep: {
         [INSTRUCTION_STEP_ENABLE_METRICBEAT]: false,
         [INSTRUCTION_STEP_DISABLE_INTERNAL]: false,
-        userAcknowledgedNoClusterUuidPrompt: false
+        userAcknowledgedNoClusterUuidPrompt: false,
       },
     };
   }
@@ -71,7 +77,7 @@ export class Flyout extends Component {
   setEsMonitoringUrl = esMonitoringUrl => {
     storage.set(ES_MONITORING_URL_KEY, esMonitoringUrl);
     this.setState({ esMonitoringUrl });
-  }
+  };
 
   finishedFlyout() {
     const { onClose } = this.props;
@@ -80,11 +86,7 @@ export class Flyout extends Component {
 
   renderActiveStep() {
     const { product, productName, onClose, meta } = this.props;
-    const {
-      activeStep,
-      esMonitoringUrl,
-      checkedStatusByStep,
-    } = this.state;
+    const { activeStep, esMonitoringUrl, checkedStatusByStep } = this.state;
 
     switch (activeStep) {
       case INSTRUCTION_STEP_SET_MONITORING_URL:
@@ -92,13 +94,19 @@ export class Flyout extends Component {
           <EuiForm>
             <EuiFormRow
               fullWidth
-              label={i18n.translate('xpack.monitoring.metricbeatMigration.flyout.step1.monitoringUrlLabel', {
-                defaultMessage: 'URL of monitoring cluster'
-              })}
-              helpText={i18n.translate('xpack.monitoring.metricbeatMigration.flyout.step1.monitoringUrlHelpText', {
-                defaultMessage: `Typically a single URL. If multiple URLs, separate with a comma.
-                The running Metricbeat instance must be able to communicate with these Elasticsearch servers.`
-              })}
+              label={i18n.translate(
+                'xpack.monitoring.metricbeatMigration.flyout.step1.monitoringUrlLabel',
+                {
+                  defaultMessage: 'URL of monitoring cluster',
+                }
+              )}
+              helpText={i18n.translate(
+                'xpack.monitoring.metricbeatMigration.flyout.step1.monitoringUrlHelpText',
+                {
+                  defaultMessage: `Typically a single URL. If multiple URLs, separate with a comma.
+                The running Metricbeat instance must be able to communicate with these Elasticsearch servers.`,
+                }
+              )}
             >
               <EuiFieldText
                 fullWidth
@@ -119,7 +127,7 @@ export class Flyout extends Component {
 
         return (
           <Fragment>
-            <EuiSteps steps={instructionSteps}/>
+            <EuiSteps steps={instructionSteps} />
           </Fragment>
         );
     }
@@ -147,8 +155,7 @@ export class Flyout extends Component {
         willShowNextButton = false;
         // ES can be fully migrated for net new users
         willDisableDoneButton = !product.isPartiallyMigrated && !product.isFullyMigrated;
-      }
-      else {
+      } else {
         // Do not bother taking them to the disable internal step for non ES use cases
         // since disabling is an individual action per node, versus ES where it is
         // a cluster setting
@@ -177,12 +184,10 @@ export class Flyout extends Component {
         isDisabled = !esMonitoringUrl || esMonitoringUrl.length === 0;
         if (product.isPartiallyMigrated || product.isFullyMigrated) {
           nextStep = INSTRUCTION_STEP_DISABLE_INTERNAL;
-        }
-        else {
+        } else {
           nextStep = INSTRUCTION_STEP_ENABLE_METRICBEAT;
         }
-      }
-      else if (activeStep === INSTRUCTION_STEP_ENABLE_METRICBEAT) {
+      } else if (activeStep === INSTRUCTION_STEP_ENABLE_METRICBEAT) {
         isDisabled = !product.isPartiallyMigrated && !product.isFullyMigrated;
         nextStep = INSTRUCTION_STEP_DISABLE_INTERNAL;
       }
@@ -197,7 +202,7 @@ export class Flyout extends Component {
           onClick={() => this.setState({ activeStep: nextStep })}
         >
           {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.nextButtonLabel', {
-            defaultMessage: 'Next'
+            defaultMessage: 'Next',
           })}
         </EuiButton>
       );
@@ -210,7 +215,7 @@ export class Flyout extends Component {
         onClick={() => this.finishedFlyout()}
       >
         {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.doneButtonLabel', {
-          defaultMessage: 'Done'
+          defaultMessage: 'Done',
         })}
       </EuiButton>
     );
@@ -222,8 +227,7 @@ export class Flyout extends Component {
     let documentationUrl = null;
     if (productName === KIBANA_SYSTEM_ID) {
       documentationUrl = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/monitoring-metricbeat.html`;
-    }
-    else if (productName === ELASTICSEARCH_SYSTEM_ID) {
+    } else if (productName === ELASTICSEARCH_SYSTEM_ID) {
       documentationUrl = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`;
     }
 
@@ -235,7 +239,7 @@ export class Flyout extends Component {
       <EuiText size="s">
         <EuiLink href={documentationUrl} target="_blank">
           {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.learnMore', {
-            defaultMessage: 'Learn about why.'
+            defaultMessage: 'Learn about why.',
           })}
         </EuiLink>
       </EuiText>
@@ -252,8 +256,8 @@ export class Flyout extends Component {
       defaultMessage: 'Monitor `{instanceName}` {instanceIdentifier} with Metricbeat',
       values: {
         instanceName,
-        instanceIdentifier
-      }
+        instanceIdentifier,
+      },
     });
 
     if (product.isNetNewUser) {
@@ -261,8 +265,8 @@ export class Flyout extends Component {
         defaultMessage: 'Monitor {instanceName} {instanceIdentifier} with Metricbeat',
         values: {
           instanceIdentifier,
-          instanceName
-        }
+          instanceName,
+        },
       });
     }
 
@@ -276,7 +280,7 @@ export class Flyout extends Component {
             title={i18n.translate(
               'xpack.monitoring.metricbeatMigration.flyout.noClusterUuidTitle',
               {
-                defaultMessage: 'No cluster detected'
+                defaultMessage: 'No cluster detected',
               }
             )}
           >
@@ -289,14 +293,17 @@ export class Flyout extends Component {
                   productName,
                   instanceIdentifier,
                   link: (
-                    <EuiLink href={`#/overview?_g=(cluster_uuid:__standalone_cluster__)`} target="_blank">
+                    <EuiLink
+                      href={`#/overview?_g=(cluster_uuid:__standalone_cluster__)`}
+                      target="_blank"
+                    >
                       Click here to view the Standalone cluster.
                     </EuiLink>
-                  )
+                  ),
                 }}
               />
             </p>
-            <EuiSpacer size="s"/>
+            <EuiSpacer size="s" />
             <EuiCheckbox
               id="monitoringFlyoutNoClusterUuidCheckbox"
               label={i18n.translate(
@@ -306,29 +313,26 @@ export class Flyout extends Component {
                   this {productName} {instanceIdentifier}.`,
                   values: {
                     productName,
-                    instanceIdentifier
-                  }
+                    instanceIdentifier,
+                  },
                 }
               )}
               checked={this.state.userAcknowledgedNoClusterUuidPrompt}
-              onChange={e => this.setState({ userAcknowledgedNoClusterUuidPrompt: e.target.checked })}
+              onChange={e =>
+                this.setState({ userAcknowledgedNoClusterUuidPrompt: e.target.checked })
+              }
             />
           </EuiCallOut>
-          <EuiSpacer size="s"/>
+          <EuiSpacer size="s" />
         </Fragment>
       );
     }
 
     return (
-      <EuiFlyout
-        onClose={onClose}
-        aria-labelledby="flyoutTitle"
-      >
+      <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id="flyoutTitle">
-              {title}
-            </h2>
+            <h2 id="flyoutTitle">{title}</h2>
           </EuiTitle>
           {/* Remove until we have a why article: https://github.com/elastic/kibana/pull/45799#issuecomment-536778656 */}
           {/* {this.getDocumentationTitle()} */}
@@ -340,19 +344,13 @@ export class Flyout extends Component {
         <EuiFlyoutFooter style={{ marginBottom: '64px' }}>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="cross"
-                onClick={onClose}
-                flush="left"
-              >
+              <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
                 {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.closeButtonLabel', {
-                  defaultMessage: 'Close'
+                  defaultMessage: 'Close',
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {this.renderActiveStepNextButton()}
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{this.renderActiveStepNextButton()}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>

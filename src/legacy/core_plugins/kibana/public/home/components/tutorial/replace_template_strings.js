@@ -23,7 +23,7 @@ import { metadata } from 'ui/metadata';
 import {
   DOC_LINK_VERSION,
   ELASTIC_WEBSITE_URL,
-  documentationLinks
+  documentationLinks,
 } from 'ui/documentation_links/documentation_links';
 
 const TEMPLATE_TAGS = ['{', '}'];
@@ -46,7 +46,7 @@ export function replaceTemplateStrings(text, params = {}) {
     curlyClose: '}',
     config: {
       cloud: {
-        id: chrome.getInjected('cloudId')
+        id: chrome.getInjected('cloudId'),
       },
       docs: {
         base_url: ELASTIC_WEBSITE_URL,
@@ -59,13 +59,13 @@ export function replaceTemplateStrings(text, params = {}) {
           auditbeat: documentationLinks.auditbeat.base,
         },
         logstash: documentationLinks.logstash.base,
-        version: DOC_LINK_VERSION
+        version: DOC_LINK_VERSION,
       },
       kibana: {
-        version: metadata.version
-      }
+        version: metadata.version,
+      },
     },
-    params: params
+    params: params,
   };
   mustacheWriter.parse(text, TEMPLATE_TAGS);
   return mustacheWriter.render(text, variables);

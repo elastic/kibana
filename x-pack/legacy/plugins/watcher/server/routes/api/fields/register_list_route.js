@@ -16,7 +16,7 @@ function fetchFields(callWithRequest, indexes) {
     fields: ['*'],
     ignoreUnavailable: true,
     allowNoIndices: true,
-    ignore: 404
+    ignore: 404,
   };
 
   return callWithRequest('fieldCaps', params);
@@ -29,15 +29,13 @@ export function registerListRoute(server) {
   server.route({
     path: '/api/watcher/fields',
     method: 'POST',
-    handler: (request) => {
+    handler: request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { indexes } = request.payload;
 
       return fetchFields(callWithRequest, indexes)
         .then(response => {
-          const json = (response.status === 404)
-            ? { fields: [] }
-            : response;
+          const json = response.status === 404 ? { fields: [] } : response;
 
           const fields = Fields.fromUpstreamJson(json);
 
@@ -54,7 +52,7 @@ export function registerListRoute(server) {
         });
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

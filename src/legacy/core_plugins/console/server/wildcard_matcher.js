@@ -28,7 +28,7 @@ export class WildcardMatcher {
       dot: true,
       nocase: true,
       matchBase: true,
-      nocomment: true
+      nocomment: true,
     });
   }
 

@@ -66,10 +66,10 @@ export class Pager {
     this.totalPages = Math.ceil(this.totalItems / this.pageSize);
     this.currentPage = clamp(this.currentPage, 1, this.totalPages);
 
-    this.startItem = ((this.currentPage - 1) * this.pageSize) + 1;
+    this.startItem = (this.currentPage - 1) * this.pageSize + 1;
     this.startItem = clamp(this.startItem, 0, this.totalItems);
 
-    this.endItem = (this.startItem - 1) + this.pageSize;
+    this.endItem = this.startItem - 1 + this.pageSize;
     this.endItem = clamp(this.endItem, 0, this.totalItems);
 
     this.startIndex = this.startItem - 1;

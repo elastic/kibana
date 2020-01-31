@@ -21,14 +21,13 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { aggTypes } from '../..';
 
-describe('Terms Agg', function () {
-  describe('order agg editor UI', function () {
-
+describe('Terms Agg', function() {
+  describe('order agg editor UI', function() {
     let $rootScope;
 
     function init({ metricAggs = [], aggParams = {} }) {
       ngMock.module('kibana');
-      ngMock.inject(function ($controller, _$rootScope_) {
+      ngMock.inject(function($controller, _$rootScope_) {
         const terms = aggTypes.buckets.find(agg => agg.name === 'terms');
         const orderAggController = terms.paramByName('orderAgg').controller;
 
@@ -38,7 +37,7 @@ describe('Terms Agg', function () {
           params: aggParams,
           type: terms,
           vis: {
-            aggs: []
+            aggs: [],
           },
           getParam: key => aggParams[key],
         };
@@ -49,16 +48,16 @@ describe('Terms Agg', function () {
     }
 
     // should be rewritten after EUIficate order_agg.html
-    it.skip('selects _key if the selected metric becomes incompatible', function () {
+    it.skip('selects _key if the selected metric becomes incompatible', function() {
       init({
         metricAggs: [
           {
             id: 'agg1',
             type: {
-              name: 'count'
-            }
-          }
-        ]
+              name: 'count',
+            },
+          },
+        ],
       });
 
       expect($rootScope.agg.params.orderBy).to.be('agg1');
@@ -66,25 +65,25 @@ describe('Terms Agg', function () {
         {
           id: 'agg1',
           type: {
-            name: 'top_hits'
-          }
-        }
+            name: 'top_hits',
+          },
+        },
       ];
       $rootScope.$digest();
       expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
     // should be rewritten after EUIficate order_agg.html
-    it.skip('selects _key if the selected metric is removed', function () {
+    it.skip('selects _key if the selected metric is removed', function() {
       init({
         metricAggs: [
           {
             id: 'agg1',
             type: {
-              name: 'count'
-            }
-          }
-        ]
+              name: 'count',
+            },
+          },
+        ],
       });
       expect($rootScope.agg.params.orderBy).to.be('agg1');
       $rootScope.metricAggs = [];
@@ -99,24 +98,24 @@ describe('Terms Agg', function () {
             {
               id: 'agg1',
               type: {
-                name: 'count'
-              }
-            }
+                name: 'count',
+              },
+            },
           ],
           aggParams: {
             otherBucketLabel: 'Other',
-            missingBucketLabel: 'Missing'
-          }
+            missingBucketLabel: 'Missing',
+          },
         });
         $rootScope.$digest();
       });
 
-      it ('converts __other__ key', () => {
+      it('converts __other__ key', () => {
         const formatter = $rootScope.agg.type.getFormat($rootScope.agg).getConverterFor('text');
         expect(formatter('__other__')).to.be('Other');
       });
 
-      it ('converts __missing__ key', () => {
+      it('converts __missing__ key', () => {
         const formatter = $rootScope.agg.type.getFormat($rootScope.agg).getConverterFor('text');
         expect(formatter('__missing__')).to.be('Missing');
       });
@@ -129,17 +128,16 @@ describe('Terms Agg', function () {
     it('saves the "custom metric" to state and refreshes from it');
     it('invalidates the form if the metric agg form is not complete');
 
-    describe.skip('convert include/exclude from old format', function () {
-
-      it('it doesnt do anything with string type', function () {
+    describe.skip('convert include/exclude from old format', function() {
+      it('it doesnt do anything with string type', function() {
         init({
           aggParams: {
             include: '404',
             exclude: '400',
             field: {
-              type: 'string'
+              type: 'string',
             },
-          }
+          },
         });
 
         const aggConfig = $rootScope.agg;
@@ -158,18 +156,19 @@ describe('Terms Agg', function () {
         expect(output.params.exclude).to.equal('400');
       });
 
-      it('converts object to string type', function () {
+      it('converts object to string type', function() {
         init({
           aggParams: {
             include: {
-              pattern: '404'
-            }, exclude: {
-              pattern: '400'
+              pattern: '404',
+            },
+            exclude: {
+              pattern: '400',
             },
             field: {
-              type: 'string'
+              type: 'string',
             },
-          }
+          },
         });
 
         const aggConfig = $rootScope.agg;
@@ -187,7 +186,6 @@ describe('Terms Agg', function () {
         expect(output.params.include).to.equal('404');
         expect(output.params.exclude).to.equal('400');
       });
-
     });
   });
 });

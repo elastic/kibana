@@ -28,64 +28,69 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import { Schemas } from '../editors/default/schemas';
 import { AggGroupNames } from '../editors/default/agg_groups';
 
-describe('AggConfigs', function () {
-
+describe('AggConfigs', function() {
   let Vis;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    // load main deps
-    Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-  }));
+  beforeEach(
+    ngMock.inject(function(Private) {
+      // load main deps
+      Vis = Private(VisProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    })
+  );
 
-  describe('constructor', function () {
-    it('handles passing just a vis', function () {
+  describe('constructor', function() {
+    it('handles passing just a vis', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
-        aggs: []
+        aggs: [],
       });
 
       const ac = new AggConfigs(vis.indexPattern, [], vis.type.schemas.all);
       expect(ac.aggs).to.have.length(1);
     });
 
-    it('converts configStates into AggConfig objects if they are not already', function () {
+    it('converts configStates into AggConfig objects if they are not already', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
-        aggs: []
+        aggs: [],
       });
 
-      const ac = new AggConfigs(vis.indexPattern, [
-        {
-          type: 'date_histogram',
-          schema: 'segment'
-        },
-        new AggConfig(vis.aggs, {
-          type: 'terms',
-          schema: 'split'
-        })
-      ], vis.type.schemas.all);
+      const ac = new AggConfigs(
+        vis.indexPattern,
+        [
+          {
+            type: 'date_histogram',
+            schema: 'segment',
+          },
+          new AggConfig(vis.aggs, {
+            type: 'terms',
+            schema: 'split',
+          }),
+        ],
+        vis.type.schemas.all
+      );
 
       expect(ac.aggs).to.have.length(3);
     });
 
-    it('attempts to ensure that all states have an id', function () {
+    it('attempts to ensure that all states have an id', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
-        aggs: []
+        aggs: [],
       });
 
       const states = [
         {
           type: 'date_histogram',
-          schema: 'segment'
+          schema: 'segment',
         },
         {
           type: 'terms',
-          schema: 'split'
-        }
+          schema: 'split',
+        },
       ];
 
       const spy = sinon.spy(AggConfig, 'ensureIds');
@@ -95,9 +100,9 @@ describe('AggConfigs', function () {
       AggConfig.ensureIds.restore();
     });
 
-    describe('defaults', function () {
+    describe('defaults', function() {
       let vis;
-      beforeEach(function () {
+      beforeEach(function() {
         vis = {
           indexPattern: indexPattern,
           type: {
@@ -111,8 +116,8 @@ describe('AggConfigs', function () {
                 defaults: [
                   { schema: 'metric', type: 'count' },
                   { schema: 'metric', type: 'avg' },
-                  { schema: 'metric', type: 'sum' }
-                ]
+                  { schema: 'metric', type: 'sum' },
+                ],
               },
               {
                 group: AggGroupNames.Buckets,
@@ -122,34 +127,38 @@ describe('AggConfigs', function () {
                 max: 1,
                 defaults: [
                   { schema: 'segment', type: 'terms' },
-                  { schema: 'segment', type: 'filters' }
-                ]
-              }
-            ])
-          }
+                  { schema: 'segment', type: 'filters' },
+                ],
+              },
+            ]),
+          },
         };
       });
 
-      it('should only set the number of defaults defined by the max', function () {
+      it('should only set the number of defaults defined by the max', function() {
         const ac = new AggConfigs(vis.indexPattern, [], vis.type.schemas.all);
         expect(ac.bySchemaName('metric')).to.have.length(2);
       });
 
-      it('should set the defaults defined in the schema when none exist', function () {
+      it('should set the defaults defined in the schema when none exist', function() {
         const ac = new AggConfigs(vis.indexPattern, [], vis.type.schemas.all);
         expect(ac.aggs).to.have.length(3);
       });
 
-      it('should NOT set the defaults defined in the schema when some exist', function () {
-        const ac = new AggConfigs(vis.indexPattern, [{ schema: 'segment', type: 'date_histogram' }], vis.type.schemas.all);
+      it('should NOT set the defaults defined in the schema when some exist', function() {
+        const ac = new AggConfigs(
+          vis.indexPattern,
+          [{ schema: 'segment', type: 'date_histogram' }],
+          vis.type.schemas.all
+        );
         expect(ac.aggs).to.have.length(3);
         expect(ac.bySchemaName('segment')[0].type.name).to.equal('date_histogram');
       });
     });
   });
 
-  describe('#getRequestAggs', function () {
-    it('performs a stable sort, but moves metrics to the bottom', function () {
+  describe('#getRequestAggs', function() {
+    it('performs a stable sort, but moves metrics to the bottom', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
@@ -159,12 +168,12 @@ describe('AggConfigs', function () {
           { type: 'sum', schema: 'metric' },
           { type: 'date_histogram', schema: 'segment' },
           { type: 'filters', schema: 'split' },
-          { type: 'percentiles', schema: 'metric' }
-        ]
+          { type: 'percentiles', schema: 'metric' },
+        ],
       });
 
       const sorted = vis.aggs.getRequestAggs();
-      const aggs = _.indexBy(vis.aggs.aggs, function (agg) {
+      const aggs = _.indexBy(vis.aggs.aggs, function(agg) {
         return agg.type.name;
       });
 
@@ -179,19 +188,19 @@ describe('AggConfigs', function () {
     });
   });
 
-  describe('#getResponseAggs', function () {
-    it('returns all request aggs for basic aggs', function () {
+  describe('#getResponseAggs', function() {
+    it('returns all request aggs for basic aggs', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           { type: 'terms', schema: 'split' },
           { type: 'date_histogram', schema: 'segment' },
-          { type: 'count', schema: 'metric' }
-        ]
+          { type: 'count', schema: 'metric' },
+        ],
       });
 
       const sorted = vis.aggs.getResponseAggs();
-      const aggs = _.indexBy(vis.aggs.aggs, function (agg) {
+      const aggs = _.indexBy(vis.aggs.aggs, function(agg) {
         return agg.type.name;
       });
 
@@ -201,18 +210,18 @@ describe('AggConfigs', function () {
       expect(sorted).to.have.length(0);
     });
 
-    it('expands aggs that have multiple responses', function () {
+    it('expands aggs that have multiple responses', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           { type: 'terms', schema: 'split' },
           { type: 'date_histogram', schema: 'segment' },
-          { type: 'percentiles', schema: 'metric', params: { percents: [1, 2, 3] } }
-        ]
+          { type: 'percentiles', schema: 'metric', params: { percents: [1, 2, 3] } },
+        ],
       });
 
       const sorted = vis.aggs.getResponseAggs();
-      const aggs = _.indexBy(vis.aggs.aggs, function (agg) {
+      const aggs = _.indexBy(vis.aggs.aggs, function(agg) {
         return agg.type.name;
       });
 
@@ -225,31 +234,28 @@ describe('AggConfigs', function () {
     });
   });
 
-  describe('#toDsl', function () {
-    it('uses the sorted aggs', function () {
+  describe('#toDsl', function() {
+    it('uses the sorted aggs', function() {
       const vis = new Vis(indexPattern, { type: 'histogram' });
       sinon.spy(vis.aggs, 'getRequestAggs');
       vis.aggs.toDsl();
       expect(vis.aggs.getRequestAggs).to.have.property('callCount', 1);
     });
 
-    it('calls aggConfig#toDsl() on each aggConfig and compiles the nested output', function () {
+    it('calls aggConfig#toDsl() on each aggConfig and compiles the nested output', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
-        aggs: [
-          { type: 'date_histogram', schema: 'segment' },
-          { type: 'filters', schema: 'split' }
-        ]
+        aggs: [{ type: 'date_histogram', schema: 'segment' }, { type: 'filters', schema: 'split' }],
       });
 
-      const aggInfos = vis.aggs.aggs.map(function (aggConfig) {
+      const aggInfos = vis.aggs.aggs.map(function(aggConfig) {
         const football = {};
 
         sinon.stub(aggConfig, 'toDsl').returns(football);
 
         return {
           id: aggConfig.id,
-          football: football
+          football: football,
         };
       });
 
@@ -262,18 +268,22 @@ describe('AggConfigs', function () {
         if (lvl[info.id].aggs) {
           return recurse(lvl[info.id].aggs);
         }
-      }(vis.aggs.toDsl()));
+      })(vis.aggs.toDsl());
 
       expect(aggInfos).to.have.length(1);
     });
 
-    it('skips aggs that don\'t have a dsl representation', function () {
+    it("skips aggs that don't have a dsl representation", function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
-          { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp', interval: '10s' } },
-          { type: 'count', schema: 'metric' }
-        ]
+          {
+            type: 'date_histogram',
+            schema: 'segment',
+            params: { field: '@timestamp', interval: '10s' },
+          },
+          { type: 'count', schema: 'metric' },
+        ],
       });
 
       const dsl = vis.aggs.toDsl();
@@ -286,16 +296,20 @@ describe('AggConfigs', function () {
       expect(dsl).to.not.have.property(count.id);
     });
 
-    it('writes multiple metric aggregations at the same level', function () {
+    it('writes multiple metric aggregations at the same level', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
-          { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp', interval: '10s' } },
-          { type: 'avg', schema: 'metric', params: { field: 'bytes' }  },
-          { type: 'sum', schema: 'metric', params: { field: 'bytes' }  },
-          { type: 'min', schema: 'metric', params: { field: 'bytes' }  },
-          { type: 'max', schema: 'metric', params: { field: 'bytes' }  }
-        ]
+          {
+            type: 'date_histogram',
+            schema: 'segment',
+            params: { field: '@timestamp', interval: '10s' },
+          },
+          { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'sum', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'min', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'max', schema: 'metric', params: { field: 'bytes' } },
+        ],
       });
 
       const dsl = vis.aggs.toDsl();
@@ -307,23 +321,23 @@ describe('AggConfigs', function () {
       expect(dsl[histo.id]).to.be.an('object');
       expect(dsl[histo.id]).to.have.property('aggs');
 
-      metrics.forEach(function (metric) {
+      metrics.forEach(function(metric) {
         expect(dsl[histo.id].aggs).to.have.property(metric.id);
         expect(dsl[histo.id].aggs[metric.id]).to.not.have.property('aggs');
       });
     });
 
-    it('writes multiple metric aggregations at every level if the vis is hierarchical', function () {
+    it('writes multiple metric aggregations at every level if the vis is hierarchical', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           { type: 'terms', schema: 'segment', params: { field: 'ip', orderBy: 1 } },
           { type: 'terms', schema: 'segment', params: { field: 'extension', orderBy: 1 } },
-          { id: 1, type: 'avg', schema: 'metric', params: { field: 'bytes' }  },
-          { type: 'sum', schema: 'metric', params: { field: 'bytes' }  },
-          { type: 'min', schema: 'metric', params: { field: 'bytes' }  },
-          { type: 'max', schema: 'metric', params: { field: 'bytes' }  }
-        ]
+          { id: 1, type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'sum', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'min', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'max', schema: 'metric', params: { field: 'bytes' } },
+        ],
       });
       vis.isHierarchical = _.constant(true);
 
@@ -338,7 +352,7 @@ describe('AggConfigs', function () {
         expect(dsl[bucket.id]).to.be.an('object');
         expect(dsl[bucket.id]).to.have.property('aggs');
 
-        metrics.forEach(function (metric) {
+        metrics.forEach(function(metric) {
           expect(dsl[bucket.id].aggs).to.have.property(metric.id);
           expect(dsl[bucket.id].aggs[metric.id]).to.not.have.property('aggs');
         });
@@ -346,10 +360,10 @@ describe('AggConfigs', function () {
         if (buckets.length) {
           checkLevel(dsl[bucket.id].aggs);
         }
-      }(topLevelDsl));
+      })(topLevelDsl);
     });
 
-    it('adds the parent aggs of nested metrics at every level if the vis is hierarchical', function () {
+    it('adds the parent aggs of nested metrics at every level if the vis is hierarchical', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
@@ -365,15 +379,15 @@ describe('AggConfigs', function () {
                 params: {
                   field: '@timestamp',
                   interval: '10s',
-                }
+                },
               },
               customMetric: {
                 id: '1-metric',
                 type: 'count',
                 schema: 'metricAgg',
-                params: {}
-              }
-            }
+                params: {},
+              },
+            },
           },
           {
             id: '2',
@@ -381,7 +395,7 @@ describe('AggConfigs', function () {
             schema: 'bucket',
             params: {
               field: 'geo.src',
-            }
+            },
           },
           {
             id: '3',
@@ -389,9 +403,9 @@ describe('AggConfigs', function () {
             schema: 'bucket',
             params: {
               field: 'machine.os',
-            }
-          }
-        ]
+            },
+          },
+        ],
       });
       vis.isHierarchical = _.constant(true);
 
@@ -399,7 +413,10 @@ describe('AggConfigs', function () {
       expect(topLevelDsl.aggs).to.have.keys(['1', '1-bucket']);
       expect(topLevelDsl.aggs['1'].avg_bucket).to.have.property('buckets_path', '1-bucket>_count');
       expect(topLevelDsl.aggs['3'].aggs).to.have.keys(['1', '1-bucket']);
-      expect(topLevelDsl.aggs['3'].aggs['1'].avg_bucket).to.have.property('buckets_path', '1-bucket>_count');
+      expect(topLevelDsl.aggs['3'].aggs['1'].avg_bucket).to.have.property(
+        'buckets_path',
+        '1-bucket>_count'
+      );
     });
   });
 });

@@ -26,24 +26,24 @@ jest.mock('../../lib', () => ({
 }));
 
 const manifestContentMock = JSON.stringify({
-  'name': 'vendors',
-  'content': {
+  name: 'vendors',
+  content: {
     '/mock/node_modules/dep1': {},
     '/mock/node_modules/dep2': {},
     '/mock/node_modules/dep3': {},
-    '/mock/tmp/dep2': {}
-  }
+    '/mock/tmp/dep2': {},
+  },
 });
 
 const emptyManifestContentMock = JSON.stringify({
-  'name': 'vendors',
-  'content': {}
+  name: 'vendors',
+  content: {},
 });
 
 const noManifestMock = JSON.stringify(null);
 
 const noContentFieldManifestMock = JSON.stringify({
-  'name': 'vendors',
+  name: 'vendors',
 });
 
 describe('Webpack DLL Build Tasks Utils', () => {
@@ -53,10 +53,12 @@ describe('Webpack DLL Build Tasks Utils', () => {
     isFileAccessible.mockImplementation(() => true);
 
     const mockManifestPath = '/mock/mock_dll_manifest.json';
-    const mockModulesWhitelist = [ 'dep1' ];
+    const mockModulesWhitelist = ['dep1'];
     const dllEntries = await getDllEntries(mockManifestPath, mockModulesWhitelist);
 
-    expect(dllEntries).toEqual(expect.arrayContaining(['/mock/node_modules/dep2', '/mock/node_modules/dep3']));
+    expect(dllEntries).toEqual(
+      expect.arrayContaining(['/mock/node_modules/dep2', '/mock/node_modules/dep3'])
+    );
   });
 
   it('should only include accessible files', async () => {
@@ -65,7 +67,7 @@ describe('Webpack DLL Build Tasks Utils', () => {
     isFileAccessible.mockImplementation(() => false);
 
     const mockManifestPath = '/mock/mock_dll_manifest.json';
-    const mockModulesWhitelist = [ 'dep1' ];
+    const mockModulesWhitelist = ['dep1'];
     const dllEntries = await getDllEntries(mockManifestPath, mockModulesWhitelist);
 
     isFileAccessible.mockRestore();
@@ -81,7 +83,9 @@ describe('Webpack DLL Build Tasks Utils', () => {
     try {
       await getDllEntries(mockManifestPath, []);
     } catch (error) {
-      expect(error.message).toEqual(`The following dll manifest doesn't exists: /mock/mock_dll_manifest.json`);
+      expect(error.message).toEqual(
+        `The following dll manifest doesn't exists: /mock/mock_dll_manifest.json`
+      );
     }
   });
 
@@ -93,7 +97,9 @@ describe('Webpack DLL Build Tasks Utils', () => {
     try {
       await getDllEntries(mockManifestPath, []);
     } catch (error) {
-      expect(error.message).toEqual(`The following dll manifest doesn't exists: /mock/mock_dll_manifest.json`);
+      expect(error.message).toEqual(
+        `The following dll manifest doesn't exists: /mock/mock_dll_manifest.json`
+      );
     }
   });
 
@@ -105,7 +111,9 @@ describe('Webpack DLL Build Tasks Utils', () => {
     try {
       await getDllEntries(mockManifestPath, []);
     } catch (error) {
-      expect(error.message).toEqual(`The following dll manifest is reporting an empty dll: /mock/mock_dll_manifest.json`);
+      expect(error.message).toEqual(
+        `The following dll manifest is reporting an empty dll: /mock/mock_dll_manifest.json`
+      );
     }
   });
 

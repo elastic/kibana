@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiCodeEditor
-} from '@elastic/eui';
+import { EuiCodeEditor } from '@elastic/eui';
 
 export const EDITOR_MODE = { TEXT: 'text', JSON: 'json' };
 
@@ -22,7 +19,7 @@ export function MLJobEditor({
   readOnly = false,
   syntaxChecking = true,
   theme = 'textmate',
-  onChange = () => {}
+  onChange = () => {},
 }) {
   return (
     <EuiCodeEditor
@@ -38,7 +35,7 @@ export function MLJobEditor({
       setOptions={{
         useWorker: syntaxChecking,
         tabSize: 2,
-        useSoftTabs: true
+        useSoftTabs: true,
       }}
       onChange={onChange}
     />

@@ -9,9 +9,11 @@ import expect from '@kbn/expect';
 import url from 'url';
 import supertestAsPromised from 'supertest-as-promised';
 
-const { task: { properties: taskManagerIndexMapping } } = require('../../../../legacy/plugins/task_manager/mappings.json');
+const {
+  task: { properties: taskManagerIndexMapping },
+} = require('../../../../legacy/plugins/task_manager/mappings.json');
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const es = getService('legacyEs');
   const log = getService('log');
   const retry = getService('retry');
@@ -20,9 +22,12 @@ export default function ({ getService }) {
   const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
   describe('scheduling and running tasks', () => {
-    beforeEach(() => supertest.delete('/api/sample_tasks')
-      .set('kbn-xsrf', 'xxx')
-      .expect(200));
+    beforeEach(() =>
+      supertest
+        .delete('/api/sample_tasks')
+        .set('kbn-xsrf', 'xxx')
+        .expect(200)
+    );
 
     beforeEach(async () => {
       const exists = await es.indices.exists({ index: testHistoryIndex });
@@ -37,7 +42,7 @@ export default function ({ getService }) {
           index: testHistoryIndex,
           body: {
             mappings: {
-              properties: taskManagerIndexMapping
+              properties: taskManagerIndexMapping,
             },
           },
         });
@@ -45,24 +50,28 @@ export default function ({ getService }) {
     });
 
     function currentTasks() {
-      return supertest.get('/api/sample_tasks')
+      return supertest
+        .get('/api/sample_tasks')
         .expect(200)
-        .then((response) => response.body);
+        .then(response => response.body);
     }
 
     function historyDocs() {
-      return es.search({
-        index: testHistoryIndex,
-        q: 'type:task',
-      }).then(result => result.hits.hits);
+      return es
+        .search({
+          index: testHistoryIndex,
+          q: 'type:task',
+        })
+        .then(result => result.hits.hits);
     }
 
     function scheduleTask(task) {
-      return supertest.post('/api/sample_tasks')
+      return supertest
+        .post('/api/sample_tasks')
         .set('kbn-xsrf', 'xxx')
         .send(task)
         .expect(200)
-        .then((response) => response.body);
+        .then(response => response.body);
     }
 
     it('should support middleware', async () => {
@@ -96,7 +105,7 @@ export default function ({ getService }) {
     it('should remove non-recurring tasks after they complete', async () => {
       await scheduleTask({
         taskType: 'sampleTask',
-        params: { },
+        params: {},
       });
 
       await retry.try(async () => {
@@ -110,7 +119,7 @@ export default function ({ getService }) {
       const result = await scheduleTask({
         id: 'test-task-for-sample-task-plugin-to-test-task-manager',
         taskType: 'sampleTask',
-        params: { },
+        params: {},
       });
 
       expect(result.id).to.be('test-task-for-sample-task-plugin-to-test-task-manager');
@@ -126,7 +135,9 @@ export default function ({ getService }) {
         const [scheduledTask] = (await currentTasks()).docs;
         expect(scheduledTask.id).to.eql(task.id);
         expect(scheduledTask.attempts).to.be.greaterThan(0);
-        expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(Date.parse(task.runAt) + 5 * 60 * 1000);
+        expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(
+          Date.parse(task.runAt) + 5 * 60 * 1000
+        );
       });
     });
 
@@ -158,7 +169,7 @@ export default function ({ getService }) {
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
         interval: `${interval}m`,
-        params: { },
+        params: {},
       });
 
       await retry.try(async () => {
@@ -175,7 +186,9 @@ export default function ({ getService }) {
     async function expectReschedule(originalTask, currentTask, expectedDiff) {
       const originalRunAt = Date.parse(originalTask.runAt);
       const buffer = 10000;
-      expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.greaterThan(expectedDiff - buffer);
+      expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.greaterThan(
+        expectedDiff - buffer
+      );
       expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.lessThan(expectedDiff + buffer);
     }
   });

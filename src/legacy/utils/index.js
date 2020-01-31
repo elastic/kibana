@@ -41,7 +41,4 @@ export {
   createReplaceStream,
 } from './streams';
 
-export {
-  parseCommaSeparatedList,
-  formatListAsProse,
-} from './strings';
+export { parseCommaSeparatedList, formatListAsProse } from './strings';

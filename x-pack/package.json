@@ -1,6 +1,6 @@
 {
   "name": "x-pack",
-  "version": "7.5.1",
+  "version": "7.5.3",
   "author": "Elastic",
   "private": true,
   "license": "Elastic-License",
@@ -32,7 +32,6 @@
     "@kbn/es": "1.0.0",
     "@kbn/expect": "1.0.0",
     "@kbn/plugin-helpers": "9.0.2",
-    "@kbn/pm": "1.0.0",
     "@kbn/test": "1.0.0",
     "@kbn/utility-types": "1.0.0",
     "@mattapperson/slapshot": "1.4.0",
@@ -376,7 +375,7 @@
     "xregexp": "4.2.4"
   },
   "engines": {
-    "yarn": "^1.10.1"
+    "yarn": "^1.21.1"
   },
   "workspaces": {
     "nohoist": [

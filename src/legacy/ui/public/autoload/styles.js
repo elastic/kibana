@@ -18,7 +18,11 @@
  */
 
 // All Kibana styles inside of the /styles dir
-const context = require.context('../styles', false, /[\/\\](?!mixins|variables|_|\.|bootstrap_(light|dark))[^\/\\]+\.less/);
+const context = require.context(
+  '../styles',
+  false,
+  /[\/\\](?!mixins|variables|_|\.|bootstrap_(light|dark))[^\/\\]+\.less/
+);
 context.keys().forEach(key => context(key));
 
 // manually require non-less files

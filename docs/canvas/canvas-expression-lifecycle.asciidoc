@@ -1,0 +1,261 @@
+[role="xpack"]
+[[canvas-expression-lifecycle]]
+== Canvas expression lifecycle
+
+Elements in Canvas are all created using an *expression language* that defines how to retrieve, manipulate, and ultimately visualize data. The goal is to allow you to do most of what you need without understanding the *expression language*, but learning how it works unlocks a lot of Canvas's power.
+
+
+[[canvas-expressions-always-start-with-a-function]]
+=== Expressions always start with a function
+
+Expressions simply execute <<canvas-function-reference, functions>> in a specific order, which produce some output value. That output can then be inserted into another function, and another after that, until it produces the output you need. 
+
+To use demo dataset available in Canvas to produce a table, run the following expression:
+
+[source,text]
+----
+filters
+| demodata
+| table
+| render
+----
+
+This expression starts out with the <<filters_fn, filters>> function, which provides the value of any time filters or dropdown filters in the workpad. This is then inserted into <<demodata_fn, demodata>>, a function that returns exactly what you expect, demo data. Because the <<demodata_fn, demodata>> function receives the filter information from the <<filters_fn, filters>> function before it, it applies those filters to reduce the set of data it returns. We call the output from the previous function _context_.
+
+The filtered <<demodata_fn, demo data>> becomes the _context_ of the next function, <<table_fn, table>>, which creates a table visualization from this data set. The <<table_fn, table>> function isn’t strictly required, but by being explicit, you have the option of providing arguments to control things like the font used in the table. The output of the <<table_fn, table>> function becomes the _context_ of the <<render_fn, render>> function. Like the <<table_fn, table>>, the <<render_fn, render>> function isn’t required either, but it allows access to other arguments, such as styling the border of the element or injecting custom CSS.
+
+
+[[canvas-function-arguments]]
+=== Function arguments
+
+Let’s look at another expression, which uses the same <<demodata_fn, demodata>> function, but instead produces a pie chart.
+
+image::images/canvas-functions-can-take-arguments-pie-chart.png[Pie Chart, height=400]
+[source,text]
+----
+filters
+| demodata
+| pointseries color="state" size="max(price)"
+| pie
+| render
+----
+
+To produce a filtered set of random data, the expression uses the <<filters_fn, filters>> and <<demodata_fn, demodata>> functions. This time, however, the output becomes the context for the <<pointseries_fn, pointseries>> function, which is a way to aggregate your data, similar to how Elasticsearch works, but more generalized. In this case, the data is split up using the `color` and `size` dimensions, using arguments on the <<pointseries_fn, pointseries>> function. Each unique value in the state column will have an associated size value, which in this case, will be the maximum value of the price column.
+
+If the expression stopped there, it would produce a `pointseries` data type as the output of this expression. But instead of looking at the raw values, the result is inserted into the <<pie_fn, pie>> function, which will produce an output that will render a pie visualization. And just like before, this is inserted into the <<render_fn, render>> function, which is useful for its arguments.
+
+The end result is a simple pie chart that uses the default color palette, but the <<pie_fn, pie>> function can take additional arguments that control how it gets rendered. For example, you can provide a `hole` argument to turn your pie chart into a donut chart by changing the expression to:
+
+
+image::images/canvas-functions-can-take-arguments-donut-chart.png[Donut Chart, height=400]
+[source,text]
+----
+filters
+| demodata
+| pointseries color="state" size="max(price)"
+| pie hole=50
+| render
+----
+
+
+[[canvas-aliases-and-unnamed-arguments]]
+=== Aliases and unnamed arguments
+
+Argument definitions have one canonical name, which is always provided in the underlying code. When argument definitions are used in an expression, they often include aliases that make them easier or faster to type.
+
+For example, the <<mapColumn_fn, mapColumn>> function has 2 arguments:
+
+* `expression` - Produces a calculated value.
+* `name` - The name of column.
+
+The `expression` argument includes some aliases, namely `exp`, `fn`, and `function`. That means that you can use any of those four options to provide that argument’s value. 
+
+So `mapColumn name=newColumn fn={string example}` is equal to `mapColumn name=newColumn expression={string example}`.
+
+There’s also a special type of alias which allows you to leave off the argument’s name entirely. The alias for this is an underscore, which indicates that the argument is an _unnamed_ argument and can be provided without explicitly naming it in the expression. The `name` argument here uses the _unnamed_ alias, which means that you can further simplify our example to `mapColumn newColumn fn={string example}`.
+
+NOTE: There can only be one _unnamed_ argument for each function.
+
+
+[[canvas-change-your-expression-change-your-output]]
+=== Change your expression, change your output
+You can substitute one function for another to change the output. For example, you could change the visualization by swapping out the <<pie_fn, pie>> function for another renderer, a function that returns a `render` data type. 
+
+Let’s change that last pie chart into a bubble chart by replacing the <<pie_fn, pie>> function with the <<plot_fn, plot>> function. This is possible because both functions can accept a `pointseries` data type as their _context_. Switching the functions will work, but it won’t produce a useful visualization on its own since you don’t have the x-axis and y-axis defined. You will also need to modify the <<pointseries_fn, pointseries>> function to change its output. In this case, you can change the `size` argument to `y`, so the maximum price values are plotted on the y-axis, and add an `x` argument using the `@timestamp` field in the data to plot those values over time. This leaves you with the following expression and produces a bubble chart showing the max price of each state over time:
+
+image::images/canvas-change-your-expression-chart.png[Bubble Chart, height=400]
+[source,text]
+----
+filters
+| demodata
+| pointseries color="state" y="max(price)" x="@timestamp"
+| plot
+| render
+----
+
+Similar to the <<pie_fn, pie>> function, the <<plot_fn, plot>> function takes arguments that control the design elements of the visualization. As one example, passing a `legend` argument with a value of `false` to the function will hide the legend on the chart.
+
+image::images/canvas-change-your-expression-chart-no-legend.png[Bubble Chart Without Legend, height=400]
+[source,text,subs=+quotes]
+----
+filters
+| demodata
+| pointseries color="state" y="max(price)" x="@timestamp"
+| plot *legend=false*
+| render
+----
+
+
+[[canvas-fetch-and-manipulate-data]]
+=== Fetch and manipulate data
+So far, you have only seen expressions as a way to produce visualizations, but that’s not really what’s happening. Expressions only produce data, which is then used to create something, which in the case of Canvas, means rendering an element. An element can be a visualization, driven by data, but it can also be something much simpler, like a static image. Either way, an expression is used to produce an output that is used to render the desired result. For example, here’s an expression that shows an image:
+
+[source,text]
+----
+image dataurl=https://placekitten.com/160/160 mode="cover"
+----
+
+But as mentioned, this doesn’t actually _render that image_, but instead it _produces some output that can be used to render that image_. That’s an important distinction, and you can see the actual output by adding in the render function and telling it to produce debug output. For example:
+
+[source,text]
+----
+image dataurl=https://placekitten.com/160/160 mode="cover"
+| render as=debug
+----
+
+The follow appears as JSON output:
+
+[source,JSON]
+----
+{
+  "type": "image",
+  "mode": "cover",
+  "dataurl": "https://placekitten.com/160/160"
+}
+----
+
+NOTE: You may need to expand the element’s size to see the whole output.
+
+Canvas uses this output’s data type to map to a specific renderer and passes the entire output into it. It’s up to the image render function to produce an image on the workpad’s page. In this case, the expression produces some JSON output, but expressions can also produce other, simpler data, like a string or a number. Typically, useful results use JSON.
+
+Canvas uses the output to render an element, but other applications can use expressions to do pretty much anything. As stated previously, expressions simply execute functions, and the functions are all written in Javascript. That means if you can do something in Javascript, you can do it with an expression. 
+
+This can include:
+
+* Sending emails
+* Sending notifications
+* Reading from a file
+* Writing to a file
+* Controlling devices with WebUSB or Web Bluetooth
+* Consuming external APIs
+
+If your Javascript works in the environment where the code will run, such as in Node.js or in a browser, you can do it with an expression.
+
+[[canvas-expressions-compose-functions-with-subexpressions]]
+=== Compose functions with sub-expressions
+
+You may have noticed another syntax in examples from other sections, namely expressions inside of curly brackets. These are called sub-expressions, and they can be used to provide a calculated value to another expression, instead of just a static one.
+
+A simple example of this is when you upload your own images to a Canvas workpad. That upload becomes an asset, and that asset can be retrieved using the `asset` function. Usually you’ll just do this from the UI, adding an image element to the page and uploading your image from the control in the sidebar, or picking an existing asset from there as well. In both cases, the system will consume that asset via the `asset` function, and you’ll end up with an expression similar to this:
+
+[source,text]
+----
+image dataurl={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b}
+----
+
+Sub-expressions are executed before the function that uses them is executed. In this case, `asset` will be run first, it will produce a value, the base64-encoded value of the image and that value will be used as the value for the `dataurl` argument in the <<image_fn, image>> function. After the asset function executes, you will get the following output:
+
+[source,text]
+----
+image dataurl="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0"
+----
+
+Since all of the sub-expressions are now resolved into actual values, the <<image_fn, image>> function can be executed to produce its JSON output, just as it’s explained previously. In the case of images, the ability to nest sub-expressions is particularly useful to show one of several images conditionally. For example, you could swap between two images based on some calculated value by mixing in the <<if_fn, if>> function, like in this example expression:
+
+[source,text]
+----
+demodata
+| image dataurl={
+  if condition={getCell price | gte 100} 
+    then={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b} 
+    else={asset cbc11a1f-8f25-4163-94b4-2c3a060192e7}
+}
+----
+
+NOTE: The examples in this section can’t be copy and pasted directly, since the values used throughout will not exist in your workpad.
+
+Here, the expression to use for the value of the `condition` argument, `getCell price | gte 100`, runs first since it is nested deeper.
+
+The expression does the following:
+
+* Retrieves the value from the *price* column in the first row of the `demodata` data table
+* Inputs the value to the `gte` function
+* Compares the value to `100`
+* Returns `true` if the value is 100 or greater, and `false` if the value is 100 or less
+
+That boolean value becomes the value for the `condition` argument. The output from the `then` expression is used as the output when `condition` is `true`. The output from the `else` expression is used when `condition` is false. In both cases, a base64-encoded image will be returned, and one of the two images will be displayed.
+
+You might be wondering how the <<getCell_fn, getCell>> function in the sub-expression accessed the data from the <<demodata_fn, demoData>> function, even though <<demodata_fn, demoData>> was not being directly inserted into <<getCell_fn, getCell>>. The answer is simple, but important to understand. When nested sub-expressions are executed, they automatically receive the same _context_, or output of the previous function that its parent function receives. In this specific expression, demodata’s data table is automatically provided to the nested expression’s `getCell` function, which allows that expression to pull out a value and compare it to another value. 
+
+The passing of the _context_ is automatic, and it happens no matter how deeply you nest your sub-expressions. To demonstrate this, let’s modify the expression slightly to compare the value of the price against multiple conditions using the <<all_fn, all>> function. 
+
+[source,text]
+----
+demodata
+| image dataurl={
+  if condition={getCell price | all {gte 100} {neq 105}} 
+    then={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b} 
+    else={asset cbc11a1f-8f25-4163-94b4-2c3a060192e7}
+}
+----
+
+This time, `getCell price` is run, and the result is passed into the next function as the context.  Then, each sub-expression of the <<all_fn, all>> function is run, with the context given to their parent, which in this case is the result of `getCell price`. If `all` of these sub-expressions evaluate to `true`, then the `if` condition argument will be true. 
+
+Sub-expressions can seem a little foreign, especially if you aren’t a developer, but they’re worth getting familiar with, since they provide a ton of power and flexibility. Since you can nest any expression you want, you can also use this behavior to mix data from multiple indices, or even data from multiple sources. As an example, you could query an API for a value to use as part of the query provided to <<essql_fn, essql>>. 
+
+This whole section is really just scratching the surface, but hopefully after reading it, you at least understand how to read expressions and make sense of what they are doing. With a little practice, you’ll get the hang of mixing _context_ and sub-expressions together to turn any input into your desired output.
+
+[[canvas-handling-context-and-argument-types]]
+=== Handling context and argument types
+If you look through the <<canvas-function-reference,function docs>>, you may notice that all of them define what a function accepts and what it returns. Additionally, every argument includes a type property that specifies the kind of data that can be used. These two types of values are actually the same, and can be used as a guide for how to deal with piping to other functions and using subexpressions for argument values. 
+
+To explain how this works, consider the following expression from the previous section:
+
+[source,text]
+----
+image dataurl={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b}
+----
+
+If you <<image_fn,look at the docs>> for the `image` function, you’ll see that it accepts the `null` data type and returns an `image` data type. Accepting `null` effectively means that it does not use context at all, so if you insert anything to `image`, the value that was produced previously will be ignored. When the function executes, it will produce an `image` output, which is simply an object of type `image` that contains the information required to render an image. 
+
+NOTE: The function does not render an image itself.
+
+As explained in the "<<canvas-fetch-and-manipulate-data, Fetch and manipulate data>>" section, the output of an expression is just data. So the `image` type here is just a specific shape of data, not an actual image.
+
+Next, let’s take a look at the `asset` function. Like `image`, it accepts `null`, but it returns something different, a `string` in this case. Because `asset` will produce a string, its output can be used as the input for any function or argument that accepts a string. 
+
+<<asset_fn,Looking at the docs>> for the `dataurl` argument, its type is `string`, meaning it will accept any kind of string. There are some rules about the value of the string that the function itself enforces, but as far as the interpreter is concerned, that expression is valid because the argument accepts a string and the output of `asset` is a string. 
+
+The interpreter also attempts to cast some input types into others, which allows you to use a string input even when the function or argument calls for a number. Keep in mind that it’s not able to convert any string value, but if the string is a number, it can easily be cast into a `number` type. Take the following expression for example:
+
+[source,text]
+----
+string "0.4"
+| revealImage image={asset asset-06511b39-ec44-408a-a5f3-abe2da44a426}
+----
+
+If you <<revealImage_fn,check the docs>> for the `revealImage` function, you’ll see that it accepts a `number` but the `string` function returns a `string` type. In this case, because the string value is a number, it can be converted into a `number` type and used without you having to do anything else. 
+
+Most `primitive` types can be converted automatically, as you might expect. You just saw that a `string` can be cast into a `number`, but you can also pretty easily cast things into `boolean` too, and you can cast anything to `null`. 
+
+There are other useful type casting options available. For example, something of type `datatable` can be cast to a type `pointseries` simply by only preserving specific columns from the data (namely x, y, size, color, and text). This allows you to treat your source data, which is generally of type `datatable`, like a `pointseries` type simply by convention. 
+
+You can fetch data from Elasticsearch using `essql`, which allows you to aggregate the data, provide a custom name for the value, and insert that data directly to another function that only accepts `pointseries` even though `essql` will output a `datatable` type. This makes the following example expression valid:
+
+[source,text]
+----
+essql "SELECT user AS x, sum(cost) AS y FROM index GROUP BY user"
+| plot
+----
+
+In the docs you can see that `essql` returns a `datatable` type, but `plot` expects a `pointseries` context. This works because the `datatable` output will have the columns `x` and `y` as a result of using `AS` in the sql statement to name them. Because the data follows the convention of the `pointseries` data type, casting it into `pointseries` is possible, and it can be passed directly to `plot` as a result. 

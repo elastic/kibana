@@ -423,7 +423,7 @@ function migrateSearchSortToNestedArray(doc) {
     attributes: {
       ...doc.attributes,
       sort: [doc.attributes.sort],
-    }
+    },
   };
 }
 
@@ -457,7 +457,6 @@ function migrateFiltersAggQueryStringQueries(doc) {
     }
   }
   return doc;
-
 }
 
 const executeMigrations720 = flow(
@@ -471,17 +470,11 @@ const executeMigrations730 = flow(
   replaceMovAvgToMovFn
 );
 
-const executeVisualizationMigrations731 = flow(
-  migrateFiltersAggQueryStringQueries,
-);
+const executeVisualizationMigrations731 = flow(migrateFiltersAggQueryStringQueries);
 
-const executeSearchMigrations740 = flow(
-  migrateSearchSortToNestedArray,
-);
+const executeSearchMigrations740 = flow(migrateSearchSortToNestedArray);
 
-const executeMigrations742 = flow(
-  transformSplitFiltersStringToQueryObject
-);
+const executeMigrations742 = flow(transformSplitFiltersStringToQueryObject);
 
 export const migrations = {
   'index-pattern': {
@@ -630,7 +623,7 @@ export const migrations = {
       doc.attributes.panelsJSON = JSON.stringify(panels);
       return doc;
     },
-    '7.3.0': dashboardMigrations730
+    '7.3.0': dashboardMigrations730,
   },
   search: {
     '7.0.0': doc => {

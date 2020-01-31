@@ -7,17 +7,11 @@
 import { createAction } from 'redux-actions';
 import { getPermissions } from '../../lib/es';
 
-export const permissionsLoading = createAction(
-  'LICENSE_MANAGEMENT_PERMISSIONS_LOADING'
-);
+export const permissionsLoading = createAction('LICENSE_MANAGEMENT_PERMISSIONS_LOADING');
 
-export const permissionsSuccess = createAction(
-  'LICENSE_MANAGEMENT_PERMISSIONS_SUCCESS'
-);
+export const permissionsSuccess = createAction('LICENSE_MANAGEMENT_PERMISSIONS_SUCCESS');
 
-export const permissionsError = createAction(
-  'LICENSE_MANAGEMENT_PERMISSIONS_ERROR'
-);
+export const permissionsError = createAction('LICENSE_MANAGEMENT_PERMISSIONS_ERROR');
 
 export const loadPermissions = () => async dispatch => {
   dispatch(permissionsLoading(true));

@@ -17,7 +17,7 @@ export function OrientationEditor(props) {
       ordinalFields={props.ordinalFields}
       property={props.styleProperty}
       label={i18n.translate('xpack.maps.styles.vector.orientationLabel', {
-        defaultMessage: 'Symbol orientation'
+        defaultMessage: 'Symbol orientation',
       })}
       styleDescriptor={props.styleDescriptor}
       handlePropertyChange={props.handlePropertyChange}

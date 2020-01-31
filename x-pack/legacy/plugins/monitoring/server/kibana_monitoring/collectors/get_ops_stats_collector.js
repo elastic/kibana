@@ -24,7 +24,7 @@ class OpsMonitor {
   }
 
   start = () => {
-    this._oppsy.on('ops', (event) => {
+    this._oppsy.on('ops', event => {
       // Oppsy has a bad race condition that will modify this data before
       // we ship it off to the buffer. Let's create our copy first.
       event = cloneDeep(event);
@@ -45,7 +45,6 @@ class OpsMonitor {
   };
 }
 
-
 /*
  * Initialize a collector for Kibana Ops Stats
  */
@@ -56,7 +55,7 @@ export function getOpsStatsCollector({
   config,
   getOSInfo,
   hapiServer,
-  collectorSet
+  collectorSet,
 }) {
   const buffer = opsBuffer({ log, config, getOSInfo });
   const interval = kbnServerConfig.get('ops.interval');
@@ -96,6 +95,6 @@ export function getOpsStatsCollector({
     },
     fetch: async () => {
       return await buffer.flush();
-    }
+    },
   });
 }

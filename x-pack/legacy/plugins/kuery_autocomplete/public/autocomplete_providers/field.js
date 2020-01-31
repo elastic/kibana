@@ -10,7 +10,6 @@ import { sortPrefixFirst } from 'ui/utils/sort_prefix_first';
 import { isFilterable } from 'ui/index_patterns';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-
 const type = 'field';
 
 function getDescription(fieldName) {
@@ -26,9 +25,11 @@ function getDescription(fieldName) {
 }
 
 export function getSuggestionsProvider({ indexPatterns }) {
-  const allFields = flatten(indexPatterns.map(indexPattern => {
-    return indexPattern.fields.filter(isFilterable);
-  }));
+  const allFields = flatten(
+    indexPatterns.map(indexPattern => {
+      return indexPattern.fields.filter(isFilterable);
+    })
+  );
   return function getFieldSuggestions({ start, end, prefix, suffix }) {
     const search = `${prefix}${suffix}`.toLowerCase();
     const fieldNames = allFields.map(field => field.name);

@@ -21,13 +21,13 @@ import $ from 'jquery';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('app/discover');
 
-module.directive('kbnInfiniteScroll', function () {
+module.directive('kbnInfiniteScroll', function() {
   return {
     restrict: 'E',
     scope: {
-      more: '='
+      more: '=',
     },
-    link: function ($scope, $element) {
+    link: function($scope, $element) {
       const $window = $(window);
       let checkTimer;
 
@@ -39,8 +39,8 @@ module.directive('kbnInfiniteScroll', function () {
         const elTop = $element.offset().top;
         const remaining = elTop - winBottom;
 
-        if (remaining <= winHeight * 0.50) {
-          $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
+        if (remaining <= winHeight * 0.5) {
+          $scope[$scope.$$phase ? '$eval' : '$apply'](function() {
             $scope.more();
           });
         }
@@ -48,18 +48,18 @@ module.directive('kbnInfiniteScroll', function () {
 
       function scheduleCheck() {
         if (checkTimer) return;
-        checkTimer = setTimeout(function () {
+        checkTimer = setTimeout(function() {
           checkTimer = null;
           onScroll();
         }, 50);
       }
 
       $window.on('scroll', scheduleCheck);
-      $scope.$on('$destroy', function () {
+      $scope.$on('$destroy', function() {
         clearTimeout(checkTimer);
         $window.off('scroll', scheduleCheck);
       });
       scheduleCheck();
-    }
+    },
   };
 });

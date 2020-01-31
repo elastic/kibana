@@ -10,22 +10,22 @@ import {
   normalizeIndices,
   calcTimes,
   normalizeTimes,
-  flattenResults
+  flattenResults,
 } from 'plugins/searchprofiler/directives/profile_tree/util';
 import { uiModules } from 'ui/modules';
 
 const uiModule = uiModules.get('app/searchprofiler/directives', []);
-uiModule.directive('profiletree',  HighlightService => {
+uiModule.directive('profiletree', HighlightService => {
   return {
     restrict: 'E',
     scope: {
       data: '=',
-      target: '@'
+      target: '@',
     },
     template: template,
     link: $scope => {
       $scope.visible = {
-        'foo': {}
+        foo: {},
       };
       $scope.indexVisibility = {};
       $scope.highlightedRow = null;
@@ -77,9 +77,9 @@ uiModule.directive('profiletree',  HighlightService => {
               shards: [],
               time: {
                 searches: 0,
-                aggregations: 0
+                aggregations: 0,
               },
-              name: shard.id[1]
+              name: shard.id[1],
             };
           }
           indices[shard.id[1]].shards.push(shard);
@@ -146,27 +146,26 @@ uiModule.directive('profiletree',  HighlightService => {
         if (!shard.time) {
           shard.time = {
             searches: 0,
-            aggregations: 0
+            aggregations: 0,
           };
         }
 
         if (!shard.color) {
           shard.color = {
             searches: 0,
-            aggregations: 0
+            aggregations: 0,
           };
         }
 
         if (!shard.relative) {
           shard.relative = {
             searches: 0,
-            aggregations: 0
+            aggregations: 0,
           };
         }
       }
 
       $scope.$watch('data', render);
-
-    }
+    },
   };
 });

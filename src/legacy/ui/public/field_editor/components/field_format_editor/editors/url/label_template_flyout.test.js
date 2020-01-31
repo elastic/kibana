@@ -24,18 +24,12 @@ import { LabelTemplateFlyoutComponent } from './label_template_flyout';
 
 describe('LabelTemplateFlyout', () => {
   it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <LabelTemplateFlyoutComponent
-        isVisible={true}
-      />
-    );
+    const component = shallowWithIntl(<LabelTemplateFlyoutComponent isVisible={true} />);
     expect(component).toMatchSnapshot();
   });
 
   it('should not render if not visible', async () => {
-    const component = shallowWithIntl(
-      <LabelTemplateFlyoutComponent />
-    );
+    const component = shallowWithIntl(<LabelTemplateFlyoutComponent />);
     expect(component).toMatchSnapshot();
   });
 });

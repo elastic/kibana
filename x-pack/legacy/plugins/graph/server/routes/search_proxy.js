@@ -7,25 +7,22 @@
 import Joi from 'joi';
 import Boom from 'boom';
 
-import {
-  verifyApiAccessPre,
-  getCallClusterPre,
-  callEsSearchApi,
-} from '../lib';
+import { verifyApiAccessPre, getCallClusterPre, callEsSearchApi } from '../lib';
 
 export const searchProxyRoute = {
   path: '/api/graph/searchProxy',
   method: 'POST',
   config: {
-    pre: [
-      getCallClusterPre,
-      verifyApiAccessPre,
-    ],
+    pre: [getCallClusterPre, verifyApiAccessPre],
     validate: {
-      payload: Joi.object().keys({
-        index: Joi.string().required(),
-        body: Joi.object().unknown(true).default()
-      }).default()
+      payload: Joi.object()
+        .keys({
+          index: Joi.string().required(),
+          body: Joi.object()
+            .unknown(true)
+            .default(),
+        })
+        .default(),
     },
     async handler(request) {
       const includeFrozen = await request.getUiSettingsService().get('search:includeFrozen');
@@ -36,8 +33,8 @@ export const searchProxyRoute = {
         queryParams: {
           rest_total_hits_as_int: true,
           ignore_throttled: !includeFrozen,
-        }
+        },
       });
-    }
-  }
+    },
+  },
 };

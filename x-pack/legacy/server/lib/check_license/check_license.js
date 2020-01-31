@@ -14,7 +14,7 @@ import {
 } from '../../../common/constants';
 
 export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInfo) {
-  if(!RANKED_LICENSE_TYPES.includes(minimumLicenseRequired)) {
+  if (!RANKED_LICENSE_TYPES.includes(minimumLicenseRequired)) {
     throw new Error(`Invalid license type supplied to checkLicense: ${minimumLicenseRequired}`);
   }
 
@@ -23,18 +23,18 @@ export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInf
   if (!xpackLicenseInfo || !xpackLicenseInfo.isAvailable()) {
     return {
       status: LICENSE_STATUS_UNAVAILABLE,
-      message: i18n.translate(
-        'xpack.server.checkLicense.errorUnavailableMessage',
-        {
-          defaultMessage: 'You cannot use {pluginName} because license information is not available at this time.',
-          values: { pluginName },
-        },
-      ),
+      message: i18n.translate('xpack.server.checkLicense.errorUnavailableMessage', {
+        defaultMessage:
+          'You cannot use {pluginName} because license information is not available at this time.',
+        values: { pluginName },
+      }),
     };
   }
 
   const { license } = xpackLicenseInfo;
-  const isLicenseModeValid = license.isOneOf([...RANKED_LICENSE_TYPES].splice(RANKED_LICENSE_TYPES.indexOf(minimumLicenseRequired)));
+  const isLicenseModeValid = license.isOneOf(
+    [...RANKED_LICENSE_TYPES].splice(RANKED_LICENSE_TYPES.indexOf(minimumLicenseRequired))
+  );
   const isLicenseActive = license.isActive();
   const licenseType = license.getType();
 
@@ -42,13 +42,11 @@ export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInf
   if (!isLicenseModeValid) {
     return {
       status: LICENSE_STATUS_INVALID,
-      message: i18n.translate(
-        'xpack.server.checkLicense.errorUnsupportedMessage',
-        {
-          defaultMessage: 'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
-          values: { licenseType, pluginName },
-        },
-      ),
+      message: i18n.translate('xpack.server.checkLicense.errorUnsupportedMessage', {
+        defaultMessage:
+          'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
+        values: { licenseType, pluginName },
+      }),
     };
   }
 
@@ -56,13 +54,11 @@ export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInf
   if (!isLicenseActive) {
     return {
       status: LICENSE_STATUS_EXPIRED,
-      message: i18n.translate(
-        'xpack.server.checkLicense.errorExpiredMessage',
-        {
-          defaultMessage: 'You cannot use {pluginName} because your {licenseType} license has expired.',
-          values: { licenseType, pluginName },
-        },
-      ),
+      message: i18n.translate('xpack.server.checkLicense.errorExpiredMessage', {
+        defaultMessage:
+          'You cannot use {pluginName} because your {licenseType} license has expired.',
+        values: { licenseType, pluginName },
+      }),
     };
   }
 

@@ -14,19 +14,18 @@ import {
   isInvalid,
   isApplying,
   uploadNeedsAcknowledgement,
-  uploadMessages
+  uploadMessages,
 } from '../../store/reducers/licenseManagement';
 import { UploadLicense as PresentationComponent } from './upload_license';
 
-
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     isInvalid: isInvalid(state),
     needsAcknowledgement: uploadNeedsAcknowledgement(state),
     messages: uploadMessages(state),
     errorMessage: getUploadErrorMessage(state),
     applying: isApplying(state),
-    currentLicenseType: getLicenseType(state) || ''
+    currentLicenseType: getLicenseType(state) || '',
   };
 };
 const mapDispatchToProps = {
@@ -35,4 +34,7 @@ const mapDispatchToProps = {
   uploadLicenseStatus,
 };
 
-export const UploadLicense = connect(mapStateToProps, mapDispatchToProps)(PresentationComponent);
+export const UploadLicense = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(PresentationComponent);

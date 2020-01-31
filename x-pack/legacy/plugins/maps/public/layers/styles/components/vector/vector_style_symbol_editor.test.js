@@ -12,7 +12,7 @@ import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
 
 const symbolOptions = [
   { value: 'symbol1', label: 'symbol1' },
-  { value: 'symbol2', label: 'symbol2' }
+  { value: 'symbol2', label: 'symbol2' },
 ];
 
 const defaultProps = {
@@ -22,18 +22,13 @@ const defaultProps = {
   },
   handlePropertyChange: () => {},
   symbolOptions,
-  isDarkMode: false
+  isDarkMode: false,
 };
 
 test('Should render symbol select when symbolized as Circle', () => {
-  const component = shallow(
-    <VectorStyleSymbolEditor
-      {...defaultProps}
-    />
-  );
+  const component = shallow(<VectorStyleSymbolEditor {...defaultProps} />);
 
-  expect(component)
-    .toMatchSnapshot();
+  expect(component).toMatchSnapshot();
 });
 
 test('Should render icon select when symbolized as Icon', () => {
@@ -47,6 +42,5 @@ test('Should render icon select when symbolized as Icon', () => {
     />
   );
 
-  expect(component)
-    .toMatchSnapshot();
+  expect(component).toMatchSnapshot();
 });

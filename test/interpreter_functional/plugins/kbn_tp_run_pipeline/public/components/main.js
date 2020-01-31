@@ -18,15 +18,9 @@
  */
 
 import React from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentHeader,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiPageContentHeader } from '@elastic/eui';
 
 class Main extends React.Component {
-
   chartDiv = React.createRef();
   exprDiv = React.createRef();
 
@@ -50,18 +44,24 @@ class Main extends React.Component {
     };
 
     const handlers = {
-      onDestroy: () => { return; },
+      onDestroy: () => {
+        return;
+      },
     };
 
     window.renderPipelineResponse = async (context = {}) => {
       return new Promise(resolve => {
         if (context.type !== 'render') {
-          this.setState({ expression: 'Expression did not return render type!\n\n' + JSON.stringify(context) });
+          this.setState({
+            expression: 'Expression did not return render type!\n\n' + JSON.stringify(context),
+          });
           return resolve();
         }
         const renderer = props.registries.renderers.get(context.as);
         if (!renderer) {
-          this.setState({ expression: 'Renderer was not found in registry!\n\n' + JSON.stringify(context) });
+          this.setState({
+            expression: 'Renderer was not found in registry!\n\n' + JSON.stringify(context),
+          });
           return resolve();
         }
         props.visualizationLoader.destroy(this.chartDiv);
@@ -72,27 +72,22 @@ class Main extends React.Component {
         this.chartDiv.addEventListener('renderComplete', renderCompleteHandler);
         renderer.render(this.chartDiv, context.value, handlers);
       });
-
     };
-
   }
-
 
   render() {
     const pStyle = {
       display: 'flex',
       width: '100%',
-      height: '300px'
+      height: '300px',
     };
 
     return (
       <EuiPage>
         <EuiPageBody>
           <EuiPageContent data-test-subj="pluginContent">
-            <EuiPageContentHeader>
-              runPipeline tests are running ...
-            </EuiPageContentHeader>
-            <div data-test-subj="pluginChart" ref={ref => this.chartDiv = ref} style={pStyle}/>
+            <EuiPageContentHeader>runPipeline tests are running ...</EuiPageContentHeader>
+            <div data-test-subj="pluginChart" ref={ref => (this.chartDiv = ref)} style={pStyle} />
             <div>{this.state.expression}</div>
           </EuiPageContent>
         </EuiPageBody>

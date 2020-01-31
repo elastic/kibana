@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
@@ -43,11 +43,11 @@ export default function ({ getService, getPageObjects }) {
 
     before(initGaugeVis);
 
-    it('should have inspector enabled', async function () {
+    it('should have inspector enabled', async function() {
       await inspector.expectIsEnabled();
     });
 
-    it('should show Count', function () {
+    it('should show Count', function() {
       const expectedCount = ['14,004', 'Count'];
 
       // initial metric of "Count" is selected by default
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show Split Gauges', async function () {
+    it('should show Split Gauges', async function() {
       log.debug('Bucket = Split Group');
       await PageObjects.visualize.clickBucket('Split group');
       log.debug('Aggregation = Terms');
@@ -70,16 +70,20 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         expect(await PageObjects.visualize.getGaugeValue()).to.eql([
-          '2,904', 'win 8',
-          '2,858', 'win xp',
-          '2,814', 'win 7',
-          '2,784', 'ios',
+          '2,904',
+          'win 8',
+          '2,858',
+          'win xp',
+          '2,814',
+          'win 7',
+          '2,784',
+          'ios',
         ]);
       });
     });
 
-    it('should show correct values for fields with fieldFormatters', async function () {
-      const expectedTexts = [ '2,904', 'win 8: Count', '0B', 'win 8: Min bytes' ];
+    it('should show correct values for fields with fieldFormatters', async function() {
+      const expectedTexts = ['2,904', 'win 8: Count', '0B', 'win 8: Min bytes'];
 
       await PageObjects.visualize.selectAggregation('Terms');
       await PageObjects.visualize.selectField('machine.os.raw');
@@ -95,7 +99,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should format the metric correctly in percentage mode', async function () {
+    it('should format the metric correctly in percentage mode', async function() {
       await initGaugeVis();
       await PageObjects.visualize.clickMetricEditor();
       await PageObjects.visualize.selectAggregation('Average', 'metrics');
@@ -107,7 +111,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
 
       await retry.try(async function tryingForTime() {
-        const expectedTexts = [ '57.273%', 'Average bytes' ];
+        const expectedTexts = ['57.273%', 'Average bytes'];
         const metricValue = await PageObjects.visualize.getGaugeValue();
         expect(expectedTexts).to.eql(metricValue);
       });

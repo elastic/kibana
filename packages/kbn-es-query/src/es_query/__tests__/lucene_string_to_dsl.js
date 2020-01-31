@@ -20,34 +20,30 @@
 import { luceneStringToDsl } from '../lucene_string_to_dsl';
 import expect from '@kbn/expect';
 
-describe('build query', function () {
-
-  describe('luceneStringToDsl', function () {
-
-    it('should wrap strings with an ES query_string query', function () {
+describe('build query', function() {
+  describe('luceneStringToDsl', function() {
+    it('should wrap strings with an ES query_string query', function() {
       const result = luceneStringToDsl('foo:bar');
       const expectedResult = {
-        query_string: { query: 'foo:bar' }
+        query_string: { query: 'foo:bar' },
       };
       expect(result).to.eql(expectedResult);
     });
 
-    it('should return a match_all query for empty strings and whitespace', function () {
+    it('should return a match_all query for empty strings and whitespace', function() {
       const expectedResult = {
-        match_all: {}
+        match_all: {},
       };
 
       expect(luceneStringToDsl('')).to.eql(expectedResult);
       expect(luceneStringToDsl('   ')).to.eql(expectedResult);
     });
 
-    it('should return non-string arguments without modification', function () {
+    it('should return non-string arguments without modification', function() {
       const expectedResult = {};
       const result = luceneStringToDsl(expectedResult);
       expect(result).to.be(expectedResult);
       expect(result).to.eql(expectedResult);
     });
-
   });
-
 });

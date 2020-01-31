@@ -25,7 +25,7 @@ export function hideEmptyDevTools(Private) {
   const hasTools = !!Private(DevToolsRegistryProvider).length;
   if (!hasTools) {
     npStart.core.chrome.navLinks.update('kibana:dev_tools', {
-      hidden: true
+      hidden: true,
     });
   }
 }

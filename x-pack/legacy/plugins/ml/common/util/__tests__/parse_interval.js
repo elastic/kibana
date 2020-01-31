@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { parseInterval } from '../parse_interval';
 import expect from '@kbn/expect';
 
-describe('ML parse interval util', function () {
-  it('correctly parses an interval containing unit and value', function () {
+describe('ML parse interval util', function() {
+  it('correctly parses an interval containing unit and value', function() {
     let duration = parseInterval('1d');
     expect(duration.as('d')).to.be(1);
 
@@ -40,10 +38,9 @@ describe('ML parse interval util', function () {
 
     duration = parseInterval('0h');
     expect(duration.as('h')).to.be(0);
-
   });
 
-  it('correctly handles zero value intervals', function () {
+  it('correctly handles zero value intervals', function() {
     let duration = parseInterval('0h');
     expect(duration.as('h')).to.be(0);
 
@@ -51,7 +48,7 @@ describe('ML parse interval util', function () {
     expect(duration).to.not.be.ok();
   });
 
-  it('returns null for an invalid interval', function () {
+  it('returns null for an invalid interval', function() {
     let duration = parseInterval('');
     expect(duration).to.not.be.ok();
 

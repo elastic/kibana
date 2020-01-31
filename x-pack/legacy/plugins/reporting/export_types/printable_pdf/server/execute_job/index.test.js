@@ -14,7 +14,7 @@ import { LevelLogger } from '../../../../server/lib';
 jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
 
 const cancellationToken = {
-  on: jest.fn()
+  on: jest.fn(),
 };
 
 let config;
@@ -24,10 +24,10 @@ beforeEach(() => {
     'xpack.reporting.encryptionKey': 'testencryptionkey',
     'server.basePath': '/sbp',
     'server.host': 'localhost',
-    'server.port': 5601
+    'server.port': 5601,
   };
   mockServer = {
-    expose: () => { },
+    expose: () => {},
     config: memoize(() => ({ get: jest.fn() })),
     info: {
       protocol: 'http',
@@ -36,10 +36,10 @@ beforeEach(() => {
       elasticsearch: {
         getCluster: memoize(() => {
           return {
-            callWithRequest: jest.fn()
+            callWithRequest: jest.fn(),
           };
-        })
-      }
+        }),
+      },
     },
     savedObjects: {
       getScopedSavedObjectsClient: jest.fn(),
@@ -47,7 +47,7 @@ beforeEach(() => {
     uiSettingsServiceFactory: jest.fn().mockReturnValue({ get: jest.fn() }),
   };
 
-  mockServer.config().get.mockImplementation((key) => {
+  mockServer.config().get.mockImplementation(key => {
     return config[key];
   });
 
@@ -56,7 +56,7 @@ beforeEach(() => {
 
 afterEach(() => generatePdfObservableFactory.mockReset());
 
-const encryptHeaders = async (headers) => {
+const encryptHeaders = async headers => {
   const crypto = cryptoFactory(mockServer);
   return await crypto.encrypt(headers);
 };
@@ -69,7 +69,11 @@ test(`passes browserTimezone to generatePdf`, async () => {
 
   const executeJob = executeJobFactory(mockServer);
   const browserTimezone = 'UTC';
-  await executeJob('pdfJobId', { objects: [], browserTimezone, headers: encryptedHeaders }, cancellationToken);
+  await executeJob(
+    'pdfJobId',
+    { objects: [], browserTimezone, headers: encryptedHeaders },
+    cancellationToken
+  );
 
   expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
   expect(generatePdfObservable).toBeCalledWith(
@@ -106,7 +110,11 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
 
   const executeJob = executeJobFactory(mockServer);
   const encryptedHeaders = await encryptHeaders({});
-  const { content } = await executeJob('pdfJobId', { objects: [], timeRange: {}, headers: encryptedHeaders }, cancellationToken);
+  const { content } = await executeJob(
+    'pdfJobId',
+    { objects: [], timeRange: {}, headers: encryptedHeaders },
+    cancellationToken
+  );
 
   expect(content).toEqual(Buffer.from(testContent).toString('base64'));
 });

@@ -23,14 +23,10 @@ import { BaseParamType } from '../param_types/base';
 import { FieldParamType } from '../param_types/field';
 import { OptionedParamType } from '../param_types/optioned';
 
-describe('AggParams class', function () {
-
-  describe('constructor args', function () {
-    it('accepts an array of param defs', function () {
-      const params = [
-        { name: 'one' },
-        { name: 'two' }
-      ];
+describe('AggParams class', function() {
+  describe('constructor args', function() {
+    it('accepts an array of param defs', function() {
+      const params = [{ name: 'one' }, { name: 'two' }];
       const aggParams = initParams(params);
 
       expect(aggParams).to.have.length(params.length);
@@ -38,23 +34,21 @@ describe('AggParams class', function () {
     });
   });
 
-  describe('AggParam creation', function () {
-    it('Uses the FieldParamType class for params with the name "field"', function () {
-      const params = [
-        { name: 'field', type: 'field' }
-      ];
+  describe('AggParam creation', function() {
+    it('Uses the FieldParamType class for params with the name "field"', function() {
+      const params = [{ name: 'field', type: 'field' }];
       const aggParams = initParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams[0]).to.be.a(FieldParamType);
     });
 
-    it('Uses the OptionedParamType class for params of type "optioned"', function () {
+    it('Uses the OptionedParamType class for params of type "optioned"', function() {
       const params = [
         {
           name: 'interval',
-          type: 'optioned'
-        }
+          type: 'optioned',
+        },
       ];
       const aggParams = initParams(params);
 
@@ -62,12 +56,12 @@ describe('AggParams class', function () {
       expect(aggParams[0]).to.be.a(OptionedParamType);
     });
 
-    it('Uses the OptionedParamType class for params of type "optioned"', function () {
+    it('Uses the OptionedParamType class for params of type "optioned"', function() {
       const params = [
         {
           name: 'order',
-          type: 'optioned'
-        }
+          type: 'optioned',
+        },
       ];
       const aggParams = initParams(params);
 
@@ -75,25 +69,25 @@ describe('AggParams class', function () {
       expect(aggParams[0]).to.be.a(OptionedParamType);
     });
 
-    it('Always converts the params to a BaseParamType', function () {
+    it('Always converts the params to a BaseParamType', function() {
       const params = [
         {
           name: 'height',
-          editor: '<blink>high</blink>'
+          editor: '<blink>high</blink>',
         },
         {
           name: 'weight',
-          editor: '<blink>big</blink>'
+          editor: '<blink>big</blink>',
         },
         {
           name: 'waist',
-          editor: '<blink>small</blink>'
-        }
+          editor: '<blink>small</blink>',
+        },
       ];
       const aggParams = initParams(params);
 
       expect(aggParams).to.have.length(params.length);
-      aggParams.forEach(function (aggParam) {
+      aggParams.forEach(function(aggParam) {
         expect(aggParam).to.be.a(BaseParamType);
       });
     });

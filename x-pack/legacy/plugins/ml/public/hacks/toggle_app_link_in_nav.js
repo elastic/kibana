@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
@@ -16,7 +14,7 @@ uiModules.get('xpack/ml').run(() => {
   const navLinkUpdates = {
     // hide by default, only show once the xpackInfo is initialized
     hidden: !showAppLink,
-    disabled: !showAppLink || (showAppLink && !xpackInfo.get('features.ml.isAvailable', false))
+    disabled: !showAppLink || (showAppLink && !xpackInfo.get('features.ml.isAvailable', false)),
   };
 
   npStart.core.chrome.navLinks.update('ml', navLinkUpdates);

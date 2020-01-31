@@ -39,7 +39,6 @@ jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
 }));
 
-
 function getHandlerMock(config = {}, data = {}) {
   return {
     visConfig: { get: (id, fallback) => config[id] || fallback },
@@ -62,6 +61,5 @@ describe('Vislib event responses dispatcher', () => {
     const dispatch = new Dispatch(handlerMock);
     const actual = dispatch.eventResponse(dataPoint, 0);
     expect(actual.isPercentageMode).toBeFalsy();
-
   });
 });

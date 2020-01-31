@@ -16,23 +16,15 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: true,
       enableLinks: false,
-      message: i18n.translate(
-        'xpack.rollupJobs.checkLicense.errorUnavailableMessage',
-        {
-          defaultMessage: 'You cannot use {pluginName} because license information is not available at this time.',
-          values: { pluginName },
-        },
-      ),
+      message: i18n.translate('xpack.rollupJobs.checkLicense.errorUnavailableMessage', {
+        defaultMessage:
+          'You cannot use {pluginName} because license information is not available at this time.',
+        values: { pluginName },
+      }),
     };
   }
 
-  const VALID_LICENSE_MODES = [
-    'trial',
-    'basic',
-    'standard',
-    'gold',
-    'platinum'
-  ];
+  const VALID_LICENSE_MODES = ['trial', 'basic', 'standard', 'gold', 'platinum'];
 
   const isLicenseModeValid = xpackLicenseInfo.license.isOneOf(VALID_LICENSE_MODES);
   const isLicenseActive = xpackLicenseInfo.license.isActive();
@@ -43,13 +35,11 @@ export function checkLicense(xpackLicenseInfo) {
     return {
       isAvailable: false,
       showLinks: false,
-      message: i18n.translate(
-        'xpack.rollupJobs.checkLicense.errorUnsupportedMessage',
-        {
-          defaultMessage: 'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
-          values: { licenseType, pluginName },
-        },
-      ),
+      message: i18n.translate('xpack.rollupJobs.checkLicense.errorUnsupportedMessage', {
+        defaultMessage:
+          'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
+        values: { licenseType, pluginName },
+      }),
     };
   }
 
@@ -59,13 +49,11 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: true,
       enableLinks: false,
-      message: i18n.translate(
-        'xpack.rollupJobs.checkLicense.errorExpiredMessage',
-        {
-          defaultMessage: 'You cannot use {pluginName} because your {licenseType} license has expired',
-          values: { licenseType, pluginName },
-        },
-      ),
+      message: i18n.translate('xpack.rollupJobs.checkLicense.errorExpiredMessage', {
+        defaultMessage:
+          'You cannot use {pluginName} because your {licenseType} license has expired',
+        values: { licenseType, pluginName },
+      }),
     };
   }
 
@@ -73,6 +61,6 @@ export function checkLicense(xpackLicenseInfo) {
   return {
     isAvailable: true,
     showLinks: true,
-    enableLinks: true
+    enableLinks: true,
   };
 }

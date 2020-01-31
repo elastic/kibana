@@ -10,21 +10,16 @@ import { importDataProvider } from '../models/import_data';
 import { MAX_BYTES } from '../../common/constants/file_import';
 import { updateTelemetry } from '../telemetry/telemetry';
 
-
-function importData({
-  callWithRequest, id, index, settings, mappings, ingestPipeline, data
-}) {
+function importData({ callWithRequest, id, index, settings, mappings, ingestPipeline, data }) {
   const { importData: importDataFunc } = importDataProvider(callWithRequest);
   return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
 }
 
 export function fileUploadRoutes(server, commonRouteConfig) {
-
   server.route({
     method: 'POST',
     path: '/api/fileupload/import',
     async handler(request) {
-
       // `id` being `undefined` tells us that this is a new import due to create a new index.
       // follow-up import calls to just add additional data will include the `id` of the created
       // index, we'll ignore those and don't increment the counter.
@@ -34,12 +29,11 @@ export function fileUploadRoutes(server, commonRouteConfig) {
       }
 
       const callWithRequest = callWithRequestFactory(server, request);
-      return importData({ callWithRequest, id, ...request.payload })
-        .catch(wrapError);
+      return importData({ callWithRequest, id, ...request.payload }).catch(wrapError);
     },
     config: {
       ...commonRouteConfig,
       payload: { maxBytes: MAX_BYTES },
-    }
+    },
   });
 }

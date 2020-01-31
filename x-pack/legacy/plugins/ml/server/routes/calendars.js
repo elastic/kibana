@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { CalendarManager } from '../models/calendar';
-
 
 function getAllCalendars(callWithRequest) {
   const cal = new CalendarManager(callWithRequest);
@@ -37,18 +34,16 @@ function deleteCalendar(callWithRequest, calendarId) {
 }
 
 export function calendars({ commonRouteConfig, elasticsearchPlugin, route }) {
-
   route({
     method: 'GET',
     path: '/api/ml/calendars',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return getAllCalendars(callWithRequest)
-        .catch(resp => wrapError(resp));
+      return getAllCalendars(callWithRequest).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -57,12 +52,11 @@ export function calendars({ commonRouteConfig, elasticsearchPlugin, route }) {
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const calendarId = request.params.calendarId;
-      return getCalendar(callWithRequest, calendarId)
-        .catch(resp => wrapError(resp));
+      return getCalendar(callWithRequest, calendarId).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -71,12 +65,11 @@ export function calendars({ commonRouteConfig, elasticsearchPlugin, route }) {
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const body = request.payload;
-      return newCalendar(callWithRequest, body)
-        .catch(resp => wrapError(resp));
+      return newCalendar(callWithRequest, body).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -86,12 +79,11 @@ export function calendars({ commonRouteConfig, elasticsearchPlugin, route }) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const calendarId = request.params.calendarId;
       const body = request.payload;
-      return updateCalendar(callWithRequest, calendarId, body)
-        .catch(resp => wrapError(resp));
+      return updateCalendar(callWithRequest, calendarId, body).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -100,12 +92,10 @@ export function calendars({ commonRouteConfig, elasticsearchPlugin, route }) {
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const calendarId = request.params.calendarId;
-      return deleteCalendar(callWithRequest, calendarId)
-        .catch(resp => wrapError(resp));
+      return deleteCalendar(callWithRequest, calendarId).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
-
 }

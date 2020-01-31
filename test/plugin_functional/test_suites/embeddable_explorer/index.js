@@ -17,18 +17,21 @@
  * under the License.
  */
 
-export default function ({ getService, getPageObjects, loadTestFile }) {
+export default function({ getService, getPageObjects, loadTestFile }) {
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  describe('embeddable explorer', function () {
+  describe('embeddable explorer', function() {
     before(async () => {
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/dashboard/current/data');
       await esArchiver.load('../functional/fixtures/es_archiver/dashboard/current/kibana');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'Australia/North', 'defaultIndex': 'logstash-*' });
+      await kibanaServer.uiSettings.replace({
+        'dateFormat:tz': 'Australia/North',
+        defaultIndex: 'logstash-*',
+      });
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('settings');
       await appsMenu.clickLink('Embeddable Explorer');

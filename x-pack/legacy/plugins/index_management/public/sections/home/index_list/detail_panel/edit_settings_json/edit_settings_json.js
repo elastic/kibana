@@ -19,21 +19,17 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { TAB_SETTINGS } from '../../../../../constants';
-import {
-  settingsToDisplay,
-  readOnlySettings
-} from '../../../../../lib/editSettings';
+import { settingsToDisplay, readOnlySettings } from '../../../../../lib/editSettings';
 import { createAceEditor } from '../../../../../lib/ace';
 import _ from 'lodash';
 
 import { flattenObject } from '../../../../../lib/flatten_object';
 
-
 export class EditSettingsJson extends React.PureComponent {
   constructor() {
     super();
     this.state = {
-      valid: true
+      valid: true,
     };
   }
 
@@ -68,12 +64,7 @@ export class EditSettingsJson extends React.PureComponent {
       this.originalSettings = newSettings;
       const prettyJson = JSON.stringify(newSettings, null, 2);
       const settingsKeys = Object.keys(newSettings);
-      const editor = this.editor = createAceEditor(
-        this.aceDiv,
-        prettyJson,
-        false,
-        settingsKeys
-      );
+      const editor = (this.editor = createAceEditor(this.aceDiv, prettyJson, false, settingsKeys));
       const session = editor.getSession();
       session.on('changeAnnotation', () => {
         this.setState({ valid: session.getAnnotations().length === 0 });
@@ -143,11 +134,7 @@ export class EditSettingsJson extends React.PureComponent {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
-        <EuiLink
-          href={settingsDocumentationLink}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <EuiLink href={settingsDocumentationLink} target="_blank" rel="noopener noreferrer">
           <FormattedMessage
             id="xpack.idxMgmt.editSettingsJSON.settingsReferenceLinkText"
             defaultMessage="Settings reference"

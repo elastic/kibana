@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function natsMetricsSpecProvider(server, context) {
   const moduleName = 'nats';
@@ -33,7 +37,8 @@ export function natsMetricsSpecProvider(server, context) {
       defaultMessage: 'Fetch monitoring metrics from the Nats server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.natsMetrics.longDescription', {
-      defaultMessage: 'The `nats` Metricbeat module fetches monitoring metrics from Nats. \
+      defaultMessage:
+        'The `nats` Metricbeat module fetches monitoring metrics from Nats. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-nats.html',
@@ -44,20 +49,23 @@ export function natsMetricsSpecProvider(server, context) {
       dashboards: [
         {
           id: 'Metricbeat-Nats-Dashboard-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.natsMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Nats metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.natsMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Nats metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-nats.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-nats.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/nats_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

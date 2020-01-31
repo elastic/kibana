@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import { translateTimeRelativeToWeek } from './translate_timestamp';
 
 describe('translateTimeRelativeToWeek', () => {
@@ -104,4 +103,3 @@ describe('translateTimeRelativeToWeek', () => {
     });
   });
 });
-

@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
 import { abbreviateWholeNumber } from '../abbreviate_whole_number';
 
 describe('ML - abbreviateWholeNumber formatter', () => {
-
   it('returns the correct format using default max digits', () => {
     expect(abbreviateWholeNumber(1)).to.be(1);
     expect(abbreviateWholeNumber(12)).to.be(12);
@@ -38,5 +35,4 @@ describe('ML - abbreviateWholeNumber formatter', () => {
     expect(abbreviateWholeNumber(1234567890, 3)).to.be('1b');
     expect(abbreviateWholeNumber(5555555555555.55, 5)).to.be('6t');
   });
-
 });

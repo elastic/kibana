@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import React from 'react';
-import {
-  EuiSelect,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiSelect, EuiFormRow } from '@elastic/eui';
 
 import { getEMSClient } from '../../../meta';
 import { getEmsUnavailableMessage } from '../ems_unavailable_message';
@@ -18,41 +14,40 @@ import { i18n } from '@kbn/i18n';
 export const AUTO_SELECT = 'auto_select';
 
 export class EMSTMSCreateSourceEditor extends React.Component {
-
   state = {
-    emsTmsOptionsRaw: null
+    emsTmsOptionsRaw: null,
   };
 
   _loadTmsOptions = async () => {
     const emsClient = getEMSClient();
-    const emsTMSServices =  await emsClient.getTMSServices();
+    const emsTMSServices = await emsClient.getTMSServices();
     const options = emsTMSServices.map(tmsService => {
       return {
         id: tmsService.getId(),
-        name: tmsService.getDisplayName()
+        name: tmsService.getDisplayName(),
       };
     });
     options.unshift({
       id: AUTO_SELECT,
       name: i18n.translate('xpack.maps.source.emsTile.autoLabel', {
         defaultMessage: 'Autoselect based on Kibana theme',
-      })
+      }),
     });
     if (this._isMounted) {
       this.setState({
-        emsTmsOptionsRaw: options
+        emsTmsOptionsRaw: options,
       });
     }
-  }
+  };
 
   _onEmsTileServiceChange = e => {
     const value = e.target.value;
     const isAutoSelect = value === AUTO_SELECT;
     this.props.onSourceConfigChange({
       id: isAutoSelect ? null : value,
-      isAutoSelect
+      isAutoSelect,
     });
-  }
+  };
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -64,17 +59,15 @@ export class EMSTMSCreateSourceEditor extends React.Component {
   }
 
   render() {
-
     if (!this.state.emsTmsOptionsRaw) {
       // TODO display loading message
       return null;
     }
 
-    const emsTileOptions = this.state.emsTmsOptionsRaw.map((service) => ({
+    const emsTileOptions = this.state.emsTmsOptionsRaw.map(service => ({
       value: service.id,
-      text: service.name || service.id
+      text: service.name || service.id,
     }));
-
 
     return (
       <EuiFormRow

@@ -69,20 +69,20 @@ export default function TaskManagerPerformanceAPI(kibana) {
                 const leadTime = now - taskInstance.runAt;
                 performanceState.leadTimeQueue.push(leadTime);
 
-                const counter = (state.counter ? 1 + state.counter : 1);
+                const counter = state.counter ? 1 + state.counter : 1;
 
                 const stateUpdated = {
                   ...state,
-                  counter
+                  counter,
                 };
 
-                if(params.trackExecutionTimeline) {
+                if (params.trackExecutionTimeline) {
                   stateUpdated.timeline = stateUpdated.timeline || [];
                   stateUpdated.timeline.push({
                     owner: taskInstance.owner.split('-')[0],
                     counter,
                     leadTime,
-                    ranAt: now
+                    ranAt: now,
                   });
                 }
                 return {

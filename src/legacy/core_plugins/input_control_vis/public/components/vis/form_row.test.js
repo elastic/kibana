@@ -20,17 +20,11 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import {
-  FormRow,
-} from './form_row';
+import { FormRow } from './form_row';
 
 test('renders enabled control', () => {
   const component = shallow(
-    <FormRow
-      label="test control"
-      id="controlId"
-      controlIndex={0}
-    >
+    <FormRow label="test control" id="controlId" controlIndex={0}>
       <div>My Control</div>
     </FormRow>
   );
@@ -39,12 +33,7 @@ test('renders enabled control', () => {
 
 test('renders control with warning', () => {
   const component = shallow(
-    <FormRow
-      label="test control"
-      id="controlId"
-      controlIndex={0}
-      warningMsg="This is a warning"
-    >
+    <FormRow label="test control" id="controlId" controlIndex={0} warningMsg="This is a warning">
       <div>My Control</div>
     </FormRow>
   );

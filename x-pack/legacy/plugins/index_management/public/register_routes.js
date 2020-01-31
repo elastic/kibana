@@ -21,7 +21,7 @@ import { manageAngularLifecycle } from './lib/manage_angular_lifecycle';
 import { indexManagementStore } from './store';
 
 let elem;
-const renderReact = async (elem) => {
+const renderReact = async elem => {
   render(
     <I18nContext>
       <Provider store={indexManagementStore()}>
@@ -47,7 +47,7 @@ routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
         change(url) {
           kbnUrl.change(url);
           $rootScope.$digest();
-        }
+        },
       });
       $scope.$$postDigest(() => {
         elem = document.getElementById('indexManagementReactRoot');
@@ -55,5 +55,5 @@ routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
         manageAngularLifecycle($scope, $route, elem);
       });
     }
-  }
+  },
 });

@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { ESTermSource } from '../sources/es_term_source';
 import { VectorStyle } from '../styles/vector_style';
 
 export class InnerJoin {
-
   constructor(joinDescriptor, inspectorAdapters) {
     this._descriptor = joinDescriptor;
     this._rightSource = new ESTermSource(joinDescriptor.right, inspectorAdapters);
@@ -57,17 +55,20 @@ export class InnerJoin {
       // delete all dynamic properties for metric field
       const stylePropertyPrefix = VectorStyle.getComputedFieldNamePrefix(metricPropertyKey);
       Object.keys(feature.properties).forEach(featurePropertyKey => {
-        if (featurePropertyKey.length >= stylePropertyPrefix.length &&
-          featurePropertyKey.substring(0, stylePropertyPrefix.length) === stylePropertyPrefix) {
+        if (
+          featurePropertyKey.length >= stylePropertyPrefix.length &&
+          featurePropertyKey.substring(0, stylePropertyPrefix.length) === stylePropertyPrefix
+        ) {
           delete feature.properties[featurePropertyKey];
         }
       });
     }
 
     const joinKey = feature.properties[this._descriptor.leftField];
-    const coercedKey = typeof joinKey === 'undefined' || joinKey === null  ? null : joinKey.toString();
+    const coercedKey =
+      typeof joinKey === 'undefined' || joinKey === null ? null : joinKey.toString();
     if (propertiesMap && coercedKey !== null && propertiesMap.has(coercedKey)) {
-      Object.assign(feature.properties,  propertiesMap.get(coercedKey));
+      Object.assign(feature.properties, propertiesMap.get(coercedKey));
       return true;
     } else {
       return false;
@@ -87,11 +88,10 @@ export class InnerJoin {
   }
 
   getIndexPatternIds() {
-    return  this._rightSource.getIndexPatternIds();
+    return this._rightSource.getIndexPatternIds();
   }
 
   getWhereQuery() {
     return this._rightSource.getWhereQuery();
   }
 }
-

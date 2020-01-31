@@ -26,7 +26,7 @@ import {
 } from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
 import { LoggerFactory } from '../../logging';
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
-import { Config } from '../../config';
+import { Config, PackageInfo } from '../../config';
 
 export interface LegacyPluginPack {
   getPath(): string;
@@ -38,7 +38,11 @@ export interface LegacyPluginSpec {
   getConfigPrefix: () => string;
 }
 
-export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: LoggerFactory) {
+export async function findLegacyPluginSpecs(
+  settings: unknown,
+  loggerFactory: LoggerFactory,
+  packageInfo: PackageInfo
+) {
   const configToMutate: Config = defaultConfig(settings);
   const {
     pack$,
@@ -98,8 +102,7 @@ export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: Lo
       map(spec => {
         const name = spec.getId();
         const pluginVersion = spec.getExpectedKibanaVersion();
-        // @ts-ignore
-        const kibanaVersion = settings.pkg.version;
+        const kibanaVersion = packageInfo.version;
         return `Plugin "${name}" was disabled because it expected Kibana version "${pluginVersion}", and found "${kibanaVersion}".`;
       }),
       distinct(),

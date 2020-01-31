@@ -47,7 +47,7 @@ function startTrialDescription() {
   );
 }
 
-export const DatavisualizerSelector = injectI18n(function (props) {
+export const DatavisualizerSelector = injectI18n(function(props) {
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
 

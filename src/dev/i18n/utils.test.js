@@ -165,9 +165,7 @@ describe('i18n utils', () => {
     const defaultMessage = 'Test message {first, plural, one {{second}} other {{third}}}';
     const messageId = 'namespace.message.id';
 
-    expect(() =>
-      checkValuesProperty(valuesKeys, defaultMessage, messageId)
-    ).not.toThrow();
+    expect(() => checkValuesProperty(valuesKeys, defaultMessage, messageId)).not.toThrow();
   });
 
   test(`should throw on wrong nested ICU message`, () => {

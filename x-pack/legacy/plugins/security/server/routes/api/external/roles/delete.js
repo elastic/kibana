@@ -22,12 +22,11 @@ export function initDeleteRolesApi(server, callWithRequest, routePreCheckLicense
       validate: {
         params: Joi.object()
           .keys({
-            name: Joi.string()
-              .required(),
+            name: Joi.string().required(),
           })
           .required(),
       },
-      pre: [routePreCheckLicenseFn]
-    }
+      pre: [routePreCheckLicenseFn],
+    },
   });
 }

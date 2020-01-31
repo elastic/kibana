@@ -24,9 +24,8 @@ import glob from 'glob';
 import fs from 'fs';
 import { analyzeArchive, extractArchive, _isDirectory } from './zip';
 
-describe('kibana cli', function () {
-
-  describe('zip', function () {
+describe('kibana cli', function() {
+  describe('zip', function() {
     const repliesPath = path.resolve(__dirname, '__fixtures__', 'replies');
     const archivePath = path.resolve(repliesPath, 'test_plugin.zip');
 
@@ -41,7 +40,7 @@ describe('kibana cli', function () {
       rimraf.sync(tempPath);
     });
 
-    describe('analyzeArchive', function () {
+    describe('analyzeArchive', function() {
       it('returns array of plugins', async () => {
         const packages = await analyzeArchive(archivePath);
         const plugin = packages[0];
@@ -67,7 +66,7 @@ describe('kibana cli', function () {
           'package.json',
           'public',
           'public/app.js',
-          'README.md'
+          'README.md',
         ];
         expect(files.sort()).toEqual(expected.sort());
       });
@@ -80,18 +79,20 @@ describe('kibana cli', function () {
         await extractArchive(archivePath, tempPath, 'kibana/libs');
         const files = await glob.sync('**/*', { cwd: tempPath });
 
-        const expected = [
-          'executable',
-          'unexecutable'
-        ];
+        const expected = ['executable', 'unexecutable'];
         expect(files.sort()).toEqual(expected.sort());
 
-        const executableMode = '0' + (fs.statSync(path.resolve(tempPath, 'executable')).mode & parseInt('777', 8)).toString(8);
-        const unExecutableMode = '0' + (fs.statSync(path.resolve(tempPath, 'unexecutable')).mode & parseInt('777', 8)).toString(8);
+        const executableMode =
+          '0' +
+          (fs.statSync(path.resolve(tempPath, 'executable')).mode & parseInt('777', 8)).toString(8);
+        const unExecutableMode =
+          '0' +
+          (fs.statSync(path.resolve(tempPath, 'unexecutable')).mode & parseInt('777', 8)).toString(
+            8
+          );
 
         expect(executableMode).toEqual('0755');
         expect(unExecutableMode).toEqual('0644');
-
       });
     });
 
@@ -99,7 +100,7 @@ describe('kibana cli', function () {
       try {
         await extractArchive(path.resolve(repliesPath, 'corrupt.zip'));
         throw new Error('This should have failed');
-      } catch(e) {
+      } catch (e) {
         return;
       }
     });
@@ -120,5 +121,4 @@ describe('kibana cli', function () {
       expect(_isDirectory('/path/to/foo.txt')).toBe(false);
     });
   });
-
 });

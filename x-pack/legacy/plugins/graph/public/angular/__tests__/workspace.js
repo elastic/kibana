@@ -6,26 +6,28 @@
 
 const gws = require('../graph_client_workspace.js');
 const expect = require('@kbn/expect');
-describe('graphui-workspace', function () {
-
-  describe('createWorkspace()', function () {
+describe('graphui-workspace', function() {
+  describe('createWorkspace()', function() {
     // var fooResource=null;
     let mockedResult = null;
     let init = null;
-    beforeEach(function () {
+    beforeEach(function() {
       //Setup logic here
       // fooResource={"foo":"bar"};
-      init = function () {
-        const callNodeProxy = function (indexName, query, responseHandler) {
+      init = function() {
+        const callNodeProxy = function(indexName, query, responseHandler) {
           responseHandler(mockedResult);
         };
         const options = {
           indexName: 'indexName',
-          vertex_fields: [{
-            'name': 'field1'
-          }, {
-            'name': 'field2'
-          }],
+          vertex_fields: [
+            {
+              name: 'field1',
+            },
+            {
+              name: 'field2',
+            },
+          ],
           graphExploreProxy: callNodeProxy,
           exploreControls: {
             useSignificance: false,
@@ -33,47 +35,47 @@ describe('graphui-workspace', function () {
             timeoutMillis: 5000,
             sampleDiversityField: null,
             maxValuesPerDoc: 1,
-            minDocCount: 1
-          }
+            minDocCount: 1,
+          },
         };
         const workspace = gws.createWorkspace(options);
         return {
-          workspace
+          workspace,
           //, get to(){}
-
         };
       };
     });
-    it('initializeWorkspace', function () {
-      const {
-        workspace
-      } = init();
+    it('initializeWorkspace', function() {
+      const { workspace } = init();
       expect(workspace.nodes).to.have.length(0);
     });
-    it('simpleSearch', function () {
+    it('simpleSearch', function() {
       //Test that a graph is loaded from a free-text search
-      const {
-        workspace
-      } = init();
+      const { workspace } = init();
 
       mockedResult = {
-        'vertices': [{
-          'field': 'field1',
-          'term': 'a',
-          'weight': 1,
-          'depth': 0
-        }, {
-          'field': 'field1',
-          'term': 'b',
-          'weight': 1,
-          'depth': 1
-        }],
-        'connections': [{
-          'source': 0,
-          'target': 1,
-          'weight': 1,
-          'doc_count': 5
-        }]
+        vertices: [
+          {
+            field: 'field1',
+            term: 'a',
+            weight: 1,
+            depth: 0,
+          },
+          {
+            field: 'field1',
+            term: 'b',
+            weight: 1,
+            depth: 1,
+          },
+        ],
+        connections: [
+          {
+            source: 0,
+            target: 1,
+            weight: 1,
+            doc_count: 5,
+          },
+        ],
       };
       workspace.simpleSearch('myquery', {}, 2);
 
@@ -81,41 +83,41 @@ describe('graphui-workspace', function () {
       expect(workspace.edges).to.have.length(1);
       expect(workspace.selectedNodes).to.have.length(0);
       expect(workspace.blacklistedNodes).to.have.length(0);
-
 
       const nodeA = workspace.getNode(workspace.makeNodeId('field1', 'a'));
       expect(nodeA).to.be.an(Object);
 
       const nodeD = workspace.getNode(workspace.makeNodeId('field1', 'd'));
       expect(nodeD).to.be(undefined);
-
-
     });
 
-    it('expandTest', function () {
+    it('expandTest', function() {
       //Test that a graph can be expanded
-      const {
-        workspace
-      } = init();
+      const { workspace } = init();
 
       mockedResult = {
-        'vertices': [{
-          'field': 'field1',
-          'term': 'a',
-          'weight': 1,
-          'depth': 0
-        }, {
-          'field': 'field1',
-          'term': 'b',
-          'weight': 1,
-          'depth': 1
-        }],
-        'connections': [{
-          'source': 0,
-          'target': 1,
-          'weight': 1,
-          'doc_count': 5
-        }]
+        vertices: [
+          {
+            field: 'field1',
+            term: 'a',
+            weight: 1,
+            depth: 0,
+          },
+          {
+            field: 'field1',
+            term: 'b',
+            weight: 1,
+            depth: 1,
+          },
+        ],
+        connections: [
+          {
+            source: 0,
+            target: 1,
+            weight: 1,
+            doc_count: 5,
+          },
+        ],
       };
       workspace.simpleSearch('myquery', {}, 2);
 
@@ -125,76 +127,79 @@ describe('graphui-workspace', function () {
       expect(workspace.blacklistedNodes).to.have.length(0);
 
       mockedResult = {
-        'vertices': [{
-          'field': 'field1',
-          'term': 'b',
-          'weight': 1,
-          'depth': 0
-        }, {
-          'field': 'field1',
-          'term': 'c',
-          'weight': 1,
-          'depth': 1
-        }],
-        'connections': [{
-          'source': 0,
-          'target': 1,
-          'weight': 1,
-          'doc_count': 5
-        }]
+        vertices: [
+          {
+            field: 'field1',
+            term: 'b',
+            weight: 1,
+            depth: 0,
+          },
+          {
+            field: 'field1',
+            term: 'c',
+            weight: 1,
+            depth: 1,
+          },
+        ],
+        connections: [
+          {
+            source: 0,
+            target: 1,
+            weight: 1,
+            doc_count: 5,
+          },
+        ],
       };
       workspace.expandGraph();
       expect(workspace.nodes).to.have.length(3); //we already had b from initial query
       expect(workspace.edges).to.have.length(2);
-
-
     });
 
-
-    it('selectionTest', function () {
+    it('selectionTest', function() {
       //Test selections on a graph
-      const {
-        workspace
-      } = init();
+      const { workspace } = init();
       // graph is a1->a2 and b1->b2
       mockedResult = {
-        'vertices': [{
-          'field': 'field1',
-          'term': 'a1',
-          'weight': 1,
-          'depth': 0
-        }, {
-          'field': 'field1',
-          'term': 'a2',
-          'weight': 1,
-          'depth': 1
-        },
-        {
-          'field': 'field1',
-          'term': 'b1',
-          'weight': 1,
-          'depth': 1
-        },
-        {
-          'field': 'field1',
-          'term': 'b2',
-          'weight': 1,
-          'depth': 1
-        }
+        vertices: [
+          {
+            field: 'field1',
+            term: 'a1',
+            weight: 1,
+            depth: 0,
+          },
+          {
+            field: 'field1',
+            term: 'a2',
+            weight: 1,
+            depth: 1,
+          },
+          {
+            field: 'field1',
+            term: 'b1',
+            weight: 1,
+            depth: 1,
+          },
+          {
+            field: 'field1',
+            term: 'b2',
+            weight: 1,
+            depth: 1,
+          },
         ],
-        'connections': [{
-          'source': 0,
-          'target': 1,
-          'weight': 1,
-          'doc_count': 5
-        },
-        {
-          'source': 2,
-          'target': 3,
-          'weight': 1,
-          'doc_count': 5
-        }
-        ]
+        connections: [
+          {
+            source: 0,
+            target: 1,
+            weight: 1,
+            doc_count: 5,
+          },
+          {
+            source: 2,
+            target: 3,
+            weight: 1,
+            doc_count: 5,
+          },
+        ],
       };
       workspace.simpleSearch('myquery', {}, 2);
 
@@ -230,34 +235,34 @@ describe('graphui-workspace', function () {
       workspace.selectNeighbours();
       //Should have reached full extent of a1-a2 island.
       expect(workspace.selectedNodes).to.have.length(2);
-
     });
 
-    it('undoRedoDeletes', function () {
-      const {
-        workspace
-      } = init();
+    it('undoRedoDeletes', function() {
+      const { workspace } = init();
       // graph is a1->a2
       mockedResult = {
-        'vertices': [{
-          'field': 'field1',
-          'term': 'a1',
-          'weight': 1,
-          'depth': 0
-        }, {
-          'field': 'field1',
-          'term': 'a2',
-          'weight': 1,
-          'depth': 1
-        }
+        vertices: [
+          {
+            field: 'field1',
+            term: 'a1',
+            weight: 1,
+            depth: 0,
+          },
+          {
+            field: 'field1',
+            term: 'a2',
+            weight: 1,
+            depth: 1,
+          },
         ],
-        'connections': [{
-          'source': 0,
-          'target': 1,
-          'weight': 1,
-          'doc_count': 5
-        }
-        ]
+        connections: [
+          {
+            source: 0,
+            target: 1,
+            weight: 1,
+            doc_count: 5,
+          },
+        ],
       };
       workspace.simpleSearch('myquery', {}, 2);
 
@@ -286,35 +291,34 @@ describe('graphui-workspace', function () {
 
       workspace.undo();
       expect(workspace.nodes).to.have.length(2);
-
-
     });
 
-    it('undoRedoGroupings', function () {
-      const {
-        workspace
-      } = init();
+    it('undoRedoGroupings', function() {
+      const { workspace } = init();
       // graph is a1->a2
       mockedResult = {
-        'vertices': [{
-          'field': 'field1',
-          'term': 'a1',
-          'weight': 1,
-          'depth': 0
-        }, {
-          'field': 'field1',
-          'term': 'a2',
-          'weight': 1,
-          'depth': 1
-        }
+        vertices: [
+          {
+            field: 'field1',
+            term: 'a1',
+            weight: 1,
+            depth: 0,
+          },
+          {
+            field: 'field1',
+            term: 'a2',
+            weight: 1,
+            depth: 1,
+          },
         ],
-        'connections': [{
-          'source': 0,
-          'target': 1,
-          'weight': 1,
-          'doc_count': 5
-        }
-        ]
+        connections: [
+          {
+            source: 0,
+            target: 1,
+            weight: 1,
+            doc_count: 5,
+          },
+        ],
       };
       workspace.simpleSearch('myquery', {}, 2);
 
@@ -348,10 +352,6 @@ describe('graphui-workspace', function () {
       expect(workspace.nodes).to.have.length(2);
       groupedItems = workspace.returnUnpackedGroupeds([nodeA1]);
       expect(groupedItems).to.have.length(2);
-
     });
-
-
-
   });
 });

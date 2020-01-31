@@ -24,7 +24,7 @@ export const getIndexPatternMock = () => {
     fields: [
       { name: 'keywordField', type: 'string', aggregatable: true },
       { name: 'textField', type: 'string', aggregatable: false },
-      { name: 'numberField', type: 'number', aggregatable: true }
-    ]
+      { name: 'numberField', type: 'number', aggregatable: true },
+    ],
   });
 };

@@ -40,10 +40,7 @@ export function showOpenSearchPanel({ makeUrl }) {
   document.body.appendChild(container);
   const element = (
     <I18nContext>
-      <OpenSearchPanel
-        onClose={onClose}
-        makeUrl={makeUrl}
-      />
+      <OpenSearchPanel onClose={onClose} makeUrl={makeUrl} />
     </I18nContext>
   );
   ReactDOM.render(element, container);

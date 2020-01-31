@@ -57,7 +57,6 @@ function getNotifications(json) {
   }, {});
 }
 
-
 function getActionTypesSettings(upstreamJson) {
   const upstreamActionTypes = getNotifications(upstreamJson);
 
@@ -69,7 +68,7 @@ function getActionTypesSettings(upstreamJson) {
     }
 
     const actionTypeData = {
-      enabled: isEnabledByDefault(actionType)
+      enabled: isEnabledByDefault(actionType),
     };
 
     // For actions types requiring setup, mark them as enabled
@@ -102,7 +101,7 @@ export class Settings {
 
   get downstreamJson() {
     const result = {
-      action_types: this.actionTypes
+      action_types: this.actionTypes,
     };
 
     return result;
@@ -111,7 +110,7 @@ export class Settings {
   static fromUpstreamJson(json) {
     const actionTypes = getActionTypesSettings(json);
     const props = {
-      actionTypes
+      actionTypes,
     };
     return new Settings(props);
   }

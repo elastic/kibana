@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -13,14 +11,12 @@ import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 
-
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
 
 const DEFAULT_MAX_EXAMPLES = 500;
 
 export function resultsServiceProvider(callWithRequest) {
-
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
   // Return an Object with properties 'anomalies' and 'interval' (interval used to aggregate anomalies,
   // one of day, hour or second. Note 'auto' can be provided as the aggregationInterval in the request,
@@ -38,8 +34,8 @@ export function resultsServiceProvider(callWithRequest) {
     dateFormatTz,
     maxRecords = ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
     maxExamples = DEFAULT_MAX_EXAMPLES,
-    influencersFilterQuery) {
-
+    influencersFilterQuery
+  ) {
     // Build the query to return the matching anomaly record results.
     // Add criteria for the time range, record score, plus any specified job IDs.
     const boolCriteria = [
@@ -48,17 +44,17 @@ export function resultsServiceProvider(callWithRequest) {
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
       {
         range: {
           record_score: {
             gte: threshold,
-          }
-        }
-      }
+          },
+        },
+      },
     ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
@@ -73,17 +69,17 @@ export function resultsServiceProvider(callWithRequest) {
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
     // Add in term queries for each of the specified criteria.
-    criteriaFields.forEach((criteria) => {
+    criteriaFields.forEach(criteria => {
       boolCriteria.push({
         term: {
-          [criteria.fieldName]: criteria.fieldValue
-        }
+          [criteria.fieldName]: criteria.fieldValue,
+        },
       });
     });
 
@@ -95,7 +91,7 @@ export function resultsServiceProvider(callWithRequest) {
     if (influencers.length > 0) {
       boolCriteria.push({
         bool: {
-          should: influencers.map((influencer) => {
+          should: influencers.map(influencer => {
             return {
               nested: {
                 path: 'influencers',
@@ -104,22 +100,22 @@ export function resultsServiceProvider(callWithRequest) {
                     must: [
                       {
                         match: {
-                          'influencers.influencer_field_name': influencer.fieldName
-                        }
+                          'influencers.influencer_field_name': influencer.fieldName,
+                        },
                       },
                       {
                         match: {
-                          'influencers.influencer_field_values': influencer.fieldValue
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
+                          'influencers.influencer_field_values': influencer.fieldValue,
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
             };
           }),
           minimum_should_match: 1,
-        }
+        },
       });
     }
 
@@ -134,27 +130,25 @@ export function resultsServiceProvider(callWithRequest) {
               {
                 query_string: {
                   query: 'result_type:record',
-                  analyze_wildcard: false
-                }
+                  analyze_wildcard: false,
+                },
               },
               {
                 bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
-        sort: [
-          { record_score: { order: 'desc' } }
-        ]
-      }
+        sort: [{ record_score: { order: 'desc' } }],
+      },
     });
 
     const tableData = { anomalies: [], interval: 'second' };
     if (resp.hits.total !== 0) {
       let records = [];
-      resp.hits.hits.forEach((hit) => {
+      resp.hits.hits.forEach(hit => {
         records.push(hit._source);
       });
 
@@ -167,18 +161,20 @@ export function resultsServiceProvider(callWithRequest) {
         const latest = moment(records[records.length - 1].timestamp);
 
         const daysDiff = latest.diff(earliest, 'days');
-        tableData.interval = (daysDiff < 2 ? 'hour' : 'day');
+        tableData.interval = daysDiff < 2 ? 'hour' : 'day';
       }
 
       tableData.anomalies = buildAnomalyTableItems(records, tableData.interval, dateFormatTz);
 
       // Load examples for any categorization anomalies.
-      const categoryAnomalies = tableData.anomalies.filter(item => item.entityName === 'mlcategory');
+      const categoryAnomalies = tableData.anomalies.filter(
+        item => item.entityName === 'mlcategory'
+      );
       if (categoryAnomalies.length > 0) {
         tableData.examplesByJobId = {};
 
         const categoryIdsByJobId = {};
-        categoryAnomalies.forEach((anomaly) => {
+        categoryAnomalies.forEach(anomaly => {
           if (!_.has(categoryIdsByJobId, anomaly.jobId)) {
             categoryIdsByJobId[anomaly.jobId] = [];
           }
@@ -188,16 +184,20 @@ export function resultsServiceProvider(callWithRequest) {
         });
 
         const categoryJobIds = Object.keys(categoryIdsByJobId);
-        await Promise.all(categoryJobIds.map(async (jobId) => {
-          const examplesByCategoryId = await getCategoryExamples(jobId, categoryIdsByJobId[jobId], maxExamples);
-          tableData.examplesByJobId[jobId] = examplesByCategoryId;
-        }));
+        await Promise.all(
+          categoryJobIds.map(async jobId => {
+            const examplesByCategoryId = await getCategoryExamples(
+              jobId,
+              categoryIdsByJobId[jobId],
+              maxExamples
+            );
+            tableData.examplesByJobId[jobId] = examplesByCategoryId;
+          })
+        );
       }
-
     }
 
     return tableData;
-
   }
 
   // Returns the maximum anomaly_score for result_type:bucket over jobIds for the interval passed in
@@ -210,10 +210,10 @@ export function resultsServiceProvider(callWithRequest) {
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
-      }
+            format: 'epoch_millis',
+          },
+        },
+      },
     ];
 
     if (jobIds.length > 0) {
@@ -228,37 +228,40 @@ export function resultsServiceProvider(callWithRequest) {
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
-    const query =  {
+    const query = {
       size: 0,
       index: ML_RESULTS_INDEX_PATTERN,
       body: {
         query: {
           bool: {
-            filter: [{
-              query_string: {
-                query: 'result_type:bucket',
-                analyze_wildcard: false
-              }
-            }, {
-              bool: {
-                must: boolCriteria
-              }
-            }]
-          }
+            filter: [
+              {
+                query_string: {
+                  query: 'result_type:bucket',
+                  analyze_wildcard: false,
+                },
+              },
+              {
+                bool: {
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
         aggs: {
           max_score: {
             max: {
-              field: 'anomaly_score'
-            }
-          }
-        }
-      }
+              field: 'anomaly_score',
+            },
+          },
+        },
+      },
     };
 
     const resp = await callWithRequest('search', query);
@@ -274,9 +277,9 @@ export function resultsServiceProvider(callWithRequest) {
     const filter = [
       {
         term: {
-          result_type: 'bucket'
-        }
-      }
+          result_type: 'bucket',
+        },
+      },
     ];
 
     if (jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
@@ -291,8 +294,8 @@ export function resultsServiceProvider(callWithRequest) {
       filter.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
@@ -305,37 +308,35 @@ export function resultsServiceProvider(callWithRequest) {
       body: {
         query: {
           bool: {
-            filter
-          }
+            filter,
+          },
         },
         aggs: {
           byJobId: {
             terms: {
               field: 'job_id',
-              size: maxJobs
+              size: maxJobs,
             },
             aggs: {
               maxTimestamp: {
                 max: {
-                  field: 'timestamp'
-                }
-              }
-            }
-          }
-        }
-      }
+                  field: 'timestamp',
+                },
+              },
+            },
+          },
+        },
+      },
     });
-
 
     const bucketsByJobId = _.get(resp, ['aggregations', 'byJobId', 'buckets'], []);
     const timestampByJobId = {};
-    bucketsByJobId.forEach((bucket) => {
+    bucketsByJobId.forEach(bucket => {
       timestampByJobId[bucket.key] = bucket.maxTimestamp.value;
     });
 
     return timestampByJobId;
   }
-
 
   // Obtains the categorization examples for the categories with the specified IDs
   // from the given index and job ID.
@@ -344,25 +345,25 @@ export function resultsServiceProvider(callWithRequest) {
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       rest_total_hits_as_int: true,
-      size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,    // Matches size of records in anomaly summary table.
+      size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
       body: {
         query: {
           bool: {
-            filter: [
-              { term: { job_id: jobId } },
-              { terms: { category_id: categoryIds } }
-            ]
-          }
-        }
-      }
+            filter: [{ term: { job_id: jobId } }, { terms: { category_id: categoryIds } }],
+          },
+        },
+      },
     });
 
     const examplesByCategoryId = {};
     if (resp.hits.total !== 0) {
-      resp.hits.hits.forEach((hit) => {
+      resp.hits.hits.forEach(hit => {
         if (maxExamples) {
-          examplesByCategoryId[hit._source.category_id] =
-            _.slice(hit._source.examples, 0, Math.min(hit._source.examples.length, maxExamples));
+          examplesByCategoryId[hit._source.category_id] = _.slice(
+            hit._source.examples,
+            0,
+            Math.min(hit._source.examples.length, maxExamples)
+          );
         } else {
           examplesByCategoryId[hit._source.category_id] = hit._source.examples;
         }
@@ -383,13 +384,10 @@ export function resultsServiceProvider(callWithRequest) {
       body: {
         query: {
           bool: {
-            filter: [
-              { term: { job_id: jobId } },
-              { term: { category_id: categoryId } }
-            ]
-          }
-        }
-      }
+            filter: [{ term: { job_id: jobId } }, { term: { category_id: categoryId } }],
+          },
+        },
+      },
     });
 
     const definition = { categoryId, terms: null, regex: null, examples: [] };
@@ -409,7 +407,6 @@ export function resultsServiceProvider(callWithRequest) {
     getCategoryDefinition,
     getCategoryExamples,
     getLatestBucketTimestampByJob,
-    getMaxAnomalyScore
+    getMaxAnomalyScore,
   };
-
 }

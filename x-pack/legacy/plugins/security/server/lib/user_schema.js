@@ -13,5 +13,5 @@ export const userSchema = Joi.object({
   full_name: Joi.string().allow(null, ''),
   email: Joi.string().allow(null, ''),
   metadata: Joi.object(),
-  enabled: Joi.boolean().default(true)
+  enabled: Joi.boolean().default(true),
 });

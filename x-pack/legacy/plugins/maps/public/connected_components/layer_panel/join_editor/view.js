@@ -21,22 +21,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 export function JoinEditor({ joins, layer, onChange }) {
-
   const renderJoins = () => {
     return joins.map((joinDescriptor, index) => {
-      const handleOnChange = (updatedDescriptor) => {
-        onChange(layer, [
-          ...joins.slice(0, index),
-          updatedDescriptor,
-          ...joins.slice(index + 1)
-        ]);
+      const handleOnChange = updatedDescriptor => {
+        onChange(layer, [...joins.slice(0, index), updatedDescriptor, ...joins.slice(index + 1)]);
       };
 
       const handleOnRemove = () => {
-        onChange(layer, [
-          ...joins.slice(0, index),
-          ...joins.slice(index + 1)
-        ]);
+        onChange(layer, [...joins.slice(0, index), ...joins.slice(index + 1)]);
       };
 
       return (
@@ -58,9 +50,9 @@ export function JoinEditor({ joins, layer, onChange }) {
       ...joins,
       {
         right: {
-          id: uuid()
-        }
-      }
+          id: uuid(),
+        },
+      },
     ]);
   };
 
@@ -76,7 +68,8 @@ export function JoinEditor({ joins, layer, onChange }) {
             <h5>
               <EuiToolTip
                 content={i18n.translate('xpack.maps.layerPanel.joinEditor.termJoinTooltip', {
-                  defaultMessage: 'Use term joins to augment this layer with properties for data driven styling.'
+                  defaultMessage:
+                    'Use term joins to augment this layer with properties for data driven styling.',
                 })}
               >
                 <FormattedMessage
@@ -88,19 +81,15 @@ export function JoinEditor({ joins, layer, onChange }) {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-
           <EuiButtonIcon
             iconType="plusInCircle"
             onClick={addJoin}
             aria-label={i18n.translate('xpack.maps.layerPanel.joinEditor.addJoinAriaLabel', {
-              defaultMessage: 'Add join'
-            })
-            }
-            title={
-              i18n.translate('xpack.maps.layerPanel.joinEditor.addJoinButtonLabel', {
-                defaultMessage: 'Add join'
-              })
-            }
+              defaultMessage: 'Add join',
+            })}
+            title={i18n.translate('xpack.maps.layerPanel.joinEditor.addJoinButtonLabel', {
+              defaultMessage: 'Add join',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

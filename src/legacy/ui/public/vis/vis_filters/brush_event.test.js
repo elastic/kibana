@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import _ from 'lodash';
 import moment from 'moment';
 import expect from '@kbn/expect';
@@ -28,12 +27,14 @@ describe('brushEvent', () => {
   const JAN_01_2014 = 1388559600000;
 
   const baseEvent = {
-    aggConfigs: [{
-      params: {},
-      getIndexPattern: () => ({
-        timeFieldName: 'time',
-      })
-    }],
+    aggConfigs: [
+      {
+        params: {},
+        getIndexPattern: () => ({
+          timeFieldName: 'time',
+        }),
+      },
+    ],
     data: {
       fieldFormatter: _.constant({}),
       series: [
@@ -47,20 +48,20 @@ describe('brushEvent', () => {
                     {
                       id: '1',
                     },
-                  ]
-                }
-              }
+                  ],
+                },
+              },
             },
-          ]
+          ],
         },
-      ]
+      ],
     },
   };
 
   beforeEach(() => {
     baseEvent.data.indexPattern = {
       id: 'logstash-*',
-      timeFieldName: 'time'
+      timeFieldName: 'time',
     };
   });
 
@@ -79,7 +80,7 @@ describe('brushEvent', () => {
       let dateEvent;
       const dateField = {
         name: 'time',
-        type: 'date'
+        type: 'date',
       };
 
       beforeEach(() => {
@@ -109,7 +110,7 @@ describe('brushEvent', () => {
       let dateEvent;
       const dateField = {
         name: 'anotherTimeField',
-        type: 'date'
+        type: 'date',
       };
 
       beforeEach(() => {
@@ -124,15 +125,11 @@ describe('brushEvent', () => {
         const rangeEnd = rangeBegin + DAY_IN_MS;
         event.range = [rangeBegin, rangeEnd];
         const filters = onBrushEvent(event);
-        expect(filters.length)
-          .to.equal(1);
-        expect(filters[0].range.anotherTimeField.gte)
-          .to.equal(moment(rangeBegin).toISOString());
-        expect(filters[0].range.anotherTimeField.lt)
-          .to.equal(moment(rangeEnd).toISOString());
+        expect(filters.length).to.equal(1);
+        expect(filters[0].range.anotherTimeField.gte).to.equal(moment(rangeBegin).toISOString());
+        expect(filters[0].range.anotherTimeField.lt).to.equal(moment(rangeEnd).toISOString());
         expect(filters[0].range.anotherTimeField).to.have.property('format');
-        expect(filters[0].range.anotherTimeField.format)
-          .to.equal('strict_date_optional_time');
+        expect(filters[0].range.anotherTimeField.format).to.equal('strict_date_optional_time');
       });
     });
   });
@@ -141,7 +138,7 @@ describe('brushEvent', () => {
     let numberEvent;
     const numberField = {
       name: 'numberField',
-      type: 'number'
+      type: 'number',
     };
 
     beforeEach(() => {
@@ -161,12 +158,9 @@ describe('brushEvent', () => {
       const event = _.cloneDeep(numberEvent);
       event.range = [1, 2, 3, 4];
       const filters = onBrushEvent(event);
-      expect(filters.length)
-        .to.equal(1);
-      expect(filters[0].range.numberField.gte)
-        .to.equal(1);
-      expect(filters[0].range.numberField.lt)
-        .to.equal(4);
+      expect(filters.length).to.equal(1);
+      expect(filters[0].range.numberField.gte).to.equal(1);
+      expect(filters[0].range.numberField.lt).to.equal(4);
       expect(filters[0].range.numberField).not.to.have.property('format');
     });
   });

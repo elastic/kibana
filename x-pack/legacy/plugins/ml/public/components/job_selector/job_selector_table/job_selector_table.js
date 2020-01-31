@@ -4,28 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React, { Fragment, useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
 import { CustomSelectionTable } from '../custom_selection_table';
 import { JobSelectorBadge } from '../job_selector_badge';
 import { TimeRangeBar } from '../timerange_bar/';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiTabbedContent,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTabbedContent } from '@elastic/eui';
 
-import {
-  LEFT_ALIGNMENT,
-  CENTER_ALIGNMENT,
-  SortableProperties,
-} from '@elastic/eui/lib/services';
+import { LEFT_ALIGNMENT, CENTER_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
-
 
 const JOB_FILTER_FIELDS = ['job_id', 'groups'];
 const GROUP_FILTER_FIELDS = ['id'];
@@ -37,7 +25,7 @@ export function JobSelectorTable({
   onSelection,
   selectedIds,
   singleSelection,
-  timeseriesOnly
+  timeseriesOnly,
 }) {
   const [sortableProperties, setSortableProperties] = useState();
   const [currentTab, setCurrentTab] = useState('Jobs');
@@ -57,7 +45,7 @@ export function JobSelectorTable({
           name: 'groups',
           getValue: item => (item.groups && item.groups[0] ? item.groups[0].toLowerCase() : ''),
           isAscending: true,
-        }
+        },
       ];
     } else if (currentTab === 'Groups') {
       defaultSortProperty = 'id';
@@ -66,7 +54,7 @@ export function JobSelectorTable({
           name: 'id',
           getValue: item => item.id.toLowerCase(),
           isAscending: true,
-        }
+        },
       ];
     }
     const sortableProps = new SortableProperties(sortablePropertyItems, defaultSortProperty);
@@ -75,20 +63,22 @@ export function JobSelectorTable({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobs, currentTab]);
 
-  const tabs = [{
-    id: 'Jobs',
-    name: i18n.translate('xpack.ml.jobSelector.jobsTab', {
-      defaultMessage: 'Jobs',
-    }),
-    content: renderJobsTable(),
-  },
-  {
-    id: 'Groups',
-    name: i18n.translate('xpack.ml.jobSelector.groupsTab', {
-      defaultMessage: 'Groups',
-    }),
-    content: renderGroupsTable()
-  }];
+  const tabs = [
+    {
+      id: 'Jobs',
+      name: i18n.translate('xpack.ml.jobSelector.jobsTab', {
+        defaultMessage: 'Jobs',
+      }),
+      content: renderJobsTable(),
+    },
+    {
+      id: 'Groups',
+      name: i18n.translate('xpack.ml.jobSelector.groupsTab', {
+        defaultMessage: 'Groups',
+      }),
+      content: renderGroupsTable(),
+    },
+  ];
 
   function getGroupOptions() {
     return groupsList.map(g => ({
@@ -107,7 +97,7 @@ export function JobSelectorTable({
             </EuiFlexItem>
           </EuiFlexGroup>
         </Fragment>
-      )
+      ),
     }));
   }
 
@@ -123,16 +113,15 @@ export function JobSelectorTable({
         label: 'job ID',
         id: 'job_id',
         isSortable: true,
-        alignment: LEFT_ALIGNMENT
+        alignment: LEFT_ALIGNMENT,
       },
       {
         id: 'groups',
         label: 'groups',
         isSortable: true,
         alignment: LEFT_ALIGNMENT,
-        render: ({ groups = [] }) => (
-          groups.map((group) => <JobSelectorBadge key={`${group}-key`} id={group} isGroup={true} />)
-        ),
+        render: ({ groups = [] }) =>
+          groups.map(group => <JobSelectorBadge key={`${group}-key`} id={group} isGroup={true} />),
       },
       {
         label: 'time range',
@@ -140,8 +129,8 @@ export function JobSelectorTable({
         alignment: LEFT_ALIGNMENT,
         render: ({ timeRange = {}, isRunning }) => (
           <TimeRangeBar timerange={timeRange} isRunning={isRunning} ganttBarWidth={ganttBarWidth} />
-        )
-      }
+        ),
+      },
     ];
 
     const filters = [
@@ -155,8 +144,8 @@ export function JobSelectorTable({
         noOptionsMessage: 'No groups found.',
         multiSelect: 'or',
         cache: 10000,
-        options: getGroupOptions()
-      }
+        options: getGroupOptions(),
+      },
     ];
 
     return (
@@ -165,7 +154,7 @@ export function JobSelectorTable({
         filters={filters}
         filterDefaultFields={!singleSelection ? JOB_FILTER_FIELDS : undefined}
         items={jobs}
-        onTableChange={(selectionFromTable) => onSelection({ selectionFromTable })}
+        onTableChange={selectionFromTable => onSelection({ selectionFromTable })}
         selectedIds={selectedIds}
         singleSelection={singleSelection}
         sortableProperties={sortableProperties}
@@ -187,23 +176,23 @@ export function JobSelectorTable({
         id: 'id',
         isSortable: true,
         alignment: LEFT_ALIGNMENT,
-        render: ({ id }) => <JobSelectorBadge id={id} isGroup={true} />
+        render: ({ id }) => <JobSelectorBadge id={id} isGroup={true} />,
       },
       {
         id: 'jobs in group',
         label: 'jobs in group',
         isSortable: false,
         alignment: CENTER_ALIGNMENT,
-        render: ({ jobIds = [] }) => jobIds.length
+        render: ({ jobIds = [] }) => jobIds.length,
       },
       {
         label: 'time range',
         id: 'timerange',
         alignment: LEFT_ALIGNMENT,
         render: ({ timeRange = {} }) => (
-          <TimeRangeBar timerange={timeRange} ganttBarWidth={ganttBarWidth}/>
-        )
-      }
+          <TimeRangeBar timerange={timeRange} ganttBarWidth={ganttBarWidth} />
+        ),
+      },
     ];
 
     return (
@@ -211,7 +200,7 @@ export function JobSelectorTable({
         columns={groupColumns}
         filterDefaultFields={!singleSelection ? GROUP_FILTER_FIELDS : undefined}
         items={groupsList}
-        onTableChange={(selectionFromTable) => onSelection({ selectionFromTable })}
+        onTableChange={selectionFromTable => onSelection({ selectionFromTable })}
         selectedIds={selectedIds}
         sortableProperties={sortableProperties}
       />
@@ -224,7 +213,9 @@ export function JobSelectorTable({
         size="s"
         tabs={tabs}
         initialSelectedTab={tabs[0]}
-        onTabClick={(tab) => { setCurrentTab(tab.id); }}
+        onTabClick={tab => {
+          setCurrentTab(tab.id);
+        }}
       />
     );
   }
@@ -245,5 +236,5 @@ JobSelectorTable.propTypes = {
   onSelection: PropTypes.func.isRequired,
   selectedIds: PropTypes.array.isRequired,
   singleSelection: PropTypes.bool,
-  timeseriesOnly: PropTypes.bool
+  timeseriesOnly: PropTypes.bool,
 };

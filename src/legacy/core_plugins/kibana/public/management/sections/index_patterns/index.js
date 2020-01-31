@@ -28,7 +28,10 @@ import indexTemplate from './index.html';
 import indexPatternListTemplate from './list.html';
 import { IndexPatternTable } from './index_pattern_table';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import {
+  FeatureCatalogueRegistryProvider,
+  FeatureCatalogueCategory,
+} from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { UICapabilitiesProvider } from 'ui/capabilities/react';
@@ -39,11 +42,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 const INDEX_PATTERN_LIST_DOM_ELEMENT_ID = 'indexPatternListReact';
 
-export function updateIndexPatternList(
-  indexPatterns,
-  kbnUrl,
-  indexPatternCreationOptions,
-) {
+export function updateIndexPatternList(indexPatterns, kbnUrl, indexPatternCreationOptions) {
   const node = document.getElementById(INDEX_PATTERN_LIST_DOM_ELEMENT_ID);
   if (!node) {
     return;
@@ -59,7 +58,7 @@ export function updateIndexPatternList(
         />
       </UICapabilitiesProvider>
     </I18nContext>,
-    node,
+    node
   );
 }
 
@@ -69,58 +68,61 @@ export const destroyIndexPatternList = () => {
 };
 
 const indexPatternsResolutions = {
-  indexPatterns: function (Private) {
+  indexPatterns: function(Private) {
     const savedObjectsClient = Private(SavedObjectsClientProvider);
 
-    return savedObjectsClient.find({
-      type: 'index-pattern',
-      fields: ['title', 'type'],
-      perPage: 10000
-    }).then(response => response.savedObjects);
-  }
+    return savedObjectsClient
+      .find({
+        type: 'index-pattern',
+        fields: ['title', 'type'],
+        perPage: 10000,
+      })
+      .then(response => response.savedObjects);
+  },
 };
 
 // add a dependency to all of the subsection routes
-uiRoutes
-  .defaults(/management\/kibana\/(index_patterns|index_pattern)/, {
-    resolve: indexPatternsResolutions,
-    requireUICapability: 'management.kibana.index_patterns',
-    badge: uiCapabilities => {
-      if (uiCapabilities.indexPatterns.save) {
-        return undefined;
-      }
-
-      return {
-        text: i18n.translate('kbn.management.indexPatterns.badge.readOnly.text', {
-          defaultMessage: 'Read only',
-        }),
-        tooltip: i18n.translate('kbn.management.indexPatterns.badge.readOnly.tooltip', {
-          defaultMessage: 'Unable to save index patterns',
-        }),
-        iconType: 'glasses'
-      };
+uiRoutes.defaults(/management\/kibana\/(index_patterns|index_pattern)/, {
+  resolve: indexPatternsResolutions,
+  requireUICapability: 'management.kibana.index_patterns',
+  badge: uiCapabilities => {
+    if (uiCapabilities.indexPatterns.save) {
+      return undefined;
     }
-  });
 
-uiRoutes
-  .when('/management/kibana/index_patterns', {
-    template: indexPatternListTemplate,
-    k7Breadcrumbs: getListBreadcrumbs
-  });
+    return {
+      text: i18n.translate('kbn.management.indexPatterns.badge.readOnly.text', {
+        defaultMessage: 'Read only',
+      }),
+      tooltip: i18n.translate('kbn.management.indexPatterns.badge.readOnly.tooltip', {
+        defaultMessage: 'Unable to save index patterns',
+      }),
+      iconType: 'glasses',
+    };
+  },
+});
+
+uiRoutes.when('/management/kibana/index_patterns', {
+  template: indexPatternListTemplate,
+  k7Breadcrumbs: getListBreadcrumbs,
+});
 
 // wrapper directive, which sets some global stuff up like the left nav
-uiModules.get('apps/management')
-  .directive('kbnManagementIndexPatterns', function ($route, config, kbnUrl, Private) {
+uiModules
+  .get('apps/management')
+  .directive('kbnManagementIndexPatterns', function($route, config, kbnUrl, Private) {
     return {
       restrict: 'E',
       transclude: true,
       template: indexTemplate,
-      link: async function ($scope) {
+      link: async function($scope) {
         const indexPatternListProvider = Private(IndexPatternListFactory)();
         const indexPatternCreationProvider = Private(IndexPatternCreationFactory)();
-        const indexPatternCreationOptions = await indexPatternCreationProvider.getIndexPatternCreationOptions((url) => {
-          $scope.$evalAsync(() => kbnUrl.change(url));
-        });
+        const indexPatternCreationOptions = await indexPatternCreationProvider.getIndexPatternCreationOptions(
+          url => {
+            $scope.$evalAsync(() => kbnUrl.change(url));
+          }
+        );
 
         const renderList = () => {
           $scope.indexPatternList =
@@ -129,10 +131,7 @@ uiModules.get('apps/management')
                 const id = pattern.id;
                 const title = pattern.get('title');
                 const isDefault = $scope.defaultIndex === id;
-                const tags = indexPatternListProvider.getIndexPatternTags(
-                  pattern,
-                  isDefault
-                );
+                const tags = indexPatternListProvider.getIndexPatternTags(pattern, isDefault);
 
                 return {
                   id,
@@ -165,25 +164,30 @@ uiModules.get('apps/management')
         $scope.$watch('defaultIndex', () => renderList());
         config.bindToScope($scope, 'defaultIndex');
         $scope.$apply();
-      }
+      },
     };
   });
 
 management.getSection('kibana').register('index_patterns', {
-  display: i18n.translate('kbn.management.indexPattern.sectionsHeader', { defaultMessage: 'Index Patterns' }),
+  display: i18n.translate('kbn.management.indexPattern.sectionsHeader', {
+    defaultMessage: 'Index Patterns',
+  }),
   order: 0,
-  url: '#/management/kibana/index_patterns/'
+  url: '#/management/kibana/index_patterns/',
 });
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'index_patterns',
-    title: i18n.translate('kbn.management.indexPatternHeader', { defaultMessage: 'Index Patterns' }),
-    description: i18n.translate('kbn.management.indexPatternLabel',
-      { defaultMessage: 'Manage the index patterns that help retrieve your data from Elasticsearch.' }),
+    title: i18n.translate('kbn.management.indexPatternHeader', {
+      defaultMessage: 'Index Patterns',
+    }),
+    description: i18n.translate('kbn.management.indexPatternLabel', {
+      defaultMessage: 'Manage the index patterns that help retrieve your data from Elasticsearch.',
+    }),
     icon: 'indexPatternApp',
     path: '/app/kibana#/management/kibana/index_patterns',
     showOnHomePage: true,
-    category: FeatureCatalogueCategory.ADMIN
+    category: FeatureCatalogueCategory.ADMIN,
   };
 });

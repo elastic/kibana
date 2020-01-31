@@ -24,7 +24,7 @@ const TEST_DOC_END_TIME = '2015-09-23 18:31:44.000';
 const TEST_COLUMN_NAMES = ['@message'];
 const TEST_FILTER_COLUMN_NAMES = [['extension', 'jpg'], ['geo.src', 'IN']];
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
@@ -32,20 +32,22 @@ export default function ({ getService, getPageObjects }) {
 
   describe('doc link in discover', function contextSize() {
     this.tags('smoke');
-    before(async function () {
+    before(async function() {
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(TEST_DOC_START_TIME, TEST_DOC_END_TIME);
-      await Promise.all(TEST_COLUMN_NAMES.map((columnName) => (
-        PageObjects.discover.clickFieldListItemAdd(columnName)
-      )));
-      await Promise.all(TEST_FILTER_COLUMN_NAMES.map(async ([columnName, value]) => {
-        await PageObjects.discover.clickFieldListItem(columnName);
-        await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
-      }));
+      await Promise.all(
+        TEST_COLUMN_NAMES.map(columnName => PageObjects.discover.clickFieldListItemAdd(columnName))
+      );
+      await Promise.all(
+        TEST_FILTER_COLUMN_NAMES.map(async ([columnName, value]) => {
+          await PageObjects.discover.clickFieldListItem(columnName);
+          await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
+        })
+      );
     });
 
-    it('should open the doc view of the selected document', async function () {
+    it('should open the doc view of the selected document', async function() {
       // navigate to the doc view
       await docTable.clickRowToggle({ rowIndex: 0 });
       await (await docTable.getRowActions({ rowIndex: 0 }))[1].click();

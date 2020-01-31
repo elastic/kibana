@@ -10,7 +10,7 @@ import { getLayerList } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {
-    layerList: getLayerList(state)
+    layerList: getLayerList(state),
   };
 }
 
@@ -18,5 +18,8 @@ function mapDispatchToProps() {
   return {};
 }
 
-const connectedViewControl = connect(mapStateToProps, mapDispatchToProps)(AttributionControl);
+const connectedViewControl = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(AttributionControl);
 export { connectedViewControl as AttributionControl };

@@ -14,13 +14,17 @@ import { initializeAppState, subscribeAppStateToObservable } from '../app_state_
 describe('ML - initializeAppState', () => {
   let AppState;
 
-  beforeEach(ngMock.module('kibana', (stateManagementConfigProvider) => {
-    stateManagementConfigProvider.enable();
-  }));
+  beforeEach(
+    ngMock.module('kibana', stateManagementConfigProvider => {
+      stateManagementConfigProvider.enable();
+    })
+  );
 
-  beforeEach(ngMock.inject(($injector) => {
-    AppState = $injector.get('AppState');
-  }));
+  beforeEach(
+    ngMock.inject($injector => {
+      AppState = $injector.get('AppState');
+    })
+  );
 
   it('Throws an error when called without arguments.', () => {
     expect(() => initializeAppState()).to.throwError();
@@ -36,21 +40,25 @@ describe('ML - subscribeAppStateToObservable', () => {
   let AppState;
   let $rootScope;
 
-  beforeEach(ngMock.module('kibana', (stateManagementConfigProvider) => {
-    stateManagementConfigProvider.enable();
-  }));
+  beforeEach(
+    ngMock.module('kibana', stateManagementConfigProvider => {
+      stateManagementConfigProvider.enable();
+    })
+  );
 
-  beforeEach(ngMock.inject(($injector) => {
-    AppState = $injector.get('AppState');
-    $rootScope = $injector.get('$rootScope');
-  }));
+  beforeEach(
+    ngMock.inject($injector => {
+      AppState = $injector.get('AppState');
+      $rootScope = $injector.get('$rootScope');
+    })
+  );
 
-  it('Initializes a custom state store, sets and gets a test value using events.', (done) => {
+  it('Initializes a custom state store, sets and gets a test value using events.', done => {
     const o$ = new BehaviorSubject({ value: 10 });
 
     subscribeAppStateToObservable(AppState, 'mlTest', o$, () => $rootScope.$applyAsync());
 
-    o$.subscribe((payload) => {
+    o$.subscribe(payload => {
       const appState = new AppState();
       appState.fetch();
 
@@ -59,6 +67,5 @@ describe('ML - subscribeAppStateToObservable', () => {
 
       done();
     });
-
   });
 });

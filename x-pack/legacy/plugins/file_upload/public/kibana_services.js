@@ -8,6 +8,6 @@ import { uiModules } from 'ui/modules';
 
 export let indexPatternService;
 
-uiModules.get('app/file_upload').run(($injector) => {
+uiModules.get('app/file_upload').run($injector => {
   indexPatternService = $injector.get('indexPatterns');
 });

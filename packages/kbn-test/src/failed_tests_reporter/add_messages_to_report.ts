@@ -57,14 +57,20 @@ export async function addMessagesToReport(options: {
     }
 
     log.info(`${classname} - ${name}:${messageList}`);
-    const append = `\n\nFailed Tests Reporter:${messageList}\n`;
+    const output = `Failed Tests Reporter:${messageList}\n\n`;
 
-    const [failure] = testCase.failure;
-    if (typeof failure === 'object') {
-      failure._ += append;
-    } else {
-      testCase.failure[0] = String(failure) + append;
+    if (!testCase['system-out']) {
+      testCase['system-out'] = [output];
+      continue;
     }
+
+    if (typeof testCase['system-out'][0] === 'string') {
+      testCase['system-out'][0] = output + String(testCase['system-out'][0]);
+      continue;
+    }
+
+    const [current] = testCase['system-out'];
+    current._ = output + current._;
   }
 
   const builder = new xml2js.Builder({

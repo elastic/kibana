@@ -44,9 +44,13 @@ function CompilingContext(endpointId, parametrizedComponentFactories) {
  * which should return the top level components for the given endpoint
  */
 
-
 function resolvePathToComponents(tokenPath, context, editor, components) {
-  const walkStates = walkTokenPath(tokenPath, [new WalkingState('ROOT', components, [])], context, editor);
+  const walkStates = walkTokenPath(
+    tokenPath,
+    [new WalkingState('ROOT', components, [])],
+    context,
+    editor
+  );
   const result = [].concat.apply([], _.pluck(walkStates, 'components'));
   return result;
 }
@@ -58,8 +62,7 @@ class ScopeResolver extends SharedComponent {
       // relative link, inject current endpoint
       if (link === '.') {
         link = compilingContext.endpointId;
-      }
-      else {
+      } else {
         link = compilingContext.endpointId + link;
       }
     }
@@ -88,13 +91,11 @@ class ScopeResolver extends SharedComponent {
         const term = path[2];
         components = context.globalComponentResolver(term);
         path = path.slice(3);
-      }
-      else {
+      } else {
         path = path.slice(1);
         components = context.endpointComponentResolver(endpoint);
       }
-    }
-    catch (e) {
+    } catch (e) {
       throw new Error('failed to resolve link [' + this.link + ']: ' + e);
     }
     return resolvePathToComponents(path, context, editor, components);
@@ -103,7 +104,7 @@ class ScopeResolver extends SharedComponent {
   getTerms(context, editor) {
     const options = [];
     const components = this.resolveLinkToComponents(context, editor);
-    _.each(components, function (component) {
+    _.each(components, function(component) {
       options.push.apply(options, component.getTerms(context, editor));
     });
     return options;
@@ -111,11 +112,11 @@ class ScopeResolver extends SharedComponent {
 
   match(token, context, editor) {
     const result = {
-      next: []
+      next: [],
     };
     const components = this.resolveLinkToComponents(context, editor);
 
-    _.each(components, function (component) {
+    _.each(components, function(component) {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
         result.next.push.apply(result.next, componentResult.next);
@@ -193,7 +194,7 @@ function compileDescription(description, compilingContext) {
     }
     if (description.__one_of) {
       return _.flatten(
-        _.map(description.__one_of, function (d) {
+        _.map(description.__one_of, function(d) {
           return compileDescription(d, compilingContext);
         })
       );
@@ -215,7 +216,7 @@ function compileParametrizedValue(value, compilingContext, template) {
   value = value.substr(1, value.length - 2).toLowerCase();
   let component = compilingContext.parametrizedComponentFactories.getComponent(value, true);
   if (!component) {
-    throw new Error('no factory found for \'' + value + '\'');
+    throw new Error("no factory found for '" + value + "'");
   }
   component = component(value, null, template);
   if (!_.isUndefined(template)) {
@@ -228,7 +229,7 @@ function compileObject(objDescription, compilingContext) {
   const objectC = new ConstantComponent('{');
   const constants = [];
   const patterns = [];
-  _.each(objDescription, function (desc, key) {
+  _.each(objDescription, function(desc, key) {
     if (key.indexOf('__') === 0) {
       // meta key
       return;
@@ -237,11 +238,7 @@ function compileObject(objDescription, compilingContext) {
     const options = getOptions(desc);
     let component;
     if (/^\{.*\}$/.test(key)) {
-      component = compileParametrizedValue(
-        key,
-        compilingContext,
-        options.template
-      );
+      component = compileParametrizedValue(key, compilingContext, options.template);
       patterns.push(component);
     } else if (key === '*') {
       component = new SharedComponent(key);
@@ -251,7 +248,7 @@ function compileObject(objDescription, compilingContext) {
       component = new ConstantComponent(key, null, [options]);
       constants.push(component);
     }
-    _.map(compileDescription(desc, compilingContext), function (subComponent) {
+    _.map(compileDescription(desc, compilingContext), function(subComponent) {
       component.addComponent(subComponent);
     });
   });
@@ -261,8 +258,8 @@ function compileObject(objDescription, compilingContext) {
 
 function compileList(listRule, compilingContext) {
   const listC = new ConstantComponent('[');
-  _.each(listRule, function (desc) {
-    _.each(compileDescription(desc, compilingContext), function (component) {
+  _.each(listRule, function(desc) {
+    _.each(compileDescription(desc, compilingContext), function(component) {
       listC.addComponent(component);
     });
   });
@@ -272,7 +269,7 @@ function compileList(listRule, compilingContext) {
 /** takes a compiled object and wraps in a {@link ConditionalProxy }*/
 function compileCondition(description, compiledObject) {
   if (description.lines_regex) {
-    return new ConditionalProxy(function (context, editor) {
+    return new ConditionalProxy(function(context, editor) {
       const lines = editor
         .getSession()
         .getLines(context.requestStartRow, editor.getCursorPosition().row)
@@ -302,11 +299,7 @@ export function globalsOnlyAutocompleteComponents() {
  *   }
  * }
  */
-export function compileBodyDescription(
-  endpointId,
-  description,
-  parametrizedComponentFactories
-) {
+export function compileBodyDescription(endpointId, description, parametrizedComponentFactories) {
   return compileDescription(
     description,
     new CompilingContext(endpointId, parametrizedComponentFactories)

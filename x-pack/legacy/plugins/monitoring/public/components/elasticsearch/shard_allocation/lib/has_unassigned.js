@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 export function hasUnassigned(item) {
-  return item.unassigned && item.unassigned.length > 0 || false;
+  return (item.unassigned && item.unassigned.length > 0) || false;
 }

@@ -23,22 +23,29 @@ import $ from 'jquery';
 export class AxisTitle {
   constructor(axisConfig) {
     this.axisConfig = axisConfig;
-    this.elSelector = this.axisConfig.get('title.elSelector').replace('{pos}', this.axisConfig.get('position'));
+    this.elSelector = this.axisConfig
+      .get('title.elSelector')
+      .replace('{pos}', this.axisConfig.get('position'));
   }
 
   render() {
-    d3.select(this.axisConfig.get('rootEl')).selectAll(this.elSelector).call(this.draw());
+    d3.select(this.axisConfig.get('rootEl'))
+      .selectAll(this.elSelector)
+      .call(this.draw());
   }
 
   destroy() {
-    $(this.axisConfig.get('rootEl')).find(this.elSelector).find('svg').remove();
+    $(this.axisConfig.get('rootEl'))
+      .find(this.elSelector)
+      .find('svg')
+      .remove();
   }
 
   draw() {
     const config = this.axisConfig;
 
-    return function (selection) {
-      selection.each(function () {
+    return function(selection) {
+      selection.each(function() {
         if (!config.get('show') && !config.get('title.show', false)) return;
 
         const el = this;
@@ -47,14 +54,16 @@ export class AxisTitle {
         const height = $(el).height();
         const axisPrefix = config.isHorizontal() ? 'x' : 'y';
 
-        const svg = div.append('svg')
+        const svg = div
+          .append('svg')
           .attr('focusable', 'false')
           .attr('width', width)
           .attr('height', height)
           .attr('class', `axis-title ${axisPrefix}-axis-title`);
 
-        const bbox = svg.append('text')
-          .attr('transform', function () {
+        const bbox = svg
+          .append('text')
+          .attr('transform', function() {
             if (config.isHorizontal()) {
               return `translate(${width / 2},0)`;
             }

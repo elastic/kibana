@@ -23,32 +23,34 @@ describe('setupXPackMain()', () => {
     mockElasticsearchPlugin = {
       getCluster: sinon.stub(),
       status: sinon.stub({
-        on() {}
-      })
+        on() {},
+      }),
     };
 
     mockXPackMainPlugin = {
       status: sinon.stub({
         green() {},
-        red() {}
-      })
+        red() {},
+      }),
     };
 
     mockServer = sinon.stub({
       plugins: {
         elasticsearch: mockElasticsearchPlugin,
-        xpack_main: mockXPackMainPlugin
+        xpack_main: mockXPackMainPlugin,
       },
       newPlatform: { setup: { plugins: { features: {} } } },
       events: { on() {} },
       log() {},
       config() {},
       expose() {},
-      ext() {}
+      ext() {},
     });
 
     // Make sure we don't misspell config key.
-    const configGetStub = sinon.stub().throws(new Error('`config.get` is called with unexpected key.'));
+    const configGetStub = sinon
+      .stub()
+      .throws(new Error('`config.get` is called with unexpected key.'));
     configGetStub.withArgs('xpack.xpack_main.xpack_api_polling_frequency_millis').returns(1234);
     mockServer.config.returns({ get: configGetStub });
   });
@@ -88,8 +90,8 @@ describe('setupXPackMain()', () => {
     beforeEach(() => {
       setupXPackMain(mockServer);
 
-      onElasticsearchPluginStatusChange = mockElasticsearchPlugin.status.on
-        .withArgs('change').firstCall.args[1];
+      onElasticsearchPluginStatusChange = mockElasticsearchPlugin.status.on.withArgs('change')
+        .firstCall.args[1];
       xPackInfo = mockServer.expose.firstCall.args[1];
     });
 
@@ -98,7 +100,7 @@ describe('setupXPackMain()', () => {
       // We need this to make sure the code waits for `refreshNow` to complete before it tries
       // to access its properties.
       sinon.stub(xPackInfo, 'refreshNow').callsFake(() => {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
           xPackInfo.isAvailable.returns(true);
           resolve();
         });
@@ -117,7 +119,7 @@ describe('setupXPackMain()', () => {
       // We need this to make sure the code waits for `refreshNow` to complete before it tries
       // to access its properties.
       sinon.stub(xPackInfo, 'refreshNow').callsFake(() => {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
           xPackInfo.isAvailable.returns(false);
           xPackInfo.unavailableReason.returns('Some weird error.');
           resolve();

@@ -25,8 +25,7 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import { VisProvider } from '../../../../vis';
 import { intervalOptions } from '../../../buckets/_interval_options';
 
-describe.skip('editor', function () {
-
+describe.skip('editor', function() {
   let indexPattern;
   let vis;
   let agg;
@@ -34,76 +33,85 @@ describe.skip('editor', function () {
   let $scope;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector, $compile) {
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+  beforeEach(
+    ngMock.inject(function(Private, $injector, $compile) {
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    const Vis = Private(VisProvider);
+      const Vis = Private(VisProvider);
 
-    /**
-     * Render the AggParams editor for the date histogram aggregation
-     *
-     * @param  {object} params - the agg params to give to the date_histogram
-     *                           by default
-     * @return {object} - object pointing to the different inputs, keys
-     *                    are the aggParam name and the value is an object
-     *                    with $el, $scope, and a few helpers for getting
-     *                    data from them.
-     */
-    render = function (params) {
-      vis = new Vis(indexPattern, {
-        type: 'histogram',
-        aggs: [
-          { schema: 'metric', type: 'avg', params: { field: 'bytes' } },
-          { schema: 'segment', type: 'date_histogram', params: params || {} }
-        ]
-      });
+      /**
+       * Render the AggParams editor for the date histogram aggregation
+       *
+       * @param  {object} params - the agg params to give to the date_histogram
+       *                           by default
+       * @return {object} - object pointing to the different inputs, keys
+       *                    are the aggParam name and the value is an object
+       *                    with $el, $scope, and a few helpers for getting
+       *                    data from them.
+       */
+      render = function(params) {
+        vis = new Vis(indexPattern, {
+          type: 'histogram',
+          aggs: [
+            { schema: 'metric', type: 'avg', params: { field: 'bytes' } },
+            { schema: 'segment', type: 'date_histogram', params: params || {} },
+          ],
+        });
 
-      const $el = $('<vis-editor-agg-params agg="agg" ' +
-        'index-pattern="agg.getIndexPattern()" ' +
-        'group-name="groupName">' +
-        '</vis-editor-agg-params>');
-      const $parentScope = $injector.get('$rootScope').$new();
+        const $el = $(
+          '<vis-editor-agg-params agg="agg" ' +
+            'index-pattern="agg.getIndexPattern()" ' +
+            'group-name="groupName">' +
+            '</vis-editor-agg-params>'
+        );
+        const $parentScope = $injector.get('$rootScope').$new();
 
-      agg = $parentScope.agg = vis.aggs.bySchemaName('segment')[0];
-      $parentScope.groupName = 'buckets';
-      $parentScope.vis = vis;
+        agg = $parentScope.agg = vis.aggs.bySchemaName('segment')[0];
+        $parentScope.groupName = 'buckets';
+        $parentScope.vis = vis;
 
-      $compile($el)($parentScope);
-      $scope = $el.scope();
-      $scope.$digest();
+        $compile($el)($parentScope);
+        $scope = $el.scope();
+        $scope.$digest();
 
-      const $inputs = $('vis-agg-param-editor', $el);
-      return _.transform($inputs.toArray(), function (inputs, e) {
-        const $el = $(e);
-        const $scope = $el.scope();
+        const $inputs = $('vis-agg-param-editor', $el);
+        return _.transform(
+          $inputs.toArray(),
+          function(inputs, e) {
+            const $el = $(e);
+            const $scope = $el.scope();
 
-        inputs[$scope.aggParam.name] = {
-          $el: $el,
-          $scope: $scope,
-          $input: function () {
-            return $el.find('[ng-model]').first();
+            inputs[$scope.aggParam.name] = {
+              $el: $el,
+              $scope: $scope,
+              $input: function() {
+                return $el.find('[ng-model]').first();
+              },
+              modelValue: function() {
+                return this.$input().controller('ngModel').$modelValue;
+              },
+            };
           },
-          modelValue: function () {
-            return this.$input().controller('ngModel').$modelValue;
-          }
-        };
-      }, {});
-    };
+          {}
+        );
+      };
+    })
+  );
 
-  }));
-
-  describe('random field/interval', function () {
+  describe('random field/interval', function() {
     let params;
     let field;
     let interval;
 
-    beforeEach(ngMock.inject(function () {
-      field = _.sample(indexPattern.fields);
-      interval = _.sample(intervalOptions);
-      params = render({ field: field, interval: interval.val });
-    }));
+    beforeEach(
+      ngMock.inject(function() {
+        field = _.sample(indexPattern.fields);
+        interval = _.sample(intervalOptions);
+        params = render({ field: field, interval: interval.val });
+      })
+    );
 
-    it('renders the field editor', function () {
+    it('renders the field editor', function() {
       expect(agg.params.field).to.be(field);
 
       expect(params).to.have.property('field');
@@ -111,7 +119,7 @@ describe.skip('editor', function () {
       expect($scope.agg.params.field).to.be(field);
     });
 
-    it('renders the interval editor', function () {
+    it('renders the interval editor', function() {
       expect(agg.params.interval).to.be(interval.val);
 
       expect(params).to.have.property('interval');
@@ -119,6 +127,4 @@ describe.skip('editor', function () {
       expect($scope.agg.params.interval).to.be(interval.val);
     });
   });
-
-
 });

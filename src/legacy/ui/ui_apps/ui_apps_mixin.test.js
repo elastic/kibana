@@ -31,7 +31,7 @@ jest.mock('./ui_app', () => ({
     isHidden() {
       return this._hidden;
     }
-  }
+  },
 }));
 
 describe('UiAppsMixin', () => {
@@ -50,8 +50,8 @@ describe('UiAppsMixin', () => {
             id: 'bar',
             hidden: false,
           },
-        ]
-      }
+        ],
+      },
     };
 
     server = {
@@ -99,13 +99,12 @@ describe('UiAppsMixin', () => {
 
   describe('server.injectUiAppVars()/server.getInjectedUiAppVars()', () => {
     it('stored injectVars provider and returns provider result when requested', async () => {
-
       server.injectUiAppVars('foo', () => ({
-        thisIsFoo: true
+        thisIsFoo: true,
       }));
 
       server.injectUiAppVars('bar', async () => ({
-        thisIsFoo: false
+        thisIsFoo: false,
       }));
 
       await expect(server.getInjectedUiAppVars('foo')).resolves.toMatchSnapshot('foo');
@@ -122,7 +121,7 @@ describe('UiAppsMixin', () => {
 
       server.injectUiAppVars('foo', async () => ({
         bar: false,
-        box: true
+        box: true,
       }));
 
       server.injectUiAppVars('foo', async () => ({

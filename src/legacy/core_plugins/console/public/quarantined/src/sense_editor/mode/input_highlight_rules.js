@@ -33,7 +33,7 @@ export function InputHighlightRules() {
     }
     return [
       { token: tokens.concat(['whitespace']), regex: reg + '(\\s*)$', next: nextIfEOL },
-      { token: tokens, regex: reg, next: normalNext }
+      { token: tokens, regex: reg, next: normalNext },
     ];
   }
 
@@ -41,40 +41,46 @@ export function InputHighlightRules() {
   // regexps are ordered -> the first match is used
   /*jshint -W015 */
   this.$rules = {
-    'start': mergeTokens([
-      { 'token': 'warning', 'regex': '#!.*$' },
-      { token: 'comment', regex: /^#.*$/ },
-      { token: 'paren.lparen', regex: '{', next: 'json', push: true }
-    ],
-    addEOL(['method'], /([a-zA-Z]+)/, 'start', 'method_sep')
-    ,
-    [
-      {
-        token: 'whitespace',
-        regex: '\\s+'
-      },
-      {
-        token: 'text',
-        regex: '.+?'
-      }
-    ]),
-    'method_sep': mergeTokens(
-      addEOL(['whitespace', 'url.protocol_host', 'url.slash'], /(\s+)(https?:\/\/[^?\/,]+)(\/)/, 'start', 'url'),
+    start: mergeTokens(
+      [
+        { token: 'warning', regex: '#!.*$' },
+        { token: 'comment', regex: /^#.*$/ },
+        { token: 'paren.lparen', regex: '{', next: 'json', push: true },
+      ],
+      addEOL(['method'], /([a-zA-Z]+)/, 'start', 'method_sep'),
+      [
+        {
+          token: 'whitespace',
+          regex: '\\s+',
+        },
+        {
+          token: 'text',
+          regex: '.+?',
+        },
+      ]
+    ),
+    method_sep: mergeTokens(
+      addEOL(
+        ['whitespace', 'url.protocol_host', 'url.slash'],
+        /(\s+)(https?:\/\/[^?\/,]+)(\/)/,
+        'start',
+        'url'
+      ),
       addEOL(['whitespace', 'url.protocol_host'], /(\s+)(https?:\/\/[^?\/,]+)/, 'start', 'url'),
       addEOL(['whitespace', 'url.slash'], /(\s+)(\/)/, 'start', 'url'),
       addEOL(['whitespace'], /(\s+)/, 'start', 'url')
     ),
-    'url': mergeTokens(
+    url: mergeTokens(
       addEOL(['url.part'], /([^?\/,\s]+)/, 'start'),
       addEOL(['url.comma'], /(,)/, 'start'),
       addEOL(['url.slash'], /(\/)/, 'start'),
       addEOL(['url.questionmark'], /(\?)/, 'start', 'urlParams')
     ),
-    'urlParams': mergeTokens(
+    urlParams: mergeTokens(
       addEOL(['url.param', 'url.equal', 'url.value'], /([^&=]+)(=)([^&]*)/, 'start'),
       addEOL(['url.param'], /([^&=]+)/, 'start'),
       addEOL(['url.amp'], /(&)/, 'start')
-    )
+    ),
   };
 
   addToRules(this);
@@ -82,7 +88,6 @@ export function InputHighlightRules() {
   if (this.constructor === InputHighlightRules) {
     this.normalizeRules();
   }
-
 }
 
 oop.inherits(InputHighlightRules, TextHighlightRules);

@@ -22,14 +22,13 @@ const MODE = {
   IN_REQUEST: 4,
   MULTI_DOC_CUR_DOC_END: 8,
   REQUEST_END: 16,
-  BETWEEN_REQUESTS: 32
-
+  BETWEEN_REQUESTS: 32,
 };
 
 function RowParser(editor) {
   const defaultEditor = editor;
 
-  this.getRowParseMode = function (row) {
+  this.getRowParseMode = function(row) {
     if (row === null || typeof row === 'undefined') {
       row = editor.getCursorPosition().row;
     }
@@ -56,10 +55,10 @@ function RowParser(editor) {
       row++;
       if (row < session.getLength()) {
         line = (session.getLine(row) || '').trim();
-        if (line.indexOf('{') === 0) { // next line is another doc in a multi doc
+        if (line.indexOf('{') === 0) {
+          // next line is another doc in a multi doc
           return MODE.MULTI_DOC_CUR_DOC_END | MODE.IN_REQUEST;
         }
-
       }
       return MODE.REQUEST_END | MODE.MULTI_DOC_CUR_DOC_END; // end of request
     }
@@ -70,69 +69,75 @@ function RowParser(editor) {
       return MODE.REQUEST_START | MODE.REQUEST_END;
     }
     line = (session.getLine(row) || '').trim();
-    if (line.indexOf('{') !== 0) { // next line is another request
+    if (line.indexOf('{') !== 0) {
+      // next line is another request
       return MODE.REQUEST_START | MODE.REQUEST_END;
     }
 
     return MODE.REQUEST_START;
   };
 
-  this.rowPredicate = function (row, editor, value) {
+  this.rowPredicate = function(row, editor, value) {
     const mode = this.getRowParseMode(row, editor);
     return (mode & value) > 0;
   };
 
-  this.isEndRequestRow = function (row, _e) {
+  this.isEndRequestRow = function(row, _e) {
     const editor = _e || defaultEditor;
     return this.rowPredicate(row, editor, MODE.REQUEST_END);
   };
 
-  this.isRequestEdge = function (row, _e) {
+  this.isRequestEdge = function(row, _e) {
     const editor = _e || defaultEditor;
     return this.rowPredicate(row, editor, MODE.REQUEST_END | MODE.REQUEST_START);
   };
 
-  this.isStartRequestRow = function (row, _e) {
+  this.isStartRequestRow = function(row, _e) {
     const editor = _e || defaultEditor;
     return this.rowPredicate(row, editor, MODE.REQUEST_START);
   };
 
-  this.isInBetweenRequestsRow = function (row, _e) {
+  this.isInBetweenRequestsRow = function(row, _e) {
     const editor = _e || defaultEditor;
     return this.rowPredicate(row, editor, MODE.BETWEEN_REQUESTS);
   };
 
-  this.isInRequestsRow = function (row, _e) {
+  this.isInRequestsRow = function(row, _e) {
     const editor = _e || defaultEditor;
     return this.rowPredicate(row, editor, MODE.IN_REQUEST);
   };
 
-  this.isMultiDocDocEndRow = function (row, _e) {
+  this.isMultiDocDocEndRow = function(row, _e) {
     const editor = _e || defaultEditor;
     return this.rowPredicate(row, editor, MODE.MULTI_DOC_CUR_DOC_END);
   };
 
-  this.isEmptyToken = function (tokenOrTokenIter) {
-    const token = tokenOrTokenIter && tokenOrTokenIter.getCurrentToken ? tokenOrTokenIter.getCurrentToken() : tokenOrTokenIter;
+  this.isEmptyToken = function(tokenOrTokenIter) {
+    const token =
+      tokenOrTokenIter && tokenOrTokenIter.getCurrentToken
+        ? tokenOrTokenIter.getCurrentToken()
+        : tokenOrTokenIter;
     return !token || token.type === 'whitespace';
   };
 
-  this.isUrlOrMethodToken = function (tokenOrTokenIter) {
-    const t = tokenOrTokenIter.getCurrentToken ? tokenOrTokenIter.getCurrentToken() : tokenOrTokenIter;
+  this.isUrlOrMethodToken = function(tokenOrTokenIter) {
+    const t = tokenOrTokenIter.getCurrentToken
+      ? tokenOrTokenIter.getCurrentToken()
+      : tokenOrTokenIter;
     return t && t.type && (t.type === 'method' || t.type.indexOf('url') === 0);
   };
 
-
-  this.nextNonEmptyToken = function (tokenIter) {
+  this.nextNonEmptyToken = function(tokenIter) {
     let t = tokenIter.stepForward();
     while (t && this.isEmptyToken(t)) t = tokenIter.stepForward();
     return t;
   };
 
-  this.prevNonEmptyToken = function (tokenIter) {
+  this.prevNonEmptyToken = function(tokenIter) {
     let t = tokenIter.stepBackward();
     // empty rows return null token.
-    while ((t || tokenIter.getCurrentTokenRow() > 0) && this.isEmptyToken(t)) t = tokenIter.stepBackward();
+    while ((t || tokenIter.getCurrentTokenRow() > 0) && this.isEmptyToken(t))
+      t = tokenIter.stepBackward();
     return t;
   };
 }

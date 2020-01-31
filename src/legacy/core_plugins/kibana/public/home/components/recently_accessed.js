@@ -39,7 +39,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export const NUM_LONG_LINKS = 5;
 
 export class RecentlyAccessed extends Component {
-
   constructor(props) {
     super(props);
 
@@ -52,13 +51,13 @@ export class RecentlyAccessed extends Component {
     this.setState({
       isPopoverOpen: !this.state.isPopoverOpen,
     });
-  }
+  };
 
   closePopover = () => {
     this.setState({
       isPopoverOpen: false,
     });
-  }
+  };
 
   renderDropdown = () => {
     if (this.props.recentlyAccessed.length <= NUM_LONG_LINKS) {
@@ -68,38 +67,27 @@ export class RecentlyAccessed extends Component {
     const dropdownLinks = [];
     for (let i = NUM_LONG_LINKS; i < this.props.recentlyAccessed.length; i++) {
       dropdownLinks.push(
-        (
-          <li
-            style={{ marginBottom: 8 }}
-            key={this.props.recentlyAccessed[i].id}
-            data-test-subj={`moreRecentlyAccessedItem${this.props.recentlyAccessed[i].id}`}
+        <li
+          style={{ marginBottom: 8 }}
+          key={this.props.recentlyAccessed[i].id}
+          data-test-subj={`moreRecentlyAccessedItem${this.props.recentlyAccessed[i].id}`}
+        >
+          <EuiLink
+            className="homRecentlyAccessed__dropdownLink"
+            href={this.props.recentlyAccessed[i].link}
           >
-            <EuiLink
-              className="homRecentlyAccessed__dropdownLink"
-              href={this.props.recentlyAccessed[i].link}
-            >
-              {this.props.recentlyAccessed[i].label}
-            </EuiLink>
-          </li>
-        )
+            {this.props.recentlyAccessed[i].label}
+          </EuiLink>
+        </li>
       );
     }
 
     const openPopoverComponent = (
-      <EuiLink
-        onClick={this.onButtonClick}
-        data-test-subj="openMoreRecentlyAccessedPopover"
-      >
-        <EuiTextColor
-          className="homRecentlyAccessed__dropdownLabel"
-          color="subdued"
-        >
+      <EuiLink onClick={this.onButtonClick} data-test-subj="openMoreRecentlyAccessedPopover">
+        <EuiTextColor className="homRecentlyAccessed__dropdownLabel" color="subdued">
           {`${dropdownLinks.length} more`}
         </EuiTextColor>
-        <EuiIcon
-          type="arrowDown"
-          color="subdued"
-        />
+        <EuiIcon type="arrowDown" color="subdued" />
       </EuiLink>
     );
 
@@ -117,12 +105,10 @@ export class RecentlyAccessed extends Component {
         closePopover={this.closePopover}
         anchorPosition={anchorPosition}
       >
-        <ul>
-          {dropdownLinks}
-        </ul>
+        <ul>{dropdownLinks}</ul>
       </EuiPopover>
     );
-  }
+  };
 
   renderLongLink = (recentlyAccessedItem, includeSeparator = false) => {
     let separator;
@@ -130,10 +116,7 @@ export class RecentlyAccessed extends Component {
       separator = (
         <EuiFlexItem grow={false} className="homRecentlyAccessed__separator">
           <EuiText>
-            <EuiIcon
-              type="dot"
-              color="subdued"
-            />
+            <EuiIcon type="dot" color="subdued" />
           </EuiText>
         </EuiFlexItem>
       );
@@ -142,32 +125,26 @@ export class RecentlyAccessed extends Component {
     // Also want to avoid truncating really short names (happens when there is no min width)
     // Dynamically setting the min width based on label length meets both of these goals.
     const EM_RATIO = 0.65; // 'em' ratio that avoids too much horizontal white space and too much truncation
-    const minWidth = (recentlyAccessedItem.label.length < 8 ? recentlyAccessedItem.label.length : 8) * EM_RATIO;
+    const minWidth =
+      (recentlyAccessedItem.label.length < 8 ? recentlyAccessedItem.label.length : 8) * EM_RATIO;
     const style = { minWidth: `${minWidth}em` };
     return (
       <React.Fragment key={recentlyAccessedItem.id}>
         {separator}
-        <EuiFlexItem
-          className="homRecentlyAccessed__item"
-          style={style}
-          grow={false}
-        >
+        <EuiFlexItem className="homRecentlyAccessed__item" style={style} grow={false}>
           <EuiToolTip
             anchorClassName="homRecentlyAccessed__anchor"
             position="bottom"
             content={recentlyAccessedItem.label}
           >
-            <EuiLink
-              className="homRecentlyAccessed__longLink"
-              href={recentlyAccessedItem.link}
-            >
+            <EuiLink className="homRecentlyAccessed__longLink" href={recentlyAccessedItem.link}>
               {recentlyAccessedItem.label}
             </EuiLink>
           </EuiToolTip>
         </EuiFlexItem>
       </React.Fragment>
     );
-  }
+  };
 
   renderRecentlyAccessed = () => {
     if (this.props.recentlyAccessed.length <= NUM_LONG_LINKS) {
@@ -186,9 +163,7 @@ export class RecentlyAccessed extends Component {
       if (i === 0) {
         includeSeparator = false;
       }
-      links.push(this.renderLongLink(
-        this.props.recentlyAccessed[i],
-        includeSeparator));
+      links.push(this.renderLongLink(this.props.recentlyAccessed[i], includeSeparator));
     }
     return links;
   };
@@ -207,20 +182,15 @@ export class RecentlyAccessed extends Component {
           </h2>
         </EuiTitle>
 
-        <EuiSpacer size="s"/>
+        <EuiSpacer size="s" />
 
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" wrap>
           <EuiFlexItem grow={false} className="homRecentlyAccessed__flexItem">
-            <EuiFlexGroup>
-              {this.renderRecentlyAccessed()}
-            </EuiFlexGroup>
+            <EuiFlexGroup>{this.renderRecentlyAccessed()}</EuiFlexGroup>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            {this.renderDropdown()}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{this.renderDropdown()}</EuiFlexItem>
         </EuiFlexGroup>
-
       </EuiPanel>
     );
   }
@@ -233,5 +203,5 @@ export const recentlyAccessedShape = PropTypes.shape({
 });
 
 RecentlyAccessed.propTypes = {
-  recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired
+  recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
 };

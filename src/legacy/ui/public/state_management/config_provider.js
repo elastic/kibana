@@ -25,9 +25,10 @@
 
 import { uiModules } from '../modules';
 
-uiModules.get('kibana/state_management')
-  .provider('stateManagementConfig', class StateManagementConfigProvider {
-    _enabled = true
+uiModules.get('kibana/state_management').provider(
+  'stateManagementConfig',
+  class StateManagementConfigProvider {
+    _enabled = true;
 
     $get(/* inject stuff */) {
       return {
@@ -42,4 +43,5 @@ uiModules.get('kibana/state_management')
     enable() {
       this._enabled = true;
     }
-  });
+  }
+);

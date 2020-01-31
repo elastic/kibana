@@ -17,19 +17,12 @@
  * under the License.
  */
 
-
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 
 import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText, EuiToolTip } from '@elastic/eui';
 
 const module = uiModules.get('discover/field_chooser');
 
@@ -41,9 +34,7 @@ function StringFieldProgressBar(props) {
       delay="regular"
       position="right"
     >
-      <EuiFlexGroup
-        alignItems="center"
-      >
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiProgress
             value={props.percent}
@@ -54,17 +45,13 @@ function StringFieldProgressBar(props) {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText
-            size="xs"
-          >
-            {props.percent}%
-          </EuiText>
+          <EuiText size="xs">{props.percent}%</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiToolTip>
   );
 }
 
-module.directive('stringFieldProgressBar', function (reactDirective) {
+module.directive('stringFieldProgressBar', function(reactDirective) {
   return reactDirective(wrapInI18nContext(StringFieldProgressBar));
 });

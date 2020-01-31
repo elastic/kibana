@@ -23,11 +23,7 @@ import { Home } from './home';
 import { FeatureDirectory } from './feature_directory';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
-import {
-  HashRouter as Router,
-  Switch,
-  Route
-} from 'react-router-dom';
+import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { telemetryOptInProvider } from '../kibana_services';
@@ -37,10 +33,10 @@ export function HomeApp({ directories }) {
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
   const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
   const mlEnabled = chrome.getInjected('mlEnabled', false);
-  const { setOptInNoticeSeen } = telemetryOptInProvider;
+  const { setOptInNoticeSeen, getOptIn } = telemetryOptInProvider;
   const savedObjectsClient = chrome.getSavedObjectsClient();
 
-  const renderTutorialDirectory = (props) => {
+  const renderTutorialDirectory = props => {
     return (
       <TutorialDirectory
         addBasePath={chrome.addBasePath}
@@ -50,7 +46,7 @@ export function HomeApp({ directories }) {
     );
   };
 
-  const renderTutorial = (props) => {
+  const renderTutorial = props => {
     return (
       <Tutorial
         addBasePath={chrome.addBasePath}
@@ -66,25 +62,12 @@ export function HomeApp({ directories }) {
   return (
     <Router>
       <Switch>
-        <Route
-          path="/home/tutorial/:id"
-          render={renderTutorial}
-        />
-        <Route
-          path="/home/tutorial_directory/:tab?"
-          render={renderTutorialDirectory}
-        />
-        <Route
-          path="/home/feature_directory"
-        >
-          <FeatureDirectory
-            addBasePath={chrome.addBasePath}
-            directories={directories}
-          />
+        <Route path="/home/tutorial/:id" render={renderTutorial} />
+        <Route path="/home/tutorial_directory/:tab?" render={renderTutorialDirectory} />
+        <Route path="/home/feature_directory">
+          <FeatureDirectory addBasePath={chrome.addBasePath} directories={directories} />
         </Route>
-        <Route
-          path="/home"
-        >
+        <Route path="/home">
           <Home
             addBasePath={chrome.addBasePath}
             directories={directories}
@@ -94,6 +77,7 @@ export function HomeApp({ directories }) {
             localStorage={localStorage}
             urlBasePath={chrome.getBasePath()}
             onOptInSeen={setOptInNoticeSeen}
+            getOptInStatus={getOptIn}
           />
         </Route>
       </Switch>
@@ -102,13 +86,15 @@ export function HomeApp({ directories }) {
 }
 
 HomeApp.propTypes = {
-  directories: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    icon: PropTypes.string.isRequired,
-    path: PropTypes.string.isRequired,
-    showOnHomePage: PropTypes.bool.isRequired,
-    category: PropTypes.string.isRequired
-  })),
+  directories: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      description: PropTypes.string.isRequired,
+      icon: PropTypes.string.isRequired,
+      path: PropTypes.string.isRequired,
+      showOnHomePage: PropTypes.bool.isRequired,
+      category: PropTypes.string.isRequired,
+    })
+  ),
 };

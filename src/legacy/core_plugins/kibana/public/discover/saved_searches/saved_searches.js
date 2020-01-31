@@ -28,20 +28,20 @@ const module = uiModules.get('discover/saved_searches');
 // edited by the object editor.
 savedObjectManagementRegistry.register({
   service: 'savedSearches',
-  title: 'searches'
+  title: 'searches',
 });
 
-module.service('savedSearches', function (Private, SavedSearch, kbnUrl, chrome) {
+module.service('savedSearches', function(Private, SavedSearch, kbnUrl, chrome) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
   const savedSearchLoader = new SavedObjectLoader(SavedSearch, kbnUrl, chrome, savedObjectClient);
   // Customize loader properties since adding an 's' on type doesn't work for type 'search' .
   savedSearchLoader.loaderProperties = {
     name: 'searches',
     noun: 'Saved Search',
-    nouns: 'saved searches'
+    nouns: 'saved searches',
   };
 
-  savedSearchLoader.urlFor = function (id) {
+  savedSearchLoader.urlFor = function(id) {
     return kbnUrl.eval('#/discover/{{id}}', { id: id });
   };
 

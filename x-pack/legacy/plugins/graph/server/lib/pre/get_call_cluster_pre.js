@@ -9,5 +9,5 @@ export const getCallClusterPre = {
   method(request) {
     const cluster = request.server.plugins.elasticsearch.getCluster('data');
     return (...args) => cluster.callWithRequest(request, ...args);
-  }
+  },
 };

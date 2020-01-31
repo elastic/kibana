@@ -11,5 +11,8 @@ function mapStateToProps() {
   return {};
 }
 
-const connectedToolbarOverlay = connect(mapStateToProps, null)(ToolbarOverlay);
+const connectedToolbarOverlay = connect(
+  mapStateToProps,
+  null
+)(ToolbarOverlay);
 export { connectedToolbarOverlay as ToolbarOverlay };

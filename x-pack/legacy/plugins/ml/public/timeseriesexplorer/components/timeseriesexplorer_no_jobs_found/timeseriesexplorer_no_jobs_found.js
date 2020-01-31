@@ -19,7 +19,10 @@ export const TimeseriesexplorerNoJobsFound = () => (
     iconType="alert"
     title={
       <h2>
-        <FormattedMessage id="xpack.ml.timeSeriesExplorer.noSingleMetricJobsFoundLabel" defaultMessage="No single metric jobs found" />
+        <FormattedMessage
+          id="xpack.ml.timeSeriesExplorer.noSingleMetricJobsFoundLabel"
+          defaultMessage="No single metric jobs found"
+        />
       </h2>
     }
     actions={

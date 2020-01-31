@@ -44,7 +44,7 @@ export default class ServerStatus {
 
   each(fn) {
     const self = this;
-    _.forOwn(self._created, function (status, i, list) {
+    _.forOwn(self._created, function(status, i, list) {
       if (status.state !== 'disabled') {
         fn.call(self, status, i, list);
       }
@@ -56,9 +56,7 @@ export default class ServerStatus {
   }
 
   getForPluginId(pluginId) {
-    return _.find(this._created, s =>
-      s.plugin && s.plugin.id === pluginId
-    );
+    return _.find(this._created, s => s.plugin && s.plugin.id === pluginId);
   }
 
   getState(id) {
@@ -80,7 +78,7 @@ export default class ServerStatus {
       // get the state descriptor for each status
       .map(status => states.get(status.state))
       // reduce to the state with the highest severity, defaulting to green
-      .reduce((a, b) => a.severity > b.severity ? a : b, states.get('green'));
+      .reduce((a, b) => (a.severity > b.severity ? a : b), states.get('green'));
 
     const statuses = _.where(this._created, { state: state.id });
     const since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);
@@ -96,7 +94,7 @@ export default class ServerStatus {
   }
 
   isGreen() {
-    return (this.overall().state === 'green');
+    return this.overall().state === 'green';
   }
 
   notGreen() {
@@ -111,7 +109,7 @@ export default class ServerStatus {
   toJSON() {
     return {
       overall: this.overall(),
-      statuses: _.values(this._created)
+      statuses: _.values(this._created),
     };
   }
 }

@@ -20,13 +20,13 @@
 import _ from 'lodash';
 
 /*
-* Accepts a Kibana data object, flattens the data.series values array,
-* and returns an array of values objects.
-*/
+ * Accepts a Kibana data object, flattens the data.series values array,
+ * and returns an array of values objects.
+ */
 export function flattenData(obj) {
   let charts;
 
-  if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
+  if (!_.isObject(obj) || (!obj.rows && !obj.columns && !obj.series)) {
     throw new TypeError('flattenData expects an object with a series, rows, or columns key');
   }
 

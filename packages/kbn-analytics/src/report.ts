@@ -75,6 +75,7 @@ export class ReportManager {
   }
   assignReports(newMetrics: Metric | Metric[]) {
     wrapArray(newMetrics).forEach(newMetric => this.assignReport(this.report, newMetric));
+    return { report: this.report };
   }
   static createMetricKey(metric: Metric): string {
     switch (metric.type) {
@@ -98,7 +99,7 @@ export class ReportManager {
       case METRIC_TYPE.USER_AGENT: {
         const { appName, type, userAgent } = metric;
         if (userAgent) {
-          this.report.userAgent = {
+          report.userAgent = {
             [key]: {
               key,
               appName,
@@ -107,14 +108,16 @@ export class ReportManager {
             },
           };
         }
+
         return;
       }
       case METRIC_TYPE.CLICK:
       case METRIC_TYPE.LOADED:
       case METRIC_TYPE.COUNT: {
         const { appName, type, eventName, count } = metric;
+        report.uiStatsMetrics = report.uiStatsMetrics || {};
         const existingStats = (report.uiStatsMetrics[key] || {}).stats;
-        this.report.uiStatsMetrics[key] = {
+        report.uiStatsMetrics[key] = {
           key,
           appName,
           eventName,

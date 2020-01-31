@@ -10,10 +10,11 @@ describe('layer', () => {
   const layer = new AbstractLayer({ layerDescriptor: {} });
 
   describe('updateDueToExtent', () => {
-
     it('should be false when the source is not extent aware', async () => {
       const sourceMock = {
-        isFilterByMapBounds: () => { return false; }
+        isFilterByMapBounds: () => {
+          return false;
+        },
       };
       const updateDueToExtent = layer.updateDueToExtent(sourceMock);
       expect(updateDueToExtent).toBe(false);
@@ -21,7 +22,9 @@ describe('layer', () => {
 
     it('should be false when buffers are the same', async () => {
       const sourceMock = {
-        isFilterByMapBounds: () => { return true; }
+        isFilterByMapBounds: () => {
+          return true;
+        },
       };
       const oldBuffer = {
         maxLat: 12.5,
@@ -35,13 +38,19 @@ describe('layer', () => {
         minLat: 2.5,
         minLon: 92.5,
       };
-      const updateDueToExtent = layer.updateDueToExtent(sourceMock, { buffer: oldBuffer }, { buffer: newBuffer });
+      const updateDueToExtent = layer.updateDueToExtent(
+        sourceMock,
+        { buffer: oldBuffer },
+        { buffer: newBuffer }
+      );
       expect(updateDueToExtent).toBe(false);
     });
 
     it('should be false when the new buffer is contained in the old buffer', async () => {
       const sourceMock = {
-        isFilterByMapBounds: () => { return true; }
+        isFilterByMapBounds: () => {
+          return true;
+        },
       };
       const oldBuffer = {
         maxLat: 12.5,
@@ -55,13 +64,19 @@ describe('layer', () => {
         minLat: 5,
         minLon: 95,
       };
-      const updateDueToExtent = layer.updateDueToExtent(sourceMock, { buffer: oldBuffer }, { buffer: newBuffer });
+      const updateDueToExtent = layer.updateDueToExtent(
+        sourceMock,
+        { buffer: oldBuffer },
+        { buffer: newBuffer }
+      );
       expect(updateDueToExtent).toBe(false);
     });
 
     it('should be true when the new buffer is contained in the old buffer and the past results were truncated', async () => {
       const sourceMock = {
-        isFilterByMapBounds: () => { return true; }
+        isFilterByMapBounds: () => {
+          return true;
+        },
       };
       const oldBuffer = {
         maxLat: 12.5,
@@ -78,13 +93,16 @@ describe('layer', () => {
       const updateDueToExtent = layer.updateDueToExtent(
         sourceMock,
         { buffer: oldBuffer, areResultsTrimmed: true },
-        { buffer: newBuffer });
+        { buffer: newBuffer }
+      );
       expect(updateDueToExtent).toBe(true);
     });
 
     it('should be true when meta has no old buffer', async () => {
       const sourceMock = {
-        isFilterByMapBounds: () => { return true; }
+        isFilterByMapBounds: () => {
+          return true;
+        },
       };
       const updateDueToExtent = layer.updateDueToExtent(sourceMock);
       expect(updateDueToExtent).toBe(true);
@@ -92,7 +110,9 @@ describe('layer', () => {
 
     it('should be true when the new buffer is not contained in the old buffer', async () => {
       const sourceMock = {
-        isFilterByMapBounds: () => { return true; }
+        isFilterByMapBounds: () => {
+          return true;
+        },
       };
       const oldBuffer = {
         maxLat: 12.5,
@@ -106,7 +126,11 @@ describe('layer', () => {
         minLat: -2.5,
         minLon: 82.5,
       };
-      const updateDueToExtent = layer.updateDueToExtent(sourceMock, { buffer: oldBuffer }, { buffer: newBuffer });
+      const updateDueToExtent = layer.updateDueToExtent(
+        sourceMock,
+        { buffer: oldBuffer },
+        { buffer: newBuffer }
+      );
       expect(updateDueToExtent).toBe(true);
     });
   });

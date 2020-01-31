@@ -20,10 +20,7 @@
 import expect from '@kbn/expect';
 import { getLineageMap } from './lineage_map';
 import { getParentCandidates } from './parent_candidates';
-import {
-  CONTROL_TYPES,
-  newControl,
-} from '../editor_utils';
+import { CONTROL_TYPES, newControl } from '../editor_utils';
 
 function createControlParams(id) {
   const controlParams = newControl(CONTROL_TYPES.LIST);
@@ -43,12 +40,26 @@ test('creates parent candidates that avoid circular graphs', () => {
   const controlParamsList = [control1, control2, control3];
   const lineageMap = getLineageMap(controlParamsList);
 
-  const parentCandidatesForControl1 = getParentCandidates(controlParamsList, control1.id, lineageMap);
+  const parentCandidatesForControl1 = getParentCandidates(
+    controlParamsList,
+    control1.id,
+    lineageMap
+  );
   expect([]).to.eql(parentCandidatesForControl1);
 
-  const parentCandidatesForControl2 = getParentCandidates(controlParamsList, control2.id, lineageMap);
+  const parentCandidatesForControl2 = getParentCandidates(
+    controlParamsList,
+    control2.id,
+    lineageMap
+  );
   expect([{ value: 1, text: 'fieldName' }]).to.eql(parentCandidatesForControl2);
 
-  const parentCandidatesForControl3 = getParentCandidates(controlParamsList, control3.id, lineageMap);
-  expect([{ value: 1, text: 'fieldName' }, { value: 2, text: 'fieldName' }]).to.eql(parentCandidatesForControl3);
+  const parentCandidatesForControl3 = getParentCandidates(
+    controlParamsList,
+    control3.id,
+    lineageMap
+  );
+  expect([{ value: 1, text: 'fieldName' }, { value: 2, text: 'fieldName' }]).to.eql(
+    parentCandidatesForControl3
+  );
 });

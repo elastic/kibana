@@ -24,17 +24,20 @@ export default function tlConfigFn(setup) {
   let targetSeries;
 
   let tlConfig = {
-    getTargetSeries: function () {
-      return _.map(targetSeries, function (bucket) { // eslint-disable-line no-use-before-define
+    getTargetSeries: function() {
+      return _.map(targetSeries, function(bucket) {
+        // eslint-disable-line no-use-before-define
         return [bucket, null];
       });
     },
-    setTargetSeries: function () {
+    setTargetSeries: function() {
       targetSeries = buildTarget(this);
     },
-    writeTargetSeries: function (series) {
-      targetSeries = _.map(series, function (p) {return p[0];});
-    }
+    writeTargetSeries: function(series) {
+      targetSeries = _.map(series, function(p) {
+        return p[0];
+      });
+    },
   };
 
   tlConfig = _.extend(tlConfig, setup);

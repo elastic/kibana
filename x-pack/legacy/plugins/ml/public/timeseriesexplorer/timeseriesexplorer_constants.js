@@ -8,7 +8,6 @@
  * Contains values for ML time series explorer.
  */
 
-
 export const APP_STATE_ACTION = {
   CLEAR: 'CLEAR',
   GET_DETECTOR_INDEX: 'GET_DETECTOR_INDEX',

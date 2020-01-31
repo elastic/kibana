@@ -39,7 +39,7 @@ export function initLoginView({ config: { cookieName } }, server, xpackMainPlugi
       return h.renderAppWithDefaultConfig(login);
     },
     config: {
-      auth: false
-    }
+      auth: false,
+    },
   });
 }

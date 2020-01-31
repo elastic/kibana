@@ -32,32 +32,38 @@ const EMPTY_STYLE = {
   weight: 1,
   opacity: 0.6,
   color: 'rgb(200,200,200)',
-  fillOpacity: 0
+  fillOpacity: 0,
 };
 
 export default class ChoroplethLayer extends KibanaMapLayer {
-
   static _doInnerJoin(sortedMetrics, sortedGeojsonFeatures, joinField) {
     let j = 0;
     for (let i = 0; i < sortedGeojsonFeatures.length; i++) {
       const property = sortedGeojsonFeatures[i].properties[joinField];
       sortedGeojsonFeatures[i].__kbnJoinedMetric = null;
-      const position = sortedMetrics.length ? compareLexicographically(property, sortedMetrics[j].term) : -1;
-      if (position === -1) {//just need to cycle on
+      const position = sortedMetrics.length
+        ? compareLexicographically(property, sortedMetrics[j].term)
+        : -1;
+      if (position === -1) {
+        //just need to cycle on
       } else if (position === 0) {
         sortedGeojsonFeatures[i].__kbnJoinedMetric = sortedMetrics[j];
-      } else if (position === 1) {//needs to catch up
+      } else if (position === 1) {
+        //needs to catch up
         while (j < sortedMetrics.length) {
           const newTerm = sortedMetrics[j].term;
           const newPosition = compareLexicographically(newTerm, property);
-          if (newPosition === -1) {//not far enough
+          if (newPosition === -1) {
+            //not far enough
           } else if (newPosition === 0) {
             sortedGeojsonFeatures[i].__kbnJoinedMetric = sortedMetrics[j];
             break;
-          } else if (newPosition === 1) {//too far!
+          } else if (newPosition === 1) {
+            //too far!
             break;
           }
-          if (j === sortedMetrics.length - 1) {//always keep a reference to the last metric
+          if (j === sortedMetrics.length - 1) {
+            //always keep a reference to the last metric
             break;
           } else {
             j++;
@@ -67,9 +73,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     }
   }
 
-
   constructor(name, attribution, format, showAllShapes, meta, layerConfig, serviceSettings) {
-
     super();
     this._serviceSettings = serviceSettings;
     this._metrics = null;
@@ -98,21 +102,21 @@ export default class ChoroplethLayer extends KibanaMapLayer {
             }
             this.emit('showTooltip', {
               content: tooltipContents,
-              position: location
+              position: location,
             });
           },
           mouseout: () => {
             this.emit('hideTooltip');
-          }
+          },
         });
       },
-      style: this._makeEmptyStyleFunction()
+      style: this._makeEmptyStyleFunction(),
     });
 
     this._loaded = false;
     this._error = false;
     this._isJoinValid = false;
-    this._whenDataLoaded = new Promise(async (resolve) => {
+    this._whenDataLoaded = new Promise(async resolve => {
       try {
         const data = await this._makeJsonAjaxCall();
         let featureCollection;
@@ -129,13 +133,15 @@ export default class ChoroplethLayer extends KibanaMapLayer {
           featureCollection = data;
         } else if (formatType === 'topojson') {
           const features = _.get(data, 'objects.' + meta.feature_collection_path);
-          featureCollection = topojson.feature(data, features);//conversion to geojson
+          featureCollection = topojson.feature(data, features); //conversion to geojson
         } else {
           //should never happen
-          throw new Error(i18n.translate('regionMap.choroplethLayer.unrecognizedFormatErrorMessage', {
-            defaultMessage: 'Unrecognized format {formatType}',
-            values: { formatType },
-          }));
+          throw new Error(
+            i18n.translate('regionMap.choroplethLayer.unrecognizedFormatErrorMessage', {
+              defaultMessage: 'Unrecognized format {formatType}',
+              values: { formatType },
+            })
+          );
         }
         this._sortedFeatures = featureCollection.features.slice();
         this._sortFeatures();
@@ -155,30 +161,40 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
         let errorMessage;
         if (e.status === 404) {
-          errorMessage = i18n.translate('regionMap.choroplethLayer.downloadingVectorData404ErrorMessage', {
-            defaultMessage: 'Server responding with \'404\' when attempting to fetch {name}. \
-Make sure the file exists at that location.',
-            values: { name: name },
-          });
+          errorMessage = i18n.translate(
+            'regionMap.choroplethLayer.downloadingVectorData404ErrorMessage',
+            {
+              defaultMessage:
+                "Server responding with '404' when attempting to fetch {name}. \
+Make sure the file exists at that location.",
+              values: { name: name },
+            }
+          );
         } else {
-          errorMessage = i18n.translate('regionMap.choroplethLayer.downloadingVectorDataErrorMessage', {
-            defaultMessage: 'Cannot download {name} file. Please ensure the \
+          errorMessage = i18n.translate(
+            'regionMap.choroplethLayer.downloadingVectorDataErrorMessage',
+            {
+              defaultMessage:
+                'Cannot download {name} file. Please ensure the \
 CORS configuration of the server permits requests from the Kibana application on this host.',
-            values: { name: name },
-          });
+              values: { name: name },
+            }
+          );
         }
 
         toastNotifications.addDanger({
-          title: i18n.translate('regionMap.choroplethLayer.downloadingVectorDataErrorMessageTitle', {
-            defaultMessage: 'Error downloading vector data',
-          }),
+          title: i18n.translate(
+            'regionMap.choroplethLayer.downloadingVectorDataErrorMessageTitle',
+            {
+              defaultMessage: 'Error downloading vector data',
+            }
+          ),
           text: errorMessage,
         });
 
         resolve();
       }
     });
-
   }
 
   //This method is stubbed in the tests to avoid network request during unit tests.
@@ -205,7 +221,7 @@ CORS configuration of the server permits requests from the Kibana application on
       if (!this._showAllShapes) {
         const featureCollection = {
           type: 'FeatureCollection',
-          features: this._sortedFeatures.filter(feature => feature.__kbnJoinedMetric)
+          features: this._sortedFeatures.filter(feature => feature.__kbnJoinedMetric),
         };
         this._leafletLayer.addData(featureCollection);
       }
@@ -217,12 +233,15 @@ CORS configuration of the server permits requests from the Kibana application on
     if (this._metrics && this._metrics.length > 0) {
       const { min, max } = getMinMax(this._metrics);
       this._legendColors = colorUtil.getLegendColors(this._colorRamp);
-      const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
-      this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
+      const quantizeDomain = min !== max ? [min, max] : d3.scale.quantize().domain();
+      this._legendQuantizer = d3.scale
+        .quantize()
+        .domain(quantizeDomain)
+        .range(this._legendColors);
     }
     this._boundsOfData = styler.getLeafletBounds();
     this.emit('styleChanged', {
-      mismatches: styler.getMismatches()
+      mismatches: styler.getMismatches(),
     });
   }
 
@@ -231,12 +250,14 @@ CORS configuration of the server permits requests from the Kibana application on
   }
 
   setTooltipFormatter(tooltipFormatter, fieldFormatter, fieldName, metricLabel) {
-    this._tooltipFormatter = (geojsonFeature) => {
+    this._tooltipFormatter = geojsonFeature => {
       if (!this._metrics) {
         return '';
       }
-      const match = this._metrics.find((bucket) => {
-        return compareLexicographically(bucket.term, geojsonFeature.properties[this._joinField]) === 0;
+      const match = this._metrics.find(bucket => {
+        return (
+          compareLexicographically(bucket.term, geojsonFeature.properties[this._joinField]) === 0
+        );
       });
       return tooltipFormatter(match, fieldFormatter, fieldName, metricLabel);
     };
@@ -251,8 +272,24 @@ CORS configuration of the server permits requests from the Kibana application on
     this._setStyle();
   }
 
-  cloneChoroplethLayerForNewData(name, attribution, format, showAllData, meta, layerConfig, serviceSettings) {
-    const clonedLayer = new ChoroplethLayer(name, attribution, format, showAllData, meta, layerConfig, serviceSettings);
+  cloneChoroplethLayerForNewData(
+    name,
+    attribution,
+    format,
+    showAllData,
+    meta,
+    layerConfig,
+    serviceSettings
+  ) {
+    const clonedLayer = new ChoroplethLayer(
+      name,
+      attribution,
+      format,
+      showAllData,
+      meta,
+      layerConfig,
+      serviceSettings
+    );
     clonedLayer.setJoinField(this._joinField);
     clonedLayer.setColorRamp(this._colorRamp);
     clonedLayer.setLineWeight(this._lineWeight);
@@ -287,7 +324,6 @@ CORS configuration of the server permits requests from the Kibana application on
     this._invalidateJoin();
     this._setStyle();
   }
-
 
   setColorRamp(colorRamp) {
     if (_.isEqual(colorRamp, this._colorRamp)) {
@@ -329,21 +365,21 @@ CORS configuration of the server permits requests from the Kibana application on
 
   getBounds() {
     const bounds = super.getBounds();
-    return (this._boundsOfData) ? this._boundsOfData : bounds;
+    return this._boundsOfData ? this._boundsOfData : bounds;
   }
 
   appendLegendContents(jqueryDiv) {
-
     if (!this._legendColors || !this._legendQuantizer) {
       return;
     }
 
     const titleText = this._metricTitle;
-    const $title = $('<div>').addClass('visMapLegend__title').text(titleText);
+    const $title = $('<div>')
+      .addClass('visMapLegend__title')
+      .text(titleText);
     jqueryDiv.append($title);
 
-    this._legendColors.forEach((color) => {
-
+    this._legendColors.forEach(color => {
       const labelText = this._legendQuantizer
         .invertExtent(color)
         .map(val => {
@@ -354,7 +390,7 @@ CORS configuration of the server permits requests from the Kibana application on
       const label = $('<div>');
       const icon = $('<i>').css({
         background: color,
-        'border-color': makeColorDarker(color)
+        'border-color': makeColorDarker(color),
       });
 
       const text = $('<span>').text(labelText);
@@ -366,9 +402,8 @@ CORS configuration of the server permits requests from the Kibana application on
   }
 
   _makeEmptyStyleFunction() {
-
     const emptyStyle = _.assign({}, EMPTY_STYLE, {
-      weight: this._lineWeight
+      weight: this._lineWeight,
     });
 
     return () => {
@@ -388,7 +423,7 @@ CORS configuration of the server permits requests from the Kibana application on
         },
         getLeafletBounds: () => {
           return null;
-        }
+        },
       };
     }
 
@@ -396,7 +431,7 @@ CORS configuration of the server permits requests from the Kibana application on
 
     const boundsOfAllFeatures = new L.LatLngBounds();
     return {
-      leafletStyleFunction: (geojsonFeature) => {
+      leafletStyleFunction: geojsonFeature => {
         const match = geojsonFeature.__kbnJoinedMetric;
         if (!match) {
           return emptyStyle();
@@ -409,7 +444,7 @@ CORS configuration of the server permits requests from the Kibana application on
           weight: this._lineWeight,
           opacity: 1,
           color: 'white',
-          fillOpacity: 0.7
+          fillOpacity: 0.7,
         };
       },
       /**
@@ -418,7 +453,7 @@ CORS configuration of the server permits requests from the Kibana application on
        */
       getMismatches: () => {
         const mismatches = this._metrics.slice();
-        this._sortedFeatures.forEach((feature) => {
+        this._sortedFeatures.forEach(feature => {
           const index = mismatches.indexOf(feature.__kbnJoinedMetric);
           if (index >= 0) {
             mismatches.splice(index, 1);
@@ -426,13 +461,11 @@ CORS configuration of the server permits requests from the Kibana application on
         });
         return mismatches.map(b => b.term);
       },
-      getLeafletBounds: function () {
+      getLeafletBounds: function() {
         return boundsOfAllFeatures.isValid() ? boundsOfAllFeatures : null;
-      }
+      },
     };
-
   }
-
 }
 
 //lexicographic compare
@@ -443,10 +476,12 @@ function compareLexicographically(termA, termB) {
 }
 
 function makeColorDarker(color) {
-  const amount = 1.3;//magic number, carry over from earlier
-  return d3.hcl(color).darker(amount).toString();
+  const amount = 1.3; //magic number, carry over from earlier
+  return d3
+    .hcl(color)
+    .darker(amount)
+    .toString();
 }
-
 
 function getMinMax(data) {
   let min = data[0].value;
@@ -468,6 +503,3 @@ function getChoroplethColor(value, min, max, colorRamp) {
 
   return colorUtil.getColor(colorRamp, i);
 }
-
-
-

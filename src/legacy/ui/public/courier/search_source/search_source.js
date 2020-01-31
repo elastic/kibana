@@ -105,9 +105,7 @@ function parseInitialFields(initialFields) {
     return {};
   }
 
-  return typeof initialFields === 'string' ?
-    JSON.parse(initialFields)
-    : _.cloneDeep(initialFields);
+  return typeof initialFields === 'string' ? JSON.parse(initialFields) : _.cloneDeep(initialFields);
 }
 
 function isIndexPattern(val) {
@@ -136,18 +134,21 @@ export function SearchSourceProvider(Promise, Private, config) {
       this._inheritOptions = {};
 
       this._filterPredicates = [
-        (filter) => {
+        filter => {
           // remove null/undefined filters
           return filter;
         },
-        (filter) => {
+        filter => {
           const disabled = _.get(filter, 'meta.disabled');
           return disabled === undefined || disabled === false;
         },
         (filter, data) => {
           const index = data.index || this.getField('index');
-          return !config.get('courier:ignoreFilterIfFieldNotInIndex') || filterMatchesIndex(filter, index);
-        }
+          return (
+            !config.get('courier:ignoreFilterIfFieldNotInIndex') ||
+            filterMatchesIndex(filter, index)
+          );
+        },
       ];
     }
 
@@ -170,7 +171,9 @@ export function SearchSourceProvider(Promise, Private, config) {
 
     setField = (field, value) => {
       if (!FIELDS.includes(field)) {
-        throw new Error(`Can't set field '${field}' on SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
+        throw new Error(
+          `Can't set field '${field}' on SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`
+        );
       }
 
       if (field === 'index') {
@@ -196,7 +199,7 @@ export function SearchSourceProvider(Promise, Private, config) {
         if (!fields.source) {
           // imply source filtering based on the index pattern, but allow overriding
           // it by simply setting another field for "source". When index is changed
-          fields.source = function () {
+          fields.source = function() {
             return value.getSourceFiltering();
           };
           fields.source[forIp] = value;
@@ -227,7 +230,11 @@ export function SearchSourceProvider(Promise, Private, config) {
      */
     getField = field => {
       if (!FIELDS.includes(field)) {
-        throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
+        throw new Error(
+          `Can't get field '${field}' from SearchSource. Acceptable fields are: ${FIELDS.join(
+            ', '
+          )}.`
+        );
       }
 
       let searchSource = this;
@@ -247,7 +254,11 @@ export function SearchSourceProvider(Promise, Private, config) {
      */
     getOwnField(field) {
       if (!FIELDS.includes(field)) {
-        throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
+        throw new Error(
+          `Can't get field '${field}' from SearchSource. Acceptable fields are: ${FIELDS.join(
+            ', '
+          )}.`
+        );
       }
 
       const value = this._fields[field];
@@ -329,7 +340,8 @@ export function SearchSourceProvider(Promise, Private, config) {
      * @return {undefined}
      */
     cancelQueued() {
-      searchRequestQueue.getAll()
+      searchRequestQueue
+        .getAll()
         .filter(req => req.source === this)
         .forEach(req => req.abort());
     }
@@ -363,9 +375,7 @@ export function SearchSourceProvider(Promise, Private, config) {
         }
       }
 
-      return Promise
-        .map(handlers, fn => fn(this, request))
-        .then(_.noop);
+      return Promise.map(handlers, fn => fn(this, request)).then(_.noop);
     }
 
     /**
@@ -376,7 +386,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     onResults() {
       const self = this;
 
-      return new Promise(function (resolve, reject) {
+      return new Promise(function(resolve, reject) {
         const defer = createDefer(Promise);
         defer.promise.then(resolve, reject);
 
@@ -416,9 +426,7 @@ export function SearchSourceProvider(Promise, Private, config) {
      ******/
 
     _myStartableQueued() {
-      return searchRequestQueue
-        .getStartable()
-        .filter(req => req.source === this);
+      return searchRequestQueue.getStartable().filter(req => req.source === this);
     }
 
     /**
@@ -446,10 +454,9 @@ export function SearchSourceProvider(Promise, Private, config) {
     _mergeProp(data, val, key) {
       if (typeof val === 'function') {
         const source = this;
-        return Promise.cast(val(this))
-          .then(function (newVal) {
-            return source._mergeProp(data, newVal, key);
-          });
+        return Promise.cast(val(this)).then(function(newVal) {
+          return source._mergeProp(data, newVal, key);
+        });
       }
 
       if (val == null || !key || !_.isString(key)) return;
@@ -527,106 +534,116 @@ export function SearchSourceProvider(Promise, Private, config) {
         // iterate the _fields object (not array) and
         // pass each key:value pair to source._mergeProp. if _mergeProp
         // returns a promise, then wait for it to complete and call _mergeProp again
-        return Promise.all(_.map(current._fields, function ittr(value, key) {
-          if (Promise.is(value)) {
-            return value.then(function (value) {
-              return ittr(value, key);
-            });
-          }
-
-          const prom = root._mergeProp(flatData, value, key);
-          return Promise.is(prom) ? prom : null;
-        }))
-          .then(function () {
-            // move to this sources parent
-            const parent = current.getParent();
-            // keep calling until we reach the top parent
-            if (parent) {
-              current = parent;
-              return ittr();
-            }
-          });
-      }())
-        .then(function () {
-          // This is down here to prevent the circular dependency
-          flatData.body = flatData.body || {};
-
-          const computedFields = flatData.index.getComputedFields();
-
-          flatData.body.stored_fields = computedFields.storedFields;
-          flatData.body.script_fields = flatData.body.script_fields || {};
-          _.extend(flatData.body.script_fields, computedFields.scriptFields);
-
-          const defaultDocValueFields = computedFields.docvalueFields ? computedFields.docvalueFields : [];
-          flatData.body.docvalue_fields = flatData.body.docvalue_fields || defaultDocValueFields;
-
-          if (flatData.body._source) {
-            // exclude source fields for this index pattern specified by the user
-            const filter = fieldWildcardFilter(flatData.body._source.excludes);
-            flatData.body.docvalue_fields = flatData.body.docvalue_fields.filter(
-              docvalueField => filter(docvalueField.field)
-            );
-          }
-
-          // if we only want to search for certain fields
-          const fields = flatData.fields;
-          if (fields) {
-            // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
-            flatData.body.docvalue_fields = filterDocvalueFields(flatData.body.docvalue_fields, fields);
-            flatData.body.script_fields = _.pick(flatData.body.script_fields, fields);
-
-            // request the remaining fields from both stored_fields and _source
-            const remainingFields = _.difference(fields, _.keys(flatData.body.script_fields));
-            flatData.body.stored_fields = remainingFields;
-            _.set(flatData.body, '_source.includes', remainingFields);
-          }
-
-          const esQueryConfigs = getEsQueryConfig(config);
-          flatData.body.query = buildEsQuery(flatData.index, flatData.query, flatData.filters, esQueryConfigs);
-
-          if (flatData.highlightAll != null) {
-            if (flatData.highlightAll && flatData.body.query) {
-              flatData.body.highlight = getHighlightRequest(flatData.body.query, getConfig);
-            }
-            delete flatData.highlightAll;
-          }
-
-          /**
-           * Translate a filter into a query to support es 3+
-           * @param  {Object} filter - The filter to translate
-           * @return {Object} the query version of that filter
-           */
-          const translateToQuery = function (filter) {
-            if (!filter) return;
-
-            if (filter.query) {
-              return filter.query;
+        return Promise.all(
+          _.map(current._fields, function ittr(value, key) {
+            if (Promise.is(value)) {
+              return value.then(function(value) {
+                return ittr(value, key);
+              });
             }
 
-            return filter;
-          };
-
-          // re-write filters within filter aggregations
-          (function recurse(aggBranch) {
-            if (!aggBranch) return;
-            Object.keys(aggBranch).forEach(function (id) {
-              const agg = aggBranch[id];
-
-              if (agg.filters) {
-                // translate filters aggregations
-                const filters = agg.filters.filters;
-
-                Object.keys(filters).forEach(function (filterId) {
-                  filters[filterId] = translateToQuery(filters[filterId]);
-                });
-              }
-
-              recurse(agg.aggs || agg.aggregations);
-            });
-          }(flatData.body.aggs || flatData.body.aggregations));
-
-          return flatData;
+            const prom = root._mergeProp(flatData, value, key);
+            return Promise.is(prom) ? prom : null;
+          })
+        ).then(function() {
+          // move to this sources parent
+          const parent = current.getParent();
+          // keep calling until we reach the top parent
+          if (parent) {
+            current = parent;
+            return ittr();
+          }
         });
+      })().then(function() {
+        // This is down here to prevent the circular dependency
+        flatData.body = flatData.body || {};
+
+        const computedFields = flatData.index.getComputedFields();
+
+        flatData.body.stored_fields = computedFields.storedFields;
+        flatData.body.script_fields = flatData.body.script_fields || {};
+        _.extend(flatData.body.script_fields, computedFields.scriptFields);
+
+        const defaultDocValueFields = computedFields.docvalueFields
+          ? computedFields.docvalueFields
+          : [];
+        flatData.body.docvalue_fields = flatData.body.docvalue_fields || defaultDocValueFields;
+
+        if (flatData.body._source) {
+          // exclude source fields for this index pattern specified by the user
+          const filter = fieldWildcardFilter(flatData.body._source.excludes);
+          flatData.body.docvalue_fields = flatData.body.docvalue_fields.filter(docvalueField =>
+            filter(docvalueField.field)
+          );
+        }
+
+        // if we only want to search for certain fields
+        const fields = flatData.fields;
+        if (fields) {
+          // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
+          flatData.body.docvalue_fields = filterDocvalueFields(
+            flatData.body.docvalue_fields,
+            fields
+          );
+          flatData.body.script_fields = _.pick(flatData.body.script_fields, fields);
+
+          // request the remaining fields from both stored_fields and _source
+          const remainingFields = _.difference(fields, _.keys(flatData.body.script_fields));
+          flatData.body.stored_fields = remainingFields;
+          _.set(flatData.body, '_source.includes', remainingFields);
+        }
+
+        const esQueryConfigs = getEsQueryConfig(config);
+        flatData.body.query = buildEsQuery(
+          flatData.index,
+          flatData.query,
+          flatData.filters,
+          esQueryConfigs
+        );
+
+        if (flatData.highlightAll != null) {
+          if (flatData.highlightAll && flatData.body.query) {
+            flatData.body.highlight = getHighlightRequest(flatData.body.query, getConfig);
+          }
+          delete flatData.highlightAll;
+        }
+
+        /**
+         * Translate a filter into a query to support es 3+
+         * @param  {Object} filter - The filter to translate
+         * @return {Object} the query version of that filter
+         */
+        const translateToQuery = function(filter) {
+          if (!filter) return;
+
+          if (filter.query) {
+            return filter.query;
+          }
+
+          return filter;
+        };
+
+        // re-write filters within filter aggregations
+        (function recurse(aggBranch) {
+          if (!aggBranch) return;
+          Object.keys(aggBranch).forEach(function(id) {
+            const agg = aggBranch[id];
+
+            if (agg.filters) {
+              // translate filters aggregations
+              const filters = agg.filters.filters;
+
+              Object.keys(filters).forEach(function(filterId) {
+                filters[filterId] = translateToQuery(filters[filterId]);
+              });
+            }
+
+            recurse(agg.aggs || agg.aggregations);
+          });
+        })(flatData.body.aggs || flatData.body.aggregations);
+
+        return flatData;
+      });
     }
   }
 

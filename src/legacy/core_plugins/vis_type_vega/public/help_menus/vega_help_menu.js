@@ -17,16 +17,9 @@
  * under the License.
  */
 
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -66,46 +59,48 @@ export class VegaHelpMenu extends Component {
     );
 
     const items = [
-      (
-        <EuiContextMenuItem
-          key="vegaHelp"
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.elastic.co/guide/en/kibana/master/vega-graph.html"
-          onClick={() => { this.closePopover(); }}
-        >
-          <FormattedMessage
-            id="visTypeVega.editor.vegaHelpLinkText"
-            defaultMessage="Kibana Vega Help"
-          />
-        </EuiContextMenuItem>
-      ), (
-        <EuiContextMenuItem
-          key="vegaLiteDocs"
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://vega.github.io/vega-lite/docs/"
-          onClick={() => { this.closePopover(); }}
-        >
-          <FormattedMessage
-            id="visTypeVega.editor.vegaLiteDocumentationLinkText"
-            defaultMessage="Vega-Lite Documentation"
-          />
-        </EuiContextMenuItem>
-      ), (
-        <EuiContextMenuItem
-          key="vegaDoc"
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://vega.github.io/vega/docs/"
-          onClick={() => { this.closePopover(); }}
-        >
-          <FormattedMessage
-            id="visTypeVega.editor.vegaDocumentationLinkText"
-            defaultMessage="Vega Documentation"
-          />
-        </EuiContextMenuItem>
-      )
+      <EuiContextMenuItem
+        key="vegaHelp"
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://www.elastic.co/guide/en/kibana/master/vega-graph.html"
+        onClick={() => {
+          this.closePopover();
+        }}
+      >
+        <FormattedMessage
+          id="visTypeVega.editor.vegaHelpLinkText"
+          defaultMessage="Kibana Vega Help"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="vegaLiteDocs"
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://vega.github.io/vega-lite/docs/"
+        onClick={() => {
+          this.closePopover();
+        }}
+      >
+        <FormattedMessage
+          id="visTypeVega.editor.vegaLiteDocumentationLinkText"
+          defaultMessage="Vega-Lite Documentation"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="vegaDoc"
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://vega.github.io/vega/docs/"
+        onClick={() => {
+          this.closePopover();
+        }}
+      >
+        <FormattedMessage
+          id="visTypeVega.editor.vegaDocumentationLinkText"
+          defaultMessage="Vega Documentation"
+        />
+      </EuiContextMenuItem>,
     ];
 
     return (
@@ -117,9 +112,7 @@ export class VegaHelpMenu extends Component {
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel
-          items={items}
-        />
+        <EuiContextMenuPanel items={items} />
       </EuiPopover>
     );
   }

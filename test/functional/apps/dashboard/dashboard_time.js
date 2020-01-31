@@ -24,24 +24,26 @@ const dashboardName = 'Dashboard Test Time';
 const fromTime = '2015-09-19 06:31:44.000';
 const toTime = '2015-09-23 18:31:44.000';
 
-export default function ({ getPageObjects, getService }) {
+export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'timePicker']);
   const browser = getService('browser');
 
   describe('dashboard time', () => {
-    before(async function () {
+    before(async function() {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
-    after(async function () {
+    after(async function() {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
     describe('dashboard without stored timed', () => {
       it('is saved', async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.addVisualizations([PageObjects.dashboard.getTestVisualizationNames()[0]]);
+        await PageObjects.dashboard.addVisualizations([
+          PageObjects.dashboard.getTestVisualizationNames()[0],
+        ]);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
       });
 
@@ -56,15 +58,18 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
-    describe('dashboard with stored timed', function () {
-      it('is saved with time', async function () {
+    describe('dashboard with stored timed', function() {
+      it('is saved with time', async function() {
         await PageObjects.dashboard.switchToEditMode();
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
       });
 
-      it('sets time on open', async function () {
-        await PageObjects.timePicker.setAbsoluteRange('2019-01-01 00:00:00.000', '2019-01-02 00:00:00.000');
+      it('sets time on open', async function() {
+        await PageObjects.timePicker.setAbsoluteRange(
+          '2019-01-01 00:00:00.000',
+          '2019-01-02 00:00:00.000'
+        );
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
@@ -76,7 +81,7 @@ export default function ({ getPageObjects, getService }) {
       // If time is stored with a dashboard, it's supposed to override the current time settings when opened.
       // However, if the URL also contains time in the global state, then the global state
       // time should take precedence.
-      it('should be overwritten by global state', async function () {
+      it('should be overwritten by global state', async function() {
         const currentUrl = await browser.getCurrentUrl();
         const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
@@ -95,11 +100,14 @@ export default function ({ getPageObjects, getService }) {
     // when it's opened. However, if the user then changes the time, navigates to visualize, then navigates
     // back to dashboard, the overridden time should be preserved. The time is *only* reset on open, not
     // during navigation or page refreshes.
-    describe('time changes', function () {
-      it('preserved during navigation', async function () {
+    describe('time changes', function() {
+      it('preserved during navigation', async function() {
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
-        await PageObjects.timePicker.setAbsoluteRange('2019-01-01 00:00:00.000', '2019-01-02 00:00:00.000');
+        await PageObjects.timePicker.setAbsoluteRange(
+          '2019-01-01 00:00:00.000',
+          '2019-01-02 00:00:00.000'
+        );
         await PageObjects.header.clickVisualize();
         await PageObjects.header.clickDashboard();
 

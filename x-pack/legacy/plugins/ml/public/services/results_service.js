@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 // Service for carrying out Elasticsearch queries to obtain data for the
 // Ml Results dashboards.
 import _ from 'lodash';
@@ -25,7 +23,7 @@ function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxResults) {
   return new Promise((resolve, reject) => {
     const obj = {
       success: true,
-      results: {}
+      results: {},
     };
 
     // Build the criteria to use in the bool filter part of the request.
@@ -36,10 +34,10 @@ function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxResults) {
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
-      }
+            format: 'epoch_millis',
+          },
+        },
+      },
     ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
@@ -54,8 +52,8 @@ function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxResults) {
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
@@ -65,17 +63,20 @@ function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxResults) {
       body: {
         query: {
           bool: {
-            filter: [{
-              query_string: {
-                query: 'result_type:bucket',
-                analyze_wildcard: false
-              }
-            }, {
-              bool: {
-                must: boolCriteria
-              }
-            }]
-          }
+            filter: [
+              {
+                query_string: {
+                  query: 'result_type:bucket',
+                  analyze_wildcard: false,
+                },
+              },
+              {
+                bool: {
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
         aggs: {
           jobId: {
@@ -83,14 +84,14 @@ function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxResults) {
               field: 'job_id',
               size: maxResults !== undefined ? maxResults : 5,
               order: {
-                anomalyScore: 'desc'
-              }
+                anomalyScore: 'desc',
+              },
             },
             aggs: {
               anomalyScore: {
                 max: {
-                  field: 'anomaly_score'
-                }
+                  field: 'anomaly_score',
+                },
               },
               byTime: {
                 date_histogram: {
@@ -99,31 +100,31 @@ function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxResults) {
                   min_doc_count: 1,
                   extended_bounds: {
                     min: earliestMs,
-                    max: latestMs
-                  }
+                    max: latestMs,
+                  },
                 },
                 aggs: {
                   anomalyScore: {
                     max: {
-                      field: 'anomaly_score'
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                      field: 'anomaly_score',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         const dataByJobId = _.get(resp, ['aggregations', 'jobId', 'buckets'], []);
-        _.each(dataByJobId, (dataForJob) => {
+        _.each(dataByJobId, dataForJob => {
           const jobId = dataForJob.key;
 
           const resultsForTime = {};
 
           const dataByTime = _.get(dataForJob, ['byTime', 'buckets'], []);
-          _.each(dataByTime, (dataForTime) => {
+          _.each(dataByTime, dataForTime => {
             const value = _.get(dataForTime, ['anomalyScore', 'value']);
             if (value !== undefined) {
               const time = dataForTime.key;
@@ -135,7 +136,7 @@ function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxResults) {
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -145,17 +146,11 @@ function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxResults) {
 // Pass an empty array or ['*'] to search over all job IDs.
 // Returned response contains a events property, which will only
 // contains keys for jobs which have scheduled events for the specified time range.
-function getScheduledEventsByBucket(
-  jobIds,
-  earliestMs,
-  latestMs,
-  interval,
-  maxJobs,
-  maxEvents) {
+function getScheduledEventsByBucket(jobIds, earliestMs, latestMs, interval, maxJobs, maxEvents) {
   return new Promise((resolve, reject) => {
     const obj = {
       success: true,
-      events: {}
+      events: {},
     };
 
     // Build the criteria to use in the bool filter part of the request.
@@ -166,13 +161,13 @@ function getScheduledEventsByBucket(
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
       {
-        exists: { field: 'scheduled_events' }
-      }
+        exists: { field: 'scheduled_events' },
+      },
     ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
@@ -183,8 +178,8 @@ function getScheduledEventsByBucket(
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
@@ -194,53 +189,56 @@ function getScheduledEventsByBucket(
       body: {
         query: {
           bool: {
-            filter: [{
-              query_string: {
-                query: 'result_type:bucket',
-                analyze_wildcard: false
-              }
-            }, {
-              bool: {
-                must: boolCriteria
-              }
-            }]
-          }
+            filter: [
+              {
+                query_string: {
+                  query: 'result_type:bucket',
+                  analyze_wildcard: false,
+                },
+              },
+              {
+                bool: {
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
         aggs: {
           jobs: {
             terms: {
               field: 'job_id',
               min_doc_count: 1,
-              size: maxJobs
+              size: maxJobs,
             },
             aggs: {
               times: {
                 date_histogram: {
                   field: 'timestamp',
                   interval: interval,
-                  min_doc_count: 1
+                  min_doc_count: 1,
                 },
                 aggs: {
                   events: {
                     terms: {
                       field: 'scheduled_events',
-                      size: maxEvents
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                      size: maxEvents,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         const dataByJobId = _.get(resp, ['aggregations', 'jobs', 'buckets'], []);
-        _.each(dataByJobId, (dataForJob) => {
+        _.each(dataByJobId, dataForJob => {
           const jobId = dataForJob.key;
           const resultsForTime = {};
           const dataByTime = _.get(dataForJob, ['times', 'buckets'], []);
-          _.each(dataByTime, (dataForTime) => {
+          _.each(dataByTime, dataForTime => {
             const time = dataForTime.key;
             const events = _.get(dataForTime, ['events', 'buckets']);
             resultsForTime[time] = _.map(events, 'key');
@@ -250,12 +248,11 @@ function getScheduledEventsByBucket(
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
 }
-
 
 // Obtains the top influencers, by maximum influencer score, for the specified index, time range and job ID(s).
 // Pass an empty array or ['*'] to search over all job IDs.
@@ -269,7 +266,8 @@ function getTopInfluencers(
   latestMs,
   maxFieldValues = 10,
   influencers = [],
-  influencersFilterQuery) {
+  influencersFilterQuery
+) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, influencers: {} };
 
@@ -281,17 +279,17 @@ function getTopInfluencers(
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
       {
         range: {
           influencer_score: {
-            gt: 0
-          }
-        }
-      }
+            gt: 0,
+          },
+        },
+      },
     ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
@@ -306,8 +304,8 @@ function getTopInfluencers(
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
@@ -319,18 +317,18 @@ function getTopInfluencers(
     if (influencers.length > 0) {
       boolCriteria.push({
         bool: {
-          should: influencers.map((influencer) => {
+          should: influencers.map(influencer => {
             return {
               bool: {
                 must: [
                   { term: { influencer_field_name: influencer.fieldName } },
-                  { term: { influencer_field_value: influencer.fieldValue } }
-                ]
-              }
+                  { term: { influencer_field_value: influencer.fieldValue } },
+                ],
+              },
             };
           }),
           minimum_should_match: 1,
-        }
+        },
       });
     }
 
@@ -344,16 +342,16 @@ function getTopInfluencers(
               {
                 query_string: {
                   query: 'result_type:influencer',
-                  analyze_wildcard: false
-                }
+                  analyze_wildcard: false,
+                },
               },
               {
                 bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
         aggs: {
           influencerFieldNames: {
@@ -361,53 +359,57 @@ function getTopInfluencers(
               field: 'influencer_field_name',
               size: 5,
               order: {
-                maxAnomalyScore: 'desc'
-              }
+                maxAnomalyScore: 'desc',
+              },
             },
             aggs: {
               maxAnomalyScore: {
                 max: {
-                  field: 'influencer_score'
-                }
+                  field: 'influencer_score',
+                },
               },
               influencerFieldValues: {
                 terms: {
                   field: 'influencer_field_value',
                   size: maxFieldValues,
                   order: {
-                    maxAnomalyScore: 'desc'
-                  }
+                    maxAnomalyScore: 'desc',
+                  },
                 },
                 aggs: {
                   maxAnomalyScore: {
                     max: {
-                      field: 'influencer_score'
-                    }
+                      field: 'influencer_score',
+                    },
                   },
                   sumAnomalyScore: {
                     sum: {
-                      field: 'influencer_score'
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                      field: 'influencer_score',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
-        const fieldNameBuckets = _.get(resp, ['aggregations', 'influencerFieldNames', 'buckets'], []);
-        _.each(fieldNameBuckets, (nameBucket) => {
+      .then(resp => {
+        const fieldNameBuckets = _.get(
+          resp,
+          ['aggregations', 'influencerFieldNames', 'buckets'],
+          []
+        );
+        _.each(fieldNameBuckets, nameBucket => {
           const fieldName = nameBucket.key;
           const fieldValues = [];
 
           const fieldValueBuckets = _.get(nameBucket, ['influencerFieldValues', 'buckets'], []);
-          _.each(fieldValueBuckets, (valueBucket) => {
+          _.each(fieldValueBuckets, valueBucket => {
             const fieldValueResult = {
               influencerFieldValue: valueBucket.key,
               maxAnomalyScore: valueBucket.maxAnomalyScore.value,
-              sumAnomalyScore: valueBucket.sumAnomalyScore.value
+              sumAnomalyScore: valueBucket.sumAnomalyScore.value,
             };
             fieldValues.push(fieldValueResult);
           });
@@ -417,7 +419,7 @@ function getTopInfluencers(
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -434,15 +436,17 @@ function getTopInfluencerValues(jobIds, influencerFieldName, earliestMs, latestM
 
     // Build the criteria to use in the bool filter part of the request.
     // Adds criteria for the time range plus any specified job IDs.
-    const boolCriteria = [{
-      range: {
-        timestamp: {
-          gte: earliestMs,
-          lte: latestMs,
-          format: 'epoch_millis'
-        }
-      }
-    }];
+    const boolCriteria = [
+      {
+        range: {
+          timestamp: {
+            gte: earliestMs,
+            lte: latestMs,
+            format: 'epoch_millis',
+          },
+        },
+      },
+    ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
@@ -456,8 +460,8 @@ function getTopInfluencerValues(jobIds, influencerFieldName, earliestMs, latestM
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
@@ -470,17 +474,19 @@ function getTopInfluencerValues(jobIds, influencerFieldName, earliestMs, latestM
             filter: [
               {
                 query_string: {
-                  query: `result_type:influencer AND influencer_field_name: ${escapeForElasticsearchQuery(influencerFieldName)}`,
-                  analyze_wildcard: false
-                }
+                  query: `result_type:influencer AND influencer_field_name: ${escapeForElasticsearchQuery(
+                    influencerFieldName
+                  )}`,
+                  analyze_wildcard: false,
+                },
               },
               {
                 bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
         aggs: {
           influencerFieldValues: {
@@ -488,38 +494,39 @@ function getTopInfluencerValues(jobIds, influencerFieldName, earliestMs, latestM
               field: 'influencer_field_value',
               size: maxResults !== undefined ? maxResults : 2,
               order: {
-                maxAnomalyScore: 'desc'
-              }
+                maxAnomalyScore: 'desc',
+              },
             },
             aggs: {
               maxAnomalyScore: {
                 max: {
-                  field: 'influencer_score'
-                }
+                  field: 'influencer_score',
+                },
               },
               sumAnomalyScore: {
                 sum: {
-                  field: 'influencer_score'
-                }
-              }
-            }
-          }
-        }
-      }
+                  field: 'influencer_score',
+                },
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         const buckets = _.get(resp, ['aggregations', 'influencerFieldValues', 'buckets'], []);
-        _.each(buckets, (bucket) => {
+        _.each(buckets, bucket => {
           const result = {
             influencerFieldValue: bucket.key,
             maxAnomalyScore: bucket.maxAnomalyScore.value,
-            sumAnomalyScore: bucket.sumAnomalyScore.value };
+            sumAnomalyScore: bucket.sumAnomalyScore.value,
+          };
           obj.results.push(result);
         });
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -537,11 +544,11 @@ function getOverallBucketScores(jobIds, topN, earliestMs, latestMs, interval) {
       topN: topN,
       bucketSpan: interval,
       start: earliestMs,
-      end: latestMs
+      end: latestMs,
     })
       .then(resp => {
         const dataByTime = _.get(resp, ['overall_buckets'], []);
-        _.each(dataByTime, (dataForTime) => {
+        _.each(dataByTime, dataForTime => {
           const value = _.get(dataForTime, ['overall_score']);
           if (value !== undefined) {
             obj.results[dataForTime.timestamp] = value;
@@ -569,7 +576,8 @@ function getInfluencerValueMaxScoreByTime(
   latestMs,
   interval,
   maxResults,
-  influencersFilterQuery) {
+  influencersFilterQuery
+) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, results: {} };
 
@@ -581,17 +589,17 @@ function getInfluencerValueMaxScoreByTime(
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
       {
         range: {
           influencer_score: {
-            gt: 0
-          }
-        }
-      }
+            gt: 0,
+          },
+        },
+      },
     ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
@@ -605,8 +613,8 @@ function getInfluencerValueMaxScoreByTime(
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
@@ -626,13 +634,12 @@ function getInfluencerValueMaxScoreByTime(
           // Wrap whitespace influencer field values in quotes for the query_string query.
           influencerFilterStr += `influencer_field_value:"${value}"`;
         }
-
       });
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: influencerFilterStr
-        }
+          query: influencerFilterStr,
+        },
       });
     }
 
@@ -645,17 +652,19 @@ function getInfluencerValueMaxScoreByTime(
             filter: [
               {
                 query_string: {
-                  query: `result_type:influencer AND influencer_field_name: ${escapeForElasticsearchQuery(influencerFieldName)}`,
-                  analyze_wildcard: false
-                }
+                  query: `result_type:influencer AND influencer_field_name: ${escapeForElasticsearchQuery(
+                    influencerFieldName
+                  )}`,
+                  analyze_wildcard: false,
+                },
               },
               {
                 bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
         aggs: {
           influencerFieldValues: {
@@ -663,42 +672,46 @@ function getInfluencerValueMaxScoreByTime(
               field: 'influencer_field_value',
               size: maxResults !== undefined ? maxResults : 10,
               order: {
-                maxAnomalyScore: 'desc'
-              }
+                maxAnomalyScore: 'desc',
+              },
             },
             aggs: {
               maxAnomalyScore: {
                 max: {
-                  field: 'influencer_score'
-                }
+                  field: 'influencer_score',
+                },
               },
               byTime: {
                 date_histogram: {
                   field: 'timestamp',
                   interval,
-                  min_doc_count: 1
+                  min_doc_count: 1,
                 },
                 aggs: {
                   maxAnomalyScore: {
                     max: {
-                      field: 'influencer_score'
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                      field: 'influencer_score',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
-        const fieldValueBuckets = _.get(resp, ['aggregations', 'influencerFieldValues', 'buckets'], []);
-        _.each(fieldValueBuckets, (valueBucket) => {
+      .then(resp => {
+        const fieldValueBuckets = _.get(
+          resp,
+          ['aggregations', 'influencerFieldValues', 'buckets'],
+          []
+        );
+        _.each(fieldValueBuckets, valueBucket => {
           const fieldValue = valueBucket.key;
           const fieldValues = {};
 
           const timeBuckets = _.get(valueBucket, ['byTime', 'buckets'], []);
-          _.each(timeBuckets, (timeBucket) => {
+          _.each(timeBuckets, timeBucket => {
             const time = timeBucket.key;
             const score = timeBucket.maxAnomalyScore.value;
             fieldValues[time] = score;
@@ -709,7 +722,7 @@ function getInfluencerValueMaxScoreByTime(
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -735,29 +748,29 @@ function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, maxResult
             bool: {
               must: [
                 {
-                  exists: { field: 'influencers' }
-                }
-              ]
-            }
-          }
-        }
+                  exists: { field: 'influencers' },
+                },
+              ],
+            },
+          },
+        },
       },
       {
         range: {
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
       {
         range: {
           record_score: {
             gte: threshold,
-          }
-        }
-      }
+          },
+        },
+      },
     ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
@@ -772,8 +785,8 @@ function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, maxResult
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
@@ -789,36 +802,33 @@ function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, maxResult
               {
                 query_string: {
                   query: 'result_type:record',
-                  analyze_wildcard: false
-                }
+                  analyze_wildcard: false,
+                },
               },
               {
                 bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
-        sort: [
-          { record_score: { order: 'desc' } }
-        ],
-      }
+        sort: [{ record_score: { order: 'desc' } }],
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         if (resp.hits.total !== 0) {
-          _.each(resp.hits.hits, (hit) => {
+          _.each(resp.hits.hits, hit => {
             obj.records.push(hit._source);
           });
         }
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
 }
-
 
 // Queries Elasticsearch to obtain the record level results containing the specified influencer(s),
 // for the specified job(s), time range, and record score threshold.
@@ -826,7 +836,15 @@ function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, maxResult
 // 'fieldValue' properties. The influencer array uses 'should' for the nested bool query,
 // so this returns record level results which have at least one of the influencers.
 // Pass an empty array or ['*'] to search over all job IDs.
-function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, latestMs, maxResults, influencersFilterQuery) {
+function getRecordsForInfluencer(
+  jobIds,
+  influencers,
+  threshold,
+  earliestMs,
+  latestMs,
+  maxResults,
+  influencersFilterQuery
+) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, records: [] };
 
@@ -838,17 +856,17 @@ function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, lat
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
       {
         range: {
           record_score: {
             gte: threshold,
-          }
-        }
-      }
+          },
+        },
+      },
     ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
@@ -863,8 +881,8 @@ function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, lat
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
@@ -876,7 +894,7 @@ function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, lat
     if (influencers.length > 0) {
       boolCriteria.push({
         bool: {
-          should: influencers.map((influencer) => {
+          should: influencers.map(influencer => {
             return {
               nested: {
                 path: 'influencers',
@@ -885,22 +903,22 @@ function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, lat
                     must: [
                       {
                         match: {
-                          'influencers.influencer_field_name': influencer.fieldName
-                        }
+                          'influencers.influencer_field_name': influencer.fieldName,
+                        },
                       },
                       {
                         match: {
-                          'influencers.influencer_field_values': influencer.fieldValue
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
+                          'influencers.influencer_field_values': influencer.fieldValue,
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
             };
           }),
           minimum_should_match: 1,
-        }
+        },
       });
     }
 
@@ -915,36 +933,33 @@ function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, lat
               {
                 query_string: {
                   query: 'result_type:record',
-                  analyze_wildcard: false
-                }
+                  analyze_wildcard: false,
+                },
               },
               {
                 bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
-        sort: [
-          { record_score: { order: 'desc' } }
-        ]
-      }
+        sort: [{ record_score: { order: 'desc' } }],
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         if (resp.hits.total !== 0) {
-          _.each(resp.hits.hits, (hit) => {
+          _.each(resp.hits.hits, hit => {
             obj.records.push(hit._source);
           });
         }
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
 }
-
 
 // Queries Elasticsearch to obtain the record level results for the specified job and detector,
 // time range, record score threshold, and whether to only return results containing influencers.
@@ -958,7 +973,8 @@ function getRecordsForDetector(
   threshold,
   earliestMs,
   latestMs,
-  maxResults) {
+  maxResults
+) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, records: [] };
 
@@ -970,23 +986,23 @@ function getRecordsForDetector(
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
       {
-        term: { job_id: jobId }
+        term: { job_id: jobId },
       },
       {
-        term: { detector_index: detectorIndex }
+        term: { detector_index: detectorIndex },
       },
       {
         range: {
           record_score: {
             gte: threshold,
-          }
-        }
-      }
+          },
+        },
+      },
     ];
 
     // Add a nested query to filter for the specified influencer field name and value.
@@ -999,18 +1015,18 @@ function getRecordsForDetector(
               must: [
                 {
                   match: {
-                    'influencers.influencer_field_name': influencerFieldName
-                  }
+                    'influencers.influencer_field_name': influencerFieldName,
+                  },
                 },
                 {
                   match: {
-                    'influencers.influencer_field_values': influencerFieldValue
-                  }
-                }
-              ]
-            }
-          }
-        }
+                    'influencers.influencer_field_values': influencerFieldValue,
+                  },
+                },
+              ],
+            },
+          },
+        },
       });
     } else {
       if (checkForInfluencers === true) {
@@ -1021,12 +1037,12 @@ function getRecordsForDetector(
               bool: {
                 must: [
                   {
-                    exists: { field: 'influencers' }
-                  }
-                ]
-              }
-            }
-          }
+                    exists: { field: 'influencers' },
+                  },
+                ],
+              },
+            },
+          },
         });
       }
     }
@@ -1042,31 +1058,29 @@ function getRecordsForDetector(
               {
                 query_string: {
                   query: 'result_type:record',
-                  analyze_wildcard: false
-                }
+                  analyze_wildcard: false,
+                },
               },
               {
                 bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
-        sort: [
-          { record_score: { order: 'desc' } }
-        ],
-      }
+        sort: [{ record_score: { order: 'desc' } }],
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         if (resp.hits.total !== 0) {
-          _.each(resp.hits.hits, (hit) => {
+          _.each(resp.hits.hits, hit => {
             obj.records.push(hit._source);
           });
         }
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -1085,7 +1099,14 @@ function getRecords(jobIds, threshold, earliestMs, latestMs, maxResults) {
 // criteriaFields parameter must be an array, with each object in the array having 'fieldName'
 // 'fieldValue' properties.
 // Pass an empty array or ['*'] to search over all job IDs.
-function getRecordsForCriteria(jobIds, criteriaFields, threshold, earliestMs, latestMs, maxResults) {
+function getRecordsForCriteria(
+  jobIds,
+  criteriaFields,
+  threshold,
+  earliestMs,
+  latestMs,
+  maxResults
+) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, records: [] };
 
@@ -1097,17 +1118,17 @@ function getRecordsForCriteria(jobIds, criteriaFields, threshold, earliestMs, la
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
       {
         range: {
           record_score: {
             gte: threshold,
-          }
-        }
-      }
+          },
+        },
+      },
     ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
@@ -1122,17 +1143,17 @@ function getRecordsForCriteria(jobIds, criteriaFields, threshold, earliestMs, la
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
     // Add in term queries for each of the specified criteria.
-    _.each(criteriaFields, (criteria) => {
+    _.each(criteriaFields, criteria => {
       boolCriteria.push({
         term: {
-          [criteria.fieldName]: criteria.fieldValue
-        }
+          [criteria.fieldName]: criteria.fieldValue,
+        },
       });
     });
 
@@ -1147,36 +1168,33 @@ function getRecordsForCriteria(jobIds, criteriaFields, threshold, earliestMs, la
               {
                 query_string: {
                   query: 'result_type:record',
-                  analyze_wildcard: false
-                }
+                  analyze_wildcard: false,
+                },
               },
               {
                 bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
-        sort: [
-          { record_score: { order: 'desc' } }
-        ],
-      }
+        sort: [{ record_score: { order: 'desc' } }],
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         if (resp.hits.total !== 0) {
-          _.each(resp.hits.hits, (hit) => {
+          _.each(resp.hits.hits, hit => {
             obj.records.push(hit._source);
           });
         }
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
 }
-
 
 // Queries Elasticsearch to obtain metric aggregation results.
 // index can be a String, or String[], of index names to search.
@@ -1194,7 +1212,8 @@ function getMetricData(
   timeFieldName,
   earliestMs,
   latestMs,
-  interval) {
+  interval
+) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, results: {} };
 
@@ -1209,23 +1228,22 @@ function getMetricData(
         [timeFieldName]: {
           gte: earliestMs,
           lte: latestMs,
-          format: 'epoch_millis'
-        }
-      }
+          format: 'epoch_millis',
+        },
+      },
     });
 
     if (query) {
       mustCriteria.push(query);
     }
 
-    _.each(entityFields, (entity) => {
+    _.each(entityFields, entity => {
       if (entity.fieldValue.length !== 0) {
         mustCriteria.push({
           term: {
-            [entity.fieldName]: entity.fieldValue
-          }
+            [entity.fieldName]: entity.fieldValue,
+          },
         });
-
       } else {
         // Add special handling for blank entity field values, checking for either
         // an empty string or the field not existing.
@@ -1234,45 +1252,43 @@ function getMetricData(
             must: [
               {
                 term: {
-                  [entity.fieldName]: ''
-                }
-              }
-            ]
-          }
+                  [entity.fieldName]: '',
+                },
+              },
+            ],
+          },
         });
         shouldCriteria.push({
           bool: {
             must_not: [
               {
-                exists: { field: entity.fieldName }
-              }
-            ]
-          }
+                exists: { field: entity.fieldName },
+              },
+            ],
+          },
         });
       }
-
     });
 
     const body = {
       query: {
         bool: {
-          must: mustCriteria
-        }
+          must: mustCriteria,
+        },
       },
       size: 0,
       _source: {
-        excludes: []
+        excludes: [],
       },
       aggs: {
         byTime: {
           date_histogram: {
             field: timeFieldName,
             interval: interval,
-            min_doc_count: 0
-          }
-
-        }
-      }
+            min_doc_count: 0,
+          },
+        },
+      },
     };
 
     if (shouldCriteria.length > 0) {
@@ -1285,8 +1301,8 @@ function getMetricData(
 
       const metricAgg = {
         [metricFunction]: {
-          field: metricFieldName
-        }
+          field: metricFieldName,
+        },
       };
 
       if (metricFunction === 'percentiles') {
@@ -1297,11 +1313,11 @@ function getMetricData(
 
     ml.esSearch({
       index,
-      body
+      body,
     })
-      .then((resp) => {
+      .then(resp => {
         const dataByTime = _.get(resp, ['aggregations', 'byTime', 'buckets'], []);
-        _.each(dataByTime, (dataForTime) => {
+        _.each(dataByTime, dataForTime => {
           if (metricFunction === 'count') {
             obj.results[dataForTime.key] = dataForTime.doc_count;
           } else {
@@ -1327,7 +1343,7 @@ function getMetricData(
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -1339,28 +1355,24 @@ function getMetricData(
 // Extra query object can be supplied, or pass null if no additional query.
 // Returned response contains a results property, which is an object
 // of document counts against time (epoch millis).
-function getEventRateData(
-  index,
-  query,
-  timeFieldName,
-  earliestMs,
-  latestMs,
-  interval) {
+function getEventRateData(index, query, timeFieldName, earliestMs, latestMs, interval) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, results: {} };
 
     // Build the criteria to use in the bool filter part of the request.
     // Add criteria for the time range, entity fields,
     // plus any additional supplied query.
-    const mustCriteria = [{
-      range: {
-        [timeFieldName]: {
-          gte: earliestMs,
-          lte: latestMs,
-          format: 'epoch_millis'
-        }
-      }
-    }];
+    const mustCriteria = [
+      {
+        range: {
+          [timeFieldName]: {
+            gte: earliestMs,
+            lte: latestMs,
+            format: 'epoch_millis',
+          },
+        },
+      },
+    ];
 
     if (query) {
       mustCriteria.push(query);
@@ -1373,11 +1385,11 @@ function getEventRateData(
       body: {
         query: {
           bool: {
-            must: mustCriteria
-          }
+            must: mustCriteria,
+          },
         },
         _source: {
-          excludes: []
+          excludes: [],
         },
         aggs: {
           eventRate: {
@@ -1388,15 +1400,15 @@ function getEventRateData(
               extended_bounds: {
                 min: earliestMs,
                 max: latestMs,
-              }
-            }
-          }
-        }
-      }
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         const dataByTimeBucket = _.get(resp, ['aggregations', 'eventRate', 'buckets'], []);
-        _.each(dataByTimeBucket, (dataForTime) => {
+        _.each(dataByTimeBucket, dataForTime => {
           const time = dataForTime.key;
           obj.results[time] = dataForTime.doc_count;
         });
@@ -1404,7 +1416,7 @@ function getEventRateData(
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -1430,7 +1442,8 @@ function getEventDistributionData(
   timeFieldName,
   earliestMs,
   latestMs,
-  interval) {
+  interval
+) {
   return new Promise((resolve, reject) => {
     if (splitField === undefined) {
       return resolve([]);
@@ -1446,9 +1459,9 @@ function getEventDistributionData(
         [timeFieldName]: {
           gte: earliestMs,
           lte: latestMs,
-          format: 'epoch_millis'
-        }
-      }
+          format: 'epoch_millis',
+        },
+      },
     });
 
     if (query) {
@@ -1458,8 +1471,8 @@ function getEventDistributionData(
     if (filterField !== null) {
       mustCriteria.push({
         term: {
-          [filterField.fieldName]: filterField.fieldValue
-        }
+          [filterField.fieldName]: filterField.fieldValue,
+        },
       });
     }
 
@@ -1471,49 +1484,49 @@ function getEventDistributionData(
         function_score: {
           query: {
             bool: {
-              must: mustCriteria
-            }
+              must: mustCriteria,
+            },
           },
           functions: [
             {
               random_score: {
                 // static seed to get same randomized results on every request
                 seed: 10,
-                field: '_seq_no'
-              }
-            }
-          ]
-        }
+                field: '_seq_no',
+              },
+            },
+          ],
+        },
       },
       size: 0,
       _source: {
-        excludes: []
+        excludes: [],
       },
       aggs: {
         sample: {
           sampler: {
-            shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE
+            shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
           },
           aggs: {
             byTime: {
               date_histogram: {
                 field: timeFieldName,
                 interval: interval,
-                min_doc_count: AGGREGATION_MIN_DOC_COUNT
+                min_doc_count: AGGREGATION_MIN_DOC_COUNT,
               },
               aggs: {
                 entities: {
                   terms: {
                     field: splitField.fieldName,
                     size: ENTITY_AGGREGATION_SIZE,
-                    min_doc_count: AGGREGATION_MIN_DOC_COUNT
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                    min_doc_count: AGGREGATION_MIN_DOC_COUNT,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     };
 
     if (metricFieldName !== undefined && metricFieldName !== '') {
@@ -1521,8 +1534,8 @@ function getEventDistributionData(
 
       const metricAgg = {
         [metricFunction]: {
-          field: metricFieldName
-        }
+          field: metricFieldName,
+        },
       };
 
       if (metricFunction === 'percentiles') {
@@ -1540,7 +1553,7 @@ function getEventDistributionData(
       body,
       rest_total_hits_as_int: true,
     })
-      .then((resp) => {
+      .then(resp => {
         // Because of the sampling, results of metricFunctions which use sum or count
         // can be significantly skewed. Taking into account totalHits we calculate a
         // a factor to normalize results for these metricFunctions.
@@ -1548,7 +1561,7 @@ function getEventDistributionData(
         const successfulShards = _.get(resp, ['_shards', 'successful'], 0);
 
         let normalizeFactor = 1;
-        if (totalHits > (successfulShards * SAMPLER_TOP_TERMS_SHARD_SIZE)) {
+        if (totalHits > successfulShards * SAMPLER_TOP_TERMS_SHARD_SIZE) {
           normalizeFactor = totalHits / (successfulShards * SAMPLER_TOP_TERMS_SHARD_SIZE);
         }
 
@@ -1556,13 +1569,13 @@ function getEventDistributionData(
         const data = dataByTime.reduce((d, dataForTime) => {
           const date = +dataForTime.key;
           const entities = _.get(dataForTime, ['entities', 'buckets'], []);
-          entities.forEach((entity) => {
-            let value = (metricFunction === 'count') ? entity.doc_count : entity.metric.value;
+          entities.forEach(entity => {
+            let value = metricFunction === 'count' ? entity.doc_count : entity.metric.value;
 
             if (
-              metricFunction === 'count'
-              || metricFunction === 'cardinality'
-              || metricFunction === 'sum'
+              metricFunction === 'count' ||
+              metricFunction === 'cardinality' ||
+              metricFunction === 'sum'
             ) {
               value = value * normalizeFactor;
             }
@@ -1570,14 +1583,14 @@ function getEventDistributionData(
             d.push({
               date,
               entity: entity.key,
-              value
+              value,
             });
           });
           return d;
         }, []);
         resolve(data);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -1590,45 +1603,47 @@ function getModelPlotOutput(
   earliestMs,
   latestMs,
   interval,
-  aggType) {
+  aggType
+) {
   return new Promise((resolve, reject) => {
     const obj = {
       success: true,
-      results: {}
+      results: {},
     };
 
     // if an aggType object has been passed in, use it.
     // otherwise default to min and max aggs for the upper and lower bounds
-    const modelAggs = (aggType === undefined) ?
-      { max: 'max', min: 'min' } :
-      {
-        max: aggType.max,
-        min: aggType.min
-      };
+    const modelAggs =
+      aggType === undefined
+        ? { max: 'max', min: 'min' }
+        : {
+            max: aggType.max,
+            min: aggType.min,
+          };
 
     // Build the criteria to use in the bool filter part of the request.
     // Add criteria for the job ID and time range.
     const mustCriteria = [
       {
-        term: { job_id: jobId }
+        term: { job_id: jobId },
       },
       {
         range: {
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
-      }
+            format: 'epoch_millis',
+          },
+        },
+      },
     ];
 
     // Add in term queries for each of the specified criteria.
-    _.each(criteriaFields, (criteria) => {
+    _.each(criteriaFields, criteria => {
       mustCriteria.push({
         term: {
-          [criteria.fieldName]: criteria.fieldValue
-        }
+          [criteria.fieldName]: criteria.fieldValue,
+        },
       });
     });
 
@@ -1636,17 +1651,17 @@ function getModelPlotOutput(
     // contain a detector_index field, so use a should criteria with a 'not exists' check.
     const shouldCriteria = [
       {
-        term: { detector_index: detectorIndex }
+        term: { detector_index: detectorIndex },
       },
       {
         bool: {
           must_not: [
             {
-              exists: { field: 'detector_index' }
-            }
-          ]
-        }
-      }
+              exists: { field: 'detector_index' },
+            },
+          ],
+        },
+      },
     ];
 
     ml.esSearch({
@@ -1655,51 +1670,54 @@ function getModelPlotOutput(
       body: {
         query: {
           bool: {
-            filter: [{
-              query_string: {
-                query: 'result_type:model_plot',
-                analyze_wildcard: true
-              }
-            }, {
-              bool: {
-                must: mustCriteria,
-                should: shouldCriteria,
-                minimum_should_match: 1
-              }
-            }]
-          }
+            filter: [
+              {
+                query_string: {
+                  query: 'result_type:model_plot',
+                  analyze_wildcard: true,
+                },
+              },
+              {
+                bool: {
+                  must: mustCriteria,
+                  should: shouldCriteria,
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
         },
         aggs: {
           times: {
             date_histogram: {
               field: 'timestamp',
               interval: interval,
-              min_doc_count: 0
+              min_doc_count: 0,
             },
             aggs: {
               actual: {
                 avg: {
-                  field: 'actual'
-                }
+                  field: 'actual',
+                },
               },
               modelUpper: {
                 [modelAggs.max]: {
-                  field: 'model_upper'
-                }
+                  field: 'model_upper',
+                },
               },
               modelLower: {
                 [modelAggs.min]: {
-                  field: 'model_lower'
-                }
-              }
-            }
-          }
-        }
-      }
+                  field: 'model_lower',
+                },
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-        _.each(aggregationsByTime, (dataForTime) => {
+        _.each(aggregationsByTime, dataForTime => {
           const time = dataForTime.key;
           let modelUpper = _.get(dataForTime, ['modelUpper', 'value']);
           let modelLower = _.get(dataForTime, ['modelLower', 'value']);
@@ -1715,13 +1733,13 @@ function getModelPlotOutput(
           obj.results[time] = {
             actual,
             modelUpper,
-            modelLower
+            modelLower,
           };
         });
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -1735,7 +1753,7 @@ function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, in
   return new Promise((resolve, reject) => {
     const obj = {
       success: true,
-      results: {}
+      results: {},
     };
 
     // Build the criteria to use in the bool filter part of the request.
@@ -1745,20 +1763,20 @@ function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, in
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
-      { term: { job_id: jobId } }
+      { term: { job_id: jobId } },
     ];
     const shouldCriteria = [];
 
-    _.each(criteriaFields, (criteria) => {
+    _.each(criteriaFields, criteria => {
       if (criteria.fieldValue.length !== 0) {
         mustCriteria.push({
           term: {
-            [criteria.fieldName]: criteria.fieldValue
-          }
+            [criteria.fieldName]: criteria.fieldValue,
+          },
         });
       } else {
         // Add special handling for blank entity field values, checking for either
@@ -1767,11 +1785,10 @@ function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, in
           bool: {
             must: [
               {
-                term: {
-                }
-              }
-            ]
-          }
+                term: {},
+              },
+            ],
+          },
         };
         emptyFieldCondition.bool.must[0].term[criteria.fieldName] = '';
         shouldCriteria.push(emptyFieldCondition);
@@ -1779,13 +1796,12 @@ function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, in
           bool: {
             must_not: [
               {
-                exists: { field: criteria.fieldName }
-              }
-            ]
-          }
+                exists: { field: criteria.fieldName },
+              },
+            ],
+          },
         });
       }
-
     });
 
     ml.esSearch({
@@ -1794,39 +1810,42 @@ function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, in
       body: {
         query: {
           bool: {
-            filter: [{
-              query_string: {
-                query: 'result_type:record',
-                analyze_wildcard: true
-              }
-            }, {
-              bool: {
-                must: mustCriteria
-              }
-            }]
-          }
+            filter: [
+              {
+                query_string: {
+                  query: 'result_type:record',
+                  analyze_wildcard: true,
+                },
+              },
+              {
+                bool: {
+                  must: mustCriteria,
+                },
+              },
+            ],
+          },
         },
         aggs: {
           times: {
             date_histogram: {
               field: 'timestamp',
               interval: interval,
-              min_doc_count: 1
+              min_doc_count: 1,
             },
             aggs: {
               recordScore: {
                 max: {
-                  field: 'record_score'
-                }
-              }
-            }
-          }
-        }
-      }
+                  field: 'record_score',
+                },
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-        _.each(aggregationsByTime, (dataForTime) => {
+        _.each(aggregationsByTime, dataForTime => {
           const time = dataForTime.key;
           obj.results[time] = {
             score: _.get(dataForTime, ['recordScore', 'value']),
@@ -1835,7 +1854,7 @@ function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, in
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -1857,5 +1876,5 @@ export const mlResultsService = {
   getEventRateData,
   getEventDistributionData,
   getModelPlotOutput,
-  getRecordMaxScoreByTime
+  getRecordMaxScoreByTime,
 };

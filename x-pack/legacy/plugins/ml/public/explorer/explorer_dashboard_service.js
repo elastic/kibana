@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * Service for firing and registering for events across the different
  * components in the Explorer dashboard.

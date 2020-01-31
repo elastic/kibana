@@ -7,7 +7,7 @@
 import { snapshotQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 import { expectFixtureEql } from './helpers/expect_fixture_eql';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   describe('snapshot query', () => {
     before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
     after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
@@ -72,7 +72,6 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotQuery });
 
-
       expectFixtureEql(data, 'snapshot_filtered_by_up');
     });
 
@@ -92,7 +91,6 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotQuery });
-
 
       expectFixtureEql(data, 'snapshot_empty');
     });

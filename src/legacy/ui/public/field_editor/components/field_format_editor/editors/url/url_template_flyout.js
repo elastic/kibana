@@ -19,29 +19,20 @@
 
 import React from 'react';
 
-import {
-  EuiBasicTable,
-  EuiCode,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiCode, EuiFlyout, EuiFlyoutBody, EuiText } from '@elastic/eui';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export const UrlTemplateFlyoutComponent = ({
-  isVisible = false,
-  onClose = () => {},
-  intl,
-}) => {
+export const UrlTemplateFlyoutComponent = ({ isVisible = false, onClose = () => {}, intl }) => {
   return isVisible ? (
-    <EuiFlyout
-      onClose={onClose}
-    >
+    <EuiFlyout onClose={onClose}>
       <EuiFlyoutBody>
         <EuiText>
           <h3>
-            <FormattedMessage id="common.ui.fieldEditor.urlTemplateHeader" defaultMessage="Url Template" />
+            <FormattedMessage
+              id="common.ui.fieldEditor.urlTemplateHeader"
+              defaultMessage="Url Template"
+            />
           </h3>
           <p>
             <FormattedMessage
@@ -50,29 +41,39 @@ export const UrlTemplateFlyoutComponent = ({
               a complete URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values.
               The following values can be accessed:"
               values={{
-                doubleCurlyBraces: <EuiCode>{('{{ }}')}</EuiCode>,
+                doubleCurlyBraces: <EuiCode>{'{{ }}'}</EuiCode>,
                 strongUrlTemplate: (
                   <strong>
                     <FormattedMessage
                       id="common.ui.fieldEditor.urlTemplateLabel.strongUrlTemplateLabel"
                       defaultMessage="Url Template"
                     />
-                  </strong>)
+                  </strong>
+                ),
               }}
             />
           </p>
           <ul>
             <li>
               <EuiCode>value</EuiCode> &mdash;&nbsp;
-              <FormattedMessage id="common.ui.fieldEditor.urlTemplate.valueLabel" defaultMessage="The URI-escaped value" />
+              <FormattedMessage
+                id="common.ui.fieldEditor.urlTemplate.valueLabel"
+                defaultMessage="The URI-escaped value"
+              />
             </li>
             <li>
               <EuiCode>rawValue</EuiCode> &mdash;&nbsp;
-              <FormattedMessage id="common.ui.fieldEditor.urlTemplate.rawValueLabel" defaultMessage="The unescaped value" />
+              <FormattedMessage
+                id="common.ui.fieldEditor.urlTemplate.rawValueLabel"
+                defaultMessage="The unescaped value"
+              />
             </li>
           </ul>
           <h4>
-            <FormattedMessage id="common.ui.fieldEditor.urlTemplate.examplesHeader" defaultMessage="Examples" />
+            <FormattedMessage
+              id="common.ui.fieldEditor.urlTemplate.examplesHeader"
+              defaultMessage="Examples"
+            />
           </h4>
           <EuiBasicTable
             items={[
@@ -95,16 +96,25 @@ export const UrlTemplateFlyoutComponent = ({
             columns={[
               {
                 field: 'input',
-                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.inputHeader', defaultMessage: 'Input' }),
+                name: intl.formatMessage({
+                  id: 'common.ui.fieldEditor.urlTemplate.inputHeader',
+                  defaultMessage: 'Input',
+                }),
                 width: '160px',
               },
               {
                 field: 'template',
-                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.templateHeader', defaultMessage: 'Template' }),
+                name: intl.formatMessage({
+                  id: 'common.ui.fieldEditor.urlTemplate.templateHeader',
+                  defaultMessage: 'Template',
+                }),
               },
               {
                 field: 'output',
-                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.outputHeader', defaultMessage: 'Output' }),
+                name: intl.formatMessage({
+                  id: 'common.ui.fieldEditor.urlTemplate.outputHeader',
+                  defaultMessage: 'Output',
+                }),
               },
             ]}
           />

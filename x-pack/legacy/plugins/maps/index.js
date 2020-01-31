@@ -12,8 +12,7 @@ import { getWebLogsSavedObjects } from './server/sample_data/web_logs_saved_obje
 import mappings from './mappings.json';
 import { checkLicense } from './check_license';
 import { migrations } from './migrations';
-import { watchStatusAndLicenseToInitialize } from
-  '../../server/lib/watch_status_and_license_to_initialize';
+import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { initTelemetryCollection } from './server/maps_telemetry';
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, createMapPath } from './common/constants';
@@ -21,7 +20,6 @@ import { getAppTitle } from './common/i18n_getters';
 import _ from 'lodash';
 
 export function maps(kibana) {
-
   return new kibana.Plugin({
     // task_manager could be required, but is only used for telemetry
     require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map'],
@@ -32,7 +30,7 @@ export function maps(kibana) {
       app: {
         title: getAppTitle(),
         description: i18n.translate('xpack.maps.appDescription', {
-          defaultMessage: 'Map application'
+          defaultMessage: 'Map application',
         }),
         main: 'plugins/maps/index',
         icon: 'plugins/maps/icon.svg',
@@ -53,24 +51,20 @@ export function maps(kibana) {
           emsLandingPageUrl: mapConfig.emsLandingPageUrl,
           kbnPkgVersion: serverConfig.get('pkg.version'),
           regionmapLayers: _.get(mapConfig, 'regionmap.layers', []),
-          tilemap: _.get(mapConfig, 'tilemap', [])
+          tilemap: _.get(mapConfig, 'tilemap', []),
         };
       },
-      embeddableFactories: [
-        'plugins/maps/embeddable/map_embeddable_factory'
-      ],
-      inspectorViews: [
-        'plugins/maps/inspector/views/register_views',
-      ],
+      embeddableFactories: ['plugins/maps/embeddable/map_embeddable_factory'],
+      inspectorViews: ['plugins/maps/inspector/views/register_views'],
       home: ['plugins/maps/register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
         'maps-telemetry': {
-          isNamespaceAgnostic: true
-        }
+          isNamespaceAgnostic: true,
+        },
       },
       savedObjectsManagement: {
-        'map': {
+        map: {
           icon: APP_ICON,
           defaultSearchField: 'title',
           isImportableAndExportable: true,
@@ -122,42 +116,39 @@ export function maps(kibana) {
           all: {
             savedObject: {
               all: ['map', 'query'],
-              read: ['index-pattern']
+              read: ['index-pattern'],
             },
             ui: ['save', 'show', 'saveQuery'],
           },
           read: {
             savedObject: {
               all: [],
-              read: ['map', 'index-pattern', 'query']
+              read: ['map', 'index-pattern', 'query'],
             },
             ui: ['show'],
           },
+        },
+      });
+
+      watchStatusAndLicenseToInitialize(xpackMainPlugin, this, async license => {
+        if (license && license.maps && !routesInitialized) {
+          routesInitialized = true;
+          initRoutes(server, license.uid);
         }
       });
 
-      watchStatusAndLicenseToInitialize(xpackMainPlugin, this,
-        async license => {
-          if (license && license.maps && !routesInitialized) {
-            routesInitialized = true;
-            initRoutes(server, license.uid);
-          }
-        });
-
-      xpackMainPlugin.info
-        .feature(this.id)
-        .registerLicenseCheckResultsGenerator(checkLicense);
+      xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
 
       const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
-        defaultMessage: 'Map'
+        defaultMessage: 'Map',
       });
       server.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
       server.addAppLinksToSampleDataset('ecommerce', [
         {
           path: createMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
-          icon: 'gisApp'
-        }
+          icon: 'gisApp',
+        },
       ]);
       server.replacePanelInSampleDatasetDashboard({
         sampleDataId: 'ecommerce',
@@ -166,7 +157,7 @@ export function maps(kibana) {
         embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
         embeddableType: 'map',
         embeddableConfig: {
-          isLayerTOCOpen: false
+          isLayerTOCOpen: false,
         },
       });
 
@@ -175,8 +166,8 @@ export function maps(kibana) {
         {
           path: createMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
-          icon: 'gisApp'
-        }
+          icon: 'gisApp',
+        },
       ]);
       server.replacePanelInSampleDatasetDashboard({
         sampleDataId: 'flights',
@@ -185,7 +176,7 @@ export function maps(kibana) {
         embeddableId: '5dd88580-1906-11e9-919b-ffe5949a18d2',
         embeddableType: 'map',
         embeddableConfig: {
-          isLayerTOCOpen: true
+          isLayerTOCOpen: true,
         },
       });
 
@@ -194,8 +185,8 @@ export function maps(kibana) {
         {
           path: createMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
-          icon: 'gisApp'
-        }
+          icon: 'gisApp',
+        },
       ]);
       server.replacePanelInSampleDatasetDashboard({
         sampleDataId: 'logs',
@@ -204,13 +195,13 @@ export function maps(kibana) {
         embeddableId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
         embeddableType: 'map',
         embeddableConfig: {
-          isLayerTOCOpen: false
+          isLayerTOCOpen: false,
         },
       });
 
       server.injectUiAppVars('maps', async () => {
         return await server.getInjectedUiAppVars('kibana');
       });
-    }
+    },
   });
 }

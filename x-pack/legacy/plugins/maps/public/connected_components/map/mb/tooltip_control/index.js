@@ -28,9 +28,12 @@ function mapDispatchToProps(dispatch) {
     },
     clearTooltipState() {
       dispatch(setTooltipState(null));
-    }
+    },
   };
 }
 
-const connectedTooltipControl = connect(mapStateToProps, mapDispatchToProps)(TooltipControl);
+const connectedTooltipControl = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TooltipControl);
 export { connectedTooltipControl as TooltipControl };

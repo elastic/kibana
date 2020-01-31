@@ -6,5 +6,5 @@
 
 export const metadata = {
   id: 'printablePdf',
-  name: 'PDF'
+  name: 'PDF',
 };

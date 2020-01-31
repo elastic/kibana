@@ -31,48 +31,58 @@ describe('ui/courier/fetch search request', () => {
     searchRequestQueue.removeAll();
   });
 
-  it('throws exception when created without errorHandler', ngMock.inject((Private) => {
-    const SearchReq = Private(SearchRequestProvider);
-
-    let caughtError = false;
-    try {
-      new SearchReq({ source: {} });
-    } catch(error) {
-      caughtError = true;
-    }
-    expect(caughtError).to.be(true);
-  }));
-
-  describe('start', () => {
-    it('calls this.source.requestIsStarting(request)', ngMock.inject((Private) => {
+  it(
+    'throws exception when created without errorHandler',
+    ngMock.inject(Private => {
       const SearchReq = Private(SearchRequestProvider);
 
-      const spy = sinon.spy(() => Promise.resolve());
-      const source = { requestIsStarting: spy };
+      let caughtError = false;
+      try {
+        new SearchReq({ source: {} });
+      } catch (error) {
+        caughtError = true;
+      }
+      expect(caughtError).to.be(true);
+    })
+  );
 
-      const req = new SearchReq({ source, errorHandler: () => {} });
-      expect(req.start()).to.have.property('then').a('function');
-      sinon.assert.calledOnce(spy);
-      sinon.assert.calledWithExactly(spy, req);
-    }));
+  describe('start', () => {
+    it(
+      'calls this.source.requestIsStarting(request)',
+      ngMock.inject(Private => {
+        const SearchReq = Private(SearchRequestProvider);
+
+        const spy = sinon.spy(() => Promise.resolve());
+        const source = { requestIsStarting: spy };
+
+        const req = new SearchReq({ source, errorHandler: () => {} });
+        expect(req.start())
+          .to.have.property('then')
+          .a('function');
+        sinon.assert.calledOnce(spy);
+        sinon.assert.calledWithExactly(spy, req);
+      })
+    );
   });
 
   describe('clone', () => {
-    it('returns a search request with identical constructor arguments', ngMock.inject((Private) => {
-      const SearchRequest = Private(SearchRequestProvider);
+    it(
+      'returns a search request with identical constructor arguments',
+      ngMock.inject(Private => {
+        const SearchRequest = Private(SearchRequestProvider);
 
-      const source = {};
-      const errorHandler = () => {};
-      const defer = {};
+        const source = {};
+        const errorHandler = () => {};
+        const defer = {};
 
-      const originalRequest = new SearchRequest({ source, errorHandler, defer });
-      const clonedRequest = originalRequest.clone();
+        const originalRequest = new SearchRequest({ source, errorHandler, defer });
+        const clonedRequest = originalRequest.clone();
 
-      expect(clonedRequest).not.to.be(originalRequest);
-      expect(clonedRequest.source).to.be(source);
-      expect(clonedRequest.errorHandler).to.be(errorHandler);
-      expect(clonedRequest.defer).to.be(defer);
-    }));
-
+        expect(clonedRequest).not.to.be(originalRequest);
+        expect(clonedRequest.source).to.be(source);
+        expect(clonedRequest.errorHandler).to.be(errorHandler);
+        expect(clonedRequest.defer).to.be(defer);
+      })
+    );
   });
 });

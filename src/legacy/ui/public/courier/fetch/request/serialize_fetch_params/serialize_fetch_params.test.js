@@ -30,7 +30,7 @@ function serializeFetchParamsWithDefaults(paramOverrides) {
     config: {
       get: () => {
         return 'sessionId';
-      }
+      },
     },
     timeout: 100,
   };
@@ -41,7 +41,7 @@ function serializeFetchParamsWithDefaults(paramOverrides) {
     Promise,
     params.sessionId,
     params.config,
-    params.timeout,
+    params.timeout
   );
 }
 
@@ -52,8 +52,8 @@ describe('when indexList is not empty', () => {
         index: ['logstash-123'],
         type: 'blah',
         search_type: 'blah2',
-        body: { foo: 'bar', $foo: 'bar' }
-      }
+        body: { foo: 'bar', $foo: 'bar' },
+      },
     ];
     return serializeFetchParamsWithDefaults({ requestFetchParams }).then(value => {
       expect(_.includes(value, '"index":["logstash-123"]')).toBe(true);
@@ -62,17 +62,16 @@ describe('when indexList is not empty', () => {
 });
 
 describe('headers', () => {
-
   const requestFetchParams = [
     {
       index: ['logstash-123'],
       type: 'blah',
       search_type: 'blah2',
-      body: { foo: 'bar' }
-    }
+      body: { foo: 'bar' },
+    },
   ];
 
-  const getHeader = async (paramOverrides) => {
+  const getHeader = async paramOverrides => {
     const request = await serializeFetchParamsWithDefaults(paramOverrides);
     const requestParts = request.split('\n');
     if (requestParts.length < 2) {
@@ -86,7 +85,7 @@ describe('headers', () => {
       const config = {
         get: () => {
           return 'sessionId';
-        }
+        },
       };
       const header = await getHeader({ requestFetchParams, config });
       expect(header.preference).toBe(DEFAULT_SESSION_ID);
@@ -95,13 +94,13 @@ describe('headers', () => {
     test('should be set to custom string when courier:setRequestPreference is "custom"', async () => {
       const CUSTOM_PREFERENCE = '_local';
       const config = {
-        get: (key) => {
+        get: key => {
           if (key === 'courier:setRequestPreference') {
             return 'custom';
           } else if (key === 'courier:customRequestPreference') {
             return CUSTOM_PREFERENCE;
           }
-        }
+        },
       };
       const header = await getHeader({ requestFetchParams, config });
       expect(header.preference).toBe(CUSTOM_PREFERENCE);
@@ -111,7 +110,7 @@ describe('headers', () => {
       const config = {
         get: () => {
           return 'none';
-        }
+        },
       };
       const header = await getHeader({ requestFetchParams, config });
       expect(header.preference).toBe(undefined);
@@ -125,11 +124,11 @@ describe('body', () => {
       index: ['logstash-123'],
       type: 'blah',
       search_type: 'blah2',
-      body: { foo: 'bar' }
-    }
+      body: { foo: 'bar' },
+    },
   ];
 
-  const getBody = async (paramOverrides) => {
+  const getBody = async paramOverrides => {
     const request = await serializeFetchParamsWithDefaults(paramOverrides);
     const requestParts = request.split('\n');
     if (requestParts.length < 2) {

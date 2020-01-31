@@ -43,41 +43,30 @@ exports[`PingList component renders sorted list without errors 1`] = `
                   label="Status"
                   labelType="label"
                 >
-                  <EuiComboBox
+                  <EuiSelect
                     aria-label="Status"
                     compressed={false}
                     fullWidth={false}
-                    isClearable={false}
+                    hasNoInitialSelection={false}
+                    isLoading={false}
                     onChange={[Function]}
                     options={
                       Array [
                         Object {
-                          "label": "All",
+                          "text": "All",
                           "value": "",
                         },
                         Object {
-                          "label": "Up",
+                          "text": "Up",
                           "value": "up",
                         },
                         Object {
-                          "label": "Down",
+                          "text": "Down",
                           "value": "down",
                         },
                       ]
                     }
-                    selectedOptions={
-                      Array [
-                        Object {
-                          "label": "Down",
-                          "value": "down",
-                        },
-                      ]
-                    }
-                    singleSelection={
-                      Object {
-                        "asPlainText": true,
-                      }
-                    }
+                    value="down"
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -92,37 +81,26 @@ exports[`PingList component renders sorted list without errors 1`] = `
                   label="Location"
                   labelType="label"
                 >
-                  <EuiComboBox
+                  <EuiSelect
                     aria-label="Location"
                     compressed={false}
                     fullWidth={false}
-                    isClearable={false}
+                    hasNoInitialSelection={false}
+                    isLoading={false}
                     onChange={[Function]}
                     options={
                       Array [
                         Object {
-                          "label": "All",
-                          "value": "All",
+                          "text": "All",
+                          "value": "",
                         },
                         Object {
-                          "label": "nyc",
+                          "text": "nyc",
                           "value": "nyc",
                         },
                       ]
                     }
-                    selectedOptions={
-                      Array [
-                        Object {
-                          "label": "All",
-                          "value": "All",
-                        },
-                      ]
-                    }
-                    singleSelection={
-                      Object {
-                        "asPlainText": true,
-                      }
-                    }
+                    value=""
                   />
                 </EuiFormRow>
               </EuiFlexItem>

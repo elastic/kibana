@@ -40,8 +40,7 @@ export function filterToKueryAST(filter) {
 
     try {
       return converter(filter);
-    }
-    catch (ex) {
+    } catch (ex) {
       return null;
     }
   }, null);

@@ -24,18 +24,11 @@ export function uiNavLinksMixin(kbnServer, server) {
 
   const { navLinkSpecs = [] } = kbnServer.uiExports;
 
-  const fromSpecs = navLinkSpecs
-    .map(navLinkSpec => new UiNavLink(navLinkSpec));
+  const fromSpecs = navLinkSpecs.map(navLinkSpec => new UiNavLink(navLinkSpec));
 
-  const fromApps = uiApps
-    .map(app => app.getNavLink())
-    .filter(Boolean);
+  const fromApps = uiApps.map(app => app.getNavLink()).filter(Boolean);
 
-  const uiNavLinks = fromSpecs
-    .concat(fromApps)
-    .sort((a, b) => a.getOrder() - b.getOrder());
+  const uiNavLinks = fromSpecs.concat(fromApps).sort((a, b) => a.getOrder() - b.getOrder());
 
-  server.decorate('server', 'getUiNavLinks', () => (
-    uiNavLinks.slice(0)
-  ));
+  server.decorate('server', 'getUiNavLinks', () => uiNavLinks.slice(0));
 }

@@ -8,11 +8,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { uniqueId } from 'lodash';
 import { FilterBar } from './filter_bar';
-import {
-  EuiCallOut,
-  EuiLink,
-  EuiText
-} from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { metadata } from 'ui/metadata';
 import { getSuggestions, getKqlQueryValues } from './utils';
@@ -28,7 +24,8 @@ function getErrorWithLink(errorMessage) {
         {'Kibana Query Language'}
       </EuiLink>
       {' (KQL) syntax.'}
-    </EuiText>);
+    </EuiText>
+  );
 }
 
 export class KqlFilterBar extends Component {
@@ -49,12 +46,12 @@ export class KqlFilterBar extends Component {
     const boolFilter = [];
 
     try {
-      const suggestions = (await getSuggestions(
+      const suggestions = await getSuggestions(
         inputValue,
         selectionStart,
         indexPattern,
         boolFilter
-      ));
+      );
 
       if (currentRequest !== this.currentRequest) {
         return;
@@ -64,9 +61,9 @@ export class KqlFilterBar extends Component {
     } catch (e) {
       console.error('Error while fetching suggestions', e);
       const errorMessage = i18n.translate('xpack.ml.explorer.fetchingSuggestionsErrorMessage', {
-        defaultMessage: 'Error while fetching suggestions'
+        defaultMessage: 'Error while fetching suggestions',
       });
-      this.setState({ isLoadingSuggestions: false, error: (e.message ? e.message : errorMessage) });
+      this.setState({ isLoadingSuggestions: false, error: e.message ? e.message : errorMessage });
     }
   };
 
@@ -82,9 +79,9 @@ export class KqlFilterBar extends Component {
       console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
       const errorWithLink = getErrorWithLink(e.message);
       const errorMessage = i18n.translate('xpack.ml.explorer.invalidKuerySyntaxErrorMessage', {
-        defaultMessage: 'Invalid kuery syntax'
+        defaultMessage: 'Invalid kuery syntax',
       });
-      this.setState({ error: (e.message ? errorWithLink : errorMessage) });
+      this.setState({ error: e.message ? errorWithLink : errorMessage });
     }
   };
 
@@ -105,10 +102,7 @@ export class KqlFilterBar extends Component {
           valueExternal={valueExternal}
           testSubj={testSubj}
         />
-        { error &&
-          <EuiCallOut color="danger">
-            {error}
-          </EuiCallOut>}
+        {error && <EuiCallOut color="danger">{error}</EuiCallOut>}
       </Fragment>
     );
   }
@@ -122,4 +116,3 @@ KqlFilterBar.propTypes = {
   valueExternal: PropTypes.string,
   testSubj: PropTypes.string,
 };
-

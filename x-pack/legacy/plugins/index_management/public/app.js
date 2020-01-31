@@ -28,12 +28,8 @@ export const AppWithoutRouter = () => (
   <Switch>
     <Route exact path={`${BASE_PATH}create_template`} component={TemplateCreate} />
     <Route exact path={`${BASE_PATH}clone_template/:name*`} component={TemplateClone} />
-    <Route
-      exact
-      path={`${BASE_PATH}edit_template/:name*`}
-      component={TemplateEdit}
-    />
+    <Route exact path={`${BASE_PATH}edit_template/:name*`} component={TemplateEdit} />
     <Route path={`${BASE_PATH}:section(indices|templates)`} component={IndexManagementHome} />
-    <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}indices`}/>
+    <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}indices`} />
   </Switch>
 );

@@ -60,11 +60,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.DATA, Status.UI_STATE],
     visualization,
     editorConfig: {
-      optionsTemplate: props => (
-        <RegionMapOptions
-          {...props}
-          serviceSettings={serviceSettings}
-        />),
+      optionsTemplate: props => <RegionMapOptions {...props} serviceSettings={serviceSettings} />,
       collections: {
         colorSchemas,
         vectorLayers: [],
@@ -106,7 +102,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
         },
       ]),
     },
-    setup: async (savedVis) => {
+    setup: async savedVis => {
       const vis = savedVis.vis;
 
       const tmsLayers = await serviceSettings.getTMSServices();
@@ -125,12 +121,11 @@ provided base maps, or add your own. Darker colors represent higher values.',
         const newLayers = layers
           .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
           .filter(
-            (layer) =>
-              !vectorLayers.some(vectorLayer => vectorLayer.layerId === layer.layerId)
+            layer => !vectorLayers.some(vectorLayer => vectorLayer.layerId === layer.layerId)
           );
 
         // backfill v1 manifest for now
-        newLayers.forEach((layer) => {
+        newLayers.forEach(layer => {
           if (layer.format === 'geojson') {
             layer.format = {
               type: 'geojson',

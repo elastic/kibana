@@ -21,7 +21,6 @@ import { shortUrlLookupProvider } from './lib/short_url_lookup';
 import { createGotoRoute } from './goto';
 import { createShortenUrlRoute } from './shorten_url';
 
-
 export function createRoutes(server) {
   const shortUrlLookup = shortUrlLookupProvider(server);
 

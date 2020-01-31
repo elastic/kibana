@@ -6,4 +6,6 @@
 
 export { clusterSetupStatusRoute } from './cluster_setup_status';
 export { nodeSetupStatusRoute } from './node_setup_status';
-export { disableElasticsearchInternalCollectionRoute } from './disable_elasticsearch_internal_collection';
+export {
+  disableElasticsearchInternalCollectionRoute,
+} from './disable_elasticsearch_internal_collection';

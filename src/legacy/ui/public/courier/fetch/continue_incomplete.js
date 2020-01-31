@@ -25,7 +25,7 @@ export function ContinueIncompleteProvider() {
   function continueIncompleteRequests(searchRequests, responses, fetchSearchResults) {
     const incompleteSearchRequests = [];
 
-    responses.forEach(function (response, index) {
+    responses.forEach(function(response, index) {
       if (response === INCOMPLETE) {
         incompleteSearchRequests.push(searchRequests[index]);
       }
@@ -35,16 +35,15 @@ export function ContinueIncompleteProvider() {
       return responses;
     }
 
-    return fetchSearchResults(incompleteSearchRequests)
-      .then(function (completedResponses) {
-        return responses.map(function (prevResponse) {
-          if (prevResponse !== INCOMPLETE) {
-            return prevResponse;
-          }
+    return fetchSearchResults(incompleteSearchRequests).then(function(completedResponses) {
+      return responses.map(function(prevResponse) {
+        if (prevResponse !== INCOMPLETE) {
+          return prevResponse;
+        }
 
-          return completedResponses.shift();
-        });
+        return completedResponses.shift();
       });
+    });
   }
 
   return continueIncompleteRequests;

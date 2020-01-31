@@ -17,20 +17,14 @@
  * under the License.
  */
 
-export default function (kibana) {
-
+export default function(kibana) {
   return new kibana.Plugin({
-
     uiExports: {
-      visTypes: [
-        'plugins/kbn_vislib_vis_types/kbn_vislib_vis_types'
-      ],
+      visTypes: ['plugins/kbn_vislib_vis_types/kbn_vislib_vis_types'],
       interpreter: [
         'plugins/kbn_vislib_vis_types/pie_fn',
         'plugins/kbn_vislib_vis_types/vislib_fn',
-      ]
-    }
-
+      ],
+    },
   });
-
 }

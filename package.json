@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "7.5.1",
+  "version": "7.5.3",
   "branch": "7.5",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -84,7 +84,8 @@
     "**/graphql-toolkit/lodash": "^4.17.13",
     "**/isomorphic-git/**/base64-js": "^1.2.1",
     "**/babel-plugin-inline-react-svg/svgo/js-yaml": "^3.13.1",
-    "**/serialize-javascript": "^2.1.1"
+    "**/serialize-javascript": "^2.1.1",
+    "**/yarn": "^1.21.1"
   },
   "workspaces": {
     "packages": [
@@ -105,7 +106,7 @@
   "dependencies": {
     "@babel/core": "^7.5.5",
     "@babel/register": "^7.7.0",
-    "@elastic/charts": "^13.5.12",
+    "@elastic/charts": "~13.5.13",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "1.0.5",
     "@elastic/eui": "14.5.1",
@@ -340,7 +341,7 @@
     "@types/redux-actions": "^2.2.1",
     "@types/request": "^2.48.2",
     "@types/rimraf": "^2.0.2",
-    "@types/selenium-webdriver": "^4.0.3",
+    "@types/selenium-webdriver": "^4.0.5",
     "@types/semver": "^5.5.0",
     "@types/sinon": "^7.0.13",
     "@types/strip-ansi": "^3.0.0",
@@ -362,7 +363,7 @@
     "chance": "1.0.18",
     "cheerio": "0.22.0",
     "chokidar": "3.2.1",
-    "chromedriver": "78.0.1",
+    "chromedriver": "79.0.0",
     "classnames": "2.2.6",
     "dedent": "^0.7.0",
     "delete-empty": "^2.0.0",
@@ -455,6 +456,6 @@
   },
   "engines": {
     "node": "10.15.2",
-    "yarn": "^1.10.1"
+    "yarn": "^1.21.1"
   }
 }

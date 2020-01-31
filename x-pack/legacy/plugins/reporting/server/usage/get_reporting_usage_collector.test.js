@@ -8,7 +8,8 @@ import { getReportingUsageCollector } from './get_reporting_usage_collector';
 
 function getServerMock(customization) {
   class MockUsageCollector {
-    constructor(_server, { fetch }) { // eslint-disable-line no-unused-vars
+    constructor(_server, { fetch }) {
+      // eslint-disable-line no-unused-vars
       this.fetch = fetch;
     }
   }

@@ -26,60 +26,58 @@ import { fieldFormats } from '../../registry/field_formats';
 import { AggType } from '../agg_type';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-describe('AggType Class', function () {
+describe('AggType Class', function() {
   let indexPattern;
   let Vis;
 
-
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
+  beforeEach(
+    ngMock.inject(function(Private) {
+      Vis = Private(VisProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    })
+  );
 
-    Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-  }));
-
-  describe('constructor', function () {
-
-    it('requires a config object as it\'s first param', function () {
-      expect(function () {
+  describe('constructor', function() {
+    it("requires a config object as it's first param", function() {
+      expect(function() {
         new AggType(null);
       }).to.throwError();
     });
 
-    describe('application of config properties', function () {
-      const copiedConfigProps = [
-        'name',
-        'title',
-        'makeLabel',
-        'ordered'
-      ];
+    describe('application of config properties', function() {
+      const copiedConfigProps = ['name', 'title', 'makeLabel', 'ordered'];
 
-      describe('"' + copiedConfigProps.join('", "') + '"', function () {
-        it('assigns the config value to itself', function () {
-          const config = _.transform(copiedConfigProps, function (config, prop) {
-            config[prop] = {};
-          }, {});
+      describe('"' + copiedConfigProps.join('", "') + '"', function() {
+        it('assigns the config value to itself', function() {
+          const config = _.transform(
+            copiedConfigProps,
+            function(config, prop) {
+              config[prop] = {};
+            },
+            {}
+          );
 
           const aggType = new AggType(config);
 
-          copiedConfigProps.forEach(function (prop) {
+          copiedConfigProps.forEach(function(prop) {
             expect(aggType[prop]).to.be(config[prop]);
           });
         });
       });
 
-      describe('makeLabel', function () {
-        it('makes a function when the makeLabel config is not specified', function () {
-          const someGetter = function () {};
+      describe('makeLabel', function() {
+        it('makes a function when the makeLabel config is not specified', function() {
+          const someGetter = function() {};
 
           let aggType = new AggType({
-            makeLabel: someGetter
+            makeLabel: someGetter,
           });
 
           expect(aggType.makeLabel).to.be(someGetter);
 
           aggType = new AggType({
-            name: 'pizza'
+            name: 'pizza',
           });
 
           expect(aggType.makeLabel).to.be.a('function');
@@ -87,17 +85,17 @@ describe('AggType Class', function () {
         });
       });
 
-      describe('getFormat', function () {
-        it('returns the formatter for the aggConfig', function () {
+      describe('getFormat', function() {
+        it('returns the formatter for the aggConfig', function() {
           const aggType = new AggType({});
 
           let vis = new Vis(indexPattern, {
             aggs: [
               {
                 type: 'date_histogram',
-                schema: 'segment'
-              }
-            ]
+                schema: 'segment',
+              },
+            ],
           });
           let aggConfig = vis.aggs.byName('date_histogram')[0];
 
@@ -107,31 +105,30 @@ describe('AggType Class', function () {
             aggs: [
               {
                 type: 'count',
-                schema: 'metric'
-              }
-            ]
+                schema: 'metric',
+              },
+            ],
           });
           aggConfig = vis.aggs.byName('count')[0];
 
           expect(aggType.getFormat(aggConfig)).to.be(fieldFormats.getDefaultInstance('string'));
         });
 
-        it('can be overridden via config', function () {
-          const someGetter = function () {};
+        it('can be overridden via config', function() {
+          const someGetter = function() {};
 
           const aggType = new AggType({
-            getFormat: someGetter
+            getFormat: someGetter,
           });
 
           expect(aggType.getFormat).to.be(someGetter);
         });
       });
 
-      describe('params', function () {
-
-        it('defaults to AggParams object with JSON param', function () {
+      describe('params', function() {
+        it('defaults to AggParams object with JSON param', function() {
           const aggType = new AggType({
-            name: 'smart agg'
+            name: 'smart agg',
           });
 
           expect(aggType.params).to.be.an(Array);
@@ -140,26 +137,23 @@ describe('AggType Class', function () {
           expect(aggType.params[1].name).to.be('customLabel');
         });
 
-        it('can disable customLabel', function () {
+        it('can disable customLabel', function() {
           const aggType = new AggType({
             name: 'smart agg',
-            customLabels: false
+            customLabels: false,
           });
 
           expect(aggType.params.length).to.be(1);
           expect(aggType.params[0].name).to.be('json');
         });
 
-        it('passes the params arg directly to the AggParams constructor', function () {
-          const params = [
-            { name: 'one' },
-            { name: 'two' }
-          ];
+        it('passes the params arg directly to the AggParams constructor', function() {
+          const params = [{ name: 'one' }, { name: 'two' }];
           const paramLength = params.length + 2; // json and custom label are always appended
 
           const aggType = new AggType({
             name: 'bucketeer',
-            params: params
+            params: params,
           });
 
           expect(aggType.params).to.be.an(Array);
@@ -167,23 +161,22 @@ describe('AggType Class', function () {
         });
       });
 
-      describe('getResponseAggs', function () {
-        it('copies the value', function () {
+      describe('getResponseAggs', function() {
+        it('copies the value', function() {
           const football = {};
           const aggType = new AggType({
-            getResponseAggs: football
+            getResponseAggs: football,
           });
 
           expect(aggType.getResponseAggs).to.be(football);
         });
 
-        it('defaults to noop', function () {
+        it('defaults to noop', function() {
           const aggType = new AggType({});
           const responseAggs = aggType.getRequestAggs();
           expect(responseAggs).to.be(undefined);
         });
       });
     });
-
   });
 });

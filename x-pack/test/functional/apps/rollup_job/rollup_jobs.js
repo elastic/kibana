@@ -7,12 +7,12 @@
 import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'rollup', 'common', 'header']);
 
-  describe('rollup job', function () {
+  describe('rollup job', function() {
     this.tags('smoke');
     before(async () => {
       // init data

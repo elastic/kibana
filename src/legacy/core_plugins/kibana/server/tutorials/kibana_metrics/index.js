@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function kibanaMetricsSpecProvider(server, context) {
   const moduleName = 'kibana';
@@ -34,7 +38,8 @@ export function kibanaMetricsSpecProvider(server, context) {
       defaultMessage: 'Fetch internal metrics from Kibana.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.kibanaMetrics.longDescription', {
-      defaultMessage: 'The `kibana` Metricbeat module fetches internal metrics from Kibana. \
+      defaultMessage:
+        'The `kibana` Metricbeat module fetches internal metrics from Kibana. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kibana.html',
@@ -46,16 +51,16 @@ export function kibanaMetricsSpecProvider(server, context) {
         label: i18n.translate('kbn.server.tutorials.kibanaMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover'
+        path: '/app/kibana#/discover',
       },
       dashboards: [],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-kibana.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-kibana.html',
+      },
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

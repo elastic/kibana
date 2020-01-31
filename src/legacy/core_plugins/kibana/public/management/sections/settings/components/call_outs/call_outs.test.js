@@ -24,9 +24,7 @@ import { CallOuts } from './call_outs';
 
 describe('CallOuts', () => {
   it('should render normally', async () => {
-    const component = shallow(
-      <CallOuts />
-    );
+    const component = shallow(<CallOuts />);
 
     expect(component).toMatchSnapshot();
   });

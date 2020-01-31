@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import path from 'path';
 import uuid from 'uuid/v4';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
   const testSubjects = getService('testSubjects');
   const log = getService('log');
@@ -106,32 +106,32 @@ export default function ({ getService, getPageObjects }) {
     const GEO_POINT = 'geo_point';
     const pointGeojsonFiles = ['point.json', 'multi_point.json'];
     pointGeojsonFiles.forEach(async pointFile => {
-      it(`should index with type geo_point for file: ${pointFile}`,
-        async () => {
-          await loadFileAndIndex(pointFile);
-          const indexPatternResults = await PageObjects.maps.getIndexPatternResults();
-          const coordinatesField = indexPatternResults.fields.find(
-            ({ name }) => name === 'coordinates'
-          );
-          expect(coordinatesField.type).to.be(GEO_POINT);
-        });
+      it(`should index with type geo_point for file: ${pointFile}`, async () => {
+        await loadFileAndIndex(pointFile);
+        const indexPatternResults = await PageObjects.maps.getIndexPatternResults();
+        const coordinatesField = indexPatternResults.fields.find(
+          ({ name }) => name === 'coordinates'
+        );
+        expect(coordinatesField.type).to.be(GEO_POINT);
+      });
     });
 
     const GEO_SHAPE = 'geo_shape';
     const nonPointGeojsonFiles = [
-      'line_string.json', 'multi_line_string.json', 'multi_polygon.json',
-      'polygon.json'
+      'line_string.json',
+      'multi_line_string.json',
+      'multi_polygon.json',
+      'polygon.json',
     ];
     nonPointGeojsonFiles.forEach(async shapeFile => {
-      it(`should index with type geo_shape for file: ${shapeFile}`,
-        async () => {
-          await loadFileAndIndex(shapeFile);
-          const indexPatternResults = await PageObjects.maps.getIndexPatternResults();
-          const coordinatesField = indexPatternResults.fields.find(
-            ({ name }) => name === 'coordinates'
-          );
-          expect(coordinatesField.type).to.be(GEO_SHAPE);
-        });
+      it(`should index with type geo_shape for file: ${shapeFile}`, async () => {
+        await loadFileAndIndex(shapeFile);
+        const indexPatternResults = await PageObjects.maps.getIndexPatternResults();
+        const coordinatesField = indexPatternResults.fields.find(
+          ({ name }) => name === 'coordinates'
+        );
+        expect(coordinatesField.type).to.be(GEO_SHAPE);
+      });
     });
   });
 }

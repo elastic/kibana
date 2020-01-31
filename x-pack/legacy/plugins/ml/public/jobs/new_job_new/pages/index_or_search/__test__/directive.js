@@ -18,7 +18,7 @@ describe('ML - Index or Saved Search selection directive', () => {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(() => {
-    ngMock.inject(function ($injector) {
+    ngMock.inject(function($injector) {
       $compile = $injector.get('$compile');
       const $rootScope = $injector.get('$rootScope');
       $scope = $rootScope.$new();
@@ -31,7 +31,7 @@ describe('ML - Index or Saved Search selection directive', () => {
 
   it('Initialize Index or Saved Search selection directive', done => {
     sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
-    ngMock.inject(function () {
+    ngMock.inject(function() {
       expect(() => {
         $element = $compile('<ml-index-or-search />')($scope);
       }).to.not.throwError();

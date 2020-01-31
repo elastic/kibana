@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { pick } from 'lodash';
 import chrome from 'ui/chrome';
 
@@ -22,14 +20,14 @@ const basePath = chrome.addBasePath('/api/ml');
 
 export const ml = {
   getJobs(obj) {
-    const jobId = (obj && obj.jobId) ? `/${obj.jobId}` : '';
+    const jobId = obj && obj.jobId ? `/${obj.jobId}` : '';
     return http({
       url: `${basePath}/anomaly_detectors${jobId}`,
     });
   },
 
   getJobStats(obj) {
-    const jobId = (obj && obj.jobId) ? `/${obj.jobId}` : '';
+    const jobId = obj && obj.jobId ? `/${obj.jobId}` : '';
     return http({
       url: `${basePath}/anomaly_detectors${jobId}/_stats`,
     });
@@ -39,35 +37,35 @@ export const ml = {
     return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}`,
       method: 'PUT',
-      data: obj.job
+      data: obj.job,
     });
   },
 
   openJob(obj) {
     return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}/_open`,
-      method: 'POST'
+      method: 'POST',
     });
   },
 
   closeJob(obj) {
     return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}/_close`,
-      method: 'POST'
+      method: 'POST',
     });
   },
 
   deleteJob(obj) {
     return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}`,
-      method: 'DELETE'
+      method: 'DELETE',
     });
   },
 
   forceDeleteJob(obj) {
     return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}?force=true`,
-      method: 'DELETE'
+      method: 'DELETE',
     });
   },
 
@@ -75,7 +73,7 @@ export const ml = {
     return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}/_update`,
       method: 'POST',
-      data: obj.job
+      data: obj.job,
     });
   },
 
@@ -83,7 +81,7 @@ export const ml = {
     return http({
       url: `${basePath}/validate/estimate_bucket_span`,
       method: 'POST',
-      data: obj
+      data: obj,
     });
   },
 
@@ -91,7 +89,7 @@ export const ml = {
     return http({
       url: `${basePath}/validate/job`,
       method: 'POST',
-      data: obj
+      data: obj,
     });
   },
 
@@ -99,19 +97,19 @@ export const ml = {
     return http({
       url: `${basePath}/validate/cardinality`,
       method: 'POST',
-      data: obj
+      data: obj,
     });
   },
 
   getDatafeeds(obj) {
-    const datafeedId = (obj && obj.datafeedId) ? `/${obj.datafeedId}` : '';
+    const datafeedId = obj && obj.datafeedId ? `/${obj.datafeedId}` : '';
     return http({
       url: `${basePath}/datafeeds${datafeedId}`,
     });
   },
 
   getDatafeedStats(obj) {
-    const datafeedId = (obj && obj.datafeedId) ? `/${obj.datafeedId}` : '';
+    const datafeedId = obj && obj.datafeedId ? `/${obj.datafeedId}` : '';
     return http({
       url: `${basePath}/datafeeds${datafeedId}/_stats`,
     });
@@ -121,7 +119,7 @@ export const ml = {
     return http({
       url: `${basePath}/datafeeds/${obj.datafeedId}`,
       method: 'PUT',
-      data: obj.datafeedConfig
+      data: obj.datafeedConfig,
     });
   },
 
@@ -129,50 +127,50 @@ export const ml = {
     return http({
       url: `${basePath}/datafeeds/${obj.datafeedId}/_update`,
       method: 'POST',
-      data: obj.datafeedConfig
+      data: obj.datafeedConfig,
     });
   },
 
   deleteDatafeed(obj) {
     return http({
       url: `${basePath}/datafeeds/${obj.datafeedId}`,
-      method: 'DELETE'
+      method: 'DELETE',
     });
   },
 
   forceDeleteDatafeed(obj) {
     return http({
       url: `${basePath}/datafeeds/${obj.datafeedId}?force=true`,
-      method: 'DELETE'
+      method: 'DELETE',
     });
   },
 
   startDatafeed(obj) {
     const data = {};
-    if(obj.start !== undefined) {
+    if (obj.start !== undefined) {
       data.start = obj.start;
     }
-    if(obj.end !== undefined) {
+    if (obj.end !== undefined) {
       data.end = obj.end;
     }
     return http({
       url: `${basePath}/datafeeds/${obj.datafeedId}/_start`,
       method: 'POST',
-      data
+      data,
     });
   },
 
   stopDatafeed(obj) {
     return http({
       url: `${basePath}/datafeeds/${obj.datafeedId}/_stop`,
-      method: 'POST'
+      method: 'POST',
     });
   },
 
   datafeedPreview(obj) {
     return http({
       url: `${basePath}/datafeeds/${obj.datafeedId}/_preview`,
-      method: 'GET'
+      method: 'GET',
     });
   },
 
@@ -180,34 +178,29 @@ export const ml = {
     return http({
       url: `${basePath}/anomaly_detectors/_validate/detector`,
       method: 'POST',
-      data: obj.detector
+      data: obj.detector,
     });
   },
 
   forecast(obj) {
     const data = {};
-    if(obj.duration !== undefined) {
+    if (obj.duration !== undefined) {
       data.duration = obj.duration;
     }
 
     return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}/_forecast`,
       method: 'POST',
-      data
+      data,
     });
   },
 
   overallBuckets(obj) {
-    const data = pick(obj, [
-      'topN',
-      'bucketSpan',
-      'start',
-      'end'
-    ]);
+    const data = pick(obj, ['topN', 'bucketSpan', 'start', 'end']);
     return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}/results/overall_buckets`,
       method: 'POST',
-      data
+      data,
     });
   },
 
@@ -215,7 +208,7 @@ export const ml = {
     return http({
       url: `${basePath}/_has_privileges`,
       method: 'POST',
-      data: obj
+      data: obj,
     });
   },
 
@@ -229,57 +222,57 @@ export const ml = {
   checkManageMLPrivileges() {
     return http({
       url: `${basePath}/ml_capabilities?ignoreSpaces=true`,
-      method: 'GET'
+      method: 'GET',
     });
   },
 
   getNotificationSettings() {
     return http({
       url: `${basePath}/notification_settings`,
-      method: 'GET'
+      method: 'GET',
     });
   },
 
   getFieldCaps(obj) {
     const data = {};
-    if(obj.index !== undefined) {
+    if (obj.index !== undefined) {
       data.index = obj.index;
     }
-    if(obj.fields !== undefined) {
+    if (obj.fields !== undefined) {
       data.fields = obj.fields;
     }
     return http({
       url: `${basePath}/indices/field_caps`,
       method: 'POST',
-      data
+      data,
     });
   },
 
   recognizeIndex(obj) {
     return http({
       url: `${basePath}/modules/recognize/${obj.indexPatternTitle}`,
-      method: 'GET'
+      method: 'GET',
     });
   },
 
   listDataRecognizerModules() {
     return http({
       url: `${basePath}/modules/get_module`,
-      method: 'GET'
+      method: 'GET',
     });
   },
 
   getDataRecognizerModule(obj) {
     return http({
       url: `${basePath}/modules/get_module/${obj.moduleId}`,
-      method: 'GET'
+      method: 'GET',
     });
   },
 
   dataRecognizerModuleJobsExist(obj) {
     return http({
       url: `${basePath}/modules/jobs_exist/${obj.moduleId}`,
-      method: 'GET'
+      method: 'GET',
     });
   },
 
@@ -292,13 +285,13 @@ export const ml = {
       'useDedicatedIndex',
       'startDatafeed',
       'start',
-      'end'
+      'end',
     ]);
 
     return http({
       url: `${basePath}/modules/setup/${obj.moduleId}`,
       method: 'POST',
-      data
+      data,
     });
   },
 
@@ -311,13 +304,13 @@ export const ml = {
       'samplerShardSize',
       'interval',
       'fields',
-      'maxExamples'
+      'maxExamples',
     ]);
 
     return http({
       url: `${basePath}/data_visualizer/get_field_stats/${obj.indexPatternTitle}`,
       method: 'POST',
-      data
+      data,
     });
   },
 
@@ -329,21 +322,21 @@ export const ml = {
       'latest',
       'samplerShardSize',
       'aggregatableFields',
-      'nonAggregatableFields'
+      'nonAggregatableFields',
     ]);
 
     return http({
       url: `${basePath}/data_visualizer/get_overall_stats/${obj.indexPatternTitle}`,
       method: 'POST',
-      data
+      data,
     });
   },
 
   calendars(obj) {
-    const calendarId = (obj && obj.calendarId) ? `/${obj.calendarId}` : '';
+    const calendarId = obj && obj.calendarId ? `/${obj.calendarId}` : '';
     return http({
       url: `${basePath}/calendars${calendarId}`,
-      method: 'GET'
+      method: 'GET',
     });
   },
 
@@ -351,37 +344,37 @@ export const ml = {
     return http({
       url: `${basePath}/calendars`,
       method: 'PUT',
-      data: obj
+      data: obj,
     });
   },
 
   updateCalendar(obj) {
-    const calendarId = (obj && obj.calendarId) ? `/${obj.calendarId}` : '';
+    const calendarId = obj && obj.calendarId ? `/${obj.calendarId}` : '';
     return http({
       url: `${basePath}/calendars${calendarId}`,
       method: 'PUT',
-      data: obj
+      data: obj,
     });
   },
 
   deleteCalendar(obj) {
     return http({
       url: `${basePath}/calendars/${obj.calendarId}`,
-      method: 'DELETE'
+      method: 'DELETE',
     });
   },
 
   mlNodeCount() {
     return http({
       url: `${basePath}/ml_node_count`,
-      method: 'GET'
+      method: 'GET',
     });
   },
 
   mlInfo() {
     return http({
       url: `${basePath}/info`,
-      method: 'GET'
+      method: 'GET',
     });
   },
 
@@ -394,13 +387,13 @@ export const ml = {
       'influencerNames',
       'timeFieldName',
       'earliestMs',
-      'latestMs'
+      'latestMs',
     ]);
 
     return http({
       url: `${basePath}/validate/calculate_model_memory_limit`,
       method: 'POST',
-      data
+      data,
     });
   },
 
@@ -411,27 +404,23 @@ export const ml = {
       'query',
       'timeFieldName',
       'earliestMs',
-      'latestMs'
+      'latestMs',
     ]);
 
     return http({
       url: `${basePath}/fields_service/field_cardinality`,
       method: 'POST',
-      data
+      data,
     });
   },
 
   getTimeFieldRange(obj) {
-    const data = pick(obj, [
-      'index',
-      'timeFieldName',
-      'query'
-    ]);
+    const data = pick(obj, ['index', 'timeFieldName', 'query']);
 
     return http({
       url: `${basePath}/fields_service/time_field_range`,
       method: 'POST',
-      data
+      data,
     });
   },
 
@@ -439,7 +428,7 @@ export const ml = {
     return http({
       url: `${basePath}/es_search`,
       method: 'POST',
-      data: obj
+      data: obj,
     });
   },
 

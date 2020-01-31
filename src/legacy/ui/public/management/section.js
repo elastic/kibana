@@ -42,7 +42,7 @@ export class ManagementSection {
     this.id = id;
     this.items = new IndexedArray({
       index: ['id'],
-      order: ['order']
+      order: ['order'],
     });
     this.visible = true;
     this.disabled = false;
@@ -51,13 +51,14 @@ export class ManagementSection {
     this.url = '';
 
     assign(this, options);
-
   }
 
   get visibleItems() {
     return this.items.inOrder.filter(item => {
       const capabilityManagementSection = capabilities.get().management[this.id];
-      const itemCapability = capabilityManagementSection ? capabilityManagementSection[item.id] : null;
+      const itemCapability = capabilityManagementSection
+        ? capabilityManagementSection[item.id]
+        : null;
 
       return item.visible && itemCapability !== false;
     });
@@ -95,10 +96,10 @@ export class ManagementSection {
   }
 
   /**
-  * Deregisters a section
-  *
-  * @param {string} id
-  */
+   * Deregisters a section
+   *
+   * @param {string} id
+   */
   deregister(id) {
     this.items.remove(item => item.id === id);
     listeners.forEach(fn => fn(this.items));

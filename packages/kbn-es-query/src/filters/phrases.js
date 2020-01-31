@@ -25,39 +25,35 @@ export function buildPhrasesFilter(field, params, indexPattern) {
   const index = indexPattern.id;
   const type = 'phrases';
   const key = field.name;
-  const value = params
-    .map(value => format(field, value))
-    .join(', ');
+  const value = params.map(value => format(field, value)).join(', ');
 
   const filter = {
-    meta: { index, type, key, value, params }
+    meta: { index, type, key, value, params },
   };
 
   let should;
   if (field.scripted) {
-    should = params.map((value) => ({
-      script: getPhraseScript(field, value)
+    should = params.map(value => ({
+      script: getPhraseScript(field, value),
     }));
   } else {
-    should = params.map((value) => ({
+    should = params.map(value => ({
       match_phrase: {
-        [field.name]: value
-      }
+        [field.name]: value,
+      },
     }));
   }
 
   filter.query = {
     bool: {
       should,
-      minimum_should_match: 1
-    }
+      minimum_should_match: 1,
+    },
   };
 
   return filter;
 }
 
 function format(field, value) {
-  return field && field.format && field.format.convert
-    ? field.format.convert(value)
-    : value;
+  return field && field.format && field.format.convert ? field.format.convert(value) : value;
 }

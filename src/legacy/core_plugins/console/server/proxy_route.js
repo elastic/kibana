@@ -121,11 +121,7 @@ export const createProxyRoute = ({
         agent,
       });
 
-      const {
-        statusCode,
-        statusMessage,
-        headers: responseHeaders,
-      } = esIncomingMessage;
+      const { statusCode, statusMessage, headers: responseHeaders } = esIncomingMessage;
 
       const { warning } = responseHeaders;
 

@@ -7,7 +7,7 @@
 import { getPermissions } from '../../../lib/permissions';
 
 export function registerPermissionsRoute(router, xpackInfo) {
-  router.post('/permissions', (request) => {
+  router.post('/permissions', request => {
     return getPermissions(request, xpackInfo);
   });
 }

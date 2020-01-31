@@ -15,12 +15,12 @@ const taskManagerQuery = {
           {
             term: {
               'task.scope': scope,
-            }
-          }
-        ]
-      }
-    }
-  }
+            },
+          },
+        ],
+      },
+    },
+  },
 };
 
 export function initRoutes(server) {
@@ -42,10 +42,13 @@ export function initRoutes(server) {
     },
     async handler(request) {
       try {
-        const task = await taskManager.schedule({
-          ...request.payload,
-          scope: [scope],
-        }, { request });
+        const task = await taskManager.schedule(
+          {
+            ...request.payload,
+            scope: [scope],
+          },
+          { request }
+        );
         return task;
       } catch (err) {
         return err;
@@ -64,7 +67,7 @@ export function initRoutes(server) {
       } catch (err) {
         return err;
       }
-    }
+    },
   });
 
   server.route({
@@ -75,7 +78,7 @@ export function initRoutes(server) {
         const { docs: tasks } = await taskManager.fetch({
           query: taskManagerQuery,
         });
-        return Promise.all(tasks.map((task) => taskManager.remove(task.id)));
+        return Promise.all(tasks.map(task => taskManager.remove(task.id)));
       } catch (err) {
         return err;
       }

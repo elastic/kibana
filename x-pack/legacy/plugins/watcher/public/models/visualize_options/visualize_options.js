@@ -17,7 +17,7 @@ export class VisualizeOptions {
       rangeFrom: this.rangeFrom,
       rangeTo: this.rangeTo,
       interval: this.interval,
-      timezone: this.timezone
+      timezone: this.timezone,
     };
   }
 }

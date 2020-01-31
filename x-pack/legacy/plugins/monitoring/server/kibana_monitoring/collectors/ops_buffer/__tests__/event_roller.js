@@ -13,8 +13,8 @@ const events = [
       '5601': {
         total: 103,
         disconnects: 0,
-        statusCodes: { '200': 15, '304': 88 }
-      }
+        statusCodes: { '200': 15, '304': 88 },
+      },
     },
     responseTimes: { '5601': { avg: 5.213592233009709, max: 36 } },
     osload: [1.90380859375, 1.84033203125, 1.82666015625],
@@ -25,23 +25,23 @@ const events = [
       rss: 518164480,
       heapTotal: 474275840,
       heapUsed: 318428400,
-      external: 5172252
+      external: 5172252,
     },
     concurrent_connections: 6,
-    psdelay: 0.4091129992157221
+    psdelay: 0.4091129992157221,
   },
   {
     requests: {
       '5601': {
         total: 35,
         disconnects: 0,
-        statusCodes: { '200': 5, '304': 30 }
-      }
+        statusCodes: { '200': 5, '304': 30 },
+      },
     },
     responseTimes: { '5601': { avg: 4.6, max: 29 } },
     sockets: {
       http: { total: 1, '169.254.169.254:80:': 1 },
-      https: { total: 0 }
+      https: { total: 0 },
     },
     osload: [1.9111328125, 1.8427734375, 1.82763671875],
     osmem: { total: 17179869184, free: 641744896 },
@@ -51,11 +51,11 @@ const events = [
       rss: 518193152,
       heapTotal: 474275840,
       heapUsed: 315669840,
-      external: 5083177
+      external: 5083177,
     },
     concurrent_connections: 6,
-    psdelay: 0.6715770000591874
-  }
+    psdelay: 0.6715770000591874,
+  },
 ];
 
 describe('Event Roller', () => {
@@ -68,7 +68,7 @@ describe('Event Roller', () => {
 
   it('adds events and rolls them up', () => {
     const eventRoller = new EventRoller();
-    const [ event1, event2 ] = events;
+    const [event1, event2] = events;
     eventRoller.addEvent(event1);
     eventRoller.addEvent(event2);
 
@@ -84,20 +84,20 @@ describe('Event Roller', () => {
         memory: {
           total_in_bytes: 17179869184,
           free_in_bytes: 641744896,
-          used_in_bytes: 16538124288 // just the latest
+          used_in_bytes: 16538124288, // just the latest
         },
-        uptime_in_millis: 4620000 // converted from latest osup
+        uptime_in_millis: 4620000, // converted from latest osup
       },
       process: {
         event_loop_delay: 1.0806899992749095, // 0.4091129992157221 + 0.6715770000591874
         memory: {
           heap: {
             total_in_bytes: 474275840,
-            used_in_bytes: 315669840
+            used_in_bytes: 315669840,
           },
-          resident_set_size_in_bytes: 518193152 // just the latest
+          resident_set_size_in_bytes: 518193152, // just the latest
         },
-        uptime_in_millis: 67390 // latest from psup
+        uptime_in_millis: 67390, // latest from psup
       },
       requests: {
         disconnects: 0,
@@ -105,14 +105,14 @@ describe('Event Roller', () => {
       },
       response_times: {
         average: 5.213592233009709, // max of 5.213592233009709, 4.6
-        max: 36 // max of 36, 29
-      }
+        max: 36, // max of 36, 29
+      },
     });
   });
 
   it('forgets the rollup after flush', () => {
     const eventRoller = new EventRoller();
-    const [ event1, event2 ] = events;
+    const [event1, event2] = events;
     eventRoller.addEvent(event1);
     eventRoller.addEvent(event2);
 

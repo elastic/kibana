@@ -6,11 +6,7 @@
 
 import _ from 'lodash';
 import { Metric } from '../classes';
-import {
-  LARGE_FLOAT,
-  SMALL_FLOAT,
-  SMALL_BYTES
-} from '../../../../common/formatting';
+import { LARGE_FLOAT, SMALL_FLOAT, SMALL_BYTES } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
@@ -20,7 +16,7 @@ export class ElasticsearchMetric extends Metric {
       ...opts,
       app: 'elasticsearch',
       uuidField: 'source_node.uuid',
-      timestampField: 'timestamp'
+      timestampField: 'timestamp',
     });
 
     this.checkRequiredParams({ type: opts.type });
@@ -29,7 +25,7 @@ export class ElasticsearchMetric extends Metric {
   static getMetricFields() {
     return {
       uuidField: 'source_node.uuid', // ???
-      timestampField: 'timestamp'
+      timestampField: 'timestamp',
     };
   }
 }
@@ -45,21 +41,21 @@ export class DifferenceMetric extends ElasticsearchMetric {
 
     this.checkRequiredParams({
       metric,
-      metric2
+      metric2,
     });
 
     this.aggs = {
       metric_max: {
-        max: { field: `${fieldSource}.${metric}` }
+        max: { field: `${fieldSource}.${metric}` },
       },
       metric2_max: {
-        max: { field: `${fieldSource}.${metric2}` }
+        max: { field: `${fieldSource}.${metric2}` },
       },
     };
 
     this.getFields = () => [`${fieldSource}.${metric}`, `${fieldSource}.${metric2}`];
 
-    this.calculation = (bucket) => {
+    this.calculation = bucket => {
       return _.get(bucket, 'metric_max.value') - _.get(bucket, 'metric2_max.value');
     };
   }
@@ -72,13 +68,13 @@ export class LatencyMetric extends ElasticsearchMetric {
       format: LARGE_FLOAT,
       metricAgg: 'sum', // NOTE: this is used for a pointless aggregation
       units: i18n.translate('xpack.monitoring.metrics.es.msTimeUnitLabel', {
-        defaultMessage: 'ms'
-      })
+        defaultMessage: 'ms',
+      }),
     });
 
     this.checkRequiredParams({
       metric,
-      fieldSource
+      fieldSource,
     });
 
     let metricField;
@@ -89,7 +85,7 @@ export class LatencyMetric extends ElasticsearchMetric {
     } else {
       throw new Error(
         i18n.translate('xpack.monitoring.metrics.es.latencyMetricParamErrorMessage', {
-          defaultMessage: 'Latency metric param must be a string equal to `index` or `query`'
+          defaultMessage: 'Latency metric param must be a string equal to `index` or `query`',
         })
       );
     }
@@ -99,38 +95,30 @@ export class LatencyMetric extends ElasticsearchMetric {
 
     this.aggs = {
       event_time_in_millis: {
-        max: { field: timeInMillisField }
+        max: { field: timeInMillisField },
       },
       event_total: {
-        max: { field: eventTotalField }
+        max: { field: eventTotalField },
       },
       event_time_in_millis_deriv: {
         derivative: {
           buckets_path: 'event_time_in_millis',
           gap_policy: 'skip',
-          unit: NORMALIZED_DERIVATIVE_UNIT
-        }
+          unit: NORMALIZED_DERIVATIVE_UNIT,
+        },
       },
       event_total_deriv: {
         derivative: {
           buckets_path: 'event_total',
           gap_policy: 'skip',
-          unit: NORMALIZED_DERIVATIVE_UNIT
-        }
-      }
+          unit: NORMALIZED_DERIVATIVE_UNIT,
+        },
+      },
     };
 
     this.calculation = (bucket, _key, _metric, _bucketSizeInSeconds) => {
-      const timeInMillisDeriv = _.get(
-        bucket,
-        'event_time_in_millis_deriv.normalized_value',
-        null
-      );
-      const totalEventsDeriv = _.get(
-        bucket,
-        'event_total_deriv.normalized_value',
-        null
-      );
+      const timeInMillisDeriv = _.get(bucket, 'event_time_in_millis_deriv.normalized_value', null);
+      const totalEventsDeriv = _.get(bucket, 'event_total_deriv.normalized_value', null);
 
       return Metric.calculateLatency(timeInMillisDeriv, totalEventsDeriv);
     };
@@ -145,8 +133,8 @@ export class RequestRateMetric extends ElasticsearchMetric {
       format: LARGE_FLOAT,
       metricAgg: 'max',
       units: i18n.translate('xpack.monitoring.metrics.es.perSecondsUnitLabel', {
-        defaultMessage: '/s'
-      })
+        defaultMessage: '/s',
+      }),
     });
   }
 }
@@ -159,7 +147,7 @@ export class ThreadPoolQueueMetric extends ElasticsearchMetric {
       type: 'node',
       format: SMALL_FLOAT,
       metricAgg: 'max',
-      units: ''
+      units: '',
     });
   }
 }
@@ -173,7 +161,7 @@ export class ThreadPoolRejectedMetric extends ElasticsearchMetric {
       derivative: true,
       format: SMALL_FLOAT,
       metricAgg: 'max',
-      units: ''
+      units: '',
     });
   }
 }
@@ -192,7 +180,7 @@ export class IndexMemoryMetric extends ElasticsearchMetric {
       ...opts,
       format: SMALL_BYTES,
       metricAgg: 'max',
-      units: 'B'
+      units: 'B',
     });
   }
 }
@@ -201,7 +189,7 @@ export class NodeIndexMemoryMetric extends IndexMemoryMetric {
   constructor(opts) {
     super({
       ...opts,
-      type: 'node'
+      type: 'node',
     });
 
     // override the field set by the super constructor
@@ -213,7 +201,7 @@ export class IndicesMemoryMetric extends IndexMemoryMetric {
   constructor(opts) {
     super({
       ...opts,
-      type: 'cluster'
+      type: 'cluster',
     });
 
     // override the field set by the super constructor
@@ -225,7 +213,7 @@ export class SingleIndexMemoryMetric extends IndexMemoryMetric {
   constructor(opts) {
     super({
       ...opts,
-      type: 'index'
+      type: 'index',
     });
 
     // override the field set by the super constructor
@@ -337,8 +325,8 @@ export class MillisecondsToSecondsMetric extends ElasticsearchMetric {
     super({
       ...opts,
       units: i18n.translate('xpack.monitoring.metrics.es.secondsUnitLabel', {
-        defaultMessage: 's'
-      })
+        defaultMessage: 's',
+      }),
     });
 
     this.calculation = bucket => {

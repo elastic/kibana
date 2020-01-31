@@ -6,46 +6,41 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiPopover,
-  EuiExpression,
-  EuiFormHelpText,
-} from '@elastic/eui';
+import { EuiButton, EuiPopover, EuiExpression, EuiFormHelpText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SearchBar } from 'plugins/data';
 import { npStart } from 'ui/new_platform';
 
 export class WhereExpression extends Component {
-
   state = {
     isPopoverOpen: false,
   };
 
   _togglePopover = () => {
-    this.setState((prevState) => ({
+    this.setState(prevState => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
-  }
+  };
 
   _closePopover = () => {
     this.setState({
       isPopoverOpen: false,
     });
-  }
+  };
 
   _onQueryChange = ({ query }) => {
     this.props.onChange(query);
     this._closePopover();
-  }
+  };
 
   render() {
     const { whereQuery, indexPattern } = this.props;
-    const expressionValue = whereQuery && whereQuery.query
-      ? whereQuery.query
-      : i18n.translate('xpack.maps.layerPanel.whereExpression.expressionValuePlaceholder', {
-        defaultMessage: '-- add filter --'
-      });
+    const expressionValue =
+      whereQuery && whereQuery.query
+        ? whereQuery.query
+        : i18n.translate('xpack.maps.layerPanel.whereExpression.expressionValuePlaceholder', {
+            defaultMessage: '-- add filter --',
+          });
 
     const { uiSettings } = npStart.core;
 
@@ -60,9 +55,12 @@ export class WhereExpression extends Component {
         button={
           <EuiExpression
             onClick={this._togglePopover}
-            description={i18n.translate('xpack.maps.layerPanel.whereExpression.expressionDescription', {
-              defaultMessage: 'where'
-            })}
+            description={i18n.translate(
+              'xpack.maps.layerPanel.whereExpression.expressionDescription',
+              {
+                defaultMessage: 'where',
+              }
+            )}
             uppercase={false}
             value={expressionValue}
             data-test-subj="mapJoinWhereExpressionButton"
@@ -80,14 +78,15 @@ export class WhereExpression extends Component {
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}
-            query={whereQuery ? whereQuery : { language: uiSettings.get('search:queryLanguage'), query: '' }}
+            query={
+              whereQuery
+                ? whereQuery
+                : { language: uiSettings.get('search:queryLanguage'), query: '' }
+            }
             onQuerySubmit={this._onQueryChange}
             indexPatterns={[indexPattern]}
             customSubmitButton={
-              <EuiButton
-                fill
-                data-test-subj="mapWhereFilterEditorSubmitButton"
-              >
+              <EuiButton fill data-test-subj="mapWhereFilterEditorSubmitButton">
                 <FormattedMessage
                   id="xpack.maps.layerPanel.whereExpression.queryBarSubmitButtonLabel"
                   defaultMessage="Set filter"

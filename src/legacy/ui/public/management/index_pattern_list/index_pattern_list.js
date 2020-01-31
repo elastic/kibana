@@ -26,25 +26,27 @@ class IndexPatternList {
 
   getIndexPatternTags = (indexPattern, isDefault) => {
     return this._plugins.reduce((tags, plugin) => {
-      return plugin.getIndexPatternTags ? tags.concat(plugin.getIndexPatternTags(indexPattern, isDefault)) : tags;
+      return plugin.getIndexPatternTags
+        ? tags.concat(plugin.getIndexPatternTags(indexPattern, isDefault))
+        : tags;
     }, []);
-  }
+  };
 
   getFieldInfo = (indexPattern, field) => {
     return this._plugins.reduce((info, plugin) => {
       return plugin.getFieldInfo ? info.concat(plugin.getFieldInfo(indexPattern, field)) : info;
     }, []);
-  }
+  };
 
-  areScriptedFieldsEnabled = (indexPattern) => {
-    return this._plugins.every((plugin) => {
+  areScriptedFieldsEnabled = indexPattern => {
+    return this._plugins.every(plugin => {
       return plugin.areScriptedFieldsEnabled ? plugin.areScriptedFieldsEnabled(indexPattern) : true;
     });
-  }
+  };
 }
 
-export const IndexPatternListFactory = (Private) => {
-  return function () {
+export const IndexPatternListFactory = Private => {
+  return function() {
     const indexPatternListRegistry = Private(IndexPatternListConfigRegistry);
     const indexPatternListProvider = new IndexPatternList(indexPatternListRegistry);
     return indexPatternListProvider;

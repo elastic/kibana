@@ -6,10 +6,9 @@
 
 import { fetchIndices } from '../../../lib/fetch_indices';
 const handler = async (request, callWithRequest) => {
-  const { indexNames = [ ] } = request.payload;
+  const { indexNames = [] } = request.payload;
   return fetchIndices(callWithRequest, indexNames);
 };
 export function registerReloadRoute(router) {
   router.post('indices/reload', handler);
 }
-

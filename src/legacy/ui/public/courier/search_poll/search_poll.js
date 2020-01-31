@@ -81,18 +81,17 @@ export function SearchPollProvider(Private, Promise) {
 
       // We use resolve() here instead of try() because the latter won't trigger a $digest
       // when the promise resolves.
-      this._searchPromise = Promise.resolve().then(() => {
-        timefilter.notifyShouldFetch();
-        const requests = searchRequestQueue.getInactive();
+      this._searchPromise = Promise.resolve()
+        .then(() => {
+          timefilter.notifyShouldFetch();
+          const requests = searchRequestQueue.getInactive();
 
-        // The promise returned from fetchSearchRequests() only resolves when the requests complete.
-        // We want to continue even if the requests abort so we return a different promise.
-        fetchSoon.fetchSearchRequests(requests);
+          // The promise returned from fetchSearchRequests() only resolves when the requests complete.
+          // We want to continue even if the requests abort so we return a different promise.
+          fetchSoon.fetchSearchRequests(requests);
 
-        return Promise.all(
-          requests.map(request => request.getCompleteOrAbortedPromise())
-        );
-      })
+          return Promise.all(requests.map(request => request.getCompleteOrAbortedPromise()));
+        })
         .then(() => {
           this._searchPromise = null;
 

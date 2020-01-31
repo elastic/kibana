@@ -21,14 +21,11 @@ import _ from 'lodash';
 import moment from 'moment';
 import { PointSeries } from './_point_series';
 import { getHeatmapColors } from '../../components/color/heatmap_color';
-import {
-  isColorDark
-} from '@elastic/eui';
-
+import { isColorDark } from '@elastic/eui';
 
 const defaults = {
   color: undefined, // todo
-  fillColor: undefined // todo
+  fillColor: undefined, // todo
 };
 /**
  * Line Chart Visualization
@@ -47,7 +44,7 @@ export class HeatmapChart extends PointSeries {
 
     this.handler.visConfig.set('legend', {
       labels: this.getHeatmapLabels(this.handler.visConfig),
-      colors: this.getHeatmapColors(this.handler.visConfig)
+      colors: this.getHeatmapColors(this.handler.visConfig),
     });
 
     const colors = this.handler.visConfig.get('legend.colors', null);
@@ -75,7 +72,7 @@ export class HeatmapChart extends PointSeries {
       });
     } else {
       if (max === min) {
-        return [ min.toString() ];
+        return [min.toString()];
       }
       for (let i = 0; i < colorsNumber; i++) {
         let label;
@@ -91,9 +88,8 @@ export class HeatmapChart extends PointSeries {
           if (max - min > maxColorCnt) {
             const valInt = Math.ceil(val);
             if (i === 0) {
-              val = (valInt === val ? val : valInt - 1);
-            }
-            else{
+              val = valInt === val ? val : valInt - 1;
+            } else {
               val = valInt;
             }
             nextVal = Math.ceil(nextVal);
@@ -141,22 +137,19 @@ export class HeatmapChart extends PointSeries {
     const showLabels = zAxisConfig.get('labels.show');
     const overwriteLabelColor = zAxisConfig.get('labels.overwriteColor', false);
 
-    const layer = svg.append('g')
-      .attr('class', 'series');
+    const layer = svg.append('g').attr('class', 'series');
 
-    const squares = layer
-      .selectAll('g.square')
-      .data(data.values);
+    const squares = layer.selectAll('g.square').data(data.values);
 
-    squares
-      .exit()
-      .remove();
+    squares.exit().remove();
 
     let barWidth;
     if (this.getCategoryAxis().axisConfig.isTimeDomain()) {
       const { min, interval } = this.handler.data.get('ordered');
       const start = min;
-      const end = moment(min).add(interval).valueOf();
+      const end = moment(min)
+        .add(interval)
+        .valueOf();
 
       barWidth = xScale(end) - xScale(start);
       if (!isHorizontal) barWidth *= -1;
@@ -214,7 +207,8 @@ export class HeatmapChart extends PointSeries {
       .append('g')
       .attr('class', 'square');
 
-    squares.append('rect')
+    squares
+      .append('rect')
       .attr('x', x)
       .attr('width', squareWidth)
       .attr('y', y)
@@ -226,22 +220,23 @@ export class HeatmapChart extends PointSeries {
         return d.hide ? 'none' : 'initial';
       });
 
-
     // todo: verify that longest label is not longer than the barwidth
     // or barwidth is not smaller than textheight (and vice versa)
     //
     if (showLabels) {
       const rotate = zAxisConfig.get('labels.rotate');
-      const rotateRad = rotate * Math.PI / 180;
+      const rotateRad = (rotate * Math.PI) / 180;
       const cellPadding = 5;
-      const maxLength = Math.min(
-        Math.abs(squareWidth / Math.cos(rotateRad)),
-        Math.abs(squareHeight / Math.sin(rotateRad))
-      ) - cellPadding;
-      const maxHeight = Math.min(
-        Math.abs(squareWidth / Math.sin(rotateRad)),
-        Math.abs(squareHeight / Math.cos(rotateRad))
-      ) - cellPadding;
+      const maxLength =
+        Math.min(
+          Math.abs(squareWidth / Math.cos(rotateRad)),
+          Math.abs(squareHeight / Math.sin(rotateRad))
+        ) - cellPadding;
+      const maxHeight =
+        Math.min(
+          Math.abs(squareWidth / Math.sin(rotateRad)),
+          Math.abs(squareHeight / Math.cos(rotateRad))
+        ) - cellPadding;
 
       let labelColor;
       if (overwriteLabelColor) {
@@ -253,14 +248,16 @@ export class HeatmapChart extends PointSeries {
           const bgColor = z(d);
           const color = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/.exec(bgColor);
           return color && isColorDark(parseInt(color[1]), parseInt(color[2]), parseInt(color[3]))
-            ? '#FFF' : '#222';
+            ? '#FFF'
+            : '#222';
         };
       }
 
       let hiddenLabels = false;
-      squares.append('text')
+      squares
+        .append('text')
         .text(d => zAxisFormatter(d.y))
-        .style('display', function (d) {
+        .style('display', function(d) {
           const textLength = this.getBBox().width;
           const textHeight = this.getBBox().height;
           const textTooLong = textLength > maxLength;
@@ -273,15 +270,15 @@ export class HeatmapChart extends PointSeries {
         .style('dominant-baseline', 'central')
         .style('text-anchor', 'middle')
         .style('fill', labelColor)
-        .attr('x', function (d) {
+        .attr('x', function(d) {
           const center = x(d) + squareWidth / 2;
           return center;
         })
-        .attr('y', function (d) {
+        .attr('y', function(d) {
           const center = y(d) + squareHeight / 2;
           return center;
         })
-        .attr('transform', function (d) {
+        .attr('transform', function(d) {
           const horizontalCenter = x(d) + squareWidth / 2;
           const verticalCenter = y(d) + squareHeight / 2;
           return `rotate(${rotate},${horizontalCenter},${verticalCenter})`;
@@ -307,8 +304,8 @@ export class HeatmapChart extends PointSeries {
   draw() {
     const self = this;
 
-    return function (selection) {
-      selection.each(function () {
+    return function(selection) {
+      selection.each(function() {
         const svg = self.chartEl.append('g');
         svg.data([self.chartData]);
 
@@ -316,7 +313,7 @@ export class HeatmapChart extends PointSeries {
         self.addCircleEvents(squares);
 
         self.events.emit('rendered', {
-          chart: self.chartData
+          chart: self.chartData,
         });
 
         return svg;

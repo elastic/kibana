@@ -5,9 +5,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, {
-  Component
-} from 'react';
+import React, { Component } from 'react';
 
 import {
   EuiButton,
@@ -21,10 +19,7 @@ import {
 
 import { toastNotifications } from 'ui/notify';
 
-import {
-  CustomUrlEditor,
-  CustomUrlList,
-} from '../../../../components/custom_url_editor';
+import { CustomUrlEditor, CustomUrlList } from '../../../../components/custom_url_editor';
 import {
   getNewCustomUrlDefaults,
   getQueryEntityFieldNames,
@@ -32,10 +27,7 @@ import {
   buildCustomUrlFromSettings,
   getTestUrl,
 } from '../../../../components/custom_url_editor/utils';
-import {
-  loadSavedDashboards,
-  loadIndexPatterns,
-} from '../edit_utils';
+import { loadSavedDashboards, loadIndexPatterns } from '../edit_utils';
 import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -71,93 +63,107 @@ class CustomUrlsUI extends Component {
     const { intl } = this.props;
 
     loadSavedDashboards(MAX_NUMBER_DASHBOARDS)
-      .then((dashboards)=> {
+      .then(dashboards => {
         this.setState({ dashboards });
       })
-      .catch((resp) => {
+      .catch(resp => {
         console.log('Error loading list of dashboards:', resp);
-        toastNotifications.addDanger(intl.formatMessage({
-          id: 'xpack.ml.jobsList.editJobFlyout.customUrls.loadSavedDashboardsErrorNotificationMessage',
-          defaultMessage: 'An error occurred loading the list of saved Kibana dashboards'
-        }));
+        toastNotifications.addDanger(
+          intl.formatMessage({
+            id:
+              'xpack.ml.jobsList.editJobFlyout.customUrls.loadSavedDashboardsErrorNotificationMessage',
+            defaultMessage: 'An error occurred loading the list of saved Kibana dashboards',
+          })
+        );
       });
 
     loadIndexPatterns(MAX_NUMBER_INDEX_PATTERNS)
-      .then((indexPatterns) => {
+      .then(indexPatterns => {
         this.setState({ indexPatterns });
       })
-      .catch((resp) => {
+      .catch(resp => {
         console.log('Error loading list of dashboards:', resp);
-        toastNotifications.addDanger(intl.formatMessage({
-          id: 'xpack.ml.jobsList.editJobFlyout.customUrls.loadIndexPatternsErrorNotificationMessage',
-          defaultMessage: 'An error occurred loading the list of saved index patterns'
-        }));
+        toastNotifications.addDanger(
+          intl.formatMessage({
+            id:
+              'xpack.ml.jobsList.editJobFlyout.customUrls.loadIndexPatternsErrorNotificationMessage',
+            defaultMessage: 'An error occurred loading the list of saved index patterns',
+          })
+        );
       });
   }
 
   editNewCustomUrl = () => {
     // Opens the editor for configuring a new custom URL.
-    this.setState((prevState) => {
+    this.setState(prevState => {
       const { dashboards, indexPatterns } = prevState;
 
       return {
         editorOpen: true,
-        editorSettings: getNewCustomUrlDefaults(this.props.job, dashboards, indexPatterns)
+        editorSettings: getNewCustomUrlDefaults(this.props.job, dashboards, indexPatterns),
       };
     });
-  }
+  };
 
-  setEditCustomUrl = (customUrl) => {
+  setEditCustomUrl = customUrl => {
     this.setState({
-      editorSettings: customUrl
+      editorSettings: customUrl,
     });
-  }
+  };
 
   addNewCustomUrl = () => {
     buildCustomUrlFromSettings(this.state.editorSettings)
-      .then((customUrl) => {
+      .then(customUrl => {
         const customUrls = [...this.state.customUrls, customUrl];
         this.setCustomUrls(customUrls);
         this.setState({ editorOpen: false });
       })
-      .catch((resp) => {
+      .catch(resp => {
         console.log('Error building custom URL from settings:', resp);
-        toastNotifications.addDanger(this.props.intl.formatMessage({
-          id: 'xpack.ml.jobsList.editJobFlyout.customUrls.addNewUrlErrorNotificationMessage',
-          defaultMessage: 'An error occurred building the new custom URL from the supplied settings'
-        }));
+        toastNotifications.addDanger(
+          this.props.intl.formatMessage({
+            id: 'xpack.ml.jobsList.editJobFlyout.customUrls.addNewUrlErrorNotificationMessage',
+            defaultMessage:
+              'An error occurred building the new custom URL from the supplied settings',
+          })
+        );
       });
-  }
+  };
 
   onTestButtonClick = () => {
     const job = this.props.job;
     const { intl } = this.props;
     buildCustomUrlFromSettings(this.state.editorSettings)
-      .then((customUrl) => {
+      .then(customUrl => {
         getTestUrl(job, customUrl)
-          .then((testUrl) => {
+          .then(testUrl => {
             openCustomUrlWindow(testUrl, customUrl);
           })
-          .catch((resp) => {
+          .catch(resp => {
             console.log('Error obtaining URL for test:', resp);
-            toastNotifications.addWarning(intl.formatMessage({
-              id: 'xpack.ml.jobsList.editJobFlyout.customUrls.getTestUrlErrorNotificationMessage',
-              defaultMessage: 'An error occurred obtaining the URL to test the configuration'
-            }));
+            toastNotifications.addWarning(
+              intl.formatMessage({
+                id: 'xpack.ml.jobsList.editJobFlyout.customUrls.getTestUrlErrorNotificationMessage',
+                defaultMessage: 'An error occurred obtaining the URL to test the configuration',
+              })
+            );
           });
       })
-      .catch((resp) => {
+      .catch(resp => {
         console.log('Error building custom URL from settings:', resp);
-        toastNotifications.addWarning(intl.formatMessage({
-          id: 'xpack.ml.jobsList.editJobFlyout.customUrls.buildUrlErrorNotificationMessage',
-          defaultMessage: 'An error occurred building the custom URL for testing from the supplied settings'
-        }));
+        toastNotifications.addWarning(
+          intl.formatMessage({
+            id: 'xpack.ml.jobsList.editJobFlyout.customUrls.buildUrlErrorNotificationMessage',
+            defaultMessage:
+              'An error occurred building the custom URL for testing from the supplied settings',
+          })
+        );
       });
-  }
+  };
 
   closeEditor = () => {
     this.setState({ editorOpen: false });
-  }
+  };
 
   render() {
     const {
@@ -169,18 +175,15 @@ class CustomUrlsUI extends Component {
       queryEntityFieldNames,
     } = this.state;
 
-    const isValidEditorSettings = (editorOpen === true) ?
-      isValidCustomUrlSettings(editorSettings, customUrls) : true;
+    const isValidEditorSettings =
+      editorOpen === true ? isValidCustomUrlSettings(editorSettings, customUrls) : true;
 
     return (
       <React.Fragment>
         <EuiSpacer size="m" />
         {editorOpen === false ? (
           <React.Fragment>
-            <EuiButton
-              size="s"
-              onClick={() => this.editNewCustomUrl()}
-            >
+            <EuiButton size="s" onClick={() => this.editNewCustomUrl()}>
               <FormattedMessage
                 id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
                 defaultMessage="Add custom URL"
@@ -196,7 +199,7 @@ class CustomUrlsUI extends Component {
                 iconType="cross"
                 aria-label={this.props.intl.formatMessage({
                   id: 'xpack.ml.jobsList.editJobFlyout.customUrls.closeEditorAriaLabel',
-                  defaultMessage: 'Close custom URL editor'
+                  defaultMessage: 'Close custom URL editor',
                 })}
                 className="close-editor-button"
               />
@@ -234,7 +237,6 @@ class CustomUrlsUI extends Component {
                     />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-
               </EuiFlexGroup>
             </EuiPanel>
           </React.Fragment>
@@ -245,7 +247,6 @@ class CustomUrlsUI extends Component {
           customUrls={customUrls}
           setCustomUrls={this.setCustomUrls}
         />
-
       </React.Fragment>
     );
   }

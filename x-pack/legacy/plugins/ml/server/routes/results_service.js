@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { resultsServiceProvider } from '../models/results_service';
-
 
 function getAnomaliesTableData(callWithRequest, payload) {
   const rs = resultsServiceProvider(callWithRequest);
@@ -24,7 +21,8 @@ function getAnomaliesTableData(callWithRequest, payload) {
     dateFormatTz,
     maxRecords,
     maxExamples,
-    influencersFilterQuery } = payload;
+    influencersFilterQuery,
+  } = payload;
   return rs.getAnomaliesTableData(
     jobIds,
     criteriaFields,
@@ -36,54 +34,38 @@ function getAnomaliesTableData(callWithRequest, payload) {
     dateFormatTz,
     maxRecords,
     maxExamples,
-    influencersFilterQuery);
+    influencersFilterQuery
+  );
 }
 
 function getCategoryDefinition(callWithRequest, payload) {
   const rs = resultsServiceProvider(callWithRequest);
-  return rs.getCategoryDefinition(
-    payload.jobId,
-    payload.categoryId);
+  return rs.getCategoryDefinition(payload.jobId, payload.categoryId);
 }
 
 function getCategoryExamples(callWithRequest, payload) {
   const rs = resultsServiceProvider(callWithRequest);
-  const {
-    jobId,
-    categoryIds,
-    maxExamples } = payload;
-  return rs.getCategoryExamples(
-    jobId,
-    categoryIds,
-    maxExamples);
+  const { jobId, categoryIds, maxExamples } = payload;
+  return rs.getCategoryExamples(jobId, categoryIds, maxExamples);
 }
-
 
 function getMaxAnomalyScore(callWithRequest, payload) {
   const rs = resultsServiceProvider(callWithRequest);
-  const {
-    jobIds,
-    earliestMs,
-    latestMs } = payload;
-  return rs.getMaxAnomalyScore(
-    jobIds,
-    earliestMs,
-    latestMs);
+  const { jobIds, earliestMs, latestMs } = payload;
+  return rs.getMaxAnomalyScore(jobIds, earliestMs, latestMs);
 }
 
 export function resultsServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
-
   route({
     method: 'POST',
     path: '/api/ml/results/anomalies_table_data',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return getAnomaliesTableData(callWithRequest, request.payload)
-        .catch(resp => wrapError(resp));
+      return getAnomaliesTableData(callWithRequest, request.payload).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -91,12 +73,11 @@ export function resultsServiceRoutes({ commonRouteConfig, elasticsearchPlugin, r
     path: '/api/ml/results/category_definition',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return getCategoryDefinition(callWithRequest, request.payload)
-        .catch(resp => wrapError(resp));
+      return getCategoryDefinition(callWithRequest, request.payload).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -104,12 +85,11 @@ export function resultsServiceRoutes({ commonRouteConfig, elasticsearchPlugin, r
     path: '/api/ml/results/max_anomaly_score',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return getMaxAnomalyScore(callWithRequest, request.payload)
-        .catch(resp => wrapError(resp));
+      return getMaxAnomalyScore(callWithRequest, request.payload).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -117,12 +97,10 @@ export function resultsServiceRoutes({ commonRouteConfig, elasticsearchPlugin, r
     path: '/api/ml/results/category_examples',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return getCategoryExamples(callWithRequest, request.payload)
-        .catch(resp => wrapError(resp));
+      return getCategoryExamples(callWithRequest, request.payload).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
-
 }

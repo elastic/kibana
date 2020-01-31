@@ -14,7 +14,7 @@ const enrichResponse = async (response, callWithRequest) => {
     try {
       const dataEnricherResponse = await dataEnricher(enrichedResponse, callWithRequest);
       enrichedResponse = dataEnricherResponse;
-    } catch(e) {
+    } catch (e) {
       // silently swallow enricher response errors
     }
   }
@@ -40,7 +40,7 @@ function formatHits(hits, aliases) {
 async function fetchIndicesCall(callWithRequest, indexNames) {
   const params = {
     format: 'json',
-    h: 'health,status,index,uuid,pri,rep,docs.count,sth,store.size'
+    h: 'health,status,index,uuid,pri,rep,docs.count,sth,store.size',
   };
   if (indexNames) {
     params.index = indexNames;

@@ -4,15 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiTabs,
-  EuiTab
-} from '@elastic/eui';
+import { EuiTabs, EuiTab } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -25,7 +21,6 @@ function hasAggregations(profileResponse) {
   const aggs = _.get(profileResponse, '[0].aggregations', []);
   return aggs.length > 0;
 }
-
 
 function handleClick(activateTab, tabName) {
   activateTab(tabName);

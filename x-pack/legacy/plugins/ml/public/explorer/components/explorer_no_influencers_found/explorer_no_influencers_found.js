@@ -14,7 +14,10 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-export const ExplorerNoInfluencersFound = ({ swimlaneViewByFieldName, showFilterMessage = false }) => (
+export const ExplorerNoInfluencersFound = ({
+  swimlaneViewByFieldName,
+  showFilterMessage = false,
+}) => (
   <EuiEmptyPrompt
     titleSize="xs"
     title={
@@ -35,9 +38,10 @@ export const ExplorerNoInfluencersFound = ({ swimlaneViewByFieldName, showFilter
         )}
       </h2>
     }
-  />);
+  />
+);
 
 ExplorerNoInfluencersFound.propTypes = {
   swimlaneViewByFieldName: PropTypes.string.isRequired,
-  showFilterMessage: PropTypes.bool
+  showFilterMessage: PropTypes.bool,
 };

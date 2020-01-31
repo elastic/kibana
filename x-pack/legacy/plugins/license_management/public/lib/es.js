@@ -23,7 +23,9 @@ export function putLicense(license, acknowledge) {
 
 export function startBasic(acknowledge) {
   const options = {
-    url: `${chrome.addBasePath('/api/license/start_basic')}${acknowledge ? '?acknowledge=true' : ''}`,
+    url: `${chrome.addBasePath('/api/license/start_basic')}${
+      acknowledge ? '?acknowledge=true' : ''
+    }`,
     contentType: 'application/json',
     cache: false,
     crossDomain: true,
@@ -68,4 +70,3 @@ export function getPermissions() {
 
   return $.ajax(options);
 }
-

@@ -17,14 +17,14 @@
  * under the License.
  */
 
-export default function (kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
     uiExports: {
       app: {
         title: 'Embedding Vis',
         description: 'This is a sample plugin to test embedding of visualizations',
         main: 'plugins/kbn_tp_visualize_embedding/app',
-      }
+      },
     },
 
     init(server) {
@@ -34,6 +34,6 @@ export default function (kibana) {
       server.injectUiAppVars('kbn_tp_visualize_embedding', async () => {
         return await server.getInjectedUiAppVars('kibana');
       });
-    }
+    },
   });
 }

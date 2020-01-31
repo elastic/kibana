@@ -26,7 +26,6 @@ import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { MetricVisValue } from './metric_vis_value';
 
 export class MetricVisComponent extends Component {
-
   _getLabels() {
     const config = this.props.visParams.metric;
     const isPercentageMode = config.percentageMode;
@@ -34,8 +33,8 @@ export class MetricVisComponent extends Component {
     const max = last(colorsRange).to;
     const labels = [];
     colorsRange.forEach(range => {
-      const from = isPercentageMode ? Math.round(100 * range.from / max) : range.from;
-      const to = isPercentageMode ? Math.round(100 * range.to / max) : range.to;
+      const from = isPercentageMode ? Math.round((100 * range.from) / max) : range.from;
+      const to = isPercentageMode ? Math.round((100 * range.to) / max) : range.to;
       labels.push(`${from} - ${to}`);
     });
 
@@ -113,7 +112,6 @@ export class MetricVisComponent extends Component {
       const column = table.columns[columnIndex];
       const formatter = getFormat(metric.format);
       table.rows.forEach((row, rowIndex) => {
-
         let title = column.name;
         let value = row[column.id];
         const color = this._getColor(value, labels, colors);
@@ -144,13 +142,17 @@ export class MetricVisComponent extends Component {
     return metrics;
   }
 
-  _filterBucket = (metric) => {
+  _filterBucket = metric => {
     const dimensions = this.props.visParams.dimensions;
     if (!dimensions.bucket) {
       return;
     }
     const table = this.props.visData;
-    this.props.vis.API.events.filter({ table, column: dimensions.bucket.accessor, row: metric.rowIndex });
+    this.props.vis.API.events.filter({
+      table,
+      column: dimensions.bucket.accessor,
+      row: metric.rowIndex,
+    });
   };
 
   _renderMetric = (metric, index) => {
@@ -171,7 +173,7 @@ export class MetricVisComponent extends Component {
       const metrics = this._processTableGroups(this.props.visData);
       metricsHtml = metrics.map(this._renderMetric);
     }
-    return (<div className="mtrVis">{metricsHtml}</div>);
+    return <div className="mtrVis">{metricsHtml}</div>;
   }
 
   componentDidMount() {

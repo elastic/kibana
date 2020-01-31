@@ -17,34 +17,35 @@
  * under the License.
  */
 
-
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { VisProvider } from '../../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { createFilterHistogram } from '../../../buckets/create_filter/histogram';
 
-describe('AggConfig Filters', function () {
-  describe('histogram', function () {
+describe('AggConfig Filters', function() {
+  describe('histogram', function() {
     let indexPattern;
     let Vis;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      Vis = Private(VisProvider);
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    }));
+    beforeEach(
+      ngMock.inject(function(Private) {
+        Vis = Private(VisProvider);
+        indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      })
+    );
 
-    it('should return an range filter for histogram', function () {
+    it('should return an range filter for histogram', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
             type: 'histogram',
             schema: 'segment',
-            params: { field: 'bytes', interval: 1024 }
-          }
-        ]
+            params: { field: 'bytes', interval: 1024 },
+          },
+        ],
       });
 
       const aggConfig = vis.aggs.byName('histogram')[0];

@@ -20,16 +20,18 @@
 import path from 'path';
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
   const PageObjects = getPageObjects(['dashboard', 'timePicker', 'settings', 'common']);
 
-  describe('dashboard time zones', function () {
+  describe('dashboard time zones', function() {
     this.tags('smoke');
     before(async () => {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
-      await PageObjects.settings.importFile(path.join(__dirname, 'exports', 'timezonetest_6_2_4.json'));
+      await PageObjects.settings.importFile(
+        path.join(__dirname, 'exports', 'timezonetest_6_2_4.json')
+      );
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('time zone test');
     });

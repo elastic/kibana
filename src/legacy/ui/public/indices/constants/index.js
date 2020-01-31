@@ -19,7 +19,7 @@
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../index_patterns';
 
-export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [ ...INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, '*' ];
+export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [...INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, '*'];
 
 // Insert the comma into the middle, so it doesn't look as if it has grammatical meaning when
 // these characters are rendered in the UI.

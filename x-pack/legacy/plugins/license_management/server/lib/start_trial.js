@@ -8,7 +8,7 @@ export async function canStartTrial(req) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const options = {
     method: 'GET',
-    path: '/_license/trial_status'
+    path: '/_license/trial_status',
   };
   try {
     const response = await callWithRequest(req, 'transport.request', options);
@@ -22,7 +22,7 @@ export async function startTrial(req, xpackInfo) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const options = {
     method: 'POST',
-    path: '/_license/start_trial?acknowledge=true'
+    path: '/_license/start_trial?acknowledge=true',
   };
   try {
     /*eslint camelcase: 0*/

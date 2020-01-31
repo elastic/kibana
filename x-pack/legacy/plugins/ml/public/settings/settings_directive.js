@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -26,22 +25,19 @@ const template = `
   <ml-settings />
 `;
 
-uiRoutes
-  .when('/settings', {
-    template,
-    k7Breadcrumbs: getSettingsBreadcrumbs,
-    resolve: {
-      CheckLicense: checkFullLicense,
-      privileges: checkGetJobsPrivilege,
-      mlNodeCount: getMlNodeCount,
-    }
-  });
-
+uiRoutes.when('/settings', {
+  template,
+  k7Breadcrumbs: getSettingsBreadcrumbs,
+  resolve: {
+    CheckLicense: checkFullLicense,
+    privileges: checkGetJobsPrivilege,
+    mlNodeCount: getMlNodeCount,
+  },
+});
 
 import { Settings } from './settings.js';
 
-module.directive('mlSettings', function () {
-
+module.directive('mlSettings', function() {
   const canGetFilters = checkPermission('canGetFilters');
   const canGetCalendars = checkPermission('canGetCalendars');
 
@@ -49,7 +45,7 @@ module.directive('mlSettings', function () {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (scope, element) {
+    link: function(scope, element) {
       timefilter.disableTimeRangeSelector();
       timefilter.disableAutoRefreshSelector();
 
@@ -59,6 +55,6 @@ module.directive('mlSettings', function () {
         </I18nContext>,
         element[0]
       );
-    }
+    },
   };
 });

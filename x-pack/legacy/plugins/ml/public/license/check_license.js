@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import React from 'react';
 import { xpackInfo } from '../../../xpack_main/public/services/xpack_info';
 import { banners, addAppRedirectMessageToUrl } from 'ui/notify';
@@ -25,14 +24,10 @@ export function checkFullLicense(kbnBaseUrl, kbnUrl) {
   if (features.isAvailable === false) {
     // ML is not enabled
     return redirectToKibana(features, kbnBaseUrl);
-
   } else if (features.licenseType === LICENSE_TYPE.BASIC) {
-
     // ML is enabled, but only with a basic or gold license
     return redirectToBasic(kbnUrl);
-
   } else {
-
     // ML is enabled
     setLicenseExpired(features);
     return Promise.resolve(features);
@@ -46,9 +41,7 @@ export function checkBasicLicense(kbnBaseUrl) {
   if (features.isAvailable === false) {
     // ML is not enabled
     return redirectToKibana(features, kbnBaseUrl);
-
   } else {
-
     // ML is enabled
     setLicenseExpired(features);
     return Promise.resolve(features);
@@ -60,7 +53,7 @@ export function checkBasicLicense(kbnBaseUrl) {
 // if the user's license has expired.
 export function checkLicenseExpired(kbnBaseUrl, kbnUrl) {
   return checkFullLicense(kbnBaseUrl, kbnUrl)
-    .then((features) => {
+    .then(features => {
       if (features.hasExpired) {
         kbnUrl.redirect('/jobs');
         return Promise.halt();
@@ -74,22 +67,16 @@ export function checkLicenseExpired(kbnBaseUrl, kbnUrl) {
 }
 
 function setLicenseExpired(features) {
-  licenseHasExpired = (features.hasExpired || false);
+  licenseHasExpired = features.hasExpired || false;
   // If the license has expired ML app will still work for 7 days and then
   // the job management endpoints (e.g. create job, start datafeed) will be restricted.
   // Therefore we need to keep the app enabled but show an info banner to the user.
-  if(licenseHasExpired) {
+  if (licenseHasExpired) {
     const message = features.message;
     if (expiredLicenseBannerId === undefined) {
       // Only show the banner once with no way to dismiss it
       expiredLicenseBannerId = banners.add({
-        component: (
-          <EuiCallOut
-            iconType="iInCircle"
-            color="warning"
-            title={message}
-          />
-        ),
+        component: <EuiCallOut iconType="iInCircle" color="warning" title={message} />,
       });
     }
   }
@@ -101,7 +88,7 @@ function getFeatures() {
 
 function redirectToKibana(features, kbnBaseUrl) {
   const { message } = features;
-  const newUrl = addAppRedirectMessageToUrl(chrome.addBasePath(kbnBaseUrl), (message || ''));
+  const newUrl = addAppRedirectMessageToUrl(chrome.addBasePath(kbnBaseUrl), message || '');
   window.location.href = newUrl;
   return Promise.halt();
 }
@@ -116,7 +103,7 @@ export function hasLicenseExpired() {
 }
 
 export function isFullLicense() {
-  return (licenseType === LICENSE_TYPE.FULL);
+  return licenseType === LICENSE_TYPE.FULL;
 }
 
 export function xpackFeatureAvailable(feature) {

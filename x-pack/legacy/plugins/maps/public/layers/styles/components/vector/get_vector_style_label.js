@@ -12,19 +12,19 @@ export function getVectorStyleLabel(styleName) {
   switch (styleName) {
     case vectorStyles.FILL_COLOR:
       return i18n.translate('xpack.maps.styles.vector.fillColorLabel', {
-        defaultMessage: 'Fill color'
+        defaultMessage: 'Fill color',
       });
     case vectorStyles.LINE_COLOR:
       return i18n.translate('xpack.maps.styles.vector.borderColorLabel', {
-        defaultMessage: 'Border color'
+        defaultMessage: 'Border color',
       });
     case vectorStyles.LINE_WIDTH:
       return i18n.translate('xpack.maps.styles.vector.borderWidthLabel', {
-        defaultMessage: 'Border width'
+        defaultMessage: 'Border width',
       });
     case vectorStyles.ICON_SIZE:
       return i18n.translate('xpack.maps.styles.vector.symbolSizeLabel', {
-        defaultMessage: 'Symbol size'
+        defaultMessage: 'Symbol size',
       });
     default:
       return styleName;

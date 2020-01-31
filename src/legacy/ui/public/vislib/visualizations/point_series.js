@@ -128,34 +128,39 @@ export class PointSeries extends Chart {
     // so draw the endzones at the actual time bounds
     const leftEndzone = {
       x: drawInverted ? 0 : Math.max(xScale(ordered.min), 0),
-      w: drawInverted ? Math.max(xScale(ordered.min), 0) : height - Math.max(xScale(ordered.min), 0)
+      w: drawInverted
+        ? Math.max(xScale(ordered.min), 0)
+        : height - Math.max(xScale(ordered.min), 0),
     };
 
     const expandLastBucket = xAxis.axisConfig.get('scale.expandLastBucket');
-    const rightLastVal = expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.values));
+    const rightLastVal = expandLastBucket
+      ? ordered.max
+      : Math.min(ordered.max, _.last(xAxis.values));
     const rightStart = rightLastVal + oneUnit;
     const rightEndzone = {
       x: drawInverted ? xScale(rightStart) : 0,
-      w: drawInverted ? Math.max(size - xScale(rightStart), 0) : xScale(rightStart)
+      w: drawInverted ? Math.max(size - xScale(rightStart), 0) : xScale(rightStart),
     };
 
-    this.endzones = svg.selectAll('.layer')
+    this.endzones = svg
+      .selectAll('.layer')
       .data([leftEndzone, rightEndzone])
       .enter()
       .insert('g', '.brush')
       .attr('class', 'endzone')
       .append('rect')
       .attr('class', 'zone')
-      .attr('x', function (d) {
+      .attr('x', function(d) {
         return isHorizontal ? d.x : 0;
       })
-      .attr('y', function (d) {
+      .attr('y', function(d) {
         return isHorizontal ? 0 : d.x;
       })
-      .attr('height', function (d) {
+      .attr('height', function(d) {
         return isHorizontal ? height : d.w;
       })
-      .attr('width', function (d) {
+      .attr('width', function(d) {
         return isHorizontal ? d.w : width;
       });
 
@@ -179,7 +184,7 @@ export class PointSeries extends Chart {
 
       return {
         wholeBucket: wholeBucket,
-        touchdown: min > xLeft || max < xRight
+        touchdown: min > xLeft || max < xRight,
       };
     }
 
@@ -198,38 +203,42 @@ export class PointSeries extends Chart {
 
   calculateRadiusLimits(data) {
     this.radii = _(data.series)
-      .map(function (series) {
+      .map(function(series) {
         return _.map(series.values, 'z');
       })
       .flattenDeep()
-      .reduce(function (result, val) {
-        if (result.min > val) result.min = val;
-        if (result.max < val) result.max = val;
-        return result;
-      }, {
-        min: Infinity,
-        max: -Infinity
-      });
+      .reduce(
+        function(result, val) {
+          if (result.min > val) result.min = val;
+          if (result.max < val) result.max = val;
+          return result;
+        },
+        {
+          min: Infinity,
+          max: -Infinity,
+        }
+      );
   }
 
   draw() {
     const self = this;
     const $elem = $(this.chartEl);
-    const width = this.chartConfig.width = $elem.width();
-    const height = this.chartConfig.height = $elem.height();
+    const width = (this.chartConfig.width = $elem.width());
+    const height = (this.chartConfig.height = $elem.height());
     const xScale = this.handler.categoryAxes[0].getScale();
     const addTimeMarker = this.chartConfig.addTimeMarker;
     const times = this.chartConfig.times || [];
     let div;
     let svg;
 
-    return function (selection) {
-      selection.each(function (data) {
+    return function(selection) {
+      selection.each(function(data) {
         const el = this;
 
         div = d3.select(el);
 
-        svg = div.append('svg')
+        svg = div
+          .append('svg')
           .attr('focusable', 'false')
           .attr('width', width)
           .attr('height', height);
@@ -244,7 +253,8 @@ export class PointSeries extends Chart {
         self.series = [];
         _.each(self.chartConfig.series, (seriArgs, i) => {
           if (!seriArgs.show) return;
-          const SeriClass = seriTypes[seriArgs.type || self.handler.visConfig.get('chart.type')] || seriTypes.line;
+          const SeriClass =
+            seriTypes[seriArgs.type || self.handler.visConfig.get('chart.type')] || seriTypes.line;
           const series = new SeriClass(self.handler, svg, data.series[i], seriArgs);
           series.events = self.events;
           svg.call(series.draw());

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React, { Fragment } from 'react';
 import { PropTypes } from 'prop-types';
 
@@ -17,7 +15,7 @@ import {
   EuiPageContentHeader,
   EuiPageContent,
   EuiPageBody,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,10 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useUiChromeContext } from '../contexts/ui/use_ui_chrome_context';
 import { NavigationMenu } from '../components/navigation_menu';
 
-export function Settings({
-  canGetFilters,
-  canGetCalendars
-}) {
+export function Settings({ canGetFilters, canGetCalendars }) {
   const basePath = useUiChromeContext().getBasePath();
 
   return (
@@ -36,10 +31,7 @@ export function Settings({
       <NavigationMenu tabId="settings" />
       <EuiPage className="mlSettingsPage" data-test-subj="mlPageSettings">
         <EuiPageBody className="mlSettingsPage__body">
-          <EuiPageContent
-            className="mlSettingsPage__content"
-            horizontalPosition="center"
-          >
+          <EuiPageContent className="mlSettingsPage__content" horizontalPosition="center">
             <EuiPageContentHeader>
               <EuiTitle>
                 <h2>
@@ -82,7 +74,6 @@ export function Settings({
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
-
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>

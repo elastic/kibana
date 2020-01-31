@@ -22,11 +22,9 @@ import { uiModules } from 'ui/modules';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 
-const module = uiModules.get('discover/saved_searches', [
-  'kibana/courier'
-]);
+const module = uiModules.get('discover/saved_searches', ['kibana/courier']);
 
-module.factory('SavedSearch', function (Private) {
+module.factory('SavedSearch', function(Private) {
   const SavedObject = Private(SavedObjectProvider);
   createLegacyClass(SavedSearch).inherits(SavedObject);
   function SavedSearch(id) {
@@ -42,7 +40,7 @@ module.factory('SavedSearch', function (Private) {
         columns: [],
         hits: 0,
         sort: [],
-        version: 1
+        version: 1,
       },
     });
 
@@ -57,7 +55,7 @@ module.factory('SavedSearch', function (Private) {
     hits: 'integer',
     columns: 'keyword',
     sort: 'keyword',
-    version: 'integer'
+    version: 'integer',
   };
 
   // Order these fields to the top, the rest are alphabetical
@@ -65,7 +63,7 @@ module.factory('SavedSearch', function (Private) {
 
   SavedSearch.searchSource = true;
 
-  SavedSearch.prototype.getFullPath = function () {
+  SavedSearch.prototype.getFullPath = function() {
     return `/app/kibana#/discover/${this.id}`;
   };
 

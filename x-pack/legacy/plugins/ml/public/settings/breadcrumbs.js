@@ -4,19 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB, SETTINGS } from '../breadcrumbs';
 import { i18n } from '@kbn/i18n';
-
 
 export function getSettingsBreadcrumbs() {
   // Whilst top level nav menu with tabs remains,
   // use root ML breadcrumb.
-  return [
-    ML_BREADCRUMB,
-    ANOMALY_DETECTION_BREADCRUMB,
-    SETTINGS
-  ];
+  return [ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB, SETTINGS];
 }
 
 export function getCalendarManagementBreadcrumbs() {
@@ -24,10 +18,10 @@ export function getCalendarManagementBreadcrumbs() {
     ...getSettingsBreadcrumbs(),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
-        defaultMessage: 'Calendar management'
+        defaultMessage: 'Calendar management',
       }),
-      href: '#/settings/calendars_list'
-    }
+      href: '#/settings/calendars_list',
+    },
   ];
 }
 
@@ -36,10 +30,10 @@ export function getCreateCalendarBreadcrumbs() {
     ...getCalendarManagementBreadcrumbs(),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
-        defaultMessage: 'Create'
+        defaultMessage: 'Create',
       }),
-      href: '#/settings/calendars_list/new_calendar'
-    }
+      href: '#/settings/calendars_list/new_calendar',
+    },
   ];
 }
 
@@ -48,10 +42,10 @@ export function getEditCalendarBreadcrumbs() {
     ...getCalendarManagementBreadcrumbs(),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
-        defaultMessage: 'Edit'
+        defaultMessage: 'Edit',
       }),
-      href: '#/settings/calendars_list/edit_calendar'
-    }
+      href: '#/settings/calendars_list/edit_calendar',
+    },
   ];
 }
 
@@ -60,10 +54,10 @@ export function getFilterListsBreadcrumbs() {
     ...getSettingsBreadcrumbs(),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsLabel', {
-        defaultMessage: 'Filter lists'
+        defaultMessage: 'Filter lists',
       }),
-      href: '#/settings/filter_lists'
-    }
+      href: '#/settings/filter_lists',
+    },
   ];
 }
 
@@ -72,10 +66,10 @@ export function getCreateFilterListBreadcrumbs() {
     ...getFilterListsBreadcrumbs(),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.createLabel', {
-        defaultMessage: 'Create'
+        defaultMessage: 'Create',
       }),
-      href: '#/settings/filter_lists/new'
-    }
+      href: '#/settings/filter_lists/new',
+    },
   ];
 }
 
@@ -84,9 +78,9 @@ export function getEditFilterListBreadcrumbs() {
     ...getFilterListsBreadcrumbs(),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.editLabel', {
-        defaultMessage: 'Edit'
+        defaultMessage: 'Edit',
       }),
-      href: '#/settings/filter_lists/edit'
-    }
+      href: '#/settings/filter_lists/edit',
+    },
   ];
 }

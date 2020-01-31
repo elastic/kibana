@@ -22,6 +22,7 @@ export const EMS_TILES_VECTOR_TILE_PATH = 'ems/tiles/vector/tile';
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
+export const TELEMETRY_TYPE = 'maps-telemetry';
 
 export const MAP_APP_PATH = `app/${APP_ID}`;
 export const GIS_API_PATH = `api/${APP_ID}`;
@@ -36,7 +37,7 @@ export const LAYER_TYPE = {
   TILE: 'TILE',
   VECTOR: 'VECTOR',
   VECTOR_TILE: 'VECTOR_TILE',
-  HEATMAP: 'HEATMAP'
+  HEATMAP: 'HEATMAP',
 };
 
 export const SORT_ORDER = {
@@ -52,7 +53,7 @@ export const ES_PEW_PEW = 'ES_PEW_PEW';
 
 export const FIELD_ORIGIN = {
   SOURCE: 'source',
-  JOIN: 'join'
+  JOIN: 'join',
 };
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';
@@ -70,7 +71,7 @@ export const MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER = '_';
 
 export const ES_GEO_FIELD_TYPE = {
   GEO_POINT: 'geo_point',
-  GEO_SHAPE: 'geo_shape'
+  GEO_SHAPE: 'geo_shape',
 };
 
 export const ES_SPATIAL_RELATIONS = {
@@ -95,10 +96,10 @@ export const LAT_INDEX = 1;
 
 export const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
-  features: []
+  features: [],
 };
 
 export const DRAW_TYPE = {
   BOUNDS: 'BOUNDS',
-  POLYGON: 'POLYGON'
+  POLYGON: 'POLYGON',
 };

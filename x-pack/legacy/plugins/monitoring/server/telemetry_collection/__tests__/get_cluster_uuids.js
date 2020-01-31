@@ -6,27 +6,31 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { getClusterUuids, fetchClusterUuids, handleClusterUuidsResponse } from '../get_cluster_uuids';
+import {
+  getClusterUuids,
+  fetchClusterUuids,
+  handleClusterUuidsResponse,
+} from '../get_cluster_uuids';
 
 describe('get_cluster_uuids', () => {
   const callWith = sinon.stub();
   const size = 123;
   const server = {
     config: sinon.stub().returns({
-      get: sinon.stub().withArgs('xpack.monitoring.elasticsearch.index_pattern').returns('.monitoring-es-N-*')
-        .withArgs('xpack.monitoring.max_bucket_size').returns(size)
-    })
+      get: sinon
+        .stub()
+        .withArgs('xpack.monitoring.elasticsearch.index_pattern')
+        .returns('.monitoring-es-N-*')
+        .withArgs('xpack.monitoring.max_bucket_size')
+        .returns(size),
+    }),
   };
   const response = {
     aggregations: {
       cluster_uuids: {
-        buckets: [
-          { key: 'abc' },
-          { key: 'xyz' },
-          { key: '123' }
-        ]
-      }
-    }
+        buckets: [{ key: 'abc' }, { key: 'xyz' }, { key: '123' }],
+      },
+    },
   };
   const expectedUuids = response.aggregations.cluster_uuids.buckets.map(bucket => bucket.key);
   const start = new Date();
@@ -66,9 +70,9 @@ describe('get_cluster_uuids', () => {
       const clusterUuids = handleClusterUuidsResponse({
         aggregations: {
           cluster_uuids: {
-            buckets: []
-          }
-        }
+            buckets: [],
+          },
+        },
       });
 
       expect(clusterUuids.length).to.be(0);

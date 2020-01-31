@@ -27,9 +27,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
 
-import {
-  RangeControlEditor,
-} from './range_control_editor';
+import { RangeControlEditor } from './range_control_editor';
 
 const controlParams = {
   id: '1',
@@ -39,8 +37,8 @@ const controlParams = {
   type: 'range',
   options: {
     decimalPlaces: 0,
-    step: 1
-  }
+    step: 1,
+  },
 };
 let handleFieldNameChange;
 let handleIndexPatternChange;
@@ -53,27 +51,33 @@ beforeEach(() => {
 });
 
 test('renders RangeControlEditor', () => {
-  const component = shallow(<RangeControlEditor
-    getIndexPattern={getIndexPatternMock}
-    controlIndex={0}
-    controlParams={controlParams}
-    handleFieldNameChange={handleFieldNameChange}
-    handleIndexPatternChange={handleIndexPatternChange}
-    handleNumberOptionChange={handleNumberOptionChange}
-  />);
+  const component = shallow(
+    <RangeControlEditor
+      getIndexPattern={getIndexPatternMock}
+      controlIndex={0}
+      controlParams={controlParams}
+      handleFieldNameChange={handleFieldNameChange}
+      handleIndexPatternChange={handleIndexPatternChange}
+      handleNumberOptionChange={handleNumberOptionChange}
+    />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 test('handleNumberOptionChange - step', () => {
-  const component = mountWithIntl(<RangeControlEditor
-    getIndexPattern={getIndexPatternMock}
-    controlIndex={0}
-    controlParams={controlParams}
-    handleFieldNameChange={handleFieldNameChange}
-    handleIndexPatternChange={handleIndexPatternChange}
-    handleNumberOptionChange={handleNumberOptionChange}
-  />);
-  findTestSubject(component, 'rangeControlSizeInput0').simulate('change', { target: { value: 0.5 } });
+  const component = mountWithIntl(
+    <RangeControlEditor
+      getIndexPattern={getIndexPatternMock}
+      controlIndex={0}
+      controlParams={controlParams}
+      handleFieldNameChange={handleFieldNameChange}
+      handleIndexPatternChange={handleIndexPatternChange}
+      handleNumberOptionChange={handleNumberOptionChange}
+    />
+  );
+  findTestSubject(component, 'rangeControlSizeInput0').simulate('change', {
+    target: { value: 0.5 },
+  });
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
   const expectedControlIndex = 0;
@@ -82,24 +86,29 @@ test('handleNumberOptionChange - step', () => {
     handleNumberOptionChange,
     expectedControlIndex,
     expectedOptionName,
-    sinon.match((evt) => {
+    sinon.match(evt => {
       if (evt.target.value === 0.5) {
         return true;
       }
       return false;
-    }, 'unexpected input event'));
+    }, 'unexpected input event')
+  );
 });
 
 test('handleNumberOptionChange - decimalPlaces', () => {
-  const component = mountWithIntl(<RangeControlEditor
-    getIndexPattern={getIndexPatternMock}
-    controlIndex={0}
-    controlParams={controlParams}
-    handleFieldNameChange={handleFieldNameChange}
-    handleIndexPatternChange={handleIndexPatternChange}
-    handleNumberOptionChange={handleNumberOptionChange}
-  />);
-  findTestSubject(component, 'rangeControlDecimalPlacesInput0').simulate('change', { target: { value: 2 } });
+  const component = mountWithIntl(
+    <RangeControlEditor
+      getIndexPattern={getIndexPatternMock}
+      controlIndex={0}
+      controlParams={controlParams}
+      handleFieldNameChange={handleFieldNameChange}
+      handleIndexPatternChange={handleIndexPatternChange}
+      handleNumberOptionChange={handleNumberOptionChange}
+    />
+  );
+  findTestSubject(component, 'rangeControlDecimalPlacesInput0').simulate('change', {
+    target: { value: 2 },
+  });
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
   const expectedControlIndex = 0;
@@ -108,10 +117,11 @@ test('handleNumberOptionChange - decimalPlaces', () => {
     handleNumberOptionChange,
     expectedControlIndex,
     expectedOptionName,
-    sinon.match((evt) => {
+    sinon.match(evt => {
       if (evt.target.value === 2) {
         return true;
       }
       return false;
-    }, 'unexpected input event'));
+    }, 'unexpected input event')
+  );
 });

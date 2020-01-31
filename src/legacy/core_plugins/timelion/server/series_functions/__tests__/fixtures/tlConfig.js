@@ -23,7 +23,7 @@ import sinon from 'sinon';
 import timelionDefaults from '../../../lib/get_namespaced_settings';
 import esResponse from './es_response';
 
-export default function () {
+export default function() {
   const functions = require('../../../lib/load_functions')('series_functions');
   const kibanaServerConfigs = {
     'timelion.graphiteUrls': ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
@@ -31,27 +31,30 @@ export default function () {
   const server = {
     plugins: {
       timelion: {
-        getFunction: (name) => {
-          if (!functions[name]) throw new Error ('No such function: ' + name);
+        getFunction: name => {
+          if (!functions[name]) throw new Error('No such function: ' + name);
           return functions[name];
-        }
+        },
       },
       elasticsearch: {
-        getCluster: sinon.stub().withArgs('data').returns({
-          callWithRequest: function () {
-            return Promise.resolve(esResponse);
-          }
-        })
-      }
+        getCluster: sinon
+          .stub()
+          .withArgs('data')
+          .returns({
+            callWithRequest: function() {
+              return Promise.resolve(esResponse);
+            },
+          }),
+      },
     },
     newPlatform: {
       __internals: {
         elasticsearch: {
-          legacy: { config$: of({ shardTimeout: moment.duration(30000) }) }
-        }
-      }
+          legacy: { config$: of({ shardTimeout: moment.duration(30000) }) },
+        },
+      },
     },
-    config: () => ({ get: (key) => kibanaServerConfigs[key] })
+    config: () => ({ get: key => kibanaServerConfigs[key] }),
   };
 
   const tlConfig = require('../../../handlers/lib/tl_config.js')({
@@ -63,7 +66,7 @@ export default function () {
     interval: '1y',
     from: moment('1980-01-01T00:00:00Z').valueOf(),
     to: moment('1983-01-01T00:00:00Z').valueOf(),
-    timezone: 'Etc/UTC'
+    timezone: 'Etc/UTC',
   };
 
   tlConfig.settings = timelionDefaults();

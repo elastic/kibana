@@ -18,8 +18,8 @@ export const fileUpload = kibana => {
     },
     savedObjectSchemas: {
       'file-upload-telemetry': {
-        isNamespaceAgnostic: true
-      }
+        isNamespaceAgnostic: true,
+      },
     },
 
     init(server) {
@@ -28,6 +28,6 @@ export const fileUpload = kibana => {
       mirrorPluginStatus(xpackMainPlugin, this);
       fileUploadRoutes(server);
       makeUsageCollector(server);
-    }
+    },
   });
 };

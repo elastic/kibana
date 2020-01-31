@@ -25,7 +25,7 @@ import { getKbnFieldType } from '../plugins/data/common';
 export default function stubbedLogstashIndexPatternService() {
   const mockLogstashFields = stubbedLogstashFields();
 
-  const fields = mockLogstashFields.map(function (field) {
+  const fields = mockLogstashFields.map(function(field) {
     const kbnType = getKbnFieldType(field.type);
 
     if (!kbnType || kbnType.name === 'unknown') {
@@ -34,8 +34,8 @@ export default function stubbedLogstashIndexPatternService() {
 
     return {
       ...field,
-      sortable: ('sortable' in field) ? !!field.sortable : kbnType.sortable,
-      filterable: ('filterable' in field) ? !!field.filterable : kbnType.filterable,
+      sortable: 'sortable' in field ? !!field.sortable : kbnType.sortable,
+      filterable: 'filterable' in field ? !!field.filterable : kbnType.filterable,
       displayName: field.name,
     };
   });
@@ -45,5 +45,4 @@ export default function stubbedLogstashIndexPatternService() {
   indexPattern.isTimeNanosBased = () => false;
 
   return indexPattern;
-
 }

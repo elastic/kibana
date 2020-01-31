@@ -19,7 +19,6 @@
 
 import d3 from 'd3';
 
-
 /*
  * Adds div DOM elements to the `.visWrapper__chart` element based on the data layout.
  * For example, if the data has rows, it returns the same number of
@@ -27,22 +26,22 @@ import d3 from 'd3';
  */
 
 export function chartSplit(selection) {
-  selection.each(function (data) {
-    const div = d3.select(this)
-      .attr('class', function () {
-        if (data.rows) {
-          return 'visWrapper__splitCharts--row';
-        } else if (data.columns) {
-          return 'visWrapper__splitCharts--column';
-        } else {
-          return 'visWrapper__chart';
-        }
-      });
+  selection.each(function(data) {
+    const div = d3.select(this).attr('class', function() {
+      if (data.rows) {
+        return 'visWrapper__splitCharts--row';
+      } else if (data.columns) {
+        return 'visWrapper__splitCharts--column';
+      } else {
+        return 'visWrapper__chart';
+      }
+    });
     let divClass;
 
-    const charts = div.selectAll('charts')
+    const charts = div
+      .selectAll('charts')
       .append('div')
-      .data(function (d) {
+      .data(function(d) {
         if (d.rows) {
           divClass = 'chart-row';
           return d.rows;
@@ -56,7 +55,7 @@ export function chartSplit(selection) {
       })
       .enter()
       .append('div')
-      .attr('class', function () {
+      .attr('class', function() {
         return divClass;
       });
 

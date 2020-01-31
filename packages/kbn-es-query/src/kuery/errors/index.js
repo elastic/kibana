@@ -25,7 +25,6 @@ const endOfInputText = i18n.translate('kbnESQuery.kql.errors.endOfInputText', {
 });
 
 export class KQLSyntaxError extends Error {
-
   constructor(error, expression) {
     const grammarRuleTranslations = {
       fieldName: i18n.translate('kbnESQuery.kql.errors.fieldNameText', {
@@ -42,7 +41,7 @@ export class KQLSyntaxError extends Error {
       }),
     };
 
-    const translatedExpectations = error.expected.map((expected) => {
+    const translatedExpectations = error.expected.map(expected => {
       return grammarRuleTranslations[expected.description] || expected.description;
     });
 
@@ -56,11 +55,9 @@ export class KQLSyntaxError extends Error {
       },
     });
 
-    const fullMessage = [
-      message,
-      expression,
-      repeat('-', error.location.start.offset) + '^',
-    ].join('\n');
+    const fullMessage = [message, expression, repeat('-', error.location.start.offset) + '^'].join(
+      '\n'
+    );
 
     super(fullMessage);
     this.name = 'KQLSyntaxError';

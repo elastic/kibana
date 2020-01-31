@@ -45,6 +45,5 @@ export class ConstantComponent extends SharedComponent {
     }
 
     return super.match(token, context, editor);
-
   }
 }

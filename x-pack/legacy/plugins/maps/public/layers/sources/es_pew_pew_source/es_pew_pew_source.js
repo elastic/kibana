@@ -33,20 +33,17 @@ const aggSchemas = new Schemas([
     min: 1,
     max: Infinity,
     aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
-    defaults: [
-      { schema: 'metric', type: 'count' }
-    ]
-  }
+    defaults: [{ schema: 'metric', type: 'count' }],
+  },
 ]);
 
 export class ESPewPewSource extends AbstractESSource {
-
   static type = ES_PEW_PEW;
   static title = i18n.translate('xpack.maps.source.pewPewTitle', {
-    defaultMessage: 'Point to point'
+    defaultMessage: 'Point to point',
   });
   static description = i18n.translate('xpack.maps.source.pewPewDescription', {
-    defaultMessage: 'Aggregated data paths between the source and destination'
+    defaultMessage: 'Aggregated data paths between the source and destination',
   });
 
   static createDescriptor({ indexPatternId, sourceGeoField, destGeoField }) {
@@ -55,12 +52,12 @@ export class ESPewPewSource extends AbstractESSource {
       id: uuid(),
       indexPatternId: indexPatternId,
       sourceGeoField,
-      destGeoField
+      destGeoField,
     };
   }
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = (sourceConfig) => {
+    const onSourceConfigChange = sourceConfig => {
       if (!sourceConfig) {
         onPreviewSource(null);
         return;
@@ -71,7 +68,7 @@ export class ESPewPewSource extends AbstractESSource {
       onPreviewSource(source);
     };
 
-    return (<CreateSourceEditor onSourceConfigChange={onSourceConfigChange}/>);
+    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   }
 
   renderSourceSettingsEditor({ onChange }) {
@@ -118,24 +115,25 @@ export class ESPewPewSource extends AbstractESSource {
     return [
       {
         label: getDataSourceLabel(),
-        value: ESPewPewSource.title
+        value: ESPewPewSource.title,
       },
       {
         label: i18n.translate('xpack.maps.source.pewPew.indexPatternLabel', {
-          defaultMessage: 'Index pattern'
+          defaultMessage: 'Index pattern',
         }),
-        value: indexPatternTitle },
+        value: indexPatternTitle,
+      },
       {
         label: i18n.translate('xpack.maps.source.pewPew.sourceGeoFieldLabel', {
-          defaultMessage: 'Source'
+          defaultMessage: 'Source',
         }),
-        value: this._descriptor.sourceGeoField
+        value: this._descriptor.sourceGeoField,
       },
       {
         label: i18n.translate('xpack.maps.source.pewPew.destGeoFieldLabel', {
-          defaultMessage: 'Destination'
+          defaultMessage: 'Destination',
         }),
-        value: this._descriptor.destGeoField
+        value: this._descriptor.destGeoField,
       },
     ];
   }
@@ -148,10 +146,10 @@ export class ESPewPewSource extends AbstractESSource {
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN
+            origin: SOURCE_DATA_ID_ORIGIN,
           },
-          color: 'Blues'
-        }
+          color: 'Blues',
+        },
       },
       [vectorStyles.LINE_WIDTH]: {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
@@ -159,22 +157,22 @@ export class ESPewPewSource extends AbstractESSource {
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN
+            origin: SOURCE_DATA_ID_ORIGIN,
           },
           minSize: 4,
           maxSize: 32,
-        }
-      }
+        },
+      },
     });
 
     return new VectorLayer({
       layerDescriptor: VectorLayer.createDescriptor({
         ...options,
         sourceDescriptor: this._descriptor,
-        style: styleDescriptor
+        style: styleDescriptor,
       }),
       source: this,
-      style: new VectorStyle(styleDescriptor, this)
+      style: new VectorStyle(styleDescriptor, this),
     });
   }
 
@@ -191,7 +189,7 @@ export class ESPewPewSource extends AbstractESSource {
         enabled: true,
         type: metric.type,
         schema: 'metric',
-        params: {}
+        params: {},
       };
       if (metric.type !== 'count') {
         metricAggConfig.params = { field: metric.field };
@@ -200,18 +198,18 @@ export class ESPewPewSource extends AbstractESSource {
     });
     const aggConfigs = new AggConfigs(indexPattern, metricAggConfigs, aggSchemas.all);
 
-    const searchSource  = await this._makeSearchSource(searchFilters, 0);
+    const searchSource = await this._makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
       destSplit: {
         terms: {
           script: {
             source: `doc['${this._descriptor.destGeoField}'].value.toString()`,
-            lang: 'painless'
+            lang: 'painless',
           },
           order: {
-            _count: 'desc'
+            _count: 'desc',
           },
-          size: 100
+          size: 100,
         },
         aggs: {
           sourceGrid: {
@@ -223,14 +221,14 @@ export class ESPewPewSource extends AbstractESSource {
             aggs: {
               sourceCentroid: {
                 geo_centroid: {
-                  field: this._descriptor.sourceGeoField
-                }
+                  field: this._descriptor.sourceGeoField,
+                },
               },
-              ...aggConfigs.toDsl()
-            }
-          }
-        }
-      }
+              ...aggConfigs.toDsl(),
+            },
+          },
+        },
+      },
     });
 
     const esResponse = await this._runEsQuery(
@@ -238,16 +236,17 @@ export class ESPewPewSource extends AbstractESSource {
       searchSource,
       registerCancelCallback,
       i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
-        defaultMessage: 'Source-destination connections request'
-      }));
+        defaultMessage: 'Source-destination connections request',
+      })
+    );
 
     const { featureCollection } = convertToLines(esResponse);
 
     return {
       data: featureCollection,
       meta: {
-        areResultsTrimmed: false
-      }
+        areResultsTrimmed: false,
+      },
     };
   }
 
@@ -263,10 +262,12 @@ export class ESPewPewSource extends AbstractESSource {
     const indexPattern = await this._getIndexPattern();
     const geoField = indexPattern.fields.getByName(this._descriptor.destGeoField);
     if (!geoField) {
-      throw new Error(i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
-        defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,
-        values: { indexPatternTitle: indexPattern.title, geoField: this._descriptor.geoField }
-      }));
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
+          defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,
+          values: { indexPatternTitle: indexPattern.title, geoField: this._descriptor.geoField },
+        })
+      );
     }
     return geoField;
   }

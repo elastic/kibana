@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -26,23 +25,22 @@ const template = `
   <ml-filter-lists />
 `;
 
-uiRoutes
-  .when('/settings/filter_lists', {
-    template,
-    k7Breadcrumbs: getFilterListsBreadcrumbs,
-    resolve: {
-      CheckLicense: checkFullLicense,
-      privileges: checkGetJobsPrivilege,
-      mlNodeCount: getMlNodeCount,
-    }
-  });
+uiRoutes.when('/settings/filter_lists', {
+  template,
+  k7Breadcrumbs: getFilterListsBreadcrumbs,
+  resolve: {
+    CheckLicense: checkFullLicense,
+    privileges: checkGetJobsPrivilege,
+    mlNodeCount: getMlNodeCount,
+  },
+});
 
-module.directive('mlFilterLists', function () {
+module.directive('mlFilterLists', function() {
   return {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (scope, element) {
+    link: function(scope, element) {
       const props = {
         canCreateFilter: checkPermission('canCreateFilter'),
         canDeleteFilter: checkPermission('canDeleteFilter'),
@@ -54,6 +52,6 @@ module.directive('mlFilterLists', function () {
         </I18nContext>,
         element[0]
       );
-    }
+    },
   };
 });

@@ -39,18 +39,21 @@ async function loadTutorials() {
       headers: headers,
     });
     if (response.status >= 300) {
-      throw new Error(i18n.translate('kbn.home.loadTutorials.requestFailedErrorMessage', {
-        defaultMessage: 'Request failed with status code: {status}', values: { status: response.status } }
-      ));
+      throw new Error(
+        i18n.translate('kbn.home.loadTutorials.requestFailedErrorMessage', {
+          defaultMessage: 'Request failed with status code: {status}',
+          values: { status: response.status },
+        })
+      );
     }
 
     tutorials = await response.json();
     tutorialsLoaded = true;
-  } catch(err) {
+  } catch (err) {
     toastNotifications.addDanger({
       title: i18n.translate('kbn.home.loadTutorials.unableToLoadErrorMessage', {
-        defaultMessage: 'Unable to load tutorials' }
-      ),
+        defaultMessage: 'Unable to load tutorials',
+      }),
       text: err.message,
     });
   }

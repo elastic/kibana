@@ -49,7 +49,7 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
       updateGeohashAgg();
 
       const uiState = this.vis.getUiState();
-      uiState.on('change', (prop) => {
+      uiState.on('change', prop => {
         if (prop === 'mapZoom' || prop === 'mapCenter') {
           updateGeohashAgg();
         }
@@ -59,12 +59,15 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
       let precisionChange = false;
       this._kibanaMap.on('zoomchange', () => {
         const geohashAgg = this._getGeoHashAgg();
-        precisionChange = (previousPrecision !== this._kibanaMap.getGeohashPrecision());
+        precisionChange = previousPrecision !== this._kibanaMap.getGeohashPrecision();
         previousPrecision = this._kibanaMap.getGeohashPrecision();
         if (!geohashAgg) {
           return;
         }
-        const isAutoPrecision = typeof geohashAgg.params.autoPrecision === 'boolean' ? geohashAgg.params.autoPrecision : true;
+        const isAutoPrecision =
+          typeof geohashAgg.params.autoPrecision === 'boolean'
+            ? geohashAgg.params.autoPrecision
+            : true;
         if (isAutoPrecision) {
           geohashAgg.params.precision = previousPrecision;
         }
@@ -74,7 +77,10 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
         if (!geohashAgg) {
           return;
         }
-        const isAutoPrecision = typeof geohashAgg.params.autoPrecision === 'boolean' ? geohashAgg.params.autoPrecision : true;
+        const isAutoPrecision =
+          typeof geohashAgg.params.autoPrecision === 'boolean'
+            ? geohashAgg.params.autoPrecision
+            : true;
         if (!isAutoPrecision) {
           return;
         }
@@ -98,12 +104,12 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
     }
 
     async _updateData(geojsonFeatureCollectionAndMeta) {
-
       // Only recreate geohash layer when there is new aggregation data
       // Exception is Heatmap: which needs to be redrawn every zoom level because the clustering is based on meters per pixel
       if (
         this._getMapsParams().mapType !== 'Heatmap' &&
-        geojsonFeatureCollectionAndMeta === this._geoJsonFeatureCollectionAndMeta) {
+        geojsonFeatureCollectionAndMeta === this._geoJsonFeatureCollectionAndMeta
+      ) {
         return;
       }
 
@@ -118,7 +124,6 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
         this._geohashLayer = null;
         return;
       }
-
 
       this._geoJsonFeatureCollectionAndMeta = geojsonFeatureCollectionAndMeta;
       this._recreateGeohashLayer();
@@ -135,12 +140,12 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
         this._geoJsonFeatureCollectionAndMeta.meta,
         geohashOptions,
         this._kibanaMap.getZoomLevel(),
-        this._kibanaMap);
+        this._kibanaMap
+      );
       this._kibanaMap.addLayer(this._geohashLayer);
     }
 
     async _updateParams() {
-
       await super._updateParams();
 
       this._kibanaMap.setDesaturateBaseLayer(this._params.isDesaturated);
@@ -163,7 +168,9 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
 
       return {
         label: metricAgg ? metricAgg.makeLabel() : '',
-        valueFormatter: this._geoJsonFeatureCollectionAndMeta ? (metricAgg && metricAgg.fieldFormatter()) : null,
+        valueFormatter: this._geoJsonFeatureCollectionAndMeta
+          ? metricAgg && metricAgg.fieldFormatter()
+          : null,
         tooltipFormatter: this._geoJsonFeatureCollectionAndMeta ? boundTooltipFormatter : null,
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
@@ -192,7 +199,7 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
     }
 
     _getGeoHashAgg() {
-      return this.vis.getAggConfig().aggs.find((agg) => {
+      return this.vis.getAggConfig().aggs.find(agg => {
         return get(agg, 'type.dslName') === 'geohash_grid';
       });
     }

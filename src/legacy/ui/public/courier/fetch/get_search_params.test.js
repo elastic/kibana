@@ -21,7 +21,7 @@ import { getMSearchParams, getSearchParams } from './get_search_params';
 
 function getConfigStub(config = {}) {
   return {
-    get: key => config[key]
+    get: key => config[key],
   };
 }
 

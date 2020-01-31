@@ -23,7 +23,6 @@ import chrome from '../../chrome';
 import { I18nContext } from '../../i18n';
 import { BaseVisType } from './base_vis_type';
 
-
 class ReactVisController {
   constructor(element, vis) {
     this.el = element;
@@ -33,7 +32,7 @@ class ReactVisController {
   render(visData, visParams, updateStatus) {
     this.visData = visData;
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const Component = this.vis.type.visConfig.component;
       const config = chrome.getUiSettingsClient();
       render(
@@ -46,7 +45,9 @@ class ReactVisController {
             renderComplete={resolve}
             updateStatus={updateStatus}
           />
-        </I18nContext>, this.el);
+        </I18nContext>,
+        this.el
+      );
     });
   }
 
@@ -59,7 +60,7 @@ export class ReactVisType extends BaseVisType {
   constructor(opts) {
     super({
       ...opts,
-      visualization: ReactVisController
+      visualization: ReactVisController,
     });
 
     if (!this.visConfig.component) {

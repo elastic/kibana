@@ -7,14 +7,17 @@
 import { i18n } from '@kbn/i18n';
 
 export function checkLicense(xpackLicenseInfo) {
-
   if (!xpackLicenseInfo || !xpackLicenseInfo.isAvailable()) {
     return {
       showAppLink: true,
       enableAppLink: false,
-      message: i18n.translate('xpack.graph.serverSideErrors.unavailableLicenseInformationErrorMessage', {
-        defaultMessage: 'Graph is unavailable - license information is not available at this time.',
-      })
+      message: i18n.translate(
+        'xpack.graph.serverSideErrors.unavailableLicenseInformationErrorMessage',
+        {
+          defaultMessage:
+            'Graph is unavailable - license information is not available at this time.',
+        }
+      ),
     };
   }
 
@@ -25,7 +28,7 @@ export function checkLicense(xpackLicenseInfo) {
       enableAppLink: false,
       message: i18n.translate('xpack.graph.serverSideErrors.unavailableGraphErrorMessage', {
         defaultMessage: 'Graph is unavailable',
-      })
+      }),
     };
   }
 
@@ -37,16 +40,17 @@ export function checkLicense(xpackLicenseInfo) {
     });
   }
 
-  if (xpackLicenseInfo.license.isOneOf([ 'trial', 'platinum' ])) {
+  if (xpackLicenseInfo.license.isOneOf(['trial', 'platinum'])) {
     return {
       showAppLink: true,
       enableAppLink: isLicenseActive,
-      message
+      message,
     };
   }
 
   message = i18n.translate('xpack.graph.serverSideErrors.wrongLicenseTypeErrorMessage', {
-    defaultMessage: 'Graph is unavailable for the current {licenseType} license. Please upgrade your license.',
+    defaultMessage:
+      'Graph is unavailable for the current {licenseType} license. Please upgrade your license.',
     values: {
       licenseType: xpackLicenseInfo.license.getType(),
     },
@@ -55,6 +59,6 @@ export function checkLicense(xpackLicenseInfo) {
   return {
     showAppLink: false,
     enableAppLink: false,
-    message
+    message,
   };
 }

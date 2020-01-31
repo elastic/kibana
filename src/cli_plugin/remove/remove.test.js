@@ -25,17 +25,15 @@ import remove from './remove';
 import { join } from 'path';
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
 
-describe('kibana cli', function () {
-
-  describe('plugin remover', function () {
-
+describe('kibana cli', function() {
+  describe('plugin remover', function() {
     const pluginDir = join(__dirname, '.test.data.remove');
     let processExitStub;
     let logger;
 
     const settings = { pluginDir };
 
-    beforeEach(function () {
+    beforeEach(function() {
       processExitStub = sinon.stub(process, 'exit');
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
@@ -44,14 +42,14 @@ describe('kibana cli', function () {
       mkdirSync(pluginDir, { recursive: true });
     });
 
-    afterEach(function () {
+    afterEach(function() {
       processExitStub.restore();
       logger.log.restore();
       logger.error.restore();
       rimraf.sync(pluginDir);
     });
 
-    it('throw an error if the plugin is not installed.', function () {
+    it('throw an error if the plugin is not installed.', function() {
       settings.pluginPath = join(pluginDir, 'foo');
       settings.plugin = 'foo';
 
@@ -60,7 +58,7 @@ describe('kibana cli', function () {
       expect(process.exit.called).toBe(true);
     });
 
-    it('throw an error if the specified plugin is not a folder.', function () {
+    it('throw an error if the specified plugin is not a folder.', function() {
       writeFileSync(join(pluginDir, 'foo'), 'This is a file, and not a folder.');
 
       remove(settings, logger);
@@ -82,10 +80,12 @@ describe('kibana cli', function () {
       settings.plugin = 'x-pack';
       expect(existsSync(settings.pluginPath)).toEqual(false);
       remove(settings, logger);
-      expect(logger.error.getCall(0).args[0]).toMatch(/Please install the OSS-only distribution to remove X-Pack features/);
+      expect(logger.error.getCall(0).args[0]).toMatch(
+        /Please install the OSS-only distribution to remove X-Pack features/
+      );
     });
 
-    it('delete the specified folder.', function () {
+    it('delete the specified folder.', function() {
       settings.pluginPath = join(pluginDir, 'foo');
       mkdirSync(join(pluginDir, 'foo'), { recursive: true });
       mkdirSync(join(pluginDir, 'bar'), { recursive: true });
@@ -96,7 +96,5 @@ describe('kibana cli', function () {
       const expected = ['bar'];
       expect(files.sort()).toEqual(expected.sort());
     });
-
   });
-
 });

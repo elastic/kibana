@@ -6,14 +6,17 @@
 
 import { connect } from 'react-redux';
 import { JoinEditor } from './view';
-import { getSelectedLayer, getSelectedLayerJoinDescriptors } from '../../../selectors/map_selectors';
+import {
+  getSelectedLayer,
+  getSelectedLayerJoinDescriptors,
+} from '../../../selectors/map_selectors';
 import { setJoinsForLayer } from '../../../actions/map_actions';
 
 function mapDispatchToProps(dispatch) {
   return {
     onChange: (layer, joins) => {
       dispatch(setJoinsForLayer(layer, joins));
-    }
+    },
   };
 }
 
@@ -24,5 +27,8 @@ function mapStateToProps(state = {}) {
   };
 }
 
-const connectedJoinEditor = connect(mapStateToProps, mapDispatchToProps)(JoinEditor);
+const connectedJoinEditor = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(JoinEditor);
 export { connectedJoinEditor as JoinEditor };

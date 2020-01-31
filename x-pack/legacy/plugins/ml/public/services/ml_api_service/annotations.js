@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import chrome from 'ui/chrome';
 
 import { http } from '../../services/http_service';
@@ -17,20 +15,20 @@ export const annotations = {
     return http({
       url: `${basePath}/annotations`,
       method: 'POST',
-      data: obj
+      data: obj,
     });
   },
   indexAnnotation(obj) {
     return http({
       url: `${basePath}/annotations/index`,
       method: 'PUT',
-      data: obj
+      data: obj,
     });
   },
   deleteAnnotation(id) {
     return http({
       url: `${basePath}/annotations/delete/${id}`,
-      method: 'DELETE'
+      method: 'DELETE',
     });
-  }
+  },
 };

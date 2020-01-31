@@ -9,7 +9,7 @@ import { wrapCustomError } from '../error_wrappers';
 import { PLUGIN } from '../../../common/constants';
 import { LICENSE_STATUS_VALID } from '../../../../../common/constants/license_status';
 
-export const licensePreRoutingFactory = once((server) => {
+export const licensePreRoutingFactory = once(server => {
   const xpackMainPlugin = server.plugins.xpack_main;
 
   // License checking and enable/disable logic
@@ -28,4 +28,3 @@ export const licensePreRoutingFactory = once((server) => {
 
   return licensePreRouting;
 });
-

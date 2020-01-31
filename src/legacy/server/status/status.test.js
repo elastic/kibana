@@ -20,13 +20,13 @@
 import sinon from 'sinon';
 import ServerStatus from './server_status';
 
-describe('Status class', function () {
+describe('Status class', function() {
   const plugin = { id: 'test', version: '1.2.3' };
 
   let server;
   let serverStatus;
 
-  beforeEach(function () {
+  beforeEach(function() {
     server = { expose: sinon.stub(), logWithMetadata: sinon.stub() };
     serverStatus = new ServerStatus(server);
   });
@@ -35,15 +35,15 @@ describe('Status class', function () {
     expect(serverStatus.createForPlugin(plugin)).toHaveProperty('state', 'uninitialized');
   });
 
-  it('emits change when the status is set', function (done) {
+  it('emits change when the status is set', function(done) {
     const status = serverStatus.createForPlugin(plugin);
 
-    status.once('change', function (prevState, prevMsg, newState, newMsg) {
+    status.once('change', function(prevState, prevMsg, newState, newMsg) {
       expect(newState).toBe('green');
       expect(newMsg).toBe('GREEN');
       expect(prevState).toBe('uninitialized');
 
-      status.once('change', function (prevState, prevMsg, newState, newMsg) {
+      status.once('change', function(prevState, prevMsg, newState, newMsg) {
         expect(newState).toBe('red');
         expect(newMsg).toBe('RED');
         expect(prevState).toBe('green');
@@ -58,7 +58,7 @@ describe('Status class', function () {
     status.green('GREEN');
   });
 
-  it('should only trigger the change listener when something changes', function () {
+  it('should only trigger the change listener when something changes', function() {
     const status = serverStatus.createForPlugin(plugin);
     const stub = sinon.stub();
     status.on('change', stub);
@@ -68,7 +68,7 @@ describe('Status class', function () {
     sinon.assert.calledTwice(stub);
   });
 
-  it('should create a JSON representation of the status', function () {
+  it('should create a JSON representation of the status', function() {
     const status = serverStatus.createForPlugin(plugin);
     status.green('Ready');
 
@@ -78,12 +78,12 @@ describe('Status class', function () {
     expect(json.message).toEqual('Ready');
   });
 
-  it('should call on handler if status is already matched', function (done) {
+  it('should call on handler if status is already matched', function(done) {
     const status = serverStatus.createForPlugin(plugin);
     const msg = 'Test Ready';
     status.green(msg);
 
-    status.on('green', function (prev, prevMsg) {
+    status.on('green', function(prev, prevMsg) {
       expect(arguments.length).toBe(2);
       expect(prev).toBe('green');
       expect(prevMsg).toBe(msg);
@@ -92,12 +92,12 @@ describe('Status class', function () {
     });
   });
 
-  it('should call once handler if status is already matched', function (done) {
+  it('should call once handler if status is already matched', function(done) {
     const status = serverStatus.createForPlugin(plugin);
     const msg = 'Test Ready';
     status.green(msg);
 
-    status.once('green', function (prev, prevMsg) {
+    status.once('green', function(prev, prevMsg) {
       expect(arguments.length).toBe(2);
       expect(prev).toBe('green');
       expect(prevMsg).toBe(msg);
@@ -107,7 +107,7 @@ describe('Status class', function () {
   });
 
   function testState(color) {
-    it(`should change the state to ${color} when #${color}() is called`, function () {
+    it(`should change the state to ${color} when #${color}() is called`, function() {
       const status = serverStatus.createForPlugin(plugin);
       const message = 'testing ' + color;
       status[color](message);
@@ -115,10 +115,10 @@ describe('Status class', function () {
       expect(status).toHaveProperty('message', message);
     });
 
-    it(`should trigger the "change" listener when #${color}() is called`, function (done) {
+    it(`should trigger the "change" listener when #${color}() is called`, function(done) {
       const status = serverStatus.createForPlugin(plugin);
       const message = 'testing ' + color;
-      status.on('change', function (prev, prevMsg) {
+      status.on('change', function(prev, prevMsg) {
         expect(status.state).toBe(color);
         expect(status.message).toBe(message);
 
@@ -129,10 +129,10 @@ describe('Status class', function () {
       status[color](message);
     });
 
-    it(`should trigger the "${color}" listener when #${color}() is called`, function (done) {
+    it(`should trigger the "${color}" listener when #${color}() is called`, function(done) {
       const status = serverStatus.createForPlugin(plugin);
       const message = 'testing ' + color;
-      status.on(color, function () {
+      status.on(color, function() {
         expect(status.state).toBe(color);
         expect(status.message).toBe(message);
         done();
@@ -144,5 +144,4 @@ describe('Status class', function () {
   testState('green');
   testState('yellow');
   testState('red');
-
 });

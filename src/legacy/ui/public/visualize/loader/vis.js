@@ -33,7 +33,6 @@ import { PersistedState } from '../../persisted_state';
 
 import { start as visualizations } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy';
 
-
 export function VisProvider(indexPatterns, getAppState) {
   const visTypes = visualizations.types;
 
@@ -75,7 +74,8 @@ export function VisProvider(indexPatterns, getAppState) {
         this.type = type;
       }
 
-      this.params = _.defaultsDeep({},
+      this.params = _.defaultsDeep(
+        {},
         _.cloneDeep(state.params || {}),
         _.cloneDeep(this.type.visConfig.defaults || {})
       );

@@ -22,25 +22,27 @@ jest.mock('../lib/url_shortener', () => ({}));
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import {
-  ShareContextMenu,
-} from './share_context_menu';
+import { ShareContextMenu } from './share_context_menu';
 
 test('should render context menu panel when there are more than one panel', () => {
-  const component = shallowWithIntl(<ShareContextMenu.WrappedComponent
-    allowEmbed
-    objectType="dashboard"
-    getUnhashableStates={() => {}}
-  />);
+  const component = shallowWithIntl(
+    <ShareContextMenu.WrappedComponent
+      allowEmbed
+      objectType="dashboard"
+      getUnhashableStates={() => {}}
+    />
+  );
   expect(component).toMatchSnapshot();
 });
 
 test('should only render permalink panel when there are no other panels', () => {
-  const component = shallowWithIntl(<ShareContextMenu.WrappedComponent
-    allowEmbed={false}
-    objectType="dashboard"
-    getUnhashableStates={() => {}}
-  />);
+  const component = shallowWithIntl(
+    <ShareContextMenu.WrappedComponent
+      allowEmbed={false}
+      objectType="dashboard"
+      getUnhashableStates={() => {}}
+    />
+  );
   expect(component).toMatchSnapshot();
 });
 
@@ -52,15 +54,15 @@ describe('shareContextMenuExtensions', () => {
           {
             panel: {
               title: 'AAA panel',
-              content: (<div>panel content</div>),
+              content: <div>panel content</div>,
             },
             shareMenuItem: {
               name: 'AAA panel',
               sortOrder: 5,
-            }
-          }
+            },
+          },
         ];
-      }
+      },
     },
     {
       getShareActions: () => {
@@ -68,25 +70,27 @@ describe('shareContextMenuExtensions', () => {
           {
             panel: {
               title: 'ZZZ panel',
-              content: (<div>panel content</div>),
+              content: <div>panel content</div>,
             },
             shareMenuItem: {
               name: 'ZZZ panel',
               sortOrder: 0,
-            }
-          }
+            },
+          },
         ];
-      }
-    }
+      },
+    },
   ];
 
   test('should sort ascending on sort order first and then ascending on name', () => {
-    const component = shallowWithIntl(<ShareContextMenu.WrappedComponent
-      allowEmbed={false}
-      objectType="dashboard"
-      getUnhashableStates={() => {}}
-      shareContextMenuExtensions={shareContextMenuExtensions}
-    />);
+    const component = shallowWithIntl(
+      <ShareContextMenu.WrappedComponent
+        allowEmbed={false}
+        objectType="dashboard"
+        getUnhashableStates={() => {}}
+        shareContextMenuExtensions={shareContextMenuExtensions}
+      />
+    );
     expect(component).toMatchSnapshot();
   });
 });

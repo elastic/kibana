@@ -21,45 +21,34 @@ import _ from 'lodash';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { getFilterGenerator } from 'ui/filter_manager';
-import {
-  MAX_CONTEXT_SIZE,
-  MIN_CONTEXT_SIZE,
-  QUERY_PARAMETER_KEYS,
-} from './constants';
-
+import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE, QUERY_PARAMETER_KEYS } from './constants';
 
 export function QueryParameterActionsProvider(indexPatterns, Private) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterGen = getFilterGenerator(queryFilter);
 
-  const setPredecessorCount = (state) => (predecessorCount) => (
-    state.queryParameters.predecessorCount = clamp(
+  const setPredecessorCount = state => predecessorCount =>
+    (state.queryParameters.predecessorCount = clamp(
       MIN_CONTEXT_SIZE,
       MAX_CONTEXT_SIZE,
-      predecessorCount,
-    )
-  );
+      predecessorCount
+    ));
 
-  const setSuccessorCount = (state) => (successorCount) => (
-    state.queryParameters.successorCount = clamp(
+  const setSuccessorCount = state => successorCount =>
+    (state.queryParameters.successorCount = clamp(
       MIN_CONTEXT_SIZE,
       MAX_CONTEXT_SIZE,
-      successorCount,
-    )
-  );
+      successorCount
+    ));
 
-  const setQueryParameters = (state) => (queryParameters) => (
-    Object.assign(
-      state.queryParameters,
-      _.pick(queryParameters, QUERY_PARAMETER_KEYS),
-    )
-  );
+  const setQueryParameters = state => queryParameters =>
+    Object.assign(state.queryParameters, _.pick(queryParameters, QUERY_PARAMETER_KEYS));
 
   const updateFilters = () => filters => {
     queryFilter.setFilters(filters);
   };
 
-  const addFilter = (state) => async (field, values, operation) => {
+  const addFilter = state => async (field, values, operation) => {
     const indexPatternId = state.queryParameters.indexPatternId;
     const newFilters = filterGen.generate(field, values, operation, indexPatternId);
     queryFilter.addFilters(newFilters);

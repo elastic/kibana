@@ -25,51 +25,48 @@ const RUN_KBN_SERVER_STARTUP = require.resolve('./fixtures/run_kbn_server_startu
 const SETUP_NODE_ENV = require.resolve('../../../../setup_node_env');
 const SECOND = 1000;
 
-describe('config/deprecation warnings', function () {
+describe('config/deprecation warnings', function() {
   this.timeout(65 * SECOND);
 
   let stdio = '';
   let proc = null;
 
   before(async () => {
-    proc = spawn(process.execPath, [
-      '-r', SETUP_NODE_ENV,
-      RUN_KBN_SERVER_STARTUP
-    ], {
+    proc = spawn(process.execPath, ['-r', SETUP_NODE_ENV, RUN_KBN_SERVER_STARTUP], {
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
         ...process.env,
         CREATE_SERVER_OPTS: JSON.stringify({
           logging: {
             quiet: false,
-            silent: false
+            silent: false,
           },
           uiSettings: {
-            enabled: true
-          }
-        })
-      }
+            enabled: true,
+          },
+        }),
+      },
     });
 
     // Either time out in 60 seconds, or resolve once the line is in our buffer
     return Promise.race([
-      new Promise((resolve) => setTimeout(resolve, 60 * SECOND)),
+      new Promise(resolve => setTimeout(resolve, 60 * SECOND)),
       new Promise((resolve, reject) => {
-        proc.stdout.on('data', (chunk) => {
+        proc.stdout.on('data', chunk => {
           stdio += chunk.toString('utf8');
           if (chunk.toString('utf8').includes('deprecation')) {
             resolve();
           }
         });
 
-        proc.stderr.on('data', (chunk) => {
+        proc.stderr.on('data', chunk => {
           stdio += chunk.toString('utf8');
           if (chunk.toString('utf8').includes('deprecation')) {
             resolve();
           }
         });
 
-        proc.on('exit', (code) => {
+        proc.on('exit', code => {
           proc = null;
           if (code > 0) {
             reject(new Error(`Kibana server exited with ${code} -- stdout:\n\n${stdio}\n`));
@@ -77,7 +74,7 @@ describe('config/deprecation warnings', function () {
             resolve();
           }
         });
-      })
+      }),
     ]);
   });
 
@@ -100,17 +97,21 @@ describe('config/deprecation warnings', function () {
         }
       })
       .filter(Boolean)
-      .filter(line =>
-        line.type === 'log' &&
-        line.tags.includes('deprecation') &&
-        line.tags.includes('warning')
+      .filter(
+        line =>
+          line.type === 'log' && line.tags.includes('deprecation') && line.tags.includes('warning')
       );
 
     try {
       expect(deprecationLines).to.have.length(1);
-      expect(deprecationLines[0]).to.have.property('message', 'uiSettings.enabled is deprecated and is no longer used');
+      expect(deprecationLines[0]).to.have.property(
+        'message',
+        'uiSettings.enabled is deprecated and is no longer used'
+      );
     } catch (error) {
-      throw new Error(`Expected stdio to include deprecation message about uiSettings.enabled\n\nstdio:\n${stdio}\n\n`);
+      throw new Error(
+        `Expected stdio to include deprecation message about uiSettings.enabled\n\nstdio:\n${stdio}\n\n`
+      );
     }
   });
 });

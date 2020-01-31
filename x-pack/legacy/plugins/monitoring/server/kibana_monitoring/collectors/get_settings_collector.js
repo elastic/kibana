@@ -37,16 +37,19 @@ export async function getDefaultAdminEmail(config, callCluster, log) {
   const uiSettingsDoc = await callCluster('get', {
     index,
     id: `config:${version}`,
-    ignore: [400, 404] // 400 if the index is closed, 404 if it does not exist
+    ignore: [400, 404], // 400 if the index is closed, 404 if it does not exist
   });
 
-  const emailAddress = get(uiSettingsDoc, ['_source', 'config', XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING], null);
+  const emailAddress = get(
+    uiSettingsDoc,
+    ['_source', 'config', XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING],
+    null
+  );
 
   if (emailAddress && !loggedDeprecationWarning) {
-    const message = (
+    const message =
       `Monitoring is using ${XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING} for cluster alert notifications, ` +
-      `which will not be supported in Kibana 7.0. Please configure ${emailAddressConfigKey} in your kibana.yml settings`
-    );
+      `which will not be supported in Kibana 7.0. Please configure ${emailAddressConfigKey} in your kibana.yml settings`;
 
     log.warn(message);
     loggedDeprecationWarning = true;
@@ -91,9 +94,13 @@ export function getSettingsCollector({ config, collectorSet }) {
       // skip everything if defaultAdminEmail === undefined
       if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
         kibanaSettingsData = this.getEmailValueStructure(defaultAdminEmail);
-        this.log.debug(`[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`);
+        this.log.debug(
+          `[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`
+        );
       } else {
-        this.log.debug(`not sending [${KIBANA_SETTINGS_TYPE}] monitoring document because [${defaultAdminEmail}] is null or invalid.`);
+        this.log.debug(
+          `not sending [${KIBANA_SETTINGS_TYPE}] monitoring document because [${defaultAdminEmail}] is null or invalid.`
+        );
       }
 
       // remember the current email so that we can mark it as successful if the bulk does not error out
@@ -105,9 +112,9 @@ export function getSettingsCollector({ config, collectorSet }) {
     getEmailValueStructure(email) {
       return {
         xpack: {
-          default_admin_email: email
-        }
+          default_admin_email: email,
+        },
       };
-    }
+    },
   });
 }

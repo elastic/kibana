@@ -4,18 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import PropTypes from 'prop-types';
-import React, {
-  Component
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiSpacer,
-  EuiCallOut,
-  EuiLoadingSpinner
-} from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { checkPermission } from 'plugins/ml/privilege/check_privilege';
@@ -24,14 +16,13 @@ import { MLJobEditor } from '../ml_job_editor';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class DatafeedPreviewPane extends Component {
-
   constructor(props) {
     super(props);
 
     this.state = {
       previewJson: '',
       loading: true,
-      canPreviewDatafeed: true
+      canPreviewDatafeed: true,
     };
   }
 
@@ -41,10 +32,12 @@ export class DatafeedPreviewPane extends Component {
     if (canPreviewDatafeed === false) {
       return (
         <EuiCallOut
-          title={<FormattedMessage
-            id="xpack.ml.jobsList.jobDetails.noPermissionToViewDatafeedPreviewTitle"
-            defaultMessage="You do not have permission to view the datafeed preview"
-          />}
+          title={
+            <FormattedMessage
+              id="xpack.ml.jobsList.jobDetails.noPermissionToViewDatafeedPreviewTitle"
+              defaultMessage="You do not have permission to view the datafeed preview"
+            />
+          }
           color="warning"
           iconType="alert"
         >
@@ -54,7 +47,8 @@ export class DatafeedPreviewPane extends Component {
               defaultMessage="Please contact your administrator"
             />
           </p>
-        </EuiCallOut>);
+        </EuiCallOut>
+      );
     } else if (loading === true) {
       return <EuiLoadingSpinner size="xl" />;
     } else {
@@ -67,10 +61,10 @@ export class DatafeedPreviewPane extends Component {
     this.setState({ canPreviewDatafeed });
 
     updateDatafeedPreview(this.props.job, canPreviewDatafeed)
-      .then((previewJson) => {
+      .then(previewJson => {
         this.setState({ previewJson, loading: false });
       })
-      .catch((error) => {
+      .catch(error => {
         console.log('Datafeed preview could not be loaded', error);
         this.setState({ loading: false });
       });
@@ -92,8 +86,9 @@ DatafeedPreviewPane.propTypes = {
 function updateDatafeedPreview(job, canPreviewDatafeed) {
   return new Promise((resolve, reject) => {
     if (canPreviewDatafeed) {
-      mlJobService.getDatafeedPreview(job.job_id)
-        .then((resp) => {
+      mlJobService
+        .getDatafeedPreview(job.job_id)
+        .then(resp => {
           if (Array.isArray(resp)) {
             resolve(JSON.stringify(resp.slice(0, ML_DATA_PREVIEW_COUNT), null, 2));
           } else {
@@ -101,7 +96,7 @@ function updateDatafeedPreview(job, canPreviewDatafeed) {
             console.log('Datafeed preview could not be loaded', resp);
           }
         })
-        .catch((error) => {
+        .catch(error => {
           reject(error);
         });
     }

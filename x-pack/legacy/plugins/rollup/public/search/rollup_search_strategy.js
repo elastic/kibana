@@ -8,9 +8,9 @@ import { kfetch } from 'ui/kfetch';
 import { SearchError, getSearchErrorType } from 'ui/courier';
 
 function getAllFetchParams(searchRequests, Promise) {
-  return Promise.map(searchRequests, (searchRequest) => {
+  return Promise.map(searchRequests, searchRequest => {
     return Promise.try(searchRequest.getFetchParams, void 0, searchRequest)
-      .then((fetchParams) => {
+      .then(fetchParams => {
         return (searchRequest.fetchParams = fetchParams);
       })
       .then(value => ({ resolved: value }))
@@ -43,24 +43,23 @@ function serializeAllFetchParams(fetchParams, searchRequests) {
 }
 
 function serializeFetchParams(searchRequestsWithFetchParams) {
-  return JSON.stringify(searchRequestsWithFetchParams.map(searchRequestWithFetchParams => {
-    const indexPattern = searchRequestWithFetchParams.index.title || searchRequestWithFetchParams.index;
-    const {
-      body: {
-        size,
-        aggs,
+  return JSON.stringify(
+    searchRequestsWithFetchParams.map(searchRequestWithFetchParams => {
+      const indexPattern =
+        searchRequestWithFetchParams.index.title || searchRequestWithFetchParams.index;
+      const {
+        body: { size, aggs, query: _query },
+      } = searchRequestWithFetchParams;
+
+      const query = {
+        size: size,
+        aggregations: aggs,
         query: _query,
-      },
-    } = searchRequestWithFetchParams;
+      };
 
-    const query = {
-      'size': size,
-      'aggregations': aggs,
-      'query': _query,
-    };
-
-    return { index: indexPattern, query };
-  }));
+      return { index: indexPattern, query };
+    })
+  );
 }
 
 // Rollup search always returns 0 hits, but visualizations expect search responses
@@ -68,16 +67,22 @@ function serializeFetchParams(searchRequestsWithFetchParams) {
 // by counting the number of aggregation buckets/values returned by rollup search.
 function shimHitsInFetchResponse(response) {
   return response.map(result => {
-    const buckets = result.aggregations ? Object.keys(result.aggregations).reduce((allBuckets, agg) => {
-      return allBuckets.concat(result.aggregations[agg].buckets || [result.aggregations[agg].value] || []);
-    }, []) : [];
-    return buckets && buckets.length ? {
-      ...result,
-      hits: {
-        ...result.hits,
-        total: buckets.length
-      }
-    } : result;
+    const buckets = result.aggregations
+      ? Object.keys(result.aggregations).reduce((allBuckets, agg) => {
+          return allBuckets.concat(
+            result.aggregations[agg].buckets || [result.aggregations[agg].value] || []
+          );
+        }, [])
+      : [];
+    return buckets && buckets.length
+      ? {
+          ...result,
+          hits: {
+            ...result.hits,
+            total: buckets.length,
+          },
+        }
+      : result;
   });
 }
 
@@ -90,10 +95,10 @@ export const rollupSearchStrategy = {
     const allFetchParams = await getAllFetchParams(searchRequests, Promise);
 
     // Serialize the fetch params into a format suitable for the body of an ES query.
-    const {
-      serializedFetchParams,
-      failedSearchRequests,
-    } = await serializeAllFetchParams(allFetchParams, searchRequests);
+    const { serializedFetchParams, failedSearchRequests } = await serializeAllFetchParams(
+      allFetchParams,
+      searchRequests
+    );
 
     const controller = new AbortController();
     const promise = kfetch({
@@ -104,31 +109,29 @@ export const rollupSearchStrategy = {
     });
 
     return {
-      searching: promise
-        .then(shimHitsInFetchResponse)
-        .catch(error => {
-          const {
-            body: { statusText, error: title, message },
-            res: { url },
-          } = error;
+      searching: promise.then(shimHitsInFetchResponse).catch(error => {
+        const {
+          body: { statusText, error: title, message },
+          res: { url },
+        } = error;
 
-          // Format kfetch error as a SearchError.
-          const searchError = new SearchError({
-            status: statusText,
-            title,
-            message: `Rollup search error: ${message}`,
-            path: url,
-            type: getSearchErrorType({ message }),
-          });
+        // Format kfetch error as a SearchError.
+        const searchError = new SearchError({
+          status: statusText,
+          title,
+          message: `Rollup search error: ${message}`,
+          path: url,
+          type: getSearchErrorType({ message }),
+        });
 
-          return Promise.reject(searchError);
-        }),
+        return Promise.reject(searchError);
+      }),
       abort: () => controller.abort(),
       failedSearchRequests,
     };
   },
 
-  isViable: (indexPattern) => {
+  isViable: indexPattern => {
     if (!indexPattern) {
       return false;
     }

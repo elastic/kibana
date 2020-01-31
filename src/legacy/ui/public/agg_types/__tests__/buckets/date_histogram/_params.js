@@ -31,8 +31,7 @@ import { timefilter } from 'ui/timefilter';
 
 const config = chrome.getUiSettingsClient();
 
-describe('date_histogram params', function () {
-
+describe('date_histogram params', function() {
   let paramWriter;
   let writeInterval;
   let write;
@@ -41,33 +40,40 @@ describe('date_histogram params', function () {
   let timeField;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    const AggParamWriter = Private(AggParamWriterProvider);
-    const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+  beforeEach(
+    ngMock.inject(function(Private) {
+      const AggParamWriter = Private(AggParamWriterProvider);
+      const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    timeField = indexPattern.timeFieldName;
+      timeField = indexPattern.timeFieldName;
 
-    paramWriter = new AggParamWriter({ aggType: 'date_histogram' });
-    writeInterval = function (interval, timeRange, params = {}) {
-      return paramWriter.write({ ...params, interval: interval, field: timeField, timeRange: timeRange });
-    };
-    write = (params) => {
-      return paramWriter.write({ interval: '10s', ...params });
-    };
-
-    const now = moment();
-    getTimeBounds = function (n, units) {
-      timefilter.enableAutoRefreshSelector();
-      timefilter.enableTimeRangeSelector();
-      return {
-        from: now.clone().subtract(n, units),
-        to: now.clone()
+      paramWriter = new AggParamWriter({ aggType: 'date_histogram' });
+      writeInterval = function(interval, timeRange, params = {}) {
+        return paramWriter.write({
+          ...params,
+          interval: interval,
+          field: timeField,
+          timeRange: timeRange,
+        });
       };
-    };
-  }));
+      write = params => {
+        return paramWriter.write({ interval: '10s', ...params });
+      };
 
-  describe('interval', function () {
-    it('accepts a valid calendar interval', function () {
+      const now = moment();
+      getTimeBounds = function(n, units) {
+        timefilter.enableAutoRefreshSelector();
+        timefilter.enableTimeRangeSelector();
+        return {
+          from: now.clone().subtract(n, units),
+          to: now.clone(),
+        };
+      };
+    })
+  );
+
+  describe('interval', function() {
+    it('accepts a valid calendar interval', function() {
       const output = writeInterval('d');
       expect(output.params).to.have.property('calendar_interval', '1d');
     });
@@ -77,11 +83,11 @@ describe('date_histogram params', function () {
       expect(output.params).to.have.property('fixed_interval', '100s');
     });
 
-    it('throws error when interval is invalid', function () {
+    it('throws error when interval is invalid', function() {
       expect(() => writeInterval('foo')).to.throw('TypeError: "foo" is not a valid interval.');
     });
 
-    it('automatically picks an interval', function () {
+    it('automatically picks an interval', function() {
       const timeBounds = getTimeBounds(15, 'm');
       const output = writeInterval('auto', timeBounds);
       expect(output.params).to.have.property('fixed_interval', '30s');
@@ -96,8 +102,7 @@ describe('date_histogram params', function () {
     });
 
     describe('scaling behavior', () => {
-
-      it('should not scale without scaleMetricValues: true', function () {
+      it('should not scale without scaleMetricValues: true', function() {
         const timeBounds = getTimeBounds(30, 'm');
         const output = writeInterval('s', timeBounds);
         expect(output.params).to.have.property('fixed_interval', '10s');
@@ -105,18 +110,18 @@ describe('date_histogram params', function () {
         expect(output).not.to.property('metricScale');
       });
 
-      describe('only scales when all metrics are sum or count', function () {
+      describe('only scales when all metrics are sum or count', function() {
         const tests = [
-          [ false, 'avg', 'count', 'sum' ],
-          [ true, 'count', 'sum' ],
-          [ false, 'count', 'cardinality' ]
+          [false, 'avg', 'count', 'sum'],
+          [true, 'count', 'sum'],
+          [false, 'count', 'cardinality'],
         ];
 
-        tests.forEach(function (test) {
+        tests.forEach(function(test) {
           const should = test.shift();
           const typeNames = test.slice();
 
-          it(typeNames.join(', ') + ' should ' + (should ? '' : 'not') + ' scale', function () {
+          it(typeNames.join(', ') + ' should ' + (should ? '' : 'not') + ' scale', function() {
             const timeBounds = getTimeBounds(1, 'y');
 
             const vis = paramWriter.vis;
@@ -125,16 +130,23 @@ describe('date_histogram params', function () {
             const histoConfig = new AggConfig(vis.aggs, {
               type: aggTypes.buckets.find(agg => agg.name === 'date_histogram'),
               schema: 'segment',
-              params: { interval: 's', field: timeField, timeRange: timeBounds, scaleMetricValues: true }
+              params: {
+                interval: 's',
+                field: timeField,
+                timeRange: timeBounds,
+                scaleMetricValues: true,
+              },
             });
 
             vis.aggs.aggs.push(histoConfig);
 
-            typeNames.forEach(function (type) {
-              vis.aggs.aggs.push(new AggConfig(vis.aggs, {
-                type: aggTypes.metrics.find(agg => agg.name === type),
-                schema: 'metric'
-              }));
+            typeNames.forEach(function(type) {
+              vis.aggs.aggs.push(
+                new AggConfig(vis.aggs, {
+                  type: aggTypes.metrics.find(agg => agg.name === type),
+                  schema: 'metric',
+                })
+              );
             });
 
             const output = histoConfig.write(vis.aggs);
@@ -164,7 +176,11 @@ describe('date_histogram params', function () {
     });
 
     it('should use the fixed time_zone from the index pattern typeMeta', () => {
-      _.set(paramWriter.indexPattern, ['typeMeta', 'aggs', 'date_histogram', timeField, 'time_zone'], 'Europe/Rome');
+      _.set(
+        paramWriter.indexPattern,
+        ['typeMeta', 'aggs', 'date_histogram', timeField, 'time_zone'],
+        'Europe/Rome'
+      );
       const output = write({ field: timeField });
       expect(output.params).to.have.property('time_zone', 'Europe/Rome');
     });
@@ -175,41 +191,37 @@ describe('date_histogram params', function () {
     });
   });
 
-  describe('extended_bounds', function () {
-    it('should write a long value if a moment passed in', function () {
+  describe('extended_bounds', function() {
+    it('should write a long value if a moment passed in', function() {
       const then = moment(0);
       const now = moment(500);
       const output = write({
         extended_bounds: {
           min: then,
-          max: now
-        }
+          max: now,
+        },
       });
 
       expect(typeof output.params.extended_bounds.min).to.be('number');
       expect(typeof output.params.extended_bounds.max).to.be('number');
       expect(output.params.extended_bounds.min).to.be(then.valueOf());
       expect(output.params.extended_bounds.max).to.be(now.valueOf());
-
-
     });
 
-    it('should write a long if a long is passed', function () {
+    it('should write a long if a long is passed', function() {
       const then = 0;
       const now = 500;
       const output = write({
         extended_bounds: {
           min: then,
-          max: now
-        }
+          max: now,
+        },
       });
 
       expect(typeof output.params.extended_bounds.min).to.be('number');
       expect(typeof output.params.extended_bounds.max).to.be('number');
       expect(output.params.extended_bounds.min).to.be(then.valueOf());
       expect(output.params.extended_bounds.max).to.be(now.valueOf());
-
-
     });
   });
 });

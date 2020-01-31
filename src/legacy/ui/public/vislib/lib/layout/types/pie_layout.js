@@ -52,7 +52,7 @@ export function pieLayout(el, data) {
         {
           type: 'div',
           class: 'visAxis__splitTitles--y',
-          splits: chartTitleSplit
+          splits: chartTitleSplit,
         },
         {
           type: 'div',
@@ -61,16 +61,16 @@ export function pieLayout(el, data) {
             {
               type: 'div',
               class: 'visWrapper__chart',
-              splits: chartSplit
+              splits: chartSplit,
             },
             {
               type: 'div',
               class: 'visAxis__splitTitles--x',
-              splits: chartTitleSplit
-            }
-          ]
-        }
-      ]
-    }
+              splits: chartTitleSplit,
+            },
+          ],
+        },
+      ],
+    },
   ];
 }

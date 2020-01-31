@@ -9,11 +9,11 @@ import { get } from 'lodash';
 import { Watch } from '../../../models/watch';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function fetchWatch(callWithRequest, watchId) {
   return callWithRequest('watcher.getWatch', {
-    id: watchId
+    id: watchId,
   });
 }
 
@@ -24,7 +24,7 @@ export function registerLoadRoute(server) {
   server.route({
     path: '/api/watcher/watch/{id}',
     method: 'GET',
-    handler: (request) => {
+    handler: request => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       const id = request.params.id;
@@ -45,7 +45,7 @@ export function registerLoadRoute(server) {
             },
           });
           return {
-            watch: watch.downstreamJson
+            watch: watch.downstreamJson,
           };
         })
         .catch(err => {
@@ -62,7 +62,7 @@ export function registerLoadRoute(server) {
         });
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

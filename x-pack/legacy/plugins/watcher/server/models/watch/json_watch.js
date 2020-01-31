@@ -23,21 +23,11 @@ export class JsonWatch extends BaseWatch {
     return serializeJsonWatch(this.name, this.watch);
   }
 
-  // To Elasticsearch
-  get upstreamJson() {
-    const result = super.upstreamJson;
-    return result;
-  }
-
   // To Kibana
   get downstreamJson() {
-    const result = merge(
-      {},
-      super.downstreamJson,
-      {
-        watch: this.watch
-      }
-    );
+    const result = merge({}, super.downstreamJson, {
+      watch: this.watch,
+    });
 
     return result;
   }
@@ -58,30 +48,21 @@ export class JsonWatch extends BaseWatch {
       delete watch.metadata;
     }
 
-    const props = merge(
-      {},
-      baseProps,
-      {
-        type: WATCH_TYPES.JSON,
-        watch
-      }
-    );
+    const props = merge({}, baseProps, {
+      type: WATCH_TYPES.JSON,
+      watch,
+    });
 
     return new JsonWatch(props);
   }
 
   // From Kibana
   static fromDownstreamJson(json) {
-    const props = merge(
-      {},
-      super.getPropsFromDownstreamJson(json),
-      {
-        type: WATCH_TYPES.JSON,
-        watch: json.watch
-      }
-    );
+    const props = merge({}, super.getPropsFromDownstreamJson(json), {
+      type: WATCH_TYPES.JSON,
+      watch: json.watch,
+    });
 
     return new JsonWatch(props);
   }
-
 }

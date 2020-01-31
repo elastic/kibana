@@ -4,23 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import _ from 'lodash';
 import React from 'react';
 import { Shard } from './shard';
 import { i18n } from '@kbn/i18n';
 
 export class Unassigned extends React.Component {
-  static displayName = i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.unassignedDisplayName', {
-    defaultMessage: 'Unassigned',
-  });
+  static displayName = i18n.translate(
+    'xpack.monitoring.elasticsearch.shardAllocation.unassignedDisplayName',
+    {
+      defaultMessage: 'Unassigned',
+    }
+  );
 
-  createShard = (shard) => {
+  createShard = shard => {
     const type = shard.primary ? 'primary' : 'replica';
     const additionId = shard.state === 'UNASSIGNED' ? Math.random() : '';
-    const key = shard.index + '.' + shard.node + '.' + type + '.' + shard.state + '.' + shard.shard + additionId;
-    return (<Shard shard={shard} key={key} />);
+    const key =
+      shard.index +
+      '.' +
+      shard.node +
+      '.' +
+      type +
+      '.' +
+      shard.state +
+      '.' +
+      shard.shard +
+      additionId;
+    return <Shard shard={shard} key={key} />;
   };
 
   render() {

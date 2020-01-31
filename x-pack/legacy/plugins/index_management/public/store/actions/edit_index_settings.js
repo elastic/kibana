@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { loadIndexSettings as request } from '../../services';
 import { loadIndexDataSuccess } from './load_index_data';
 import { toastNotifications } from 'ui/notify';
 
-export const editIndexSettings = ({ indexName }) => async (dispatch) => {
+export const editIndexSettings = ({ indexName }) => async dispatch => {
   let indexSettings;
   try {
     indexSettings = await request(indexName);
@@ -17,16 +17,19 @@ export const editIndexSettings = ({ indexName }) => async (dispatch) => {
     return toastNotifications.addDanger(error.data.message);
   }
   toastNotifications.addSuccess(
-    i18n.translate('xpack.idxMgmt.editIndexSettingsAction.successfullySavedSettingsForIndicesMessage', {
-      defaultMessage: 'Successfully saved settings for {indexName}',
-      values: { indexName }
-    })
+    i18n.translate(
+      'xpack.idxMgmt.editIndexSettingsAction.successfullySavedSettingsForIndicesMessage',
+      {
+        defaultMessage: 'Successfully saved settings for {indexName}',
+        values: { indexName },
+      }
+    )
   );
   dispatch(
     loadIndexDataSuccess({
       data: indexSettings,
       panelType: 'editIndexSettings',
-      indexName
+      indexName,
     })
   );
 };

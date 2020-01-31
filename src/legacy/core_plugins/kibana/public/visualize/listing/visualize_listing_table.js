@@ -24,16 +24,9 @@ import { i18n } from '@kbn/i18n';
 import { capabilities } from 'ui/capabilities';
 import { TableListView } from './../../table_list_view';
 
-import {
-  EuiIcon,
-  EuiBetaBadge,
-  EuiLink,
-  EuiButton,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiIcon, EuiBetaBadge, EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 class VisualizeListingTableUi extends Component {
-
   constructor(props) {
     super(props);
   }
@@ -53,24 +46,18 @@ class VisualizeListingTableUi extends Component {
         selectable={item => item.canDelete}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}
-        entityName={
-          intl.formatMessage({
-            id: 'kbn.visualize.listing.table.entityName',
-            defaultMessage: 'visualization',
-          })
-        }
-        entityNamePlural={
-          intl.formatMessage({
-            id: 'kbn.visualize.listing.table.entityNamePlural',
-            defaultMessage: 'visualizations',
-          })
-        }
-        tableListTitle={
-          intl.formatMessage({
-            id: 'kbn.visualize.listing.table.listTitle',
-            defaultMessage: 'Visualizations',
-          })
-        }
+        entityName={intl.formatMessage({
+          id: 'kbn.visualize.listing.table.entityName',
+          defaultMessage: 'visualization',
+        })}
+        entityNamePlural={intl.formatMessage({
+          id: 'kbn.visualize.listing.table.entityNamePlural',
+          defaultMessage: 'visualizations',
+        })}
+        tableListTitle={intl.formatMessage({
+          id: 'kbn.visualize.listing.table.listTitle',
+          defaultMessage: 'Visualizations',
+        })}
       />
     );
   }
@@ -92,7 +79,7 @@ class VisualizeListingTableUi extends Component {
           >
             {field}
           </EuiLink>
-        )
+        ),
       },
       {
         field: 'typeTitle',
@@ -101,13 +88,13 @@ class VisualizeListingTableUi extends Component {
           defaultMessage: 'Type',
         }),
         sortable: true,
-        render: (field, record) =>  (
+        render: (field, record) => (
           <span>
             {this.renderItemTypeIcon(record)}
             {record.typeTitle}
             {this.getBadge(record)}
           </span>
-        )
+        ),
       },
       {
         field: 'description',
@@ -116,11 +103,7 @@ class VisualizeListingTableUi extends Component {
           defaultMessage: 'Description',
         }),
         sortable: true,
-        render: (field, record) =>  (
-          <span>
-            {record.description}
-          </span>
-        )
+        render: (field, record) => <span>{record.description}</span>,
       },
     ];
 
@@ -184,19 +167,13 @@ class VisualizeListingTableUi extends Component {
         />
       </div>
     );
-
   }
 
   renderItemTypeIcon(item) {
     let icon;
     if (item.image) {
       icon = (
-        <img
-          className="visListingTable__typeImage"
-          aria-hidden="true"
-          alt=""
-          src={item.image}
-        />
+        <img className="visListingTable__typeImage" aria-hidden="true" alt="" src={item.image} />
       );
     } else {
       icon = (
@@ -214,33 +191,35 @@ class VisualizeListingTableUi extends Component {
 
   getBadge(item) {
     if (item.stage === 'beta') {
-      return (<EuiBetaBadge
-        className="visListingTable__betaIcon"
-        label="B"
-        title={i18n.translate('kbn.visualize.listing.betaTitle', {
-          defaultMessage: 'Beta',
-        })}
-        tooltipContent={
-          i18n.translate('kbn.visualize.listing.betaTooltip', {
-            defaultMessage: 'This visualization is in beta and is subject to change. The design and code is less mature than official GA ' +
-            'features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA ' +
-            'features',
-          })
-        }
-      />);
+      return (
+        <EuiBetaBadge
+          className="visListingTable__betaIcon"
+          label="B"
+          title={i18n.translate('kbn.visualize.listing.betaTitle', {
+            defaultMessage: 'Beta',
+          })}
+          tooltipContent={i18n.translate('kbn.visualize.listing.betaTooltip', {
+            defaultMessage:
+              'This visualization is in beta and is subject to change. The design and code is less mature than official GA ' +
+              'features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA ' +
+              'features',
+          })}
+        />
+      );
     } else if (item.stage === 'experimental') {
-      return (<EuiBetaBadge
-        className="visListingTable__experimentalIcon"
-        label="E"
-        title={i18n.translate('kbn.visualize.listing.experimentalTitle', {
-          defaultMessage: 'Experimental',
-        })}
-        tooltipContent={
-          i18n.translate('kbn.visualize.listing.experimentalTooltip', {
-            defaultMessage: 'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
-          })
-        }
-      />);
+      return (
+        <EuiBetaBadge
+          className="visListingTable__experimentalIcon"
+          label="E"
+          title={i18n.translate('kbn.visualize.listing.experimentalTitle', {
+            defaultMessage: 'Experimental',
+          })}
+          tooltipContent={i18n.translate('kbn.visualize.listing.experimentalTooltip', {
+            defaultMessage:
+              'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
+          })}
+        />
+      );
     }
   }
 }

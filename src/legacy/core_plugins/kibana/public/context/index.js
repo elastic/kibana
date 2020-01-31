@@ -47,19 +47,18 @@ const k7Breadcrumbs = $route => {
   ];
 };
 
-
 uiRoutes
   // deprecated route, kept for compatibility
   // should be removed in the future
   .when('/context/:indexPatternId/:type/:id*', {
-    redirectTo: '/context/:indexPatternId/:id'
+    redirectTo: '/context/:indexPatternId/:id',
   })
   .when('/context/:indexPatternId/:id*', {
     controller: ContextAppRouteController,
     k7Breadcrumbs,
     controllerAs: 'contextAppRoute',
     resolve: {
-      indexPattern: function ($route, indexPatterns) {
+      indexPattern: function($route, indexPatterns) {
         return indexPatterns.get($route.current.params.indexPatternId);
       },
     },
@@ -87,7 +86,7 @@ function ContextAppRouteController($routeParams, $scope, AppState, config, index
     },
   });
 
-  $scope.$on('$destroy', function () {
+  $scope.$on('$destroy', function() {
     updateSubsciption.unsubscribe();
   });
   this.anchorId = $routeParams.id;

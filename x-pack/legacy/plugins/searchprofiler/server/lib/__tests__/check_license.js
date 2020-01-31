@@ -8,13 +8,12 @@ import expect from '@kbn/expect';
 import { set } from 'lodash';
 import { checkLicense } from '../check_license';
 
-describe('check_license', function () {
-
+describe('check_license', function() {
   let mockLicenseInfo;
-  beforeEach(() => mockLicenseInfo = {});
+  beforeEach(() => (mockLicenseInfo = {}));
 
   describe('license information is not available', () => {
-    beforeEach(() => mockLicenseInfo.isAvailable = () => false);
+    beforeEach(() => (mockLicenseInfo.isAvailable = () => false));
 
     it('should set showLinks to true', () => {
       expect(checkLicense(mockLicenseInfo).showAppLink).to.be(true);
@@ -37,11 +36,11 @@ describe('check_license', function () {
       describe('& license is active', () => {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => true));
 
-        it ('should set showLinks to true', () => {
+        it('should set showLinks to true', () => {
           expect(checkLicense(mockLicenseInfo).showAppLink).to.be(true);
         });
 
-        it ('should set enableLinks to true', () => {
+        it('should set enableLinks to true', () => {
           expect(checkLicense(mockLicenseInfo).enableAppLink).to.be(true);
         });
       });
@@ -49,11 +48,11 @@ describe('check_license', function () {
       describe('& license is expired', () => {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => false));
 
-        it ('should set showLinks to true', () => {
+        it('should set showLinks to true', () => {
           expect(checkLicense(mockLicenseInfo).showAppLink).to.be(true);
         });
 
-        it ('should set enableLinks to false', () => {
+        it('should set enableLinks to false', () => {
           expect(checkLicense(mockLicenseInfo).enableAppLink).to.be(false);
         });
       });
@@ -65,7 +64,7 @@ describe('check_license', function () {
       describe('& license is active', () => {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => true));
 
-        it ('should set showLinks to false', () => {
+        it('should set showLinks to false', () => {
           expect(checkLicense(mockLicenseInfo).showAppLink).to.be(false);
         });
       });
@@ -73,7 +72,7 @@ describe('check_license', function () {
       describe('& license is expired', () => {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => false));
 
-        it ('should set showLinks to false', () => {
+        it('should set showLinks to false', () => {
           expect(checkLicense(mockLicenseInfo).showAppLink).to.be(false);
         });
       });

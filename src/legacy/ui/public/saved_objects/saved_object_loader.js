@@ -36,9 +36,9 @@ export class SavedObjectLoader {
     this.chrome = chrome;
 
     this.loaderProperties = {
-      name: `${ this.lowercaseType }s`,
+      name: `${this.lowercaseType}s`,
       noun: StringUtils.upperFirst(this.type),
-      nouns: `${ this.lowercaseType }s`,
+      nouns: `${this.lowercaseType}s`,
     };
 
     this.savedObjectsClient = savedObjectClient;
@@ -51,11 +51,11 @@ export class SavedObjectLoader {
    * @returns {Promise<SavedObject>}
    */
   get(id) {
-    return (new this.Class(id)).init();
+    return new this.Class(id).init();
   }
 
   urlFor(id) {
-    return this.kbnUrl.eval(`#/${ this.lowercaseType }/{{id}}`, { id: id });
+    return this.kbnUrl.eval(`#/${this.lowercaseType}/{{id}}`, { id: id });
   }
 
   delete(ids) {
@@ -105,8 +105,8 @@ export class SavedObjectLoader {
    * @returns {Promise}
    */
   findAll(search = '', size = 100, fields) {
-    return this.savedObjectsClient.find(
-      {
+    return this.savedObjectsClient
+      .find({
         type: this.lowercaseType,
         search: search ? `${search}*` : undefined,
         perPage: size,
@@ -114,20 +114,20 @@ export class SavedObjectLoader {
         searchFields: ['title^3', 'description'],
         defaultSearchOperator: 'AND',
         fields,
-      }).then((resp) => {
-      return {
-        total: resp.total,
-        hits: resp.savedObjects
-          .map((savedObject) => this.mapSavedObjectApiHits(savedObject))
-      };
-    });
+      })
+      .then(resp => {
+        return {
+          total: resp.total,
+          hits: resp.savedObjects.map(savedObject => this.mapSavedObjectApiHits(savedObject)),
+        };
+      });
   }
 
   find(search = '', size = 100) {
     return this.findAll(search, size).then(resp => {
       return {
         total: resp.total,
-        hits: resp.hits.filter(savedObject => !savedObject.error)
+        hits: resp.hits.filter(savedObject => !savedObject.error),
       };
     });
   }

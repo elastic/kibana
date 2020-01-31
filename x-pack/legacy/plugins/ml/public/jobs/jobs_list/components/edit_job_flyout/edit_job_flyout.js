@@ -31,7 +31,6 @@ import { toastNotifications } from 'ui/notify';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 class EditJobFlyoutUI extends Component {
-
   _initialJobFormState = null;
 
   constructor(props) {
@@ -101,7 +100,7 @@ class EditJobFlyoutUI extends Component {
         'datafeedQueryDelay',
         'datafeedFrequency',
         'datafeedScrollSize',
-      ]),
+      ])
     );
   }
 

@@ -17,11 +17,13 @@ import { XPackInfo } from './xpack_info';
  */
 export function setupXPackMain(server) {
   const info = new XPackInfo(server, {
-    pollFrequencyInMillis: server.config().get('xpack.xpack_main.xpack_api_polling_frequency_millis')
+    pollFrequencyInMillis: server
+      .config()
+      .get('xpack.xpack_main.xpack_api_polling_frequency_millis'),
   });
 
   server.expose('info', info);
-  server.expose('createXPackInfo', (options) => new XPackInfo(server, options));
+  server.expose('createXPackInfo', options => new XPackInfo(server, options));
   server.ext('onPreResponse', (request, h) => injectXPackInfoSignature(info, request, h));
 
   const { registerFeature, getFeatures } = server.newPlatform.setup.plugins.features;

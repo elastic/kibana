@@ -24,7 +24,7 @@ import ngMock from 'ng_mock';
 import { VisProvider } from '../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-describe('visualize_legend directive', function () {
+describe('visualize_legend directive', function() {
   let $rootScope;
   let $compile;
   let $timeout;
@@ -34,18 +34,22 @@ describe('visualize_legend directive', function () {
   let fixtures;
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
-    $rootScope = $injector.get('$rootScope');
-    $compile = $injector.get('$compile');
-    $timeout = $injector.get('$timeout');
-    fixtures = require('fixtures/fake_hierarchical_data');
-    Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-  }));
+  beforeEach(
+    ngMock.inject(function(Private, $injector) {
+      $rootScope = $injector.get('$rootScope');
+      $compile = $injector.get('$compile');
+      $timeout = $injector.get('$timeout');
+      fixtures = require('fixtures/fake_hierarchical_data');
+      Vis = Private(VisProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    })
+  );
 
   // basically a parameterized beforeEach
   function init(vis, esResponse) {
-    vis.aggs.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
+    vis.aggs.aggs.forEach(function(agg, i) {
+      agg.id = 'agg_' + (i + 1);
+    });
 
     $rootScope.vis = vis;
     $rootScope.visData = esResponse;
@@ -66,13 +70,10 @@ describe('visualize_legend directive', function () {
           schema: 'bucket',
           params: {
             field: 'bytes',
-            ranges: [
-              { from: 0, to: 1000 },
-              { from: 1000, to: 2000 }
-            ]
-          }
-        }
-      ]
+            ranges: [{ from: 0, to: 1000 }, { from: 1000, to: 2000 }],
+          },
+        },
+      ],
     });
 
     vis.type.requestHandler = requiresSearch ? 'default' : 'none';
@@ -86,7 +87,9 @@ describe('visualize_legend directive', function () {
     const vis = new CreateVis(null, requiresSearch);
     init(vis, fixtures.oneRangeBucket);
     let highlight = 0;
-    _.set(vis, 'vislibVis.handler.highlight', () => { highlight++; });
+    _.set(vis, 'vislibVis.handler.highlight', () => {
+      highlight++;
+    });
     $rootScope.highlight({ currentTarget: null });
     expect(highlight).to.equal(1);
   });
@@ -96,7 +99,9 @@ describe('visualize_legend directive', function () {
     const vis = new CreateVis(null, requiresSearch);
     init(vis, fixtures.oneRangeBucket);
     let unhighlight = 0;
-    _.set(vis, 'vislibVis.handler.unHighlight', () => { unhighlight++; });
+    _.set(vis, 'vislibVis.handler.unHighlight', () => {
+      unhighlight++;
+    });
     $rootScope.unhighlight({ currentTarget: null });
     expect(unhighlight).to.equal(1);
   });

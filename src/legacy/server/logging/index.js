@@ -24,7 +24,7 @@ import { logWithMetadata } from './log_with_metadata';
 export async function setupLogging(server, config) {
   return await server.register({
     plugin: good,
-    options: loggingConfiguration(config)
+    options: loggingConfiguration(config),
   });
 }
 

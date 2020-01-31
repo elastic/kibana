@@ -43,7 +43,7 @@ const MIN_LINE_LENGTH = 20;
  * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
  * ```
  */
-module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl, config) {
+module.directive('kbnTableRow', function($compile, $httpParamSerializer, kbnUrl, config) {
   const cellTemplate = _.template(noWhiteSpace(cellTemplateHtml));
   const truncateByHeightTemplate = _.template(noWhiteSpace(truncateByHeightTemplateHtml));
 
@@ -58,7 +58,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       onAddColumn: '=?',
       onRemoveColumn: '=?',
     },
-    link: function ($scope, $el) {
+    link: function($scope, $el) {
       $el.after('<tr data-test-subj="docTableDetailsRow" class="kbnDocTableDetails__row">');
       $el.empty();
 
@@ -69,7 +69,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       let $toggleScope;
 
       // toggle display of the rows details, a full list of the fields from each row
-      $scope.toggleRow = function () {
+      $scope.toggleRow = function() {
         const $detailsTr = $el.next();
 
         $scope.open = !$scope.open;
@@ -98,7 +98,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         $compile($detailsTr)($detailsScope);
       };
 
-      $scope.$watchMulti(['indexPattern.timeFieldName', 'row.highlight', '[]columns'], function () {
+      $scope.$watchMulti(['indexPattern.timeFieldName', 'row.highlight', '[]columns'], function() {
         createSummaryRow($scope.row, $scope.row._id);
       });
 
@@ -144,7 +144,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
           );
         }
 
-        $scope.columns.forEach(function (column) {
+        $scope.columns.forEach(function(column) {
           const isFilterable =
             $scope.flattenedRow[column] !== undefined &&
             mapping(column) &&
@@ -163,11 +163,11 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         });
 
         let $cells = $el.children();
-        newHtmls.forEach(function (html, i) {
+        newHtmls.forEach(function(html, i) {
           const $cell = $cells.eq(i);
           if ($cell.data('discover:html') === html) return;
 
-          const reuse = _.find($cells.slice(i + 1), function (cell) {
+          const reuse = _.find($cells.slice(i + 1), function(cell) {
             return $.data(cell, 'discover:html') === html;
           });
 

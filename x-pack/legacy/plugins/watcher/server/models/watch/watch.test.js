@@ -23,13 +23,13 @@ describe('Watch', () => {
 
   describe('fromDownstreamJson factory method', () => {
     it(`throws an error if no 'type' property in json`, () => {
-      expect(() => Watch.fromDownstreamJson({}))
-        .toThrow(/must contain an type property/i);
+      expect(() => Watch.fromDownstreamJson({})).toThrow(/must contain an type property/i);
     });
 
     it(`throws an error if the type does not correspond to a WATCH_TYPES value`, () => {
-      expect(() => Watch.fromDownstreamJson({ type: 'foo' }))
-        .toThrow(/Attempted to load unknown type foo/i);
+      expect(() => Watch.fromDownstreamJson({ type: 'foo' })).toThrow(
+        /Attempted to load unknown type foo/i
+      );
     });
 
     it('JsonWatch to be used when type is WATCH_TYPES.JSON', () => {
@@ -50,15 +50,14 @@ describe('Watch', () => {
 
   describe('fromUpstreamJson factory method', () => {
     it(`throws an error if no 'watchJson' property in json`, () => {
-      expect(() => Watch.fromUpstreamJson({}))
-        .toThrow(/must contain a watchJson property/i);
+      expect(() => Watch.fromUpstreamJson({})).toThrow(/must contain a watchJson property/i);
     });
 
     it('JsonWatch to be used when type is WATCH_TYPES.JSON', () => {
       const config = {
         id: 'id',
         watchStatusJson: {},
-        watchJson: { metadata: { xpack: { type: WATCH_TYPES.JSON } } }
+        watchJson: { metadata: { xpack: { type: WATCH_TYPES.JSON } } },
       };
       expect(Watch.fromUpstreamJson(config)).toEqual(JsonWatch.fromUpstreamJson(config));
     });
@@ -67,7 +66,7 @@ describe('Watch', () => {
       const config = {
         id: 'id',
         watchStatusJson: {},
-        watchJson: { metadata: { watcherui: {}, xpack: { type: WATCH_TYPES.THRESHOLD } } }
+        watchJson: { metadata: { watcherui: {}, xpack: { type: WATCH_TYPES.THRESHOLD } } },
       };
       expect(Watch.fromUpstreamJson(config)).toEqual(ThresholdWatch.fromUpstreamJson(config));
     });
@@ -76,7 +75,7 @@ describe('Watch', () => {
       const config = {
         id: 'id',
         watchStatusJson: {},
-        watchJson: { metadata: { xpack: { type: WATCH_TYPES.MONITORING } } }
+        watchJson: { metadata: { xpack: { type: WATCH_TYPES.MONITORING } } },
       };
       expect(Watch.fromUpstreamJson(config)).toEqual(MonitoringWatch.fromUpstreamJson(config));
     });

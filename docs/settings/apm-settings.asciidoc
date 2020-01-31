@@ -13,6 +13,10 @@ copy and paste the relevant settings below into your `kibana.yml` configuration 
 [[general-apm-settings-kb]]
 ==== General APM settings
 
+// This content is reused in the APM app documentation.
+// Any changes made in this file will be seen there as well.
+// tag::general-apm-settings[]
+
 xpack.apm.enabled:: Set to `false` to disabled the APM plugin {kib}. Defaults to
 `true`.
 
@@ -37,3 +41,4 @@ apm_oss.metricsIndices:: Matcher for indices containing metric documents. Defaul
 
 apm_oss.sourcemapIndices:: Matcher for indices containing sourcemap documents. Defaults to `apm-*`.
 
+// end::general-apm-settings[]

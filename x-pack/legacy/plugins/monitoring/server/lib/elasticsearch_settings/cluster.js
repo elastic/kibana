@@ -14,7 +14,7 @@ export function handleResponse(response, isCloud) {
     if (monitoringSettings !== undefined) {
       const check = findReason(monitoringSettings, {
         context: `cluster ${source}`,
-        isCloud: isCloud
+        isCloud: isCloud,
       });
 
       if (check.found) {
@@ -35,8 +35,8 @@ export async function checkClusterSettings(req) {
     filter_path: [
       'persistent.xpack.monitoring',
       'transient.xpack.monitoring',
-      'defaults.xpack.monitoring'
-    ]
+      'defaults.xpack.monitoring',
+    ],
   });
 
   return handleResponse(response, isCloud);

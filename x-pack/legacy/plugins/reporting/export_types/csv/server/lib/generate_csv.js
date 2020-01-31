@@ -22,7 +22,7 @@ export function createGenerateCsv(logger) {
     conflictedTypesFields,
     callEndpoint,
     cancellationToken,
-    settings
+    settings,
   }) {
     const escapeValue = createEscapeValue(settings.quoteValues);
     const builder = new MaxSizeStringBuilder(settings.maxSizeBytes);
@@ -30,7 +30,7 @@ export function createGenerateCsv(logger) {
     if (!builder.tryAppend(header)) {
       return {
         content: '',
-        maxSizeReached: true
+        maxSizeReached: true,
       };
     }
 
@@ -39,7 +39,12 @@ export function createGenerateCsv(logger) {
     let csvContainsFormulas = false;
 
     const flattenHit = createFlattenHit(fields, metaFields, conflictedTypesFields);
-    const formatCsvValues = createFormatCsvValues(escapeValue, settings.separator, fields, formatsMap);
+    const formatCsvValues = createFormatCsvValues(
+      escapeValue,
+      settings.separator,
+      fields,
+      formatsMap
+    );
     try {
       while (true) {
         const { done, value: hit } = await iterator.next();
@@ -50,7 +55,8 @@ export function createGenerateCsv(logger) {
 
         const flattened = flattenHit(hit);
         const rows = formatCsvValues(flattened);
-        const rowsHaveFormulas = settings.checkForFormulas && checkIfRowsHaveFormulas(flattened, fields);
+        const rowsHaveFormulas =
+          settings.checkForFormulas && checkIfRowsHaveFormulas(flattened, fields);
 
         if (rowsHaveFormulas) {
           csvContainsFormulas = true;

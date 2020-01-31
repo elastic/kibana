@@ -17,14 +17,14 @@
  * under the License.
  */
 
-export default function (kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
     uiExports: {
       app: {
         title: 'Run Pipeline',
         description: 'This is a sample plugin to test running pipeline expressions',
         main: 'plugins/kbn_tp_run_pipeline/app',
-      }
+      },
     },
 
     init(server) {
@@ -34,6 +34,6 @@ export default function (kibana) {
       server.injectUiAppVars('kbn_tp_run_pipeline', async () => {
         return await server.getInjectedUiAppVars('kibana');
       });
-    }
+    },
   });
 }

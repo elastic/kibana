@@ -21,7 +21,9 @@ import _ from 'lodash';
 import { inflector } from './inflector';
 import { organizeBy } from '../utils/collection';
 
-const pathGetter = _(_.get).rearg(1, 0).ary(2);
+const pathGetter = _(_.get)
+  .rearg(1, 0)
+  .ary(2);
 const inflectIndex = inflector('by');
 const inflectOrder = inflector('in', 'Order');
 
@@ -42,7 +44,7 @@ const OPT_NAMES = ['index', 'group', 'order', 'initialSet', 'immutable'];
  */
 
 export class IndexedArray {
-  static OPT_NAMES = OPT_NAMES
+  static OPT_NAMES = OPT_NAMES;
 
   constructor(config) {
     config = _.pick(config || {}, OPT_NAMES);
@@ -60,7 +62,9 @@ export class IndexedArray {
           if (typeof a === 'number' && typeof b === 'number') {
             return a - b;
           }
-          return String(a).toLowerCase().localeCompare(String(b).toLowerCase());
+          return String(a)
+            .toLowerCase()
+            .localeCompare(String(b).toLowerCase());
         });
       })
     );
@@ -94,15 +98,33 @@ export class IndexedArray {
   }
 
   // wrappers for mutable Array methods
-  copyWithin(...args) { return this._mutation('copyWithin', args); }
-  fill(...args) { return this._mutation('fill', args); }
-  pop(...args) { return this._mutation('pop', args); }
-  push(...args) { return this._mutation('push', args); }
-  reverse(...args) { return this._mutation('reverse', args); }
-  shift(...args) { return this._mutation('shift', args); }
-  sort(...args) { return this._mutation('sort', args); }
-  splice(...args) { return this._mutation('splice', args); }
-  unshift(...args) { return this._mutation('unshift', args); }
+  copyWithin(...args) {
+    return this._mutation('copyWithin', args);
+  }
+  fill(...args) {
+    return this._mutation('fill', args);
+  }
+  pop(...args) {
+    return this._mutation('pop', args);
+  }
+  push(...args) {
+    return this._mutation('push', args);
+  }
+  reverse(...args) {
+    return this._mutation('reverse', args);
+  }
+  shift(...args) {
+    return this._mutation('shift', args);
+  }
+  sort(...args) {
+    return this._mutation('sort', args);
+  }
+  splice(...args) {
+    return this._mutation('splice', args);
+  }
+  unshift(...args) {
+    return this._mutation('unshift', args);
+  }
 
   /**
    *  If this instance of IndexedArray is not mutable, throw an error
@@ -172,7 +194,7 @@ export class IndexedArray {
           }
 
           return cache;
-        }
+        },
       });
 
       return indexName;
@@ -196,19 +218,22 @@ export class IndexedArray {
 // See https://babeljs.io/docs/usage/caveats/
 Object.setPrototypeOf(IndexedArray.prototype, Array.prototype);
 
-
 // Similar to `organizeBy` but returns IndexedArrays instead of normal Arrays.
 function organizeByIndexedArray(config) {
   return (...args) => {
     const grouped = organizeBy(...args);
 
-    return _.reduce(grouped, (acc, value, group) => {
-      acc[group] = new IndexedArray({
-        ...config,
-        initialSet: value
-      });
+    return _.reduce(
+      grouped,
+      (acc, value, group) => {
+        acc[group] = new IndexedArray({
+          ...config,
+          initialSet: value,
+        });
 
-      return acc;
-    }, {});
+        return acc;
+      },
+      {}
+    );
   };
 }

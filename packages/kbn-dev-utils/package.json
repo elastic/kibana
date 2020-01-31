@@ -15,6 +15,7 @@
     "execa": "^1.0.0",
     "exit-hook": "^2.2.0",
     "getopts": "^2.2.5",
+    "load-json-file": "^6.2.0",
     "moment": "^2.20.1",
     "rxjs": "^6.2.1",
     "tree-kill": "^1.2.0",

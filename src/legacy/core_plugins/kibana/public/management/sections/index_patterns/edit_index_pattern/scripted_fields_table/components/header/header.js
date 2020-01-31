@@ -20,13 +20,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -35,7 +29,10 @@ export const Header = ({ addScriptedFieldUrl }) => (
     <EuiFlexItem>
       <EuiTitle size="s">
         <h3>
-          <FormattedMessage id="kbn.management.editIndexPattern.scriptedHeader" defaultMessage="Scripted fields"/>
+          <FormattedMessage
+            id="kbn.management.editIndexPattern.scriptedHeader"
+            defaultMessage="Scripted fields"
+          />
         </h3>
       </EuiTitle>
       <EuiText>
@@ -50,11 +47,11 @@ export const Header = ({ addScriptedFieldUrl }) => (
     </EuiFlexItem>
 
     <EuiFlexItem grow={false}>
-      <EuiButton
-        data-test-subj="addScriptedFieldLink"
-        href={addScriptedFieldUrl}
-      >
-        <FormattedMessage id="kbn.management.editIndexPattern.scripted.addFieldButton" defaultMessage="Add scripted field"/>
+      <EuiButton data-test-subj="addScriptedFieldLink" href={addScriptedFieldUrl}>
+        <FormattedMessage
+          id="kbn.management.editIndexPattern.scripted.addFieldButton"
+          defaultMessage="Add scripted field"
+        />
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>

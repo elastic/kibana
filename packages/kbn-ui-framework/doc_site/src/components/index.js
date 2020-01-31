@@ -27,7 +27,7 @@ export { GuidePageSideNav } from './guide_page_side_nav/guide_page_side_nav';
 export { GuidePageSideNavItem } from './guide_page_side_nav/guide_page_side_nav_item';
 export { GuideSandbox } from './guide_sandbox/guide_sandbox';
 export {
-  GuideSandboxCodeToggleContainer as GuideSandboxCodeToggle
+  GuideSandboxCodeToggleContainer as GuideSandboxCodeToggle,
 } from './guide_sandbox/guide_sandbox_code_toggle_container';
 export { GuideSectionContainer as GuideSection } from './guide_section/guide_section_container';
 export { GuideSectionTypes } from './guide_section/guide_section_types';

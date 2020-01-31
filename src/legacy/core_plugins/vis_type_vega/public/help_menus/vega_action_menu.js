@@ -19,16 +19,9 @@
 
 import PropTypes from 'prop-types';
 
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -68,27 +61,30 @@ export class VegaActionsMenu extends Component {
     );
 
     const items = [
-      (
-        <EuiContextMenuItem
-          key="hjson"
-          onClick={(event) => { this.closePopover(); this.props.formatHJson(event); }}
-        >
-          <FormattedMessage
-            id="visTypeVega.editor.reformatAsHJSONButtonLabel"
-            defaultMessage="Reformat as HJSON"
-          />
-        </EuiContextMenuItem>
-      ), (
-        <EuiContextMenuItem
-          key="json"
-          onClick={(event) => { this.closePopover(); this.props.formatJson(event); }}
-        >
-          <FormattedMessage
-            id="visTypeVega.editor.reformatAsJSONButtonLabel"
-            defaultMessage="Reformat as JSON, delete comments"
-          />
-        </EuiContextMenuItem>
-      )
+      <EuiContextMenuItem
+        key="hjson"
+        onClick={event => {
+          this.closePopover();
+          this.props.formatHJson(event);
+        }}
+      >
+        <FormattedMessage
+          id="visTypeVega.editor.reformatAsHJSONButtonLabel"
+          defaultMessage="Reformat as HJSON"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="json"
+        onClick={event => {
+          this.closePopover();
+          this.props.formatJson(event);
+        }}
+      >
+        <FormattedMessage
+          id="visTypeVega.editor.reformatAsJSONButtonLabel"
+          defaultMessage="Reformat as JSON, delete comments"
+        />
+      </EuiContextMenuItem>,
     ];
 
     return (
@@ -100,9 +96,7 @@ export class VegaActionsMenu extends Component {
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel
-          items={items}
-        />
+        <EuiContextMenuPanel items={items} />
       </EuiPopover>
     );
   }

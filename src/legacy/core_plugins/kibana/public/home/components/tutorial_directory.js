@@ -127,9 +127,15 @@ class TutorialDirectoryUi extends React.Component {
     }
 
     let tutorialCards = tutorialConfigs.map(tutorialConfig => {
+      // add base path to SVG based icons
+      let icon = tutorialConfig.euiIconType;
+      if (icon && icon.includes('/')) {
+        icon = this.props.addBasePath(icon);
+      }
+
       return {
         category: tutorialConfig.category,
-        icon: tutorialConfig.euiIconType,
+        icon: icon,
         name: tutorialConfig.name,
         description: tutorialConfig.shortDescription,
         url: this.props.addBasePath(`#/home/tutorial/${tutorialConfig.id}`),

@@ -59,7 +59,7 @@ export function AppStateProvider(Private, $location, $injector) {
   // if the url param is missing, write it back
   AppState.prototype._persistAcrossApps = false;
 
-  AppState.prototype.destroy = function () {
+  AppState.prototype.destroy = function() {
     AppState.Super.prototype.destroy.call(this);
     AppState.getAppState._set(null);
     callEach(eventUnsubscribers);
@@ -68,7 +68,7 @@ export function AppStateProvider(Private, $location, $injector) {
   /**
    * @returns PersistedState instance.
    */
-  AppState.prototype.makeStateful = function (prop) {
+  AppState.prototype.makeStateful = function(prop) {
     if (persistedStates[prop]) return persistedStates[prop];
     const self = this;
 
@@ -76,25 +76,25 @@ export function AppStateProvider(Private, $location, $injector) {
     persistedStates[prop] = new PersistedState();
 
     // update the app state when the stateful instance changes
-    const updateOnChange = function () {
+    const updateOnChange = function() {
       const replaceState = false; // TODO: debouncing logic
       self[prop] = persistedStates[prop].getChanges();
       // Save state to the URL.
       self.save(replaceState);
     };
-    const handlerOnChange = (method) => persistedStates[prop][method]('change', updateOnChange);
+    const handlerOnChange = method => persistedStates[prop][method]('change', updateOnChange);
     handlerOnChange('on');
     eventUnsubscribers.push(() => handlerOnChange('off'));
 
     // update the stateful object when the app state changes
-    const persistOnChange = function (changes) {
+    const persistOnChange = function(changes) {
       if (!changes) return;
 
       if (changes.indexOf(prop) !== -1) {
         persistedStates[prop].set(self[prop]);
       }
     };
-    const handlePersist = (method) => this[method]('fetch_with_changes', persistOnChange);
+    const handlePersist = method => this[method]('fetch_with_changes', persistOnChange);
     handlePersist('on');
     eventUnsubscribers.push(() => handlePersist('off'));
 
@@ -104,7 +104,7 @@ export function AppStateProvider(Private, $location, $injector) {
     return persistedStates[prop];
   };
 
-  AppState.getAppState = (function () {
+  AppState.getAppState = (function() {
     let currentAppState;
 
     function get() {
@@ -112,26 +112,26 @@ export function AppStateProvider(Private, $location, $injector) {
     }
 
     // Checks to see if the appState might already exist, even if it hasn't been newed up
-    get.previouslyStored = function () {
+    get.previouslyStored = function() {
       const search = $location.search();
       return search[urlParam] ? true : false;
     };
 
-    get._set = function (current) {
+    get._set = function(current) {
       currentAppState = current;
     };
 
     return get;
-  }());
+  })();
 
   return AppState;
 }
 
-uiModules.get('kibana/global_state')
-  .factory('AppState', function (Private) {
+uiModules
+  .get('kibana/global_state')
+  .factory('AppState', function(Private) {
     return Private(AppStateProvider);
   })
-  .service('getAppState', function (Private) {
+  .service('getAppState', function(Private) {
     return Private(AppStateProvider).getAppState;
   });
-

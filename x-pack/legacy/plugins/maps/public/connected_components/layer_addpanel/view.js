@@ -9,21 +9,16 @@ import { SourceSelect } from './source_select/source_select';
 import { FlyoutFooter } from './flyout_footer';
 import { SourceEditor } from './source_editor';
 import { ImportEditor } from './import_editor';
-import {
-  EuiFlexGroup,
-  EuiTitle,
-  EuiFlyoutHeader,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiTitle, EuiFlyoutHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export class AddLayerPanel extends Component {
-
   state = {
     sourceType: null,
     layer: null,
     importView: false,
     layerImportAddReady: false,
-  }
+  };
 
   componentDidMount() {
     this._isMounted = true;
@@ -43,14 +38,17 @@ export class AddLayerPanel extends Component {
     const { sourceType, importView, layerImportAddReady } = this.state;
     let panelDescription;
     if (!sourceType) {
-      panelDescription = i18n.translate('xpack.maps.addLayerPanel.selectSource',
-        { defaultMessage: 'Select source' });
+      panelDescription = i18n.translate('xpack.maps.addLayerPanel.selectSource', {
+        defaultMessage: 'Select source',
+      });
     } else if (layerImportAddReady || !importView) {
-      panelDescription = i18n.translate('xpack.maps.addLayerPanel.addLayer',
-        { defaultMessage: 'Add layer' });
+      panelDescription = i18n.translate('xpack.maps.addLayerPanel.addLayer', {
+        defaultMessage: 'Add layer',
+      });
     } else {
-      panelDescription = i18n.translate('xpack.maps.addLayerPanel.importFile',
-        { defaultMessage: 'Import file' });
+      panelDescription = i18n.translate('xpack.maps.addLayerPanel.importFile', {
+        defaultMessage: 'Import file',
+      });
     }
     return panelDescription;
   }
@@ -65,45 +63,44 @@ export class AddLayerPanel extends Component {
       return;
     }
 
-    const style = (this.state.layer && this.state.layer.getCurrentStyle()) ?  this.state.layer.getCurrentStyle().getDescriptor() : null;
+    const style =
+      this.state.layer && this.state.layer.getCurrentStyle()
+        ? this.state.layer.getCurrentStyle().getDescriptor()
+        : null;
     const layerInitProps = {
       ...options,
-      style: style
+      style: style,
     };
     const newLayer = source.createDefaultLayer(layerInitProps, this.props.mapColors);
     if (!this._isMounted) {
       return;
     }
-    this.setState(
-      { layer: newLayer },
-      () => this.props.viewLayer(this.state.layer)
-    );
+    this.setState({ layer: newLayer }, () => this.props.viewLayer(this.state.layer));
   };
 
   _clearLayerData = ({ keepSourceType = false }) => {
-
     if (!this._isMounted) {
       return;
     }
 
     this.setState({
       layer: null,
-      ...(
-        !keepSourceType
-          ? { sourceType: null, importView: false }
-          : {}
-      ),
+      ...(!keepSourceType ? { sourceType: null, importView: false } : {}),
     });
     this.props.removeTransientLayer();
-  }
+  };
 
   _onSourceSelectionChange = ({ type, isIndexingSource }) => {
     this.setState({ sourceType: type, importView: isIndexingSource });
   };
 
   _layerAddHandler = () => {
-    const { isIndexingTriggered, setIndexingTriggered, selectLayerAndAdd,
-      resetIndexing } = this.props;
+    const {
+      isIndexingTriggered,
+      setIndexingTriggered,
+      selectLayerAndAdd,
+      resetIndexing,
+    } = this.props;
     const layerSource = this.state.layer.getSource();
     const boolIndexLayer = layerSource.shouldBeIndexed();
     this.setState({ layer: null });
@@ -118,14 +115,12 @@ export class AddLayerPanel extends Component {
         resetIndexing();
       }
     }
-  }
+  };
 
   _renderAddLayerPanel() {
     const { sourceType, importView } = this.state;
     if (!sourceType) {
-      return (
-        <SourceSelect updateSourceSelection={this._onSourceSelectionChange} />
-      );
+      return <SourceSelect updateSourceSelection={this._onSourceSelectionChange} />;
     }
     if (importView) {
       return (
@@ -149,9 +144,7 @@ export class AddLayerPanel extends Component {
     const { importView, layer } = this.state;
     const { isIndexingReady, isIndexingSuccess } = this.props;
 
-    const buttonEnabled = importView
-      ? isIndexingReady || isIndexingSuccess
-      : !!layer;
+    const buttonEnabled = importView ? isIndexingReady || isIndexingSuccess : !!layer;
 
     return (
       <FlyoutFooter
@@ -167,29 +160,22 @@ export class AddLayerPanel extends Component {
     const panelDescription = this._getPanelDescription();
 
     return (
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-      >
+      <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiTitle size="s">
-            <h2>
-              {panelDescription}
-            </h2>
+            <h2>{panelDescription}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
         <div className="mapLayerPanel__body" data-test-subj="layerAddForm">
-          <div className="mapLayerPanel__bodyOverflow">
-            { this._renderAddLayerPanel() }
-          </div>
+          <div className="mapLayerPanel__bodyOverflow">{this._renderAddLayerPanel()}</div>
         </div>
-        { this._renderFooter(panelDescription) }
+        {this._renderFooter(panelDescription)}
       </EuiFlexGroup>
     );
   }
 
   render() {
-    return (this.props.flyoutVisible) ? this._renderFlyout() : null;
+    return this.props.flyoutVisible ? this._renderFlyout() : null;
   }
 }

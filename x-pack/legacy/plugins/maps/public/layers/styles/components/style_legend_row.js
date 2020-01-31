@@ -7,18 +7,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiSpacer,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiToolTip } from '@elastic/eui';
 
 export function StyleLegendRow({ header, minLabel, maxLabel, propertyLabel, fieldLabel }) {
   return (
     <div>
-      <EuiSpacer size="xs"/>
+      <EuiSpacer size="xs" />
       {header}
       <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
         <EuiFlexItem grow={true}>
@@ -27,17 +21,11 @@ export function StyleLegendRow({ header, minLabel, maxLabel, propertyLabel, fiel
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            title={propertyLabel}
-            content={fieldLabel}
-          >
-            <EuiText
-              className="eui-textTruncate"
-              size="xs"
-              style={{ maxWidth: '180px' }}
-            >
-              <small><strong>{fieldLabel}</strong></small>
+          <EuiToolTip position="top" title={propertyLabel} content={fieldLabel}>
+            <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
+              <small>
+                <strong>{fieldLabel}</strong>
+              </small>
             </EuiText>
           </EuiToolTip>
         </EuiFlexItem>
@@ -53,14 +41,8 @@ export function StyleLegendRow({ header, minLabel, maxLabel, propertyLabel, fiel
 
 StyleLegendRow.propTypes = {
   header: PropTypes.node.isRequired,
-  minLabel: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]).isRequired,
-  maxLabel: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]).isRequired,
+  minLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  maxLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   propertyLabel: PropTypes.string.isRequired,
   fieldLabel: PropTypes.string.isRequired,
 };

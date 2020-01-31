@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import bluebird, {
-  fromNode,
-  promisify,
-} from 'bluebird';
+import bluebird, { fromNode, promisify } from 'bluebird';
 import Handlebars from 'handlebars';
 import fs from 'fs';
 import path from 'path';
@@ -51,9 +48,13 @@ async function buildGallery(comparisons) {
   const asyncBranch = promisify(simpleGit.branch, simpleGit);
   const branch = await asyncBranch();
 
-  const template = Handlebars.compile(await readFileAsync(
-    path.resolve('./utilities/templates/visual_regression_gallery.handlebars')
-    , 'utf8'), { knownHelpersOnly: true });
+  const template = Handlebars.compile(
+    await readFileAsync(
+      path.resolve('./utilities/templates/visual_regression_gallery.handlebars'),
+      'utf8'
+    ),
+    { knownHelpersOnly: true }
+  );
 
   const html = template({
     date: moment().format('MMMM Do YYYY, h:mm:ss a'),
@@ -92,32 +93,26 @@ async function compareScreenshots() {
         session: undefined,
         baseline: undefined,
         diff: undefined,
-      }
+      },
     };
 
-    const sessionImagePath = path.resolve(
-      SESSION_SCREENSHOTS_DIR,
-      screenshot
-    );
+    const sessionImagePath = path.resolve(SESSION_SCREENSHOTS_DIR, screenshot);
 
-    const baselineImagePath = path.resolve(
-      BASELINE_SCREENSHOTS_DIR,
-      screenshot
-    );
+    const baselineImagePath = path.resolve(BASELINE_SCREENSHOTS_DIR, screenshot);
 
-    const diffImagePath = path.resolve(
-      DIFF_SCREENSHOTS_DIR,
-      screenshot
-    );
+    const diffImagePath = path.resolve(DIFF_SCREENSHOTS_DIR, screenshot);
 
     // Diff the images asynchronously.
-    const diffResult = await fromNode((cb) => {
-      imageDiff.getFullResult({
-        actualImage: sessionImagePath,
-        expectedImage: baselineImagePath,
-        diffImage: diffImagePath,
-        shadow: true,
-      }, cb);
+    const diffResult = await fromNode(cb => {
+      imageDiff.getFullResult(
+        {
+          actualImage: sessionImagePath,
+          expectedImage: baselineImagePath,
+          diffImage: diffImagePath,
+          shadow: true,
+        },
+        cb
+      );
     });
 
     const change = diffResult.percentage;
@@ -127,27 +122,27 @@ async function compareScreenshots() {
     comparison.change = change;
 
     // Once the images have been diffed, we can load and store the image data.
-    comparison.imageData.session =
-      await readFileAsync(sessionImagePath, 'base64');
+    comparison.imageData.session = await readFileAsync(sessionImagePath, 'base64');
 
-    comparison.imageData.baseline =
-      await readFileAsync(baselineImagePath, 'base64');
+    comparison.imageData.baseline = await readFileAsync(baselineImagePath, 'base64');
 
-    comparison.imageData.diff =
-      await readFileAsync(diffImagePath, 'base64');
+    comparison.imageData.diff = await readFileAsync(diffImagePath, 'base64');
 
     return comparison;
   });
 }
 
 export function run(done) {
-  compareScreenshots().then(screenshotComparisons => {
-    // Once all of the data has been loaded, we can build the gallery.
-    buildGallery(screenshotComparisons).then(() => {
-      done();
-    });
-  }, error => {
-    console.error(error);
-    done(false);
-  });
+  compareScreenshots().then(
+    screenshotComparisons => {
+      // Once all of the data has been loaded, we can build the gallery.
+      buildGallery(screenshotComparisons).then(() => {
+        done();
+      });
+    },
+    error => {
+      console.error(error);
+      done(false);
+    }
+  );
 }

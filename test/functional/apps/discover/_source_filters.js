@@ -19,14 +19,14 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
 
   describe('source filters', function describeIndexTests() {
-    before(async function () {
+    before(async function() {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
 
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.sleep(1000);
     });
 
-    it('should not get the field referer', async function () {
+    it('should not get the field referer', async function() {
       //let  fieldNames;
       const fieldNames = await PageObjects.discover.getAllFieldNames();
       expect(fieldNames).to.not.contain('referer');

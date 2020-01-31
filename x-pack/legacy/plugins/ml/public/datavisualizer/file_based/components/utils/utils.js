@@ -10,7 +10,6 @@ import { ml } from '../../../../services/ml_api_service';
 
 export function readFile(file) {
   return new Promise((resolve, reject) => {
-
     if (file && file.size) {
       const reader = new FileReader();
       reader.readAsText(file);
@@ -36,7 +35,7 @@ export function reduceData(data, mb) {
   // TODO -  change this when other non UTF-8 formats are
   // supported for the read data
   const size = mb * Math.pow(2, 20);
-  return (data.length >= size) ? data.slice(0, size) : data;
+  return data.length >= size ? data.slice(0, size) : data;
 }
 
 export function createUrlOverrides(overrides, originalSettings) {
@@ -45,8 +44,8 @@ export function createUrlOverrides(overrides, originalSettings) {
     if (overrideDefaults.hasOwnProperty(o)) {
       let value = overrides[o];
       if (
-        (Array.isArray(value) && isEqual(value, originalSettings[o]) ||
-        (value === undefined || value === originalSettings[o]))
+        (Array.isArray(value) && isEqual(value, originalSettings[o])) ||
+        (value === undefined || value === originalSettings[o])
       ) {
         value = '';
       }
@@ -95,11 +94,15 @@ export function createUrlOverrides(overrides, originalSettings) {
 }
 
 export function processResults(results) {
-  const timestampFormat = (results.java_timestamp_formats !== undefined && results.java_timestamp_formats.length) ?
-    results.java_timestamp_formats[0] : undefined;
+  const timestampFormat =
+    results.java_timestamp_formats !== undefined && results.java_timestamp_formats.length
+      ? results.java_timestamp_formats[0]
+      : undefined;
 
-  const linesToSample = (results.overrides !== undefined && results.overrides.lines_to_sample !== undefined) ?
-    results.overrides.lines_to_sample : DEFAULT_LINES_TO_SAMPLE;
+  const linesToSample =
+    results.overrides !== undefined && results.overrides.lines_to_sample !== undefined
+      ? results.overrides.lines_to_sample
+      : DEFAULT_LINES_TO_SAMPLE;
 
   return {
     format: results.format,
@@ -120,25 +123,18 @@ export function processResults(results) {
 // if called with no indexName, the check will just look for the minimum cluster privileges.
 export async function hasImportPermission(indexName) {
   const priv = {
-    cluster: [
-      'cluster:monitor/nodes/info',
-      'cluster:admin/ingest/pipeline/put',
-    ]
+    cluster: ['cluster:monitor/nodes/info', 'cluster:admin/ingest/pipeline/put'],
   };
 
   if (indexName !== undefined) {
     priv.index = [
       {
         names: [indexName],
-        privileges: [
-          'indices:data/write/bulk',
-          'indices:data/write/index',
-          'indices:admin/create',
-        ]
-      }
+        privileges: ['indices:data/write/bulk', 'indices:data/write/index', 'indices:admin/create'],
+      },
     ];
   }
 
   const resp = await ml.hasPrivileges(priv);
-  return (resp.securityDisabled === true || resp.has_all_requested === true);
+  return resp.securityDisabled === true || resp.has_all_requested === true;
 }

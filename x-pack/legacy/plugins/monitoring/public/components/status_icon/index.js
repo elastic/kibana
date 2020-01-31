@@ -17,11 +17,7 @@ export function StatusIcon({ type, label }) {
 
   return (
     <span className="kuiStatusText">
-      <img
-        src={`../plugins/monitoring/icons/${icon}`}
-        alt={label}
-        data-test-subj="statusIcon"
-      />
+      <img src={`../plugins/monitoring/icons/${icon}`} alt={label} data-test-subj="statusIcon" />
     </span>
   );
 }

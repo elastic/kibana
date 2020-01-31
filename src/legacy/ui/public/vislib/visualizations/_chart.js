@@ -42,11 +42,13 @@ export class Chart {
     this.chartData = chartData;
     this.tooltips = [];
 
-    const events = this.events = new Dispatch(handler);
+    const events = (this.events = new Dispatch(handler));
 
     const fieldFormatter = getFormat(this.handler.data.get('tooltipFormatter'));
-    const tooltipFormatterProvider = this.handler.visConfig.get('type') === 'pie' ?
-      getHierarchicalTooltipFormatter() : getPointSeriesTooltipFormatter();
+    const tooltipFormatterProvider =
+      this.handler.visConfig.get('type') === 'pie'
+        ? getHierarchicalTooltipFormatter()
+        : getPointSeriesTooltipFormatter();
     const tooltipFormatter = tooltipFormatterProvider(fieldFormatter);
 
     if (this.handler.visConfig && this.handler.visConfig.get('addTooltip', false)) {
@@ -89,7 +91,7 @@ export class Chart {
       return datum[labelProp];
     }
 
-    selection.each(function (datum) {
+    selection.each(function(datum) {
       const label = resolveLabel(datum);
       if (label != null) dataLabel(this, label);
     });
@@ -103,7 +105,7 @@ export class Chart {
   destroy() {
     const selection = d3.select(this.chartEl);
     this.events.removeAllListeners();
-    this.tooltips.forEach(function (tooltip) {
+    this.tooltips.forEach(function(tooltip) {
       tooltip.destroy();
     });
     selection.remove();

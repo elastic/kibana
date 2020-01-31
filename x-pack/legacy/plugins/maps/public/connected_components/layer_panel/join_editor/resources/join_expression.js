@@ -21,18 +21,15 @@ import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getTermsFields } from '../../../../index_pattern_util';
 
-import {
-  indexPatternService,
-} from '../../../../kibana_services';
+import { indexPatternService } from '../../../../kibana_services';
 
 export class JoinExpression extends Component {
-
   state = {
     isPopoverOpen: false,
   };
 
   _togglePopover = () => {
-    this.setState((prevState) => ({
+    this.setState(prevState => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
@@ -43,7 +40,7 @@ export class JoinExpression extends Component {
     });
   };
 
-  _onRightSourceChange = async (indexPatternId) => {
+  _onRightSourceChange = async indexPatternId => {
     try {
       const indexPattern = await indexPatternService.get(indexPatternId);
       this.props.onRightSourceChange({
@@ -53,17 +50,14 @@ export class JoinExpression extends Component {
     } catch (err) {
       // do not call onChange with when unable to get indexPatternId
     }
-  }
+  };
 
-  _onLeftFieldChange = (selectedFields) => {
+  _onLeftFieldChange = selectedFields => {
     this.props.onLeftFieldChange(_.get(selectedFields, '[0].value.name', null));
   };
 
   _renderLeftFieldSelect() {
-    const {
-      leftValue,
-      leftFields,
-    } = this.props;
+    const { leftValue, leftFields } = this.props;
 
     if (!leftFields) {
       return null;
@@ -78,22 +72,20 @@ export class JoinExpression extends Component {
 
     let leftFieldOption;
     if (leftValue) {
-      leftFieldOption = options.find((option) => {
+      leftFieldOption = options.find(option => {
         const field = option.value;
         return field.name === leftValue;
       });
     }
-    const selectedOptions = leftFieldOption
-      ? [leftFieldOption]
-      : [];
+    const selectedOptions = leftFieldOption ? [leftFieldOption] : [];
 
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.layerPanel.joinExpression.leftFieldLabel', {
-          defaultMessage: 'Left field'
+          defaultMessage: 'Left field',
         })}
         helpText={i18n.translate('xpack.maps.layerPanel.joinExpression.leftSourceLabelHelpText', {
-          defaultMessage: 'Left source field that contains the shared key.'
+          defaultMessage: 'Left source field that contains the shared key.',
         })}
       >
         <EuiComboBox
@@ -115,18 +107,17 @@ export class JoinExpression extends Component {
 
     return (
       <EuiFormRow
-        label={
-          i18n.translate('xpack.maps.layerPanel.joinExpression.rightSourceLabel', {
-            defaultMessage: 'Right source'
-          })
-        }
+        label={i18n.translate('xpack.maps.layerPanel.joinExpression.rightSourceLabel', {
+          defaultMessage: 'Right source',
+        })}
       >
         <IndexPatternSelect
-          placeholder={
-            i18n.translate('xpack.maps.layerPanel.joinExpression.selectIndexPatternPlaceholder', {
-              defaultMessage: 'Select index pattern'
-            })
-          }
+          placeholder={i18n.translate(
+            'xpack.maps.layerPanel.joinExpression.selectIndexPatternPlaceholder',
+            {
+              defaultMessage: 'Select index pattern',
+            }
+          )}
           indexPatternId={this.props.rightSourceIndexPatternId}
           onChange={this._onRightSourceChange}
           isClearable={false}
@@ -140,17 +131,17 @@ export class JoinExpression extends Component {
       return null;
     }
 
-    const filterStringOrNumberFields = (field) => {
+    const filterStringOrNumberFields = field => {
       return field.type === 'string' || field.type === 'number';
     };
 
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.layerPanel.joinExpression.rightFieldLabel', {
-          defaultMessage: 'Right field'
+          defaultMessage: 'Right field',
         })}
         helpText={i18n.translate('xpack.maps.layerPanel.joinExpression.rightSourceLabelHelpText', {
-          defaultMessage: 'Right source field that contains the shared key.'
+          defaultMessage: 'Right source field that contains the shared key.',
         })}
       >
         <SingleFieldSelect
@@ -166,18 +157,13 @@ export class JoinExpression extends Component {
   }
 
   _getExpressionValue() {
-    const {
-      leftSourceName,
-      leftValue,
-      rightSourceName,
-      rightValue,
-    } = this.props;
+    const { leftSourceName, leftValue, rightSourceName, rightValue } = this.props;
     if (leftSourceName && leftValue && rightSourceName && rightValue) {
       return `${leftSourceName}:${leftValue} with ${rightSourceName}:${rightValue}`;
     }
 
     return i18n.translate('xpack.maps.layerPanel.joinExpression.selectPlaceholder', {
-      defaultMessage: '-- select --'
+      defaultMessage: '-- select --',
     });
   }
 
@@ -216,7 +202,7 @@ export class JoinExpression extends Component {
           </EuiFormHelpText>
           <EuiFormRow
             label={i18n.translate('xpack.maps.layerPanel.joinExpression.leftSourceLabel', {
-              defaultMessage: 'Left source'
+              defaultMessage: 'Left source',
             })}
           >
             <EuiComboBox
@@ -241,10 +227,12 @@ JoinExpression.propTypes = {
 
   // Left field props
   leftValue: PropTypes.string,
-  leftFields: PropTypes.arrayOf(PropTypes.shape({
-    label: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-  })),
+  leftFields: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+    })
+  ),
   onLeftFieldChange: PropTypes.func.isRequired,
 
   // Right source props
@@ -260,6 +248,6 @@ JoinExpression.propTypes = {
 
 function getSelectFieldPlaceholder() {
   return i18n.translate('xpack.maps.layerPanel.joinExpression.selectFieldPlaceholder', {
-    defaultMessage: 'Select field'
+    defaultMessage: 'Select field',
   });
 }

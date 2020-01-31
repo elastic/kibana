@@ -21,7 +21,6 @@ import _ from 'lodash';
 import { functions } from '../functions';
 
 export function buildNode(functionName, ...functionArgs) {
-
   const kueryFunction = functions[functionName];
   if (_.isUndefined(kueryFunction)) {
     throw new Error(`Unknown function "${functionName}"`);
@@ -30,7 +29,7 @@ export function buildNode(functionName, ...functionArgs) {
   return {
     type: 'function',
     function: functionName,
-    ...kueryFunction.buildNodeParams(...functionArgs)
+    ...kueryFunction.buildNodeParams(...functionArgs),
   };
 }
 
@@ -51,4 +50,3 @@ export function toElasticsearchQuery(node, indexPattern, config = {}) {
   const kueryFunction = functions[node.function];
   return kueryFunction.toElasticsearchQuery(node, indexPattern, config);
 }
-

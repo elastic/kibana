@@ -21,24 +21,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 export function StringParameter({ id, label, value, setParameter }) {
-  const handleChange = (evt) => {
+  const handleChange = evt => {
     setParameter(id, evt.target.value);
   };
 
   return (
     <div className="visEditorSidebar__formRow">
-      <label
-        className="visEditorSidebar__formLabel"
-      >
-        {label}
-      </label>
+      <label className="visEditorSidebar__formLabel">{label}</label>
       <div className="visEditorSidebar__formControl kuiFieldGroupSection--wide">
-        <input
-          className="kuiTextInput"
-          type="text"
-          value={value}
-          onChange={handleChange}
-        />
+        <input className="kuiTextInput" type="text" value={value} onChange={handleChange} />
       </div>
     </div>
   );

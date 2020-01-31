@@ -25,7 +25,7 @@ export default new Chainable('lines', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'width',
@@ -61,25 +61,25 @@ export default new Chainable('lines', {
       help: i18n.translate('timelion.help.functions.lines.args.stepsHelpText', {
         defaultMessage: 'Show line as step, e.g., do not interpolate between points',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.linesHelpText', {
     defaultMessage: 'Show the seriesList as lines',
   }),
   fn: function linesFn(args) {
-    return alter(args, function (eachSeries, width, fill, stack, show, steps) {
+    return alter(args, function(eachSeries, width, fill, stack, show, steps) {
       eachSeries.lines = eachSeries.lines || {};
 
       // Defaults
       if (eachSeries.lines.lineWidth == null) eachSeries.lines.lineWidth = 3;
 
       if (width != null) eachSeries.lines.lineWidth = width;
-      if (fill != null)  eachSeries.lines.fill = fill / 10;
+      if (fill != null) eachSeries.lines.fill = fill / 10;
       if (stack != null) eachSeries.stack = stack;
-      if (show != null)  eachSeries.lines.show = show;
+      if (show != null) eachSeries.lines.show = show;
       if (steps != null) eachSeries.lines.steps = steps;
 
       return eachSeries;
     });
-  }
+  },
 });

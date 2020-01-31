@@ -8,18 +8,17 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { checkLicense } from '../check_license';
 
-describe('check_license', function () {
-
+describe('check_license', function() {
   let mockXPackInfo;
 
-  beforeEach(function () {
+  beforeEach(function() {
     mockXPackInfo = {
       isAvailable: sinon.stub(),
       isXpackUnavailable: sinon.stub(),
       feature: sinon.stub(),
       license: sinon.stub({
-        isOneOf() { },
-      })
+        isOneOf() {},
+      }),
     };
 
     mockXPackInfo.isAvailable.returns(true);
@@ -57,12 +56,13 @@ describe('check_license', function () {
     });
   });
 
-
   it('should show login page and other security elements if license is basic and security is enabled.', () => {
     mockXPackInfo.license.isOneOf.withArgs(['basic']).returns(true);
     mockXPackInfo.license.isOneOf.withArgs(['platinum', 'trial']).returns(false);
     mockXPackInfo.feature.withArgs('security').returns({
-      isEnabled: () => { return true; }
+      isEnabled: () => {
+        return true;
+      },
     });
 
     const licenseCheckResults = checkLicense(mockXPackInfo);
@@ -72,14 +72,16 @@ describe('check_license', function () {
       showLinks: true,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
-      allowRbac: true
+      allowRbac: true,
     });
   });
 
   it('should not show login page or other security elements if security is disabled in Elasticsearch.', () => {
     mockXPackInfo.license.isOneOf.withArgs(['basic']).returns(false);
     mockXPackInfo.feature.withArgs('security').returns({
-      isEnabled: () => { return false; }
+      isEnabled: () => {
+        return false;
+      },
     });
 
     const licenseCheckResults = checkLicense(mockXPackInfo);
@@ -90,16 +92,19 @@ describe('check_license', function () {
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: false,
-      linksMessage: 'Access is denied because Security is disabled in Elasticsearch.'
+      linksMessage: 'Access is denied because Security is disabled in Elasticsearch.',
     });
   });
 
   it('should allow to login and allow RBAC but forbid document level security if license is not platinum or trial.', () => {
     mockXPackInfo.license.isOneOf
       .returns(false)
-      .withArgs(['platinum', 'trial']).returns(false);
+      .withArgs(['platinum', 'trial'])
+      .returns(false);
     mockXPackInfo.feature.withArgs('security').returns({
-      isEnabled: () => { return true; }
+      isEnabled: () => {
+        return true;
+      },
     });
 
     expect(checkLicense(mockXPackInfo)).to.be.eql({
@@ -115,9 +120,12 @@ describe('check_license', function () {
   it('should allow to login, allow RBAC and document level security if license is platinum or trial.', () => {
     mockXPackInfo.license.isOneOf
       .returns(false)
-      .withArgs(['platinum', 'trial']).returns(true);
+      .withArgs(['platinum', 'trial'])
+      .returns(true);
     mockXPackInfo.feature.withArgs('security').returns({
-      isEnabled: () => { return true; }
+      isEnabled: () => {
+        return true;
+      },
     });
 
     expect(checkLicense(mockXPackInfo)).to.be.eql({
@@ -129,5 +137,4 @@ describe('check_license', function () {
       allowRbac: true,
     });
   });
-
 });

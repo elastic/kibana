@@ -37,9 +37,10 @@ describe('Resize Checker', () => {
   beforeEach(ngMock.module('kibana'));
   beforeEach(() => {
     setup = () => {
-
       const createEl = () => {
-        const el = $('<div>').appendTo('body').get(0);
+        const el = $('<div>')
+          .appendTo('body')
+          .get(0);
         teardown.push(() => $(el).remove());
         return el;
       };

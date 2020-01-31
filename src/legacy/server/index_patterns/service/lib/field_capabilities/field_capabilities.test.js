@@ -34,12 +34,12 @@ import * as mergeOverridesNS from './overrides';
 
 describe('index_patterns/field_capabilities/field_capabilities', () => {
   let sandbox;
-  beforeEach(() => sandbox = sinon.createSandbox());
+  beforeEach(() => (sandbox = sinon.createSandbox()));
   afterEach(() => sandbox.restore());
 
   const footballs = [
     { 'could be aything': true },
-    { 'used to verify that values are directly passed through': true }
+    { 'used to verify that values are directly passed through': true },
   ];
 
   // assert that the stub was called with the exact `args`, using === matching
@@ -48,11 +48,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
   };
 
   const stubDeps = (options = {}) => {
-    const {
-      esResponse = {},
-      fieldsFromFieldCaps = [],
-      mergeOverrides = identity
-    } = options;
+    const { esResponse = {}, fieldsFromFieldCaps = [], mergeOverrides = identity } = options;
 
     sandbox.stub(callFieldCapsApiNS, 'callFieldCapsApi').callsFake(async () => esResponse);
     sandbox.stub(readFieldCapsResponseNS, 'readFieldCapsResponse').returns(fieldsFromFieldCaps);
@@ -72,7 +68,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
   describe('calls `readFieldCapsResponse`', () => {
     it('passes exact es response', async () => {
       stubDeps({
-        esResponse: footballs[0]
+        esResponse: footballs[0],
       });
 
       await getFieldCapabilities();
@@ -87,7 +83,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
       const sortedLetters = sortBy(letters);
 
       stubDeps({
-        fieldsFromFieldCaps: shuffle(letters.map(name => ({ name })))
+        fieldsFromFieldCaps: shuffle(letters.map(name => ({ name }))),
       });
 
       const fieldNames = (await getFieldCapabilities()).map(field => field.name);
@@ -98,10 +94,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
   describe('metaFields', () => {
     it('ensures there is a response for each metaField', async () => {
       stubDeps({
-        fieldsFromFieldCaps: [
-          { name: 'foo' },
-          { name: 'bar' },
-        ]
+        fieldsFromFieldCaps: [{ name: 'foo' }, { name: 'bar' }],
       });
 
       const resp = await getFieldCapabilities(undefined, undefined, ['meta1', 'meta2']);
@@ -111,20 +104,14 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
   });
 
   describe('defaults', () => {
-    const properties = [
-      'name',
-      'type',
-      'searchable',
-      'aggregatable',
-      'readFromDocValues',
-    ];
+    const properties = ['name', 'type', 'searchable', 'aggregatable', 'readFromDocValues'];
 
     const createField = () => ({
       name: footballs[0],
       type: footballs[0],
       searchable: footballs[0],
       aggregatable: footballs[0],
-      readFromDocValues: footballs[0]
+      readFromDocValues: footballs[0],
     });
 
     describe('ensures that every field has property:', () => {
@@ -134,7 +121,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
           delete field[property];
 
           stubDeps({
-            fieldsFromFieldCaps: [field]
+            fieldsFromFieldCaps: [field],
           });
 
           const resp = await getFieldCapabilities();
@@ -155,11 +142,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
 
   describe('overrides', () => {
     it('passes each field to `mergeOverrides()`', async () => {
-      const fieldsFromFieldCaps = [
-        { name: 'foo' },
-        { name: 'bar' },
-        { name: 'baz' },
-      ];
+      const fieldsFromFieldCaps = [{ name: 'foo' }, { name: 'bar' }, { name: 'baz' }];
 
       stubDeps({ fieldsFromFieldCaps });
 
@@ -173,21 +156,18 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
     });
 
     it('replaces field with return value', async () => {
-      const fieldsFromFieldCaps = [
-        { name: 'foo', bar: 1 },
-        { name: 'baz', box: 2 },
-      ];
+      const fieldsFromFieldCaps = [{ name: 'foo', bar: 1 }, { name: 'baz', box: 2 }];
 
       stubDeps({
         fieldsFromFieldCaps,
         mergeOverrides() {
           return { notFieldAnymore: 1 };
-        }
+        },
       });
 
       expect(await getFieldCapabilities()).toEqual([
         { notFieldAnymore: 1 },
-        { notFieldAnymore: 1 }
+        { notFieldAnymore: 1 },
       ]);
     });
   });

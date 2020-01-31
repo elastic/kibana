@@ -47,20 +47,16 @@ export function onBrushEvent(event) {
     range = {
       gte: moment(min).toISOString(),
       lt: moment(max).toISOString(),
-      format: 'strict_date_optional_time'
+      format: 'strict_date_optional_time',
     };
   } else {
     range = {
       gte: min,
-      lt: max
+      lt: max,
     };
   }
 
-  const newFilter = buildRangeFilter(
-    field,
-    range,
-    indexPattern,
-    event.data.xAxisFormatter);
+  const newFilter = buildRangeFilter(field, range, indexPattern, event.data.xAxisFormatter);
 
   return [newFilter];
 }

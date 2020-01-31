@@ -14,7 +14,7 @@ describe('Monitoring Check License', () => {
       const result = checkLicense(null, true, 'test-cluster-abc');
       expect(result).to.eql({
         clusterAlerts: { enabled: false },
-        message: `Cluster Alerts are not displayed because the [test-cluster-abc] cluster's license could not be determined.`
+        message: `Cluster Alerts are not displayed because the [test-cluster-abc] cluster's license could not be determined.`,
       });
     });
   });
@@ -24,7 +24,7 @@ describe('Monitoring Check License', () => {
       const result = checkLicense('platinum', false, 'test-cluster-def');
       expect(result).to.eql({
         clusterAlerts: { enabled: false },
-        message: `Cluster Alerts are not displayed because the [test-cluster-def] cluster's current license [platinum] is not active.`
+        message: `Cluster Alerts are not displayed because the [test-cluster-def] cluster's current license [platinum] is not active.`,
       });
     });
   });
@@ -35,7 +35,7 @@ describe('Monitoring Check License', () => {
         const result = checkLicense('basic', true, 'test-cluster-ghi');
         expect(result).to.eql({
           clusterAlerts: { enabled: false },
-          message: `Cluster Alerts are not displayed if Watcher is disabled or the [test-cluster-ghi] cluster's current license is Basic.`
+          message: `Cluster Alerts are not displayed if Watcher is disabled or the [test-cluster-ghi] cluster's current license is Basic.`,
         });
       });
     });
@@ -44,21 +44,21 @@ describe('Monitoring Check License', () => {
       it('standard active license - results true with no message', () => {
         const result = checkLicense('standard', true, 'test-cluster-jkl');
         expect(result).to.eql({
-          clusterAlerts: { enabled: true }
+          clusterAlerts: { enabled: true },
         });
       });
 
       it('gold active license - results true with no message', () => {
         const result = checkLicense('gold', true, 'test-cluster-mno');
         expect(result).to.eql({
-          clusterAlerts: { enabled: true }
+          clusterAlerts: { enabled: true },
         });
       });
 
       it('platinum active license - results true with no message', () => {
         const result = checkLicense('platinum', true, 'test-cluster-pqr');
         expect(result).to.eql({
-          clusterAlerts: { enabled: true }
+          clusterAlerts: { enabled: true },
         });
       });
 
@@ -67,7 +67,7 @@ describe('Monitoring Check License', () => {
           const result = checkLicense('platinum', true, 'test-cluster-pqr', false);
           expect(result).to.eql({
             clusterAlerts: { enabled: false },
-            message: 'Cluster Alerts are not enabled because Watcher is disabled.'
+            message: 'Cluster Alerts are not enabled because Watcher is disabled.',
           });
         });
       });
@@ -89,9 +89,9 @@ describe('Monitoring Check License', () => {
       const xpackInfo = {
         license: {
           getType: () => 'fake-type',
-          isActive: () => true
+          isActive: () => true,
         },
-        feature: () => null
+        feature: () => null,
       };
       const checker = sinon.stub().returns(expected);
       const result = checkLicenseGenerator(xpackInfo, checker);
@@ -102,13 +102,16 @@ describe('Monitoring Check License', () => {
 
     it('mock license with watcher', () => {
       const expected = 123;
-      const feature = sinon.stub().withArgs('watcher').returns({ isEnabled: () => true });
+      const feature = sinon
+        .stub()
+        .withArgs('watcher')
+        .returns({ isEnabled: () => true });
       const xpackInfo = {
         license: {
           getType: () => 'another-type',
-          isActive: () => true
+          isActive: () => true,
         },
-        feature
+        feature,
       };
       const checker = sinon.stub().returns(expected);
       const result = checkLicenseGenerator(xpackInfo, checker);
@@ -122,13 +125,13 @@ describe('Monitoring Check License', () => {
       const xpackInfo = {
         license: {
           getType: () => 'platinum',
-          isActive: () => true
+          isActive: () => true,
         },
         feature: () => {
           return {
-            isEnabled: () => true
+            isEnabled: () => true,
           };
-        }
+        },
       };
       const result = checkLicenseGenerator(xpackInfo);
 

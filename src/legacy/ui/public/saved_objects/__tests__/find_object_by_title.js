@@ -38,10 +38,14 @@ describe('findObjectByTitle', () => {
   });
 
   it('matches any case', async () => {
-    const indexPattern = new SimpleSavedObject(savedObjectsClient, { attributes: { title: 'foo' } });
-    savedObjectsClient.find.returns(Promise.resolve({
-      savedObjects: [indexPattern]
-    }));
+    const indexPattern = new SimpleSavedObject(savedObjectsClient, {
+      attributes: { title: 'foo' },
+    });
+    savedObjectsClient.find.returns(
+      Promise.resolve({
+        savedObjects: [indexPattern],
+      })
+    );
 
     const match = await findObjectByTitle(savedObjectsClient, 'index-pattern', 'FOO');
     expect(match).to.eql(indexPattern);

@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
-import {
-  clearTransientLayerStateAndCloseFlyout,
-} from '../../../actions/map_actions';
+import { clearTransientLayerStateAndCloseFlyout } from '../../../actions/map_actions';
 
 function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);
@@ -27,6 +23,8 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps)(FlyoutFooter);
+const connectedFlyOut = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(FlyoutFooter);
 export { connectedFlyOut as FlyoutFooter };
-

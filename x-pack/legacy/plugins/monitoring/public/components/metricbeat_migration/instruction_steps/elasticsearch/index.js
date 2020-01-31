@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getElasticsearchInstructionsForDisablingInternalCollection } from './disable_internal_collection_instructions';
-export { getElasticsearchInstructionsForEnablingMetricbeat } from './enable_metricbeat_instructions';
+export {
+  getElasticsearchInstructionsForDisablingInternalCollection,
+} from './disable_internal_collection_instructions';
+export {
+  getElasticsearchInstructionsForEnablingMetricbeat,
+} from './enable_metricbeat_instructions';

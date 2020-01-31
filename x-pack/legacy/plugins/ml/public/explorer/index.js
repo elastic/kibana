@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import 'plugins/ml/explorer/explorer_controller';
 import 'plugins/ml/explorer/explorer_dashboard_service';
 import 'plugins/ml/explorer/explorer_react_wrapper_directive';

@@ -21,7 +21,7 @@ import sinon from 'sinon';
 
 export const npSetup = {
   core: {
-    chrome: {}
+    chrome: {},
   },
   plugins: {
     embeddable: {
@@ -38,8 +38,7 @@ export const npSetup = {
         },
       },
     },
-    data: {
-    },
+    data: {},
     inspector: {
       registerView: () => undefined,
       __LEGACY: {
@@ -58,7 +57,7 @@ export const npSetup = {
 
 export const npStart = {
   core: {
-    chrome: {}
+    chrome: {},
   },
   plugins: {
     embeddable: {

@@ -32,12 +32,8 @@ test('renders KuiTable', () => {
   const component = (
     <KuiTable {...requiredProps}>
       <KuiTableHeader>
-        <KuiTableHeaderCell>
-          Hi Title
-        </KuiTableHeaderCell>
-        <KuiTableHeaderCell>
-          Bye Title
-        </KuiTableHeaderCell>
+        <KuiTableHeaderCell>Hi Title</KuiTableHeaderCell>
+        <KuiTableHeaderCell>Bye Title</KuiTableHeaderCell>
       </KuiTableHeader>
       <KuiTableBody>
         <KuiTableRow>

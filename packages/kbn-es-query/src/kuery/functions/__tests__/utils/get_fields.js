@@ -25,23 +25,20 @@ import { nodeTypes } from '../../..';
 
 let indexPattern;
 
-describe('getFields', function () {
-
-
+describe('getFields', function() {
   beforeEach(() => {
     indexPattern = indexPatternResponse;
   });
 
-  describe('field names without a wildcard', function () {
-
-    it('should return an empty array if the field does not exist in the index pattern', function () {
+  describe('field names without a wildcard', function() {
+    it('should return an empty array if the field does not exist in the index pattern', function() {
       const fieldNameNode = nodeTypes.literal.buildNode('nonExistentField');
       const expected = [];
       const actual = getFields(fieldNameNode, indexPattern);
       expect(actual).to.eql(expected);
     });
 
-    it('should return the single matching field in an array', function () {
+    it('should return the single matching field in an array', function() {
       const fieldNameNode = nodeTypes.literal.buildNode('extension');
       const results = getFields(fieldNameNode, indexPattern);
       expect(results).to.be.an('array');
@@ -49,7 +46,7 @@ describe('getFields', function () {
       expect(results[0].name).to.be('extension');
     });
 
-    it('should not match a wildcard in a literal node', function () {
+    it('should not match a wildcard in a literal node', function() {
       const indexPatternWithWildField = {
         title: 'wildIndex',
         fields: [
@@ -72,26 +69,29 @@ describe('getFields', function () {
     });
   });
 
-  describe('field name patterns with a wildcard', function () {
-
-    it('should return an empty array if it does not match any fields in the index pattern', function () {
+  describe('field name patterns with a wildcard', function() {
+    it('should return an empty array if it does not match any fields in the index pattern', function() {
       const fieldNameNode = nodeTypes.wildcard.buildNode('nonExistent*');
       const expected = [];
       const actual = getFields(fieldNameNode, indexPattern);
       expect(actual).to.eql(expected);
     });
 
-    it('should return all fields that match the pattern in an array', function () {
+    it('should return all fields that match the pattern in an array', function() {
       const fieldNameNode = nodeTypes.wildcard.buildNode('machine*');
       const results = getFields(fieldNameNode, indexPattern);
       expect(results).to.be.an('array');
       expect(results).to.have.length(2);
-      expect(results.find((field) => {
-        return field.name === 'machine.os';
-      })).to.be.ok();
-      expect(results.find((field) => {
-        return field.name === 'machine.os.raw';
-      })).to.be.ok();
+      expect(
+        results.find(field => {
+          return field.name === 'machine.os';
+        })
+      ).to.be.ok();
+      expect(
+        results.find(field => {
+          return field.name === 'machine.os.raw';
+        })
+      ).to.be.ok();
     });
   });
 });

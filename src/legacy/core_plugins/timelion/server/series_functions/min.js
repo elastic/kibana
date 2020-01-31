@@ -25,7 +25,7 @@ export default new Chainable('min', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'value',
@@ -35,16 +35,15 @@ export default new Chainable('min', {
           'Sets the point to whichever is lower, the existing value, or the one passed. ' +
           'If passing a seriesList it must contain exactly 1 series.',
       }),
-    }
-
+    },
   ],
   help: i18n.translate('timelion.help.functions.minHelpText', {
     defaultMessage:
       'Minimum values of one or more series in a seriesList to each position, in each series, of the input seriesList',
   }),
   fn: function minFn(args) {
-    return reduce(args, function (a, b) {
+    return reduce(args, function(a, b) {
       return Math.min(a, b);
     });
-  }
+  },
 });

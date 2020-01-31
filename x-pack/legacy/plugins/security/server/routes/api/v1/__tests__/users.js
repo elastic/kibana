@@ -31,7 +31,10 @@ describe('User routes', () => {
     clusterStub = sinon.stub({ callWithRequest() {} });
     sandbox.stub(ClientShield, 'getClient').returns(clusterStub);
 
-    initUsersApi({ authc: { login: loginStub }, config: { authc: { providers: ['basic'] } } }, serverStub);
+    initUsersApi(
+      { authc: { login: loginStub }, config: { authc: { providers: ['basic'] } } },
+      serverStub
+    );
   });
 
   afterEach(() => sandbox.restore());
@@ -41,16 +44,15 @@ describe('User routes', () => {
     let request;
 
     beforeEach(() => {
-      changePasswordRoute = serverStub.route
-        .withArgs(sinon.match({ path: '/api/security/v1/users/{username}/password' }))
-        .firstCall
-        .args[0];
+      changePasswordRoute = serverStub.route.withArgs(
+        sinon.match({ path: '/api/security/v1/users/{username}/password' })
+      ).firstCall.args[0];
 
       request = requestFixture({
         headers: {},
         auth: { credentials: { username: 'user' } },
         params: { username: 'target-user' },
-        payload: { password: 'old-password', newPassword: 'new-password' }
+        payload: { password: 'old-password', newPassword: 'new-password' },
       });
     });
 
@@ -65,8 +67,8 @@ describe('User routes', () => {
       expect(changePasswordRoute.config.validate).to.eql({
         payload: Joi.object({
           password: Joi.string(),
-          newPassword: Joi.string().required()
-        })
+          newPassword: Joi.string().required(),
+        }),
       });
     });
 
@@ -74,10 +76,11 @@ describe('User routes', () => {
       beforeEach(() => {
         request.params.username = request.auth.credentials.username;
         loginStub = loginStub
-          .withArgs(
-            sinon.match.instanceOf(KibanaRequest),
-            { provider: 'basic', value: { username: 'user', password: 'old-password' }, stateless: true }
-          )
+          .withArgs(sinon.match.instanceOf(KibanaRequest), {
+            provider: 'basic',
+            value: { username: 'user', password: 'old-password' },
+            stateless: true,
+          })
           .resolves(AuthenticationResult.succeeded({}));
       });
 
@@ -91,16 +94,16 @@ describe('User routes', () => {
         expect(response.output.payload).to.eql({
           statusCode: 401,
           error: 'Unauthorized',
-          message: 'Something went wrong.'
+          message: 'Something went wrong.',
         });
       });
 
       it('returns 401 if user can authenticate with new password.', async () => {
         loginStub
-          .withArgs(
-            sinon.match.instanceOf(KibanaRequest),
-            { provider: 'basic', value: { username: 'user', password: 'new-password' } }
-          )
+          .withArgs(sinon.match.instanceOf(KibanaRequest), {
+            provider: 'basic',
+            value: { username: 'user', password: 'new-password' },
+          })
           .resolves(AuthenticationResult.failed(new Error('Something went wrong.')));
 
         const response = await changePasswordRoute.handler(request);
@@ -117,17 +120,16 @@ describe('User routes', () => {
         expect(response.output.payload).to.eql({
           statusCode: 401,
           error: 'Unauthorized',
-          message: 'Something went wrong.'
+          message: 'Something went wrong.',
         });
       });
 
       it('returns 500 if password update request fails.', async () => {
         clusterStub.callWithRequest
-          .withArgs(
-            sinon.match.same(request),
-            'shield.changePassword',
-            { username: 'user', body: { password: 'new-password' } }
-          )
+          .withArgs(sinon.match.same(request), 'shield.changePassword', {
+            username: 'user',
+            body: { password: 'new-password' },
+          })
           .rejects(new Error('Request failed.'));
 
         const response = await changePasswordRoute.handler(request);
@@ -136,16 +138,16 @@ describe('User routes', () => {
         expect(response.output.payload).to.eql({
           statusCode: 500,
           error: 'Internal Server Error',
-          message: 'An internal server error occurred'
+          message: 'An internal server error occurred',
         });
       });
 
       it('successfully changes own password if provided old password is correct.', async () => {
         loginStub
-          .withArgs(
-            sinon.match.instanceOf(KibanaRequest),
-            { provider: 'basic', value: { username: 'user', password: 'new-password' } }
-          )
+          .withArgs(sinon.match.instanceOf(KibanaRequest), {
+            provider: 'basic',
+            value: { username: 'user', password: 'new-password' },
+          })
           .resolves(AuthenticationResult.succeeded({}));
 
         const hResponseStub = { code: sinon.stub() };
@@ -169,11 +171,10 @@ describe('User routes', () => {
     describe('other user password', () => {
       it('returns 500 if password update request fails.', async () => {
         clusterStub.callWithRequest
-          .withArgs(
-            sinon.match.same(request),
-            'shield.changePassword',
-            { username: 'target-user', body: { password: 'new-password' } }
-          )
+          .withArgs(sinon.match.same(request), 'shield.changePassword', {
+            username: 'target-user',
+            body: { password: 'new-password' },
+          })
           .returns(Promise.reject(new Error('Request failed.')));
 
         const response = await changePasswordRoute.handler(request);
@@ -185,7 +186,7 @@ describe('User routes', () => {
         expect(response.output.payload).to.eql({
           statusCode: 500,
           error: 'Internal Server Error',
-          message: 'An internal server error occurred'
+          message: 'An internal server error occurred',
         });
       });
 

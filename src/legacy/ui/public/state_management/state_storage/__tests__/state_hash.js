@@ -20,16 +20,12 @@
 import expect from '@kbn/expect';
 import { encode as encodeRison } from 'rison-node';
 
-import {
-  createStateHash,
-  isStateHash,
-} from '../state_hash';
+import { createStateHash, isStateHash } from '../state_hash';
 
 describe('stateHash', () => {
   const existingJsonProvider = () => null;
 
   describe('#createStateHash', () => {
-
     describe('returns a hash', () => {
       const json = JSON.stringify({ a: 'a' });
       const hash = createStateHash(json, existingJsonProvider);

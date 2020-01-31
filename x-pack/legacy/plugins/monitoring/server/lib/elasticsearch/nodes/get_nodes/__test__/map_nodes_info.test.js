@@ -17,9 +17,9 @@ describe('map nodes info', () => {
             transport_address: '127.0.0.1:9300',
             ip: '127.0.0.1',
             name: 'node01',
-            timestamp: '2018-02-14T17:51:40.386Z'
-          }
-        }
+            timestamp: '2018-02-14T17:51:40.386Z',
+          },
+        },
       },
       {
         _source: {
@@ -29,10 +29,10 @@ describe('map nodes info', () => {
             transport_address: '127.0.0.1:9301',
             ip: '127.0.0.1',
             name: 'node02',
-            timestamp: '2018-02-14T17:46:31.520Z'
-          }
-        }
-      }
+            timestamp: '2018-02-14T17:46:31.520Z',
+          },
+        },
+      },
     ];
     const clusterStats = {
       cluster_uuid: 'fHJwISmKTFO8bj57oFBLUQ',
@@ -51,17 +51,17 @@ describe('map nodes info', () => {
             transport_address: '127.0.0.1:9300',
             attributes: {
               'ml.machine_memory': '17179869184',
-              'ml.max_open_jobs': '20'
-            }
-          }
-        }
-      }
+              'ml.max_open_jobs': '20',
+            },
+          },
+        },
+      },
     };
     const shardStats = {
       indicesTotals: {
         primary: 57,
         replica: 0,
-        unassigned: { primary: 0, replica: 41 }
+        unassigned: { primary: 0, replica: 41 },
       },
       nodes: {
         'ENVgDIKRSdCVJo-YqY4kUQ': {
@@ -69,9 +69,9 @@ describe('map nodes info', () => {
           indexCount: 25,
           name: 'node01',
           node_ids: ['ENVgDIKRSdCVJo-YqY4kUQ'],
-          type: 'master'
-        }
-      }
+          type: 'master',
+        },
+      },
     };
 
     expect(mapNodesInfo(nodeHits, clusterStats, shardStats)).toMatchSnapshot();

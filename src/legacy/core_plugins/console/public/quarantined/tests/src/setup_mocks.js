@@ -20,7 +20,7 @@
 jest.mock('../../src/sense_editor/mode/worker', () => {
   return { workerModule: { id: 'sense_editor/mode/worker', src: '' } };
 });
-window.Worker = function () {
+window.Worker = function() {
   this.postMessage = () => {};
   this.terminate = () => {};
 };
@@ -36,7 +36,9 @@ import 'brace/ext/searchbox';
 import 'brace/mode/json';
 import 'brace/mode/text';
 
-jest.mock('../../../../np_ready/public/application', () => ({ legacyBackDoorToSettings: () => {}, }));
+jest.mock('../../../../np_ready/public/application', () => ({
+  legacyBackDoorToSettings: () => {},
+}));
 
 document.queryCommandSupported = () => true;
 

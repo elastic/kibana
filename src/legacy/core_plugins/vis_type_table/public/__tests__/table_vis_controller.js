@@ -30,7 +30,7 @@ import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { createTableVisTypeDefinition } from '../table_vis_type';
 import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 
-describe('Table Vis - Controller', async function () {
+describe('Table Vis - Controller', async function() {
   let $rootScope;
   let $compile;
   let Private;
@@ -43,7 +43,7 @@ describe('Table Vis - Controller', async function () {
   let tabifiedResponse;
   let legacyDependencies;
 
-  ngMock.inject(function ($injector) {
+  ngMock.inject(function($injector) {
     Private = $injector.get('Private');
     legacyDependencies = {
       // eslint-disable-next-line new-cap
@@ -57,7 +57,7 @@ describe('Table Vis - Controller', async function () {
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
   beforeEach(
-    ngMock.inject(function ($injector) {
+    ngMock.inject(function($injector) {
       Private = $injector.get('Private');
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
@@ -102,7 +102,7 @@ describe('Table Vis - Controller', async function () {
 
   // basically a parameterized beforeEach
   function initController(vis) {
-    vis.aggs.aggs.forEach(function (agg, i) {
+    vis.aggs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
 
@@ -111,7 +111,7 @@ describe('Table Vis - Controller', async function () {
     $rootScope.visParams = vis.params;
     $rootScope.uiState = new AppState({ uiState: {} }).makeStateful('uiState');
     $rootScope.renderComplete = () => {};
-    $rootScope.newScope = function (scope) {
+    $rootScope.newScope = function(scope) {
       $scope = scope;
     };
 
@@ -135,7 +135,7 @@ describe('Table Vis - Controller', async function () {
     $rootScope.$apply();
   }
 
-  it('exposes #tableGroups and #hasSomeRows when a response is attached to scope', async function () {
+  it('exposes #tableGroups and #hasSomeRows when a response is attached to scope', async function() {
     const vis = new OneRangeVis();
     initController(vis);
 
@@ -151,7 +151,7 @@ describe('Table Vis - Controller', async function () {
     expect($scope.tableGroups.tables[0].rows).to.have.length(2);
   });
 
-  it('clears #tableGroups and #hasSomeRows when the response is removed', async function () {
+  it('clears #tableGroups and #hasSomeRows when the response is removed', async function() {
     const vis = new OneRangeVis();
     initController(vis);
 
@@ -162,7 +162,7 @@ describe('Table Vis - Controller', async function () {
     expect(!$scope.tableGroups).to.be.ok();
   });
 
-  it('sets the sort on the scope when it is passed as a vis param', async function () {
+  it('sets the sort on the scope when it is passed as a vis param', async function() {
     const sortObj = {
       columnIndex: 1,
       direction: 'asc',
@@ -176,7 +176,7 @@ describe('Table Vis - Controller', async function () {
     expect($scope.sort.direction).to.equal(sortObj.direction);
   });
 
-  it('sets #hasSomeRows properly if the table group is empty', async function () {
+  it('sets #hasSomeRows properly if the table group is empty', async function() {
     const vis = new OneRangeVis();
     initController(vis);
 
@@ -188,14 +188,14 @@ describe('Table Vis - Controller', async function () {
     expect(!$scope.tableGroups).to.be.ok();
   });
 
-  it('passes partialRows:true to tabify based on the vis params', function () {
+  it('passes partialRows:true to tabify based on the vis params', function() {
     const vis = new OneRangeVis({ showPartialRows: true });
     initController(vis);
 
     expect(vis.isHierarchical()).to.equal(true);
   });
 
-  it('passes partialRows:false to tabify based on the vis params', function () {
+  it('passes partialRows:false to tabify based on the vis params', function() {
     const vis = new OneRangeVis({ showPartialRows: false });
     initController(vis);
 

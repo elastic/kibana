@@ -6,9 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
 import {
   EuiAvatar,
@@ -53,7 +51,9 @@ export class SecurityNavControl extends Component {
         aria-controls="headerUserMenu"
         aria-expanded={this.state.isOpen}
         aria-haspopup="true"
-        aria-label={i18n.translate('xpack.security.navControlComponent.accountMenuAriaLabel', { defaultMessage: 'Account menu' })}
+        aria-label={i18n.translate('xpack.security.navControlComponent.accountMenuAriaLabel', {
+          defaultMessage: 'Account menu',
+        })}
         onClick={this.onMenuButtonClick}
         data-test-subj="userMenuButton"
       >
@@ -80,7 +80,7 @@ export class SecurityNavControl extends Component {
 
             <EuiFlexItem>
               <EuiText>
-                <p>{name}</p>
+                <p className="eui-textBreakWord">{name}</p>
               </EuiText>
 
               <EuiSpacer size="m" />

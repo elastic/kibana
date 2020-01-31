@@ -29,8 +29,9 @@ import './lib/pager';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
-uiModules.get('app/discover')
-  .directive('docTable', function (config, getAppState, pagerFactory, $filter) {
+uiModules
+  .get('app/discover')
+  .directive('docTable', function(config, getAppState, pagerFactory, $filter) {
     return {
       restrict: 'E',
       template: html,
@@ -51,14 +52,14 @@ uiModules.get('app/discover')
         onRemoveColumn: '=?',
         inspectorAdapters: '=?',
       },
-      link: function ($scope, $el) {
-        $scope.$watch('minimumVisibleRows', (minimumVisibleRows) => {
+      link: function($scope, $el) {
+        $scope.$watch('minimumVisibleRows', minimumVisibleRows => {
           $scope.limit = Math.max(minimumVisibleRows || 50, $scope.limit || 50);
         });
 
         $scope.persist = {
           sorting: $scope.sorting,
-          columns: $scope.columns
+          columns: $scope.columns,
         };
 
         const limitTo = $filter('limitTo');
@@ -67,14 +68,16 @@ uiModules.get('app/discover')
           $scope.pageOfItems = limitTo($scope.hits, $scope.pager.pageSize, $scope.pager.startIndex);
         };
 
-        $scope.limitedResultsWarning = getLimitedSearchResultsMessage(config.get('discover:sampleSize'));
+        $scope.limitedResultsWarning = getLimitedSearchResultsMessage(
+          config.get('discover:sampleSize')
+        );
 
-        $scope.addRows = function () {
+        $scope.addRows = function() {
           $scope.limit += 50;
         };
 
         // This exists to fix the problem of an empty initial column list not playing nice with watchCollection.
-        $scope.$watch('columns', function (columns) {
+        $scope.$watch('columns', function(columns) {
           if (columns.length !== 0) return;
 
           const $state = getAppState();
@@ -82,7 +85,7 @@ uiModules.get('app/discover')
           if ($state) $state.replace();
         });
 
-        $scope.$watchCollection('columns', function (columns, oldColumns) {
+        $scope.$watchCollection('columns', function(columns, oldColumns) {
           if (oldColumns.length === 1 && oldColumns[0] === '_source' && $scope.columns.length > 1) {
             _.pull($scope.columns, '_source');
           }
@@ -116,9 +119,8 @@ uiModules.get('app/discover')
           calculateItemsOnPage();
         };
 
-        $scope.shouldShowLimitedResultsWarning = () => (
-          !$scope.pager.hasNextPage && $scope.pager.totalItems < $scope.totalHitCount
-        );
-      }
+        $scope.shouldShowLimitedResultsWarning = () =>
+          !$scope.pager.hasNextPage && $scope.pager.totalItems < $scope.totalHitCount;
+      },
     };
   });

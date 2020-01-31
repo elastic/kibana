@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import moment from 'moment';
@@ -25,18 +24,20 @@ import { VisProvider } from '../../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { createFilterDateRange } from '../../../buckets/create_filter/date_range';
 
-describe('AggConfig Filters', function () {
-  describe('Date range', function () {
+describe('AggConfig Filters', function() {
+  describe('Date range', function() {
     let indexPattern;
     let Vis;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      Vis = Private(VisProvider);
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    }));
+    beforeEach(
+      ngMock.inject(function(Private) {
+        Vis = Private(VisProvider);
+        indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      })
+    );
 
-    it('should return a range filter for date_range agg', function () {
+    it('should return a range filter for date_range agg', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
@@ -44,12 +45,10 @@ describe('AggConfig Filters', function () {
             type: 'date_range',
             params: {
               field: '@timestamp',
-              ranges: [
-                { from: '2014-01-01', to: '2014-12-31' }
-              ]
-            }
-          }
-        ]
+              ranges: [{ from: '2014-01-01', to: '2014-12-31' }],
+            },
+          },
+        ],
       });
 
       const aggConfig = vis.aggs.byName('date_range')[0];

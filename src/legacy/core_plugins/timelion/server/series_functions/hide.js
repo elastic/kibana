@@ -25,7 +25,7 @@ export default new Chainable('hide', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'hide',
@@ -33,15 +33,15 @@ export default new Chainable('hide', {
       help: i18n.translate('timelion.help.functions.hide.args.hideHelpText', {
         defaultMessage: 'Hide or unhide the series',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.hideHelpText', {
     defaultMessage: 'Hide the series by default',
   }),
   fn: function hideFn(args) {
-    return alter(args, function (eachSeries, hide) {
+    return alter(args, function(eachSeries, hide) {
       eachSeries._hide = hide == null ? true : hide;
       return eachSeries;
     });
-  }
+  },
 });

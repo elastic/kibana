@@ -21,30 +21,32 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import moment from 'moment-timezone';
 import { fieldFormats } from 'ui/registry/field_formats';
-describe('Date Format', function () {
+describe('Date Format', function() {
   let settings;
   let convert;
   let $scope;
   let off;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (config, $rootScope) {
-    $scope = $rootScope;
-    settings = config;
+  beforeEach(
+    ngMock.inject(function(config, $rootScope) {
+      $scope = $rootScope;
+      settings = config;
 
-    const getConfig = (...args) => config.get(...args);
-    const DateFormat = fieldFormats.getType('date');
-    const date = new DateFormat({}, getConfig);
+      const getConfig = (...args) => config.get(...args);
+      const DateFormat = fieldFormats.getType('date');
+      const date = new DateFormat({}, getConfig);
 
-    convert = date.convert.bind(date);
-  }));
+      convert = date.convert.bind(date);
+    })
+  );
 
-  it('decoding an undefined or null date should return an empty string', function () {
+  it('decoding an undefined or null date should return an empty string', function() {
     expect(convert(null)).to.be('-');
     expect(convert(undefined)).to.be('-');
   });
 
-  it('should clear the memoization cache after changing the date', function () {
+  it('should clear the memoization cache after changing the date', function() {
     function setDefaultTimezone() {
       moment.tz.setDefault(settings.get('dateFormat:tz'));
     }
@@ -64,7 +66,7 @@ describe('Date Format', function () {
     off();
   });
 
-  it('should return the value itself when it cannot successfully be formatted', function () {
+  it('should return the value itself when it cannot successfully be formatted', function() {
     const dateMath = 'now+1M/d';
     expect(convert(dateMath)).to.be(dateMath);
   });

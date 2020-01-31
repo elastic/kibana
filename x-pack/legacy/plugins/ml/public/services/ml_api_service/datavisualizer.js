@@ -11,7 +11,6 @@ import { http } from '../../services/http_service';
 const basePath = chrome.addBasePath('/api/ml');
 
 export const fileDatavisualizer = {
-
   analyzeFile(obj, params = {}) {
     let paramString = '';
     if (Object.keys(params).length) {
@@ -25,19 +24,13 @@ export const fileDatavisualizer = {
     return http({
       url: `${basePath}/file_data_visualizer/analyze_file${paramString}`,
       method: 'POST',
-      data: obj
+      data: obj,
     });
   },
 
   import(obj) {
-    const paramString = (obj.id !== undefined) ? `?id=${obj.id}` : '';
-    const {
-      index,
-      data,
-      settings,
-      mappings,
-      ingestPipeline
-    } = obj;
+    const paramString = obj.id !== undefined ? `?id=${obj.id}` : '';
+    const { index, data, settings, mappings, ingestPipeline } = obj;
 
     return http({
       url: `${basePath}/file_data_visualizer/import${paramString}`,
@@ -48,8 +41,7 @@ export const fileDatavisualizer = {
         settings,
         mappings,
         ingestPipeline,
-      }
+      },
     });
-  }
-
+  },
 };

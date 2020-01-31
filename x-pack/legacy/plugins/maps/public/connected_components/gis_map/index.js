@@ -14,7 +14,7 @@ import {
   areLayersLoaded,
   getRefreshConfig,
   getMapInitError,
-  getQueryableUniqueIndexPatternIds
+  getQueryableUniqueIndexPatternIds,
 } from '../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
@@ -39,5 +39,8 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedGisMap = connect(mapStateToProps, mapDispatchToProps)(GisMap);
+const connectedGisMap = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(GisMap);
 export { connectedGisMap as GisMap };

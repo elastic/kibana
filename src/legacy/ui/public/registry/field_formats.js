@@ -59,7 +59,7 @@ class FieldFormatRegistry {
    * @param  {String} formatId - the format id
    * @return {Function}
    */
-  getType = (formatId) => {
+  getType = formatId => {
     return this.fieldFormats.get(formatId);
   };
   /**
@@ -83,8 +83,8 @@ class FieldFormatRegistry {
    * @param  {String[]} esTypes - Array of ES data types
    * @return {String|undefined}
    */
-  getTypeNameByEsTypes = (esTypes) => {
-    if(!Array.isArray(esTypes)) {
+  getTypeNameByEsTypes = esTypes => {
+    if (!Array.isArray(esTypes)) {
       return;
     }
     return esTypes.find(type => this._defaultMap[type] && this._defaultMap[type].es);
@@ -107,7 +107,7 @@ class FieldFormatRegistry {
    * @param  {String} formatId
    * @return {FieldFormat}
    */
-  getInstance = memoize(function (formatId) {
+  getInstance = memoize(function(formatId) {
     const FieldFormat = this.getType(formatId);
     if (!FieldFormat) {
       throw new Error(`Field Format '${formatId}' not found!`);
@@ -153,8 +153,9 @@ class FieldFormatRegistry {
    */
 
   getByFieldType(fieldType) {
-    return [ ...this.fieldFormats.values()]
-      .filter(format => format.fieldType.indexOf(fieldType) !== -1);
+    return [...this.fieldFormats.values()].filter(
+      format => format.fieldType.indexOf(fieldType) !== -1
+    );
   }
 
   /**
@@ -169,7 +170,7 @@ class FieldFormatRegistry {
 
   parseDefaultTypeMap(value) {
     this._defaultMap = value;
-    forOwn(this, function (fn) {
+    forOwn(this, function(fn) {
       if (isFunction(fn) && fn.cache) {
         // clear all memoize caches
         fn.cache = new memoize.Cache();
@@ -177,7 +178,7 @@ class FieldFormatRegistry {
     });
   }
 
-  register = (module) => {
+  register = module => {
     const fieldFormatInstance = module(FieldFormat);
     this.fieldFormats.set(fieldFormatInstance.id, fieldFormatInstance);
     return this;

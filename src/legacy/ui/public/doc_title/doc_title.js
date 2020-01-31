@@ -36,7 +36,10 @@ function render() {
 
   if (!lastChange[1]) parts.push(baseTitle);
 
-  return _(parts).flattenDeep().compact().join(' - ');
+  return _(parts)
+    .flattenDeep()
+    .compact()
+    .join(' - ');
 }
 
 function change(title, complete) {
@@ -59,11 +62,9 @@ export const docTitle = {
   update,
 };
 
-uiModules.get('kibana')
-  .run(function ($rootScope) {
+uiModules.get('kibana').run(function($rootScope) {
   // always bind to the route events
-    $rootScope.$on('$routeChangeStart', docTitle.reset);
-    $rootScope.$on('$routeChangeError', docTitle.update);
-    $rootScope.$on('$routeChangeSuccess', docTitle.update);
-  });
-
+  $rootScope.$on('$routeChangeStart', docTitle.reset);
+  $rootScope.$on('$routeChangeError', docTitle.update);
+  $rootScope.$on('$routeChangeSuccess', docTitle.update);
+});

@@ -32,8 +32,12 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
   if (_.isUndefined(value)) {
     throw new Error('value is a required argument');
   }
-  const fieldNode = typeof fieldName === 'string' ? ast.fromLiteralExpression(fieldName) : literal.buildNode(fieldName);
-  const valueNode = typeof value === 'string' ? ast.fromLiteralExpression(value) : literal.buildNode(value);
+  const fieldNode =
+    typeof fieldName === 'string'
+      ? ast.fromLiteralExpression(fieldName)
+      : literal.buildNode(fieldName);
+  const valueNode =
+    typeof value === 'string' ? ast.fromLiteralExpression(value) : literal.buildNode(value);
   const isPhraseNode = literal.buildNode(isPhrase);
   return {
     arguments: [fieldNode, valueNode, isPhraseNode],
@@ -41,7 +45,9 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
 }
 
 export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
-  const { arguments: [fieldNameArg, valueArg, isPhraseArg] } = node;
+  const {
+    arguments: [fieldNameArg, valueArg, isPhraseArg],
+  } = node;
   const fieldName = ast.toElasticsearchQuery(fieldNameArg);
   const value = !_.isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
@@ -59,7 +65,7 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
         type,
         query: value,
         lenient: true,
-      }
+      },
     };
   }
 
@@ -78,8 +84,8 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
 
   const isExistsQuery = valueArg.type === 'wildcard' && value === '*';
   const isAllFieldsQuery =
-    (fieldNameArg.type === 'wildcard' && fieldName === '*')
-    || (fields && indexPattern && fields.length === indexPattern.fields.length);
+    (fieldNameArg.type === 'wildcard' && fieldName === '*') ||
+    (fields && indexPattern && fields.length === indexPattern.fields.length);
   const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
 
   if (isMatchAllQuery) {
@@ -90,60 +96,71 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
     if (field.scripted) {
       // Exists queries don't make sense for scripted fields
       if (!isExistsQuery) {
-        return [...accumulator, {
-          script: {
-            ...getPhraseScript(field, value)
-          }
-        }];
+        return [
+          ...accumulator,
+          {
+            script: {
+              ...getPhraseScript(field, value),
+            },
+          },
+        ];
       }
-    }
-    else if (isExistsQuery) {
-      return [...accumulator, {
-        exists: {
-          field: field.name
-        }
-      }];
-    }
-    else if (valueArg.type === 'wildcard') {
-      return [...accumulator, {
-        query_string: {
-          fields: [field.name],
-          query: wildcard.toQueryStringQuery(valueArg),
-        }
-      }];
-    }
-    /*
+    } else if (isExistsQuery) {
+      return [
+        ...accumulator,
+        {
+          exists: {
+            field: field.name,
+          },
+        },
+      ];
+    } else if (valueArg.type === 'wildcard') {
+      return [
+        ...accumulator,
+        {
+          query_string: {
+            fields: [field.name],
+            query: wildcard.toQueryStringQuery(valueArg),
+          },
+        },
+      ];
+    } else if (field.type === 'date') {
+      /*
       If we detect that it's a date field and the user wants an exact date, we need to convert the query to both >= and <= the value provided to force a range query. This is because match and match_phrase queries do not accept a timezone parameter.
       dateFormatTZ can have the value of 'Browser', in which case we guess the timezone using moment.tz.guess.
     */
-    else if (field.type === 'date') {
-      const timeZoneParam = config.dateFormatTZ ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) } : {};
-      return [...accumulator, {
-        range: {
-          [field.name]: {
-            gte: value,
-            lte: value,
-            ...timeZoneParam,
+      const timeZoneParam = config.dateFormatTZ
+        ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) }
+        : {};
+      return [
+        ...accumulator,
+        {
+          range: {
+            [field.name]: {
+              gte: value,
+              lte: value,
+              ...timeZoneParam,
+            },
           },
-        }
-      }];
-    }
-    else {
+        },
+      ];
+    } else {
       const queryType = type === 'phrase' ? 'match_phrase' : 'match';
-      return [...accumulator, {
-        [queryType]: {
-          [field.name]: value
-        }
-      }];
+      return [
+        ...accumulator,
+        {
+          [queryType]: {
+            [field.name]: value,
+          },
+        },
+      ];
     }
   }, []);
 
   return {
     bool: {
       should: queries,
-      minimum_should_match: 1
-    }
+      minimum_should_match: 1,
+    },
   };
 }
-
-

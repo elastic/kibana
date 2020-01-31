@@ -8,7 +8,7 @@ import moment from 'moment';
 import expect from '@kbn/expect';
 import { PINGS_DATE_RANGE_START, PINGS_DATE_RANGE_END } from './constants';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -20,7 +20,9 @@ export default function ({ getService }) {
 
     it('should get all pings stored in index', async () => {
       const { body: apiResponse } = await supertest
-        .get(`/api/uptime/pings?sort=desc&dateRangeStart=${PINGS_DATE_RANGE_START}&dateRangeEnd=${PINGS_DATE_RANGE_END}`)
+        .get(
+          `/api/uptime/pings?sort=desc&dateRangeStart=${PINGS_DATE_RANGE_START}&dateRangeEnd=${PINGS_DATE_RANGE_END}`
+        )
         .expect(200);
 
       expect(apiResponse.total).to.be(2);

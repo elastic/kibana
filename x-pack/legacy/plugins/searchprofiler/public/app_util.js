@@ -6,7 +6,7 @@
 
 // Convert triple quotes into regular quotes and escape internal quotes.
 function collapseLiteralStrings(data) {
-  return data.replace(/"""(?:\s*\r?\n)?((?:.|\r?\n)*?)(?:\r?\n\s*)?"""/g, function (match, literal) {
+  return data.replace(/"""(?:\s*\r?\n)?((?:.|\r?\n)*?)(?:\r?\n\s*)?"""/g, function(match, literal) {
     return JSON.stringify(literal);
   });
 }

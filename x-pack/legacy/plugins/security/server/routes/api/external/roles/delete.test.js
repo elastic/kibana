@@ -18,12 +18,7 @@ const defaultPreCheckLicenseImpl = () => null;
 describe('DELETE role', () => {
   const deleteRoleTest = (
     description,
-    {
-      name,
-      preCheckLicenseImpl,
-      callWithRequestImpl,
-      asserts,
-    }
+    { name, preCheckLicenseImpl, callWithRequestImpl, asserts }
   ) => {
     test(description, async () => {
       const mockServer = createMockServer();
@@ -58,7 +53,7 @@ describe('DELETE role', () => {
             }),
           }),
           'shield.deleteRole',
-          { name },
+          { name }
         );
       } else {
         expect(mockCallWithRequest).not.toHaveBeenCalled();
@@ -117,8 +112,8 @@ describe('DELETE role', () => {
       callWithRequestImpl: async () => {},
       asserts: {
         statusCode: 204,
-        result: null
-      }
+        result: null,
+      },
     });
   });
 });

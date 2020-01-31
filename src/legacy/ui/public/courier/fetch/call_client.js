@@ -56,7 +56,7 @@ export function CallClientProvider(Private, Promise, es, config, sessionId, esSh
     const respondToSearchRequests = (responsesInOriginalRequestOrder = []) => {
       // We map over searchRequests because if we were originally provided an ABORTED
       // request then we'll return that value.
-      return Promise.map(searchRequests, function (searchRequest, searchRequestIndex) {
+      return Promise.map(searchRequests, function(searchRequest, searchRequestIndex) {
         if (searchRequest.aborted) {
           return ABORTED;
         }
@@ -75,21 +75,19 @@ export function CallClientProvider(Private, Promise, es, config, sessionId, esSh
         }
 
         return responsesInOriginalRequestOrder[searchRequestIndex];
-      })
-        .then(
-          (res) => defer.resolve(res),
-          (err) => defer.reject(err)
-        );
+      }).then(res => defer.resolve(res), err => defer.reject(err));
     };
 
     // handle a request being aborted while being fetched
-    const requestWasAborted = Promise.method(function (searchRequest, index) {
+    const requestWasAborted = Promise.method(function(searchRequest, index) {
       if (searchRequests[index] === ABORTED) {
-        defer.reject(new Error(
-          i18n.translate('common.ui.courier.fetch.requestWasAbortedTwiceErrorMessage', {
-            defaultMessage: 'Request was aborted twice?',
-          })
-        ));
+        defer.reject(
+          new Error(
+            i18n.translate('common.ui.courier.fetch.requestWasAbortedTwiceErrorMessage', {
+              defaultMessage: 'Request was aborted twice?',
+            })
+          )
+        );
       }
 
       requestsToFetchCount--;
@@ -109,12 +107,12 @@ export function CallClientProvider(Private, Promise, es, config, sessionId, esSh
     });
 
     // attach abort handlers, close over request index
-    searchRequests.forEach(function (searchRequest, index) {
+    searchRequests.forEach(function(searchRequest, index) {
       if (!isRequest(searchRequest)) {
         return;
       }
 
-      searchRequest.whenAborted(function () {
+      searchRequest.whenAborted(function() {
         requestWasAborted(searchRequest, index).catch(defer.reject);
       });
     });
@@ -128,11 +126,15 @@ export function CallClientProvider(Private, Promise, es, config, sessionId, esSh
       for (let i = 0; i < searchStrategiesWithRequests.length; i++) {
         const searchStrategyWithSearchRequests = searchStrategiesWithRequests[i];
         const { searchStrategy, searchRequests } = searchStrategyWithSearchRequests;
-        const {
-          searching,
-          abort,
-          failedSearchRequests,
-        } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams, config, sessionId, esShardTimeout });
+        const { searching, abort, failedSearchRequests } = await searchStrategy.search({
+          searchRequests,
+          es,
+          Promise,
+          serializeFetchParams,
+          config,
+          sessionId,
+          esShardTimeout,
+        });
 
         // Collect searchRequests which have successfully been sent.
         searchRequests.forEach(searchRequest => {
@@ -156,12 +158,14 @@ export function CallClientProvider(Private, Promise, es, config, sessionId, esSh
           return;
         }
 
-        const segregatedResponses = await Promise.all(abortableSearches.map(async ({ searching, requestsCount }) => {
-          return searching.catch((e) => {
-            // Duplicate errors so that they correspond to the original requests.
-            return new Array(requestsCount).fill({ error: e });
-          });
-        }));
+        const segregatedResponses = await Promise.all(
+          abortableSearches.map(async ({ searching, requestsCount }) => {
+            return searching.catch(e => {
+              // Duplicate errors so that they correspond to the original requests.
+              return new Array(requestsCount).fill({ error: e });
+            });
+          })
+        );
 
         // Assigning searchRequests to strategies means that the responses come back in a different
         // order than the original searchRequests. So we'll put them back in order so that we can
@@ -169,14 +173,15 @@ export function CallClientProvider(Private, Promise, es, config, sessionId, esSh
         const responsesInOriginalRequestOrder = new Array(searchRequests.length);
         segregatedResponses.forEach((responses, strategyIndex) => {
           responses.forEach((response, responseIndex) => {
-            const searchRequest = searchStrategiesWithRequests[strategyIndex].searchRequests[responseIndex];
+            const searchRequest =
+              searchStrategiesWithRequests[strategyIndex].searchRequests[responseIndex];
             const requestIndex = searchRequests.indexOf(searchRequest);
             responsesInOriginalRequestOrder[requestIndex] = response;
           });
         });
 
         await respondToSearchRequests(responsesInOriginalRequestOrder);
-      } catch(error) {
+      } catch (error) {
         if (errorAllowExplicitIndex.test(error)) {
           return errorAllowExplicitIndex.takeover();
         }
@@ -188,7 +193,7 @@ export function CallClientProvider(Private, Promise, es, config, sessionId, esSh
     // Return the promise which acts as our vehicle for providing search responses to the consumer.
     // However, if there are any errors, notify the searchRequests of them *instead* of bubbling
     // them up to the consumer.
-    return defer.promise.catch((err) => {
+    return defer.promise.catch(err => {
       // By returning the return value of this catch() without rethrowing the error, we delegate
       // error-handling to the searchRequest instead of the consumer.
       searchRequests.forEach((searchRequest, index) => {

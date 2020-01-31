@@ -27,7 +27,7 @@ export async function getPermissions(req, xpackInfo) {
     path: '/_security/user/_has_privileges',
     body: {
       cluster: ['manage'], // License management requires "manage" cluster privileges
-    }
+    },
   };
 
   try {
@@ -38,5 +38,4 @@ export async function getPermissions(req, xpackInfo) {
   } catch (error) {
     return error.body;
   }
-
 }

@@ -37,9 +37,7 @@ const aggSchemas = new Schemas([
     min: 1,
     max: Infinity,
     aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
-    defaults: [
-      { schema: 'metric', type: 'count' }
-    ]
+    defaults: [{ schema: 'metric', type: 'count' }],
   },
   {
     group: 'buckets',
@@ -47,18 +45,17 @@ const aggSchemas = new Schemas([
     title: 'Geo Grid',
     aggFilter: 'geotile_grid',
     min: 1,
-    max: 1
-  }
+    max: 1,
+  },
 ]);
 
 export class ESGeoGridSource extends AbstractESSource {
-
   static type = ES_GEO_GRID;
   static title = i18n.translate('xpack.maps.source.esGridTitle', {
-    defaultMessage: 'Grid aggregation'
+    defaultMessage: 'Grid aggregation',
   });
   static description = i18n.translate('xpack.maps.source.esGridDescription', {
-    defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell'
+    defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell',
   });
 
   static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
@@ -68,12 +65,12 @@ export class ESGeoGridSource extends AbstractESSource {
       indexPatternId: indexPatternId,
       geoField: geoField,
       requestType: requestType,
-      resolution: resolution ? resolution : GRID_RESOLUTION.COARSE
+      resolution: resolution ? resolution : GRID_RESOLUTION.COARSE,
     };
   }
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = (sourceConfig) => {
+    const onSourceConfigChange = sourceConfig => {
       if (!sourceConfig) {
         onPreviewSource(null);
         return;
@@ -84,7 +81,7 @@ export class ESGeoGridSource extends AbstractESSource {
       onPreviewSource(source);
     };
 
-    return (<CreateSourceEditor onSourceConfigChange={onSourceConfigChange}/>);
+    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   }
 
   renderSourceSettingsEditor({ onChange }) {
@@ -111,24 +108,25 @@ export class ESGeoGridSource extends AbstractESSource {
     return [
       {
         label: getDataSourceLabel(),
-        value: ESGeoGridSource.title
+        value: ESGeoGridSource.title,
       },
       {
         label: i18n.translate('xpack.maps.source.esGrid.indexPatternLabel', {
-          defaultMessage: 'Index pattern'
+          defaultMessage: 'Index pattern',
         }),
-        value: indexPatternTitle },
+        value: indexPatternTitle,
+      },
       {
         label: i18n.translate('xpack.maps.source.esGrid.geospatialFieldLabel', {
-          defaultMessage: 'Geospatial field'
+          defaultMessage: 'Geospatial field',
         }),
-        value: this._descriptor.geoField
+        value: this._descriptor.geoField,
       },
       {
         label: i18n.translate('xpack.maps.source.esGrid.showasFieldLabel', {
-          defaultMessage: 'Show as'
+          defaultMessage: 'Show as',
         }),
-        value: this._descriptor.requestType
+        value: this._descriptor.requestType,
       },
     ];
   }
@@ -169,12 +167,14 @@ export class ESGeoGridSource extends AbstractESSource {
       return 4;
     }
 
-    throw new Error(i18n.translate('xpack.maps.source.esGrid.resolutionParamErrorMessage', {
-      defaultMessage: `Grid resolution param not recognized: {resolution}`,
-      values: {
-        resolution: this._descriptor.resolution
-      }
-    }));
+    throw new Error(
+      i18n.translate('xpack.maps.source.esGrid.resolutionParamErrorMessage', {
+        defaultMessage: `Grid resolution param not recognized: {resolution}`,
+        values: {
+          resolution: this._descriptor.resolution,
+        },
+      })
+    );
   }
 
   async getNumberFields() {
@@ -185,16 +185,21 @@ export class ESGeoGridSource extends AbstractESSource {
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this._getIndexPattern();
-    const searchSource  = await this._makeSearchSource(searchFilters, 0);
-    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
+    const searchSource = await this._makeSearchSource(searchFilters, 0);
+    const aggConfigs = new AggConfigs(
+      indexPattern,
+      this._makeAggConfigs(searchFilters.geogridPrecision),
+      aggSchemas.all
+    );
     searchSource.setField('aggs', aggConfigs.toDsl());
     const esResponse = await this._runEsQuery(
       layerName,
       searchSource,
       registerCancelCallback,
       i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
-        defaultMessage: 'Elasticsearch geo grid aggregation request'
-      }));
+        defaultMessage: 'Elasticsearch geo grid aggregation request',
+      })
+    );
 
     const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
     const { featureCollection } = convertToGeoJson({
@@ -205,8 +210,8 @@ export class ESGeoGridSource extends AbstractESSource {
     return {
       data: featureCollection,
       meta: {
-        areResultsTrimmed: false
-      }
+        areResultsTrimmed: false,
+      },
     };
   }
 
@@ -229,7 +234,7 @@ export class ESGeoGridSource extends AbstractESSource {
         enabled: true,
         type: metric.type,
         schema: 'metric',
-        params: {}
+        params: {},
       };
       if (metric.type !== 'count') {
         metricAggConfig.params = { field: metric.field };
@@ -248,7 +253,7 @@ export class ESGeoGridSource extends AbstractESSource {
           field: this._descriptor.geoField,
           useGeocentroid: true,
           precision: precision,
-        }
+        },
       },
     ];
   }
@@ -257,13 +262,13 @@ export class ESGeoGridSource extends AbstractESSource {
     if (this._descriptor.requestType === RENDER_AS.HEATMAP) {
       return HeatmapLayer.createDescriptor({
         sourceDescriptor: this._descriptor,
-        ...options
+        ...options,
       });
     }
 
     const descriptor = VectorLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
-      ...options
+      ...options,
     });
     descriptor.style = VectorStyle.createDescriptor({
       [vectorStyles.FILL_COLOR]: {
@@ -272,10 +277,10 @@ export class ESGeoGridSource extends AbstractESSource {
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN
+            origin: SOURCE_DATA_ID_ORIGIN,
           },
-          color: 'Blues'
-        }
+          color: 'Blues',
+        },
       },
       [vectorStyles.ICON_SIZE]: {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
@@ -283,12 +288,12 @@ export class ESGeoGridSource extends AbstractESSource {
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN
+            origin: SOURCE_DATA_ID_ORIGIN,
           },
           minSize: 4,
           maxSize: 32,
-        }
-      }
+        },
+      },
     });
     return descriptor;
   }
@@ -297,7 +302,7 @@ export class ESGeoGridSource extends AbstractESSource {
     if (this._descriptor.requestType === RENDER_AS.HEATMAP) {
       return new HeatmapLayer({
         layerDescriptor: this._createDefaultLayerDescriptor(options),
-        source: this
+        source: this,
       });
     }
 
@@ -306,7 +311,7 @@ export class ESGeoGridSource extends AbstractESSource {
     return new VectorLayer({
       layerDescriptor: layerDescriptor,
       source: this,
-      style
+      style,
     });
   }
 

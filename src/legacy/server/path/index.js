@@ -26,13 +26,13 @@ const CONFIG_PATHS = [
   process.env.KIBANA_PATH_CONF && join(process.env.KIBANA_PATH_CONF, 'kibana.yml'),
   process.env.CONFIG_PATH, //deprecated
   fromRoot('config/kibana.yml'),
-  '/etc/kibana/kibana.yml'
+  '/etc/kibana/kibana.yml',
 ].filter(Boolean);
 
 const DATA_PATHS = [
   process.env.DATA_PATH, //deprecated
   fromRoot('data'),
-  '/var/lib/kibana'
+  '/var/lib/kibana',
 ].filter(Boolean);
 
 function findFile(paths) {

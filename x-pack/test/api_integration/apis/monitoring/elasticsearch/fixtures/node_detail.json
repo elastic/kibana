@@ -18,6 +18,7 @@
       "indexPatternExists": false,
       "indexPatternInTimeRangeExists": false,
       "typeExistsAtAnyTime": false,
+      "usingStructuredLogs": false,
       "nodeExists": false,
       "indexExists": null,
       "typeExists": false

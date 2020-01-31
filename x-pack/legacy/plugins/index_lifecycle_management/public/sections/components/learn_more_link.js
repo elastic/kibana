@@ -20,11 +20,10 @@ export class LearnMoreLink extends React.PureComponent {
     } else {
       url = href;
     }
-    const content = text ? text : (
-      <FormattedMessage
-        id="xpack.indexLifecycleMgmt.learnMore"
-        defaultMessage="Learn more"
-      />
+    const content = text ? (
+      text
+    ) : (
+      <FormattedMessage id="xpack.indexLifecycleMgmt.learnMore" defaultMessage="Learn more" />
     );
     return (
       <EuiLink href={url} target="_blank">

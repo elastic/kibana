@@ -26,41 +26,43 @@ let indexPattern;
 const params = {
   bottomRight: {
     lat: 50.73,
-    lon: -135.35
+    lon: -135.35,
   },
   topLeft: {
     lat: 73.12,
-    lon: -174.37
-  }
+    lon: -174.37,
+  },
 };
 
-describe('kuery functions', function () {
-  describe('geoBoundingBox', function () {
-
+describe('kuery functions', function() {
+  describe('geoBoundingBox', function() {
     beforeEach(() => {
       indexPattern = indexPatternResponse;
     });
 
-    describe('buildNodeParams', function () {
-
-      it('should return an "arguments" param', function () {
+    describe('buildNodeParams', function() {
+      it('should return an "arguments" param', function() {
         const result = geoBoundingBox.buildNodeParams('geo', params);
         expect(result).to.only.have.keys('arguments');
       });
 
-      it('arguments should contain the provided fieldName as a literal', function () {
+      it('arguments should contain the provided fieldName as a literal', function() {
         const result = geoBoundingBox.buildNodeParams('geo', params);
-        const { arguments: [ fieldName ] } = result;
+        const {
+          arguments: [fieldName],
+        } = result;
 
         expect(fieldName).to.have.property('type', 'literal');
         expect(fieldName).to.have.property('value', 'geo');
       });
 
-      it('arguments should contain the provided params as named arguments with "lat, lon" string values', function () {
+      it('arguments should contain the provided params as named arguments with "lat, lon" string values', function() {
         const result = geoBoundingBox.buildNodeParams('geo', params);
-        const { arguments: [ , ...args ] } = result;
+        const {
+          arguments: [, ...args],
+        } = result;
 
-        args.map((param) => {
+        args.map(param => {
           expect(param).to.have.property('type', 'namedArg');
           expect(['bottomRight', 'topLeft'].includes(param.name)).to.be(true);
           expect(param.value.type).to.be('literal');
@@ -70,12 +72,10 @@ describe('kuery functions', function () {
           expect(param.value.value).to.be(expectedLatLon);
         });
       });
-
     });
 
-    describe('toElasticsearchQuery', function () {
-
-      it('should return an ES geo_bounding_box query representing the given node', function () {
+    describe('toElasticsearchQuery', function() {
+      it('should return an ES geo_bounding_box query representing the given node', function() {
         const node = nodeTypes.function.buildNode('geoBoundingBox', 'geo', params);
         const result = geoBoundingBox.toElasticsearchQuery(node, indexPattern);
         expect(result).to.have.property('geo_bounding_box');
@@ -83,7 +83,7 @@ describe('kuery functions', function () {
         expect(result.geo_bounding_box.geo).to.have.property('bottom_right', '50.73, -135.35');
       });
 
-      it('should return an ES geo_bounding_box query without an index pattern', function () {
+      it('should return an ES geo_bounding_box query without an index pattern', function() {
         const node = nodeTypes.function.buildNode('geoBoundingBox', 'geo', params);
         const result = geoBoundingBox.toElasticsearchQuery(node);
         expect(result).to.have.property('geo_bounding_box');
@@ -91,16 +91,17 @@ describe('kuery functions', function () {
         expect(result.geo_bounding_box.geo).to.have.property('bottom_right', '50.73, -135.35');
       });
 
-      it('should use the ignore_unmapped parameter', function () {
+      it('should use the ignore_unmapped parameter', function() {
         const node = nodeTypes.function.buildNode('geoBoundingBox', 'geo', params);
         const result = geoBoundingBox.toElasticsearchQuery(node, indexPattern);
         expect(result.geo_bounding_box.ignore_unmapped).to.be(true);
       });
 
-      it('should throw an error for scripted fields', function () {
+      it('should throw an error for scripted fields', function() {
         const node = nodeTypes.function.buildNode('geoBoundingBox', 'script number', params);
         expect(geoBoundingBox.toElasticsearchQuery)
-          .withArgs(node, indexPattern).to.throwException(/Geo bounding box query does not support scripted fields/);
+          .withArgs(node, indexPattern)
+          .to.throwException(/Geo bounding box query does not support scripted fields/);
       });
     });
   });

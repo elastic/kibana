@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { VectorLayer } from '../vector_layer';
 import { TooltipProperty } from '../tooltips/tooltip_property';
 import { VectorStyle } from '../styles/vector_style';
@@ -15,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import { VECTOR_SHAPE_TYPES } from './vector_feature_types';
 
 export class AbstractVectorSource extends AbstractSource {
-
   static async getGeoJson({ format, featureCollectionPath, fetchUrl }) {
     let fetchedJson;
     try {
@@ -27,10 +25,12 @@ export class AbstractVectorSource extends AbstractSource {
       }
       fetchedJson = await response.json();
     } catch (e) {
-      throw new Error(i18n.translate('xpack.maps.source.vetorSource.requestFailedErrorMessage', {
-        defaultMessage: `Unable to fetch vector shapes from url: {fetchUrl}`,
-        values: { fetchUrl }
-      }));
+      throw new Error(
+        i18n.translate('xpack.maps.source.vetorSource.requestFailedErrorMessage', {
+          defaultMessage: `Unable to fetch vector shapes from url: {fetchUrl}`,
+          values: { fetchUrl },
+        })
+      );
     }
 
     if (format === 'geojson') {
@@ -42,19 +42,22 @@ export class AbstractVectorSource extends AbstractSource {
       return topojson.feature(fetchedJson, features);
     }
 
-    throw new Error(i18n.translate('xpack.maps.source.vetorSource.formatErrorMessage', {
-      defaultMessage: `Unable to fetch vector shapes from url: {format}`,
-      values: { format }
-    }));
+    throw new Error(
+      i18n.translate('xpack.maps.source.vetorSource.formatErrorMessage', {
+        defaultMessage: `Unable to fetch vector shapes from url: {format}`,
+        values: { format },
+      })
+    );
   }
 
   _createDefaultLayerDescriptor(options, mapColors) {
     return VectorLayer.createDescriptor(
       {
         sourceDescriptor: this._descriptor,
-        ...options
+        ...options,
       },
-      mapColors);
+      mapColors
+    );
   }
 
   createDefaultLayer(options, mapColors) {
@@ -63,7 +66,7 @@ export class AbstractVectorSource extends AbstractSource {
     return new VectorLayer({
       layerDescriptor: layerDescriptor,
       source: this,
-      style
+      style,
     });
   }
 
@@ -104,7 +107,8 @@ export class AbstractVectorSource extends AbstractSource {
   async filterAndFormatPropertiesToHtml(properties) {
     const tooltipProperties = [];
     for (const key in properties) {
-      if (key.startsWith('__kbn')) {//these are system properties and should be ignored
+      if (key.startsWith('__kbn')) {
+        //these are system properties and should be ignored
         continue;
       }
       tooltipProperties.push(new TooltipProperty(key, key, properties[key]));
@@ -121,11 +125,7 @@ export class AbstractVectorSource extends AbstractSource {
   }
 
   async getSupportedShapeTypes() {
-    return [
-      VECTOR_SHAPE_TYPES.POINT,
-      VECTOR_SHAPE_TYPES.LINE,
-      VECTOR_SHAPE_TYPES.POLYGON
-    ];
+    return [VECTOR_SHAPE_TYPES.POINT, VECTOR_SHAPE_TYPES.LINE, VECTOR_SHAPE_TYPES.POLYGON];
   }
 
   getSourceTooltipContent(/* sourceDataRequest */) {

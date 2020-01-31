@@ -16,17 +16,20 @@ jest.mock('./privileges', () => ({
 
 const application = 'default-application';
 
-const registerPrivilegesWithClusterTest = (description, {
-  settings = {},
-  savedObjectTypes,
-  privilegeMap,
-  existingPrivileges,
-  throwErrorWhenDeletingPrivileges,
-  errorDeletingPrivilegeName,
-  throwErrorWhenGettingPrivileges,
-  throwErrorWhenPuttingPrivileges,
-  assert
-}) => {
+const registerPrivilegesWithClusterTest = (
+  description,
+  {
+    settings = {},
+    savedObjectTypes,
+    privilegeMap,
+    existingPrivileges,
+    throwErrorWhenDeletingPrivileges,
+    errorDeletingPrivilegeName,
+    throwErrorWhenGettingPrivileges,
+    throwErrorWhenPuttingPrivileges,
+    assert,
+  }
+) => {
   const registerMockCallWithInternalUser = () => {
     const callWithInternalUser = jest.fn();
     getClient.mockReturnValue({
@@ -49,11 +52,11 @@ const registerPrivilegesWithClusterTest = (description, {
             actions: Symbol(),
             application,
             privileges: {
-              get: () => privilegeMap
-            }
-          }
-        }
-      }
+              get: () => privilegeMap,
+            },
+          },
+        },
+      },
     };
 
     const defaultSettings = {
@@ -65,7 +68,7 @@ const registerPrivilegesWithClusterTest = (description, {
     });
 
     mockServer.savedObjects = {
-      types: savedObjectTypes
+      types: savedObjectTypes,
     };
 
     return mockServer;
@@ -78,24 +81,18 @@ const registerPrivilegesWithClusterTest = (description, {
       expect(mockCallWithInternalUser).toHaveBeenCalledWith('shield.getPrivilege', {
         privilege: application,
       });
-      expect(mockCallWithInternalUser).toHaveBeenCalledWith(
-        'shield.postPrivileges',
-        {
-          body: postPrivilegesBody,
-        }
-      );
+      expect(mockCallWithInternalUser).toHaveBeenCalledWith('shield.postPrivileges', {
+        body: postPrivilegesBody,
+      });
       for (const deletedPrivilege of deletedPrivileges) {
         expect(mockServer.log).toHaveBeenCalledWith(
           ['security', 'debug'],
           `Deleting Kibana Privilege ${deletedPrivilege} from Elasticearch for ${application}`
         );
-        expect(mockCallWithInternalUser).toHaveBeenCalledWith(
-          'shield.deletePrivilege',
-          {
-            application,
-            privilege: deletedPrivilege
-          }
-        );
+        expect(mockCallWithInternalUser).toHaveBeenCalledWith('shield.deletePrivilege', {
+          application,
+          privilege: deletedPrivilege,
+        });
       }
       expect(mockServer.log).toHaveBeenCalledWith(
         ['security', 'debug'],
@@ -113,7 +110,7 @@ const registerPrivilegesWithClusterTest = (description, {
       expect(error).toBeUndefined();
       expect(mockCallWithInternalUser).toHaveBeenCalledTimes(1);
       expect(mockCallWithInternalUser).toHaveBeenLastCalledWith('shield.getPrivilege', {
-        privilege: application
+        privilege: application,
       });
 
       expect(mockServer.log).toHaveBeenCalledWith(
@@ -128,7 +125,7 @@ const registerPrivilegesWithClusterTest = (description, {
   };
 
   const createExpectErrorThrown = (mockServer, actualError) => {
-    return (expectedErrorMessage) => {
+    return expectedErrorMessage => {
       expect(actualError).toBeDefined();
       expect(actualError).toBeInstanceOf(Error);
       expect(actualError.message).toEqual(expectedErrorMessage);
@@ -149,42 +146,41 @@ const registerPrivilegesWithClusterTest = (description, {
 
   test(description, async () => {
     const mockServer = createMockServer({
-      privilegeMap
+      privilegeMap,
     });
-    const mockCallWithInternalUser = registerMockCallWithInternalUser()
-      .mockImplementation((api) => {
-        switch(api) {
-          case 'shield.getPrivilege': {
-            if (throwErrorWhenGettingPrivileges) {
-              throw throwErrorWhenGettingPrivileges;
-            }
-
-            // ES returns an empty object if we don't have any privileges
-            if (!existingPrivileges) {
-              return {};
-            }
-
-            return existingPrivileges;
+    const mockCallWithInternalUser = registerMockCallWithInternalUser().mockImplementation(api => {
+      switch (api) {
+        case 'shield.getPrivilege': {
+          if (throwErrorWhenGettingPrivileges) {
+            throw throwErrorWhenGettingPrivileges;
           }
-          case 'shield.deletePrivilege': {
-            if (throwErrorWhenDeletingPrivileges) {
-              throw throwErrorWhenDeletingPrivileges;
-            }
 
-            break;
+          // ES returns an empty object if we don't have any privileges
+          if (!existingPrivileges) {
+            return {};
           }
-          case 'shield.postPrivileges': {
-            if (throwErrorWhenPuttingPrivileges) {
-              throw throwErrorWhenPuttingPrivileges;
-            }
 
-            return;
-          }
-          default: {
-            expect(true).toBe(false);
-          }
+          return existingPrivileges;
         }
-      });
+        case 'shield.deletePrivilege': {
+          if (throwErrorWhenDeletingPrivileges) {
+            throw throwErrorWhenDeletingPrivileges;
+          }
+
+          break;
+        }
+        case 'shield.postPrivileges': {
+          if (throwErrorWhenPuttingPrivileges) {
+            throw throwErrorWhenPuttingPrivileges;
+          }
+
+          return;
+        }
+        default: {
+          expect(true).toBe(false);
+        }
+      }
+    });
 
     let error;
     try {
@@ -194,13 +190,21 @@ const registerPrivilegesWithClusterTest = (description, {
     }
 
     assert({
-      expectUpdatedPrivileges: createExpectUpdatedPrivileges(mockServer, mockCallWithInternalUser, error),
-      expectDidntUpdatePrivileges: createExpectDidntUpdatePrivileges(mockServer, mockCallWithInternalUser, error),
+      expectUpdatedPrivileges: createExpectUpdatedPrivileges(
+        mockServer,
+        mockCallWithInternalUser,
+        error
+      ),
+      expectDidntUpdatePrivileges: createExpectDidntUpdatePrivileges(
+        mockServer,
+        mockCallWithInternalUser,
+        error
+      ),
       expectErrorThrown: createExpectErrorThrown(mockServer, error),
       mocks: {
         buildRawKibanaPrivileges,
         server: mockServer,
-      }
+      },
     });
   });
 };
@@ -209,10 +213,10 @@ registerPrivilegesWithClusterTest(`inserts privileges when we don't have any exi
   privilegeMap: {
     features: {},
     global: {
-      all: ['action:all']
+      all: ['action:all'],
     },
     space: {
-      read: ['action:read']
+      read: ['action:read'],
     },
     features: {
       foo: {
@@ -220,11 +224,11 @@ registerPrivilegesWithClusterTest(`inserts privileges when we don't have any exi
       },
       bar: {
         read: ['action:bar_read'],
-      }
+      },
     },
     reserved: {
-      customApplication: ['action:customApplication']
-    }
+      customApplication: ['action:customApplication'],
+    },
   },
   existingPrivileges: null,
   assert: ({ expectUpdatedPrivileges }) => {
@@ -259,10 +263,10 @@ registerPrivilegesWithClusterTest(`inserts privileges when we don't have any exi
           name: 'reserved_customApplication',
           actions: ['action:customApplication'],
           metadata: {},
-        }
-      }
+        },
+      },
     });
-  }
+  },
 });
 
 registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
@@ -272,7 +276,7 @@ registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
       all: ['action:foo'],
     },
     space: {
-      read: ['action:bar']
+      read: ['action:bar'],
     },
     reserved: {},
   },
@@ -307,49 +311,52 @@ registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
         name: 'reserved_customApplication',
         actions: ['action:customApplication'],
         metadata: {},
-      }
-    }
+      },
+    },
   },
   assert: ({ expectUpdatedPrivileges }) => {
-    expectUpdatedPrivileges({
-      [application]: {
-        all: {
-          application,
-          name: 'all',
-          actions: ['action:foo'],
-          metadata: {},
+    expectUpdatedPrivileges(
+      {
+        [application]: {
+          all: {
+            application,
+            name: 'all',
+            actions: ['action:foo'],
+            metadata: {},
+          },
+          space_read: {
+            application,
+            name: 'space_read',
+            actions: ['action:bar'],
+            metadata: {},
+          },
         },
-        space_read: {
-          application,
-          name: 'space_read',
-          actions: ['action:bar'],
-          metadata: {},
-        }
-      }
-    }, ['read', 'space_baz', 'reserved_customApplication']);
-  }
+      },
+      ['read', 'space_baz', 'reserved_customApplication']
+    );
+  },
 });
 
 registerPrivilegesWithClusterTest(`updates privileges when global actions don't match`, {
   privilegeMap: {
     features: {},
     global: {
-      all: ['action:foo']
+      all: ['action:foo'],
     },
     space: {
-      read: ['action:bar']
+      read: ['action:bar'],
     },
     features: {
       foo: {
-        all: ['action:baz']
+        all: ['action:baz'],
       },
       bar: {
-        read: ['action:quz']
-      }
+        read: ['action:quz'],
+      },
     },
     reserved: {
-      customApplication: ['action:customApplication']
-    }
+      customApplication: ['action:customApplication'],
+    },
   },
   existingPrivileges: {
     [application]: {
@@ -380,8 +387,8 @@ registerPrivilegesWithClusterTest(`updates privileges when global actions don't 
         name: 'reserved_customApplication',
         actions: ['action:customApplication'],
         metadata: {},
-      }
-    }
+      },
+    },
   },
   assert: ({ expectUpdatedPrivileges }) => {
     expectUpdatedPrivileges({
@@ -415,32 +422,32 @@ registerPrivilegesWithClusterTest(`updates privileges when global actions don't 
           name: 'reserved_customApplication',
           actions: ['action:customApplication'],
           metadata: {},
-        }
-      }
+        },
+      },
     });
-  }
+  },
 });
 
 registerPrivilegesWithClusterTest(`updates privileges when space actions don't match`, {
   privilegeMap: {
     features: {},
     global: {
-      all: ['action:foo']
+      all: ['action:foo'],
     },
     space: {
-      read: ['action:bar']
+      read: ['action:bar'],
     },
     features: {
       foo: {
-        all: ['action:baz']
+        all: ['action:baz'],
       },
       bar: {
-        read: ['action:quz']
-      }
+        read: ['action:quz'],
+      },
     },
     reserved: {
-      customApplication: ['action:customApplication']
-    }
+      customApplication: ['action:customApplication'],
+    },
   },
   existingPrivileges: {
     [application]: {
@@ -471,8 +478,8 @@ registerPrivilegesWithClusterTest(`updates privileges when space actions don't m
         name: 'reserved_customApplication',
         actions: ['action:customApplication'],
         metadata: {},
-      }
-    }
+      },
+    },
   },
   assert: ({ expectUpdatedPrivileges }) => {
     expectUpdatedPrivileges({
@@ -506,32 +513,32 @@ registerPrivilegesWithClusterTest(`updates privileges when space actions don't m
           name: 'reserved_customApplication',
           actions: ['action:customApplication'],
           metadata: {},
-        }
-      }
+        },
+      },
     });
-  }
+  },
 });
 
 registerPrivilegesWithClusterTest(`updates privileges when feature actions don't match`, {
   privilegeMap: {
     features: {},
     global: {
-      all: ['action:foo']
+      all: ['action:foo'],
     },
     space: {
-      read: ['action:bar']
+      read: ['action:bar'],
     },
     features: {
       foo: {
-        all: ['action:baz']
+        all: ['action:baz'],
       },
       bar: {
-        read: ['action:quz']
-      }
+        read: ['action:quz'],
+      },
     },
     reserved: {
-      customApplication: ['action:customApplication']
-    }
+      customApplication: ['action:customApplication'],
+    },
   },
   existingPrivileges: {
     [application]: {
@@ -562,8 +569,8 @@ registerPrivilegesWithClusterTest(`updates privileges when feature actions don't
         name: 'reserved_customApplication',
         actions: ['action:customApplication'],
         metadata: {},
-      }
-    }
+      },
+    },
   },
   assert: ({ expectUpdatedPrivileges }) => {
     expectUpdatedPrivileges({
@@ -597,29 +604,29 @@ registerPrivilegesWithClusterTest(`updates privileges when feature actions don't
           name: 'reserved_customApplication',
           actions: ['action:customApplication'],
           metadata: {},
-        }
-      }
+        },
+      },
     });
-  }
+  },
 });
 
 registerPrivilegesWithClusterTest(`updates privileges when reserved actions don't match`, {
   privilegeMap: {
     features: {},
     global: {
-      all: ['action:foo']
+      all: ['action:foo'],
     },
     space: {
-      read: ['action:bar']
+      read: ['action:bar'],
     },
     features: {
       foo: {
-        all: ['action:baz']
-      }
+        all: ['action:baz'],
+      },
     },
     reserved: {
-      customApplication: ['action:customApplication']
-    }
+      customApplication: ['action:customApplication'],
+    },
   },
   existingPrivileges: {
     [application]: {
@@ -645,8 +652,8 @@ registerPrivilegesWithClusterTest(`updates privileges when reserved actions don'
         name: 'reserved_customApplication',
         actions: ['action:not-customApplication'],
         metadata: {},
-      }
-    }
+      },
+    },
   },
   assert: ({ expectUpdatedPrivileges }) => {
     expectUpdatedPrivileges({
@@ -674,29 +681,29 @@ registerPrivilegesWithClusterTest(`updates privileges when reserved actions don'
           name: 'reserved_customApplication',
           actions: ['action:customApplication'],
           metadata: {},
-        }
-      }
+        },
+      },
     });
-  }
+  },
 });
 
 registerPrivilegesWithClusterTest(`updates privileges when global privilege added`, {
   privilegeMap: {
     global: {
       all: ['action:foo'],
-      read: ['action:quz']
+      read: ['action:quz'],
     },
     space: {
-      read: ['action:bar']
+      read: ['action:bar'],
     },
     features: {
       foo: {
-        all: ['action:foo-all']
-      }
+        all: ['action:foo-all'],
+      },
     },
     reserved: {
-      customApplication: ['action:customApplication']
-    }
+      customApplication: ['action:customApplication'],
+    },
   },
   existingPrivileges: {
     [application]: {
@@ -723,8 +730,8 @@ registerPrivilegesWithClusterTest(`updates privileges when global privilege adde
         name: 'reserved_customApplication',
         actions: ['action:customApplication'],
         metadata: {},
-      }
-    }
+      },
+    },
   },
   assert: ({ expectUpdatedPrivileges }) => {
     expectUpdatedPrivileges({
@@ -758,10 +765,10 @@ registerPrivilegesWithClusterTest(`updates privileges when global privilege adde
           name: 'reserved_customApplication',
           actions: ['action:customApplication'],
           metadata: {},
-        }
-      }
+        },
+      },
     });
-  }
+  },
 });
 
 registerPrivilegesWithClusterTest(`updates privileges when space privilege added`, {
@@ -771,16 +778,16 @@ registerPrivilegesWithClusterTest(`updates privileges when space privilege added
     },
     space: {
       all: ['action:bar'],
-      read: ['action:quz']
+      read: ['action:quz'],
     },
     features: {
       foo: {
-        all: ['action:foo-all']
-      }
+        all: ['action:foo-all'],
+      },
     },
     reserved: {
-      customApplication: ['action:customApplication']
-    }
+      customApplication: ['action:customApplication'],
+    },
   },
   existingPrivileges: {
     [application]: {
@@ -807,8 +814,8 @@ registerPrivilegesWithClusterTest(`updates privileges when space privilege added
         name: 'reserved_customApplication',
         actions: ['action:customApplication'],
         metadata: {},
-      }
-    }
+      },
+    },
   },
   assert: ({ expectUpdatedPrivileges }) => {
     expectUpdatedPrivileges({
@@ -842,10 +849,10 @@ registerPrivilegesWithClusterTest(`updates privileges when space privilege added
           name: 'reserved_customApplication',
           actions: ['action:customApplication'],
           metadata: {},
-        }
-      }
+        },
+      },
     });
-  }
+  },
 });
 
 registerPrivilegesWithClusterTest(`updates privileges when feature privilege added`, {
@@ -860,12 +867,12 @@ registerPrivilegesWithClusterTest(`updates privileges when feature privilege add
     features: {
       foo: {
         all: ['action:foo-all'],
-        read: ['action:foo-read']
-      }
+        read: ['action:foo-read'],
+      },
     },
     reserved: {
-      customApplication: ['action:customApplication']
-    }
+      customApplication: ['action:customApplication'],
+    },
   },
   existingPrivileges: {
     [application]: {
@@ -892,8 +899,8 @@ registerPrivilegesWithClusterTest(`updates privileges when feature privilege add
         name: 'reserved_customApplication',
         actions: ['action:customApplication'],
         metadata: {},
-      }
-    }
+      },
+    },
   },
   assert: ({ expectUpdatedPrivileges }) => {
     expectUpdatedPrivileges({
@@ -927,10 +934,10 @@ registerPrivilegesWithClusterTest(`updates privileges when feature privilege add
           name: 'reserved_customApplication',
           actions: ['action:customApplication'],
           metadata: {},
-        }
-      }
+        },
+      },
     });
-  }
+  },
 });
 
 registerPrivilegesWithClusterTest(`updates privileges when reserved privilege added`, {
@@ -945,12 +952,12 @@ registerPrivilegesWithClusterTest(`updates privileges when reserved privilege ad
     features: {
       foo: {
         all: ['action:foo-all'],
-      }
+      },
     },
     reserved: {
       customApplication1: ['action:customApplication1'],
-      customApplication2: ['action:customApplication2']
-    }
+      customApplication2: ['action:customApplication2'],
+    },
   },
   existingPrivileges: {
     [application]: {
@@ -977,8 +984,8 @@ registerPrivilegesWithClusterTest(`updates privileges when reserved privilege ad
         name: 'reserved_customApplication1',
         actions: ['action:customApplication1'],
         metadata: {},
-      }
-    }
+      },
+    },
   },
   assert: ({ expectUpdatedPrivileges }) => {
     expectUpdatedPrivileges({
@@ -1012,28 +1019,28 @@ registerPrivilegesWithClusterTest(`updates privileges when reserved privilege ad
           name: 'reserved_customApplication2',
           actions: ['action:customApplication2'],
           metadata: {},
-        }
-      }
+        },
+      },
     });
-  }
+  },
 });
 
 registerPrivilegesWithClusterTest(`doesn't update privileges when order of actions differ`, {
   privilegeMap: {
     global: {
-      all: ['action:foo', 'action:quz']
+      all: ['action:foo', 'action:quz'],
     },
     space: {
-      read: ['action:bar', 'action:quz']
+      read: ['action:bar', 'action:quz'],
     },
     features: {
       foo: {
-        all: ['action:foo-all', 'action:bar-all']
-      }
+        all: ['action:foo-all', 'action:bar-all'],
+      },
     },
     reserved: {
-      customApplication: ['action:customApplication1', 'action:customApplication2']
-    }
+      customApplication: ['action:customApplication1', 'action:customApplication2'],
+    },
   },
   existingPrivileges: {
     [application]: {
@@ -1060,12 +1067,12 @@ registerPrivilegesWithClusterTest(`doesn't update privileges when order of actio
         name: 'reserved_customApplication',
         actions: ['action:customApplication2', 'action:customApplication1'],
         metadata: {},
-      }
-    }
+      },
+    },
   },
   assert: ({ expectDidntUpdatePrivileges }) => {
     expectDidntUpdatePrivileges();
-  }
+  },
 });
 
 registerPrivilegesWithClusterTest(`throws and logs error when errors getting privileges`, {
@@ -1078,17 +1085,17 @@ registerPrivilegesWithClusterTest(`throws and logs error when errors getting pri
   throwErrorWhenGettingPrivileges: new Error('Error getting privileges'),
   assert: ({ expectErrorThrown }) => {
     expectErrorThrown('Error getting privileges');
-  }
+  },
 });
 
 registerPrivilegesWithClusterTest(`throws and logs error when errors putting privileges`, {
   privilegeMap: {
     features: {},
     global: {
-      all: []
+      all: [],
     },
     space: {
-      read: []
+      read: [],
     },
     reserved: {},
   },
@@ -1096,5 +1103,5 @@ registerPrivilegesWithClusterTest(`throws and logs error when errors putting pri
   throwErrorWhenPuttingPrivileges: new Error('Error putting privileges'),
   assert: ({ expectErrorThrown }) => {
     expectErrorThrown('Error putting privileges');
-  }
+  },
 });

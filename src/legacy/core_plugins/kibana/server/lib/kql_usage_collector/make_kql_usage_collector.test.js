@@ -20,7 +20,6 @@
 import { makeKQLUsageCollector } from './make_kql_usage_collector';
 
 describe('makeKQLUsageCollector', () => {
-
   let server;
   let makeUsageCollectorStub;
   let registerStub;
@@ -32,7 +31,7 @@ describe('makeKQLUsageCollector', () => {
       usage: {
         collectorSet: { makeUsageCollector: makeUsageCollectorStub, register: registerStub },
       },
-      config: () => ({ get: () => '.kibana' })
+      config: () => ({ get: () => '.kibana' }),
     };
   });
 

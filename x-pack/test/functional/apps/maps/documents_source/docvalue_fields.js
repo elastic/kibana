@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects, getService }) {
+export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
@@ -52,6 +52,5 @@ export default function ({ getPageObjects, getService }) {
       expect(firstHit.fields['@timestamp']).to.be.an('array');
       expect(firstHit.fields['@timestamp'][0]).to.equal('1442709321445');
     });
-
   });
 }

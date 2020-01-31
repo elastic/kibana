@@ -66,34 +66,36 @@ const serializeShard = ({
 
 export const getFollowerIndexStatsMock = (
   name = chance.string(),
-  shards = [{
-    id: chance.string(),
-    remoteCluster: chance.string(),
-    leaderIndex: chance.string(),
-    leaderGlobalCheckpoint: chance.integer(),
-    leaderMaxSequenceNum: chance.integer(),
-    followerGlobalCheckpoint: chance.integer(),
-    followerMaxSequenceNum: chance.integer(),
-    lastRequestedSequenceNum: chance.integer(),
-    outstandingReadRequestsCount: chance.integer(),
-    outstandingWriteRequestsCount: chance.integer(),
-    writeBufferOperationsCount: chance.integer(),
-    writeBufferSizeBytes: chance.integer(),
-    followerMappingVersion: chance.integer(),
-    followerSettingsVersion: chance.integer(),
-    totalReadTimeMs: chance.integer(),
-    totalReadRemoteExecTimeMs: chance.integer(),
-    successfulReadRequestCount: chance.integer(),
-    failedReadRequestsCount: chance.integer(),
-    operationsReadCount: chance.integer(),
-    bytesReadCount: chance.integer(),
-    totalWriteTimeMs: chance.integer(),
-    successfulWriteRequestsCount: chance.integer(),
-    failedWriteRequestsCount: chance.integer(),
-    operationsWrittenCount: chance.integer(),
-    readExceptions: [ chance.string() ],
-    timeSinceLastReadMs: chance.integer(),
-  }]
+  shards = [
+    {
+      id: chance.string(),
+      remoteCluster: chance.string(),
+      leaderIndex: chance.string(),
+      leaderGlobalCheckpoint: chance.integer(),
+      leaderMaxSequenceNum: chance.integer(),
+      followerGlobalCheckpoint: chance.integer(),
+      followerMaxSequenceNum: chance.integer(),
+      lastRequestedSequenceNum: chance.integer(),
+      outstandingReadRequestsCount: chance.integer(),
+      outstandingWriteRequestsCount: chance.integer(),
+      writeBufferOperationsCount: chance.integer(),
+      writeBufferSizeBytes: chance.integer(),
+      followerMappingVersion: chance.integer(),
+      followerSettingsVersion: chance.integer(),
+      totalReadTimeMs: chance.integer(),
+      totalReadRemoteExecTimeMs: chance.integer(),
+      successfulReadRequestCount: chance.integer(),
+      failedReadRequestsCount: chance.integer(),
+      operationsReadCount: chance.integer(),
+      bytesReadCount: chance.integer(),
+      totalWriteTimeMs: chance.integer(),
+      successfulWriteRequestsCount: chance.integer(),
+      failedWriteRequestsCount: chance.integer(),
+      operationsWrittenCount: chance.integer(),
+      readExceptions: [chance.string()],
+      timeSinceLastReadMs: chance.integer(),
+    },
+  ]
 ) => ({
   index: name,
   shards: shards.map(serializeShard),
@@ -106,7 +108,7 @@ export const getFollowerIndexListStatsMock = (total = 3, names) => {
     },
   };
 
-  for(let i = 0; i < total; i++) {
+  for (let i = 0; i < total; i++) {
     list.follow_stats.indices.push(getFollowerIndexStatsMock(names[i]));
   }
 
@@ -150,7 +152,7 @@ export const getFollowerIndexListInfoMock = (total = 3) => {
     follower_indices: [],
   };
 
-  for(let i = 0; i < total; i++) {
+  for (let i = 0; i < total; i++) {
     list.follower_indices.push(getFollowerIndexInfoMock());
   }
 
@@ -165,7 +167,7 @@ export const getFollowerIndexMock = ({
   name = getRandomString(),
   remoteCluster = getRandomString(),
   leaderIndex = getRandomString(),
-  status = 'Active'
+  status = 'Active',
 } = {}) => ({
   name,
   remoteCluster,
@@ -181,32 +183,34 @@ export const getFollowerIndexMock = ({
   maxWriteBufferSize: getRandomString({ length: 5 }),
   maxRetryDelay: getRandomString({ length: 5 }),
   readPollTimeout: getRandomString({ length: 5 }),
-  shards: [{
-    id: 0,
-    remoteCluster: remoteCluster,
-    leaderIndex: leaderIndex,
-    leaderGlobalCheckpoint: chance.integer(),
-    leaderMaxSequenceNum: chance.integer(),
-    followerGlobalCheckpoint: chance.integer(),
-    followerMaxSequenceNum: chance.integer(),
-    lastRequestedSequenceNum: chance.integer(),
-    outstandingReadRequestsCount: chance.integer(),
-    outstandingWriteRequestsCount: chance.integer(),
-    writeBufferOperationsCount: chance.integer(),
-    writeBufferSizeBytes: chance.integer(),
-    followerMappingVersion: chance.integer(),
-    followerSettingsVersion: chance.integer(),
-    totalReadTimeMs: chance.integer(),
-    totalReadRemoteExecTimeMs: chance.integer(),
-    successfulReadRequestCount: chance.integer(),
-    failedReadRequestsCount: chance.integer(),
-    operationsReadCount: chance.integer(),
-    bytesReadCount: chance.integer(),
-    totalWriteTimeMs: chance.integer(),
-    successfulWriteRequestsCount: chance.integer(),
-    failedWriteRequestsCount: chance.integer(),
-    operationsWrittenCount: chance.integer(),
-    readExceptions: [],
-    timeSinceLastReadMs: chance.integer(),
-  }]
+  shards: [
+    {
+      id: 0,
+      remoteCluster: remoteCluster,
+      leaderIndex: leaderIndex,
+      leaderGlobalCheckpoint: chance.integer(),
+      leaderMaxSequenceNum: chance.integer(),
+      followerGlobalCheckpoint: chance.integer(),
+      followerMaxSequenceNum: chance.integer(),
+      lastRequestedSequenceNum: chance.integer(),
+      outstandingReadRequestsCount: chance.integer(),
+      outstandingWriteRequestsCount: chance.integer(),
+      writeBufferOperationsCount: chance.integer(),
+      writeBufferSizeBytes: chance.integer(),
+      followerMappingVersion: chance.integer(),
+      followerSettingsVersion: chance.integer(),
+      totalReadTimeMs: chance.integer(),
+      totalReadRemoteExecTimeMs: chance.integer(),
+      successfulReadRequestCount: chance.integer(),
+      failedReadRequestsCount: chance.integer(),
+      operationsReadCount: chance.integer(),
+      bytesReadCount: chance.integer(),
+      totalWriteTimeMs: chance.integer(),
+      successfulWriteRequestsCount: chance.integer(),
+      failedWriteRequestsCount: chance.integer(),
+      operationsWrittenCount: chance.integer(),
+      readExceptions: [],
+      timeSinceLastReadMs: chance.integer(),
+    },
+  ],
 });

@@ -42,15 +42,15 @@ function insertDataIntoIndex(
         if (doc[timeFieldName]) {
           doc[timeFieldName] = dataIndexConfig.preserveDayOfWeekTimeOfDay
             ? translateTimeRelativeToWeek(
-              doc[timeFieldName],
-              dataIndexConfig.currentTimeMarker,
-              nowReference
-            )
+                doc[timeFieldName],
+                dataIndexConfig.currentTimeMarker,
+                nowReference
+              )
             : translateTimeRelativeToDifference(
-              doc[timeFieldName],
-              dataIndexConfig.currentTimeMarker,
-              nowReference
-            );
+                doc[timeFieldName],
+                dataIndexConfig.currentTimeMarker,
+                nowReference
+              );
         }
       });
       return doc;

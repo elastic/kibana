@@ -9,14 +9,13 @@ import { set } from 'lodash';
 import sinon from 'sinon';
 import { checkLicense } from '../check_license';
 
-describe('check_license: ', function () {
-
+describe('check_license: ', function() {
   let mockLicenseInfo;
   let licenseCheckResult;
 
   beforeEach(() => {
     mockLicenseInfo = {
-      isAvailable: () => true
+      isAvailable: () => true,
     };
   });
 
@@ -26,11 +25,11 @@ describe('check_license: ', function () {
       licenseCheckResult = checkLicense(mockLicenseInfo);
     });
 
-    it ('should set showAppLink to true', () => {
+    it('should set showAppLink to true', () => {
       expect(licenseCheckResult.showAppLink).to.be(true);
     });
 
-    it ('should set enableAppLink to false', () => {
+    it('should set enableAppLink to false', () => {
       expect(licenseCheckResult.enableAppLink).to.be(false);
     });
   });
@@ -41,34 +40,55 @@ describe('check_license: ', function () {
       licenseCheckResult = checkLicense(mockLicenseInfo);
     });
 
-    it ('should set showAppLink to true', () => {
+    it('should set showAppLink to true', () => {
       expect(licenseCheckResult.showAppLink).to.be(true);
     });
 
-    it ('should set enableAppLink to false', () => {
+    it('should set enableAppLink to false', () => {
       expect(licenseCheckResult.enableAppLink).to.be(false);
     });
   });
 
   describe('graph is disabled in Elasticsearch', () => {
     beforeEach(() => {
-      set(mockLicenseInfo, 'feature', sinon.stub().withArgs('graph').returns({ isEnabled: () => false }));
+      set(
+        mockLicenseInfo,
+        'feature',
+        sinon
+          .stub()
+          .withArgs('graph')
+          .returns({ isEnabled: () => false })
+      );
       licenseCheckResult = checkLicense(mockLicenseInfo);
     });
 
-    it ('should set showAppLink to false', () => {
+    it('should set showAppLink to false', () => {
       expect(licenseCheckResult.showAppLink).to.be(false);
     });
   });
 
   describe('graph is enabled in Elasticsearch', () => {
     beforeEach(() => {
-      set(mockLicenseInfo, 'feature', sinon.stub().withArgs('graph').returns({ isEnabled: () => true }));
+      set(
+        mockLicenseInfo,
+        'feature',
+        sinon
+          .stub()
+          .withArgs('graph')
+          .returns({ isEnabled: () => true })
+      );
     });
 
     describe('& license is trial or platinum', () => {
       beforeEach(() => {
-        set(mockLicenseInfo, 'license.isOneOf', sinon.stub().withArgs([ 'trial', 'platinum' ]).returns(true));
+        set(
+          mockLicenseInfo,
+          'license.isOneOf',
+          sinon
+            .stub()
+            .withArgs(['trial', 'platinum'])
+            .returns(true)
+        );
         set(mockLicenseInfo, 'license.getType', () => 'trial');
       });
 
@@ -78,11 +98,11 @@ describe('check_license: ', function () {
           licenseCheckResult = checkLicense(mockLicenseInfo);
         });
 
-        it ('should set showAppLink to true', () => {
+        it('should set showAppLink to true', () => {
           expect(licenseCheckResult.showAppLink).to.be(true);
         });
 
-        it ('should set enableAppLink to true', () => {
+        it('should set enableAppLink to true', () => {
           expect(licenseCheckResult.enableAppLink).to.be(true);
         });
       });
@@ -93,15 +113,14 @@ describe('check_license: ', function () {
           licenseCheckResult = checkLicense(mockLicenseInfo);
         });
 
-        it ('should set showAppLink to true', () => {
+        it('should set showAppLink to true', () => {
           expect(licenseCheckResult.showAppLink).to.be(true);
         });
 
-        it ('should set enableAppLink to false', () => {
+        it('should set enableAppLink to false', () => {
           expect(licenseCheckResult.enableAppLink).to.be(false);
         });
       });
-
     });
 
     describe('& license is neither trial nor platinum', () => {
@@ -112,7 +131,7 @@ describe('check_license: ', function () {
         licenseCheckResult = checkLicense(mockLicenseInfo);
       });
 
-      it ('should set showAppLink to false', () => {
+      it('should set showAppLink to false', () => {
         expect(licenseCheckResult.showAppLink).to.be(false);
       });
     });

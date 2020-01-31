@@ -7,16 +7,9 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiCodeBlock,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 
-export const TabRequest = ({
-  json,
-  endpoint,
-}) => {
+export const TabRequest = ({ json, endpoint }) => {
   const request = `${endpoint}\n${JSON.stringify(json, null, 2)}`;
 
   return (
@@ -32,10 +25,7 @@ export const TabRequest = ({
 
       <EuiSpacer size="m" />
 
-      <EuiCodeBlock
-        language="json"
-        isCopyable
-      >
+      <EuiCodeBlock language="json" isCopyable>
         {request}
       </EuiCodeBlock>
     </Fragment>

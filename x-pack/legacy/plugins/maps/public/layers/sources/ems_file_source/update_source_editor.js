@@ -10,10 +10,9 @@ import { TooltipSelector } from '../../../components/tooltip_selector';
 import { getEMSClient } from '../../../meta';
 
 export class UpdateSourceEditor extends Component {
-
   static propTypes = {
     onChange: PropTypes.func.isRequired,
-    tooltipProperties: PropTypes.arrayOf(PropTypes.string).isRequired
+    tooltipProperties: PropTypes.arrayOf(PropTypes.string).isRequired,
   };
 
   state = {
@@ -34,15 +33,15 @@ export class UpdateSourceEditor extends Component {
     try {
       const emsClient = getEMSClient();
       const emsFiles = await emsClient.getFileLayers();
-      const emsFile = emsFiles.find((emsFile => emsFile.getId() === this.props.layerId));
+      const emsFile = emsFiles.find(emsFile => emsFile.getId() === this.props.layerId);
       const emsFields = emsFile.getFieldsInLanguage();
       fields = emsFields.map(field => {
         return {
           name: field.name,
-          label: field.description
+          label: field.description,
         };
       });
-    } catch(e) {
+    } catch (e) {
       //swallow this error. when a matching EMS-config cannot be found, the source already will have thrown errors during the data request. This will propagate to the vector-layer and be displayed in the UX
       fields = [];
     }
@@ -51,7 +50,7 @@ export class UpdateSourceEditor extends Component {
     }
   }
 
-  _onTooltipPropertiesSelect = (propertyNames) => {
+  _onTooltipPropertiesSelect = propertyNames => {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 

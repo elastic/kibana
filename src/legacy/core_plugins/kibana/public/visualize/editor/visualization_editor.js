@@ -24,7 +24,7 @@ import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualizationEditor', function (Private, $timeout, getAppState) {
+  .directive('visualizationEditor', function(Private, $timeout, getAppState) {
     const editorTypes = Private(VisEditorTypesRegistryProvider);
 
     return {
@@ -35,10 +35,12 @@ uiModules
         timeRange: '=',
         filters: '=',
       },
-      link: function ($scope, element) {
+      link: function($scope, element) {
         const editorType = $scope.savedObj.vis.type.editor;
-        const Editor = typeof editorType === 'function' ? editorType :
-          editorTypes.find(editor => editor.key === editorType);
+        const Editor =
+          typeof editorType === 'function'
+            ? editorType
+            : editorTypes.find(editor => editor.key === editorType);
         const editor = new Editor(element[0], $scope.savedObj);
 
         $scope.renderFunction = () => {
@@ -50,18 +52,23 @@ uiModules
           });
         };
 
-        $scope.$on('render', (event) => {
+        $scope.$on('render', event => {
           event.preventDefault();
-          $timeout(() => { $scope.renderFunction(); });
+          $timeout(() => {
+            $scope.renderFunction();
+          });
         });
 
         $scope.$on('$destroy', () => {
           editor.destroy();
         });
 
-        $scope.$watchGroup(['timeRange', 'filters'], debounce(() => {
-          $scope.renderFunction();
-        }, 100));
-      }
+        $scope.$watchGroup(
+          ['timeRange', 'filters'],
+          debounce(() => {
+            $scope.renderFunction();
+          }, 100)
+        );
+      },
     };
   });

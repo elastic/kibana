@@ -21,7 +21,7 @@ let elem;
 const renderReact = async (elem, licenseStatus) => {
   render(
     <I18nContext>
-      <App licenseStatus={licenseStatus}/>
+      <App licenseStatus={licenseStatus} />
     </I18nContext>,
     elem
   );
@@ -62,7 +62,6 @@ routes.defaults(/\/management/, {
       }
 
       watchesSection.show();
-
     },
   },
 });

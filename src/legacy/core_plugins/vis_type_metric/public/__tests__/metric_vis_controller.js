@@ -20,21 +20,19 @@
 import expect from '@kbn/expect';
 import { MetricVisComponent } from '../components/metric_vis_controller';
 
-describe('metric_vis - controller', function () {
-
+describe('metric_vis - controller', function() {
   const vis = {
     params: {
       metric: {
         colorSchema: 'Green to Red',
-        colorsRange: [
-          { from: 0, to: 1000 }
-        ],
+        colorsRange: [{ from: 0, to: 1000 }],
         style: {},
-      }, dimensions: {
+      },
+      dimensions: {
         metrics: [{ accessor: 0 }],
         bucket: null,
-      }
-    }
+      },
+    },
   };
 
   let metricController;
@@ -43,10 +41,10 @@ describe('metric_vis - controller', function () {
     metricController = new MetricVisComponent({ vis: vis, visParams: vis.params });
   });
 
-  it('should set the metric label and value', function () {
+  it('should set the metric label and value', function() {
     const metrics = metricController._processTableGroups({
       columns: [{ id: 'col-0', name: 'Count' }],
-      rows: [{ 'col-0': 4301021 }]
+      rows: [{ 'col-0': 4301021 }],
     });
 
     expect(metrics.length).to.be(1);
@@ -54,14 +52,14 @@ describe('metric_vis - controller', function () {
     expect(metrics[0].value).to.be(4301021);
   });
 
-  it('should support multi-value metrics', function () {
+  it('should support multi-value metrics', function() {
     vis.params.dimensions.metrics.push({ accessor: 1 });
     const metrics = metricController._processTableGroups({
       columns: [
         { id: 'col-0', name: '1st percentile of bytes' },
-        { id: 'col-1', name: '99th percentile of bytes' }
+        { id: 'col-1', name: '99th percentile of bytes' },
       ],
-      rows: [{ 'col-0': 182, 'col-1': 445842.4634666484 }]
+      rows: [{ 'col-0': 182, 'col-1': 445842.4634666484 }],
     });
 
     expect(metrics.length).to.be(2);

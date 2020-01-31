@@ -14,6 +14,5 @@ management.getSection('elasticsearch').register('license_management', {
     defaultMessage: 'License Management',
   }),
   order: 99,
-  url: `#${BASE_PATH}home`
+  url: `#${BASE_PATH}home`,
 });
-

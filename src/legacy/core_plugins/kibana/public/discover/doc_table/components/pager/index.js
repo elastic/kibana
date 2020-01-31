@@ -24,10 +24,10 @@ import { wrapInI18nContext } from 'ui/i18n';
 
 const app = uiModules.get('kibana');
 
-app.directive('toolBarPagerText', function (reactDirective) {
+app.directive('toolBarPagerText', function(reactDirective) {
   return reactDirective(wrapInI18nContext(ToolBarPagerText));
 });
 
-app.directive('toolBarPagerButtons', function (reactDirective) {
+app.directive('toolBarPagerButtons', function(reactDirective) {
   return reactDirective(wrapInI18nContext(ToolBarPagerButtons));
 });

@@ -7,7 +7,7 @@
 function formatHit(hit, indexName) {
   const mapping = hit[indexName].mappings;
   return {
-    mapping
+    mapping,
   };
 }
 const handler = async (request, callWithRequest) => {
@@ -15,6 +15,7 @@ const handler = async (request, callWithRequest) => {
   const params = {
     expand_wildcards: 'none',
     index: indexName,
+    include_type_name: true,
   };
 
   const hit = await callWithRequest('indices.getMapping', params);

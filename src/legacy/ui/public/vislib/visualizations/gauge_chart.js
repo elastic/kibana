@@ -88,8 +88,8 @@ export class GaugeChart extends Chart {
     const self = this;
     const { gaugeConfig } = this;
 
-    return function (selection) {
-      selection.each(function (data) {
+    return function(selection) {
+      selection.each(function(data) {
         const div = d3.select(this);
         const { width, height } = self.calcGaugeDim(
           gaugeConfig.alignment,

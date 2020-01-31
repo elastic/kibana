@@ -40,3 +40,33 @@ Correctly parse with JSON embedded inside values
   "content\\\\": """ { "json": "inside\\" ok!  1
   "  } """
 }
+==========
+Single quotes escaped special case, start and end
+-------------------------------------
+{
+  "query": "\"test\""
+}
+-------------------------------------
+{
+  "query": "\"test\""
+}
+==========
+Single quotes escaped special case, start
+-------------------------------------
+{
+  "query": "\"test"
+}
+-------------------------------------
+{
+  "query": "\"test"
+}
+==========
+Single quotes escaped special case, end
+-------------------------------------
+{
+  "query": "test\""
+}
+-------------------------------------
+{
+  "query": "test\""
+}

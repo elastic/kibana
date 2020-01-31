@@ -22,7 +22,7 @@ export function createFlattenHit(fields, metaFields, conflictedTypesFields) {
         } else if (_.isArray(flat[key])) {
           flat[key].push(val);
         } else {
-          flat[key] = [ flat[key], val ];
+          flat[key] = [flat[key], val];
         }
         return;
       }
@@ -32,7 +32,7 @@ export function createFlattenHit(fields, metaFields, conflictedTypesFields) {
   };
 
   const flattenMetaFields = (flat, hit) => {
-    _.each(metaFields, (meta) => {
+    _.each(metaFields, meta => {
       if (meta === '_source') return;
       flat[meta] = hit[meta];
     });

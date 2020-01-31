@@ -43,7 +43,7 @@ function setup(opts = {}) {
   const worker = new Worker({
     log: new Log(false, true),
     ...opts,
-    baseArgv: []
+    baseArgv: [],
   });
 
   workersToShutdown.push(worker);
@@ -52,7 +52,7 @@ function setup(opts = {}) {
 
 describe('CLI cluster manager', () => {
   afterEach(async () => {
-    while(workersToShutdown.length > 0) {
+    while (workersToShutdown.length > 0) {
       const worker = workersToShutdown.pop();
       // If `fork` exists we should set `exitCode` to the non-zero value to
       // prevent worker from auto restart.

@@ -37,15 +37,7 @@ describe('Create Rollup Job, step 6: Review', () => {
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments
     httpRequestsMockHelpers.setIndexPatternValidityResponse();
-    ({
-      find,
-      exists,
-      actions,
-      getEuiStepsHorizontalActive,
-      goToStep,
-      table,
-      form
-    } = setup());
+    ({ find, exists, actions, getEuiStepsHorizontalActive, goToStep, table, form } = setup());
   });
 
   describe('layout', () => {
@@ -75,14 +67,13 @@ describe('Create Rollup Job, step 6: Review', () => {
 
   describe('tabs', () => {
     const getTabsText = () => find('stepReviewTab').map(tab => tab.text());
-    const selectFirstField = (step) => {
+    const selectFirstField = step => {
       find('rollupJobShowFieldChooserButton').simulate('click');
 
       // Select the first term field
-      table.getMetaData(`rollupJob${step}FieldChooser-table`)
-        .rows[0]
-        .reactWrapper
-        .simulate('click');
+      table
+        .getMetaData(`rollupJob${step}FieldChooser-table`)
+        .rows[0].reactWrapper.simulate('click');
     };
 
     it('should have a "Summary" & "Request" tabs to review the Job', async () => {
@@ -115,7 +106,10 @@ describe('Create Rollup Job, step 6: Review', () => {
     });
 
     it('should have a "Summary", "Metrics" & "Request" tab if a histogram field was added', async () => {
-      httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: ['a-field'], dateFields: ['b-field'] });
+      httpRequestsMockHelpers.setIndexPatternValidityResponse({
+        numericFields: ['a-field'],
+        dateFields: ['b-field'],
+      });
       await goToStep(5);
       selectFirstField('Metrics');
       form.selectCheckBox('rollupJobMetricsCheckbox-avg'); // select a metric

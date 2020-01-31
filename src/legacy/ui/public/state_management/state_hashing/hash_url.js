@@ -22,9 +22,9 @@ import rison from 'rison-node';
 import { parse as parseUrl, format as formatUrl } from 'url';
 import { stringify as stringifyQuerystring } from 'querystring';
 
-const conservativeStringifyQuerystring = (query) => {
+const conservativeStringifyQuerystring = query => {
   return stringifyQuerystring(query, null, null, {
-    encodeURIComponent: encodeUriQuery
+    encodeURIComponent: encodeUriQuery,
   });
 };
 
@@ -49,10 +49,9 @@ const hashStatesInQuery = (states, query) => {
     return result;
   }, {});
 
-
   return {
     ...query,
-    ...hashedQuery
+    ...hashedQuery,
   };
 };
 
@@ -84,7 +83,7 @@ export const hashUrl = (states, redirectUrl) => {
 
   const newHash = formatUrl({
     search: conservativeStringifyQuerystring(newQuery),
-    pathname: parsedAppUrl.pathname
+    pathname: parsedAppUrl.pathname,
   });
 
   return formatUrl({

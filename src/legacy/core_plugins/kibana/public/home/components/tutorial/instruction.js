@@ -35,11 +35,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export function Instruction({ commands, paramValues, textPost, textPre, replaceTemplateStrings }) {
   let pre;
   if (textPre) {
-    pre = (
-      <Content
-        text={replaceTemplateStrings(textPre)}
-      />
-    );
+    pre = <Content text={replaceTemplateStrings(textPre)} />;
   }
 
   let post;
@@ -47,9 +43,7 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
     post = (
       <div>
         <EuiSpacer size="m" />
-        <Content
-          text={replaceTemplateStrings(textPost)}
-        />
+        <Content text={replaceTemplateStrings(textPost)} />
       </div>
     );
   }
@@ -57,17 +51,19 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
   let copyButton;
   let commandBlock;
   if (commands) {
-    const cmdText = commands.map(cmd => { return replaceTemplateStrings(cmd, paramValues); }).join('\n');
+    const cmdText = commands
+      .map(cmd => {
+        return replaceTemplateStrings(cmd, paramValues);
+      })
+      .join('\n');
     copyButton = (
-      <EuiCopy
-        textToCopy={cmdText}
-      >
-        {(copy) => (
-          <EuiButton
-            size="s"
-            onClick={copy}
-          >
-            <FormattedMessage id="kbn.home.tutorial.instruction.copyButtonLabel" defaultMessage="Copy snippet"/>
+      <EuiCopy textToCopy={cmdText}>
+        {copy => (
+          <EuiButton size="s" onClick={copy}>
+            <FormattedMessage
+              id="kbn.home.tutorial.instruction.copyButtonLabel"
+              defaultMessage="Copy snippet"
+            />
           </EuiButton>
         )}
       </EuiCopy>
@@ -75,25 +71,17 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
     commandBlock = (
       <div>
         <EuiSpacer size="m" />
-        <EuiCodeBlock language="sh">
-          {cmdText}
-        </EuiCodeBlock>
+        <EuiCodeBlock language="sh">{cmdText}</EuiCodeBlock>
       </div>
     );
   }
 
   return (
     <div>
-
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-        <EuiFlexItem grow={false}>
-          {pre}
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{pre}</EuiFlexItem>
 
-        <EuiFlexItem
-          className="homTutorial__instruction"
-          grow={false}
-        >
+        <EuiFlexItem className="homTutorial__instruction" grow={false}>
           {copyButton}
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -103,7 +91,6 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
       {post}
 
       <EuiSpacer />
-
     </div>
   );
 }

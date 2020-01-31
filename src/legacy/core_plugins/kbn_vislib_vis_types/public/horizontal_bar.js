@@ -37,14 +37,15 @@ import { palettes } from '@elastic/eui/lib/services';
 import { vislibVisController } from './controller';
 
 export default function PointSeriesVisType() {
-
   return visFactory.createBaseVisualization({
     name: 'horizontal_bar',
-    title: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarTitle', { defaultMessage: 'Horizontal Bar' }),
+    title: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarTitle', {
+      defaultMessage: 'Horizontal Bar',
+    }),
     icon: 'visBarHorizontal',
-    description: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarDescription',
-      { defaultMessage: 'Assign a continuous variable to each axis' }
-    ),
+    description: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarDescription', {
+      defaultMessage: 'Assign a continuous variable to each axis',
+    }),
     visualization: vislibVisController,
     visConfig: {
       defaults: {
@@ -58,8 +59,7 @@ export default function PointSeriesVisType() {
             type: AxisTypes.CATEGORY,
             position: Positions.LEFT,
             show: true,
-            style: {
-            },
+            style: {},
             scale: {
               type: ScaleTypes.LINEAR,
             },
@@ -67,10 +67,10 @@ export default function PointSeriesVisType() {
               show: true,
               rotate: Rotates.HORIZONTAL,
               filter: false,
-              truncate: 200
+              truncate: 200,
             },
-            title: {}
-          }
+            title: {},
+          },
         ],
         valueAxes: [
           {
@@ -79,8 +79,7 @@ export default function PointSeriesVisType() {
             type: AxisTypes.VALUE,
             position: Positions.BOTTOM,
             show: true,
-            style: {
-            },
+            style: {},
             scale: {
               type: ScaleTypes.LINEAR,
               mode: AxisModes.NORMAL,
@@ -89,26 +88,28 @@ export default function PointSeriesVisType() {
               show: true,
               rotate: Rotates.ANGLED,
               filter: true,
-              truncate: 100
+              truncate: 100,
             },
             title: {
               text: countLabel,
-            }
-          }
-        ],
-        seriesParams: [{
-          show: true,
-          type: ChartTypes.HISTOGRAM,
-          mode: ChartModes.NORMAL,
-          data: {
-            label: countLabel,
-            id: '1'
+            },
           },
-          valueAxis: 'ValueAxis-1',
-          drawLinesBetweenPoints: true,
-          lineWidth: 2,
-          showCircles: true
-        }],
+        ],
+        seriesParams: [
+          {
+            show: true,
+            type: ChartTypes.HISTOGRAM,
+            mode: ChartModes.NORMAL,
+            data: {
+              label: countLabel,
+              id: '1',
+            },
+            valueAxis: 'ValueAxis-1',
+            drawLinesBetweenPoints: true,
+            lineWidth: 2,
+            showCircles: true,
+          },
+        ],
         addTooltip: true,
         addLegend: true,
         legendPosition: Positions.RIGHT,
@@ -120,7 +121,7 @@ export default function PointSeriesVisType() {
           value: 10,
           width: 1,
           style: ThresholdLineStyles.FULL,
-          color: palettes.euiPaletteColorBlind.colors[9]
+          color: palettes.euiPaletteColorBlind.colors[9],
         },
       },
     },
@@ -134,46 +135,54 @@ export default function PointSeriesVisType() {
         {
           group: AggGroupNames.Metrics,
           name: 'metric',
-          title: i18n.translate('kbnVislibVisTypes.horizontalBar.metricTitle', { defaultMessage: 'Y-axis' }),
+          title: i18n.translate('kbnVislibVisTypes.horizontalBar.metricTitle', {
+            defaultMessage: 'Y-axis',
+          }),
           min: 1,
           aggFilter: ['!geo_centroid', '!geo_bounds'],
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
+          defaults: [{ schema: 'metric', type: 'count' }],
         },
         {
           group: AggGroupNames.Metrics,
           name: 'radius',
-          title: i18n.translate('kbnVislibVisTypes.horizontalBar.radiusTitle', { defaultMessage: 'Dot size' }),
+          title: i18n.translate('kbnVislibVisTypes.horizontalBar.radiusTitle', {
+            defaultMessage: 'Dot size',
+          }),
           min: 0,
           max: 1,
-          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
+          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality'],
         },
         {
           group: AggGroupNames.Buckets,
           name: 'segment',
-          title: i18n.translate('kbnVislibVisTypes.horizontalBar.segmentTitle', { defaultMessage: 'X-axis' }),
+          title: i18n.translate('kbnVislibVisTypes.horizontalBar.segmentTitle', {
+            defaultMessage: 'X-axis',
+          }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
         },
         {
           group: AggGroupNames.Buckets,
           name: 'group',
-          title: i18n.translate('kbnVislibVisTypes.horizontalBar.groupTitle', { defaultMessage: 'Split series' }),
+          title: i18n.translate('kbnVislibVisTypes.horizontalBar.groupTitle', {
+            defaultMessage: 'Split series',
+          }),
           min: 0,
           max: 3,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
         },
         {
           group: AggGroupNames.Buckets,
           name: 'split',
-          title: i18n.translate('kbnVislibVisTypes.horizontalBar.splitTitle', { defaultMessage: 'Split chart' }),
+          title: i18n.translate('kbnVislibVisTypes.horizontalBar.splitTitle', {
+            defaultMessage: 'Split chart',
+          }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-        }
-      ])
-    }
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        },
+      ]),
+    },
   });
 }

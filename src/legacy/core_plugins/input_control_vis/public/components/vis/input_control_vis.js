@@ -21,12 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { RangeControl } from './range_control';
 import { ListControl } from './list_control';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -52,7 +47,6 @@ export class InputControlVis extends Component {
   }
 
   renderControls() {
-
     return this.props.controls.map((control, index) => {
       let controlComponent = null;
       switch (control.type) {
@@ -70,7 +64,9 @@ export class InputControlVis extends Component {
               dynamicOptions={control.options.dynamicOptions}
               controlIndex={index}
               stageFilter={this.props.stageFilter}
-              fetchOptions={query => { this.props.refreshControl(index, query); }}
+              fetchOptions={query => {
+                this.props.refreshControl(index, query);
+              }}
             />
           );
           break;
@@ -102,38 +98,41 @@ export class InputControlVis extends Component {
     return (
       <EuiFlexGroup wrap={true}>
         <EuiFlexItem grow={false}>
-
           <EuiButton
             fill
             onClick={this.handleSubmit}
             disabled={!this.props.hasChanges()}
             data-test-subj="inputControlSubmitBtn"
           >
-            <FormattedMessage id="inputControl.vis.inputControlVis.applyChangesButtonLabel" defaultMessage="Apply changes"/>
+            <FormattedMessage
+              id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
+              defaultMessage="Apply changes"
+            />
           </EuiButton>
-
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-
           <EuiButtonEmpty
             onClick={this.handleReset}
             disabled={!this.props.hasChanges()}
             data-test-subj="inputControlCancelBtn"
           >
-            <FormattedMessage id="inputControl.vis.inputControlVis.cancelChangesButtonLabel" defaultMessage="Cancel changes"/>
+            <FormattedMessage
+              id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
+              defaultMessage="Cancel changes"
+            />
           </EuiButtonEmpty>
-
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-
           <EuiButtonEmpty
             onClick={this.handleClearAll}
             disabled={!this.props.hasValues()}
             data-test-subj="inputControlClearBtn"
           >
-            <FormattedMessage id="inputControl.vis.inputControlVis.clearFormButtonLabel" defaultMessage="Clear form"/>
+            <FormattedMessage
+              id="inputControl.vis.inputControlVis.clearFormButtonLabel"
+              defaultMessage="Clear form"
+            />
           </EuiButtonEmpty>
-
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -147,9 +146,7 @@ export class InputControlVis extends Component {
 
     return (
       <div className="icvContainer">
-        <EuiFlexGroup wrap>
-          {this.renderControls()}
-        </EuiFlexGroup>
+        <EuiFlexGroup wrap>{this.renderControls()}</EuiFlexGroup>
         {stagingButtons}
       </div>
     );

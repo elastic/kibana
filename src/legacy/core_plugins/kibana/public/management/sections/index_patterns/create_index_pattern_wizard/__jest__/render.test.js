@@ -32,7 +32,7 @@ jest.mock('ui/chrome', () => ({
   getUiSettingsClient: () => ({
     get: () => '',
   }),
-  addBasePath: () => { },
+  addBasePath: () => {},
 }));
 
 jest.mock('ui/i18n', () => ({
@@ -49,17 +49,14 @@ describe('CreateIndexPatternWizardRender', () => {
   });
 
   it('should call render', () => {
-    renderCreateIndexPatternWizard(
-      '',
-      {
-        es: {},
-        indexPatterns: {},
-        savedObjectsClient: {},
-        config: {},
-        changeUrl: () => {},
-        indexPatternCreationType: {},
-      }
-    );
+    renderCreateIndexPatternWizard('', {
+      es: {},
+      indexPatterns: {},
+      savedObjectsClient: {},
+      config: {},
+      changeUrl: () => {},
+      indexPatternCreationType: {},
+    });
 
     expect(render.mock.calls.length).toBe(1);
   });

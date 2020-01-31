@@ -27,9 +27,7 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
 
-import {
-  ListControlEditor,
-} from './list_control_editor';
+import { ListControlEditor } from './list_control_editor';
 
 const controlParams = {
   id: '1',
@@ -41,8 +39,8 @@ const controlParams = {
     type: 'terms',
     multiselect: true,
     dynamicOptions: false,
-    size: 10
-  }
+    size: 10,
+  },
 };
 let handleFieldNameChange;
 let handleIndexPatternChange;
@@ -68,19 +66,21 @@ describe('renders', () => {
         multiselect: true,
         dynamicOptions: true,
         size: 5,
-      }
+      },
     };
-    const component = shallow(<ListControlEditor
-      getIndexPattern={getIndexPatternMock}
-      controlIndex={0}
-      controlParams={controlParams}
-      handleFieldNameChange={handleFieldNameChange}
-      handleIndexPatternChange={handleIndexPatternChange}
-      handleCheckboxOptionChange={handleCheckboxOptionChange}
-      handleNumberOptionChange={handleNumberOptionChange}
-      handleParentChange={() => {}}
-      parentCandidates={[]}
-    />);
+    const component = shallow(
+      <ListControlEditor
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParams}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleCheckboxOptionChange={handleCheckboxOptionChange}
+        handleNumberOptionChange={handleNumberOptionChange}
+        handleParentChange={() => {}}
+        parentCandidates={[]}
+      />
+    );
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -91,21 +91,20 @@ describe('renders', () => {
   });
 
   test('should display chaining input when parents are provided', async () => {
-    const parentCandidates = [
-      { value: '1', text: 'fieldA' },
-      { value: '2', text: 'fieldB' }
-    ];
-    const component = shallow(<ListControlEditor
-      getIndexPattern={getIndexPatternMock}
-      controlIndex={0}
-      controlParams={controlParams}
-      handleFieldNameChange={handleFieldNameChange}
-      handleIndexPatternChange={handleIndexPatternChange}
-      handleCheckboxOptionChange={handleCheckboxOptionChange}
-      handleNumberOptionChange={handleNumberOptionChange}
-      handleParentChange={() => {}}
-      parentCandidates={parentCandidates}
-    />);
+    const parentCandidates = [{ value: '1', text: 'fieldA' }, { value: '2', text: 'fieldB' }];
+    const component = shallow(
+      <ListControlEditor
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParams}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleCheckboxOptionChange={handleCheckboxOptionChange}
+        handleNumberOptionChange={handleNumberOptionChange}
+        handleParentChange={() => {}}
+        parentCandidates={parentCandidates}
+      />
+    );
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -127,19 +126,21 @@ describe('renders', () => {
           multiselect: true,
           dynamicOptions: true,
           size: 5,
-        }
+        },
       };
-      const component = shallow(<ListControlEditor
-        getIndexPattern={getIndexPatternMock}
-        controlIndex={0}
-        controlParams={controlParams}
-        handleFieldNameChange={handleFieldNameChange}
-        handleIndexPatternChange={handleIndexPatternChange}
-        handleCheckboxOptionChange={handleCheckboxOptionChange}
-        handleNumberOptionChange={handleNumberOptionChange}
-        handleParentChange={() => {}}
-        parentCandidates={[]}
-      />);
+      const component = shallow(
+        <ListControlEditor
+          getIndexPattern={getIndexPatternMock}
+          controlIndex={0}
+          controlParams={controlParams}
+          handleFieldNameChange={handleFieldNameChange}
+          handleIndexPatternChange={handleIndexPatternChange}
+          handleCheckboxOptionChange={handleCheckboxOptionChange}
+          handleNumberOptionChange={handleNumberOptionChange}
+          handleParentChange={() => {}}
+          parentCandidates={[]}
+        />
+      );
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -160,19 +161,21 @@ describe('renders', () => {
           multiselect: true,
           dynamicOptions: false,
           size: 5,
-        }
+        },
       };
-      const component = shallow(<ListControlEditor
-        getIndexPattern={getIndexPatternMock}
-        controlIndex={0}
-        controlParams={controlParams}
-        handleFieldNameChange={handleFieldNameChange}
-        handleIndexPatternChange={handleIndexPatternChange}
-        handleCheckboxOptionChange={handleCheckboxOptionChange}
-        handleNumberOptionChange={handleNumberOptionChange}
-        handleParentChange={() => {}}
-        parentCandidates={[]}
-      />);
+      const component = shallow(
+        <ListControlEditor
+          getIndexPattern={getIndexPatternMock}
+          controlIndex={0}
+          controlParams={controlParams}
+          handleFieldNameChange={handleFieldNameChange}
+          handleIndexPatternChange={handleIndexPatternChange}
+          handleCheckboxOptionChange={handleCheckboxOptionChange}
+          handleNumberOptionChange={handleNumberOptionChange}
+          handleParentChange={() => {}}
+          parentCandidates={[]}
+        />
+      );
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -193,19 +196,21 @@ describe('renders', () => {
           multiselect: true,
           dynamicOptions: true,
           size: 5,
-        }
+        },
       };
-      const component = shallow(<ListControlEditor
-        getIndexPattern={getIndexPatternMock}
-        controlIndex={0}
-        controlParams={controlParams}
-        handleFieldNameChange={handleFieldNameChange}
-        handleIndexPatternChange={handleIndexPatternChange}
-        handleCheckboxOptionChange={handleCheckboxOptionChange}
-        handleNumberOptionChange={handleNumberOptionChange}
-        handleParentChange={() => {}}
-        parentCandidates={[]}
-      />);
+      const component = shallow(
+        <ListControlEditor
+          getIndexPattern={getIndexPatternMock}
+          controlIndex={0}
+          controlParams={controlParams}
+          handleFieldNameChange={handleFieldNameChange}
+          handleIndexPatternChange={handleIndexPatternChange}
+          handleCheckboxOptionChange={handleCheckboxOptionChange}
+          handleNumberOptionChange={handleNumberOptionChange}
+          handleParentChange={() => {}}
+          parentCandidates={[]}
+        />
+      );
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -218,17 +223,19 @@ describe('renders', () => {
 });
 
 test('handleCheckboxOptionChange - multiselect', async () => {
-  const component = mountWithIntl(<ListControlEditor
-    getIndexPattern={getIndexPatternMock}
-    controlIndex={0}
-    controlParams={controlParams}
-    handleFieldNameChange={handleFieldNameChange}
-    handleIndexPatternChange={handleIndexPatternChange}
-    handleCheckboxOptionChange={handleCheckboxOptionChange}
-    handleNumberOptionChange={handleNumberOptionChange}
-    handleParentChange={() => {}}
-    parentCandidates={[]}
-  />);
+  const component = mountWithIntl(
+    <ListControlEditor
+      getIndexPattern={getIndexPatternMock}
+      controlIndex={0}
+      controlParams={controlParams}
+      handleFieldNameChange={handleFieldNameChange}
+      handleIndexPatternChange={handleIndexPatternChange}
+      handleCheckboxOptionChange={handleCheckboxOptionChange}
+      handleNumberOptionChange={handleNumberOptionChange}
+      handleParentChange={() => {}}
+      parentCandidates={[]}
+    />
+  );
 
   // Ensure all promises resolve
   await new Promise(resolve => process.nextTick(resolve));
@@ -246,26 +253,29 @@ test('handleCheckboxOptionChange - multiselect', async () => {
     handleCheckboxOptionChange,
     expectedControlIndex,
     expectedOptionName,
-    sinon.match((evt) => {
+    sinon.match(evt => {
       if (evt.target.checked === true) {
         return true;
       }
       return false;
-    }, 'unexpected checkbox input event'));
+    }, 'unexpected checkbox input event')
+  );
 });
 
 test('handleNumberOptionChange - size', async () => {
-  const component = mountWithIntl(<ListControlEditor
-    getIndexPattern={getIndexPatternMock}
-    controlIndex={0}
-    controlParams={controlParams}
-    handleFieldNameChange={handleFieldNameChange}
-    handleIndexPatternChange={handleIndexPatternChange}
-    handleCheckboxOptionChange={handleCheckboxOptionChange}
-    handleNumberOptionChange={handleNumberOptionChange}
-    handleParentChange={() => {}}
-    parentCandidates={[]}
-  />);
+  const component = mountWithIntl(
+    <ListControlEditor
+      getIndexPattern={getIndexPatternMock}
+      controlIndex={0}
+      controlParams={controlParams}
+      handleFieldNameChange={handleFieldNameChange}
+      handleIndexPatternChange={handleIndexPatternChange}
+      handleCheckboxOptionChange={handleCheckboxOptionChange}
+      handleNumberOptionChange={handleNumberOptionChange}
+      handleParentChange={() => {}}
+      parentCandidates={[]}
+    />
+  );
 
   // Ensure all promises resolve
   await new Promise(resolve => process.nextTick(resolve));
@@ -283,12 +293,13 @@ test('handleNumberOptionChange - size', async () => {
     handleNumberOptionChange,
     expectedControlIndex,
     expectedOptionName,
-    sinon.match((evt) => {
+    sinon.match(evt => {
       if (evt.target.value === 7) {
         return true;
       }
       return false;
-    }, 'unexpected input event'));
+    }, 'unexpected input event')
+  );
 });
 
 test('field name change', async () => {
@@ -314,9 +325,13 @@ test('field name change', async () => {
   };
 
   // ensure that after async loading is complete the DynamicOptionsSwitch is not disabled
-  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')).toHaveLength(0);
+  expect(
+    component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')
+  ).toHaveLength(0);
   await update();
-  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')).toHaveLength(1);
+  expect(
+    component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')
+  ).toHaveLength(1);
 
   component.setProps({
     controlParams: {
@@ -326,16 +341,24 @@ test('field name change', async () => {
   });
 
   // ensure that after async loading is complete the DynamicOptionsSwitch is disabled, because this is not a "string" field
-  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=true]')).toHaveLength(0);
+  expect(
+    component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=true]')
+  ).toHaveLength(0);
   await update();
-  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=true]')).toHaveLength(1);
+  expect(
+    component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=true]')
+  ).toHaveLength(1);
 
   component.setProps({
-    controlParams
+    controlParams,
   });
 
   // ensure that after async loading is complete the DynamicOptionsSwitch is not disabled again, because we switched to original "string" field
-  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')).toHaveLength(0);
+  expect(
+    component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')
+  ).toHaveLength(0);
   await update();
-  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')).toHaveLength(1);
+  expect(
+    component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')
+  ).toHaveLength(1);
 });

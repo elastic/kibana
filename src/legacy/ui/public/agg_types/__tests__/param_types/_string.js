@@ -23,7 +23,7 @@ import { BaseParamType } from '../../param_types/base';
 import { StringParamType } from '../../param_types/string';
 
 // eslint-disable-next-line import/no-default-export
-export default describe('String', function () {
+export default describe('String', function() {
   const paramName = 'json_test';
   let aggParam;
   let aggConfig;
@@ -33,29 +33,27 @@ export default describe('String', function () {
     config = config || {};
     const defaults = {
       name: paramName,
-      type: 'string'
+      type: 'string',
     };
 
     aggParam = new StringParamType(_.defaults(config, defaults));
   }
 
-
   // fetch our deps
-  beforeEach(function () {
-
+  beforeEach(function() {
     aggConfig = { params: {} };
     output = { params: {} };
   });
 
-  describe('constructor', function () {
-    it('it is an instance of BaseParamType', function () {
+  describe('constructor', function() {
+    it('it is an instance of BaseParamType', function() {
       initAggParam();
       expect(aggParam).to.be.a(BaseParamType);
     });
   });
 
-  describe('write', function () {
-    it('should append param by name', function () {
+  describe('write', function() {
+    it('should append param by name', function() {
       const paramName = 'testing';
       const params = {};
       params[paramName] = 'some input';
@@ -68,7 +66,7 @@ export default describe('String', function () {
       expect(output.params).to.eql(params);
     });
 
-    it('should not be in output with empty input', function () {
+    it('should not be in output with empty input', function() {
       const paramName = 'more_testing';
       const params = {};
       params[paramName] = '';

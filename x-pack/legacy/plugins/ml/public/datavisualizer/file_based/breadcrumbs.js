@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { ML_BREADCRUMB, DATA_VISUALIZER_BREADCRUMB } from '../../breadcrumbs';
 import { i18n } from '@kbn/i18n';
-
 
 export function getFileDataVisualizerBreadcrumbs() {
   // Whilst top level nav menu with tabs remains,
@@ -17,10 +15,9 @@ export function getFileDataVisualizerBreadcrumbs() {
     DATA_VISUALIZER_BREADCRUMB,
     {
       text: i18n.translate('xpack.ml.dataVisualizer.fileBasedLabel', {
-        defaultMessage: 'File'
+        defaultMessage: 'File',
       }),
-      href: ''
-    }
+      href: '',
+    },
   ];
 }
-

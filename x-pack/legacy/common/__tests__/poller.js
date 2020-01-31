@@ -9,7 +9,6 @@ import sinon from 'sinon';
 import { Poller } from '../poller';
 
 describe('Poller', () => {
-
   const pollFrequencyInMillis = 20;
   let functionToPoll;
   let successFunction;
@@ -28,7 +27,6 @@ describe('Poller', () => {
     }
   });
 
-
   // Allowing the Poller to poll requires intimate knowledge of the inner workings of the Poller.
   // We have to ensure that the Promises internal to the `_poll` method are resolved to queue up
   // the next setTimeout before incrementing the clock. The order of this differs slightly when the
@@ -38,27 +36,28 @@ describe('Poller', () => {
     await Promise.resolve();
   };
 
-  const allowPoll = async (interval) => {
+  const allowPoll = async interval => {
     await queueNextPoll();
     clock.tick(interval);
   };
 
-  const allowDelayPoll = async (interval) => {
+  const allowDelayPoll = async interval => {
     clock.tick(interval);
     await queueNextPoll();
   };
 
   describe('start()', () => {
-
     beforeEach(() => {
-      functionToPoll = sinon.spy(() => { return Promise.resolve(42); });
+      functionToPoll = sinon.spy(() => {
+        return Promise.resolve(42);
+      });
       successFunction = sinon.spy();
       errorFunction = sinon.spy();
       poller = new Poller({
         functionToPoll,
         successFunction,
         errorFunction,
-        pollFrequencyInMillis
+        pollFrequencyInMillis,
       });
     });
 
@@ -76,7 +75,7 @@ describe('Poller', () => {
           successFunction,
           errorFunction,
           pollFrequencyInMillis,
-          trailing: true
+          trailing: true,
         });
       });
 
@@ -88,41 +87,39 @@ describe('Poller', () => {
       });
     });
 
-    it ('polls the functionToPoll multiple times', async () => {
+    it('polls the functionToPoll multiple times', async () => {
       poller.start();
       await allowPoll(pollFrequencyInMillis * 2);
       expect(functionToPoll.callCount).to.be.greaterThan(1);
     });
 
     describe('when the function to poll succeeds', () => {
-
-      it ('calls the successFunction multiple times', async () => {
+      it('calls the successFunction multiple times', async () => {
         poller.start();
         await allowPoll(pollFrequencyInMillis * 2);
         expect(successFunction.callCount).to.be.greaterThan(1);
         expect(errorFunction.callCount).to.be(0);
       });
-
     });
 
     describe('when the function to poll fails', () => {
-
       beforeEach(() => {
-        functionToPoll = sinon.spy(() => { return Promise.reject(42); });
+        functionToPoll = sinon.spy(() => {
+          return Promise.reject(42);
+        });
       });
 
       describe('when the continuePollingOnError option has not been set', () => {
-
         beforeEach(() => {
           poller = new Poller({
             functionToPoll,
             successFunction,
             errorFunction,
-            pollFrequencyInMillis
+            pollFrequencyInMillis,
           });
         });
 
-        it ('calls the errorFunction exactly once and polling is stopped', async () => {
+        it('calls the errorFunction exactly once and polling is stopped', async () => {
           poller.start();
           await allowPoll(pollFrequencyInMillis * 4);
           expect(poller.isRunning()).to.be(false);
@@ -132,18 +129,17 @@ describe('Poller', () => {
       });
 
       describe('when the continuePollingOnError option has been set to true', () => {
-
         beforeEach(() => {
           poller = new Poller({
             functionToPoll,
             successFunction,
             errorFunction,
             pollFrequencyInMillis,
-            continuePollingOnError: true
+            continuePollingOnError: true,
           });
         });
 
-        it ('calls the errorFunction multiple times', async () => {
+        it('calls the errorFunction multiple times', async () => {
           poller.start();
           await allowPoll(pollFrequencyInMillis);
           await allowPoll(pollFrequencyInMillis);
@@ -159,7 +155,7 @@ describe('Poller', () => {
               errorFunction,
               pollFrequencyInMillis,
               continuePollingOnError: true,
-              pollFrequencyErrorMultiplier: 2
+              pollFrequencyErrorMultiplier: 2,
             });
           });
 
@@ -174,16 +170,16 @@ describe('Poller', () => {
           });
         });
       });
-
     });
   });
 
   describe('isRunning()', () => {
-
     beforeEach(() => {
-      functionToPoll = sinon.spy(() => { return Promise.resolve(42); });
+      functionToPoll = sinon.spy(() => {
+        return Promise.resolve(42);
+      });
       poller = new Poller({
-        functionToPoll
+        functionToPoll,
       });
     });
 
@@ -200,13 +196,14 @@ describe('Poller', () => {
   });
 
   describe('stop()', () => {
-
     describe(`when successFunction isn't set`, () => {
       beforeEach(() => {
-        functionToPoll = sinon.spy(() => { return Promise.resolve(42); });
+        functionToPoll = sinon.spy(() => {
+          return Promise.resolve(42);
+        });
         poller = new Poller({
           functionToPoll,
-          pollFrequencyInMillis
+          pollFrequencyInMillis,
         });
       });
 
@@ -221,11 +218,13 @@ describe('Poller', () => {
 
     describe(`when successFunction is a Promise`, () => {
       beforeEach(() => {
-        functionToPoll = sinon.spy(() => { return Promise.resolve(42); });
+        functionToPoll = sinon.spy(() => {
+          return Promise.resolve(42);
+        });
         poller = new Poller({
           functionToPoll,
           successFunction: Promise.resolve(),
-          pollFrequencyInMillis
+          pollFrequencyInMillis,
         });
       });
 

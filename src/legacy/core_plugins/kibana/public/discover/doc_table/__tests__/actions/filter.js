@@ -26,42 +26,38 @@ import sinon from 'sinon';
 
 function getFilterGeneratorStub() {
   return {
-    add: sinon.stub()
+    add: sinon.stub(),
   };
 }
 
-describe('doc table filter actions', function () {
+describe('doc table filter actions', function() {
   NoDigestPromises.activateForSuite();
 
   let filterGen;
   let indexPattern;
 
-  beforeEach(ngMock.module(
-    'kibana',
-    'kibana/courier',
-    function ($provide) {
+  beforeEach(
+    ngMock.module('kibana', 'kibana/courier', function($provide) {
       $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
-    }
-  ));
+    })
+  );
 
-  beforeEach(ngMock.inject(function (Private) {
-    indexPattern = Private(StubbedLogstashIndexPatternProvider);
-    filterGen = getFilterGeneratorStub();
-  }));
+  beforeEach(
+    ngMock.inject(function(Private) {
+      indexPattern = Private(StubbedLogstashIndexPatternProvider);
+      filterGen = getFilterGeneratorStub();
+    })
+  );
 
-  describe('add', function () {
-
-    it('should defer to the FilterManager when dealing with a lucene query', function () {
+  describe('add', function() {
+    it('should defer to the FilterManager when dealing with a lucene query', function() {
       const state = {
-        query: { query: 'foo', language: 'lucene' }
+        query: { query: 'foo', language: 'lucene' },
       };
-      const args = ['foo', ['bar'], '+', indexPattern, ];
+      const args = ['foo', ['bar'], '+', indexPattern];
       addFilter('foo', ['bar'], '+', indexPattern, state, filterGen);
       expect(filterGen.add.calledOnce).to.be(true);
       expect(filterGen.add.calledWith(...args)).to.be(true);
     });
-
   });
-
-
 });

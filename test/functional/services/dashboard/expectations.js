@@ -28,8 +28,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize']);
   const findTimeout = 2500;
 
-  return new class DashboardExpect {
-
+  return new (class DashboardExpect {
     async panelCount(expectedCount) {
       log.debug(`DashboardExpect.panelCount(${expectedCount})`);
       await retry.try(async () => {
@@ -49,7 +48,10 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async selectedLegendColorCount(color, expectedCount) {
       log.debug(`DashboardExpect.selectedLegendColorCount(${color}, ${expectedCount})`);
       await retry.try(async () => {
-        const selectedLegendColor = await testSubjects.findAll(`legendSelectedColor-${color}`, findTimeout);
+        const selectedLegendColor = await testSubjects.findAll(
+          `legendSelectedColor-${color}`,
+          findTimeout
+        );
         expect(selectedLegendColor.length).to.be(expectedCount);
       });
     }
@@ -72,12 +74,14 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
 
     async legendValuesToExist(legendValues) {
       log.debug(`DashboardExpect.legendValuesToExist(${legendValues})`);
-      await Promise.all(legendValues.map(async legend => {
-        await retry.try(async () => {
-          const legendValueExists = await testSubjects.exists(`legend-${legend}`);
-          expect(legendValueExists).to.be(true);
-        });
-      }));
+      await Promise.all(
+        legendValues.map(async legend => {
+          await retry.try(async () => {
+            const legendValueExists = await testSubjects.exists(`legend-${legend}`);
+            expect(legendValueExists).to.be(true);
+          });
+        })
+      );
     }
 
     async textWithinElementsExists(texts, getElementsFn) {
@@ -85,9 +89,11 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         const elements = await getElementsFn();
         const elementTexts = [];
-        await Promise.all(elements.map(async element => {
-          elementTexts.push(await element.getVisibleText());
-        }));
+        await Promise.all(
+          elements.map(async element => {
+            elementTexts.push(await element.getVisibleText());
+          })
+        );
         log.debug(`Found ${elements.length} elements with values: ${JSON.stringify(elementTexts)}`);
         texts.forEach(value => {
           const indexOfValue = elementTexts.indexOf(value);
@@ -114,9 +120,11 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         const elements = await getElementsFn();
         const elementTexts = [];
-        await Promise.all(elements.map(async element => {
-          elementTexts.push(await element.getVisibleText());
-        }));
+        await Promise.all(
+          elements.map(async element => {
+            elementTexts.push(await element.getVisibleText());
+          })
+        );
         log.debug(`Found ${elements.length} elements with values: ${JSON.stringify(elementTexts)}`);
         texts.forEach(value => {
           const indexOfValue = elementTexts.indexOf(value);
@@ -127,7 +135,10 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
 
     async textWithinCssElementDoNotExist(texts, selector) {
       log.debug(`textWithinCssElementExists:(${JSON.stringify(texts)},${selector})`);
-      await this.textWithinElementsDoNotExist(texts, async () => await find.allByCssSelector(selector));
+      await this.textWithinElementsDoNotExist(
+        texts,
+        async () => await find.allByCssSelector(selector)
+      );
     }
 
     async timelionLegendCount(expectedCount) {
@@ -141,24 +152,28 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async emptyTagCloudFound() {
       log.debug(`DashboardExpect.emptyTagCloudFound()`);
       const tagCloudVisualizations = await testSubjects.findAll('tagCloudVisualization');
-      const tagCloudsHaveContent = await Promise.all(tagCloudVisualizations.map(async tagCloud => {
-        return await find.descendantExistsByCssSelector('text', tagCloud);
-      }));
+      const tagCloudsHaveContent = await Promise.all(
+        tagCloudVisualizations.map(async tagCloud => {
+          return await find.descendantExistsByCssSelector('text', tagCloud);
+        })
+      );
       expect(tagCloudsHaveContent.indexOf(false)).to.be.greaterThan(-1);
     }
 
     async tagCloudWithValuesFound(values) {
       log.debug(`DashboardExpect.tagCloudWithValuesFound(${values})`);
       const tagCloudVisualizations = await testSubjects.findAll('tagCloudVisualization');
-      const matches = await Promise.all(tagCloudVisualizations.map(async tagCloud => {
-        for (let i = 0; i < values.length; i++) {
-          const valueExists = await testSubjects.descendantExists(values[i], tagCloud);
-          if (!valueExists) {
-            return false;
+      const matches = await Promise.all(
+        tagCloudVisualizations.map(async tagCloud => {
+          for (let i = 0; i < values.length; i++) {
+            const valueExists = await testSubjects.descendantExists(values[i], tagCloud);
+            if (!valueExists) {
+              return false;
+            }
           }
-        }
-        return true;
-      }));
+          return true;
+        })
+      );
       expect(matches.indexOf(true)).to.be.greaterThan(-1);
     }
 
@@ -205,7 +220,10 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async savedSearchRowCount(expectedCount) {
       log.debug(`DashboardExpect.savedSearchRowCount(${expectedCount})`);
       await retry.try(async () => {
-        const savedSearchRows = await testSubjects.findAll('docTableExpandToggleColumn', findTimeout);
+        const savedSearchRows = await testSubjects.findAll(
+          'docTableExpandToggleColumn',
+          findTimeout
+        );
         expect(savedSearchRows.length).to.be(expectedCount);
       });
     }
@@ -252,5 +270,5 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
         expect(tableCells.length).to.be(expectedCount);
       });
     }
-  };
+  })();
 }

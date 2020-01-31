@@ -23,7 +23,7 @@ import sinon from 'sinon';
 import { hideEmptyDevTools } from '../hide_empty_tools';
 import { npStart } from 'ui/new_platform';
 
-describe('hide dev tools', function () {
+describe('hide dev tools', function() {
   let updateNavLink;
 
   function PrivateWithoutTools() {
@@ -38,22 +38,22 @@ describe('hide dev tools', function () {
     return updateNavLink.calledWith('kibana:dev_tools', { hidden: true });
   }
 
-  beforeEach(function () {
+  beforeEach(function() {
     const coreNavLinks = npStart.core.chrome.navLinks;
     updateNavLink = sinon.spy(coreNavLinks, 'update');
   });
 
-  it('should hide the app if there are no dev tools', function () {
+  it('should hide the app if there are no dev tools', function() {
     hideEmptyDevTools(PrivateWithTools);
     expect(isHidden()).to.be(false);
   });
 
-  it('should not hide the app if there are tools', function () {
+  it('should not hide the app if there are tools', function() {
     hideEmptyDevTools(PrivateWithoutTools);
     expect(isHidden()).to.be(true);
   });
 
-  afterEach(function () {
+  afterEach(function() {
     updateNavLink.restore();
   });
 });

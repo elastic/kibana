@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { BaseVisType } from '../../vis_types/base_vis_type';
 
-describe('Base Vis Type', function () {
+describe('Base Vis Type', function() {
   beforeEach(ngMock.module('kibana'));
 
   describe('initialization', () => {
@@ -47,9 +47,14 @@ describe('Base Vis Type', function () {
       }).to.throwError('vis_type must define visualization controller');
 
       expect(() => {
-        new BaseVisType({ name: 'test', title: 'test', description: 'test', icon: 'test', visualization: {} });
+        new BaseVisType({
+          name: 'test',
+          title: 'test',
+          description: 'test',
+          icon: 'test',
+          visualization: {},
+        });
       }).to.not.throwError();
     });
   });
-
 });

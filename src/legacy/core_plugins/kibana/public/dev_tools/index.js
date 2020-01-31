@@ -20,19 +20,21 @@
 import uiRoutes from 'ui/routes';
 import { i18n } from '@kbn/i18n';
 import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import {
+  FeatureCatalogueRegistryProvider,
+  FeatureCatalogueCategory,
+} from 'ui/registry/feature_catalogue';
 import 'ui/directives/kbn_href';
 import './directives/dev_tools_app';
 
-uiRoutes
-  .when('/dev_tools', {
-    resolve: {
-      redirect(Private, kbnUrl) {
-        const items = Private(DevToolsRegistryProvider).inOrder;
-        kbnUrl.redirect(items[0].url.substring(1));
-      }
-    }
-  });
+uiRoutes.when('/dev_tools', {
+  resolve: {
+    redirect(Private, kbnUrl) {
+      const items = Private(DevToolsRegistryProvider).inOrder;
+      kbnUrl.redirect(items[0].url.substring(1));
+    },
+  },
+});
 
 uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
   badge: uiCapabilities => {
@@ -47,31 +49,31 @@ uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
       tooltip: i18n.translate('kbn.devTools.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save',
       }),
-      iconType: 'glasses'
+      iconType: 'glasses',
     };
   },
   k7Breadcrumbs: () => [
     {
       text: i18n.translate('kbn.devTools.k7BreadcrumbsDevToolsLabel', {
-        defaultMessage: 'Dev Tools'
+        defaultMessage: 'Dev Tools',
       }),
-      href: '#/dev_tools'
-    }
-  ]
+      href: '#/dev_tools',
+    },
+  ],
 });
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'console',
     title: i18n.translate('kbn.devTools.consoleTitle', {
-      defaultMessage: 'Console'
+      defaultMessage: 'Console',
     }),
     description: i18n.translate('kbn.devTools.consoleDescription', {
-      defaultMessage: 'Skip cURL and use this JSON interface to work with your data directly.'
+      defaultMessage: 'Skip cURL and use this JSON interface to work with your data directly.',
     }),
     icon: 'consoleApp',
     path: '/app/kibana#/dev_tools/console',
     showOnHomePage: true,
-    category: FeatureCatalogueCategory.ADMIN
+    category: FeatureCatalogueCategory.ADMIN,
   };
 });

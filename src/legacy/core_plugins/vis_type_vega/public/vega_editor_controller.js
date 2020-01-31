@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 export class VegaEditorController {
   constructor($scope) {
     this.$scope = $scope;
-    $scope.aceLoaded = (editor) => {
+    $scope.aceLoaded = editor => {
       editor.$blockScrolling = Infinity;
 
       const session = editor.getSession();
@@ -35,13 +35,13 @@ export class VegaEditorController {
       this.aceEditor = editor;
     };
 
-    $scope.formatJson = (event) => {
+    $scope.formatJson = event => {
       this._format(event, compactStringify, {
         maxLength: this._getCodeWidth(),
       });
     };
 
-    $scope.formatHJson = (event) => {
+    $scope.formatHJson = event => {
       this._format(event, hjson.stringify, {
         condense: this._getCodeWidth(),
         bracesSameLine: true,
@@ -59,7 +59,10 @@ export class VegaEditorController {
 
     let newSpec;
     try {
-      const spec = hjson.parse(this.aceEditor.getSession().doc.getValue(), { legacyRoot: false, keepWsc: true });
+      const spec = hjson.parse(this.aceEditor.getSession().doc.getValue(), {
+        legacyRoot: false,
+        keepWsc: true,
+      });
       newSpec = stringify(spec, opts);
     } catch (err) {
       // This is a common case - user tries to format an invalid HJSON text

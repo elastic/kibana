@@ -19,13 +19,13 @@
 
 export const CONTROL_TYPES = {
   LIST: 'list',
-  RANGE: 'range'
+  RANGE: 'range',
 };
 
 export const setControl = (controls, controlIndex, control) => [
   ...controls.slice(0, controlIndex),
   control,
-  ...controls.slice(controlIndex + 1)
+  ...controls.slice(controlIndex + 1),
 ];
 
 export const addControl = (controls, control) => [...controls, control];
@@ -40,17 +40,11 @@ export const moveControl = (controls, controlIndex, direction) => {
 
   if (newIndex < 0) {
     // Move first item to last
-    return [
-      ...controls.slice(1),
-      controls[0]
-    ];
+    return [...controls.slice(1), controls[0]];
   } else if (newIndex >= controls.length) {
     const lastItemIndex = controls.length - 1;
     // Move last item to first
-    return [
-      controls[lastItemIndex],
-      ...controls.slice(0, lastItemIndex)
-    ];
+    return [controls[lastItemIndex], ...controls.slice(0, lastItemIndex)];
   } else {
     const swapped = controls.slice();
     const temp = swapped[newIndex];
@@ -62,10 +56,10 @@ export const moveControl = (controls, controlIndex, direction) => {
 
 export const removeControl = (controls, controlIndex) => [
   ...controls.slice(0, controlIndex),
-  ...controls.slice(controlIndex + 1)
+  ...controls.slice(controlIndex + 1),
 ];
 
-export const getDefaultOptions = (type) => {
+export const getDefaultOptions = type => {
   const defaultOptions = {};
   switch (type) {
     case CONTROL_TYPES.RANGE:
@@ -83,8 +77,8 @@ export const getDefaultOptions = (type) => {
   return defaultOptions;
 };
 
-export const newControl = (type) => ({
-  id: (new Date()).getTime().toString(),
+export const newControl = type => ({
+  id: new Date().getTime().toString(),
   indexPattern: '',
   fieldName: '',
   parent: '',

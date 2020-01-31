@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
 import moment from 'moment-timezone';
 import { formatValue } from '../format_value';
@@ -22,7 +20,7 @@ describe('ML - formatValue formatter', () => {
     by_field_name: 'clientip',
     by_field_value: '65.55.215.39',
     function: 'time_of_week',
-    function_description: 'time'
+    function_description: 'time',
   };
 
   const timeOfDayRecord = {
@@ -36,7 +34,7 @@ describe('ML - formatValue formatter', () => {
     by_field_name: 'clientip',
     by_field_value: '157.56.93.83',
     function: 'time_of_day',
-    function_description: 'time'
+    function_description: 'time',
   };
 
   // Set timezone to US/Eastern for time_of_day and time_of_week tests.
@@ -89,5 +87,4 @@ describe('ML - formatValue formatter', () => {
   it('correctly formats multi-valued array', () => {
     expect(formatValue([30.3, 26.2], 'lat_long')).to.be('[30.3,26.2]');
   });
-
 });

@@ -49,8 +49,8 @@ export function buildRangeFilter(field, params, indexPattern, formattedValue) {
   const filter = { meta: { index: indexPattern.id } };
   if (formattedValue) filter.meta.formattedValue = formattedValue;
 
-  params = _.mapValues(params, (value) => {
-    return (field.type === 'number') ? parseFloat(value) : value;
+  params = _.mapValues(params, value => {
+    return field.type === 'number' ? parseFloat(value) : value;
   });
 
   if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');
@@ -88,16 +88,20 @@ export function getRangeScript(field, params) {
   const knownParams = _.pick(params, (val, key) => {
     return key in operators;
   });
-  let script = _.map(knownParams, function (val, key) {
+  let script = _.map(knownParams, function(val, key) {
     return '(' + field.script + ')' + operators[key] + key;
   }).join(' && ');
 
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
   if (field.lang === 'painless') {
     const comp = field.type === 'date' ? dateComparators : comparators;
-    const currentComparators = _.reduce(knownParams, (acc, val, key) => acc.concat(comp[key]), []).join(' ');
+    const currentComparators = _.reduce(
+      knownParams,
+      (acc, val, key) => acc.concat(comp[key]),
+      []
+    ).join(' ');
 
-    const comparisons = _.map(knownParams, function (val, key) {
+    const comparisons = _.map(knownParams, function(val, key) {
       return `${key}(() -> { ${field.script} }, params.${key})`;
     }).join(' && ');
 
@@ -108,14 +112,11 @@ export function getRangeScript(field, params) {
     script: {
       source: script,
       params: knownParams,
-      lang: field.lang
-    }
+      lang: field.lang,
+    },
   };
 }
 
 function format(field, value) {
-  return field && field.format && field.format.convert
-    ? field.format.convert(value)
-    : value;
+  return field && field.format && field.format.convert ? field.format.convert(value) : value;
 }
-

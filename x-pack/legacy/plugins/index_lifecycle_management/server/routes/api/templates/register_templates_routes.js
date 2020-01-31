@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import { registerFetchRoute } from './register_fetch_route';
 import { registerGetRoute } from './register_get_route';
 import { registerAddPolicyRoute } from './register_add_policy_route';

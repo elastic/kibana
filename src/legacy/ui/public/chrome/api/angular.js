@@ -24,7 +24,7 @@ import { registerSubUrlHooks } from './sub_url_hooks';
 import { configureAppAngularModule } from 'ui/legacy_compat';
 
 export function initAngularApi(chrome, internals) {
-  chrome.setupAngular = function () {
+  chrome.setupAngular = function() {
     const kibana = uiModules.get('kibana');
 
     configureAppAngularModule(kibana);
@@ -36,5 +36,4 @@ export function initAngularApi(chrome, internals) {
 
     uiModules.link(kibana);
   };
-
 }

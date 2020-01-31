@@ -21,21 +21,24 @@ const template = `
   <datavisualizer-selector data-test-subj="mlPageDataVisualizerSelector" />
 `;
 
-uiRoutes
-  .when('/datavisualizer', {
-    template,
-    k7Breadcrumbs: getDataVisualizerBreadcrumbs,
-    resolve: {
-      CheckLicense: checkBasicLicense,
-      privileges: checkFindFileStructurePrivilege,
-    }
-  });
-
+uiRoutes.when('/datavisualizer', {
+  template,
+  k7Breadcrumbs: getDataVisualizerBreadcrumbs,
+  resolve: {
+    CheckLicense: checkBasicLicense,
+    privileges: checkFindFileStructurePrivilege,
+  },
+});
 
 import { DatavisualizerSelector } from './datavisualizer_selector';
 
-module.directive('datavisualizerSelector', function ($injector) {
+module.directive('datavisualizerSelector', function($injector) {
   const reactDirective = $injector.get('reactDirective');
 
-  return reactDirective(wrapInI18nContext(DatavisualizerSelector), undefined, { restrict: 'E' }, { });
+  return reactDirective(
+    wrapInI18nContext(DatavisualizerSelector),
+    undefined,
+    { restrict: 'E' },
+    {}
+  );
 });

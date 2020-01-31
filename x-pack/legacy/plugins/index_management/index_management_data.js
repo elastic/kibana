@@ -5,7 +5,7 @@
  */
 
 const indexManagementDataEnrichers = [];
-export const addIndexManagementDataEnricher = (enricher) => {
+export const addIndexManagementDataEnricher = enricher => {
   indexManagementDataEnrichers.push(enricher);
 };
 export const getIndexManagementDataEnrichers = () => {

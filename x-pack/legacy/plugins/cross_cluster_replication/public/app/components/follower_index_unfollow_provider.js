@@ -9,10 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiConfirmModal,
-  EuiOverlayMask,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
 import { unfollowLeaderIndex } from '../store/actions';
 import { arrify } from '../../../common/services/utils';
@@ -20,20 +17,20 @@ import { arrify } from '../../../common/services/utils';
 class FollowerIndexUnfollowProviderUi extends PureComponent {
   static propTypes = {
     onConfirm: PropTypes.func,
-  }
+  };
 
   state = {
     isModalOpen: false,
-    ids: null
-  }
+    ids: null,
+  };
 
-  onMouseOverModal = (event) => {
+  onMouseOverModal = event => {
     // This component can sometimes be used inside of an EuiToolTip, in which case mousing over
     // the modal can trigger the tooltip. Stopping propagation prevents this.
     event.stopPropagation();
   };
 
-  unfollowLeaderIndex = (id) => {
+  unfollowLeaderIndex = id => {
     this.setState({ isModalOpen: true, ids: arrify(id) });
   };
 
@@ -41,7 +38,7 @@ class FollowerIndexUnfollowProviderUi extends PureComponent {
     this.props.unfollowLeaderIndex(this.state.ids);
     this.setState({ isModalOpen: false, ids: null });
     this.props.onConfirm && this.props.onConfirm();
-  }
+  };
 
   closeConfirmModal = () => {
     this.setState({
@@ -54,43 +51,40 @@ class FollowerIndexUnfollowProviderUi extends PureComponent {
     const isSingle = ids.length === 1;
     const title = isSingle
       ? i18n.translate(
-        'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.unfollowSingleTitle',
-        {
-          defaultMessage: `Unfollow leader index of '{name}'?`,
-          values: { name: ids[0] }
-        }
-      ) : i18n.translate(
-        'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.unfollowMultipleTitle',
-        {
-          defaultMessage: `Unfollow {count} leader indices?`,
-          values: { count: ids.length }
-        }
-      );
+          'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.unfollowSingleTitle',
+          {
+            defaultMessage: `Unfollow leader index of '{name}'?`,
+            values: { name: ids[0] },
+          }
+        )
+      : i18n.translate(
+          'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.unfollowMultipleTitle',
+          {
+            defaultMessage: `Unfollow {count} leader indices?`,
+            values: { count: ids.length },
+          }
+        );
 
     return (
       <EuiOverlayMask>
-        { /* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */ }
+        {/* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */}
         <EuiConfirmModal
           title={title}
           onCancel={this.closeConfirmModal}
           onConfirm={this.onConfirm}
-          cancelButtonText={
-            i18n.translate(
-              'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.cancelButtonText',
-              {
-                defaultMessage: 'Cancel'
-              }
-            )
-          }
+          cancelButtonText={i18n.translate(
+            'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.cancelButtonText',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
           buttonColor="danger"
-          confirmButtonText={
-            i18n.translate(
-              'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.confirmButtonText',
-              {
-                defaultMessage: 'Unfollow leader'
-              }
-            )
-          }
+          confirmButtonText={i18n.translate(
+            'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.confirmButtonText',
+            {
+              defaultMessage: 'Unfollow leader',
+            }
+          )}
           onMouseOver={this.onMouseOverModal}
           data-test-subj="unfollowLeaderConfirmation"
         >
@@ -115,13 +109,17 @@ class FollowerIndexUnfollowProviderUi extends PureComponent {
                     Index Management. You can't undo this operation."
                 />
               </p>
-              <ul>{ids.map(id => <li key={id}>{id}</li>)}</ul>
+              <ul>
+                {ids.map(id => (
+                  <li key={id}>{id}</li>
+                ))}
+              </ul>
             </Fragment>
           )}
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
-  }
+  };
 
   render() {
     const { children } = this.props;
@@ -136,12 +134,11 @@ class FollowerIndexUnfollowProviderUi extends PureComponent {
   }
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  unfollowLeaderIndex: (id) => dispatch(unfollowLeaderIndex(id)),
+const mapDispatchToProps = dispatch => ({
+  unfollowLeaderIndex: id => dispatch(unfollowLeaderIndex(id)),
 });
 
 export const FollowerIndexUnfollowProvider = connect(
   undefined,
   mapDispatchToProps
 )(FollowerIndexUnfollowProviderUi);
-

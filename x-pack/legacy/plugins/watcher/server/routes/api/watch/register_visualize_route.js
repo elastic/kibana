@@ -9,7 +9,7 @@ import { Watch } from '../../../models/watch';
 import { VisualizeOptions } from '../../../models/visualize_options';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function fetchVisualizeData(callWithRequest, index, body) {
   const params = {
@@ -17,7 +17,7 @@ function fetchVisualizeData(callWithRequest, index, body) {
     body,
     ignoreUnavailable: true,
     allowNoIndices: true,
-    ignore: [404]
+    ignore: [404],
   };
 
   return callWithRequest('search', params);
@@ -30,7 +30,7 @@ export function registerVisualizeRoute(server) {
   server.route({
     path: '/api/watcher/watch/visualize',
     method: 'POST',
-    handler: (request) => {
+    handler: request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const watch = Watch.fromDownstreamJson(request.payload.watch);
       const options = VisualizeOptions.fromDownstreamJson(request.payload.options);
@@ -41,11 +41,10 @@ export function registerVisualizeRoute(server) {
           const visualizeData = watch.formatVisualizeData(hits);
 
           return {
-            visualizeData
+            visualizeData,
           };
         })
         .catch(err => {
-
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
             throw wrapEsError(err);
@@ -56,7 +55,7 @@ export function registerVisualizeRoute(server) {
         });
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

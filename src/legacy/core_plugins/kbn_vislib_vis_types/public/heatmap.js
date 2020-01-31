@@ -27,12 +27,13 @@ import { HeatmapOptions } from './components/options';
 import { vislibVisController } from './controller';
 
 export default function HeatmapVisType() {
-
   return visFactory.createBaseVisualization({
     name: 'heatmap',
     title: i18n.translate('kbnVislibVisTypes.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
     icon: 'visHeatmap',
-    description: i18n.translate('kbnVislibVisTypes.heatmap.heatmapDescription', { defaultMessage: 'Shade cells within a matrix' }),
+    description: i18n.translate('kbnVislibVisTypes.heatmap.heatmapDescription', {
+      defaultMessage: 'Shade cells within a matrix',
+    }),
     visualization: vislibVisController,
     visConfig: {
       defaults: {
@@ -48,21 +49,23 @@ export default function HeatmapVisType() {
         colorsRange: [],
         invertColors: false,
         percentageMode: false,
-        valueAxes: [{
-          show: false,
-          id: 'ValueAxis-1',
-          type: AxisTypes.VALUE,
-          scale: {
-            type: ScaleTypes.LINEAR,
-            defaultYExtents: false,
-          },
-          labels: {
+        valueAxes: [
+          {
             show: false,
-            rotate: 0,
-            overwriteColor: false,
-            color: 'black',
-          }
-        }]
+            id: 'ValueAxis-1',
+            type: AxisTypes.VALUE,
+            scale: {
+              type: ScaleTypes.LINEAR,
+              defaultYExtents: false,
+            },
+            labels: {
+              show: false,
+              rotate: 0,
+              overwriteColor: false,
+              color: 'black',
+            },
+          },
+        ],
       },
     },
     events: {
@@ -75,40 +78,55 @@ export default function HeatmapVisType() {
         {
           group: AggGroupNames.Metrics,
           name: 'metric',
-          title: i18n.translate('kbnVislibVisTypes.heatmap.metricTitle', { defaultMessage: 'Value' }),
+          title: i18n.translate('kbnVislibVisTypes.heatmap.metricTitle', {
+            defaultMessage: 'Value',
+          }),
           min: 1,
           max: 1,
-          aggFilter: ['count', 'avg', 'median', 'sum', 'min', 'max', 'cardinality', 'std_dev', 'top_hits'],
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
+          aggFilter: [
+            'count',
+            'avg',
+            'median',
+            'sum',
+            'min',
+            'max',
+            'cardinality',
+            'std_dev',
+            'top_hits',
+          ],
+          defaults: [{ schema: 'metric', type: 'count' }],
         },
         {
           group: AggGroupNames.Buckets,
           name: 'segment',
-          title: i18n.translate('kbnVislibVisTypes.heatmap.segmentTitle', { defaultMessage: 'X-axis' }),
+          title: i18n.translate('kbnVislibVisTypes.heatmap.segmentTitle', {
+            defaultMessage: 'X-axis',
+          }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
         },
         {
           group: AggGroupNames.Buckets,
           name: 'group',
-          title: i18n.translate('kbnVislibVisTypes.heatmap.groupTitle', { defaultMessage: 'Y-axis' }),
+          title: i18n.translate('kbnVislibVisTypes.heatmap.groupTitle', {
+            defaultMessage: 'Y-axis',
+          }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
         },
         {
           group: AggGroupNames.Buckets,
           name: 'split',
-          title: i18n.translate('kbnVislibVisTypes.heatmap.splitTitle', { defaultMessage: 'Split chart' }),
+          title: i18n.translate('kbnVislibVisTypes.heatmap.splitTitle', {
+            defaultMessage: 'Split chart',
+          }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-        }
-      ])
-    }
-
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        },
+      ]),
+    },
   });
 }

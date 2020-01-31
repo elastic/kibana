@@ -7,7 +7,6 @@
 import { copyPersistentState } from '../../reducers/util';
 
 export class AbstractSource {
-
   static isIndexingSource = false;
 
   static renderEditor() {
@@ -96,7 +95,7 @@ export class AbstractSource {
   }
 
   getIndexPatternIds() {
-    return  [];
+    return [];
   }
 
   getGeoGridPrecision() {
@@ -129,5 +128,3 @@ export class AbstractSource {
     return null;
   }
 }
-
-

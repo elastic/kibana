@@ -155,7 +155,7 @@ class SpaceSelectorUI extends Component<Props, State> {
 
   public getSearchField = () => {
     const { intl } = this.props;
-    if (!this.props.spaces || this.props.spaces.length < SPACE_SEARCH_COUNT_THRESHOLD) {
+    if (!this.state.spaces || this.state.spaces.length < SPACE_SEARCH_COUNT_THRESHOLD) {
       return null;
     }
     return (
@@ -163,6 +163,7 @@ class SpaceSelectorUI extends Component<Props, State> {
         {
           // @ts-ignore onSearch doesn't exist on EuiFieldSearch
           <EuiFieldSearch
+            data-test-subj="spaceSelectorSearchField"
             className="spcSpaceSelector__searchField"
             placeholder={intl.formatMessage({
               id: 'xpack.spaces.spaceSelector.findSpacePlaceholder',

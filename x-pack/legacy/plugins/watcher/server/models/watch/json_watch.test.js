@@ -11,14 +11,14 @@ describe('JsonWatch', () => {
     let props;
     beforeEach(() => {
       props = {
-        watch: 'foo'
+        watch: 'foo',
       };
     });
 
     it('should populate all expected fields', () => {
       const actual = new JsonWatch(props);
       const expected = {
-        watch: 'foo'
+        watch: 'foo',
       };
 
       expect(actual).toMatchObject(expected);
@@ -52,32 +52,12 @@ describe('JsonWatch', () => {
     });
   });
 
-  describe('upstreamJson getter method', () => {
-    it('should return the correct result', () => {
-      const watch = new JsonWatch({ watch: { foo: 'bar' } });
-      const actual = watch.upstreamJson;
-      const expected = {
-        id: undefined,
-        watch: {
-          foo: 'bar',
-          metadata: {
-            xpack: {
-              type: 'json',
-            },
-          },
-        },
-      };
-
-      expect(actual).toEqual(expected);
-    });
-  });
-
   describe('downstreamJson getter method', () => {
     let props;
     beforeEach(() => {
       props = {
         watch: 'foo',
-        watchJson: 'bar'
+        watchJson: 'bar',
       };
     });
 
@@ -109,7 +89,7 @@ describe('JsonWatch', () => {
           transform: 'transform',
           throttle_period: 'throttle_period',
           throttle_period_in_millis: 'throttle_period_in_millis',
-        }
+        },
       };
     });
 
@@ -132,7 +112,7 @@ describe('JsonWatch', () => {
       upstreamJson.watchJson.metadata = {
         name: 'foobar',
         xpack: { prop: 'val' },
-        foo: 'bar'
+        foo: 'bar',
       };
 
       const jsonWatch = JsonWatch.fromUpstreamJson(upstreamJson);
@@ -153,7 +133,7 @@ describe('JsonWatch', () => {
     let downstreamJson;
     beforeEach(() => {
       downstreamJson = {
-        watch: { foo: { bar: 'baz' } }
+        watch: { foo: { bar: 'baz' } },
       };
     });
 

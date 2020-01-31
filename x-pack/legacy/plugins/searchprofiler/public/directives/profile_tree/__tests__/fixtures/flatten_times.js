@@ -1,4 +1,3 @@
-/* eslint quotes: 0 */
 export const flatTimes = [
   {
     id:"f1e689b1-dafe-4c2b-9a4d-9bd8f1a53803",

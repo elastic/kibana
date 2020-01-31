@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 // A simple template renderer, it replaces mustache/angular style {{...}} tags with
 // the values provided via the data object
 export function renderTemplate(str, data) {
@@ -29,7 +26,7 @@ export function stringHash(str) {
   }
   for (let i = 0; i < str.length; i++) {
     chr = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
+    hash = (hash << 5) - hash + chr;
     hash |= 0;
   }
   return hash < 0 ? hash * -2 : hash;

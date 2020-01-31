@@ -25,13 +25,8 @@ import '../../private';
 import { toastNotifications } from '../../notify';
 import * as FatalErrorNS from '../../notify/fatal_error';
 import { StateProvider } from '../state';
-import {
-  unhashQueryString,
-} from '../state_hashing';
-import {
-  createStateHash,
-  isStateHash,
-} from '../state_storage';
+import { unhashQueryString } from '../state_hashing';
+import { createStateHash, isStateHash } from '../state_storage';
 import { HashedItemStore } from '../state_storage/hashed_item_store';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { EventsProvider } from '../../events';
@@ -47,26 +42,31 @@ describe('State Management', () => {
     let setup;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (_$rootScope_, _$location_, Private, config) {
-      const State = Private(StateProvider);
-      $location = _$location_;
-      $rootScope = _$rootScope_;
-      Events = Private(EventsProvider);
+    beforeEach(
+      ngMock.inject(function(_$rootScope_, _$location_, Private, config) {
+        const State = Private(StateProvider);
+        $location = _$location_;
+        $rootScope = _$rootScope_;
+        Events = Private(EventsProvider);
 
-      setup = opts => {
-        const { param, initial, storeInHash } = (opts || {});
-        sinon.stub(config, 'get').withArgs('state:storeInSessionStorage').returns(!!storeInHash);
-        const store = new StubBrowserStorage();
-        const hashedItemStore = new HashedItemStore(store);
-        const state = new State(param, initial, hashedItemStore);
+        setup = opts => {
+          const { param, initial, storeInHash } = opts || {};
+          sinon
+            .stub(config, 'get')
+            .withArgs('state:storeInSessionStorage')
+            .returns(!!storeInHash);
+          const store = new StubBrowserStorage();
+          const hashedItemStore = new HashedItemStore(store);
+          const state = new State(param, initial, hashedItemStore);
 
-        const getUnhashedSearch = state => {
-          return unhashQueryString($location.search(), [ state ]);
+          const getUnhashedSearch = state => {
+            return unhashQueryString($location.search(), [state]);
+          };
+
+          return { store, hashedItemStore, state, getUnhashedSearch };
         };
-
-        return { store, hashedItemStore, state, getUnhashedSearch };
-      };
-    }));
+      })
+    );
 
     describe('Provider', () => {
       it('should reset the state to the defaults', () => {
@@ -88,9 +88,9 @@ describe('State Management', () => {
         expect(state).to.be.an(Events);
       });
 
-      it('should emit an event if reset with changes', (done) => {
+      it('should emit an event if reset with changes', done => {
         const { state } = setup({ initial: { message: ['test'] } });
-        state.on('reset_with_changes', (keys) => {
+        state.on('reset_with_changes', keys => {
           expect(keys).to.eql(['message']);
           done();
         });
@@ -121,9 +121,9 @@ describe('State Management', () => {
         expect(search._s).to.equal('(test:foo)');
       });
 
-      it('should emit an event if changes are saved', (done) => {
+      it('should emit an event if changes are saved', done => {
         const { state, getUnhashedSearch } = setup();
-        state.on('save_with_changes', (keys) => {
+        state.on('save_with_changes', keys => {
           expect(keys).to.eql(['test']);
           done();
         });
@@ -135,9 +135,9 @@ describe('State Management', () => {
     });
 
     describe('Fetch', () => {
-      it('should emit an event if changes are fetched', (done) => {
+      it('should emit an event if changes are fetched', done => {
         const { state } = setup();
-        state.on('fetch_with_changes', (keys) => {
+        state.on('fetch_with_changes', keys => {
           expect(keys).to.eql(['foo']);
           done();
         });
@@ -147,9 +147,9 @@ describe('State Management', () => {
         $rootScope.$apply();
       });
 
-      it('should have events that attach to scope', (done) => {
+      it('should have events that attach to scope', done => {
         const { state } = setup();
-        state.on('test', (message) => {
+        state.on('test', message => {
           expect(message).to.equal('foo');
           done();
         });
@@ -157,9 +157,9 @@ describe('State Management', () => {
         $rootScope.$apply();
       });
 
-      it('should fire listeners for #onUpdate() on #fetch()', (done) => {
+      it('should fire listeners for #onUpdate() on #fetch()', done => {
         const { state } = setup();
-        state.on('fetch_with_changes', (keys) => {
+        state.on('fetch_with_changes', keys => {
           expect(keys).to.eql(['foo']);
           done();
         });
@@ -229,12 +229,12 @@ describe('State Management', () => {
 
       it('does not replace the state value on read', () => {
         const { state } = setup();
-        sinon.stub($location, 'search').callsFake((newSearch) => {
+        sinon.stub($location, 'search').callsFake(newSearch => {
           if (newSearch) {
             return $location;
           } else {
             return {
-              [state.getQueryParamName()]: '(a:1)'
+              [state.getQueryParamName()]: '(a:1)',
             };
           }
         });
@@ -301,16 +301,16 @@ describe('State Management', () => {
           const fatalErrorStub = sandbox.stub();
           Object.defineProperty(FatalErrorNS, 'fatalError', {
             writable: true,
-            value: fatalErrorStub
+            value: fatalErrorStub,
           });
 
           sandbox.stub(hashedItemStore, 'setItem').returns(false);
           state.toQueryParam();
           sinon.assert.calledOnce(fatalErrorStub);
-          sinon.assert.calledWith(fatalErrorStub, sinon.match(error => (
-            error instanceof Error &&
-            error.message.includes('github.com'))
-          ));
+          sinon.assert.calledWith(
+            fatalErrorStub,
+            sinon.match(error => error instanceof Error && error.message.includes('github.com'))
+          );
         });
 
         it('translateHashToRison should gracefully fallback if parameter can not be parsed', () => {
@@ -342,29 +342,36 @@ describe('State Management', () => {
       return search[stateParam];
     };
 
-    beforeEach(ngMock.module('kibana', function (stateManagementConfigProvider) {
-      stateManagementConfigProvider.disable();
-    }));
-    beforeEach(ngMock.inject(function (_$rootScope_, _$location_, Private, config) {
-      const State = Private(StateProvider);
-      $location = _$location_;
-      $rootScope = _$rootScope_;
+    beforeEach(
+      ngMock.module('kibana', function(stateManagementConfigProvider) {
+        stateManagementConfigProvider.disable();
+      })
+    );
+    beforeEach(
+      ngMock.inject(function(_$rootScope_, _$location_, Private, config) {
+        const State = Private(StateProvider);
+        $location = _$location_;
+        $rootScope = _$rootScope_;
 
-      sinon.stub(config, 'get').withArgs('state:storeInSessionStorage').returns(false);
+        sinon
+          .stub(config, 'get')
+          .withArgs('state:storeInSessionStorage')
+          .returns(false);
 
-      class MockPersistedState extends State {
-        _persistAcrossApps = true
-      }
+        class MockPersistedState extends State {
+          _persistAcrossApps = true;
+        }
 
-      MockPersistedState.prototype._persistAcrossApps = true;
+        MockPersistedState.prototype._persistAcrossApps = true;
 
-      state = new MockPersistedState(stateParam);
-    }));
+        state = new MockPersistedState(stateParam);
+      })
+    );
 
     describe('changing state', () => {
       const methods = ['save', 'replace', 'reset'];
 
-      methods.forEach((method) => {
+      methods.forEach(method => {
         it(`${method} should not change the URL`, () => {
           $location.search({ _s: '(foo:bar)' });
           state[method]();

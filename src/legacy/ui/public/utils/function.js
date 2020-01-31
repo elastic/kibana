@@ -26,7 +26,7 @@ import _ from 'lodash';
  * @return {undefined}
  */
 export function callEach(arr) {
-  return _.map(arr, function (fn) {
+  return _.map(arr, function(fn) {
     return _.isFunction(fn) ? fn() : undefined;
   });
 }

@@ -22,7 +22,6 @@ import { yAxisSplit } from '../splits/column_chart/y_axis_split';
 import { xAxisSplit } from '../splits/column_chart/x_axis_split';
 import { chartTitleSplit } from '../splits/column_chart/chart_title_split';
 
-
 /**
  * Specifies the visualization layout for column charts.
  *
@@ -58,7 +57,7 @@ export function columnLayout(el, data) {
           children: [
             {
               type: 'div',
-              class: 'visAxis__spacer--y visAxis__spacer--y-top'
+              class: 'visAxis__spacer--y visAxis__spacer--y-top',
             },
             {
               type: 'div',
@@ -67,20 +66,20 @@ export function columnLayout(el, data) {
                 {
                   type: 'div',
                   class: 'visAxis__splitTitles--y',
-                  splits: chartTitleSplit
+                  splits: chartTitleSplit,
                 },
                 {
                   type: 'div',
                   class: 'visAxis__splitAxes--y',
-                  splits: yAxisSplit
-                }
-              ]
+                  splits: yAxisSplit,
+                },
+              ],
             },
             {
               type: 'div',
-              class: 'visAxis__spacer--y visAxis__spacer--y-bottom'
-            }
-          ]
+              class: 'visAxis__spacer--y visAxis__spacer--y-bottom',
+            },
+          ],
         },
         {
           type: 'div',
@@ -93,18 +92,18 @@ export function columnLayout(el, data) {
                 {
                   type: 'div',
                   class: 'visAxis__splitAxes--x',
-                  splits: xAxisSplit
-                }
-              ]
+                  splits: xAxisSplit,
+                },
+              ],
             },
             {
               type: 'div',
               class: 'visWrapper__chart',
-              splits: chartSplit
+              splits: chartSplit,
             },
             {
               type: 'div',
-              class: 'visWrapper__alerts'
+              class: 'visWrapper__alerts',
             },
             {
               type: 'div',
@@ -113,16 +112,16 @@ export function columnLayout(el, data) {
                 {
                   type: 'div',
                   class: 'visAxis__splitAxes--x',
-                  splits: xAxisSplit
+                  splits: xAxisSplit,
                 },
                 {
                   type: 'div',
                   class: 'visAxis__splitTitles--x',
-                  splits: chartTitleSplit
-                }
-              ]
-            }
-          ]
+                  splits: chartTitleSplit,
+                },
+              ],
+            },
+          ],
         },
         {
           type: 'div',
@@ -130,7 +129,7 @@ export function columnLayout(el, data) {
           children: [
             {
               type: 'div',
-              class: 'visAxis__spacer--y visAxis__spacer--y-top'
+              class: 'visAxis__spacer--y visAxis__spacer--y-top',
             },
             {
               type: 'div',
@@ -139,17 +138,17 @@ export function columnLayout(el, data) {
                 {
                   type: 'div',
                   class: 'visAxis__splitAxes--y',
-                  splits: yAxisSplit
-                }
-              ]
+                  splits: yAxisSplit,
+                },
+              ],
             },
             {
               type: 'div',
-              class: 'visAxis__spacer--y visAxis__spacer--y-bottom'
-            }
-          ]
-        }
-      ]
-    }
+              class: 'visAxis__spacer--y visAxis__spacer--y-bottom',
+            },
+          ],
+        },
+      ],
+    },
   ];
 }

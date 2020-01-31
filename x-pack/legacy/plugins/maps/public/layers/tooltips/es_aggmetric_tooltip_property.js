@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { ESTooltipProperty } from './es_tooltip_property';
 
 export class ESAggMetricTooltipProperty extends ESTooltipProperty {
-
   constructor(propertyKey, propertyName, rawValue, indexPattern, metricField) {
     super(propertyKey, propertyName, rawValue, indexPattern);
     this._metricField = metricField;
@@ -30,10 +28,8 @@ export class ESAggMetricTooltipProperty extends ESTooltipProperty {
     }
     const htmlConverter = indexPatternField.format.getConverterFor('html');
 
-    return (htmlConverter)
+    return htmlConverter
       ? htmlConverter(this._rawValue)
       : indexPatternField.format.convert(this._rawValue);
-
   }
-
 }

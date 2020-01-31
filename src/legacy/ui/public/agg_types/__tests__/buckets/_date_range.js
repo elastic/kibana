@@ -27,18 +27,20 @@ import chrome from '../../../chrome';
 
 const config = chrome.getUiSettingsClient();
 
-describe('date_range params', function () {
+describe('date_range params', function() {
   let paramWriter;
   let timeField;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    const AggParamWriter = Private(AggParamWriterProvider);
-    const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+  beforeEach(
+    ngMock.inject(function(Private) {
+      const AggParamWriter = Private(AggParamWriterProvider);
+      const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    timeField = indexPattern.timeFieldName;
-    paramWriter = new AggParamWriter({ aggType: 'date_range' });
-  }));
+      timeField = indexPattern.timeFieldName;
+      paramWriter = new AggParamWriter({ aggType: 'date_range' });
+    })
+  );
 
   describe('getKey', () => {
     const dateRange = aggTypes.buckets.find(agg => agg.name === 'date_range');
@@ -67,7 +69,11 @@ describe('date_range params', function () {
     });
 
     it('should use the fixed time_zone from the index pattern typeMeta', () => {
-      set(paramWriter.indexPattern, ['typeMeta', 'aggs', 'date_range', timeField, 'time_zone'], 'Europe/Rome');
+      set(
+        paramWriter.indexPattern,
+        ['typeMeta', 'aggs', 'date_range', timeField, 'time_zone'],
+        'Europe/Rome'
+      );
       const output = paramWriter.write({ field: timeField });
       expect(output.params).to.have.property('time_zone', 'Europe/Rome');
     });

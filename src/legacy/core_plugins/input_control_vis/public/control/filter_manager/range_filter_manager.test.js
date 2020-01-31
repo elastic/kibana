@@ -20,33 +20,37 @@
 import expect from '@kbn/expect';
 import { RangeFilterManager } from './range_filter_manager';
 
-describe('RangeFilterManager', function () {
-
+describe('RangeFilterManager', function() {
   const controlId = 'control1';
 
-  describe('createFilter', function () {
+  describe('createFilter', function() {
     const indexPatternId = '1';
     const fieldMock = {
-      name: 'field1'
+      name: 'field1',
     };
     const indexPatternMock = {
       id: indexPatternId,
       fields: {
         getByName: name => {
           const fields = {
-            field1: fieldMock
+            field1: fieldMock,
           };
           return fields[name];
-        }
-      }
+        },
+      },
     };
     const queryFilterMock = {};
     let filterManager;
     beforeEach(() => {
-      filterManager = new RangeFilterManager(controlId, 'field1', indexPatternMock, queryFilterMock);
+      filterManager = new RangeFilterManager(
+        controlId,
+        'field1',
+        indexPatternMock,
+        queryFilterMock
+      );
     });
 
-    test('should create range filter from slider value', function () {
+    test('should create range filter from slider value', function() {
       const newFilter = filterManager.createFilter({ min: 1, max: 3 });
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
@@ -57,7 +61,7 @@ describe('RangeFilterManager', function () {
     });
   });
 
-  describe('getValueFromFilterBar', function () {
+  describe('getValueFromFilterBar', function() {
     const indexPatternMock = {};
     const queryFilterMock = {};
     let filterManager;
@@ -74,19 +78,24 @@ describe('RangeFilterManager', function () {
           this.mockFilters = mockFilters;
         }
       }
-      filterManager = new MockFindFiltersRangeFilterManager(controlId, 'field1', indexPatternMock, queryFilterMock);
+      filterManager = new MockFindFiltersRangeFilterManager(
+        controlId,
+        'field1',
+        indexPatternMock,
+        queryFilterMock
+      );
     });
 
-    test('should extract value from range filter', function () {
+    test('should extract value from range filter', function() {
       filterManager.setMockFilters([
         {
           range: {
             field1: {
               gt: 1,
-              lt: 3
-            }
-          }
-        }
+              lt: 3,
+            },
+          },
+        },
       ]);
       const value = filterManager.getValueFromFilterBar();
       expect(value).to.be.a('object');
@@ -96,20 +105,18 @@ describe('RangeFilterManager', function () {
       expect(value.max).to.be(3);
     });
 
-    test('should return undefined when filter value can not be extracted from Kibana filter', function () {
+    test('should return undefined when filter value can not be extracted from Kibana filter', function() {
       filterManager.setMockFilters([
         {
           range: {
             myFieldWhichIsNotField1: {
               gte: 1,
-              lte: 3
-            }
-          }
-        }
+              lte: 3,
+            },
+          },
+        },
       ]);
       expect(filterManager.getValueFromFilterBar()).to.eql(undefined);
     });
   });
-
 });
-

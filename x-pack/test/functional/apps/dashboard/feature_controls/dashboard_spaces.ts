@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-// eslint-disable-next-line max-len
 import {
   createDashboardEditUrl,
   DashboardConstants,
