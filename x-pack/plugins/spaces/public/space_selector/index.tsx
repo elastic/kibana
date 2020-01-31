@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SpaceSelector } from './space_selector';
 export { spaceSelectorApp } from './space_selector_app';

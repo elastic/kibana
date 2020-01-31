@@ -16,7 +16,7 @@ import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_en
 import { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space';
 import { AdvancedSettingsService } from './advanced_settings';
 import { ManagementService } from './management';
-import { SpaceSelector, spaceSelectorApp } from './space_selector';
+import { spaceSelectorApp } from './space_selector';
 
 export interface PluginsSetup {
   home?: HomePublicPluginSetup;
@@ -106,14 +106,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
     return {
       activeSpace$: this.spacesManager.onActiveSpaceChange$,
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
-      __legacyCompat: {
-        SpaceSelector: () => (
-          <core.i18n.Context>
-            <SpaceSelector spacesManager={this.spacesManager} />
-          </core.i18n.Context>
-        ),
-        spacesManager: this.spacesManager,
-      },
     };
   }
 
