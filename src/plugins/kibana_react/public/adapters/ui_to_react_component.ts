@@ -44,7 +44,7 @@ export const uiToReactComponent = <Props extends object>(
   return h('div', {
     ref: (el: HTMLDivElement) => {
       ref.current = el;
-      render();
+      if (el) render();
     },
   });
 };

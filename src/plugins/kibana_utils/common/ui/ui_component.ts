@@ -24,8 +24,10 @@
  * components. UI component receives a DOM element and `props` through `render()`
  * method, the `render()` method can be called many times.
  *
- * Although Kibana wants to be library agnostic, Kibana itself is written in React
- * and this interface maps easily to a React component.
+ * Although Kibana wants to be library agnostic, Kibana itself is written in React,
+ * thus here we define `UiComponent` which is an abstract unit of UI that can be
+ * implemented in any framework, but it maps easily to React components, i.e.
+ * `UiComponent<Props>` is like `React.ComponentType<Props>`.
  */
 export type UiComponent<Props extends object> = () => UiComponentInstance<Props>;
 
@@ -35,6 +37,7 @@ export type UiComponent<Props extends object> = () => UiComponentInstance<Props>
 export interface UiComponentInstance<Props extends object> {
   /**
    * Call this method on initial render and on all subsequent updates.
+   *
    * @param el DOM element.
    * @param props Component props, same as props in React.
    */
