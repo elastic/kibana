@@ -66,7 +66,7 @@ export interface CasesState {
 }
 export interface Action {
   type: string;
-  payload?: FlattenedCasesSavedObjects | QueryArgs;
+  payload?: FlattenedCasesSavedObjects | QueryArgs | FilterOptions;
 }
 
 export interface FilterOptions {
