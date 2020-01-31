@@ -82,8 +82,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
     home.featureCatalogue.register(watcherHome);
 
     licensing.license$.pipe(first(), map(licenseToLicenseStatus)).subscribe(({ valid }) => {
-      // eslint-disable-next-line no-console
-      console.error('Got license', valid);
       if (valid) {
         watcherESApp.enable();
         watcherHome.showOnHomePage = true;

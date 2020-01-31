@@ -120,7 +120,6 @@ export const useRequest = (
 
     const response = await sendRequest(httpClient, requestBody);
     const { data: serializedResponseData, error: responseError } = response;
-    const responseData = deserializer(serializedResponseData);
 
     // If an outdated request has resolved, DON'T update state, but DO allow the processData handler
     // to execute side effects like update telemetry.
@@ -129,7 +128,12 @@ export const useRequest = (
     }
 
     setError(responseError);
-    setData(responseData);
+
+    if (!responseError) {
+      const responseData = deserializer(serializedResponseData);
+      setData(responseData);
+    }
+
     setIsLoading(false);
     setIsInitialRequest(false);
 

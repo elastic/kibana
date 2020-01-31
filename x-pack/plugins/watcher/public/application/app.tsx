@@ -57,11 +57,7 @@ export const App = (deps: AppDeps) => {
   const [{ valid, message }, setLicenseStatus] = useState<LicenseStatus>({ valid: true });
 
   useEffect(() => {
-    const s = deps.licenseStatus$.subscribe(licenseStatus => {
-      // eslint-disable-next-line no-console
-      console.error('got license status', JSON.stringify(licenseStatus, null, 2));
-      setLicenseStatus(licenseStatus);
-    });
+    const s = deps.licenseStatus$.subscribe(setLicenseStatus);
     return () => s.unsubscribe();
   }, [deps.licenseStatus$]);
 
