@@ -15,7 +15,7 @@ export const initMonitoringXpackInfo = async ({ config, xpackMainPlugin, expose,
   const xpackInfo = hasMonitoringCluster(config)
     ? xpackMainPlugin.createXPackInfo({
         clusterSource: 'monitoring',
-        pollFrequencyInMillis: config.get('xpack.monitoring.xpack_api_polling_frequency_millis'),
+        pollFrequencyInMillis: config.get('monitoring.xpack_api_polling_frequency_millis'),
       })
     : xpackMainPlugin.info;
 

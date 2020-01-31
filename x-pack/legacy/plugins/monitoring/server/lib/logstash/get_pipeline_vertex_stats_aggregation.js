@@ -216,7 +216,7 @@ export function getPipelineVertexStatsAggregation(
     version,
     vertexId,
     timeSeriesIntervalInSeconds,
-    config.get('xpack.monitoring.max_bucket_size'),
+    config.get('monitoring.ui.max_bucket_size'),
     callWithRequest,
     req
   );
