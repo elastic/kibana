@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiPopover } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React, {
   CSSProperties,
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState
 } from 'react';
 import { CytoscapeContext } from '../Cytoscape';
@@ -27,7 +29,31 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const onFocusClick = useCallback(() => setSelectedNode(undefined), [
     setSelectedNode
   ]);
+  const renderedHeight = selectedNode?.renderedHeight() ?? 0;
+  const renderedWidth = selectedNode?.renderedWidth() ?? 0;
+  const { x, y } = selectedNode?.renderedPosition() ?? { x: 0, y: 0 };
+  const isOpen = !!selectedNode;
+  const selectedNodeServiceName: string = selectedNode?.data('id');
+  const isService = selectedNode?.data('type') === 'service';
+  const triggerStyle: CSSProperties = {
+    background: 'transparent',
+    height: renderedHeight,
+    position: 'absolute',
+    width: renderedWidth
+  };
+  const trigger = <div className="trigger" style={triggerStyle} />;
+  const zoom = cy?.zoom() ?? 1;
+  const height = selectedNode?.height() ?? 0;
+  const translateY = y - ((zoom + 1) * height) / 4;
+  const popoverStyle: CSSProperties = {
+    position: 'absolute',
+    transform: `translate(${x}px, ${translateY}px)`
+  };
+  const data = selectedNode?.data() ?? {};
+  const label = data.label || selectedNodeServiceName;
+  const popoverRef = useRef<EuiPopover>(null);
 
+  // Set up Cytoscape event handlers
   useEffect(() => {
     const selectHandler: cytoscape.EventHandler = event => {
       setSelectedNode(event.target);
@@ -51,29 +77,13 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     };
   }, [cy]);
 
-  const renderedHeight = selectedNode?.renderedHeight() ?? 0;
-  const renderedWidth = selectedNode?.renderedWidth() ?? 0;
-  const { x, y } = selectedNode?.renderedPosition() ?? { x: 0, y: 0 };
-  const isOpen = !!selectedNode;
-  const selectedNodeServiceName: string = selectedNode?.data('id');
-  const isService = selectedNode?.data('type') === 'service';
-  const triggerStyle: CSSProperties = {
-    background: 'transparent',
-    height: renderedHeight,
-    position: 'absolute',
-    width: renderedWidth
-  };
-  const trigger = <div className="trigger" style={triggerStyle} />;
-
-  const zoom = cy?.zoom() ?? 1;
-  const height = selectedNode?.height() ?? 0;
-  const translateY = y - (zoom + 1) * (height / 2);
-  const popoverStyle: CSSProperties = {
-    position: 'absolute',
-    transform: `translate(${x}px, ${translateY}px)`
-  };
-  const data = selectedNode?.data() ?? {};
-  const label = data.label || selectedNodeServiceName;
+  // Handle positioning of popover. This makes it so the popover positions
+  // itself correctly and the arrows are always pointing to where they should.
+  useEffect(() => {
+    if (popoverRef.current) {
+      popoverRef.current.positionPopoverFluid();
+    }
+  }, [popoverRef, x, y]);
 
   return (
     <Contents
@@ -83,6 +93,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
       isService={isService}
       label={label}
       onFocusClick={onFocusClick}
+      popoverRef={popoverRef}
       selectedNodeServiceName={selectedNodeServiceName}
       style={popoverStyle}
     />

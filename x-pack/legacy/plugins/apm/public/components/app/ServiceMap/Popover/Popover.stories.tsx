@@ -5,7 +5,7 @@
  */
 
 import { storiesOf } from '@storybook/react';
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { Contents } from './Contents';
 import {
   ApmPluginContext,
@@ -22,7 +22,8 @@ const data = {
 };
 
 function Example() {
-  const [isOpen, setIsOpen] = React.useState(true);
+  const [isOpen, setIsOpen] = useState(true);
+  const ref = useRef();
 
   return (
     <Contents
@@ -40,6 +41,7 @@ function Example() {
       isService={true}
       label="opbeans-node"
       onFocusClick={() => {}}
+      popoverRef={ref}
       selectedNodeServiceName="opbeans-node"
       style={{}}
     />
