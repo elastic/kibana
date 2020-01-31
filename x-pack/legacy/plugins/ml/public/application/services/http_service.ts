@@ -8,8 +8,6 @@
 
 import chrome from 'ui/chrome';
 
-// @ts-ignore
-import { addSystemApiHeader } from 'ui/system_api';
 import { fromFetch } from 'rxjs/fetch';
 import { from, Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -19,11 +17,12 @@ export interface HttpOptions {
 }
 
 function getResultHeaders(headers: HeadersInit): HeadersInit {
-  return addSystemApiHeader({
+  return {
+    asSystemRequest: false,
     'Content-Type': 'application/json',
     'kbn-version': chrome.getXsrfToken(),
     ...headers,
-  });
+  } as HeadersInit;
 }
 
 export function http(options: any) {
@@ -31,11 +30,7 @@ export function http(options: any) {
     if (options && options.url) {
       let url = '';
       url = url + (options.url || '');
-      const headers: Record<string, string> = addSystemApiHeader({
-        'Content-Type': 'application/json',
-        'kbn-version': chrome.getXsrfToken(),
-        ...options.headers,
-      });
+      const headers = getResultHeaders(options.headers ?? {});
 
       const allHeaders =
         options.headers === undefined ? headers : { ...options.headers, ...headers };
