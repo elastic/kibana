@@ -33,7 +33,6 @@ export interface ErrorInstruction extends PulseInstruction {
   status: 'new' | 'seen';
   currentKibanaVersion: string;
   timestamp: Date;
-  id: string;
   fixedVersion?: string;
 }
 export interface Payload {
@@ -49,7 +48,7 @@ export interface PulseErrorPayloadRecord {
   hash: string;
   fixedVersion?: string;
   message: string;
-  status?: 'new' | 'seen';
+  status: 'new' | 'seen';
   timestamp?: Date;
   seenOn?: Date;
 }
@@ -78,15 +77,6 @@ export class Collector extends PulseCollector<Payload> {
             type: 'keyword',
           },
           hash: {
-            type: 'text',
-            fields: {
-              keyword: {
-                type: 'keyword',
-                ignore_above: 256,
-              },
-            },
-          },
-          id: {
             type: 'text',
             fields: {
               keyword: {
@@ -132,8 +122,7 @@ export class Collector extends PulseCollector<Payload> {
                 ...record,
                 channel_id: 'errors',
                 deployment_id: '123',
-                status: record.status || 'new',
-                id: record.hash,
+                status: record.status,
                 timestamp: record.timestamp || moment(),
               });
             }

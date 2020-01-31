@@ -77,10 +77,12 @@ export const NewsfeedFlyout = ({
     }
   }
   if (errorsInstructionsToShow && errorsInstructionsToShow.length > 0) {
-    const hasNew = errorsInstructionsToShow.some(instructions => instructions.status === 'new');
-    if (hasNew) {
+    const hasNewErrorInstructionsToShow = errorsInstructionsToShow.filter(
+      instruction => instruction.status === 'new'
+    );
+    if (hasNewErrorInstructionsToShow.length > 0) {
       errorsChannel.sendPulse(
-        errorsInstructionsToShow.map(item => {
+        hasNewErrorInstructionsToShow.map(item => {
           return {
             ...item,
             status: 'seen',

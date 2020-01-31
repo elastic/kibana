@@ -78,16 +78,16 @@ export const errorChannelPayloads: PulseErrorPayloadRecord[] = [
       .add(25, 'seconds')
       .toDate(),
   },
-  // {
-  //   channel_id: 'errors',
-  //   deployment_id: '123',
-  //   message: '[Error]: Test',
-  //   hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 4',
-  //   status: 'new',
-  //   fixedVersion: 'v7.5.2',
-  //   currentKibanaVersion: 'v7.x',
-  //   timestamp: moment()
-  //     .add(30, 'seconds')
-  //     .toDate(),
-  // },
+  {
+    channel_id: 'errors',
+    deployment_id: '123',
+    message: '[Error]: Test2',
+    hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 4',
+    status: 'new',
+    fixedVersion: 'v7.5.2',
+    currentKibanaVersion: 'v7.x',
+    timestamp: moment()
+      .add(30, 'seconds')
+      .toDate(),
+  },
 ];
