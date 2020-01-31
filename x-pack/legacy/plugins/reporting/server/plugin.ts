@@ -20,6 +20,7 @@ import { logConfiguration } from '../log_configuration';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 
 import { setFieldFormats } from './services';
+import { ReportingPluginSpecOptions } from '../types';
 
 export interface ReportingSetupDeps {
   usageCollection: UsageCollectionSetup;
@@ -39,6 +40,7 @@ export interface LegacySetup {
     xpack_main: XPackMainPlugin & {
       status?: any;
     };
+    reporting: ReportingPluginSpecOptions;
   };
   route: Legacy.Server['route'];
   savedObjects: Legacy.Server['savedObjects'];
@@ -68,8 +70,8 @@ export class ReportingPlugin implements Plugin<void, void, ReportingSetupDeps, R
     logConfiguration(__LEGACY, logger);
     runValidations(__LEGACY, logger, browserDriverFactory);
 
-    const { xpack_main: xpackMainPlugin } = __LEGACY.plugins;
-    mirrorPluginStatus(xpackMainPlugin, plugins);
+    const { xpack_main: xpackMainPlugin, reporting } = __LEGACY.plugins;
+    mirrorPluginStatus(xpackMainPlugin, reporting);
 
     const checkLicense = checkLicenseFactory(exportTypesRegistry);
 

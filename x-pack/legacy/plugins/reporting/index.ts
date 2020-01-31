@@ -61,7 +61,7 @@ export const reporting = (kibana: any) => {
     },
 
     async init(server: Legacy.Server) {
-      return legacyInit(server);
+      return legacyInit(server, this);
     },
 
     deprecations({ unused }: any) {
