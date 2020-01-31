@@ -26,7 +26,7 @@ export function createConfig$(context: PluginInitializerContext) {
 
       let encryptionKey = config.encryptionKey;
       const encryptionKeyRandomlyGenerated = encryptionKey === undefined;
-      if (encryptionKeyRandomlyGenerated) {
+      if (encryptionKey === undefined) {
         logger.warn(
           'Generating a random key for xpack.encryptedSavedObjects.encryptionKey. ' +
             'To be able to decrypt encrypted saved objects attributes after restart, ' +
