@@ -40,18 +40,18 @@ function normalizeLegacyPlatformLogging(input: string) {
   return replaceTimestamp(stripColors(input));
 }
 
-export function getPlatformLoggingFromMock(logMock: jest.SpyInstance<string, string[]>) {
+export function getPlatformLogsFromMock(logMock: jest.SpyInstance<string, string[]>) {
   return logMock.mock.calls.map(([message]) => message).map(normalizePlatformLogging);
 }
 
-export function getLegacyPlatformLoggingFromMock(stdoutMock: jest.SpyInstance<string, Buffer[]>) {
+export function getLegacyPlatformLogsFromMock(stdoutMock: jest.SpyInstance<string, Buffer[]>) {
   return stdoutMock.mock.calls
     .map(([message]) => message)
     .map(String)
     .map(normalizeLegacyPlatformLogging);
 }
 
-export async function getPlatformLoggingContent(path: string) {
+export async function getPlatformLogsFromFile(path: string) {
   const fileContent = await readFile(path, 'utf-8');
   return fileContent
     .split('\n')
@@ -59,7 +59,7 @@ export async function getPlatformLoggingContent(path: string) {
     .join('\n');
 }
 
-export async function getLegacyPlatformLoggingContent(path: string) {
+export async function getLegacyPlatformLogsFromFile(path: string) {
   const fileContent = await readFile(path, 'utf-8');
   return fileContent
     .split('\n')

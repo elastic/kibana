@@ -19,8 +19,8 @@
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
 
 import {
-  getPlatformLoggingFromMock,
-  getLegacyPlatformLoggingFromMock,
+  getPlatformLogsFromMock,
+  getLegacyPlatformLogsFromMock,
 } from '../../logging/integration_tests/utils';
 
 import { LegacyLoggingConfig } from '../config/legacy_object_to_config_adapter';
@@ -93,7 +93,7 @@ describe('logging service', () => {
         root.logger.get('test-file').info('handled by NP');
 
         expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-        const loggedString = getPlatformLoggingFromMock(mockConsoleLog);
+        const loggedString = getPlatformLogsFromMock(mockConsoleLog);
         expect(loggedString).toMatchInlineSnapshot(`
           Array [
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] handled by NP",
@@ -106,7 +106,7 @@ describe('logging service', () => {
 
         expect(mockStdout).toHaveBeenCalledTimes(1);
 
-        const loggedString = getLegacyPlatformLoggingFromMock(mockStdout);
+        const loggedString = getLegacyPlatformLogsFromMock(mockStdout);
         expect(loggedString).toMatchInlineSnapshot(`
           Array [
             "  log   [xx:xx:xx.xxx] [info][test-file-legacy] handled by LP
@@ -138,7 +138,7 @@ describe('logging service', () => {
 
         expect(mockConsoleLog).toHaveBeenCalledTimes(3);
 
-        expect(getPlatformLoggingFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
+        expect(getPlatformLogsFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
           Array [
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
@@ -169,7 +169,7 @@ describe('logging service', () => {
 
         expect(mockConsoleLog).toHaveBeenCalledTimes(3);
 
-        expect(getPlatformLoggingFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
+        expect(getPlatformLogsFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
           Array [
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
@@ -185,7 +185,7 @@ describe('logging service', () => {
         legacyPlatformLogger.error('error');
 
         expect(mockStdout).toHaveBeenCalledTimes(1);
-        expect(getLegacyPlatformLoggingFromMock(mockStdout)).toMatchInlineSnapshot(`
+        expect(getLegacyPlatformLogsFromMock(mockStdout)).toMatchInlineSnapshot(`
           Array [
             "  log   [xx:xx:xx.xxx] [error][test-file-legacy] error
           ",
@@ -206,7 +206,7 @@ describe('logging service', () => {
 
         expect(mockConsoleLog).toHaveBeenCalledTimes(3);
 
-        expect(getPlatformLoggingFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
+        expect(getPlatformLogsFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
           Array [
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
@@ -222,7 +222,7 @@ describe('logging service', () => {
         legacyPlatformLogger.error('error');
 
         expect(mockStdout).toHaveBeenCalledTimes(3);
-        expect(getLegacyPlatformLoggingFromMock(mockStdout)).toMatchInlineSnapshot(`
+        expect(getLegacyPlatformLogsFromMock(mockStdout)).toMatchInlineSnapshot(`
           Array [
             "  log   [xx:xx:xx.xxx] [info][test-file-legacy] info
           ",
