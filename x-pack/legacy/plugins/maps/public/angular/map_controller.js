@@ -58,6 +58,7 @@ import { esFilters } from '../../../../../../src/plugins/data/public';
 import { createHashHistory } from 'history';
 import { createKbnUrlStateStorage } from '../../../../../../src/plugins/kibana_utils/public';
 import { createStateContainer, syncState } from '../../../../../../src/plugins/kibana_utils/public';
+import { pairwise } from 'rxjs/operators';
 
 const MAP_STATE_STORAGE_KEY = '_a';
 
@@ -91,8 +92,9 @@ app.controller(
       setSavedQueryId: state => savedQueryId => ({ ...state, savedQuery: savedQueryId }),
     };
     const stateContainer = createStateContainer(initialState, transitions);
-    const stateContainerChangeSub = stateContainer.state$.subscribe((newState) => {
-      console.log(`new: `, newState);
+    const stateContainerChangeSub = stateContainer.state$.pipe(pairwise()).subscribe(([prevState, nextState]) => {
+      console.log(`new: `, nextState);
+      console.log(`prev: `, prevState);
     });
     const stateSyncRef = syncState({
       storageKey: MAP_STATE_STORAGE_KEY,
