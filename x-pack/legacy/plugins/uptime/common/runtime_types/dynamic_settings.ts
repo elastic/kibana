@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './monitor';
-export * from './overview_filters';
-export * from './snapshot';
-export * from './monitor_status';
-export * from './dynamic_settings';
+import * as t from 'io-ts';
+
+export const DynamicSettingsType = t.type({
+  indexPattern: t.string,
+});
+
+export type DynamicSettings = t.TypeOf<typeof DynamicSettingsType>;

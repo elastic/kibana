@@ -28,3 +28,7 @@ export const selectSelectedMonitor = (state: AppState) => {
 export const selectMonitorStatus = (state: AppState) => {
   return state.monitorStatus.status;
 };
+
+export const selectDynamicSettings = (state: AppState) => {
+  return state.dynamicSettings;
+};

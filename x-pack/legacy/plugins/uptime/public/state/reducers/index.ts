@@ -10,6 +10,7 @@ import { overviewFiltersReducer } from './overview_filters';
 import { snapshotReducer } from './snapshot';
 import { uiReducer } from './ui';
 import { monitorStatusReducer } from './monitor_status';
+import { dynamicSettingsReducer } from './dynamic_settings';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
@@ -17,4 +18,5 @@ export const rootReducer = combineReducers({
   snapshot: snapshotReducer,
   ui: uiReducer,
   monitorStatus: monitorStatusReducer,
+  dynamicSettings: dynamicSettingsReducer,
 });

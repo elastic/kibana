@@ -8,3 +8,4 @@ export * from './common';
 export * from './monitor';
 export * from './overview_filters';
 export * from './snapshot';
+export * from './dynamic_settings';
