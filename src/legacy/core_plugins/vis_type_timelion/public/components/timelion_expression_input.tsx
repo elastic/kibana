@@ -24,8 +24,11 @@ import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { CodeEditor, useKibana } from '../../../../../plugins/kibana_react/public';
 import { suggest, getSuggestion } from './timelion_expression_input_helpers';
-import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
+import {
+  ITimelionFunction,
+  TimelionFunctionArgs,
+} from '../../../../../plugins/timelion/common/types';
 
 const LANGUAGE_ID = 'timelion_expression';
 monacoEditor.languages.register({ id: LANGUAGE_ID });
@@ -107,37 +110,39 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
         <FormattedMessage id="timelion.vis.expressionLabel" defaultMessage="Timelion expression" />
       </EuiFormLabel>
       <div className="timExpressionInput__editor">
-        <CodeEditor
-          languageId={LANGUAGE_ID}
-          value={value}
-          onChange={setValue}
-          suggestionProvider={{
-            triggerCharacters: ['.', ',', '(', '=', ':'],
-            provideCompletionItems,
-          }}
-          hoverProvider={{ provideHover }}
-          options={{
-            fixedOverflowWidgets: true,
-            fontSize: 14,
-            folding: false,
-            lineNumbers: 'off',
-            scrollBeyondLastLine: false,
-            minimap: {
-              enabled: false,
-            },
-            wordBasedSuggestions: false,
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-          }}
-          languageConfiguration={{
-            autoClosingPairs: [
-              {
-                open: '(',
-                close: ')',
+        <div className="timExpressionInput__absolute">
+          <CodeEditor
+            languageId={LANGUAGE_ID}
+            value={value}
+            onChange={setValue}
+            suggestionProvider={{
+              triggerCharacters: ['.', ',', '(', '=', ':'],
+              provideCompletionItems,
+            }}
+            hoverProvider={{ provideHover }}
+            options={{
+              fixedOverflowWidgets: true,
+              fontSize: 14,
+              folding: false,
+              lineNumbers: 'off',
+              scrollBeyondLastLine: false,
+              minimap: {
+                enabled: false,
               },
-            ],
-          }}
-        />
+              wordBasedSuggestions: false,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+            }}
+            languageConfiguration={{
+              autoClosingPairs: [
+                {
+                  open: '(',
+                  close: ')',
+                },
+              ],
+            }}
+          />
+        </div>
       </div>
     </div>
   );

@@ -12,11 +12,17 @@
 /src/legacy/core_plugins/kibana/public/discover/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/visualize/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
-/src/legacy/core_plugins/kibana/public/home/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
 /src/legacy/core_plugins/metrics/ @elastic/kibana-app
 /src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
-/src/plugins/home/ @elastic/kibana-app
+# Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
+/src/plugins/home/public @elastic/kibana-app
+/src/plugins/home/server/*.ts @elastic/kibana-app
+/src/plugins/home/server/services/ @elastic/kibana-app
+# Exclude tutorial resources folder for now because they are not owned by Kibana app and most will move out soon
+/src/legacy/core_plugins/kibana/public/home/*.ts @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/home/*.scss @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/home/np_ready/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/timelion/ @elastic/kibana-app
 /src/plugins/dev_tools/ @elastic/kibana-app
@@ -45,8 +51,11 @@
 
 # APM
 /x-pack/legacy/plugins/apm/  @elastic/apm-ui
+/x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
 /src/legacy/core_plugins/apm_oss/  @elastic/apm-ui
+/src/plugins/apm_oss/  @elastic/apm-ui
+/src/apm.js @watson
 
 # Beats
 /x-pack/legacy/plugins/beats_management/  @elastic/beats
@@ -81,6 +90,7 @@
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
 /src/optimize/ @elastic/kibana-operations
+/src/es_archiver/ @elastic/kibana-operations
 /packages/*eslint*/ @elastic/kibana-operations
 /packages/*babel*/ @elastic/kibana-operations
 /packages/kbn-dev-utils*/ @elastic/kibana-operations
@@ -106,6 +116,7 @@
 /src/legacy/server/logging/ @elastic/kibana-platform
 /src/legacy/server/saved_objects/  @elastic/kibana-platform
 /src/legacy/server/status/ @elastic/kibana-platform
+/src/dev/run_check_core_api_changes.ts @elastic/kibana-platform
 
 # Security
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-platform
@@ -142,9 +153,9 @@
 **/*.scss  @elastic/kibana-design
 
 # Elasticsearch UI
-/src/legacy/core_plugins/console/  @elastic/es-ui
+/src/plugins/console/  @elastic/es-ui
 /src/plugins/es_ui_shared/  @elastic/es-ui
-/x-pack/legacy/plugins/console_extensions/  @elastic/es-ui
+/x-pack/plugins/console_extensions/  @elastic/es-ui
 /x-pack/legacy/plugins/cross_cluster_replication/  @elastic/es-ui
 /x-pack/legacy/plugins/index_lifecycle_management/  @elastic/es-ui
 /x-pack/legacy/plugins/index_management/  @elastic/es-ui
@@ -153,4 +164,4 @@
 /x-pack/legacy/plugins/rollup/  @elastic/es-ui
 /x-pack/plugins/searchprofiler/  @elastic/es-ui
 /x-pack/legacy/plugins/snapshot_restore/  @elastic/es-ui
-/x-pack/legacy/plugins/watcher/  @elastic/es-ui
+/x-pack/plugins/watcher/  @elastic/es-ui

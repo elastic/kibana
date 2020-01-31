@@ -4,38 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
+import { ResponseObject } from 'hapi';
 import { Legacy } from 'kibana';
-import boom from 'boom';
 import { API_BASE_URL } from '../../common/constants';
 import {
-  ServerFacade,
   ExportTypesRegistry,
-  Logger,
-  ReportingResponseToolkit,
   JobDocOutput,
   JobSource,
   ListQuery,
+  Logger,
+  ReportingResponseToolkit,
+  ServerFacade,
 } from '../../types';
-// @ts-ignore
 import { jobsQueryFactory } from '../lib/jobs_query';
-// @ts-ignore
+import { ReportingSetupDeps } from '../plugin';
 import { jobResponseHandlerFactory } from './lib/job_response_handler';
+import { makeRequestFacade } from './lib/make_request_facade';
 import {
   getRouteConfigFactoryDownloadPre,
   getRouteConfigFactoryManagementPre,
 } from './lib/route_config_factories';
-import { makeRequestFacade } from './lib/make_request_facade';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
+function isResponse(response: Boom<null> | ResponseObject): response is ResponseObject {
+  return !(response as Boom<unknown>).isBoom;
+}
+
 export function registerJobInfoRoutes(
   server: ServerFacade,
+  plugins: ReportingSetupDeps,
   exportTypesRegistry: ExportTypesRegistry,
   logger: Logger
 ) {
-  const jobsQuery = jobsQueryFactory(server);
-  const getRouteConfig = getRouteConfigFactoryManagementPre(server);
-  const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server);
+  const { elasticsearch } = plugins;
+  const jobsQuery = jobsQueryFactory(server, elasticsearch);
+  const getRouteConfig = getRouteConfigFactoryManagementPre(server, plugins, logger);
+  const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server, plugins, logger);
 
   // list jobs in the queue, paginated
   server.route({
@@ -84,14 +90,14 @@ export function registerJobInfoRoutes(
       return jobsQuery.get(request.pre.user, docId, { includeContent: true }).then(
         (result): JobDocOutput => {
           if (!result) {
-            throw boom.notFound();
+            throw Boom.notFound();
           }
           const {
             _source: { jobtype: jobType, output: jobOutput },
           } = result;
 
           if (!request.pre.management.jobTypes.includes(jobType)) {
-            throw boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
+            throw Boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
           }
 
           return jobOutput;
@@ -111,13 +117,13 @@ export function registerJobInfoRoutes(
 
       return jobsQuery.get(request.pre.user, docId).then((result): JobSource<any>['_source'] => {
         if (!result) {
-          throw boom.notFound();
+          throw Boom.notFound();
         }
 
         const { _source: job } = result;
         const { jobtype: jobType, payload: jobPayload } = job;
         if (!request.pre.management.jobTypes.includes(jobType)) {
-          throw boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
+          throw Boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
         }
 
         return {
@@ -132,7 +138,7 @@ export function registerJobInfoRoutes(
   });
 
   // trigger a download of the output from a job
-  const jobResponseHandler = jobResponseHandlerFactory(server, exportTypesRegistry);
+  const jobResponseHandler = jobResponseHandlerFactory(server, elasticsearch, exportTypesRegistry);
   server.route({
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
@@ -147,21 +153,22 @@ export function registerJobInfoRoutes(
         h,
         { docId }
       );
-      const { statusCode } = response;
 
-      if (statusCode !== 200) {
-        if (statusCode === 500) {
-          logger.error(`Report ${docId} has failed: ${JSON.stringify(response.source)}`);
-        } else {
-          logger.debug(
-            `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
-              response.source
-            )}]`
-          );
+      if (isResponse(response)) {
+        const { statusCode } = response;
+
+        if (statusCode !== 200) {
+          if (statusCode === 500) {
+            logger.error(`Report ${docId} has failed: ${JSON.stringify(response.source)}`);
+          } else {
+            logger.debug(
+              `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
+                response.source
+              )}]`
+            );
+          }
         }
-      }
 
-      if (!response.isBoom) {
         response = response.header('accept-ranges', 'none');
       }
 

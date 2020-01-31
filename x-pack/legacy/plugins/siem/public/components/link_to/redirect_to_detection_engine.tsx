@@ -12,6 +12,7 @@ import { RedirectWrapper } from './redirect_wrapper';
 
 export type DetectionEngineComponentProps = RouteComponentProps<{
   tabName: DetectionEngineTab;
+  detailName: string;
   search: string;
 }>;
 
@@ -41,14 +42,22 @@ export const RedirectToCreateRulePage = ({
 };
 
 export const RedirectToRuleDetailsPage = ({
+  match: {
+    params: { detailName },
+  },
   location: { search },
 }: DetectionEngineComponentProps) => {
-  return <RedirectWrapper to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/rule-details${search}`} />;
+  return <RedirectWrapper to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${detailName}${search}`} />;
 };
 
-export const RedirectToEditRulePage = ({ location: { search } }: DetectionEngineComponentProps) => {
+export const RedirectToEditRulePage = ({
+  match: {
+    params: { detailName },
+  },
+  location: { search },
+}: DetectionEngineComponentProps) => {
   return (
-    <RedirectWrapper to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/rule-details/edit-rule${search}`} />
+    <RedirectWrapper to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${detailName}/edit${search}`} />
   );
 };
 

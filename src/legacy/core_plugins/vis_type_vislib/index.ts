@@ -22,7 +22,7 @@ import { Legacy } from 'kibana';
 
 import { LegacyPluginApi, LegacyPluginInitializer } from '../../types';
 
-const kbnVislibVisTypesPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
+const visTypeVislibPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
     id: 'vis_type_vislib',
     require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
@@ -41,4 +41,4 @@ const kbnVislibVisTypesPluginInitializer: LegacyPluginInitializer = ({ Plugin }:
   } as Legacy.PluginSpecOptions);
 
 // eslint-disable-next-line import/no-default-export
-export default kbnVislibVisTypesPluginInitializer;
+export default visTypeVislibPluginInitializer;

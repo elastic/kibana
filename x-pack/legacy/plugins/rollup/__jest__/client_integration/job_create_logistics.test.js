@@ -13,7 +13,8 @@ import {
   YEAR,
 } from '../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
-import { setupEnvironment, pageHelpers } from './helpers';
+import { setHttp } from '../../public/crud_app/services';
+import { mockHttpRequest, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
 
@@ -22,27 +23,29 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 const { setup } = pageHelpers.jobCreate;
 
 describe('Create Rollup Job, step 1: Logistics', () => {
-  let server;
-  let httpRequestsMockHelpers;
   let find;
   let exists;
   let actions;
   let form;
   let getEuiStepsHorizontalActive;
+  let npStart;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    npStart = require('ui/new_platform').npStart; // eslint-disable-line
+    setHttp(npStart.core.http);
   });
 
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments
-    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+    mockHttpRequest(npStart.core.http);
 
     ({ find, exists, actions, form, getEuiStepsHorizontalActive } = setup());
+  });
+
+  afterEach(() => {
+    npStart.core.http.get.mockClear();
+    npStart.core.http.post.mockClear();
+    npStart.core.http.put.mockClear();
   });
 
   it('should have the horizontal step active on "Logistics"', () => {
@@ -94,14 +97,14 @@ describe('Create Rollup Job, step 1: Logistics', () => {
       });
 
       it('should not allow an unknown index pattern', async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ doesMatchIndices: false });
+        mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { doesMatchIndices: false } });
         await form.setInputValue('rollupIndexPattern', 'unknown', true);
         actions.clickNextStep();
         expect(form.getErrorsMessages()).toContain("Index pattern doesn't match any indices.");
       });
 
       it('should not allow an index pattern without time fields', async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ dateFields: [] });
+        mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { dateFields: [] } });
         await form.setInputValue('rollupIndexPattern', 'abc', true);
         actions.clickNextStep();
         expect(form.getErrorsMessages()).toContain(
@@ -110,7 +113,9 @@ describe('Create Rollup Job, step 1: Logistics', () => {
       });
 
       it('should not allow an index pattern that matches a rollup index', async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ doesMatchRollupIndices: true });
+        mockHttpRequest(npStart.core.http, {
+          indxPatternVldtResp: { doesMatchRollupIndices: true },
+        });
         await form.setInputValue('rollupIndexPattern', 'abc', true);
         actions.clickNextStep();
         expect(form.getErrorsMessages()).toContain('Index pattern must not match rollup indices.');

@@ -36,16 +36,11 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   item,
   onAlertChanged,
 }: ComponentOpts) => {
-  const {
-    http,
-    legacy: { capabilities },
-  } = useAppDependencies();
+  const { http, capabilities } = useAppDependencies();
 
-  const canDelete = hasDeleteAlertsCapability(capabilities.get());
-  const canSave = hasSaveAlertsCapability(capabilities.get());
+  const canDelete = hasDeleteAlertsCapability(capabilities);
+  const canSave = hasSaveAlertsCapability(capabilities);
 
-  const [isEnabled, setIsEnabled] = useState<boolean>(item.enabled);
-  const [isMuted, setIsMuted] = useState<boolean>(item.muteAll);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const button = (
@@ -72,14 +67,12 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         <EuiSwitch
           name="enable"
           disabled={!canSave}
-          checked={isEnabled}
+          checked={item.enabled}
           data-test-subj="enableSwitch"
           onChange={async () => {
-            if (isEnabled) {
-              setIsEnabled(false);
+            if (item.enabled) {
               await disableAlerts({ http, ids: [item.id] });
             } else {
-              setIsEnabled(true);
               await enableAlerts({ http, ids: [item.id] });
             }
             onAlertChanged();
@@ -95,15 +88,13 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       <EuiFormRow>
         <EuiSwitch
           name="mute"
-          checked={isMuted}
-          disabled={!canSave || !isEnabled}
+          checked={item.muteAll}
+          disabled={!(canSave && item.enabled)}
           data-test-subj="muteSwitch"
           onChange={async () => {
-            if (isMuted) {
-              setIsMuted(false);
+            if (item.muteAll) {
               await unmuteAlerts({ http, ids: [item.id] });
             } else {
-              setIsMuted(true);
               await muteAlerts({ http, ids: [item.id] });
             }
             onAlertChanged();

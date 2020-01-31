@@ -85,6 +85,7 @@ import { ibmmqLogsSpecProvider } from './ibmmq_logs';
 import { stanMetricsSpecProvider } from './stan_metrics';
 import { envoyproxyMetricsSpecProvider } from './envoyproxy_metrics';
 import { ibmmqMetricsSpecProvider } from './ibmmq_metrics';
+import { statsdMetricsSpecProvider } from './statsd_metrics';
 
 export const builtInTutorials = [
   systemLogsSpecProvider,
@@ -156,4 +157,5 @@ export const builtInTutorials = [
   ibmmqMetricsSpecProvider,
   stanMetricsSpecProvider,
   envoyproxyMetricsSpecProvider,
+  statsdMetricsSpecProvider,
 ];
