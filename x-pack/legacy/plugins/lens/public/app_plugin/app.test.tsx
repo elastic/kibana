@@ -62,7 +62,11 @@ function createMockFilterManager() {
     }),
     setFilters: jest.fn((newFilters: unknown[]) => {
       filters = newFilters;
-      subscriber();
+      if (subscriber) subscriber();
+    }),
+    setAppFilters: jest.fn((newFilters: unknown[]) => {
+      filters = newFilters;
+      if (subscriber) subscriber();
     }),
     getFilters: () => filters,
     getGlobalFilters: () => {
@@ -189,6 +193,13 @@ describe('Lens App', () => {
     `);
   });
 
+  it('clears app filters on load', () => {
+    const defaultArgs = makeDefaultArgs();
+    mount(<App {...defaultArgs} />);
+
+    expect(defaultArgs.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([]);
+  });
+
   it('sets breadcrumbs when the document title changes', async () => {
     const defaultArgs = makeDefaultArgs();
     const instance = mount(<App {...defaultArgs} />);
@@ -246,7 +257,7 @@ describe('Lens App', () => {
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
       expect(args.data.indexPatterns.get).toHaveBeenCalledWith('1');
-      expect(args.data.query.filterManager.setFilters).toHaveBeenCalledWith([
+      expect(args.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([
         { query: { match_phrase: { src: 'test' } } },
       ]);
       expect(TopNavMenu).toHaveBeenCalledWith(
