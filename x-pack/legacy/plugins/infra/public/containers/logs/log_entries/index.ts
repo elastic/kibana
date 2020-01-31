@@ -137,7 +137,7 @@ const useFetchEntriesEffect = (
   const [prevParams, cachePrevParams] = useState(props);
   const [startedStreaming, setStartedStreaming] = useState(false);
 
-  const runFetchNewEntriesRequest = async (override = {}) => {
+  const runFetchNewEntriesRequest = async (overrides: Partial<LogEntriesProps> = {}) => {
     if (!props.startTimestamp || !props.endTimestamp || !props.timeKey) {
       return;
     }
@@ -146,10 +146,10 @@ const useFetchEntriesEffect = (
 
     try {
       const fetchArgs: LogEntriesRequest = {
-        sourceId: props.sourceId,
-        startDate: props.startTimestamp,
-        endDate: props.endTimestamp,
-        query: props.filterQuery || undefined, // FIXME
+        sourceId: overrides.sourceId || props.sourceId,
+        startDate: overrides.startTimestamp || props.startTimestamp,
+        endDate: overrides.endTimestamp || props.endTimestamp,
+        query: overrides.filterQuery || props.filterQuery || undefined, // FIXME
       };
 
       if (props.timeKey) {
@@ -237,7 +237,7 @@ const useFetchEntriesEffect = (
 
   const fetchNewerEntries = useCallback(
     throttle(() => runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After), 500),
-    [props, state.entriesEnd]
+    [props, state.bottomCursor]
   );
 
   const streamEntriesEffectDependencies = [
@@ -251,16 +251,11 @@ const useFetchEntriesEffect = (
         if (startedStreaming) {
           await new Promise(res => setTimeout(res, 5000));
         } else {
-          const nowKey = {
-            tiebreaker: 0,
-            time: Date.now(),
-          };
-          props.jumpToTargetPosition(nowKey);
+          const endTimestamp = Date.now();
+          props.jumpToTargetPosition({ tiebreaker: 0, time: endTimestamp });
           setStartedStreaming(true);
           if (state.hasMoreAfterEnd) {
-            runFetchNewEntriesRequest({
-              timeKey: nowKey,
-            });
+            runFetchNewEntriesRequest({ endTimestamp });
             return;
           }
         }

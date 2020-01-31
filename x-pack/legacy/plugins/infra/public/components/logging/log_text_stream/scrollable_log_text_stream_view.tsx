@@ -59,6 +59,7 @@ interface ScrollableLogTextStreamViewProps {
   startDate: string;
   endDate: string;
   updateDateRange: (range: { startDate?: string; endDate?: string }) => void;
+  startLiveStreaming: () => void;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -140,6 +141,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       startDate,
       endDate,
       updateDateRange,
+      startLiveStreaming,
     } = this.props;
     const { targetId, items, isScrollLocked } = this.state;
     const hasItems = items.length > 0;
@@ -258,7 +260,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                               }
                               rangeEdge={endDate}
                               onExtendRange={newDate => updateDateRange({ endDate: newDate })}
-                              // onStreamStart={(...args) => console.log('end.streamStart', args)}
+                              onStreamStart={() => startLiveStreaming()}
                               // onLoadMore={this.handleLoadNewerItems}
                             />
                             {isScrollLocked && (

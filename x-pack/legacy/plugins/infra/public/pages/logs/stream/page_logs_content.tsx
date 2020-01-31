@@ -50,6 +50,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     visibleTimeInterval,
     reportVisiblePositions,
     jumpToTargetPosition,
+    startLiveStreaming,
     stopLiveStreaming,
     startDate,
     endDate,
@@ -110,6 +111,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
               startDate={startDate}
               endDate={endDate}
               updateDateRange={updateDateRange}
+              startLiveStreaming={startLiveStreaming}
             />
           )}
         </WithStreamItems>
