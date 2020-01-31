@@ -4,27 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPopover,
-  EuiTitle
-} from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React, {
   CSSProperties,
+  useCallback,
   useContext,
   useEffect,
-  useState,
-  useCallback
+  useState
 } from 'react';
 import { CytoscapeContext } from '../Cytoscape';
-import { Buttons } from './Buttons';
-import { Info } from './Info';
-import { ServiceMetricList } from './ServiceMetricList';
-
-const popoverMinWidth = 280;
+import { Contents } from './Contents';
 
 interface PopoverProps {
   focusedServiceName?: string;
@@ -87,40 +76,15 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const label = data.label || selectedNodeServiceName;
 
   return (
-    <EuiPopover
-      anchorPosition={'upCenter'}
+    <Contents
       button={trigger}
-      closePopover={() => {}}
+      data={data}
       isOpen={isOpen}
+      isService={isService}
+      label={label}
+      onFocusClick={onFocusClick}
+      selectedNodeServiceName={selectedNodeServiceName}
       style={popoverStyle}
-    >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
-        style={{ minWidth: popoverMinWidth }}
-      >
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h3>{label}</h3>
-          </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          {isService ? (
-            <ServiceMetricList serviceName={selectedNodeServiceName} />
-          ) : (
-            <Info {...data} />
-          )}
-        </EuiFlexItem>
-        {isService && (
-          <Buttons
-            focusedServiceName={focusedServiceName}
-            onFocusClick={onFocusClick}
-            selectedNodeServiceName={selectedNodeServiceName}
-          />
-        )}
-      </EuiFlexGroup>
-    </EuiPopover>
+    />
   );
 }
