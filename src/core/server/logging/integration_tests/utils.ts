@@ -32,12 +32,23 @@ function stripColors(input: string) {
   return input.replace(/\u001b[^m]+m/g, '');
 }
 
-export function normalizePlatformLogging(input: string) {
+function normalizePlatformLogging(input: string) {
   return replaceTimestamp(input);
 }
 
-export function normalizeLegacyPlatformLogging(input: string) {
+function normalizeLegacyPlatformLogging(input: string) {
   return replaceTimestamp(stripColors(input));
+}
+
+export function getPlatformLoggingFromMock(logMock: jest.SpyInstance<string, string[]>) {
+  return logMock.mock.calls.map(([message]) => message).map(normalizePlatformLogging);
+}
+
+export function getLegacyPlatformLoggingFromMock(stdoutMock: jest.SpyInstance<string, Buffer[]>) {
+  return stdoutMock.mock.calls
+    .map(([message]) => message)
+    .map(String)
+    .map(normalizeLegacyPlatformLogging);
 }
 
 export async function getPlatformLoggingContent(path: string) {

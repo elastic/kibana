@@ -16,37 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import Fs from 'fs';
-import Path from 'path';
-import Util from 'util';
-import del from 'del';
-
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
-import { fromRoot } from '../../utils';
+
 import {
-  getPlatformLoggingContent as _getPlatformLoggingContent,
-  getLegacyPlatformLoggingContent as _getLegacyPlatformLoggingContent,
+  getPlatformLoggingFromMock,
+  getLegacyPlatformLoggingFromMock,
 } from '../../logging/integration_tests/utils';
 
 import { LegacyLoggingConfig } from '../config/legacy_object_to_config_adapter';
-
-const mkdir = Util.promisify(Fs.mkdir);
-const truncate = Util.promisify(Fs.truncate);
-
-const tempFolderPath = fromRoot('data/test/tmp-logging-service');
-const platformDestination = Path.join(tempFolderPath, 'compatibility-np.txt');
-const legacyPlatformDestination = Path.join(tempFolderPath, 'compatibility-lp.txt');
-
-const getPlatformLoggingContent = () => _getPlatformLoggingContent(platformDestination);
-const getLegacyPlatformLoggingContent = () =>
-  _getLegacyPlatformLoggingContent(legacyPlatformDestination);
 
 function createRoot(legacyLoggingConfig: LegacyLoggingConfig = {}) {
   return kbnTestServer.createRoot({
     logging: {
       // legacy platform config
       silent: false,
-      dest: legacyPlatformDestination,
       json: false,
       ...legacyLoggingConfig,
       events: {
@@ -54,10 +37,10 @@ function createRoot(legacyLoggingConfig: LegacyLoggingConfig = {}) {
       },
       // platform config
       appenders: {
-        file: {
-          kind: 'file',
-          path: platformDestination,
+        'test-console': {
+          kind: 'console',
           layout: {
+            highlight: false,
             kind: 'pattern',
           },
         },
@@ -65,7 +48,7 @@ function createRoot(legacyLoggingConfig: LegacyLoggingConfig = {}) {
       loggers: [
         {
           context: 'test-file',
-          appenders: ['file'],
+          appenders: ['test-console'],
           level: 'info',
         },
       ],
@@ -74,17 +57,20 @@ function createRoot(legacyLoggingConfig: LegacyLoggingConfig = {}) {
 }
 
 describe('logging service', () => {
+  let mockConsoleLog: jest.SpyInstance;
+  let mockStdout: jest.SpyInstance;
+
+  beforeAll(async () => {
+    mockConsoleLog = jest.spyOn(global.console, 'log');
+    mockStdout = jest.spyOn(global.process.stdout, 'write');
+  });
+
+  afterAll(async () => {
+    mockConsoleLog.mockRestore();
+    mockStdout.mockRestore();
+  });
+
   describe('compatibility', () => {
-    beforeAll(async () => {
-      await mkdir(tempFolderPath, { recursive: true });
-    });
-    afterAll(async () => {
-      await del(tempFolderPath);
-    });
-    afterEach(async () => {
-      await truncate(platformDestination);
-      await truncate(legacyPlatformDestination);
-    });
     describe('uses configured loggers', () => {
       let root: ReturnType<typeof createRoot>;
       beforeAll(async () => {
@@ -98,31 +84,49 @@ describe('logging service', () => {
         await root.shutdown();
       });
 
+      beforeEach(() => {
+        mockConsoleLog.mockClear();
+        mockStdout.mockClear();
+      });
+
       it('when context matches', async () => {
         root.logger.get('test-file').info('handled by NP');
 
-        expect(await getPlatformLoggingContent()).toMatchInlineSnapshot(`
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] handled by NP
-            "
+        expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+        const loggedString = getPlatformLoggingFromMock(mockConsoleLog);
+        expect(loggedString).toMatchInlineSnapshot(`
+          Array [
+            "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] handled by NP",
+          ]
         `);
-
-        expect(await getLegacyPlatformLoggingContent()).toHaveLength(0);
       });
 
       it('falls back to the root legacy logger otherwise', async () => {
         root.logger.get('test-file-legacy').info('handled by LP');
 
-        expect(await getLegacyPlatformLoggingContent()).toMatchInlineSnapshot(`
+        expect(mockStdout).toHaveBeenCalledTimes(1);
+
+        const loggedString = getLegacyPlatformLoggingFromMock(mockStdout);
+        expect(loggedString).toMatchInlineSnapshot(`
+          Array [
             "  log   [xx:xx:xx.xxx] [info][test-file-legacy] handled by LP
-            "
+          ",
+          ]
         `);
-        expect(await getPlatformLoggingContent()).toHaveLength(0);
       });
     });
 
     describe('logging config respects legacy logging settings', () => {
+      let root: ReturnType<typeof createRoot>;
+
+      afterEach(async () => {
+        mockConsoleLog.mockClear();
+        mockStdout.mockClear();
+        await root.shutdown();
+      });
+
       it('"silent": true', async () => {
-        const root = createRoot({ silent: true });
+        root = createRoot({ silent: true });
 
         await root.setup();
         await root.start();
@@ -132,26 +136,28 @@ describe('logging service', () => {
         platformLogger.warn('warn');
         platformLogger.error('error');
 
+        expect(mockConsoleLog).toHaveBeenCalledTimes(3);
+
+        expect(getPlatformLoggingFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
+          Array [
+            "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
+            "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
+            "[xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error",
+          ]
+        `);
+
+        mockStdout.mockClear();
+
         const legacyPlatformLogger = root.logger.get('test-file-legacy');
         legacyPlatformLogger.info('info');
         legacyPlatformLogger.warn('warn');
         legacyPlatformLogger.error('error');
 
-        // calls shutdown to close write stream and flush logged messages
-        await root.shutdown();
-
-        expect(await getPlatformLoggingContent()).toMatchInlineSnapshot(`
-          "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info
-          [xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn
-          [xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error
-          "
-        `);
-
-        expect(await getLegacyPlatformLoggingContent()).toHaveLength(0);
+        expect(mockStdout).toHaveBeenCalledTimes(0);
       });
 
       it('"quiet": true', async () => {
-        const root = createRoot({ quiet: true });
+        root = createRoot({ quiet: true });
 
         await root.setup();
         await root.start();
@@ -161,29 +167,34 @@ describe('logging service', () => {
         platformLogger.warn('warn');
         platformLogger.error('error');
 
+        expect(mockConsoleLog).toHaveBeenCalledTimes(3);
+
+        expect(getPlatformLoggingFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
+          Array [
+            "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
+            "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
+            "[xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error",
+          ]
+        `);
+
+        mockStdout.mockClear();
+
         const legacyPlatformLogger = root.logger.get('test-file-legacy');
         legacyPlatformLogger.info('info');
         legacyPlatformLogger.warn('warn');
         legacyPlatformLogger.error('error');
 
-        // calls shutdown to close write stream and flush logged messages
-        await root.shutdown();
-
-        expect(await getPlatformLoggingContent()).toMatchInlineSnapshot(`
-          "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info
-          [xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn
-          [xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error
-          "
-        `);
-
-        expect(await getLegacyPlatformLoggingContent()).toMatchInlineSnapshot(`
-          "  log   [xx:xx:xx.xxx] [error][test-file-legacy] error
-          "
+        expect(mockStdout).toHaveBeenCalledTimes(1);
+        expect(getLegacyPlatformLoggingFromMock(mockStdout)).toMatchInlineSnapshot(`
+          Array [
+            "  log   [xx:xx:xx.xxx] [error][test-file-legacy] error
+          ",
+          ]
         `);
       });
 
       it('"verbose": true', async () => {
-        const root = createRoot({ verbose: true });
+        root = createRoot({ verbose: true });
 
         await root.setup();
         await root.start();
@@ -193,26 +204,33 @@ describe('logging service', () => {
         platformLogger.warn('warn');
         platformLogger.error('error');
 
+        expect(mockConsoleLog).toHaveBeenCalledTimes(3);
+
+        expect(getPlatformLoggingFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
+          Array [
+            "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
+            "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
+            "[xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error",
+          ]
+        `);
+
+        mockStdout.mockClear();
+
         const legacyPlatformLogger = root.logger.get('test-file-legacy');
         legacyPlatformLogger.info('info');
         legacyPlatformLogger.warn('warn');
         legacyPlatformLogger.error('error');
 
-        // calls shutdown to close write stream and flush logged messages
-        await root.shutdown();
-
-        expect(await getPlatformLoggingContent()).toMatchInlineSnapshot(`
-          "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info
-          [xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn
-          [xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error
-          "
-        `);
-
-        expect(await getLegacyPlatformLoggingContent()).toMatchInlineSnapshot(`
-          "  log   [xx:xx:xx.xxx] [info][test-file-legacy] info
-            log   [xx:xx:xx.xxx] [warning][test-file-legacy] warn
-            log   [xx:xx:xx.xxx] [error][test-file-legacy] error
-          "
+        expect(mockStdout).toHaveBeenCalledTimes(3);
+        expect(getLegacyPlatformLoggingFromMock(mockStdout)).toMatchInlineSnapshot(`
+          Array [
+            "  log   [xx:xx:xx.xxx] [info][test-file-legacy] info
+          ",
+            "  log   [xx:xx:xx.xxx] [warning][test-file-legacy] warn
+          ",
+            "  log   [xx:xx:xx.xxx] [error][test-file-legacy] error
+          ",
+          ]
         `);
       });
     });
