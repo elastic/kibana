@@ -79,11 +79,7 @@ def ci(Map params, Closure closure) {
   return base(config) {
     kibanaPipeline.withGcsArtifactUpload(config.name) {
       kibanaPipeline.withPostBuildReporting {
-        withEnv([
-          "JOB=${config.name}"
-        ]) {
-          closure()
-        }
+        closure()
       }
     }
   }
@@ -93,7 +89,9 @@ def ci(Map params, Closure closure) {
 def intake(jobName, String script) {
   return {
     ci(name: jobName, label: 'linux && immutable', ramDisk: false) {
-      runbld(script, "Execute ${jobName}")
+      withEnv(["JOB=${jobName}"]) {
+        runbld(script, "Execute ${jobName}")
+      }
     }
   }
 }
@@ -133,9 +131,7 @@ def parallelProcesses(Map params) {
           sleep(delay)
         }
 
-        withEnv(["JOB=${processName}"]) {
-          processClosure(processNumber)
-        }
+        processClosure(processNumber)
       }
     }
 

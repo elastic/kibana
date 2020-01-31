@@ -30,6 +30,7 @@ def functionalTestProcess(String name, Closure closure) {
       "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
       "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
       "IS_PIPELINE_JOB=1",
+      "JOB=${name}",
     ]) {
       closure()
     }
