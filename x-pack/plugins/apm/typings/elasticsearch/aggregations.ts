@@ -147,19 +147,13 @@ type BucketSubAggregationResponse<
   ? AggregationResponseMap<TAggregationInputMap, TDocument>
   : {};
 
-interface AggregationResponsePart<
-  TAggregationOptionsMap extends AggregationOptionsMap,
-  TDocument
-> {
+interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOptionsMap, TDocument> {
   terms: {
     buckets: Array<
       {
         doc_count: number;
         key: string | number;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      } & BucketSubAggregationResponse<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   histogram: {
@@ -167,10 +161,7 @@ interface AggregationResponsePart<
       {
         doc_count: number;
         key: number;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      } & BucketSubAggregationResponse<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   date_histogram: {
@@ -179,10 +170,7 @@ interface AggregationResponsePart<
         doc_count: number;
         key: number;
         key_as_string: string;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      } & BucketSubAggregationResponse<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   avg: MetricsAggregationResponsePart;
@@ -227,10 +215,7 @@ interface AggregationResponsePart<
   } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
   filters: TAggregationOptionsMap extends { filters: { filters: any[] } }
     ? Array<
-        { doc_count: number } & AggregationResponseMap<
-          TAggregationOptionsMap['aggs'],
-          TDocument
-        >
+        { doc_count: number } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>
       >
     : TAggregationOptionsMap extends {
         filters: {
@@ -264,10 +249,7 @@ interface AggregationResponsePart<
       {
         key: Record<GetCompositeKeys<TAggregationOptionsMap>, number>;
         doc_count: number;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      } & BucketSubAggregationResponse<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   diversified_sampler: {

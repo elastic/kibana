@@ -18,8 +18,8 @@ import {
   AggregationRestrictions,
 } from './types';
 import { updateLayerIndexPattern } from './state_helpers';
-import { DateRange, ExistingFields } from '../../common/types';
-import { BASE_API_URL } from '../../common';
+import { DateRange, ExistingFields } from '../../../../../plugins/lens/common/types';
+import { BASE_API_URL } from '../../../../../plugins/lens/common';
 import { documentField } from './document_field';
 import { isNestedField, IFieldType } from '../../../../../../src/plugins/data/public';
 
