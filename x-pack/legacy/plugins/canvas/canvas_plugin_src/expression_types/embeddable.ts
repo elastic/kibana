@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionTypeDefinition } from 'src/plugins/expressions';
-import { EmbeddableInput } from 'src/plugins/embeddable/public';
+import { ExpressionTypeDefinition } from '../../../../../../src/plugins/expressions';
+import { EmbeddableInput } from '../../../../../../src/plugins/embeddable/public';
 import { EmbeddableTypes } from './embeddable_types';
 
 export const EmbeddableExpressionType = 'embeddable';

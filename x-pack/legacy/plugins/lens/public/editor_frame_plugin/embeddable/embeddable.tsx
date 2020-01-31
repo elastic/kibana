@@ -8,15 +8,15 @@ import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
-import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { Subscription } from 'rxjs';
+import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
 import {
   Embeddable as AbstractEmbeddable,
   EmbeddableOutput,
   IContainer,
   EmbeddableInput,
-} from 'src/plugins/embeddable/public';
+} from '../../../../../../../src/plugins/embeddable/public';
 import { Document, DOC_TYPE } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
 
