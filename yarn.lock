@@ -21875,10 +21875,10 @@ object-prototype-functions@^1.2.0:
   resolved "https://registry.yarnpkg.com/object-prototype-functions/-/object-prototype-functions-1.2.0.tgz#59ffa520f2e7ef3b3ba427ba81178eb8feca1048"
   integrity sha512-7pfkHi5KHFz/B3RhQVORykDYF2CdQY/h1isJzCJJfEubKkSO59io1raYHAMUrx0Im3fUSrU1oX6E4KeCwyU/jQ==
 
-object-prototype@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/object-prototype/-/object-prototype-2.0.0.tgz#8173498090e6f5ad05337615147c3f330b50ba1f"
-  integrity sha512-hbGRLa+asxkpcg1CFd1ewOHp8P9Iyuo8AAeGJpUd/QGXJ4wloYb4RO4ZgbsWd3V+TcI9HH9aui8g7wWF45PP5Q==
+object-prototype@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/object-prototype/-/object-prototype-3.0.0.tgz#ce1901633565e687179ff0e625fd18135f7f6636"
+  integrity sha512-68KfejzD2T9z8rIFabiZk4Zyv4mj5CisiCb7fz6nRTCSbM8t+IbVorbdkrQ8heVVeeIow+eYLS/nnFY9gH64ug==
   dependencies:
     object-prototype-functions "^1.2.0"
 

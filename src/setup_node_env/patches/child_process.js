@@ -22,20 +22,44 @@
 // from `Object.prototype`. This protects against similar RCE vulnerabilities
 // as described in CVE-2019-7609
 module.exports = function(cp) {
-  cp.exec = new Proxy(cp.exec, { apply: patchOptionsAtIndex(1) });
-  cp.execFile = new Proxy(cp.execFile, { apply: patchOptionsAtIndex(2) });
-  cp.fork = new Proxy(cp.fork, { apply: patchOptionsAtIndex(2) });
-  cp.spawn = new Proxy(cp.spawn, { apply: patchOptionsAtIndex(2) });
-  cp.execFileSync = new Proxy(cp.execFileSync, { apply: patchOptionsAtIndex(2) });
-  cp.execSync = new Proxy(cp.execSync, { apply: patchOptionsAtIndex(1) });
-  cp.spawnSync = new Proxy(cp.spawnSync, { apply: patchOptionsAtIndex(2) });
+  cp.exec = new Proxy(cp.exec, { apply: patchOptions() });
+  cp.execFile = new Proxy(cp.execFile, { apply: patchOptions(true) });
+  cp.fork = new Proxy(cp.fork, { apply: patchOptions(true) });
+  cp.spawn = new Proxy(cp.spawn, { apply: patchOptions(true) });
+  cp.execFileSync = new Proxy(cp.execFileSync, { apply: patchOptions(true) });
+  cp.execSync = new Proxy(cp.execSync, { apply: patchOptions() });
+  cp.spawnSync = new Proxy(cp.spawnSync, { apply: patchOptions(true) });
   return cp;
 };
 
-function patchOptionsAtIndex(index) {
-  return function apply(target, thisArg, argumentsList) {
-    argumentsList[index] = prototypelessSpawnOpts(argumentsList[index]);
-    return target.apply(thisArg, argumentsList);
+function patchOptions(hasArgs) {
+  return function apply(target, thisArg, args) {
+    var pos = 1;
+    if (pos === args.length) {
+      // fn(arg1)
+      args[pos] = Object.create(null);
+    } else if (pos < args.length) {
+      if (hasArgs && (Array.isArray(args[pos]) || args[pos] == null)) {
+        // fn(arg1, args, ...)
+        pos++;
+      }
+
+      if (pos < args.length && typeof args[pos] === 'object') {
+        // fn(arg1, {}, ...)
+        // fn(arg1, args, {}, ...)
+        args[pos] = prototypelessSpawnOpts(args[pos]);
+      } else if (pos < args.length && args[pos] == null) {
+        // fn(arg1, null, ...)
+        // fn(arg1, args, null, ...)
+        args[pos] = Object.create(null);
+      } else if (pos < args.length && typeof args[pos] === 'function') {
+        // fn(arg1, callback)
+        // fn(arg1, args, callback)
+        args.splice(pos, 0, Object.create(null));
+      }
+    }
+
+    return target.apply(thisArg, args);
   };
 }
 
