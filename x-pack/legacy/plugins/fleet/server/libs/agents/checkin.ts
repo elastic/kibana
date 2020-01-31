@@ -25,21 +25,30 @@ export async function agentCheckin(
 
   const actions = filterActionsForCheckin(agent);
 
+  // Generate new agent config if config is updated
   if (isNewAgentConfig(agent) && agent.policy_id) {
     const policy = await libs.policies.getFullPolicy(internalUser, agent.policy_id);
-    // Assign output API keys
+    if (policy) {
+      // Assign output API keys
+      // We currently only support default ouput
+      if (!agent.default_api_key) {
+        updateData.default_api_key = await libs.apiKeys.generateOutputApiKey('default', agent.id);
+      }
+      // Mutate the policy to set the api token for this agent
+      policy.outputs.default.api_token = agent.default_api_key || updateData.default_api_key;
 
-    const policyChangeAction: AgentAction = {
-      id: uuid.v4(),
-      type: 'POLICY_CHANGE',
-      created_at: new Date().toISOString(),
-      data: JSON.stringify({
-        policy,
-      }),
-    };
-    actions.push(policyChangeAction);
-    // persist new action
-    updateData.actions = actions;
+      const policyChangeAction: AgentAction = {
+        id: uuid.v4(),
+        type: 'POLICY_CHANGE',
+        created_at: new Date().toISOString(),
+        data: JSON.stringify({
+          policy,
+        }),
+      };
+      actions.push(policyChangeAction);
+      // persist new action
+      updateData.actions = actions;
+    }
   }
   if (localMetadata) {
     updateData.local_metadata = localMetadata;
@@ -51,6 +60,7 @@ export async function agentCheckin(
     events
   );
 
+  // Persist changes
   if (updatedErrorEvents) {
     updateData.current_error_events = updatedErrorEvents;
   }

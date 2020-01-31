@@ -102,7 +102,7 @@ const newAgentOptionalProperties = t.partial({
   local_metadata: t.dictionary(t.string, t.string),
   shared_id: t.string,
   access_api_key_id: t.string,
-  access_api_key: t.string,
+  default_api_key: t.string,
   policy_id: t.string,
 });
 
@@ -117,6 +117,7 @@ export const RuntimeAgent = t.intersection([
     last_updated: t.string,
     last_checkin: t.string,
     config_updated_at: t.string,
+    access_api_key: t.string,
   }),
   newAgentOptionalProperties,
 ]);

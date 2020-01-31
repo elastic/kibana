@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { NewOutput, Output } from '../types';
 import { DEFAULT_OUTPUT, DEFAULT_OUTPUT_ID, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { configService } from './config';
@@ -30,7 +30,6 @@ class OutputService {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
         hosts: [configService.getConfig()!.fleet.defaultOutputHost],
-        api_key: await this.createDefaultOutputApiKey(adminUser.username, adminUser.password),
         admin_username: adminUser.username,
         admin_password: adminUser.password,
       } as NewOutput;
@@ -50,35 +49,6 @@ class OutputService {
       username: so!.attributes.admin_username,
       password: so!.attributes.admin_password,
     };
-  }
-
-  // TODO: TEMPORARY this is going to be per agent
-  private async createDefaultOutputApiKey(username: string, password: string): Promise<string> {
-    const key = await appContextService.getSecurity()?.authc.createAPIKey(
-      {
-        headers: {
-          authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
-        },
-      } as KibanaRequest,
-      {
-        name: 'fleet-default-output',
-        role_descriptors: {
-          'fleet-output': {
-            cluster: ['monitor'],
-            index: [
-              {
-                names: ['logs-*', 'metrics-*'],
-                privileges: ['write'],
-              },
-            ],
-          },
-        },
-      }
-    );
-    if (!key) {
-      throw new Error('An error occured while creating default API Key');
-    }
-    return `${key.id}:${key.api_key}`;
   }
 
   public async create(
