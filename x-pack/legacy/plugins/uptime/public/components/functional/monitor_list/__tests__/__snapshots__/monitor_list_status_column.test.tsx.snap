@@ -50,43 +50,11 @@ exports[`MonitorListStatusColumn can handle a non-numeric timestamp value 1`] = 
   <EuiFlexItem
     grow={2}
   >
-    <EuiHideFor
-      sizes={
-        Array [
-          "m",
-        ]
-      }
+    <EuiText
+      size="s"
     >
-      <EuiText
-        size="s"
-      >
-        in 0/0 Location
-      </EuiText>
-    </EuiHideFor>
-    <EuiShowFor
-      sizes={
-        Array [
-          "m",
-        ]
-      }
-    >
-      <EuiText
-        size="s"
-      >
-        <FormattedMessage
-          defaultMessage="in {noLoc} {icon}"
-          id="xpack.uptime.monitorList.statusColumn.locStatusMessage.icon"
-          values={
-            Object {
-              "icon": <EuiIcon
-                type="visMapCoordinate"
-              />,
-              "noLoc": "0/0",
-            }
-          }
-        />
-      </EuiText>
-    </EuiShowFor>
+      in 0/0 Location
+    </EuiText>
   </EuiFlexItem>
 </Styled(EuiFlexGroup)>
 `;
@@ -141,43 +109,11 @@ exports[`MonitorListStatusColumn provides expected tooltip and display times 1`]
   <EuiFlexItem
     grow={2}
   >
-    <EuiHideFor
-      sizes={
-        Array [
-          "m",
-        ]
-      }
+    <EuiText
+      size="s"
     >
-      <EuiText
-        size="s"
-      >
-        in 0/0 Location
-      </EuiText>
-    </EuiHideFor>
-    <EuiShowFor
-      sizes={
-        Array [
-          "m",
-        ]
-      }
-    >
-      <EuiText
-        size="s"
-      >
-        <FormattedMessage
-          defaultMessage="in {noLoc} {icon}"
-          id="xpack.uptime.monitorList.statusColumn.locStatusMessage.icon"
-          values={
-            Object {
-              "icon": <EuiIcon
-                type="visMapCoordinate"
-              />,
-              "noLoc": "0/0",
-            }
-          }
-        />
-      </EuiText>
-    </EuiShowFor>
+      in 0/0 Location
+    </EuiText>
   </EuiFlexItem>
 </Styled(EuiFlexGroup)>
 `;
@@ -232,43 +168,11 @@ exports[`MonitorListStatusColumn will display location status 1`] = `
   <EuiFlexItem
     grow={2}
   >
-    <EuiHideFor
-      sizes={
-        Array [
-          "m",
-        ]
-      }
+    <EuiText
+      size="s"
     >
-      <EuiText
-        size="s"
-      >
-        in 1/3 Locations
-      </EuiText>
-    </EuiHideFor>
-    <EuiShowFor
-      sizes={
-        Array [
-          "m",
-        ]
-      }
-    >
-      <EuiText
-        size="s"
-      >
-        <FormattedMessage
-          defaultMessage="in {noLoc} {icon}"
-          id="xpack.uptime.monitorList.statusColumn.locStatusMessage.icon"
-          values={
-            Object {
-              "icon": <EuiIcon
-                type="visMapCoordinate"
-              />,
-              "noLoc": "1/3",
-            }
-          }
-        />
-      </EuiText>
-    </EuiShowFor>
+      in 1/3 Locations
+    </EuiText>
   </EuiFlexItem>
 </Styled(EuiFlexGroup)>
 `;
@@ -341,24 +245,9 @@ exports[`MonitorListStatusColumn will render display location status 1`] = `
     class="euiFlexItem euiFlexItem--flexGrow2"
   >
     <div
-      class="euiText euiText--small eui-hideFor--m"
+      class="euiText euiText--small"
     >
       in 1/3 Locations
-    </div>
-    <div
-      class="euiText euiText--small eui-showFor--m"
-    >
-      in 1/3 
-      <svg
-        aria-hidden="true"
-        class="euiIcon euiIcon--medium euiIcon-isLoading"
-        focusable="false"
-        height="16"
-        role="img"
-        viewBox="0 0 16 16"
-        width="16"
-        xmlns="http://www.w3.org/2000/svg"
-      />
     </div>
   </div>
 </div>

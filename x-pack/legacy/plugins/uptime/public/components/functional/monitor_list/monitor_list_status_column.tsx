@@ -7,19 +7,9 @@
 import React from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { capitalize } from 'lodash';
 import styled from 'styled-components';
-import {
-  EuiHealth,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiToolTip,
-  EuiHideFor,
-  EuiShowFor,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { parseTimestamp } from './parse_timestamp';
 import { Check } from '../../../../common/graphql/types';
 import {
@@ -85,7 +75,7 @@ const getRelativeShortTimeStamp = (timeStamp: any) => {
   return shortTimestamp;
 };
 
-export const getLocationStatus = (checks: Check[], status: string, showIcon = false) => {
+export const getLocationStatus = (checks: Check[], status: string) => {
   const upChecks: Set<string> = new Set();
   const downChecks: Set<string> = new Set();
 
@@ -108,16 +98,6 @@ export const getLocationStatus = (checks: Check[], status: string, showIcon = fa
     statusMessage = `${downChecks.size}/${totalLocations}`;
   } else {
     statusMessage = `${absUpChecks.size}/${totalLocations}`;
-  }
-
-  if (showIcon) {
-    return (
-      <FormattedMessage
-        id="xpack.uptime.monitorList.statusColumn.locStatusMessage.icon"
-        defaultMessage="in {noLoc} {icon}"
-        values={{ noLoc: statusMessage, icon: <EuiIcon type={'visMapCoordinate'} /> }}
-      />
-    );
   }
 
   if (totalLocations > 1) {
@@ -160,12 +140,7 @@ export const MonitorListStatusColumn = ({
         </PaddedSpan>
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <EuiHideFor sizes={['m']}>
-          <EuiText size="s">{getLocationStatus(checks, status)}</EuiText>
-        </EuiHideFor>
-        <EuiShowFor sizes={['m']}>
-          <EuiText size="s">{getLocationStatus(checks, status, true)}</EuiText>
-        </EuiShowFor>
+        <EuiText size="s">{getLocationStatus(checks, status)}</EuiText>
       </EuiFlexItem>
     </StatusColumnFlexG>
   );
