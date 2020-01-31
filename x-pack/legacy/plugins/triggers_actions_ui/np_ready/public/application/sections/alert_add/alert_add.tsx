@@ -49,7 +49,7 @@ import {
   ActionConnector,
 } from '../../../types';
 import { ACTION_GROUPS } from '../../constants/action_groups';
-import { getTimeOptions } from '../../lib/get_time_options';
+import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { SectionLoading } from '../../components/section_loading';
 
 interface Props {

@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TIME_UNITS } from '../constants';
+import { TIME_UNITS } from '../../application/constants';
 
 export function getTimeUnitLabel(timeUnit = TIME_UNITS.SECOND, timeValue = '0') {
   switch (timeUnit) {

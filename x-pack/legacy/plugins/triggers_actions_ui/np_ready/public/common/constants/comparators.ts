@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const COMPARATORS: { [key: string]: string } = {
-  GREATER_THAN: '>',
-  GREATER_THAN_OR_EQUALS: '>=',
-  BETWEEN: 'between',
-  LESS_THAN: '<',
-  LESS_THAN_OR_EQUALS: '<=',
-};
+export enum COMPARATORS {
+  GREATER_THAN = '>',
+  GREATER_THAN_OR_EQUALS = '>=',
+  BETWEEN = 'between',
+  LESS_THAN = '<',
+  LESS_THAN_OR_EQUALS = '<=',
+}
