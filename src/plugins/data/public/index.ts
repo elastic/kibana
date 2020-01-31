@@ -20,7 +20,6 @@
 import './_index.scss';
 
 import { PluginInitializerContext } from '../../../core/public';
-import * as autocomplete from './autocomplete';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataPublicPlugin(initializerContext);
@@ -46,7 +45,7 @@ export {
   RefreshInterval,
   TimeRange,
 } from '../common';
-
+export { autocomplete } from './autocomplete';
 export * from './field_formats';
 export * from './index_patterns';
 export * from './search';
@@ -72,5 +71,3 @@ export {
 // Export plugin after all other imports
 import { DataPublicPlugin } from './plugin';
 export { DataPublicPlugin as Plugin };
-
-export { autocomplete };

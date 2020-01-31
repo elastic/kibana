@@ -8,7 +8,7 @@ New Platform plugins with `"ui": true` in their `kibana.json` file will have the
 
 The [Webpack config][WebpackConfig] is designed to provide the majority of what was available in the legacy optimizer and is the same for all plugins to promote consistency and keep things sane for the operations team. It has support for JS/TS built with babel, url imports of image and font files, and support for importing `scss` and `css` files. SCSS is pre-processed by [postcss][PostCss], built for both light and dark mode and injected automatically into the page when the parent module is loaded (page reloads are still required for switching between light/dark mode). CSS is injected into the DOM as it is written on disk when the parent module is loaded (no postcss support).
 
-Source maps are enabled execpt when building the distributable. They show the code actually being executed by the browser to strike a balance between debuggability and performance. They are not configurable at this time but will be configurable once we have a developer configuration solution that doesn't rely on the server (see [#55656](https://github.com/elastic/kibana/issues/55656)).
+Source maps are enabled except when building the distributable. They show the code actually being executed by the browser to strike a balance between debuggability and performance. They are not configurable at this time but will be configurable once we have a developer configuration solution that doesn't rely on the server (see [#55656](https://github.com/elastic/kibana/issues/55656)).
 
 ### IE Support
 

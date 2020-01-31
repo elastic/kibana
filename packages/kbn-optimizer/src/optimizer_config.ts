@@ -48,7 +48,7 @@ interface Options {
   examples?: boolean;
   /** absolute paths to specific plugins that should be built */
   pluginPaths?: string[];
-  /** absolute paths to directories that should be built, overrides the default scan dires */
+  /** absolute paths to directories that should be built, overrides the default scan dirs */
   pluginScanDirs?: string[];
   /** absolute paths that should be added to the default scan dirs */
   extraPluginScanDirs?: string[];
