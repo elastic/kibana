@@ -13,14 +13,16 @@ const NoWriteSignalsCallOutComponent = () => {
   const [showCallOut, setShowCallOut] = useState(true);
   const handleCallOut = useCallback(() => setShowCallOut(false), [setShowCallOut]);
 
-  return showCallOut ? (
-    <EuiCallOut title={i18n.NO_WRITE_SIGNALS_CALLOUT_TITLE} color="warning" iconType="alert">
-      <p>{i18n.NO_WRITE_SIGNALS_CALLOUT_MSG}</p>
-      <EuiButton color="warning" onClick={handleCallOut}>
-        {i18n.DISMISS_CALLOUT}
-      </EuiButton>
-    </EuiCallOut>
-  ) : null;
+  return (
+    showCallOut && (
+      <EuiCallOut title={i18n.NO_WRITE_SIGNALS_CALLOUT_TITLE} color="warning" iconType="alert">
+        <p>{i18n.NO_WRITE_SIGNALS_CALLOUT_MSG}</p>
+        <EuiButton color="warning" onClick={handleCallOut}>
+          {i18n.DISMISS_CALLOUT}
+        </EuiButton>
+      </EuiCallOut>
+    )
+  );
 };
 
 export const NoWriteSignalsCallOut = memo(NoWriteSignalsCallOutComponent);

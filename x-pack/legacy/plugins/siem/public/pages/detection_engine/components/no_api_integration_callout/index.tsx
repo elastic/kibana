@@ -13,14 +13,16 @@ const NoApiIntegrationKeyCallOutComponent = () => {
   const [showCallOut, setShowCallOut] = useState(true);
   const handleCallOut = useCallback(() => setShowCallOut(false), [setShowCallOut]);
 
-  return showCallOut ? (
-    <EuiCallOut title={i18n.NO_API_INTEGRATION_KEY_CALLOUT_TITLE} color="danger" iconType="alert">
-      <p>{i18n.NO_API_INTEGRATION_KEY_CALLOUT_MSG}</p>
-      <EuiButton color="danger" onClick={handleCallOut}>
-        {i18n.DISMISS_CALLOUT}
-      </EuiButton>
-    </EuiCallOut>
-  ) : null;
+  return (
+    showCallOut && (
+      <EuiCallOut title={i18n.NO_API_INTEGRATION_KEY_CALLOUT_TITLE} color="danger" iconType="alert">
+        <p>{i18n.NO_API_INTEGRATION_KEY_CALLOUT_MSG}</p>
+        <EuiButton color="danger" onClick={handleCallOut}>
+          {i18n.DISMISS_CALLOUT}
+        </EuiButton>
+      </EuiCallOut>
+    )
+  );
 };
 
 export const NoApiIntegrationKeyCallOut = memo(NoApiIntegrationKeyCallOutComponent);

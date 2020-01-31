@@ -58,7 +58,7 @@ export type Action =
       isAuthenticated: boolean | null;
     }
   | {
-      type: 'updatehasEncryptionKey';
+      type: 'updateHasEncryptionKey';
       hasEncryptionKey: boolean | null;
     }
   | {
@@ -108,7 +108,7 @@ export const userInfoReducer = (state: State, action: Action): State => {
         isAuthenticated: action.isAuthenticated,
       };
     }
-    case 'updatehasEncryptionKey': {
+    case 'updateHasEncryptionKey': {
       return {
         ...state,
         hasEncryptionKey: action.hasEncryptionKey,
@@ -221,7 +221,7 @@ export const useUserInfo = (): State => {
 
   useEffect(() => {
     if (!loading && hasEncryptionKey !== isApiEncryptionKey && isApiEncryptionKey != null) {
-      dispatch({ type: 'updatehasEncryptionKey', hasEncryptionKey: isApiEncryptionKey });
+      dispatch({ type: 'updateHasEncryptionKey', hasEncryptionKey: isApiEncryptionKey });
     }
   }, [loading, hasEncryptionKey, isApiEncryptionKey]);
 

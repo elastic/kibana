@@ -23,9 +23,6 @@ export const encryptedSavedObjects = (kibana: {
     config: (Joi: Root) =>
       Joi.object({
         enabled: Joi.boolean().default(true),
-        encryptionKey: Joi.any().description(
-          'This key is handled in the new platform security plugin ONLY'
-        ),
       })
         .unknown(true)
         .default(),
