@@ -74,7 +74,6 @@ export function getOrdinalColorRampStops(
   if (!colorRampName) {
     return null;
   }
-  console.log('so', scale, offset);
   return getHexColorRangeStrings(colorRampName, numberColors).reduce(
     (accu, stopColor, idx, srcArr) => {
       const stopNumber = offset + ((idx * scale) / srcArr.length); // number between 0 and 1, increasing as index increases

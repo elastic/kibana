@@ -10,18 +10,15 @@ import _ from 'lodash';
 import { FEATURE_ID_PROPERTY_NAME, MVT_SOURCE_ID } from '../../common/constants';
 
 export async function getTile({
-  esClient,
   server,
+  request,
   indexPattern,
-  size,
   geometryFieldName,
   x,
   y,
   z,
-  fields = [],
   requestBody = {},
 }) {
-  // server.log('info', { indexPattern, size, geometryFieldName, x, y, z, fields });
   const polygon = toBoundingBox(x, y, z);
 
   try {
@@ -42,16 +39,16 @@ export async function getTile({
         index: indexPattern,
         body: requestBody,
       };
-      server.log('info', JSON.stringify(esQuery));
-      result = await esClient.search(esQuery);
-      server.log('result', JSON.stringify(result));
+
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+      result = await callWithRequest(request, 'search', esQuery);
     } catch (e) {
-      server.log('error', e.message);
+      server.log('info', e.message);
       throw e;
     }
 
-    server.log('info', `result length ${result.body.hits.hits.length}`);
-    const feats = result.body.hits.hits.map(hit => {
+    server.log('info', `result length ${result.hits.hits.length}`);
+    const feats = result.hits.hits.map(hit => {
       let geomType;
       const geometry = hit._source[geometryFieldName];
       if (geometry.type === 'polygon' || geometry.type === 'Polygon') {
@@ -139,10 +136,9 @@ export async function getTile({
 }
 
 export async function getGridTile({
-  esClient,
   server,
+  request,
   indexPattern,
-  size,
   geometryFieldName,
   x,
   y,
@@ -172,14 +168,15 @@ export async function getGridTile({
         body: requestBody,
       };
       server.log('info', JSON.stringify(esQuery));
-      result = await esClient.search(esQuery);
-      server.log('result', JSON.stringify(result));
+
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+      result = await callWithRequest(request, 'search', esQuery);
+      server.log('grid result', JSON.stringify(result));
     } catch (e) {
       server.log('error', e.message);
       throw e;
     }
 
-    server.log('info', `result length ${result.body.hits.hits.length}`);
 
     const ffeats = [];
 

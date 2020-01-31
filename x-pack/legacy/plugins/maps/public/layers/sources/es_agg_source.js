@@ -99,7 +99,9 @@ export class AbstractESAggSource extends AbstractESSource {
   }
 
   createMetricAggConfigs() {
-    return this.getMetricFields().map(esAggMetric => esAggMetric.makeMetricAggConfig());
+    const mf = this.getMetricFields().map(esAggMetric => esAggMetric.makeMetricAggConfig());
+
+    return mf;
   }
 
   async getNumberFields() {

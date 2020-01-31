@@ -4,19 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  GIS_API_PATH,
-  MVT_GETTILE_API_PATH,
-  MVT_GETGRIDTILE_API_PATH,
-} from '../common/constants';
-import { Client } from '@elastic/elasticsearch';
-import { getTile } from './mvt/get_tile';
+import { GIS_API_PATH, MVT_GETTILE_API_PATH, MVT_GETGRIDTILE_API_PATH } from '../common/constants';
+import { getTile, getGridTile } from './mvt/get_tile';
 import rison from 'rison-node';
 
 const ROOT = `/${GIS_API_PATH}`;
 
 export function initMVTRoutes(server) {
-  const esClient = new Client({ node: 'http://elastic:changeme@localhost:9200' });
 
   server.route({
     method: 'GET',
@@ -25,7 +19,6 @@ export function initMVTRoutes(server) {
       const { server, query } = request;
 
       const indexPattern = query.indexPattern;
-
 
       const x = parseInt(query.x);
       const y = parseInt(query.y);
@@ -39,7 +32,7 @@ export function initMVTRoutes(server) {
       // server.log('info',requestBodyDSL);
       const tile = await getTile({
         server,
-        esClient,
+        request,
         size,
         geometryFieldName,
         fields,
@@ -47,7 +40,7 @@ export function initMVTRoutes(server) {
         y,
         z,
         indexPattern,
-        requestBody: requestBodyDSL
+        requestBody: requestBodyDSL,
       });
 
       // server.log('info', tile);
@@ -62,9 +55,6 @@ export function initMVTRoutes(server) {
       response = response.encoding('binary');
 
       return response;
-      // return {
-      //   q: request.query,
-      // };
     },
   });
 
@@ -75,7 +65,6 @@ export function initMVTRoutes(server) {
       const { server, query } = request;
 
       const indexPattern = query.indexPattern;
-
 
       const x = parseInt(query.x);
       const y = parseInt(query.y);
@@ -89,7 +78,7 @@ export function initMVTRoutes(server) {
       // server.log('info',requestBodyDSL);
       const tile = await getGridTile({
         server,
-        esClient,
+        request,
         size,
         geometryFieldName,
         fields,
@@ -97,9 +86,8 @@ export function initMVTRoutes(server) {
         y,
         z,
         indexPattern,
-        requestBody: requestBodyDSL
+        requestBody: requestBodyDSL,
       });
-
 
       if (!tile) {
         return null;

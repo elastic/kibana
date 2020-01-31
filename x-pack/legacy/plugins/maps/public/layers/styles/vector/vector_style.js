@@ -381,7 +381,6 @@ export class VectorStyle extends AbstractStyle {
 
     const data = styleMetaDataRequest.getData();
     const fieldMeta = dynamicProp.pluckStyleMetaFromFieldMetaData(data);
-    console.log('fm', fieldMeta);
     return fieldMeta ? fieldMeta : fieldMetaFromLocalFeatures;
   };
 

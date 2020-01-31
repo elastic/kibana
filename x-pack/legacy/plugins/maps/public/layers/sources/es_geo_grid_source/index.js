@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ESGeoGridSource } from './es_geo_grid_source';
+export { ESGeoGridSource, aggSchemas } from './es_geo_grid_source';

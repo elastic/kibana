@@ -37,7 +37,7 @@ import { StaticStyleProperty } from '../../styles/vector/properties/static_style
 
 const MAX_GEOTILE_LEVEL = 29;
 
-const aggSchemas = new Schemas([
+export const aggSchemas = new Schemas([
   AbstractESAggSource.METRIC_SCHEMA_CONFIG,
   {
     group: 'buckets',

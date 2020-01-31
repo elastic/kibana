@@ -49,7 +49,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
   syncFillColorWithMb(mbLayerId, mbMap, alpha) {
     const color = this._getMbColor();
-    console.log('color ul', color);
     mbMap.setPaintProperty(mbLayerId, 'fill-color', color);
     mbMap.setPaintProperty(mbLayerId, 'fill-opacity', alpha);
   }
@@ -136,13 +135,11 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
       const fieldMeta = this._getFieldMeta(fieldName);
       if (!fieldMeta) {
-        console.log('no field meta');
         return null;
       }
 
 
       colorStops = this._getMbOrdinalColorStops((fieldMeta.max - fieldMeta.min), fieldMeta.min);
-      console.log('cs', colorStops);
       getFunction = 'get';
       propFieldName = fieldName;
     } else {
@@ -151,7 +148,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       propFieldName = targetName;
     }
 
-    console.log('cs', colorStops);
 
     if (!colorStops) {
       return null;

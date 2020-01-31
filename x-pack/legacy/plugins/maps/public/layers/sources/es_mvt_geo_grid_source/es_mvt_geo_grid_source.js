@@ -5,11 +5,17 @@
  */
 
 import { ESSearchSource } from '../es_search_source';
+import { AggConfigs, Schemas } from 'ui/agg_types';
 import {
   ES_MVT_SEARCH,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
-  ES_GEO_FIELD_TYPE, ES_MVT_GEO_GRID, COUNT_PROP_NAME, SOURCE_DATA_ID_ORIGIN, COLOR_MAP_TYPE, MVT_SOURCE_ID,
+  ES_GEO_FIELD_TYPE,
+  ES_MVT_GEO_GRID,
+  COUNT_PROP_NAME,
+  SOURCE_DATA_ID_ORIGIN,
+  COLOR_MAP_TYPE,
+  MVT_SOURCE_ID, MVT_GETGRIDTILE_API_PATH,
 } from '../../../../common/constants';
 import { TiledVectorLayer } from '../../tiled_vector_layer';
 import uuid from 'uuid/v4';
@@ -19,16 +25,19 @@ import { i18n } from '@kbn/i18n';
 import { loadIndexSettings } from '../es_search_source/load_index_settings';
 import rison from 'rison-node';
 import { UpdateSourceEditor } from '../es_geo_grid_source/update_source_editor';
-import {ESGeoGridSource} from "../es_geo_grid_source";
-import {GRID_RESOLUTION} from "../../grid_resolution";
-import {RENDER_AS} from "../es_geo_grid_source/render_as";
-import {HeatmapLayer} from "../../heatmap_layer";
-import {VectorStyle} from "../../styles/vector/vector_style";
-import {VectorLayer} from "../../vector_layer";
-import {getDefaultDynamicProperties, VECTOR_STYLES} from "../../styles/vector/vector_style_defaults";
-import {DynamicStyleProperty} from "../../styles/vector/properties/dynamic_style_property";
-import {COLOR_GRADIENTS} from "../../styles/color_utils";
-import {StaticStyleProperty} from "../../styles/vector/properties/static_style_property";
+import { ESGeoGridSource, aggSchemas } from '../es_geo_grid_source';
+import { GRID_RESOLUTION } from '../../grid_resolution';
+import { RENDER_AS } from '../es_geo_grid_source/render_as';
+import { HeatmapLayer } from '../../heatmap_layer';
+import { VectorStyle } from '../../styles/vector/vector_style';
+import { VectorLayer } from '../../vector_layer';
+import {
+  getDefaultDynamicProperties,
+  VECTOR_STYLES,
+} from '../../styles/vector/vector_style_defaults';
+import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import { COLOR_GRADIENTS } from '../../styles/color_utils';
+import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';
 
 export class ESMVTGeoGridSource extends ESGeoGridSource {
   static type = ES_MVT_GEO_GRID;
@@ -63,12 +72,60 @@ export class ESMVTGeoGridSource extends ESGeoGridSource {
       onPreviewSource(source);
     };
 
-    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} clustersOnly={true}/>;;
+    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} clustersOnly={true} />;
+  }
+
+  _makeAggConfigs(precision) {
+    const metricAggConfigs = this.createMetricAggConfigs();
+    return [
+      ...metricAggConfigs,
+      {
+        id: 'grid',
+        enabled: true,
+        type: 'geotile_grid',
+        schema: 'segment',
+        params: {
+          field: this._descriptor.geoField,
+          useGeocentroid: true,
+          precision: precision,
+        },
+      },
+    ];
+  }
+
+  async _makeSearchSourceWithAggConfigs(searchFilters) {
+    const indexPattern = await this.getIndexPattern();
+    const searchSource = await this._makeSearchSource(searchFilters, 0);
+    const aggConfigs = new AggConfigs(
+      indexPattern,
+      this._makeAggConfigs(searchFilters.geogridPrecision),
+      aggSchemas.all
+    );
+    searchSource.setField('aggs', aggConfigs.toDsl());
+    return { searchSource, aggConfigs };
   }
 
   async getUrlTemplate(searchFilters) {
     console.log('should get url template for sf', searchFilters);
-    return null;
+
+    const indexPattern = await this.getIndexPattern();
+
+    const geoField = await this._getGeoField();
+
+    const { searchSource, aggConfigs } = await this._makeSearchSourceWithAggConfigs(searchFilters);
+
+    console.log(searchSource);
+
+    const dsl = await searchSource.getSearchRequestBody();
+    console.log('dsl', dsl);
+    const risonDsl = rison.encode(dsl);
+    console.log('r', risonDsl);
+
+
+    const ipTitle = indexPattern.title;
+
+
+    return `../${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}?x={x}&y={y}&z={z}&indexPattern=${ipTitle}&requestBody=${risonDsl}`;
   }
 
   getMvtSourceLayer() {
