@@ -133,6 +133,9 @@ export const NewsfeedNavButton = ({
       if (instructions.length) {
         setShowPulseBadge(instructions.length > 0);
         setErrorsInstructionsToShow(instructions);
+      } else {
+        setShowPulseBadge(false);
+        setErrorsInstructionsToShow([]);
       }
       // updateRecordsToSeen(instructions); TODO: implement me
     }
@@ -141,7 +144,7 @@ export const NewsfeedNavButton = ({
         const newInstructions = instructions.filter(
           instruction =>
             // instruction.sendTo === 'newsfeed' && !fixedVersionsSeen.has(instruction.hash) --> removes these items from the list. We can still use the hash list to change the status of the messages shown in teh channel.
-            instruction.sendTo === 'newsfeed'
+            instruction.fixedVersion && instruction.status === 'new'
         );
         handleErrorsInstructionsChange(newInstructions);
       }

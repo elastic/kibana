@@ -34,17 +34,12 @@ export interface ErrorInstruction extends PulseInstruction {
   currentKibanaVersion: string;
   timestamp: Date;
   id: string;
-  pulseMessage: string;
-  sendTo: 'toasts' | 'newsfeed';
   fixedVersion?: string;
 }
 export interface Payload {
   deploymentId: string;
   records: Array<
-    Omit<
-      PulseErrorPayloadRecord,
-      'channel_id' | 'deployment_id' | 'fixedVersion' | 'sendTo' | 'pulseMessage' | 'seenOn'
-    >
+    Omit<PulseErrorPayloadRecord, 'channel_id' | 'deployment_id' | 'fixedVersion' | 'seenOn'>
   >;
 }
 export interface PulseErrorPayloadRecord {
@@ -152,7 +147,6 @@ export class Collector extends PulseCollector<Payload> {
     if (this.elasticsearch) {
       const results = await this.elasticsearch.search(this.channelName, {
         bool: {
-          should: [{ match: { status: 'new' } }],
           filter: {
             range: {
               timestamp: {

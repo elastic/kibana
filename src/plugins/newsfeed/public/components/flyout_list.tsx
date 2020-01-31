@@ -138,7 +138,7 @@ export const NewsfeedFlyout = ({
               <EuiHeaderAlert
                 key={index}
                 title={item.hash}
-                text={item.pulseMessage}
+                text={`The error ${item.hash} has been fixed in version ${item.fixedVersion}.`}
                 action={
                   <EuiLink target="_blank" href="#">
                     {item.fixedVersion}

@@ -46,15 +46,12 @@ export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseEr
             // see if the array actually contains a doc and isn't null
             if (instruction) {
               // No fixed versions yet: check specifically for toast notifications -> this will move to a switch later
-              if (
-                instruction.sendTo === 'toasts' &&
-                !this.noFxedVersionsSeen.has(instruction.hash)
-              ) {
+              if (!instruction.fixedVersion && !this.noFxedVersionsSeen.has(instruction.hash)) {
                 // show the instruction as a toast
                 core.notifications.toasts.addError(new Error(JSON.stringify(instruction)), {
                   // @ts-ignore-next-line
                   title: `Error:${instruction.hash}`,
-                  toastMessage: `An error occurred: ${instruction.message}. Pulse message:${instruction.pulseMessage}`,
+                  toastMessage: `An error occurred: ${instruction.message}. 'The error has been reported to Pulse`,
                 });
                 // add it to the 'seen' Set
                 this.noFxedVersionsSeen.add(instruction.hash);
