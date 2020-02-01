@@ -5,17 +5,19 @@
  */
 
 import * as i18n from '../translations';
+import { StartServices } from '../../plugin';
 import { parseJsonFromBody, ToasterErrors } from '../../components/ml/api/throw_if_not_ok';
 import { IndexPatternSavedObject, IndexPatternSavedObjectAttributes } from '../types';
-import { getServices } from '../../lib/kibana';
 
 /**
  * Fetches Configured Index Patterns from the Kibana saved objects API
  *
  * TODO: Refactor to context provider: https://github.com/elastic/siem-team/issues/448
  */
-export const getIndexPatterns = async (): Promise<IndexPatternSavedObject[]> => {
-  const response = await getServices().savedObjects.client.find<IndexPatternSavedObjectAttributes>({
+export const getIndexPatterns = async (
+  savedObjects: StartServices['savedObjects']
+): Promise<IndexPatternSavedObject[]> => {
+  const response = await savedObjects.client.find<IndexPatternSavedObjectAttributes>({
     type: 'index-pattern',
     fields: ['title'],
     perPage: 10000,
