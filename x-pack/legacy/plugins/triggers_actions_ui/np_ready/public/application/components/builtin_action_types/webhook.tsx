@@ -31,7 +31,7 @@ import {
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
-import { WebhookActionParams } from './types';
+import { WebhookActionParams, WebhookActionConnector } from './types';
 
 const HTTP_VERBS = ['post', 'put'];
 
@@ -45,7 +45,7 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send a request to a web service.',
       }
     ),
-    validateConnector: (action: ActionConnector): ValidationResult => {
+    validateConnector: (action: WebhookActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         url: new Array<string>(),
@@ -96,7 +96,7 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    validateParams: (actionParams: any): ValidationResult => {
+    validateParams: (actionParams: WebhookActionParams): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         body: new Array<string>(),
@@ -119,12 +119,9 @@ export function getActionType(): ActionTypeModel {
   };
 }
 
-const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  action,
-  editActionConfig,
-  editActionSecrets,
-  errors,
-}) => {
+const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  WebhookActionConnector
+>> = ({ action, editActionConfig, editActionSecrets, errors }) => {
   const [httpHeaderKey, setHttpHeaderKey] = useState<string>('');
   const [httpHeaderValue, setHttpHeaderValue] = useState<string>('');
   const [hasHeaders, setHasHeaders] = useState<boolean>(false);

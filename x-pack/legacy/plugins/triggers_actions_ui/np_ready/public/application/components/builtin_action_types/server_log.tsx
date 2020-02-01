@@ -36,7 +36,7 @@ export function getActionType(): ActionTypeModel {
     validateConnector: (): ValidationResult => {
       return { errors: {} };
     },
-    validateParams: (actionParams: any): ValidationResult => {
+    validateParams: (actionParams: ServerLogActionParams): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         message: new Array<string>(),

@@ -116,13 +116,15 @@ describe('alerts_list component empty', () => {
   });
 
   it('renders empty list', () => {
-    expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
-    expect(wrapper.find('EuiTableRow')).toHaveLength(1);
-    expect(wrapper.find('EuiTableRowCell')).toHaveLength(1);
+    expect(
+      wrapper.find('[data-test-subj="createFirstConnectorEmptyPrompt"]').exists()
+    ).toBeTruthy();
   });
 
   it('renders Create alert button', () => {
-    expect(wrapper.find('[data-test-subj="createAlertButton"]').find('EuiButton')).toHaveLength(1);
+    expect(
+      wrapper.find('[data-test-subj="createFirstActionButton"]').find('EuiButton')
+    ).toHaveLength(1);
     expect(wrapper.find('AlertAdd')).toHaveLength(1);
   });
 });

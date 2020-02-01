@@ -13,7 +13,7 @@ import {
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
-import { IndexActionParams } from './types';
+import { IndexActionParams, EsIndexActionConnector } from './types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -36,10 +36,9 @@ export function getActionType(): ActionTypeModel {
   };
 }
 
-const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  action,
-  editActionConfig,
-}) => {
+const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  EsIndexActionConnector
+>> = ({ action, editActionConfig }) => {
   const { index } = action.config;
   return (
     <EuiFormRow

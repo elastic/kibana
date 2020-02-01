@@ -8,7 +8,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
 import { ActionTypeModel, ActionConnector, ActionParamsProps } from '../../../types';
-import { WebhookActionParams } from './types';
+import { WebhookActionParams, WebhookActionConnector } from './types';
 
 const ACTION_TYPE_ID = '.webhook';
 let actionTypeModel: ActionTypeModel;
@@ -42,9 +42,9 @@ describe('webhook connector validation', () => {
       config: {
         method: 'PUT',
         url: 'http:\\test',
-        headers: ['content-type: text'],
+        headers: { 'content-type': 'text' },
       },
-    } as ActionConnector;
+    } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
@@ -67,7 +67,7 @@ describe('webhook connector validation', () => {
       config: {
         method: 'PUT',
       },
-    } as ActionConnector;
+    } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
@@ -110,9 +110,9 @@ describe('WebhookActionConnectorFields renders', () => {
       config: {
         method: 'PUT',
         url: 'http:\\test',
-        headers: ['content-type: text'],
+        headers: { 'content-type': 'text' },
       },
-    } as ActionConnector;
+    } as WebhookActionConnector;
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}

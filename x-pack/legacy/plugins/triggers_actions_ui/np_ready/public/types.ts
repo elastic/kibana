@@ -20,8 +20,8 @@ export type AlertTypeIndex = Record<string, AlertType>;
 export type ActionTypeRegistryContract = PublicMethodsOf<TypeRegistry<ActionTypeModel>>;
 export type AlertTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
 
-export interface ActionConnectorFieldsProps {
-  action: ActionConnector;
+export interface ActionConnectorFieldsProps<TActionCOnnector> {
+  action: TActionCOnnector;
   editActionConfig: (property: string, value: any) => void;
   editActionSecrets: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
@@ -46,9 +46,9 @@ export interface ActionTypeModel {
   iconClass: string;
   selectMessage: string;
   actionTypeTitle?: string;
-  validateConnector: (action: ActionConnector) => ValidationResult;
+  validateConnector: (connector: any) => ValidationResult;
   validateParams: (actionParams: any) => ValidationResult;
-  actionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> | null;
+  actionConnectorFields: React.FunctionComponent<any> | null;
   actionParamsFields:
     | React.FunctionComponent<ActionParamsProps<EmailActionParams>>
     | React.FunctionComponent<ActionParamsProps<IndexActionParams>>

@@ -7,8 +7,8 @@ import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector, ActionParamsProps } from '../../../types';
-import { EmailActionParams } from './types';
+import { ActionTypeModel, ActionParamsProps } from '../../../types';
+import { EmailActionParams, EmailActionConnector } from './types';
 
 const ACTION_TYPE_ID = '.email';
 let actionTypeModel: ActionTypeModel;
@@ -41,43 +41,15 @@ describe('connector validation', () => {
       name: 'email',
       config: {
         from: 'test@test.com',
-        port: '2323',
+        port: 2323,
         host: 'localhost',
         test: 'test',
       },
-    } as ActionConnector;
+    } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
         from: [],
-        service: [],
-        port: [],
-        host: [],
-        user: [],
-        password: [],
-      },
-    });
-
-    delete actionConnector.config.test;
-    actionConnector.config.host = 'elastic.co';
-    actionConnector.config.port = 8080;
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        service: [],
-        port: [],
-        host: [],
-        user: [],
-        password: [],
-      },
-    });
-    delete actionConnector.config.host;
-    delete actionConnector.config.port;
-    actionConnector.config.service = 'testService';
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        service: [],
         port: [],
         host: [],
         user: [],
@@ -98,12 +70,11 @@ describe('connector validation', () => {
       config: {
         from: 'test@test.com',
       },
-    } as ActionConnector;
+    } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
         from: [],
-        service: ['Service is required.'],
         port: ['Port is required.'],
         host: ['Host is required.'],
         user: [],
@@ -169,11 +140,11 @@ describe('EmailActionConnectorFields renders', () => {
       config: {
         from: 'test@test.com',
       },
-    } as ActionConnector;
+    } as EmailActionConnector;
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}
-        errors={{ from: [], service: [], port: [], host: [], user: [], password: [] }}
+        errors={{ from: [], port: [], host: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
       />

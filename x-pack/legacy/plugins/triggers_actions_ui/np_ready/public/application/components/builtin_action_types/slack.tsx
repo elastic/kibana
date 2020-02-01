@@ -19,11 +19,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
-  ActionConnector,
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
-import { SlackActionParams } from './types';
+import { SlackActionParams, SlackActionConnector } from './types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -41,7 +40,7 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send to Slack',
       }
     ),
-    validateConnector: (action: ActionConnector): ValidationResult => {
+    validateConnector: (action: SlackActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         webhookUrl: new Array<string>(),
@@ -59,7 +58,7 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    validateParams: (actionParams: any): ValidationResult => {
+    validateParams: (actionParams: SlackActionParams): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         message: new Array<string>(),
@@ -82,11 +81,9 @@ export function getActionType(): ActionTypeModel {
   };
 }
 
-const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  action,
-  editActionSecrets,
-  errors,
-}) => {
+const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  SlackActionConnector
+>> = ({ action, editActionSecrets, errors }) => {
   const { webhookUrl } = action.secrets;
 
   return (

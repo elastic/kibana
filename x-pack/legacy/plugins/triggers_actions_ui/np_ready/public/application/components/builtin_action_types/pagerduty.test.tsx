@@ -7,8 +7,13 @@ import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector, ActionParamsProps } from '../../../types';
-import { PagerDutyActionParams, EventActionOptions, SeverityActionOptions } from './types';
+import { ActionTypeModel, ActionParamsProps } from '../../../types';
+import {
+  PagerDutyActionParams,
+  EventActionOptions,
+  SeverityActionOptions,
+  PagerDutyActionConnector,
+} from './types';
 
 const ACTION_TYPE_ID = '.pagerduty';
 let actionTypeModel: ActionTypeModel;
@@ -41,7 +46,7 @@ describe('pagerduty connector validation', () => {
       config: {
         apiUrl: 'http:\\test',
       },
-    } as ActionConnector;
+    } as PagerDutyActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
@@ -67,7 +72,7 @@ describe('pagerduty connector validation', () => {
       config: {
         apiUrl: 'http:\\test',
       },
-    } as ActionConnector;
+    } as PagerDutyActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
@@ -116,7 +121,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
       config: {
         apiUrl: 'http:\\test',
       },
-    } as ActionConnector;
+    } as PagerDutyActionConnector;
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}

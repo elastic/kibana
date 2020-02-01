@@ -7,8 +7,8 @@ import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector, ActionParamsProps } from '../../../types';
-import { SlackActionParams } from './types';
+import { ActionTypeModel, ActionParamsProps } from '../../../types';
+import { SlackActionParams, SlackActionConnector } from './types';
 
 const ACTION_TYPE_ID = '.slack';
 let actionTypeModel: ActionTypeModel;
@@ -39,7 +39,7 @@ describe('slack connector validation', () => {
       actionTypeId: '.email',
       name: 'email',
       config: {},
-    } as ActionConnector;
+    } as SlackActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
@@ -55,7 +55,7 @@ describe('slack connector validation', () => {
       actionTypeId: '.email',
       name: 'email',
       config: {},
-    } as ActionConnector;
+    } as SlackActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
@@ -92,7 +92,7 @@ describe('SlackActionFields renders', () => {
       actionTypeId: '.email',
       name: 'email',
       config: {},
-    } as ActionConnector;
+    } as SlackActionConnector;
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}

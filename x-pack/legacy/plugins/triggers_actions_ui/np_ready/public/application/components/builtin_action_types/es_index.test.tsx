@@ -7,8 +7,8 @@ import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector, ActionParamsProps } from '../../../types';
-import { IndexActionParams } from './types';
+import { ActionTypeModel, ActionParamsProps } from '../../../types';
+import { IndexActionParams, EsIndexActionConnector } from './types';
 
 const ACTION_TYPE_ID = '.index';
 let actionTypeModel: ActionTypeModel;
@@ -39,7 +39,7 @@ describe('index connector validation', () => {
       config: {
         index: 'test_es_index',
       },
-    } as ActionConnector;
+    } as EsIndexActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {},
@@ -88,7 +88,7 @@ describe('IndexActionConnectorFields renders', () => {
       config: {
         index: 'test',
       },
-    } as ActionConnector;
+    } as EsIndexActionConnector;
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}

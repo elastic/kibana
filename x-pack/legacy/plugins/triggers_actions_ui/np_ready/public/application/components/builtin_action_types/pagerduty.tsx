@@ -17,11 +17,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
-  ActionConnector,
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
-import { PagerDutyActionParams } from './types';
+import { PagerDutyActionParams, PagerDutyActionConnector } from './types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -39,7 +38,7 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send to PagerDuty',
       }
     ),
-    validateConnector: (action: ActionConnector): ValidationResult => {
+    validateConnector: (action: PagerDutyActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         routingKey: new Array<string>(),
@@ -80,12 +79,9 @@ export function getActionType(): ActionTypeModel {
   };
 }
 
-const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  errors,
-  action,
-  editActionConfig,
-  editActionSecrets,
-}) => {
+const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  PagerDutyActionConnector
+>> = ({ errors, action, editActionConfig, editActionSecrets }) => {
   const { apiUrl } = action.config;
   const { routingKey } = action.secrets;
   return (

@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ActionConnector } from '../../../types';
 
 export interface EmailActionParams {
   to: string[];
@@ -64,4 +65,66 @@ export interface SlackActionParams {
 
 export interface WebhookActionParams {
   body?: string;
+}
+
+interface EmailConfig {
+  from: string;
+  host: string;
+  port: number;
+  secure?: boolean;
+}
+
+interface EmailSecrets {
+  user: string;
+  password: string;
+}
+
+export interface EmailActionConnector extends ActionConnector {
+  config: EmailConfig;
+  secrets: EmailSecrets;
+}
+
+interface EsIndexConfig {
+  index?: string;
+}
+
+export interface EsIndexActionConnector extends ActionConnector {
+  config: EsIndexConfig;
+}
+
+interface PagerDutyConfig {
+  apiUrl?: string;
+}
+
+interface PagerDutySecrets {
+  routingKey: string;
+}
+
+export interface PagerDutyActionConnector extends ActionConnector {
+  config: PagerDutyConfig;
+  secrets: PagerDutySecrets;
+}
+
+interface SlackSecrets {
+  webhookUrl: string;
+}
+
+export interface SlackActionConnector extends ActionConnector {
+  secrets: SlackSecrets;
+}
+
+interface WebhookConfig {
+  method: string;
+  url: string;
+  headers: Record<string, string>;
+}
+
+interface WebhookSecrets {
+  user: string;
+  password: string;
+}
+
+export interface WebhookActionConnector extends ActionConnector {
+  config: WebhookConfig;
+  secrets: WebhookSecrets;
 }

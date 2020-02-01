@@ -25,11 +25,10 @@ import { i18n } from '@kbn/i18n';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
-  ActionConnector,
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
-import { EmailActionParams } from './types';
+import { EmailActionParams, EmailActionConnector } from './types';
 
 export function getActionType(): ActionTypeModel {
   const mailformat = /^[^@\s]+@[^@\s]+$/;
@@ -48,11 +47,10 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send to email',
       }
     ),
-    validateConnector: (action: ActionConnector): ValidationResult => {
+    validateConnector: (action: EmailActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         from: new Array<string>(),
-        service: new Array<string>(),
         port: new Array<string>(),
         host: new Array<string>(),
         user: new Array<string>(),
@@ -79,7 +77,7 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
-      if (!action.config.port && !action.config.service) {
+      if (!action.config.port) {
         errors.port.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPortText',
@@ -89,17 +87,7 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
-      if (!action.config.service && (!action.config.port || !action.config.host)) {
-        errors.service.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredServiceText',
-            {
-              defaultMessage: 'Service is required.',
-            }
-          )
-        );
-      }
-      if (!action.config.host && !action.config.service) {
+      if (!action.config.host) {
         errors.host.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredHostText',
@@ -183,12 +171,9 @@ export function getActionType(): ActionTypeModel {
   };
 }
 
-const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  action,
-  editActionConfig,
-  editActionSecrets,
-  errors,
-}) => {
+const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  EmailActionConnector
+>> = ({ action, editActionConfig, editActionSecrets, errors }) => {
   const { from, host, port, secure } = action.config;
   const { user, password } = action.secrets;
 
@@ -278,7 +263,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                   isInvalid={errors.port.length > 0 && port !== undefined}
                   fullWidth
                   name="port"
-                  value={port || ''}
+                  value={port}
                   data-test-subj="emailPortInput"
                   onChange={e => {
                     editActionConfig('port', parseInt(e.target.value, 10));
