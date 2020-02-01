@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Breadcrumb } from 'ui/chrome';
 import { isEmpty } from 'lodash/fp';
 
+import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import {
   getDetectionEngineUrl,
   getDetectionEngineTabUrl,
@@ -50,7 +50,7 @@ const isRuleCreatePage = (pathname: string) =>
 const isRuleEditPage = (pathname: string) =>
   pathname.includes('/rules') && pathname.includes('/edit');
 
-export const getBreadcrumbs = (params: RouteSpyState, search: string[]): Breadcrumb[] => {
+export const getBreadcrumbs = (params: RouteSpyState, search: string[]): ChromeBreadcrumb[] => {
   let breadcrumb = [
     {
       text: i18nDetections.PAGE_TITLE,
