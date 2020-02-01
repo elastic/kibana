@@ -4,15 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiSelect,
   EuiTextArea,
   EuiFormRow,
-  EuiTextColor,
-  EuiSpacer,
-  EuiText,
   EuiContextMenuItem,
   EuiPopover,
   EuiButtonIcon,

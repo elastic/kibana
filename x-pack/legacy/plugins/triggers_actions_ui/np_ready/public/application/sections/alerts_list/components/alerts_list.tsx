@@ -16,7 +16,6 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiEmptyPrompt,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { AlertsContextProvider } from '../../../context/alerts_context';

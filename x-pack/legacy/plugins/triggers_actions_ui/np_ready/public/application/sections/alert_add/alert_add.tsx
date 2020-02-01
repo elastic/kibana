@@ -44,9 +44,6 @@ export const AlertAdd = () => {
   const setAlert = (value: any) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
-  const setActionProperty = (key: string, value: any, index: number) => {
-    dispatch({ command: { type: 'setAlertActionProperty' }, payload: { key, value, index } });
-  };
 
   const { addFlyoutVisible, setAddFlyoutVisibility, reloadAlerts } = useAlertsContext();
 
