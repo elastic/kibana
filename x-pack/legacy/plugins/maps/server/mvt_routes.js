@@ -79,6 +79,7 @@ export function initMVTRoutes(server) {
       const tile = await getGridTile({
         server,
         request,
+        aggNames: query.aggNames.split(','),
         size,
         geometryFieldName,
         fields,

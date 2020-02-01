@@ -110,7 +110,7 @@ export class ESMVTGeoGridSource extends ESGeoGridSource {
 
     const indexPattern = await this.getIndexPattern();
 
-    const geoField = await this._getGeoField();
+    const geoFieldName = this._descriptor.geoField;
 
     const { searchSource, aggConfigs } = await this._makeSearchSourceWithAggConfigs(searchFilters);
 
@@ -121,11 +121,13 @@ export class ESMVTGeoGridSource extends ESGeoGridSource {
     const risonDsl = rison.encode(dsl);
     console.log('r', risonDsl);
 
-
+    const aggConfigNames = aggConfigs.aggs.map(config => config.id);
+    const aggNames = aggConfigNames.join(',');
     const ipTitle = indexPattern.title;
 
+    console.log('a', aggNames);
 
-    return `../${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}?x={x}&y={y}&z={z}&indexPattern=${ipTitle}&requestBody=${risonDsl}`;
+    return `../${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}?x={x}&y={y}&z={z}&geometryFieldName=${geoFieldName}&aggNames=${aggNames}&indexPattern=${ipTitle}&requestBody=${risonDsl}`;
   }
 
   getMvtSourceLayer() {

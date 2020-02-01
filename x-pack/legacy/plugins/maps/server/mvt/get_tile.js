@@ -137,31 +137,40 @@ export async function getTile({
 
 export async function getGridTile({
   server,
+  size,
   request,
   indexPattern,
   geometryFieldName,
+  aggNames,
   x,
   y,
   z,
   fields = [],
   requestBody = {},
 }) {
-  // server.log('info', { indexPattern, size, geometryFieldName, x, y, z, fields });
+  server.log('info', { indexPattern, aggNames, requestBody, geometryFieldName, x, y, z, fields });
   const polygon = toBoundingBox(x, y, z);
+
+  const wLon = tile2long(x, z);
+  const sLat = tile2lat(y + 1, z);
+  const eLon = tile2long(x + 1, z);
+  const nLat = tile2lat(y, z);
 
   try {
     let result;
     try {
-      const geoShapeFilter = {
-        geo_shape: {
+      const geoBoundingBox = {
+        geo_bounding_box: {
           [geometryFieldName]: {
-            shape: polygon,
-            relation: 'INTERSECTS',
+            top_left: [wLon, nLat],
+            bottom_right: [eLon, sLat],
           },
         },
       };
 
-      requestBody.query.bool.filter.push(geoShapeFilter);
+      requestBody.query.bool.filter.push(geoBoundingBox);
+
+      requestBody.aggs.grid.geotile_grid.precision = Math.min(z + 6, 24);
 
       const esQuery = {
         index: indexPattern,
@@ -171,21 +180,49 @@ export async function getGridTile({
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
       result = await callWithRequest(request, 'search', esQuery);
-      server.log('grid result', JSON.stringify(result));
+
+      // server.log('info', JSON.stringify(result));
     } catch (e) {
-      server.log('error', e.message);
+      server.log('warning', e.message);
       throw e;
     }
 
-
     const ffeats = [];
+    result.aggregations.grid.buckets.forEach(bucket => {
+      const feature = {
+        type: 'Feature',
+        properties: {},
+        geometry: null,
+      };
+
+      for (let i = 0; i < aggNames.length; i++) {
+        const aggName = aggNames[i];
+        if (aggName === 'doc_count') {
+          feature.properties[aggName] = bucket[aggName];
+        } else if (aggName === 'grid') {
+          //do nothing
+        } else {
+          feature.properties[aggName] = bucket[aggName].value;
+        }
+      }
+
+      const centroid = {
+        type: 'Point',
+        coordinates: [bucket['1'].location.lon, bucket['1'].location.lat],
+      };
+
+      feature.geometry = centroid;
+
+      ffeats.push(feature);
+    });
 
     const featureCollection = {
       features: ffeats,
       type: 'FeatureCollection',
     };
 
-    // server.log('info', `feature length ${featureCollection.features.length}`);
+    server.log('info', `feature length ${featureCollection.features.length}`);
+    // server.log('info', featureCollection.features);
 
     const tileIndex = geojsonvt(featureCollection, {
       maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24
@@ -215,20 +252,20 @@ export async function getGridTile({
 }
 
 function toBoundingBox(x, y, z) {
-  const w_lon = tile2long(x, z);
-  const s_lat = tile2lat(y + 1, z);
-  const e_lon = tile2long(x + 1, z);
-  const n_lat = tile2lat(y, z);
+  const wLon = tile2long(x, z);
+  const sLat = tile2lat(y + 1, z);
+  const eLon = tile2long(x + 1, z);
+  const nLat = tile2lat(y, z);
 
   const polygon = {
     type: 'Polygon',
     coordinates: [
       [
-        [w_lon, s_lat],
-        [w_lon, n_lat],
-        [e_lon, n_lat],
-        [e_lon, s_lat],
-        [w_lon, s_lat],
+        [wLon, sLat],
+        [wLon, nLat],
+        [eLon, nLat],
+        [eLon, sLat],
+        [wLon, sLat],
       ],
     ],
   };
