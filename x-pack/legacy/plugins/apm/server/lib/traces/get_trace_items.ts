@@ -40,7 +40,8 @@ export async function getTraceItems(
               terms: {
                 [PROCESSOR_EVENT]: [
                   ProcessorEvent.span,
-                  ProcessorEvent.transaction
+                  ProcessorEvent.transaction,
+                  ProcessorEvent.error
                 ]
               }
             },
