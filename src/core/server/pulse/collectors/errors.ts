@@ -34,6 +34,7 @@ export interface ErrorInstruction extends PulseInstruction {
   currentKibanaVersion: string;
   timestamp: Date;
   fixedVersion?: string;
+  seenOn?: Date;
 }
 export interface Payload {
   deploymentId: string;

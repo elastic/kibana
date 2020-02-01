@@ -78,7 +78,7 @@ export const NewsfeedFlyout = ({
   }
   if (errorsInstructionsToShow && errorsInstructionsToShow.length > 0) {
     const hasNewErrorInstructionsToShow = errorsInstructionsToShow.filter(
-      instruction => instruction.status === 'new'
+      instruction => instruction.status === 'new' && !instruction.seenOn!
     );
     if (hasNewErrorInstructionsToShow.length > 0) {
       errorsChannel.sendPulse(
