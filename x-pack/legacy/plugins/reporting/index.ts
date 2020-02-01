@@ -12,12 +12,7 @@ import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/ser
 import { PluginSetupContract as SecurityPluginSetup } from '../../../plugins/security/server';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { config as reportingConfig } from './config';
-import {
-  LegacySetup,
-  ReportingPlugin,
-  reportingPluginFactory,
-  ReportingSetupDeps,
-} from './server/plugin';
+import { LegacySetup, ReportingPlugin, reportingPluginFactory } from './server/plugin';
 import { ReportingConfigOptions, ReportingPluginSpecOptions } from './types.d';
 
 const kbToBase64Length = (kb: number) => {
@@ -74,10 +69,6 @@ export const reporting = (kibana: any) => {
 
     async init(server: Legacy.Server) {
       const coreSetup = server.newPlatform.setup.core;
-      const pluginsSetup: ReportingSetupDeps = {
-        security: server.newPlatform.setup.plugins.security as SecurityPluginSetup,
-        usageCollection: server.newPlatform.setup.plugins.usageCollection,
-      };
 
       const fieldFormatServiceFactory = async (uiSettings: IUiSettingsClient) => {
         const [, plugins] = await coreSetup.getStartServices();
@@ -90,18 +81,22 @@ export const reporting = (kibana: any) => {
         config: server.config,
         info: server.info,
         route: server.route.bind(server),
-        plugins: {
-          elasticsearch: server.plugins.elasticsearch,
-          xpack_main: server.plugins.xpack_main,
-        },
+        plugins: { xpack_main: server.plugins.xpack_main },
         savedObjects: server.savedObjects,
         fieldFormatServiceFactory,
         uiSettingsServiceFactory: server.uiSettingsServiceFactory,
       };
 
-      const initializerContext = server.newPlatform.coreContext;
-      const plugin: ReportingPlugin = reportingPluginFactory(initializerContext, __LEGACY, this);
-      await plugin.setup(coreSetup, pluginsSetup);
+      const plugin: ReportingPlugin = reportingPluginFactory(
+        server.newPlatform.coreContext,
+        __LEGACY,
+        this
+      );
+      await plugin.setup(coreSetup, {
+        elasticsearch: coreSetup.elasticsearch,
+        security: server.newPlatform.setup.plugins.security as SecurityPluginSetup,
+        usageCollection: server.newPlatform.setup.plugins.usageCollection,
+      });
     },
 
     deprecations({ unused }: any) {
