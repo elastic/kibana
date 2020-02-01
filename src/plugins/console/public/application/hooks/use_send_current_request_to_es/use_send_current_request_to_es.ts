@@ -19,7 +19,7 @@
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
-import { useRequestActionContext, useServicesContext } from '../../contexts';
+import { useRequestActionContext, useServicesContext, useRequestReadContext } from '../../contexts';
 import { sendRequestToES } from './send_request_to_es';
 import { track } from './track';
 
@@ -31,9 +31,19 @@ export const useSendCurrentRequestToES = () => {
     services: { history, settings, notifications, trackUiMetric },
   } = useServicesContext();
 
+  const { requestInFlight } = useRequestReadContext();
   const dispatch = useRequestActionContext();
 
   return useCallback(async () => {
+    if (requestInFlight) {
+      notifications.toasts.addWarning({
+        title: i18n.translate('console.requestAlreadyInFlightTitle', {
+          defaultMessage: 'Cannot send request right now.',
+        }),
+        toastLifeTimeMs: 3000,
+      });
+      return;
+    }
     dispatch({ type: 'sendRequest', payload: undefined });
     try {
       const editor = registry.getInputEditor();
@@ -41,7 +51,20 @@ export const useSendCurrentRequestToES = () => {
       if (!requests.length) {
         dispatch({
           type: 'requestFail',
-          payload: { value: 'No requests in range', contentType: 'text/plain' },
+          payload: {
+            response: {
+              value: 'No requests in range',
+              contentType: 'text/plain',
+              statusCode: 0,
+              statusText: 'None',
+              timeMs: 0,
+            },
+            request: {
+              data: null,
+              method: '',
+              path: '',
+            },
+          },
         });
         return;
       }
@@ -84,5 +107,5 @@ export const useSendCurrentRequestToES = () => {
         });
       }
     }
-  }, [dispatch, settings, history, notifications, trackUiMetric]);
+  }, [dispatch, settings, history, notifications, trackUiMetric, requestInFlight]);
 };
