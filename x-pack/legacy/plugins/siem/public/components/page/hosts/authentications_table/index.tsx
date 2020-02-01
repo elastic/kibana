@@ -190,7 +190,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
             excluded: false,
             kqlQuery: '',
             queryMatch: {
-              field: 'event.type',
+              field: 'event.outcome',
               value: 'authentication_success',
               operator: IS_OPERATOR,
             },
@@ -228,7 +228,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
             excluded: false,
             kqlQuery: '',
             queryMatch: {
-              field: 'event.type',
+              field: 'event.outcome',
               value: 'authentication_failure',
               operator: IS_OPERATOR,
             },

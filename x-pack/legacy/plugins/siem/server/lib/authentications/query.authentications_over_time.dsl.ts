@@ -13,7 +13,7 @@ export const buildAuthenticationsOverTimeQuery = ({
   sourceConfiguration: {
     fields: { timestamp },
   },
-  stackByField = 'event.type',
+  stackByField = 'event.outcome',
 }: MatrixHistogramRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
