@@ -6,16 +6,19 @@
 
 import { StartServices } from '../../plugin';
 
-let _services: StartServices | null = null;
+type GlobalServices = Pick<StartServices, 'http' | 'uiSettings'>;
+let _services: GlobalServices | null = null;
 
 export const initServices = (services: StartServices) => {
-  _services = services;
+  const { http, uiSettings } = services;
+
+  _services = { http, uiSettings };
 };
 
-export const getServices = (): StartServices => {
+export const getServices = (): GlobalServices => {
   if (!_services) {
     throw new Error(
-      'Kibana services not set - are you trying to import this module from outside of the siem app?'
+      'Kibana services not set - are you trying to import this module from outside of the SIEM app?'
     );
   }
 
