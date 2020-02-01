@@ -6,19 +6,19 @@
 
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
-import { PLUGIN_ID } from './common/constants';
+import { PLUGIN } from './common/constants';
 import { Plugin as IndexLifecycleManagementPlugin } from './plugin';
 import { createShim } from './shim';
 
 export function indexLifecycleManagement(kibana: any) {
   return new kibana.Plugin({
-    id: PLUGIN_ID,
+    id: PLUGIN.ID,
     configPrefix: 'xpack.ilm',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main', 'index_management'],
     uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      managementSections: ['plugins/index_lifecycle_management'],
+      styleSheetPaths: resolve(__dirname, 'public/np_ready/application/index.scss'),
+      managementSections: ['plugins/index_lifecycle_management/legacy'],
       injectDefaultVars(server: Legacy.Server) {
         const config = server.config();
         return {

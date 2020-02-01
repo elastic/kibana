@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import moment from 'moment-timezone';
+import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import {
   retryLifecycleActionExtension,
   removeLifecyclePolicyActionExtension,
@@ -13,9 +13,13 @@ import {
   ilmBannerExtension,
   ilmFilterExtension,
   ilmSummaryExtension,
-} from '../public/extend_index_management';
+} from '../public/np_ready/extend_index_management';
+import { init as initUiMetric } from '../public/np_ready/application/services/ui_metric';
+
+initUiMetric(() => () => {});
 
 jest.mock('ui/new_platform');
+
 const indexWithoutLifecyclePolicy = {
   health: 'yellow',
   status: 'open',
@@ -33,6 +37,7 @@ const indexWithoutLifecyclePolicy = {
     managed: false,
   },
 };
+
 const indexWithLifecyclePolicy = {
   health: 'yellow',
   status: 'open',
@@ -58,6 +63,7 @@ const indexWithLifecyclePolicy = {
     step_time_millis: 1544187775867,
   },
 };
+
 const indexWithLifecycleError = {
   health: 'yellow',
   status: 'open',
@@ -95,76 +101,84 @@ const indexWithLifecycleError = {
     },
   },
 };
+
 moment.tz.setDefault('utc');
+
 describe('retry lifecycle action extension', () => {
   test('should return null when no indices have index lifecycle policy', () => {
-    const extension = retryLifecycleActionExtension([indexWithoutLifecyclePolicy]);
+    const extension = retryLifecycleActionExtension({ indices: [indexWithoutLifecyclePolicy] });
     expect(extension).toBeNull();
   });
+
   test('should return null when no index has lifecycle errors', () => {
-    const extension = retryLifecycleActionExtension([
-      indexWithLifecyclePolicy,
-      indexWithLifecyclePolicy,
-    ]);
+    const extension = retryLifecycleActionExtension({
+      indices: [indexWithLifecyclePolicy, indexWithLifecyclePolicy],
+    });
     expect(extension).toBeNull();
   });
+
   test('should return null when not all indices have lifecycle errors', () => {
-    const extension = retryLifecycleActionExtension([
-      indexWithLifecyclePolicy,
-      indexWithLifecycleError,
-    ]);
+    const extension = retryLifecycleActionExtension({
+      indices: [indexWithLifecyclePolicy, indexWithLifecycleError],
+    });
     expect(extension).toBeNull();
   });
+
   test('should return extension when all indices have lifecycle errors', () => {
-    const extension = retryLifecycleActionExtension([
-      indexWithLifecycleError,
-      indexWithLifecycleError,
-    ]);
+    const extension = retryLifecycleActionExtension({
+      indices: [indexWithLifecycleError, indexWithLifecycleError],
+    });
     expect(extension).toBeDefined();
     expect(extension).toMatchSnapshot();
   });
 });
+
 describe('remove lifecycle action extension', () => {
   test('should return null when no indices have index lifecycle policy', () => {
-    const extension = removeLifecyclePolicyActionExtension([indexWithoutLifecyclePolicy]);
+    const extension = removeLifecyclePolicyActionExtension({
+      indices: [indexWithoutLifecyclePolicy],
+    });
     expect(extension).toBeNull();
   });
+
   test('should return null when some indices have index lifecycle policy', () => {
-    const extension = removeLifecyclePolicyActionExtension([
-      indexWithoutLifecyclePolicy,
-      indexWithLifecyclePolicy,
-    ]);
+    const extension = removeLifecyclePolicyActionExtension({
+      indices: [indexWithoutLifecyclePolicy, indexWithLifecyclePolicy],
+    });
     expect(extension).toBeNull();
   });
+
   test('should return extension when all indices have lifecycle policy', () => {
-    const extension = removeLifecyclePolicyActionExtension([
-      indexWithLifecycleError,
-      indexWithLifecycleError,
-    ]);
+    const extension = removeLifecyclePolicyActionExtension({
+      indices: [indexWithLifecycleError, indexWithLifecycleError],
+    });
     expect(extension).toBeDefined();
     expect(extension).toMatchSnapshot();
   });
 });
+
 describe('add lifecycle policy action extension', () => {
   test('should return null when index has index lifecycle policy', () => {
-    const extension = addLifecyclePolicyActionExtension([indexWithLifecyclePolicy]);
+    const extension = addLifecyclePolicyActionExtension({ indices: [indexWithLifecyclePolicy] });
     expect(extension).toBeNull();
   });
+
   test('should return null when more than one index is passed', () => {
-    const extension = addLifecyclePolicyActionExtension([
-      indexWithoutLifecyclePolicy,
-      indexWithoutLifecyclePolicy,
-    ]);
+    const extension = addLifecyclePolicyActionExtension({
+      indices: [indexWithoutLifecyclePolicy, indexWithoutLifecyclePolicy],
+    });
     expect(extension).toBeNull();
   });
+
   test('should return extension when one index is passed and it does not have lifecycle policy', () => {
-    const extension = addLifecyclePolicyActionExtension([indexWithoutLifecyclePolicy]);
+    const extension = addLifecyclePolicyActionExtension({ indices: [indexWithoutLifecyclePolicy] });
     expect(extension.renderConfirmModal).toBeDefined;
     const component = extension.renderConfirmModal(jest.fn());
     const rendered = mountWithIntl(component);
     expect(rendered.exists('.euiModal--confirmation'));
   });
 });
+
 describe('ilm banner extension', () => {
   test('should return null when no index has index lifecycle policy', () => {
     const extension = ilmBannerExtension([
@@ -173,10 +187,12 @@ describe('ilm banner extension', () => {
     ]);
     expect(extension).toBeNull();
   });
+
   test('should return null no index has lifecycle error', () => {
     const extension = ilmBannerExtension([indexWithoutLifecyclePolicy, indexWithLifecyclePolicy]);
     expect(extension).toBeNull();
   });
+
   test('should return extension when any index has lifecycle error', () => {
     const extension = ilmBannerExtension([
       indexWithoutLifecyclePolicy,
@@ -187,18 +203,21 @@ describe('ilm banner extension', () => {
     expect(extension).toMatchSnapshot();
   });
 });
+
 describe('ilm summary extension', () => {
   test('should render null when index has no index lifecycle policy', () => {
     const extension = ilmSummaryExtension(indexWithoutLifecyclePolicy);
     const rendered = mountWithIntl(extension);
     expect(rendered.isEmptyRender()).toBeTruthy();
   });
+
   test('should return extension when index has lifecycle policy', () => {
     const extension = ilmSummaryExtension(indexWithLifecyclePolicy);
     expect(extension).toBeDefined();
     const rendered = mountWithIntl(extension);
     expect(rendered).toMatchSnapshot();
   });
+
   test('should return extension when index has lifecycle error', () => {
     const extension = ilmSummaryExtension(indexWithLifecycleError);
     expect(extension).toBeDefined();
@@ -206,6 +225,7 @@ describe('ilm summary extension', () => {
     expect(rendered).toMatchSnapshot();
   });
 });
+
 describe('ilm filter extension', () => {
   test('should return empty array when no indices have index lifecycle policy', () => {
     const extension = ilmFilterExtension([
@@ -214,6 +234,7 @@ describe('ilm filter extension', () => {
     ]);
     expect(extension.length).toBe(0);
   });
+
   test('should return extension when any index has lifecycle policy', () => {
     const extension = ilmFilterExtension([
       indexWithLifecyclePolicy,

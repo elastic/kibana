@@ -4,5 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN_ID = 'index_lifecycle_management';
+import { i18n } from '@kbn/i18n';
+
+export const PLUGIN = {
+  ID: 'index_lifecycle_management',
+  TITLE: i18n.translate('xpack.indexLifecycleMgmt.appTitle', {
+    defaultMessage: 'Index Lifecycle Policies',
+  }),
+};
+
 export const BASE_PATH = '/management/elasticsearch/index_lifecycle_management/';

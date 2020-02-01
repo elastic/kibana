@@ -7,7 +7,7 @@
 import { Legacy } from 'kibana';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../server/lib/mirror_plugin_status';
-import { PLUGIN_ID } from '../../../common/constants';
+import { PLUGIN } from '../../../common/constants';
 import { checkLicense } from '../check_license';
 
 export function registerLicenseChecker(server: Legacy.Server) {
@@ -18,6 +18,6 @@ export function registerLicenseChecker(server: Legacy.Server) {
   xpackMainPlugin.status.once('green', () => {
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
-    xpackMainPlugin.info.feature(PLUGIN_ID).registerLicenseCheckResultsGenerator(checkLicense);
+    xpackMainPlugin.info.feature(PLUGIN.ID).registerLicenseCheckResultsGenerator(checkLicense);
   });
 }

@@ -22,10 +22,16 @@ import {
   EuiOverlayMask,
   EuiCheckbox,
 } from '@elastic/eui';
+
+// We will be able to remove these after the NP migration is complete.
+import { toastNotifications, fatalError } from 'ui/notify';
+import { npStart } from 'ui/new_platform';
+import { createUiStatsReporter } from '../../../../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { getHttpClient } from '../../../../services/api';
+
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../../common/constants';
 import { getActionExtensions } from '../../../../../index_management_extensions';
-import { getHttpClient } from '../../../../services/api';
 
 export class IndexActionsContextMenu extends Component {
   constructor(props) {
@@ -211,7 +217,21 @@ export class IndexActionsContextMenu extends Component {
       },
     });
     getActionExtensions().forEach(actionExtension => {
-      const actionExtensionDefinition = actionExtension(indices, reloadIndices);
+      const actionExtensionDefinition = actionExtension({
+        indices,
+        reloadIndices,
+        // These config options can probably be removed once the NP migration is complete.
+        // They're needed for now because ILM's extensions make API calls which require these
+        // dependencies, but they're not available unless the app's "setup" lifecycle stage occurs.
+        // Within the old platform, "setup" only occurs once the user actually visits the app.
+        // Once ILM and IM have been moved out of legacy this hack won't be necessary.
+        prependBasePath: npStart.core.http.basePath.prepend,
+        createUiStatsReporter,
+        toasts: toastNotifications,
+        fatalError,
+        httpClient: getHttpClient(),
+      });
+
       if (actionExtensionDefinition) {
         const {
           buttonLabel,
@@ -727,7 +747,7 @@ export class IndexActionsContextMenu extends Component {
     return (
       <div>
         {this.state.renderConfirmModal
-          ? this.state.renderConfirmModal(this.closeConfirmModal, getHttpClient())
+          ? this.state.renderConfirmModal(this.closeConfirmModal)
           : null}
         <EuiPopover
           id="contextMenuIndices"
