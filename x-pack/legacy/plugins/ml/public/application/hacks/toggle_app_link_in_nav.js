@@ -8,6 +8,8 @@ import { xpackInfo } from '../../../../xpack_main/public/services/xpack_info';
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
 
+// IS THIS FILE NEEDED ANYMORE????
+
 uiModules.get('xpack/ml').run(() => {
   const showAppLink = xpackInfo.get('features.ml.showLinks', false);
 

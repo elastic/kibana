@@ -14,8 +14,6 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 
-import { npStart } from 'ui/new_platform';
-
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
@@ -30,7 +28,7 @@ import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from '../services/results_service';
 import { getBoundsRoundedToInterval, TimeBuckets } from '../util/time_buckets';
-import { getTimefilter } from '../util/dependency_cache';
+import { getTimefilter, getUiSettings } from '../util/dependency_cache';
 
 import {
   MAX_CATEGORY_EXAMPLES,
@@ -149,9 +147,9 @@ export function getInfluencers(selectedJobs = []) {
 }
 
 export function getDateFormatTz() {
-  const config = npStart.core.uiSettings;
+  const uiSettings = getUiSettings();
   // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
-  const tzConfig = config.get('dateFormat:tz');
+  const tzConfig = uiSettings.get('dateFormat:tz');
   const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
   return dateFormatTz;
 }

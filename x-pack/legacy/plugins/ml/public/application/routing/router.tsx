@@ -9,8 +9,19 @@ import { HashRouter, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 
 import { IUiSettingsClient, ChromeStart } from 'src/core/public';
-import { ChromeBreadcrumb, DocLinksStart, ToastsStart, OverlayStart } from 'kibana/public';
-import { IndexPatternsContract, TimefilterSetup } from 'src/plugins/data/public';
+import {
+  ChromeBreadcrumb,
+  DocLinksStart,
+  ToastsStart,
+  OverlayStart,
+  ChromeRecentlyAccessed,
+} from 'kibana/public';
+import {
+  IndexPatternsContract,
+  TimefilterSetup,
+  FieldFormatsStart,
+  DataPublicPluginStart,
+} from 'src/plugins/data/public';
 import { MlContext, MlContextValue } from '../contexts/ml';
 
 import * as routes from './routes';
@@ -39,6 +50,9 @@ export interface PageDependencies {
   docLinks: DocLinksStart;
   toastNotifications: ToastsStart;
   overlays: OverlayStart;
+  recentlyAccessed: ChromeRecentlyAccessed;
+  fieldFormats: FieldFormatsStart;
+  autocomplete: DataPublicPluginStart['autocomplete'];
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {

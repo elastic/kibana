@@ -44,6 +44,9 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
     docLinks: coreStart.docLinks!,
     toastNotifications: coreStart.notifications.toasts,
     overlays: coreStart.overlays,
+    recentlyAccessed: coreStart.chrome!.recentlyAccessed,
+    fieldFormats: deps.data.fieldFormats,
+    autocomplete: deps.data.autocomplete,
   };
 
   const services = {

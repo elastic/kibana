@@ -7,8 +7,12 @@
 import { useEffect } from 'react';
 import { TimefilterSetup } from 'src/plugins/data/public';
 import { IUiSettingsClient, ChromeStart } from 'src/core/public';
-import { IndexPatternsContract } from 'src/plugins/data/public';
-import { DocLinksStart, ToastsStart, OverlayStart } from 'kibana/public';
+import {
+  IndexPatternsContract,
+  FieldFormatsStart,
+  DataPublicPluginStart,
+} from 'src/plugins/data/public';
+import { DocLinksStart, ToastsStart, OverlayStart, ChromeRecentlyAccessed } from 'kibana/public';
 import { PageDependencies } from '../routing/router';
 
 interface DependencyCache {
@@ -19,6 +23,9 @@ interface DependencyCache {
   docLinks: DocLinksStart | null;
   toastNotifications: ToastsStart | null;
   overlays: OverlayStart | null;
+  recentlyAccessed: ChromeRecentlyAccessed | null;
+  fieldFormats: FieldFormatsStart | null;
+  autocomplete: DataPublicPluginStart['autocomplete'] | null;
 }
 
 const cache: DependencyCache = {
@@ -29,16 +36,22 @@ const cache: DependencyCache = {
   docLinks: null,
   toastNotifications: null,
   overlays: null,
+  recentlyAccessed: null,
+  fieldFormats: null,
+  autocomplete: null,
 };
 
-export function useDependencyCache(dep: PageDependencies) {
-  cache.timefilter = dep.timefilter;
-  cache.config = dep.config;
-  cache.chrome = dep.chrome;
-  cache.indexPatterns = dep.indexPatterns;
-  cache.docLinks = dep.docLinks;
-  cache.toastNotifications = dep.toastNotifications;
-  cache.overlays = dep.overlays;
+export function useDependencyCache(deps: PageDependencies) {
+  cache.timefilter = deps.timefilter;
+  cache.config = deps.config;
+  cache.chrome = deps.chrome;
+  cache.indexPatterns = deps.indexPatterns;
+  cache.docLinks = deps.docLinks;
+  cache.toastNotifications = deps.toastNotifications;
+  cache.overlays = deps.overlays;
+  cache.recentlyAccessed = deps.recentlyAccessed;
+  cache.fieldFormats = deps.fieldFormats;
+  cache.autocomplete = deps.autocomplete;
 
   useEffect(() => {
     return () => {
@@ -55,7 +68,10 @@ export function getDependencyCache(): Readonly<PageDependencies> {
     cache.indexPatterns === null ||
     cache.docLinks === null ||
     cache.toastNotifications === null ||
-    cache.overlays === null
+    cache.overlays === null ||
+    cache.recentlyAccessed === null ||
+    cache.fieldFormats === null ||
+    cache.autocomplete === null
   ) {
     throw new Error();
   }
@@ -67,6 +83,9 @@ export function getDependencyCache(): Readonly<PageDependencies> {
     docLinks: cache.docLinks,
     toastNotifications: cache.toastNotifications,
     overlays: cache.overlays,
+    recentlyAccessed: cache.recentlyAccessed,
+    fieldFormats: cache.fieldFormats,
+    autocomplete: cache.autocomplete,
   };
 }
 
@@ -103,6 +122,41 @@ export function getOverlays() {
   }
   return cache.overlays;
 }
+
+export function getUiSettings() {
+  if (cache.config === null) {
+    throw new Error();
+  }
+  return cache.config;
+}
+
+export function getRecentlyAccessed() {
+  if (cache.recentlyAccessed === null) {
+    throw new Error();
+  }
+  return cache.recentlyAccessed;
+}
+
+export function getFieldFormats() {
+  if (cache.fieldFormats === null) {
+    throw new Error();
+  }
+  return cache.fieldFormats;
+}
+
+export function getAutocomplete() {
+  if (cache.autocomplete === null) {
+    throw new Error();
+  }
+  return cache.autocomplete;
+}
+
+// export function getData() {
+//   if (cache.d === null) {
+//     throw new Error();
+//   }
+//   return cache.d;
+// }
 
 export function clearCache() {
   console.log('clearing cache'); // eslint-disable-line no-console
