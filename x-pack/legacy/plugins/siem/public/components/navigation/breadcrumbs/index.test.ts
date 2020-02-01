@@ -19,12 +19,6 @@ jest.mock('ui/chrome', () => ({
   },
 }));
 
-jest.mock('../../search_bar', () => ({
-  siemFilterManager: {
-    addFilters: jest.fn(),
-  },
-}));
-
 const mockDefaultTab = (pageName: string): SiemRouteType | undefined => {
   switch (pageName) {
     case 'hosts':

@@ -16,7 +16,6 @@ import {
   AbsoluteTimeRange,
   RelativeTimeRange,
 } from '../../store/inputs/model';
-import { getServices } from '../../lib/kibana';
 
 import { CONSTANTS } from './constants';
 import { decodeRisonUrlState } from './helpers';
@@ -29,14 +28,14 @@ export const dispatchSetInitialStateFromUrl = (
 ): DispatchSetInitialStateFromUrl => ({
   apolloClient,
   detailName,
+  filterManager,
   indexPattern,
   pageName,
+  savedQueries,
   updateTimeline,
   updateTimelineIsLoading,
   urlStateToUpdate,
 }: SetInitialStateFromUrl<unknown>): (() => void) => () => {
-  const { filterManager, savedQueries } = getServices().data.query;
-
   urlStateToUpdate.forEach(({ urlKey, newUrlStateString }) => {
     if (urlKey === CONSTANTS.timerange) {
       const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
