@@ -71,7 +71,7 @@ export const useSendCurrentRequestToES = () => {
         },
       });
     } catch (e) {
-      if (e.contentType) {
+      if (e.response?.contentType) {
         dispatch({
           type: 'requestFail',
           payload: e,

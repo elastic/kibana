@@ -18,6 +18,8 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+
+import { NetworkRequestStatusBar } from '../../../../components';
 import { createReadOnlyAceEditor, CustomAceEditor } from '../../../../models/legacy_core_editor';
 import {
   useServicesContext,
@@ -70,8 +72,8 @@ function EditorOutputUI() {
           .join('\n')
       );
     } else if (error) {
-      editor.session.setMode(modeForContentType(error.contentType));
-      editor.update(error.value);
+      editor.session.setMode(modeForContentType(error.response.contentType));
+      editor.update(error.response.value as string);
     } else {
       editor.update('');
     }
@@ -81,17 +83,33 @@ function EditorOutputUI() {
     applyCurrentSettings(editorInstanceRef.current!, readOnlySettings);
   }, [readOnlySettings]);
 
+  const lastDatum = data?.[data.length - 1] ?? error;
+
   return (
-    <div ref={editorRef} className="conApp__output" data-test-subj="response-editor">
-      {/* Axe complains about Ace's textarea element missing a label, which interferes with our
+    <>
+      {lastDatum ? (
+        <div className="conApp__networkRequestContainer">
+          <NetworkRequestStatusBar
+            method={lastDatum.request.method.toUpperCase()}
+            endpoint={lastDatum.request.path}
+            statusCode={lastDatum.response.statusCode}
+            statusText={lastDatum.response.statusText}
+            timeElapsedMs={lastDatum.response.timeMs}
+          />
+        </div>
+      ) : null}
+
+      <div ref={editorRef} className="conApp__output" data-test-subj="response-editor">
+        {/* Axe complains about Ace's textarea element missing a label, which interferes with our
       automated a11y tests per #52136. This wrapper does nothing to address a11y but it does
       satisfy Axe. */}
 
-      {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-      <label className="conApp__textAreaLabelHack">
-        <div className="conApp__outputContent" id="ConAppOutput" />
-      </label>
-    </div>
+        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+        <label className="conApp__textAreaLabelHack">
+          <div className="conApp__outputContent" id="ConAppOutput" />
+        </label>
+      </div>
+    </>
   );
 }
 

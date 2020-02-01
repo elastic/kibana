@@ -26,16 +26,23 @@ export interface EsRequestArgs {
   requests: any;
 }
 
-export interface ESRequestResult {
-  request: {
-    path: string;
-    data: any;
-    method: string;
-  };
-  response: {
-    contentType: BaseResponseType;
-    value: unknown;
-  };
+export interface ESRequestObject {
+  path: string;
+  data: any;
+  method: string;
+}
+
+export interface ESResponseObject<V = unknown> {
+  statusCode: number;
+  statusText: string;
+  timeMs: number;
+  contentType: BaseResponseType;
+  value: V;
+}
+
+export interface ESRequestResult<V = unknown> {
+  request: ESRequestObject;
+  response: ESResponseObject<V>;
 }
 
 let CURRENT_REQ_ID = 0;
@@ -71,6 +78,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
         esData += '\n';
       } // append a new line for bulk requests.
 
+      const startTime = Date.now();
       es.send(esMethod, esPath, esData).always(
         (dataOrjqXHR: any, textStatus: string, jqXhrORerrorThrown: any) => {
           if (reqId !== CURRENT_REQ_ID) {
@@ -99,6 +107,9 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
 
             results.push({
               response: {
+                timeMs: Date.now() - startTime,
+                statusCode: xhr.status,
+                statusText: xhr.statusText,
                 contentType: xhr.getResponseHeader('Content-Type'),
                 value,
               },
@@ -124,7 +135,20 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
             if (isMultiRequest) {
               value = '# ' + req.method + ' ' + req.url + '\n' + value;
             }
-            reject({ value, contentType });
+            reject({
+              response: {
+                value,
+                contentType,
+                timeMs: Date.now() - startTime,
+                statusCode: xhr.status,
+                statusText: xhr.statusText,
+              },
+              request: {
+                data: esData,
+                method: esMethod,
+                path: esPath,
+              },
+            });
           }
         }
       );
