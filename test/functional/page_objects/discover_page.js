@@ -327,6 +327,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async waitForChartLoadingComplete(renderCount) {
       await elasticChart.waitForRenderingCount('discoverChart', renderCount);
     }
+
+    async getDataGridHeaders() {
+      const $ = await (await testSubjects.find('dataGridHeader')).parseDomContent();
+      return await $('[role="columnheader"]').toArray();
+    }
   }
 
   return new DiscoverPage();

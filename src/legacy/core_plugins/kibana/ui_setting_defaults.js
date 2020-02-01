@@ -1191,11 +1191,11 @@ export function getUiSettingDefaults() {
       },
     },
     'doc_table:legacyTable': {
-      name: i18n.translate('kbn.advancedSettings.context.tieBreakerFieldsTitle', {
+      name: i18n.translate('kbn.advancedSettings.docTableVersionName', {
         defaultMessage: 'Use legacy table',
       }),
       value: false,
-      description: i18n.translate('kbn.advancedSettings.docTableVersion', {
+      description: i18n.translate('kbn.advancedSettings.docTableVersionDescription', {
         defaultMessage:
           'Prefer the legacy version of the documents table in Discover while available',
       }),

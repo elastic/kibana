@@ -58,7 +58,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       const tableFields = await testSubjects.findAll('docTableField', 2500);
-      expect(tableFields).to.greaterThan(0);
+      expect(tableFields.length).to.greaterThan(0);
 
       // Set to time range with no data
       await PageObjects.timePicker.setAbsoluteRange(

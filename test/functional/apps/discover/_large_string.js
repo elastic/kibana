@@ -31,7 +31,10 @@ export default function({ getService, getPageObjects }) {
     before(async function() {
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('hamlet');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'testlargestring' });
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'testlargestring',
+        'doc_table:legacyTable': true,
+      });
     });
 
     it('verify the large string book present', async function() {
