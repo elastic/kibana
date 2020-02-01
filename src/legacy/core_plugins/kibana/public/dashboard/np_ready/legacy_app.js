@@ -59,11 +59,6 @@ export function initDashboardApp(app, deps) {
     addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
   }
 
-  app.config(stateManagementConfigProvider => {
-    // Dashboard state management is handled by state containers and state_sync utilities
-    stateManagementConfigProvider.disable();
-  });
-
   app.factory('history', () => createHashHistory());
   app.factory('kbnUrlStateStorage', history =>
     createKbnUrlStateStorage({
@@ -141,7 +136,7 @@ export function initDashboardApp(app, deps) {
           });
         },
         resolve: {
-          dash: function($rootScope, $route, redirectWhenMissing, kbnUrl) {
+          dash: function($rootScope, $route, redirectWhenMissing, kbnUrl, history) {
             return ensureDefaultIndexPattern(deps.core, deps.npDataStart, $rootScope, kbnUrl).then(
               () => {
                 const savedObjectsClient = deps.savedObjectsClient;
@@ -160,13 +155,13 @@ export function initDashboardApp(app, deps) {
                           dashboard.attributes.title.toLowerCase() === title.toLowerCase()
                       );
                       if (matchingDashboards.length === 1) {
-                        kbnUrl.redirect(createDashboardEditUrl(matchingDashboards[0].id));
+                        history.replace(createDashboardEditUrl(matchingDashboards[0].id));
                       } else {
-                        kbnUrl.redirect(
+                        history.replace(
                           `${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`
                         );
+                        $route.reload();
                       }
-                      $rootScope.$digest();
                       return new Promise(() => {});
                     });
                 }
