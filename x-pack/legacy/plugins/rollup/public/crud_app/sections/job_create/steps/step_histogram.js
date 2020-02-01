@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
@@ -20,13 +20,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { histogramDetailsUrl } from '../../../services';
+import { getHistogramDetailsUrl } from '../../../services';
 
 import { FieldList } from '../../components';
 
 import { FieldChooser, StepError } from './components';
 
-export class StepHistogramUi extends Component {
+export class StepHistogram extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -96,7 +96,7 @@ export class StepHistogramUi extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={histogramDetailsUrl}
+              href={getHistogramDetailsUrl()}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateHistogramDocsButton"
@@ -212,5 +212,3 @@ export class StepHistogramUi extends Component {
     return <StepError />;
   };
 }
-
-export const StepHistogram = injectI18n(StepHistogramUi);
