@@ -21,6 +21,8 @@ export async function getTile({
 }) {
   const polygon = toBoundingBox(x, y, z);
 
+  let resultFeatures;
+
   try {
     let result;
     try {
@@ -41,70 +43,87 @@ export async function getTile({
       };
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      result = await callWithRequest(request, 'search', esQuery);
+      server.log('info', JSON.stringify(esQuery));
+      const countQuery = {
+        index: indexPattern,
+        body: {
+          query: requestBody.query,
+        },
+      };
+      const countResult = await callWithRequest(request, 'count', countQuery);
+      server.log('info', `count`);
+      server.log('info', countResult, requestBody.size);
+
+      if (countResult.count > requestBody.size) {
+        server.log('info', 'do NOT do search');
+        resultFeatures = [];
+      } else {
+        server.log('do search');
+        result = await callWithRequest(request, 'search', esQuery);
+
+        server.log('info', `result length ${result.hits.hits.length}`);
+        const feats = result.hits.hits.map(hit => {
+          let geomType;
+          const geometry = hit._source[geometryFieldName];
+          if (geometry.type === 'polygon' || geometry.type === 'Polygon') {
+            geomType = 'Polygon';
+          } else if (geometry.type === 'multipolygon' || geometry.type === 'MultiPolygon') {
+            geomType = 'MultiPolygon';
+          } else if (geometry.type === 'linestring' || geometry.type === 'LineString') {
+            geomType = 'LineString';
+          } else if (geometry.type === 'multilinestring' || geometry.type === 'MultiLineString') {
+            geomType = 'MultiLineString';
+          } else if (geometry.type === 'point' || geometry.type === 'Point') {
+            geomType = 'Point';
+          } else if (geometry.type === 'MultiPoint' || geomType.type === 'multipoint') {
+            geomType = 'MultiPoint';
+          } else {
+            return null;
+          }
+          const geometryGeoJson = {
+            type: geomType,
+            coordinates: geometry.coordinates,
+          };
+
+          const firstFields = {};
+          if (hit.fields) {
+            const fields = hit.fields;
+            Object.keys(fields).forEach(key => {
+              const value = fields[key];
+              if (Array.isArray(value)) {
+                firstFields[key] = value[0];
+              } else {
+                firstFields[key] = value;
+              }
+            });
+          }
+
+          const properties = {
+            ...hit._source,
+            ...firstFields,
+            _id: hit._id,
+            _index: hit._index,
+            [FEATURE_ID_PROPERTY_NAME]: hit._id,
+          };
+          delete properties[geometryFieldName];
+
+          return {
+            type: 'Feature',
+            id: hit._id,
+            geometry: geometryGeoJson,
+            properties: properties,
+          };
+        });
+
+        resultFeatures = feats.filter(f => !!f);
+      }
     } catch (e) {
       server.log('info', e.message);
       throw e;
     }
 
-    server.log('info', `result length ${result.hits.hits.length}`);
-    const feats = result.hits.hits.map(hit => {
-      let geomType;
-      const geometry = hit._source[geometryFieldName];
-      if (geometry.type === 'polygon' || geometry.type === 'Polygon') {
-        geomType = 'Polygon';
-      } else if (geometry.type === 'multipolygon' || geometry.type === 'MultiPolygon') {
-        geomType = 'MultiPolygon';
-      } else if (geometry.type === 'linestring' || geometry.type === 'LineString') {
-        geomType = 'LineString';
-      } else if (geometry.type === 'multilinestring' || geometry.type === 'MultiLineString') {
-        geomType = 'MultiLineString';
-      } else if (geometry.type === 'point' || geometry.type === 'Point') {
-        geomType = 'Point';
-      } else if (geometry.type === 'MultiPoint' || geomType.type === 'multipoint') {
-        geomType = 'MultiPoint';
-      } else {
-        return null;
-      }
-      const geometryGeoJson = {
-        type: geomType,
-        coordinates: geometry.coordinates,
-      };
-
-      const firstFields = {};
-      if (hit.fields) {
-        const fields = hit.fields;
-        Object.keys(fields).forEach(key => {
-          const value = fields[key];
-          if (Array.isArray(value)) {
-            firstFields[key] = value[0];
-          } else {
-            firstFields[key] = value;
-          }
-        });
-      }
-
-      const properties = {
-        ...hit._source,
-        ...firstFields,
-        _id: hit._id,
-        _index: hit._index,
-        [FEATURE_ID_PROPERTY_NAME]: hit._id,
-      };
-      delete properties[geometryFieldName];
-
-      return {
-        type: 'Feature',
-        id: hit._id,
-        geometry: geometryGeoJson,
-        properties: properties,
-      };
-    });
-
-    const ffeats = feats.filter(f => !!f);
-
     const featureCollection = {
-      features: ffeats,
+      features: resultFeatures,
       type: 'FeatureCollection',
     };
 
