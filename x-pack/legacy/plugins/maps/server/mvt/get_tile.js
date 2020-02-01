@@ -59,6 +59,10 @@ export async function getTile({
         geomType = 'LineString';
       } else if (geometry.type === 'multilinestring' || geometry.type === 'MultiLineString') {
         geomType = 'MultiLineString';
+      } else if (geometry.type === 'point' || geometry.type === 'Point') {
+        geomType = 'Point';
+      } else if (geometry.type === 'MultiPoint' || geomType.type === 'multipoint') {
+        geomType = 'MultiPoint';
       } else {
         return null;
       }
