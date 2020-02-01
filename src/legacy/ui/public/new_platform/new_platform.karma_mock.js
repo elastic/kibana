@@ -20,7 +20,7 @@
 import sinon from 'sinon';
 import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { componentRegistryMock } from '../../../../../src/plugins/advanced_settings/public/mocks';
+import { ComponentRegistry } from '../../../../../src/plugins/advanced_settings/public/';
 
 const mockObservable = () => {
   return {
@@ -62,7 +62,7 @@ export const npSetup = {
     advancedSettings: {
       component: {
         register: sinon.fake(),
-        componentType: componentRegistryMock.componentType,
+        componentType: ComponentRegistry.componentType,
       },
     },
     usageCollection: {
