@@ -20,4 +20,4 @@
 export { fatalError, addFatalErrorCallback } from './fatal_error';
 export { toastNotifications } from './toasts';
 export { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';
-export * from './banners';
+export { banners } from './banners';

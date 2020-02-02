@@ -17,12 +17,7 @@
  * under the License.
  */
 
-import {
-  ErrorToastOptions,
-  NotificationsSetup,
-  Toast,
-  ToastInput,
-} from '../../../../../../target/types/core/public';
+import { NotificationsSetup, Toast, ToastInput, ErrorToastOptions } from 'kibana/public';
 
 export class ToastNotifications {
   public list: Toast[] = [];
