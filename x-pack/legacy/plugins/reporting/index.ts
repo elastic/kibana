@@ -4,21 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
 import { IUiSettingsClient } from 'kibana/server';
-import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
-import { ReportingConfigOptions, ReportingPluginSpecOptions } from './types.d';
-import { config as reportingConfig } from './config';
-import {
-  LegacySetup,
-  ReportingPlugin,
-  ReportingSetupDeps,
-  reportingPluginFactory,
-} from './server/plugin';
-
+import { resolve } from 'path';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+import { PluginSetupContract as SecurityPluginSetup } from '../../../plugins/security/server';
+import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
+import { config as reportingConfig } from './config';
+import { LegacySetup, ReportingPlugin, reportingPluginFactory } from './server/plugin';
+import { ReportingConfigOptions, ReportingPluginSpecOptions } from './types.d';
 
 const kbToBase64Length = (kb: number) => {
   return Math.floor((kb * 1024 * 8) / 6);
@@ -74,9 +69,6 @@ export const reporting = (kibana: any) => {
 
     async init(server: Legacy.Server) {
       const coreSetup = server.newPlatform.setup.core;
-      const pluginsSetup: ReportingSetupDeps = {
-        usageCollection: server.newPlatform.setup.plugins.usageCollection,
-      };
 
       const fieldFormatServiceFactory = async (uiSettings: IUiSettingsClient) => {
         const [, plugins] = await coreSetup.getStartServices();
@@ -89,19 +81,22 @@ export const reporting = (kibana: any) => {
         config: server.config,
         info: server.info,
         route: server.route.bind(server),
-        plugins: {
-          elasticsearch: server.plugins.elasticsearch,
-          xpack_main: server.plugins.xpack_main,
-          security: server.plugins.security,
-        },
+        plugins: { xpack_main: server.plugins.xpack_main },
         savedObjects: server.savedObjects,
         fieldFormatServiceFactory,
         uiSettingsServiceFactory: server.uiSettingsServiceFactory,
       };
 
-      const initializerContext = server.newPlatform.coreContext;
-      const plugin: ReportingPlugin = reportingPluginFactory(initializerContext, __LEGACY, this);
-      await plugin.setup(coreSetup, pluginsSetup);
+      const plugin: ReportingPlugin = reportingPluginFactory(
+        server.newPlatform.coreContext,
+        __LEGACY,
+        this
+      );
+      await plugin.setup(coreSetup, {
+        elasticsearch: coreSetup.elasticsearch,
+        security: server.newPlatform.setup.plugins.security as SecurityPluginSetup,
+        usageCollection: server.newPlatform.setup.plugins.usageCollection,
+      });
     },
 
     deprecations({ unused }: any) {

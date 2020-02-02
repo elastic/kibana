@@ -52,7 +52,7 @@ export const MonitorStatusBarComponent: React.FC<Props> = ({
   const full = monitorStatus?.url?.full ?? '';
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>
         <StatusByLocations locations={monitorLocations?.locations ?? []} />
       </EuiFlexItem>

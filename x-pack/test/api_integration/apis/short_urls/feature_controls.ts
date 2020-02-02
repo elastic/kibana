@@ -12,8 +12,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const security = getService('security');
 
   describe('feature controls', () => {
-    const kibanaUsername = 'kibana_user';
-    const kibanaUserRoleName = 'kibana_user';
+    const kibanaUsername = 'kibana_admin';
+    const kibanaUserRoleName = 'kibana_admin';
 
     const kibanaUserPassword = `${kibanaUsername}-password`;
 
