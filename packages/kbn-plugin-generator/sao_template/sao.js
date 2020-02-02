@@ -50,11 +50,11 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
         message: 'Should a server API be generated?',
         default: true,
       },
-      generateTranslations: {
-        type: 'confirm',
-        message: 'Should translation files be generated?',
-        default: true,
-      },
+      // generateTranslations: {
+      //   type: 'confirm',
+      //   message: 'Should translation files be generated?',
+      //   default: true,
+      // },
       generateScss: {
         type: 'confirm',
         message: 'Should SCSS be used?',
@@ -71,8 +71,8 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
       'public/**/index.scss': 'generateScss',
       'public/**/*': 'generateApp',
       'server/**/*': 'generateApi',
-      'translations/**/*': 'generateTranslations',
-      '.i18nrc.json': 'generateTranslations',
+      // 'translations/**/*': 'generateTranslations',
+      // '.i18nrc.json': 'generateTranslations',
       'eslintrc.js': 'generateEslint',
     },
     move: {

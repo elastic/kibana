@@ -1,6 +1,6 @@
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '<%= relRoot %>/src/core/public';
-import { <%= upperCamelCaseName %>PluginSetup, <%= upperCamelCaseName %>PluginStart, AppPluginDependencies } from './types';
+import { <%= upperCamelCaseName %>PluginSetup, <%= upperCamelCaseName %>PluginStart, AppPluginStartDependencies } from './types';
 import { PLUGIN_NAME } from '../common';
 
 export class <%= upperCamelCaseName %>Plugin
@@ -17,7 +17,7 @@ export class <%= upperCamelCaseName %>Plugin
         // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
         // Render the application
-        return renderApp(coreStart, depsStart as AppPluginDependencies, params);
+        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
       },
     });
 
