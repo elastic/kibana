@@ -19,10 +19,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
-import { AggConfig, Vis } from 'ui/vis';
+import { AggConfig } from 'ui/agg_types';
 import { npStart } from 'ui/new_platform';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 import { fieldFormats } from '../../../../../../plugins/data/public';
+import { Vis } from '../../../../../core_plugins/visualizations/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import { DateRangeKey, convertDateRangeToString } from '../../../agg_types/buckets/date_range';

@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { Vis } from 'ui/vis';
+import { Vis } from '../../../../visualizations/public/np_ready/public/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 import { createTagCloudVisualization } from '../tag_cloud_visualization';
 import basicdrawPng from './basicdraw.png';
