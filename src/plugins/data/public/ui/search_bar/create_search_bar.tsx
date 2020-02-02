@@ -196,15 +196,12 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       fetchSavedQuery();
     }, [props.savedQueryId, savedQueries]);
 
-    const [filters, setFilters] = useState(filterManager.getFilters());
-
-    // We do not really need to keep track of the time
-    // since this is just for initialization
-    const timeRange = timefilter.timefilter.getTime();
-
+    // timerange
+    const [timeRange, setTimerange] = useState(timefilter.timefilter.getTime());
     useEffect(() => {
       let isSubscribed = true;
       const subscriptions = new Subscription();
+
       subscriptions.add(
         timefilter.timefilter.getRefreshIntervalUpdate$().subscribe({
           next: () => {
@@ -216,6 +213,28 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           },
         })
       );
+
+      subscriptions.add(
+        timefilter.timefilter.getTimeUpdate$().subscribe({
+          next: () => {
+            if (isSubscribed) {
+              setTimerange(timefilter.timefilter.getTime());
+            }
+          },
+        })
+      );
+
+      return () => {
+        isSubscribed = false;
+        subscriptions.unsubscribe();
+      };
+    }, [timefilter.timefilter]);
+
+    // filters
+    const [filters, setFilters] = useState(filterManager.getFilters());
+    useEffect(() => {
+      let isSubscribed = true;
+      const subscriptions = new Subscription();
 
       subscriptions.add(
         filterManager.getUpdates$().subscribe({
@@ -232,7 +251,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
         isSubscribed = false;
         subscriptions.unsubscribe();
       };
-    }, [filterManager, timefilter.timefilter]);
+    }, [filterManager]);
 
     return (
       <KibanaContextProvider
