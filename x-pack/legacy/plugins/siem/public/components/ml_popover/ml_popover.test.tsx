@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { MlPopover } from './ml_popover';

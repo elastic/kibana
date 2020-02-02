@@ -28,7 +28,7 @@ import { useKibana } from '../../../lib/kibana';
 import { decodeIpv6 } from '../../../lib/helpers';
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import { ConditionalFlexGroup } from '../../../pages/network/navigation/conditional_flex_group';
-import { networkModel, networkSelectors, State, inputsSelectors } from '../../../store';
+import { networkModel, State, inputsSelectors } from '../../../store';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { setIpDetailsTablesActivePageToZero as dispatchIpDetailsTablesActivePageToZero } from '../../../store/network/actions';
 import { SpyRoute } from '../../../utils/route/spy_routes';
@@ -46,7 +46,7 @@ export { getBreadcrumbs } from './utils';
 
 const IpOverviewManage = manageQuery(IpOverview);
 
-export const IPDetailsComponent = ({
+export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRedux> = ({
   detailName,
   filters,
   flowTarget,
@@ -57,7 +57,7 @@ export const IPDetailsComponent = ({
   setIpDetailsTablesActivePageToZero,
   setQuery,
   to,
-}: IPDetailsComponentProps & PropsFromRedux) => {
+}) => {
   const type = networkModel.NetworkType.details;
   const narrowDateRange = useCallback(
     (score, interval) => {
@@ -102,7 +102,7 @@ export const IPDetailsComponent = ({
                   subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
                   title={ip}
                 >
-                  <FlowTargetSelectConnected />
+                  <FlowTargetSelectConnected flowTarget={flowTarget} />
                 </HeaderPage>
 
                 <IpOverviewQuery
@@ -279,18 +279,19 @@ IPDetailsComponent.displayName = 'IPDetailsComponent';
 const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
+
   return (state: State) => ({
     query: getGlobalQuerySelector(state),
     filters: getGlobalFiltersQuerySelector(state),
-    flowTarget: getIpDetailsFlowTargetSelector(state),
   });
 };
 
-export const connector = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
   setIpDetailsTablesActivePageToZero: dispatchIpDetailsTablesActivePageToZero,
-});
+};
+
+export const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

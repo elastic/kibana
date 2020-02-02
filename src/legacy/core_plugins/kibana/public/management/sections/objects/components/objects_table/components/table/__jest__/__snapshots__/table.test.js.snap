@@ -203,6 +203,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           "onSelectionChange": [Function],
         }
       }
+      tableLayout="fixed"
     />
   </div>
 </Fragment>
@@ -410,6 +411,7 @@ exports[`Table should render normally 1`] = `
           "onSelectionChange": [Function],
         }
       }
+      tableLayout="fixed"
     />
   </div>
 </Fragment>

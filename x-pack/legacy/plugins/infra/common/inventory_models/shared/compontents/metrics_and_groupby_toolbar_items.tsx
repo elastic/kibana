@@ -9,14 +9,14 @@ import { EuiFlexItem } from '@elastic/eui';
 import { ToolbarProps } from '../../../../public/components/inventory/toolbars/toolbar';
 import { WaffleMetricControls } from '../../../../public/components/waffle/waffle_metric_controls';
 import { WaffleGroupByControls } from '../../../../public/components/waffle/waffle_group_by_controls';
-import { InfraSnapshotMetricType } from '../../../../public/graphql/types';
 import {
   toGroupByOpt,
   toMetricOpt,
 } from '../../../../public/components/inventory/toolbars/toolbar_wrapper';
+import { SnapshotMetricType } from '../../types';
 
 interface Props extends ToolbarProps {
-  metricTypes: InfraSnapshotMetricType[];
+  metricTypes: SnapshotMetricType[];
   groupByFields: string[];
 }
 

@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import * as React from 'react';
+import React from 'react';
 import chrome from 'ui/chrome';
 
 import { useKibana } from '../../lib/kibana';
@@ -24,7 +24,7 @@ export const IndexPatternsMissingPromptComponent = () => {
         <>
           <p>
             <FormattedMessage
-              defaultMessage="To display map data, you must define SIEM indices ({defaultIndex}) and Kibana index patterns with identical names or glob patterns. When using {beats}, you can run the {setup} command on your hosts to automatically create the index patterns. For example: {example}."
+              defaultMessage="To display map data, you must define SIEM indices ({defaultIndex}) and Kibana index patterns with matching glob patterns. When using {beats}, you can run the {setup} command on your hosts to automatically create the index patterns. For example: {example}."
               id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription1"
               values={{
                 defaultIndex: (

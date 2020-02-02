@@ -18,6 +18,7 @@ import {
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
 import { AutoSizer } from '../auto_sizer';
 import { ChartPlaceHolder } from './chart_place_holder';
+import { useTimeZone } from '../../hooks';
 import {
   chartDefaultSettings,
   ChartSeriesConfigs,
@@ -26,7 +27,6 @@ import {
   getChartWidth,
   WrappedByAutoSizer,
   useTheme,
-  useBrowserTimeZone,
 } from './common';
 
 // custom series styles: https://ela.st/areachart-styling
@@ -71,7 +71,7 @@ export const AreaChartBaseComponent = ({
   configs?: ChartSeriesConfigs | undefined;
 }) => {
   const theme = useTheme();
-  const timeZone = useBrowserTimeZone();
+  const timeZone = useTimeZone();
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const xAxisId = `group-${data[0].key}-x`;

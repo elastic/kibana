@@ -6,7 +6,6 @@
 
 import moment from 'moment';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
-import { CoreSetup } from 'src/core/server';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
 import {
   SearchParams,
@@ -16,7 +15,12 @@ import {
 } from 'elasticsearch';
 import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
-import { RunContext } from '../../../task_manager/server';
+import {
+  RunContext,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../../plugins/task_manager/server';
+
 import { getVisualizationCounts } from './visualization_counts';
 
 // This task is responsible for running daily and aggregating all the Lens click event objects
@@ -39,19 +43,21 @@ type ClusterDeleteType = (
   options?: CallClusterOptions
 ) => Promise<DeleteDocumentByQueryResponse>;
 
-export function initializeLensTelemetry(core: CoreSetup, server: Server) {
-  registerLensTelemetryTask(core, server);
-  scheduleTasks(server);
-}
-
-function registerLensTelemetryTask(core: CoreSetup, server: Server) {
-  const taskManager = server.plugins.task_manager;
-
+export function initializeLensTelemetry(server: Server, taskManager?: TaskManagerSetupContract) {
   if (!taskManager) {
     server.log(['debug', 'telemetry'], `Task manager is not available`);
-    return;
+  } else {
+    registerLensTelemetryTask(server, taskManager);
   }
+}
 
+export function scheduleLensTelemetry(server: Server, taskManager?: TaskManagerStartContract) {
+  if (taskManager) {
+    scheduleTasks(server, taskManager);
+  }
+}
+
+function registerLensTelemetryTask(server: Server, taskManager: TaskManagerSetupContract) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Lens telemetry fetch task',
@@ -62,16 +68,10 @@ function registerLensTelemetryTask(core: CoreSetup, server: Server) {
   });
 }
 
-function scheduleTasks(server: Server) {
-  const taskManager = server.plugins.task_manager;
+function scheduleTasks(server: Server, taskManager: TaskManagerStartContract) {
   const { kbnServer } = (server.plugins.xpack_main as XPackMainPlugin & {
     status: { plugin: { kbnServer: KbnServer } };
   }).status.plugin;
-
-  if (!taskManager) {
-    server.log(['debug', 'telemetry'], `Task manager is not available`);
-    return;
-  }
 
   kbnServer.afterPluginsInit(() => {
     // The code block below can't await directly within "afterPluginsInit"

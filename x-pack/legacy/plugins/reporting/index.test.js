@@ -16,6 +16,7 @@ jest.mock('os', () => {
   return os;
 });
 
+// eslint-disable-next-line jest/valid-describe
 const describeWithContext = describe.each([
   [{ dev: false, dist: false }],
   [{ dev: true, dist: false }],

@@ -31,7 +31,6 @@ import { uiModules } from '../modules';
 import { StateProvider } from './state';
 import '../persisted_state';
 import { createLegacyClass } from '../utils/legacy_class';
-import { callEach } from '../utils/function';
 
 const urlParam = '_a';
 
@@ -62,7 +61,8 @@ export function AppStateProvider(Private, $location, $injector) {
   AppState.prototype.destroy = function() {
     AppState.Super.prototype.destroy.call(this);
     AppState.getAppState._set(null);
-    callEach(eventUnsubscribers);
+
+    eventUnsubscribers.forEach(listener => listener());
   };
 
   /**

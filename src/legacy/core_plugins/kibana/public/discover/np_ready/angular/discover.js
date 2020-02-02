@@ -25,6 +25,7 @@ import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import '../components/field_chooser/field_chooser';
 
+import { RequestAdapter } from '../../../../../../../plugins/inspector/public';
 // doc table
 import './doc_table';
 import { getSort } from './doc_table/lib/get_sort';
@@ -36,6 +37,7 @@ import { showOpenSearchPanel } from '../components/top_nav/show_open_search_pane
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
+import { discoverResponseHandler } from './response_handler';
 import {
   angular,
   buildVislibDimensions,
@@ -44,21 +46,18 @@ import {
   getServices,
   hasSearchStategyForIndexPattern,
   intervalOptions,
-  isDefaultTypeIndexPattern,
   migrateLegacyQuery,
-  RequestAdapter,
   showSaveModal,
   unhashUrl,
   stateMonitorFactory,
   subscribeWithScope,
   tabifyAggResponse,
-  vislibSeriesResponseHandlerProvider,
-  Vis,
   SavedObjectSaveModal,
   getAngularModule,
   ensureDefaultIndexPattern,
   registerTimefilterWithGlobalStateFactory,
 } from '../../kibana_services';
+import { Vis } from '../../../../../visualizations/public';
 
 const {
   core,
@@ -73,7 +72,10 @@ const {
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
-import { generateFilters } from '../../../../../../../plugins/data/public';
+import {
+  generateFilters,
+  indexPatterns as indexPatternsUtils,
+} from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { FilterStateManager } from '../../../../../data/public';
 
@@ -187,7 +189,6 @@ function discoverController(
   $timeout,
   $window,
   AppState,
-  Private,
   Promise,
   config,
   kbnUrl,
@@ -196,7 +197,6 @@ function discoverController(
   getAppState,
   globalState
 ) {
-  const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
 
   const inspectorAdapters = {
@@ -402,7 +402,8 @@ function discoverController(
 
   // searchSource which applies time range
   const timeRangeSearchSource = savedSearch.searchSource.create();
-  if (isDefaultTypeIndexPattern($scope.indexPattern)) {
+
+  if (indexPatternsUtils.isDefault($scope.indexPattern)) {
     timeRangeSearchSource.setField('filter', () => {
       return timefilter.createFilter($scope.indexPattern);
     });
@@ -486,7 +487,14 @@ function discoverController(
 
     const { searchFields, selectFields } = await getSharingDataFields();
     searchSource.setField('fields', searchFields);
-    searchSource.setField('sort', getSortForSearchSource($state.sort, $scope.indexPattern));
+    searchSource.setField(
+      'sort',
+      getSortForSearchSource(
+        $state.sort,
+        $scope.indexPattern,
+        config.get('discover:sort:defaultOrder')
+      )
+    );
     searchSource.setField('highlight', null);
     searchSource.setField('highlightAll', null);
     searchSource.setField('aggs', null);
@@ -517,11 +525,7 @@ function discoverController(
           language:
             localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
         },
-      sort: getSort.array(
-        savedSearch.sort,
-        $scope.indexPattern,
-        config.get('discover:sort:defaultOrder')
-      ),
+      sort: getSort.array(savedSearch.sort, $scope.indexPattern),
       columns:
         savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
@@ -560,7 +564,8 @@ function discoverController(
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
-    timefield: isDefaultTypeIndexPattern($scope.indexPattern) && $scope.indexPattern.timeFieldName,
+    timefield:
+      indexPatternsUtils.isDefault($scope.indexPattern) && $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
   };
@@ -637,7 +642,7 @@ function discoverController(
 
       // fetch data when filters fire fetch event
       subscriptions.add(
-        subscribeWithScope($scope, filterManager.getUpdates$(), {
+        subscribeWithScope($scope, filterManager.getFetches$(), {
           next: $scope.fetch,
         })
       );
@@ -671,7 +676,9 @@ function discoverController(
       $scope.$watch('state.query', (newQuery, oldQuery) => {
         if (!_.isEqual(newQuery, oldQuery)) {
           const query = migrateLegacyQuery(newQuery);
-          $scope.updateQueryAndFetch({ query });
+          if (!_.isEqual(query, newQuery)) {
+            $scope.updateQueryAndFetch({ query });
+          }
         }
       });
 
@@ -817,15 +824,21 @@ function discoverController(
             title: i18n.translate('kbn.discover.errorLoadingData', {
               defaultMessage: 'Error loading data',
             }),
+            toastMessage: error.shortMessage,
           });
         }
       });
   };
 
   $scope.updateQueryAndFetch = function({ query, dateRange }) {
+    const oldDateRange = timefilter.getTime();
     timefilter.setTime(dateRange);
     $state.query = query;
-    $scope.fetch();
+    // storing the updated timerange in the state will trigger a fetch
+    // call automatically, so only trigger fetch in case this is a refresh call (no changes in parameters).
+    if (_.isEqual(oldDateRange, dateRange)) {
+      $scope.fetch();
+    }
   };
 
   function onResults(resp) {
@@ -839,11 +852,9 @@ function discoverController(
           timeRange: $scope.timeRange,
           searchSource: $scope.searchSource,
         })
-      )
-        .then(resp => responseHandler(tabifiedData, resp))
-        .then(resp => {
-          $scope.histogramData = resp;
-        });
+      ).then(resp => {
+        $scope.histogramData = discoverResponseHandler(tabifiedData, resp);
+      });
     }
 
     $scope.hits = resp.hits.total;
@@ -926,7 +937,10 @@ function discoverController(
     const { indexPattern, searchSource } = $scope;
     searchSource
       .setField('size', $scope.opts.sampleSize)
-      .setField('sort', getSortForSearchSource($state.sort, indexPattern))
+      .setField(
+        'sort',
+        getSortForSearchSource($state.sort, indexPattern, config.get('discover:sort:defaultOrder'))
+      )
       .setField('query', !$state.query ? null : $state.query)
       .setField('filter', filterManager.getFilters());
   });
@@ -992,7 +1006,7 @@ function discoverController(
       query: '',
       language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
     };
-    filterManager.removeAll();
+    filterManager.setFilters(filterManager.getGlobalFilters());
     $state.save();
     $scope.fetch();
   };
@@ -1000,7 +1014,9 @@ function discoverController(
   const updateStateFromSavedQuery = savedQuery => {
     $state.query = savedQuery.attributes.query;
     $state.save();
-    filterManager.setFilters(savedQuery.attributes.filters || []);
+    const savedQueryFilters = savedQuery.attributes.filters || [];
+    const globalFilters = filterManager.getGlobalFilters();
+    filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
 
     if (savedQuery.attributes.timefilter) {
       timefilter.setTime({
@@ -1150,7 +1166,7 @@ function discoverController(
   // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
   // supported.
   $scope.isUnsupportedIndexPattern =
-    !isDefaultTypeIndexPattern($route.current.locals.savedObjects.ip.loaded) &&
+    !indexPatternsUtils.isDefault($route.current.locals.savedObjects.ip.loaded) &&
     !hasSearchStategyForIndexPattern($route.current.locals.savedObjects.ip.loaded);
 
   if ($scope.isUnsupportedIndexPattern) {

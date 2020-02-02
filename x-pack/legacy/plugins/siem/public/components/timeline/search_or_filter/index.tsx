@@ -21,7 +21,7 @@ import {
   inputsSelectors,
 } from '../../../store';
 import { timelineActions } from '../../../store/actions';
-import { KqlMode, timelineDefaults, TimelineModel } from '../../../store/timeline/model';
+import { KqlMode, timelineDefaults, TimelineModel, EventType } from '../../../store/timeline/model';
 import { dispatchUpdateReduxTime } from '../../super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
 
@@ -38,6 +38,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     applyKqlFilterQuery,
     browserFields,
     dataProviders,
+    eventType,
     filters,
     filterQuery,
     filterQueryDraft,
@@ -54,6 +55,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     timelineId,
     to,
     toStr,
+    updateEventType,
     updateKqlMode,
     updateReduxTime,
   }) => {
@@ -102,11 +104,21 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       [timelineId]
     );
 
+    const handleUpdateEventType = useCallback(
+      (newEventType: EventType) =>
+        updateEventType({
+          id: timelineId,
+          eventType: newEventType,
+        }),
+      [timelineId]
+    );
+
     return (
       <SearchOrFilter
         applyKqlFilterQuery={applyFilterQueryFromKueryExpression}
         browserFields={browserFields}
         dataProviders={dataProviders}
+        eventType={eventType}
         filters={filters}
         filterQuery={filterQuery}
         filterQueryDraft={filterQueryDraft}
@@ -123,6 +135,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         timelineId={timelineId}
         to={to}
         toStr={toStr}
+        updateEventType={handleUpdateEventType}
         updateKqlMode={updateKqlMode!}
         updateReduxTime={updateReduxTime}
       />
@@ -130,6 +143,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
   },
   (prevProps, nextProps) => {
     return (
+      prevProps.eventType === nextProps.eventType &&
       prevProps.from === nextProps.from &&
       prevProps.fromStr === nextProps.fromStr &&
       prevProps.to === nextProps.to &&
@@ -163,6 +177,7 @@ const makeMapStateToProps = () => {
     const policy: inputsModel.Policy = getInputsPolicy(state);
     return {
       dataProviders: timeline.dataProviders,
+      eventType: timeline.eventType ?? 'raw',
       filterQuery: getKqlFilterQuery(state, timelineId)!,
       filterQueryDraft: getKqlFilterQueryDraft(state, timelineId)!,
       filters: timeline.filters!,
@@ -187,6 +202,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
         filterQuery,
       })
     ),
+  updateEventType: ({ id, eventType }: { id: string; eventType: EventType }) =>
+    dispatch(timelineActions.updateEventType({ id, eventType })),
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) =>
     dispatch(timelineActions.updateKqlMode({ id, kqlMode })),
   setKqlFilterQueryDraft: ({

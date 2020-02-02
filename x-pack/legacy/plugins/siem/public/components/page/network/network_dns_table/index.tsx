@@ -6,8 +6,7 @@
 
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { networkActions } from '../../../../store/actions';
 import {
@@ -37,22 +36,7 @@ interface OwnProps {
   type: networkModel.NetworkType;
 }
 
-interface NetworkDnsTableReduxProps {
-  activePage: number;
-  limit: number;
-  sort: NetworkDnsSortField;
-  isPtrIncluded: boolean;
-}
-
-interface NetworkDnsTableDispatchProps {
-  updateNetworkTable: ActionCreator<{
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.AllNetworkTables;
-    updates: networkModel.TableUpdates;
-  }>;
-}
-
-type NetworkDnsTableProps = OwnProps & NetworkDnsTableReduxProps & NetworkDnsTableDispatchProps;
+type NetworkDnsTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -172,6 +156,12 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const NetworkDnsTable = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   updateNetworkTable: networkActions.updateNetworkTable,
-})(NetworkDnsTableComponent);
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const NetworkDnsTable = connector(NetworkDnsTableComponent);

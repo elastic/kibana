@@ -33,10 +33,10 @@ import _ from 'lodash';
  * @return {array} - the objs argument
  */
 export function move(
-  objs: object[],
+  objs: any[],
   obj: object | number,
   below: number | boolean,
-  qualifier: (object: object, index: number) => any
+  qualifier?: ((object: object, index: number) => any) | Record<string, any> | string
 ): object[] {
   const origI = _.isNumber(obj) ? obj : objs.indexOf(obj);
   if (origI === -1) {
@@ -50,7 +50,7 @@ export function move(
   }
 
   below = !!below;
-  qualifier = _.callback(qualifier);
+  qualifier = qualifier && _.callback(qualifier);
 
   const above = !below;
   const finder = below ? _.findIndex : _.findLastIndex;
@@ -63,7 +63,7 @@ export function move(
     if (above && otherI >= origI) {
       return;
     }
-    return !!qualifier(otherAgg, otherI);
+    return Boolean(_.isFunction(qualifier) && qualifier(otherAgg, otherI));
   });
 
   if (targetI === -1) {
@@ -73,69 +73,4 @@ export function move(
   // place the obj at it's new index
   objs.splice(targetI, 0, objs.splice(origI, 1)[0]);
   return objs;
-}
-
-/**
- * Like _.groupBy, but allows specifying multiple groups for a
- * single object.
- *
- * organizeBy([{ a: [1, 2, 3] }, { b: true, a: [1, 4] }], 'a')
- * // Object {1: Array[2], 2: Array[1], 3: Array[1], 4: Array[1]}
- *
- * _.groupBy([{ a: [1, 2, 3] }, { b: true, a: [1, 4] }], 'a')
- * // Object {'1,2,3': Array[1], '1,4': Array[1]}
- *
- * @param  {array} collection - the list of values to organize
- * @param  {Function} callback - either a property name, or a callback.
- * @return {object}
- */
-export function organizeBy(collection: object[], callback: (obj: object) => string | string) {
-  const buckets: { [key: string]: object[] } = {};
-  const prop = typeof callback === 'function' ? false : callback;
-
-  function add(key: string, obj: object) {
-    if (!buckets[key]) {
-      buckets[key] = [];
-    }
-    buckets[key].push(obj);
-  }
-
-  _.each(collection, (obj: object) => {
-    const keys = prop === false ? callback(obj) : obj[prop];
-
-    if (!Array.isArray(keys)) {
-      add(keys, obj);
-      return;
-    }
-
-    let length = keys.length;
-    while (length-- > 0) {
-      add(keys[length], obj);
-    }
-  });
-
-  return buckets;
-}
-
-/**
- * Efficient and safe version of [].push(dest, source);
- *
- * @param  {Array} source - the array to pull values from
- * @param  {Array} dest   - the array to push values into
- * @return {Array} dest
- */
-export function pushAll(source: any[], dest: any[]): any[] {
-  const start = dest.length;
-  const adding = source.length;
-
-  // allocate - http://goo.gl/e2i0S0
-  dest.length = start + adding;
-
-  // fill sparse positions
-  let i = -1;
-  while (++i < adding) {
-    dest[start + i] = source[i];
-  }
-
-  return dest;
 }

@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FeatureTable can render without spaces 1`] = `
+<EuiInMemoryTable
+  columns={
+    Array [
+      Object {
+        "field": "feature",
+        "name": "Feature",
+        "render": [Function],
+      },
+      Object {
+        "field": "privilege",
+        "name": <span>
+          <FormattedMessage
+            defaultMessage="Privilege"
+            id="xpack.security.management.editRole.featureTable.enabledRoleFeaturesEnabledColumnTitle"
+            values={Object {}}
+          />
+          <ChangeAllPrivilegesControl
+            onChange={[Function]}
+            privileges={
+              Array [
+                "all",
+                "read",
+                "none",
+              ]
+            }
+          />
+        </span>,
+        "render": [Function],
+      },
+    ]
+  }
+  items={Array []}
+  responsive={false}
+  tableLayout="fixed"
+/>
+`;

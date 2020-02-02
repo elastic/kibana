@@ -52,7 +52,7 @@ describe('Webpack DLL Build Tasks Utils', () => {
 
     isFileAccessible.mockImplementation(() => true);
 
-    const mockManifestPath = '/mock/mock_dll_manifest.json';
+    const mockManifestPath = ['/mock/mock_dll_manifest.json'];
     const mockModulesWhitelist = ['dep1'];
     const dllEntries = await getDllEntries(mockManifestPath, mockModulesWhitelist);
 
@@ -66,7 +66,7 @@ describe('Webpack DLL Build Tasks Utils', () => {
 
     isFileAccessible.mockImplementation(() => false);
 
-    const mockManifestPath = '/mock/mock_dll_manifest.json';
+    const mockManifestPath = ['/mock/mock_dll_manifest.json'];
     const mockModulesWhitelist = ['dep1'];
     const dllEntries = await getDllEntries(mockManifestPath, mockModulesWhitelist);
 
@@ -78,7 +78,7 @@ describe('Webpack DLL Build Tasks Utils', () => {
   it('should throw an error for no manifest file', async () => {
     read.mockImplementationOnce(async () => noManifestMock);
 
-    const mockManifestPath = '/mock/mock_dll_manifest.json';
+    const mockManifestPath = ['/mock/mock_dll_manifest.json'];
 
     try {
       await getDllEntries(mockManifestPath, []);
@@ -92,7 +92,7 @@ describe('Webpack DLL Build Tasks Utils', () => {
   it('should throw an error for no manifest content field', async () => {
     read.mockImplementation(async () => noContentFieldManifestMock);
 
-    const mockManifestPath = '/mock/mock_dll_manifest.json';
+    const mockManifestPath = ['/mock/mock_dll_manifest.json'];
 
     try {
       await getDllEntries(mockManifestPath, []);
@@ -106,7 +106,7 @@ describe('Webpack DLL Build Tasks Utils', () => {
   it('should throw an error for manifest file without any content', async () => {
     read.mockImplementation(async () => emptyManifestContentMock);
 
-    const mockManifestPath = '/mock/mock_dll_manifest.json';
+    const mockManifestPath = ['/mock/mock_dll_manifest.json'];
 
     try {
       await getDllEntries(mockManifestPath, []);

@@ -5,10 +5,16 @@
  */
 
 import _ from 'lodash';
-import { EMS_FILE, ES_GEO_FIELD_TYPE, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import {
+  EMS_FILE,
+  ES_GEO_FIELD_TYPE,
+  MAP_SAVED_OBJECT_TYPE,
+  TELEMETRY_TYPE,
+} from '../../common/constants';
 
-function getSavedObjectsClient(server, callCluster) {
+function getSavedObjectsClient(server) {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
+  const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
   const internalRepository = getSavedObjectsRepository(callCluster);
   return new SavedObjectsClient(internalRepository);
 }
@@ -79,7 +85,7 @@ export function buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, 
     // Total count of maps
     mapsTotalCount: mapsCount,
     // Time of capture
-    timeCaptured: new Date(),
+    timeCaptured: new Date().toISOString(),
     attributesPerMap: {
       // Count of data sources per map
       dataSourcesCount: {
@@ -115,16 +121,16 @@ async function getIndexPatternSavedObjects(savedObjectsClient) {
   return _.get(indexPatternSavedObjects, 'saved_objects', []);
 }
 
-export async function getMapsTelemetry(server, callCluster) {
-  const savedObjectsClient = getSavedObjectsClient(server, callCluster);
+export async function getMapsTelemetry(server) {
+  const savedObjectsClient = getSavedObjectsClient(server);
   const mapSavedObjects = await getMapSavedObjects(savedObjectsClient);
   const indexPatternSavedObjects = await getIndexPatternSavedObjects(savedObjectsClient);
   const settings = {
     showMapVisualizationTypes: server.config().get('xpack.maps.showMapVisualizationTypes'),
   };
   const mapsTelemetry = buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
-  return await savedObjectsClient.create('maps-telemetry', mapsTelemetry, {
-    id: 'maps-telemetry',
+  return await savedObjectsClient.create(TELEMETRY_TYPE, mapsTelemetry, {
+    id: TELEMETRY_TYPE,
     overwrite: true,
   });
 }

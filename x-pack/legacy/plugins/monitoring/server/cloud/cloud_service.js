@@ -48,7 +48,7 @@ export class CloudService {
    * @param {Object} _request 'request' HTTP handler.
    * @return {Promise} Never {@code null} {@code CloudServiceResponse}.
    */
-  _checkIfService(_request) {
+  _checkIfService() {
     return Promise.reject(new Error('not implemented'));
   }
 

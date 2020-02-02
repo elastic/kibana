@@ -30,9 +30,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('EEndpoint');
       });
 
@@ -70,9 +68,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).not.to.contain('EEndpoint');
       });
     });

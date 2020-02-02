@@ -25,7 +25,7 @@ export default function({ getService, getPageObjects }) {
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const renderable = getService('renderable');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'visEditor', 'header', 'visChart']);
 
   describe.skip('data table with index without time filter', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable without time filter';
@@ -40,27 +40,27 @@ export default function({ getService, getPageObjects }) {
         PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED
       );
       log.debug('Bucket = Split Rows');
-      await PageObjects.visualize.clickBucket('Split rows');
+      await PageObjects.visEditor.clickBucket('Split rows');
       log.debug('Aggregation = Histogram');
-      await PageObjects.visualize.selectAggregation('Histogram');
+      await PageObjects.visEditor.selectAggregation('Histogram');
       log.debug('Field = bytes');
-      await PageObjects.visualize.selectField('bytes');
+      await PageObjects.visEditor.selectField('bytes');
       log.debug('Interval = 2000');
-      await PageObjects.visualize.setNumericInterval('2000');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.setInterval('2000', { type: 'numeric' });
+      await PageObjects.visEditor.clickGo();
     });
 
     it('should allow applying changed params', async () => {
-      await PageObjects.visualize.setNumericInterval('1', { append: true });
-      const interval = await PageObjects.visualize.getNumericInterval();
+      await PageObjects.visEditor.setInterval('1', { type: 'numeric', append: true });
+      const interval = await PageObjects.visEditor.getNumericInterval();
       expect(interval).to.be('20001');
-      const isApplyButtonEnabled = await PageObjects.visualize.isApplyEnabled();
+      const isApplyButtonEnabled = await PageObjects.visEditor.isApplyEnabled();
       expect(isApplyButtonEnabled).to.be(true);
     });
 
     it('should allow reseting changed params', async () => {
-      await PageObjects.visualize.clickReset();
-      const interval = await PageObjects.visualize.getNumericInterval();
+      await PageObjects.visEditor.clickReset();
+      const interval = await PageObjects.visEditor.getNumericInterval();
       expect(interval).to.be('2000');
     });
 
@@ -68,7 +68,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visualize.waitForVisualization();
+      await PageObjects.visChart.waitForVisualization();
     });
 
     it('should have inspector enabled', async function() {
@@ -102,12 +102,12 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch(
         PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED
       );
-      await PageObjects.visualize.clickBucket('Metric', 'metrics');
-      await PageObjects.visualize.selectAggregation('Average Bucket', 'metrics');
-      await PageObjects.visualize.selectAggregation('Terms', 'metrics', 'buckets');
-      await PageObjects.visualize.selectField('geo.src', 'metrics', 'buckets');
-      await PageObjects.visualize.clickGo();
-      const data = await PageObjects.visualize.getTableVisData();
+      await PageObjects.visEditor.clickBucket('Metric', 'metrics');
+      await PageObjects.visEditor.selectAggregation('Average Bucket', 'metrics');
+      await PageObjects.visEditor.selectAggregation('Terms', 'metrics', 'buckets');
+      await PageObjects.visEditor.selectField('geo.src', 'metrics', 'buckets');
+      await PageObjects.visEditor.clickGo();
+      const data = await PageObjects.visChart.getTableVisData();
       log.debug(data.split('\n'));
       expect(data.trim().split('\n')).to.be.eql(['14,004 1,412.6']);
     });
@@ -118,12 +118,12 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch(
         PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED
       );
-      await PageObjects.visualize.clickBucket('Split rows');
-      await PageObjects.visualize.selectAggregation('Date Histogram');
-      await PageObjects.visualize.selectField('@timestamp');
-      await PageObjects.visualize.setInterval('Daily');
-      await PageObjects.visualize.clickGo();
-      const data = await PageObjects.visualize.getTableVisData();
+      await PageObjects.visEditor.clickBucket('Split rows');
+      await PageObjects.visEditor.selectAggregation('Date Histogram');
+      await PageObjects.visEditor.selectField('@timestamp');
+      await PageObjects.visEditor.setInterval('Daily');
+      await PageObjects.visEditor.clickGo();
+      const data = await PageObjects.visChart.getTableVisData();
       log.debug(data.split('\n'));
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20',
@@ -141,12 +141,12 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch(
         PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED
       );
-      await PageObjects.visualize.clickBucket('Split rows');
-      await PageObjects.visualize.selectAggregation('Date Histogram');
-      await PageObjects.visualize.selectField('@timestamp');
-      await PageObjects.visualize.setInterval('Daily');
-      await PageObjects.visualize.clickGo();
-      const data = await PageObjects.visualize.getTableVisData();
+      await PageObjects.visEditor.clickBucket('Split rows');
+      await PageObjects.visEditor.selectAggregation('Date Histogram');
+      await PageObjects.visEditor.selectField('@timestamp');
+      await PageObjects.visEditor.setInterval('Daily');
+      await PageObjects.visEditor.clickGo();
+      const data = await PageObjects.visChart.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20',
         '4,757',
@@ -161,7 +161,7 @@ export default function({ getService, getPageObjects }) {
       await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
-      const data = await PageObjects.visualize.getTableVisData();
+      const data = await PageObjects.visChart.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql(['2015-09-20', '4,757']);
     });
 
@@ -169,7 +169,7 @@ export default function({ getService, getPageObjects }) {
       await filterBar.toggleFilterPinned('@timestamp');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
-      const data = await PageObjects.visualize.getTableVisData();
+      const data = await PageObjects.visChart.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql(['2015-09-20', '4,757']);
     });
   });

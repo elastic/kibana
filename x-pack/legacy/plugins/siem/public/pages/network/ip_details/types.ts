@@ -14,7 +14,10 @@ import { GlobalTimeArgs } from '../../../containers/global_time';
 
 export const type = NetworkType.details;
 
-export type IPDetailsComponentProps = GlobalTimeArgs & { detailName: string };
+export type IPDetailsComponentProps = GlobalTimeArgs & {
+  detailName: string;
+  flowTarget: FlowTarget;
+};
 
 export interface OwnProps {
   type: NetworkType;

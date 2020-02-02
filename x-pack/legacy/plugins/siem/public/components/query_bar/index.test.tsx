@@ -14,8 +14,6 @@ import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/
 import { QueryBar, QueryBarComponentProps } from '.';
 import { createKibanaContextProviderMock } from '../../mock/kibana_react';
 
-jest.mock('../../lib/kibana');
-
 const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 
 describe('QueryBar ', () => {

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { logPositionActions } from './log_position';
 export { waffleFilterActions } from './waffle_filter';
 export { waffleTimeActions } from './waffle_time';
 export { waffleOptionsActions } from './waffle_options';

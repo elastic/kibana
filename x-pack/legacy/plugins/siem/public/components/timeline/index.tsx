@@ -5,13 +5,14 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { WithSource } from '../../containers/source';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions } from '../../store/actions';
 import { timelineDefaults, TimelineModel } from '../../store/timeline/model';
+import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
 
 import { ColumnHeader } from './body/column_headers/column_header';
 import { defaultHeaders } from './body/column_headers/default_headers';
@@ -39,6 +40,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     columns,
     createTimeline,
     dataProviders,
+    eventType,
     end,
     filters,
     flyoutHeaderHeight,
@@ -63,6 +65,20 @@ const StatefulTimelineComponent = React.memo<Props>(
     updateItemsPerPage,
     upsertColumn,
   }) => {
+    const { loading, signalIndexExists, signalIndexName } = useSignalIndex();
+
+    const indexToAdd = useMemo<string[]>(() => {
+      if (
+        eventType &&
+        signalIndexExists &&
+        signalIndexName != null &&
+        ['signal', 'all'].includes(eventType)
+      ) {
+        return [signalIndexName];
+      }
+      return [];
+    }, [eventType, signalIndexExists, signalIndexName]);
+
     const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
       (providerId: string, andProviderId?: string) =>
         removeProvider!({ id, providerId, andProviderId }),
@@ -149,23 +165,26 @@ const StatefulTimelineComponent = React.memo<Props>(
     }, []);
 
     return (
-      <WithSource sourceId="default">
+      <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indexPattern, browserFields }) => (
           <Timeline
             browserFields={browserFields}
             columns={columns}
             dataProviders={dataProviders!}
             end={end}
+            eventType={eventType}
             filters={filters}
             flyoutHeaderHeight={flyoutHeaderHeight}
             flyoutHeight={flyoutHeight}
             id={id}
             indexPattern={indexPattern}
+            indexToAdd={indexToAdd}
             isLive={isLive}
             itemsPerPage={itemsPerPage!}
             itemsPerPageOptions={itemsPerPageOptions!}
             kqlMode={kqlMode}
             kqlQueryExpression={kqlQueryExpression}
+            loadingIndexName={loading}
             onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
             onChangeDroppableAndProvider={onChangeDroppableAndProvider}
             onChangeItemsPerPage={onChangeItemsPerPage}
@@ -185,6 +204,7 @@ const StatefulTimelineComponent = React.memo<Props>(
   },
   (prevProps, nextProps) => {
     return (
+      prevProps.eventType === nextProps.eventType &&
       prevProps.end === nextProps.end &&
       prevProps.flyoutHeaderHeight === nextProps.flyoutHeaderHeight &&
       prevProps.flyoutHeight === nextProps.flyoutHeight &&
@@ -218,6 +238,7 @@ const makeMapStateToProps = () => {
     const {
       columns,
       dataProviders,
+      eventType,
       filters,
       itemsPerPage,
       itemsPerPageOptions,
@@ -232,6 +253,7 @@ const makeMapStateToProps = () => {
     return {
       columns,
       dataProviders,
+      eventType,
       end: input.timerange.to,
       filters: timelineFilter,
       id,
@@ -249,7 +271,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const connector = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   addProvider: timelineActions.addProvider,
   createTimeline: timelineActions.createTimeline,
   onDataProviderEdited: timelineActions.dataProviderEdited,
@@ -264,7 +286,9 @@ export const connector = connect(makeMapStateToProps, {
   updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
   updateSort: timelineActions.updateSort,
   upsertColumn: timelineActions.upsertColumn,
-});
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

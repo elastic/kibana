@@ -5,7 +5,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 
 import { Direction } from '../../../../graphql/types';
 

@@ -5,28 +5,43 @@
  */
 
 import { VectorStyle } from './vector_style';
-import { SYMBOLIZE_AS_CIRCLE, DEFAULT_ICON_SIZE } from './vector_constants';
-import { COLOR_GRADIENTS, DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../color_utils';
+import { DEFAULT_ICON, SYMBOLIZE_AS_TYPES } from '../../../../common/constants';
+import {
+  COLOR_GRADIENTS,
+  COLOR_PALETTES,
+  DEFAULT_FILL_COLORS,
+  DEFAULT_LINE_COLORS,
+} from '../color_utils';
 import chrome from 'ui/chrome';
-
-const DEFAULT_ICON = 'airfield';
 
 export const MIN_SIZE = 1;
 export const MAX_SIZE = 64;
 export const DEFAULT_MIN_SIZE = 4;
 export const DEFAULT_MAX_SIZE = 32;
 export const DEFAULT_SIGMA = 3;
+export const DEFAULT_LABEL_SIZE = 14;
+export const DEFAULT_ICON_SIZE = 6;
+
+export const LABEL_BORDER_SIZES = {
+  NONE: 'NONE',
+  SMALL: 'SMALL',
+  MEDIUM: 'MEDIUM',
+  LARGE: 'LARGE',
+};
 
 export const VECTOR_STYLES = {
-  SYMBOL: 'symbol',
+  SYMBOLIZE_AS: 'symbolizeAs',
   FILL_COLOR: 'fillColor',
   LINE_COLOR: 'lineColor',
   LINE_WIDTH: 'lineWidth',
+  ICON: 'icon',
   ICON_SIZE: 'iconSize',
   ICON_ORIENTATION: 'iconOrientation',
   LABEL_TEXT: 'labelText',
   LABEL_COLOR: 'labelColor',
   LABEL_SIZE: 'labelSize',
+  LABEL_BORDER_COLOR: 'labelBorderColor',
+  LABEL_BORDER_SIZE: 'labelBorderSize',
 };
 
 export const LINE_STYLES = [VECTOR_STYLES.LINE_COLOR, VECTOR_STYLES.LINE_WIDTH];
@@ -39,10 +54,14 @@ export const POLYGON_STYLES = [
 export function getDefaultProperties(mapColors = []) {
   return {
     ...getDefaultStaticProperties(mapColors),
-    [VECTOR_STYLES.SYMBOL]: {
+    [VECTOR_STYLES.SYMBOLIZE_AS]: {
       options: {
-        symbolizeAs: SYMBOLIZE_AS_CIRCLE,
-        symbolId: DEFAULT_ICON,
+        value: SYMBOLIZE_AS_TYPES.CIRCLE,
+      },
+    },
+    [VECTOR_STYLES.LABEL_BORDER_SIZE]: {
+      options: {
+        size: LABEL_BORDER_SIZES.SMALL,
       },
     },
   };
@@ -58,6 +77,12 @@ export function getDefaultStaticProperties(mapColors = []) {
   const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode', false);
 
   return {
+    [VECTOR_STYLES.ICON]: {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options: {
+        value: DEFAULT_ICON,
+      },
+    },
     [VECTOR_STYLES.FILL_COLOR]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
@@ -103,7 +128,13 @@ export function getDefaultStaticProperties(mapColors = []) {
     [VECTOR_STYLES.LABEL_SIZE]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
-        size: 14,
+        size: DEFAULT_LABEL_SIZE,
+      },
+    },
+    [VECTOR_STYLES.LABEL_BORDER_COLOR]: {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options: {
+        color: isDarkMode ? '#000000' : '#FFFFFF',
       },
     },
   };
@@ -111,10 +142,18 @@ export function getDefaultStaticProperties(mapColors = []) {
 
 export function getDefaultDynamicProperties() {
   return {
+    [VECTOR_STYLES.ICON]: {
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      options: {
+        iconPaletteId: 'filledShapes',
+        field: undefined,
+      },
+    },
     [VECTOR_STYLES.FILL_COLOR]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         color: COLOR_GRADIENTS[0].value,
+        colorCategory: COLOR_PALETTES[0].value,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,
@@ -125,7 +164,7 @@ export function getDefaultDynamicProperties() {
     [VECTOR_STYLES.LINE_COLOR]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
-        color: COLOR_GRADIENTS[0].value,
+        color: undefined,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,
@@ -158,7 +197,7 @@ export function getDefaultDynamicProperties() {
       },
     },
     [VECTOR_STYLES.ICON_ORIENTATION]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         field: undefined,
         fieldMetaOptions: {
@@ -168,15 +207,16 @@ export function getDefaultDynamicProperties() {
       },
     },
     [VECTOR_STYLES.LABEL_TEXT]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         field: undefined,
       },
     },
     [VECTOR_STYLES.LABEL_COLOR]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         color: COLOR_GRADIENTS[0].value,
+        colorCategory: COLOR_PALETTES[0].value,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,
@@ -185,10 +225,22 @@ export function getDefaultDynamicProperties() {
       },
     },
     [VECTOR_STYLES.LABEL_SIZE]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         minSize: DEFAULT_MIN_SIZE,
         maxSize: DEFAULT_MAX_SIZE,
+        field: undefined,
+        fieldMetaOptions: {
+          isEnabled: true,
+          sigma: DEFAULT_SIGMA,
+        },
+      },
+    },
+    [VECTOR_STYLES.LABEL_BORDER_COLOR]: {
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      options: {
+        color: COLOR_GRADIENTS[0].value,
+        colorCategory: COLOR_PALETTES[0].value,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,

@@ -1,68 +1,25 @@
 {
-  "rule_id": "041d4d41-9589-43e2-ba13-5680af75ebc2",
-  "risk_score": 50,
-  "description": "Linux: Iodine Activity",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Linux: Iodine Activity",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.name: (iodine or iodined)",
-  "language": "kuery",
-  "filters": [
-    {
-      "meta": {
-        "negate": false,
-        "type": "phrase",
-        "key": "event.dataset",
-        "value": "process",
-        "params": {
-          "query": "process"
-        },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
-      },
-      "query": {
-        "match": {
-          "event.dataset": {
-            "query": "process",
-            "type": "phrase"
-          }
-        }
-      },
-      "$state": {
-        "store": "appState"
-      }
-    },
-    {
-      "meta": {
-        "negate": false,
-        "type": "phrase",
-        "key": "event.action",
-        "value": "process_started",
-        "params": {
-          "query": "process_started"
-        },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
-      },
-      "query": {
-        "match": {
-          "event.action": {
-            "query": "process_started",
-            "type": "phrase"
-          }
-        }
-      },
-      "$state": {
-        "store": "appState"
-      }
-    }
+  "description": "Iodine is a tool for tunneling Internet protocol version 4 (IPV4) traffic over the DNS protocol in order to circumvent firewalls, network security groups or network access lists while evading detection.",
+  "false_positives": [
+    "Normal use of Iodine is uncommon apart from security testing and research. Use by non-security engineers is very uncommon."
   ],
-  "enabled": false,
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 33,
+  "name": "Potential DNS Tunneling via Iodine",
+  "query": "process.name: (iodine or iodined) and event.action:executed",
+  "references": [
+    "https://code.kryo.se/iodine/"
+  ],
+  "risk_score": 73,
+  "rule_id": "041d4d41-9589-43e2-ba13-5680af75ebc2",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "type": "query",
   "version": 1
 }

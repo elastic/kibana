@@ -27,9 +27,6 @@
 import chrome from 'ui/chrome';
 
 export const legacyChrome = chrome;
-export { State } from 'ui/state_management/state';
-export { AppState } from 'ui/state_management/app_state';
-export { AppStateClass } from 'ui/state_management/app_state';
 export { SavedObjectSaveOpts } from 'ui/saved_objects/types';
 export { npSetup, npStart } from 'ui/new_platform';
 export { IPrivate } from 'ui/private';
@@ -41,16 +38,7 @@ export { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_sa
 export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { KbnUrl } from 'ui/url/kbn_url';
 // @ts-ignore
-export { GlobalStateProvider } from 'ui/state_management/global_state';
-// @ts-ignore
-export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-// @ts-ignore
-export { AppStateProvider } from 'ui/state_management/app_state';
-// @ts-ignore
 export { PrivateProvider } from 'ui/private/private';
-// @ts-ignore
-export { EventsProvider } from 'ui/events';
-export { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 // @ts-ignore
@@ -60,10 +48,9 @@ export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url/index';
 // @ts-ignore
 export { confirmModalFactory } from 'ui/modals/confirm_modal';
 export { configureAppAngularModule } from 'ui/legacy_compat';
-export { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_monitor_factory';
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
-export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 export { IInjector } from 'ui/chrome';
 export { SavedObjectLoader } from 'ui/saved_objects';
-export { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize_embeddable';
+export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
+export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';

@@ -8,6 +8,7 @@ import { createMockServer } from '../__mocks__/_mock_server';
 import { setSignalsStatusRoute } from './open_close_signals_route';
 import * as myUtils from '../utils';
 import { ServerInjectOptions } from 'hapi';
+
 import {
   getSetSignalStatusByIdsRequest,
   getSetSignalStatusByQueryRequest,

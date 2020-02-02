@@ -7,6 +7,9 @@
 import React from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
+import deepmerge from 'deepmerge';
+
+import { useTimeZone } from '../../hooks';
 import { AutoSizer } from '../auto_sizer';
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
@@ -17,7 +20,6 @@ import {
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
-  useBrowserTimeZone,
   useTheme,
 } from './common';
 
@@ -44,7 +46,7 @@ export const BarChartBaseComponent = ({
   configs?: ChartSeriesConfigs | undefined;
 }) => {
   const theme = useTheme();
-  const timeZone = useBrowserTimeZone();
+  const timeZone = useTimeZone();
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const tickSize = getOr(0, 'configs.axis.tickSize', chartConfigs);
@@ -52,8 +54,7 @@ export const BarChartBaseComponent = ({
   const yAxisId = `stat-items-barchart-${data[0].key}-y`;
   const settings = {
     ...chartDefaultSettings,
-    theme,
-    ...get('configs.settings', chartConfigs),
+    ...deepmerge(get('configs.settings', chartConfigs), { theme }),
   };
 
   return chartConfigs.width && chartConfigs.height ? (

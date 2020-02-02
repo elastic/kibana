@@ -54,9 +54,11 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const connector = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   setTimelineQuery: inputsActions.setQuery,
-});
+};
+
+export const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

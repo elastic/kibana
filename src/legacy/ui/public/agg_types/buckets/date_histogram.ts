@@ -26,10 +26,7 @@ import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
-import { TimeIntervalParamEditor } from '../../vis/editors/default/controls/time_interval';
 import { timefilter } from '../../timefilter';
-import { DropPartialsParamEditor } from '../../vis/editors/default/controls/drop_partials';
-import { ScaleMetricsParamEditor } from '../../vis/editors/default/controls/scale_metrics';
 import { dateHistogramInterval } from '../../../../core_plugins/data/public';
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
@@ -144,11 +141,9 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
       default: false,
       write: _.noop,
       advanced: true,
-      editorComponent: ScaleMetricsParamEditor,
     },
     {
       name: 'interval',
-      editorComponent: TimeIntervalParamEditor,
       deserialize(state: any, agg) {
         // For upgrading from 7.0.x to 7.1.x - intervals are now stored as key of options or custom value
         if (state === 'custom') {
@@ -240,7 +235,6 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
       name: 'drop_partials',
       default: false,
       write: _.noop,
-      editorComponent: DropPartialsParamEditor,
       shouldShow: agg => {
         const field = agg.params.field;
         return field && field.name && field.name === agg.getIndexPattern().timeFieldName;

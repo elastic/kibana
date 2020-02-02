@@ -5,8 +5,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { Direction } from '../../graphql/types';
 
@@ -58,7 +57,7 @@ describe('Paginated Table Component', () => {
         </ThemeProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders the loading panel at the beginning ', () => {

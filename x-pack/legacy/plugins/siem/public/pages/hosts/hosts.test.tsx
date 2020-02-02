@@ -6,21 +6,21 @@
 
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { ActionCreator } from 'typescript-fsa';
 
+import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
 import '../../mock/match_media';
 import { mocksSource } from '../../containers/source/mock';
 import { wait } from '../../lib/helpers';
-import { TestProviders } from '../../mock';
-import { InputsModelId } from '../../store/inputs/constants';
+import { apolloClientObservable, TestProviders, mockGlobalState } from '../../mock';
 import { SiemNavigation } from '../../components/navigation';
+import { inputsActions } from '../../store/inputs';
+import { State, createStore } from '../../store';
 import { HostsComponentProps } from './types';
 import { Hosts } from './hosts';
-
-jest.mock('../../lib/kibana');
+import { HostsTabs } from './hosts_tabs';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -75,13 +75,6 @@ describe('Hosts - rendering', () => {
     to,
     setQuery: jest.fn(),
     isInitializing: false,
-    setAbsoluteRangeDatePicker: (jest.fn() as unknown) as ActionCreator<{
-      from: number;
-      id: InputsModelId;
-      to: number;
-    }>,
-    query: { query: '', language: 'kuery' },
-    filters: [],
     hostsPagePath: '',
   };
 
@@ -137,5 +130,59 @@ describe('Hosts - rendering', () => {
     await wait();
     wrapper.update();
     expect(wrapper.find(SiemNavigation).exists()).toBe(true);
+  });
+
+  test('it should add the new filters after init', async () => {
+    const newFilters: esFilters.Filter[] = [
+      {
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'host.name': 'ItRocks',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        meta: {
+          alias: '',
+          disabled: false,
+          key: 'bool',
+          negate: false,
+          type: 'custom',
+          value:
+            '{"query": {"bool": {"filter": [{"bool": {"should": [{"match_phrase": {"host.name": "ItRocks"}}],"minimum_should_match": 1}}]}}}',
+        },
+      },
+    ];
+    localSource[0].result.data.source.status.indicesExist = true;
+    const myState: State = mockGlobalState;
+    const myStore = createStore(myState, apolloClientObservable);
+    const wrapper = mount(
+      <TestProviders store={myStore}>
+        <MockedProvider mocks={localSource} addTypename={false}>
+          <Router history={mockHistory}>
+            <Hosts {...hostProps} />
+          </Router>
+        </MockedProvider>
+      </TestProviders>
+    );
+    await wait();
+    wrapper.update();
+
+    myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));
+    wrapper.update();
+    expect(wrapper.find(HostsTabs).props().filterQuery).toEqual(
+      '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+    );
   });
 });

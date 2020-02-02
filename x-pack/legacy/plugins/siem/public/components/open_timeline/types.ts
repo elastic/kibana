@@ -92,6 +92,8 @@ export interface OnTableChangeParams {
 /** Invoked by the EUI table implementation when the user interacts with the table */
 export type OnTableChange = (tableChange: OnTableChangeParams) => void;
 
+export type ActionTimelineToShow = 'duplicate' | 'delete' | 'selectable';
+
 export interface OpenTimelineProps {
   /** Invoked when the user clicks the delete (trash) icon on an individual timeline */
   deleteTimelines?: DeleteTimelines;
@@ -137,6 +139,8 @@ export interface OpenTimelineProps {
   title: string;
   /** The total (server-side) count of the search results */
   totalSearchResultsCount: number;
+  /** Hide action on timeline if needed it */
+  hideActions?: ActionTimelineToShow[];
 }
 
 export interface UpdateTimeline {

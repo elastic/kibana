@@ -234,6 +234,26 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   />
                                 </span>
                               </div>
+                              <div
+                                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                              >
+                                <button
+                                  aria-label="Clear input"
+                                  class="euiFormControlLayoutClearButton"
+                                  type="button"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -565,6 +585,26 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           />
                                         </span>
                                       </div>
+                                      <div
+                                        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                      >
+                                        <button
+                                          aria-label="Clear input"
+                                          class="euiFormControlLayoutClearButton"
+                                          type="button"
+                                        >
+                                          <svg
+                                            aria-hidden="true"
+                                            class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
+                                            focusable="false"
+                                            height="16"
+                                            role="img"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          />
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
@@ -834,6 +874,26 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                               xmlns="http://www.w3.org/2000/svg"
                                             />
                                           </span>
+                                        </div>
+                                        <div
+                                          class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                        >
+                                          <button
+                                            aria-label="Clear input"
+                                            class="euiFormControlLayoutClearButton"
+                                            type="button"
+                                          >
+                                            <svg
+                                              aria-hidden="true"
+                                              class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
+                                              focusable="false"
+                                              height="16"
+                                              role="img"
+                                              viewBox="0 0 16 16"
+                                              width="16"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            />
+                                          </button>
                                         </div>
                                       </div>
                                     </div>
@@ -1139,12 +1199,18 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         data-test-subj="filterVisType"
                                         fullWidth={true}
                                         incremental={false}
+                                        isClearable={true}
                                         isLoading={false}
                                         onChange={[Function]}
                                         placeholder="Filter"
                                         value="with"
                                       >
                                         <EuiFormControlLayout
+                                          clear={
+                                            Object {
+                                              "onClick": [Function],
+                                            }
+                                          }
                                           compressed={false}
                                           fullWidth={true}
                                           icon="search"
@@ -1169,6 +1235,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 />
                                               </EuiValidatableControl>
                                               <EuiFormControlLayoutIcons
+                                                clear={
+                                                  Object {
+                                                    "onClick": [Function],
+                                                  }
+                                                }
                                                 icon="search"
                                                 isLoading={false}
                                               >
@@ -1208,6 +1279,50 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                       </EuiIcon>
                                                     </span>
                                                   </EuiFormControlLayoutCustomIcon>
+                                                </div>
+                                                <div
+                                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                                >
+                                                  <EuiFormControlLayoutClearButton
+                                                    onClick={[Function]}
+                                                  >
+                                                    <EuiI18n
+                                                      default="Clear input"
+                                                      token="euiFormControlLayoutClearButton.label"
+                                                    >
+                                                      <button
+                                                        aria-label="Clear input"
+                                                        className="euiFormControlLayoutClearButton"
+                                                        onClick={[Function]}
+                                                        type="button"
+                                                      >
+                                                        <EuiIcon
+                                                          className="euiFormControlLayoutClearButton__icon"
+                                                          type="cross"
+                                                        >
+                                                          <EuiIconEmpty
+                                                            aria-hidden={true}
+                                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
+                                                            focusable="false"
+                                                            role="img"
+                                                            style={null}
+                                                          >
+                                                            <svg
+                                                              aria-hidden={true}
+                                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
+                                                              focusable="false"
+                                                              height={16}
+                                                              role="img"
+                                                              style={null}
+                                                              viewBox="0 0 16 16"
+                                                              width={16}
+                                                              xmlns="http://www.w3.org/2000/svg"
+                                                            />
+                                                          </EuiIconEmpty>
+                                                        </EuiIcon>
+                                                      </button>
+                                                    </EuiI18n>
+                                                  </EuiFormControlLayoutClearButton>
                                                 </div>
                                               </EuiFormControlLayoutIcons>
                                             </div>
@@ -1594,7 +1709,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 />
                               </EuiSpacer>
                               <NewVisHelp
-                                addBasePath={[Function]}
+                                onPromotionClicked={[Function]}
                                 promotedTypes={Array []}
                               >
                                 <EuiText>
@@ -2775,12 +2890,14 @@ exports[`NewVisModal should render as expected 1`] = `
                                         data-test-subj="filterVisType"
                                         fullWidth={true}
                                         incremental={false}
+                                        isClearable={true}
                                         isLoading={false}
                                         onChange={[Function]}
                                         placeholder="Filter"
                                         value=""
                                       >
                                         <EuiFormControlLayout
+                                          clear={null}
                                           compressed={false}
                                           fullWidth={true}
                                           icon="search"
@@ -2805,6 +2922,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 />
                                               </EuiValidatableControl>
                                               <EuiFormControlLayoutIcons
+                                                clear={null}
                                                 icon="search"
                                                 isLoading={false}
                                               >
@@ -3218,7 +3336,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                 />
                               </EuiSpacer>
                               <NewVisHelp
-                                addBasePath={[Function]}
+                                onPromotionClicked={[Function]}
                                 promotedTypes={Array []}
                               >
                                 <EuiText>

@@ -19,6 +19,7 @@ export interface CoreStart
 |  [application](./kibana-plugin-public.corestart.application.md) | <code>ApplicationStart</code> | [ApplicationStart](./kibana-plugin-public.applicationstart.md) |
 |  [chrome](./kibana-plugin-public.corestart.chrome.md) | <code>ChromeStart</code> | [ChromeStart](./kibana-plugin-public.chromestart.md) |
 |  [docLinks](./kibana-plugin-public.corestart.doclinks.md) | <code>DocLinksStart</code> | [DocLinksStart](./kibana-plugin-public.doclinksstart.md) |
+|  [fatalErrors](./kibana-plugin-public.corestart.fatalerrors.md) | <code>FatalErrorsStart</code> | [FatalErrorsStart](./kibana-plugin-public.fatalerrorsstart.md) |
 |  [http](./kibana-plugin-public.corestart.http.md) | <code>HttpStart</code> | [HttpStart](./kibana-plugin-public.httpstart.md) |
 |  [i18n](./kibana-plugin-public.corestart.i18n.md) | <code>I18nStart</code> | [I18nStart](./kibana-plugin-public.i18nstart.md) |
 |  [injectedMetadata](./kibana-plugin-public.corestart.injectedmetadata.md) | <code>{</code><br/><code>        getInjectedVar: (name: string, defaultValue?: any) =&gt; unknown;</code><br/><code>    }</code> | exposed temporarily until https://github.com/elastic/kibana/issues/41990 done use \*only\* to retrieve config values. There is no way to set injected values in the new platform. Use the legacy platform API instead. |

@@ -25,24 +25,12 @@ import { serialDiffMetricAgg } from './serial_diff';
 import { AggConfigs } from '../agg_configs';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 
-jest.mock('../../vis/editors/default/schemas', () => {
+jest.mock('../schemas', () => {
   class MockedSchemas {
     all = [{}];
   }
   return {
     Schemas: jest.fn().mockImplementation(() => new MockedSchemas()),
-  };
-});
-
-jest.mock('../../vis/editors/default/controls/sub_metric', () => {
-  return {
-    SubMetricParamEditor() {},
-  };
-});
-
-jest.mock('../../vis/editors/default/controls/sub_agg', () => {
-  return {
-    SubAggParamEditor() {},
   };
 });
 

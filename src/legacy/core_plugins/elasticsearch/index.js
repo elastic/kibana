@@ -16,13 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { combineLatest } from 'rxjs';
-import { first, map } from 'rxjs/operators';
-import healthCheck from './lib/health_check';
-import { Cluster } from './lib/cluster';
-import { createProxy } from './lib/create_proxy';
-import { handleESError } from './lib/handle_es_error';
+import { first } from 'rxjs/operators';
+import { Cluster } from './server/lib/cluster';
+import { createProxy } from './server/lib/create_proxy';
+import { handleESError } from './server/lib/handle_es_error';
+import { versionHealthCheck } from './lib/version_health_check';
 
 export default function(kibana) {
   let defaultVars;
@@ -36,19 +34,12 @@ export default function(kibana) {
       // All methods that ES plugin exposes are synchronous so we should get the first
       // value from all observables here to be able to synchronously return and create
       // cluster clients afterwards.
-      const [esConfig, adminCluster, dataCluster] = await combineLatest(
-        server.newPlatform.__internals.elasticsearch.legacy.config$,
-        server.newPlatform.setup.core.elasticsearch.adminClient$,
-        server.newPlatform.setup.core.elasticsearch.dataClient$
-      )
-        .pipe(
-          first(),
-          map(([config, adminClusterClient, dataClusterClient]) => [
-            config,
-            new Cluster(adminClusterClient),
-            new Cluster(dataClusterClient),
-          ])
-        )
+      const { adminClient, dataClient } = server.newPlatform.setup.core.elasticsearch;
+      const adminCluster = new Cluster(adminClient);
+      const dataCluster = new Cluster(dataClient);
+
+      const esConfig = await server.newPlatform.__internals.elasticsearch.legacy.config$
+        .pipe(first())
         .toPromise();
 
       defaultVars = {
@@ -101,15 +92,13 @@ export default function(kibana) {
 
       createProxy(server);
 
-      // Set up the health check service and start it.
-      const { start, waitUntilReady } = healthCheck(
+      const waitUntilHealthy = versionHealthCheck(
         this,
-        server,
-        esConfig.healthCheckDelay.asMilliseconds(),
-        esConfig.ignoreVersionMismatch
+        server.logWithMetadata,
+        server.newPlatform.__internals.elasticsearch.esNodesCompatibility$
       );
-      server.expose('waitUntilReady', waitUntilReady);
-      start();
+
+      server.expose('waitUntilReady', () => waitUntilHealthy);
     },
   });
 }

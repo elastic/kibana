@@ -8,6 +8,7 @@ import React, { Fragment, FC, useEffect } from 'react';
 
 import {
   EuiComboBox,
+  EuiComboBoxOptionProps,
   EuiForm,
   EuiFieldText,
   EuiFormRow,
@@ -22,8 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { metadata } from 'ui/metadata';
 import { ml } from '../../../../../services/ml_api_service';
-import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
-
+import { Field } from '../../../../../../../common/types/fields';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useKibanaContext } from '../../../../../contexts/kibana';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
@@ -41,22 +41,8 @@ import {
   IndexPattern,
   indexPatterns,
 } from '../../../../../../../../../../../src/plugins/data/public';
-
-const NUMERICAL_FIELD_TYPES = new Set([
-  'long',
-  'integer',
-  'short',
-  'byte',
-  'double',
-  'float',
-  'half_float',
-  'scaled_float',
-]);
-
-const SUPPORTED_CLASSIFICATION_FIELD_TYPES = new Set(['boolean', 'text', 'keyword', 'ip']);
-
-// List of system fields we want to ignore for the numeric field check.
-const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
+import { DfAnalyticsExplainResponse, FieldSelectionItem } from '../../../../common/analytics';
+import { shouldAddAsDepVarOption, OMIT_FIELDS } from './form_options_validation';
 
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setFormState } = actions;
@@ -74,15 +60,22 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     destinationIndexNameExists,
     destinationIndexNameValid,
     destinationIndexPatternTitleExists,
+    excludes,
+    excludesOptions,
+    fieldOptionsFetchFail,
     jobId,
     jobIdEmpty,
     jobIdExists,
     jobIdValid,
     jobIdInvalidMaxLength,
     jobType,
-    loadingDepFieldOptions,
+    loadingDepVarOptions,
+    loadingFieldOptions,
+    maxDistinctValuesError,
     modelMemoryLimit,
     modelMemoryLimitUnitValid,
+    previousJobType,
+    previousSourceIndex,
     sourceIndex,
     sourceIndexNameEmpty,
     sourceIndexNameValid,
@@ -91,6 +84,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     trainingPercent,
   } = form;
   const characterList = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(', ');
+
+  const isJobTypeWithDepVar =
+    jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION;
 
   // Find out if index pattern contain numeric fields. Provides a hint in the form
   // that an analytics jobs is not able to identify outliers if there are no numeric fields present.
@@ -114,42 +110,99 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     }
   };
 
-  // Regression supports numeric fields. Classification supports numeric, boolean, text, keyword and ip.
-  const shouldAddFieldOption = (field: Field) => {
-    if (field.id === EVENT_RATE_FIELD_ID) return false;
+  const onCreateOption = (searchValue: string, flattenedOptions: EuiComboBoxOptionProps[]) => {
+    const normalizedSearchValue = searchValue.trim().toLowerCase();
 
-    const isNumerical = NUMERICAL_FIELD_TYPES.has(field.type);
-    const isSupportedByClassification =
-      isNumerical || SUPPORTED_CLASSIFICATION_FIELD_TYPES.has(field.type);
+    if (!normalizedSearchValue) {
+      return;
+    }
 
-    if (jobType === JOB_TYPES.REGRESSION) return isNumerical;
-    if (jobType === JOB_TYPES.CLASSIFICATION) return isNumerical || isSupportedByClassification;
+    const newOption = {
+      label: searchValue,
+    };
+
+    // Create the option if it doesn't exist.
+    if (
+      !flattenedOptions.some(
+        (option: EuiComboBoxOptionProps) =>
+          option.label.trim().toLowerCase() === normalizedSearchValue
+      )
+    ) {
+      excludesOptions.push(newOption);
+      setFormState({ excludes: [...excludes, newOption.label] });
+    }
   };
 
-  const debouncedMmlEstimateLoad = debounce(async () => {
+  const debouncedGetExplainData = debounce(async () => {
+    // Reset if sourceIndex or jobType changes (jobType requires dependent_variable to be set -
+    // which won't be the case if switching from outlier detection)
+    if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
+      setFormState({
+        loadingFieldOptions: true,
+      });
+    }
+
     try {
       const jobConfig = getJobConfigFromFormState(form);
       delete jobConfig.dest;
       delete jobConfig.model_memory_limit;
-      const resp = await ml.dataFrameAnalytics.estimateDataFrameAnalyticsMemoryUsage(jobConfig);
-      setFormState({
-        modelMemoryLimit: resp.memory_estimation?.expected_memory_without_disk,
-      });
+      delete jobConfig.analyzed_fields;
+      const resp: DfAnalyticsExplainResponse = await ml.dataFrameAnalytics.explainDataFrameAnalytics(
+        jobConfig
+      );
+
+      // If sourceIndex has changed load analysis field options again
+      if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
+        const analyzedFieldsOptions: EuiComboBoxOptionProps[] = [];
+
+        if (resp.field_selection) {
+          resp.field_selection.forEach((selectedField: FieldSelectionItem) => {
+            if (selectedField.is_included === true && selectedField.name !== dependentVariable) {
+              analyzedFieldsOptions.push({ label: selectedField.name });
+            }
+          });
+        }
+
+        setFormState({
+          modelMemoryLimit: resp.memory_estimation?.expected_memory_without_disk,
+          excludesOptions: analyzedFieldsOptions,
+          loadingFieldOptions: false,
+          fieldOptionsFetchFail: false,
+          maxDistinctValuesError: undefined,
+        });
+      } else {
+        setFormState({
+          modelMemoryLimit: resp.memory_estimation?.expected_memory_without_disk,
+        });
+      }
     } catch (e) {
+      let errorMessage;
+      if (
+        jobType === JOB_TYPES.CLASSIFICATION &&
+        e.message !== undefined &&
+        e.message.includes('status_exception') &&
+        e.message.includes('must have at most')
+      ) {
+        errorMessage = e.message;
+      }
       setFormState({
+        fieldOptionsFetchFail: true,
+        maxDistinctValuesError: errorMessage,
+        loadingFieldOptions: false,
         modelMemoryLimit:
           jobType !== undefined
             ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
             : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection,
       });
     }
-  }, 500);
+  }, 400);
 
-  const loadDependentFieldOptions = async () => {
+  const loadDepVarOptions = async () => {
     setFormState({
-      loadingDepFieldOptions: true,
+      loadingDepVarOptions: true,
+      // clear when the source index changes
       dependentVariable: '',
-      // Reset outlier detection sourceIndex checks to default values if we've switched to regression
+      maxDistinctValuesError: undefined,
       sourceIndexFieldsCheckFailed: false,
       sourceIndexContainsNumericalFields: true,
     });
@@ -162,22 +215,23 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         await newJobCapsService.initializeFromIndexPattern(indexPattern);
         // Get fields and filter for supported types for job type
         const { fields } = newJobCapsService;
-        const options: Array<{ label: string }> = [];
+
+        const depVarOptions: EuiComboBoxOptionProps[] = [];
 
         fields.forEach((field: Field) => {
-          if (shouldAddFieldOption(field)) {
-            options.push({ label: field.id });
+          if (shouldAddAsDepVarOption(field, jobType)) {
+            depVarOptions.push({ label: field.id });
           }
         });
 
         setFormState({
-          dependentVariableOptions: options,
-          loadingDepFieldOptions: false,
+          dependentVariableOptions: depVarOptions,
+          loadingDepVarOptions: false,
           dependentVariableFetchFail: false,
         });
       }
     } catch (e) {
-      setFormState({ loadingDepFieldOptions: false, dependentVariableFetchFail: true });
+      setFormState({ loadingDepVarOptions: false, dependentVariableFetchFail: true });
     }
   };
 
@@ -209,13 +263,21 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     return errors;
   };
 
+  const onSourceIndexChange = (selectedOptions: EuiComboBoxOptionProps[]) => {
+    setFormState({
+      excludes: [],
+      excludesOptions: [],
+      previousSourceIndex: sourceIndex,
+      sourceIndex: selectedOptions[0].label || '',
+    });
+  };
+
   useEffect(() => {
-    if (
-      (jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) &&
-      sourceIndexNameEmpty === false
-    ) {
-      loadDependentFieldOptions();
-    } else if (jobType === JOB_TYPES.OUTLIER_DETECTION && sourceIndexNameEmpty === false) {
+    if (isJobTypeWithDepVar && sourceIndexNameEmpty === false) {
+      loadDepVarOptions();
+    }
+
+    if (jobType === JOB_TYPES.OUTLIER_DETECTION && sourceIndexNameEmpty === false) {
       validateSourceIndexFields();
     }
   }, [sourceIndex, jobType, sourceIndexNameEmpty]);
@@ -223,21 +285,18 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   useEffect(() => {
     const hasBasicRequiredFields =
       jobType !== undefined && sourceIndex !== '' && sourceIndexNameValid === true;
-    const jobTypesWithDepVar =
-      jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION;
 
     const hasRequiredAnalysisFields =
-      (jobTypesWithDepVar && dependentVariable !== '' && trainingPercent !== undefined) ||
-      jobType === JOB_TYPES.OUTLIER_DETECTION;
+      (isJobTypeWithDepVar && dependentVariable !== '') || jobType === JOB_TYPES.OUTLIER_DETECTION;
 
     if (hasBasicRequiredFields && hasRequiredAnalysisFields) {
-      debouncedMmlEstimateLoad();
+      debouncedGetExplainData();
     }
 
     return () => {
-      debouncedMmlEstimateLoad.cancel();
+      debouncedGetExplainData.cancel();
     };
-  }, [jobType, sourceIndex, dependentVariable, trainingPercent]);
+  }, [jobType, sourceIndex, sourceIndexNameEmpty, dependentVariable, trainingPercent]);
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
@@ -354,9 +413,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   selectedOptions={
                     indexPatternsMap[sourceIndex] !== undefined ? [{ label: sourceIndex }] : []
                   }
-                  onChange={selectedOptions =>
-                    setFormState({ sourceIndex: selectedOptions[0].label || '' })
-                  }
+                  onChange={onSourceIndexChange}
                   isClearable={false}
                   data-test-subj="mlAnalyticsCreateJobFlyoutSourceIndexSelect"
                 />
@@ -431,6 +488,27 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
           {(jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) && (
             <Fragment>
               <EuiFormRow
+                fullWidth
+                isInvalid={maxDistinctValuesError !== undefined}
+                error={[
+                  ...(fieldOptionsFetchFail === true && maxDistinctValuesError !== undefined
+                    ? [
+                        <Fragment>
+                          {i18n.translate(
+                            'xpack.ml.dataframe.analytics.create.dependentVariableMaxDistictValuesError',
+                            {
+                              defaultMessage: 'Invalid. {message}',
+                              values: { message: maxDistinctValuesError },
+                            }
+                          )}
+                        </Fragment>,
+                      ]
+                    : []),
+                ]}
+              >
+                <Fragment />
+              </EuiFormRow>
+              <EuiFormRow
                 label={i18n.translate(
                   'xpack.ml.dataframe.analytics.create.dependentVariableLabel',
                   {
@@ -448,19 +526,22 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                     }
                   )
                 }
-                error={
-                  dependentVariableFetchFail === true && [
-                    <Fragment>
-                      {i18n.translate(
-                        'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
-                        {
-                          defaultMessage:
-                            'There was a problem fetching fields. Please refresh the page and try again.',
-                        }
-                      )}
-                    </Fragment>,
-                  ]
-                }
+                isInvalid={maxDistinctValuesError !== undefined}
+                error={[
+                  ...(dependentVariableFetchFail === true
+                    ? [
+                        <Fragment>
+                          {i18n.translate(
+                            'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
+                            {
+                              defaultMessage:
+                                'There was a problem fetching fields. Please refresh the page and try again.',
+                            }
+                          )}
+                        </Fragment>,
+                      ]
+                    : []),
+                ]}
               >
                 <EuiComboBox
                   aria-label={i18n.translate(
@@ -476,12 +557,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                     }
                   )}
                   isDisabled={isJobCreated}
-                  isLoading={loadingDepFieldOptions}
+                  isLoading={loadingDepVarOptions}
                   singleSelection={true}
                   options={dependentVariableOptions}
                   selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
                   onChange={selectedOptions =>
-                    setFormState({ dependentVariable: selectedOptions[0].label || '' })
+                    setFormState({
+                      dependentVariable: selectedOptions[0].label || '',
+                    })
                   }
                   isClearable={false}
                   isInvalid={dependentVariable === ''}
@@ -508,6 +591,49 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               </EuiFormRow>
             </Fragment>
           )}
+          <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.excludedFieldsLabel', {
+              defaultMessage: 'Excluded fields',
+            })}
+            helpText={i18n.translate('xpack.ml.dataframe.analytics.create.excludedFieldsHelpText', {
+              defaultMessage:
+                'Optionally select fields to be excluded from analysis. All other supported fields will be included',
+            })}
+            error={
+              excludesOptions.length === 0 &&
+              fieldOptionsFetchFail === false &&
+              !sourceIndexNameEmpty && [
+                i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.excludesOptionsNoSupportedFields',
+                  {
+                    defaultMessage:
+                      'No supported analysis fields were found for this index pattern.',
+                  }
+                ),
+              ]
+            }
+          >
+            <EuiComboBox
+              aria-label={i18n.translate(
+                'xpack.ml.dataframe.analytics.create.excludesInputAriaLabel',
+                {
+                  defaultMessage: 'Optional. Enter or select field to be excluded.',
+                }
+              )}
+              isDisabled={isJobCreated}
+              isLoading={loadingFieldOptions}
+              options={excludesOptions}
+              selectedOptions={excludes.map(field => ({
+                label: field,
+              }))}
+              onCreateOption={onCreateOption}
+              onChange={selectedOptions =>
+                setFormState({ excludes: selectedOptions.map(option => option.label) })
+              }
+              isClearable={true}
+              data-test-subj="mlAnalyticsCreateJobFlyoutExcludesSelect"
+            />
+          </EuiFormRow>
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryLimitLabel', {
               defaultMessage: 'Model memory limit',

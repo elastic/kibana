@@ -74,6 +74,8 @@ export class LegacyPlatformService {
         appUrl: navLink.url,
         subUrlBase: navLink.subUrlBase,
         linkToLastSubUrl: navLink.linkToLastSubUrl,
+        category: navLink.category,
+        disableSubUrlTracking: navLink.disableSubUrlTracking,
       })
     );
 
@@ -81,6 +83,7 @@ export class LegacyPlatformService {
       ...core,
       getStartServices: () => this.startDependencies,
       application: {
+        ...core.application,
         register: notSupported(`core.application.register()`),
         registerMountContext: notSupported(`core.application.registerMountContext()`),
       },

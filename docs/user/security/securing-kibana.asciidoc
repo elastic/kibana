@@ -88,6 +88,8 @@ xpack.security.session.lifespan: "8h"
 
 . Optional: <<configuring-tls,Configure {kib} to encrypt communications>>. 
 
+. Optional: <<elasticsearch-mutual-tls,Configure {kib} to authenticate to {es} with a client certificate>>.
+
 . Restart {kib}.
 
 . [[kibana-roles]]Choose an authentication mechanism and grant users the privileges they need to
@@ -102,7 +104,7 @@ You can manage privileges on the *Management / Security / Roles* page in {kib}.
 If you're using the native realm with Basic Authentication, you can assign roles
 using the *Management / Security / Users* page in {kib} or the
 {ref}/security-api.html#security-user-apis[user management APIs]. For example, 
-the following creates a user named `jacknich` and assigns it the `kibana_user` 
+the following creates a user named `jacknich` and assigns it the `kibana_admin` 
 role:
 
 [source,js]
@@ -110,7 +112,7 @@ role:
 POST /_security/user/jacknich
 {
   "password" : "t0pS3cr3t",
-  "roles" : [ "kibana_user" ]
+  "roles" : [ "kibana_admin" ]
 }
 --------------------------------------------------------------------------------
 // CONSOLE
@@ -141,4 +143,5 @@ NOTE: This must be a user who has been assigned <<kibana-privileges, Kibana priv
 
 include::authentication/index.asciidoc[]
 include::securing-communications/index.asciidoc[]
+include::securing-communications/elasticsearch-mutual-tls.asciidoc[]
 include::audit-logging.asciidoc[]

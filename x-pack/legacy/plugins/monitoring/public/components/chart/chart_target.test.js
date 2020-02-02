@@ -38,8 +38,8 @@ const props = {
     max: 1562962539851,
   },
   hasLegend: true,
-  onBrush: _ => void 0,
-  tickFormatter: _ => void 0,
+  onBrush: () => void 0,
+  tickFormatter: () => void 0,
   updateLegend: () => void 0,
 };
 

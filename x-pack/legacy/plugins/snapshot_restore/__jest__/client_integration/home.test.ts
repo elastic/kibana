@@ -88,8 +88,15 @@ describe('<SnapshotRestoreHome />', () => {
       test('should have 4 tabs', () => {
         const { find } = testBed;
 
-        expect(find('tab').length).toBe(4);
-        expect(find('tab').map(t => t.text())).toEqual([
+        const tabs = [
+          find('snapshots_tab'),
+          find('repositories_tab'),
+          find('policies_tab'),
+          find('restore_status_tab'),
+        ];
+
+        expect(tabs.length).toBe(4);
+        expect(tabs.map(t => t.text())).toEqual([
           'Snapshots',
           'Repositories',
           'Policies',

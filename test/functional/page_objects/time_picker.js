@@ -124,6 +124,11 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await this.setAbsoluteRange(this.defaultStartTime, this.defaultEndTime);
     }
 
+    async isOff() {
+      const element = await find.byClassName('euiDatePickerRange--readOnly');
+      return !!element;
+    }
+
     async isQuickSelectMenuOpen() {
       return await testSubjects.exists('superDatePickerQuickMenu');
     }
@@ -263,6 +268,22 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       }
 
       await this.closeQuickSelectTimeMenu();
+    }
+
+    async setHistoricalDataRange() {
+      await this.setDefaultAbsoluteRange();
+    }
+
+    async setDefaultDataRange() {
+      const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
+      const toTime = 'Apr 13, 2018 @ 00:00:00.000';
+      await this.setAbsoluteRange(fromTime, toTime);
+    }
+
+    async setLogstashDataRange() {
+      const fromTime = 'Apr 9, 2018 @ 00:00:00.000';
+      const toTime = 'Apr 13, 2018 @ 00:00:00.000';
+      await this.setAbsoluteRange(fromTime, toTime);
     }
   }
 

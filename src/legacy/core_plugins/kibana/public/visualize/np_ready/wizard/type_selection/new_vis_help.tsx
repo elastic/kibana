@@ -21,10 +21,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { EuiText, EuiButton } from '@elastic/eui';
 import { VisTypeAliasListEntry } from './type_selection';
+import { VisTypeAlias } from '../../../../../../visualizations/public';
 
 interface Props {
   promotedTypes: VisTypeAliasListEntry[];
-  addBasePath: (path: string) => string;
+  onPromotionClicked: (visType: VisTypeAlias) => void;
 }
 
 export function NewVisHelp(props: Props) {
@@ -42,7 +43,7 @@ export function NewVisHelp(props: Props) {
             <strong>{t.promotion!.description}</strong>
           </p>
           <EuiButton
-            href={props.addBasePath(t.aliasUrl)}
+            onClick={() => props.onPromotionClicked(t)}
             fill
             size="s"
             iconType="popout"

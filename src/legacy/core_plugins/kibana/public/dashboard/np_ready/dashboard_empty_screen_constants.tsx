@@ -19,6 +19,16 @@
 
 import { i18n } from '@kbn/i18n';
 
+/** READONLY VIEW CONSTANTS **/
+export const emptyDashboardTitle: string = i18n.translate('kbn.dashboard.emptyDashboardTitle', {
+  defaultMessage: 'This dashboard is empty.',
+});
+export const emptyDashboardAdditionalPrivilege = i18n.translate(
+  'kbn.dashboard.emptyDashboardAdditionalPrivilege',
+  {
+    defaultMessage: 'You need additional privileges to edit this dashboard.',
+  }
+);
 /** VIEW MODE CONSTANTS **/
 export const fillDashboardTitle: string = i18n.translate('kbn.dashboard.fillDashboardTitle', {
   defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
