@@ -68,8 +68,7 @@ export { timezoneProvider } from 'ui/vis/lib/timezone';
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
-// @ts-ignore
-export { formatMsg, formatStack } from 'ui/notify/lib/index';
+export { formatMsg, formatStack } from '../../../../../plugins/kibana_legacy/public';
 // @ts-ignore
 export { migrateLegacyQuery } from '../../../../../plugins/kibana_legacy/public';
 

@@ -17,15 +17,19 @@
  * under the License.
  */
 
-import MarkdownIt from 'markdown-it';
-import { uiModules } from 'ui/modules';
-import 'angular-sanitize';
+import { i18n } from '@kbn/i18n';
 
-const markdownIt = new MarkdownIt({
-  html: false,
-  linkify: true,
-});
-
-uiModules.get('kibana', ['ngSanitize']).filter('markdown', function($sanitize) {
-  return md => (md ? $sanitize(markdownIt.render(md)) : '');
-});
+// browsers format Error.stack differently; always include message
+export function formatStack(err: Record<string, any>) {
+  if (err.stack && err.stack.indexOf(err.message) === -1) {
+    return i18n.translate('common.ui.notify.toaster.errorMessage', {
+      defaultMessage: `Error: {errorMessage}
+      {errorStack}`,
+      values: {
+        errorMessage: err.message,
+        errorStack: err.stack,
+      },
+    });
+  }
+  return err.stack;
+}

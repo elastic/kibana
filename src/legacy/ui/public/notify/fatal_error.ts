@@ -22,7 +22,7 @@ import {
   AngularHttpError,
   formatAngularHttpError,
   isAngularHttpError,
-} from './lib/format_angular_http_error';
+} from '../../../../plugins/kibana_legacy/public';
 
 export function addFatalErrorCallback(callback: () => void) {
   npSetup.core.fatalErrors.get$().subscribe(() => {

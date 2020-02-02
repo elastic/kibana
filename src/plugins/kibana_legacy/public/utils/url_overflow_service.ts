@@ -22,6 +22,9 @@ const URL_MAX_OTHERS = 25000;
 export const IE_REGEX = /(; ?MSIE |Edge\/\d|Trident\/[\d+\.]+;.*rv:*11\.\d+)/;
 
 export class UrlOverflowService {
+  private readonly _ieLike: boolean;
+  private _val?: string | null;
+  private readonly _sync: () => void;
   constructor() {
     const key = 'error/url-overflow/url';
     const store = window.sessionStorage || {
@@ -37,8 +40,11 @@ export class UrlOverflowService {
 
     this._val = store.getItem(key);
     this._sync = () => {
-      if (this._val == null) store.removeItem(key);
-      else store.setItem(key, this._val);
+      if (typeof this._val === 'string') {
+        store.setItem(key, this._val);
+      } else {
+        store.removeItem(key);
+      }
     };
   }
 
@@ -46,7 +52,7 @@ export class UrlOverflowService {
     return this._ieLike ? URL_MAX_IE : URL_MAX_OTHERS;
   }
 
-  set(v) {
+  set(v: string) {
     this._val = v;
     this._sync();
   }
@@ -55,7 +61,7 @@ export class UrlOverflowService {
     return this._val;
   }
 
-  check(absUrl) {
+  check(absUrl: string) {
     if (!this.get()) {
       const urlLength = absUrl.length;
       const remaining = this.failLength() - urlLength;

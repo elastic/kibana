@@ -18,7 +18,10 @@
  */
 
 import expect from '@kbn/expect';
-import { addSystemApiHeader, isSystemApiRequest } from '../system_api';
+import {
+  addSystemApiHeader,
+  isSystemApiRequest,
+} from '../../../../../plugins/kibana_legacy/public';
 
 describe('system_api', () => {
   describe('#addSystemApiHeader', () => {

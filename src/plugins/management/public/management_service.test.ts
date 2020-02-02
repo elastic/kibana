@@ -20,7 +20,10 @@
 import { ManagementService } from './management_service';
 import { coreMock } from '../../../core/public/mocks';
 
-const mockKibanaLegacy = { registerLegacyApp: () => {}, forwardApp: () => {} };
+const mockKibanaLegacy = {
+  registerLegacyApp: () => {},
+  forwardApp: () => {},
+};
 
 test('Provides default sections', () => {
   const service = new ManagementService().setup(

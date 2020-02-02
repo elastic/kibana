@@ -22,9 +22,7 @@ import {
   NotificationsSetup,
   Toast,
   ToastInput,
-} from '../../../../../core/public';
-
-export { Toast, ToastInput };
+} from '../../../../../../target/types/core/public';
 
 export class ToastNotifications {
   public list: Toast[] = [];

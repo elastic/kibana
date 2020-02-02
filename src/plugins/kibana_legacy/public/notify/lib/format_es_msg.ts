@@ -17,4 +17,21 @@
  * under the License.
  */
 
-export { banners } from './banners';
+import _ from 'lodash';
+
+const getRootCause = (err: Record<string, any> | string) => _.get(err, 'resp.error.root_cause');
+
+/**
+ * Utilize the extended error information returned from elasticsearch
+ * @param  {Error|String} err
+ * @returns {string}
+ */
+export const formatESMsg = (err: Record<string, any> | string) => {
+  const rootCause = getRootCause(err);
+
+  if (!Array.isArray(rootCause)) {
+    return;
+  }
+
+  return rootCause.map((cause: Record<string, any>) => cause.reason).join('\n');
+};

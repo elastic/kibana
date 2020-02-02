@@ -29,7 +29,7 @@ const has = _.has;
  * @param  {String} source - Prefix for message indicating source (optional)
  * @returns {string}
  */
-export function formatMsg(err, source) {
+export function formatMsg(err: Record<string, any> | string, source: string = '') {
   let message = '';
   if (source) {
     message += source + ': ';
@@ -68,7 +68,7 @@ export function formatMsg(err, source) {
   return message;
 }
 
-formatMsg.describeError = function(err) {
+formatMsg.describeError = function(err: Record<string, any>) {
   if (!err) return undefined;
   if (err.shortMessage) return err.shortMessage;
   if (err.body && err.body.message) return err.body.message;

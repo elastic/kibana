@@ -7,7 +7,7 @@
 import React from 'react';
 import { contains } from 'lodash';
 import { toastNotifications } from 'ui/notify';
-import { formatMsg } from 'ui/notify/lib';
+import { formatMsg } from '../../../../../../src/plugins/kibana_legacy/public'; // eslint-disable-line import/order
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';

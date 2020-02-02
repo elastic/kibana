@@ -20,3 +20,5 @@
 export { PromiseServiceCreator } from './promises';
 // @ts-ignore
 export { watchMultiDecorator } from './watch_multi';
+export * from './angular_config';
+export { ensureDefaultIndexPattern } from './ensure_default_index_pattern';

@@ -28,25 +28,33 @@ import {
   IRootScopeService,
 } from 'angular';
 import $ from 'jquery';
-import _, { cloneDeep, forOwn, get, set } from 'lodash';
+import { cloneDeep, forOwn, get, set } from 'lodash';
 import React, { Fragment } from 'react';
 import * as Rx from 'rxjs';
+import { ChromeBreadcrumb } from 'kibana/public';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, LegacyCoreStart } from 'kibana/public';
-
-import { fatalError } from 'ui/notify';
-import { RouteConfiguration } from 'ui/routes/route_manager';
-// @ts-ignore
-import { modifyUrl } from 'ui/url';
-import { toMountPoint } from '../../../../plugins/kibana_react/public';
-// @ts-ignore
-import { UrlOverflowService } from '../error_url_overflow';
-// @ts-ignore
-import { isSystemApiRequest } from '../system_api';
+import { modifyUrl } from '../../../../core/utils';
+import { toMountPoint } from '../../../kibana_react/public';
+import { isSystemApiRequest, UrlOverflowService } from '../utils';
+import { formatAngularHttpError, isAngularHttpError } from '../notify/lib';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
+
+export interface RouteConfiguration {
+  controller?: string | ((...args: any[]) => void);
+  redirectTo?: string;
+  resolveRedirectTo?: (...args: any[]) => void;
+  reloadOnSearch?: boolean;
+  reloadOnUrl?: boolean;
+  outerAngularWrapperRoute?: boolean;
+  resolve?: object;
+  template?: string;
+  k7Breadcrumbs?: (...args: any[]) => ChromeBreadcrumb[];
+  requireUICapability?: string;
+}
 
 /**
  * Detects whether a given angular route is a dummy route that doesn't
@@ -260,7 +268,10 @@ const $setupBreadcrumbsAutoClear = (newPlatform: CoreStart, isLocalAngular: bool
     try {
       newPlatform.chrome.setBreadcrumbs($injector.invoke(k7BreadcrumbsProvider));
     } catch (error) {
-      fatalError(error);
+      if (isAngularHttpError(error)) {
+        error = formatAngularHttpError(error);
+      }
+      newPlatform.fatalErrors.add(error, 'location');
     }
   });
 };
@@ -302,7 +313,10 @@ const $setupBadgeAutoClear = (newPlatform: CoreStart, isLocalAngular: boolean) =
     try {
       newPlatform.chrome.setBadge($injector.invoke(badgeProvider));
     } catch (error) {
-      fatalError(error);
+      if (isAngularHttpError(error)) {
+        error = formatAngularHttpError(error);
+      }
+      newPlatform.fatalErrors.add(error, 'location');
     }
   });
 };

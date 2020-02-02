@@ -19,7 +19,7 @@
 
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import { ToastNotifications } from './toast_notifications';
-import { Toast } from '../../../../../core/public';
+import { Toast } from 'kibana/public';
 import { BehaviorSubject } from 'rxjs';
 
 describe('ToastNotifications', () => {

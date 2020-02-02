@@ -17,5 +17,11 @@
  * under the License.
  */
 
-export { toastNotifications } from './toasts';
-export { Toast, ToastInput } from './toast_notifications';
+export { formatESMsg } from './format_es_msg';
+export { formatMsg } from './format_msg';
+export { formatStack } from './format_stack';
+export {
+  isAngularHttpError,
+  formatAngularHttpError,
+  AngularHttpError,
+} from './format_angular_http_error';

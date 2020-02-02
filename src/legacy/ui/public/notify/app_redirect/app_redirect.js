@@ -18,7 +18,7 @@
  */
 
 import { modifyUrl } from '../../../../../core/utils';
-import { toastNotifications } from '../toasts';
+import { toastNotifications } from '../';
 
 const APP_REDIRECT_MESSAGE_PARAM = 'app_redirect_message';
 

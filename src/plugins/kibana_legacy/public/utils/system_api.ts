@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { IRequestConfig } from 'angular';
+
 const SYSTEM_API_HEADER_NAME = 'kbn-system-api';
 
 /**
@@ -24,7 +26,7 @@ const SYSTEM_API_HEADER_NAME = 'kbn-system-api';
  * @param originalHeaders Object representing set of headers
  * @return Object representing set of headers, with system API header added in
  */
-export function addSystemApiHeader(originalHeaders) {
+export function addSystemApiHeader(originalHeaders: Record<string, string>) {
   const systemApiHeaders = {
     [SYSTEM_API_HEADER_NAME]: true,
   };
@@ -40,6 +42,7 @@ export function addSystemApiHeader(originalHeaders) {
  * @param request Object Request object created by $http service
  * @return true if request is a system API request; false otherwise
  */
-export function isSystemApiRequest(request) {
-  return !!request.headers[SYSTEM_API_HEADER_NAME];
+export function isSystemApiRequest(request: IRequestConfig) {
+  const { headers } = request;
+  return headers && !!headers[SYSTEM_API_HEADER_NAME];
 }

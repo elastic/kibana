@@ -17,7 +17,7 @@ import { act } from '@testing-library/react';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
-import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
+import { ToastNotifications } from '../../../../../../../src/plugins/kibana_legacy/public';
 
 jest.mock('../../../../../../../src/legacy/core_plugins/management/public/legacy', () => ({
   setup: mockManagementPlugin.createSetupContract(),

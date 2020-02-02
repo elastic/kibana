@@ -21,7 +21,7 @@ import {
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
+import { ToastNotifications } from '../../../../../../../src/plugins/kibana_legacy/public';
 import { SavedObjectsManagementRecord } from '../../../../../../../src/legacy/core_plugins/management/public';
 import {
   ProcessedImportResponse,

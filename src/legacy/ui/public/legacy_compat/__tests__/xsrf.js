@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 
-import { $setupXsrfRequestInterceptor } from '../angular_config';
+import { $setupXsrfRequestInterceptor } from '../../../../../plugins/kibana_legacy/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { version } from '../../../../../core/server/utils/package_json';
 

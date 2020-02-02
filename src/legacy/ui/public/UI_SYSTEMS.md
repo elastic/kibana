@@ -4,5 +4,5 @@ In this directory you'll find various UI systems you can use to craft effective 
 
 ## ui/notify
 
-* [banners](notify/banners/BANNERS.md)
-* [toastNotifications](notify/toasts/TOAST_NOTIFICATIONS.md)
+* [banners](../../../plugins/kibana_legacy/public/notify/banners/BANNERS.md)
+* [toastNotifications](../../../plugins/kibana_legacy/public/notify/toasts/TOAST_NOTIFICATIONS.md)

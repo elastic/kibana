@@ -25,5 +25,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export * from './plugin';
-export { PromiseServiceCreator, watchMultiDecorator } from './angular';
-export { migrateLegacyQuery } from './utils/migrate_legacy_query';
+export * from './angular';
+export * from './notify';
+export * from './utils';

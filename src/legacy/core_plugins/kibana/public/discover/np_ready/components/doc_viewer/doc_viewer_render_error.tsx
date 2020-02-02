@@ -21,12 +21,12 @@ import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 import { formatMsg, formatStack } from '../../../kibana_services';
 
 interface Props {
-  error: Error | string | null;
+  error: Error | string;
 }
 
 export function DocViewerError({ error }: Props) {
   const errMsg = formatMsg(error);
-  const errStack = error ? formatStack(error) : '';
+  const errStack = typeof error === 'object' ? formatStack(error) : '';
 
   return (
     <EuiCallOut title={errMsg} color="danger" iconType="cross" data-test-subj="docViewerError">
