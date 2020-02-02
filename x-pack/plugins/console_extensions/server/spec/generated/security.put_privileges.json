@@ -12,7 +12,7 @@
       "POST"
     ],
     "patterns": [
-      "_security/privilege/"
+      "_security/privilege"
     ],
     "documentation": "TODO"
   }

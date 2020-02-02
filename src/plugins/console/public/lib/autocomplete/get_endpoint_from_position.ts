@@ -30,7 +30,10 @@ export function getEndpointFromPosition(editor: CoreEditor, pos: Position, parse
   const context = {
     ...getCurrentMethodAndTokenPaths(
       editor,
-      { column: lineValue.length, lineNumber: pos.lineNumber },
+      {
+        column: lineValue.length + 1 /* Go to the very end of the line */,
+        lineNumber: pos.lineNumber,
+      },
       parser,
       true
     ),
