@@ -75,7 +75,7 @@ export interface SearchBarOwnProps {
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
   onQueryChange?: (payload: { dateRange: TimeRange; query?: Query }) => void;
-  onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   // User has saved the current state as a saved query
   onSaved?: (savedQuery: SavedQuery) => void;
   // User has modified the saved query, your app should persist the update

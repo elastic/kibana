@@ -72,7 +72,7 @@ const defaultOnQuerySubmit = (
     timefilter.setTime(payload.dateRange);
     setQueryStringState(payload.query);
 
-    if (props.onQuerySubmit && isUpdate) props.onQuerySubmit(payload);
+    if (props.onQuerySubmit) props.onQuerySubmit(payload, isUpdate);
   };
 };
 
