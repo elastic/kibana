@@ -40,89 +40,91 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
-  activePage,
-  data,
-  fakeTotalCount,
-  id,
-  isInspect,
-  limit,
-  loading,
-  loadPage,
-  showMorePagesIndicator,
-  sort,
-  totalCount,
-  type,
-  updateNetworkTable,
-}) => {
-  const tableType =
-    type === networkModel.NetworkType.page
-      ? networkModel.NetworkTableType.http
-      : networkModel.IpDetailsTableType.http;
+const NetworkHttpTableComponent = React.memo<NetworkHttpTableProps>(
+  ({
+    activePage,
+    data,
+    fakeTotalCount,
+    id,
+    isInspect,
+    limit,
+    loading,
+    loadPage,
+    showMorePagesIndicator,
+    sort,
+    totalCount,
+    type,
+    updateNetworkTable,
+  }) => {
+    const tableType =
+      type === networkModel.NetworkType.page
+        ? networkModel.NetworkTableType.http
+        : networkModel.IpDetailsTableType.http;
 
-  const updateLimitPagination = useCallback(
-    newLimit =>
-      updateNetworkTable({
-        networkType: type,
-        tableType,
-        updates: { limit: newLimit },
-      }),
-    [type, updateNetworkTable, tableType]
-  );
-
-  const updateActivePage = useCallback(
-    newPage =>
-      updateNetworkTable({
-        networkType: type,
-        tableType,
-        updates: { activePage: newPage },
-      }),
-    [type, updateNetworkTable, tableType]
-  );
-
-  const onChange = useCallback(
-    (criteria: Criteria) => {
-      if (criteria.sort != null && criteria.sort.direction !== sort.direction) {
+    const updateLimitPagination = useCallback(
+      newLimit =>
         updateNetworkTable({
           networkType: type,
           tableType,
-          updates: {
-            sort: {
-              direction: criteria.sort.direction as Direction,
+          updates: { limit: newLimit },
+        }),
+      [type, updateNetworkTable, tableType]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { activePage: newPage },
+        }),
+      [type, updateNetworkTable, tableType]
+    );
+
+    const onChange = useCallback(
+      (criteria: Criteria) => {
+        if (criteria.sort != null && criteria.sort.direction !== sort.direction) {
+          updateNetworkTable({
+            networkType: type,
+            tableType,
+            updates: {
+              sort: {
+                direction: criteria.sort.direction as Direction,
+              },
             },
-          },
-        });
-      }
-    },
-    [tableType, sort.direction, type, updateNetworkTable]
-  );
+          });
+        }
+      },
+      [tableType, sort.direction, type, updateNetworkTable]
+    );
 
-  const sorting = { field: `node.${NetworkHttpFields.requestCount}`, direction: sort.direction };
+    const sorting = { field: `node.${NetworkHttpFields.requestCount}`, direction: sort.direction };
 
-  return (
-    <PaginatedTable
-      activePage={activePage}
-      columns={getNetworkHttpColumns(tableType)}
-      dataTestSubj={`table-${tableType}`}
-      headerCount={totalCount}
-      headerTitle={i18n.HTTP_REQUESTS}
-      headerUnit={i18n.UNIT(totalCount)}
-      id={id}
-      itemsPerRow={rowItems}
-      isInspect={isInspect}
-      limit={limit}
-      loading={loading}
-      loadPage={loadPage}
-      onChange={onChange}
-      pageOfItems={data}
-      showMorePagesIndicator={showMorePagesIndicator}
-      sorting={sorting}
-      totalCount={fakeTotalCount}
-      updateActivePage={updateActivePage}
-      updateLimitPagination={updateLimitPagination}
-    />
-  );
-};
+    return (
+      <PaginatedTable
+        activePage={activePage}
+        columns={getNetworkHttpColumns(tableType)}
+        dataTestSubj={`table-${tableType}`}
+        headerCount={totalCount}
+        headerTitle={i18n.HTTP_REQUESTS}
+        headerUnit={i18n.UNIT(totalCount)}
+        id={id}
+        itemsPerRow={rowItems}
+        isInspect={isInspect}
+        limit={limit}
+        loading={loading}
+        loadPage={loadPage}
+        onChange={onChange}
+        pageOfItems={data}
+        showMorePagesIndicator={showMorePagesIndicator}
+        sorting={sorting}
+        totalCount={fakeTotalCount}
+        updateActivePage={updateActivePage}
+        updateLimitPagination={updateLimitPagination}
+      />
+    );
+  }
+);
 
 NetworkHttpTableComponent.displayName = 'NetworkHttpTableComponent';
 

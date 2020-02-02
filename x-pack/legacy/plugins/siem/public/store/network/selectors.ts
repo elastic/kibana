@@ -18,6 +18,7 @@ import {
   NetworkType,
   TopCountriesQuery,
   TlsQuery,
+  HttpQuery,
 } from './model';
 
 const selectNetworkPage = (state: State): NetworkPageModel => state.network.page;
@@ -72,7 +73,7 @@ const selectTopCountriesByType = (
 export const topCountriesSelector = () =>
   createSelector(selectTopCountriesByType, topCountriesQueries => topCountriesQueries);
 
-const selectHttpByType = (state: State, networkType: NetworkType) => {
+const selectHttpByType = (state: State, networkType: NetworkType): HttpQuery => {
   const httpType =
     networkType === NetworkType.page ? NetworkTableType.http : IpDetailsTableType.http;
   return (
