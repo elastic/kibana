@@ -34,7 +34,7 @@ If the {es} {security-features} are enabled, you must have the
 {ref}/security-privileges.html[`manage_watcher` or `monitor_watcher`]
 cluster privileges to use Watcher in {kib}.
 
-Alternately, you can have the built-in `kibana_user` role
+Alternately, you can have the built-in `kibana_admin` role
 and either of these watcher roles:
 
 * `watcher_admin`. You can perform all Watcher actions, including create and edit watches.
