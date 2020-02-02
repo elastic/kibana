@@ -4,110 +4,73 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CANVAS_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
-import { initializeDeleteWorkpadRoute } from './delete';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-} from 'src/core/server';
-import {
-  savedObjectsClientMock,
-  httpServiceMock,
-  httpServerMock,
-  loggingServiceMock,
-} from 'src/core/server/mocks';
+import { querySchema, bodySchema, idConditionalValidation } from './file_upload';
 
-const mockRouteContext = ({
-  core: {
-    savedObjects: {
-      client: savedObjectsClientMock.create(),
-    },
-  },
-} as unknown) as RequestHandlerContext;
+const queryWithId = {
+  id: '123',
+};
 
-const sampleFirstReq = {
-  index: 'dinagatislandhh',
+const bodyWithoutQueryId = {
+  index: 'islandofone',
   data: [],
   settings: { number_of_shards: 1 },
   mappings: { coordinates: { type: 'geo_point' } },
   ingestPipeline: {},
   fileType: 'json',
-  app: 'Maps'
+  app: 'Maps',
 };
 
-const sampleSecondReq = {
-  index: 'dinagatislandhh',
-  data: [ { coordinates: [Array], name: 'Dinagat Islands' } ],
+const bodyWithQueryId = {
+  index: 'islandofone2',
+  data: [{ coordinates: [], name: 'islandofone2' }],
   settings: {},
   mappings: {},
   ingestPipeline: {},
-  fileType: 'json'
+  fileType: 'json',
 };
 
-
-describe('POST file', () => {
-  let routeHandler: RequestHandler<any, any, any>;
-
-  beforeEach(() => {
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-    initializeDeleteWorkpadRoute({
-      router,
-      logger: loggingServiceMock.create().get(),
-    });
-
-    routeHandler = router.delete.mock.calls[0][1];
+describe('route validation', () => {
+  it(`validates query with id`, async () => {
+    const validationResult = querySchema.validate(queryWithId);
+    expect(validationResult.id).toBe(queryWithId.id);
   });
 
-  it(`rejects file with no content`, async () => {
-  });
-  it(`accepts request with correct structure`, async () => {
-  });
-  it(`rejects request with incorrect structure`, async () => {
-  });
-  it(`rejects request over size limit`, async () => {
-  });
-  it(`accepts request within size limit`, async () => {
-  });
-  it(`requires mappings if no id present`, async () => {
-  });
-  it(`requires data & settings if id is present`, async () => {
+  it(`validates query without id`, async () => {
+    const validationResult = querySchema.validate({});
+    expect(validationResult.id).toBeNull();
   });
 
-  it(`returns 200 ok when the workpad is deleted`, async () => {
-    const id = 'some-id';
-    const request = httpServerMock.createKibanaRequest({
-      method: 'delete',
-      path: `api/canvas/workpad/${id}`,
-      params: {
-        id,
-      },
-    });
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-    expect(response.status).toBe(200);
-    expect(response.payload).toEqual({ ok: true });
-    expect(mockRouteContext.core.savedObjects.client.delete).toBeCalledWith(CANVAS_TYPE, id);
+  it(`throws when query contains content other than an id`, async () => {
+    expect(() => querySchema.validate({ notAnId: 123 })).toThrowError(
+      `[notAnId]: definition for this key is missing`
+    );
   });
 
-  it(`returns bad request if delete is unsuccessful`, async () => {
-    const request = httpServerMock.createKibanaRequest({
-      method: 'delete',
-      path: `api/canvas/workpad/some-id`,
-      params: {
-        id: 'some-id',
-      },
-    });
+  it(`validates body with valid fields`, async () => {
+    const validationResult = bodySchema.validate(bodyWithoutQueryId);
+    expect(validationResult).toEqual(bodyWithoutQueryId);
+  });
 
-    (mockRouteContext.core.savedObjects.client.delete as jest.Mock).mockImplementationOnce(() => {
-      throw mockRouteContext.core.savedObjects.client.errors.createBadRequestError('bad request');
-    });
+  it(`throws if an expected field is missing`, async () => {
+    /* eslint-disable no-unused-vars */
+    const { index, ...bodyWithoutIndexField } = bodyWithoutQueryId;
+    expect(() => bodySchema.validate(bodyWithoutIndexField)).toThrowError(
+      `[index]: expected value of type [string] but got [undefined]`
+    );
+  });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+  it(`validates conditional fields when id has been provided in query`, async () => {
+    const validationResult = idConditionalValidation(bodyWithQueryId, true);
+    expect(validationResult).toEqual(bodyWithQueryId);
+  });
 
-    expect(response.status).toBe(400);
+  it(`validates conditional fields when no id has been provided in query`, async () => {
+    const validationResultWhenIdPresent = idConditionalValidation(bodyWithoutQueryId, false);
+    expect(validationResultWhenIdPresent).toEqual(bodyWithoutQueryId);
+    // Conditions for no id are more strict since this query sets up the index,
+    // expect it to throw if expected fields aren't present
+    expect(() => idConditionalValidation(bodyWithoutQueryId, true)).toThrowError(
+      `[data]: array size is [0], but cannot be smaller than [1]`
+    );
   });
 });

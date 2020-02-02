@@ -12,13 +12,13 @@ import { schema } from '@kbn/config-schema';
 
 export const IMPORT_ROUTE = '/api/fileupload/import';
 
-const querySchema = schema.maybe(
+export const querySchema = schema.maybe(
   schema.object({
     id: schema.nullable(schema.string()),
   })
 );
 
-const bodySchema = schema.object(
+export const bodySchema = schema.object(
   {
     app: schema.maybe(schema.string()),
     index: schema.string(),
@@ -43,8 +43,8 @@ const options = {
   },
 };
 
-const idConditionalValidation = (body, boolHasId) => {
-  const validConditionalBodyParams = schema
+export const idConditionalValidation = (body, boolHasId) =>
+  schema
     .object(
       {
         data: boolHasId
@@ -74,9 +74,6 @@ const idConditionalValidation = (body, boolHasId) => {
       { allowUnknowns: true }
     )
     .validate(body);
-
-  return validConditionalBodyParams;
-};
 
 const finishValidationAndProcessReq = (elasticsearchPlugin, getSavedObjectsRepository) => {
   return async (con, req, { ok, badRequest }) => {
