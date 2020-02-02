@@ -7,7 +7,7 @@
 import geojsonvt from 'geojson-vt';
 import vtpbf from 'vt-pbf';
 import _ from 'lodash';
-import { FEATURE_ID_PROPERTY_NAME, MVT_SOURCE_ID } from '../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME, MVT_SOURCE_ID, KBN_TOO_MANY_FEATURES_PROPERTY } from '../../common/constants';
 
 export async function getTile({
   server,
@@ -56,9 +56,17 @@ export async function getTile({
 
       if (countResult.count > requestBody.size) {
         server.log('info', 'do NOT do search');
-        resultFeatures = [];
+        resultFeatures = [
+          {
+            type: 'Feature',
+            properties: {
+              [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
+            },
+            geometry: polygon,
+          },
+        ];
       } else {
-        server.log('do search');
+        server.log('info', 'do search');
         result = await callWithRequest(request, 'search', esQuery);
 
         server.log('info', `result length ${result.hits.hits.length}`);

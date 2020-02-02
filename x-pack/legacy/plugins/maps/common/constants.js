@@ -41,6 +41,7 @@ export function createMapPath(id) {
 }
 
 export const MVT_SOURCE_ID = 'geojsonLayer';
+export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__';
 
 export const LAYER_TYPE = {
   TILE: 'TILE',
