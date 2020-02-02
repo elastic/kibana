@@ -19,6 +19,7 @@ import {
   LAYER_TYPE,
   FIELD_ORIGIN,
   LAYER_STYLE_TYPE,
+  KBN_TOO_MANY_FEATURES_PROPERTY,
 } from '../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
@@ -752,6 +753,7 @@ export class VectorLayer extends AbstractLayer {
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
+    const tooManyFeaturesLayerId = this._getMbTooManyFeaturesLayerId();
     const hasJoins = this._hasJoins();
     if (!mbMap.getLayer(fillLayerId)) {
       const mbLayer = {
@@ -777,6 +779,27 @@ export class VectorLayer extends AbstractLayer {
       }
       mbMap.addLayer(mbLayer);
     }
+    if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
+      const mbLayer = {
+        id: tooManyFeaturesLayerId,
+        type: 'fill',
+        source: sourceId,
+        paint: {},
+      };
+      if (mvtSourceLayer) {
+        mbLayer['source-layer'] = mvtSourceLayer;
+      }
+      mbMap.addLayer(mbLayer);
+      mbMap.setFilter(tooManyFeaturesLayerId, [
+        '==',
+        ['get', KBN_TOO_MANY_FEATURES_PROPERTY],
+        true,
+      ]);
+      // mbMap.setPaintProperty(tooManyFeaturesLayerId, 'fill-color', 'rgb(255,0,0)');
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'fill-pattern', '__kbn_too_many_features__');
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'fill-opacity', this.getAlpha(),);
+    }
+
     this._style.setMBPaintProperties({
       alpha: this.getAlpha(),
       mbMap,
@@ -797,6 +820,13 @@ export class VectorLayer extends AbstractLayer {
     if (lineFilterExpr !== mbMap.getFilter(lineLayerId)) {
       mbMap.setFilter(lineLayerId, lineFilterExpr);
     }
+
+    this.syncVisibilityWithMb(mbMap, tooManyFeaturesLayerId);
+    mbMap.setLayerZoomRange(
+      tooManyFeaturesLayerId,
+      this._descriptor.minZoom,
+      this._descriptor.maxZoom
+    );
   }
 
   _syncStylePropertiesWithMb(mbMap) {
@@ -840,6 +870,10 @@ export class VectorLayer extends AbstractLayer {
     return this.makeMbLayerId('fill');
   }
 
+  _getMbTooManyFeaturesLayerId() {
+    return this.makeMbLayerId('toomanyfeatures');
+  }
+
   getMbLayerIds() {
     return [
       this._getMbPointLayerId(),
@@ -847,6 +881,7 @@ export class VectorLayer extends AbstractLayer {
       this._getMbSymbolLayerId(),
       this._getMbLineLayerId(),
       this._getMbPolygonLayerId(),
+      this._getMbTooManyFeaturesLayerId(),
     ];
   }
 

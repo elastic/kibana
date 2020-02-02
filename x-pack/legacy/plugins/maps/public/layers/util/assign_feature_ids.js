@@ -5,7 +5,10 @@
  */
 
 import _ from 'lodash';
-import { FEATURE_ID_PROPERTY_NAME } from '../../../common/constants';
+import {
+  FEATURE_ID_PROPERTY_NAME,
+  KBN_TOO_MANY_FEATURES_PROPERTY,
+} from '../../../common/constants';
 
 let idCounter = 0;
 
@@ -36,17 +39,20 @@ export function assignFeatureIds(featureCollection) {
   for (let i = 0; i < featureCollection.features.length; i++) {
     const numericId = randomizedIds[i];
     const feature = featureCollection.features[i];
-    features.push({
+    const nf = {
       type: 'Feature',
       geometry: feature.geometry, // do not copy geometry, this object can be massive
       properties: {
         // preserve feature id provided by source so features can be referenced across fetches
         [FEATURE_ID_PROPERTY_NAME]: feature.id == null ? numericId : feature.id,
+        [KBN_TOO_MANY_FEATURES_PROPERTY]: false,
         // create new object for properties so original is not polluted with kibana internal props
         ...feature.properties,
       },
       id: numericId, // Mapbox feature state id, must be integer
-    });
+    };
+    console.log('n', nf);
+    features.push(nf);
   }
 
   return {

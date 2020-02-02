@@ -112,6 +112,7 @@ export async function getTile({
             _id: hit._id,
             _index: hit._index,
             [FEATURE_ID_PROPERTY_NAME]: hit._id,
+            [KBN_TOO_MANY_FEATURES_PROPERTY]: false,
           };
           delete properties[geometryFieldName];
 
