@@ -5,7 +5,6 @@
  */
 
 import { OVERVIEW_PAGE } from '../../lib/urls';
-import { clearFetch, stubApi } from '../../lib/fixtures/helpers';
 import {
   HOST_STATS,
   NETWORK_STATS,
@@ -17,8 +16,7 @@ import { loginAndWaitForPage } from '../../lib/util/helpers';
 
 describe('Overview Page', () => {
   beforeEach(() => {
-    clearFetch();
-    stubApi('overview');
+    cy.stubSIEMapi('overview');
     loginAndWaitForPage(OVERVIEW_PAGE);
   });
 
