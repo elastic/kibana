@@ -5269,6 +5269,13 @@
   resolved "https://registry.yarnpkg.com/@types/unist/-/unist-2.0.3.tgz#9c088679876f374eb5983f150d4787aa6fb32d7e"
   integrity sha512-FvUupuM3rlRsRtCN+fDudtmytGO6iHJuuRKS1Ss0pG5z8oX0diNEw94UEL7hgDbpN94rgaK5R7sWm6RrSkZuAQ==
 
+"@types/use-resize-observer@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@types/use-resize-observer/-/use-resize-observer-6.0.0.tgz#d1b162b2733b22225908a7877ca7115c67f3752e"
+  integrity sha512-8RD06szR+wzHpfCBFbcTEQ0OCoogoSWCyyUmWyqc5qGG2fa1sOUdwNte5dwoJWG/sh5sBU0QVZ1+9zcQGLUSVg==
+  dependencies:
+    "@types/react" "*"
+
 "@types/uuid@^3.4.4":
   version "3.4.4"
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-3.4.4.tgz#7af69360fa65ef0decb41fd150bf4ca5c0cefdf5"
@@ -30168,6 +30175,13 @@ use-memo-one@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/use-memo-one/-/use-memo-one-1.1.1.tgz#39e6f08fe27e422a7d7b234b5f9056af313bd22c"
   integrity sha512-oFfsyun+bP7RX8X2AskHNTxu+R3QdE/RC5IefMbqptmACAA/gfol1KDD5KRzPsGMa62sWxGZw+Ui43u6x4ddoQ==
+
+use-resize-observer@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/use-resize-observer/-/use-resize-observer-6.0.0.tgz#8450ade735c386e8d93cdf983c26d34a9f478a54"
+  integrity sha512-Zfe1qsZVhzfgECs+L/ZcSukyVPFGOmWtC7xZI5Lpn4PR2hNgVvD1NmQ/GYBoCSV2pJskxflJWcDzpTAt84nhvw==
+  dependencies:
+    resize-observer-polyfill "^1.5.1"
 
 use@^2.0.0:
   version "2.0.2"
