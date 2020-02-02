@@ -7,6 +7,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ScaleType } from '@elastic/charts';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal/react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { noop } from 'lodash/fp';
@@ -223,4 +224,4 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   );
 };
 
-export const MatrixHistogram = React.memo(MatrixHistogramComponent);
+export const MatrixHistogram = React.memo(MatrixHistogramComponent, deepEqual);

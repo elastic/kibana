@@ -5,9 +5,10 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+import deepEqual from 'fast-deep-equal/react';
 
 import { networkActions } from '../../../../store/actions';
 import {
@@ -131,10 +132,12 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
       [type, updateNetworkTable, isPtrIncluded]
     );
 
+    const columns = useMemo(() => getNetworkDnsColumns(), []);
+
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getNetworkDnsColumns(type)}
+        columns={columns}
         dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerSupplement={
@@ -161,7 +164,8 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
         updateLimitPagination={updateLimitPagination}
       />
     );
-  }
+  },
+  deepEqual
 );
 
 NetworkDnsTableComponent.displayName = 'NetworkDnsTableComponent';
@@ -172,6 +176,11 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const NetworkDnsTable = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   updateNetworkTable: networkActions.updateNetworkTable,
-})(NetworkDnsTableComponent);
+};
+
+export const NetworkDnsTable = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(NetworkDnsTableComponent);

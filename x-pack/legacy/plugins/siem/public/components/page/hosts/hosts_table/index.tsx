@@ -8,6 +8,8 @@ import React, { useMemo, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { IIndexPattern } from 'src/plugins/data/public';
+import deepEqual from 'fast-deep-equal/react';
+
 import { hostsActions } from '../../../../store/actions';
 import {
   Direction,
@@ -183,7 +185,8 @@ const HostsTableComponent = React.memo<HostsTableProps>(
         updateActivePage={updateActivePage}
       />
     );
-  }
+  },
+  deepEqual
 );
 
 HostsTableComponent.displayName = 'HostsTableComponent';
@@ -217,10 +220,12 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const HostsTable = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   updateHostsSort: hostsActions.updateHostsSort,
   updateTableActivePage: hostsActions.updateTableActivePage,
   updateTableLimit: hostsActions.updateTableLimit,
-})(HostsTableComponent);
+};
+
+export const HostsTable = connect(makeMapStateToProps, mapDispatchToProps)(HostsTableComponent);
 
 HostsTable.displayName = 'HostsTable';

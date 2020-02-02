@@ -13,8 +13,11 @@ import {
   Position,
   Settings,
 } from '@elastic/charts';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiProgress } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal/react';
+import memoizeOne from 'memoize-one';
+
 import { useTheme } from '../../../../components/charts/common';
 import { histogramDateTimeFormatter } from '../../../../components/utils';
 import { HistogramData } from './types';
@@ -31,57 +34,65 @@ interface HistogramSignalsProps {
   updateDateRange: (min: number, max: number) => void;
 }
 
-export const SignalsHistogram = React.memo<HistogramSignalsProps>(
-  ({
-    chartHeight = DEFAULT_CHART_HEIGHT,
-    data,
-    from,
-    legendPosition = 'right',
-    loading,
-    to,
-    updateDateRange,
-  }) => {
-    const theme = useTheme();
+const MemoChart = React.memo(Chart, deepEqual);
+const MemoSettings = React.memo(Settings, deepEqual);
+const MemoHistogramBarSeries = React.memo(HistogramBarSeries, deepEqual);
+const MemoAxis = React.memo(Axis, deepEqual);
 
-    return (
-      <>
-        {loading && (
-          <EuiProgress
-            data-test-subj="loadingPanelSignalsHistogram"
-            size="xs"
-            position="absolute"
-            color="accent"
-          />
-        )}
+const SignalsHistogramComponent: React.FC<HistogramSignalsProps> = ({
+  chartHeight = DEFAULT_CHART_HEIGHT,
+  data,
+  from,
+  legendPosition = 'right',
+  loading,
+  to,
+  updateDateRange,
+}) => {
+  const theme = useTheme();
 
-        <Chart size={['100%', chartHeight]}>
-          <Settings
-            legendPosition={legendPosition}
-            onBrushEnd={updateDateRange}
-            showLegend
-            theme={theme}
-          />
+  const chartSize = useMemo(() => ['100%', chartHeight], [chartHeight]);
+  const xAxisId = useMemo(() => getAxisId('signalsHistogramAxisX'), []);
+  const yAxisId = useMemo(() => getAxisId('signalsHistogramAxisY'), []);
+  const id = useMemo(() => getSpecId('signalsHistogram'), []);
+  const yAccessors = useMemo(() => ['y'], []);
+  const splitSeriesAccessors = useMemo(() => ['g'], []);
+  const tickFormat = useMemo(() => histogramDateTimeFormatter([from, to]), [from, to]);
 
-          <Axis
-            id={getAxisId('signalsHistogramAxisX')}
-            position="bottom"
-            tickFormat={histogramDateTimeFormatter([from, to])}
-          />
+  return (
+    <>
+      {loading && (
+        <EuiProgress
+          data-test-subj="loadingPanelSignalsHistogram"
+          size="xs"
+          position="absolute"
+          color="accent"
+        />
+      )}
 
-          <Axis id={getAxisId('signalsHistogramAxisY')} position="left" />
+      <MemoChart size={chartSize}>
+        <MemoSettings
+          legendPosition={legendPosition}
+          onBrushEnd={updateDateRange}
+          showLegend
+          theme={theme}
+        />
 
-          <HistogramBarSeries
-            id={getSpecId('signalsHistogram')}
-            xScaleType="time"
-            yScaleType="linear"
-            xAccessor="x"
-            yAccessors={['y']}
-            splitSeriesAccessors={['g']}
-            data={data}
-          />
-        </Chart>
-      </>
-    );
-  }
-);
-SignalsHistogram.displayName = 'SignalsHistogram';
+        <MemoAxis id={xAxisId} position="bottom" tickFormat={tickFormat} />
+
+        <MemoAxis id={yAxisId} position="left" />
+
+        <MemoHistogramBarSeries
+          id={id}
+          xScaleType="time"
+          yScaleType="linear"
+          xAccessor="x"
+          yAccessors={yAccessors}
+          splitSeriesAccessors={splitSeriesAccessors}
+          data={data}
+        />
+      </MemoChart>
+    </>
+  );
+};
+
+export const SignalsHistogram = React.memo(SignalsHistogramComponent, deepEqual);

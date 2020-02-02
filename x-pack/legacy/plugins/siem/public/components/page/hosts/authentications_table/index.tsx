@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 
 import { has } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -120,6 +120,8 @@ const AuthenticationTableComponent = React.memo<AuthenticationTableProps>(
         }),
       [type, updateTableActivePage]
     );
+
+    const columns = useMemo(() => getAuthenticationColumnsCurated(type), [type]);
 
     return (
       <PaginatedTable

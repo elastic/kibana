@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/actions';
@@ -121,10 +120,12 @@ const NetworkHttpTableComponent = React.memo<NetworkHttpTableProps>(
 
     const sorting = { field: `node.${NetworkHttpFields.requestCount}`, direction: sort.direction };
 
+    const columns = useMemo(() => getNetworkHttpColumns(tableType), [tableType]);
+
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getNetworkHttpColumns(tableType)}
+        columns={columns}
         dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerTitle={i18n.HTTP_REQUESTS}
@@ -155,8 +156,11 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const NetworkHttpTable = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps, {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  })
+const mapDispatchToProps = {
+  updateNetworkTable: networkActions.updateNetworkTable,
+};
+
+export const NetworkHttpTable = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
 )(NetworkHttpTableComponent);

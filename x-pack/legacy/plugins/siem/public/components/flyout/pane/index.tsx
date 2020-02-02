@@ -183,8 +183,9 @@ const FlyoutPaneComponent: React.FC<Props> = ({
   );
 };
 
-export const Pane = connect(null, {
+const mapDispatchToProps = {
   applyDeltaToWidth: timelineActions.applyDeltaToWidth,
-})(React.memo(FlyoutPaneComponent));
+};
+export const Pane = connect(null, mapDispatchToProps)(React.memo(FlyoutPaneComponent));
 
 Pane.displayName = 'Pane';

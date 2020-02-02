@@ -8,6 +8,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
+import deepEqual from 'fast-deep-equal/react';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetKpiNetworkQuery, KpiNetworkData } from '../../graphql/types';
@@ -66,7 +67,8 @@ const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & KpiNetworkReducer>
         });
       }}
     </Query>
-  )
+  ),
+  deepEqual
 );
 
 KpiNetworkComponentQuery.displayName = 'KpiNetworkComponentQuery';

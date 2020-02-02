@@ -6,6 +6,7 @@
 
 import { isEqual } from 'lodash/fp';
 import React, { memo, useState, useEffect, useMemo, useCallback } from 'react';
+import deepEqual from 'fast-deep-equal/react';
 
 import {
   esFilters,
@@ -149,5 +150,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
         {...searchBarProps}
       />
     );
-  }
+  },
+  deepEqual
 );

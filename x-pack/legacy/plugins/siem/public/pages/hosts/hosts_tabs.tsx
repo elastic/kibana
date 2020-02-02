@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { HostsTabsProps } from './types';
@@ -22,7 +22,7 @@ import {
 } from './navigation';
 import { HostAlertsQueryTabBody } from './navigation/alerts_query_tab_body';
 
-const HostsTabs = memo<HostsTabsProps>(
+export const HostsTabs = memo<HostsTabsProps>(
   ({
     deleteQuery,
     filterQuery,
@@ -44,52 +44,48 @@ const HostsTabs = memo<HostsTabsProps>(
       startDate: from,
       type,
       indexPattern,
-      narrowDateRange: (score: Anomaly, interval: string) => {
-        const fromTo = scoreIntervalToDateTime(score, interval);
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: fromTo.from,
-          to: fromTo.to,
-        });
-      },
-      updateDateRange: (min: number, max: number) => {
-        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-      },
+      narrowDateRange: useCallback(
+        (score: Anomaly, interval: string) => {
+          const fromTo = scoreIntervalToDateTime(score, interval);
+          setAbsoluteRangeDatePicker({
+            id: 'global',
+            from: fromTo.from,
+            to: fromTo.to,
+          });
+        },
+        [setAbsoluteRangeDatePicker]
+      ),
+      updateDateRange: useCallback(
+        (min: number, max: number) => {
+          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+        },
+        [setAbsoluteRangeDatePicker]
+      ),
     };
 
     return (
       <Switch>
-        <Route
-          path={`${hostsPagePath}/:tabName(${HostsTableType.hosts})`}
-          render={() => <HostsQueryTabBody {...tabProps} />}
-        />
-        <Route
-          path={`${hostsPagePath}/:tabName(${HostsTableType.authentications})`}
-          render={() => <AuthenticationsQueryTabBody {...tabProps} />}
-        />
-        <Route
-          path={`${hostsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}
-          render={() => <UncommonProcessQueryTabBody {...tabProps} />}
-        />
-        <Route
-          path={`${hostsPagePath}/:tabName(${HostsTableType.anomalies})`}
-          render={() => (
-            <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
-          )}
-        />
-        <Route
-          path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}
-          render={() => <EventsQueryTabBody {...tabProps} />}
-        />
-        <Route
-          path={`${hostsPagePath}/:tabName(${HostsTableType.alerts})`}
-          render={() => <HostAlertsQueryTabBody {...tabProps} />}
-        />
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.hosts})`}>
+          <HostsQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.authentications})`}>
+          <AuthenticationsQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}>
+          <UncommonProcessQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.anomalies})`}>
+          <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
+        </Route>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}>
+          <EventsQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.alerts})`}>
+          <HostAlertsQueryTabBody {...tabProps} />
+        </Route>
       </Switch>
     );
   }
 );
 
 HostsTabs.displayName = 'HostsTabs';
-
-export { HostsTabs };

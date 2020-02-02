@@ -26,7 +26,7 @@ export type NetworkDnsColumns = [
   Columns<NetworkDnsItem['dnsBytesOut']>
 ];
 
-export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDnsColumns => [
+export const getNetworkDnsColumns = (): NetworkDnsColumns => [
   {
     field: `node.${NetworkDnsFields.dnsName}`,
     name: i18n.REGISTERED_DOMAIN,

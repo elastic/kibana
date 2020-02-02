@@ -6,7 +6,7 @@
 
 /* eslint-disable react/display-name */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -119,10 +119,12 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
       [type, updateTableActivePage]
     );
 
+    const columns = useMemo(() => getUncommonColumnsCurated(type), [type]);
+
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getUncommonColumnsCurated(type)}
+        columns={columns}
         dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerTitle={i18n.UNCOMMON_PROCESSES}

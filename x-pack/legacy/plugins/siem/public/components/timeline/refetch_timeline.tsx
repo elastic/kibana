@@ -48,8 +48,10 @@ const TimelineRefetchComponent: React.FC<OwnProps> = ({
   return null;
 };
 
+const mapDispatchToProps = {
+  setTimelineQuery: inputsActions.setQuery,
+};
+
 export const TimelineRefetch = compose<React.ComponentClass<TimelineRefetchProps>>(
-  connect(null, {
-    setTimelineQuery: inputsActions.setQuery,
-  })
+  connect(null, mapDispatchToProps)
 )(React.memo(TimelineRefetchComponent));

@@ -92,46 +92,34 @@ export const HomePage: React.FC = () => (
 
                 <Switch>
                   <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
-                  <Route
-                    path={`/:pageName(${SiemPageName.overview})`}
-                    render={() => <Overview />}
-                  />
+                  <Route path={`/:pageName(${SiemPageName.overview})`}>
+                    <Overview />
+                  </Route>
                   <Route
                     path={`/:pageName(${SiemPageName.hosts})`}
-                    render={({ location, match }) => (
-                      <HostsContainer location={location} url={match.url} />
-                    )}
+                    render={({ match }) => <HostsContainer url={match.url} />}
                   />
-                  <Route
-                    path={`/:pageName(${SiemPageName.network})`}
-                    render={({ location, match }) => (
-                      <NetworkContainer location={location} url={match.url} />
-                    )}
-                  />
-                  <Route
-                    path={`/:pageName(${SiemPageName.detections})`}
-                    render={({ location, match }) => (
-                      <DetectionEngineContainer location={location} url={match.url} />
-                    )}
-                  />
-                  <Route
-                    path={`/:pageName(${SiemPageName.timelines})`}
-                    render={() => <Timelines />}
-                  />
+                  <Route path={`/:pageName(${SiemPageName.network})`}>
+                    <NetworkContainer />
+                  </Route>
+                  <Route path={`/:pageName(${SiemPageName.detections})`}>
+                    <DetectionEngineContainer />
+                  </Route>
+                  <Route path={`/:pageName(${SiemPageName.timelines})`}>
+                    <Timelines />
+                  </Route>
                   <Route path="/link-to" render={props => <LinkToPage {...props} />} />
                   <Route
                     path="/ml-hosts"
-                    render={({ location, match }) => (
-                      <MlHostConditionalContainer location={location} url={match.url} />
-                    )}
+                    render={({ match }) => <MlHostConditionalContainer url={match.url} />}
                   />
                   <Route
                     path="/ml-network"
-                    render={({ location, match }) => (
-                      <MlNetworkConditionalContainer location={location} url={match.url} />
-                    )}
+                    render={({ match }) => <MlNetworkConditionalContainer url={match.url} />}
                   />
-                  <Route render={() => <NotFoundPage />} />
+                  <Route>
+                    <NotFoundPage />
+                  </Route>
                 </Switch>
               </DragDropContextWrapper>
             )}

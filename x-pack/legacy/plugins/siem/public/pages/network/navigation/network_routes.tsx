@@ -23,7 +23,7 @@ import { TlsQueryTabBody } from './tls_query_tab_body';
 import { Anomaly } from '../../../components/ml/types';
 import { NetworkAlertsQueryTabBody } from './alerts_query_tab_body';
 
-export const NetworkRoutes = ({
+const NetworkRoutesComponent: React.FC<NetworkRoutesProps> = ({
   networkPagePath,
   type,
   to,
@@ -33,7 +33,7 @@ export const NetworkRoutes = ({
   indexPattern,
   setQuery,
   setAbsoluteRangeDatePicker,
-}: NetworkRoutesProps) => {
+}) => {
   const narrowDateRange = useCallback(
     (score: Anomaly, interval: string) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
@@ -94,62 +94,49 @@ export const NetworkRoutes = ({
 
   return (
     <Switch>
-      <Route
-        path={`${networkPagePath}/:tabName(${NetworkRouteType.dns})`}
-        render={() => <DnsQueryTabBody {...tabProps} />}
-      />
-      <Route
-        path={`${networkPagePath}/:tabName(${NetworkRouteType.flows})`}
-        render={() => (
-          <>
-            <ConditionalFlexGroup direction="column">
-              <EuiFlexItem>
-                <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
-              </EuiFlexItem>
+      <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.dns})`}>
+        <DnsQueryTabBody {...tabProps} />
+      </Route>
+      <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.flows})`}>
+        <>
+          <ConditionalFlexGroup direction="column">
+            <EuiFlexItem>
+              <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
+            </EuiFlexItem>
 
-              <EuiFlexItem>
-                <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.destination} />
-              </EuiFlexItem>
-            </ConditionalFlexGroup>
-            <EuiSpacer />
-            <ConditionalFlexGroup direction="column">
-              <EuiFlexItem>
-                <CountriesQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
-              </EuiFlexItem>
+            <EuiFlexItem>
+              <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.destination} />
+            </EuiFlexItem>
+          </ConditionalFlexGroup>
+          <EuiSpacer />
+          <ConditionalFlexGroup direction="column">
+            <EuiFlexItem>
+              <CountriesQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
+            </EuiFlexItem>
 
-              <EuiFlexItem>
-                <CountriesQueryTabBody
-                  {...tabProps}
-                  flowTarget={FlowTargetSourceDest.destination}
-                />
-              </EuiFlexItem>
-            </ConditionalFlexGroup>
-          </>
-        )}
-      />
-      <Route
-        path={`${networkPagePath}/:tabName(${NetworkRouteType.http})`}
-        render={() => <HttpQueryTabBody {...tabProps} />}
-      />
-      <Route
-        path={`${networkPagePath}/:tabName(${NetworkRouteType.tls})`}
-        render={() => <TlsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />}
-      />
-      <Route
-        path={`${networkPagePath}/:tabName(${NetworkRouteType.anomalies})`}
-        render={() => (
-          <AnomaliesQueryTabBody
-            {...anomaliesProps}
-            AnomaliesTableComponent={AnomaliesNetworkTable}
-          />
-        )}
-      />
-      <Route
-        path={`${networkPagePath}/:tabName(${NetworkRouteType.alerts})`}
-        render={() => <NetworkAlertsQueryTabBody {...tabProps} />}
-      />
+            <EuiFlexItem>
+              <CountriesQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.destination} />
+            </EuiFlexItem>
+          </ConditionalFlexGroup>
+        </>
+      </Route>
+      <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.http})`}>
+        <HttpQueryTabBody {...tabProps} />
+      </Route>
+      <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.tls})`}>
+        <TlsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
+      </Route>
+      <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.anomalies})`}>
+        <AnomaliesQueryTabBody
+          {...anomaliesProps}
+          AnomaliesTableComponent={AnomaliesNetworkTable}
+        />
+      </Route>
+      <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.alerts})`}>
+        <NetworkAlertsQueryTabBody {...tabProps} />
+      </Route>
     </Switch>
   );
 };
 
-NetworkRoutes.displayName = 'NetworkRoutes';
+export const NetworkRoutes = React.memo(NetworkRoutesComponent);

@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -124,10 +124,15 @@ const UsersTableComponent = React.memo<UsersTableProps>(
       [sort, type, updateNetworkTable]
     );
 
+    const columns = useMemo(() => getUsersColumns(flowTarget, usersTableId), [
+      flowTarget,
+      usersTableId,
+    ]);
+
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getUsersColumns(flowTarget, usersTableId)}
+        columns={columns}
         dataTestSubj={`table-${tableType}`}
         showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}

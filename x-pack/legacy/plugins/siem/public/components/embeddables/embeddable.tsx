@@ -7,6 +7,7 @@
 import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal/react';
 
 const Panel = styled(EuiPanel)`
   overflow: hidden;
@@ -17,9 +18,12 @@ export interface EmbeddableProps {
   children: React.ReactNode;
 }
 
-export const Embeddable = React.memo<EmbeddableProps>(({ children }) => (
-  <section className="siemEmbeddable">
-    <Panel paddingSize="none">{children}</Panel>
-  </section>
-));
+export const Embeddable = React.memo<EmbeddableProps>(
+  ({ children }) => (
+    <section className="siemEmbeddable">
+      <Panel paddingSize="none">{children}</Panel>
+    </section>
+  ),
+  deepEqual
+);
 Embeddable.displayName = 'Embeddable';

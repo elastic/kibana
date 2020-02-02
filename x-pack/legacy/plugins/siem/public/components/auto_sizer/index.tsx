@@ -7,6 +7,7 @@
 import isEqual from 'lodash/fp/isEqual';
 import React from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
+import deepEqual from 'fast-deep-equal/react';
 
 interface Measurement {
   width?: number;
@@ -37,7 +38,7 @@ interface AutoSizerState {
 }
 
 /** A hard-fork of the `infra` `AutoSizer` ಠ_ಠ */
-export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerState> {
+export class AutoSizer extends React.Component<AutoSizerProps, AutoSizerState> {
   public element: HTMLElement | null = null;
   public resizeObserver: ResizeObserver | null = null;
   public windowWidth: number = -1;
@@ -69,6 +70,10 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
         }
       });
     });
+  }
+
+  public shouldComponentUpdate(nextProps: AutoSizerProps) {
+    return !deepEqual(this.props, nextProps);
   }
 
   public componentWillUnmount() {

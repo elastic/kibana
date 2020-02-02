@@ -6,8 +6,8 @@
 import { isEqual, last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
+import deepEqual from 'fast-deep-equal/react';
 
 import { networkActions } from '../../../../store/actions';
 import {
@@ -180,8 +180,11 @@ const makeMapStateToProps = () => {
     getTopNFlowSelector(state, type, flowTargeted);
 };
 
-export const NetworkTopNFlowTable = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps, {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  })
-)(React.memo(NetworkTopNFlowTableComponent));
+const mapDispatchToProps = {
+  updateNetworkTable: networkActions.updateNetworkTable,
+};
+
+export const NetworkTopNFlowTable = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(React.memo(NetworkTopNFlowTableComponent, deepEqual));

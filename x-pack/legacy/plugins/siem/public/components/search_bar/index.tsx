@@ -5,11 +5,12 @@
  */
 
 import { getOr, isEqual, set } from 'lodash/fp';
-import React, { memo, useEffect, useCallback, useMemo } from 'react';
+import React, { FC, memo, useEffect, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal/react';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 
@@ -75,209 +76,206 @@ const SearchBarContainer = styled.div`
   }
 `;
 
-const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSearchBarDispatch>(
-  ({
-    end,
-    filterQuery,
-    fromStr,
-    id,
-    indexPattern,
-    isLoading = false,
-    queries,
-    savedQuery,
-    setSavedQuery,
-    setSearchBarFilter,
-    start,
-    timelineId,
-    toStr,
-    updateSearch,
-    dataTestSubj,
-  }) => {
-    const { timefilter } = npStart.plugins.data.query.timefilter;
-    if (fromStr != null && toStr != null) {
-      timefilter.setTime({ from: fromStr, to: toStr });
-    } else if (start != null && end != null) {
-      timefilter.setTime({
-        from: new Date(start).toISOString(),
-        to: new Date(end).toISOString(),
-      });
-    }
+const SearchBarComponent: FC<SiemSearchBarProps & SiemSearchBarRedux & SiemSearchBarDispatch> = ({
+  end,
+  filterQuery,
+  fromStr,
+  id,
+  indexPattern,
+  isLoading = false,
+  queries,
+  savedQuery,
+  setSavedQuery,
+  setSearchBarFilter,
+  start,
+  toStr,
+  updateSearch,
+  dataTestSubj,
+}) => {
+  const { timefilter } = npStart.plugins.data.query.timefilter;
+  if (fromStr != null && toStr != null) {
+    timefilter.setTime({ from: fromStr, to: toStr });
+  } else if (start != null && end != null) {
+    timefilter.setTime({
+      from: new Date(start).toISOString(),
+      to: new Date(end).toISOString(),
+    });
+  }
 
-    const onQuerySubmit = useCallback(
-      (payload: { dateRange: TimeRange; query?: Query }) => {
-        const isQuickSelection =
-          payload.dateRange.from.includes('now') || payload.dateRange.to.includes('now');
-        let updateSearchBar: UpdateReduxSearchBar = {
-          id,
-          end: toStr != null ? toStr : new Date(end).toISOString(),
-          start: fromStr != null ? fromStr : new Date(start).toISOString(),
-          isInvalid: false,
-          isQuickSelection,
-          updateTime: false,
-        };
-        let isStateUpdated = false;
+  const onQuerySubmit = useCallback(
+    (payload: { dateRange: TimeRange; query?: Query }) => {
+      const isQuickSelection =
+        payload.dateRange.from.includes('now') || payload.dateRange.to.includes('now');
+      let updateSearchBar: UpdateReduxSearchBar = {
+        id,
+        end: toStr != null ? toStr : new Date(end).toISOString(),
+        start: fromStr != null ? fromStr : new Date(start).toISOString(),
+        isInvalid: false,
+        isQuickSelection,
+        updateTime: false,
+      };
+      let isStateUpdated = false;
 
-        if (
-          (isQuickSelection &&
-            (fromStr !== payload.dateRange.from || toStr !== payload.dateRange.to)) ||
-          (!isQuickSelection &&
-            (start !== formatDate(payload.dateRange.from) ||
-              end !== formatDate(payload.dateRange.to)))
-        ) {
-          isStateUpdated = true;
+      if (
+        (isQuickSelection &&
+          (fromStr !== payload.dateRange.from || toStr !== payload.dateRange.to)) ||
+        (!isQuickSelection &&
+          (start !== formatDate(payload.dateRange.from) ||
+            end !== formatDate(payload.dateRange.to)))
+      ) {
+        isStateUpdated = true;
+        updateSearchBar.updateTime = true;
+        updateSearchBar.end = payload.dateRange.to;
+        updateSearchBar.start = payload.dateRange.from;
+      }
+
+      if (payload.query != null && !isEqual(payload.query, filterQuery)) {
+        isStateUpdated = true;
+        updateSearchBar = set('query', payload.query, updateSearchBar);
+      }
+
+      if (!isStateUpdated) {
+        // That mean we are doing a refresh!
+        if (isQuickSelection) {
           updateSearchBar.updateTime = true;
           updateSearchBar.end = payload.dateRange.to;
           updateSearchBar.start = payload.dateRange.from;
-        }
-
-        if (payload.query != null && !isEqual(payload.query, filterQuery)) {
-          isStateUpdated = true;
-          updateSearchBar = set('query', payload.query, updateSearchBar);
-        }
-
-        if (!isStateUpdated) {
-          // That mean we are doing a refresh!
-          if (isQuickSelection) {
-            updateSearchBar.updateTime = true;
-            updateSearchBar.end = payload.dateRange.to;
-            updateSearchBar.start = payload.dateRange.from;
-          } else {
-            queries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
-          }
-        }
-
-        window.setTimeout(() => updateSearch(updateSearchBar), 0);
-      },
-      [id, end, filterQuery, fromStr, queries, start, toStr]
-    );
-
-    const onRefresh = useCallback(
-      (payload: { dateRange: TimeRange }) => {
-        if (payload.dateRange.from.includes('now') || payload.dateRange.to.includes('now')) {
-          updateSearch({
-            id,
-            end: payload.dateRange.to,
-            start: payload.dateRange.from,
-            isInvalid: false,
-            isQuickSelection: true,
-            updateTime: true,
-          });
         } else {
           queries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
         }
-      },
-      [id, queries]
-    );
+      }
 
-    const onSaved = useCallback(
-      (newSavedQuery: SavedQuery) => {
-        setSavedQuery({ id, savedQuery: newSavedQuery });
-      },
-      [id]
-    );
+      window.setTimeout(() => updateSearch(updateSearchBar), 0);
+    },
+    [id, end, filterQuery, fromStr, queries, start, toStr]
+  );
 
-    const onSavedQueryUpdated = useCallback(
-      (savedQueryUpdated: SavedQuery) => {
-        const isQuickSelection = savedQueryUpdated.attributes.timefilter
-          ? savedQueryUpdated.attributes.timefilter.from.includes('now') ||
-            savedQueryUpdated.attributes.timefilter.to.includes('now')
-          : false;
-
-        let updateSearchBar: UpdateReduxSearchBar = {
-          id,
-          filters: savedQueryUpdated.attributes.filters || [],
-          end: toStr != null ? toStr : new Date(end).toISOString(),
-          start: fromStr != null ? fromStr : new Date(start).toISOString(),
-          isInvalid: false,
-          isQuickSelection,
-          updateTime: false,
-        };
-
-        if (savedQueryUpdated.attributes.timefilter) {
-          updateSearchBar.end = savedQueryUpdated.attributes.timefilter
-            ? savedQueryUpdated.attributes.timefilter.to
-            : updateSearchBar.end;
-          updateSearchBar.start = savedQueryUpdated.attributes.timefilter
-            ? savedQueryUpdated.attributes.timefilter.from
-            : updateSearchBar.start;
-          updateSearchBar.updateTime = true;
-        }
-
-        updateSearchBar = set('query', savedQueryUpdated.attributes.query, updateSearchBar);
-        updateSearchBar = set('savedQuery', savedQueryUpdated, updateSearchBar);
-
-        updateSearch(updateSearchBar);
-      },
-      [id, end, fromStr, start, toStr]
-    );
-
-    const onClearSavedQuery = useCallback(() => {
-      if (savedQuery != null) {
+  const onRefresh = useCallback(
+    (payload: { dateRange: TimeRange }) => {
+      if (payload.dateRange.from.includes('now') || payload.dateRange.to.includes('now')) {
         updateSearch({
           id,
-          filters: [],
-          end: toStr != null ? toStr : new Date(end).toISOString(),
-          start: fromStr != null ? fromStr : new Date(start).toISOString(),
+          end: payload.dateRange.to,
+          start: payload.dateRange.from,
           isInvalid: false,
-          isQuickSelection: false,
-          updateTime: false,
-          query: {
-            query: '',
-            language: savedQuery.attributes.query.language,
-          },
-          resetSavedQuery: true,
-          savedQuery: undefined,
+          isQuickSelection: true,
+          updateTime: true,
         });
+      } else {
+        queries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
       }
-    }, [id, end, fromStr, start, toStr, savedQuery]);
+    },
+    [id, queries]
+  );
 
-    useEffect(() => {
-      let isSubscribed = true;
-      const subscriptions = new Subscription();
+  const onSaved = useCallback(
+    (newSavedQuery: SavedQuery) => {
+      setSavedQuery({ id, savedQuery: newSavedQuery });
+    },
+    [id]
+  );
 
-      subscriptions.add(
-        siemFilterManager.getUpdates$().subscribe({
-          next: () => {
-            if (isSubscribed) {
-              setSearchBarFilter({
-                id,
-                filters: siemFilterManager.getFilters(),
-              });
-            }
-          },
-        })
-      );
+  const onSavedQueryUpdated = useCallback(
+    (savedQueryUpdated: SavedQuery) => {
+      const isQuickSelection = savedQueryUpdated.attributes.timefilter
+        ? savedQueryUpdated.attributes.timefilter.from.includes('now') ||
+          savedQueryUpdated.attributes.timefilter.to.includes('now')
+        : false;
 
-      return () => {
-        isSubscribed = false;
-        subscriptions.unsubscribe();
+      let updateSearchBar: UpdateReduxSearchBar = {
+        id,
+        filters: savedQueryUpdated.attributes.filters || [],
+        end: toStr != null ? toStr : new Date(end).toISOString(),
+        start: fromStr != null ? fromStr : new Date(start).toISOString(),
+        isInvalid: false,
+        isQuickSelection,
+        updateTime: false,
       };
-    }, []);
-    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
-    return (
-      <SearchBarContainer data-test-subj={`${id}DatePicker`}>
-        <SearchBar
-          appName="siem"
-          isLoading={isLoading}
-          indexPatterns={indexPatterns}
-          query={filterQuery}
-          onClearSavedQuery={onClearSavedQuery}
-          onQuerySubmit={onQuerySubmit}
-          onRefresh={onRefresh}
-          onSaved={onSaved}
-          onSavedQueryUpdated={onSavedQueryUpdated}
-          savedQuery={savedQuery}
-          showFilterBar={true}
-          showDatePicker={true}
-          showQueryBar={true}
-          showQueryInput={true}
-          showSaveQuery={true}
-          dataTestSubj={dataTestSubj}
-        />
-      </SearchBarContainer>
+
+      if (savedQueryUpdated.attributes.timefilter) {
+        updateSearchBar.end = savedQueryUpdated.attributes.timefilter
+          ? savedQueryUpdated.attributes.timefilter.to
+          : updateSearchBar.end;
+        updateSearchBar.start = savedQueryUpdated.attributes.timefilter
+          ? savedQueryUpdated.attributes.timefilter.from
+          : updateSearchBar.start;
+        updateSearchBar.updateTime = true;
+      }
+
+      updateSearchBar = set('query', savedQueryUpdated.attributes.query, updateSearchBar);
+      updateSearchBar = set('savedQuery', savedQueryUpdated, updateSearchBar);
+
+      updateSearch(updateSearchBar);
+    },
+    [id, end, fromStr, start, toStr]
+  );
+
+  const onClearSavedQuery = useCallback(() => {
+    if (savedQuery != null) {
+      updateSearch({
+        id,
+        filters: [],
+        end: toStr != null ? toStr : new Date(end).toISOString(),
+        start: fromStr != null ? fromStr : new Date(start).toISOString(),
+        isInvalid: false,
+        isQuickSelection: false,
+        updateTime: false,
+        query: {
+          query: '',
+          language: savedQuery.attributes.query.language,
+        },
+        resetSavedQuery: true,
+        savedQuery: undefined,
+      });
+    }
+  }, [id, end, fromStr, start, toStr, savedQuery]);
+
+  useEffect(() => {
+    let isSubscribed = true;
+    const subscriptions = new Subscription();
+
+    subscriptions.add(
+      siemFilterManager.getUpdates$().subscribe({
+        next: () => {
+          if (isSubscribed) {
+            setSearchBarFilter({
+              id,
+              filters: siemFilterManager.getFilters(),
+            });
+          }
+        },
+      })
     );
-  }
-);
+
+    return () => {
+      isSubscribed = false;
+      subscriptions.unsubscribe();
+    };
+  }, []);
+  const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+  return (
+    <SearchBarContainer data-test-subj={`${id}DatePicker`}>
+      <SearchBar
+        appName="siem"
+        isLoading={isLoading}
+        indexPatterns={indexPatterns}
+        query={filterQuery}
+        onClearSavedQuery={onClearSavedQuery}
+        onQuerySubmit={onQuerySubmit}
+        onRefresh={onRefresh}
+        onSaved={onSaved}
+        onSavedQueryUpdated={onSavedQueryUpdated}
+        savedQuery={savedQuery}
+        showFilterBar={true}
+        showDatePicker={true}
+        showQueryBar={true}
+        showQueryInput={true}
+        showSaveQuery={true}
+        dataTestSubj={dataTestSubj}
+      />
+    </SearchBarContainer>
+  );
+};
 
 const makeMapStateToProps = () => {
   const getEndSelector = endSelector();
@@ -397,4 +395,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 
-export const SiemSearchBar = connect(makeMapStateToProps, mapDispatchToProps)(SearchBarComponent);
+export const SiemSearchBar = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(memo(SearchBarComponent, deepEqual));

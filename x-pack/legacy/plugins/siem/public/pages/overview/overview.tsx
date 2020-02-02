@@ -8,7 +8,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-import { compose } from 'redux';
 import { Query, esFilters } from 'src/plugins/data/public';
 import styled from 'styled-components';
 
@@ -145,6 +144,7 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = { setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker };
 
-export const StatefulOverview = compose<React.ComponentClass<OverviewComponentReduxProps>>(
-  connect(makeMapStateToProps, mapDispatchToProps)
+export const StatefulOverview = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
 )(React.memo(OverviewComponent));

@@ -23,7 +23,7 @@ import { InspectButtonContainer } from '../../../../components/inspect';
 import { useQuerySignals } from '../../../../containers/detection_engine/signals/use_query';
 import { MatrixLoader } from '../../../../components/matrix_histogram/matrix_loader';
 
-import { formatSignalsData, getSignalsHistogramQuery } from './helpers';
+import { memoFormatSignalsData, getSignalsHistogramQuery } from './helpers';
 import * as i18n from './translations';
 
 const DEFAULT_PANEL_HEIGHT = 300;
@@ -121,7 +121,9 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
       );
     }, []);
 
-    const formattedSignalsData = useMemo(() => formatSignalsData(signalsData), [signalsData]);
+    const formattedSignalsData = memoFormatSignalsData(
+      signalsData?.aggregations?.signalsByGrouping?.buckets
+    );
 
     useEffect(() => {
       if (!loadingInitial && isInitialLoading && !isLoadingSignals && signalsData) {

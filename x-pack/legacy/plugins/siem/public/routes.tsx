@@ -20,8 +20,12 @@ const PageRouterComponent: FC<RouterProps> = ({ history }) => (
   <ManageRoutesSpy>
     <Router history={history}>
       <Switch>
-        <Route path="/" render={() => <HomePage />} />
-        <Route render={() => <NotFoundPage />} />
+        <Route path="/">
+          <HomePage />
+        </Route>
+        <Route>
+          <NotFoundPage />
+        </Route>
       </Switch>
     </Router>
   </ManageRoutesSpy>

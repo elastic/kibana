@@ -8,6 +8,7 @@ import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } f
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal/react';
 
 import { OverviewNetworkData } from '../../../../graphql/types';
 import { FormattedStat, StatGroup } from '../types';
@@ -130,7 +131,7 @@ const AccordionContent = styled.div`
   margin-top: 8px;
 `;
 
-export const OverviewNetworkStats = React.memo<OverviewNetworkProps>(({ data, loading }) => {
+const OverviewNetworkStatsComponent: React.FC<OverviewNetworkProps> = ({ data, loading }) => {
   const allNetworkStats = getOverviewNetworkStats(data);
   const allNetworkStatsCount = allNetworkStats.reduce((total, stat) => total + stat.count, 0);
 
@@ -190,6 +191,6 @@ export const OverviewNetworkStats = React.memo<OverviewNetworkProps>(({ data, lo
       })}
     </NetworkStatsContainer>
   );
-});
+};
 
-OverviewNetworkStats.displayName = 'OverviewNetworkStats';
+export const OverviewNetworkStats = React.memo(OverviewNetworkStatsComponent, deepEqual);

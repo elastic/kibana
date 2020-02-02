@@ -20,6 +20,7 @@ import {
 import { noop } from 'lodash/fp';
 import React, { FC, memo, useState, useEffect, ComponentType } from 'react';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal/react';
 
 import { AuthTableColumns } from '../page/hosts/authentications_table';
 import { HostsTableColumns } from '../page/hosts/hosts_table';
@@ -302,7 +303,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   );
 };
 
-export const PaginatedTable = memo(PaginatedTableComponent);
+export const PaginatedTable = memo(PaginatedTableComponent, deepEqual);
 
 type BasicTableType = ComponentType<EuiBasicTableProps<any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
 const BasicTable: typeof EuiBasicTable & { displayName: string } = styled(

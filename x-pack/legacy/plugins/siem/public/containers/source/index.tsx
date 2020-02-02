@@ -10,6 +10,8 @@ import { Query } from 'react-apollo';
 import React, { useEffect, useMemo, useState } from 'react';
 import memoizeOne from 'memoize-one';
 import { IIndexPattern } from 'src/plugins/data/public';
+import deepEqual from 'fast-deep-equal/react';
+
 import { useUiSetting$ } from '../../lib/kibana';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -82,7 +84,7 @@ export const getBrowserFields = memoizeOne(
       : {}
 );
 
-export const WithSource = React.memo<WithSourceProps>(({ children, indexToAdd, sourceId }) => {
+const WithSourceComponent: React.FC<WithSourceProps> = ({ children, indexToAdd, sourceId }) => {
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const defaultIndex = useMemo<string[]>(() => {
     if (indexToAdd != null && !isEmpty(indexToAdd)) {
@@ -113,9 +115,9 @@ export const WithSource = React.memo<WithSourceProps>(({ children, indexToAdd, s
       }
     </Query>
   );
-});
+};
 
-WithSource.displayName = 'WithSource';
+export const WithSource = React.memo(WithSourceComponent, deepEqual);
 
 export const indicesExistOrDataTemporarilyUnavailable = (indicesExist: boolean | undefined) =>
   indicesExist || isUndefined(indicesExist);

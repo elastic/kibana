@@ -7,6 +7,7 @@
 import { isEqual, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
+import deepEqual from 'fast-deep-equal/react';
 
 import {
   IIndexPattern,
@@ -295,7 +296,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         dataTestSubj={'timelineQueryInput'}
       />
     );
-  }
+  },
+  deepEqual
 );
 
 export const getDataProviderFilter = (dataProviderDsl: string): esFilters.Filter => {
