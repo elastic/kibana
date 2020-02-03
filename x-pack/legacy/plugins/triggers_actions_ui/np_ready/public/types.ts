@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ActionType } from '../../../../../plugins/actions/common';
 import { TypeRegistry } from './application/type_registry';
 import { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
 import {
