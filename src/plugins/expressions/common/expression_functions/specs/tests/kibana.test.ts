@@ -46,8 +46,7 @@ describe('interpreter/functions#kibana', () => {
       timeRange: { from: '2', to: '3' },
     };
     context = {
-      getInitialInput: () => initialInput,
-      getInitialContext: () => initialInput,
+      getInitialInput: () => input,
       types: {},
       variables: {},
       abortSignal: {} as any,

@@ -26,30 +26,13 @@ describe('expression_functions', () => {
   describe('var_set', () => {
     const fn = functionWrapper(variableSet);
     let input: Partial<KibanaContext>;
-    let initialInput: KibanaContext;
     let context: ExecutionContext;
     let variables: Record<string, any>;
 
     beforeEach(() => {
       input = { timeRange: { from: '0', to: '1' } };
-      initialInput = {
-        type: 'kibana_context',
-        query: { language: 'lucene', query: 'geo.src:US' },
-        filters: [
-          {
-            meta: {
-              disabled: false,
-              negate: false,
-              alias: null,
-            },
-            query: { match: {} },
-          },
-        ],
-        timeRange: { from: '2', to: '3' },
-      };
       context = {
-        getInitialInput: () => initialInput,
-        getInitialContext: () => initialInput,
+        getInitialInput: () => input,
         types: {},
         variables: { test: 1 },
         abortSignal: {} as any,

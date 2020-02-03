@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TimeRange, Query, esFilters } from '../../../data/common';
+import { ExecutionContextSearch } from '../execution';
 
 export type ExpressionValueUnboxed = any;
 
@@ -25,13 +25,9 @@ export type ExpressionValueBoxed<Type extends string = string, Value extends obj
   type: Type;
 } & Value;
 
-export type ExpressionValueKibanaContext = ExpressionValueBoxed<
+export type ExpressionValueSearchContext = ExpressionValueBoxed<
   'kibana_context',
-  {
-    filters?: esFilters.Filter[];
-    query?: Query;
-    timeRange?: TimeRange;
-  }
+  ExecutionContextSearch
 >;
 
 export type ExpressionValue = ExpressionValueUnboxed | ExpressionValueBoxed;

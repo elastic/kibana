@@ -60,7 +60,6 @@ describe('Execution', () => {
     const execution = createExecution();
     expect(execution.context).toMatchObject({
       getInitialInput: expect.any(Function),
-      getInitialContext: expect.any(Function),
       variables: expect.any(Object),
       types: expect.any(Object),
     });
@@ -116,16 +115,6 @@ describe('Execution', () => {
   });
 
   describe('execution context', () => {
-    test('context.getInitialInput is a function', async () => {
-      const { result } = (await run('introspectContext key="getInitialInput"')) as any;
-      expect(typeof result).toBe('function');
-    });
-
-    test('context.getInitialContext is a function', async () => {
-      const { result } = (await run('introspectContext key="getInitialContext"')) as any;
-      expect(typeof result).toBe('function');
-    });
-
     test('context.variables is an object', async () => {
       const { result } = (await run('introspectContext key="variables"')) as any;
       expect(typeof result).toBe('object');

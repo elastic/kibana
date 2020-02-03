@@ -19,6 +19,7 @@
 
 import { ExpressionType } from '../expression_types';
 import { DataAdapter, RequestAdapter } from '../../../inspector/common';
+import { TimeRange, Query, esFilters } from '../../../data/common';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;
@@ -29,13 +30,6 @@ export interface ExecutionContext<Input = unknown, InspectorAdapters = DefaultIn
    * Get initial input with which execution started.
    */
   getInitialInput: () => Input;
-
-  /**
-   * Same as `getInitialInput`, use `getInitialInput` instead, `getInitialContext` is deprecated.
-   *
-   * @deprecated
-   */
-  getInitialContext: () => Input;
 
   /**
    * Context variables that can be consumed using `var` and `var_set` functions.
@@ -56,6 +50,11 @@ export interface ExecutionContext<Input = unknown, InspectorAdapters = DefaultIn
    * Adapters for `inspector` plugin.
    */
   inspectorAdapters: InspectorAdapters;
+
+  /**
+   * Search context in which expression should operate.
+   */
+  search?: ExecutionContextSearch;
 }
 
 /**
@@ -64,4 +63,10 @@ export interface ExecutionContext<Input = unknown, InspectorAdapters = DefaultIn
 export interface DefaultInspectorAdapters {
   requests: RequestAdapter;
   data: DataAdapter;
+}
+
+export interface ExecutionContextSearch {
+  filters?: esFilters.Filter[];
+  query?: Query;
+  timeRange?: TimeRange;
 }

@@ -103,7 +103,6 @@ export class Execution<
 
     this.context = {
       getInitialInput: () => this.input,
-      getInitialContext: () => this.input,
       variables: {},
       types: executor.getTypes(),
       abortSignal: this.abortController.signal,

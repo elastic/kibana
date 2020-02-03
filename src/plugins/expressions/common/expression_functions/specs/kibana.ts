@@ -19,13 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
-import { ExpressionValue } from '../../expression_types';
+import { ExpressionValueSearchContext } from '../../expression_types';
 
 export type ExpressionFunctionKibana = ExpressionFunctionDefinition<
   'kibana',
-  ExpressionValue,
+  ExpressionValueSearchContext | null,
   object,
-  ExpressionValue
+  ExpressionValueSearchContext
 >;
 
 export const kibana: ExpressionFunctionKibana = {
@@ -39,26 +39,27 @@ export const kibana: ExpressionFunctionKibana = {
   help: i18n.translate('expressions.functions.kibana.help', {
     defaultMessage: 'Gets kibana global context',
   }),
+
   args: {},
-  fn(input, _, context) {
-    const initialInput: ExpressionValue = context.getInitialInput ? context.getInitialInput() : {};
 
-    if (input && input.query) {
-      initialInput.query = initialInput.query.concat(input.query);
+  fn(input, _, { search }) {
+    if (!search) {
+      throw new Error('`search` context not provided in ExecutionContext.');
     }
 
-    if (input && input.filters) {
-      initialInput.filters = initialInput.filters.concat(input.filters);
-    }
-
-    const timeRange = initialInput.timeRange || (input ? input.timeRange : undefined);
-
-    return {
+    const output: ExpressionValueSearchContext = {
       ...input,
       type: 'kibana_context',
-      query: initialInput.query,
-      filters: initialInput.filters,
-      timeRange,
+      // query: ...
+      filters: [...(search.filters || []), ...((input && input.filters) || [])],
+      timeRange: search.timeRange || (input ? input.timeRange : undefined),
     };
+
+    // TODO: FIX THIS.
+    // if (input && input.query && search.query) {
+    // output.query = [...search.query, ...input.query];
+    // }
+
+    return output;
   },
 };

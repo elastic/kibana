@@ -20,9 +20,9 @@
 import { Adapters } from '../../../inspector/public';
 import {
   Executor,
-  ExpressionValueKibanaContext,
   IInterpreterRenderHandlers,
   ExpressionValue,
+  ExecutionContextSearch,
 } from '../../common';
 
 /**
@@ -42,7 +42,7 @@ export interface ExpressionInterpreter {
 }
 
 export interface IExpressionLoaderParams {
-  searchContext?: ExpressionValueKibanaContext;
+  searchContext?: ExecutionContextSearch;
   context?: ExpressionValue;
   variables?: Record<string, any>;
   disableCaching?: boolean;
