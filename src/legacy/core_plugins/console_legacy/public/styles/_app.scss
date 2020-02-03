@@ -40,7 +40,7 @@
 .conApp__textAreaLabelHack,
 .conApp__editorContent,
 .conApp__outputContent {
-  height: 100%;
+  height: calc(100% - #{$euiSizeL});
   flex: 1 1 1px;
 }
 
@@ -52,8 +52,7 @@
   position: absolute;
   z-index: $euiZLevel1;
   top: 0;
-  // Adjust for possible scrollbars
-  right: $euiSize;
+  left: 0;
   line-height: 1;
   // For IE11
   min-width: 40px;

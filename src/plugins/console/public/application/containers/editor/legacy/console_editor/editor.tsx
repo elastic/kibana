@@ -18,7 +18,6 @@
  */
 
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
@@ -26,10 +25,16 @@ import { debounce } from 'lodash';
 // @ts-ignore
 import * as qs from 'querystring-browser';
 
-import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiControlBar,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { useServicesContext, useEditorReadContext } from '../../../../contexts';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
-import { ConsoleMenu } from '../../../../components';
 
 import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { registerCommands } from './keyboard_shortcuts';
@@ -226,20 +231,6 @@ function EditorUI({ initialTextValue }: EditorProps) {
               </button>
             </EuiToolTip>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <ConsoleMenu
-              getCurl={() => {
-                return editorInstanceRef.current!.getRequestsAsCURL(elasticsearchUrl);
-              }}
-              getDocumentation={() => {
-                return getDocumentation(editorInstanceRef.current!, docLinkVersion);
-              }}
-              autoIndent={(event: any) => {
-                autoIndent(editorInstanceRef.current!, event);
-              }}
-              addNotification={({ title }) => notifications.toasts.add({ title })}
-            />
-          </EuiFlexItem>
         </EuiFlexGroup>
 
         {/* Axe complains about Ace's textarea element missing a label, which interferes with our
@@ -255,6 +246,53 @@ function EditorUI({ initialTextValue }: EditorProps) {
             data-test-subj="request-editor"
           />
         </label>
+        <EuiControlBar
+          position="absolute"
+          controls={[
+            {
+              controlType: 'spacer',
+            },
+            {
+              id: 'label',
+              controlType: 'text',
+              text: (
+                <EuiText size="s" color="subdued">
+                  Current Request
+                </EuiText>
+              ),
+            },
+            {
+              controlType: 'text',
+              id: 'copy_to_curl',
+              text: (
+                <EuiToolTip content="Copy to cURL (keyboard shortcut)">
+                  <EuiIcon type="console" color="primary" />
+                </EuiToolTip>
+              ),
+            },
+            {
+              controlType: 'text',
+              id: 'open_documentation',
+              text: (
+                <EuiToolTip content="Open Documentation (keyboard shortcut)">
+                  <EuiIcon type="link" color="primary" />
+                </EuiToolTip>
+              ),
+            },
+            {
+              controlType: 'text',
+              id: 'auto_indent',
+              text: (
+                <EuiToolTip content="Auto Indent (keyboard shortcut)">
+                  <EuiIcon type="editorItemAlignLeft" color="secondary" />
+                </EuiToolTip>
+              ),
+            },
+          ]}
+          size="m"
+          // showContent={this.state.contentIsVisible}
+          showOnMobile
+        />
       </div>
     </div>
   );
