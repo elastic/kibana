@@ -84,7 +84,7 @@ export async function getApms(req, apmIndexPattern, clusterUuid) {
 
   const params = {
     index: apmIndexPattern,
-    size: config.get('xpack.monitoring.max_bucket_size'), // FIXME
+    size: config.get('monitoring.ui.max_bucket_size'), // FIXME
     ignoreUnavailable: true,
     filterPath: [
       // only filter path can filter for inner_hits

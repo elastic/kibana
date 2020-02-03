@@ -7,4 +7,4 @@
 export { DonutChart } from './donut_chart';
 export { DurationChart } from './duration_chart';
 export { MonitorBarSeries } from './monitor_bar_series';
-export { SnapshotHistogram } from './snapshot_histogram';
+export { PingHistogramComponent } from './ping_histogram';
