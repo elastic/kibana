@@ -10,6 +10,9 @@ import { i18n } from '@kbn/i18n';
 
 import { AutoFollowPatternDeleteProvider } from '../auto_follow_pattern_delete_provider';
 
+// @ts-ignore
+import routing from '../../services/routing';
+
 const actionsAriaLabel = i18n.translate(
   'xpack.crossClusterReplication.autoFollowActionMenu.autoFollowPatternActionMenuButtonAriaLabel',
   {
@@ -18,6 +21,7 @@ const actionsAriaLabel = i18n.translate(
 );
 
 export interface Props {
+  edit: boolean;
   patterns: Array<{ name: string; active: boolean }>;
   deleteAutoFollowPattern: (id: string[]) => void;
   pauseAutoFollowPattern: (id: string[]) => void;
@@ -46,6 +50,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
   pauseAutoFollowPattern,
   resumeAutoFollowPattern,
   arrowDirection,
+  edit,
 }) => {
   const [showPopover, setShowPopover] = useState(false);
 
@@ -56,6 +61,9 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
   };
 
   const panelItems = [
+    /**
+     * Resume or pause pattern
+     */
     allActiveValuesSame
       ? patterns[0].active
         ? {
@@ -81,6 +89,23 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
             },
           }
       : null,
+    /**
+     * Navigate to edit a pattern
+     */
+    edit && patterns.length === 1
+      ? {
+          name: i18n.translate('xpack.crossClusterReplication.editAutoFollowPatternButtonLabel', {
+            defaultMessage: 'Edit',
+          }),
+          icon: <EuiIcon type="pencil" />,
+          onClick: () => {
+            window.location.hash = routing.getAutoFollowPatternPath(patterns[0].name);
+          },
+        }
+      : null,
+    /**
+     * Delete a pattern
+     */
     {
       name: i18n.translate('xpack.crossClusterReplication.deleteAutoFollowPatternButtonLabel', {
         defaultMessage: 'Delete {total, plural, one {pattern} other {patterns}}',

@@ -6,12 +6,10 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getIndexListUri } from '../../../../../../../../index_management/public/app/services/navigation';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -28,16 +26,12 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
-  EuiPopover,
-  EuiContextMenu,
 } from '@elastic/eui';
 
 import {
   AutoFollowPatternIndicesPreview,
-  AutoFollowPatternDeleteProvider,
+  AutoFollowPatternActionMenu,
 } from '../../../../../components';
-
-import routing from '../../../../../services/routing';
 
 export class DetailPanel extends Component {
   static propTypes = {
@@ -301,47 +295,11 @@ export class DetailPanel extends Component {
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <AutoFollowPatternDeleteProvider>
-                    {deleteAutoFollowPattern => (
-                      <EuiButtonEmpty
-                        color="danger"
-                        onClick={() => deleteAutoFollowPattern(autoFollowPattern.name)}
-                        data-test-subj="deleteButton"
-                      >
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.deleteButtonLabel"
-                          defaultMessage="Delete"
-                        />
-                      </EuiButtonEmpty>
-                    )}
-                  </AutoFollowPatternDeleteProvider>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    button={
-                      <EuiButton>
-                        { i18n.translate(
-                        'xpack.crossClusterReplication.autoFollowPatternDetailPanel.manageButtonLabel', {defaultMessage: 'Manage'})
-                        }
-                      </EuiButton>}
-                    panelPaddingSize="none"
-                    withTitle
-                    repositionOnScroll
-                  >
-                    <EuiContextMenu panels={[]} />
-                  </EuiPopover>
-                  <EuiButton
-                    fill
-                    color="primary"
-                    href={routing.getAutoFollowPatternPath(autoFollowPattern.name)}
-                    data-test-subj="editButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.editButtonLabel"
-                      defaultMessage="Edit"
-                    />
-                  </EuiButton>
+                  <AutoFollowPatternActionMenu
+                    edit
+                    arrowDirection="up"
+                    patterns={[autoFollowPattern]}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

@@ -177,21 +177,21 @@ export const pauseAutoFollowPattern = id =>
       }
 
       if (response.itemsPaused.length) {
-        const hasMultipleDelete = response.itemsDeleted.length > 1;
+        const hasMultiple = response.itemsPaused.length > 1;
 
-        const successMessage = hasMultipleDelete
+        const successMessage = hasMultiple
           ? i18n.translate(
               'xpack.crossClusterReplication.autoFollowPattern.pauseAction.successMultipleNotificationTitle',
               {
                 defaultMessage: `{count} auto-follow patterns were paused`,
-                values: { count: response.itemsDeleted.length },
+                values: { count: response.itemsPaused.length },
               }
             )
           : i18n.translate(
               'xpack.crossClusterReplication.autoFollowPattern.pauseAction.successSingleNotificationTitle',
               {
                 defaultMessage: `Auto-follow pattern '{name}' was paused`,
-                values: { name: response.itemsDeleted[0] },
+                values: { name: response.itemsPaused[0] },
               }
             );
 
@@ -232,22 +232,22 @@ export const resumeAutoFollowPattern = id =>
         toastNotifications.addDanger(errorMessage);
       }
 
-      if (response.itemsPaused.length) {
-        const hasMultipleDelete = response.itemsDeleted.length > 1;
+      if (response.itemsResumed.length) {
+        const hasMultiple = response.itemsResumed.length > 1;
 
-        const successMessage = hasMultipleDelete
+        const successMessage = hasMultiple
           ? i18n.translate(
               'xpack.crossClusterReplication.autoFollowPattern.resumeAction.successMultipleNotificationTitle',
               {
                 defaultMessage: `{count} auto-follow patterns were resumed`,
-                values: { count: response.itemsDeleted.length },
+                values: { count: response.itemsResumed.length },
               }
             )
           : i18n.translate(
               'xpack.crossClusterReplication.autoFollowPattern.resumeAction.successSingleNotificationTitle',
               {
                 defaultMessage: `Auto-follow pattern '{name}' was resumed`,
-                values: { name: response.itemsDeleted[0] },
+                values: { name: response.itemsResumed[0] },
               }
             );
 
