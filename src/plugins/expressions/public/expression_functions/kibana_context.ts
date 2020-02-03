@@ -76,7 +76,7 @@ export const kibanaContext = (): ExpressionFunctionKibanaContext => ({
       }),
     },
   },
-  async fn(context, args, handlers) {
+  async fn(input, args) {
     const queryArg = args.q ? JSON.parse(args.q) : [];
     let queries = Array.isArray(queryArg) ? queryArg : [queryArg];
     let filters = args.filters ? JSON.parse(args.filters) : [];
@@ -89,18 +89,18 @@ export const kibanaContext = (): ExpressionFunctionKibanaContext => ({
       filters = filters.concat(data.filter);
     }
 
-    if (context && context.query) {
-      queries = queries.concat(context.query);
+    if (input && input.query) {
+      queries = queries.concat(input.query);
     }
 
-    if (context && context.filters) {
-      filters = filters.concat(context.filters).filter((f: any) => !f.meta.disabled);
+    if (input && input.filters) {
+      filters = filters.concat(input.filters).filter((f: any) => !f.meta.disabled);
     }
 
     const timeRange = args.timeRange
       ? JSON.parse(args.timeRange)
-      : context
-      ? context.timeRange
+      : input
+      ? input.timeRange
       : undefined;
 
     return {

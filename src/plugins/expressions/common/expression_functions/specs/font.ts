@@ -134,7 +134,7 @@ export const font: ExpressionFunctionDefinition<'font', null, Arguments, Style> 
       types: ['string'],
     },
   },
-  fn: (_context, args) => {
+  fn: (input, args) => {
     if (!Object.values(FontWeight).includes(args.weight!)) {
       throw new Error(
         i18n.translate('expressions.functions.font.invalidFontWeightErrorMessage', {
