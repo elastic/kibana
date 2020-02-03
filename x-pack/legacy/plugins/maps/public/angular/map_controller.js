@@ -92,10 +92,15 @@ app.controller(
       setSavedQueryId: state => savedQueryId => ({ ...state, savedQuery: savedQueryId }),
     };
     const stateContainer = createStateContainer(initialState, transitions);
-    const stateContainerChangeSub = stateContainer.state$.pipe(pairwise()).subscribe(([prevState, nextState]) => {
+
+    const onUrlChange = _.debounce(([prevState, nextState]) => {
+      if (nextState.savedQuery !== prevState.savedQuery) {
+        onUrlSavedQueryChange(nextState.savedQuery);
+      }
       console.log(`new: `, nextState);
       console.log(`prev: `, prevState);
-    });
+    }, 100);
+    const stateContainerChangeSub = stateContainer.state$.pipe(pairwise()).subscribe(onUrlChange);
     const stateSyncRef = syncState({
       storageKey: MAP_STATE_STORAGE_KEY,
       stateContainer: {
@@ -227,24 +232,22 @@ app.controller(
       updateStateFromSavedQuery(newSavedQuery);
     });
 
-    $scope.$watch(
-      () => $state.savedQuery,
-      newSavedQueryId => {
-        if (!newSavedQueryId) {
-          $scope.savedQuery = undefined;
-          return;
-        }
-        if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
-          savedQueryService.getSavedQuery(newSavedQueryId).then(savedQuery => {
-            $scope.$evalAsync(() => {
-              $scope.savedQuery = savedQuery;
-              updateStateFromSavedQuery(savedQuery);
-            });
+    const onUrlSavedQueryChange = newSavedQueryId => {
+      console.log(`onUrlSavedQueryChange, newSavedQueryId:${newSavedQueryId}`);
+      if (!newSavedQueryId) {
+        $scope.savedQuery = undefined;
+        return;
+      } else if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
+        savedQueryService.getSavedQuery(newSavedQueryId).then(savedQuery => {
+          $scope.$evalAsync(() => {
+            $scope.savedQuery = savedQuery;
+            updateStateFromSavedQuery(savedQuery);
           });
-        }
+        });
       }
-    );
+    }
     /* End of Saved Queries */
+
     async function onQueryChange({ filters, query, time, refresh }) {
       if (filters) {
         filterManager.setFilters(filters); // Maps and merges filters
