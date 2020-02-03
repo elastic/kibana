@@ -12,7 +12,7 @@ import {
   GetServicesFunction,
   RawAction,
 } from '../types';
-import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceSetup } from '../../../spaces/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger } from '../../../event_log/server';
@@ -21,7 +21,7 @@ export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceSetup;
   getServices: GetServicesFunction;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
 }
