@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Vector2 } from '../../types';
+import { Vector2, PanDirection } from '../../types';
 
 interface UserSetZoomLevel {
   readonly type: 'userSetZoomLevel';
@@ -14,13 +14,21 @@ interface UserSetZoomLevel {
   readonly payload: number;
 }
 
+interface UserClickedZoomOut {
+  readonly type: 'userClickedZoomOut';
+}
+
+interface UserClickedZoomIn {
+  readonly type: 'userClickedZoomIn';
+}
+
 interface UserZoomed {
   readonly type: 'userZoomed';
   /**
    * A value to zoom in by. Should be a fraction of `1`. For a `'wheel'` event when `event.deltaMode` is `'pixel'`,
    * pass `event.deltaY / -renderHeight` where `renderHeight` is the height of the Resolver element in pixels.
    */
-  payload: number;
+  readonly payload: number;
 }
 
 interface UserSetRasterSize {
@@ -56,6 +64,14 @@ interface UserStoppedPanning {
   readonly type: 'userStoppedPanning';
 }
 
+interface UserClickedPanControl {
+  readonly type: 'userClickedPanControl';
+  /**
+   * String that represents the direction in which Resolver can be panned
+   */
+  readonly payload: PanDirection;
+}
+
 interface UserMovedPointer {
   readonly type: 'userMovedPointer';
   /**
@@ -72,4 +88,7 @@ export type CameraAction =
   | UserStartedPanning
   | UserStoppedPanning
   | UserZoomed
-  | UserMovedPointer;
+  | UserMovedPointer
+  | UserClickedZoomOut
+  | UserClickedZoomIn
+  | UserClickedPanControl;

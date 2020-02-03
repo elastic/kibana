@@ -8,15 +8,22 @@ import { Alert, AlertType } from '../../types';
 import { httpServiceMock } from '../../../../../../../../src/core/public/mocks';
 import {
   createAlert,
+  deleteAlert,
   deleteAlerts,
   disableAlerts,
   enableAlerts,
+  disableAlert,
+  enableAlert,
+  loadAlert,
   loadAlerts,
   loadAlertTypes,
   muteAlerts,
   unmuteAlerts,
+  muteAlert,
+  unmuteAlert,
   updateAlert,
 } from './alert_api';
+import uuid from 'uuid';
 
 const http = httpServiceMock.createStartContract();
 
@@ -39,6 +46,31 @@ describe('loadAlertTypes', () => {
         "/api/alert/types",
       ]
     `);
+  });
+});
+
+describe('loadAlert', () => {
+  test('should call get API with base parameters', async () => {
+    const alertId = uuid.v4();
+    const resolvedValue = {
+      id: alertId,
+      name: 'name',
+      tags: [],
+      enabled: true,
+      alertTypeId: '.noop',
+      schedule: { interval: '1s' },
+      actions: [],
+      params: {},
+      createdBy: null,
+      updatedBy: null,
+      throttle: null,
+      muteAll: false,
+      mutedInstanceIds: [],
+    };
+    http.get.mockResolvedValueOnce(resolvedValue);
+
+    expect(await loadAlert({ http, alertId })).toEqual(resolvedValue);
+    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}`);
   });
 });
 
@@ -83,20 +115,20 @@ describe('loadAlerts', () => {
     const result = await loadAlerts({ http, searchText: 'apples', page: { index: 0, size: 10 } });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      "/api/alert/_find",
-      Object {
-        "query": Object {
-          "default_search_operator": "AND",
-          "filter": undefined,
-          "page": 1,
-          "per_page": 10,
-          "search": "apples",
-          "search_fields": "[\\"name\\",\\"tags\\"]",
-        },
-      },
-    ]
-    `);
+          Array [
+            "/api/alert/_find",
+            Object {
+              "query": Object {
+                "default_search_operator": "AND",
+                "filter": undefined,
+                "page": 1,
+                "per_page": 10,
+                "search": "apples",
+                "search_fields": "[\\"name\\",\\"tags\\"]",
+              },
+            },
+          ]
+        `);
   });
 
   test('should call find API with actionTypesFilter', async () => {
@@ -115,20 +147,20 @@ describe('loadAlerts', () => {
     });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      "/api/alert/_find",
-      Object {
-        "query": Object {
-          "default_search_operator": "AND",
-          "filter": undefined,
-          "page": 1,
-          "per_page": 10,
-          "search": "foo",
-          "search_fields": "[\\"name\\",\\"tags\\"]",
-        },
-      },
-    ]
-    `);
+          Array [
+            "/api/alert/_find",
+            Object {
+              "query": Object {
+                "default_search_operator": "AND",
+                "filter": undefined,
+                "page": 1,
+                "per_page": 10,
+                "search": "foo",
+                "search_fields": "[\\"name\\",\\"tags\\"]",
+              },
+            },
+          ]
+        `);
   });
 
   test('should call find API with typesFilter', async () => {
@@ -147,20 +179,20 @@ describe('loadAlerts', () => {
     });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      "/api/alert/_find",
-      Object {
-        "query": Object {
-          "default_search_operator": "AND",
-          "filter": "alert.attributes.alertTypeId:(foo or bar)",
-          "page": 1,
-          "per_page": 10,
-          "search": undefined,
-          "search_fields": undefined,
-        },
-      },
-    ]
-    `);
+          Array [
+            "/api/alert/_find",
+            Object {
+              "query": Object {
+                "default_search_operator": "AND",
+                "filter": "alert.attributes.alertTypeId:(foo or bar)",
+                "page": 1,
+                "per_page": 10,
+                "search": undefined,
+                "search_fields": undefined,
+              },
+            },
+          ]
+        `);
   });
 
   test('should call find API with actionTypesFilter and typesFilter', async () => {
@@ -180,20 +212,20 @@ describe('loadAlerts', () => {
     });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      "/api/alert/_find",
-      Object {
-        "query": Object {
-          "default_search_operator": "AND",
-          "filter": "alert.attributes.alertTypeId:(foo or bar)",
-          "page": 1,
-          "per_page": 10,
-          "search": "baz",
-          "search_fields": "[\\"name\\",\\"tags\\"]",
-        },
-      },
-    ]
-    `);
+          Array [
+            "/api/alert/_find",
+            Object {
+              "query": Object {
+                "default_search_operator": "AND",
+                "filter": "alert.attributes.alertTypeId:(foo or bar)",
+                "page": 1,
+                "per_page": 10,
+                "search": "baz",
+                "search_fields": "[\\"name\\",\\"tags\\"]",
+              },
+            },
+          ]
+        `);
   });
 
   test('should call find API with searchText and tagsFilter and typesFilter', async () => {
@@ -213,19 +245,32 @@ describe('loadAlerts', () => {
     });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      "/api/alert/_find",
-      Object {
-        "query": Object {
-          "default_search_operator": "AND",
-          "filter": "alert.attributes.alertTypeId:(foo or bar)",
-          "page": 1,
-          "per_page": 10,
-          "search": "apples, foo, baz",
-          "search_fields": "[\\"name\\",\\"tags\\"]",
-        },
-      },
-    ]
+          Array [
+            "/api/alert/_find",
+            Object {
+              "query": Object {
+                "default_search_operator": "AND",
+                "filter": "alert.attributes.alertTypeId:(foo or bar)",
+                "page": 1,
+                "per_page": 10,
+                "search": "apples, foo, baz",
+                "search_fields": "[\\"name\\",\\"tags\\"]",
+              },
+            },
+          ]
+        `);
+  });
+});
+
+describe('deleteAlert', () => {
+  test('should call delete API for alert', async () => {
+    const id = '1';
+    const result = await deleteAlert({ http, id });
+    expect(result).toEqual(undefined);
+    expect(http.delete.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/api/alert/1",
+      ]
     `);
   });
 });
@@ -258,10 +303,17 @@ describe('createAlert', () => {
       tags: ['foo'],
       enabled: true,
       alertTypeId: 'test',
-      interval: '1m',
+      schedule: {
+        interval: '1m',
+      },
       actions: [],
       params: {},
       throttle: null,
+      consumer: '',
+      createdAt: new Date('1970-01-01T00:00:00.000Z'),
+      updatedAt: new Date('1970-01-01T00:00:00.000Z'),
+      apiKey: null,
+      apiKeyOwner: null,
     };
     const resolvedValue: Alert = {
       ...alertToCreate,
@@ -279,7 +331,7 @@ describe('createAlert', () => {
       Array [
         "/api/alert",
         Object {
-          "body": "{\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"interval\\":\\"1m\\",\\"actions\\":[],\\"params\\":{},\\"throttle\\":null}",
+          "body": "{\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"consumer\\":\\"\\",\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
         },
       ]
     `);
@@ -292,9 +344,16 @@ describe('updateAlert', () => {
       throttle: '1m',
       name: 'test',
       tags: ['foo'],
-      interval: '1m',
+      schedule: {
+        interval: '1m',
+      },
       params: {},
       actions: [],
+      consumer: '',
+      createdAt: new Date('1970-01-01T00:00:00.000Z'),
+      updatedAt: new Date('1970-01-01T00:00:00.000Z'),
+      apiKey: null,
+      apiKeyOwner: null,
     };
     const resolvedValue: Alert = {
       ...alertToUpdate,
@@ -314,8 +373,64 @@ describe('updateAlert', () => {
       Array [
         "/api/alert/123",
         Object {
-          "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"interval\\":\\"1m\\",\\"params\\":{},\\"actions\\":[]}",
+          "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"consumer\\":\\"\\",\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
         },
+      ]
+    `);
+  });
+});
+
+describe('enableAlert', () => {
+  test('should call enable alert API', async () => {
+    const result = await enableAlert({ http, id: '1' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/_enable",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('disableAlert', () => {
+  test('should call disable alert API', async () => {
+    const result = await disableAlert({ http, id: '1' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/_disable",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('muteAlert', () => {
+  test('should call mute alert API', async () => {
+    const result = await muteAlert({ http, id: '1' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/_mute_all",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('unmuteAlert', () => {
+  test('should call unmute alert API', async () => {
+    const result = await unmuteAlert({ http, id: '1' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/_unmute_all",
+        ],
       ]
     `);
   });

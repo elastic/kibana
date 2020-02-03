@@ -23,7 +23,8 @@ import React from 'react';
 import angular from 'angular';
 
 import { Subscription } from 'rxjs';
-import { createHashHistory } from 'history';
+import { map } from 'rxjs/operators';
+import { History } from 'history';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
@@ -32,16 +33,17 @@ import {
   SavedObjectSaveOpts,
   SaveResult,
   showSaveModal,
-  State,
   subscribeWithScope,
 } from '../legacy_imports';
-import { FilterStateManager } from '../../../../data/public';
 import {
-  esFilters,
+  COMPARE_ALL_OPTIONS,
+  compareFilters,
   IndexPattern,
   IndexPatternsContract,
   Query,
   SavedQuery,
+  syncAppFilters,
+  syncQuery,
 } from '../../../../../../plugins/data/public';
 
 import {
@@ -76,17 +78,22 @@ import {
   SavedObjectFinderProps,
   SavedObjectFinderUi,
 } from '../../../../../../plugins/kibana_react/public';
-import { removeQueryParam, unhashUrl } from '../../../../../../plugins/kibana_utils/public';
+import {
+  IKbnUrlStateStorage,
+  removeQueryParam,
+  unhashUrl,
+} from '../../../../../../plugins/kibana_utils/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
   $route: any;
   $routeParams: any;
-  globalState: State;
   indexPatterns: IndexPatternsContract;
   dashboardConfig: any;
   config: any;
   confirmModal: ConfirmModalFn;
+  history: History;
+  kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 export class DashboardAppController {
@@ -99,7 +106,6 @@ export class DashboardAppController {
     $scope,
     $route,
     $routeParams,
-    globalState,
     dashboardConfig,
     localStorage,
     indexPatterns,
@@ -109,15 +115,21 @@ export class DashboardAppController {
     embeddables,
     share,
     dashboardCapabilities,
-    npDataStart: {
-      query: {
-        filterManager,
-        timefilter: { timefilter },
-      },
-    },
+    npDataStart: { query: queryService },
     core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects, http },
+    history,
+    kbnUrlStateStorage,
   }: DashboardAppControllerDependencies) {
+    const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
+    const timefilter = queryService.timefilter.timefilter;
+
+    // starts syncing `_g` portion of url with query services
+    // note: dashboard_state_manager.ts syncs `_a` portion of url
+    const {
+      stop: stopSyncingGlobalStateWithUrl,
+      hasInheritedQueryFromUrl: hasInheritedGlobalStateFromUrl,
+    } = syncQuery(queryService, kbnUrlStateStorage);
 
     let lastReloadRequestTime = 0;
 
@@ -126,34 +138,23 @@ export class DashboardAppController {
       chrome.docTitle.change(dash.title);
     }
 
-    const history = createHashHistory();
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
-      useHashedUrl: config.get('state:storeInSessionStorage'),
       hideWriteControls: dashboardConfig.getHideWriteControls(),
       kibanaVersion: injectedMetadata.getKibanaVersion(),
+      kbnUrlStateStorage,
       history,
     });
 
-    const filterStateManager = new FilterStateManager(
-      globalState,
-      () => {
-        // Temporary AppState replacement
-        return {
-          set filters(_filters: esFilters.Filter[]) {
-            dashboardStateManager.setFilters(_filters);
-          },
-          get filters() {
-            return dashboardStateManager.appState.filters;
-          },
-        };
-      },
-      filterManager
-    );
+    const stopSyncingAppFilters = syncAppFilters(filterManager, {
+      set: filters => dashboardStateManager.setFilters(filters),
+      get: () => dashboardStateManager.appState.filters,
+      state$: dashboardStateManager.appState$.pipe(map(state => state.filters)),
+    });
 
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
-    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !globalState.$inheritedGlobalState) {
+    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !hasInheritedGlobalStateFromUrl) {
       dashboardStateManager.syncTimefilterWithDashboard(timefilter);
     }
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
@@ -316,8 +317,14 @@ export class DashboardAppController {
             // This has to be first because handleDashboardContainerChanges causes
             // appState.save which will cause refreshDashboardContainer to be called.
 
-            // Add filters modifies the object passed to it, hence the clone deep.
-            if (!_.isEqual(container.getInput().filters, queryFilter.getFilters())) {
+            if (
+              !compareFilters(
+                container.getInput().filters,
+                queryFilter.getFilters(),
+                COMPARE_ALL_OPTIONS
+              )
+            ) {
+              // Add filters modifies the object passed to it, hence the clone deep.
               queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
 
               dashboardStateManager.applyFilters($scope.model.query, container.getInput().filters);
@@ -411,19 +418,27 @@ export class DashboardAppController {
 
       const containerInput = dashboardContainer.getInput();
       const differences: Partial<DashboardContainerInput> = {};
-      Object.keys(containerInput).forEach(key => {
+
+      // Filters shouldn't  be compared using regular isEqual
+      if (
+        !compareFilters(containerInput.filters, appStateDashboardInput.filters, COMPARE_ALL_OPTIONS)
+      ) {
+        differences.filters = appStateDashboardInput.filters;
+      }
+
+      Object.keys(_.omit(containerInput, 'filters')).forEach(key => {
         const containerValue = (containerInput as { [key: string]: unknown })[key];
         const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[
           key
         ];
         if (!_.isEqual(containerValue, appStateValue)) {
-          // cloneDeep hack is needed, as there are multiple place, where container's input mutated,
-          // but values from appStateValue are deeply frozen, as they can't be mutated directly
-          (differences as { [key: string]: unknown })[key] = _.cloneDeep(appStateValue);
+          (differences as { [key: string]: unknown })[key] = appStateValue;
         }
       });
 
-      return Object.values(differences).length === 0 ? undefined : differences;
+      // cloneDeep hack is needed, as there are multiple place, where container's input mutated,
+      // but values from appStateValue are deeply frozen, as they can't be mutated directly
+      return Object.values(differences).length === 0 ? undefined : _.cloneDeep(differences);
     };
 
     const refreshDashboardContainer = () => {
@@ -480,18 +495,21 @@ export class DashboardAppController {
           language:
             localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
         },
-        []
+        queryFilter.getGlobalFilters()
       );
       // Making this method sync broke the updates.
       // Temporary fix, until we fix the complex state in this file.
-      setTimeout(queryFilter.removeAll, 0);
+      setTimeout(() => {
+        queryFilter.setFilters(queryFilter.getGlobalFilters());
+      }, 0);
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
-      dashboardStateManager.applyFilters(
-        savedQuery.attributes.query,
-        savedQuery.attributes.filters || []
-      );
+      const savedQueryFilters = savedQuery.attributes.filters || [];
+      const globalFilters = queryFilter.getGlobalFilters();
+      const allFilters = [...globalFilters, ...savedQueryFilters];
+
+      dashboardStateManager.applyFilters(savedQuery.attributes.query, allFilters);
       if (savedQuery.attributes.timefilter) {
         timefilter.setTime({
           from: savedQuery.attributes.timefilter.from,
@@ -504,7 +522,7 @@ export class DashboardAppController {
       // Making this method sync broke the updates.
       // Temporary fix, until we fix the complex state in this file.
       setTimeout(() => {
-        queryFilter.setFilters(savedQuery.attributes.filters || []);
+        queryFilter.setFilters(allFilters);
       }, 0);
     };
 
@@ -875,6 +893,8 @@ export class DashboardAppController {
 
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
+      stopSyncingGlobalStateWithUrl();
+      stopSyncingAppFilters();
       visibleSubscription.unsubscribe();
       $scope.timefilterSubscriptions$.unsubscribe();
 
@@ -887,9 +907,6 @@ export class DashboardAppController {
       }
       if (dashboardContainer) {
         dashboardContainer.destroy();
-      }
-      if (filterStateManager) {
-        filterStateManager.destroy();
       }
     });
   }

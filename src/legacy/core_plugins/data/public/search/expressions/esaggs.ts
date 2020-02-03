@@ -28,20 +28,16 @@ import {
   KibanaDatatableColumn,
 } from 'src/plugins/expressions/public';
 import {
+  ISearchSource,
+  SearchSource,
   Query,
   TimeRange,
   esFilters,
   getTime,
   FilterManager,
 } from '../../../../../../plugins/data/public';
-import {
-  SearchSource,
-  ISearchSource,
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../../../../ui/public/courier';
 
-import { buildTabularInspectorData } from '../../../../../ui/public/inspector/build_tabular_inspector_data';
+import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { calculateObjectHash } from '../../../../visualizations/public';
 // @ts-ignore
 import { tabifyAggResponse } from '../../../../../ui/public/agg_response/tabify/tabify';
@@ -49,6 +45,8 @@ import { PersistedState } from '../../../../../ui/public/persisted_state';
 import { Adapters } from '../../../../../../plugins/inspector/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getQueryService, getIndexPatterns } from '../../../../../../plugins/data/public/services';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../..';
+import { serializeAggConfig } from './utils';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
@@ -292,6 +290,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
         const cleanedColumn: KibanaDatatableColumn = {
           id: column.id,
           name: column.name,
+          meta: serializeAggConfig(column.aggConfig),
         };
         if (args.includeFormatHints) {
           cleanedColumn.formatHint = createFormat(column.aggConfig);

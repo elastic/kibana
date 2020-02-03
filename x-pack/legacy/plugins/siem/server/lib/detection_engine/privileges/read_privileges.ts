@@ -11,7 +11,7 @@ export const readPrivileges = async (
   index: string
 ): Promise<unknown> => {
   return callWithRequest('transport.request', {
-    path: `_security/user/_has_privileges`,
+    path: '/_security/user/_has_privileges',
     method: 'POST',
     body: {
       cluster: [

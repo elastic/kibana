@@ -21,6 +21,7 @@ import {
   AlertAction,
   AlertType,
   IntervalSchedule,
+  SanitizedAlert,
 } from './types';
 import { validateAlertTypeParams } from './lib';
 import {
@@ -28,7 +29,7 @@ import {
   CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../../plugins/security/server';
-import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../../plugins/task_manager/server';
 
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
@@ -44,7 +45,7 @@ interface ConstructorOptions {
   taskManager: TaskManagerStartContract;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
   spaceId?: string;
   namespace?: string;
   getUserName: () => Promise<string | null>;
@@ -74,7 +75,7 @@ export interface FindResult {
   page: number;
   perPage: number;
   total: number;
-  data: Alert[];
+  data: SanitizedAlert[];
 }
 
 interface CreateOptions {
@@ -119,7 +120,7 @@ export class AlertsClient {
   private readonly invalidateAPIKey: (
     params: InvalidateAPIKeyParams
   ) => Promise<InvalidateAPIKeyResult>;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
 
   constructor({
     alertTypeRegistry,
@@ -198,7 +199,7 @@ export class AlertsClient {
     );
   }
 
-  public async get({ id }: { id: string }): Promise<Alert> {
+  public async get({ id }: { id: string }): Promise<SanitizedAlert> {
     const result = await this.savedObjectsClient.get('alert', id);
     return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
   }

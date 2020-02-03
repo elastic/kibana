@@ -74,6 +74,8 @@ export class LegacyPlatformService {
         appUrl: navLink.url,
         subUrlBase: navLink.subUrlBase,
         linkToLastSubUrl: navLink.linkToLastSubUrl,
+        category: navLink.category,
+        disableSubUrlTracking: navLink.disableSubUrlTracking,
       })
     );
 

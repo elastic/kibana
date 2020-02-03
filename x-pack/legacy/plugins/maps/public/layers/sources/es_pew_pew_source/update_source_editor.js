@@ -11,6 +11,7 @@ import { indexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { isNestedField } from '../../../../../../../../src/plugins/data/public';
 
 export class UpdateSourceEditor extends Component {
   state = {
@@ -48,7 +49,7 @@ export class UpdateSourceEditor extends Component {
       return;
     }
 
-    this.setState({ fields: indexPattern.fields });
+    this.setState({ fields: indexPattern.fields.filter(field => !isNestedField(field)) });
   }
 
   _onMetricsChange = metrics => {

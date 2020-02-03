@@ -17,6 +17,5 @@
  * under the License.
  */
 
-export { SearchService, SearchSetup, SearchStart } from './search_service';
-
 export { getRequestInspectorStats, getResponseInspectorStats } from './utils';
+export { serializeAggConfig } from './expressions/utils';

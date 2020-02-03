@@ -25,7 +25,7 @@ describe('get_export_by_object_ids', () => {
       const exports = await getExportByObjectIds(unsafeCast, objects);
       expect(exports).toEqual({
         rulesNdjson:
-          '{"created_at":"2019-12-13T16:40:33.400Z","updated_at":"2019-12-13T16:40:33.400Z","created_by":"elastic","description":"Detecting root and admin users","enabled":true,"false_positives":[],"filters":[{"query":{"match_phrase":{"host.name":"some-host"}}}],"from":"now-6m","id":"04128c15-0d1b-4716-a4c5-46997ac7f3bd","immutable":false,"index":["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"],"interval":"5m","rule_id":"rule-1","language":"kuery","output_index":".siem-signals","max_signals":100,"risk_score":50,"name":"Detect Root/Admin Users","query":"user.name: root or user.name: admin","references":["http://www.example.com","https://ww.example.com"],"saved_id":"some-id","timeline_id":"some-timeline-id","timeline_title":"some-timeline-title","meta":{"someMeta":"someField"},"severity":"high","updated_by":"elastic","tags":[],"to":"now","type":"query","threats":[{"framework":"MITRE ATT&CK","tactic":{"id":"TA0040","name":"impact","reference":"https://attack.mitre.org/tactics/TA0040/"},"techniques":[{"id":"T1499","name":"endpoint denial of service","reference":"https://attack.mitre.org/techniques/T1499/"}]}],"version":1}\n',
+          '{"created_at":"2019-12-13T16:40:33.400Z","updated_at":"2019-12-13T16:40:33.400Z","created_by":"elastic","description":"Detecting root and admin users","enabled":true,"false_positives":[],"filters":[{"query":{"match_phrase":{"host.name":"some-host"}}}],"from":"now-6m","id":"04128c15-0d1b-4716-a4c5-46997ac7f3bd","immutable":false,"index":["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"],"interval":"5m","rule_id":"rule-1","language":"kuery","output_index":".siem-signals","max_signals":100,"risk_score":50,"name":"Detect Root/Admin Users","query":"user.name: root or user.name: admin","references":["http://www.example.com","https://ww.example.com"],"saved_id":"some-id","timeline_id":"some-timeline-id","timeline_title":"some-timeline-title","meta":{"someMeta":"someField"},"severity":"high","updated_by":"elastic","tags":[],"to":"now","type":"query","threat":[{"framework":"MITRE ATT&CK","tactic":{"id":"TA0040","name":"impact","reference":"https://attack.mitre.org/tactics/TA0040/"},"technique":[{"id":"T1499","name":"endpoint denial of service","reference":"https://attack.mitre.org/techniques/T1499/"}]}],"version":1}\n',
         exportDetails: '{"exported_count":1,"missing_rules":[],"missing_rules_count":0}\n',
       });
     });
@@ -66,6 +66,7 @@ describe('get_export_by_object_ids', () => {
       const objects = [{ rule_id: 'rule-1' }];
       const exports = await getRulesFromObjects(unsafeCast, objects);
       const expected: RulesErrors = {
+        exportedCount: 1,
         missingRules: [],
         rules: [
           {
@@ -98,7 +99,7 @@ describe('get_export_by_object_ids', () => {
             tags: [],
             to: 'now',
             type: 'query',
-            threats: [
+            threat: [
               {
                 framework: 'MITRE ATT&CK',
                 tactic: {
@@ -106,7 +107,7 @@ describe('get_export_by_object_ids', () => {
                   name: 'impact',
                   reference: 'https://attack.mitre.org/tactics/TA0040/',
                 },
-                techniques: [
+                technique: [
                   {
                     id: 'T1499',
                     name: 'endpoint denial of service',
@@ -141,6 +142,7 @@ describe('get_export_by_object_ids', () => {
       const objects = [{ rule_id: 'rule-1' }];
       const exports = await getRulesFromObjects(unsafeCast, objects);
       const expected: RulesErrors = {
+        exportedCount: 0,
         missingRules: [{ rule_id: 'rule-1' }],
         rules: [],
       };
@@ -164,6 +166,7 @@ describe('get_export_by_object_ids', () => {
       const objects = [{ rule_id: 'rule-1' }];
       const exports = await getRulesFromObjects(unsafeCast, objects);
       const expected: RulesErrors = {
+        exportedCount: 0,
         missingRules: [{ rule_id: 'rule-1' }],
         rules: [],
       };
