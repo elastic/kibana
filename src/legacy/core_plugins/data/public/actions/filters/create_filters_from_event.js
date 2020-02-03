@@ -17,8 +17,10 @@
  * under the License.
  */
 
-import { onBrushEvent } from './brush_event';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { esFilters } from '../../../../../../plugins/data/public';
+import { deserializeAggConfig } from '../../search/expressions/utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getIndexPatterns } from '../../../../../../plugins/data/public/services';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
@@ -63,11 +65,16 @@ const getOtherBucketFilterTerms = (table, columnIndex, rowIndex) => {
  * @param  {string} cellValue - value of the current cell
  * @return {array|string} - filter or list of filters to provide to queryFilter.addFilters()
  */
-const createFilter = (aggConfigs, table, columnIndex, rowIndex, cellValue) => {
+const createFilter = async (table, columnIndex, rowIndex) => {
+  if (!table || !table.columns || !table.columns[columnIndex]) return;
   const column = table.columns[columnIndex];
-  const aggConfig = aggConfigs[columnIndex];
+  const aggConfig = deserializeAggConfig({
+    type: column.meta.type,
+    aggConfigParams: column.meta.aggConfigParams,
+    indexPattern: await getIndexPatterns().get(column.meta.indexPatternId),
+  });
   let filter = [];
-  const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : cellValue;
+  const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
   if (value === null || value === undefined || !aggConfig.isFilterable()) {
     return;
   }
@@ -85,26 +92,28 @@ const createFilter = (aggConfigs, table, columnIndex, rowIndex, cellValue) => {
   return filter;
 };
 
-const createFiltersFromEvent = event => {
+const createFiltersFromEvent = async event => {
   const filters = [];
   const dataPoints = event.data || [event];
 
-  dataPoints
-    .filter(point => point)
-    .forEach(val => {
-      const { table, column, row, value } = val;
-      const filter = createFilter(event.aggConfigs, table, column, row, value);
-      if (filter) {
-        filter.forEach(f => {
-          if (event.negate) {
-            f = esFilters.toggleFilterNegated(f);
-          }
-          filters.push(f);
-        });
-      }
-    });
+  await Promise.all(
+    dataPoints
+      .filter(point => point)
+      .map(async val => {
+        const { table, column, row } = val;
+        const filter = await createFilter(table, column, row);
+        if (filter) {
+          filter.forEach(f => {
+            if (event.negate) {
+              f = esFilters.toggleFilterNegated(f);
+            }
+            filters.push(f);
+          });
+        }
+      })
+  );
 
   return filters;
 };
 
-export { createFilter, createFiltersFromEvent, onBrushEvent };
+export { createFilter, createFiltersFromEvent };
