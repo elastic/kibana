@@ -19,7 +19,6 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
-import { RecursiveReadonly } from '@kbn/utility-types';
 import deepFreeze from 'deep-freeze-strict';
 import {
   PureTransitionsToTransitions,
@@ -32,14 +31,18 @@ import {
 const $$observable = (typeof Symbol === 'function' && (Symbol as any).observable) || '@@observable';
 const $$setActionType = '@@SET';
 
-const freeze: <T>(value: T) => RecursiveReadonly<T> =
-  process.env.NODE_ENV !== 'production'
-    ? <T>(value: T): RecursiveReadonly<T> => {
-        const isFreezable = value !== null && typeof value === 'object';
-        if (isFreezable) return deepFreeze(value) as RecursiveReadonly<T>;
-        return value as RecursiveReadonly<T>;
-      }
-    : <T>(value: T) => value as RecursiveReadonly<T>;
+const isProduction =
+  typeof window === 'object'
+    ? process.env.NODE_ENV === 'production'
+    : !process.env.NODE_ENV || process.env.NODE_ENV === 'production';
+
+const freeze: <T>(value: T) => T = isProduction
+  ? <T>(value: T) => value as T
+  : <T>(value: T): T => {
+      const isFreezable = value !== null && typeof value === 'object';
+      if (isFreezable) return deepFreeze(value) as T;
+      return value as T;
+    };
 
 export function createStateContainer<State extends BaseState>(
   defaultState: State
@@ -66,7 +69,7 @@ export function createStateContainer<
   pureTransitions: PureTransitions = {} as PureTransitions,
   pureSelectors: PureSelectors = {} as PureSelectors
 ): ReduxLikeStateContainer<State, PureTransitions, PureSelectors> {
-  const data$ = new BehaviorSubject<RecursiveReadonly<State>>(freeze(defaultState));
+  const data$ = new BehaviorSubject<State>(freeze(defaultState));
   const state$ = data$.pipe(skip(1));
   const get = () => data$.getValue();
   const container: ReduxLikeStateContainer<State, PureTransitions, PureSelectors> = {
@@ -101,7 +104,7 @@ export function createStateContainer<
     ),
     addMiddleware: middleware =>
       (container.dispatch = middleware(container as any)(container.dispatch)),
-    subscribe: (listener: (state: RecursiveReadonly<State>) => void) => {
+    subscribe: (listener: (state: State) => void) => {
       const subscription = state$.subscribe(listener);
       return () => subscription.unsubscribe();
     },
