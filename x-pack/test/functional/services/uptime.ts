@@ -38,10 +38,10 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       await browser.pressKeys(browser.keys.ENTER);
     },
     async goToNextPage() {
-      await testSubjects.click('xpack.uptime.monitorList.nextButton');
+      await testSubjects.click('xpack.uptime.monitorList.nextButton', 5000);
     },
     async goToPreviousPage() {
-      await testSubjects.click('xpack.uptime.monitorList.prevButton');
+      await testSubjects.click('xpack.uptime.monitorList.prevButton', 5000);
     },
     async setStatusFilterUp() {
       await testSubjects.click('xpack.uptime.filterBar.filterStatusUp');
