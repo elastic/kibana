@@ -15,6 +15,8 @@ import {
   findFieldByPath,
   IndexPatternField,
   createFieldFormatMap,
+  createIndexPatternFields,
+  createIndexPattern,
 } from './install';
 import { Fields, Field } from '../../fields/field';
 
@@ -42,6 +44,16 @@ describe('creating index patterns from yaml fields', () => {
   }
 
   const name = 'testField';
+
+  test('createIndexPatternFields function creates Kibana index pattern fields and fieldFormatMap', () => {
+    const indexPatternFields = createIndexPatternFields(fields);
+    expect(indexPatternFields).toMatchSnapshot('createIndexPatternFields');
+  });
+
+  test('createIndexPattern function creates Kibana index pattern', () => {
+    const indexPattern = createIndexPattern('logs', fields);
+    expect(indexPattern).toMatchSnapshot('createIndexPattern');
+  });
 
   test('flattenFields function flattens recursively and handles copying alias fields', () => {
     const flattened = flattenFields(fields);

@@ -9,6 +9,7 @@ import { SAVED_OBJECT_TYPE_PACKAGES } from '../../common/constants';
 import { AssetReference, AssetType, ElasticsearchAssetType } from '../../common/types';
 import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { getInstallation, savedObjectTypes } from './index';
+import { installIndexPatterns } from '../lib/kibana/index_pattern/install';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -23,6 +24,9 @@ export async function removeInstallation(options: {
   // could also update with [] or some other state
   await savedObjectsClient.delete(SAVED_OBJECT_TYPE_PACKAGES, pkgkey);
 
+  // recreate or delete index patterns when a package is uninstalled
+  const indexPatternPromise = installIndexPatterns(savedObjectsClient);
+
   // Delete the installed assets
   const deletePromises = installedObjects.map(async ({ id, type }) => {
     const assetType = type as AssetType;
@@ -34,7 +38,7 @@ export async function removeInstallation(options: {
       deleteTemplate(callCluster, id);
     }
   });
-  await Promise.all(deletePromises);
+  await Promise.all([...deletePromises, indexPatternPromise]);
 
   // successful delete's in SO client return {}. return something more useful
   return installedObjects;

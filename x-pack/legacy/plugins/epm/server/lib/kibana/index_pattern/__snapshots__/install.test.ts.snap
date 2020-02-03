@@ -36,8 +36,657 @@ exports[`creating index patterns from yaml fields createFieldFormatMap creates c
 }
 `;
 
+exports[`creating index patterns from yaml fields createIndexPattern function creates Kibana index pattern: createIndexPattern 1`] = `
+{
+  "title": "logs-*",
+  "timeFieldName": "@timestamp",
+  "fields": "[{\\"name\\":\\"coredns.id\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"coredns.allParams\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"number\\"},{\\"name\\":\\"coredns.query.length\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"number\\"},{\\"name\\":\\"coredns.query.size\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"number\\"},{\\"name\\":\\"coredns.query.class\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"coredns.query.name\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"coredns.query.type\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"coredns.response.code\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"coredns.response.flags\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"coredns.response.size\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"number\\"},{\\"name\\":\\"coredns.dnssec_ok\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"boolean\\"},{\\"name\\":\\"@timestamp\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"date\\"},{\\"name\\":\\"labels\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"message\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":false,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"tags\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"agent.ephemeral_id\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"agent.id\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"agent.name\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"agent.type\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"agent.version\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"as.number\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"number\\"},{\\"name\\":\\"as.organization.name\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"nginx.access.remote_ip_list\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.body_sent.bytes\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.user_name\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.method\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.url\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.http_version\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.response_code\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.referrer\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.agent\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.user_agent.device\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.user_agent.name\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.user_agent.os\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.user_agent.os_name\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.user_agent.original\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.geoip.continent_name\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":false,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"nginx.access.geoip.country_iso_code\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.geoip.location\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.geoip.region_name\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.geoip.city_name\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"nginx.access.geoip.region_iso_code\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true},{\\"name\\":\\"source.geo.continent_name\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":false,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"country\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"country.keyword\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":true,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"},{\\"name\\":\\"country.text\\",\\"count\\":0,\\"scripted\\":false,\\"indexed\\":true,\\"analyzed\\":false,\\"searchable\\":true,\\"aggregatable\\":false,\\"doc_values\\":true,\\"readFromDocValues\\":true,\\"type\\":\\"string\\"}]",
+  "fieldFormatMap": "{\\"coredns.allParams\\":{\\"id\\":\\"bytes\\",\\"params\\":{\\"pattern\\":\\"patternValQueryWeight\\",\\"inputFormat\\":\\"inputFormatVal,\\",\\"outputFormat\\":\\"outputFormalVal,\\",\\"outputPrecision\\":\\"3,\\",\\"labelTemplate\\":\\"labelTemplateVal,\\",\\"urlTemplate\\":\\"urlTemplateVal,\\"}},\\"coredns.query.length\\":{\\"params\\":{\\"pattern\\":\\"patternValQueryLength\\"}},\\"coredns.query.size\\":{\\"id\\":\\"bytes\\",\\"params\\":{\\"pattern\\":\\"patternValQuerySize\\"}},\\"coredns.response.size\\":{\\"id\\":\\"bytes\\"}}"
+}
+`;
+
+exports[`creating index patterns from yaml fields createIndexPatternFields function creates Kibana index pattern fields and fieldFormatMap: createIndexPatternFields 1`] = `
+{
+  "indexPatternFields": [
+    {
+      "name": "coredns.id",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "coredns.allParams",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "number"
+    },
+    {
+      "name": "coredns.query.length",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "number"
+    },
+    {
+      "name": "coredns.query.size",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "number"
+    },
+    {
+      "name": "coredns.query.class",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "coredns.query.name",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "coredns.query.type",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "coredns.response.code",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "coredns.response.flags",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "coredns.response.size",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "number"
+    },
+    {
+      "name": "coredns.dnssec_ok",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "boolean"
+    },
+    {
+      "name": "@timestamp",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "date"
+    },
+    {
+      "name": "labels",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "message",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": false,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "tags",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "agent.ephemeral_id",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "agent.id",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "agent.name",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "agent.type",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "agent.version",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "as.number",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "number"
+    },
+    {
+      "name": "as.organization.name",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "nginx.access.remote_ip_list",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.body_sent.bytes",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.user_name",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.method",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.url",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.http_version",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.response_code",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.referrer",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.agent",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.user_agent.device",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.user_agent.name",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.user_agent.os",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.user_agent.os_name",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.user_agent.original",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.geoip.continent_name",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": false,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "nginx.access.geoip.country_iso_code",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.geoip.location",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.geoip.region_name",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.geoip.city_name",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "nginx.access.geoip.region_iso_code",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "source.geo.continent_name",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": false,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "country",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "country.keyword",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": true,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    },
+    {
+      "name": "country.text",
+      "count": 0,
+      "scripted": false,
+      "indexed": true,
+      "analyzed": false,
+      "searchable": true,
+      "aggregatable": false,
+      "doc_values": true,
+      "readFromDocValues": true,
+      "type": "string"
+    }
+  ],
+  "fieldFormatMap": {
+    "coredns.allParams": {
+      "id": "bytes",
+      "params": {
+        "pattern": "patternValQueryWeight",
+        "inputFormat": "inputFormatVal,",
+        "outputFormat": "outputFormalVal,",
+        "outputPrecision": "3,",
+        "labelTemplate": "labelTemplateVal,",
+        "urlTemplate": "urlTemplateVal,"
+      }
+    },
+    "coredns.query.length": {
+      "params": {
+        "pattern": "patternValQueryLength"
+      }
+    },
+    "coredns.query.size": {
+      "id": "bytes",
+      "params": {
+        "pattern": "patternValQuerySize"
+      }
+    },
+    "coredns.response.size": {
+      "id": "bytes"
+    }
+  }
+}
+`;
+
 exports[`creating index patterns from yaml fields dedupFields function remove duplicated fields when parsing multiple files: dedupeFields 1`] = `
 [
+  {
+    "name": "coredns",
+    "type": "group",
+    "description": "coredns fields after normalization\\n",
+    "fields": [
+      {
+        "name": "id",
+        "type": "keyword",
+        "description": "id of the DNS transaction\\n"
+      },
+      {
+        "name": "allParams",
+        "type": "integer",
+        "format": "bytes",
+        "pattern": "patternValQueryWeight",
+        "input_format": "inputFormatVal,",
+        "output_format": "outputFormalVal,",
+        "output_precision": "3,",
+        "label_template": "labelTemplateVal,",
+        "url_template": "urlTemplateVal,",
+        "openLinkInCurrentTab": "true,",
+        "description": "weight of the DNS query\\n"
+      },
+      {
+        "name": "query.length",
+        "type": "integer",
+        "pattern": "patternValQueryLength",
+        "description": "length of the DNS query\\n"
+      },
+      {
+        "name": "query.size",
+        "type": "integer",
+        "format": "bytes",
+        "pattern": "patternValQuerySize",
+        "description": "size of the DNS query\\n"
+      },
+      {
+        "name": "query.class",
+        "type": "keyword",
+        "description": "DNS query class\\n"
+      },
+      {
+        "name": "query.name",
+        "type": "keyword",
+        "description": "DNS query name\\n"
+      },
+      {
+        "name": "query.type",
+        "type": "keyword",
+        "description": "DNS query type\\n"
+      },
+      {
+        "name": "response.code",
+        "type": "keyword",
+        "description": "DNS response code\\n"
+      },
+      {
+        "name": "response.flags",
+        "type": "keyword",
+        "description": "DNS response flags\\n"
+      },
+      {
+        "name": "response.size",
+        "type": "integer",
+        "format": "bytes",
+        "description": "size of the DNS response\\n"
+      },
+      {
+        "name": "dnssec_ok",
+        "type": "boolean",
+        "description": "dnssec flag\\n"
+      }
+    ]
+  },
   {
     "name": "@timestamp",
     "level": "core",
@@ -330,6 +979,73 @@ exports[`creating index patterns from yaml fields dedupFields function remove du
 
 exports[`creating index patterns from yaml fields flattenFields function flattens recursively and handles copying alias fields: flattenFields 1`] = `
 [
+  {
+    "name": "coredns.id",
+    "type": "keyword",
+    "description": "id of the DNS transaction\\n"
+  },
+  {
+    "name": "coredns.allParams",
+    "type": "integer",
+    "format": "bytes",
+    "pattern": "patternValQueryWeight",
+    "input_format": "inputFormatVal,",
+    "output_format": "outputFormalVal,",
+    "output_precision": "3,",
+    "label_template": "labelTemplateVal,",
+    "url_template": "urlTemplateVal,",
+    "openLinkInCurrentTab": "true,",
+    "description": "weight of the DNS query\\n"
+  },
+  {
+    "name": "coredns.query.length",
+    "type": "integer",
+    "pattern": "patternValQueryLength",
+    "description": "length of the DNS query\\n"
+  },
+  {
+    "name": "coredns.query.size",
+    "type": "integer",
+    "format": "bytes",
+    "pattern": "patternValQuerySize",
+    "description": "size of the DNS query\\n"
+  },
+  {
+    "name": "coredns.query.class",
+    "type": "keyword",
+    "description": "DNS query class\\n"
+  },
+  {
+    "name": "coredns.query.name",
+    "type": "keyword",
+    "description": "DNS query name\\n"
+  },
+  {
+    "name": "coredns.query.type",
+    "type": "keyword",
+    "description": "DNS query type\\n"
+  },
+  {
+    "name": "coredns.response.code",
+    "type": "keyword",
+    "description": "DNS response code\\n"
+  },
+  {
+    "name": "coredns.response.flags",
+    "type": "keyword",
+    "description": "DNS response flags\\n"
+  },
+  {
+    "name": "coredns.response.size",
+    "type": "integer",
+    "format": "bytes",
+    "description": "size of the DNS response\\n"
+  },
+  {
+    "name": "coredns.dnssec_ok",
+    "type": "boolean",
+    "description": "dnssec flag\\n"
+  },
   {
     "name": "@timestamp",
     "level": "core",

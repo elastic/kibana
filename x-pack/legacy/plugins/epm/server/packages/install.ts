@@ -18,14 +18,16 @@ export async function installPackage(options: {
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgkey } = options;
 
-  const toSave = await installAssets({
+  const installIndexPatternsPromise = installIndexPatterns(savedObjectsClient, pkgkey);
+
+  const installAssetsPromise = installAssets({
     savedObjectsClient,
     pkgkey,
   });
 
-  // Setup basic index patterns
-  // TODO: This should be updated and not overwritten in the future
-  await installIndexPatterns(pkgkey, savedObjectsClient);
+  const res = await Promise.all([installIndexPatternsPromise, installAssetsPromise]);
+  // save the response of assets that were installed and return
+  const toSave = res[1];
 
   // Save those references in the package manager's state saved object
   await saveInstallationReferences({
