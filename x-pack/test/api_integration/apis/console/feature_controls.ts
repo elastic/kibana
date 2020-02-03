@@ -43,6 +43,29 @@ export default function securityTests({ getService }: FtrProviderContext) {
       }
     });
 
+    it('can be accessed by kibana_admin role', async () => {
+      const username = 'kibana_admin';
+      const roleName = 'kibana_admin';
+      try {
+        const password = `${username}-password`;
+
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana admin',
+        });
+
+        await supertest
+          .post(`/api/console/proxy?method=GET&path=${encodeURIComponent('/_cat')}`)
+          .auth(username, password)
+          .set('kbn-xsrf', 'xxx')
+          .send()
+          .expect(200);
+      } finally {
+        await security.user.delete(username);
+      }
+    });
+
     it('can be accessed by global all role', async () => {
       const username = 'global_all';
       const roleName = 'global_all';
