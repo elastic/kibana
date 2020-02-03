@@ -1,9 +1,9 @@
 import React from "react";
 // import logo from './logo.svg';
 
-export default function Header() {
+export default function Footer() {
   return (
-    <header className="App-header">
+    <header className="App-footer">
       {/*<img src={logo} className="App-logo" alt="logo"/>*/}
       <a
         className="App-link"
@@ -11,7 +11,7 @@ export default function Header() {
         target="_blank"
         rel="noopener noreferrer"
       >
-        Header
+        Footer
       </a>
     </header>
   );

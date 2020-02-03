@@ -21,6 +21,7 @@ import React from 'react';
 import './app.css';
 import Header from './header';
 import TestRunnerItemList from './test_runner_item_list';
+import Footer from './footer';
 
 export default function App({ items }) {
   return (
@@ -29,6 +30,7 @@ export default function App({ items }) {
       <div>
         <TestRunnerItemList items={items} />
       </div>
+      <Footer/>
     </div>
   );
 }
