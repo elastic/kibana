@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import _ from 'lodash';
 import { first, map } from 'rxjs/operators';
 import { getPanelData } from './vis_data/get_panel_data';
@@ -57,13 +57,15 @@ export type GetVisData = (
 export function getVisData(
   requestContext: RequestHandlerContext,
   options: GetVisDataOptions,
-  framework: Framework
+  framework: Framework,
+  request?: PublicMethodsOf<KibanaRequest>
 ): Promise<GetVisDataResponse> {
   // NOTE / TODO: This facade has been put in place to make migrating to the New Platform easier. It
   // removes the need to refactor many layers of dependencies on "req", and instead just augments the top
   // level object passed from here. The layers should be refactored fully at some point, but for now
   // this works and we are still using the New Platform services for these vis data portions.
   const reqFacade: any = {
+    ...(request || {}),
     payload: options,
     getUiSettingsService: () => requestContext.core.uiSettings.client,
     getSavedObjectsClient: () => requestContext.core.savedObjects.client,
