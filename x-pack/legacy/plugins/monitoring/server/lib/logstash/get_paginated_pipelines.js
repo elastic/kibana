@@ -37,7 +37,7 @@ export async function getPaginatedPipelines(
   queryText
 ) {
   const config = req.server.config();
-  const size = config.get('xpack.monitoring.max_bucket_size');
+  const size = config.get('monitoring.ui.max_bucket_size');
   const pipelines = await getLogstashPipelineIds(
     req,
     lsIndexPattern,
