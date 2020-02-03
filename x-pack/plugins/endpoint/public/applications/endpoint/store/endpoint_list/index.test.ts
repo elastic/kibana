@@ -64,8 +64,8 @@ describe('endpoint_list store concerns', () => {
     test('it creates default state', () => {
       expect(store.getState()).toEqual({
         endpoints: [],
-        request_page_size: 10,
-        request_page_index: 0,
+        pageSize: 10,
+        pageIndex: 0,
         total: 0,
       });
     });
