@@ -50,9 +50,9 @@
     "@babel/highlight" "^7.8.3"
 
 "@babel/compat-data@^7.8.4":
-  version "7.8.4"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@babel/compat-data/-/compat-data-7.8.4.tgz#bbe65d05a291667a8394fe8a0e0e277ef22b0d2a"
-  integrity sha1-u+ZdBaKRZnqDlP6KDg4nfvIrDSo=
+  version "7.8.5"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@babel/compat-data/-/compat-data-7.8.5.tgz#d28ce872778c23551cbb9432fc68d28495b613b9"
+  integrity sha1-0ozocneMI1Ucu5Qy/GjShJW2E7k=
   dependencies:
     browserslist "^4.8.5"
     invariant "^2.2.4"
@@ -2021,19 +2021,19 @@
     warning "^4.0.1"
 
 "@material-ui/core@^4.4.0":
-  version "4.9.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@material-ui/core/-/core-4.9.0.tgz#96ca3281ee06216d44fd4d0e306dbe0429eb2ebe"
-  integrity sha1-lsoyge4GIW1E/U0OMG2+BCnrLr4=
+  version "4.9.1"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@material-ui/core/-/core-4.9.1.tgz#8e57382b12a01b35a3fa2a45424528915aef2115"
+  integrity sha1-jlc4KxKgGzWj+ipFQkUokVrvIRU=
   dependencies:
     "@babel/runtime" "^7.4.4"
     "@material-ui/styles" "^4.9.0"
-    "@material-ui/system" "^4.7.1"
+    "@material-ui/system" "^4.9.1"
     "@material-ui/types" "^5.0.0"
     "@material-ui/utils" "^4.7.1"
     "@types/react-transition-group" "^4.2.0"
     clsx "^1.0.2"
     convert-css-length "^2.0.1"
-    hoist-non-react-statics "^3.2.1"
+    hoist-non-react-statics "^3.3.2"
     normalize-scroll-left "^0.2.0"
     popper.js "^1.14.1"
     prop-types "^15.7.2"
@@ -2041,16 +2041,16 @@
     react-transition-group "^4.3.0"
 
 "@material-ui/icons@^4.5.1":
-  version "4.5.1"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@material-ui/icons/-/icons-4.5.1.tgz#6963bad139e938702ece85ca43067688018f04f8"
-  integrity sha1-aWO60TnpOHAuzoXKQwZ2iAGPBPg=
+  version "4.9.1"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@material-ui/icons/-/icons-4.9.1.tgz#fdeadf8cb3d89208945b33dbc50c7c616d0bd665"
+  integrity sha1-/erfjLPYkgiUWzPbxQx8YW0L1mU=
   dependencies:
     "@babel/runtime" "^7.4.4"
 
 "@material-ui/lab@^4.0.0-alpha.26":
-  version "4.0.0-alpha.40"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@material-ui/lab/-/lab-4.0.0-alpha.40.tgz#8d78dc80d32c27c05def7eda8a36e0d0a0748e7f"
-  integrity sha1-jXjcgNMsJ8Bd737aijbg0KB0jn8=
+  version "4.0.0-alpha.41"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@material-ui/lab/-/lab-4.0.0-alpha.41.tgz#3848fd0ad224f02d86f737b60ce78c1524c122a3"
+  integrity sha1-OEj9CtIk8C2G9ze2DOeMFSTBIqM=
   dependencies:
     "@babel/runtime" "^7.4.4"
     "@material-ui/utils" "^4.7.1"
@@ -2102,10 +2102,10 @@
     prop-types "^15.6.0"
     warning "^4.0.1"
 
-"@material-ui/system@^4.7.1":
-  version "4.7.1"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@material-ui/system/-/system-4.7.1.tgz#d928dacc0eeae6bea569ff3ee079f409efb3517d"
-  integrity sha1-2SjazA7q5r6laf8+4Hn0Ce+zUX0=
+"@material-ui/system@^4.9.1":
+  version "4.9.1"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@material-ui/system/-/system-4.9.1.tgz#beb6595e1b164317340bdc5a629a6798fc35f82d"
+  integrity sha1-vrZZXhsWQxc0C9xaYppnmPw1+C0=
   dependencies:
     "@babel/runtime" "^7.4.4"
     "@material-ui/utils" "^4.7.1"
@@ -2369,18 +2369,18 @@
     url-template "^2.0.8"
 
 "@octokit/endpoint@^5.1.0", "@octokit/endpoint@^5.5.0":
-  version "5.5.1"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@octokit/endpoint/-/endpoint-5.5.1.tgz#2eea81e110ca754ff2de11c79154ccab4ae16b3f"
-  integrity sha1-LuqB4RDKdU/y3hHHkVTMq0rhaz8=
+  version "5.5.2"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@octokit/endpoint/-/endpoint-5.5.2.tgz#ed19d01fe85ac58bc2b774661658f9e5429b8164"
+  integrity sha1-7RnQH+haxYvCt3RmFlj55UKbgWQ=
   dependencies:
     "@octokit/types" "^2.0.0"
     is-plain-object "^3.0.0"
     universal-user-agent "^4.0.0"
 
 "@octokit/plugin-paginate-rest@^1.1.1":
-  version "1.1.1"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-1.1.1.tgz#ea189a73af25b13fc1636d7adc334e8462af8f9d"
-  integrity sha1-6hiac68lsT/BY2163DNOhGKvj50=
+  version "1.1.2"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-1.1.2.tgz#004170acf8c2be535aba26727867d692f7b488fc"
+  integrity sha1-AEFwrPjCvlNauiZyeGfWkve0iPw=
   dependencies:
     "@octokit/types" "^2.0.1"
 
@@ -2389,10 +2389,10 @@
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@octokit/plugin-request-log/-/plugin-request-log-1.0.0.tgz#eef87a431300f6148c39a7f75f8cfeb218b2547e"
   integrity sha1-7vh6QxMA9hSMOaf3X4z+shiyVH4=
 
-"@octokit/plugin-rest-endpoint-methods@^2.1.0":
-  version "2.1.2"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@octokit/plugin-rest-endpoint-methods/-/plugin-rest-endpoint-methods-2.1.2.tgz#c9b72657a1dca049aa8f51cca7d12faa85ccefc1"
-  integrity sha1-ybcmV6HcoEmqj1HMp9EvqoXM78E=
+"@octokit/plugin-rest-endpoint-methods@2.4.0":
+  version "2.4.0"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@octokit/plugin-rest-endpoint-methods/-/plugin-rest-endpoint-methods-2.4.0.tgz#3288ecf5481f68c494dd0602fc15407a59faf61e"
+  integrity sha1-Mojs9UgfaMSU3QYC/BVAeln69h4=
   dependencies:
     "@octokit/types" "^2.0.1"
     deprecation "^2.3.1"
@@ -2405,9 +2405,9 @@
     bottleneck "^2.15.3"
 
 "@octokit/request-error@^1.0.1", "@octokit/request-error@^1.0.2":
-  version "1.2.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@octokit/request-error/-/request-error-1.2.0.tgz#a64d2a9d7a13555570cd79722de4a4d76371baaa"
-  integrity sha1-pk0qnXoTVVVwzXlyLeSk12Nxuqo=
+  version "1.2.1"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@octokit/request-error/-/request-error-1.2.1.tgz#ede0714c773f32347576c25649dc013ae6b31801"
+  integrity sha1-7eBxTHc/MjR1dsJWSdwBOuazGAE=
   dependencies:
     "@octokit/types" "^2.0.0"
     deprecation "^2.0.0"
@@ -2452,14 +2452,14 @@
     universal-user-agent "^4.0.0"
 
 "@octokit/rest@^16.23.2":
-  version "16.40.2"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@octokit/rest/-/rest-16.40.2.tgz#f32ecb96d4cfadd3ab8fbfeb91a6018368d03956"
-  integrity sha1-8y7LltTPrdOrj7/rkaYBg2jQOVY=
+  version "16.43.0"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@octokit/rest/-/rest-16.43.0.tgz#519ac030b5c3604afde6550720ff56513aee32aa"
+  integrity sha1-UZrAMLXDYEr95lUHIP9WUTruMqo=
   dependencies:
     "@octokit/auth-token" "^2.4.0"
     "@octokit/plugin-paginate-rest" "^1.1.1"
     "@octokit/plugin-request-log" "^1.0.0"
-    "@octokit/plugin-rest-endpoint-methods" "^2.1.0"
+    "@octokit/plugin-rest-endpoint-methods" "2.4.0"
     "@octokit/request" "^5.2.0"
     "@octokit/request-error" "^1.0.2"
     atob-lite "^2.0.0"
@@ -2505,15 +2505,14 @@
     winston "^2.0.0"
 
 "@reach/router@^1.2.1":
-  version "1.2.1"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@reach/router/-/router-1.2.1.tgz#34ae3541a5ac44fa7796e5506a5d7274a162be4e"
-  integrity sha1-NK41QaWsRPp3luVQal1ydKFivk4=
+  version "1.3.1"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@reach/router/-/router-1.3.1.tgz#0a49f75fa9621323d6e21c803447bcfcde1713b2"
+  integrity sha1-Ckn3X6liEyPW4hyANEe8/N4XE7I=
   dependencies:
-    create-react-context "^0.2.1"
+    create-react-context "0.3.0"
     invariant "^2.2.3"
     prop-types "^15.6.1"
     react-lifecycles-compat "^3.0.4"
-    warning "^3.0.0"
 
 "@samverschueren/stream-to-observable@^0.3.0":
   version "0.3.0"
@@ -2610,16 +2609,16 @@
     axios "^0.18.0"
 
 "@storybook/addon-actions@^5.2.6":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/addon-actions/-/addon-actions-5.3.9.tgz#fc8b1d912c87f418e69c2b52031d29465bb4867b"
-  integrity sha1-/IsdkSyH9BjmnCtSAx0pRlu0hns=
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/addon-actions/-/addon-actions-5.3.10.tgz#08cfaa656a787990260e73e5b556efd903a92dcc"
+  integrity sha1-CM+qZWp4eZAmDnPltVbv2QOpLcw=
   dependencies:
-    "@storybook/addons" "5.3.9"
-    "@storybook/api" "5.3.9"
-    "@storybook/client-api" "5.3.9"
-    "@storybook/components" "5.3.9"
-    "@storybook/core-events" "5.3.9"
-    "@storybook/theming" "5.3.9"
+    "@storybook/addons" "5.3.10"
+    "@storybook/api" "5.3.10"
+    "@storybook/client-api" "5.3.10"
+    "@storybook/components" "5.3.10"
+    "@storybook/core-events" "5.3.10"
+    "@storybook/theming" "5.3.10"
     core-js "^3.0.1"
     fast-deep-equal "^2.0.1"
     global "^4.3.2"
@@ -2637,14 +2636,14 @@
     global "^4.3.2"
 
 "@storybook/addon-info@^5.2.6":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/addon-info/-/addon-info-5.3.9.tgz#626950c69fdbfe9a22b0c4f4f2ae9531f9431c67"
-  integrity sha1-YmlQxp/b/poisMT08q6VMflDHGc=
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/addon-info/-/addon-info-5.3.10.tgz#1aa34882223641f73da921561a3a7434cc9b4e93"
+  integrity sha1-GqNIgiI2Qfc9qSFWGjp0NMybTpM=
   dependencies:
-    "@storybook/addons" "5.3.9"
-    "@storybook/client-logger" "5.3.9"
-    "@storybook/components" "5.3.9"
-    "@storybook/theming" "5.3.9"
+    "@storybook/addons" "5.3.10"
+    "@storybook/client-logger" "5.3.10"
+    "@storybook/components" "5.3.10"
+    "@storybook/theming" "5.3.10"
     core-js "^3.0.1"
     global "^4.3.2"
     marksy "^8.0.0"
@@ -2658,16 +2657,16 @@
     util-deprecate "^1.0.2"
 
 "@storybook/addon-knobs@^5.2.6":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/addon-knobs/-/addon-knobs-5.3.9.tgz#b51be01731dd31ad1b883276acdbeabedc0b7095"
-  integrity sha1-tRvgFzHdMa0biDJ2rNvqvtwLcJU=
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/addon-knobs/-/addon-knobs-5.3.10.tgz#3dbb6046f2e625a9f6ef22e1b5660c9976f4f842"
+  integrity sha1-PbtgRvLmJan27yLhtWYMmXb0+EI=
   dependencies:
-    "@storybook/addons" "5.3.9"
-    "@storybook/api" "5.3.9"
-    "@storybook/client-api" "5.3.9"
-    "@storybook/components" "5.3.9"
-    "@storybook/core-events" "5.3.9"
-    "@storybook/theming" "5.3.9"
+    "@storybook/addons" "5.3.10"
+    "@storybook/api" "5.3.10"
+    "@storybook/client-api" "5.3.10"
+    "@storybook/components" "5.3.10"
+    "@storybook/core-events" "5.3.10"
+    "@storybook/theming" "5.3.10"
     "@types/react-color" "^3.0.1"
     copy-to-clipboard "^3.0.8"
     core-js "^3.0.1"
@@ -2682,14 +2681,14 @@
     react-select "^3.0.8"
 
 "@storybook/addon-storyshots@^5.2.6":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/addon-storyshots/-/addon-storyshots-5.3.9.tgz#5b4a3205991a1149b994cdb97873a5c119a2b3cf"
-  integrity sha1-W0oyBZkaEUm5lM25eHOlwRmis88=
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/addon-storyshots/-/addon-storyshots-5.3.10.tgz#4f8cac78e26467f6ddbe3529bc624fbcb81ab148"
+  integrity sha1-T4yseOJkZ/bdvjUpvGJPvLgasUg=
   dependencies:
     "@jest/transform" "^24.9.0"
-    "@storybook/addons" "5.3.9"
-    "@storybook/client-api" "5.3.9"
-    "@storybook/core" "5.3.9"
+    "@storybook/addons" "5.3.10"
+    "@storybook/client-api" "5.3.10"
+    "@storybook/core" "5.3.10"
     "@types/glob" "^7.1.1"
     "@types/jest" "^24.0.16"
     "@types/jest-specific-snapshot" "^0.5.3"
@@ -2702,31 +2701,31 @@
     regenerator-runtime "^0.13.3"
     ts-dedent "^1.1.0"
 
-"@storybook/addons@5.3.9":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/addons/-/addons-5.3.9.tgz#f2492de356e0cd38e3da357f4dafa058a4756e36"
-  integrity sha1-8kkt41bgzTjj2jV/Ta+gWKR1bjY=
+"@storybook/addons@5.3.10":
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/addons/-/addons-5.3.10.tgz#60a969329fdee455a491e95e9f2ed982faa97e65"
+  integrity sha1-YKlpMp/e5FWkkeleny7ZgvqpfmU=
   dependencies:
-    "@storybook/api" "5.3.9"
-    "@storybook/channels" "5.3.9"
-    "@storybook/client-logger" "5.3.9"
-    "@storybook/core-events" "5.3.9"
+    "@storybook/api" "5.3.10"
+    "@storybook/channels" "5.3.10"
+    "@storybook/client-logger" "5.3.10"
+    "@storybook/core-events" "5.3.10"
     core-js "^3.0.1"
     global "^4.3.2"
     util-deprecate "^1.0.2"
 
-"@storybook/api@5.3.9":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/api/-/api-5.3.9.tgz#090119c6fd4082442e926a434d3d171535ec6784"
-  integrity sha1-CQEZxv1AgkQukmpDTT0XFTXsZ4Q=
+"@storybook/api@5.3.10":
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/api/-/api-5.3.10.tgz#45927f7cbba111842729f85f8f9a38ab2c0d3793"
+  integrity sha1-RZJ/fLuhEYQnKfhfj5o4qywNN5M=
   dependencies:
     "@reach/router" "^1.2.1"
-    "@storybook/channels" "5.3.9"
-    "@storybook/client-logger" "5.3.9"
-    "@storybook/core-events" "5.3.9"
+    "@storybook/channels" "5.3.10"
+    "@storybook/client-logger" "5.3.10"
+    "@storybook/core-events" "5.3.10"
     "@storybook/csf" "0.0.1"
-    "@storybook/router" "5.3.9"
-    "@storybook/theming" "5.3.9"
+    "@storybook/router" "5.3.10"
+    "@storybook/theming" "5.3.10"
     "@types/reach__router" "^1.2.3"
     core-js "^3.0.1"
     fast-deep-equal "^2.0.1"
@@ -2741,34 +2740,34 @@
     telejson "^3.2.0"
     util-deprecate "^1.0.2"
 
-"@storybook/channel-postmessage@5.3.9":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/channel-postmessage/-/channel-postmessage-5.3.9.tgz#3846ae7ea5bc2fe36b1ef64fbc215f480cf8a189"
-  integrity sha1-OEaufqW8L+NrHvZPvCFfSAz4oYk=
+"@storybook/channel-postmessage@5.3.10":
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/channel-postmessage/-/channel-postmessage-5.3.10.tgz#0d5ede72e4057a20b5c2ad5d871134f3cba54b78"
+  integrity sha1-DV7ecuQFeiC1wq1dhxE088ulS3g=
   dependencies:
-    "@storybook/channels" "5.3.9"
-    "@storybook/client-logger" "5.3.9"
+    "@storybook/channels" "5.3.10"
+    "@storybook/client-logger" "5.3.10"
     core-js "^3.0.1"
     global "^4.3.2"
     telejson "^3.2.0"
 
-"@storybook/channels@5.3.9":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/channels/-/channels-5.3.9.tgz#7ee8f6e6f4c9465227120d6711805b5e6862107f"
-  integrity sha1-fuj25vTJRlInEg1nEYBbXmhiEH8=
+"@storybook/channels@5.3.10":
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/channels/-/channels-5.3.10.tgz#6556b0fbe99bc0234a9a54de3c94e9e1cf55e4e3"
+  integrity sha1-ZVaw++mbwCNKmlTePJTp4c9V5OM=
   dependencies:
     core-js "^3.0.1"
 
-"@storybook/client-api@5.3.9":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/client-api/-/client-api-5.3.9.tgz#43ae2651bf303e832e97c014fd6c77a523669fd9"
-  integrity sha1-Q64mUb8wPoMul8AU/Wx3pSNmn9k=
+"@storybook/client-api@5.3.10":
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/client-api/-/client-api-5.3.10.tgz#74c9c36a62d653f5eb29ceb84c3acbec19aad254"
+  integrity sha1-dMnDamLWU/XrKc64TDrL7Bmq0lQ=
   dependencies:
-    "@storybook/addons" "5.3.9"
-    "@storybook/channel-postmessage" "5.3.9"
-    "@storybook/channels" "5.3.9"
-    "@storybook/client-logger" "5.3.9"
-    "@storybook/core-events" "5.3.9"
+    "@storybook/addons" "5.3.10"
+    "@storybook/channel-postmessage" "5.3.10"
+    "@storybook/channels" "5.3.10"
+    "@storybook/client-logger" "5.3.10"
+    "@storybook/core-events" "5.3.10"
     "@storybook/csf" "0.0.1"
     "@types/webpack-env" "^1.15.0"
     core-js "^3.0.1"
@@ -2782,20 +2781,20 @@
     ts-dedent "^1.1.0"
     util-deprecate "^1.0.2"
 
-"@storybook/client-logger@5.3.9":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/client-logger/-/client-logger-5.3.9.tgz#06654be9caa8d37366270b0426c2d5acb217f504"
-  integrity sha1-BmVL6cqo03NmJwsEJsLVrLIX9QQ=
+"@storybook/client-logger@5.3.10":
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/client-logger/-/client-logger-5.3.10.tgz#3f1ab223ccc5389004f76d9cab792083003d1db9"
+  integrity sha1-PxqyI8zFOJAE922cq3kggwA9Hbk=
   dependencies:
     core-js "^3.0.1"
 
-"@storybook/components@5.3.9":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/components/-/components-5.3.9.tgz#1fbc688770889ddadb8c603f5a4dbcf987f3eb0f"
-  integrity sha1-H7xoh3CIndrbjGA/Wk28+Yfz6w8=
+"@storybook/components@5.3.10":
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/components/-/components-5.3.10.tgz#09cb0e931ff27d90ded3b94b8d4cd1ac52007c52"
+  integrity sha1-CcsOkx/yfZDe07lLjUzRrFIAfFI=
   dependencies:
-    "@storybook/client-logger" "5.3.9"
-    "@storybook/theming" "5.3.9"
+    "@storybook/client-logger" "5.3.10"
+    "@storybook/theming" "5.3.10"
     "@types/react-syntax-highlighter" "11.0.2"
     "@types/react-textarea-autosize" "^4.3.3"
     core-js "^3.0.1"
@@ -2816,33 +2815,33 @@
     simplebar-react "^1.0.0-alpha.6"
     ts-dedent "^1.1.0"
 
-"@storybook/core-events@5.3.9":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/core-events/-/core-events-5.3.9.tgz#3c7fbc20204ae4b937c896ed6281e782cc09c4aa"
-  integrity sha1-PH+8ICBK5Lk3yJbtYoHngswJxKo=
+"@storybook/core-events@5.3.10":
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/core-events/-/core-events-5.3.10.tgz#3fa271f5f47ec9822c488b91d4ea7c298eb7ed6c"
+  integrity sha1-P6Jx9fR+yYIsSIuR1Op8KY637Ww=
   dependencies:
     core-js "^3.0.1"
 
-"@storybook/core@5.3.9":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/core/-/core-5.3.9.tgz#a13149714c46788555641124ed4f9fb7359e4550"
-  integrity sha1-oTFJcUxGeIVVZBEk7U+ftzWeRVA=
+"@storybook/core@5.3.10":
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/core/-/core-5.3.10.tgz#862574b61da6f484facb40fed48ad99badf42574"
+  integrity sha1-hiV0th2m9IT6y0D+1IrZm630JXQ=
   dependencies:
     "@babel/plugin-proposal-class-properties" "^7.7.0"
     "@babel/plugin-proposal-object-rest-spread" "^7.6.2"
     "@babel/plugin-syntax-dynamic-import" "^7.2.0"
     "@babel/plugin-transform-react-constant-elements" "^7.2.0"
     "@babel/preset-env" "^7.4.5"
-    "@storybook/addons" "5.3.9"
-    "@storybook/channel-postmessage" "5.3.9"
-    "@storybook/client-api" "5.3.9"
-    "@storybook/client-logger" "5.3.9"
-    "@storybook/core-events" "5.3.9"
+    "@storybook/addons" "5.3.10"
+    "@storybook/channel-postmessage" "5.3.10"
+    "@storybook/client-api" "5.3.10"
+    "@storybook/client-logger" "5.3.10"
+    "@storybook/core-events" "5.3.10"
     "@storybook/csf" "0.0.1"
-    "@storybook/node-logger" "5.3.9"
-    "@storybook/router" "5.3.9"
-    "@storybook/theming" "5.3.9"
-    "@storybook/ui" "5.3.9"
+    "@storybook/node-logger" "5.3.10"
+    "@storybook/router" "5.3.10"
+    "@storybook/theming" "5.3.10"
+    "@storybook/ui" "5.3.10"
     airbnb-js-shims "^2.2.1"
     ansi-to-html "^0.6.11"
     autoprefixer "^9.7.2"
@@ -2909,10 +2908,10 @@
   dependencies:
     lodash "^4.17.15"
 
-"@storybook/node-logger@5.3.9":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/node-logger/-/node-logger-5.3.9.tgz#5de49697b5e2565a4a84bd56244a424368f5e726"
-  integrity sha1-XeSWl7XiVlpKhL1WJEpCQ2j15yY=
+"@storybook/node-logger@5.3.10":
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/node-logger/-/node-logger-5.3.10.tgz#5bf4b8ce352901cd629401cc903b15e423ccd76c"
+  integrity sha1-W/S4zjUpAc1ilAHMkDsV5CPM12w=
   dependencies:
     "@types/npmlog" "^4.1.2"
     chalk "^3.0.0"
@@ -2922,16 +2921,16 @@
     regenerator-runtime "^0.13.3"
 
 "@storybook/react@^5.2.6":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/react/-/react-5.3.9.tgz#cf3a954b5d0430c5a3558ea5df305bb70e2af3cd"
-  integrity sha1-zzqVS10EMMWjVY6l3zBbtw4q880=
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/react/-/react-5.3.10.tgz#86e7746ee7a59245ccbd81635409232e52ca17ca"
+  integrity sha1-hud0buelkkXMvYFjVAkjLlLKF8o=
   dependencies:
     "@babel/plugin-transform-react-constant-elements" "^7.6.3"
     "@babel/preset-flow" "^7.0.0"
     "@babel/preset-react" "^7.0.0"
-    "@storybook/addons" "5.3.9"
-    "@storybook/core" "5.3.9"
-    "@storybook/node-logger" "5.3.9"
+    "@storybook/addons" "5.3.10"
+    "@storybook/core" "5.3.10"
+    "@storybook/node-logger" "5.3.10"
     "@svgr/webpack" "^4.0.3"
     "@types/webpack-env" "^1.15.0"
     babel-plugin-add-react-displayname "^0.0.5"
@@ -2940,7 +2939,7 @@
     core-js "^3.0.1"
     global "^4.3.2"
     lodash "^4.17.15"
-    mini-css-extract-plugin "^0.8.0"
+    mini-css-extract-plugin "^0.9.0"
     prop-types "^15.7.2"
     react-dev-utils "^9.0.0"
     regenerator-runtime "^0.13.3"
@@ -2948,10 +2947,10 @@
     ts-dedent "^1.1.0"
     webpack "^4.33.0"
 
-"@storybook/router@5.3.9":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/router/-/router-5.3.9.tgz#3c6e01f4dced9de8e8c5c314352fdc437f2441c2"
-  integrity sha1-PG4B9NztnejoxcMUNS/cQ38kQcI=
+"@storybook/router@5.3.10":
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/router/-/router-5.3.10.tgz#a30f2694f4fa586ce4e398d02d4db7b70161551d"
+  integrity sha1-ow8mlPT6WGzk45jQLU23twFhVR0=
   dependencies:
     "@reach/router" "^1.2.1"
     "@storybook/csf" "0.0.1"
@@ -2963,14 +2962,14 @@
     qs "^6.6.0"
     util-deprecate "^1.0.2"
 
-"@storybook/theming@5.3.9", "@storybook/theming@^5.2.6":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/theming/-/theming-5.3.9.tgz#caaeea398f9e630394298ccfe8f36a185a289e4f"
-  integrity sha1-yq7qOY+eYwOUKYzP6PNqGFoonk8=
+"@storybook/theming@5.3.10", "@storybook/theming@^5.2.6":
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/theming/-/theming-5.3.10.tgz#6f53df9684d998ce3dfdb22babfaeb667b7f250d"
+  integrity sha1-b1PfloTZmM49/bIrq/rrZnt/JQ0=
   dependencies:
     "@emotion/core" "^10.0.20"
     "@emotion/styled" "^10.0.17"
-    "@storybook/client-logger" "5.3.9"
+    "@storybook/client-logger" "5.3.10"
     core-js "^3.0.1"
     deep-object-diff "^1.1.0"
     emotion-theming "^10.0.19"
@@ -2981,20 +2980,20 @@
     resolve-from "^5.0.0"
     ts-dedent "^1.1.0"
 
-"@storybook/ui@5.3.9":
-  version "5.3.9"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/ui/-/ui-5.3.9.tgz#7e084ef93abb90b50ac18d4eea879c1f16b3e741"
-  integrity sha1-fghO+Tq7kLUKwY1O6oecHxaz50E=
+"@storybook/ui@5.3.10":
+  version "5.3.10"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@storybook/ui/-/ui-5.3.10.tgz#7af027773f8fa300c02447455b85d26d8a762b13"
+  integrity sha1-evAndz+PowDAJEdFW4XSbYp2KxM=
   dependencies:
     "@emotion/core" "^10.0.20"
-    "@storybook/addons" "5.3.9"
-    "@storybook/api" "5.3.9"
-    "@storybook/channels" "5.3.9"
-    "@storybook/client-logger" "5.3.9"
-    "@storybook/components" "5.3.9"
-    "@storybook/core-events" "5.3.9"
-    "@storybook/router" "5.3.9"
-    "@storybook/theming" "5.3.9"
+    "@storybook/addons" "5.3.10"
+    "@storybook/api" "5.3.10"
+    "@storybook/channels" "5.3.10"
+    "@storybook/client-logger" "5.3.10"
+    "@storybook/components" "5.3.10"
+    "@storybook/core-events" "5.3.10"
+    "@storybook/router" "5.3.10"
+    "@storybook/theming" "5.3.10"
     copy-to-clipboard "^3.0.8"
     core-js "^3.0.1"
     core-js-pure "^3.0.1"
@@ -3600,9 +3599,9 @@
   integrity sha1-Y2QD3E4LJklCHEFY5cQEQW8/AzA=
 
 "@types/history@*", "@types/history@^4.7.3":
-  version "4.7.4"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@types/history/-/history-4.7.4.tgz#06cbceb0ace6a342a9aafcb655a688cf38f6150d"
-  integrity sha1-BsvOsKzmo0Kpqvy2VaaIzzj2FQ0=
+  version "4.7.5"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@types/history/-/history-4.7.5.tgz#527d20ef68571a4af02ed74350164e7a67544860"
+  integrity sha1-Un0g72hXGkrwLtdDUBZOemdUSGA=
 
 "@types/hoek@^4.1.3":
   version "4.1.3"
@@ -3994,9 +3993,9 @@
   integrity sha1-afBZ5AoPqT3C4JXUFCOVrmrcXXo=
 
 "@types/pngjs@^3.3.2":
-  version "3.4.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@types/pngjs/-/pngjs-3.4.0.tgz#8d2c330df29db9135211bfb9a988fb121ec30dc3"
-  integrity sha1-jSwzDfKduRNSEb+5qYj7Eh7DDcM=
+  version "3.4.1"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@types/pngjs/-/pngjs-3.4.1.tgz#2da41c25e4eb4c4e4c703cb306f7561311ac3a0c"
+  integrity sha1-LaQcJeTrTE5McDyzBvdWExGsOgw=
   dependencies:
     "@types/node" "*"
 
@@ -4179,10 +4178,10 @@
     "@types/prop-types" "*"
     "@types/react" "*"
 
-"@types/react@*", "@types/react@16.8.3", "@types/react@^16.8.0", "@types/react@^16.8.19", "@types/react@^16.8.23":
-  version "16.8.3"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@types/react/-/react-16.8.3.tgz#7b67956f682bea30a5a09b3242c0784ff196c848"
-  integrity sha1-e2eVb2gr6jCloJsyQsB4T/GWyEg=
+"@types/react@*", "@types/react@^16.8.0", "@types/react@^16.8.19", "@types/react@^16.8.23":
+  version "16.9.19"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@types/react/-/react-16.9.19.tgz#c842aa83ea490007d29938146ff2e4d9e4360c40"
+  integrity sha1-yEKqg+pJAAfSmTgUb/Lk2eQ2DEA=
   dependencies:
     "@types/prop-types" "*"
     csstype "^2.2.0"
@@ -4308,9 +4307,9 @@
     "@types/react" "*"
 
 "@types/superagent@*":
-  version "4.1.4"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@types/superagent/-/superagent-4.1.4.tgz#63f74955a28073870cfd9c100bcacb26d72b3764"
-  integrity sha1-Y/dJVaKAc4cM/ZwQC8rLJtcrN2Q=
+  version "4.1.5"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@types/superagent/-/superagent-4.1.5.tgz#dc46a8ad2f4d96f8e7a777c4ea6a5847184af877"
+  integrity sha1-3EaorS9Nlvjnp3fE6mpYRxhK+Hc=
   dependencies:
     "@types/cookiejar" "*"
     "@types/node" "*"
@@ -4457,16 +4456,16 @@
   integrity sha1-yz+fdBhp4gzOMw/765JxWQSDiC0=
 
 "@types/yargs@^13.0.0":
-  version "13.0.7"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@types/yargs/-/yargs-13.0.7.tgz#658d8578a444670a41cc9c338d5e0e0a9910fd9e"
-  integrity sha1-ZY2FeKREZwpBzJwzjV4OCpkQ/Z4=
+  version "13.0.8"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@types/yargs/-/yargs-13.0.8.tgz#a38c22def2f1c2068f8971acb3ea734eb3c64a99"
+  integrity sha1-o4wi3vLxwgaPiXGss+pzTrPGSpk=
   dependencies:
     "@types/yargs-parser" "*"
 
 "@types/yargs@^15.0.0":
-  version "15.0.2"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@types/yargs/-/yargs-15.0.2.tgz#0bf292a0369493cee030e2e4f4ff84f5982b028d"
-  integrity sha1-C/KSoDaUk87gMOLk9P+E9ZgrAo0=
+  version "15.0.3"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@types/yargs/-/yargs-15.0.3.tgz#41453a0bc7ab393e995d1f5451455638edbd2baf"
+  integrity sha1-QUU6C8erOT6ZXR9UUUVWOO29K68=
   dependencies:
     "@types/yargs-parser" "*"
 
@@ -4519,9 +4518,9 @@
     semver "5.5.0"
 
 "@typescript-eslint/typescript-estree@^2.4.0":
-  version "2.18.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@typescript-eslint/typescript-estree/-/typescript-estree-2.18.0.tgz#cfbd16ed1b111166617d718619c19b62764c8460"
-  integrity sha1-z70W7RsREWZhfXGGGcGbYnZMhGA=
+  version "2.19.0"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@typescript-eslint/typescript-estree/-/typescript-estree-2.19.0.tgz#6bd7310b9827e04756fe712909f26956aac4b196"
+  integrity sha1-a9cxC5gn4EdW/nEpCfJpVqrEsZY=
   dependencies:
     debug "^4.1.1"
     eslint-visitor-keys "^1.1.0"
@@ -4958,7 +4957,7 @@ ajv-keywords@^3.1.0, ajv-keywords@^3.4.1:
 
 ajv@^4.7.0, ajv@^4.9.1:
   version "4.11.8"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-4.11.8.tgz#82ffb02b29e662ae53bdc20af15947706739c536"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/ajv/-/ajv-4.11.8.tgz#82ffb02b29e662ae53bdc20af15947706739c536"
   integrity sha1-gv+wKynmYq5TvcIK8VlHcGc5xTY=
   dependencies:
     co "^4.6.0"
@@ -5728,7 +5727,7 @@ assert-plus@1.0.0, assert-plus@^1.0.0:
 
 assert-plus@^0.2.0:
   version "0.2.0"
-  resolved "https://registry.yarnpkg.com/assert-plus/-/assert-plus-0.2.0.tgz#d74e1b87e7affc0db8aadb7021f3fe48101ab234"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/assert-plus/-/assert-plus-0.2.0.tgz#d74e1b87e7affc0db8aadb7021f3fe48101ab234"
   integrity sha1-104bh+ev/A24qttwIfP+SBAasjQ=
 
 assert@^1.1.1:
@@ -5985,7 +5984,7 @@ autoprefixer@^9.7.2:
 
 aws-sign2@~0.6.0:
   version "0.6.0"
-  resolved "https://registry.yarnpkg.com/aws-sign2/-/aws-sign2-0.6.0.tgz#14342dd38dbcc94d0e5b87d763cd63612c0e794f"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/aws-sign2/-/aws-sign2-0.6.0.tgz#14342dd38dbcc94d0e5b87d763cd63612c0e794f"
   integrity sha1-FDQt0428yU0OW4fXY81jYSwOeU8=
 
 aws-sign2@~0.7.0:
@@ -6290,9 +6289,9 @@ babel-plugin-mock-imports@^1.0.1:
   integrity sha1-wJbmHitjXvNIUorjh72jVHfGp7E=
 
 babel-plugin-named-asset-import@^0.3.1:
-  version "0.3.5"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/babel-plugin-named-asset-import/-/babel-plugin-named-asset-import-0.3.5.tgz#d3fa1a7f1f4babd4ed0785b75e2f926df0d70d0d"
-  integrity sha1-0/oafx9Lq9TtB4W3Xi+SbfDXDQ0=
+  version "0.3.6"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/babel-plugin-named-asset-import/-/babel-plugin-named-asset-import-0.3.6.tgz#c9750a1b38d85112c9e166bf3ef7c5dbc605f4be"
+  integrity sha1-yXUKGzjYURLJ4Wa/PvfF28YF9L4=
 
 babel-plugin-react-docgen@^4.0.0:
   version "4.1.0"
@@ -6790,7 +6789,7 @@ boolbase@^1.0.0, boolbase@~1.0.0:
 
 boom@2.x.x:
   version "2.10.1"
-  resolved "https://registry.yarnpkg.com/boom/-/boom-2.10.1.tgz#39c8918ceff5799f83f9492a848f625add0c766f"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/boom/-/boom-2.10.1.tgz#39c8918ceff5799f83f9492a848f625add0c766f"
   integrity sha1-OciRjO/1eZ+D+UkqhI9iWt0Mdm8=
   dependencies:
     hoek "2.x.x"
@@ -8089,9 +8088,9 @@ cloneable-readable@^1.0.0:
     readable-stream "^2.3.5"
 
 clsx@^1.0.1, clsx@^1.0.2, clsx@^1.0.4:
-  version "1.0.4"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/clsx/-/clsx-1.0.4.tgz#0c0171f6d5cb2fe83848463c15fcc26b4df8c2ec"
-  integrity sha1-DAFx9tXLL+g4SEY8FfzCa034wuw=
+  version "1.1.0"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/clsx/-/clsx-1.1.0.tgz#62937c6adfea771247c34b54d320fb99624f5702"
+  integrity sha1-YpN8at/qdxJHw0tU0yD7mWJPVwI=
 
 cmd-shim@^2.1.0:
   version "2.1.0"
@@ -8300,9 +8299,9 @@ commander@2.20.0:
   integrity sha1-1YuytcHuj4ew00ACfp6U4iLFpCI=
 
 commander@^4.0.0, commander@^4.0.1:
-  version "4.1.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/commander/-/commander-4.1.0.tgz#545983a0603fe425bc672d66c9e3c89c42121a83"
-  integrity sha1-VFmDoGA/5CW8Zy1myePInEISGoM=
+  version "4.1.1"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/commander/-/commander-4.1.1.tgz#9fd602bd936294e9e9ef46a3f4d6964044b18068"
+  integrity sha1-n9YCvZNilOnp70aj9NaWQESxgGg=
 
 commander@~2.8.1:
   version "2.8.1"
@@ -8825,26 +8824,26 @@ create-react-class@^15.5.1, create-react-class@^15.5.2:
     loose-envify "^1.3.1"
     object-assign "^4.1.1"
 
-create-react-context@^0.1.5:
-  version "0.1.6"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/create-react-context/-/create-react-context-0.1.6.tgz#0f425931d907741127acc6e31acb4f9015dd9fdc"
-  integrity sha1-D0JZMdkHdBEnrMbjGstPkBXdn9w=
-
-create-react-context@^0.2.1, create-react-context@^0.2.2:
-  version "0.2.3"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/create-react-context/-/create-react-context-0.2.3.tgz#9ec140a6914a22ef04b8b09b7771de89567cb6f3"
-  integrity sha1-nsFAppFKIu8EuLCbd3HeiVZ8tvM=
-  dependencies:
-    fbjs "^0.8.0"
-    gud "^1.0.0"
-
-create-react-context@^0.3.0:
+create-react-context@0.3.0, create-react-context@^0.3.0:
   version "0.3.0"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/create-react-context/-/create-react-context-0.3.0.tgz#546dede9dc422def0d3fc2fe03afe0bc0f4f7d8c"
   integrity sha1-VG3t6dxCLe8NP8L+A6/gvA9PfYw=
   dependencies:
     gud "^1.0.0"
     warning "^4.0.3"
+
+create-react-context@^0.1.5:
+  version "0.1.6"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/create-react-context/-/create-react-context-0.1.6.tgz#0f425931d907741127acc6e31acb4f9015dd9fdc"
+  integrity sha1-D0JZMdkHdBEnrMbjGstPkBXdn9w=
+
+create-react-context@^0.2.2:
+  version "0.2.3"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/create-react-context/-/create-react-context-0.2.3.tgz#9ec140a6914a22ef04b8b09b7771de89567cb6f3"
+  integrity sha1-nsFAppFKIu8EuLCbd3HeiVZ8tvM=
+  dependencies:
+    fbjs "^0.8.0"
+    gud "^1.0.0"
 
 cronstrue@^1.51.0:
   version "1.88.0"
@@ -8934,7 +8933,7 @@ crypt@~0.0.1:
 
 cryptiles@2.x.x:
   version "2.0.5"
-  resolved "https://registry.yarnpkg.com/cryptiles/-/cryptiles-2.0.5.tgz#3bdfecdc608147c1c67202fa291e7dca59eaa3b8"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/cryptiles/-/cryptiles-2.0.5.tgz#3bdfecdc608147c1c67202fa291e7dca59eaa3b8"
   integrity sha1-O9/s3GCBR8HGcgL6KR59ylnqo7g=
   dependencies:
     boom "2.x.x"
@@ -10784,11 +10783,12 @@ enzyme-shallow-equal@^1.0.1:
     object-is "^1.0.2"
 
 enzyme-to-json@^3.3.4:
-  version "3.4.3"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/enzyme-to-json/-/enzyme-to-json-3.4.3.tgz#ed4386f48768ed29e2d1a2910893542c34e7e0af"
-  integrity sha1-7UOG9Ido7Sni0aKRCJNULDTn4K8=
+  version "3.4.4"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/enzyme-to-json/-/enzyme-to-json-3.4.4.tgz#b30726c59091d273521b6568c859e8831e94d00e"
+  integrity sha1-swcmxZCR0nNSG2VoyFnogx6U0A4=
   dependencies:
     lodash "^4.17.15"
+    react-is "^16.12.0"
 
 enzyme@^3.10.0:
   version "3.11.0"
@@ -12582,7 +12582,7 @@ form-data@^2.3.1, form-data@^2.3.3, form-data@^2.5.0:
 
 form-data@~2.1.1:
   version "2.1.4"
-  resolved "https://registry.yarnpkg.com/form-data/-/form-data-2.1.4.tgz#33c183acf193276ecaa98143a69e94bfee1750d1"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/form-data/-/form-data-2.1.4.tgz#33c183acf193276ecaa98143a69e94bfee1750d1"
   integrity sha1-M8GDrPGTJ27KqYFDpp6Uv+4XUNE=
   dependencies:
     asynckit "^0.4.0"
@@ -14189,7 +14189,7 @@ hapi@^17.5.3:
 
 har-schema@^1.0.5:
   version "1.0.5"
-  resolved "https://registry.yarnpkg.com/har-schema/-/har-schema-1.0.5.tgz#d263135f43307c02c602afc8fe95970c0151369e"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/har-schema/-/har-schema-1.0.5.tgz#d263135f43307c02c602afc8fe95970c0151369e"
   integrity sha1-0mMTX0MwfALGAq/I/pWXDAFRNp4=
 
 har-schema@^2.0.0:
@@ -14199,7 +14199,7 @@ har-schema@^2.0.0:
 
 har-validator@~4.2.1:
   version "4.2.1"
-  resolved "https://registry.yarnpkg.com/har-validator/-/har-validator-4.2.1.tgz#33481d0f1bbff600dd203d75812a6a5fba002e2a"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/har-validator/-/har-validator-4.2.1.tgz#33481d0f1bbff600dd203d75812a6a5fba002e2a"
   integrity sha1-M0gdDxu/9gDdID11gSpqX7oALio=
   dependencies:
     ajv "^4.9.1"
@@ -14376,7 +14376,7 @@ hat@0.0.3:
 
 hawk@~3.1.3:
   version "3.1.3"
-  resolved "https://registry.yarnpkg.com/hawk/-/hawk-3.1.3.tgz#078444bd7c1640b0fe540d2c9b73d59678e8e1c4"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/hawk/-/hawk-3.1.3.tgz#078444bd7c1640b0fe540d2c9b73d59678e8e1c4"
   integrity sha1-B4REvXwWQLD+VA0sm3PVlnjo4cQ=
   dependencies:
     boom "2.x.x"
@@ -14432,9 +14432,9 @@ highlight.js@9.15.10:
   integrity sha1-exjtdckDSMBF7vntCMoTGaIhmtI=
 
 highlight.js@^9.12.0:
-  version "9.18.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/highlight.js/-/highlight.js-9.18.0.tgz#6b1763cfcd53744313bd3f31f1210f7beb962c79"
-  integrity sha1-axdjz81TdEMTvT8x8SEPe+uWLHk=
+  version "9.18.1"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/highlight.js/-/highlight.js-9.18.1.tgz#ed21aa001fe6252bb10a3d76d47573c6539fe13c"
+  integrity sha1-7SGqAB/mJSuxCj121HVzxlOf4Tw=
 
 highlight.js@~9.12.0:
   version "9.12.0"
@@ -14524,7 +14524,7 @@ hoist-non-react-statics@^2.3.1, hoist-non-react-statics@^2.5.0:
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/hoist-non-react-statics/-/hoist-non-react-statics-2.5.5.tgz#c5903cf409c0dfd908f388e619d86b9c1174cb47"
   integrity sha1-xZA89AnA39kI84jmGdhrnBF0y0c=
 
-hoist-non-react-statics@^3.0.0, hoist-non-react-statics@^3.2.0, hoist-non-react-statics@^3.2.1, hoist-non-react-statics@^3.3.0:
+hoist-non-react-statics@^3.0.0, hoist-non-react-statics@^3.2.0, hoist-non-react-statics@^3.2.1, hoist-non-react-statics@^3.3.0, hoist-non-react-statics@^3.3.2:
   version "3.3.2"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/hoist-non-react-statics/-/hoist-non-react-statics-3.3.2.tgz#ece0acaf71d62c2969c2ec59feff42a4b1a85b45"
   integrity sha1-7OCsr3HWLClpwuxZ/v9CpLGoW0U=
@@ -14751,7 +14751,7 @@ http-proxy@^1.13.0, http-proxy@^1.17.0:
 
 http-signature@~1.1.0:
   version "1.1.1"
-  resolved "https://registry.yarnpkg.com/http-signature/-/http-signature-1.1.1.tgz#df72e267066cd0ac67fb76adf8e134a8fbcf91bf"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/http-signature/-/http-signature-1.1.1.tgz#df72e267066cd0ac67fb76adf8e134a8fbcf91bf"
   integrity sha1-33LiZwZs0Kxn+3at+OE0qPvPkb8=
   dependencies:
     assert-plus "^0.2.0"
@@ -14906,7 +14906,7 @@ image-diff@1.6.3:
 
 image-size@~0.5.0:
   version "0.5.5"
-  resolved "https://registry.yarnpkg.com/image-size/-/image-size-0.5.5.tgz#09dfd4ab9d20e29eb1c3e80b8990378df9e3cb9c"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/image-size/-/image-size-0.5.5.tgz#09dfd4ab9d20e29eb1c3e80b8990378df9e3cb9c"
   integrity sha1-Cd/Uq50g4p6xw+gLiZA3jfnjy5w=
 
 immediate@~3.0.5:
@@ -17559,8 +17559,8 @@ left-pad@^1.3.0:
 
 less-loader@5.0.0:
   version "5.0.0"
-  resolved "https://registry.yarnpkg.com/less-loader/-/less-loader-5.0.0.tgz#498dde3a6c6c4f887458ee9ed3f086a12ad1b466"
-  integrity sha512-bquCU89mO/yWLaUq0Clk7qCsKhsF/TZpJUzETRvJa9KSVEL9SO3ovCvdEHISBhrC81OwC8QSVX7E0bzElZj9cg==
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/less-loader/-/less-loader-5.0.0.tgz#498dde3a6c6c4f887458ee9ed3f086a12ad1b466"
+  integrity sha1-SY3eOmxsT4h0WO6e0/CGoSrRtGY=
   dependencies:
     clone "^2.1.1"
     loader-utils "^1.1.0"
@@ -17568,8 +17568,8 @@ less-loader@5.0.0:
 
 less@^2.5.1:
   version "2.7.3"
-  resolved "https://registry.yarnpkg.com/less/-/less-2.7.3.tgz#cc1260f51c900a9ec0d91fb6998139e02507b63b"
-  integrity sha512-KPdIJKWcEAb02TuJtaLrhue0krtRLoRoo7x6BNJIBelO00t/CCdJQUnHW5V34OnHMWzIktSalJxRO+FvytQlCQ==
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/less/-/less-2.7.3.tgz#cc1260f51c900a9ec0d91fb6998139e02507b63b"
+  integrity sha1-zBJg9RyQCp7A2R+2mYE54CUHtjs=
   optionalDependencies:
     errno "^0.1.1"
     graceful-fs "^4.1.2"
@@ -18982,10 +18982,10 @@ mini-css-extract-plugin@0.8.0:
     schema-utils "^1.0.0"
     webpack-sources "^1.1.0"
 
-mini-css-extract-plugin@^0.8.0:
-  version "0.8.2"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/mini-css-extract-plugin/-/mini-css-extract-plugin-0.8.2.tgz#a875e169beb27c88af77dd962771c9eedc3da161"
-  integrity sha1-qHXhab6yfIivd92WJ3HJ7tw9oWE=
+mini-css-extract-plugin@^0.9.0:
+  version "0.9.0"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/mini-css-extract-plugin/-/mini-css-extract-plugin-0.9.0.tgz#47f2cf07aa165ab35733b1fc97d4c46c0564339e"
+  integrity sha1-R/LPB6oWWrNXM7H8l9TEbAVkM54=
   dependencies:
     loader-utils "^1.1.0"
     normalize-url "1.9.1"
@@ -20076,7 +20076,7 @@ nyc@^14.1.1:
 
 oauth-sign@~0.8.1:
   version "0.8.2"
-  resolved "https://registry.yarnpkg.com/oauth-sign/-/oauth-sign-0.8.2.tgz#46a6ab7f0aead8deae9ec0565780b7d4efeb9d43"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/oauth-sign/-/oauth-sign-0.8.2.tgz#46a6ab7f0aead8deae9ec0565780b7d4efeb9d43"
   integrity sha1-Rqarfwrq2N6unsBWV4C31O/rnUM=
 
 oauth-sign@~0.9.0:
@@ -20318,9 +20318,9 @@ open@^6.3.0:
     is-wsl "^1.1.0"
 
 open@^7.0.0:
-  version "7.0.1"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/open/-/open-7.0.1.tgz#259a6c2097da6b95c596a2734f2ed05643c432b8"
-  integrity sha1-JZpsIJfaa5XFlqJzTy7QVkPEMrg=
+  version "7.0.2"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/open/-/open-7.0.2.tgz#fb3681f11f157f2361d2392307548ca1792960e8"
+  integrity sha1-+zaB8R8VfyNh0jkjB1SMoXkpYOg=
   dependencies:
     is-docker "^2.0.0"
     is-wsl "^2.1.1"
@@ -22106,7 +22106,7 @@ qs@^6.4.0, qs@^6.5.1, qs@^6.6.0:
 
 qs@~6.4.0:
   version "6.4.0"
-  resolved "https://registry.yarnpkg.com/qs/-/qs-6.4.0.tgz#13e26d28ad6b0ffaa91312cd3bf708ed351e7233"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/qs/-/qs-6.4.0.tgz#13e26d28ad6b0ffaa91312cd3bf708ed351e7233"
   integrity sha1-E+JtKK1rD/qpExLNO/cI7TUecjM=
 
 qs@~6.5.2:
@@ -22525,9 +22525,9 @@ react-element-to-jsx-string@^14.0.2:
     is-plain-object "3.0.0"
 
 react-error-overlay@^6.0.3:
-  version "6.0.4"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/react-error-overlay/-/react-error-overlay-6.0.4.tgz#0d165d6d27488e660bc08e57bdabaad741366f7a"
-  integrity sha1-DRZdbSdIjmYLwI5Xvauq10E2b3o=
+  version "6.0.5"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/react-error-overlay/-/react-error-overlay-6.0.5.tgz#55d59c2a3810e8b41922e0b4e5f85dcf239bd533"
+  integrity sha1-VdWcKjgQ6LQZIuC05fhdzyOb1TM=
 
 react-event-listener@^0.6.2:
   version "0.6.6"
@@ -22855,9 +22855,9 @@ react-resize-detector@^4.2.0:
     resize-observer-polyfill "^1.5.1"
 
 react-reverse-portal@^1.0.4:
-  version "1.0.4"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/react-reverse-portal/-/react-reverse-portal-1.0.4.tgz#d127d2c9147549b25c4959aba1802eca4b144cd4"
-  integrity sha1-0SfSyRR1SbJcSVmroYAuyksUTNQ=
+  version "1.0.5"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/react-reverse-portal/-/react-reverse-portal-1.0.5.tgz#4af4f547fbe65141b87e526a0c1413113b00a0e3"
+  integrity sha1-SvT1R/vmUUG4flJqDBQTETsAoOM=
 
 react-router-dom@^4.3.1:
   version "4.3.1"
@@ -23786,7 +23786,7 @@ request-promise@^4.2.2:
 
 request@2.81.0:
   version "2.81.0"
-  resolved "https://registry.yarnpkg.com/request/-/request-2.81.0.tgz#c6928946a0e06c5f8d6f8a9333469ffda46298a0"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/request/-/request-2.81.0.tgz#c6928946a0e06c5f8d6f8a9333469ffda46298a0"
   integrity sha1-xpKJRqDgbF+Nb4qTM0af/aRimKA=
   dependencies:
     aws-sign2 "~0.6.0"
@@ -24862,9 +24862,9 @@ simplicial-complex@^1.0.0:
     union-find "^1.0.0"
 
 simplify-js@^1.2.1:
-  version "1.2.3"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/simplify-js/-/simplify-js-1.2.3.tgz#a3422c1b9884d60421345eb44d2b872662df27f5"
-  integrity sha1-o0IsG5iE1gQhNF60TSuHJmLfJ/U=
+  version "1.2.4"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/simplify-js/-/simplify-js-1.2.4.tgz#7aab22d6df547ffd40ef0761ccd82b75287d45c7"
+  integrity sha1-eqsi1t9Uf/1A7wdhzNgrdSh9Rcc=
 
 sinon@^7.4.2:
   version "7.5.0"
@@ -24957,7 +24957,7 @@ snapdragon@^0.8.1:
 
 sntp@1.x.x:
   version "1.0.9"
-  resolved "https://registry.yarnpkg.com/sntp/-/sntp-1.0.9.tgz#6541184cc90aeea6c6e7b35e2659082443c66198"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/sntp/-/sntp-1.0.9.tgz#6541184cc90aeea6c6e7b35e2659082443c66198"
   integrity sha1-ZUEYTMkK7qbG57NeJlkIJEPGYZg=
   dependencies:
     hoek "2.x.x"
@@ -25172,8 +25172,8 @@ spdx-compare@^0.1.2:
 
 spdx-correct@^2.0.3:
   version "2.0.4"
-  resolved "https://registry.yarnpkg.com/spdx-correct/-/spdx-correct-2.0.4.tgz#d1652ad2ebc516f656f66ea93398558065f1b4a4"
-  integrity sha512-c+4gPpt9YDhz7cHlz5UrsHzxxRi4ksclxnEEKsuGT9JdwSC+ZNmsGbYRzzgxyZaBYpcWnlu+4lPcdLKx4DOCmA==
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/spdx-correct/-/spdx-correct-2.0.4.tgz#d1652ad2ebc516f656f66ea93398558065f1b4a4"
+  integrity sha1-0WUq0uvFFvZW9m6pM5hVgGXxtKQ=
   dependencies:
     spdx-expression-parse "^2.0.1"
     spdx-license-ids "^2.0.1"
@@ -25188,7 +25188,7 @@ spdx-correct@^3.0.0:
 
 spdx-exceptions@^1.0.0:
   version "1.0.5"
-  resolved "https://registry.yarnpkg.com/spdx-exceptions/-/spdx-exceptions-1.0.5.tgz#9d21ac4da4bdb71d060fb74e5a67531d032cbba6"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/spdx-exceptions/-/spdx-exceptions-1.0.5.tgz#9d21ac4da4bdb71d060fb74e5a67531d032cbba6"
   integrity sha1-nSGsTaS9tx0GD7dOWmdTHQMsu6Y=
 
 spdx-exceptions@^2.0.0, spdx-exceptions@^2.1.0:
@@ -25198,33 +25198,33 @@ spdx-exceptions@^2.0.0, spdx-exceptions@^2.1.0:
 
 spdx-expression-parse@^1.0.0:
   version "1.0.4"
-  resolved "https://registry.yarnpkg.com/spdx-expression-parse/-/spdx-expression-parse-1.0.4.tgz#9bdf2f20e1f40ed447fbe273266191fced51626c"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/spdx-expression-parse/-/spdx-expression-parse-1.0.4.tgz#9bdf2f20e1f40ed447fbe273266191fced51626c"
   integrity sha1-m98vIOH0DtRH++JzJmGR/O1RYmw=
 
 spdx-expression-parse@^2.0.1:
   version "2.0.2"
-  resolved "https://registry.yarnpkg.com/spdx-expression-parse/-/spdx-expression-parse-2.0.2.tgz#e2e0f229c057eac704c5a6d1c687eed66aca034b"
-  integrity sha512-oFxOkWCfFS0ltNp0H66gXlU4NF6bxg7RkoTYR0413t+yTY9zyj+AIWsjtN8dcVp6703ijDYBWBIARlJ7DkyP9Q==
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/spdx-expression-parse/-/spdx-expression-parse-2.0.2.tgz#e2e0f229c057eac704c5a6d1c687eed66aca034b"
+  integrity sha1-4uDyKcBX6scExabRxofu1mrKA0s=
   dependencies:
     spdx-exceptions "^2.0.0"
     spdx-license-ids "^2.0.1"
 
 spdx-expression-parse@^3.0.0:
   version "3.0.0"
-  resolved "https://registry.yarnpkg.com/spdx-expression-parse/-/spdx-expression-parse-3.0.0.tgz#99e119b7a5da00e05491c9fa338b7904823b41d0"
-  integrity sha512-Yg6D3XpRD4kkOmTpdgbUiEJFKghJH03fiC1OPll5h/0sO6neh2jqRDVHOQ4o/LMea0tgCkbMgea5ip/e+MkWyg==
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/spdx-expression-parse/-/spdx-expression-parse-3.0.0.tgz#99e119b7a5da00e05491c9fa338b7904823b41d0"
+  integrity sha1-meEZt6XaAOBUkcn6M4t5BII7QdA=
   dependencies:
     spdx-exceptions "^2.1.0"
     spdx-license-ids "^3.0.0"
 
 spdx-license-ids@^1.0.0:
   version "1.2.2"
-  resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-1.2.2.tgz#c9df7a3424594ade6bd11900d596696dc06bac57"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/spdx-license-ids/-/spdx-license-ids-1.2.2.tgz#c9df7a3424594ade6bd11900d596696dc06bac57"
   integrity sha1-yd96NCRZSt5r0RkA1ZZpbcBrrFc=
 
 spdx-license-ids@^2.0.1:
   version "2.0.1"
-  resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-2.0.1.tgz#02017bcc3534ee4ffef6d58d20e7d3e9a1c3c8ec"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/spdx-license-ids/-/spdx-license-ids-2.0.1.tgz#02017bcc3534ee4ffef6d58d20e7d3e9a1c3c8ec"
   integrity sha1-AgF7zDU07k/+9tWNIOfT6aHDyOw=
 
 spdx-license-ids@^3.0.0:
@@ -25691,8 +25691,8 @@ stringify-object@^3.2.1:
 
 stringstream@~0.0.4:
   version "0.0.6"
-  resolved "https://registry.yarnpkg.com/stringstream/-/stringstream-0.0.6.tgz#7880225b0d4ad10e30927d167a1d6f2fd3b33a72"
-  integrity sha512-87GEBAkegbBcweToUrdzf3eLhWNg06FJTebl4BVJz/JgWy8CvEr9dRtX5qWphiynMSQlxxi+QqN0z5T32SLlhA==
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/stringstream/-/stringstream-0.0.6.tgz#7880225b0d4ad10e30927d167a1d6f2fd3b33a72"
+  integrity sha1-eIAiWw1K0Q4wkn0Weh1vL9OzOnI=
 
 strip-ansi@*, strip-ansi@^6.0.0:
   version "6.0.0"
@@ -26768,8 +26768,8 @@ tough-cookie@^2.0.0, tough-cookie@^2.3.3, tough-cookie@^2.3.4, tough-cookie@^2.4
 
 tough-cookie@~2.3.0:
   version "2.3.4"
-  resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-2.3.4.tgz#ec60cee38ac675063ffc97a5c18970578ee83655"
-  integrity sha512-TZ6TTfI5NtZnuyy/Kecv+CnoROnyXn2DN97LontgQpCwsX2XyLYCC0ENhYkehSOwAp8rTQKc/NUIF7BkQ5rKLA==
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/tough-cookie/-/tough-cookie-2.3.4.tgz#ec60cee38ac675063ffc97a5c18970578ee83655"
+  integrity sha1-7GDO44rGdQY//JelwYlwV47oNlU=
   dependencies:
     punycode "^1.4.1"
 
@@ -28536,9 +28536,9 @@ vega-transforms@^2.3.0:
     vega-util "^1.7.0"
 
 vega-typings@*:
-  version "0.12.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/vega-typings/-/vega-typings-0.12.0.tgz#bf998252b7f72bb2f22d6d5a02813e0bd3685562"
-  integrity sha1-v5mCUrf3K7LyLW1aAoE+C9NoVWI=
+  version "0.12.1"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/vega-typings/-/vega-typings-0.12.1.tgz#47f61c7e5bce01617f891dff5148f06fdae5f881"
+  integrity sha1-R/YcflvOAWF/iR3/UUjwb9rl+IE=
   dependencies:
     vega-util "^1.12.1"
 
@@ -28932,9 +28932,9 @@ webpack-dev-middleware@^3.7.0, webpack-dev-middleware@^3.7.2:
     webpack-log "^2.0.0"
 
 webpack-dev-server@^3.8.2:
-  version "3.10.1"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/webpack-dev-server/-/webpack-dev-server-3.10.1.tgz#1ff3e5cccf8e0897aa3f5909c654e623f69b1c0e"
-  integrity sha1-H/PlzM+OCJeqP1kJxlTmI/abHA4=
+  version "3.10.2"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/webpack-dev-server/-/webpack-dev-server-3.10.2.tgz#3403287d674c7407aab6d9b3f72259ecd0aa0874"
+  integrity sha1-NAMofWdMdAeqttmz9yJZ7NCqCHQ=
   dependencies:
     ansi-html "0.0.7"
     bonjour "^3.5.0"
