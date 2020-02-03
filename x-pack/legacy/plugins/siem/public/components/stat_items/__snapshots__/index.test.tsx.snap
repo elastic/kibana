@@ -87,14 +87,13 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                               queryId="statItems"
                               title="KPI HOSTS"
                             >
-                              <Memo(InspectButtonComponent)
+                              <InspectButtonComponent
                                 id=""
                                 inspect={null}
                                 inspectIndex={0}
                                 isInspected={false}
                                 loading={false}
                                 queryId="statItems"
-                                refetch={null}
                                 selectedInspectIndex={0}
                                 setIsInspected={[Function]}
                                 title="KPI HOSTS"
@@ -152,7 +151,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                                   response={null}
                                   title="KPI HOSTS"
                                 />
-                              </Memo(InspectButtonComponent)>
+                              </InspectButtonComponent>
                             </Connect(Component)>
                           </div>
                         </EuiFlexItem>
@@ -321,14 +320,13 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                               queryId="statItems"
                               title="KPI HOSTS"
                             >
-                              <Memo(InspectButtonComponent)
+                              <InspectButtonComponent
                                 id=""
                                 inspect={null}
                                 inspectIndex={0}
                                 isInspected={false}
                                 loading={false}
                                 queryId="statItems"
-                                refetch={null}
                                 selectedInspectIndex={0}
                                 setIsInspected={[Function]}
                                 title="KPI HOSTS"
@@ -386,7 +384,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                                   response={null}
                                   title="KPI HOSTS"
                                 />
-                              </Memo(InspectButtonComponent)>
+                              </InspectButtonComponent>
                             </Connect(Component)>
                           </div>
                         </EuiFlexItem>
@@ -625,14 +623,13 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             queryId="statItems"
                             title="KPI UNIQUE_PRIVATE_IPS"
                           >
-                            <Memo(InspectButtonComponent)
+                            <InspectButtonComponent
                               id=""
                               inspect={null}
                               inspectIndex={0}
                               isInspected={false}
                               loading={false}
                               queryId="statItems"
-                              refetch={null}
                               selectedInspectIndex={0}
                               setIsInspected={[Function]}
                               title="KPI UNIQUE_PRIVATE_IPS"
@@ -690,7 +687,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                 response={null}
                                 title="KPI UNIQUE_PRIVATE_IPS"
                               />
-                            </Memo(InspectButtonComponent)>
+                            </InspectButtonComponent>
                           </Connect(Component)>
                         </div>
                       </EuiFlexItem>

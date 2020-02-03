@@ -9,7 +9,7 @@ import React from 'react';
 
 import { BarChartBaseComponent, BarChartComponent } from './barchart';
 import { ChartSeriesData } from './common';
-import { BarSeries, ScaleType, Axis } from '@elastic/charts';
+import { ScaleType } from '@elastic/charts';
 
 jest.mock('../../lib/kibana');
 
@@ -139,7 +139,7 @@ describe('BarChartBaseComponent', () => {
     });
 
     it('should render two bar series', () => {
-      expect(shallowWrapper.find('Chart')).toHaveLength(1);
+      expect(shallowWrapper.find('MemoChart')).toHaveLength(1);
     });
   });
 
@@ -168,13 +168,13 @@ describe('BarChartBaseComponent', () => {
 
     it(`should ${mockBarChartData.length} render BarSeries`, () => {
       expect(shallow).toMatchSnapshot();
-      expect(shallowWrapper.find(BarSeries)).toHaveLength(mockBarChartData.length);
+      expect(shallowWrapper.find('MemoBarSeries')).toHaveLength(mockBarChartData.length);
     });
 
     it('should render BarSeries with given xScaleType', () => {
       expect(
         shallowWrapper
-          .find(BarSeries)
+          .find('MemoBarSeries')
           .first()
           .prop('xScaleType')
       ).toEqual(configs.series.xScaleType);
@@ -183,7 +183,7 @@ describe('BarChartBaseComponent', () => {
     it('should render BarSeries with given yScaleType', () => {
       expect(
         shallowWrapper
-          .find(BarSeries)
+          .find('MemoBarSeries')
           .first()
           .prop('yScaleType')
       ).toEqual(configs.series.yScaleType);
@@ -192,7 +192,7 @@ describe('BarChartBaseComponent', () => {
     it('should render xAxis with given tick formatter', () => {
       expect(
         shallowWrapper
-          .find(Axis)
+          .find('MemoAxis')
           .first()
           .prop('tickFormat')
       ).toBeUndefined();
@@ -201,7 +201,7 @@ describe('BarChartBaseComponent', () => {
     it('should render yAxis with given tick formatter', () => {
       expect(
         shallowWrapper
-          .find(Axis)
+          .find('MemoAxis')
           .last()
           .prop('tickFormat')
       ).toEqual(mockNumberFormatter);
@@ -217,13 +217,13 @@ describe('BarChartBaseComponent', () => {
 
     it(`should ${mockBarChartData.length} render BarSeries`, () => {
       expect(shallow).toMatchSnapshot();
-      expect(shallowWrapper.find(BarSeries)).toHaveLength(mockBarChartData.length);
+      expect(shallowWrapper.find('MemoBarSeries')).toHaveLength(mockBarChartData.length);
     });
 
     it('should render BarSeries with default xScaleType: Linear', () => {
       expect(
         shallowWrapper
-          .find(BarSeries)
+          .find('MemoBarSeries')
           .first()
           .prop('xScaleType')
       ).toEqual(ScaleType.Linear);
@@ -232,7 +232,7 @@ describe('BarChartBaseComponent', () => {
     it('should render BarSeries with default yScaleType: Linear', () => {
       expect(
         shallowWrapper
-          .find(BarSeries)
+          .find('MemoBarSeries')
           .first()
           .prop('yScaleType')
       ).toEqual(ScaleType.Linear);
@@ -241,7 +241,7 @@ describe('BarChartBaseComponent', () => {
     it('should not format xTicks value', () => {
       expect(
         shallowWrapper
-          .find(Axis)
+          .find('MemoAxis')
           .last()
           .prop('tickFormat')
       ).toBeUndefined();
@@ -250,7 +250,7 @@ describe('BarChartBaseComponent', () => {
     it('should not format yTicks value', () => {
       expect(
         shallowWrapper
-          .find(Axis)
+          .find('MemoAxis')
           .last()
           .prop('tickFormat')
       ).toBeUndefined();

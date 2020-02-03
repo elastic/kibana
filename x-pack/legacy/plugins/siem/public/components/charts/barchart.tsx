@@ -25,9 +25,13 @@ import {
 } from './common';
 
 const MemoChart = React.memo(Chart, deepEqual);
+MemoChart.displayName = 'MemoChart';
 const MemoSettings = React.memo(Settings, deepEqual);
+MemoSettings.displayName = 'MemoSettings';
 const MemoBarSeries = React.memo(BarSeries, deepEqual);
+MemoBarSeries.displayName = 'MemoBarSeries';
 const MemoAxis = React.memo(Axis, deepEqual);
+MemoAxis.displayName = 'MemoAxis';
 
 const checkIfAllTheDataInTheSeriesAreValid = (series: ChartSeriesData): series is ChartSeriesData =>
   series != null &&

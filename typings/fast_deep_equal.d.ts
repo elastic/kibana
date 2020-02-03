@@ -17,5 +17,10 @@
  * under the License.
  */
 
+/*
+  TODO: Remove after https://github.com/epoberezkin/fast-deep-equal/pull/48
+  is merged and fast-deep-equal version is bumped
+*/
+
 declare const equal: (a: any, b: any) => boolean;
 export = equal;

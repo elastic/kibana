@@ -135,3 +135,5 @@ const mapDispatchToProps = {
 };
 
 export const Flyout = connect(mapStateToProps, mapDispatchToProps)(FlyoutComponent);
+
+Flyout.displayName = 'Flyout';
