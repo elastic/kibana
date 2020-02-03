@@ -6,7 +6,6 @@
 
 import React, { Component, Fragment } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
@@ -39,6 +38,7 @@ import { DocumentationLinksService } from '../documentation_links';
 import { RoleMappingsAPIClient } from '../role_mappings_api_client';
 import { RoleTableDisplay } from '../../role_table_display';
 import { RolesAPIClient } from '../../roles';
+import { EnabledBadge, DisabledBadge } from '../../badges';
 
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
@@ -345,24 +345,10 @@ export class RoleMappingsGridPage extends Component<Props, State> {
         sortable: true,
         render: (enabled: boolean) => {
           if (enabled) {
-            return (
-              <EuiBadge data-test-subj="roleMappingEnabled" color="secondary">
-                <FormattedMessage
-                  id="xpack.security.management.roleMappings.enabledBadge"
-                  defaultMessage="Enabled"
-                />
-              </EuiBadge>
-            );
+            return <EnabledBadge data-test-subj="roleMappingEnabled" />;
           }
 
-          return (
-            <EuiBadge color="hollow" data-test-subj="roleMappingEnabled">
-              <FormattedMessage
-                id="xpack.security.management.roleMappings.disabledBadge"
-                defaultMessage="Disabled"
-              />
-            </EuiBadge>
-          );
+          return <DisabledBadge data-test-subj="roleMappingEnabled" />;
         },
       },
       {
