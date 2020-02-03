@@ -395,7 +395,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     }
 
     async selectRole(role) {
-      const dropdown = await testSubjects.find('userFormRolesDropdown');
+      const dropdown = await testSubjects.find('rolesDropdown');
       const input = await dropdown.findByCssSelector('input');
       await input.type(role);
       await testSubjects.click(`roleOption-${role}`);

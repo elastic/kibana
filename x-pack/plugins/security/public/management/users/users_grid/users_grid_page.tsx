@@ -7,7 +7,6 @@
 import React, { Component, Fragment } from 'react';
 import {
   EuiButton,
-  EuiIcon,
   EuiLink,
   EuiFlexGroup,
   EuiInMemoryTable,
@@ -20,22 +19,28 @@ import {
   EuiBasicTableColumn,
   EuiSwitchEvent,
   EuiSwitch,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
-import { User, isDeprecatedRole, Role } from '../../../../common/model';
+import { User, Role } from '../../../../common/model';
 import { ConfirmDeleteUsers } from '../components';
+import { isUserReserved } from '../user_utils';
+import { EnabledBadge, DisabledBadge, ReservedBadge } from '../../badges';
+import { RoleTableDisplay } from '../../role_table_display';
+import { RolesAPIClient } from '../../roles';
 import { UserAPIClient } from '..';
 
 interface Props {
   apiClient: PublicMethodsOf<UserAPIClient>;
+  rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   notifications: NotificationsStart;
 }
 
 interface State {
   users: User[];
-  roles: Role[];
+  roles: null | Role[];
   selection: User[];
   showDeleteConfirmation: boolean;
   permissionDenied: boolean;
@@ -58,7 +63,7 @@ export class UsersGridPage extends Component<Props, State> {
   }
 
   public componentDidMount() {
-    this.loadUsers();
+    this.loadUsersAndRoles();
   }
 
   public render() {
@@ -100,17 +105,6 @@ export class UsersGridPage extends Component<Props, State> {
     const path = '#/management/security/';
     const columns: Array<EuiBasicTableColumn<User>> = [
       {
-        field: 'full_name',
-        name: i18n.translate('xpack.security.management.users.fullNameColumnName', {
-          defaultMessage: 'Full Name',
-        }),
-        sortable: true,
-        truncateText: true,
-        render: (fullName: string) => {
-          return <div data-test-subj="userRowFullName">{fullName}</div>;
-        },
-      },
-      {
         field: 'username',
         name: i18n.translate('xpack.security.management.users.userNameColumnName', {
           defaultMessage: 'User Name',
@@ -123,6 +117,18 @@ export class UsersGridPage extends Component<Props, State> {
           </EuiLink>
         ),
       },
+      {
+        field: 'full_name',
+        name: i18n.translate('xpack.security.management.users.fullNameColumnName', {
+          defaultMessage: 'Full Name',
+        }),
+        sortable: true,
+        truncateText: true,
+        render: (fullName: string) => {
+          return <div data-test-subj="userRowFullName">{fullName}</div>;
+        },
+      },
+
       {
         field: 'email',
         name: i18n.translate('xpack.security.management.users.emailAddressColumnName', {
@@ -141,24 +147,10 @@ export class UsersGridPage extends Component<Props, State> {
         }),
         render: (rolenames: string[]) => {
           const roleLinks = rolenames.map((rolename, index) => {
-            const roleDefinition = roles.find(role => role.name === rolename);
-            const isDeprecated =
-              rolename === 'kibana_user' || (roleDefinition && isDeprecatedRole(roleDefinition));
+            const roleDefinition = roles?.find(role => role.name === rolename) ?? rolename;
             return (
               <Fragment key={rolename}>
-                <EuiLink
-                  href={`${path}roles/edit/${rolename}`}
-                  color={isDeprecated ? 'warning' : 'primary'}
-                  title={
-                    isDeprecated
-                      ? i18n.translate('xpack.security.management.users.deprecatedRoleTitle', {
-                          defaultMessage: 'This role is deprecated, and should no longer be used.',
-                        })
-                      : undefined
-                  }
-                >
-                  {rolename}
-                </EuiLink>
+                <RoleTableDisplay role={roleDefinition} />
                 {index === rolenames.length - 1 ? null : ', '}
               </Fragment>
             );
@@ -168,20 +160,15 @@ export class UsersGridPage extends Component<Props, State> {
       },
       {
         field: 'metadata',
-        name: i18n.translate('xpack.security.management.users.reservedColumnName', {
-          defaultMessage: 'Reserved',
+        name: i18n.translate('xpack.security.management.users.statusColumnName', {
+          defaultMessage: 'Status',
         }),
         sortable: ({ metadata }: User) => Boolean(metadata && metadata._reserved),
-        width: '100px',
-        align: 'right',
         description: i18n.translate('xpack.security.management.users.reservedColumnDescription', {
           defaultMessage:
             'Reserved users are built-in and cannot be removed. Only the password can be changed.',
         }),
-        render: (metadata: User['metadata']) =>
-          metadata && metadata._reserved ? (
-            <EuiIcon aria-label="Reserved user" data-test-subj="reservedUser" type="check" />
-          ) : null,
+        render: (metadata: User['metadata'], record: User) => this.getUserStatusBadges(record),
       },
     ];
     const pagination = {
@@ -295,10 +282,13 @@ export class UsersGridPage extends Component<Props, State> {
     });
   };
 
-  private async loadUsers() {
+  private async loadUsersAndRoles() {
     try {
-      const users = await this.props.apiClient.getUsers();
-      this.setState({ users });
+      const [users, roles] = await Promise.all([
+        this.props.apiClient.getUsers(),
+        this.props.rolesAPIClient.getRoles(),
+      ]);
+      this.setState({ users, roles });
     } catch (e) {
       if (e.body.statusCode === 403) {
         this.setState({ permissionDenied: true });
@@ -356,6 +346,41 @@ export class UsersGridPage extends Component<Props, State> {
       />
     );
   }
+
+  private getUserStatusBadges = (user: User) => {
+    const enabled = user.enabled;
+    const reserved = isUserReserved(user);
+
+    const badges = [];
+    if (enabled) {
+      badges.push(<EnabledBadge data-test-subj="userEnabled" />);
+    } else {
+      badges.push(<DisabledBadge data-test-subj="userDisabled" />);
+    }
+    if (reserved) {
+      badges.push(
+        <ReservedBadge
+          data-test-subj="userReserved"
+          tooltipContent={
+            <FormattedMessage
+              id="xpack.security.management.users.reservedUserBadgeTooltip"
+              defaultMessage="Reserved users are built-in and cannot be edited or removed."
+            />
+          }
+        />
+      );
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="xs">
+        {badges.map((badge, index) => (
+          <EuiFlexItem key={index} grow={false}>
+            {badge}
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  };
 
   private onCancelDelete = () => {
     this.setState({ showDeleteConfirmation: false });

@@ -20,9 +20,6 @@ import {
   EuiBasicTableColumn,
   EuiSwitchEvent,
   EuiSwitch,
-  EuiIconTip,
-  EuiToolTip,
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -40,6 +37,7 @@ import {
 import { RolesAPIClient } from '../roles_api_client';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
+import { EnabledBadge, DisabledBadge, DeprecatedBadge, ReservedBadge } from '../../badges';
 
 interface Props {
   notifications: NotificationsStart;
@@ -174,11 +172,6 @@ export class RolesGridPage extends Component<Props, State> {
   };
 
   private getColumnConfig = () => {
-    const reservedRoleDesc = i18n.translate(
-      'xpack.security.management.roles.reservedColumnDescription',
-      { defaultMessage: 'Reserved roles are built-in and cannot be edited or removed.' }
-    );
-
     return [
       {
         field: 'name',
@@ -198,41 +191,13 @@ export class RolesGridPage extends Component<Props, State> {
         },
       },
       {
-        field: 'metadata._deprecated',
+        field: 'metadata',
         name: i18n.translate('xpack.security.management.roles.statusColumnName', {
           defaultMessage: 'Status',
         }),
         sortable: (role: Role) => isRoleEnabled(role) && !isDeprecatedRole(role),
         render: (metadata: Role['metadata'], record: Role) => {
           return this.getRoleStatusBadges(record);
-        },
-      },
-      {
-        field: 'metadata',
-        name: i18n.translate('xpack.security.management.roles.reservedColumnName', {
-          defaultMessage: 'Reserved',
-        }),
-        sortable: (role: Role) => isReservedRole(role),
-        dataType: 'boolean',
-        align: 'right',
-        description: reservedRoleDesc,
-        render: (metadata: Role['metadata'], record: Role) => {
-          const isDeprecated = isDeprecatedRole(record);
-
-          const label = isDeprecated
-            ? this.getDeprecationText(record)
-            : i18n.translate('xpack.security.management.roles.reservedRoleIconLabel', {
-                defaultMessage: 'Reserved roles are built-in and cannot be removed or modified.',
-              });
-
-          return isReservedRole(record) ? (
-            <EuiIconTip
-              aria-label={label}
-              content={label}
-              data-test-subj="reservedRole"
-              type={isDeprecated ? 'alert' : 'check'}
-            />
-          ) : null;
         },
       },
       {
@@ -308,37 +273,33 @@ export class RolesGridPage extends Component<Props, State> {
   private getRoleStatusBadges = (role: Role) => {
     const enabled = isRoleEnabled(role);
     const deprecated = isDeprecatedRole(role);
+    const reserved = isReservedRole(role);
 
     const badges = [];
     if (enabled) {
-      badges.push(
-        <EuiBadge data-test-subj="roleEnabled" color="secondary">
-          <FormattedMessage
-            id="xpack.security.management.roles.enabledBadge"
-            defaultMessage="Enabled"
-          />
-        </EuiBadge>
-      );
+      badges.push(<EnabledBadge data-test-subj="roleEnabled" />);
     } else {
+      badges.push(<DisabledBadge data-test-subj="roleDisabled" />);
+    }
+    if (reserved) {
       badges.push(
-        <EuiBadge data-test-subj="roleDisabled" color="hollow">
-          <FormattedMessage
-            id="xpack.security.management.roles.disabledBadge"
-            defaultMessage="Disabled"
-          />
-        </EuiBadge>
+        <ReservedBadge
+          data-test-subj="roleReserved"
+          tooltipContent={
+            <FormattedMessage
+              id="xpack.security.management.roles.reservedRoleBadgeTooltip"
+              defaultMessage="Reserved roles are built-in and cannot be edited or removed."
+            />
+          }
+        />
       );
     }
     if (deprecated) {
       badges.push(
-        <EuiToolTip content={this.getDeprecationText(role)}>
-          <EuiBadge color="warning">
-            <FormattedMessage
-              id="xpack.security.management.roles.deprecatedBadge"
-              defaultMessage="Deprecated"
-            />
-          </EuiBadge>
-        </EuiToolTip>
+        <DeprecatedBadge
+          data-test-subj="roleDeprecated"
+          tooltipContent={this.getDeprecationText(role)}
+        />
       );
     }
 

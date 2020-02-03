@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -46,6 +47,8 @@ import {
   BuiltinESPrivileges,
   isReadOnlyRole as checkIfRoleReadOnly,
   isReservedRole as checkIfRoleReserved,
+  isDeprecatedRole as checkIfRoleDeprecated,
+  getDeprecatedReason,
   copyRole,
   prepareRoleClone,
   RoleIndexPrivilege,
@@ -301,6 +304,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const isEditingExistingRole = !!roleName && action === 'edit';
   const isReadOnlyRole = checkIfRoleReadOnly(role);
   const isReservedRole = checkIfRoleReserved(role);
+  const isDeprecatedRole = checkIfRoleDeprecated(role);
 
   const [kibanaPrivileges, builtInESPrivileges] = privileges;
 
@@ -574,6 +578,25 @@ export const EditRolePage: FunctionComponent<Props> = ({
                 />
               </p>
             </EuiText>
+          </Fragment>
+        )}
+
+        {isDeprecatedRole && (
+          <Fragment>
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.security.management.editRole.deprecatedRoleCalloutTitle"
+                  defaultMessage="This role is deprecated, and should not be assigned to users. {reason}"
+                  values={{
+                    reason: getDeprecatedReason(role),
+                  }}
+                />
+              }
+              color="warning"
+              iconType="alert"
+            />
           </Fragment>
         )}
 

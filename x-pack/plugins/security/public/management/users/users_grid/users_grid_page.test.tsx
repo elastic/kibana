@@ -5,12 +5,13 @@
  */
 
 import { User } from '../../../../common/model';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { UsersGridPage } from './users_grid_page';
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { userAPIClientMock } from '../index.mock';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { rolesAPIClientMock } from '../../roles/index.mock';
 
 describe('UsersGridPage', () => {
   it('renders the list of users', async () => {
@@ -40,6 +41,7 @@ describe('UsersGridPage', () => {
     const wrapper = mountWithIntl(
       <UsersGridPage
         apiClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
       />
     );
@@ -56,7 +58,11 @@ describe('UsersGridPage', () => {
     apiClient.getUsers.mockRejectedValue({ body: { statusCode: 403 } });
 
     const wrapper = mountWithIntl(
-      <UsersGridPage apiClient={apiClient} notifications={coreMock.createStart().notifications} />
+      <UsersGridPage
+        apiClient={apiClient}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreMock.createStart().notifications}
+      />
     );
 
     await waitForRender(wrapper);
@@ -68,7 +74,6 @@ describe('UsersGridPage', () => {
 });
 
 async function waitForRender(wrapper: ReactWrapper<any, any>) {
-  await Promise.resolve();
-  await Promise.resolve();
+  await nextTick();
   wrapper.update();
 }

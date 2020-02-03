@@ -7,12 +7,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiText } from '@elastic/eui';
-import { Role, isDeprecatedRole } from '../../common/model';
+import { Role, isDeprecatedRole } from '../../../common/model';
 
 interface Props {
   availableRoles: Role[];
   selectedRoleNames: string[];
   onChange: (selectedRoleNames: string[]) => void;
+  placeholder?: string;
+  isLoading?: boolean;
   isDisabled?: boolean;
 }
 
@@ -40,11 +42,15 @@ export const RoleComboBox = (props: Props) => {
 
   return (
     <EuiComboBox
-      data-test-subj="userFormRolesDropdown"
-      placeholder={i18n.translate('xpack.security.management.users.editUser.addRolesPlaceholder', {
-        defaultMessage: 'Add roles',
-      })}
+      data-test-subj="rolesDropdown"
+      placeholder={
+        props.placeholder ||
+        i18n.translate('xpack.security.management.users.editUser.addRolesPlaceholder', {
+          defaultMessage: 'Add roles',
+        })
+      }
       onChange={onRolesChange}
+      isLoading={props.isLoading}
       isDisabled={props.isDisabled}
       options={options}
       selectedOptions={selectedOptions}

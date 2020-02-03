@@ -58,7 +58,7 @@ describe('usersManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `#${basePath}`, text: 'Users' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Users Page: {"notifications":{"toasts":{}},"apiClient":{"http":{"basePath":{"basePath":""},"anonymousPaths":{}}}}
+        Users Page: {"notifications":{"toasts":{}},"apiClient":{"http":{"basePath":{"basePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":""},"anonymousPaths":{}}}}
       </div>
     `);
 

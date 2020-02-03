@@ -39,9 +39,16 @@ export const usersManagementApp = Object.freeze({
         ];
 
         const userAPIClient = new UserAPIClient(http);
+        const rolesAPIClient = new RolesAPIClient(http);
         const UsersGridPageWithBreadcrumbs = () => {
           setBreadcrumbs(usersBreadcrumbs);
-          return <UsersGridPage notifications={notifications} apiClient={userAPIClient} />;
+          return (
+            <UsersGridPage
+              notifications={notifications}
+              apiClient={userAPIClient}
+              rolesAPIClient={rolesAPIClient}
+            />
+          );
         };
 
         const EditUserPageWithBreadcrumbs = () => {

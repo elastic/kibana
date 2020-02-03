@@ -16,6 +16,8 @@ import { DocumentationLinksService } from '../documentation_links';
 
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
+import { rolesAPIClientMock } from '../../roles/index.mock';
+import { RoleTableDisplay } from '../../role_table_display';
 
 describe('RoleMappingsGridPage', () => {
   it('renders an empty prompt when no role mappings exist', async () => {
@@ -29,6 +31,7 @@ describe('RoleMappingsGridPage', () => {
     const { docLinks, notifications } = coreMock.createStart();
     const wrapper = mountWithIntl(
       <RoleMappingsGridPage
+        rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
@@ -55,6 +58,7 @@ describe('RoleMappingsGridPage', () => {
     const { docLinks, notifications } = coreMock.createStart();
     const wrapper = mountWithIntl(
       <RoleMappingsGridPage
+        rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
@@ -89,6 +93,7 @@ describe('RoleMappingsGridPage', () => {
     const { docLinks, notifications } = coreMock.createStart();
     const wrapper = mountWithIntl(
       <RoleMappingsGridPage
+        rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
@@ -104,7 +109,7 @@ describe('RoleMappingsGridPage', () => {
     expect(wrapper.find(NoCompatibleRealms)).toHaveLength(1);
   });
 
-  it('renders links to mapped roles', async () => {
+  it('renders links to mapped roles, even if the roles API call returns nothing', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([
       {
@@ -122,6 +127,7 @@ describe('RoleMappingsGridPage', () => {
     const { docLinks, notifications } = coreMock.createStart();
     const wrapper = mountWithIntl(
       <RoleMappingsGridPage
+        rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
@@ -135,6 +141,49 @@ describe('RoleMappingsGridPage', () => {
     expect(links.at(0).props()).toMatchObject({
       href: '#/management/security/roles/edit/superuser',
     });
+  });
+
+  it('renders deprecated roles as such', async () => {
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    roleMappingsAPI.getRoleMappings.mockResolvedValue([
+      {
+        name: 'some realm',
+        enabled: true,
+        roles: ['superuser', 'some_deprecated_role'],
+        rules: { field: { username: '*' } },
+      },
+    ]);
+    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
+      canManageRoleMappings: true,
+      hasCompatibleRealms: true,
+    });
+
+    const rolesAPI = rolesAPIClientMock.create();
+    rolesAPI.getRoles.mockResolvedValue([
+      {
+        name: 'some_deprecated_role',
+        metadata: { _deprecated: true, _deprecated_reason: 'because I said so' },
+      },
+    ]);
+
+    const { docLinks, notifications } = coreMock.createStart();
+    const wrapper = mountWithIntl(
+      <RoleMappingsGridPage
+        rolesAPIClient={rolesAPI}
+        roleMappingsAPI={roleMappingsAPI}
+        notifications={notifications}
+        docLinks={new DocumentationLinksService(docLinks)}
+      />
+    );
+    await nextTick();
+    wrapper.update();
+
+    const roles = findTestSubject(wrapper, 'roleMappingRoles').find(RoleTableDisplay);
+    expect(roles).toHaveLength(2);
+    expect(roles.at(0).props().role).toEqual('superuser');
+    expect(roles.at(0).find('EuiLink[color="warning"]')).toHaveLength(0);
+
+    expect(roles.at(1).find('EuiLink[color="warning"]')).toHaveLength(1);
   });
 
   it('describes the number of mapped role templates', async () => {
@@ -155,6 +204,7 @@ describe('RoleMappingsGridPage', () => {
     const { docLinks, notifications } = coreMock.createStart();
     const wrapper = mountWithIntl(
       <RoleMappingsGridPage
+        rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
@@ -192,6 +242,7 @@ describe('RoleMappingsGridPage', () => {
     const { docLinks, notifications } = coreMock.createStart();
     const wrapper = mountWithIntl(
       <RoleMappingsGridPage
+        rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}

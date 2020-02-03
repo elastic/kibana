@@ -6,11 +6,12 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
 import { RoleMapping, Role } from '../../../../../common/model';
 import { RolesAPIClient } from '../../../roles';
 import { AddRoleTemplateButton } from './add_role_template_button';
 import { RoleTemplateEditor } from './role_template_editor';
+import { RoleComboBox } from '../../../role_combo_box';
 
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
@@ -49,19 +50,18 @@ export class RoleSelector extends React.Component<Props, State> {
   private getRoleComboBox = () => {
     const { roles = [] } = this.props.roleMapping;
     return (
-      <EuiComboBox
-        data-test-subj="roleMappingFormRoleComboBox"
+      <RoleComboBox
         placeholder={i18n.translate(
           'xpack.security.management.editRoleMapping.selectRolesPlaceholder',
           { defaultMessage: 'Select one or more roles' }
         )}
         isLoading={this.state.roles.length === 0}
-        options={this.state.roles.map(r => ({ label: r.name }))}
-        selectedOptions={roles!.map(r => ({ label: r }))}
-        onChange={selectedOptions => {
+        availableRoles={this.state.roles}
+        selectedRoleNames={roles}
+        onChange={selectedRoles => {
           this.props.onChange({
             ...this.props.roleMapping,
-            roles: selectedOptions.map(so => so.label),
+            roles: selectedRoles,
             role_templates: [],
           });
         }}

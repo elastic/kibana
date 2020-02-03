@@ -17,7 +17,6 @@ import { EditRoleMappingPage } from '.';
 import { NoCompatibleRealms, SectionLoading, PermissionDenied } from '../components';
 import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
 import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';
-import { EuiComboBox } from '@elastic/eui';
 import { RolesAPIClient } from '../../roles';
 import { Role } from '../../../../common/model';
 import { DocumentationLinksService } from '../documentation_links';
@@ -25,6 +24,7 @@ import { DocumentationLinksService } from '../documentation_links';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
 import { rolesAPIClientMock } from '../../roles/roles_api_client.mock';
+import { RoleComboBox } from '../../role_combo_box';
 
 describe('EditRoleMappingPage', () => {
   let rolesAPI: PublicMethodsOf<RolesAPIClient>;
@@ -63,10 +63,10 @@ describe('EditRoleMappingPage', () => {
       target: { value: 'my-role-mapping' },
     });
 
-    (wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="roleMappingFormRoleComboBox"]')
-      .props() as any).onChange([{ label: 'foo_role' }]);
+    wrapper
+      .find(RoleComboBox)
+      .props()
+      .onChange(['foo_role']);
 
     findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
 
@@ -126,10 +126,10 @@ describe('EditRoleMappingPage', () => {
 
     findTestSubject(wrapper, 'switchToRolesButton').simulate('click');
 
-    (wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="roleMappingFormRoleComboBox"]')
-      .props() as any).onChange([{ label: 'foo_role' }]);
+    wrapper
+      .find(RoleComboBox)
+      .props()
+      .onChange(['foo_role']);
 
     findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
     wrapper.find('button[id="addRuleOption"]').simulate('click');
