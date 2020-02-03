@@ -24,7 +24,7 @@ function getPageData($injector) {
   const globalState = $injector.get('globalState');
   const $http = $injector.get('$http');
   const Private = $injector.get('Private');
-  const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/alerts`;
+  const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/legacy_alerts`;
 
   const timeBounds = timefilter.getBounds();
 
