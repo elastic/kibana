@@ -8,7 +8,11 @@ import { flatten } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { escapeKuery } from './lib/escape_kuery';
 import { sortPrefixFirst } from './sort_prefix_first';
-import { IFieldType, isFilterable, autocomplete } from '../../../../../../src/plugins/data/public';
+import {
+  IFieldType,
+  isFilterable,
+  autocomplete,
+} from '../../../../../../../src/plugins/data/public';
 import { KqlQuerySuggestionProvider } from './types';
 
 const getDescription = (field: IFieldType) => {

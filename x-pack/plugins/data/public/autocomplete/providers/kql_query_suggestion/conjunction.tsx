@@ -7,7 +7,7 @@ import React from 'react';
 import { $Keys } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KqlQuerySuggestionProvider } from './types';
-import { autocomplete } from '../../../../../../src/plugins/data/public';
+import { autocomplete } from '../../../../../../../src/plugins/data/public';
 
 const bothArgumentsText = (
   <FormattedMessage

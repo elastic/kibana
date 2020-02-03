@@ -10,7 +10,7 @@ import { $Keys } from 'utility-types';
 import { flatten } from 'lodash';
 
 import { KqlQuerySuggestionProvider } from './types';
-import { autocomplete } from '../../../../../../src/plugins/data/public';
+import { autocomplete } from '../../../../../../../src/plugins/data/public';
 
 const equalsText = (
   <FormattedMessage
