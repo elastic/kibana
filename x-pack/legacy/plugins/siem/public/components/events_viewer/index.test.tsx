@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
+import useResizeObserver from 'use-resize-observer';
 
 import { wait } from '../../lib/helpers';
 import { mockIndexPattern, TestProviders } from '../../mock';
@@ -25,6 +26,10 @@ mockUseFetchIndexPatterns.mockImplementation(() => [
     indexPatterns: mockIndexPattern,
   },
 ]);
+
+const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
+jest.mock('use-resize-observer');
+mockUseResizeObserver.mockImplementation(() => ({}));
 
 const from = 1566943856794;
 const to = 1566857456791;
