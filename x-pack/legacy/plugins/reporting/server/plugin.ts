@@ -14,7 +14,7 @@ import {
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
-import { PluginSetupContract as SecurityPluginSetup } from '../../../../plugins/security/server';
+import { SecurityPluginSetup } from '../../../../plugins/security/server';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
