@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  MapsPlugin,
-  MapsPluginSetup,
-  MapsPluginStart,
-} from './plugin';
-import {PluginInitializer, PluginInitializerContext} from 'kibana/public';
+import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
+import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
 
 export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
   context: PluginInitializerContext

@@ -5,13 +5,13 @@
  */
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
+import { auto } from 'angular';
 import { IEmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 // @ts-ignore
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory.js';
 // @ts-ignore
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { initKibanaServices } from './kibana_services';
-import {auto} from "angular";
 
 export interface MapsPluginSetupDependencies {
   embeddable: IEmbeddableSetup;
@@ -28,12 +28,13 @@ export type MapsPluginSetup = ReturnType<MapsPlugin['setup']>;
 export type MapsPluginStart = ReturnType<MapsPlugin['start']>;
 
 /** @internal */
-export class MapsPlugin implements
-  Plugin<
-    MapsPluginSetup,
-    MapsPluginStart,
-    MapsPluginSetupDependencies,
-    MapsPluginStartDependencies
+export class MapsPlugin
+  implements
+    Plugin<
+      MapsPluginSetup,
+      MapsPluginStart,
+      MapsPluginSetupDependencies,
+      MapsPluginStartDependencies
     > {
   private getEmbeddableInjector: (() => Promise<auto.IInjectorService>) | null = null;
   constructor(context: PluginInitializerContext) {}
@@ -46,10 +47,11 @@ export class MapsPlugin implements
     if (!this.getEmbeddableInjector) {
       throw Error('Maps plugin method getEmbeddableInjector is undefined');
     }
+    const addBasePath = core.http.basePath.prepend;
     const factory = new MapEmbeddableFactory(
-      plugins.uiActions.executeTriggerActions,
       this.getEmbeddableInjector,
-      isEditable
+      isEditable,
+      addBasePath
     );
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
     plugins.embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
