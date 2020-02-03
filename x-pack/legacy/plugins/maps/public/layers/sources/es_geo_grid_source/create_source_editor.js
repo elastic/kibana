@@ -14,43 +14,37 @@ import { indexPatternService } from '../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 import { i18n } from '@kbn/i18n';
 
+import { EuiFormRow, EuiComboBox, EuiSpacer } from '@elastic/eui';
 import {
-  EuiFormRow,
-  EuiComboBox,
-  EuiSpacer,
-} from '@elastic/eui';
-import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
+  AGGREGATABLE_GEO_FIELD_TYPES,
+  getAggregatableGeoFields,
+} from '../../../index_pattern_util';
 
 import { npStart } from 'ui/new_platform';
 const { IndexPatternSelect } = npStart.plugins.data.ui;
 
-function filterGeoField({ type }) {
-  return [ES_GEO_FIELD_TYPE.GEO_POINT].includes(type);
-}
-
 const requestTypeOptions = [
   {
     label: i18n.translate('xpack.maps.source.esGeoGrid.gridRectangleDropdownOption', {
-      defaultMessage: 'grid rectangles'
+      defaultMessage: 'grid rectangles',
     }),
-    value: RENDER_AS.GRID
+    value: RENDER_AS.GRID,
   },
   {
     label: i18n.translate('xpack.maps.source.esGeoGrid.heatmapDropdownOption', {
-      defaultMessage: 'heat map'
+      defaultMessage: 'heat map',
     }),
-    value: RENDER_AS.HEATMAP
+    value: RENDER_AS.HEATMAP,
   },
   {
     label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
-      defaultMessage: 'points'
+      defaultMessage: 'clusters',
     }),
-    value: RENDER_AS.POINT
-  }
+    value: RENDER_AS.POINT,
+  },
 ];
 
 export class CreateSourceEditor extends Component {
-
   static propTypes = {
     onSourceConfigChange: PropTypes.func.isRequired,
   };
@@ -61,7 +55,7 @@ export class CreateSourceEditor extends Component {
     geoField: '',
     requestType: requestTypeOptions[0],
     noGeoIndexPatternsExist: false,
-  }
+  };
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -71,21 +65,27 @@ export class CreateSourceEditor extends Component {
     this._isMounted = true;
   }
 
-  onIndexPatternSelect = (indexPatternId) => {
-    this.setState({
-      indexPatternId,
-    }, this.loadIndexPattern.bind(null, indexPatternId));
+  onIndexPatternSelect = indexPatternId => {
+    this.setState(
+      {
+        indexPatternId,
+      },
+      this.loadIndexPattern.bind(null, indexPatternId)
+    );
   };
 
-  loadIndexPattern = (indexPatternId) => {
-    this.setState({
-      isLoadingIndexPattern: true,
-      indexPattern: undefined,
-      geoField: undefined,
-    }, this.debouncedLoad.bind(null, indexPatternId));
+  loadIndexPattern = indexPatternId => {
+    this.setState(
+      {
+        isLoadingIndexPattern: true,
+        indexPattern: undefined,
+        geoField: undefined,
+      },
+      this.debouncedLoad.bind(null, indexPatternId)
+    );
   };
 
-  debouncedLoad = _.debounce(async (indexPatternId) => {
+  debouncedLoad = _.debounce(async indexPatternId => {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
@@ -110,45 +110,47 @@ export class CreateSourceEditor extends Component {
 
     this.setState({
       isLoadingIndexPattern: false,
-      indexPattern: indexPattern
+      indexPattern: indexPattern,
     });
 
     //make default selection
-    const geoFields = indexPattern.fields.filter(filterGeoField);
+    const geoFields = getAggregatableGeoFields(indexPattern.fields);
     if (geoFields[0]) {
       this._onGeoFieldSelect(geoFields[0].name);
     }
-
   }, 300);
 
-  _onGeoFieldSelect = (geoField) => {
-    this.setState({
-      geoField
-    }, this.previewLayer);
+  _onGeoFieldSelect = geoField => {
+    this.setState(
+      {
+        geoField,
+      },
+      this.previewLayer
+    );
   };
 
-  _onRequestTypeSelect =  (selectedOptions) => {
-    this.setState({
-      requestType: selectedOptions[0]
-    }, this.previewLayer);
+  _onRequestTypeSelect = selectedOptions => {
+    this.setState(
+      {
+        requestType: selectedOptions[0],
+      },
+      this.previewLayer
+    );
   };
 
   previewLayer = () => {
-    const {
-      indexPatternId,
-      geoField,
-      requestType
-    } = this.state;
+    const { indexPatternId, geoField, requestType } = this.state;
 
-    const sourceConfig = (indexPatternId && geoField)
-      ? { indexPatternId, geoField, requestType: requestType.value }
-      : null;
+    const sourceConfig =
+      indexPatternId && geoField
+        ? { indexPatternId, geoField, requestType: requestType.value }
+        : null;
     this.props.onSourceConfigChange(sourceConfig);
   };
 
   _onNoIndexPatterns = () => {
     this.setState({ noGeoIndexPatternsExist: true });
-  }
+  };
 
   _renderGeoSelect() {
     if (!this.state.indexPattern) {
@@ -156,18 +158,22 @@ export class CreateSourceEditor extends Component {
     }
 
     return (
-      <EuiFormRow label={i18n.translate('xpack.maps.source.esGeoGrid.geofieldLabel', {
-        defaultMessage: 'Geospatial field'
-      })}
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.source.esGeoGrid.geofieldLabel', {
+          defaultMessage: 'Geospatial field',
+        })}
       >
         <SingleFieldSelect
           placeholder={i18n.translate('xpack.maps.source.esGeoGrid.geofieldPlaceholder', {
-            defaultMessage: 'Select geo field'
+            defaultMessage: 'Select geo field',
           })}
           value={this.state.geoField}
           onChange={this._onGeoFieldSelect}
-          filterField={filterGeoField}
-          fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
+          fields={
+            this.state.indexPattern
+              ? getAggregatableGeoFields(this.state.indexPattern.fields)
+              : undefined
+          }
         />
       </EuiFormRow>
     );
@@ -179,13 +185,14 @@ export class CreateSourceEditor extends Component {
     }
 
     return (
-      <EuiFormRow label={i18n.translate('xpack.maps.source.esGeoGrid.showAsLabel', {
-        defaultMessage: 'Show as'
-      })}
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.source.esGeoGrid.showAsLabel', {
+          defaultMessage: 'Show as',
+        })}
       >
         <EuiComboBox
           placeholder={i18n.translate('xpack.maps.source.esGeoGrid.showAsPlaceholder', {
-            defaultMessage: 'Select a single option'
+            defaultMessage: 'Select a single option',
           })}
           singleSelection={{ asPlainText: true }}
           options={requestTypeOptions}
@@ -193,23 +200,25 @@ export class CreateSourceEditor extends Component {
           onChange={this._onRequestTypeSelect}
           isClearable={false}
         />
-      </EuiFormRow>);
+      </EuiFormRow>
+    );
   }
 
   _renderIndexPatternSelect() {
     return (
-      <EuiFormRow label={i18n.translate('xpack.maps.source.esGeoGrid.indexPatternLabel', {
-        defaultMessage: 'Index pattern'
-      })}
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.source.esGeoGrid.indexPatternLabel', {
+          defaultMessage: 'Index pattern',
+        })}
       >
         <IndexPatternSelect
           isDisabled={this.state.noGeoIndexPatternsExist}
           indexPatternId={this.state.indexPatternId}
           onChange={this.onIndexPatternSelect}
           placeholder={i18n.translate('xpack.maps.source.esGeoGrid.indexPatternPlaceholder', {
-            defaultMessage: 'Select index pattern'
+            defaultMessage: 'Select index pattern',
           })}
-          fieldTypes={[ES_GEO_FIELD_TYPE.GEO_POINT]}
+          fieldTypes={AGGREGATABLE_GEO_FIELD_TYPES}
           onNoIndexPatterns={this._onNoIndexPatterns}
         />
       </EuiFormRow>

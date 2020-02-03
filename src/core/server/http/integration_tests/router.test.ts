@@ -142,6 +142,61 @@ describe('Handler', () => {
       statusCode: 400,
     });
   });
+
+  it('accept to receive an array payload', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    let body: any = null;
+    router.post(
+      {
+        path: '/',
+        validate: {
+          body: schema.arrayOf(schema.object({ foo: schema.string() })),
+        },
+      },
+      (context, req, res) => {
+        body = req.body;
+        return res.ok({ body: 'ok' });
+      }
+    );
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .post('/')
+      .send([{ foo: 'bar' }, { foo: 'dolly' }])
+      .expect(200);
+
+    expect(body).toEqual([{ foo: 'bar' }, { foo: 'dolly' }]);
+  });
+
+  it('accept to receive a json primitive payload', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    let body: any = null;
+    router.post(
+      {
+        path: '/',
+        validate: {
+          body: schema.number(),
+        },
+      },
+      (context, req, res) => {
+        body = req.body;
+        return res.ok({ body: 'ok' });
+      }
+    );
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .post('/')
+      .type('json')
+      .send('12')
+      .expect(200);
+
+    expect(body).toEqual(12);
+  });
 });
 
 describe('handleLegacyErrors', () => {
@@ -640,6 +695,116 @@ describe('Response factory', () => {
         },
         statusCode: 400,
       });
+    });
+
+    it('validate function in body', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/foo');
+
+      router.post(
+        {
+          path: '/',
+          validate: {
+            body: ({ bar, baz } = {}, { ok, badRequest }) => {
+              if (typeof bar === 'string' && typeof baz === 'number') {
+                return ok({ bar, baz });
+              } else {
+                return badRequest('Wrong payload', ['body']);
+              }
+            },
+          },
+        },
+        (context, req, res) => {
+          return res.ok({ body: req.body });
+        }
+      );
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 123,
+        })
+        .expect(200)
+        .then(res => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: '123',
+        })
+        .expect(400)
+        .then(res => {
+          expect(res.body).toEqual({
+            error: 'Bad Request',
+            message: '[request body.body]: Wrong payload',
+            statusCode: 400,
+          });
+        });
+    });
+
+    it('@kbn/config-schema validation in body', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/foo');
+
+      router.post(
+        {
+          path: '/',
+          validate: {
+            body: schema.object({
+              bar: schema.string(),
+              baz: schema.number(),
+            }),
+          },
+        },
+        (context, req, res) => {
+          return res.ok({ body: req.body });
+        }
+      );
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 123,
+        })
+        .expect(200)
+        .then(res => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: '123', // Automatic casting happens
+        })
+        .expect(200)
+        .then(res => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 'test', // Can't cast it into number
+        })
+        .expect(400)
+        .then(res => {
+          expect(res.body).toEqual({
+            error: 'Bad Request',
+            message: '[request body.baz]: expected value of type [number] but got [string]',
+            statusCode: 400,
+          });
+        });
     });
 
     it('401 Unauthorized', async () => {

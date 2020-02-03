@@ -85,7 +85,7 @@ describe('Top hit metric', () => {
     );
 
     // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
-    aggConfig = aggConfigs.aggs[0];
+    aggConfig = aggConfigs.aggs[0] as IMetricAggConfig;
     aggDsl = aggConfig.toDsl(aggConfigs);
   };
 

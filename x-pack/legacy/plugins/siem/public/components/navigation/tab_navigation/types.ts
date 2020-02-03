@@ -22,3 +22,12 @@ export interface TabNavigationProps extends SiemNavigationProps {
   [CONSTANTS.timerange]: UrlInputsModel;
   [CONSTANTS.timeline]: Timeline;
 }
+
+export interface TabNavigationItemProps {
+  href: string;
+  hrefWithSearch: string;
+  id: string;
+  disabled: boolean;
+  name: string;
+  isSelected: boolean;
+}

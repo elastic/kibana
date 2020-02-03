@@ -195,6 +195,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
               "_maxListeners": undefined,
               "_read": [Function],
               "_readableState": ReadableState {
+                "autoDestroy": false,
                 "awaitDrain": 0,
                 "buffer": BufferList {
                   "head": null,
@@ -254,6 +255,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
               "_maxListeners": undefined,
               "_read": [Function],
               "_readableState": ReadableState {
+                "autoDestroy": false,
                 "awaitDrain": 0,
                 "buffer": BufferList {
                   "head": null,

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * Builds the configuration object used to plot a chart showing where the anomalies occur in
  * the raw data in the Explorer dashboard.
@@ -31,9 +29,12 @@ export function buildConfig(record) {
   config.bucketSpanSeconds = parseInterval(job.analysis_config.bucket_span).asSeconds();
 
   config.detectorLabel = record.function;
-  if ((_.has(mlJobService.detectorsByJob, record.job_id)) &&
-    (detectorIndex < mlJobService.detectorsByJob[record.job_id].length)) {
-    config.detectorLabel = mlJobService.detectorsByJob[record.job_id][detectorIndex].detector_description;
+  if (
+    _.has(mlJobService.detectorsByJob, record.job_id) &&
+    detectorIndex < mlJobService.detectorsByJob[record.job_id].length
+  ) {
+    config.detectorLabel =
+      mlJobService.detectorsByJob[record.job_id][detectorIndex].detector_description;
   } else {
     if (record.field_name !== undefined) {
       config.detectorLabel += ` ${config.fieldName}`;
@@ -59,10 +60,10 @@ export function buildConfig(record) {
     jobId: record.job_id,
     aggregationInterval: config.interval,
     chartFunction: functionLabel,
-    entityFields: config.entityFields.map((f) => ({
+    entityFields: config.entityFields.map(f => ({
       fieldName: f.fieldName,
       fieldValue: f.fieldValue,
-    }))
+    })),
   };
 
   return config;

@@ -8,8 +8,8 @@ import compose from 'lodash/fp/compose';
 import React from 'react';
 import { match as RouteMatch, Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { replaceLogFilterInQueryString } from '../../containers/logs/with_log_filter';
-import { replaceLogPositionInQueryString } from '../../containers/logs/with_log_position';
+import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter';
+import { replaceLogPositionInQueryString } from '../../containers/logs/log_position';
 import { replaceSourceIdInQueryString } from '../../containers/source_id';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 

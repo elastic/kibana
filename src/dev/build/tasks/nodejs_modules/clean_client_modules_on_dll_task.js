@@ -17,20 +17,25 @@
  * under the License.
  */
 
-import { getDllEntries, cleanDllModuleFromEntryPath, writeEmptyFileForDllEntry } from './webpack_dll';
+import {
+  getDllEntries,
+  cleanDllModuleFromEntryPath,
+  writeEmptyFileForDllEntry,
+} from './webpack_dll';
 import { getDependencies } from './get_dependencies';
 import globby from 'globby';
 import normalizePosixPath from 'normalize-path';
 
 export const CleanClientModulesOnDLLTask = {
-  description:
-    'Cleaning client node_modules bundled into the DLL',
+  description: 'Cleaning client node_modules bundled into the DLL',
 
   async run(config, log, build) {
     const baseDir = normalizePosixPath(build.resolvePath('.'));
     const kbnPkg = config.getKibanaPkg();
     const kbnPkgDependencies = (kbnPkg && kbnPkg.dependencies) || {};
-    const kbnWebpackLoaders = Object.keys(kbnPkgDependencies).filter(dep => !!dep.includes('-loader'));
+    const kbnWebpackLoaders = Object.keys(kbnPkgDependencies).filter(
+      dep => !!dep.includes('-loader')
+    );
 
     // Define the entry points for the server code in order to
     // start here later looking for the server side dependencies
@@ -39,19 +44,21 @@ export const CleanClientModulesOnDLLTask = {
       `${baseDir}/src/cli_keystore`,
       `${baseDir}/src/cli_plugin`,
       `${baseDir}/x-pack`,
-      ...kbnWebpackLoaders.map(loader => `${baseDir}/node_modules/${loader}`)
+      ...kbnWebpackLoaders.map(loader => `${baseDir}/node_modules/${loader}`),
     ];
     const discoveredLegacyCorePluginEntries = await globby([
       `${baseDir}/src/legacy/core_plugins/*/index.js`,
-      `!${baseDir}/src/legacy/core_plugins/**/public`
+      // Small exception to load dynamically discovered functions for timelion plugin
+      `${baseDir}/src/legacy/core_plugins/timelion/server/*_functions/**/*.js`,
+      `!${baseDir}/src/legacy/core_plugins/**/public`,
     ]);
     const discoveredPluginEntries = await globby([
       `${baseDir}/src/plugins/*/server/index.js`,
-      `!${baseDir}/src/plugins/**/public`
+      `!${baseDir}/src/plugins/**/public`,
     ]);
     const discoveredNewPlatformXpackPlugins = await globby([
       `${baseDir}/x-pack/plugins/*/server/index.js`,
-      `!${baseDir}/x-pack/plugins/**/public`
+      `!${baseDir}/x-pack/plugins/**/public`,
     ]);
 
     // Compose all the needed entries
@@ -59,7 +66,7 @@ export const CleanClientModulesOnDLLTask = {
       ...mainCodeEntries,
       ...discoveredLegacyCorePluginEntries,
       ...discoveredPluginEntries,
-      ...discoveredNewPlatformXpackPlugins
+      ...discoveredNewPlatformXpackPlugins,
     ];
 
     // Get the dependencies found searching through the server
@@ -72,40 +79,35 @@ export const CleanClientModulesOnDLLTask = {
     // in https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/maps/public/connected_components/map/mb/view.js
     //
     // manual list of exception modules
-    const manualExceptionModules = [
-      'mapbox-gl'
-    ];
+    const manualExceptionModules = ['mapbox-gl'];
 
     // consider the top modules as exceptions as the entry points
     // to look for other exceptions dependent on that one
     const manualExceptionEntries = [
-      ...manualExceptionModules.map(module => `${baseDir}/node_modules/${module}`)
+      ...manualExceptionModules.map(module => `${baseDir}/node_modules/${module}`),
     ];
 
     // dependencies for declared exception modules
     const manualExceptionModulesDependencies = await getDependencies(baseDir, [
-      ...manualExceptionEntries
+      ...manualExceptionEntries,
     ]);
 
     // final list of manual exceptions to add
-    const manualExceptions = [
-      ...manualExceptionModules,
-      ...manualExceptionModulesDependencies
-    ];
+    const manualExceptions = [...manualExceptionModules, ...manualExceptionModulesDependencies];
 
     // Consider this as our whiteList for the modules we can't delete
-    const whiteListedModules = [
-      ...serverDependencies,
-      ...kbnWebpackLoaders,
-      ...manualExceptions
-    ];
+    const whiteListedModules = [...serverDependencies, ...kbnWebpackLoaders, ...manualExceptions];
 
-    // Resolve the client vendors dll manifest path
-    const dllManifestPath = `${baseDir}/built_assets/dlls/vendors.manifest.dll.json`;
+    // Resolve the client vendors dll manifest paths
+    // excluding the runtime one
+    const dllManifestPaths = await globby([
+      `${baseDir}/built_assets/dlls/vendors_*.manifest.dll.json`,
+      `!${baseDir}/built_assets/dlls/vendors_runtime.manifest.dll.json`,
+    ]);
 
     // Get dll entries filtering out the ones
     // from any whitelisted module
-    const dllEntries = await getDllEntries(dllManifestPath, whiteListedModules, baseDir);
+    const dllEntries = await getDllEntries(dllManifestPaths, whiteListedModules, baseDir);
 
     for (const relativeEntryPath of dllEntries) {
       const entryPath = `${baseDir}/${relativeEntryPath}`;
@@ -120,5 +122,5 @@ export const CleanClientModulesOnDLLTask = {
       await cleanDllModuleFromEntryPath(log, entryPath);
       await writeEmptyFileForDllEntry(entryPath);
     }
-  }
+  },
 };

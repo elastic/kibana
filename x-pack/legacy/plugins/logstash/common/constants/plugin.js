@@ -5,5 +5,5 @@
  */
 
 export const PLUGIN = {
-  ID: 'logstash'
+  ID: 'logstash',
 };

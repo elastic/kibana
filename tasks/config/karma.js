@@ -17,13 +17,16 @@
  * under the License.
  */
 
-import { resolve, dirname } from 'path';
+import { dirname } from 'path';
 import { times } from 'lodash';
+import { makeJunitReportPath } from '@kbn/test';
+import * as UiSharedDeps from '@kbn/ui-shared-deps';
+import { DllCompiler } from '../../src/optimize/dynamic_dll_plugin';
 
 const TOTAL_CI_SHARDS = 4;
 const ROOT = dirname(require.resolve('../../package.json'));
 
-module.exports = function (grunt) {
+module.exports = function(grunt) {
   function pickBrowser() {
     if (grunt.option('browser')) {
       return grunt.option('browser');
@@ -45,6 +48,30 @@ module.exports = function (grunt) {
     }
 
     return ['progress'];
+  }
+
+  function getKarmaFiles(shardNum) {
+    return [
+      'http://localhost:5610/test_bundle/built_css.css',
+
+      `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.distFilename}`,
+      'http://localhost:5610/built_assets/dlls/vendors_runtime.bundle.dll.js',
+      ...DllCompiler.getRawDllConfig().chunks.map(
+        chunk => `http://localhost:5610/built_assets/dlls/vendors${chunk}.bundle.dll.js`
+      ),
+
+      shardNum === undefined
+        ? `http://localhost:5610/bundles/tests.bundle.js`
+        : `http://localhost:5610/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${shardNum}`,
+
+      // this causes tilemap tests to fail, probably because the eui styles haven't been
+      // included in the karma harness a long some time, if ever
+      // `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
+      ...DllCompiler.getRawDllConfig().chunks.map(
+        chunk => `http://localhost:5610/built_assets/dlls/vendors${chunk}.style.dll.css`
+      ),
+      'http://localhost:5610/bundles/tests.style.css',
+    ];
   }
 
   const config = {
@@ -79,7 +106,7 @@ module.exports = function (grunt) {
       reporters: pickReporters(),
 
       junitReporter: {
-        outputFile: resolve(ROOT, 'target/junit', process.env.JOB || '.', `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}karma.xml`),
+        outputFile: makeJunitReportPath(ROOT, 'karma'),
         useBrowserName: false,
         nameFormatter: (_, result) => [...result.suite, result.description].join(' '),
         classNameFormatter: (_, result) => {
@@ -89,15 +116,7 @@ module.exports = function (grunt) {
       },
 
       // list of files / patterns to load in the browser
-      files: [
-        'http://localhost:5610/test_bundle/built_css.css',
-
-        'http://localhost:5610/built_assets/dlls/vendors.bundle.dll.js',
-        'http://localhost:5610/bundles/tests.bundle.js',
-
-        'http://localhost:5610/built_assets/dlls/vendors.style.dll.css',
-        'http://localhost:5610/bundles/tests.style.css',
-      ],
+      files: getKarmaFiles(),
 
       proxies: {
         '/tests/': 'http://localhost:5610/tests/',
@@ -180,15 +199,7 @@ module.exports = function (grunt) {
     config[`ciShard-${n}`] = {
       singleRun: true,
       options: {
-        files: [
-          'http://localhost:5610/test_bundle/built_css.css',
-
-          'http://localhost:5610/built_assets/dlls/vendors.bundle.dll.js',
-          `http://localhost:5610/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${n}`,
-
-          'http://localhost:5610/built_assets/dlls/vendors.style.dll.css',
-          'http://localhost:5610/bundles/tests.style.css',
-        ],
+        files: getKarmaFiles(n),
       },
     };
   });

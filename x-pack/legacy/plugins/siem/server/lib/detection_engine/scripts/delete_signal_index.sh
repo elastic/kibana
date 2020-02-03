@@ -10,9 +10,7 @@ set -e
 ./check_env_variables.sh
 
 # Example: ./delete_signal_index.sh
-# https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-index.html
 curl -s -k \
-  -H "Content-Type: application/json" \
+  -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X DELETE ${ELASTICSEARCH_URL}/${SIGNALS_INDEX} \
-  | jq .
+  -X DELETE ${KIBANA_URL}${SPACE_URL}/api/detection_engine/index | jq .

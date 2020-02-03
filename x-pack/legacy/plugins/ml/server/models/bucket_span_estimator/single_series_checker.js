@@ -4,21 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 /*
  * A class for performing a series of tests on an aggregation type and field to determine a suggested bucket span.
  * Each test is run for a bucket span, if one fails, the bucket span is increased and the tests run again.
  * Bucket spans: 5m, 10m, 30m, 1h, 3h
  */
 
-
 import { mlLog } from '../../client/log';
 import { INTERVALS, LONG_INTERVALS } from './intervals';
 
 export function singleSeriesCheckerFactory(callWithRequest) {
-  const REF_DATA_INTERVAL = { name: '1h',  ms: 3600000 };
+  const REF_DATA_INTERVAL = { name: '1h', ms: 3600000 };
 
   class SingleSeriesChecker {
     constructor(index, timeField, aggType, field, duration, query, thresholds) {
@@ -32,7 +28,7 @@ export function singleSeriesCheckerFactory(callWithRequest) {
       this.refMetricData = {
         varValue: 0,
         varDiff: 0,
-        created: false
+        created: false,
       };
 
       this.interval = null;
@@ -43,11 +39,11 @@ export function singleSeriesCheckerFactory(callWithRequest) {
         const start = () => {
           // run all tests, returns a suggested interval
           this.runTests()
-            .then((interval) => {
+            .then(interval => {
               this.interval = interval;
               resolve(this.interval);
             })
-            .catch((resp) => {
+            .catch(resp => {
               reject(resp);
             });
         };
@@ -60,7 +56,7 @@ export function singleSeriesCheckerFactory(callWithRequest) {
             .then(() => {
               start();
             })
-            .catch((resp) => {
+            .catch(resp => {
               mlLog.warn('SingleSeriesChecker: Could not load metric reference data');
               reject(resp);
             });
@@ -91,8 +87,10 @@ export function singleSeriesCheckerFactory(callWithRequest) {
           for (let i = 1; i < LONG_INTERVALS.length; i++) {
             const int1 = LONG_INTERVALS[i - 1];
             const int2 = LONG_INTERVALS[i];
-            if (this.thresholds.minimumBucketSpanMS > int1.ms &&
-              this.thresholds.minimumBucketSpanMS <= int2.ms) {
+            if (
+              this.thresholds.minimumBucketSpanMS > int1.ms &&
+              this.thresholds.minimumBucketSpanMS <= int2.ms
+            ) {
               // value is between two intervals, choose the highest
               interval = int2;
               break;
@@ -107,10 +105,10 @@ export function singleSeriesCheckerFactory(callWithRequest) {
         // recursive function called with the index of the INTERVALS array
         // each time one of the checks fails, the index is increased and
         // the tests are repeated.
-        const runTest = (i) => {
+        const runTest = i => {
           const interval = intervals[i];
           this.performSearch(interval.ms)
-            .then((resp) => {
+            .then(resp => {
               const buckets = resp.aggregations.non_empty_buckets.buckets;
               const fullBuckets = this.getFullBuckets(buckets);
               if (fullBuckets.length) {
@@ -151,8 +149,8 @@ export function singleSeriesCheckerFactory(callWithRequest) {
                 reject('runTest stopped because fullBuckets is empty');
               }
             })
-            .catch((resp) => {
-            // do something better with this
+            .catch(resp => {
+              // do something better with this
               reject(resp);
             });
         };
@@ -168,19 +166,19 @@ export function singleSeriesCheckerFactory(callWithRequest) {
           non_empty_buckets: {
             date_histogram: {
               field: this.timeField,
-              interval: `${intervalMs}ms`
-            }
-          }
-        }
+              interval: `${intervalMs}ms`,
+            },
+          },
+        },
       };
 
       if (this.field !== null) {
         search.aggs.non_empty_buckets.aggs = {
           fieldValue: {
             [this.aggType]: {
-              field: this.field
-            }
-          }
+              field: this.field,
+            },
+          },
         };
       }
       return search;
@@ -192,7 +190,7 @@ export function singleSeriesCheckerFactory(callWithRequest) {
       return callWithRequest('search', {
         index: this.index,
         size: 0,
-        body
+        body,
       });
     }
 
@@ -208,8 +206,8 @@ export function singleSeriesCheckerFactory(callWithRequest) {
 
     // test that the more than 20% of the buckets contain data
     testBucketPercentage(fullBuckets, buckets) {
-      const pcnt = (fullBuckets.length / buckets.length);
-      return (pcnt > 0.2);
+      const pcnt = fullBuckets.length / buckets.length;
+      return pcnt > 0.2;
     }
 
     // test that the full buckets contain at least 5 documents
@@ -219,7 +217,7 @@ export function singleSeriesCheckerFactory(callWithRequest) {
         totalCount += fullBuckets[i].doc_count;
       }
       const mean = totalCount / fullBuckets.length;
-      return (mean >= 5);
+      return mean >= 5;
     }
 
     // create the metric data used for the metric test and the metric test 1hr reference data
@@ -229,7 +227,7 @@ export function singleSeriesCheckerFactory(callWithRequest) {
       let sumOfValueDiffs = 0;
       for (let i = 1; i < fullBuckets.length; i++) {
         const value = fullBuckets[i].fieldValue.value;
-        const diff = (value - fullBuckets[i - 1].fieldValue.value);
+        const diff = value - fullBuckets[i - 1].fieldValue.value;
         sumOfValueDiffs += diff;
         valueDiffs.push(diff);
         sumOfValues += value;
@@ -244,14 +242,17 @@ export function singleSeriesCheckerFactory(callWithRequest) {
         sumOfSquareValueResiduals += Math.pow(fullBuckets[i].fieldValue.value - meanValue, 2);
         sumOfSquareValueDiffResiduals += Math.pow(valueDiffs[i] - meanValueDiff, 2);
       }
-      sumOfSquareValueResiduals += Math.pow(fullBuckets[fullBuckets.length - 1].fieldValue.value - meanValue, 2);
+      sumOfSquareValueResiduals += Math.pow(
+        fullBuckets[fullBuckets.length - 1].fieldValue.value - meanValue,
+        2
+      );
 
-      const varValue = sumOfSquareValueResiduals / (fullBuckets.length);
+      const varValue = sumOfSquareValueResiduals / fullBuckets.length;
       const varDiff = sumOfSquareValueDiffResiduals / (fullBuckets.length - 1);
 
       return {
         varValue,
-        varDiff
+        varDiff,
       };
     }
 
@@ -264,7 +265,7 @@ export function singleSeriesCheckerFactory(callWithRequest) {
         }
 
         this.performSearch(intervalMs) // 1h
-          .then((resp) => {
+          .then(resp => {
             const buckets = resp.aggregations.non_empty_buckets.buckets;
             const fullBuckets = this.getFullBuckets(buckets);
             if (fullBuckets.length) {
@@ -274,7 +275,7 @@ export function singleSeriesCheckerFactory(callWithRequest) {
 
             resolve();
           })
-          .catch((resp) => {
+          .catch(resp => {
             reject(resp);
           });
       });
@@ -283,11 +284,12 @@ export function singleSeriesCheckerFactory(callWithRequest) {
     // scale variation test
     testMetricData(fullBuckets) {
       const metricData = this.createMetricData(fullBuckets);
-      const stat = (metricData.varDiff / metricData.varValue) / (this.refMetricData.varDiff / this.refMetricData.varValue);
-      return (stat <= 5);
+      const stat =
+        metricData.varDiff /
+        metricData.varValue /
+        (this.refMetricData.varDiff / this.refMetricData.varValue);
+      return stat <= 5;
     }
-
-
   }
 
   return SingleSeriesChecker;

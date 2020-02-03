@@ -6,7 +6,6 @@
 
 import * as rt from 'io-ts';
 import { InventoryMetricRT, ItemTypeRT } from '../inventory_models/types';
-import { InfraWrappableRequest } from '../../server/lib/adapters/framework';
 import { InfraTimerangeInputRT } from './snapshot_api';
 
 const NodeDetailsDataPointRT = rt.intersection([
@@ -51,8 +50,6 @@ export const NodeDetailsRequestRT = rt.intersection([
 ]);
 
 // export type NodeDetailsRequest = InfraWrappableRequest<NodesArgs & SourceArgs>;
-
+export type NodeDetailsMetricData = rt.TypeOf<typeof NodeDetailsMetricDataRT>;
 export type NodeDetailsRequest = rt.TypeOf<typeof NodeDetailsRequestRT>;
-export type NodeDetailsWrappedRequest = InfraWrappableRequest<NodeDetailsRequest>;
-
 export type NodeDetailsMetricDataResponse = rt.TypeOf<typeof NodeDetailsMetricDataResponseRT>;

@@ -14,28 +14,20 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
   function setup({ enabled = true, adminEmail = null } = {}) {
     const config = { get: sinon.stub() };
 
-    config.get
-      .withArgs('xpack.monitoring.cluster_alerts.email_notifications.enabled')
-      .returns(enabled);
+    config.get.withArgs('monitoring.cluster_alerts.email_notifications.enabled').returns(enabled);
 
     if (adminEmail) {
-      config.get
-        .withArgs(`xpack.monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`)
-        .returns(adminEmail);
+      config.get.withArgs(`monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`).returns(adminEmail);
     }
 
-    config.get
-      .withArgs('kibana.index')
-      .returns('.kibana');
+    config.get.withArgs('kibana.index').returns('.kibana');
 
-    config.get
-      .withArgs('pkg.version')
-      .returns('1.1.1');
+    config.get.withArgs('pkg.version').returns('1.1.1');
 
     return config;
   }
 
-  describe('xpack.monitoring.cluster_alerts.email_notifications.enabled = false', () => {
+  describe('monitoring.cluster_alerts.email_notifications.enabled = false', () => {
     it('returns null when email is defined', async () => {
       const config = setup({ enabled: false });
       expect(await getDefaultAdminEmail(config)).to.be(null);
@@ -47,7 +39,7 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
     });
   });
 
-  describe('xpack.monitoring.cluster_alerts.email_notifications.enabled = true', () => {
+  describe('monitoring.cluster_alerts.email_notifications.enabled = true', () => {
     it('returns value when email is defined', async () => {
       const config = setup({ adminEmail: 'hello@world' });
       expect(await getDefaultAdminEmail(config)).to.be('hello@world');

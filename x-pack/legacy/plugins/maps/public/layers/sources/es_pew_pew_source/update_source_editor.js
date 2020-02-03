@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { indexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
+import { isNestedField } from '../../../../../../../../src/plugins/data/public';
 
 export class UpdateSourceEditor extends Component {
   state = {
@@ -49,37 +49,35 @@ export class UpdateSourceEditor extends Component {
       return;
     }
 
-    this.setState({ fields: indexPattern.fields });
+    this.setState({ fields: indexPattern.fields.filter(field => !isNestedField(field)) });
   }
 
   _onMetricsChange = metrics => {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 
-  _onApplyGlobalQueryChange = applyGlobalQuery => {
-    this.props.onChange({ propName: 'applyGlobalQuery', value: applyGlobalQuery });
-  };
-
   render() {
     return (
-      <>
-        <EuiTitle size="xxs">
-          <h6>
-            <FormattedMessage id="xpack.maps.source.pewPew.metricsLabel" defaultMessage="Metrics" />
-          </h6>
-        </EuiTitle>
+      <Fragment>
+        <EuiPanel>
+          <EuiTitle size="xs">
+            <h6>
+              <FormattedMessage
+                id="xpack.maps.source.pewPew.metricsLabel"
+                defaultMessage="Metrics"
+              />
+            </h6>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <MetricsEditor
+            allowMultipleMetrics={true}
+            fields={this.state.fields}
+            metrics={this.props.metrics}
+            onChange={this._onMetricsChange}
+          />
+        </EuiPanel>
         <EuiSpacer size="s" />
-        <MetricsEditor
-          allowMultipleMetrics={true}
-          fields={this.state.fields}
-          metrics={this.props.metrics}
-          onChange={this._onMetricsChange}
-        />
-        <GlobalFilterCheckbox
-          applyGlobalQuery={this.props.applyGlobalQuery}
-          setApplyGlobalQuery={this._onApplyGlobalQueryChange}
-        />
-      </>
+      </Fragment>
     );
   }
 }

@@ -47,3 +47,12 @@ jest.mock('moment-timezone', () => {
   moment.tz.guess = () => 'America/New_York';
   return moment;
 });
+
+jest.mock('@elastic/eui/lib/services/react', () => {
+  // `enqueueStateChange` is an EUI method to batch queued functions that trigger React `setState` calls.
+  // This is for performance, but when used in certain Jest scernarios it can be nondeterministic.
+  // Jest tests are never concerned about the state prior to batch completion, so we bypass batching entirely.
+  return {
+    enqueueStateChange: fn => fn(),
+  };
+});

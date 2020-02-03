@@ -150,7 +150,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
               onClick={() => onSectionChange(tab.id)}
               isSelected={tab.id === section}
               key={tab.id}
-              data-test-subj="tab"
+              data-test-subj={tab.id.toLowerCase() + '_tab'}
             >
               {tab.name}
             </EuiTab>

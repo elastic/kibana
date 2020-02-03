@@ -18,24 +18,54 @@
  */
 
 import { PluginInitializerContext } from '../../../core/public';
-import { DataPublicPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataPublicPlugin(initializerContext);
 }
 
-export { DataPublicPlugin as Plugin };
-
-export * from '../common';
-
-export * from './autocomplete_provider';
-export * from './field_formats_provider';
-export * from './index_patterns';
-
-export * from './types';
-
+/**
+ * Types to be shared externally
+ * @public
+ */
 export { IRequestTypesMap, IResponseTypesMap } from './search';
+export * from './types';
+export {
+  // index patterns
+  IIndexPattern,
+  IFieldType,
+  IFieldSubType,
+  // kbn field types
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  // query
+  Query,
+  // timefilter
+  RefreshInterval,
+  TimeRange,
+} from '../common';
+export { autocomplete } from './autocomplete';
+export * from './field_formats';
+export * from './index_patterns';
 export * from './search';
 export * from './query';
-
 export * from './ui';
+export {
+  // es query
+  esFilters,
+  esKuery,
+  esQuery,
+  fieldFormats,
+  // index patterns
+  isFilterable,
+  // kbn field types
+  castEsToKbnFieldTypeName,
+  getKbnFieldType,
+  getKbnTypeNames,
+  // utils
+  parseInterval,
+  isNestedField,
+} from '../common';
+
+// Export plugin after all other imports
+import { DataPublicPlugin } from './plugin';
+export { DataPublicPlugin as Plugin };

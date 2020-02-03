@@ -60,12 +60,12 @@ export function getOrdinalValue(number) {
   let lastDigit = num && num.substr(-1);
   let ordinal;
 
-  if(!lastDigit) {
+  if (!lastDigit) {
     return number;
   }
   lastDigit = parseFloat(lastDigit);
 
-  switch(lastDigit) {
+  switch (lastDigit) {
     case 1:
       ordinal = 'st';
       break;

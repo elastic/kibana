@@ -31,6 +31,22 @@ export interface IndexPatternMapping {
   id: string;
 }
 
+export interface LayerMappingDetails {
+  metricField: string;
+  geoField: string;
+  tooltipProperties: string[];
+  label: string;
+}
+
+export interface LayerMapping {
+  source: LayerMappingDetails;
+  destination: LayerMappingDetails;
+}
+
+export interface LayerMappingCollection {
+  [indexPatternTitle: string]: LayerMapping;
+}
+
 export type SetQuery = (params: {
   id: string;
   inspect: inputsModel.InspectQuery | null;

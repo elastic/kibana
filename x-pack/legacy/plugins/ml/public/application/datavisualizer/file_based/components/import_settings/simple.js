@@ -7,14 +7,9 @@
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import {
-  EuiFieldText,
-  EuiFormRow,
-  EuiCheckbox,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiCheckbox, EuiSpacer } from '@elastic/eui';
 
-export const SimpleSettings = injectI18n(function ({
+export const SimpleSettings = injectI18n(function({
   index,
   initialized,
   onIndexChange,
@@ -38,15 +33,15 @@ export const SimpleSettings = injectI18n(function ({
         <EuiFieldText
           placeholder={intl.formatMessage({
             id: 'xpack.ml.fileDatavisualizer.simpleImportSettings.indexNamePlaceholder',
-            defaultMessage: 'index name'
+            defaultMessage: 'index name',
           })}
           value={index}
-          disabled={(initialized === true)}
+          disabled={initialized === true}
           onChange={onIndexChange}
           isInvalid={indexNameError !== ''}
           aria-label={intl.formatMessage({
             id: 'xpack.ml.fileDatavisualizer.simpleImportSettings.indexNameAriaLabel',
-            defaultMessage: 'Index name, required field'
+            defaultMessage: 'Index name, required field',
           })}
         />
       </EuiFormRow>
@@ -61,8 +56,8 @@ export const SimpleSettings = injectI18n(function ({
             defaultMessage="Create index pattern"
           />
         }
-        checked={(createIndexPattern === true)}
-        disabled={(initialized === true)}
+        checked={createIndexPattern === true}
+        disabled={initialized === true}
         onChange={onCreateIndexPatternChange}
       />
     </React.Fragment>

@@ -29,10 +29,11 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -82,10 +83,11 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -131,10 +133,11 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -184,10 +187,11 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -233,10 +237,11 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -286,10 +291,11 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}

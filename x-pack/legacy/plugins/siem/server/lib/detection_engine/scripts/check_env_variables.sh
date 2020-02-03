@@ -30,11 +30,6 @@ if [ -z "${KIBANA_URL}" ]; then
   exit 1
 fi
 
-if [ -z "${SIGNALS_INDEX}" ]; then
-  echo "Set SIGNALS_INDEX in your environment"
-  exit 1
-fi
-
 if [ -z "${TASK_MANAGER_INDEX}" ]; then
   echo "Set TASK_MANAGER_INDEX in your environment"
   exit 1

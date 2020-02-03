@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { i18n } from '@kbn/i18n';
 import Boom from 'boom';
 
@@ -21,39 +19,53 @@ import { validateInfluencers } from './validate_influencers';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
 
-export async function validateJob(callWithRequest, payload, kbnVersion = 'current', elasticsearchPlugin, xpackMainPlugin) {
+export async function validateJob(
+  callWithRequest,
+  payload,
+  kbnVersion = 'current',
+  elasticsearchPlugin,
+  xpackMainPlugin
+) {
   const messages = getMessages();
 
   try {
     if (typeof payload !== 'object' || payload === null) {
-      throw new Error(i18n.translate('xpack.ml.models.jobValidation.payloadIsNotObjectErrorMessage', {
-        defaultMessage: 'Invalid {invalidParamName}: Needs to be an object.',
-        values: { invalidParamName: 'payload' },
-      }));
+      throw new Error(
+        i18n.translate('xpack.ml.models.jobValidation.payloadIsNotObjectErrorMessage', {
+          defaultMessage: 'Invalid {invalidParamName}: Needs to be an object.',
+          values: { invalidParamName: 'payload' },
+        })
+      );
     }
 
     const { fields, job } = payload;
     let { duration } = payload;
 
     if (typeof job !== 'object') {
-      throw new Error(i18n.translate('xpack.ml.models.jobValidation.jobIsNotObjectErrorMessage', {
-        defaultMessage: 'Invalid {invalidParamName}: Needs to be an object.',
-        values: { invalidParamName: 'job' },
-      }));
+      throw new Error(
+        i18n.translate('xpack.ml.models.jobValidation.jobIsNotObjectErrorMessage', {
+          defaultMessage: 'Invalid {invalidParamName}: Needs to be an object.',
+          values: { invalidParamName: 'job' },
+        })
+      );
     }
 
     if (typeof job.analysis_config !== 'object') {
-      throw new Error(i18n.translate('xpack.ml.models.jobValidation.analysisConfigIsNotObjectErrorMessage', {
-        defaultMessage: 'Invalid {invalidParamName}: Needs to be an object.',
-        values: { invalidParamName: 'job.analysis_config' },
-      }));
+      throw new Error(
+        i18n.translate('xpack.ml.models.jobValidation.analysisConfigIsNotObjectErrorMessage', {
+          defaultMessage: 'Invalid {invalidParamName}: Needs to be an object.',
+          values: { invalidParamName: 'job.analysis_config' },
+        })
+      );
     }
 
     if (!Array.isArray(job.analysis_config.detectors)) {
-      throw new Error(i18n.translate('xpack.ml.models.jobValidation.detectorsAreNotArrayErrorMessage', {
-        defaultMessage: 'Invalid {invalidParamName}: Needs to be an array.',
-        values: { invalidParamName: 'job.analysis_config.detectors' },
-      }));
+      throw new Error(
+        i18n.translate('xpack.ml.models.jobValidation.detectorsAreNotArrayErrorMessage', {
+          defaultMessage: 'Invalid {invalidParamName}: Needs to be an array.',
+          values: { invalidParamName: 'job.analysis_config.detectors' },
+        })
+      );
     }
 
     // check if basic tests pass the requirements to run the extended tests.
@@ -65,29 +77,22 @@ export async function validateJob(callWithRequest, payload, kbnVersion = 'curren
     if (basicValidation.valid === true) {
       // remove basic success messages from tests
       // where we run additional extended tests.
-      const filteredBasicValidationMessages = basicValidation.messages.filter((m) => {
+      const filteredBasicValidationMessages = basicValidation.messages.filter(m => {
         return m.id !== 'bucket_span_valid';
       });
 
       // if no duration was part of the request, fall back to finding out
       // the time range of the time field of the index, but also check first
       // if the time field is a valid field of type 'date' using isValidTimeField()
-      if (
-        typeof duration === 'undefined' &&
-        await isValidTimeField(callWithRequest, job)
-      ) {
+      if (typeof duration === 'undefined' && (await isValidTimeField(callWithRequest, job))) {
         const fs = fieldsServiceProvider(callWithRequest);
         const index = job.datafeed_config.indices.join(',');
         const timeField = job.data_description.time_field;
-        const timeRange = await fs.getTimeFieldRange(
-          index,
-          timeField,
-          job.datafeed_config.query
-        );
+        const timeRange = await fs.getTimeFieldRange(index, timeField, job.datafeed_config.query);
 
         duration = {
           start: timeRange.start.epoch,
-          end: timeRange.end.epoch
+          end: timeRange.end.epoch,
         };
       }
 
@@ -97,20 +102,29 @@ export async function validateJob(callWithRequest, payload, kbnVersion = 'curren
       // so we can decide later whether certain additional tests should be run
       const cardinalityMessages = await validateCardinality(callWithRequest, job);
       validationMessages.push(...cardinalityMessages);
-      const cardinalityError = cardinalityMessages.some((m) => {
+      const cardinalityError = cardinalityMessages.some(m => {
         return VALIDATION_STATUS[messages[m.id].status] === VALIDATION_STATUS.ERROR;
       });
 
-      validationMessages.push(...await validateBucketSpan(callWithRequest, job, duration, elasticsearchPlugin, xpackMainPlugin));
-      validationMessages.push(...await validateTimeRange(callWithRequest, job, duration));
+      validationMessages.push(
+        ...(await validateBucketSpan(
+          callWithRequest,
+          job,
+          duration,
+          elasticsearchPlugin,
+          xpackMainPlugin
+        ))
+      );
+      validationMessages.push(...(await validateTimeRange(callWithRequest, job, duration)));
 
       // only run the influencer and model memory limit checks
       // if cardinality checks didn't return a message with an error level
       if (cardinalityError === false) {
-        validationMessages.push(...await validateInfluencers(callWithRequest, job));
-        validationMessages.push(...await validateModelMemoryLimit(callWithRequest, job, duration));
+        validationMessages.push(...(await validateInfluencers(callWithRequest, job)));
+        validationMessages.push(
+          ...(await validateModelMemoryLimit(callWithRequest, job, duration))
+        );
       }
-
     } else {
       validationMessages = basicValidation.messages;
       validationMessages.push({ id: 'skipped_extended_tests' });
@@ -133,10 +147,13 @@ export async function validateJob(callWithRequest, payload, kbnVersion = 'curren
 
         message.status = VALIDATION_STATUS[messages[message.id].status];
       } else {
-        message.text = i18n.translate('xpack.ml.models.jobValidation.unknownMessageIdErrorMessage', {
-          defaultMessage: '{messageId} (unknown message id)',
-          values: { messageId: message.id },
-        });
+        message.text = i18n.translate(
+          'xpack.ml.models.jobValidation.unknownMessageIdErrorMessage',
+          {
+            defaultMessage: '{messageId} (unknown message id)',
+            values: { messageId: message.id },
+          }
+        );
       }
 
       return message;

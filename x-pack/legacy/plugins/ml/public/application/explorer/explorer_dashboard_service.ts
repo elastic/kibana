@@ -9,30 +9,25 @@
  * components in the Explorer dashboard.
  */
 
-import { isEqual, pick } from 'lodash';
+import { isEqual } from 'lodash';
 
-import { from, isObservable, BehaviorSubject, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, flatMap, map, pairwise, scan } from 'rxjs/operators';
+import { from, isObservable, Observable, Subject } from 'rxjs';
+import { distinctUntilChanged, flatMap, map, scan } from 'rxjs/operators';
 
 import { DeepPartial } from '../../../common/types/common';
 
-import { jobSelectionActionCreator, loadExplorerData } from './actions';
+import { jobSelectionActionCreator } from './actions';
 import { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from './explorer_constants';
-import { RestoredAppState, SelectedCells, TimeRangeBounds } from './explorer_utils';
-import {
-  explorerReducer,
-  getExplorerDefaultState,
-  ExplorerAppState,
-  ExplorerState,
-} from './reducers';
+import { AppStateSelectedCells, TimeRangeBounds } from './explorer_utils';
+import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
 
 export const ALLOW_CELL_RANGE_SELECTION = true;
 
 export const dragSelect$ = new Subject();
 
 type ExplorerAction = Action | Observable<ActionPayload>;
-const explorerAction$ = new BehaviorSubject<ExplorerAction>({ type: EXPLORER_ACTION.RESET });
+export const explorerAction$ = new Subject<ExplorerAction>();
 
 export type ActionPayload = any;
 
@@ -51,94 +46,79 @@ const explorerFilteredAction$ = explorerAction$.pipe(
 
 // applies action and returns state
 const explorerState$: Observable<ExplorerState> = explorerFilteredAction$.pipe(
-  scan(explorerReducer, getExplorerDefaultState()),
-  pairwise(),
-  map(([prev, curr]) => {
-    if (
-      curr.selectedJobs !== null &&
-      curr.bounds !== undefined &&
-      !isEqual(getCompareState(prev), getCompareState(curr))
-    ) {
-      explorerAction$.next(loadExplorerData(curr).pipe(map(d => setStateActionCreator(d))));
-    }
-    return curr;
-  })
+  scan(explorerReducer, getExplorerDefaultState())
 );
 
+interface ExplorerAppState {
+  mlExplorerSwimlane: {
+    selectedType?: string;
+    selectedLanes?: string[];
+    selectedTimes?: number[];
+    showTopFieldValues?: boolean;
+    viewByFieldName?: string;
+  };
+  mlExplorerFilter: {
+    influencersFilterQuery?: unknown;
+    filterActive?: boolean;
+    filteredFields?: string[];
+    queryString?: string;
+  };
+}
+
 const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
-  map((state: ExplorerState) => state.appState),
+  map(
+    (state: ExplorerState): ExplorerAppState => {
+      const appState: ExplorerAppState = {
+        mlExplorerFilter: {},
+        mlExplorerSwimlane: {},
+      };
+
+      if (state.selectedCells !== undefined) {
+        const swimlaneSelectedCells = state.selectedCells;
+        appState.mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
+        appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
+        appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
+        appState.mlExplorerSwimlane.showTopFieldValues = swimlaneSelectedCells.showTopFieldValues;
+      }
+
+      if (state.viewBySwimlaneFieldName !== undefined) {
+        appState.mlExplorerSwimlane.viewByFieldName = state.viewBySwimlaneFieldName;
+      }
+
+      if (state.filterActive) {
+        appState.mlExplorerFilter.influencersFilterQuery = state.influencersFilterQuery;
+        appState.mlExplorerFilter.filterActive = state.filterActive;
+        appState.mlExplorerFilter.filteredFields = state.filteredFields;
+        appState.mlExplorerFilter.queryString = state.queryString;
+      }
+
+      return appState;
+    }
+  ),
   distinctUntilChanged(isEqual)
 );
 
-function getCompareState(state: ExplorerState) {
-  return pick(state, [
-    'bounds',
-    'filterActive',
-    'filteredFields',
-    'influencersFilterQuery',
-    'isAndOperator',
-    'noInfluencersConfigured',
-    'selectedCells',
-    'selectedJobs',
-    'swimlaneContainerWidth',
-    'swimlaneLimit',
-    'tableInterval',
-    'tableSeverity',
-    'viewBySwimlaneFieldName',
-  ]);
-}
-
-export const setStateActionCreator = (payload: DeepPartial<ExplorerState>) => ({
-  type: EXPLORER_ACTION.SET_STATE,
+const setExplorerDataActionCreator = (payload: DeepPartial<ExplorerState>) => ({
+  type: EXPLORER_ACTION.SET_EXPLORER_DATA,
   payload,
 });
-
-interface AppStateSelection {
-  type: string;
-  lanes: string[];
-  times: number[];
-  showTopFieldValues: boolean;
-  viewByFieldName: string;
-}
+const setFilterDataActionCreator = (payload: DeepPartial<ExplorerState>) => ({
+  type: EXPLORER_ACTION.SET_FILTER_DATA,
+  payload,
+});
 
 // Export observable state and action dispatchers as service
 export const explorerService = {
   appState$: explorerAppState$,
   state$: explorerState$,
-  appStateClearSelection: () => {
-    explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
-  },
-  appStateSaveSelection: (payload: AppStateSelection) => {
-    explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_SAVE_SELECTION, payload });
-  },
   clearInfluencerFilterSettings: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS });
   },
   clearJobs: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_JOBS });
   },
-  clearSelection: () => {
-    explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_SELECTION });
-  },
-  updateJobSelection: (selectedJobIds: string[], restoredAppState: RestoredAppState) => {
-    explorerAction$.next(
-      jobSelectionActionCreator(
-        EXPLORER_ACTION.JOB_SELECTION_CHANGE,
-        selectedJobIds,
-        restoredAppState
-      )
-    );
-  },
-  initialize: (selectedJobIds: string[], restoredAppState: RestoredAppState) => {
-    explorerAction$.next(
-      jobSelectionActionCreator(EXPLORER_ACTION.INITIALIZE, selectedJobIds, restoredAppState)
-    );
-  },
-  reset: () => {
-    explorerAction$.next({ type: EXPLORER_ACTION.RESET });
-  },
-  setAppState: (payload: DeepPartial<ExplorerAppState>) => {
-    explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_SET, payload });
+  updateJobSelection: (selectedJobIds: string[]) => {
+    explorerAction$.next(jobSelectionActionCreator(selectedJobIds));
   },
   setBounds: (payload: TimeRangeBounds) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_BOUNDS, payload });
@@ -152,14 +132,17 @@ export const explorerService = {
       payload,
     });
   },
-  setSelectedCells: (payload: SelectedCells) => {
+  setSelectedCells: (payload: AppStateSelectedCells | undefined) => {
     explorerAction$.next({
       type: EXPLORER_ACTION.SET_SELECTED_CELLS,
       payload,
     });
   },
-  setState: (payload: DeepPartial<ExplorerState>) => {
-    explorerAction$.next(setStateActionCreator(payload));
+  setExplorerData: (payload: DeepPartial<ExplorerState>) => {
+    explorerAction$.next(setExplorerDataActionCreator(payload));
+  },
+  setFilterData: (payload: DeepPartial<ExplorerState>) => {
+    explorerAction$.next(setFilterDataActionCreator(payload));
   },
   setSwimlaneContainerWidth: (payload: number) => {
     explorerAction$.next({

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
@@ -15,9 +15,9 @@ import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
-import { useKibanaCore } from '../../../../../observability/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 const initalData = {
   items: [],
@@ -28,7 +28,7 @@ const initalData = {
 let hasDisplayedToast = false;
 
 export function ServiceOverview() {
-  const core = useKibanaCore();
+  const { core } = useApmPluginContext();
   const {
     urlParams: { start, end },
     uiFilters
@@ -94,23 +94,26 @@ export function ServiceOverview() {
   );
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <LocalUIFilters {...localFiltersConfig} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={7}>
-        <EuiPanel>
-          <ServiceList
-            items={data.items}
-            noItemsMessage={
-              <NoServicesMessage
-                historicalDataFound={data.hasHistoricalData}
-                status={status}
-              />
-            }
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <LocalUIFilters {...localFiltersConfig} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={7}>
+          <EuiPanel>
+            <ServiceList
+              items={data.items}
+              noItemsMessage={
+                <NoServicesMessage
+                  historicalDataFound={data.hasHistoricalData}
+                  status={status}
+                />
+              }
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }

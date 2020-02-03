@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
 import { useVisibilityState } from '../../utils/use_visibility_state';
@@ -47,8 +47,25 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
   } = useVisibilityState(false);
 
   // Input field state
-  const [highlightTerm, setHighlightTerm] = useState('');
+  const [highlightTerm, _setHighlightTerm] = useState('');
+
   const debouncedOnChange = useMemo(() => debounce(onChange, 275), [onChange]);
+  const setHighlightTerm = useCallback<typeof _setHighlightTerm>(
+    valueOrUpdater =>
+      _setHighlightTerm(previousHighlightTerm => {
+        const newHighlightTerm =
+          typeof valueOrUpdater === 'function'
+            ? valueOrUpdater(previousHighlightTerm)
+            : valueOrUpdater;
+
+        if (newHighlightTerm !== previousHighlightTerm) {
+          debouncedOnChange([newHighlightTerm]);
+        }
+
+        return newHighlightTerm;
+      }),
+    [debouncedOnChange]
+  );
   const changeHighlightTerm = useCallback(
     e => {
       const value = e.target.value;
@@ -57,9 +74,6 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
     [setHighlightTerm]
   );
   const clearHighlightTerm = useCallback(() => setHighlightTerm(''), [setHighlightTerm]);
-  useEffect(() => {
-    debouncedOnChange([highlightTerm]);
-  }, [highlightTerm]);
 
   const button = (
     <EuiButtonEmpty color="text" size="xs" iconType="brush" onClick={togglePopover}>

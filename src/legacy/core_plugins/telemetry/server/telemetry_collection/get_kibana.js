@@ -21,7 +21,10 @@ import { get, omit } from 'lodash';
 
 export function handleKibanaStats(server, response) {
   if (!response) {
-    server.log(['warning', 'telemetry', 'local-stats'], 'No Kibana stats returned from usage collectors');
+    server.log(
+      ['warning', 'telemetry', 'local-stats'],
+      'No Kibana stats returned from usage collectors'
+    );
     return;
   }
 
@@ -30,7 +33,10 @@ export function handleKibanaStats(server, response) {
   const platform = get(kibanaStats, 'os.platform', 'unknown');
   const platformRelease = get(kibanaStats, 'os.platformRelease', 'unknown');
 
-  const version = server.config().get('pkg.version').replace(/-snapshot/i, '');
+  const version = server
+    .config()
+    .get('pkg.version')
+    .replace(/-snapshot/i, '');
 
   // combine core stats (os types, saved objects) with plugin usage stats
   // organize the object into the same format as monitoring-enabled telemetry

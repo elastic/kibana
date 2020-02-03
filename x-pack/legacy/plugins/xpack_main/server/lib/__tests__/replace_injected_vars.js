@@ -16,10 +16,11 @@ const buildRequest = (path = '/app/kibana') => {
   return {
     path,
     route: { settings: {} },
+    headers: {},
     raw: {
       req: {
-        socket: {}
-      }
+        socket: {},
+      },
     },
     getSavedObjectsClient: () => {
       return {
@@ -27,12 +28,12 @@ const buildRequest = (path = '/app/kibana') => {
         create: sinon.stub(),
 
         errors: {
-          isNotFoundError: (error) => {
+          isNotFoundError: error => {
             return error.message === 'not found exception';
-          }
-        }
+          },
+        },
       };
-    }
+    },
   };
 };
 
@@ -46,7 +47,7 @@ describe('replaceInjectedVars uiExport', () => {
     expect(newVars).to.eql({
       a: 1,
       xpackInitialInfo: {
-        b: 1
+        b: 1,
       },
     });
 
@@ -68,7 +69,7 @@ describe('replaceInjectedVars uiExport', () => {
     expect(newVars).to.eql({
       a: 1,
       xpackInitialInfo: {
-        b: 1
+        b: 1,
       },
     });
   });
@@ -83,7 +84,7 @@ describe('replaceInjectedVars uiExport', () => {
     expect(newVars).to.eql({
       a: 1,
       xpackInitialInfo: {
-        b: 1
+        b: 1,
       },
     });
   });
@@ -98,7 +99,7 @@ describe('replaceInjectedVars uiExport', () => {
     expect(newVars).to.eql({
       a: 1,
       xpackInitialInfo: {
-        b: 1
+        b: 1,
       },
     });
   });
@@ -113,7 +114,7 @@ describe('replaceInjectedVars uiExport', () => {
     expect(newVars).to.eql({
       a: 1,
       xpackInitialInfo: {
-        b: 1
+        b: 1,
       },
     });
   });
@@ -128,7 +129,7 @@ describe('replaceInjectedVars uiExport', () => {
     expect(newVars).to.eql({
       a: 1,
       xpackInitialInfo: {
-        b: 1
+        b: 1,
       },
     });
   });
@@ -154,7 +155,10 @@ describe('replaceInjectedVars uiExport', () => {
   });
 
   it('sends the originalInjectedVars (with xpackInitialInfo = undefined) if security is disabled, xpack info is unavailable', async () => {
-    const originalInjectedVars = { a: 1, uiCapabilities: { navLinks: { foo: true }, bar: { baz: true }, catalogue: { cfoo: true } } };
+    const originalInjectedVars = {
+      a: 1,
+      uiCapabilities: { navLinks: { foo: true }, bar: { baz: true }, catalogue: { cfoo: true } },
+    };
     const request = buildRequest();
     const server = mockServer();
     delete server.plugins.security;
@@ -169,7 +173,7 @@ describe('replaceInjectedVars uiExport', () => {
         bar: { baz: true },
         catalogue: {
           cfoo: true,
-        }
+        },
       },
     });
   });
@@ -192,37 +196,39 @@ function mockServer() {
   return {
     newPlatform: {
       setup: {
-        plugins: { security: { authc: { isAuthenticated: sinon.stub().returns(true) } } }
-      }
+        plugins: { security: { authc: { isAuthenticated: sinon.stub().returns(true) } } },
+      },
     },
     plugins: {
       security: {},
       xpack_main: {
-        getFeatures: () => [{
-          id: 'mockFeature',
-          name: 'Mock Feature',
-          privileges: {
-            all: {
-              app: [],
-              savedObject: {
-                all: [],
-                read: [],
+        getFeatures: () => [
+          {
+            id: 'mockFeature',
+            name: 'Mock Feature',
+            privileges: {
+              all: {
+                app: [],
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: ['mockFeatureCapability'],
               },
-              ui: ['mockFeatureCapability']
-            }
-          }
-        }],
+            },
+          },
+        ],
         info: {
           isAvailable: sinon.stub().returns(true),
           feature: () => ({
-            getLicenseCheckResults
+            getLicenseCheckResults,
           }),
           license: {
-            isOneOf: sinon.stub().returns(false)
+            isOneOf: sinon.stub().returns(false),
           },
-          toJSON: () => ({ b: 1 })
-        }
-      }
-    }
+          toJSON: () => ({ b: 1 }),
+        },
+      },
+    },
   };
 }

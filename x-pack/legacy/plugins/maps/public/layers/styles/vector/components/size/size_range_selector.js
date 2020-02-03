@@ -7,21 +7,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ValidatedDualRange } from 'ui/validated_range';
-import { DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE } from '../../vector_style_defaults';
+import { MIN_SIZE, MAX_SIZE } from '../../vector_style_defaults';
 import { i18n } from '@kbn/i18n';
 
 export function SizeRangeSelector({ minSize, maxSize, onChange, ...rest }) {
   const onSizeChange = ([min, max]) => {
     onChange({
-      minSize: Math.max(DEFAULT_MIN_SIZE, parseInt(min, 10)),
-      maxSize: Math.min(DEFAULT_MAX_SIZE, parseInt(max, 10)),
+      minSize: Math.max(MIN_SIZE, parseInt(min, 10)),
+      maxSize: Math.min(MAX_SIZE, parseInt(max, 10)),
     });
   };
 
   return (
     <ValidatedDualRange
-      min={DEFAULT_MIN_SIZE}
-      max={DEFAULT_MAX_SIZE}
+      min={MIN_SIZE}
+      max={MAX_SIZE}
       step={1}
       value={[minSize, maxSize]}
       showInput="inputWithPopover"

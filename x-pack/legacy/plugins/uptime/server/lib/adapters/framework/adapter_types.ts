@@ -4,62 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GraphQLOptions } from 'apollo-server-core';
 import { GraphQLSchema } from 'graphql';
-import { Lifecycle, ResponseToolkit } from 'hapi';
-import { RouteOptions } from 'hapi';
-import { SavedObjectsLegacyService } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import {
+  SavedObjectsLegacyService,
+  IRouter,
+  CallAPIOptions,
+  SavedObjectsClientContract,
+} from 'src/core/server';
+import { UMKibanaRoute } from '../../../rest_api';
 
-export interface UMFrameworkRequest {
-  user: string;
-  headers: Record<string, any>;
-  payload: Record<string, any>;
-  params: Record<string, any>;
-  query: Record<string, any>;
-}
+type APICaller = (
+  endpoint: string,
+  clientParams: Record<string, any>,
+  options?: CallAPIOptions
+) => Promise<any>;
 
-export type UMFrameworkResponse = Lifecycle.ReturnValue;
+export type UMElasticsearchQueryFn<P, R = any> = (
+  params: { callES: APICaller } & P
+) => Promise<R> | R;
 
-export interface UMFrameworkRouteOptions<
-  RouteRequest extends UMFrameworkRequest,
-  RouteResponse extends UMFrameworkResponse
-> {
-  path: string;
-  method: string;
-  handler: (req: Request, h: ResponseToolkit) => any;
-  config?: any;
-}
+export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
+  client: SavedObjectsClientContract,
+  params: P
+) => Promise<T> | T;
 
 export interface UptimeCoreSetup {
-  route: any;
+  route: IRouter;
 }
 
 export interface UptimeCorePlugins {
-  elasticsearch: any;
-  savedObjects: SavedObjectsLegacyService<any>;
+  savedObjects: SavedObjectsLegacyService;
   usageCollection: UsageCollectionSetup;
   xpack: any;
 }
 
-export type UMFrameworkRouteHandler<RouteRequest extends UMFrameworkRequest> = (
-  request: UMFrameworkRequest,
-  h: ResponseToolkit
-) => void;
-
-export type HapiOptionsFunction = (req: Request) => GraphQLOptions | Promise<GraphQLOptions>;
-
-export interface UMHapiGraphQLPluginOptions {
-  path: string;
-  vhost?: string;
-  route?: RouteOptions;
-  graphQLOptions: GraphQLOptions | HapiOptionsFunction;
-}
-
 export interface UMBackendFrameworkAdapter {
-  registerRoute<RouteRequest extends UMFrameworkRequest, RouteResponse extends UMFrameworkResponse>(
-    route: UMFrameworkRouteOptions<RouteRequest, RouteResponse>
-  ): void;
+  registerRoute(route: UMKibanaRoute): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
-  getSavedObjectsClient(): any;
 }

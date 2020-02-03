@@ -21,12 +21,12 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
 import { IndexPattern } from '../index_patterns';
-import { getNotifications, getFieldFormats } from '../services';
+import { getNotifications, getFieldFormats } from '../../services';
 import {
   IFieldType,
   getKbnFieldType,
   IFieldSubType,
-  FieldFormat,
+  fieldFormats,
   shortenDottedString,
 } from '../../../common';
 
@@ -94,12 +94,13 @@ export class Field implements IFieldType {
     if (!type) type = getKbnFieldType('unknown');
 
     let format = spec.format;
-    if (!format || !(format instanceof FieldFormat)) {
-      const fieldFormats = getFieldFormats();
+
+    if (!fieldFormats.FieldFormat.isInstanceOfFieldFormat(format)) {
+      const fieldFormatsService = getFieldFormats();
 
       format =
         indexPattern.fieldFormatMap[spec.name] ||
-        fieldFormats.getDefaultInstance(spec.type, spec.esTypes);
+        fieldFormatsService.getDefaultInstance(spec.type, spec.esTypes);
     }
 
     const indexed = !!spec.indexed;

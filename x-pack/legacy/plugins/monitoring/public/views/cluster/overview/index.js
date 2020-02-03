@@ -23,7 +23,7 @@ uiRoutes.when('/overview', {
       // checks license info of all monitored clusters for multi-cluster monitoring usage and capability
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: CODE_PATHS });
-    }
+    },
   },
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
@@ -34,16 +34,20 @@ uiRoutes.when('/overview', {
 
       super({
         title: i18n.translate('xpack.monitoring.cluster.overviewTitle', {
-          defaultMessage: 'Overview'
+          defaultMessage: 'Overview',
         }),
         defaultData: {},
         getPageData: async () => {
-          const clusters = await monitoringClusters(globalState.cluster_uuid, globalState.ccs, CODE_PATHS);
+          const clusters = await monitoringClusters(
+            globalState.cluster_uuid,
+            globalState.ccs,
+            CODE_PATHS
+          );
           return clusters[0];
         },
         reactNodeId: 'monitoringClusterOverviewApp',
         $scope,
-        $injector
+        $injector,
       });
 
       const changeUrl = target => {
@@ -52,28 +56,31 @@ uiRoutes.when('/overview', {
         });
       };
 
-      $scope.$watch(() => this.data, data => {
-        this.renderReact(
-          <I18nContext>
-            <SetupModeRenderer
-              scope={$scope}
-              injector={$injector}
-              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-                <Fragment>
-                  {flyoutComponent}
-                  <Overview
-                    cluster={data}
-                    setupMode={setupMode}
-                    changeUrl={changeUrl}
-                    showLicenseExpiration={showLicenseExpiration}
-                  />
-                  {bottomBarComponent}
-                </Fragment>
-              )}
-            />
-          </I18nContext>
-        );
-      });
+      $scope.$watch(
+        () => this.data,
+        data => {
+          this.renderReact(
+            <I18nContext>
+              <SetupModeRenderer
+                scope={$scope}
+                injector={$injector}
+                render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                  <Fragment>
+                    {flyoutComponent}
+                    <Overview
+                      cluster={data}
+                      setupMode={setupMode}
+                      changeUrl={changeUrl}
+                      showLicenseExpiration={showLicenseExpiration}
+                    />
+                    {bottomBarComponent}
+                  </Fragment>
+                )}
+              />
+            </I18nContext>
+          );
+        }
+      );
     }
-  }
+  },
 });

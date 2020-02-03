@@ -24,13 +24,21 @@ import {
 } from '../../../../../core/public/mocks';
 const injectedMetadataMock = injectedMetadataServiceMock.createStartContract();
 
-export function mockInjectedMetadata({ telemetryOptedIn, allowChangingOptInStatus, telemetryNotifyUserAboutOptInDefault }) {
-  const mockGetInjectedVar = jest.fn().mockImplementation((key) => {
+export function mockInjectedMetadata({
+  telemetryOptedIn,
+  allowChangingOptInStatus,
+  telemetryNotifyUserAboutOptInDefault,
+}) {
+  const mockGetInjectedVar = jest.fn().mockImplementation(key => {
     switch (key) {
-      case 'telemetryOptedIn': return telemetryOptedIn;
-      case 'allowChangingOptInStatus': return allowChangingOptInStatus;
-      case 'telemetryNotifyUserAboutOptInDefault': return telemetryNotifyUserAboutOptInDefault;
-      default: throw new Error(`unexpected injectedVar ${key}`);
+      case 'telemetryOptedIn':
+        return telemetryOptedIn;
+      case 'allowChangingOptInStatus':
+        return allowChangingOptInStatus;
+      case 'telemetryNotifyUserAboutOptInDefault':
+        return telemetryNotifyUserAboutOptInDefault;
+      default:
+        throw new Error(`unexpected injectedVar ${key}`);
     }
   });
 
@@ -41,7 +49,7 @@ jest.doMock('ui/new_platform', () => ({
   npSetup: {
     core: {
       notifications: notificationServiceMock.createSetupContract(),
-    }
+    },
   },
   npStart: {
     core: {

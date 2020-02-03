@@ -7,8 +7,8 @@
 import React, { useContext } from 'react';
 import { EuiHealth, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { UptimeSettingsContext } from '../../../../contexts';
-import { UNNAMED_LOCATION, UP } from './monitor_status_list';
+import { UptimeThemeContext } from '../../../../contexts';
+import { UNNAMED_LOCATION, STATUS } from '../../../../../common/constants';
 
 interface MonitorStatusRowProps {
   /**
@@ -24,9 +24,9 @@ interface MonitorStatusRowProps {
 export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProps) => {
   const {
     colors: { success, danger },
-  } = useContext(UptimeSettingsContext);
+  } = useContext(UptimeThemeContext);
 
-  const color = status === UP ? success : danger;
+  const color = status === STATUS.UP ? success : danger;
 
   let checkListArray = [...locationNames];
   // If un-named location exists, move it to end
@@ -43,7 +43,7 @@ export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProp
   return (
     <>
       <EuiHealth color={color}>
-        {status === UP ? (
+        {status === STATUS.UP ? (
           <FormattedMessage
             id="xpack.uptime.monitorList.drawer.locations.statusUp"
             defaultMessage="Up in {locations}"
@@ -57,7 +57,7 @@ export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProp
           />
         )}
       </EuiHealth>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="xs" />
     </>
   );
 };

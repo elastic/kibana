@@ -196,6 +196,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           const configDescriptor = plugin.getConfigDescriptor();
           if (configDescriptor) {
             this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
+            if (configDescriptor.deprecations) {
+              this.coreContext.configService.addDeprecationProvider(
+                plugin.configPath,
+                configDescriptor.deprecations
+              );
+            }
             await this.coreContext.configService.setSchema(
               plugin.configPath,
               configDescriptor.schema

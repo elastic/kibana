@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { pure } from 'recompose';
+/* eslint-disable react/display-name */
 
+import React from 'react';
+
+import { EuiTableDataType } from '@elastic/eui';
 import { NoteCard } from './note_card';
 import * as i18n from './translations';
 
-const Column = pure<{ text: string }>(({ text }) => <span>{text}</span>);
+const Column = React.memo<{ text: string }>(({ text }) => <span>{text}</span>);
 Column.displayName = 'Column';
 
 interface Item {
@@ -21,6 +23,7 @@ interface Item {
 
 interface Column {
   field: string;
+  dataType?: EuiTableDataType;
   name: string;
   sortable: boolean;
   truncateText: boolean;
@@ -30,6 +33,7 @@ interface Column {
 export const columns: Column[] = [
   {
     field: 'note',
+    dataType: 'string',
     name: i18n.NOTE,
     sortable: true,
     truncateText: false,

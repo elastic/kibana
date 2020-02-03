@@ -5,14 +5,15 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import React from 'react';
 
 import { TestProviders } from '../../../../../mock';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import { Package } from './package';
 
 describe('Package', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
@@ -24,41 +25,37 @@ describe('Package', () => {
           packageVersion="package-version-123"
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it returns null if all of the package information is null ', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <Package
-            contextId="[context-123]"
-            eventId="[event-123]"
-            packageName={null}
-            packageSummary={null}
-            packageVersion={null}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <Package
+          contextId="[context-123]"
+          eventId="[event-123]"
+          packageName={null}
+          packageSummary={null}
+          packageVersion={null}
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if all of the package information is undefined ', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <Package
-            contextId="[context-123]"
-            eventId="[event-123]"
-            packageName={undefined}
-            packageSummary={undefined}
-            packageVersion={undefined}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <Package
+          contextId="[context-123]"
+          eventId="[event-123]"
+          packageName={undefined}
+          packageSummary={undefined}
+          packageVersion={undefined}
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns just the package name', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <Package
@@ -75,7 +72,7 @@ describe('Package', () => {
     });
 
     test('it returns just the package name and package summary', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <Package
@@ -92,7 +89,7 @@ describe('Package', () => {
     });
 
     test('it returns just the package name, package summary, package version', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <Package

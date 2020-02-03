@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 
@@ -24,40 +24,49 @@ export const KeywordContent: FC<FieldDataCardProps> = ({ config }) => {
   return (
     <div className="mlFieldDataCard__stats">
       <div>
-        <EuiIcon type="document" />
-        &nbsp;
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardKeyword.documentsCountDescription"
-          defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
-          values={{
-            count,
-            docsPercent,
-          }}
-        />
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="document" />
+          &nbsp;
+          <FormattedMessage
+            id="xpack.ml.fieldDataCard.cardKeyword.documentsCountDescription"
+            defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
+            values={{
+              count,
+              docsPercent,
+            }}
+          />
+        </EuiText>
       </div>
 
       <EuiSpacer size="xs" />
 
       <div>
-        <EuiIcon type="database" />
-        &nbsp;
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardKeyword.distinctCountDescription"
-          defaultMessage="{cardinality} distinct {cardinality, plural, zero {value} one {value} other {values}}"
-          values={{
-            cardinality,
-          }}
-        />
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="database" />
+          &nbsp;
+          <FormattedMessage
+            id="xpack.ml.fieldDataCard.cardKeyword.distinctCountDescription"
+            defaultMessage="{cardinality} distinct {cardinality, plural, zero {value} one {value} other {values}}"
+            values={{
+              cardinality,
+            }}
+          />
+        </EuiText>
       </div>
 
       <EuiSpacer size="m" />
 
       <div>
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardKeyword.topValuesLabel"
-          defaultMessage="top values"
-        />
-        <EuiSpacer size="xs" />
+        <EuiText size="s">
+          <h6>
+            <FormattedMessage
+              id="xpack.ml.fieldDataCard.cardKeyword.topValuesLabel"
+              defaultMessage="Top values"
+            />
+          </h6>
+        </EuiText>
+
+        <EuiSpacer size="s" />
         <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
       </div>
     </div>

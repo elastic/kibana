@@ -26,29 +26,32 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
   >(viewType);
   const { create, error: errorOnCreate, createdId } = useCreateSavedObject(viewType);
   const { deleteObject, deletedId } = useDeleteSavedObject(viewType);
-  const deleteView = useCallback((id: string) => deleteObject(id), []);
+  const deleteView = useCallback((id: string) => deleteObject(id), [deleteObject]);
   const [createError, setCreateError] = useState<string | null>(null);
 
-  useEffect(() => setCreateError(createError), [errorOnCreate, setCreateError]);
+  useEffect(() => setCreateError(errorOnCreate), [errorOnCreate]);
 
-  const saveView = useCallback((d: { [p: string]: any }) => {
-    const doSave = async () => {
-      const exists = await hasView(d.name);
-      if (exists) {
-        setCreateError(
-          i18n.translate('xpack.infra.savedView.errorOnCreate.duplicateViewName', {
-            defaultMessage: `A view with that name already exists.`,
-          })
-        );
-        return;
-      }
-      create(d);
-    };
-    setCreateError(null);
-    doSave();
-  }, []);
+  const saveView = useCallback(
+    (d: { [p: string]: any }) => {
+      const doSave = async () => {
+        const exists = await hasView(d.name);
+        if (exists) {
+          setCreateError(
+            i18n.translate('xpack.infra.savedView.errorOnCreate.duplicateViewName', {
+              defaultMessage: `A view with that name already exists.`,
+            })
+          );
+          return;
+        }
+        create(d);
+      };
+      setCreateError(null);
+      doSave();
+    },
+    [create, hasView]
+  );
 
-  const savedObjects = data ? data.savedObjects : [];
+  const savedObjects = useMemo(() => (data ? data.savedObjects : []), [data]);
   const views = useMemo(() => {
     const items: Array<SavedView<ViewState>> = [
       {
@@ -61,19 +64,17 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
       },
     ];
 
-    if (data) {
-      data.savedObjects.forEach(
-        o =>
-          o.type === viewType &&
-          items.push({
-            ...o.attributes,
-            id: o.id,
-          })
-      );
-    }
+    savedObjects.forEach(
+      o =>
+        o.type === viewType &&
+        items.push({
+          ...o.attributes,
+          id: o.id,
+        })
+    );
 
     return items;
-  }, [savedObjects, defaultViewState]);
+  }, [defaultViewState, savedObjects, viewType]);
 
   return {
     views,

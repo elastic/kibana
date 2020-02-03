@@ -284,6 +284,44 @@ export const systemFieldsMap: Readonly<Record<string, string>> = {
   'system.auth.ssh.method': 'system.auth.ssh.method',
 };
 
+export const signalFieldsMap: Readonly<Record<string, string>> = {
+  'signal.original_time': 'signal.original_time',
+  'signal.rule.id': 'signal.rule.id',
+  'signal.rule.saved_id': 'signal.rule.saved_id',
+  'signal.rule.timeline_id': 'signal.rule.timeline_id',
+  'signal.rule.timeline_title': 'signal.rule.timeline_title',
+  'signal.rule.output_index': 'signal.rule.output_index',
+  'signal.rule.from': 'signal.rule.from',
+  'signal.rule.index': 'signal.rule.index',
+  'signal.rule.language': 'signal.rule.language',
+  'signal.rule.query': 'signal.rule.query',
+  'signal.rule.to': 'signal.rule.to',
+  'signal.rule.filters': 'signal.rule.filters',
+  'signal.rule.rule_id': 'signal.rule.rule_id',
+  'signal.rule.false_positives': 'signal.rule.false_positives',
+  'signal.rule.max_signals': 'signal.rule.max_signals',
+  'signal.rule.risk_score': 'signal.rule.risk_score',
+  'signal.rule.description': 'signal.rule.description',
+  'signal.rule.name': 'signal.rule.name',
+  'signal.rule.immutable': 'signal.rule.immutable',
+  'signal.rule.references': 'signal.rule.references',
+  'signal.rule.severity': 'signal.rule.severity',
+  'signal.rule.tags': 'signal.rule.tags',
+  'signal.rule.threat': 'signal.rule.threat',
+  'signal.rule.type': 'signal.rule.type',
+  'signal.rule.size': 'signal.rule.size',
+  'signal.rule.enabled': 'signal.rule.enabled',
+  'signal.rule.created_at': 'signal.rule.created_at',
+  'signal.rule.updated_at': 'signal.rule.updated_at',
+  'signal.rule.created_by': 'signal.rule.created_by',
+  'signal.rule.updated_by': 'signal.rule.updated_by',
+  'signal.rule.version': 'signal.rule.version',
+};
+
+export const ruleFieldsMap: Readonly<Record<string, string>> = {
+  'rule.reference': 'rule.reference',
+};
+
 export const eventFieldsMap: Readonly<Record<string, string>> = {
   timestamp: '@timestamp',
   '@timestamp': '@timestamp',
@@ -293,9 +331,12 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...dnsFieldsMap },
   ...{ ...endgameFieldsMap },
   ...{ ...eventBaseFieldsMap },
+  ...{ ...fileMap },
   ...{ ...geoFieldsMap },
   ...{ ...hostFieldsMap },
   ...{ ...networkFieldsMap },
+  ...{ ...ruleFieldsMap },
+  ...{ ...signalFieldsMap },
   ...{ ...sourceFieldsMap },
   ...{ ...suricataFieldsMap },
   ...{ ...systemFieldsMap },
@@ -305,5 +346,4 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...userFieldsMap },
   ...{ ...winlogFieldsMap },
   ...{ ...processFieldsMap },
-  ...{ ...fileMap },
 };

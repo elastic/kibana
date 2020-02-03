@@ -77,6 +77,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const [kibanaObjects, setKibanaObjects] = useState<KibanaObjects>({});
   const [saveState, setSaveState] = useState<SAVE_STATE>(SAVE_STATE.NOT_SAVED);
   const [resultsUrl, setResultsUrl] = useState<string>('');
+  const [existingGroups, setExistingGroups] = useState(existingGroupIds);
   // #endregion
 
   const {
@@ -85,17 +86,17 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     combinedQuery,
   } = useKibanaContext();
   const pageTitle =
-    savedSearch.id !== undefined
+    savedSearch !== null
       ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {
           defaultMessage: 'saved search {savedSearchTitle}',
-          values: { savedSearchTitle: savedSearch.title },
+          values: { savedSearchTitle: savedSearch.attributes.title as string },
         })
       : i18n.translate('xpack.ml.newJob.recognize.indexPatternPageTitle', {
           defaultMessage: 'index pattern {indexPatternTitle}',
           values: { indexPatternTitle: indexPattern.title },
         });
-  const displayQueryWarning = savedSearch.id !== undefined;
-  const tempQuery = savedSearch.id === undefined ? undefined : combinedQuery;
+  const displayQueryWarning = savedSearch !== null;
+  const tempQuery = savedSearch === null ? undefined : combinedQuery;
 
   /**
    * Loads recognizer module configuration.
@@ -109,6 +110,10 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       setKibanaObjects(kibanaObjectsResult);
 
       setSaveState(SAVE_STATE.NOT_SAVED);
+
+      // mix existing groups from the server with the groups used across all jobs in the module.
+      const moduleGroups = [...response.jobs.map(j => j.config.groups || [])].flat();
+      setExistingGroups([...new Set([...existingGroups, ...moduleGroups])]);
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
@@ -222,6 +227,12 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       ...jobOverrides,
       [job.job_id as string]: job,
     });
+    if (job.groups !== undefined) {
+      // add newly added jobs to the list of existing groups
+      // for use when editing other jobs in the module
+      const groups = [...new Set([...existingGroups, ...job.groups])];
+      setExistingGroups(groups);
+    }
   };
 
   const isFormVisible = [SAVE_STATE.NOT_SAVED, SAVE_STATE.SAVING].includes(saveState);
@@ -304,7 +315,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                 jobs={jobs}
                 jobPrefix={jobPrefix}
                 saveState={saveState}
-                existingGroupIds={existingGroupIds}
+                existingGroupIds={existingGroups}
                 jobOverrides={jobOverrides}
                 onJobOverridesChange={onJobOverridesChange}
               />

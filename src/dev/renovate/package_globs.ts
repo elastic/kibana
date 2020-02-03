@@ -28,6 +28,7 @@ export const PACKAGE_GLOBS = [
   'x-pack/package.json',
   'x-pack/legacy/plugins/*/package.json',
   'packages/*/package.json',
+  'examples/*/package.json',
   'test/plugin_functional/plugins/*/package.json',
   'test/interpreter_functional/plugins/*/package.json',
 ];

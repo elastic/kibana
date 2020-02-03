@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpServiceBase } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 import { callApi, FetchOptions } from './callApi';
 import { APMAPI } from '../../../server/routes/create_apm_api';
 import { Client } from '../../../server/routes/typings';
@@ -17,7 +17,7 @@ export type APMClientOptions = Omit<FetchOptions, 'query' | 'body'> & {
   };
 };
 
-export const createCallApmApi = (http: HttpServiceBase) =>
+export const createCallApmApi = (http: HttpSetup) =>
   ((options: APMClientOptions) => {
     const { pathname, params = {}, ...opts } = options;
 

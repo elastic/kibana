@@ -19,10 +19,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibanaContext } from '../../../../contexts/kibana';
+import { isSavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { timeBasedIndexCheck } from '../../../../util/index_utils';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
+import { CategorizationIcon } from './categorization_job_icon';
 
 export const Page: FC = () => {
   const kibanaContext = useKibanaContext();
@@ -32,32 +34,32 @@ export const Page: FC = () => {
 
   const isTimeBasedIndex = timeBasedIndexCheck(currentIndexPattern);
   const indexWarningTitle =
-    !isTimeBasedIndex && currentSavedSearch.id === undefined
-      ? i18n.translate('xpack.ml.newJob.wizard.jobType.indexPatternNotTimeBasedMessage', {
-          defaultMessage: 'Index pattern {indexPatternTitle} is not time based',
-          values: { indexPatternTitle: currentIndexPattern.title },
-        })
-      : i18n.translate(
+    !isTimeBasedIndex && isSavedSearchSavedObject(currentSavedSearch)
+      ? i18n.translate(
           'xpack.ml.newJob.wizard.jobType.indexPatternFromSavedSearchNotTimeBasedMessage',
           {
             defaultMessage:
               '{savedSearchTitle} uses index pattern {indexPatternTitle} which is not time based',
             values: {
-              savedSearchTitle: currentSavedSearch.title,
+              savedSearchTitle: currentSavedSearch.attributes.title as string,
               indexPatternTitle: currentIndexPattern.title,
             },
           }
-        );
-  const pageTitleLabel =
-    currentSavedSearch.id !== undefined
-      ? i18n.translate('xpack.ml.newJob.wizard.jobType.savedSearchPageTitleLabel', {
-          defaultMessage: 'saved search {savedSearchTitle}',
-          values: { savedSearchTitle: currentSavedSearch.title },
-        })
-      : i18n.translate('xpack.ml.newJob.wizard.jobType.indexPatternPageTitleLabel', {
-          defaultMessage: 'index pattern {indexPatternTitle}',
+        )
+      : i18n.translate('xpack.ml.newJob.wizard.jobType.indexPatternNotTimeBasedMessage', {
+          defaultMessage: 'Index pattern {indexPatternTitle} is not time based',
           values: { indexPatternTitle: currentIndexPattern.title },
         });
+
+  const pageTitleLabel = isSavedSearchSavedObject(currentSavedSearch)
+    ? i18n.translate('xpack.ml.newJob.wizard.jobType.savedSearchPageTitleLabel', {
+        defaultMessage: 'saved search {savedSearchTitle}',
+        values: { savedSearchTitle: currentSavedSearch.attributes.title as string },
+      })
+    : i18n.translate('xpack.ml.newJob.wizard.jobType.indexPatternPageTitleLabel', {
+        defaultMessage: 'index pattern {indexPatternTitle}',
+        values: { indexPatternTitle: currentIndexPattern.title },
+      });
 
   const recognizerResults = {
     count: 0,
@@ -67,14 +69,15 @@ export const Page: FC = () => {
   };
 
   const getUrl = (basePath: string) => {
-    return currentSavedSearch.id === undefined
+    return !isSavedSearchSavedObject(currentSavedSearch)
       ? `${basePath}?index=${currentIndexPattern.id}`
       : `${basePath}?savedSearchId=${currentSavedSearch.id}`;
   };
 
   const addSelectionToRecentlyAccessed = () => {
-    const title =
-      currentSavedSearch.id === undefined ? currentIndexPattern.title : currentSavedSearch.title;
+    const title = !isSavedSearchSavedObject(currentSavedSearch)
+      ? currentIndexPattern.title
+      : (currentSavedSearch.attributes.title as string);
     const url = getUrl('');
     addItemToRecentlyAccessed('jobs/new_job/datavisualizer', title, url);
 
@@ -148,6 +151,22 @@ export const Page: FC = () => {
           'Use the full range of options to create a job for more advanced use cases.',
       }),
       id: 'mlJobTypeLinkAdvancedJob',
+    },
+    {
+      href: getUrl('#jobs/new_job/categorization'),
+      icon: {
+        type: CategorizationIcon,
+        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationAriaLabel', {
+          defaultMessage: 'Categorization job',
+        }),
+      },
+      title: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationTitle', {
+        defaultMessage: 'Categorization',
+      }),
+      description: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationDescription', {
+        defaultMessage: 'Group log messages into categories and detect anomalies within them.',
+      }),
+      id: 'mlJobTypeLinkCategorizationJob',
     },
   ];
 

@@ -17,6 +17,8 @@
  * under the License.
  */
 
-export const KIBANA_FEEDBACK_LINK = 'https://www.elastic.co/products/kibana/feedback';
-export const KIBANA_ASK_ELASTIC_LINK = 'https://www.elastic.co/products/kibana/ask-elastic';
+export const KIBANA_FEEDBACK_LINK =
+  'https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback';
+export const KIBANA_ASK_ELASTIC_LINK =
+  'https://www.elastic.co/products/kibana/ask-elastic?blade=kibanaaskelastic';
 export const GITHUB_CREATE_ISSUE_LINK = 'https://github.com/elastic/kibana/issues/new/choose';

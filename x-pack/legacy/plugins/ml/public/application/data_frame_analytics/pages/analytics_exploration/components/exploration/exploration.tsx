@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
-
-import d3 from 'd3';
 
 import {
   EuiBadge,
@@ -18,7 +16,6 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
@@ -30,9 +27,12 @@ import {
   Query,
 } from '@elastic/eui';
 
-import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
-import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
-
+import {
+  useColorRange,
+  ColorRangeLegend,
+  COLOR_RANGE,
+  COLOR_RANGE_SCALE,
+} from '../../../../../components/color_range_legend';
 import {
   ColumnType,
   mlInMemoryTableBasicFactory,
@@ -41,14 +41,12 @@ import {
   SORT_DIRECTION,
 } from '../../../../../components/ml_in_memory_table';
 
-import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_context';
-
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 import { ml } from '../../../../../services/ml_api_service';
 
 import {
   sortColumns,
-  toggleSelectedField,
+  toggleSelectedFieldSimple,
   DataFrameAnalyticsConfig,
   EsFieldName,
   EsDoc,
@@ -57,6 +55,7 @@ import {
   SEARCH_SIZE,
   defaultSearchQuery,
 } from '../../../../common';
+import { isKeywordAndTextType } from '../../../../common/fields';
 
 import { getOutlierScoreFieldName } from './common';
 import { useExploreData, TableItem } from './use_explore_data';
@@ -66,16 +65,10 @@ import {
 } from '../../../analytics_management/components/analytics_list/common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { SavedSearchQuery } from '../../../../../contexts/kibana';
-
-const customColorScaleFactory = (n: number) => (t: number) => {
-  if (t < 1 / n) {
-    return 0;
-  }
-  if (t < 3 / n) {
-    return (n / 4) * (t - 1 / n);
-  }
-  return 0.5 + (t - 3 / n);
-};
+import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
+import { IIndexPattern } from '../../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { useKibanaContext } from '../../../../../contexts/kibana';
 
 const FEATURE_INFLUENCE = 'feature_influence';
 
@@ -102,6 +95,16 @@ interface Props {
   jobStatus: DATA_FRAME_TASK_STATE;
 }
 
+const getFeatureCount = (jobConfig?: DataFrameAnalyticsConfig, tableItems: TableItem[] = []) => {
+  if (jobConfig === undefined || tableItems.length === 0) {
+    return 0;
+  }
+
+  return Object.keys(tableItems[0]).filter(key =>
+    key.includes(`${jobConfig.dest.results_field}.${FEATURE_INFLUENCE}.`)
+  ).length;
+};
+
 export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
 
@@ -111,6 +114,19 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const [searchError, setSearchError] = useState<any>(undefined);
   const [searchString, setSearchString] = useState<string | undefined>(undefined);
+
+  const kibanaContext = useKibanaContext();
+
+  const initializeJobCapsService = async () => {
+    if (jobConfig !== undefined) {
+      const sourceIndex = jobConfig.source.index[0];
+      const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+      const indexPattern: IIndexPattern = await kibanaContext.indexPatterns.get(indexPatternId);
+      if (indexPattern !== undefined) {
+        await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
+      }
+    }
+  };
 
   useEffect(() => {
     (async function() {
@@ -126,11 +142,9 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
     })();
   }, []);
 
-  const euiTheme = useUiChromeContext()
-    .getUiSettingsClient()
-    .get('theme:darkMode')
-    ? euiThemeDark
-    : euiThemeLight;
+  useEffect(() => {
+    initializeJobCapsService();
+  }, [jobConfig && jobConfig.id]);
 
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
@@ -146,7 +160,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   function toggleColumn(column: EsFieldName) {
     if (tableItems.length > 0 && jobConfig !== undefined) {
       // spread to a new array otherwise the component wouldn't re-render
-      setSelectedFields([...toggleSelectedField(selectedFields, column)]);
+      setSelectedFields([...toggleSelectedFieldSimple(selectedFields, column)]);
     }
   }
 
@@ -169,23 +183,13 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
 
   const columns: Array<ColumnType<TableItem>> = [];
 
-  if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
-    // table cell color coding takes into account:
-    // - whether the theme is dark/light
-    // - the number of analysis features
-    // based on that
-    const cellBgColorScale = d3.scale
-      .linear()
-      .domain([0, 1])
-      // typings for .range() incorrectly don't allow passing in a color extent.
-      // @ts-ignore
-      .range([d3.rgb(euiTheme.euiColorEmptyShade), d3.rgb(euiTheme.euiColorVis1)]);
-    const featureCount = Object.keys(tableItems[0]).filter(key =>
-      key.includes(`${jobConfig.dest.results_field}.${FEATURE_INFLUENCE}.`)
-    ).length;
-    const customScale = customColorScaleFactory(featureCount);
-    const cellBgColor = (n: number) => cellBgColorScale(customScale(n));
+  const cellBgColor = useColorRange(
+    COLOR_RANGE.BLUE,
+    COLOR_RANGE_SCALE.INFLUENCER,
+    getFeatureCount(jobConfig, tableItems)
+  );
 
+  if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
     columns.push(
       ...selectedFields.sort(sortColumns(tableItems[0], jobConfig.dest.results_field)).map(k => {
         const column: ColumnType<TableItem> = {
@@ -311,10 +315,16 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
     if (jobConfig !== undefined) {
       const outlierScoreFieldName = getOutlierScoreFieldName(jobConfig);
       const outlierScoreFieldSelected = selectedFields.includes(outlierScoreFieldName);
+      let requiresKeyword = false;
 
       const field = outlierScoreFieldSelected ? outlierScoreFieldName : selectedFields[0];
       const direction = outlierScoreFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
-      loadExploreData({ field, direction, searchQuery });
+
+      if (outlierScoreFieldSelected === false) {
+        requiresKeyword = isKeywordAndTextType(field);
+      }
+
+      loadExploreData({ field, direction, searchQuery, requiresKeyword });
     }
   }, [JSON.stringify(searchQuery)]);
 
@@ -325,10 +335,16 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
     if (jobConfig !== undefined && columns.length > 0 && !selectedFields.includes(sortField)) {
       const outlierScoreFieldName = getOutlierScoreFieldName(jobConfig);
       const outlierScoreFieldSelected = selectedFields.includes(outlierScoreFieldName);
+      let requiresKeyword = false;
 
       const field = outlierScoreFieldSelected ? outlierScoreFieldName : selectedFields[0];
       const direction = outlierScoreFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
-      loadExploreData({ field, direction, searchQuery });
+
+      if (outlierScoreFieldSelected === false) {
+        requiresKeyword = isKeywordAndTextType(field);
+      }
+
+      loadExploreData({ field, direction, searchQuery, requiresKeyword });
       return;
     }
   }, [jobConfig, columns.length, sortField, sortDirection, tableItems.length]);
@@ -352,8 +368,17 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
       setPageIndex(index);
       setPageSize(size);
 
-      if (sort.field !== sortField || sort.direction !== sortDirection) {
-        loadExploreData({ ...sort, searchQuery });
+      if (
+        (sort.field !== sortField || sort.direction !== sortDirection) &&
+        jobConfig !== undefined
+      ) {
+        const outlierScoreFieldName = getOutlierScoreFieldName(jobConfig);
+        let requiresKeyword = false;
+
+        if (outlierScoreFieldName !== sort.field) {
+          requiresKeyword = isKeywordAndTextType(sort.field);
+        }
+        loadExploreData({ ...sort, searchQuery, requiresKeyword });
       }
     };
   }
@@ -428,7 +453,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<TableItem>();
 
   return (
-    <EuiPanel grow={false}>
+    <EuiPanel grow={false} data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">
@@ -504,21 +529,34 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
       {(columns.length > 0 || searchQuery !== defaultSearchQuery) && sortField !== '' && (
-        <Fragment>
-          {tableItems.length === SEARCH_SIZE && (
-            <EuiFormRow
-              helpText={i18n.translate(
-                'xpack.ml.dataframe.analytics.exploration.documentsShownHelpText',
-                {
-                  defaultMessage: 'Showing first {searchSize} documents',
-                  values: { searchSize: SEARCH_SIZE },
-                }
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              {tableItems.length === SEARCH_SIZE && (
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate(
+                    'xpack.ml.dataframe.analytics.exploration.documentsShownHelpText',
+                    {
+                      defaultMessage: 'Showing first {searchSize} documents',
+                      values: { searchSize: SEARCH_SIZE },
+                    }
+                  )}
+                </EuiText>
               )}
-            >
-              <Fragment />
-            </EuiFormRow>
-          )}
-          <EuiSpacer />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ColorRangeLegend
+                colorRange={cellBgColor}
+                title={i18n.translate(
+                  'xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle',
+                  {
+                    defaultMessage: 'Feature influence score',
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <MlInMemoryTableBasic
             allowNeutralSort={false}
             className="mlDataFrameAnalyticsExploration"
@@ -534,7 +572,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
             search={search}
             error={tableError}
           />
-        </Fragment>
+        </>
       )}
     </EuiPanel>
   );

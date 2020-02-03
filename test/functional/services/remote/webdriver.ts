@@ -43,6 +43,7 @@ import { Browsers } from './browsers';
 
 const throttleOption: string = process.env.TEST_THROTTLE_NETWORK as string;
 const headlessBrowser: string = process.env.TEST_BROWSER_HEADLESS as string;
+const remoteDebug: string = process.env.TEST_REMOTE_DEBUG as string;
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
@@ -97,6 +98,10 @@ async function attemptToCreateCommand(
           // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
           chromeOptions.push('headless', 'disable-gpu');
         }
+        if (remoteDebug === '1') {
+          // Visit chrome://inspect in chrome to remotely view/debug
+          chromeOptions.push('headless', 'disable-gpu', 'remote-debugging-port=9222');
+        }
         chromeCapabilities.set('goog:chromeOptions', {
           w3c: false,
           args: chromeOptions,
@@ -115,9 +120,9 @@ async function attemptToCreateCommand(
             session,
             logging.Type.BROWSER,
             logPollingMs,
-            lifecycle.cleanup$
+            lifecycle.cleanup.after$
           ).pipe(
-            takeUntil(lifecycle.cleanup$),
+            takeUntil(lifecycle.cleanup.after$),
             map(({ message, level: { name: level } }) => ({
               message: message.replace(/\\n/g, '\n'),
               level,
@@ -151,7 +156,7 @@ async function attemptToCreateCommand(
         }
 
         const { input, chunk$, cleanup } = await createStdoutSocket();
-        lifecycle.on('cleanup', cleanup);
+        lifecycle.cleanup.add(cleanup);
 
         const session = await new Builder()
           .forBrowser(browserType)

@@ -90,6 +90,8 @@ export type DashboardReactContext = KibanaReactContext<DashboardContainerOptions
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
+  public renderEmpty?: undefined | (() => React.ReactNode);
+
   constructor(
     initialInput: DashboardContainerInput,
     private readonly options: DashboardContainerOptions,
@@ -124,7 +126,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.options}>
-          <DashboardViewport container={this} />
+          <DashboardViewport renderEmpty={this.renderEmpty} container={this} />
         </KibanaContextProvider>
       </I18nProvider>,
       dom

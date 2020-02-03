@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
+import { npStart } from 'ui/new_platform';
 import { DEFAULT_KBN_VERSION } from '../common/constants/file_import';
 
-export const indexPatternService = data.indexPatterns.indexPatterns;
+export const indexPatternService = npStart.plugins.data.indexPatterns;
 
 export let savedObjectsClient;
 export let basePath;

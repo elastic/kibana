@@ -16,49 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IUiSettingsClient } from 'kibana/public';
+import { CoreSetup } from 'kibana/public';
+import { fieldFormats } from '../../plugins/data/public';
 
-import {
-  FieldFormatRegisty,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  StringFormat,
-  TruncateFormat,
-  UrlFormat,
-} from '../../plugins/data/public/';
+export const getFieldFormatsRegistry = (core: CoreSetup) => {
+  const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+  const getConfig = core.uiSettings.get.bind(core.uiSettings);
 
-export const getFieldFormatsRegistry = (uiSettings: IUiSettingsClient) => {
-  const fieldFormats = new FieldFormatRegisty();
+  fieldFormatsRegistry.init(getConfig, {});
 
-  fieldFormats.register([
-    BoolFormat,
-    BytesFormat,
-    ColorFormat,
-    DateFormat,
-    DateNanosFormat,
-    DurationFormat,
-    IpFormat,
-    NumberFormat,
-    PercentFormat,
-    RelativeDateFormat,
-    SourceFormat,
-    StaticLookupFormat,
-    StringFormat,
-    TruncateFormat,
-    UrlFormat,
-  ]);
-
-  fieldFormats.init(uiSettings);
-
-  return fieldFormats;
+  return fieldFormatsRegistry;
 };

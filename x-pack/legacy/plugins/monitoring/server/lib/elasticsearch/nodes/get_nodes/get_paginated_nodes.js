@@ -20,7 +20,7 @@ import { getMetrics } from '../../../details/get_metrics';
  * and returns that so the caller can perform their normal call to get the time-series data.
  *
  * @param {*} req - Server request object
- * @param {*} esIndexPattern - The index pattern to search against (`.monitoring-es-*`)
+ * @param {*} esIndexPattern - The index pattern to search against (`.monitoring-es-*,monitoring-es-*`)
  * @param {*} uuids - The optional `clusterUuid` and `nodeUuid` to filter the results from
  * @param {*} metricSet - The array of metrics that are sortable in the UI
  * @param {*} pagination - ({ index, size })
@@ -28,18 +28,24 @@ import { getMetrics } from '../../../details/get_metrics';
  * @param {*} queryText - Text that will be used to filter out pipelines
  */
 export async function getPaginatedNodes(
-  req, esIndexPattern, { clusterUuid }, metricSet, pagination, sort, queryText,
-  { clusterStats, shardStats }
+  req,
+  esIndexPattern,
+  { clusterUuid },
+  metricSet,
+  pagination,
+  sort,
+  queryText,
+  { clusterStats, nodesShardCount }
 ) {
   const config = req.server.config();
-  const size = config.get('xpack.monitoring.max_bucket_size');
+  const size = config.get('monitoring.ui.max_bucket_size');
   const nodes = await getNodeIds(req, esIndexPattern, { clusterUuid }, size);
 
   // Add `isOnline` and shards from the cluster state and shard stats
   const clusterState = get(clusterStats, 'cluster_state', { nodes: {} });
   for (const node of nodes) {
-    node.isOnline = !isUndefined(get(clusterState, [ 'nodes', node.uuid ]));
-    node.shardCount = get(shardStats, `nodes[${node.uuid}].shardCount`, 0);
+    node.isOnline = !isUndefined(get(clusterState, ['nodes', node.uuid]));
+    node.shardCount = get(nodesShardCount, `nodes[${node.uuid}].shardCount`, 0);
   }
 
   // `metricSet` defines a list of metrics that are sortable in the UI
@@ -50,16 +56,24 @@ export async function getPaginatedNodes(
   const filters = [
     {
       terms: {
-        'source_node.name': nodes.map(node => node.name)
-      }
-    }
+        'source_node.name': nodes.map(node => node.name),
+      },
+    },
   ];
   const groupBy = {
     field: `source_node.uuid`,
     include: nodes.map(node => node.uuid),
-    size: config.get('xpack.monitoring.max_bucket_size')
+    size: config.get('monitoring.ui.max_bucket_size'),
   };
-  const metricSeriesData = await getMetrics(req, esIndexPattern, metricSet, filters, { nodes }, 4, groupBy);
+  const metricSeriesData = await getMetrics(
+    req,
+    esIndexPattern,
+    metricSet,
+    filters,
+    { nodes },
+    4,
+    groupBy
+  );
   for (const metricName in metricSeriesData) {
     if (!metricSeriesData.hasOwnProperty(metricName)) {
       continue;
@@ -95,6 +109,6 @@ export async function getPaginatedNodes(
 
   return {
     pageOfNodes,
-    totalNodeCount: filteredNodes.length
+    totalNodeCount: filteredNodes.length,
   };
 }

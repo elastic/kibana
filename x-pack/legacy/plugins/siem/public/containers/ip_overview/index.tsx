@@ -8,12 +8,11 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetIpOverviewQuery, IpOverviewData } from '../../graphql/types';
 import { networkModel, inputsModel, inputsSelectors, State } from '../../store';
+import { useUiSetting } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 
@@ -39,7 +38,7 @@ export interface IpOverviewProps extends QueryTemplateProps {
   ip: string;
 }
 
-const IpOverviewComponentQuery = pure<IpOverviewProps & IpOverviewReduxProps>(
+const IpOverviewComponentQuery = React.memo<IpOverviewProps & IpOverviewReduxProps>(
   ({ id = ID, isInspected, children, filterQuery, skip, sourceId, ip }) => (
     <Query<GetIpOverviewQuery.Query, GetIpOverviewQuery.Variables>
       query={ipOverviewQuery}
@@ -50,7 +49,7 @@ const IpOverviewComponentQuery = pure<IpOverviewProps & IpOverviewReduxProps>(
         sourceId,
         filterQuery: createFilter(filterQuery),
         ip,
-        defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
         inspect: isInspected,
       }}
     >

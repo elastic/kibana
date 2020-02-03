@@ -26,16 +26,16 @@ export function kibanaInstanceRoute(server) {
       validate: {
         params: Joi.object({
           clusterUuid: Joi.string().required(),
-          kibanaUuid: Joi.string().required()
+          kibanaUuid: Joi.string().required(),
         }),
         payload: Joi.object({
           ccs: Joi.string().optional(),
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+            max: Joi.date().required(),
+          }).required(),
+        }),
+      },
     },
     async handler(req) {
       const config = server.config();
@@ -45,7 +45,7 @@ export function kibanaInstanceRoute(server) {
       const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
 
       try {
-        const [ metrics, kibanaSummary ] = await Promise.all([
+        const [metrics, kibanaSummary] = await Promise.all([
           getMetrics(req, kbnIndexPattern, metricSet),
           getKibanaInfo(req, kbnIndexPattern, { clusterUuid, kibanaUuid }),
         ]);
@@ -57,6 +57,6 @@ export function kibanaInstanceRoute(server) {
       } catch (err) {
         throw handleError(err, req);
       }
-    }
+    },
   });
 }

@@ -10,7 +10,7 @@ import React from 'react';
 import { ValidateJob } from './validate_job_view';
 
 const job = {
-  job_id: 'test-id'
+  job_id: 'test-id',
 };
 
 const getJobConfig = () => job;
@@ -19,12 +19,10 @@ function prepareTest(messages) {
   const p = Promise.resolve(messages);
 
   const mlJobService = {
-    validateJob: () => p
+    validateJob: () => p,
   };
 
-  const component = (
-    <ValidateJob getJobConfig={getJobConfig} mlJobService={mlJobService} />
-  );
+  const component = <ValidateJob getJobConfig={getJobConfig} mlJobService={mlJobService} />;
 
   const wrapper = shallowWithIntl(component);
 
@@ -34,7 +32,7 @@ function prepareTest(messages) {
 describe('ValidateJob', () => {
   const test1 = prepareTest({
     success: true,
-    messages: []
+    messages: [],
   });
 
   test('renders the button', () => {
@@ -56,10 +54,11 @@ describe('ValidateJob', () => {
         fieldName: 'airline',
         id: 'over_field_low_cardinality',
         status: 'warning',
-        text: 'Cardinality of over_field "airline" is low and therefore less suitable for population analysis.',
-        url: 'https://www.elastic.co/blog/sizing-machine-learning-with-elasticsearch'
-      }
-    ]
+        text:
+          'Cardinality of over_field "airline" is low and therefore less suitable for population analysis.',
+        url: 'https://www.elastic.co/blog/sizing-machine-learning-with-elasticsearch',
+      },
+    ],
   });
 
   test('renders button and modal with a message', () => {

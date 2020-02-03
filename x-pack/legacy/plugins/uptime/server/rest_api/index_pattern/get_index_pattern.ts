@@ -5,12 +5,24 @@
  */
 
 import { UMServerLibs } from '../../lib/lib';
+import { UMRestApiRouteFactory } from '../types';
 
-export const createGetIndexPatternRoute = (libs: UMServerLibs) => ({
+export const createGetIndexPatternRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: '/api/uptime/index_pattern',
-  tags: ['access:uptime'],
-  handler: async (): Promise<any> => {
-    return await libs.savedObjects.getUptimeIndexPattern();
+  validate: false,
+  options: {
+    tags: ['access:uptime'],
+  },
+  handler: async ({ callES }, _context, _request, response): Promise<any> => {
+    try {
+      return response.ok({
+        body: {
+          ...(await libs.stubIndexPattern.getUptimeIndexPattern(callES)),
+        },
+      });
+    } catch (e) {
+      return response.internalError({ body: { message: e.message } });
+    }
   },
 });

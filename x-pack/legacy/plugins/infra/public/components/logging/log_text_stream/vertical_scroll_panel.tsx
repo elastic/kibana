@@ -163,8 +163,10 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
       // Flag the scrollTop change that's about to happen as programmatic, as
       // opposed to being in direct response to user input
       this.nextScrollEventFromCenterTarget = true;
-      scrollRef.current.scrollTop = targetDimensions.top + targetOffset - scrollViewHeight / 2;
-      return true;
+      const currentScrollTop = scrollRef.current.scrollTop;
+      const newScrollTop = targetDimensions.top + targetOffset - scrollViewHeight / 2;
+      scrollRef.current.scrollTop = newScrollTop;
+      return currentScrollTop !== newScrollTop;
     }
     return false;
   };

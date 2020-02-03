@@ -8,8 +8,7 @@ import { spy, stub } from 'sinon';
 import expect from '@kbn/expect';
 import { MonitoringViewBaseTableController } from '../';
 
-describe('MonitoringViewBaseTableController', function () {
-
+describe('MonitoringViewBaseTableController', function() {
   let ctrl;
   let $injector;
   let $scope;
@@ -28,7 +27,7 @@ describe('MonitoringViewBaseTableController', function () {
     titleService = spy();
     executorService = {
       register: spy(),
-      start: spy()
+      start: spy(),
     };
 
     const injectorGetStub = stub();
@@ -41,15 +40,15 @@ describe('MonitoringViewBaseTableController', function () {
           pageIndex: 9000,
           filterText: 'table-ctrl-testoStorageKey',
           sortKey: 'test.testoStorageKey',
-          sortOrder: -1
-        }
-      })
+          sortOrder: -1,
+        },
+      }),
     });
     $injector = { get: injectorGetStub };
 
     $scope = {
       cluster: { cluster_uuid: 'foo' },
-      $on: stub()
+      $on: stub(),
     };
 
     opts = {
@@ -57,7 +56,7 @@ describe('MonitoringViewBaseTableController', function () {
       getPageData: () => Promise.resolve({ data: { test: true } }),
       storageKey: 'testoStorageKey',
       $injector,
-      $scope
+      $scope,
     };
 
     ctrl = new MonitoringViewBaseTableController(opts);
@@ -83,15 +82,11 @@ describe('MonitoringViewBaseTableController', function () {
   it('sets page title', () => {
     expect(titleService.calledOnce).to.be(true);
     const { args } = titleService.getCall(0);
-    expect(args).to.eql([
-      { cluster_uuid: 'foo' },
-      'testoTitle'
-    ]);
+    expect(args).to.eql([{ cluster_uuid: 'foo' }, 'testoTitle']);
   });
 
   it('starts data poller', () => {
     expect(executorService.register.calledOnce).to.be(true);
     expect(executorService.start.calledOnce).to.be(true);
   });
-
 });

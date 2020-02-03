@@ -45,7 +45,6 @@ export const normalizeResult = (report: any) => {
 export function A11yProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const Wd = getService('__webdriver__');
-  const log = getService('log');
 
   /**
    * Accessibility testing service using the Axe (https://www.deque.com/axe/)
@@ -77,11 +76,6 @@ export function A11yProvider({ getService }: FtrProviderContext) {
 
     private testAxeReport(report: AxeReport) {
       const errorMsgs = [];
-
-      for (const result of report.incomplete) {
-        // these items require human review and can't be definitively validated
-        log.warning(printResult(chalk.yellow('UNABLE TO VALIDATE'), result));
-      }
 
       for (const result of report.violations) {
         errorMsgs.push(printResult(chalk.red('VIOLATION'), result));

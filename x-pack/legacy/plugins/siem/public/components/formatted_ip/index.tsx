@@ -5,8 +5,7 @@
  */
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
@@ -60,13 +59,13 @@ const getDataProvider = ({
   and: [],
 });
 
-const NonDecoratedIp = pure<{
+const NonDecoratedIpComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldName: string;
   truncate?: boolean;
   value: string | object | null | undefined;
-}>(({ contextId, eventId, fieldName, truncate, value }) => (
+}> = ({ contextId, eventId, fieldName, truncate, value }) => (
   <DraggableWrapper
     dataProvider={getDataProvider({ contextId, eventId, fieldName, address: value })}
     key={`non-decorated-ip-draggable-wrapper-${getUniqueId({
@@ -88,17 +87,17 @@ const NonDecoratedIp = pure<{
     }
     truncate={truncate}
   />
-));
+);
 
-NonDecoratedIp.displayName = 'NonDecoratedIp';
+const NonDecoratedIp = React.memo(NonDecoratedIpComponent);
 
-const AddressLinks = pure<{
+const AddressLinksComponent: React.FC<{
   addresses: string[];
   contextId: string;
   eventId: string;
   fieldName: string;
   truncate?: boolean;
-}>(({ addresses, contextId, eventId, fieldName, truncate }) => (
+}> = ({ addresses, contextId, eventId, fieldName, truncate }) => (
   <>
     {uniq(addresses).map(address => (
       <DraggableWrapper
@@ -124,17 +123,17 @@ const AddressLinks = pure<{
       />
     ))}
   </>
-));
+);
 
-AddressLinks.displayName = 'AddressLinks';
+const AddressLinks = React.memo(AddressLinksComponent);
 
-export const FormattedIp = pure<{
+const FormattedIpComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldName: string;
   truncate?: boolean;
   value: string | object | null | undefined;
-}>(({ contextId, eventId, fieldName, truncate, value }) => {
+}> = ({ contextId, eventId, fieldName, truncate, value }) => {
   if (isString(value) && !isEmpty(value)) {
     try {
       const addresses = JSON.parse(value);
@@ -174,6 +173,6 @@ export const FormattedIp = pure<{
       />
     );
   }
-});
+};
 
-FormattedIp.displayName = 'FormattedIp';
+export const FormattedIp = React.memo(FormattedIpComponent);

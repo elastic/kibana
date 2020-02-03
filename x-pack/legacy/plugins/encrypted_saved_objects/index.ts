@@ -21,7 +21,9 @@ export const encryptedSavedObjects = (kibana: {
     // Some legacy plugins still use `enabled` config key, so we keep it here, but the rest of the
     // keys is handled by the New Platform plugin.
     config: (Joi: Root) =>
-      Joi.object({ enabled: Joi.boolean().default(true) })
+      Joi.object({
+        enabled: Joi.boolean().default(true),
+      })
         .unknown(true)
         .default(),
 
@@ -33,7 +35,6 @@ export const encryptedSavedObjects = (kibana: {
       }
 
       encryptedSavedObjectsPlugin.__legacyCompat.registerLegacyAPI({
-        savedObjects: server.savedObjects,
         auditLogger: new AuditLogger(
           server,
           'encryptedSavedObjects',

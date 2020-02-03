@@ -8,12 +8,15 @@ import { Actions } from '.';
 import { AuthorizationMode } from './mode';
 
 export const authorizationMock = {
-  create: ({ version = 'mock-version' }: { version?: string } = {}) => ({
+  create: ({
+    version = 'mock-version',
+    applicationName = 'mock-application',
+  }: { version?: string; applicationName?: string } = {}) => ({
     actions: new Actions(version),
     checkPrivilegesWithRequest: jest.fn(),
     checkPrivilegesDynamicallyWithRequest: jest.fn(),
     checkSavedObjectsPrivilegesWithRequest: jest.fn(),
-    getApplicationName: jest.fn().mockReturnValue('mock-application'),
+    applicationName,
     mode: { useRbacForRequest: jest.fn() } as jest.Mocked<AuthorizationMode>,
     privileges: { get: jest.fn() },
     registerPrivilegesWithCluster: jest.fn(),

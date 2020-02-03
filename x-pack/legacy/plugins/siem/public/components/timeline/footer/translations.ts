@@ -6,10 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LOADING_EVENTS = i18n.translate('xpack.siem.footer.loadingEventsData', {
-  defaultMessage: 'Loading Events',
-});
-
 export const LOADING_TIMELINE_DATA = i18n.translate('xpack.siem.footer.loadingTimelineData', {
   defaultMessage: 'Loading Timeline data',
 });
@@ -31,7 +27,7 @@ export const LOADING = i18n.translate('xpack.siem.footer.loadingLabel', {
 });
 
 export const LOAD_MORE = i18n.translate('xpack.siem.footer.loadMoreLabel', {
-  defaultMessage: 'Load More',
+  defaultMessage: 'Load more',
 });
 
 export const TOTAL_COUNT_OF_EVENTS = i18n.translate('xpack.siem.footer.totalCountOfEvents', {

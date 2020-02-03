@@ -23,7 +23,7 @@ export interface Field {
   id: FieldId;
   name: string;
   type: ES_FIELD_TYPES;
-  aggregatable: boolean;
+  aggregatable?: boolean;
   aggIds?: AggId[];
   aggs?: Aggregation[];
 }

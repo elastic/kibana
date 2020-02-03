@@ -43,4 +43,37 @@ export class TaskManagerUtils {
       }
     });
   }
+
+  async waitForActionTaskParamsToBeCleanedUp(createdAtFilter: Date): Promise<void> {
+    return await this.retry.try(async () => {
+      const searchResult = await this.es.search({
+        index: '.kibana',
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    type: 'action_task_params',
+                  },
+                },
+                {
+                  range: {
+                    updated_at: {
+                      gte: createdAtFilter,
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+      if (searchResult.hits.total.value) {
+        throw new Error(
+          `Expected 0 action_task_params objects but received ${searchResult.hits.total.value}`
+        );
+      }
+    });
+  }
 }

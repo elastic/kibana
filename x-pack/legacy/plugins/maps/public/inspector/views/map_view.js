@@ -10,7 +10,6 @@ import { MapDetails } from './map_details';
 import { i18n } from '@kbn/i18n';
 
 class MapViewComponent extends Component {
-
   constructor(props) {
     super(props);
     props.adapters.map.on('change', this._onMapChange);
@@ -28,7 +27,7 @@ class MapViewComponent extends Component {
       stats,
       mapStyle: style,
     });
-  }
+  };
 
   componentWillUnmount() {
     this.props.adapters.map.removeListener('change', this._onMapChange);
@@ -52,16 +51,16 @@ MapViewComponent.propTypes = {
 
 const MapView = {
   title: i18n.translate('xpack.maps.inspector.mapDetailsViewTitle', {
-    defaultMessage: 'Map details'
+    defaultMessage: 'Map details',
   }),
   order: 30,
   help: i18n.translate('xpack.maps.inspector.mapDetailsViewHelpText', {
-    defaultMessage: 'View the map state'
+    defaultMessage: 'View the map state',
   }),
   shouldShow(adapters) {
     return Boolean(adapters.map);
   },
-  component: MapViewComponent
+  component: MapViewComponent,
 };
 
 export { MapView };

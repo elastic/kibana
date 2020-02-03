@@ -48,7 +48,7 @@ import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
-import { esFilters, utils, IIndexPattern, IFieldType } from '../../..';
+import { esFilters, IIndexPattern, IFieldType } from '../../..';
 
 interface Props {
   filter: esFilters.Filter;
@@ -95,6 +95,7 @@ class FilterEditorUI extends Component<Props, State> {
                 defaultMessage="Edit filter"
               />
             </EuiFlexItem>
+            <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty size="xs" onClick={this.toggleCustomEditor}>
                 {this.state.isCustomEditorOpen ? (
@@ -371,7 +372,7 @@ class FilterEditorUI extends Component<Props, State> {
   }
 
   private getIndexPatternFromFilter() {
-    return utils.getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
+    return esFilters.getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
   }
 
   private getFieldFromFilter() {

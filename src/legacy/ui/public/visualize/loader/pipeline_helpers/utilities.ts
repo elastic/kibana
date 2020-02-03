@@ -19,17 +19,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
-import { AggConfig, Vis } from 'ui/vis';
+import { AggConfig } from 'ui/agg_types';
 import { npStart } from 'ui/new_platform';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
-
-import { IFieldFormatId, FieldFormat } from '../../../../../../plugins/data/public';
+import { fieldFormats } from '../../../../../../plugins/data/public';
+import { Vis } from '../../../../../core_plugins/visualizations/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
-import { dateRange } from '../../../utils/date_range';
-import { ipRange } from '../../../utils/ip_range';
-import { DateRangeKey } from '../../../agg_types/buckets/date_range';
-import { IpRangeKey } from '../../../agg_types/buckets/ip_range';
+import { DateRangeKey, convertDateRangeToString } from '../../../agg_types/buckets/date_range';
+import { IpRangeKey, convertIPRangeToString } from '../../../agg_types/buckets/ip_range';
 
 interface TermsFieldFormatParams {
   otherBucketLabel: string;
@@ -45,13 +43,16 @@ function isTermsFieldFormat(
 
 const getConfig = (key: string, defaultOverride?: any): any =>
   npStart.core.uiSettings.get(key, defaultOverride);
-const DefaultFieldFormat = FieldFormat.from(identity);
+const DefaultFieldFormat = fieldFormats.FieldFormat.from(identity);
 
-const getFieldFormat = (id?: IFieldFormatId, params: object = {}): FieldFormat => {
-  const fieldFormats = npStart.plugins.data.fieldFormats;
+const getFieldFormat = (
+  id?: fieldFormats.IFieldFormatId,
+  params: object = {}
+): fieldFormats.FieldFormat => {
+  const fieldFormatsService = npStart.plugins.data.fieldFormats;
 
   if (id) {
-    const Format = fieldFormats.getType(id);
+    const Format = fieldFormatsService.getType(id);
 
     if (Format) {
       return new Format(params, getConfig);
@@ -93,7 +94,7 @@ export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
   return formats[agg.type.name] ? formats[agg.type.name]() : format;
 };
 
-export type FormatFactory = (mapping?: SerializedFieldFormat) => FieldFormat;
+export type FormatFactory = (mapping?: SerializedFieldFormat) => fieldFormats.FieldFormat;
 
 export const getFormat: FormatFactory = mapping => {
   if (!mapping) {
@@ -101,7 +102,7 @@ export const getFormat: FormatFactory = mapping => {
   }
   const { id } = mapping;
   if (id === 'range') {
-    const RangeFormat = FieldFormat.from((range: any) => {
+    const RangeFormat = fieldFormats.FieldFormat.from((range: any) => {
       const format = getFieldFormat(id, mapping.params);
       const gte = '\u2265';
       const lt = '\u003c';
@@ -118,56 +119,37 @@ export const getFormat: FormatFactory = mapping => {
     return new RangeFormat();
   } else if (id === 'date_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
-    const DateRangeFormat = FieldFormat.from((range: DateRangeKey) => {
+    const DateRangeFormat = fieldFormats.FieldFormat.from((range: DateRangeKey) => {
       const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
-      return dateRange.toString(range, format.convert.bind(format));
+      return convertDateRangeToString(range, format.convert.bind(format));
     });
     return new DateRangeFormat();
   } else if (id === 'ip_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
-    const IpRangeFormat = FieldFormat.from((range: IpRangeKey) => {
+    const IpRangeFormat = fieldFormats.FieldFormat.from((range: IpRangeKey) => {
       const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
-      return ipRange.toString(range, format.convert.bind(format));
+      return convertIPRangeToString(range, format.convert.bind(format));
     });
     return new IpRangeFormat();
   } else if (isTermsFieldFormat(mapping) && mapping.params) {
-    const params = mapping.params;
+    const { params } = mapping;
+    const convert = (val: string, type: fieldFormats.ContentType) => {
+      const format = getFieldFormat(params.id, mapping.params);
+
+      if (val === '__other__') {
+        return params.otherBucketLabel;
+      }
+      if (val === '__missing__') {
+        return params.missingBucketLabel;
+      }
+
+      return format.convert(val, type);
+    };
+
     return {
-      getConverterFor: (type: string) => {
-        const format = getFieldFormat(params.id, mapping.params);
-        return (val: string) => {
-          if (val === '__other__') {
-            return params.otherBucketLabel;
-          }
-          if (val === '__missing__') {
-            return params.missingBucketLabel;
-          }
-          const parsedUrl = {
-            origin: window.location.origin,
-            pathname: window.location.pathname,
-            basePath: npStart.core.http.basePath,
-          };
-          // @ts-ignore
-          return format.convert(val, undefined, undefined, parsedUrl);
-        };
-      },
-      convert: (val: string, type: string) => {
-        const format = getFieldFormat(params.id, mapping.params);
-        if (val === '__other__') {
-          return params.otherBucketLabel;
-        }
-        if (val === '__missing__') {
-          return params.missingBucketLabel;
-        }
-        const parsedUrl = {
-          origin: window.location.origin,
-          pathname: window.location.pathname,
-          basePath: npStart.core.http.basePath,
-        };
-        // @ts-ignore
-        return format.convert(val, type, undefined, parsedUrl);
-      },
-    } as FieldFormat;
+      convert,
+      getConverterFor: (type: fieldFormats.ContentType) => (val: string) => convert(val, type),
+    } as fieldFormats.FieldFormat;
   } else {
     return getFieldFormat(id, mapping.params);
   }
@@ -180,5 +162,3 @@ export const getTableAggs = (vis: Vis): AggConfig[] => {
   const columns = tabifyGetColumns(vis.aggs.getResponseAggs(), !vis.isHierarchical());
   return columns.map(c => c.aggConfig);
 };
-
-export { FieldFormat };

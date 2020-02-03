@@ -19,6 +19,7 @@
 
 import sinon from 'sinon';
 import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 const mockObservable = () => {
   return {
@@ -31,7 +32,7 @@ const mockComponent = () => {
 };
 
 export const mockUiSettings = {
-  get: (item) => {
+  get: item => {
     return mockUiSettings[item];
   },
   getUpdate$: () => ({
@@ -44,12 +45,24 @@ export const mockUiSettings = {
   'format:defaultTypeMap': {},
 };
 
-export const npSetup = {
-  core: {
-    chrome: {},
-    uiSettings: mockUiSettings,
+const mockCore = {
+  chrome: {},
+  uiSettings: mockUiSettings,
+  http: {
+    basePath: {
+      get: sinon.fake.returns(''),
+    },
   },
+};
+
+export const npSetup = {
+  core: mockCore,
   plugins: {
+    usageCollection: {
+      allowTrackUserAgent: sinon.fake(),
+      reportUiStats: sinon.fake(),
+      METRIC_TYPE,
+    },
     embeddable: {
       registerEmbeddableFactory: sinon.fake(),
     },
@@ -87,9 +100,15 @@ export const npSetup = {
           getSavedQuery: sinon.fake(),
           deleteSavedQuery: sinon.fake(),
           getSavedQueryCount: sinon.fake(),
-        }
+        },
       },
-      fieldFormats: getFieldFormatsRegistry(mockUiSettings),
+      __LEGACY: {
+        esClient: {
+          search: sinon.fake(),
+          msearch: sinon.fake(),
+        },
+      },
+      fieldFormats: getFieldFormatsRegistry(mockCore),
     },
     share: {
       register: () => {},
@@ -118,6 +137,22 @@ export const npSetup = {
       featureCatalogue: {
         register: sinon.fake(),
       },
+      environment: {
+        update: sinon.fake(),
+      },
+    },
+    charts: {
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
+      },
+    },
+    management: {
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
+        }),
+      },
     },
   },
 };
@@ -131,6 +166,20 @@ export const npStart = {
     chrome: {},
   },
   plugins: {
+    management: {
+      legacy: {
+        getSection: () => ({
+          register: sinon.fake(),
+          deregister: sinon.fake(),
+          hasItem: sinon.fake(),
+        }),
+      },
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
+        }),
+      },
+    },
     embeddable: {
       getEmbeddableFactory: sinon.fake(),
       getEmbeddableFactories: sinon.fake(),
@@ -153,8 +202,10 @@ export const npStart = {
         getProvider: sinon.fake(),
       },
       getSuggestions: sinon.fake(),
+      indexPatterns: sinon.fake(),
       ui: {
         IndexPatternSelect: mockComponent,
+        SearchBar: mockComponent,
       },
       query: {
         filterManager: {
@@ -209,7 +260,15 @@ export const npStart = {
           history: sinon.fake(),
         },
       },
-      fieldFormats: getFieldFormatsRegistry(mockUiSettings),
+      search: {
+        __LEGACY: {
+          esClient: {
+            search: sinon.fake(),
+            msearch: sinon.fake(),
+          },
+        },
+      },
+      fieldFormats: getFieldFormatsRegistry(mockCore),
     },
     share: {
       toggleShareContextMenu: () => {},
@@ -234,6 +293,20 @@ export const npStart = {
     home: {
       featureCatalogue: {
         register: sinon.fake(),
+      },
+      environment: {
+        get: sinon.fake(),
+      },
+    },
+    navigation: {
+      ui: {
+        TopNavMenu: mockComponent,
+      },
+    },
+    charts: {
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
       },
     },
   },

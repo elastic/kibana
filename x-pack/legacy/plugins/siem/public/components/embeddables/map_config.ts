@@ -5,10 +5,17 @@
  */
 
 import uuid from 'uuid';
-import { IndexPatternMapping } from './types';
+import { euiPaletteColorBlind } from '@elastic/eui';
+import {
+  IndexPatternMapping,
+  LayerMapping,
+  LayerMappingCollection,
+  LayerMappingDetails,
+} from './types';
 import * as i18n from './translations';
+const euiVisColorPalette = euiPaletteColorBlind();
 
-// Update source/destination field mappings to modify what fields will be returned to map tooltip
+// Update field mappings to modify what fields will be returned to map tooltip
 const sourceFieldMappings: Record<string, string> = {
   'host.name': i18n.HOST,
   'source.ip': i18n.SOURCE_IP,
@@ -23,16 +30,67 @@ const destinationFieldMappings: Record<string, string> = {
   'destination.geo.country_iso_code': i18n.LOCATION,
   'destination.as.organization.name': i18n.ASN,
 };
+const clientFieldMappings: Record<string, string> = {
+  'host.name': i18n.HOST,
+  'client.ip': i18n.CLIENT_IP,
+  'client.domain': i18n.CLIENT_DOMAIN,
+  'client.geo.country_iso_code': i18n.LOCATION,
+  'client.as.organization.name': i18n.ASN,
+};
+const serverFieldMappings: Record<string, string> = {
+  'host.name': i18n.HOST,
+  'server.ip': i18n.SERVER_IP,
+  'server.domain': i18n.SERVER_DOMAIN,
+  'server.geo.country_iso_code': i18n.LOCATION,
+  'server.as.organization.name': i18n.ASN,
+};
 
 // Mapping of field -> display name for use within map tooltip
 export const sourceDestinationFieldMappings: Record<string, string> = {
   ...sourceFieldMappings,
   ...destinationFieldMappings,
+  ...clientFieldMappings,
+  ...serverFieldMappings,
 };
 
 // Field names of LineLayer props returned from Maps API
 export const SUM_OF_SOURCE_BYTES = 'sum_of_source.bytes';
 export const SUM_OF_DESTINATION_BYTES = 'sum_of_destination.bytes';
+export const SUM_OF_CLIENT_BYTES = 'sum_of_client.bytes';
+export const SUM_OF_SERVER_BYTES = 'sum_of_server.bytes';
+
+// Mapping to fields for creating specific layers for a given index pattern
+// e.g. The apm-* index pattern needs layers for client/server instead of source/destination
+export const lmc: LayerMappingCollection = {
+  default: {
+    source: {
+      metricField: 'source.bytes',
+      geoField: 'source.geo.location',
+      tooltipProperties: Object.keys(sourceFieldMappings),
+      label: i18n.SOURCE_LAYER,
+    },
+    destination: {
+      metricField: 'destination.bytes',
+      geoField: 'destination.geo.location',
+      tooltipProperties: Object.keys(destinationFieldMappings),
+      label: i18n.DESTINATION_LAYER,
+    },
+  },
+  'apm-*': {
+    source: {
+      metricField: 'client.bytes',
+      geoField: 'client.geo.location',
+      tooltipProperties: Object.keys(clientFieldMappings),
+      label: i18n.CLIENT_LAYER,
+    },
+    destination: {
+      metricField: 'server.bytes',
+      geoField: 'server.geo.location',
+      tooltipProperties: Object.keys(serverFieldMappings),
+      label: i18n.SERVER_LAYER,
+    },
+  },
+};
 
 /**
  * Returns `Source/Destination Point-to-point` Map LayerList configuration, with a source,
@@ -56,9 +114,9 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
     ...indexPatternIds.reduce((acc: object[], { title, id }) => {
       return [
         ...acc,
-        getLineLayer(title, id),
-        getDestinationLayer(title, id),
-        getSourceLayer(title, id),
+        getLineLayer(title, id, lmc[title] ?? lmc.default),
+        getDestinationLayer(title, id, lmc[title]?.destination ?? lmc.default.destination),
+        getSourceLayer(title, id, lmc[title]?.source ?? lmc.default.source),
       ];
     }, []),
   ];
@@ -70,15 +128,20 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
  *
  * @param indexPatternTitle used as layer name in LayerToC UI: "${indexPatternTitle} | Source point"
  * @param indexPatternId used as layer's indexPattern to query for data
+ * @param layerDetails layer-specific field details
  */
-export const getSourceLayer = (indexPatternTitle: string, indexPatternId: string) => ({
+export const getSourceLayer = (
+  indexPatternTitle: string,
+  indexPatternId: string,
+  layerDetails: LayerMappingDetails
+) => ({
   sourceDescriptor: {
     id: uuid.v4(),
     type: 'ES_SEARCH',
     applyGlobalQuery: true,
-    geoField: 'source.geo.location',
+    geoField: layerDetails.geoField,
     filterByMapBounds: false,
-    tooltipProperties: Object.keys(sourceFieldMappings),
+    tooltipProperties: layerDetails.tooltipProperties,
     useTopHits: false,
     topHitsTimeField: '@timestamp',
     topHitsSize: 1,
@@ -89,7 +152,7 @@ export const getSourceLayer = (indexPatternTitle: string, indexPatternId: string
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#3185FC' },
+        options: { color: euiVisColorPalette[1] },
       },
       lineColor: {
         type: 'STATIC',
@@ -101,13 +164,17 @@ export const getSourceLayer = (indexPatternTitle: string, indexPatternId: string
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbol: {
-        options: { symbolizeAs: 'icon', symbolId: 'home' },
+      symbolizeAs: {
+        options: { value: 'icon' },
+      },
+      icon: {
+        type: 'STATIC',
+        options: { value: 'home' },
       },
     },
   },
   id: uuid.v4(),
-  label: `${indexPatternTitle} | ${i18n.SOURCE_LAYER}`,
+  label: `${indexPatternTitle} | ${layerDetails.label}`,
   minZoom: 0,
   maxZoom: 24,
   alpha: 1,
@@ -123,15 +190,21 @@ export const getSourceLayer = (indexPatternTitle: string, indexPatternId: string
  *
  * @param indexPatternTitle used as layer name in LayerToC UI: "${indexPatternTitle} | Destination point"
  * @param indexPatternId used as layer's indexPattern to query for data
+ * @param layerDetails layer-specific field details
+ *
  */
-export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: string) => ({
+export const getDestinationLayer = (
+  indexPatternTitle: string,
+  indexPatternId: string,
+  layerDetails: LayerMappingDetails
+) => ({
   sourceDescriptor: {
     id: uuid.v4(),
     type: 'ES_SEARCH',
     applyGlobalQuery: true,
-    geoField: 'destination.geo.location',
+    geoField: layerDetails.geoField,
     filterByMapBounds: true,
-    tooltipProperties: Object.keys(destinationFieldMappings),
+    tooltipProperties: layerDetails.tooltipProperties,
     useTopHits: false,
     topHitsTimeField: '@timestamp',
     topHitsSize: 1,
@@ -142,7 +215,7 @@ export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: s
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#DB1374' },
+        options: { color: euiVisColorPalette[2] },
       },
       lineColor: {
         type: 'STATIC',
@@ -154,13 +227,17 @@ export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: s
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbol: {
-        options: { symbolizeAs: 'icon', symbolId: 'marker' },
+      symbolizeAs: {
+        options: { value: 'icon' },
+      },
+      icon: {
+        type: 'STATIC',
+        options: { value: 'marker' },
       },
     },
   },
   id: uuid.v4(),
-  label: `${indexPatternTitle} | ${i18n.DESTINATION_LAYER}`,
+  label: `${indexPatternTitle} | ${layerDetails.label}`,
   minZoom: 0,
   maxZoom: 24,
   alpha: 1,
@@ -175,18 +252,31 @@ export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: s
  *
  * @param indexPatternTitle used as layer name in LayerToC UI: "${indexPatternTitle} | Line"
  * @param indexPatternId used as layer's indexPattern to query for data
+ * @param layerDetails layer-specific field details
  */
-export const getLineLayer = (indexPatternTitle: string, indexPatternId: string) => ({
+export const getLineLayer = (
+  indexPatternTitle: string,
+  indexPatternId: string,
+  layerDetails: LayerMapping
+) => ({
   sourceDescriptor: {
     type: 'ES_PEW_PEW',
     applyGlobalQuery: true,
     id: uuid.v4(),
     indexPatternId,
-    sourceGeoField: 'source.geo.location',
-    destGeoField: 'destination.geo.location',
+    sourceGeoField: layerDetails.source.geoField,
+    destGeoField: layerDetails.destination.geoField,
     metrics: [
-      { type: 'sum', field: 'source.bytes', label: 'source.bytes' },
-      { type: 'sum', field: 'destination.bytes', label: 'destination.bytes' },
+      {
+        type: 'sum',
+        field: layerDetails.source.metricField,
+        label: layerDetails.source.metricField,
+      },
+      {
+        type: 'sum',
+        field: layerDetails.destination.metricField,
+        label: layerDetails.destination.metricField,
+      },
     ],
   },
   style: {
@@ -198,7 +288,7 @@ export const getLineLayer = (indexPatternTitle: string, indexPatternId: string) 
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#3185FC' },
+        options: { color: euiVisColorPalette[1] },
       },
       lineWidth: {
         type: 'DYNAMIC',
@@ -210,6 +300,10 @@ export const getLineLayer = (indexPatternTitle: string, indexPatternId: string) 
           },
           minSize: 1,
           maxSize: 8,
+          fieldMetaOptions: {
+            isEnabled: true,
+            sigma: 3,
+          },
         },
       },
       iconSize: { type: 'STATIC', options: { size: 10 } },
@@ -217,8 +311,12 @@ export const getLineLayer = (indexPatternTitle: string, indexPatternId: string) 
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbol: {
-        options: { symbolizeAs: 'circle', symbolId: 'airfield' },
+      symbolizeAs: {
+        options: { value: 'icon' },
+      },
+      icon: {
+        type: 'STATIC',
+        options: { value: 'airfield' },
       },
     },
   },

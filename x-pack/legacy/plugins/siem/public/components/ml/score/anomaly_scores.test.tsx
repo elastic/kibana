@@ -4,23 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { AnomalyScoresComponent, createJobKey } from './anomaly_scores';
 import { mockAnomalies } from '../mock';
 import { TestProviders } from '../../../mock/test_providers';
 import { getEmptyValue } from '../../empty_value';
 import { Anomalies } from '../types';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 const endDate: number = new Date('3000-01-01T00:00:00.000Z').valueOf();
 const narrowDateRange = jest.fn();
 
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
-
 describe('anomaly_scores', () => {
   let anomalies: Anomalies = cloneDeep(mockAnomalies);
+  const mount = useMountAppended();
 
   beforeEach(() => {
     anomalies = cloneDeep(mockAnomalies);
@@ -36,7 +35,7 @@ describe('anomaly_scores', () => {
         narrowDateRange={narrowDateRange}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('renders spinner when isLoading is true is passed', () => {

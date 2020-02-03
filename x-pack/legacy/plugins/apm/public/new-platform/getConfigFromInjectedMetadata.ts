@@ -17,8 +17,8 @@ export function getConfigFromInjectedMetadata(): ConfigSchema {
   } = core.injectedMetadata.getInjectedVars();
 
   return {
-    apmIndexPatternTitle,
-    apmServiceMapEnabled,
-    apmUiEnabled
-  } as ConfigSchema;
+    indexPatternTitle: `${apmIndexPatternTitle}`,
+    serviceMapEnabled: !!apmServiceMapEnabled,
+    ui: { enabled: !!apmUiEnabled }
+  };
 }

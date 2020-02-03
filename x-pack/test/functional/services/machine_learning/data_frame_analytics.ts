@@ -3,16 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MachineLearningAPIProvider } from './api';
+import { MlApi } from './api';
 
 import { DATA_FRAME_TASK_STATE } from '../../../../legacy/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 
 export function MachineLearningDataFrameAnalyticsProvider(
   { getService }: FtrProviderContext,
-  mlApi: ProvidedType<typeof MachineLearningAPIProvider>
+  mlApi: MlApi
 ) {
   const testSubjects = getService('testSubjects');
 
@@ -31,6 +30,22 @@ export function MachineLearningDataFrameAnalyticsProvider(
 
     async assertCreateNewAnalyticsButtonExists() {
       await testSubjects.existOrFail('mlAnalyticsButtonCreate');
+    },
+
+    async assertRegressionEvaluatePanelElementsExists() {
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionExplorationEvaluatePanel');
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionGenMSEstat');
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionGenRSquaredStat');
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionTrainingMSEstat');
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionTrainingRSquaredStat');
+    },
+
+    async assertRegressionTablePanelExists() {
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionExplorationTablePanel');
+    },
+
+    async assertOutlierTablePanelExists() {
+      await testSubjects.existOrFail('mlDFAnalyticsOutlierExplorationTablePanel');
     },
 
     async assertAnalyticsStatsBarExists() {

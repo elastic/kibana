@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import { RowRenderer } from '../row_renderer';
 import {
   createGenericAuditRowRenderer,
@@ -20,6 +20,8 @@ import {
 } from './generic_row_renderer';
 
 describe('GenericRowRenderer', () => {
+  const mount = useMountAppended();
+
   describe('#createGenericAuditRowRenderer', () => {
     let nonAuditd: Ecs;
     let auditd: Ecs;
@@ -43,7 +45,7 @@ describe('GenericRowRenderer', () => {
       });
 
       const wrapper = shallow(<span>{children}</span>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should return false if not a auditd datum', () => {
@@ -122,7 +124,7 @@ describe('GenericRowRenderer', () => {
       });
 
       const wrapper = shallow(<span>{children}</span>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should return false if not a auditd datum', () => {

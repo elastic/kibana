@@ -1,0 +1,11 @@
+{
+  "ml.delete_trained_model": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_ml/inference/{model_id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/delete-inference.html"
+  }
+}

@@ -11,11 +11,11 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY, KIBANA_SETTINGS_TYPE } from '../../.
  * If so, get email from kibana.yml
  */
 export async function getDefaultAdminEmail(config) {
-  if (!config.get('xpack.monitoring.cluster_alerts.email_notifications.enabled')) {
+  if (!config.get('monitoring.cluster_alerts.email_notifications.enabled')) {
     return null;
   }
 
-  const emailAddressConfigKey = `xpack.monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`;
+  const emailAddressConfigKey = `monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`;
   const configuredEmailAddress = config.get(emailAddressConfigKey);
 
   return configuredEmailAddress || null;
@@ -57,9 +57,13 @@ export function getSettingsCollector(usageCollection, config) {
       // skip everything if defaultAdminEmail === undefined
       if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
         kibanaSettingsData = this.getEmailValueStructure(defaultAdminEmail);
-        this.log.debug(`[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`);
+        this.log.debug(
+          `[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`
+        );
       } else {
-        this.log.debug(`not sending [${KIBANA_SETTINGS_TYPE}] monitoring document because [${defaultAdminEmail}] is null or invalid.`);
+        this.log.debug(
+          `not sending [${KIBANA_SETTINGS_TYPE}] monitoring document because [${defaultAdminEmail}] is null or invalid.`
+        );
       }
 
       // remember the current email so that we can mark it as successful if the bulk does not error out
@@ -71,9 +75,9 @@ export function getSettingsCollector(usageCollection, config) {
     getEmailValueStructure(email) {
       return {
         xpack: {
-          default_admin_email: email
-        }
+          default_admin_email: email,
+        },
       };
-    }
+    },
   });
 }

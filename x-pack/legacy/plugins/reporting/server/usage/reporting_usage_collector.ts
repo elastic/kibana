@@ -5,12 +5,13 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-// @ts-ignore untyped module
-import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
-import { ServerFacade, ESCallCluster } from '../../types';
+import { ServerFacade, ExportTypesRegistry, ESCallCluster } from '../../types';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
 import { getReportingUsage } from './get_reporting_usage';
 import { RangeStats } from './types';
+
+// places the reporting data as kibana stats
+const METATYPE = 'kibana_stats';
 
 /*
  * @param {Object} server
@@ -19,12 +20,14 @@ import { RangeStats } from './types';
 export function getReportingUsageCollector(
   usageCollection: UsageCollectionSetup,
   server: ServerFacade,
-  isReady: () => boolean
+  isReady: () => boolean,
+  exportTypesRegistry: ExportTypesRegistry
 ) {
   return usageCollection.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
     isReady,
-    fetch: (callCluster: ESCallCluster) => getReportingUsage(server, callCluster),
+    fetch: (callCluster: ESCallCluster) =>
+      getReportingUsage(server, callCluster, exportTypesRegistry),
 
     /*
      * Format the response data into a model for internal upload
@@ -33,7 +36,7 @@ export function getReportingUsageCollector(
      */
     formatForBulkUpload: (result: RangeStats) => {
       return {
-        type: KIBANA_STATS_TYPE_MONITORING,
+        type: METATYPE,
         payload: {
           usage: {
             xpack: {
@@ -49,8 +52,14 @@ export function getReportingUsageCollector(
 export function registerReportingUsageCollector(
   usageCollection: UsageCollectionSetup,
   server: ServerFacade,
-  isReady: () => boolean
+  isReady: () => boolean,
+  exportTypesRegistry: ExportTypesRegistry
 ) {
-  const collector = getReportingUsageCollector(usageCollection, server, isReady);
+  const collector = getReportingUsageCollector(
+    usageCollection,
+    server,
+    isReady,
+    exportTypesRegistry
+  );
   usageCollection.registerCollector(collector);
 }

@@ -11,25 +11,21 @@ import { EuiText, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 function OfflineCell() {
-  return (
-    <div className="monTableCell__number monTableCell__offline">
-      N/A
-    </div>
-  );
+  return <div className="monTableCell__number monTableCell__offline">N/A</div>;
 }
 
-const getSlopeArrow = (slope) => {
+const getSlopeArrow = slope => {
   if (slope || slope === 0) {
     return slope > 0 ? 'up' : 'down';
   }
   return null;
 };
 
-const metricVal = (metric, format, isPercent) => {
+const metricVal = (metric, format, isPercent, units) => {
   if (isPercent) {
     return formatMetric(metric, format, '%', { prependSpace: false });
   }
-  return formatMetric(metric, format);
+  return formatMetric(metric, format, units);
 };
 
 const noWrapStyle = { overflowX: 'hidden', whiteSpace: 'nowrap' };
@@ -38,6 +34,7 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
   if (isOnline) {
     const { lastVal, maxVal, minVal, slope } = get(metric, 'summary', {});
     const format = get(metric, 'metric.format');
+    const units = get(metric, 'metric.units');
 
     return (
       <EuiFlexGroup gutterSize="m" alignItems="center" wrap {...props}>
@@ -53,16 +50,16 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
             {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.maxText', {
               defaultMessage: '{metric} max',
               values: {
-                metric: metricVal(maxVal, format, isPercent)
-              }
+                metric: metricVal(maxVal, format, isPercent, units),
+              },
             })}
           </EuiText>
           <EuiText size="xs">
             {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.minText', {
               defaultMessage: '{metric} min',
               values: {
-                metric: metricVal(minVal, format, isPercent)
-              }
+                metric: metricVal(minVal, format, isPercent, units),
+              },
             })}
           </EuiText>
         </EuiFlexItem>
@@ -70,10 +67,7 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
     );
   }
 
-  return <OfflineCell/>;
+  return <OfflineCell />;
 }
 
-export {
-  OfflineCell,
-  MetricCell
-};
+export { OfflineCell, MetricCell };

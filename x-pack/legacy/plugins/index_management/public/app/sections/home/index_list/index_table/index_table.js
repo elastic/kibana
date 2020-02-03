@@ -104,7 +104,13 @@ export class IndexTable extends Component {
     const { filterChanged, filterFromURI } = this.props;
     if (filterFromURI) {
       const decodedFilter = decodeURIComponent(filterFromURI);
-      filterChanged(EuiSearchBar.Query.parse(decodedFilter));
+
+      try {
+        const filter = EuiSearchBar.Query.parse(decodedFilter);
+        filterChanged(filter);
+      } catch (e) {
+        this.setState({ filterError: e });
+      }
     }
   }
   componentWillUnmount() {
@@ -122,7 +128,8 @@ export class IndexTable extends Component {
       return;
     }
     return (
-      <Fragment>
+      <>
+        <EuiSpacer />
         <EuiCallOut
           iconType="faceSad"
           color="danger"
@@ -131,11 +138,11 @@ export class IndexTable extends Component {
 
             values: {
               errorMessage: filterError.message,
-            }
+            },
           })}
         />
-        <EuiSpacer size="l" />
-      </Fragment>
+        <EuiSpacer />
+      </>
     );
   }
   onFilterChanged = ({ query, error }) => {
@@ -248,9 +255,7 @@ export class IndexTable extends Component {
             data-test-subj={`indexTableCell-${fieldName}`}
           >
             <div className={`euiTableCellContent indTable__cell--${fieldName}`}>
-              <span className="eui-textLeft">
-                {this.buildRowCell(fieldName, value, index)}
-              </span>
+              <span className="eui-textLeft">{this.buildRowCell(fieldName, value, index)}</span>
             </div>
           </th>
         );
@@ -274,21 +279,17 @@ export class IndexTable extends Component {
 
     const data = indicesError.body ? indicesError.body : indicesError;
 
-    const {
-      error: errorString,
-      cause,
-      message,
-    } = data;
+    const { error: errorString, cause, message } = data;
 
     return (
       <Fragment>
         <EuiCallOut
-          title={(
+          title={
             <FormattedMessage
               id="xpack.idxMgmt.indexTable.serverErrorTitle"
               defaultMessage="Error loading indices"
             />
-          )}
+          }
           color="danger"
           iconType="alert"
         >
@@ -297,7 +298,9 @@ export class IndexTable extends Component {
             <Fragment>
               <EuiSpacer size="m" />
               <ul>
-                {cause.map((message, i) => <li key={i}>{message}</li>)}
+                {cause.map((message, i) => (
+                  <li key={i}>{message}</li>
+                ))}
               </ul>
             </Fragment>
           )}
@@ -353,7 +356,7 @@ export class IndexTable extends Component {
               }}
               data-test-subj="indexTableRowCheckbox"
               aria-label={i18n.translate('xpack.idxMgmt.indexTable.selectIndexAriaLabel', {
-                defaultMessage: 'Select this row'
+                defaultMessage: 'Select this row',
               })}
             />
           </EuiTableRowCellCheckbox>
@@ -420,9 +423,7 @@ export class IndexTable extends Component {
     }
 
     if (!indicesLoading && !indicesError) {
-      emptyState = (
-        <NoMatch />
-      );
+      emptyState = <NoMatch />;
     }
 
     const { selectedIndicesMap } = this.state;
@@ -446,9 +447,9 @@ export class IndexTable extends Component {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {((indicesLoading && allIndices.length === 0) || indicesError) ? null : (
+            {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
               <EuiFlexGroup>
-                {getToggleExtensions().map((toggle) => {
+                {getToggleExtensions().map(toggle => {
                   return this.renderToggleControl(toggle);
                 })}
                 <EuiFlexItem grow={false}>
@@ -487,22 +488,28 @@ export class IndexTable extends Component {
               />
             </EuiFlexItem>
           ) : null}
-          {((indicesLoading && allIndices.length === 0) || indicesError) ? null : (
+          {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
             <Fragment>
               <EuiFlexItem>
                 <EuiSearchBar
-                  filters={(this.getFilters().length > 0) ? this.getFilters() : null}
+                  filters={this.getFilters().length > 0 ? this.getFilters() : null}
                   defaultQuery={filter}
                   query={filter}
                   box={{
                     incremental: true,
-                    placeholder: i18n.translate('xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder', {
-                      defaultMessage: 'Search'
-                    }),
+                    placeholder: i18n.translate(
+                      'xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder',
+                      {
+                        defaultMessage: 'Search',
+                      }
+                    ),
                   }}
-                  aria-label={i18n.translate('xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel', {
-                    defaultMessage: 'Search indices'
-                  })}
+                  aria-label={i18n.translate(
+                    'xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel',
+                    {
+                      defaultMessage: 'Search indices',
+                    }
+                  )}
                   data-test-subj="indexTableFilterInput"
                   onChange={this.onFilterChanged}
                 />
@@ -532,11 +539,7 @@ export class IndexTable extends Component {
           <div style={{ maxWidth: '100%', overflow: 'auto' }}>
             <EuiTable className="indTable">
               <EuiScreenReaderOnly>
-                <caption
-                  role="status"
-                  aria-relevant="text"
-                  aria-live="polite"
-                >
+                <caption role="status" aria-relevant="text" aria-live="polite">
                   <FormattedMessage
                     id="xpack.idxMgmt.indexTable.captionText"
                     defaultMessage="Below is the indices table containing {count, plural, one {# row} other {# rows}} out of {total}."
@@ -551,9 +554,12 @@ export class IndexTable extends Component {
                     checked={this.areAllItemsSelected()}
                     onChange={this.toggleAll}
                     type="inList"
-                    aria-label={i18n.translate('xpack.idxMgmt.indexTable.selectAllIndicesAriaLabel', {
-                      defaultMessage: 'Select all rows'
-                    })}
+                    aria-label={i18n.translate(
+                      'xpack.idxMgmt.indexTable.selectAllIndicesAriaLabel',
+                      {
+                        defaultMessage: 'Select all rows',
+                      }
+                    )}
                   />
                 </EuiTableHeaderCellCheckbox>
                 {this.buildHeader()}

@@ -8,10 +8,13 @@ export const SERVICE_NAME = 'service.name';
 export const SERVICE_ENVIRONMENT = 'service.environment';
 export const SERVICE_AGENT_NAME = 'agent.name';
 export const SERVICE_NODE_NAME = 'service.node.name';
+export const SERVICE_VERSION = 'service.version';
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
 export const USER_ID = 'user.id';
 export const USER_AGENT_NAME = 'user_agent.name';
+
+export const DESTINATION_ADDRESS = 'destination.address';
 
 export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
 export const OBSERVER_LISTENING = 'observer.listening';

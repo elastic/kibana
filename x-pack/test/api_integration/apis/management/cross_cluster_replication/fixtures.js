@@ -9,14 +9,15 @@ import { getRandomString } from './lib';
 
 export const getAutoFollowIndexPayload = (remoteCluster = REMOTE_CLUSTER_NAME) => ({
   remoteCluster,
-  leaderIndexPatterns: [ 'leader-*'],
-  followIndexPattern: '{{leader_index}}_follower'
+  leaderIndexPatterns: ['leader-*'],
+  followIndexPattern: '{{leader_index}}_follower',
 });
 
 export const getFollowerIndexPayload = (
   leaderIndexName = getRandomString(),
   remoteCluster = REMOTE_CLUSTER_NAME,
-  advancedSettings = {}) => ({
+  advancedSettings = {}
+) => ({
   remoteCluster,
   leaderIndex: leaderIndexName,
   ...advancedSettings,

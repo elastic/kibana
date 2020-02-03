@@ -20,7 +20,7 @@ import { JobValidator } from '../../common/job_validator';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 import { WizardSteps } from './wizard_steps';
 import { WizardHorizontalSteps } from './wizard_horizontal_steps';
-import { JOB_TYPE } from '../../common/job_creator/util/constants';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 interface Props {
   jobCreator: JobCreatorType;

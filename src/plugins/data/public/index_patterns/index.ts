@@ -25,6 +25,7 @@ import {
   IndexPatternMissingIndices,
   validateIndexPattern,
   getFromSavedObject,
+  isDefault,
 } from './lib';
 import { getRoutes } from './utils';
 import { flattenHitWrapper, formatHitProvider } from './index_patterns';
@@ -40,9 +41,10 @@ export const indexPatterns = {
   getFromSavedObject,
   flattenHitWrapper,
   formatHitProvider,
+  isDefault,
 };
 
-export { IndexPatternsService } from './index_patterns_service';
-export { Field, FieldList, FieldListInterface } from './fields';
-export { IndexPattern, IndexPatterns } from './index_patterns';
-export { IndexPatternsStart, IndexPatternsSetup } from './types';
+export { Field, FieldList, IFieldList } from './fields';
+
+// TODO: figure out how to replace IndexPatterns in get_inner_angular.
+export { IndexPattern, IndexPatterns, IndexPatternsContract } from './index_patterns';

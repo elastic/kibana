@@ -4,29 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { Fragment } from 'react';
 
-import { rangeShape } from '../style_option_shapes';
-import { StylePropertyLegendRow } from './style_property_legend_row';
-
-export function VectorStyleLegend({  styleProperties }) {
-  return styleProperties.map(styleProperty => {
+export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId }) {
+  return styles.map(style => {
     return (
-      <StylePropertyLegendRow
-        style={styleProperty.style}
-        key={styleProperty.style.getStyleName()}
-        range={styleProperty.range}
-      />
+      <Fragment key={style.getStyleName()}>
+        {style.renderLegendDetailRow({
+          isLinesOnly,
+          isPointsOnly,
+          symbolId,
+        })}
+      </Fragment>
     );
   });
 }
-
-const stylePropertyShape = PropTypes.shape({
-  range: rangeShape,
-  style: PropTypes.object
-});
-
-VectorStyleLegend.propTypes = {
-  styleProperties: PropTypes.arrayOf(stylePropertyShape).isRequired
-};

@@ -21,7 +21,7 @@ export const SnapshotPageContent: React.FC = () => (
           <WithWaffleFilter indexPattern={createDerivedIndexPattern('metrics')}>
             {({ filterQueryAsJson, applyFilterQuery }) => (
               <WithWaffleTime>
-                {({ currentTimeRange, isAutoReloading }) => (
+                {({ currentTime }) => (
                   <WithWaffleOptions>
                     {({
                       metric,
@@ -31,14 +31,16 @@ export const SnapshotPageContent: React.FC = () => (
                       changeView,
                       autoBounds,
                       boundsOverride,
+                      accountId,
+                      region,
                     }) => (
                       <Layout
+                        currentTime={currentTime}
                         filterQuery={filterQueryAsJson}
                         metric={metric}
                         groupBy={groupBy}
                         nodeType={nodeType}
                         sourceId={sourceId}
-                        timeRange={currentTimeRange}
                         options={{
                           ...wafflemap,
                           metric,
@@ -50,6 +52,8 @@ export const SnapshotPageContent: React.FC = () => (
                         onViewChange={changeView}
                         autoBounds={autoBounds}
                         boundsOverride={boundsOverride}
+                        accountId={accountId}
+                        region={region}
                       />
                     )}
                   </WithWaffleOptions>

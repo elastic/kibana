@@ -12,8 +12,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const security = getService('security');
 
   describe('feature controls', () => {
-    const kibanaUsername = 'kibana_user';
-    const kibanaUserRoleName = 'kibana_user';
+    const kibanaUsername = 'kibana_admin';
+    const kibanaUserRoleName = 'kibana_admin';
 
     const kibanaUserPassword = `${kibanaUsername}-password`;
 
@@ -107,7 +107,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
               expect(resp.status).to.eql(302);
               expect(resp.headers.location).to.eql('/app/kibana#foo/bar/baz');
             } else {
-              expect(resp.status).to.eql(500);
+              expect(resp.status).to.eql(403);
               expect(resp.headers.location).to.eql(undefined);
             }
           });

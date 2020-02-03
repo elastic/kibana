@@ -1,0 +1,15 @@
+// Discover plugin styles
+@import 'mixins';
+@import 'discover';
+@import 'hacks';
+
+// Prefix all styles with "dsc" to avoid conflicts.
+// Examples
+//   dscTable
+//   dscTable__footer
+//   monChart__legend--small
+//   monChart__legend-isLoading
+
+@import 'components/index';
+@import 'angular/index';
+@import 'embeddable/index';

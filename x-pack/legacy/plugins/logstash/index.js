@@ -12,28 +12,29 @@ import { registerLogstashClusterRoutes } from './server/routes/api/cluster';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { PLUGIN } from './common/constants';
 
-export const logstash = (kibana) => new kibana.Plugin({
-  id: PLUGIN.ID,
-  publicDir: resolve(__dirname, 'public'),
-  require: ['kibana', 'elasticsearch', 'xpack_main'],
-  configPrefix: 'xpack.logstash',
-  config(Joi) {
-    return Joi.object({
-      enabled: Joi.boolean().default(true)
-    }).default();
-  },
-  uiExports: {
-    managementSections: [
-      'plugins/logstash/sections/pipeline_list',
-      'plugins/logstash/sections/pipeline_edit'
-    ],
-    home: ['plugins/logstash/lib/register_home_feature']
-  },
-  init: (server) => {
-    registerLicenseChecker(server);
-    registerLogstashPipelinesRoutes(server);
-    registerLogstashPipelineRoutes(server);
-    registerLogstashUpgradeRoutes(server);
-    registerLogstashClusterRoutes(server);
-  }
-});
+export const logstash = kibana =>
+  new kibana.Plugin({
+    id: PLUGIN.ID,
+    publicDir: resolve(__dirname, 'public'),
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    configPrefix: 'xpack.logstash',
+    config(Joi) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+    uiExports: {
+      managementSections: [
+        'plugins/logstash/sections/pipeline_list',
+        'plugins/logstash/sections/pipeline_edit',
+      ],
+      home: ['plugins/logstash/lib/register_home_feature'],
+    },
+    init: server => {
+      registerLicenseChecker(server);
+      registerLogstashPipelinesRoutes(server);
+      registerLogstashPipelineRoutes(server);
+      registerLogstashUpgradeRoutes(server);
+      registerLogstashClusterRoutes(server);
+    },
+  });

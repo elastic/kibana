@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectAttributes } from 'src/core/server';
+import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
 export enum ReindexStep {
   // Enum values are spaced out by 10 to give us room to insert steps in between.

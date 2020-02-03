@@ -17,51 +17,13 @@
  * under the License.
  */
 
-import {
-  npSetup,
-  npStart,
-  SavedObjectRegistryProvider,
-  legacyChrome,
-  IPrivate,
-} from './legacy_imports';
-import { DashboardPlugin, LegacyAngularInjectedDependencies } from './plugin';
-import { start as data } from '../../../data/public/legacy';
-import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
-import { start as navigation } from '../../../navigation/public/legacy';
-import './saved_dashboard/saved_dashboards';
-import './dashboard_config';
+import { PluginInitializerContext } from 'kibana/public';
+import { DashboardPlugin } from './plugin';
 
-/**
- * Get dependencies relying on the global angular context.
- * They also have to get resolved together with the legacy imports above
- */
-async function getAngularDependencies(): Promise<LegacyAngularInjectedDependencies> {
-  const injector = await legacyChrome.dangerouslyGetActiveInjector();
+export * from './np_ready/dashboard_constants';
+export { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
 
-  const Private = injector.get<IPrivate>('Private');
-
-  const savedObjectRegistry = Private(SavedObjectRegistryProvider);
-
-  return {
-    dashboardConfig: injector.get('dashboardConfig'),
-    savedObjectRegistry,
-    savedDashboards: injector.get('savedDashboards'),
-  };
-}
-
-(async () => {
-  const instance = new DashboardPlugin();
-  instance.setup(npSetup.core, {
-    ...npSetup.plugins,
-    __LEGACY: {
-      getAngularDependencies,
-    },
-  });
-  instance.start(npStart.core, {
-    ...npStart.plugins,
-    data,
-    npData: npStart.plugins.data,
-    embeddables,
-    navigation,
-  });
-})();
+// Core will be looking for this when loading our plugin in the new platform
+export const plugin = (context: PluginInitializerContext) => {
+  return new DashboardPlugin();
+};

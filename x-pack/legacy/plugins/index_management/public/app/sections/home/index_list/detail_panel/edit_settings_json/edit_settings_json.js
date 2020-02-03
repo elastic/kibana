@@ -19,21 +19,17 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { TAB_SETTINGS } from '../../../../../constants';
-import {
-  settingsToDisplay,
-  readOnlySettings
-} from '../../../../../lib/edit_settings';
+import { settingsToDisplay, readOnlySettings } from '../../../../../lib/edit_settings';
 import { createAceEditor } from '../../../../../lib/ace';
 import _ from 'lodash';
 
 import { flattenObject } from '../../../../../lib/flatten_object';
 
-
 export class EditSettingsJson extends React.PureComponent {
   constructor() {
     super();
     this.state = {
-      valid: true
+      valid: true,
     };
   }
 
@@ -68,15 +64,11 @@ export class EditSettingsJson extends React.PureComponent {
       this.originalSettings = newSettings;
       const prettyJson = JSON.stringify(newSettings, null, 2);
       const settingsKeys = Object.keys(newSettings);
-      const editor = this.editor = createAceEditor(
-        this.aceDiv,
-        prettyJson,
-        false,
-        settingsKeys
-      );
+      const editor = (this.editor = createAceEditor(this.aceDiv, prettyJson, false, settingsKeys));
       const session = editor.getSession();
       session.on('changeAnnotation', () => {
-        this.setState({ valid: session.getAnnotations().length === 0 });
+        const isEmptyString = session.getValue() === '';
+        this.setState({ valid: !isEmptyString && session.getAnnotations().length === 0 });
       });
     }
   }

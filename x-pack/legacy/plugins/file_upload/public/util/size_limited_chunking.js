@@ -15,22 +15,21 @@ const CHUNK_BUFFER = 2097152;
 export function sizeLimitedChunking(dataArr, maxByteSize = MAX_BYTES - CHUNK_BUFFER) {
   let chunkSize = 0;
 
-  return dataArr.reduce((accu, el) => {
-    const featureByteSize = (
-      new Blob([JSON.stringify(el)], { type: 'application/json' })
-    ).size;
-    if (featureByteSize > maxByteSize) {
-      throw `Some features exceed maximum chunk size of ${maxByteSize}`;
-    } else if (chunkSize + featureByteSize < maxByteSize) {
-      const lastChunkRef = accu.length - 1;
-      chunkSize += featureByteSize;
-      accu[lastChunkRef].push(el);
-    } else {
-      chunkSize = featureByteSize;
-      accu.push([el]);
-    }
-    return accu;
-  }, [[]]);
+  return dataArr.reduce(
+    (accu, el) => {
+      const featureByteSize = new Blob([JSON.stringify(el)], { type: 'application/json' }).size;
+      if (featureByteSize > maxByteSize) {
+        throw `Some features exceed maximum chunk size of ${maxByteSize}`;
+      } else if (chunkSize + featureByteSize < maxByteSize) {
+        const lastChunkRef = accu.length - 1;
+        chunkSize += featureByteSize;
+        accu[lastChunkRef].push(el);
+      } else {
+        chunkSize = featureByteSize;
+        accu.push([el]);
+      }
+      return accu;
+    },
+    [[]]
+  );
 }
-
-

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './search_bar';
+export { getRequestInspectorStats, getResponseInspectorStats } from './utils';

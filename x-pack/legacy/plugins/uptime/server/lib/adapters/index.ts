@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './auth';
-export * from './database';
 export * from './framework';
 export * from './monitor_states';
 export * from './monitors';
 export * from './pings';
-export * from './saved_objects';
+export * from './stub_index_pattern';
 export * from './telemetry';

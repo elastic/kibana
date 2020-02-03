@@ -22,8 +22,8 @@ function getIndexShardBucket(indexName) {
           primary: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
-            buckets: [{ key: 1, key_as_string: 'true', doc_count: 1 }]
-          }
+            buckets: [{ key: 1, key_as_string: 'true', doc_count: 1 }],
+          },
         },
         {
           key: 'RELOCATING',
@@ -31,8 +31,8 @@ function getIndexShardBucket(indexName) {
           primary: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
-            buckets: [{ key: 1, key_as_string: 'true', doc_count: 1 }]
-          }
+            buckets: [{ key: 1, key_as_string: 'true', doc_count: 1 }],
+          },
         },
         {
           key: 'INITIALIZING',
@@ -40,8 +40,8 @@ function getIndexShardBucket(indexName) {
           primary: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
-            buckets: [{ key: 1, key_as_string: 'true', doc_count: 1 }]
-          }
+            buckets: [{ key: 1, key_as_string: 'true', doc_count: 1 }],
+          },
         },
         {
           key: 'UNASSIGNED',
@@ -49,11 +49,11 @@ function getIndexShardBucket(indexName) {
           primary: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
-            buckets: [{ key: 0, key_as_string: 'false', doc_count: 2 }]
-          }
-        }
-      ]
-    }
+            buckets: [{ key: 0, key_as_string: 'false', doc_count: 2 }],
+          },
+        },
+      ],
+    },
   };
 }
 
@@ -70,10 +70,10 @@ function getNodeShardBucket(nodeId) {
           doc_count: 3,
           max_timestamp: {
             value: 1457561181492,
-            value_as_string: '2016-03-09T22:06:21.492Z'
-          }
-        }
-      ]
+            value_as_string: '2016-03-09T22:06:21.492Z',
+          },
+        },
+      ],
     },
     node_names: {
       doc_count_error_upper_bound: 0,
@@ -84,20 +84,20 @@ function getNodeShardBucket(nodeId) {
           doc_count: 3,
           max_timestamp: {
             value: 1457561181492,
-            value_as_string: '2016-03-09T22:06:21.492Z'
-          }
-        }
-      ]
+            value_as_string: '2016-03-09T22:06:21.492Z',
+          },
+        },
+      ],
     },
     node_data_attributes: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 0,
-      buckets: []
+      buckets: [],
     },
     node_master_attributes: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 0,
-      buckets: []
+      buckets: [],
     },
     node_ids: {
       doc_count_error_upper_bound: 0,
@@ -105,23 +105,20 @@ function getNodeShardBucket(nodeId) {
       buckets: [
         {
           key: nodeId,
-          doc_count: 3
-        }
-      ]
+          doc_count: 3,
+        },
+      ],
     },
     index_count: {
-      value: 6
-    }
+      value: 6,
+    },
   };
 }
 
 describe('Normalizing Shard Data', () => {
   describe('Index Shards', () => {
     it('Calculates the Index Shard data for a result bucket', () => {
-      const indices = [
-        getIndexShardBucket('nodes'),
-        getIndexShardBucket('toads'),
-      ];
+      const indices = [getIndexShardBucket('nodes'), getIndexShardBucket('toads')];
       const result = indices.reduce(normalizeIndexShards, {});
 
       expect(result.nodes.status).to.be.eql('red');
@@ -140,10 +137,7 @@ describe('Normalizing Shard Data', () => {
 
   describe('Node Shards', () => {
     it('Calculates the Node Shard data for a result bucket', () => {
-      const nodes = [
-        getNodeShardBucket('someMasterNode'),
-        getNodeShardBucket('somePlainNode'),
-      ];
+      const nodes = [getNodeShardBucket('someMasterNode'), getNodeShardBucket('somePlainNode')];
       const normalizeFn = normalizeNodeShards('someMasterNode');
       const result = nodes.reduce(normalizeFn, {});
 

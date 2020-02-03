@@ -82,20 +82,13 @@ export class AutoFollowPatternRequestFlyout extends PureComponent {
 
           <EuiSpacer />
 
-          <EuiCodeBlock
-            language="json"
-            isCopyable
-          >
+          <EuiCodeBlock language="json" isCopyable>
             {request}
           </EuiCodeBlock>
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
-          <EuiButtonEmpty
-            iconType="cross"
-            onClick={close}
-            flush="left"
-          >
+          <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternForm.requestFlyout.closeButtonLabel"
               defaultMessage="Close"

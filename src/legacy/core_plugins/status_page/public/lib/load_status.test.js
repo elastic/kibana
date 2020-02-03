@@ -27,36 +27,49 @@ const mockFetch = async () => ({
     name: 'My computer',
     status: {
       overall: {
-        state: 'yellow', title: 'Yellow'
+        state: 'yellow',
+        title: 'Yellow',
       },
       statuses: [
         { id: 'plugin:1', state: 'green', title: 'Green', message: 'Ready', uiColor: 'secondary' },
-        { id: 'plugin:2', state: 'yellow', title: 'Yellow', message: 'Something is weird', uiColor: 'warning' }
+        {
+          id: 'plugin:2',
+          state: 'yellow',
+          title: 'Yellow',
+          message: 'Something is weird',
+          uiColor: 'warning',
+        },
       ],
     },
     metrics: {
       collection_interval_in_millis: 1000,
-      os: { load: {
-        '1m': 4.1,
-        '5m': 2.1,
-        '15m': 0.1,
-      } },
+      os: {
+        load: {
+          '1m': 4.1,
+          '5m': 2.1,
+          '15m': 0.1,
+        },
+      },
 
-      process: { memory: { heap: {
-        size_limit: 1000000,
-        used_in_bytes: 100
-      } } },
+      process: {
+        memory: {
+          heap: {
+            size_limit: 1000000,
+            used_in_bytes: 100,
+          },
+        },
+      },
 
       response_times: {
         avg_in_millis: 4000,
-        max_in_millis: 8000
+        max_in_millis: 8000,
       },
 
       requests: {
-        total: 400
-      }
-    }
-  })
+        total: 400,
+      },
+    },
+  }),
 });
 
 describe('response processing', () => {
@@ -68,8 +81,14 @@ describe('response processing', () => {
   test('includes the plugin statuses', async () => {
     const data = await loadStatus(mockFetch);
     expect(data.statuses).toEqual([
-      { id: 'plugin:1', state: { id: 'green', title: 'Green', message: 'Ready', uiColor: 'secondary' } },
-      { id: 'plugin:2', state: { id: 'yellow', title: 'Yellow', message: 'Something is weird', uiColor: 'warning' } }
+      {
+        id: 'plugin:1',
+        state: { id: 'green', title: 'Green', message: 'Ready', uiColor: 'secondary' },
+      },
+      {
+        id: 'plugin:2',
+        state: { id: 'yellow', title: 'Yellow', message: 'Something is weird', uiColor: 'warning' },
+      },
     ]);
   });
 
@@ -87,17 +106,10 @@ describe('response processing', () => {
       'Load',
       'Response time avg',
       'Response time max',
-      'Requests per second'
+      'Requests per second',
     ]);
 
     const values = data.metrics.map(m => m.value);
-    expect(values).toEqual([
-      1000000,
-      100,
-      [4.1, 2.1, 0.1],
-      4000,
-      8000,
-      400
-    ]);
+    expect(values).toEqual([1000000, 100, [4.1, 2.1, 0.1], 4000, 8000, 400]);
   });
 });

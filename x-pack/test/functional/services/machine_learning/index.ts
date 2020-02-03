@@ -4,14 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { MachineLearningAnomaliesTableProvider } from './anomalies_table';
 export { MachineLearningAnomalyExplorerProvider } from './anomaly_explorer';
 export { MachineLearningAPIProvider } from './api';
+export { MachineLearningCommonProvider } from './common';
+export { MachineLearningCustomUrlsProvider } from './custom_urls';
 export { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytics';
 export { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
 export { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_analytics_table';
 export { MachineLearningDataVisualizerProvider } from './data_visualizer';
 export { MachineLearningDataVisualizerIndexBasedProvider } from './data_visualizer_index_based';
 export { MachineLearningJobManagementProvider } from './job_management';
+export { MachineLearningJobSelectionProvider } from './job_selection';
 export { MachineLearningJobSourceSelectionProvider } from './job_source_selection';
 export { MachineLearningJobTableProvider } from './job_table';
 export { MachineLearningJobTypeSelectionProvider } from './job_type_selection';

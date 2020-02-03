@@ -44,7 +44,9 @@ export function formatNumber(num, which) {
       postfix = 'ms';
       break;
     default:
-      if (which) { format = which; }
+      if (which) {
+        format = which;
+      }
   }
   return numeral(num).format(format) + postfix;
 }
@@ -62,5 +64,7 @@ export function formatMetric(value, format, suffix, options = {}) {
     }
     return formatNumber(value, format) + _suffix;
   }
-  return i18n.translate('xpack.monitoring.formatNumbers.notAvailableLabel', { defaultMessage: 'N/A' });
+  return i18n.translate('xpack.monitoring.formatNumbers.notAvailableLabel', {
+    defaultMessage: 'N/A',
+  });
 }

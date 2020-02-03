@@ -54,7 +54,6 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
         },
       ]
     }
-    executeQueryOptions={Object {}}
     items={
       Array [
         Object {
@@ -72,6 +71,7 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
     pagination={true}
     responsive={true}
     sorting={false}
+    tableLayout="fixed"
   />
 </EuiConfirmModal>
 `;
@@ -241,7 +241,6 @@ exports[`ObjectsTable relationships should show the flyout 1`] = `
 exports[`ObjectsTable should render normally 1`] = `
 <EuiPageContent
   horizontalPosition="center"
-  panelPaddingSize="l"
 >
   <Header
     filteredCount={4}

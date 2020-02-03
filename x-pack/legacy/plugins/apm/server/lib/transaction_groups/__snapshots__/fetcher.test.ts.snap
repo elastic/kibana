@@ -6,7 +6,7 @@ Array [
     Object {
       "body": Object {
         "aggs": Object {
-          "transactions": Object {
+          "transaction_groups": Object {
             "aggs": Object {
               "avg": Object {
                 "avg": Object {
@@ -42,12 +42,24 @@ Array [
                 },
               },
             },
-            "terms": Object {
-              "field": "transaction.name",
-              "order": Object {
-                "sum": "desc",
-              },
-              "size": 100,
+            "composite": Object {
+              "size": 10000,
+              "sources": Array [
+                Object {
+                  "service": Object {
+                    "terms": Object {
+                      "field": "service.name",
+                    },
+                  },
+                },
+                Object {
+                  "transaction": Object {
+                    "terms": Object {
+                      "field": "transaction.name",
+                    },
+                  },
+                },
+              ],
             },
           },
         },
@@ -104,7 +116,7 @@ Array [
     Object {
       "body": Object {
         "aggs": Object {
-          "transactions": Object {
+          "transaction_groups": Object {
             "aggs": Object {
               "avg": Object {
                 "avg": Object {
@@ -140,12 +152,22 @@ Array [
                 },
               },
             },
+            "composite": Object {
+              "size": 10000,
+              "sources": Array [
+                Object {
+                  "transaction": Object {
+                    "terms": Object {
+                      "field": "transaction.name",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          "transactions": Object {
             "terms": Object {
               "field": "transaction.name",
-              "order": Object {
-                "sum": "desc",
-              },
-              "size": 100,
             },
           },
         },

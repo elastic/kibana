@@ -5,30 +5,35 @@
  */
 
 import React, { FC } from 'react';
-import { BarSeries, Chart, getSpecId, ScaleType, Settings, TooltipType } from '@elastic/charts';
+import { BarSeries, Chart, ScaleType, Settings, TooltipType } from '@elastic/charts';
 import { Axes } from '../common/axes';
-import { getCustomColor } from '../common/utils';
 import { LineChartPoint } from '../../../../common/chart_loader';
-import { EVENT_RATE_COLOR } from '../common/settings';
+import { Anomaly } from '../../../../common/results_loader';
+import { EVENT_RATE_COLOR, EVENT_RATE_COLOR_WITH_ANOMALIES } from '../common/settings';
 import { LoadingWrapper } from '../loading_wrapper';
+import { Anomalies } from '../common/anomalies';
 
 interface Props {
   eventRateChartData: LineChartPoint[];
+  anomalyData?: Anomaly[];
   height: string;
   width: string;
   showAxis?: boolean;
   loading?: boolean;
+  fadeChart?: boolean;
 }
-
-const SPEC_ID = 'event_rate';
 
 export const EventRateChart: FC<Props> = ({
   eventRateChartData,
+  anomalyData,
   height,
   width,
   showAxis,
   loading = false,
+  fadeChart,
 }) => {
+  const barColor = fadeChart ? EVENT_RATE_COLOR_WITH_ANOMALIES : EVENT_RATE_COLOR;
+
   return (
     <div
       style={{ width, height }}
@@ -39,14 +44,15 @@ export const EventRateChart: FC<Props> = ({
           {showAxis === true && <Axes />}
 
           <Settings tooltip={TooltipType.None} />
+          <Anomalies anomalyData={anomalyData} />
           <BarSeries
-            id={getSpecId('event_rate')}
+            id="event_rate"
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor={'time'}
             yAccessors={['value']}
             data={eventRateChartData}
-            customSeriesColors={getCustomColor(SPEC_ID, EVENT_RATE_COLOR)}
+            customSeriesColors={[barColor]}
           />
         </Chart>
       </LoadingWrapper>

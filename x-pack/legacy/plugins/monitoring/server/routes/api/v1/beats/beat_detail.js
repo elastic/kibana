@@ -26,13 +26,12 @@ export function beatsDetailRoute(server) {
           ccs: Joi.string().optional(),
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+            max: Joi.date().required(),
+          }).required(),
+        }),
+      },
     },
     async handler(req) {
-
       const clusterUuid = req.params.clusterUuid;
       const beatUuid = req.params.beatUuid;
       const config = server.config();
@@ -47,9 +46,11 @@ export function beatsDetailRoute(server) {
       };
 
       try {
-        const [ summary, metrics ] = await Promise.all([
+        const [summary, metrics] = await Promise.all([
           getBeatSummary(req, beatsIndexPattern, summaryOptions),
-          getMetrics(req, beatsIndexPattern, metricSet, [{ term: { 'beats_stats.beat.uuid': beatUuid } }]),
+          getMetrics(req, beatsIndexPattern, metricSet, [
+            { term: { 'beats_stats.beat.uuid': beatUuid } },
+          ]),
         ]);
 
         return {
@@ -59,7 +60,6 @@ export function beatsDetailRoute(server) {
       } catch (err) {
         throw handleError(err, req);
       }
-
-    }
+    },
   });
 }

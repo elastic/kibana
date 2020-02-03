@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, Logger } from '../../../../../target/types/core/server';
+import { IClusterClient, Logger } from 'kibana/server';
 import { RawKibanaPrivileges } from '../../common/model';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 

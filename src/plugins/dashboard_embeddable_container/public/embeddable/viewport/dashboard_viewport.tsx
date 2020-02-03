@@ -26,6 +26,7 @@ import { context } from '../../../../kibana_react/public';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
+  renderEmpty?: () => React.ReactNode;
 }
 
 interface State {
@@ -34,6 +35,7 @@ interface State {
   title: string;
   description?: string;
   panels: { [key: string]: PanelState };
+  isEmptyState?: boolean;
 }
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
@@ -44,26 +46,40 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   private mounted: boolean = false;
   constructor(props: DashboardViewportProps) {
     super(props);
-    const { isFullScreenMode, panels, useMargins, title } = this.props.container.getInput();
+    const {
+      isFullScreenMode,
+      panels,
+      useMargins,
+      title,
+      isEmptyState,
+    } = this.props.container.getInput();
 
     this.state = {
       isFullScreenMode,
       panels,
       useMargins,
       title,
+      isEmptyState,
     };
   }
 
   public componentDidMount() {
     this.mounted = true;
     this.subscription = this.props.container.getInput$().subscribe(() => {
-      const { isFullScreenMode, useMargins, title, description } = this.props.container.getInput();
+      const {
+        isFullScreenMode,
+        useMargins,
+        title,
+        description,
+        isEmptyState,
+      } = this.props.container.getInput();
       if (this.mounted) {
         this.setState({
           isFullScreenMode,
           description,
           useMargins,
           title,
+          isEmptyState,
         });
       }
     });
@@ -82,25 +98,48 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     });
   };
 
-  public render() {
+  private renderEmptyScreen() {
+    const { renderEmpty } = this.props;
+    const { isFullScreenMode } = this.state;
+    return (
+      <div className="dshDashboardEmptyScreen">
+        {isFullScreenMode && (
+          <this.context.services.ExitFullScreenButton
+            onExitFullScreenMode={this.onExitFullScreenMode}
+          />
+        )}
+        {renderEmpty && renderEmpty()}
+      </div>
+    );
+  }
+
+  private renderContainerScreen() {
     const { container } = this.props;
+    const { isFullScreenMode, panels, title, description, useMargins } = this.state;
     return (
       <div
-        data-shared-items-count={Object.values(this.state.panels).length}
+        data-shared-items-count={Object.values(panels).length}
         data-shared-items-container
-        data-title={this.state.title}
-        data-description={this.state.description}
-        className={
-          this.state.useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'
-        }
+        data-title={title}
+        data-description={description}
+        className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
       >
-        {this.state.isFullScreenMode && (
+        {isFullScreenMode && (
           <this.context.services.ExitFullScreenButton
             onExitFullScreenMode={this.onExitFullScreenMode}
           />
         )}
         <DashboardGrid container={container} />
       </div>
+    );
+  }
+
+  public render() {
+    return (
+      <React.Fragment>
+        {this.state.isEmptyState ? this.renderEmptyScreen() : null}
+        {this.renderContainerScreen()}
+      </React.Fragment>
     );
   }
 }

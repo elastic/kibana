@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './adapter_types';
-export { ElasticsearchPingsAdapter } from './elasticsearch_pings_adapter';
+export * from './types';
+export { elasticsearchPingsAdapter } from './es_pings';

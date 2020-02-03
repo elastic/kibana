@@ -27,24 +27,24 @@ export function getIndexBreadcrumbs() {
     MANAGEMENT_BREADCRUMB,
     {
       text: i18n.translate('kbn.management.savedObjects.indexBreadcrumb', {
-        defaultMessage: 'Saved objects'
+        defaultMessage: 'Saved objects',
       }),
-      href: '#/management/kibana/objects'
-    }
+      href: '#/management/kibana/objects',
+    },
   ];
 }
 
-export function getViewBreadcrumbs($routeParams, $injector) {
+export function getViewBreadcrumbs($routeParams) {
   const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
-  const service = $injector.get(serviceObj.service);
+  const { service } = serviceObj;
 
   return [
     ...getIndexBreadcrumbs(),
     {
       text: i18n.translate('kbn.management.savedObjects.editBreadcrumb', {
         defaultMessage: 'Edit {savedObjectType}',
-        values: { savedObjectType: service.type }
-      })
-    }
+        values: { savedObjectType: service.type },
+      }),
+    },
   ];
 }

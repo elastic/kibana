@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  CRUD_APP_BASE_PATH,
-} from './paths';
+export { CRUD_APP_BASE_PATH } from './paths';
 
-export {
-  METRICS_CONFIG
-} from './metrics_config';
+export { METRICS_CONFIG } from './metrics_config';

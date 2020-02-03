@@ -20,18 +20,15 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { BUCKET_TYPES } from 'ui/agg_types/buckets/bucket_agg_types';
+
 import { npStart } from 'ui/new_platform';
-import { BucketAggParam, BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
+import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
+import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
-import { TimeIntervalParamEditor } from '../../vis/editors/default/controls/time_interval';
 import { timefilter } from '../../timefilter';
-import { DropPartialsParamEditor } from '../../vis/editors/default/controls/drop_partials';
-import { ScaleMetricsParamEditor } from '../../vis/editors/default/controls/scale_metrics';
 import { dateHistogramInterval } from '../../../../core_plugins/data/public';
 import { writeParams } from '../agg_params';
-import { AggConfigs } from '../agg_configs';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
@@ -77,7 +74,12 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
     date: true,
   },
   makeLabel(agg) {
-    const output: Record<string, any> = writeParams(this.params as BucketAggParam[], agg);
+    let output: Record<string, any> = {};
+
+    if (this.params) {
+      output = writeParams(this.params, agg);
+    }
+
     const field = agg.getFieldDisplayName();
     return i18n.translate('common.ui.aggTypes.buckets.dateHistogramLabel', {
       defaultMessage: '{fieldName} per {intervalDescription}',
@@ -102,7 +104,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
 
           return buckets;
         },
-      },
+      } as any,
     };
   },
   getFormat(agg) {
@@ -139,12 +141,10 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
       default: false,
       write: _.noop,
       advanced: true,
-      editorComponent: ScaleMetricsParamEditor,
     },
     {
       name: 'interval',
-      editorComponent: TimeIntervalParamEditor,
-      deserialize(state: any, agg: IBucketDateHistogramAggConfig) {
+      deserialize(state: any, agg) {
         // For upgrading from 7.0.x to 7.1.x - intervals are now stored as key of options or custom value
         if (state === 'custom') {
           return _.get(agg, 'params.customInterval');
@@ -164,7 +164,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
       modifyAggConfigOnSearchRequestStart(agg: IBucketDateHistogramAggConfig) {
         setBounds(agg, true);
       },
-      write(agg: IBucketDateHistogramAggConfig, output: Record<string, any>, aggs: AggConfigs) {
+      write(agg, output, aggs) {
         setBounds(agg, true);
         agg.buckets.setInterval(getInterval(agg));
         const { useNormalizedEsInterval, scaleMetricValues } = agg.params;
@@ -200,7 +200,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
           }
         }
       },
-    } as BucketAggParam,
+    },
     {
       name: 'time_zone',
       default: undefined,
@@ -208,7 +208,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
       // since we do all the logic handling it "on the fly" in the `write` method, to prevent
       // time_zones being persisted into saved_objects
       serialize: _.noop,
-      write(agg: IBucketDateHistogramAggConfig, output: Record<string, any>) {
+      write(agg, output) {
         // If a time_zone has been set explicitly always prefer this.
         let tz = agg.params.time_zone;
         if (!tz && agg.params.field) {
@@ -230,12 +230,11 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
         }
         output.params.time_zone = tz;
       },
-    } as BucketAggParam,
+    },
     {
       name: 'drop_partials',
       default: false,
       write: _.noop,
-      editorComponent: DropPartialsParamEditor,
       shouldShow: agg => {
         const field = agg.params.field;
         return field && field.name && field.name === agg.getIndexPattern().timeFieldName;
@@ -251,7 +250,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
     {
       name: 'extended_bounds',
       default: {},
-      write(agg: IBucketDateHistogramAggConfig, output: Record<string, any>) {
+      write(agg, output) {
         const val = agg.params.extended_bounds;
 
         if (val.min != null || val.max != null) {
@@ -263,6 +262,6 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
           return;
         }
       },
-    } as BucketAggParam,
+    },
   ],
 });

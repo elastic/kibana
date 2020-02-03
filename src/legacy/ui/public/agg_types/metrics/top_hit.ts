@@ -20,11 +20,6 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
-import { TopSortFieldParamEditor } from '../../vis/editors/default/controls/top_sort_field';
-import { OrderParamEditor } from '../../vis/editors/default/controls/order';
-import { TopFieldParamEditor } from '../../vis/editors/default/controls/top_field';
-import { TopSizeParamEditor } from '../../vis/editors/default/controls/top_size';
-import { TopAggregateParamEditor } from '../../vis/editors/default/controls/top_aggregate';
 import { aggTypeFieldFilters } from '../param_types/filter';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
@@ -38,7 +33,7 @@ const isNumericFieldSelected = (agg: IMetricAggConfig) => {
   return field && field.type && field.type === KBN_FIELD_TYPES.NUMBER;
 };
 
-aggTypeFieldFilters.addFilter((field, aggConfig: IMetricAggConfig) => {
+aggTypeFieldFilters.addFilter((field, aggConfig) => {
   if (
     aggConfig.type.name !== METRIC_TYPES.TOP_HITS ||
     _.get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false)
@@ -79,10 +74,9 @@ export const topHitMetricAgg = new MetricAggType({
     {
       name: 'field',
       type: 'field',
-      editorComponent: TopFieldParamEditor,
       onlyAggregatable: false,
       filterFieldTypes: '*',
-      write(agg: IMetricAggConfig, output: Record<string, any>) {
+      write(agg, output) {
         const field = agg.getParam('field');
         output.params = {};
 
@@ -110,7 +104,6 @@ export const topHitMetricAgg = new MetricAggType({
     {
       name: 'aggregate',
       type: 'optioned',
-      editorComponent: wrapWithInlineComp(TopAggregateParamEditor),
       options: [
         {
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.minLabel', {
@@ -159,13 +152,11 @@ export const topHitMetricAgg = new MetricAggType({
     },
     {
       name: 'size',
-      editorComponent: wrapWithInlineComp(TopSizeParamEditor),
       default: 1,
     },
     {
       name: 'sortField',
       type: 'field',
-      editorComponent: TopSortFieldParamEditor,
       filterFieldTypes: [
         KBN_FIELD_TYPES.NUMBER,
         KBN_FIELD_TYPES.DATE,
@@ -181,7 +172,6 @@ export const topHitMetricAgg = new MetricAggType({
       name: 'sortOrder',
       type: 'optioned',
       default: 'desc',
-      editorComponent: OrderParamEditor,
       options: [
         {
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.descendingLabel', {
@@ -196,7 +186,7 @@ export const topHitMetricAgg = new MetricAggType({
           value: 'asc',
         },
       ],
-      write(agg: IMetricAggConfig, output: Record<string, any>) {
+      write(agg, output) {
         const sortField = agg.params.sortField;
         const sortOrder = agg.params.sortOrder;
 

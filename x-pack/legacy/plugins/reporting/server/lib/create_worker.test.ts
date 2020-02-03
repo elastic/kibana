@@ -5,12 +5,14 @@
  */
 
 import * as sinon from 'sinon';
-import { ServerFacade } from '../../types';
+import { ElasticsearchServiceSetup } from 'kibana/server';
+import { HeadlessChromiumDriverFactory, ServerFacade } from '../../types';
 import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 // @ts-ignore
 import { ClientMock } from './esqueue/__tests__/fixtures/legacy_elasticsearch';
+import { ExportTypesRegistry } from './export_types_registry';
 
 const configGetStub = sinon.stub();
 configGetStub.withArgs('xpack.reporting.queue').returns({
@@ -22,16 +24,18 @@ configGetStub.withArgs('server.uuid').returns('g9ymiujthvy6v8yrh7567g6fwzgzftzfr
 
 const executeJobFactoryStub = sinon.stub();
 
-const getMockServer = (
-  exportTypes: any[] = [{ executeJobFactory: executeJobFactoryStub }]
-): ServerFacade => {
+const getMockServer = (): ServerFacade => {
   return ({
-    log: sinon.stub(),
-    expose: sinon.stub(),
     config: () => ({ get: configGetStub }),
-    plugins: { reporting: { exportTypesRegistry: { getAll: () => exportTypes } } },
   } as unknown) as ServerFacade;
 };
+const getMockLogger = jest.fn();
+
+const getMockExportTypesRegistry = (
+  exportTypes: any[] = [{ executeJobFactory: executeJobFactoryStub }]
+) => ({
+  getAll: () => exportTypes,
+});
 
 describe('Create Worker', () => {
   let queue: Esqueue;
@@ -44,7 +48,16 @@ describe('Create Worker', () => {
   });
 
   test('Creates a single Esqueue worker for Reporting', async () => {
-    const createWorker = createWorkerFactory(getMockServer());
+    const exportTypesRegistry = getMockExportTypesRegistry();
+    const createWorker = createWorkerFactory(
+      getMockServer(),
+      {} as ElasticsearchServiceSetup,
+      getMockLogger(),
+      {
+        exportTypesRegistry: exportTypesRegistry as ExportTypesRegistry,
+        browserDriverFactory: {} as HeadlessChromiumDriverFactory,
+      }
+    );
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
     createWorker(queue);
@@ -68,14 +81,21 @@ Object {
   });
 
   test('Creates a single Esqueue worker for Reporting, even if there are multiple export types', async () => {
+    const exportTypesRegistry = getMockExportTypesRegistry([
+      { executeJobFactory: executeJobFactoryStub },
+      { executeJobFactory: executeJobFactoryStub },
+      { executeJobFactory: executeJobFactoryStub },
+      { executeJobFactory: executeJobFactoryStub },
+      { executeJobFactory: executeJobFactoryStub },
+    ]);
     const createWorker = createWorkerFactory(
-      getMockServer([
-        { executeJobFactory: executeJobFactoryStub },
-        { executeJobFactory: executeJobFactoryStub },
-        { executeJobFactory: executeJobFactoryStub },
-        { executeJobFactory: executeJobFactoryStub },
-        { executeJobFactory: executeJobFactoryStub },
-      ])
+      getMockServer(),
+      {} as ElasticsearchServiceSetup,
+      getMockLogger(),
+      {
+        exportTypesRegistry: exportTypesRegistry as ExportTypesRegistry,
+        browserDriverFactory: {} as HeadlessChromiumDriverFactory,
+      }
     );
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
