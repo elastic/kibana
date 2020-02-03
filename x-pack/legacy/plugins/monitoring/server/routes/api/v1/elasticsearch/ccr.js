@@ -171,7 +171,7 @@ function buildRequest(req, config, esIndexPattern) {
 export function ccrRoute(server) {
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ccr',
+    path: '/api/monitoring/v0/clusters/{clusterUuid}/elasticsearch/ccr',
     config: {
       validate: {
         params: Joi.object({

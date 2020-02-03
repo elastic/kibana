@@ -32,7 +32,7 @@ export function logstashPipelineRoute(server) {
   server.route({
     method: 'POST',
     path:
-      '/api/monitoring/v1/clusters/{clusterUuid}/logstash/pipeline/{pipelineId}/{pipelineHash?}',
+      '/api/monitoring/v0/clusters/{clusterUuid}/logstash/pipeline/{pipelineId}/{pipelineHash?}',
     config: {
       validate: {
         params: Joi.object({

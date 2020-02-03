@@ -18,7 +18,7 @@ export function clustersRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters',
+    path: '/api/monitoring/v0/clusters',
     config: {
       validate: {
         payload: Joi.object({

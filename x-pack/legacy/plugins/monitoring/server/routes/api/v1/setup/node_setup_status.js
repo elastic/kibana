@@ -16,7 +16,7 @@ export function nodeSetupStatusRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/setup/collection/node/{nodeUuid}',
+    path: '/api/monitoring/v0/setup/collection/node/{nodeUuid}',
     config: {
       validate: {
         params: Joi.object({

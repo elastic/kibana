@@ -16,7 +16,7 @@ import { getLogstashPipelineIds } from '../../../../../lib/logstash/get_pipeline
 export function logstashClusterPipelineIdsRoute(server) {
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash/pipeline_ids',
+    path: '/api/monitoring/v0/clusters/{clusterUuid}/logstash/pipeline_ids',
     config: {
       validate: {
         params: Joi.object({

@@ -13,7 +13,7 @@ import { handleSettingsError } from '../../../../../lib/errors';
 export function setCollectionEnabledRoute(server) {
   server.route({
     method: 'PUT',
-    path: '/api/monitoring/v1/elasticsearch_settings/set/collection_enabled',
+    path: '/api/monitoring/v0/elasticsearch_settings/set/collection_enabled',
     config: {
       validate: {},
     },

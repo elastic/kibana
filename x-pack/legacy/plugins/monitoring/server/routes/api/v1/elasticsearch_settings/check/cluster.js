@@ -13,7 +13,7 @@ import { handleSettingsError } from '../../../../../lib/errors';
 export function clusterSettingsCheckRoute(server) {
   server.route({
     method: 'GET',
-    path: '/api/monitoring/v1/elasticsearch_settings/check/cluster',
+    path: '/api/monitoring/v0/elasticsearch_settings/check/cluster',
     config: {
       validate: {},
     },

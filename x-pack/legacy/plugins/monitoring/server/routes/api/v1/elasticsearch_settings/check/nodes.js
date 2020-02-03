@@ -13,7 +13,7 @@ import { handleSettingsError } from '../../../../../lib/errors';
 export function nodesSettingsCheckRoute(server) {
   server.route({
     method: 'GET',
-    path: '/api/monitoring/v1/elasticsearch_settings/check/nodes',
+    path: '/api/monitoring/v0/elasticsearch_settings/check/nodes',
     config: {
       validate: {},
     },

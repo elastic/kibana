@@ -11,7 +11,7 @@ import { setCollectionDisabled } from '../../../../lib/elasticsearch_settings/se
 export function disableElasticsearchInternalCollectionRoute(server) {
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/setup/collection/{clusterUuid}/disable_internal_collection',
+    path: '/api/monitoring/v0/setup/collection/{clusterUuid}/disable_internal_collection',
     config: {
       validate: {
         params: Joi.object({

@@ -21,7 +21,7 @@ import { getPaginatedPipelines } from '../../../../../lib/logstash/get_paginated
 export function logstashNodePipelinesRoute(server) {
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash/node/{logstashUuid}/pipelines',
+    path: '/api/monitoring/v0/clusters/{clusterUuid}/logstash/node/{logstashUuid}/pipelines',
     config: {
       validate: {
         params: Joi.object({

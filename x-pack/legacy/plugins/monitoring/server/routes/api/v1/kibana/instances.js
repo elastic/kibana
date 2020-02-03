@@ -17,7 +17,7 @@ export function kibanaInstancesRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters/{clusterUuid}/kibana/instances',
+    path: '/api/monitoring/v0/clusters/{clusterUuid}/kibana/instances',
     config: {
       validate: {
         params: Joi.object({

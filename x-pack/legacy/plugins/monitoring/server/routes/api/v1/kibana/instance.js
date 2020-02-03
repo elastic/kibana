@@ -21,7 +21,7 @@ import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';
 export function kibanaInstanceRoute(server) {
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters/{clusterUuid}/kibana/{kibanaUuid}',
+    path: '/api/monitoring/v0/clusters/{clusterUuid}/kibana/{kibanaUuid}',
     config: {
       validate: {
         params: Joi.object({

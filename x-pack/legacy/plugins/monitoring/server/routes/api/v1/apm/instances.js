@@ -13,7 +13,7 @@ import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 export function apmInstancesRoute(server) {
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters/{clusterUuid}/apm/instances',
+    path: '/api/monitoring/v0/clusters/{clusterUuid}/apm/instances',
     config: {
       validate: {
         params: Joi.object({

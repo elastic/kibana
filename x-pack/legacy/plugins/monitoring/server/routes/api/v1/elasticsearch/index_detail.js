@@ -21,7 +21,7 @@ const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSet;
 export function esIndexRoute(server) {
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/indices/{id}',
+    path: '/api/monitoring/v0/clusters/{clusterUuid}/elasticsearch/indices/{id}',
     config: {
       validate: {
         params: Joi.object({

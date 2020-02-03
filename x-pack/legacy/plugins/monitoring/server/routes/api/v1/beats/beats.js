@@ -13,7 +13,7 @@ import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 export function beatsListingRoute(server) {
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters/{clusterUuid}/beats/beats',
+    path: '/api/monitoring/v0/clusters/{clusterUuid}/beats/beats',
     config: {
       validate: {
         params: Joi.object({

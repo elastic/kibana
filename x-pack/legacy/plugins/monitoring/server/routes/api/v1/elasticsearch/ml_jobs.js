@@ -16,7 +16,7 @@ import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/sh
 export function mlJobRoute(server) {
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ml_jobs',
+    path: '/api/monitoring/v0/clusters/{clusterUuid}/elasticsearch/ml_jobs',
     config: {
       validate: {
         params: Joi.object({

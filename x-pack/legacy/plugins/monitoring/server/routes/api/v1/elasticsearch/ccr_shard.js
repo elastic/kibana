@@ -71,7 +71,7 @@ async function getCcrStat(req, esIndexPattern, filters) {
 export function ccrShardRoute(server) {
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ccr/{index}/shard/{shardId}',
+    path: '/api/monitoring/v0/clusters/{clusterUuid}/elasticsearch/ccr/{index}/shard/{shardId}',
     config: {
       validate: {
         params: Joi.object({

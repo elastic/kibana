@@ -27,7 +27,7 @@ export function logstashNodesRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash/nodes',
+    path: '/api/monitoring/v0/clusters/{clusterUuid}/logstash/nodes',
     config: {
       validate: {
         params: Joi.object({

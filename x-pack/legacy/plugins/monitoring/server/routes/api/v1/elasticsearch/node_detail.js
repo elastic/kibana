@@ -21,7 +21,7 @@ const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
 export function esNodeRoute(server) {
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/nodes/{nodeUuid}',
+    path: '/api/monitoring/v0/clusters/{clusterUuid}/elasticsearch/nodes/{nodeUuid}',
     config: {
       validate: {
         params: Joi.object({

@@ -19,7 +19,7 @@ import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/sh
 export function esNodesRoute(server) {
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/nodes',
+    path: '/api/monitoring/v0/clusters/{clusterUuid}/elasticsearch/nodes',
     config: {
       validate: {
         params: Joi.object({
