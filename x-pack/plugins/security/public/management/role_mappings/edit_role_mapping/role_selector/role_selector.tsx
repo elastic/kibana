@@ -6,8 +6,9 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
-import { RoleMapping, Role } from '../../../../../common/model';
+import { RoleMapping, Role, isDeprecatedRole } from '../../../../../common/model';
 import { RolesAPIClient } from '../../../roles';
 import { AddRoleTemplateButton } from './add_role_template_button';
 import { RoleTemplateEditor } from './role_template_editor';
@@ -41,7 +42,7 @@ export class RoleSelector extends React.Component<Props, State> {
   public render() {
     const { mode } = this.props;
     return (
-      <EuiFormRow fullWidth>
+      <EuiFormRow fullWidth helpText={this.getHelpText()}>
         {mode === 'roles' ? this.getRoleComboBox() : this.getRoleTemplates()}
       </EuiFormRow>
     );
@@ -128,6 +129,27 @@ export class RoleSelector extends React.Component<Props, State> {
           }}
         />
       </div>
+    );
+  };
+
+  private getHelpText = () => {
+    if (this.props.mode === 'roles' && this.hasDeprecatedRolesAssigned()) {
+      return (
+        <span data-test-subj="deprecatedRolesAssigned">
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.deprecatedRolesAssigned"
+            defaultMessage="This mapping is assigned a deprecated role. Please migrate to a supported role as soon as possible."
+          />
+        </span>
+      );
+    }
+  };
+
+  private hasDeprecatedRolesAssigned = () => {
+    return (
+      this.props.roleMapping.roles?.some(r =>
+        this.state.roles.some(role => role.name === r && isDeprecatedRole(role))
+      ) ?? false
     );
   };
 }
