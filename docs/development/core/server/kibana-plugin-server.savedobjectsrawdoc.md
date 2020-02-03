@@ -9,7 +9,7 @@ A raw document as represented directly in the saved object index.
 <b>Signature:</b>
 
 ```typescript
-export interface RawDoc 
+export interface SavedObjectsRawDoc 
 ```
 
 ## Properties

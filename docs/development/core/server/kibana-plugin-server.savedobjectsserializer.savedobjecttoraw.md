@@ -9,16 +9,16 @@ Converts a document from the saved object client format to the format that is st
 <b>Signature:</b>
 
 ```typescript
-savedObjectToRaw(savedObj: SanitizedSavedObjectDoc): RawDoc;
+savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  savedObj | <code>SanitizedSavedObjectDoc</code> |  |
+|  savedObj | <code>SavedObjectSanitizedDoc</code> |  |
 
 <b>Returns:</b>
 
-`RawDoc`
+`SavedObjectsRawDoc`
 

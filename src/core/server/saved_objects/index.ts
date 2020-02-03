@@ -33,8 +33,9 @@ export {
 
 export {
   SavedObjectsSerializer,
-  RawDoc as SavedObjectsRawDoc,
-  SanitizedSavedObjectDoc as SavedObjectSanitizedDoc,
+  SavedObjectsRawDoc,
+  SavedObjectSanitizedDoc,
+  SavedObjectUnsanitizedDoc,
 } from './serialization';
 
 export { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';

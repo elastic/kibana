@@ -103,10 +103,6 @@ export type SavedObjectsFieldMapping =
   | SavedObjectsCoreFieldMapping
   | SavedObjectsComplexFieldMapping;
 
-// INDEX MAPPING
-
-// IndexMapping isn't 1:1 with the options available,
-// modify as needed.
 /** @internal */
 export interface IndexMapping {
   dynamic?: string;
@@ -122,8 +118,6 @@ export interface IndexMappingMeta {
   migrationMappingPropertyHashes?: { [k: string]: string };
 }
 
-// FieldMapping isn't 1:1 with the options available,
-// modify as needed.
 /** @public */
 export interface SavedObjectsCoreFieldMapping {
   type: string;
@@ -136,8 +130,6 @@ export interface SavedObjectsCoreFieldMapping {
   };
 }
 
-// FieldMapping isn't 1:1 with the options available,
-// modify as needed.
 /** @public */
 export interface SavedObjectsComplexFieldMapping {
   dynamic?: string;

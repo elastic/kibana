@@ -1917,7 +1917,7 @@ export class SavedObjectsSchema {
     isNamespaceAgnostic(type: string): boolean;
 }
 
-// @public (undocumented)
+// @public
 export class SavedObjectsSerializer {
     // @internal
     constructor(registry: SavedObjectTypeRegistry);

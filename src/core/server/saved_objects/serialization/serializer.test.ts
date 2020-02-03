@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectsSerializer } from '.';
+import { SavedObjectsSerializer } from './serializer';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { encodeVersion } from '../version';
 

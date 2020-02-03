@@ -65,15 +65,15 @@ import _ from 'lodash';
 import cloneDeep from 'lodash.clonedeep';
 import Semver from 'semver';
 import { Logger } from '../../../logging';
-import { RawSavedObjectDoc } from '../../serialization';
+import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import { SavedObjectsMigrationVersion } from '../../types';
 import { MigrationLogger } from './migration_logger';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectMigrationFn } from '../types';
 
-export type TransformFn = (doc: RawSavedObjectDoc) => RawSavedObjectDoc;
+export type TransformFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 
-type ValidateDoc = (doc: RawSavedObjectDoc) => void;
+type ValidateDoc = (doc: SavedObjectUnsanitizedDoc) => void;
 
 interface DocumentMigratorOptions {
   kibanaVersion: string;
@@ -143,11 +143,11 @@ export class DocumentMigrator implements VersionedTransformer {
   /**
    * Migrates a document to the latest version.
    *
-   * @param {RawSavedObjectDoc} doc
-   * @returns {RawSavedObjectDoc}
+   * @param {SavedObjectUnsanitizedDoc} doc
+   * @returns {SavedObjectUnsanitizedDoc}
    * @memberof DocumentMigrator
    */
-  public migrate = (doc: RawSavedObjectDoc): RawSavedObjectDoc => {
+  public migrate = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc => {
     // Clone the document to prevent accidental mutations on the original data
     // Ex: Importing sample data that is cached at import level, migrations would
     // execute on mutated data the second time.
@@ -239,7 +239,7 @@ function buildDocumentTransform({
   migrations: ActiveMigrations;
   validateDoc: ValidateDoc;
 }): TransformFn {
-  return function transformAndValidate(doc: RawSavedObjectDoc) {
+  return function transformAndValidate(doc: SavedObjectUnsanitizedDoc) {
     const result = doc.migrationVersion
       ? applyMigrations(doc, migrations)
       : markAsUpToDate(doc, migrations);
@@ -257,7 +257,7 @@ function buildDocumentTransform({
   };
 }
 
-function applyMigrations(doc: RawSavedObjectDoc, migrations: ActiveMigrations) {
+function applyMigrations(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
   while (true) {
     const prop = nextUnmigratedProp(doc, migrations);
     if (!prop) {
@@ -270,14 +270,14 @@ function applyMigrations(doc: RawSavedObjectDoc, migrations: ActiveMigrations) {
 /**
  * Gets the doc's props, handling the special case of "type".
  */
-function props(doc: RawSavedObjectDoc) {
+function props(doc: SavedObjectUnsanitizedDoc) {
   return Object.keys(doc).concat(doc.type);
 }
 
 /**
  * Looks up the prop version in a saved object document or in our latest migrations.
  */
-function propVersion(doc: RawSavedObjectDoc | ActiveMigrations, prop: string) {
+function propVersion(doc: SavedObjectUnsanitizedDoc | ActiveMigrations, prop: string) {
   return (
     (doc[prop] && doc[prop].latestVersion) ||
     (doc.migrationVersion && (doc as any).migrationVersion[prop])
@@ -287,7 +287,7 @@ function propVersion(doc: RawSavedObjectDoc | ActiveMigrations, prop: string) {
 /**
  * Sets the doc's migrationVersion to be the most recent version
  */
-function markAsUpToDate(doc: RawSavedObjectDoc, migrations: ActiveMigrations) {
+function markAsUpToDate(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
   return {
     ...doc,
     migrationVersion: props(doc).reduce((acc, prop) => {
@@ -307,7 +307,7 @@ function wrapWithTry(
   migrationFn: SavedObjectMigrationFn,
   log: Logger
 ) {
-  return function tryTransformDoc(doc: RawSavedObjectDoc) {
+  return function tryTransformDoc(doc: SavedObjectUnsanitizedDoc) {
     try {
       const result = migrationFn(doc, new MigrationLogger(log));
 
@@ -332,7 +332,7 @@ function wrapWithTry(
 /**
  * Finds the first unmigrated property in the specified document.
  */
-function nextUnmigratedProp(doc: RawSavedObjectDoc, migrations: ActiveMigrations) {
+function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
   return props(doc).find(p => {
     const latestVersion = propVersion(migrations, p);
     const docVersion = propVersion(doc, p);
@@ -362,10 +362,10 @@ function nextUnmigratedProp(doc: RawSavedObjectDoc, migrations: ActiveMigrations
  * Applies any relevent migrations to the document for the specified property.
  */
 function migrateProp(
-  doc: RawSavedObjectDoc,
+  doc: SavedObjectUnsanitizedDoc,
   prop: string,
   migrations: ActiveMigrations
-): RawSavedObjectDoc {
+): SavedObjectUnsanitizedDoc {
   const originalType = doc.type;
   let migrationVersion = _.clone(doc.migrationVersion) || {};
   const typeChanged = () => !doc.hasOwnProperty(prop) || doc.type !== originalType;
@@ -386,7 +386,11 @@ function migrateProp(
 /**
  * Retrieves any prop transforms that have not been applied to doc.
  */
-function applicableTransforms(migrations: ActiveMigrations, doc: RawSavedObjectDoc, prop: string) {
+function applicableTransforms(
+  migrations: ActiveMigrations,
+  doc: SavedObjectUnsanitizedDoc,
+  prop: string
+) {
   const minVersion = propVersion(doc, prop);
   const { transforms } = migrations[prop];
   return minVersion
@@ -399,7 +403,7 @@ function applicableTransforms(migrations: ActiveMigrations, doc: RawSavedObjectD
  * has not mutated migrationVersion in an unsupported way.
  */
 function updateMigrationVersion(
-  doc: RawSavedObjectDoc,
+  doc: SavedObjectUnsanitizedDoc,
   migrationVersion: SavedObjectsMigrationVersion,
   prop: string,
   version: string
@@ -415,7 +419,7 @@ function updateMigrationVersion(
  * as this could get us into an infinite loop. So, we explicitly check for that here.
  */
 function assertNoDowngrades(
-  doc: RawSavedObjectDoc,
+  doc: SavedObjectUnsanitizedDoc,
   migrationVersion: SavedObjectsMigrationVersion,
   prop: string,
   version: string

@@ -25,7 +25,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClient](./kibana-plugin-server.savedobjectsclient.md) |  |
 |  [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md) |  |
 |  [SavedObjectsRepository](./kibana-plugin-server.savedobjectsrepository.md) |  |
-|  [SavedObjectsSerializer](./kibana-plugin-server.savedobjectsserializer.md) |  |
+|  [SavedObjectsSerializer](./kibana-plugin-server.savedobjectsserializer.md) | A serializer that can be used to manually convert [raw](./kibana-plugin-server.savedobjectsrawdoc.md) or [sanitized](./kibana-plugin-server.savedobjectsanitizeddoc.md) documents to the other kind. |
 |  [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md)<!-- -->. |
 
 ## Enumerations

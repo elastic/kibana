@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type SanitizedSavedObjectDoc = SavedObjectDoc & Referencable;
+export declare type SavedObjectSanitizedDoc = SavedObjectDoc & Referencable;
 ```

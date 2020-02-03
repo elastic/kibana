@@ -9,14 +9,14 @@ Determines whether or not the raw document can be converted to a saved object.
 <b>Signature:</b>
 
 ```typescript
-isRawSavedObject(rawDoc: RawDoc): any;
+isRawSavedObject(rawDoc: SavedObjectsRawDoc): any;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  rawDoc | <code>RawDoc</code> |  |
+|  rawDoc | <code>SavedObjectsRawDoc</code> |  |
 
 <b>Returns:</b>
 

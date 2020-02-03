@@ -9,16 +9,16 @@ Converts a document from the format that is stored in elasticsearch to the saved
 <b>Signature:</b>
 
 ```typescript
-rawToSavedObject(doc: RawDoc): SanitizedSavedObjectDoc;
+rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  doc | <code>RawDoc</code> |  |
+|  doc | <code>SavedObjectsRawDoc</code> |  |
 
 <b>Returns:</b>
 
-`SanitizedSavedObjectDoc`
+`SavedObjectSanitizedDoc`
 

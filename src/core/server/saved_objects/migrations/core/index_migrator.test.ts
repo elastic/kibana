@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
+import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { IndexMigrator } from './index_migrator';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
@@ -254,7 +254,7 @@ describe('IndexMigrator', () => {
   test('transforms all docs from the original index', async () => {
     let count = 0;
     const { callCluster } = testOpts;
-    const migrateDoc = jest.fn((doc: RawSavedObjectDoc) => {
+    const migrateDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
       return {
         ...doc,
         attributes: { name: ++count },

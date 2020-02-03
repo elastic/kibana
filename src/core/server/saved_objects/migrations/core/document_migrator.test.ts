@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { RawSavedObjectDoc } from '../../serialization';
+import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
 import { SavedObjectsType } from '../../types';
@@ -612,16 +612,16 @@ describe('DocumentMigrator', () => {
         {
           name: 'aaa',
           migrations: {
-            '1.2.3': (doc: RawSavedObjectDoc) => doc,
-            '10.4.0': (doc: RawSavedObjectDoc) => doc,
-            '2.2.1': (doc: RawSavedObjectDoc) => doc,
+            '1.2.3': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '10.4.0': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '2.2.1': (doc: SavedObjectUnsanitizedDoc) => doc,
           },
         },
         {
           name: 'bbb',
           migrations: {
-            '3.2.3': (doc: RawSavedObjectDoc) => doc,
-            '2.0.0': (doc: RawSavedObjectDoc) => doc,
+            '3.2.3': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '2.0.0': (doc: SavedObjectUnsanitizedDoc) => doc,
           },
         }
       ),
@@ -656,11 +656,15 @@ describe('DocumentMigrator', () => {
 });
 
 function renameAttr(path: string, newPath: string) {
-  return (doc: RawSavedObjectDoc) =>
-    _.omit(_.set(doc, newPath, _.get(doc, path)) as {}, path) as RawSavedObjectDoc;
+  return (doc: SavedObjectUnsanitizedDoc) =>
+    _.omit(_.set(doc, newPath, _.get(doc, path)) as {}, path) as SavedObjectUnsanitizedDoc;
 }
 
 function setAttr(path: string, value: any) {
-  return (doc: RawSavedObjectDoc) =>
-    _.set(doc, path, _.isFunction(value) ? value(_.get(doc, path)) : value) as RawSavedObjectDoc;
+  return (doc: SavedObjectUnsanitizedDoc) =>
+    _.set(
+      doc,
+      path,
+      _.isFunction(value) ? value(_.get(doc, path)) : value
+    ) as SavedObjectUnsanitizedDoc;
 }

@@ -4,6 +4,8 @@
 
 ## SavedObjectsSerializer class
 
+A serializer that can be used to manually convert [raw](./kibana-plugin-server.savedobjectsrawdoc.md) or [sanitized](./kibana-plugin-server.savedobjectsanitizeddoc.md) documents to the other kind.
+
 <b>Signature:</b>
 
 ```typescript
@@ -11,6 +13,8 @@ export declare class SavedObjectsSerializer
 ```
 
 ## Remarks
+
+Serializer instances should only be created and accessed by calling [SavedObjectsServiceStart.createSerializer](./kibana-plugin-server.savedobjectsservicestart.createserializer.md)
 
 The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `SavedObjectsSerializer` class.
 

@@ -25,7 +25,7 @@
 import { Logger } from 'src/core/server/logging';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
-import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
+import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator, PropertyValidators } from '../../validation';
 import { buildActiveMappings, CallCluster, IndexMigrator } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
@@ -146,7 +146,7 @@ export class KibanaMigrator {
    * @param doc - The saved object to migrate
    * @returns `doc` with all registered migrations applied.
    */
-  public migrateDocument(doc: RawSavedObjectDoc): RawSavedObjectDoc {
+  public migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
     return this.documentMigrator.migrate(doc);
   }
 }

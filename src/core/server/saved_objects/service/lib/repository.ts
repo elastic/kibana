@@ -28,7 +28,11 @@ import { decorateEsError } from './decorate_es_error';
 import { SavedObjectsErrorHelpers } from './errors';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { KibanaMigrator } from '../../migrations';
-import { SavedObjectsSerializer, SanitizedSavedObjectDoc, RawDoc } from '../../serialization';
+import {
+  SavedObjectsSerializer,
+  SavedObjectSanitizedDoc,
+  SavedObjectsRawDoc,
+} from '../../serialization';
 import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -241,7 +245,7 @@ export class SavedObjectsRepository {
         references,
       });
 
-      const raw = this._serializer.savedObjectToRaw(migrated as SanitizedSavedObjectDoc);
+      const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
       const response = await this._writeToCluster(method, {
         id: raw._id,
@@ -307,7 +311,7 @@ export class SavedObjectsRepository {
             namespace,
             updated_at: time,
             references: object.references || [],
-          }) as SanitizedSavedObjectDoc
+          }) as SavedObjectSanitizedDoc
         ),
       };
 
@@ -553,7 +557,9 @@ export class SavedObjectsRepository {
       page,
       per_page: perPage,
       total: response.hits.total,
-      saved_objects: response.hits.hits.map((hit: RawDoc) => this._rawToSavedObject(hit)),
+      saved_objects: response.hits.hits.map((hit: SavedObjectsRawDoc) =>
+        this._rawToSavedObject(hit)
+      ),
     };
   }
 
@@ -881,7 +887,7 @@ export class SavedObjectsRepository {
       updated_at: time,
     });
 
-    const raw = this._serializer.savedObjectToRaw(migrated as SanitizedSavedObjectDoc);
+    const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
@@ -966,7 +972,7 @@ export class SavedObjectsRepository {
   // includes the namespace, and we use this for migrating documents. However, we don't
   // want the namespace to be returned from the repository, as the repository scopes each
   // method transparently to the specified namespace.
-  private _rawToSavedObject(raw: RawDoc): SavedObject {
+  private _rawToSavedObject(raw: SavedObjectsRawDoc): SavedObject {
     const savedObject = this._serializer.rawToSavedObject(raw);
     return omit(savedObject, 'namespace');
   }

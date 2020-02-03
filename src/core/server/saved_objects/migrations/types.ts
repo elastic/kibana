@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { RawSavedObjectDoc } from '../serialization';
+import { SavedObjectUnsanitizedDoc } from '../serialization';
 import { SavedObjectsMigrationLogger } from './core/migration_logger';
 
 export type SavedObjectMigrationFn = (
-  doc: RawSavedObjectDoc,
+  doc: SavedObjectUnsanitizedDoc,
   log: SavedObjectsMigrationLogger
-) => RawSavedObjectDoc;
+) => SavedObjectUnsanitizedDoc;
 
 export interface SavedObjectMigrationMap {
   [version: string]: SavedObjectMigrationFn;
