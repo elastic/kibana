@@ -7,7 +7,7 @@
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { useRouteMatch, useParams } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { UptimeDatePicker } from '../components/functional/uptime_date_picker';
 import { AppState } from '../state';
@@ -17,6 +17,7 @@ import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { getTitle } from '../lib/helper/get_title';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { MONITOR_ROUTE } from '../routes';
+import { useUrlParams } from '../hooks';
 
 interface PageHeaderProps {
   monitorStatus?: any;
@@ -28,7 +29,8 @@ export const PageHeaderComponent = ({ monitorStatus, setBreadcrumbs }: PageHeade
     path: MONITOR_ROUTE,
   });
 
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useParams();
+  const [getUrlParams] = useUrlParams();
+  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
 
   const headingText = i18n.translate('xpack.uptime.overviewPage.headerText', {
     defaultMessage: 'Overview',
@@ -52,7 +54,7 @@ export const PageHeaderComponent = ({ monitorStatus, setBreadcrumbs }: PageHeade
   useEffect(() => {
     if (monitorPage) {
       if (headerText) {
-        setBreadcrumbs(getMonitorPageBreadcrumb(headerText, stringifyUrlParams(params)));
+        setBreadcrumbs(getMonitorPageBreadcrumb(headerText, stringifyUrlParams(params, true)));
       }
     } else {
       setBreadcrumbs(getOverviewPageBreadcrumbs());
@@ -65,7 +67,7 @@ export const PageHeaderComponent = ({ monitorStatus, setBreadcrumbs }: PageHeade
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <EuiTitle>
             <h1>{headerText}</h1>

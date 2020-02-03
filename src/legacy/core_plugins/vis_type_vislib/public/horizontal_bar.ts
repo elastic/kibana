@@ -38,15 +38,15 @@ import {
 } from './utils/collections';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
 import { createVislibVisController } from './vis_controller';
-import { KbnVislibVisTypesDependencies } from './plugin';
+import { VisTypeVislibDependencies } from './plugin';
 
-export const createHorizontalBarVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
+export const createHorizontalBarVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'horizontal_bar',
-  title: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarTitle', {
+  title: i18n.translate('visTypeVislib.horizontalBar.horizontalBarTitle', {
     defaultMessage: 'Horizontal Bar',
   }),
   icon: 'visBarHorizontal',
-  description: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarDescription', {
+  description: i18n.translate('visTypeVislib.horizontalBar.horizontalBarDescription', {
     defaultMessage: 'Assign a continuous variable to each axis',
   }),
   visualization: createVislibVisController(deps),
@@ -138,7 +138,7 @@ export const createHorizontalBarVisTypeDefinition = (deps: KbnVislibVisTypesDepe
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('kbnVislibVisTypes.horizontalBar.metricTitle', {
+        title: i18n.translate('visTypeVislib.horizontalBar.metricTitle', {
           defaultMessage: 'Y-axis',
         }),
         min: 1,
@@ -148,7 +148,7 @@ export const createHorizontalBarVisTypeDefinition = (deps: KbnVislibVisTypesDepe
       {
         group: AggGroupNames.Metrics,
         name: 'radius',
-        title: i18n.translate('kbnVislibVisTypes.horizontalBar.radiusTitle', {
+        title: i18n.translate('visTypeVislib.horizontalBar.radiusTitle', {
           defaultMessage: 'Dot size',
         }),
         min: 0,
@@ -158,7 +158,7 @@ export const createHorizontalBarVisTypeDefinition = (deps: KbnVislibVisTypesDepe
       {
         group: AggGroupNames.Buckets,
         name: 'segment',
-        title: i18n.translate('kbnVislibVisTypes.horizontalBar.segmentTitle', {
+        title: i18n.translate('visTypeVislib.horizontalBar.segmentTitle', {
           defaultMessage: 'X-axis',
         }),
         min: 0,
@@ -168,7 +168,7 @@ export const createHorizontalBarVisTypeDefinition = (deps: KbnVislibVisTypesDepe
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('kbnVislibVisTypes.horizontalBar.groupTitle', {
+        title: i18n.translate('visTypeVislib.horizontalBar.groupTitle', {
           defaultMessage: 'Split series',
         }),
         min: 0,
@@ -178,7 +178,7 @@ export const createHorizontalBarVisTypeDefinition = (deps: KbnVislibVisTypesDepe
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        title: i18n.translate('kbnVislibVisTypes.horizontalBar.splitTitle', {
+        title: i18n.translate('visTypeVislib.horizontalBar.splitTitle', {
           defaultMessage: 'Split chart',
         }),
         min: 0,

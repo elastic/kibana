@@ -19,15 +19,15 @@
 
 import d3 from 'd3';
 import _ from 'lodash';
-import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import 'ui/persisted_state';
 import $ from 'jquery';
+
 import { Axis } from '../../lib/axis';
 import { VisConfig } from '../../lib/vis_config';
+import { getMockUiState } from './fixtures/_vis_fixture';
 
 describe('Vislib xAxis Class Test Suite', function() {
-  let persistedState;
+  let mockUiState;
   let xAxis;
   let el;
   let fixture;
@@ -105,34 +105,30 @@ describe('Vislib xAxis Class Test Suite', function() {
     yAxisLabel: 'Count',
   };
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function($injector) {
-      persistedState = new ($injector.get('PersistedState'))();
+  beforeEach(() => {
+    mockUiState = getMockUiState();
+    el = d3
+      .select('body')
+      .append('div')
+      .attr('class', 'visAxis--x')
+      .style('height', '40px');
 
-      el = d3
-        .select('body')
-        .append('div')
-        .attr('class', 'visAxis--x')
-        .style('height', '40px');
+    fixture = el.append('div').attr('class', 'x-axis-div');
 
-      fixture = el.append('div').attr('class', 'x-axis-div');
-
-      const visConfig = new VisConfig(
-        {
-          type: 'histogram',
-        },
-        data,
-        persistedState,
-        $('.x-axis-div')[0],
-        () => undefined
-      );
-      xAxis = new Axis(visConfig, {
-        type: 'category',
-        id: 'CategoryAxis-1',
-      });
-    })
-  );
+    const visConfig = new VisConfig(
+      {
+        type: 'histogram',
+      },
+      data,
+      mockUiState,
+      $('.x-axis-div')[0],
+      () => undefined
+    );
+    xAxis = new Axis(visConfig, {
+      type: 'category',
+      id: 'CategoryAxis-1',
+    });
+  });
 
   afterEach(function() {
     fixture.remove();

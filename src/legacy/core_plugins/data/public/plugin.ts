@@ -18,19 +18,42 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { SearchService, SearchStart } from './search';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import {
+  DataPublicPluginStart,
+  addSearchStrategy,
+  defaultSearchStrategy,
+  DataPublicPluginSetup,
+} from '../../../../plugins/data/public';
+import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
 import {
-  setFieldFormats,
-  setNotifications,
   setIndexPatterns,
   setQueryService,
+  setUiSettings,
+  setInjectedMetadata,
+  setFieldFormats,
+  setSearchService,
+  setOverlays,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
+import { SELECT_RANGE_ACTION, selectRangeAction } from './actions/select_range_action';
+import { VALUE_CLICK_ACTION, valueClickAction } from './actions/value_click_action';
+import {
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/embeddable/public/lib/triggers';
+import { IUiActionsSetup, IUiActionsStart } from '../../../../plugins/ui_actions/public';
+
+export interface DataPluginSetupDependencies {
+  data: DataPublicPluginSetup;
+  expressions: ExpressionsSetup;
+  uiActions: IUiActionsSetup;
+}
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
+  uiActions: IUiActionsStart;
 }
 
 /**
@@ -38,9 +61,7 @@ export interface DataPluginStartDependencies {
  *
  * @public
  */
-export interface DataStart {
-  search: SearchStart;
-}
+export interface DataStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 /**
  * Data Plugin - public
@@ -54,25 +75,35 @@ export interface DataStart {
  * or static code.
  */
 
-export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDependencies> {
-  private readonly search = new SearchService();
+export class DataPlugin
+  implements Plugin<void, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
+  public setup(core: CoreSetup, { data, uiActions }: DataPluginSetupDependencies) {
+    setInjectedMetadata(core.injectedMetadata);
 
-  public setup(core: CoreSetup) {}
+    // This is to be deprecated once we switch to the new search service fully
+    addSearchStrategy(defaultSearchStrategy);
 
-  public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
-    // This is required for when Angular code uses Field and FieldList.
-    setFieldFormats(data.fieldFormats);
+    uiActions.registerAction(
+      selectRangeAction(data.query.filterManager, data.query.timefilter.timefilter)
+    );
+    uiActions.registerAction(
+      valueClickAction(data.query.filterManager, data.query.timefilter.timefilter)
+    );
+  }
+
+  public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
+    setUiSettings(core.uiSettings);
     setQueryService(data.query);
     setIndexPatterns(data.indexPatterns);
     setFieldFormats(data.fieldFormats);
-    setNotifications(core.notifications);
+    setSearchService(data.search);
+    setOverlays(core.overlays);
 
-    return {
-      search: this.search.start(core),
-    };
+    uiActions.attachAction(SELECT_RANGE_TRIGGER, SELECT_RANGE_ACTION);
+    uiActions.attachAction(VALUE_CLICK_TRIGGER, VALUE_CLICK_ACTION);
+
+    return {};
   }
 
-  public stop() {
-    this.search.stop();
-  }
+  public stop() {}
 }

@@ -22,9 +22,9 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { AggGroupNames } from '../../../legacy_imports';
 import { SelectOption } from '../../common';
 import { GaugeOptionsInternalProps } from '.';
+import { AggGroupNames } from '../../../legacy_imports';
 
 function StylePanel({ aggs, setGaugeValue, stateParams, vis }: GaugeOptionsInternalProps) {
   const diasableAlignment =
@@ -36,7 +36,7 @@ function StylePanel({ aggs, setGaugeValue, stateParams, vis }: GaugeOptionsInter
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="kbnVislibVisTypes.controls.gaugeOptions.styleTitle"
+            id="visTypeVislib.controls.gaugeOptions.styleTitle"
             defaultMessage="Style"
           />
         </h3>
@@ -44,7 +44,7 @@ function StylePanel({ aggs, setGaugeValue, stateParams, vis }: GaugeOptionsInter
       <EuiSpacer size="s" />
 
       <SelectOption
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.gaugeTypeLabel', {
+        label={i18n.translate('visTypeVislib.controls.gaugeOptions.gaugeTypeLabel', {
           defaultMessage: 'Gauge type',
         })}
         options={vis.type.editorConfig.collections.gaugeTypes}
@@ -55,7 +55,7 @@ function StylePanel({ aggs, setGaugeValue, stateParams, vis }: GaugeOptionsInter
 
       <SelectOption
         disabled={diasableAlignment}
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.alignmentLabel', {
+        label={i18n.translate('visTypeVislib.controls.gaugeOptions.alignmentLabel', {
           defaultMessage: 'Alignment',
         })}
         options={vis.type.editorConfig.collections.alignments}

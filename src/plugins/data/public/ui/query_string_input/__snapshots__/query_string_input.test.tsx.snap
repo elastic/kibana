@@ -150,6 +150,12 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               "setIsVisible": [MockFunction],
             },
             "data": Object {
+              "__LEGACY": Object {
+                "esClient": Object {
+                  "msearch": [MockFunction],
+                  "search": [MockFunction],
+                },
+              },
               "autocomplete": Object {
                 "getQuerySuggestions": [MockFunction],
                 "getValueSuggestions": [MockFunction],
@@ -157,7 +163,6 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               },
               "fieldFormats": Object {
                 "getByFieldType": [MockFunction],
-                "getConfig": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
                 "getDefaultInstanceCacheResolver": [MockFunction],
@@ -205,6 +210,12 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 },
               },
               "search": Object {
+                "__LEGACY": Object {
+                  "esClient": Object {
+                    "msearch": [MockFunction],
+                    "search": [MockFunction],
+                  },
+                },
                 "search": [MockFunction],
               },
               "ui": Object {
@@ -780,6 +791,12 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       "setIsVisible": [MockFunction],
                     },
                     "data": Object {
+                      "__LEGACY": Object {
+                        "esClient": Object {
+                          "msearch": [MockFunction],
+                          "search": [MockFunction],
+                        },
+                      },
                       "autocomplete": Object {
                         "getQuerySuggestions": [MockFunction],
                         "getValueSuggestions": [MockFunction],
@@ -787,7 +804,6 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       },
                       "fieldFormats": Object {
                         "getByFieldType": [MockFunction],
-                        "getConfig": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],
                         "getDefaultInstanceCacheResolver": [MockFunction],
@@ -835,6 +851,12 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         },
                       },
                       "search": Object {
+                        "__LEGACY": Object {
+                          "esClient": Object {
+                            "msearch": [MockFunction],
+                            "search": [MockFunction],
+                          },
+                        },
                         "search": [MockFunction],
                       },
                       "ui": Object {
@@ -1392,6 +1414,12 @@ exports[`QueryStringInput Should pass the query language to the language switche
               "setIsVisible": [MockFunction],
             },
             "data": Object {
+              "__LEGACY": Object {
+                "esClient": Object {
+                  "msearch": [MockFunction],
+                  "search": [MockFunction],
+                },
+              },
               "autocomplete": Object {
                 "getQuerySuggestions": [MockFunction],
                 "getValueSuggestions": [MockFunction],
@@ -1399,7 +1427,6 @@ exports[`QueryStringInput Should pass the query language to the language switche
               },
               "fieldFormats": Object {
                 "getByFieldType": [MockFunction],
-                "getConfig": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
                 "getDefaultInstanceCacheResolver": [MockFunction],
@@ -1447,6 +1474,12 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 },
               },
               "search": Object {
+                "__LEGACY": Object {
+                  "esClient": Object {
+                    "msearch": [MockFunction],
+                    "search": [MockFunction],
+                  },
+                },
                 "search": [MockFunction],
               },
               "ui": Object {
@@ -2019,6 +2052,12 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       "setIsVisible": [MockFunction],
                     },
                     "data": Object {
+                      "__LEGACY": Object {
+                        "esClient": Object {
+                          "msearch": [MockFunction],
+                          "search": [MockFunction],
+                        },
+                      },
                       "autocomplete": Object {
                         "getQuerySuggestions": [MockFunction],
                         "getValueSuggestions": [MockFunction],
@@ -2026,7 +2065,6 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       },
                       "fieldFormats": Object {
                         "getByFieldType": [MockFunction],
-                        "getConfig": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],
                         "getDefaultInstanceCacheResolver": [MockFunction],
@@ -2074,6 +2112,12 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         },
                       },
                       "search": Object {
+                        "__LEGACY": Object {
+                          "esClient": Object {
+                            "msearch": [MockFunction],
+                            "search": [MockFunction],
+                          },
+                        },
                         "search": [MockFunction],
                       },
                       "ui": Object {
@@ -2631,6 +2675,12 @@ exports[`QueryStringInput Should render the given query 1`] = `
               "setIsVisible": [MockFunction],
             },
             "data": Object {
+              "__LEGACY": Object {
+                "esClient": Object {
+                  "msearch": [MockFunction],
+                  "search": [MockFunction],
+                },
+              },
               "autocomplete": Object {
                 "getQuerySuggestions": [MockFunction],
                 "getValueSuggestions": [MockFunction],
@@ -2638,7 +2688,6 @@ exports[`QueryStringInput Should render the given query 1`] = `
               },
               "fieldFormats": Object {
                 "getByFieldType": [MockFunction],
-                "getConfig": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
                 "getDefaultInstanceCacheResolver": [MockFunction],
@@ -2686,6 +2735,12 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 },
               },
               "search": Object {
+                "__LEGACY": Object {
+                  "esClient": Object {
+                    "msearch": [MockFunction],
+                    "search": [MockFunction],
+                  },
+                },
                 "search": [MockFunction],
               },
               "ui": Object {
@@ -3258,6 +3313,12 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       "setIsVisible": [MockFunction],
                     },
                     "data": Object {
+                      "__LEGACY": Object {
+                        "esClient": Object {
+                          "msearch": [MockFunction],
+                          "search": [MockFunction],
+                        },
+                      },
                       "autocomplete": Object {
                         "getQuerySuggestions": [MockFunction],
                         "getValueSuggestions": [MockFunction],
@@ -3265,7 +3326,6 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       },
                       "fieldFormats": Object {
                         "getByFieldType": [MockFunction],
-                        "getConfig": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],
                         "getDefaultInstanceCacheResolver": [MockFunction],
@@ -3313,6 +3373,12 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         },
                       },
                       "search": Object {
+                        "__LEGACY": Object {
+                          "esClient": Object {
+                            "msearch": [MockFunction],
+                            "search": [MockFunction],
+                          },
+                        },
                         "search": [MockFunction],
                       },
                       "ui": Object {

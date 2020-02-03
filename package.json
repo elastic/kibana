@@ -27,7 +27,7 @@
     "clean": {
       "extraPatterns": [
         "build",
-        "optimize",
+        "data/optimize",
         "built_assets",
         ".eslintcache",
         ".node_binaries"
@@ -93,7 +93,8 @@
     "**/react": "^16.12.0",
     "**/react-test-renderer": "^16.12.0",
     "**/deepmerge": "^4.2.2",
-    "**/serialize-javascript": "^2.1.1"
+    "**/serialize-javascript": "^2.1.1",
+    "**/fast-deep-equal": "^3.1.1"
   },
   "workspaces": {
     "packages": [
@@ -348,6 +349,7 @@
     "@types/moment-timezone": "^0.5.12",
     "@types/mustache": "^0.8.31",
     "@types/node": "^10.12.27",
+    "@types/numeral": "^0.0.26",
     "@types/opn": "^5.1.0",
     "@types/pegjs": "^0.10.1",
     "@types/pngjs": "^3.3.2",
@@ -453,7 +455,7 @@
     "murmurhash3js": "3.0.1",
     "mutation-observer": "^1.0.3",
     "nock": "10.0.6",
-    "node-sass": "^4.9.4",
+    "node-sass": "^4.13.1",
     "normalize-path": "^3.0.0",
     "nyc": "^14.1.1",
     "pixelmatch": "^5.1.0",

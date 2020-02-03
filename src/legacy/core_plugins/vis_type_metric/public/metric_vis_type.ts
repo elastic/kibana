@@ -21,10 +21,11 @@ import { i18n } from '@kbn/i18n';
 
 import { MetricVisComponent } from './components/metric_vis_component';
 import { MetricVisOptions } from './components/metric_vis_options';
-import { Schemas, AggGroupNames, colorSchemas, ColorSchemas } from './legacy_imports';
-import { ColorModes } from '../../vis_type_vislib/public/utils/collections';
+import { ColorModes } from '../../vis_type_vislib/public';
+import { Schemas, AggGroupNames } from './legacy_imports';
+import { ColorSchemas, colorSchemas } from '../../../../plugins/charts/public';
 
-export const metricVisTypeDefinition = {
+export const createMetricVisTypeDefinition = () => ({
   name: 'metric',
   title: i18n.translate('visTypeMetric.metricTitle', { defaultMessage: 'Metric' }),
   icon: 'visMetric',
@@ -121,4 +122,4 @@ export const metricVisTypeDefinition = {
       },
     ]),
   },
-};
+});

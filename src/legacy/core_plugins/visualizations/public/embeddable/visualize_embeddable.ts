@@ -17,19 +17,15 @@
  * under the License.
  */
 
-import _, { forEach } from 'lodash';
+import _ from 'lodash';
 import { PersistedState } from 'ui/persisted_state';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
 import { SavedObject } from 'ui/saved_objects/types';
-import { Vis } from 'ui/vis';
-import { queryGeohashBounds } from 'ui/visualize/loader/utils';
-import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
-import { ISearchSource } from 'ui/courier';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -37,17 +33,20 @@ import {
   Query,
   onlyDisabledFiltersChanged,
   esFilters,
-  mapAndFlattenFilters,
+  ISearchSource,
 } from '../../../../../plugins/data/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
   Embeddable,
   Container,
-  APPLY_FILTER_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
 } from '../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
+import { Vis } from '../np_ready/public';
+import { queryGeohashBounds } from './query_geohash_bounds';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -105,7 +104,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private visCustomizations: VisualizeInput['vis'];
   private subscriptions: Subscription[] = [];
   private expression: string = '';
-  private actions: any = {};
   private vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
@@ -255,15 +253,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.savedVisualization.vis._setUiState(this.uiState);
     this.uiState = this.savedVisualization.vis.getUiState();
 
-    // init default actions
-    forEach(this.vis.type.events, (event, eventName) => {
-      if (event.disabled || !eventName) {
-        return;
-      } else {
-        this.actions[eventName] = event.defaultAction;
-      }
-    });
-
     // This is a hack to give maps visualizations access to data in the
     // globalState, since they can no longer access it via searchSource.
     // TODO: Remove this as a part of elastic/kibana#30593
@@ -301,18 +290,13 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async event => {
-        if (this.actions[event.name]) {
-          event.data.aggConfigs = getTableAggs(this.vis);
-          const filters: esFilters.Filter[] = this.actions[event.name](event.data) || [];
-          const mappedFilters = mapAndFlattenFilters(filters);
-          const timeFieldName = this.vis.indexPattern.timeFieldName;
+        const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
 
-          npStart.plugins.uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
-            embeddable: this,
-            filters: mappedFilters,
-            timeFieldName,
-          });
-        }
+        npStart.plugins.uiActions.executeTriggerActions(eventName, {
+          embeddable: this,
+          timeFieldName: this.vis.indexPattern.timeFieldName,
+          data: event.data,
+        });
       })
     );
 

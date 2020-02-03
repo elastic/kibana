@@ -6,8 +6,7 @@
 
 import _ from 'lodash';
 
-import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggConfigs } from 'ui/agg_types';
+import { AggConfigs, Schemas } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import {
   COUNT_PROP_LABEL,
