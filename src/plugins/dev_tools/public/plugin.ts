@@ -54,7 +54,7 @@ export interface DevToolsStart {
 export interface DevTool {
   /**
    * The id of the dev tools. This will become part of the URL path
-   * (`dev_tools/${devTool.id}`. It has to be unique among registered
+   * (`devTools/${devTool.id}`. It has to be unique among registered
    * dev tools.
    */
   id: string;
@@ -75,7 +75,7 @@ export interface DevTool {
    */
   tooltipContent?: string;
   /**
-   * Flag indicating whether the dev tool will do routing within the `dev_tools/${devTool.id}/`
+   * Flag indicating whether the dev tool will do routing within the `devTools/${devTool.id}/`
    * prefix. If it is set to true, the dev tool is responsible to redirect
    * the user when navigating to unknown URLs within the prefix. If set
    * to false only the root URL of the dev tool will be recognized as valid.
@@ -96,7 +96,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
 
   public setup(core: CoreSetup, { kibana_legacy }: { kibana_legacy: KibanaLegacySetup }) {
     kibana_legacy.registerLegacyApp({
-      id: 'dev_tools',
+      id: 'devTools',
       title: 'Dev Tools',
       mount: async (appMountContext, params) => {
         if (!this.getSortedDevTools) {

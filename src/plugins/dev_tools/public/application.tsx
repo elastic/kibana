@@ -68,7 +68,7 @@ function DevToolsWrapper({
               isSelected={currentDevTool === activeDevTool}
               onClick={() => {
                 if (!currentDevTool.disabled) {
-                  updateRoute(`/dev_tools/${currentDevTool.id}`);
+                  updateRoute(`/devTools/${currentDevTool.id}`);
                 }
               }}
             >
@@ -108,7 +108,7 @@ function DevToolsWrapper({
 }
 
 function redirectOnMissingCapabilities(appMountContext: AppMountContext) {
-  if (!appMountContext.core.application.capabilities.dev_tools.show) {
+  if (!appMountContext.core.application.capabilities.devTools.show) {
     window.location.hash = '/home';
     return true;
   }
@@ -116,7 +116,7 @@ function redirectOnMissingCapabilities(appMountContext: AppMountContext) {
 }
 
 function setBadge(appMountContext: AppMountContext) {
-  if (appMountContext.core.application.capabilities.dev_tools.save) {
+  if (appMountContext.core.application.capabilities.devTools.save) {
     return;
   }
   appMountContext.core.chrome.setBadge({
@@ -136,7 +136,7 @@ function setBreadcrumbs(appMountContext: AppMountContext) {
       text: i18n.translate('devTools.k7BreadcrumbsDevToolsLabel', {
         defaultMessage: 'Dev Tools',
       }),
-      href: '#/dev_tools',
+      href: '#/devTools',
     },
   ]);
 }
@@ -159,7 +159,7 @@ export function renderApp(
           {devTools.map(devTool => (
             <Route
               key={devTool.id}
-              path={`/dev_tools/${devTool.id}`}
+              path={`/devTools/${devTool.id}`}
               exact={!devTool.enableRouting}
               render={props => (
                 <DevToolsWrapper
@@ -171,8 +171,8 @@ export function renderApp(
               )}
             />
           ))}
-          <Route path="/dev_tools">
-            <Redirect to={`/dev_tools/${devTools[0].id}`} />
+          <Route path="/devTools">
+            <Redirect to={`/devTools/${devTools[0].id}`} />
           </Route>
         </Switch>
       </Router>

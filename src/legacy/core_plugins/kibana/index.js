@@ -109,12 +109,12 @@ export default function(kibana) {
           category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
-          id: 'kibana:dev_tools',
+          id: 'kibana:devTools',
           title: i18n.translate('kbn.devToolsTitle', {
             defaultMessage: 'Dev Tools',
           }),
           order: 9001,
-          url: '/app/kibana#/dev_tools',
+          url: '/app/kibana#/devTools',
           euiIconType: 'devToolsApp',
           category: DEFAULT_APP_CATEGORIES.management,
         },

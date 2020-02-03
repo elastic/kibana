@@ -109,12 +109,12 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       },
     },
     {
-      id: 'dev_tools',
+      id: 'devTools',
       name: i18n.translate('xpack.features.devToolsFeatureName', {
         defaultMessage: 'Dev Tools',
       }),
       icon: 'devToolsApp',
-      navLinkId: 'kibana:dev_tools',
+      navLinkId: 'kibana:devTools',
       app: ['kibana'],
       catalogue: ['console', 'searchprofiler', 'grokdebugger'],
       privileges: {

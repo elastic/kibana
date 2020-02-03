@@ -170,10 +170,10 @@ The API returns the following:
     }
   },
   {
-    "id": "dev_tools",
+    "id": "devTools",
     "name": "Dev Tools",
     "icon": "devToolsApp",
-    "navLinkId": "kibana:dev_tools",
+    "navLinkId": "kibana:devTools",
     "app": [
       "kibana"
     ],

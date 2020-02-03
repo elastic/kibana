@@ -82,7 +82,7 @@ PUT /api/security/role/my_kibana_role
         "dashboard": [
           "all"
         ],
-        "dev_tools": [
+        "devTools": [
           "read"
         ],
         "advancedSettings": [

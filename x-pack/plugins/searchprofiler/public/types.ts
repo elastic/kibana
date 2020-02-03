@@ -5,11 +5,11 @@
  */
 
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { DevToolsSetup } from '../../../../src/plugins/dev_tools/public';
+import { DevToolsSetup } from '../../../../src/plugins/devTools/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 
 export interface AppPublicPluginDependencies {
   licensing: LicensingPluginSetup;
   home: HomePublicPluginSetup;
-  dev_tools: DevToolsSetup;
+  devTools: DevToolsSetup;
 }

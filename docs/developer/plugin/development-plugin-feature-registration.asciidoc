@@ -141,12 +141,12 @@ Because the `read` privilege does not define the `save` capability, users with r
 init(server) {
   const xpackMainPlugin = server.plugins.xpack_main;
   xpackMainPlugin.registerFeature({
-    id: 'dev_tools',
+    id: 'devTools',
     name: i18n.translate('xpack.features.devToolsFeatureName', {
       defaultMessage: 'Dev Tools',
     }),
     icon: 'devToolsApp',
-    navLinkId: 'kibana:dev_tools',
+    navLinkId: 'kibana:devTools',
     app: ['kibana'],
     catalogue: ['console', 'searchprofiler', 'grokdebugger'],
     privileges: {

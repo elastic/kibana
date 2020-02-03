@@ -36,7 +36,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup> {
 
   async setup({ http, capabilities, getStartServices }: CoreSetup) {
     capabilities.registerProvider(() => ({
-      dev_tools: {
+      devTools: {
         show: true,
         save: true,
       },

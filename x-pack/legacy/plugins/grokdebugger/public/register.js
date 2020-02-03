@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { npSetup, npStart } from 'ui/new_platform';
 
-npSetup.plugins.dev_tools.register({
+npSetup.plugins.devTools.register({
   order: 6,
   title: i18n.translate('xpack.grokDebugger.displayName', {
     defaultMessage: 'Grok Debugger',
@@ -24,7 +24,7 @@ npSetup.plugins.dev_tools.register({
     };
     if (!licenseCheck.showPage) {
       npStart.core.notifications.toasts.addDanger(licenseCheck.message);
-      window.location.hash = '/dev_tools';
+      window.location.hash = '/devTools';
       return () => {};
     }
     const { renderApp } = await import('./render_app');

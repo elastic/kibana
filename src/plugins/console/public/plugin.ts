@@ -30,7 +30,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
 
   async setup(
     { notifications, getStartServices }: CoreSetup,
-    { dev_tools, home, usageCollection }: AppSetupUIPluginDependencies
+    { devTools, home, usageCollection }: AppSetupUIPluginDependencies
   ) {
     home.featureCatalogue.register({
       id: 'console',
@@ -41,12 +41,12 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
         defaultMessage: 'Skip cURL and use this JSON interface to work with your data directly.',
       }),
       icon: 'consoleApp',
-      path: '/app/kibana#/dev_tools/console',
+      path: '/app/kibana#/devTools/console',
       showOnHomePage: true,
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    dev_tools.register({
+    devTools.register({
       id: 'console',
       order: 1,
       title: i18n.translate('console.consoleDisplayName', {

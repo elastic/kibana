@@ -66,7 +66,7 @@ The API returns the following:
         "dashboard": [
           "all"
         ],
-        "dev_tools": [
+        "devTools": [
           "read"
         ],
         "advancedSettings": [

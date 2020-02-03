@@ -130,7 +130,7 @@ export default function securityTests({ getService }: FtrProviderContext) {
       }
     });
 
-    // this could be any role which doesn't have access to the dev_tools feature
+    // this could be any role which doesn't have access to the devTools feature
     it(`can't be accessed by a user with dashboard all access`, async () => {
       const username = 'dashboard_all';
       const roleName = 'dashboard_all';
@@ -166,7 +166,7 @@ export default function securityTests({ getService }: FtrProviderContext) {
     });
 
     describe('spaces', () => {
-      // the following tests create a user_1 which has dev_tools all access to space_1 and dashboard access to space_2
+      // the following tests create a user_1 which has devTools all access to space_1 and dashboard access to space_2
       const space1Id = 'space_1';
       const user1 = {
         username: 'user_1',
@@ -186,7 +186,7 @@ export default function securityTests({ getService }: FtrProviderContext) {
           kibana: [
             {
               feature: {
-                dev_tools: ['all'],
+                devTools: ['all'],
               },
               spaces: [space1Id],
             },
@@ -217,7 +217,7 @@ export default function securityTests({ getService }: FtrProviderContext) {
         await security.user.delete(user1.username);
       });
 
-      it('user_1 can access dev_tools in space_1', async () => {
+      it('user_1 can access devTools in space_1', async () => {
         await supertest
           .post(`/s/${space1Id}/api/console/proxy?method=GET&path=${encodeURIComponent('/_cat')}`)
           .auth(user1.username, user1.password)
@@ -226,7 +226,7 @@ export default function securityTests({ getService }: FtrProviderContext) {
           .expect(200);
       });
 
-      it(`user_1 can't access dev_tools in space_2`, async () => {
+      it(`user_1 can't access devTools in space_2`, async () => {
         await supertest
           .post(`/s/${space2Id}/api/console/proxy?method=GET&path=${encodeURIComponent('/_cat')}`)
           .auth(user1.username, user1.password)

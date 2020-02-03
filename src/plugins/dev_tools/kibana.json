@@ -1,5 +1,5 @@
 {
-  "id": "dev_tools",
+  "id": "devTools",
   "version": "kibana",
   "server": false,
   "ui": true,

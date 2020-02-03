@@ -22,8 +22,8 @@ import 'uiExports/devTools';
 
 import { npStart } from 'ui/new_platform';
 
-if (npStart.plugins.dev_tools.getSortedDevTools().length === 0) {
-  npStart.core.chrome.navLinks.update('kibana:dev_tools', {
+if (npStart.plugins.devTools.getSortedDevTools().length === 0) {
+  npStart.core.chrome.navLinks.update('kibana:devTools', {
     hidden: true,
   });
 }
