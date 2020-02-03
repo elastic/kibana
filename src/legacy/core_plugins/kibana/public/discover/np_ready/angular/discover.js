@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import '../components/field_chooser/field_chooser';
@@ -353,6 +353,10 @@ function discoverController(
           objectType: 'search',
           sharingData: {
             ...sharingData,
+            timezone:
+              core.uiSettings.get('dateFormat:tz') === 'Browser'
+                ? moment.tz.guess()
+                : core.uiSettings.get('dateFormat:tz'),
             title: savedSearch.title,
           },
           isDirty: $appStatus.dirty,

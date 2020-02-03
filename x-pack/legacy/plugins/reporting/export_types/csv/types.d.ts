@@ -94,6 +94,7 @@ export interface CsvResultFromSearch {
 }
 
 export interface GenerateCsvParams {
+  timezone?: string;
   searchRequest: SearchRequest;
   callEndpoint: EndpointCaller;
   fields: string[];
@@ -104,7 +105,6 @@ export interface GenerateCsvParams {
   settings: {
     separator: string;
     quoteValues: boolean;
-    timezone: string | null;
     maxSizeBytes: number;
     scroll: { duration: string; size: number };
     checkForFormulas?: boolean;

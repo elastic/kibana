@@ -35,6 +35,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
     const jobLogger = logger.clone([jobId]);
 
     const {
+      timezone,
       searchRequest,
       fields,
       indexPatternSavedObject,
@@ -99,28 +100,21 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
         return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
       })(),
       (async () => {
-        const [separator, quoteValues, timezone] = await Promise.all([
+        const [separator, quoteValues] = await Promise.all([
           uiConfig.get('csv:separator'),
           uiConfig.get('csv:quoteValues'),
-          uiConfig.get('dateFormat:tz'),
         ]);
-
-        if (timezone === 'Browser') {
-          jobLogger.warn(
-            `Kibana Advanced Setting "dateFormat:tz" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.`
-          );
-        }
 
         return {
           separator,
           quoteValues,
-          timezone,
         };
       })(),
     ]);
 
     const generateCsv = createGenerateCsv(jobLogger);
     const { content, maxSizeReached, size, csvContainsFormulas } = await generateCsv({
+      timezone,
       searchRequest,
       fields,
       metaFields,
