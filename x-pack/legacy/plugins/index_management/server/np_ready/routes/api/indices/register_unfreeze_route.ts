@@ -4,23 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
+import { schema } from '@kbn/config-schema';
 
-interface ReqPayload {
+import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../index';
+
+interface ReqBody {
   indices: string[];
 }
 
-const handler: RouterRouteHandler = async (request, callWithRequest, h) => {
-  const { indices = [] } = request.payload as ReqPayload;
-  const params = {
-    path: `/${encodeURIComponent(indices.join(','))}/_unfreeze`,
-    method: 'POST',
-  };
+const bodySchema = schema.object({
+  indices: schema.arrayOf(schema.string()),
+});
 
-  await callWithRequest('transport.request', params);
-  return h.response();
-};
+export function registerUnfreezeRoute({ router }: RouteDependencies) {
+  router.post(
+    { path: addBasePath('/indices/unfreeze'), validate: { body: bodySchema } },
+    async (ctx, req, res) => {
+      const { indices = [] } = req.body as ReqBody;
+      const params = {
+        path: `/${encodeURIComponent(indices.join(','))}/_unfreeze`,
+        method: 'POST',
+      };
 
-export function registerUnfreezeRoute(router: Router) {
-  router.post('indices/unfreeze', handler);
+      await ctx.core.elasticsearch.adminClient.callAsCurrentUser('transport.request', params);
+      return res.ok();
+    }
+  );
 }
