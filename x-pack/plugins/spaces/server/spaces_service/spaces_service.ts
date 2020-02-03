@@ -8,7 +8,7 @@ import { map, take } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
 import { Legacy } from 'kibana';
 import { Logger, KibanaRequest, CoreSetup } from '../../../../../src/core/server';
-import { PluginSetupContract as SecurityPluginSetup } from '../../../security/server';
+import { SecurityPluginSetup } from '../../../security/server';
 import { LegacyAPI } from '../plugin';
 import { SpacesClient } from '../lib/spaces_client';
 import { ConfigType } from '../config';
