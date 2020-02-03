@@ -9,12 +9,13 @@ import { transparentize } from 'polished';
 import React from 'react';
 
 import { euiStyled } from '../../../../observability/public';
+import { autocomplete } from '../../../../../../src/plugins/data/public';
 
 interface Props {
   isSelected?: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
-  suggestion: any;
+  suggestion: autocomplete.QuerySuggestion;
 }
 
 export const SuggestionItem: React.FC<Props> = props => {
@@ -56,7 +57,9 @@ const SuggestionItemField = euiStyled.div`
   padding: ${props => props.theme.eui.euiSizeXS};
 `;
 
-const SuggestionItemIconField = euiStyled(SuggestionItemField)<{ suggestionType: string }>`
+const SuggestionItemIconField = euiStyled(SuggestionItemField)<{
+  suggestionType: autocomplete.QuerySuggestionsTypes;
+}>`
   background-color: ${props =>
     transparentize(0.9, getEuiIconColor(props.theme, props.suggestionType))};
   color: ${props => getEuiIconColor(props.theme, props.suggestionType)};
@@ -82,34 +85,37 @@ const SuggestionItemDescriptionField = euiStyled(SuggestionItemField)`
   }
 `;
 
-const getEuiIconType = (suggestionType: string) => {
+const getEuiIconType = (suggestionType: autocomplete.QuerySuggestionsTypes) => {
   switch (suggestionType) {
-    case 'field':
+    case autocomplete.QuerySuggestionsTypes.Field:
       return 'kqlField';
-    case 'value':
+    case autocomplete.QuerySuggestionsTypes.Value:
       return 'kqlValue';
-    case 'recentSearch':
+    case autocomplete.QuerySuggestionsTypes.RecentSearch:
       return 'search';
-    case 'conjunction':
+    case autocomplete.QuerySuggestionsTypes.Conjunction:
       return 'kqlSelector';
-    case 'operator':
+    case autocomplete.QuerySuggestionsTypes.Operator:
       return 'kqlOperand';
     default:
       return 'empty';
   }
 };
 
-const getEuiIconColor = (theme: any, suggestionType: string): string => {
+const getEuiIconColor = (
+  theme: any,
+  suggestionType: autocomplete.QuerySuggestionsTypes
+): string => {
   switch (suggestionType) {
-    case 'field':
+    case autocomplete.QuerySuggestionsTypes.Field:
       return theme.eui.euiColorVis7;
-    case 'value':
+    case autocomplete.QuerySuggestionsTypes.Value:
       return theme.eui.euiColorVis0;
-    case 'operator':
+    case autocomplete.QuerySuggestionsTypes.Operator:
       return theme.eui.euiColorVis1;
-    case 'conjunction':
+    case autocomplete.QuerySuggestionsTypes.Conjunction:
       return theme.eui.euiColorVis2;
-    case 'recentSearch':
+    case autocomplete.QuerySuggestionsTypes.RecentSearch:
     default:
       return theme.eui.euiColorMediumShade;
   }
