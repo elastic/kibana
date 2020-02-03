@@ -37,7 +37,7 @@ export class RemoteClusterEdit extends Component {
     stopEditingCluster: PropTypes.func,
     editCluster: PropTypes.func,
     isEditingCluster: PropTypes.bool,
-    getEditClusterError: PropTypes.string,
+    getEditClusterError: PropTypes.object,
     clearEditClusterErrors: PropTypes.func,
     openDetailPanel: PropTypes.func,
   };

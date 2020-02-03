@@ -7,8 +7,7 @@
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import { PLUGIN } from './common';
-import { Plugin as RemoteClustersPlugin } from './plugin';
-import { createShim } from './shim';
+import { plugin } from './server';
 
 export function remoteClusters(kibana: any) {
   return new kibana.Plugin({
@@ -43,25 +42,20 @@ export function remoteClusters(kibana: any) {
         config.get('xpack.remote_clusters.enabled') && config.get('xpack.index_management.enabled')
       );
     },
-    init(server: Legacy.Server) {
-      const {
-        coreSetup,
-        pluginsSetup: {
-          license: { registerLicenseChecker },
+    init(server: any) {
+      const { core: coreSetup } = server.newPlatform.setup;
+
+      const remoteClustersPluginInstance = plugin();
+
+      remoteClustersPluginInstance.setup(coreSetup, {
+        __LEGACY: {
+          route: server.route.bind(server),
+          plugins: {
+            xpack_main: server.plugins.xpack_main,
+            remote_clusters: server.plugins[PLUGIN.ID],
+          },
         },
-      } = createShim(server, PLUGIN.ID);
-
-      const remoteClustersPlugin = new RemoteClustersPlugin();
-
-      // Set up plugin.
-      remoteClustersPlugin.setup(coreSetup);
-
-      registerLicenseChecker(
-        server,
-        PLUGIN.ID,
-        PLUGIN.getI18nName(),
-        PLUGIN.MINIMUM_LICENSE_REQUIRED
-      );
+      });
     },
   });
 }

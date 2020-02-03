@@ -1,0 +1,9 @@
+{
+  "id": "remote_clusters",
+  "version": "kibana",
+  "requiredPlugins": [
+    "home"
+  ],
+  "server": true,
+  "ui": true
+}

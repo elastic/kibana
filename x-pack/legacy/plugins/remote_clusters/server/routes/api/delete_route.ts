@@ -5,98 +5,126 @@
  */
 
 import { get } from 'lodash';
+import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+import { RequestHandler } from 'src/core/server';
 
-import {
-  Router,
-  RouterRouteHandler,
-  wrapCustomError,
-  wrapEsError,
-  wrapUnknownError,
-} from '../../../../../server/lib/create_router';
+import { RouteDependencies, ServerShim } from '../../types';
 import { serializeCluster } from '../../../common/cluster_serialization';
+import { API_BASE_PATH } from '../../../common';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
+import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
+import { isEsError } from '../../lib/is_es_error';
+import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 
-export const register = (router: Router, isEsError: any): void => {
-  router.delete('/{nameOrNames}', createDeleteHandler(isEsError));
-};
+export const register = (deps: RouteDependencies, legacy: ServerShim): void => {
+  const getDeleteHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
+    try {
+      const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
 
-export const createDeleteHandler: any = (isEsError: any) => {
-  const deleteHandler: RouterRouteHandler = async (
-    req,
-    callWithRequest
-  ): Promise<{
-    itemsDeleted: any[];
-    errors: any[];
-  }> => {
-    const { nameOrNames } = req.params as any;
-    const names = nameOrNames.split(',');
+      const { nameOrNames } = request.params;
+      const names = nameOrNames.split(',');
 
-    const itemsDeleted: any[] = [];
-    const errors: any[] = [];
+      const itemsDeleted: any[] = [];
+      const errors: any[] = [];
 
-    // Validator that returns an error if the remote cluster does not exist.
-    const validateClusterDoesExist = async (name: string) => {
-      try {
-        const existingCluster = await doesClusterExist(callWithRequest, name);
-        if (!existingCluster) {
-          return wrapCustomError(new Error('There is no remote cluster with that name.'), 404);
+      // Validator that returns an error if the remote cluster does not exist.
+      const validateClusterDoesExist = async (name: string) => {
+        try {
+          const existingCluster = await doesClusterExist(callWithRequest, name);
+          if (!existingCluster) {
+            return response.customError({
+              statusCode: 404,
+              body: {
+                message: i18n.translate(
+                  'xpack.remoteClusters.deleteRemoteCluster.noRemoteClusterErrorMessage',
+                  {
+                    defaultMessage: 'There is no remote cluster with that name.',
+                  }
+                ),
+              },
+            });
+          }
+        } catch (error) {
+          return response.customError({ statusCode: 400, body: error });
         }
-      } catch (error) {
-        return wrapCustomError(error, 400);
-      }
-    };
+      };
 
-    // Send the request to delete the cluster and return an error if it could not be deleted.
-    const sendRequestToDeleteCluster = async (name: string) => {
-      try {
-        const body = serializeCluster({ name });
-        const response = await callWithRequest('cluster.putSettings', { body });
-        const acknowledged = get(response, 'acknowledged');
-        const cluster = get(response, `persistent.cluster.remote.${name}`);
+      // Send the request to delete the cluster and return an error if it could not be deleted.
+      const sendRequestToDeleteCluster = async (name: string) => {
+        try {
+          const body = serializeCluster({ name });
+          const updateClusterResponse = await callWithRequest('cluster.putSettings', { body });
+          const acknowledged = get(updateClusterResponse, 'acknowledged');
+          const cluster = get(updateClusterResponse, `persistent.cluster.remote.${name}`);
 
-        if (acknowledged && !cluster) {
-          return null;
+          if (acknowledged && !cluster) {
+            return null;
+          }
+
+          // If for some reason the ES response still returns the cluster information,
+          // return an error. This shouldn't happen.
+          return response.customError({
+            statusCode: 400,
+            body: {
+              message: i18n.translate(
+                'xpack.remoteClusters.deleteRemoteCluster.unknownRemoteClusterErrorMessage',
+                {
+                  defaultMessage: 'Unable to delete cluster, information still returned from ES.',
+                }
+              ),
+            },
+          });
+        } catch (error) {
+          if (isEsError(error)) {
+            return response.customError({ statusCode: error.statusCode, body: error });
+          }
+          return response.internalError({ body: error });
+        }
+      };
+
+      const deleteCluster = async (clusterName: string) => {
+        // Validate that the cluster exists.
+        let error: any = await validateClusterDoesExist(clusterName);
+
+        if (!error) {
+          // Delete the cluster.
+          error = await sendRequestToDeleteCluster(clusterName);
         }
 
-        // If for some reason the ES response still returns the cluster information,
-        // return an error. This shouldn't happen.
-        return wrapCustomError(
-          new Error('Unable to delete cluster, information still returned from ES.'),
-          400
-        );
-      } catch (error) {
-        if (isEsError(error)) {
-          return wrapEsError(error);
+        if (error) {
+          errors.push({ name: clusterName, error });
+        } else {
+          itemsDeleted.push(clusterName);
         }
+      };
 
-        return wrapUnknownError(error);
+      // Delete all our cluster in parallel.
+      await Promise.all(names.map(deleteCluster));
+
+      return response.ok({
+        body: {
+          itemsDeleted,
+          errors,
+        },
+      });
+    } catch (error) {
+      if (isEsError(error)) {
+        return response.customError({ statusCode: error.statusCode, body: error });
       }
-    };
-
-    const deleteCluster = async (clusterName: string) => {
-      // Validate that the cluster exists.
-      let error: any = await validateClusterDoesExist(clusterName);
-
-      if (!error) {
-        // Delete the cluster.
-        error = await sendRequestToDeleteCluster(clusterName);
-      }
-
-      if (error) {
-        errors.push({ name: clusterName, error });
-      } else {
-        itemsDeleted.push(clusterName);
-      }
-    };
-
-    // Delete all our cluster in parallel.
-    await Promise.all(names.map(deleteCluster));
-
-    return {
-      itemsDeleted,
-      errors,
-    };
+      return response.internalError({ body: error });
+    }
   };
 
-  return deleteHandler;
+  deps.router.delete(
+    {
+      path: `${API_BASE_PATH}/{nameOrNames}`,
+      validate: {
+        params: schema.object({
+          nameOrNames: schema.string(),
+        }),
+      },
+    },
+    licensePreRoutingFactory(legacy, getDeleteHandler)
+  );
 };

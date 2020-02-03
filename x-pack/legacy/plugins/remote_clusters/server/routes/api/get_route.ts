@@ -6,35 +6,58 @@
 
 import { get } from 'lodash';
 
-import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
+import { RequestHandler } from 'src/core/server';
 import { deserializeCluster } from '../../../common/cluster_serialization';
+import { API_BASE_PATH } from '../../../common';
+import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
+import { callWithRequestFactory } from '../../lib/call_with_request_factory';
+import { isEsError } from '../../lib/is_es_error';
+import { RouteDependencies, ServerShim } from '../../types';
 
-export const register = (router: Router): void => {
-  router.get('', getAllHandler);
-};
+export const register = (deps: RouteDependencies, legacy: ServerShim): void => {
+  const getAllHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
+    try {
+      const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
+      const clusterSettings = await callWithRequest('cluster.getSettings');
 
-// GET '/api/remote_clusters'
-export const getAllHandler: RouterRouteHandler = async (req, callWithRequest): Promise<any[]> => {
-  const clusterSettings = await callWithRequest('cluster.getSettings');
-  const transientClusterNames = Object.keys(get(clusterSettings, `transient.cluster.remote`) || {});
-  const persistentClusterNames = Object.keys(
-    get(clusterSettings, `persistent.cluster.remote`) || {}
+      const transientClusterNames = Object.keys(
+        get(clusterSettings, 'transient.cluster.remote') || {}
+      );
+      const persistentClusterNames = Object.keys(
+        get(clusterSettings, 'persistent.cluster.remote') || {}
+      );
+
+      const clustersByName = await callWithRequest('cluster.remoteInfo');
+      const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
+
+      const body = clusterNames.map((clusterName: string): any => {
+        const cluster = clustersByName[clusterName];
+        const isTransient = transientClusterNames.includes(clusterName);
+        const isPersistent = persistentClusterNames.includes(clusterName);
+        // If the cluster hasn't been stored in the cluster state, then it's defined by the
+        // node's config file.
+        const isConfiguredByNode = !isTransient && !isPersistent;
+
+        return {
+          ...deserializeCluster(clusterName, cluster),
+          isConfiguredByNode,
+        };
+      });
+
+      return response.ok({ body });
+    } catch (error) {
+      if (isEsError(error)) {
+        return response.customError({ statusCode: error.statusCode, body: error });
+      }
+      return response.internalError({ body: error });
+    }
+  };
+
+  deps.router.get(
+    {
+      path: API_BASE_PATH,
+      validate: false,
+    },
+    licensePreRoutingFactory(legacy, getAllHandler)
   );
-
-  const clustersByName = await callWithRequest('cluster.remoteInfo');
-  const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
-
-  return clusterNames.map((clusterName: string): any => {
-    const cluster = clustersByName[clusterName];
-    const isTransient = transientClusterNames.includes(clusterName);
-    const isPersistent = persistentClusterNames.includes(clusterName);
-    // If the cluster hasn't been stored in the cluster state, then it's defined by the
-    // node's config file.
-    const isConfiguredByNode = !isTransient && !isPersistent;
-
-    return {
-      ...deserializeCluster(clusterName, cluster),
-      isConfiguredByNode,
-    };
-  });
 };
