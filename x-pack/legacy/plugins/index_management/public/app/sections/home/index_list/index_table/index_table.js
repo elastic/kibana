@@ -104,7 +104,13 @@ export class IndexTable extends Component {
     const { filterChanged, filterFromURI } = this.props;
     if (filterFromURI) {
       const decodedFilter = decodeURIComponent(filterFromURI);
-      filterChanged(EuiSearchBar.Query.parse(decodedFilter));
+
+      try {
+        const filter = EuiSearchBar.Query.parse(decodedFilter);
+        filterChanged(filter);
+      } catch (e) {
+        this.setState({ filterError: e });
+      }
     }
   }
   componentWillUnmount() {
@@ -122,7 +128,8 @@ export class IndexTable extends Component {
       return;
     }
     return (
-      <Fragment>
+      <>
+        <EuiSpacer />
         <EuiCallOut
           iconType="faceSad"
           color="danger"
@@ -134,8 +141,8 @@ export class IndexTable extends Component {
             },
           })}
         />
-        <EuiSpacer size="l" />
-      </Fragment>
+        <EuiSpacer />
+      </>
     );
   }
   onFilterChanged = ({ query, error }) => {

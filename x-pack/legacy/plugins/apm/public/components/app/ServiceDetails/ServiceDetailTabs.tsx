@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiTabs, EuiSpacer } from '@elastic/eui';
-import { ErrorGroupOverview } from '../ErrorGroupOverview';
-import { TransactionOverview } from '../TransactionOverview';
-import { ServiceMetrics } from '../ServiceMetrics';
-import { isRumAgentName, isJavaAgentName } from '../../../../common/agent_name';
-import { EuiTabLink } from '../../shared/EuiTabLink';
+import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
+import { useAgentName } from '../../../hooks/useAgentName';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { TransactionOverviewLink } from '../../shared/Links/apm/TransactionOverviewLink';
+import { EuiTabLink } from '../../shared/EuiTabLink';
 import { ErrorOverviewLink } from '../../shared/Links/apm/ErrorOverviewLink';
 import { MetricOverviewLink } from '../../shared/Links/apm/MetricOverviewLink';
-import { ServiceNodeOverviewLink } from '../../shared/Links/apm/ServiceNodeOverviewLink';
-import { ServiceNodeOverview } from '../ServiceNodeOverview';
-import { useAgentName } from '../../../hooks/useAgentName';
-import { ServiceMap } from '../ServiceMap';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { ServiceNodeOverviewLink } from '../../shared/Links/apm/ServiceNodeOverviewLink';
+import { TransactionOverviewLink } from '../../shared/Links/apm/TransactionOverviewLink';
+import { ErrorGroupOverview } from '../ErrorGroupOverview';
+import { ServiceMap } from '../ServiceMap';
+import { ServiceMetrics } from '../ServiceMetrics';
+import { ServiceNodeOverview } from '../ServiceNodeOverview';
+import { TransactionOverview } from '../TransactionOverview';
 
 interface Props {
   tab: 'transactions' | 'errors' | 'metrics' | 'nodes' | 'service-map';
@@ -124,7 +124,6 @@ export function ServiceDetailTabs({ tab }: Props) {
           </EuiTabLink>
         ))}
       </EuiTabs>
-      <EuiSpacer />
       {selectedTab ? selectedTab.render() : null}
     </>
   );
