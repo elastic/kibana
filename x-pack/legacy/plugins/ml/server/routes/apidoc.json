@@ -3,5 +3,19 @@
   "version": "0.1.0",
   "description": "ML Kibana API",
   "title": "ML Kibana API",
-  "url" : "/api/ml/"
+  "url" : "/api/ml/",
+  "order": [
+    "DataFrameAnalytics",
+    "GetDataFrameAnalytics",
+    "GetDataFrameAnalyticsById",
+    "GetDataFrameAnalyticsStats",
+    "GetDataFrameAnalyticsStatsById",
+    "UpdateDataFrameAnalytics",
+    "EvaluateDataFrameAnalytics",
+    "ExplainDataFrameAnalytics",
+    "DeleteDataFrameAnalytics",
+    "StartDataFrameAnalyticsJob",
+    "StopsDataFrameAnalyticsJob",
+    "GetDataFrameAnalyticsMessages"
+  ]
 }
