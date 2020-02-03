@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { createHashHistory, History } from 'history';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { createHashHistory, History, UnregisterCallback } from 'history';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { AppBase, ToastsSetup } from 'kibana/public';
 import { setStateToKbnUrl } from './kbn_url_storage';
 import { unhashUrl } from './hash_unhash_url';
@@ -104,9 +104,10 @@ export function createKbnUrlTracker({
   const historyInstance = history || createHashHistory();
   const storageInstance = storage || sessionStorage;
 
-  // local state storing current app status and active url
+  // local state storing current listeners and active url
   let activeUrl: string = '';
-  let appIsMounted = false;
+  let unsubscribeURLHistory: UnregisterCallback | undefined;
+  let unsubscribeGlobalState: Subscription[] | undefined;
 
   function setNavLink(hash: string) {
     navLinkUpdater$.next(() => ({ activeUrl: baseUrl + hash }));
@@ -117,41 +118,56 @@ export function createKbnUrlTracker({
     return url.substr(baseUrl.length);
   }
 
-  // track current hash when within app
-  const stopHistory = historyInstance.listen(location => {
-    if (!appIsMounted) {
-      return;
-    }
-    const urlWithHashes = baseUrl + '#' + location.pathname + location.search;
-    let urlWithStates = '';
-    try {
-      urlWithStates = unhashUrl(urlWithHashes);
-    } catch (e) {
-      toastNotifications.addDanger(e.message);
+  function unsubscribe() {
+    if (unsubscribeURLHistory) {
+      unsubscribeURLHistory();
+      unsubscribeURLHistory = undefined;
     }
 
-    activeUrl = getActiveSubUrl(urlWithStates || urlWithHashes);
-    storageInstance.setItem(storageKey, activeUrl);
-  });
+    if (unsubscribeGlobalState) {
+      unsubscribeGlobalState.forEach(sub => sub.unsubscribe());
+      unsubscribeGlobalState = undefined;
+    }
+  }
 
-  // propagate state updates when in other apps
-  const subs = stateParams.map(({ stateUpdate$, kbnUrlKey }) =>
-    stateUpdate$.subscribe(state => {
-      if (appIsMounted) {
-        return;
+  function onMountApp() {
+    unsubscribe();
+    // track current hash when within app
+    unsubscribeURLHistory = historyInstance.listen(location => {
+      const urlWithHashes = baseUrl + '#' + location.pathname + location.search;
+      let urlWithStates = '';
+      try {
+        urlWithStates = unhashUrl(urlWithHashes);
+      } catch (e) {
+        toastNotifications.addDanger(e.message);
       }
-      const updatedUrl = setStateToKbnUrl(
-        kbnUrlKey,
-        state,
-        { useHash: false },
-        baseUrl + (activeUrl || defaultSubUrl)
-      );
-      // remove baseUrl prefix (just storing the sub url part)
-      activeUrl = getActiveSubUrl(updatedUrl);
+
+      activeUrl = getActiveSubUrl(urlWithStates || urlWithHashes);
       storageInstance.setItem(storageKey, activeUrl);
-      setNavLink(activeUrl);
-    })
-  );
+    });
+  }
+
+  function onUnmountApp() {
+    unsubscribe();
+    // propagate state updates when in other apps
+    unsubscribeGlobalState = stateParams.map(({ stateUpdate$, kbnUrlKey }) =>
+      stateUpdate$.subscribe(state => {
+        const updatedUrl = setStateToKbnUrl(
+          kbnUrlKey,
+          state,
+          { useHash: false },
+          baseUrl + (activeUrl || defaultSubUrl)
+        );
+        // remove baseUrl prefix (just storing the sub url part)
+        activeUrl = getActiveSubUrl(updatedUrl);
+        storageInstance.setItem(storageKey, activeUrl);
+        setNavLink(activeUrl);
+      })
+    );
+  }
+
+  // register listeners for unmounted app initially
+  onUnmountApp();
 
   // initialize nav link and internal state
   const storedUrl = storageInstance.getItem(storageKey);
@@ -162,16 +178,15 @@ export function createKbnUrlTracker({
 
   return {
     appMounted() {
-      appIsMounted = true;
+      onMountApp();
       setNavLink(defaultSubUrl);
     },
     appUnMounted() {
-      appIsMounted = false;
+      onUnmountApp();
       setNavLink(activeUrl);
     },
     stop() {
-      stopHistory();
-      subs.forEach(sub => sub.unsubscribe());
+      unsubscribe();
     },
   };
 }

@@ -24,6 +24,7 @@ export {
   HomePublicPluginStart,
 } from './plugin';
 export { FeatureCatalogueEntry, FeatureCatalogueCategory, Environment } from './services';
+export * from '../common/instruction_variant';
 import { HomePublicPlugin } from './plugin';
 
 export const plugin = () => new HomePublicPlugin();

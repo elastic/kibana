@@ -47,8 +47,8 @@ import {
   KibanaLegacySetup,
 } from '../../../../../plugins/kibana_legacy/public';
 import { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
-import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public/state_management/url/kbn_url_tracker';
-import { getQueryStateContainer } from '../../../../../plugins/data/public/query/state_sync/sync_query';
+import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
+import { getQueryStateContainer } from '../../../../../plugins/data/public';
 
 export interface LegacyAngularInjectedDependencies {
   dashboardConfig: any;
