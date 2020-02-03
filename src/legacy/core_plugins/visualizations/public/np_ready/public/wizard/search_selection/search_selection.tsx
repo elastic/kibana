@@ -24,7 +24,7 @@ import React from 'react';
 import { IUiSettingsClient, SavedObjectsStart } from 'kibana/public';
 
 import { SavedObjectFinderUi } from '../../../../../../../../plugins/kibana_react/public';
-import { VisType } from '../../../legacy_imports';
+import { VisType } from '../../types';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;

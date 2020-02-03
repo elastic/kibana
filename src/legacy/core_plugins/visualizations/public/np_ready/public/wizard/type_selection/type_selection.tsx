@@ -34,13 +34,13 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { VisType } from '../../../legacy_imports';
+
 import { memoizeLast } from '../../../../../../visualizations/public/np_ready/public/legacy/memoize';
 import { VisTypeAlias } from '../../../../../../visualizations/public';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
-import { TypesStart } from '../../../../../../visualizations/public/np_ready/public/types';
+import { VisType, TypesStart } from '../../types';
 
 export interface VisTypeListEntry extends VisType {
   highlighted: boolean;

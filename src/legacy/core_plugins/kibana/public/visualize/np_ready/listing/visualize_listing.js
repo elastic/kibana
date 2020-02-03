@@ -19,12 +19,13 @@
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { VisualizeListingTable } from './visualize_listing_table';
-import { NewVisModal } from '../wizard/new_vis_modal';
+
 import { VisualizeConstants } from '../visualize_constants';
 import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../../kibana_services';
 import { wrapInI18nContext } from '../../legacy_imports';
+import { NewVisModal } from '../../../../../visualizations/public/';
 
 export function initListingDirective(app) {
   app.directive('visualizeListingTable', reactDirective =>

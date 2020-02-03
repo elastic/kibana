@@ -19,9 +19,7 @@
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-
-import { VisType } from '../../legacy_imports';
-import { TypesStart } from '../../../../../visualizations/public/np_ready/public/types';
+import { TypesStart, VisType } from '../types';
 
 jest.mock('../../legacy_imports', () => ({
   State: () => null,

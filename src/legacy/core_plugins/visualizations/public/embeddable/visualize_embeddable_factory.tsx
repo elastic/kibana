@@ -25,7 +25,6 @@ import {
   Container,
   EmbeddableOutput,
 } from '../../../../../plugins/embeddable/public';
-import { showNewVisModal } from '../../../kibana/public/visualize';
 import { SavedVisualizations } from '../../../kibana/public/visualize/np_ready/types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
@@ -45,6 +44,7 @@ import {
   getSavedObjects,
   getUsageCollector,
 } from '../np_ready/public/services';
+import { showNewVisModal } from '../np_ready/public/wizard';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;

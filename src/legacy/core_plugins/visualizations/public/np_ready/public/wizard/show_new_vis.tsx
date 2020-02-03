@@ -23,7 +23,7 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient, SavedObjectsStart } from 'kibana/public';
 import { NewVisModal } from './new_vis_modal';
-import { TypesStart } from '../../../../../visualizations/public/np_ready/public/types';
+import { TypesStart } from '../types';
 import { UsageCollectionSetup } from '../../../../../../../plugins/usage_collection/public';
 
 interface ShowNewVisModalParams {

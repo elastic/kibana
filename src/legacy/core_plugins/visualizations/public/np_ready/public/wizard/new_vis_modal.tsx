@@ -24,14 +24,9 @@ import { i18n } from '@kbn/i18n';
 
 import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 import { IUiSettingsClient, SavedObjectsStart } from 'kibana/public';
-import { VisType } from '../../legacy_imports';
-import { VisualizeConstants } from '../visualize_constants';
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
-import {
-  TypesStart,
-  VisTypeAlias,
-} from '../../../../../visualizations/public/np_ready/public/types';
+import { TypesStart, VisType, VisTypeAlias } from '../types';
 import { UsageCollectionSetup } from '../../../../../../../plugins/usage_collection/public';
 
 interface TypeSelectionProps {
@@ -50,7 +45,9 @@ interface TypeSelectionState {
   visType?: VisType;
 }
 
-const baseUrl = `#${VisualizeConstants.CREATE_PATH}?`;
+// TODO: redirect logic is specific to visualise & dashboard
+// but it is likely should be decoupled. e.g. handled by the container instead
+const baseUrl = `#/visualize/create?`;
 
 class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState> {
   public static defaultProps = {
