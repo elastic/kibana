@@ -133,9 +133,11 @@ export default function({ getService }: FtrProviderContext) {
           })
           .expect(200);
         expect(body.total).to.eql(2);
-        const availableIps = [].concat(...body.endpoints.map(metadata => metadata.host.ip));
-        expect(availableIps).to.eql(['10.192.213.130', '10.70.28.129', '10.46.229.234']);
-        expect(availableIps).not.include.eql(notIncludedIp);
+        const resultIps: string[] = [].concat(
+          ...body.endpoints.map((metadata: Record<string, any>) => metadata.host.ip)
+        );
+        expect(resultIps).to.eql(['10.192.213.130', '10.70.28.129', '10.46.229.234']);
+        expect(resultIps).not.include.eql(notIncludedIp);
         expect(body.endpoints.length).to.eql(2);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
