@@ -25,9 +25,9 @@ import { connect } from 'react-redux';
 import { FiltersGlobal } from '../../../../components/filters_global';
 import { FormattedDate } from '../../../../components/formatted_date';
 import {
-  getDetectionEngineUrl,
   getEditRuleUrl,
   getRulesUrl,
+  DETECTION_ENGINE_PAGE_NAME,
 } from '../../../../components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../components/search_bar';
 import { WrapperPage } from '../../../../components/wrapper_page';
@@ -54,7 +54,7 @@ import * as detectionI18n from '../../translations';
 import { ReadOnlyCallOut } from '../components/read_only_callout';
 import { RuleSwitch } from '../components/rule_switch';
 import { StepPanel } from '../components/step_panel';
-import { getStepsData } from '../helpers';
+import { getStepsData, redirectToDetections } from '../helpers';
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { GlobalTime } from '../../../../containers/global_time';
@@ -113,6 +113,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     loading,
     isSignalIndexExists,
     isAuthenticated,
+    hasEncryptionKey,
     canUserCRUD,
     hasManageApiKey,
     hasIndexWrite,
@@ -236,12 +237,8 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     [ruleEnabled, setRuleEnabled]
   );
 
-  if (
-    isSignalIndexExists != null &&
-    isAuthenticated != null &&
-    (!isSignalIndexExists || !isAuthenticated)
-  ) {
-    return <Redirect to={`/${getDetectionEngineUrl()}`} />;
+  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
   }
 
   return (
