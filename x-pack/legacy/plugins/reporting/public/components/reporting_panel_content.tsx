@@ -7,11 +7,10 @@
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
-import { KFetchError } from 'ui/kfetch/kfetch_error';
 import { toastNotifications } from 'ui/notify';
 import url from 'url';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
-import { reportingClient } from '../lib/reporting_client';
+import * as reportingClient from '../lib/reporting_client';
 
 interface Props {
   reportType: string;
@@ -217,8 +216,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
         });
         this.props.onClose();
       })
-      .catch((kfetchError: KFetchError) => {
-        if (kfetchError.message === 'not exportable') {
+      .catch((error: any) => {
+        if (error.message === 'not exportable') {
           return toastNotifications.addWarning({
             title: intl.formatMessage(
               {
@@ -237,7 +236,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
         }
 
         const defaultMessage =
-          kfetchError.res.status === 403 ? (
+          error?.res?.status === 403 ? (
             <FormattedMessage
               id="xpack.reporting.panelContent.noPermissionToGenerateReportDescription"
               defaultMessage="You don't have permission to generate this report."
@@ -254,7 +253,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
             defaultMessage: 'Reporting error',
           }),
-          text: toMountPoint(kfetchError.message || defaultMessage),
+          text: toMountPoint(error.message || defaultMessage),
           'data-test-subj': 'queueReportError',
         });
       });
