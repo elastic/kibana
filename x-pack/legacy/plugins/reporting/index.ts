@@ -9,7 +9,7 @@ import { Legacy } from 'kibana';
 import { IUiSettingsClient } from 'kibana/server';
 import { resolve } from 'path';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
-import { PluginSetupContract as SecurityPluginSetup } from '../../../plugins/security/server';
+import { SecurityPluginSetup } from '../../../plugins/security/server';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { config as reportingConfig } from './config';
 import { LegacySetup, ReportingPlugin, reportingPluginFactory } from './server/plugin';
