@@ -41,17 +41,17 @@ export const createLogEntryCategoryExamplesQuery = (
         ],
       },
     },
-    _source: ['message'],
+    sort: [
+      {
+        [timestampField]: {
+          order: 'asc',
+        },
+      },
+    ],
   },
+  _source: ['message'],
   index: indices,
   size: exampleCount,
-  sort: [
-    {
-      [timestampField]: {
-        order: 'asc',
-      },
-    },
-  ],
 });
 
 export const logEntryCategoryExampleHitRT = rt.type({

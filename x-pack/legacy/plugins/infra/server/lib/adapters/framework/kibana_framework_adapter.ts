@@ -178,9 +178,9 @@ export class KibanaFramework {
   ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
     requestContext: RequestHandlerContext,
-    method: 'ml.getJobs',
-    options?: object
-  ): Promise<object>;
+    method: 'transport.request',
+    options?: CallWithRequestParams
+  ): Promise<unknown>;
   callWithRequest(
     requestContext: RequestHandlerContext,
     endpoint: string,

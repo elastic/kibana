@@ -451,7 +451,7 @@ export class LogEntryCategoriesAnalysis {
     } = decodeOrThrow(mlJobsResponseRT)(
       await this.libs.framework.callWithRequest(
         requestContext,
-        'ml.getJobs',
+        'transport.request',
         createMlJobsQuery([logEntryCategoriesCountJobId])
       )
     );

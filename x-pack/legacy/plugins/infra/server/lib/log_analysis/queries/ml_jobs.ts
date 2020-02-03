@@ -7,8 +7,11 @@
 import * as rt from 'io-ts';
 
 export const createMlJobsQuery = (jobIds: string[]) => ({
-  job_id: jobIds,
-  allow_no_jobs: true,
+  method: 'GET',
+  path: `/_ml/anomaly_detectors/${jobIds.join(',')}`,
+  query: {
+    allow_no_jobs: true,
+  },
 });
 
 export const mlJobRT = rt.type({
