@@ -4,25 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
+import { schema } from '@kbn/config-schema';
 
-interface ReqPayload {
+import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../index';
+
+interface ReqBody {
   indices: string[];
 }
 
-const handler: RouterRouteHandler = async (request, callWithRequest, h) => {
-  const payload = request.payload as ReqPayload;
-  const { indices = [] } = payload;
+const bodySchema = schema.object({
+  indices: schema.arrayOf(schema.string()),
+});
 
-  const params = {
-    expandWildcards: 'none',
-    format: 'json',
-    index: indices,
-  };
-  await callWithRequest('indices.delete', params);
-  return h.response();
-};
+export function registerDeleteRoute({ router }: RouteDependencies) {
+  router.post(
+    { path: addBasePath('/indices/delete'), validate: { body: bodySchema } },
+    async (ctx, req, res) => {
+      const body = req.body as ReqBody;
+      const { indices = [] } = body;
 
-export function registerDeleteRoute(router: Router) {
-  router.post('indices/delete', handler);
+      const params = {
+        expandWildcards: 'none',
+        format: 'json',
+        index: indices,
+      };
+
+      await ctx.core.elasticsearch.adminClient.callAsCurrentUser('indices.delete', params);
+      return res.ok();
+    }
+  );
 }
