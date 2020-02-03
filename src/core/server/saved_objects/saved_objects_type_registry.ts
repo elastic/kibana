@@ -24,7 +24,7 @@ import { SavedObjectsType } from './types';
  * @internal
  */
 export class SavedObjectTypeRegistry {
-  private types = new Map<string, SavedObjectsType>();
+  private readonly types = new Map<string, SavedObjectsType>();
 
   public registerType(type: SavedObjectsType) {
     if (this.types.has(type.name)) {
