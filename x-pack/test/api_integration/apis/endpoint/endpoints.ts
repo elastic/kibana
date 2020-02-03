@@ -116,25 +116,29 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('endpoints api should return page based on filters and paging passed.', async () => {
+        const notIncludedIp = '10.101.149.26';
         const { body } = await supertest
           .post('/api/endpoint/endpoints')
           .set('kbn-xsrf', 'xxx')
           .send({
             paging_properties: [
               {
-                page_size: 1,
+                page_size: 10,
               },
               {
-                page_index: 1,
+                page_index: 0,
               },
             ],
-            filter: 'not host.ip:10.101.149.26',
+            filter: `not host.ip:${notIncludedIp}`,
           })
           .expect(200);
         expect(body.total).to.eql(2);
-        expect(body.endpoints.length).to.eql(1);
-        expect(body.request_page_size).to.eql(1);
-        expect(body.request_page_index).to.eql(1);
+        const availableIps = [].concat(...body.endpoints.map(metadata => metadata.host.ip));
+        expect(availableIps).to.eql(['10.192.213.130', '10.70.28.129', '10.46.229.234']);
+        expect(availableIps).not.include.eql(notIncludedIp);
+        expect(body.endpoints.length).to.eql(2);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_page_index).to.eql(0);
       });
     });
   });
