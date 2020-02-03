@@ -7,29 +7,17 @@
 import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['common', 'discover', 'timepicker']);
   const log = getService('log');
   const retry = getService('retry');
+  const PageObjects = getPageObjects(['common', 'uptime']);
 
   describe('check heartbeat', function() {
-    before(async function() {
-      await retry.tryForTime(120000, async function() {
-        await PageObjects.common.navigateToApp('settings', 'power', 'changeme');
-        log.debug('create Index Pattern');
-        await PageObjects.settings.createIndexPattern('heartbeat-*');
-      });
-      log.debug('navigateToApp Discover');
-      return PageObjects.common.navigateToApp('discover');
-    });
-
     it('heartbeat- should have hit count GT 0', async function() {
-      //  await PageObjects.header.clickDiscover();
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('heartbeat-*');
-      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Today');
-      await retry.tryForTime(40000, async () => {
-        const hitCount = await PageObjects.discover.getHitCount();
-        expect(hitCount).to.be.greaterThan('0');
+      log.debug('navigateToApp Discover');
+      await PageObjects.common.navigateToApp('uptime');
+      await retry.try(async function() {
+        const upCount = parseInt((await PageObjects.uptime.getSnapshotCount()).up);
+        expect(upCount).to.be.greaterThan(0);
       });
     });
   });
