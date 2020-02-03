@@ -56,14 +56,17 @@ const calculateFlyoutHeight = ({
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
 export const HomePage: React.FC = () => {
-  const { ref, height: windowHeight = 0 } = useResizeObserver();
+  const { ref: measureRef, height: windowHeight = 0 } = useResizeObserver();
   const flyoutHeight = calculateFlyoutHeight({
     globalHeaderSize: globalHeaderHeightPx,
     windowHeight,
   });
 
   return (
-    <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={ref}>
+    <WrappedByAutoSizer
+      data-test-subj="wrapped-by-auto-sizer"
+      ref={measureRef as React.RefObject<HTMLDivElement>}
+    >
       <HeaderGlobal />
 
       <main data-test-subj="pageContainer">

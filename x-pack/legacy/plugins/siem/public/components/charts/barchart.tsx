@@ -105,14 +105,14 @@ interface BarChartComponentProps {
 }
 
 export const BarChartComponent: React.FC<BarChartComponentProps> = ({ barChart, configs }) => {
-  const { ref, width, height } = useResizeObserver();
+  const { ref: measureRef, width, height } = useResizeObserver();
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
   const chartHeight = getChartHeight(customHeight, height);
   const chartWidth = getChartWidth(customWidth, width);
 
   return checkIfAnyValidSeriesExist(barChart) ? (
-    <WrappedByAutoSizer ref={ref} height={chartHeight}>
+    <WrappedByAutoSizer ref={measureRef as React.RefObject<HTMLDivElement>} height={chartHeight}>
       <BarChartBaseComponent
         height={chartHeight}
         width={chartHeight}
@@ -125,8 +125,4 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({ barChart, 
   );
 };
 
-BarChartComponent.displayName = 'BarChartComponent';
-
 export const BarChart = React.memo(BarChartComponent);
-
-BarChart.displayName = 'BarChart';

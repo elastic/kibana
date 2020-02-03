@@ -131,14 +131,14 @@ interface AreaChartComponentProps {
 }
 
 export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({ areaChart, configs }) => {
-  const { ref, width, height } = useResizeObserver();
+  const { ref: measureRef, width, height } = useResizeObserver();
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
   const chartHeight = getChartHeight(customHeight, height);
   const chartWidth = getChartWidth(customWidth, width);
 
   return checkIfAnyValidSeriesExist(areaChart) ? (
-    <WrappedByAutoSizer ref={ref} height={chartHeight}>
+    <WrappedByAutoSizer ref={measureRef as React.RefObject<HTMLDivElement>} height={chartHeight}>
       <AreaChartBase data={areaChart} height={chartHeight} width={chartWidth} configs={configs} />
     </WrappedByAutoSizer>
   ) : (

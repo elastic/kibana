@@ -119,7 +119,7 @@ export const TimelineComponent: React.FC<Props> = ({
   sort,
   toggleColumn,
 }) => {
-  const { ref, width = 0, height: timelineHeaderHeight = 0 } = useResizeObserver();
+  const { ref: measureRef, width = 0, height: timelineHeaderHeight = 0 } = useResizeObserver();
   const kibana = useKibana();
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
@@ -141,7 +141,7 @@ export const TimelineComponent: React.FC<Props> = ({
       gutterSize="none"
       justifyContent="flexStart"
     >
-      <WrappedByAutoSizer ref={ref}>
+      <WrappedByAutoSizer ref={measureRef as React.RefObject<HTMLDivElement>}>
         <TimelineHeader
           browserFields={browserFields}
           id={id}
