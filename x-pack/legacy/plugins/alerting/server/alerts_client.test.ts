@@ -2387,25 +2387,42 @@ describe('update()', () => {
 });
 
 describe('updateApiKey()', () => {
-  test('updates the API key for the alert', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        schedule: { interval: '10s' },
-        alertTypeId: '2',
-        enabled: true,
-      },
-      version: '123',
-      references: [],
-    });
+  let alertsClient: AlertsClient;
+  const existingAlert = {
+    id: '1',
+    type: 'alert',
+    attributes: {
+      schedule: { interval: '10s' },
+      alertTypeId: '2',
+      enabled: true,
+    },
+    version: '123',
+    references: [],
+  };
+  const existingEncryptedAlert = {
+    ...existingAlert,
+    attributes: {
+      ...existingAlert,
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+  };
+
+  beforeEach(() => {
+    alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValue(existingAlert);
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingEncryptedAlert);
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
-      result: { id: '123', api_key: 'abc' },
+      result: { id: '234', api_key: 'abc' },
     });
+  });
 
+  test('updates the API key for the alert', async () => {
     await alertsClient.updateApiKey({ id: '1' });
+    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
@@ -2413,37 +2430,42 @@ describe('updateApiKey()', () => {
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
-        apiKey: Buffer.from('123:abc').toString('base64'),
+        apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
       },
       { version: '123' }
     );
+    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
   });
 
   test('swallows error when invalidate API key throws', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
     alertsClientParams.invalidateAPIKey.mockRejectedValue(new Error('Fail'));
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        schedule: { interval: '10s' },
-        alertTypeId: '2',
-        enabled: true,
-        apiKey: Buffer.from('123:abc').toString('base64'),
-      },
-      version: '123',
-      references: [],
-    });
-    alertsClientParams.createAPIKey.mockResolvedValueOnce({
-      apiKeysEnabled: true,
-      result: { id: '123', api_key: 'abc' },
-    });
 
     await alertsClient.updateApiKey({ id: '1' });
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'Failed to invalidate API Key: Fail'
     );
+    expect(savedObjectsClient.update).toHaveBeenCalled();
+  });
+
+  test('swallows error when getting decrypted object throws', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
+
+    await alertsClient.updateApiKey({ id: '1' });
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'updateApiKey(): Failed to load API key to invalidate: Fail'
+    );
+    expect(savedObjectsClient.update).toHaveBeenCalled();
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+  });
+
+  test('throws when savedObjectsClient update fails', async () => {
+    savedObjectsClient.update.mockRejectedValueOnce(new Error('Fail'));
+
+    await expect(alertsClient.updateApiKey({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Fail"`
+    );
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
   });
 });

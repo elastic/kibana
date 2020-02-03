@@ -314,12 +314,20 @@ export class AlertsClient {
   }
 
   public async updateApiKey({ id }: { id: string }) {
-    const {
-      version,
-      attributes,
-    } = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAlert>('alert', id, {
-      namespace: this.namespace,
-    });
+    const [{ attributes, version }, apiKeyToInvalidate] = await Promise.all<
+      SavedObject<RawAlert>,
+      string | null | void
+    >([
+      this.savedObjectsClient.get<RawAlert>('alert', id),
+      // We'll try and load the decrypted saved object but if this fails we'll only log
+      // and skip invalidating the API key.
+      this.encryptedSavedObjectsPlugin
+        .getDecryptedAsInternalUser<RawAlert>('alert', id, { namespace: this.namespace })
+        .then(result => result.attributes.apiKey)
+        .catch(e =>
+          this.logger.error(`updateApiKey(): Failed to load API key to invalidate: ${e.message}`)
+        ),
+    ]);
 
     const username = await this.getUserName();
     await this.savedObjectsClient.update(
@@ -333,7 +341,9 @@ export class AlertsClient {
       { version }
     );
 
-    await this.invalidateApiKey({ apiKey: attributes.apiKey });
+    if (apiKeyToInvalidate) {
+      await this.invalidateApiKey({ apiKey: apiKeyToInvalidate });
+    }
   }
 
   private async invalidateApiKey({ apiKey }: { apiKey: string | null }): Promise<void> {
