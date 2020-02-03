@@ -1,1 +1,4 @@
+ingest-data/*
 screenshots/*
+
+*-e2e-tests.xml
