@@ -13,12 +13,13 @@ import {
   IUiSettingsClient,
   ApplicationStart,
 } from 'kibana/public';
-import { BASE_PATH, Section } from './constants';
+import { BASE_PATH, Section, routeToAlertDetails } from './constants';
 import { TriggersActionsUIHome } from './home';
 import { AppContextProvider, useAppDependencies } from './app_context';
 import { hasShowAlertsCapability } from './lib/capabilities';
 import { LegacyDependencies, ActionTypeModel, AlertTypeModel } from '../types';
 import { TypeRegistry } from './type_registry';
+import { AlertDetailsRouteWithApi as AlertDetailsRoute } from './sections/alert_details/components/alert_details_route';
 
 export interface AppDeps {
   chrome: ChromeStart;
@@ -53,11 +54,8 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
   const DEFAULT_SECTION: Section = canShowAlerts ? 'alerts' : 'connectors';
   return (
     <Switch>
-      <Route
-        exact
-        path={`${BASE_PATH}/:section(${sectionsRegex})`}
-        component={TriggersActionsUIHome}
-      />
+      <Route path={`${BASE_PATH}/:section(${sectionsRegex})`} component={TriggersActionsUIHome} />
+      {canShowAlerts && <Route path={routeToAlertDetails} component={AlertDetailsRoute} />}
       <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
     </Switch>
   );

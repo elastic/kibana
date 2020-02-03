@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeRegistry } from './application/type_registry';
-import { SanitizedAlert as Alert } from '../../../alerting/common';
+import { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
 import {
   EmailActionParams,
   PagerDutyActionParams,
@@ -13,7 +13,8 @@ import {
   WebhookActionParams,
   SlackActionParams,
 } from './application/components/builtin_action_types/types';
-export { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
+export { Alert, AlertAction };
+export { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Record<string, AlertType>;
@@ -61,11 +62,6 @@ export interface ActionTypeModel {
 
 export interface ValidationResult {
   errors: Record<string, any>;
-}
-
-export interface ActionType {
-  id: string;
-  name: string;
 }
 
 export interface ActionConnector {

@@ -53,25 +53,27 @@ export const AppContainer: FunctionComponent<Props> = ({
         unmountRef.current = null;
       }
     };
+
+    if (!mounter || appStatus !== AppStatus.accessible) {
+      return setAppNotFound(true);
+    }
+    setAppNotFound(false);
+
+    if (mounter.unmountBeforeMounting) {
+      unmount();
+    }
+
     const mount = async () => {
-      if (!mounter || appStatus !== AppStatus.accessible) {
-        return setAppNotFound(true);
-      }
-
-      if (mounter.unmountBeforeMounting) {
-        unmount();
-      }
-
       unmountRef.current =
         (await mounter.mount({
           appBasePath: mounter.appBasePath,
           element: elementRef.current!,
           onAppLeave: handler => setAppLeaveHandler(appId, handler),
         })) || null;
-      setAppNotFound(false);
     };
 
     mount();
+
     return unmount;
   }, [appId, appStatus, mounter, setAppLeaveHandler]);
 
