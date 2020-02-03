@@ -9,6 +9,7 @@ exports[`OptInMessage renders as expected 1`] = `
       Object {
         "privacyStatementLink": <ForwardRef
           href="https://www.elastic.co/legal/privacy-statement"
+          rel="noopener"
           target="_blank"
         >
           <FormattedMessage
