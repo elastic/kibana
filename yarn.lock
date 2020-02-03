@@ -1997,10 +1997,10 @@
     async-retry "^1.2.3"
     strip-ansi "^5.2.0"
 
-"@elastic/good@8.1.1-kibana3":
-  version "8.1.1-kibana3"
-  resolved "https://registry.yarnpkg.com/@elastic/good/-/good-8.1.1-kibana3.tgz#71ab9cd242a7c0e7770d3e20037a55a2f881cef5"
-  integrity sha512-Rg6Hnjy1A9dL5tSjXQAbS3TAW2Y5qvN51dBC9lINdqeDpA8lQ5A01gsPhPoyygW11qKdjAjEuXMqsmE8Wlmg3w==
+"@elastic/good@8.1.1-kibana4":
+  version "8.1.1-kibana4"
+  resolved "https://registry.yarnpkg.com/@elastic/good/-/good-8.1.1-kibana4.tgz#572a63298780c7c58e20417e92dd27a1a85a8dd6"
+  integrity sha512-EssP4ETo2Mpk6fmA4JMzabA5Trls7YENRTQTfqr9ncs98C2MScBVWxKm5t49Ke4Ra0Vi/5lD61lowea/miYTvg==
   dependencies:
     hoek "5.x.x"
     joi "13.x.x"
