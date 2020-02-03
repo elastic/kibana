@@ -19,6 +19,7 @@
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
+import { getEndpointFromPosition } from '../../../lib/autocomplete/get_endpoint_from_position';
 import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { sendRequestToES } from './send_request_to_es';
 import { track } from './track';
@@ -48,6 +49,17 @@ export const useSendCurrentRequestToES = () => {
 
       // Fire and forget
       setTimeout(() => track(requests, editor, trackUiMetric), 0);
+      const coreEditor = editor.getCoreEditor();
+      const endpointDescription = getEndpointFromPosition(
+        coreEditor,
+        coreEditor.getCurrentPosition(),
+        editor.parser
+      );
+
+      if (requests[0] && endpointDescription) {
+        // eslint-disable-next-line
+        console.log('endpointDescription::', endpointDescription);
+      }
 
       const results = await sendRequestToES({ requests });
 
