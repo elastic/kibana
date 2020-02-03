@@ -26,6 +26,16 @@ import { Stats } from '../stats';
 import { deleteKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
 
+interface DocRecord {
+  value: {
+    index: string;
+    type: string;
+    settings: Record<string, any>;
+    mappings: Record<string, any>;
+    aliases: Record<string, any>;
+  };
+}
+
 export function createCreateIndexStream({
   client,
   stats,
@@ -44,7 +54,7 @@ export function createCreateIndexStream({
   // migrations. This only needs to be done once per archive load operation.
   const deleteKibanaIndicesOnce = once(deleteKibanaIndices);
 
-  async function handleDoc(stream: Readable, record: any) {
+  async function handleDoc(stream: Readable, record: DocRecord) {
     if (skipDocsFromIndices.has(record.value.index)) {
       return;
     }
@@ -52,7 +62,7 @@ export function createCreateIndexStream({
     stream.push(record);
   }
 
-  async function handleIndex(record: any) {
+  async function handleIndex(record: DocRecord) {
     const { index, settings, mappings, aliases } = record.value;
     const isKibana = index.startsWith('.kibana');
 
