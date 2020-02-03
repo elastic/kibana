@@ -15,7 +15,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         <EuiModalHeaderTitle>
           <FormattedMessage
             defaultMessage="Save {objectType}"
-            id="kibana-react.savedObjects.saveModal.saveTitle"
+            id="savedObjects.saveModal.saveTitle"
             values={
               Object {
                 "objectType": "visualization",
@@ -35,7 +35,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
             label={
               <FormattedMessage
                 defaultMessage="Title"
-                id="kibana-react.savedObjects.saveModal.titleLabel"
+                id="savedObjects.saveModal.titleLabel"
                 values={Object {}}
               />
             }
@@ -59,7 +59,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
             label={
               <FormattedMessage
                 defaultMessage="Description"
-                id="kibana-react.savedObjects.saveModal.descriptionLabel"
+                id="savedObjects.saveModal.descriptionLabel"
                 values={Object {}}
               />
             }
@@ -80,7 +80,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         >
           <FormattedMessage
             defaultMessage="Cancel"
-            id="kibana-react.savedObjects.saveModal.cancelButtonLabel"
+            id="savedObjects.saveModal.cancelButtonLabel"
             values={Object {}}
           />
         </EuiButtonEmpty>

@@ -303,7 +303,7 @@ class SavedObjectFinderUi extends React.Component<
           });
         }}
       >
-        {i18n.translate('kibana-react.savedObjects.finder.sortAsc', {
+        {i18n.translate('savedObjects.finder.sortAsc', {
           defaultMessage: 'Ascending',
         })}
       </EuiContextMenuItem>,
@@ -316,7 +316,7 @@ class SavedObjectFinderUi extends React.Component<
           });
         }}
       >
-        {i18n.translate('kibana-react.savedObjects.finder.sortDesc', {
+        {i18n.translate('savedObjects.finder.sortDesc', {
           defaultMessage: 'Descending',
         })}
       </EuiContextMenuItem>,
@@ -332,7 +332,7 @@ class SavedObjectFinderUi extends React.Component<
             });
           }}
         >
-          {i18n.translate('kibana-react.savedObjects.finder.sortAuto', {
+          {i18n.translate('savedObjects.finder.sortAuto', {
             defaultMessage: 'Best match',
           })}
         </EuiContextMenuItem>
@@ -348,10 +348,10 @@ class SavedObjectFinderUi extends React.Component<
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
-            placeholder={i18n.translate('kibana-react.savedObjects.finder.searchPlaceholder', {
+            placeholder={i18n.translate('savedObjects.finder.searchPlaceholder', {
               defaultMessage: 'Search…',
             })}
-            aria-label={i18n.translate('kibana-react.savedObjects.finder.searchPlaceholder', {
+            aria-label={i18n.translate('savedObjects.finder.searchPlaceholder', {
               defaultMessage: 'Search…',
             })}
             fullWidth
@@ -387,7 +387,7 @@ class SavedObjectFinderUi extends React.Component<
                   isSelected={this.state.sortOpen}
                   data-test-subj="savedObjectFinderSortButton"
                 >
-                  {i18n.translate('kibana-react.savedObjects.finder.sortButtonLabel', {
+                  {i18n.translate('savedObjects.finder.sortButtonLabel', {
                     defaultMessage: 'Sort',
                   })}
                 </EuiFilterButton>
@@ -419,7 +419,7 @@ class SavedObjectFinderUi extends React.Component<
                     hasActiveFilters={this.state.filteredTypes.length > 0}
                     numActiveFilters={this.state.filteredTypes.length}
                   >
-                    {i18n.translate('kibana-react.savedObjects.finder.filterButtonLabel', {
+                    {i18n.translate('savedObjects.finder.filterButtonLabel', {
                       defaultMessage: 'Types',
                     })}
                   </EuiFilterButton>
