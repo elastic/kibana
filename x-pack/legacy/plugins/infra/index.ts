@@ -19,6 +19,7 @@ import { SpacesPluginSetup } from '../../../plugins/spaces/server';
 import { VisTypeTimeseriesSetup } from '../../../../src/plugins/vis_type_timeseries/server';
 import { APMPluginContract } from '../../../plugins/apm/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { registerAlertTypes } from './server/lib/alerting';
 
 export const APP_ID = 'infra';
 
@@ -27,7 +28,7 @@ export function infra(kibana: any) {
     id: APP_ID,
     configPrefix: 'xpack.infra',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'metrics'],
+    require: ['kibana', 'elasticsearch', 'metrics', 'alerting'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.infra.infrastructureDescription', {
@@ -112,6 +113,7 @@ export function infra(kibana: any) {
         'defineInternalSourceConfiguration',
         libs.sources.defineInternalSourceConfiguration.bind(libs.sources)
       );
+      registerAlertTypes(legacyServer);
     },
   });
 }

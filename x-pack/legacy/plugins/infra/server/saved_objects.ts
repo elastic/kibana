@@ -5,11 +5,13 @@
  */
 
 import { infraSourceConfigurationSavedObjectMappings } from './lib/sources';
+import { infraAlertSavedObjectMappings } from './lib/alerting';
 import { metricsExplorerViewSavedObjectMappings } from '../common/saved_objects/metrics_explorer_view';
 import { inventoryViewSavedObjectMappings } from '../common/saved_objects/inventory_view';
 
 export const savedObjectMappings = {
   ...infraSourceConfigurationSavedObjectMappings,
+  ...infraAlertSavedObjectMappings,
   ...metricsExplorerViewSavedObjectMappings,
   ...inventoryViewSavedObjectMappings,
 };

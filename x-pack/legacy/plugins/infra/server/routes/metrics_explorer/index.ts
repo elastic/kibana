@@ -10,7 +10,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { getGroupings } from './lib/get_groupings';
+import { getGroupings } from '../../../server/lib/metrics/get_groupings';
 import { populateSeriesWithTSVBData } from './lib/populate_series_with_tsvb_data';
 import { metricsExplorerRequestBodyRT, metricsExplorerResponseRT } from '../../../common/http_api';
 import { throwErrors } from '../../../common/runtime_types';
