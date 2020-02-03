@@ -19,7 +19,7 @@ const getDescription = (field: IFieldType) => {
   return (
     <p>
       <FormattedMessage
-        id="xpack.kueryAutocomplete.filterResultsDescription"
+        id="xpack.data.kueryAutocomplete.filterResultsDescription"
         defaultMessage="Filter results that contain {fieldName}"
         values={{ fieldName: <span className="kbnSuggestionItem__callout">{field.name}</span> }}
       />

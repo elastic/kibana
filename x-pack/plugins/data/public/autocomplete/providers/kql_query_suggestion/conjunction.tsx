@@ -11,17 +11,17 @@ import { autocomplete } from '../../../../../../../src/plugins/data/public';
 
 const bothArgumentsText = (
   <FormattedMessage
-    id="xpack.kueryAutocomplete.andOperatorDescription.bothArgumentsText"
+    id="xpack.data.kueryAutocomplete.andOperatorDescription.bothArgumentsText"
     defaultMessage="both arguments"
-    description="Part of xpack.kueryAutocomplete.andOperatorDescription. Full text: 'Requires both arguments to be true'"
+    description="Part of xpack.data.kueryAutocomplete.andOperatorDescription. Full text: 'Requires both arguments to be true'"
   />
 );
 
 const oneOrMoreArgumentsText = (
   <FormattedMessage
-    id="xpack.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText"
+    id="xpack.data.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText"
     defaultMessage="one or more arguments"
-    description="Part of xpack.kueryAutocomplete.orOperatorDescription. Full text: 'Requires one or more arguments to be true'"
+    description="Part of xpack.data.kueryAutocomplete.orOperatorDescription. Full text: 'Requires one or more arguments to be true'"
   />
 );
 
@@ -29,20 +29,20 @@ const conjunctions: Record<string, JSX.Element> = {
   and: (
     <p>
       <FormattedMessage
-        id="xpack.kueryAutocomplete.andOperatorDescription"
+        id="xpack.data.kueryAutocomplete.andOperatorDescription"
         defaultMessage="Requires {bothArguments} to be true"
         values={{
           bothArguments: <span className="kbnSuggestionItem__callout">{bothArgumentsText}</span>,
         }}
         description="Full text: ' Requires both arguments to be true'. See
-          'xpack.kueryAutocomplete.andOperatorDescription.bothArgumentsText' for 'both arguments' part."
+          'xpack.data.kueryAutocomplete.andOperatorDescription.bothArgumentsText' for 'both arguments' part."
       />
     </p>
   ),
   or: (
     <p>
       <FormattedMessage
-        id="xpack.kueryAutocomplete.orOperatorDescription"
+        id="xpack.data.kueryAutocomplete.orOperatorDescription"
         defaultMessage="Requires {oneOrMoreArguments} to be true"
         values={{
           oneOrMoreArguments: (
@@ -50,7 +50,7 @@ const conjunctions: Record<string, JSX.Element> = {
           ),
         }}
         description="Full text: 'Requires one or more arguments to be true'. See
-          'xpack.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText' for 'one or more arguments' part."
+          'xpack.data.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText' for 'one or more arguments' part."
       />
     </p>
   ),
