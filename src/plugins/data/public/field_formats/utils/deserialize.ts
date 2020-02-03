@@ -17,14 +17,21 @@
  * under the License.
  */
 
-import { npStart } from 'ui/new_platform';
 import { identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { convertDateRangeToString, DateRangeKey } from 'ui/agg_types/buckets/date_range';
-import { convertIPRangeToString, IpRangeKey } from 'ui/agg_types/buckets/ip_range';
+import {
+  convertDateRangeToString,
+  DateRangeKey,
+} from '../../../../../legacy/core_plugins/data/public/search/aggs/buckets/lib/date_range';
+import {
+  convertIPRangeToString,
+  IpRangeKey,
+} from '../../../../../legacy/core_plugins/data/public/search/aggs/buckets/lib/ip_range';
 import { SerializedFieldFormat } from '../../../../expressions/common/types';
-import { fieldFormats } from '../index';
+import { fieldFormats } from '../../../common/index';
 import { FieldFormatsStart } from '../../../public/field_formats';
+import { getUiSettings } from '../../../public/services';
+import { FormatFactory } from '../../../common/field_formats/utils';
 
 interface TermsFieldFormatParams {
   otherBucketLabel: string;
@@ -39,7 +46,7 @@ function isTermsFieldFormat(
 }
 
 const getConfig = (key: string, defaultOverride?: any): any =>
-  npStart.core.uiSettings.get(key, defaultOverride);
+  getUiSettings().get(key, defaultOverride);
 const DefaultFieldFormat = fieldFormats.FieldFormat.from(identity);
 
 const getFieldFormat = (
@@ -58,11 +65,6 @@ const getFieldFormat = (
   return new DefaultFieldFormat();
 };
 
-export type FormatFactory = (
-  fieldFormatsService: FieldFormatsStart,
-  mapping?: SerializedFieldFormat
-) => fieldFormats.FieldFormat;
-
 export const deserializeFieldFormat: FormatFactory = (fieldFormatsService, mapping) => {
   if (!mapping) {
     return new DefaultFieldFormat();
@@ -73,7 +75,7 @@ export const deserializeFieldFormat: FormatFactory = (fieldFormatsService, mappi
       const format = getFieldFormat(fieldFormatsService, id, mapping.params);
       const gte = '\u2265';
       const lt = '\u003c';
-      return i18n.translate('common.ui.aggTypes.buckets.ranges.rangesFormatMessage', {
+      return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessage', {
         defaultMessage: '{gte} {from} and {lt} {to}',
         values: {
           gte,

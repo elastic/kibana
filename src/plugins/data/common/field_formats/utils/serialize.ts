@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { AggConfig } from 'ui/agg_types';
+import { IAggConfig } from '../../../../../legacy/ui/public/agg_types';
 import { SerializedFieldFormat } from '../../../../expressions/common/types';
 
-export const serializeFieldFormat = (agg: AggConfig): SerializedFieldFormat => {
+export const serializeFieldFormat = (agg: IAggConfig): SerializedFieldFormat => {
   const format: SerializedFieldFormat = agg.params.field ? agg.params.field.format.toJSON() : {};
   const formats: Record<string, () => SerializedFieldFormat> = {
     date_range: () => ({ id: 'date_range', params: format }),

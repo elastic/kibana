@@ -17,15 +17,20 @@
  * under the License.
  */
 
-import { FieldFormatsStart } from '../../../public/field_formats';
-import { SerializedFieldFormat } from '../../../../expressions/common/types';
-import { fieldFormats } from '../index';
+export interface DateRangeKey {
+  from: number;
+  to: number;
+}
 
-export { asPrettyString } from './as_pretty_string';
-export { getHighlightHtml, getHighlightRequest } from './highlight';
-export { serializeFieldFormat } from './serialize';
-
-export type FormatFactory = (
-  fieldFormatsService: FieldFormatsStart,
-  mapping?: SerializedFieldFormat
-) => fieldFormats.FieldFormat;
+export const convertDateRangeToString = (
+  { from, to }: DateRangeKey,
+  format: (val: any) => string
+) => {
+  if (!from) {
+    return 'Before ' + format(to);
+  } else if (!to) {
+    return 'After ' + format(from);
+  } else {
+    return format(from) + ' to ' + format(to);
+  }
+};

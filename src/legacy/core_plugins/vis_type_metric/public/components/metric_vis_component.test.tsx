@@ -22,6 +22,9 @@ import { shallow } from 'enzyme';
 
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { MetricVisComponent, MetricVisComponentProps } from './metric_vis_component';
+import { npStart } from 'ui/new_platform';
+import { fieldFormats } from '../../../../../plugins/data/common/field_formats';
+import { identity } from 'lodash';
 
 jest.mock('ui/new_platform');
 
@@ -61,6 +64,12 @@ describe('MetricVisComponent', function() {
 
     return shallow(<MetricVisComponent {...props} />);
   };
+
+  beforeAll(() => {
+    (npStart.plugins.data.fieldFormats.deserialize as jest.Mock).mockImplementation(() => {
+      return new (fieldFormats.FieldFormat.from(identity))();
+    });
+  });
 
   it('should render component', () => {
     expect(getComponent().exists()).toBe(true);

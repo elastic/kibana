@@ -162,6 +162,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
+                "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
@@ -803,6 +804,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
+                        "deserialize": [MockFunction],
                         "getByFieldType": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],
@@ -1426,6 +1428,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
+                "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
@@ -2064,6 +2067,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
+                        "deserialize": [MockFunction],
                         "getByFieldType": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],
@@ -2687,6 +2691,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
+                "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
@@ -3325,6 +3330,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
+                        "deserialize": [MockFunction],
                         "getByFieldType": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],

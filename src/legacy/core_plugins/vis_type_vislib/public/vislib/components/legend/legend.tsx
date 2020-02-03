@@ -22,7 +22,7 @@ import { compact, uniq, map } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
-import { AggConfig } from 'ui/agg_types';
+import { IAggConfig } from 'ui/agg_types';
 
 // @ts-ignore
 import { createFiltersFromEvent } from '../../../../../data/public/actions/filters/create_filters_from_event';
@@ -33,7 +33,7 @@ import { getPieNames } from './pie_utils';
 import { Vis } from '../../../../../visualizations/public';
 import { tabifyGetColumns } from '../../../../../../ui/public/agg_response/tabify/_get_columns';
 
-const getTableAggs = (vis: Vis): AggConfig[] => {
+const getTableAggs = (vis: Vis): IAggConfig[] => {
   if (!vis.aggs || !vis.aggs.getResponseAggs) {
     return [];
   }
