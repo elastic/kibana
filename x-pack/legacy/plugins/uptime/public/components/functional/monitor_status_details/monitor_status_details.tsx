@@ -6,6 +6,7 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import styled from 'styled-components';
 import { LocationMap } from '../location_map';
 import { MonitorStatusBar } from './monitor_status_bar';
 import { UptimeRefreshContext } from '../../../contexts';
@@ -18,6 +19,12 @@ interface MonitorStatusBarProps {
   dateStart: any;
   dateEnd: any;
 }
+
+const WrapFlexItem = styled(EuiFlexItem)`
+  @media (max-width: 1150px) {
+    width: 100%;
+  }
+`;
 
 export const MonitorStatusDetailsComponent = ({
   monitorId,
@@ -54,7 +61,7 @@ export const MonitorStatusDetailsComponent = ({
 
   return (
     <EuiPanel>
-      <EuiFlexGroup gutterSize="l" wrap>
+      <EuiFlexGroup gutterSize="l" wrap responsive={true}>
         <EuiFlexItem grow={true}>
           <MonitorStatusBar
             monitorId={monitorId}
@@ -63,9 +70,9 @@ export const MonitorStatusDetailsComponent = ({
             dateEnd={dateEnd}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <WrapFlexItem grow={false}>
           <LocationMap monitorLocations={monitorLocations} />
-        </EuiFlexItem>
+        </WrapFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
