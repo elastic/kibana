@@ -23,6 +23,7 @@ import { logConfiguration } from '../log_configuration';
 import { ReportingPluginSpecOptions } from '../types.d';
 import { createBrowserDriverFactory } from './browsers';
 import { checkLicenseFactory, getExportTypesRegistry, LevelLogger, runValidations } from './lib';
+import { registerReportingUsageCollector } from './usage';
 import { registerRoutes } from './routes';
 
 export interface ReportingInitializerContext {
