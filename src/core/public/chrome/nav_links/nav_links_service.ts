@@ -72,6 +72,10 @@ export interface ChromeNavLinks {
   /**
    * Update the navlink for the given id with the updated attributes.
    * Returns the updated navlink or `undefined` if it does not exist.
+   *
+   * @deprecated Uses the {@link AppBase.updater$} property when registering
+   * your application with {@link ApplicationSetup.register} instead.
+   *
    * @param id
    * @param values
    */

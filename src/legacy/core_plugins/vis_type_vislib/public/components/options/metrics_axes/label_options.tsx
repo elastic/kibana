@@ -23,7 +23,7 @@ import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from '../../../legacy_imports';
+import { VisOptionsProps } from '../../../../../vis_default_editor/public';
 import { BasicVislibParams, Axis } from '../../../types';
 import { SelectOption, SwitchOption, TruncateLabelsOption } from '../../common';
 import { getRotateOptions } from '../../../utils/collections';
@@ -65,7 +65,7 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
       <EuiTitle size="xxs">
         <h3>
           <FormattedMessage
-            id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.labelsTitle"
+            id="visTypeVislib.controls.pointSeries.categoryAxis.labelsTitle"
             defaultMessage="Labels"
           />
         </h3>
@@ -73,12 +73,9 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
       <EuiSpacer size="s" />
 
       <SwitchOption
-        label={i18n.translate(
-          'kbnVislibVisTypes.controls.pointSeries.categoryAxis.showLabelsLabel',
-          {
-            defaultMessage: 'Show labels',
-          }
-        )}
+        label={i18n.translate('visTypeVislib.controls.pointSeries.categoryAxis.showLabelsLabel', {
+          defaultMessage: 'Show labels',
+        })}
         paramName="show"
         value={axis.labels.show}
         setValue={setAxisLabel}
@@ -89,12 +86,9 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
           axis.id
         }`}
         disabled={!axis.labels.show}
-        label={i18n.translate(
-          'kbnVislibVisTypes.controls.pointSeries.categoryAxis.filterLabelsLabel',
-          {
-            defaultMessage: 'Filter labels',
-          }
-        )}
+        label={i18n.translate('visTypeVislib.controls.pointSeries.categoryAxis.filterLabelsLabel', {
+          defaultMessage: 'Filter labels',
+        })}
         paramName="filter"
         value={axis.labels.filter}
         setValue={setAxisLabel}
@@ -106,12 +100,9 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
         <EuiFlexItem>
           <SelectOption
             disabled={!axis.labels.show}
-            label={i18n.translate(
-              'kbnVislibVisTypes.controls.pointSeries.categoryAxis.alignLabel',
-              {
-                defaultMessage: 'Align',
-              }
-            )}
+            label={i18n.translate('visTypeVislib.controls.pointSeries.categoryAxis.alignLabel', {
+              defaultMessage: 'Align',
+            })}
             options={rotateOptions}
             paramName="rotate"
             value={axis.labels.rotate}

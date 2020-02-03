@@ -18,6 +18,7 @@ import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { transformOrError } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { callWithRequestFactory, getIndex, transformError } from '../utils';
+import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
 export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
@@ -34,12 +35,10 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
     },
     async handler(request: RulesRequest, headers) {
       const {
-        created_at: createdAt,
         description,
         enabled,
         false_positives: falsePositives,
         from,
-        immutable,
         query,
         language,
         output_index: outputIndex,
@@ -56,20 +55,19 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         name,
         severity,
         tags,
-        threats,
+        threat,
         to,
         type,
-        updated_at: updatedAt,
         references,
       } = request.payload;
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = isFunction(request.getActionsClient)
-        ? request.getActionsClient()
-        : null;
+      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
+        KibanaRequest.from((request as unknown) as Hapi.Request)
+      );
       const savedObjectsClient = isFunction(request.getSavedObjectsClient)
         ? request.getSavedObjectsClient()
         : null;
-      if (!alertsClient || !actionsClient || !savedObjectsClient) {
+      if (!alertsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
@@ -91,12 +89,11 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         const createdRule = await createRules({
           alertsClient,
           actionsClient,
-          createdAt,
           description,
           enabled,
           falsePositives,
           from,
-          immutable,
+          immutable: false,
           query,
           language,
           outputIndex: finalIndex,
@@ -105,7 +102,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           timelineTitle,
           meta,
           filters,
-          ruleId: ruleId != null ? ruleId : uuid.v4(),
+          ruleId: ruleId ?? uuid.v4(),
           index,
           interval,
           maxSignals,
@@ -115,8 +112,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           tags,
           to,
           type,
-          threats,
-          updatedAt,
+          threat,
           references,
           version: 1,
         });

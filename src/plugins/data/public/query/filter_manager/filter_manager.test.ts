@@ -29,9 +29,16 @@ import { esFilters } from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
 
-setupMock.uiSettings.get.mockImplementation((key: string) => {
-  return true;
-});
+const uiSettingsMock = (pinnedByDefault: boolean) => (key: string) => {
+  switch (key) {
+    case 'filters:pinnedByDefault':
+      return pinnedByDefault;
+    default:
+      throw new Error(`Unexpected uiSettings key in FilterManager mock: ${key}`);
+  }
+};
+
+setupMock.uiSettings.get.mockImplementation(uiSettingsMock(true));
 
 describe('filter_manager', () => {
   let updateSubscription: Subscription | undefined;
@@ -169,6 +176,98 @@ describe('filter_manager', () => {
       // this time, events should be emitted
       expect(fetchStub).toBeCalledTimes(0);
       expect(updateStub).toBeCalledTimes(1);
+    });
+
+    test('should merge multiple conflicting app filters', async function() {
+      filterManager.addFilters(readyFilters, true);
+      const appFilter1 = _.cloneDeep(readyFilters[1]);
+      appFilter1.meta.negate = true;
+      appFilter1.$state = {
+        store: esFilters.FilterStateStore.APP_STATE,
+      };
+      const appFilter2 = _.cloneDeep(readyFilters[2]);
+      appFilter2.meta.negate = true;
+      appFilter2.$state = {
+        store: esFilters.FilterStateStore.APP_STATE,
+      };
+
+      const globalFilters = filterManager.getFilters();
+      filterManager.setFilters([...globalFilters, appFilter1, appFilter2]);
+
+      // global filters are taking precedence over same app filters when setting
+      const res = filterManager.getFilters();
+      expect(res).toHaveLength(3);
+      expect(
+        res.filter(function(filter) {
+          return filter.$state && filter.$state.store === esFilters.FilterStateStore.GLOBAL_STATE;
+        }).length
+      ).toBe(3);
+    });
+
+    test('should set app filters and remove any duplicated global filters', async function() {
+      filterManager.addFilters(readyFilters, true);
+      const appFilter1 = _.cloneDeep(readyFilters[1]);
+      const appFilter2 = _.cloneDeep(readyFilters[2]);
+
+      filterManager.setAppFilters([appFilter1, appFilter2]);
+
+      const newGlobalFilters = filterManager.getGlobalFilters();
+      const newAppFilters = filterManager.getAppFilters();
+
+      expect(newGlobalFilters).toHaveLength(1);
+      expect(newAppFilters).toHaveLength(2);
+    });
+
+    test('should set global filters and remove any duplicated app filters', async function() {
+      filterManager.addFilters(readyFilters, false);
+      const globalFilter1 = _.cloneDeep(readyFilters[1]);
+      const globalFilter2 = _.cloneDeep(readyFilters[2]);
+
+      filterManager.setGlobalFilters([globalFilter1, globalFilter2]);
+
+      const newGlobalFilters = filterManager.getGlobalFilters();
+      const newAppFilters = filterManager.getAppFilters();
+
+      expect(newGlobalFilters).toHaveLength(2);
+      expect(newAppFilters).toHaveLength(1);
+    });
+
+    test('set filter with no state, and force pin', async () => {
+      const f1 = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, false, false, 'age', 38);
+      f1.$state = undefined;
+
+      filterManager.setFilters([f1], true);
+      expect(filterManager.getGlobalFilters()).toHaveLength(1);
+      expect(filterManager.getAppFilters()).toHaveLength(0);
+    });
+
+    test('set filter with no state, and no pin', async () => {
+      const f1 = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, false, false, 'age', 38);
+      f1.$state = undefined;
+
+      filterManager.setFilters([f1], false);
+      expect(filterManager.getGlobalFilters()).toHaveLength(0);
+      expect(filterManager.getAppFilters()).toHaveLength(1);
+    });
+
+    test('set filters with default pin', async () => {
+      const f1 = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, false, false, 'age', 38);
+      f1.$state = undefined;
+      setupMock.uiSettings.get.mockImplementationOnce(uiSettingsMock(true));
+
+      filterManager.setFilters([f1]);
+      expect(filterManager.getGlobalFilters()).toHaveLength(1);
+      expect(filterManager.getAppFilters()).toHaveLength(0);
+    });
+
+    test('set filters without default pin', async () => {
+      const f1 = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, false, false, 'age', 38);
+      f1.$state = undefined;
+
+      setupMock.uiSettings.get.mockImplementationOnce(uiSettingsMock(false));
+      filterManager.setFilters([f1]);
+      expect(filterManager.getGlobalFilters()).toHaveLength(0);
+      expect(filterManager.getAppFilters()).toHaveLength(1);
     });
   });
 

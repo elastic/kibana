@@ -30,6 +30,7 @@ import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_co
 import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
 import { InternalElasticsearchServiceSetup } from './types';
 import { CallAPIOptions } from './api_types';
+import { pollEsNodesVersion } from './version_check/ensure_es_version';
 
 /** @internal */
 interface CoreClusterClients {
@@ -46,9 +47,17 @@ interface SetupDeps {
 export class ElasticsearchService implements CoreService<InternalElasticsearchServiceSetup> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
-  private subscription?: Subscription;
+  private subscriptions: {
+    client?: Subscription;
+    esNodesCompatibility?: Subscription;
+  } = {
+    client: undefined,
+    esNodesCompatibility: undefined,
+  };
+  private kibanaVersion: string;
 
   constructor(private readonly coreContext: CoreContext) {
+    this.kibanaVersion = coreContext.env.packageInfo.version;
     this.log = coreContext.logger.get('elasticsearch-service');
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
@@ -60,7 +69,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
 
     const clients$ = this.config$.pipe(
       filter(() => {
-        if (this.subscription !== undefined) {
+        if (this.subscriptions.client !== undefined) {
           this.log.error('Clients cannot be changed after they are created');
           return false;
         }
@@ -75,7 +84,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
             const coreClients = {
               config,
               adminClient: this.createClusterClient('admin', config),
-              dataClient: this.createClusterClient('data', config, deps.http.auth.getAuthHeaders),
+              dataClient: this.createClusterClient('data', config, deps.http.getAuthHeaders),
             };
 
             subscriber.next(coreClients);
@@ -91,7 +100,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
       publishReplay(1)
     ) as ConnectableObservable<CoreClusterClients>;
 
-    this.subscription = clients$.connect();
+    this.subscriptions.client = clients$.connect();
 
     const config = await this.config$.pipe(first()).toPromise();
 
@@ -149,15 +158,35 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
       },
     };
 
+    const esNodesCompatibility$ = pollEsNodesVersion({
+      callWithInternalUser: adminClient.callAsInternalUser,
+      log: this.log,
+      ignoreVersionMismatch: config.ignoreVersionMismatch,
+      esVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
+      kibanaVersion: this.kibanaVersion,
+    }).pipe(publishReplay(1));
+
+    this.subscriptions.esNodesCompatibility = (esNodesCompatibility$ as ConnectableObservable<
+      unknown
+    >).connect();
+
+    // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
+    esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+      if (!isCompatible && message) {
+        this.log.error(message);
+      }
+    });
+
     return {
       legacy: { config$: clients$.pipe(map(clients => clients.config)) },
 
       adminClient,
       dataClient,
+      esNodesCompatibility$,
 
       createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
         const finalConfig = merge({}, config, clientConfig);
-        return this.createClusterClient(type, finalConfig, deps.http.auth.getAuthHeaders);
+        return this.createClusterClient(type, finalConfig, deps.http.getAuthHeaders);
       },
     };
   }
@@ -166,11 +195,12 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
 
   public async stop() {
     this.log.debug('Stopping elasticsearch service');
-
-    if (this.subscription !== undefined) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
-    }
+    // TODO(TS-3.7-ESLINT)
+    // eslint-disable-next-line no-unused-expressions
+    this.subscriptions.client?.unsubscribe();
+    // eslint-disable-next-line no-unused-expressions
+    this.subscriptions.esNodesCompatibility?.unsubscribe();
+    this.subscriptions = { client: undefined, esNodesCompatibility: undefined };
   }
 
   private createClusterClient(

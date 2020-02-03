@@ -22,12 +22,14 @@ import { last } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { RangeValues, RangesParamEditor } from '../../legacy_imports';
+import { RangeValues, RangesParamEditor } from '../../../../vis_default_editor/public';
+
+export type SetColorRangeValue = (paramName: string, value: RangeValues[]) => void;
 
 interface ColorRangesProps {
   'data-test-subj'?: string;
   colorsRange: RangeValues[];
-  setValue(paramName: string, value: RangeValues[]): void;
+  setValue: SetColorRangeValue;
   setValidity?(isValid: boolean): void;
   setTouched?(isTouched: boolean): void;
 }
@@ -69,7 +71,7 @@ function ColorRanges({
   return (
     <RangesParamEditor
       data-test-subj={dataTestSubj}
-      error={i18n.translate('kbnVislibVisTypes.controls.colorRanges.errorText', {
+      error={i18n.translate('visTypeVislib.controls.colorRanges.errorText', {
         defaultMessage: 'Each range should be greater than previous.',
       })}
       hidePlaceholders={true}

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { KibanaRequest } from 'kibana/server';
-import { EndpointAppConstants, EndpointAppContext } from '../../types';
+import { EndpointAppConstants } from '../../../common/types';
+import { EndpointAppContext } from '../../types';
 
 export const kibanaRequestToEndpointListQuery = async (
   request: KibanaRequest<any, any, any>,
@@ -17,23 +18,23 @@ export const kibanaRequestToEndpointListQuery = async (
         match_all: {},
       },
       collapse: {
-        field: 'machine_id',
+        field: 'host.id.keyword',
         inner_hits: {
           name: 'most_recent',
           size: 1,
-          sort: [{ created_at: 'desc' }],
+          sort: [{ 'event.created': 'desc' }],
         },
       },
       aggs: {
         total: {
           cardinality: {
-            field: 'machine_id',
+            field: 'host.id.keyword',
           },
         },
       },
       sort: [
         {
-          created_at: {
+          'event.created': {
             order: 'desc',
           },
         },
@@ -64,3 +65,27 @@ async function getPagingProperties(
     pageIndex: pagingProperties.page_index || config.endpointResultListDefaultFirstPageIndex,
   };
 }
+
+export const kibanaRequestToEndpointFetchQuery = (
+  request: KibanaRequest<any, any, any>,
+  endpointAppContext: EndpointAppContext
+) => {
+  return {
+    body: {
+      query: {
+        match: {
+          'host.id.keyword': request.params.id,
+        },
+      },
+      sort: [
+        {
+          'event.created': {
+            order: 'desc',
+          },
+        },
+      ],
+      size: 1,
+    },
+    index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
+  };
+};

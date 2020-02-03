@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import {
   EuiButton,
   EuiCallOut,
@@ -14,22 +16,23 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 
-import { HeaderPage } from '../../../../components/header_page';
-import { WrapperPage } from '../../../../components/wrapper_page';
-import { SpyRoute } from '../../../../utils/route/spy_routes';
-import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
+import { WrapperPage } from '../../../../components/wrapper_page';
+import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
+import { displaySuccessToast, useStateToaster } from '../../../../components/toasters';
+import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useUserInfo } from '../../components/user_info';
+import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { FormHook, FormData } from '../components/shared_imports';
 import { StepPanel } from '../components/step_panel';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
 import { formatRule } from '../create/helpers';
-import { getStepsData } from '../helpers';
+import { getStepsData, redirectToDetections } from '../helpers';
 import * as ruleI18n from '../translations';
 import { RuleStep, DefineStepRule, AboutStepRule, ScheduleStepRule } from '../types';
 import * as i18n from './translations';
@@ -47,28 +50,21 @@ interface ScheduleStepRuleForm extends StepRuleForm {
   data: ScheduleStepRule | null;
 }
 
-export const EditRuleComponent = memo(() => {
+const EditRulePageComponent: FC = () => {
+  const [, dispatchToaster] = useStateToaster();
   const {
     loading: initLoading,
     isSignalIndexExists,
     isAuthenticated,
+    hasEncryptionKey,
     canUserCRUD,
     hasManageApiKey,
   } = useUserInfo();
-  const { ruleId } = useParams();
+  const { detailName: ruleId } = useParams();
   const [loading, rule] = useRule(ruleId);
 
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
-  if (
-    isSignalIndexExists != null &&
-    isAuthenticated != null &&
-    (!isSignalIndexExists || !isAuthenticated)
-  ) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
-  } else if (userHasNoPermissions) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
-  }
 
   const [initForm, setInitForm] = useState(false);
   const [myAboutRuleForm, setMyAboutRuleForm] = useState<AboutStepRuleForm>({
@@ -271,13 +267,20 @@ export const EditRuleComponent = memo(() => {
   }, []);
 
   if (isSaved || (rule != null && rule.immutable)) {
+    displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
+  }
+
+  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+  } else if (userHasNoPermissions) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
   }
 
   return (
     <>
       <WrapperPage restrictWidth>
-        <HeaderPage
+        <DetectionEngineHeaderPage
           backOptions={{
             href: `#/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`,
             text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
@@ -344,8 +347,9 @@ export const EditRuleComponent = memo(() => {
         </EuiFlexGroup>
       </WrapperPage>
 
-      <SpyRoute />
+      <SpyRoute state={{ ruleName: rule?.name }} />
     </>
   );
-});
-EditRuleComponent.displayName = 'EditRuleComponent';
+};
+
+export const EditRulePage = memo(EditRulePageComponent);

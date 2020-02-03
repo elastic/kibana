@@ -19,19 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
-import { Schemas } from 'ui/vis/editors/default/schemas';
-
-import { AggGroupNames } from 'ui/vis/editors/default';
-import { colorSchemas, ColorSchemas } from 'ui/color_maps';
-
-// @ts-ignore
-import { MetricVisComponent } from './components/metric_vis_controller';
-
+import { MetricVisComponent } from './components/metric_vis_component';
 import { MetricVisOptions } from './components/metric_vis_options';
-import { ColorModes } from '../../vis_type_vislib/public/utils/collections';
+import { ColorModes } from '../../vis_type_vislib/public';
+import { Schemas, AggGroupNames } from './legacy_imports';
+import { ColorSchemas, colorSchemas } from '../../../../plugins/charts/public';
 
-export const metricVisDefinition = {
+export const createMetricVisTypeDefinition = () => ({
   name: 'metric',
   title: i18n.translate('visTypeMetric.metricTitle', { defaultMessage: 'Metric' }),
   icon: 'visMetric',
@@ -128,4 +122,4 @@ export const metricVisDefinition = {
       },
     ]),
   },
-};
+});
