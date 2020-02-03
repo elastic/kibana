@@ -202,7 +202,12 @@ const mapDispatchToProps = {
   updateNetworkTable: networkActions.updateNetworkTable,
 };
 
-export const NetworkTopCountriesTable = connect(
+export const NetworkTopCountriesTable = connect<
+  NetworkTopCountriesTableReduxProps,
+  NetworkTopCountriesTableDispatchProps,
+  OwnProps,
+  State
+>(
   makeMapStateToProps,
   mapDispatchToProps
 )(NetworkTopCountriesTableComponent);

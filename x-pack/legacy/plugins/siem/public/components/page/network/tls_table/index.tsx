@@ -157,7 +157,10 @@ const mapDispatchToProps = {
   updateNetworkTable: networkActions.updateNetworkTable,
 };
 
-export const TlsTable = connect(makeMapStateToProps, mapDispatchToProps)(TlsTableComponent);
+export const TlsTable = connect<TlsTableReduxProps, TlsTableDispatchProps, OwnProps, State>(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(TlsTableComponent);
 
 const getSortField = (sortField: TlsSortField): SortingBasicTable => ({
   field: `node.${sortField.field}`,

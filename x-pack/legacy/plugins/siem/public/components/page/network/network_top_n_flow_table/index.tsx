@@ -45,7 +45,7 @@ interface NetworkTopNFlowTableReduxProps {
 interface NetworkTopNFlowTableDispatchProps {
   updateNetworkTable: ActionCreator<{
     networkType: networkModel.NetworkType;
-    tableType: networkModel.TopNTableType;
+    tableType: networkModel.NetworkTableType | networkModel.IpDetailsTableType;
     updates: networkModel.TableUpdates;
   }>;
 }
@@ -184,7 +184,12 @@ const mapDispatchToProps = {
   updateNetworkTable: networkActions.updateNetworkTable,
 };
 
-export const NetworkTopNFlowTable = connect(
+export const NetworkTopNFlowTable = connect<
+  NetworkTopNFlowTableReduxProps,
+  NetworkTopNFlowTableDispatchProps,
+  OwnProps,
+  State
+>(
   makeMapStateToProps,
   mapDispatchToProps
 )(React.memo(NetworkTopNFlowTableComponent, deepEqual));

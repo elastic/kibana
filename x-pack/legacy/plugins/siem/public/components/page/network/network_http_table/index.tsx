@@ -160,7 +160,12 @@ const mapDispatchToProps = {
   updateNetworkTable: networkActions.updateNetworkTable,
 };
 
-export const NetworkHttpTable = connect(
+export const NetworkHttpTable = connect<
+  NetworkHttpTableReduxProps,
+  NetworkHttpTableDispatchProps,
+  OwnProps,
+  State
+>(
   makeMapStateToProps,
   mapDispatchToProps
 )(NetworkHttpTableComponent);

@@ -84,7 +84,7 @@ export const getBrowserFields = memoizeOne(
       : {}
 );
 
-const WithSourceComponent: React.FC<WithSourceProps> = ({ children, indexToAdd, sourceId }) => {
+export const WithSource = React.memo<WithSourceProps>(({ children, indexToAdd, sourceId }) => {
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const defaultIndex = useMemo<string[]>(() => {
     if (indexToAdd != null && !isEmpty(indexToAdd)) {
@@ -115,9 +115,9 @@ const WithSourceComponent: React.FC<WithSourceProps> = ({ children, indexToAdd, 
       }
     </Query>
   );
-};
+}, deepEqual);
 
-export const WithSource = React.memo(WithSourceComponent, deepEqual);
+WithSource.displayName = 'WithSource';
 
 export const indicesExistOrDataTemporarilyUnavailable = (indicesExist: boolean | undefined) =>
   indicesExist || isUndefined(indicesExist);

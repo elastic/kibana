@@ -99,12 +99,14 @@ export const HomePage: React.FC = () => (
                     path={`/:pageName(${SiemPageName.hosts})`}
                     render={({ match }) => <HostsContainer url={match.url} />}
                   />
-                  <Route path={`/:pageName(${SiemPageName.network})`}>
-                    <NetworkContainer />
-                  </Route>
-                  <Route path={`/:pageName(${SiemPageName.detections})`}>
-                    <DetectionEngineContainer />
-                  </Route>
+                  <Route
+                    path={`/:pageName(${SiemPageName.network})`}
+                    render={({ match }) => <NetworkContainer url={match.url} />}
+                  />
+                  <Route
+                    path={`/:pageName(${SiemPageName.detections})`}
+                    render={({ match }) => <DetectionEngineContainer url={match.url} />}
+                  />
                   <Route path={`/:pageName(${SiemPageName.timelines})`}>
                     <Timelines />
                   </Route>
