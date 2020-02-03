@@ -9,15 +9,14 @@ import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema as configSchema } from '@kbn/config-schema';
 import {
-  CoreSetup,
   IRouter,
   KibanaResponseFactory,
   RequestHandlerContext,
-  PluginInitializerContext,
   KibanaRequest,
 } from '../../../../../../../src/core/server';
 import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
+import { CoreSetup, SetupPlugins, PluginInitializerContext } from '../../plugin';
 import { RequestFacade } from '../../types';
 
 import {
@@ -27,15 +26,14 @@ import {
   internalFrameworkRequest,
   WrappableRequest,
 } from './types';
-import { SiemPluginSecurity, PluginsSetup } from '../../plugin';
 
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
   private isProductionMode: boolean;
   private router: IRouter;
-  private security: SiemPluginSecurity;
+  private security: SetupPlugins['security'];
 
-  constructor(core: CoreSetup, plugins: PluginsSetup, env: PluginInitializerContext['env']) {
+  constructor(core: CoreSetup, plugins: SetupPlugins, env: PluginInitializerContext['env']) {
     this.version = env.packageInfo.version;
     this.isProductionMode = env.mode.prod;
     this.router = core.http.createRouter();

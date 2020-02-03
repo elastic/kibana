@@ -6,8 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext, Logger } from 'src/core/server';
-import { SecurityPluginSetup } from '../../../../plugins/security/server';
-import { PluginSetupContract as FeaturesSetupContract } from '../../../../plugins/features/server';
+import { SecurityPluginSetup as SecuritySetup } from '../../../../plugins/security/server';
+import { PluginSetupContract as FeaturesSetup } from '../../../../plugins/features/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { initServerWithKibana } from './kibana.index';
@@ -19,11 +19,11 @@ import {
 } from './saved_objects';
 import { ServerFacade } from './types';
 
-export type SiemPluginSecurity = Pick<SecurityPluginSetup, 'authc'>;
+export { CoreSetup, Logger, PluginInitializerContext, ServerFacade };
 
-export interface PluginsSetup {
-  features: FeaturesSetupContract;
-  security: SiemPluginSecurity;
+export interface SetupPlugins {
+  features: FeaturesSetup;
+  security: SecuritySetup;
 }
 
 export class Plugin {
@@ -38,7 +38,7 @@ export class Plugin {
     this.logger.debug('Shim plugin initialized');
   }
 
-  public setup(core: CoreSetup, plugins: PluginsSetup, __legacy: ServerFacade) {
+  public setup(core: CoreSetup, plugins: SetupPlugins, __legacy: ServerFacade) {
     this.logger.debug('Shim plugin setup');
     plugins.features.registerFeature({
       id: this.name,

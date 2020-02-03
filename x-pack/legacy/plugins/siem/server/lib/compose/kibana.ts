@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, PluginInitializerContext } from '../../../../../../../src/core/server';
-import { PluginsSetup } from '../../plugin';
+import { CoreSetup, PluginInitializerContext, SetupPlugins } from '../../plugin';
 
 import { Anomalies } from '../anomalies';
 import { ElasticsearchAnomaliesAdapter } from '../anomalies/elasticsearch_adapter';
@@ -37,7 +36,7 @@ import { Alerts, ElasticsearchAlertsAdapter } from '../alerts';
 
 export function compose(
   core: CoreSetup,
-  plugins: PluginsSetup,
+  plugins: SetupPlugins,
   env: PluginInitializerContext['env']
 ): AppBackendLibs {
   const framework = new KibanaBackendFrameworkAdapter(core, plugins, env);
