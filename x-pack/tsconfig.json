@@ -35,7 +35,8 @@
       "test_utils/*": [
         "x-pack/test_utils/*"
       ],
-      "plugins/*": ["src/legacy/core_plugins/*/public/"]
+      "plugins/*": ["src/legacy/core_plugins/*/public/"],
+      "fixtures/*": ["src/fixtures/*"]
     },
     "types": [
       "node",
