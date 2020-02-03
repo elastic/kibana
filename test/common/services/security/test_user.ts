@@ -68,30 +68,26 @@ export async function createTestUserService(
 
   return new (class TestUser {
     async restoreDefaults() {
-      this.assertIsEnabled();
-      await this.setRoles(config.get('security.defaultRoles'));
-    }
-
-    async setRoles(roles: string[]) {
-      this.assertIsEnabled();
-      log.debug(`set roles = ${roles}`);
-      await user.create('test_user', {
-        password: 'changeme',
-        roles,
-        full_name: 'test user',
-      });
-
-      if (browser && testSubjects) {
-        if (await testSubjects.exists('kibanaChrome')) {
-          await browser.refresh();
-          await testSubjects.find('kibanaChrome', config.get('timeouts.find') * 10);
-        }
+      if (isEnabled()) {
+        await this.setRoles(config.get('security.defaultRoles'));
       }
     }
 
-    private assertIsEnabled() {
-      if (!isEnabled()) {
-        throw new Error('test user is not enabled because security is disabled in Kibana');
+    async setRoles(roles: string[]) {
+      if (isEnabled()) {
+        log.debug(`set roles = ${roles}`);
+        await user.create('test_user', {
+          password: 'changeme',
+          roles,
+          full_name: 'test user',
+        });
+
+        if (browser && testSubjects) {
+          if (await testSubjects.exists('kibanaChrome')) {
+            await browser.refresh();
+            await testSubjects.find('kibanaChrome', config.get('timeouts.find') * 10);
+          }
+        }
       }
     }
   })();
