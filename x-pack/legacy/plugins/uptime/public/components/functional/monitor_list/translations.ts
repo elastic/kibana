@@ -52,3 +52,15 @@ export const NO_DATA_MESSAGE = i18n.translate('xpack.uptime.monitorList.noItemMe
   defaultMessage: 'No uptime monitors found',
   description: 'This message is shown if the monitors table is rendered but has no items.',
 });
+
+export const URL = i18n.translate('xpack.uptime.monitorList.table.url.name', {
+  defaultMessage: 'Url',
+});
+
+export const UP = i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
+  defaultMessage: 'Up',
+});
+
+export const DOWN = i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
+  defaultMessage: 'Down',
+});

@@ -5,16 +5,18 @@
  */
 
 import React, { useCallback } from 'react';
-import { esFilters, IIndexPattern, Query } from 'src/plugins/data/public';
 
-import { useSignalIndex } from '../../../containers/detection_engine/signals/use_signal_index';
 import { SignalsHistogramPanel } from '../../detection_engine/components/signals_histogram_panel';
+import { signalsHistogramOptions } from '../../detection_engine/components/signals_histogram_panel/config';
+import { useSignalIndex } from '../../../containers/detection_engine/signals/use_signal_index';
 import { SetAbsoluteRangeDatePicker } from '../../network/types';
+import { esFilters, IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../../store';
 import * as i18n from '../translations';
 
-const NO_FILTERS: esFilters.Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
+const DEFAULT_STACK_BY = 'signal.rule.threat.tactic.name';
+const NO_FILTERS: esFilters.Filter[] = [];
 
 interface Props {
   deleteQuery?: ({ id }: { id: string }) => void;
@@ -32,46 +34,46 @@ interface Props {
   to: number;
 }
 
-export const SignalsByCategory = React.memo<Props>(
-  ({
-    deleteQuery,
-    filters = NO_FILTERS,
-    from,
-    query = DEFAULT_QUERY,
-    setAbsoluteRangeDatePicker,
-    setQuery,
-    to,
-  }) => {
-    const updateDateRangeCallback = useCallback(
-      (min: number, max: number) => {
-        setAbsoluteRangeDatePicker!({ id: 'global', from: min, to: max });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
+const SignalsByCategoryComponent: React.FC<Props> = ({
+  deleteQuery,
+  filters = NO_FILTERS,
+  from,
+  query = DEFAULT_QUERY,
+  setAbsoluteRangeDatePicker,
+  setQuery,
+  to,
+}) => {
+  const { signalIndexName } = useSignalIndex();
+  const updateDateRangeCallback = useCallback(
+    (min: number, max: number) => {
+      setAbsoluteRangeDatePicker!({ id: 'global', from: min, to: max });
+    },
+    [setAbsoluteRangeDatePicker]
+  );
 
-    const { signalIndexName } = useSignalIndex();
+  const defaultStackByOption =
+    signalsHistogramOptions.find(o => o.text === DEFAULT_STACK_BY) ?? signalsHistogramOptions[0];
 
-    return (
-      <SignalsHistogramPanel
-        deleteQuery={deleteQuery}
-        filters={filters}
-        from={from}
-        query={query}
-        signalIndexName={signalIndexName}
-        setQuery={setQuery}
-        showTotalSignalsCount={true}
-        showLinkToSignals={true}
-        defaultStackByOption={{
-          text: `${i18n.SIGNALS_BY_CATEGORY}`,
-          value: 'signal.rule.threat',
-        }}
-        legendPosition={'right'}
-        to={to}
-        title={i18n.SIGNALS_BY_CATEGORY}
-        updateDateRange={updateDateRangeCallback}
-      />
-    );
-  }
-);
+  return (
+    <SignalsHistogramPanel
+      deleteQuery={deleteQuery}
+      defaultStackByOption={defaultStackByOption}
+      filters={filters}
+      from={from}
+      query={query}
+      signalIndexName={signalIndexName}
+      setQuery={setQuery}
+      showTotalSignalsCount={true}
+      showLinkToSignals={true}
+      stackByOptions={signalsHistogramOptions}
+      legendPosition={'right'}
+      to={to}
+      title={i18n.SIGNAL_COUNT}
+      updateDateRange={updateDateRangeCallback}
+    />
+  );
+};
 
-SignalsByCategory.displayName = 'SignalsByCategory';
+SignalsByCategoryComponent.displayName = 'SignalsByCategoryComponent';
+
+export const SignalsByCategory = React.memo(SignalsByCategoryComponent);

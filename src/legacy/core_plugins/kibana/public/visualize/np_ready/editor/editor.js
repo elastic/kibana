@@ -21,7 +21,6 @@ import angular from 'angular';
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import '../../saved_visualizations/saved_visualizations';
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -58,7 +57,7 @@ export function initEditorDirective(app, deps) {
     };
   });
 
-  initVisEditorDirective(app);
+  initVisEditorDirective(app, deps);
   initVisualizationDirective(app, deps);
 }
 

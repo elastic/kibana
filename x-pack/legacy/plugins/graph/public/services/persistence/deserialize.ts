@@ -24,7 +24,7 @@ import {
   colorChoices,
   iconChoicesByClass,
 } from '../../helpers/style_choices';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { IndexPattern, isNestedField } from '../../../../../../../src/plugins/data/public';
 
 const defaultAdvancedSettings: AdvancedSettings = {
   useSignificance: true,
@@ -80,7 +80,7 @@ export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
 
   return indexPattern
     .getNonScriptedFields()
-    .filter(field => !blockedFieldNames.includes(field.name))
+    .filter(field => !blockedFieldNames.includes(field.name) && !isNestedField(field))
     .map((field, index) => ({
       name: field.name,
       hopSize: defaultHopSize,

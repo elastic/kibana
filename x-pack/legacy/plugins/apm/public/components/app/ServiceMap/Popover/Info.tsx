@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
+import cytoscape from 'cytoscape';
+import React from 'react';
+import styled from 'styled-components';
 
 const ItemRow = styled.div`
   line-height: 2;
@@ -19,8 +20,8 @@ const ItemTitle = styled.dt`
 
 const ItemDescription = styled.dd``;
 
-interface InfoProps {
-  type: string;
+interface InfoProps extends cytoscape.NodeDataDefinition {
+  type?: string;
   subtype?: string;
 }
 

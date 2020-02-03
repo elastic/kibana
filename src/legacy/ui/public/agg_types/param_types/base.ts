@@ -18,8 +18,8 @@
  */
 
 import { AggConfigs } from '../agg_configs';
-import { AggConfig } from '../../vis';
-import { ISearchSource, FetchOptions } from '../../courier/types';
+import { AggConfig } from '../agg_config';
+import { FetchOptions, ISearchSource } from '../../../../../plugins/data/public';
 
 export class BaseParamType<TAggConfig extends AggConfig = AggConfig> {
   name: string;
@@ -27,7 +27,6 @@ export class BaseParamType<TAggConfig extends AggConfig = AggConfig> {
   displayName: string;
   required: boolean;
   advanced: boolean;
-  editorComponent: any = null;
   default: any;
   write: (
     aggConfig: TAggConfig,
@@ -67,7 +66,6 @@ export class BaseParamType<TAggConfig extends AggConfig = AggConfig> {
     this.onChange = config.onChange;
     this.shouldShow = config.shouldShow;
     this.default = config.default;
-    this.editorComponent = config.editorComponent;
 
     const defaultWrite = (aggConfig: TAggConfig, output: Record<string, any>) => {
       if (aggConfig.params[this.name]) {

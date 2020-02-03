@@ -20,9 +20,13 @@
 import _ from 'lodash';
 import $ from 'jquery';
 
-import { vislibColor } from 'ui/vis/components/color/color';
-
 import { Vis } from '../../../vis';
+
+// TODO: Remove when converted to jest mocks
+import {
+  ColorsService,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../../plugins/charts/public/services';
 
 const $visCanvas = $('<div>')
   .attr('id', 'vislib-vis-fixtures')
@@ -57,9 +61,14 @@ afterEach(function() {
 
 const getDeps = () => {
   const uiSettings = new Map();
+  const colors = new ColorsService();
+  colors.init(uiSettings);
+
   return {
     uiSettings,
-    vislibColor,
+    charts: {
+      colors,
+    },
   };
 };
 

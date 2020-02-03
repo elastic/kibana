@@ -51,6 +51,7 @@ interface ScrollableLogTextStreamViewProps {
     fromScroll: boolean;
   }) => any;
   loadNewerItems: () => void;
+  reloadItems: () => void;
   setFlyoutItem: (id: string) => void;
   setFlyoutVisibility: (visible: boolean) => void;
   highlightedItem: string | null;
@@ -269,10 +270,10 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   };
 
   private handleReload = () => {
-    const { jumpToTarget, target } = this.props;
+    const { reloadItems } = this.props;
 
-    if (target) {
-      jumpToTarget(target);
+    if (reloadItems) {
+      reloadItems();
     }
   };
 
