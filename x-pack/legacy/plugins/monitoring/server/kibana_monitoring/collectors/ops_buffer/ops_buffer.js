@@ -17,7 +17,7 @@ export function opsBuffer({ config, log, getOSInfo }) {
   // determine the cloud service in the background
   const cloudDetector = new CloudDetector();
 
-  if (config.get('xpack.monitoring.tests.cloud_detector.enabled')) {
+  if (config.get('monitoring.tests.cloud_detector.enabled')) {
     cloudDetector.detectCloudService();
   }
 

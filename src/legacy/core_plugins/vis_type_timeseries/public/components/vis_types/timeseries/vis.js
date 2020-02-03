@@ -34,7 +34,7 @@ import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
 import { areFieldsDifferent } from '../../lib/charts';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
-import { isBackgroundDark } from '../../../../common/set_is_reversed';
+import { isBackgroundDark } from '../../../lib/set_is_reversed';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
 
 export class TimeseriesVisualization extends Component {
