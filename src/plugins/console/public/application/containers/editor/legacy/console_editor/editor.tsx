@@ -18,7 +18,6 @@
  */
 
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
@@ -26,7 +25,22 @@ import { debounce } from 'lodash';
 // @ts-ignore
 import * as qs from 'querystring-browser';
 
-import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiPopoverFooter,
+  EuiSpacer,
+  EuiPopoverTitle,
+  EuiButton,
+  EuiText,
+  EuiLink,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+
 import { useServicesContext, useEditorReadContext } from '../../../../contexts';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { ConsoleMenu } from '../../../../components';
@@ -198,6 +212,15 @@ function EditorUI({ initialTextValue }: EditorProps) {
     });
   }, [sendCurrentRequestToES, openDocumentation]);
 
+  const pulseButton = (
+    <EuiButtonIcon
+      size="s"
+      style={{ minHeight: '18px', paddingRight: '2px' }}
+      className="conApp__editorActionButton conApp__editorActionButton--success"
+      iconType="bell"
+      onClick={() => {}}
+    />
+  );
   return (
     <div style={abs} className="conApp">
       <div className="conApp__editor">
@@ -208,6 +231,37 @@ function EditorUI({ initialTextValue }: EditorProps) {
           gutterSize="none"
           responsive={false}
         >
+          <EuiFlexItem>
+            <EuiPopover
+              id="pulse_popover"
+              button={pulseButton}
+              isOpen={true}
+              closePopover={() => {}}
+            >
+              <EuiPopoverTitle>Pulse Recommendation</EuiPopoverTitle>
+              <div style={{ width: '300px' }}>
+                <EuiText size="s">
+                  <p>
+                    You can now use the{' '}
+                    <EuiLink
+                      href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
+                      target="_blank"
+                    >
+                      Snapshot and Restore
+                    </EuiLink>{' '}
+                    UI to manage taking snapshots.
+                  </p>
+                </EuiText>
+              </div>
+              <EuiSpacer />
+              <div style={{ textAlign: 'right' }}>
+                <EuiButtonEmpty size="s">disable</EuiButtonEmpty>
+                <EuiButton size="s" fill color="primary" style={{ marginLeft: '10px' }}>
+                  Take me there!
+                </EuiButton>
+              </div>
+            </EuiPopover>
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiToolTip
               content={i18n.translate('console.sendRequestButtonTooltip', {

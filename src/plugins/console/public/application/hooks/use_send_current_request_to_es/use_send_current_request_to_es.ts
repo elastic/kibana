@@ -59,6 +59,14 @@ export const useSendCurrentRequestToES = () => {
       if (requests[0] && endpointDescription) {
         // eslint-disable-next-line
         console.log('endpointDescription::', endpointDescription);
+        dispatch({
+          type: 'requestFail',
+          // type: 'Info',
+          payload: {
+            value: 'Did you know that we have UI for snapshots api?',
+            contentType: 'text/plain',
+          },
+        });
       }
 
       const results = await sendRequestToES({ requests });
