@@ -5,7 +5,7 @@
  */
 import { Legacy } from 'kibana';
 import { PluginInitializerContext } from 'src/core/server';
-import { PluginSetupContract as SecurityPluginSetup } from '../../../../plugins/security/server';
+import { SecurityPluginSetup } from '../../../../plugins/security/server';
 import { ReportingPluginSpecOptions } from '../types';
 import { plugin } from './index';
 import { LegacySetup, ReportingStartDeps } from './plugin';
