@@ -30,7 +30,7 @@ import { IndexPatternsApiClient, GetFieldsOptions } from './index_patterns_api_c
 
 const indexPatternCache = createIndexPatternCache();
 
-type CachedIndexPatternFieldType = 'id' | 'title';
+type IndexPatternCachedFieldType = 'id' | 'title';
 
 export class IndexPatterns {
   private config: IUiSettingsClient;
@@ -78,7 +78,7 @@ export class IndexPatterns {
     return this.savedObjectsCache.map(obj => obj?.attributes?.title);
   };
 
-  getFields = async (fields: CachedIndexPatternFieldType[], refresh: boolean = false) => {
+  getFields = async (fields: IndexPatternCachedFieldType[], refresh: boolean = false) => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
@@ -86,9 +86,9 @@ export class IndexPatterns {
       return [];
     }
     return this.savedObjectsCache.map((obj: Record<string, any>) => {
-      const result: Partial<Record<CachedIndexPatternFieldType, string>> = {};
+      const result: Partial<Record<IndexPatternCachedFieldType, string>> = {};
       fields.forEach(
-        (f: CachedIndexPatternFieldType) => (result[f] = obj[f] || obj?.attributes?.[f])
+        (f: IndexPatternCachedFieldType) => (result[f] = obj[f] || obj?.attributes?.[f])
       );
       return result;
     });
