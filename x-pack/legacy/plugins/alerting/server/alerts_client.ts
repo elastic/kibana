@@ -355,12 +355,7 @@ export class AlertsClient {
   }
 
   public async enable({ id }: { id: string }) {
-    const {
-      version,
-      attributes,
-    } = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAlert>('alert', id, {
-      namespace: this.namespace,
-    });
+    const { version, attributes } = await this.savedObjectsClient.get<RawAlert>('alert', id);
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
@@ -377,12 +372,25 @@ export class AlertsClient {
       );
       const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       await this.savedObjectsClient.update('alert', id, { scheduledTaskId: scheduledTask.id });
-      await this.invalidateApiKey({ apiKey: attributes.apiKey });
     }
   }
 
   public async disable({ id }: { id: string }) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', id);
+    const [{ attributes, version }, apiKeyToInvalidate] = await Promise.all<
+      SavedObject<RawAlert>,
+      string | null | void
+    >([
+      this.savedObjectsClient.get<RawAlert>('alert', id),
+      // We'll try and load the decrypted saved object but if this fails we'll only log
+      // and skip invalidating the API key.
+      this.encryptedSavedObjectsPlugin
+        .getDecryptedAsInternalUser<RawAlert>('alert', id, { namespace: this.namespace })
+        .then(result => result.attributes.apiKey)
+        .catch(e =>
+          this.logger.error(`disable(): Failed to load API key to invalidate: ${e.message}`)
+        ),
+    ]);
+
     if (attributes.enabled === true) {
       await this.savedObjectsClient.update(
         'alert',
@@ -397,7 +405,11 @@ export class AlertsClient {
         },
         { version }
       );
-      await this.taskManager.remove(attributes.scheduledTaskId);
+
+      await Promise.all([
+        attributes.scheduledTaskId && this.taskManager.remove(attributes.scheduledTaskId),
+        apiKeyToInvalidate && this.invalidateApiKey({ apiKey: apiKeyToInvalidate }),
+      ]);
     }
   }
 

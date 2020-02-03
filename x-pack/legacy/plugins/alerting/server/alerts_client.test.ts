@@ -848,20 +848,26 @@ describe('create()', () => {
 });
 
 describe('enable()', () => {
-  test('enables an alert', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        schedule: { interval: '10s' },
-        alertTypeId: '2',
-        enabled: false,
-      },
-      version: '123',
-      references: [],
+  let alertsClient: AlertsClient;
+  const existingAlert = {
+    id: '1',
+    type: 'alert',
+    attributes: {
+      schedule: { interval: '10s' },
+      alertTypeId: '2',
+      enabled: false,
+    },
+    version: '123',
+    references: [],
+  };
+
+  beforeEach(() => {
+    alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValue(existingAlert);
+    alertsClientParams.createAPIKey.mockResolvedValue({
+      apiKeysEnabled: false,
     });
-    taskManager.schedule.mockResolvedValueOnce({
+    taskManager.schedule.mockResolvedValue({
       id: 'task-123',
       scheduledAt: new Date(),
       attempts: 0,
@@ -874,8 +880,12 @@ describe('enable()', () => {
       retryAt: null,
       ownerId: null,
     });
+  });
 
+  test('enables an alert', async () => {
     await alertsClient.enable({ id: '1' });
+    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
@@ -891,9 +901,6 @@ describe('enable()', () => {
         version: '123',
       }
     );
-    expect(savedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
-      scheduledTaskId: 'task-123',
-    });
     expect(taskManager.schedule).toHaveBeenCalledWith({
       taskType: `alerting:2`,
       params: {
@@ -907,52 +914,28 @@ describe('enable()', () => {
       },
       scope: ['alerting'],
     });
+    expect(savedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+      scheduledTaskId: 'task-123',
+    });
   });
 
   test(`doesn't enable already enabled alerts`, async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
+    savedObjectsClient.get.mockResolvedValueOnce({
+      ...existingAlert,
       attributes: {
-        schedule: { interval: '10s' },
-        alertTypeId: '2',
+        ...existingAlert.attributes,
         enabled: true,
       },
-      references: [],
     });
 
     await alertsClient.enable({ id: '1' });
-    expect(taskManager.schedule).toHaveBeenCalledTimes(0);
-    expect(savedObjectsClient.update).toHaveBeenCalledTimes(0);
+    expect(alertsClientParams.getUserName).not.toHaveBeenCalled();
+    expect(alertsClientParams.createAPIKey).not.toHaveBeenCalled();
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
-  test('calls the API key function', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        schedule: { interval: '10s' },
-        alertTypeId: '2',
-        enabled: false,
-      },
-      version: '123',
-      references: [],
-    });
-    taskManager.schedule.mockResolvedValueOnce({
-      id: 'task-123',
-      scheduledAt: new Date(),
-      attempts: 0,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      state: {},
-      params: {},
-      taskType: '',
-      startedAt: null,
-      retryAt: null,
-      ownerId: null,
-    });
+  test('sets API key when createAPIKey returns one', async () => {
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', api_key: 'abc' },
@@ -974,77 +957,97 @@ describe('enable()', () => {
         version: '123',
       }
     );
-    expect(savedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
-      scheduledTaskId: 'task-123',
-    });
-    expect(taskManager.schedule).toHaveBeenCalledWith({
-      taskType: `alerting:2`,
-      params: {
-        alertId: '1',
-        spaceId: 'default',
-      },
-      state: {
-        alertInstances: {},
-        alertTypeState: {},
-        previousStartedAt: null,
-      },
-      scope: ['alerting'],
-    });
   });
 
-  test('swallows error when invalidate API key throws', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        schedule: { interval: '10s' },
-        alertTypeId: '2',
-        enabled: false,
-        apiKey: Buffer.from('123:abc').toString('base64'),
-      },
-      version: '123',
-      references: [],
-    });
-    taskManager.schedule.mockResolvedValueOnce({
-      id: 'task-123',
-      scheduledAt: new Date(),
-      attempts: 0,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      state: {},
-      params: {},
-      taskType: '',
-      startedAt: null,
-      retryAt: null,
-      ownerId: null,
-    });
+  test('throws error when failing to load the saved object', async () => {
+    savedObjectsClient.get.mockRejectedValueOnce(new Error('Fail to get'));
 
-    await alertsClient.enable({ id: '1' });
-    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to invalidate API Key: Fail'
+    await expect(alertsClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Fail to get"`
     );
+    expect(alertsClientParams.getUserName).not.toHaveBeenCalled();
+    expect(alertsClientParams.createAPIKey).not.toHaveBeenCalled();
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws error when failing to update the first time', async () => {
+    savedObjectsClient.update.mockRejectedValueOnce(new Error('Fail to update'));
+
+    await expect(alertsClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Fail to update"`
+    );
+    expect(alertsClientParams.getUserName).toHaveBeenCalled();
+    expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
+    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws error when failing to update the second time', async () => {
+    savedObjectsClient.update.mockResolvedValueOnce({
+      ...existingAlert,
+      attributes: {
+        ...existingAlert.attributes,
+        enabled: true,
+      },
+    });
+    savedObjectsClient.update.mockRejectedValueOnce(new Error('Fail to update second time'));
+
+    await expect(alertsClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Fail to update second time"`
+    );
+    expect(alertsClientParams.getUserName).toHaveBeenCalled();
+    expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
+    expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
+    expect(taskManager.schedule).toHaveBeenCalled();
+  });
+
+  test('throws error when failing to schedule task', async () => {
+    taskManager.schedule.mockRejectedValueOnce(new Error('Fail to schedule'));
+
+    await expect(alertsClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Fail to schedule"`
+    );
+    expect(alertsClientParams.getUserName).toHaveBeenCalled();
+    expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
+    expect(savedObjectsClient.update).toHaveBeenCalled();
   });
 });
 
 describe('disable()', () => {
-  test('disables an alert', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        schedule: { interval: '10s' },
-        alertTypeId: '2',
-        enabled: true,
-        scheduledTaskId: 'task-123',
-      },
-      version: '123',
-      references: [],
-    });
+  let alertsClient: AlertsClient;
+  const existingAlert = {
+    id: '1',
+    type: 'alert',
+    attributes: {
+      schedule: { interval: '10s' },
+      alertTypeId: '2',
+      enabled: true,
+      scheduledTaskId: 'task-123',
+    },
+    version: '123',
+    references: [],
+  };
+  const existingDecryptedAlert = {
+    ...existingAlert,
+    attributes: {
+      ...existingAlert.attributes,
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+  };
 
+  beforeEach(() => {
+    alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValue(existingAlert);
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
+  });
+
+  test('disables an alert', async () => {
     await alertsClient.disable({ id: '1' });
+    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
@@ -1062,25 +1065,66 @@ describe('disable()', () => {
       }
     );
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
+    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
   });
 
   test(`doesn't disable already disabled alerts`, async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
     savedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
+      ...existingAlert,
       attributes: {
-        schedule: { interval: '10s' },
-        alertTypeId: '2',
+        ...existingAlert.attributes,
         enabled: false,
-        scheduledTaskId: 'task-123',
       },
-      references: [],
     });
 
     await alertsClient.disable({ id: '1' });
-    expect(savedObjectsClient.update).toHaveBeenCalledTimes(0);
-    expect(taskManager.remove).toHaveBeenCalledTimes(0);
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    expect(taskManager.remove).not.toHaveBeenCalled();
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+  });
+
+  test(`doesn't invalidate when no API key is used`, async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce(existingAlert);
+
+    await alertsClient.disable({ id: '1' });
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+  });
+
+  test('swallows error when failing to load decrypted saved object', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
+
+    await alertsClient.disable({ id: '1' });
+    expect(savedObjectsClient.update).toHaveBeenCalled();
+    expect(taskManager.remove).toHaveBeenCalled();
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'disable(): Failed to load API key to invalidate: Fail'
+    );
+  });
+
+  test('throws when savedObjectsClient update fails', async () => {
+    savedObjectsClient.update.mockRejectedValueOnce(new Error('Failed to update'));
+
+    await expect(alertsClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to update"`
+    );
+  });
+
+  test('swallows error when invalidate API key throws', async () => {
+    alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
+
+    await alertsClient.disable({ id: '1' });
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'Failed to invalidate API Key: Fail'
+    );
+  });
+
+  test('throws when failing to remove task from task manager', async () => {
+    taskManager.remove.mockRejectedValueOnce(new Error('Failed to remove task'));
+
+    await expect(alertsClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to remove task"`
+    );
   });
 });
 
