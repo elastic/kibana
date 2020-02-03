@@ -18,7 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { Ensure, RecursiveReadonly } from '@kbn/utility-types';
+import { Ensure } from '@kbn/utility-types';
 
 export type BaseState = object;
 export interface TransitionDescription<Type extends string = string, Args extends any[] = any[]> {
@@ -27,7 +27,7 @@ export interface TransitionDescription<Type extends string = string, Args extend
 }
 export type Transition<State extends BaseState, Args extends any[]> = (...args: Args) => State;
 export type PureTransition<State extends BaseState, Args extends any[]> = (
-  state: RecursiveReadonly<State>
+  state: State
 ) => Transition<State, Args>;
 export type EnsurePureTransition<T> = Ensure<T, PureTransition<any, any>>;
 export type PureTransitionToTransition<T extends PureTransition<any, any>> = ReturnType<T>;
@@ -36,9 +36,9 @@ export type PureTransitionsToTransitions<T extends object> = {
 };
 
 export interface BaseStateContainer<State extends BaseState> {
-  get: () => RecursiveReadonly<State>;
+  get: () => State;
   set: (state: State) => void;
-  state$: Observable<RecursiveReadonly<State>>;
+  state$: Observable<State>;
 }
 
 export interface StateContainer<
@@ -55,12 +55,12 @@ export interface ReduxLikeStateContainer<
   PureTransitions extends object = {},
   PureSelectors extends object = {}
 > extends StateContainer<State, PureTransitions, PureSelectors> {
-  getState: () => RecursiveReadonly<State>;
-  reducer: Reducer<RecursiveReadonly<State>>;
-  replaceReducer: (nextReducer: Reducer<RecursiveReadonly<State>>) => void;
+  getState: () => State;
+  reducer: Reducer<State>;
+  replaceReducer: (nextReducer: Reducer<State>) => void;
   dispatch: (action: TransitionDescription) => void;
-  addMiddleware: (middleware: Middleware<RecursiveReadonly<State>>) => void;
-  subscribe: (listener: (state: RecursiveReadonly<State>) => void) => () => void;
+  addMiddleware: (middleware: Middleware<State>) => void;
+  subscribe: (listener: (state: State) => void) => () => void;
 }
 
 export type Dispatch<T> = (action: T) => void;
