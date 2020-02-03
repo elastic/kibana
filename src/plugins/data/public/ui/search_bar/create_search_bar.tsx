@@ -18,6 +18,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
@@ -69,10 +70,20 @@ const defaultOnQuerySubmit = (
     const isUpdate =
       !_.isEqual(timefilter.getTime(), payload.dateRange) ||
       !_.isEqual(payload.query, currentQuery);
-    timefilter.setTime(payload.dateRange);
-    setQueryStringState(payload.query);
-
-    if (props.onQuerySubmit) props.onQuerySubmit(payload, isUpdate);
+    if (isUpdate) {
+      timefilter.setTime(payload.dateRange);
+      setQueryStringState(payload.query);
+    } else {
+      // If no change was detected, fire onQuerySubmit with current state
+      if (props.onQuerySubmit)
+        props.onQuerySubmit(
+          {
+            dateRange: timefilter.getTime(),
+            query: currentQuery,
+          },
+          false
+        );
+    }
   };
 };
 
@@ -173,10 +184,14 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
+    const { appName, savedQueryId, onQuerySubmit } = props;
     const { filterManager, timefilter, savedQueries } = data.query;
     const tfRefreshInterval = timefilter.timefilter.getRefreshInterval();
     const [refreshInterval, setRefreshInterval] = useState(tfRefreshInterval.value);
     const [refreshPaused, setRefreshPaused] = useState(tfRefreshInterval.pause);
+    const [timeRange, setTimerange] = useState(timefilter.timefilter.getTime());
+
+    // Handle queries
     const [query, setQuery] = useState<Query>(
       props.query || {
         query: '',
@@ -184,23 +199,48 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       }
     );
 
+    // Fire onQuerySubmit on query or timerange change
+    useEffect(() => {
+      if (onQuerySubmit)
+        onQuerySubmit(
+          {
+            dateRange: timeRange,
+            query,
+          },
+          true
+        );
+    }, [onQuerySubmit, query, timeRange]);
+
     // Handle saved queries
     const [savedQuery, setSavedQuery] = useState<SavedQuery>();
     useEffect(() => {
       const fetchSavedQuery = async () => {
-        if (props.savedQueryId) {
-          const newSavedQuery = await savedQueries.getSavedQuery(props.savedQueryId);
-          // Make sure we set the saved query to the most recent one
-          if (newSavedQuery && newSavedQuery.id === props.savedQueryId) {
-            setSavedQuery(newSavedQuery);
+        if (savedQueryId) {
+          try {
+            const newSavedQuery = await savedQueries.getSavedQuery(savedQueryId);
+            // Make sure we set the saved query to the most recent one
+            if (newSavedQuery && newSavedQuery.id === savedQueryId) {
+              setSavedQuery(newSavedQuery);
+            }
+          } catch (error) {
+            // Clear saved query
+            setSavedQuery(undefined);
+            core.notifications.toasts.addWarning({
+              title: i18n.translate('xpack.maps.unableToGetSavedQueryToastTitle', {
+                defaultMessage: 'Unable to load saved query {savedQueryId}',
+                values: { savedQueryId },
+              }),
+              text: `${error.message}`,
+            });
           }
+        } else {
+          setSavedQuery(undefined);
         }
       };
       fetchSavedQuery();
-    }, [props.savedQueryId, savedQueries]);
+    }, [savedQueryId, savedQueries]);
 
     // timerange
-    const [timeRange, setTimerange] = useState(timefilter.timefilter.getTime());
     useEffect(() => {
       const subscriptions = new Subscription();
 
@@ -249,7 +289,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
     return (
       <KibanaContextProvider
         services={{
-          appName: props.appName,
+          appName,
           data,
           storage,
           ...core,
