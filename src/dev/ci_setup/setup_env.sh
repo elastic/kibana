@@ -59,14 +59,14 @@ export KIBANA_PKG_BRANCH="$kbnBranch"
 nodeVersion="$(cat "$dir/.node-version")"
 nodeDir="$cacheDir/node/$nodeVersion"
 nodeBin="$nodeDir/bin"
-classifier="-x64.tar.gz"
+classifier="x64.tar.gz"
 
 UNAME=$(uname)
 OS="linux"
 if [[ "$UNAME" = *"MINGW64_NT"* ]]; then
   OS="win"
   nodeBin="$HOME/node"
-  classifier="-x64.zip"
+  classifier="x64.zip"
 elif [[ "$UNAME" == "Darwin" ]]; then
   OS="darwin"
 fi
