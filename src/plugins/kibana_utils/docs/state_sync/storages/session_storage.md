@@ -1,6 +1,6 @@
 # Session Storage
 
-To sync state from state containers to `sessionStorage` use `sessionStorageStateStorage`.
+To sync state from state containers to `sessionStorage` use `createSessionStorageStateStorage`.
 
 ```ts
 import {
@@ -27,7 +27,7 @@ stateContainer.set({ count: 2 });
 stop();
 ```
 
-You can also imperative use `sessionStorageStateStorage`:
+You can also use `createSessionStorageStateStorage` imperatively:
 
 ```ts
 const stateStorage = createSessionStorageStateStorage();
