@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient, IClusterClient } from 'kibana/server';
 
 export interface CheckContext {
   deploymentId: string;
@@ -16,4 +16,4 @@ export type PulsePOCCheckFunction<T = unknown> = (
   context: CheckContext
 ) => Promise<T[] | undefined>;
 
-export type PulsePOCSetupFunction = (es: IScopedClusterClient, indexName: string) => Promise<void>;
+export type PulsePOCSetupFunction = (es: IClusterClient, indexName: string) => Promise<void>;

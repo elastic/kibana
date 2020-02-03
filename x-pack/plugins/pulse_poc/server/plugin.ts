@@ -42,13 +42,12 @@ export class PulsePocPlugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public async setup(core: CoreSetup) {
-    const { adminClient } = core.elasticsearch;
     const logger = this.initializerContext.logger.get('pulse-service');
     logger.info(
       `Starting up POC pulse service, which wouldn't actually be part of Kibana in reality`
     );
-
-    await adminClient.callAsInternalUser('indices.putTemplate', {
+    const esClient = core.elasticsearch.createClient('xpack-pulse_poc');
+    await esClient.callAsInternalUser('indices.putTemplate', {
       name: 'pulse-poc-raw-template',
       body: {
         index_patterns: [PulsePocPlugin.getIndexName('*')],
@@ -152,6 +151,16 @@ export class PulsePocPlugin {
         const channels = await Promise.all(allChannelCheckResults);
         return response.ok({ body: { channels } });
       }
+    );
+
+    await Promise.all(
+      this.channels.reduce((promises, { id, checks }) => {
+        const index = PulsePocPlugin.getIndexName(id);
+        return [
+          ...checks.map(async ({ setup }) => setup && (await setup(esClient, index))),
+          ...promises,
+        ];
+      }, [] as Array<Promise<void>>)
     );
   }
 
