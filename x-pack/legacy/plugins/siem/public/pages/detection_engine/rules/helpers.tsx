@@ -138,3 +138,13 @@ export const setFieldValue = (
       form.setFieldValue(key, val);
     }
   });
+
+export const redirectToDetections = (
+  isSignalIndexExists: boolean | null,
+  isAuthenticated: boolean | null,
+  hasEncryptionKey: boolean | null
+) =>
+  isSignalIndexExists != null &&
+  isAuthenticated != null &&
+  hasEncryptionKey != null &&
+  (!isSignalIndexExists || !isAuthenticated || !hasEncryptionKey);

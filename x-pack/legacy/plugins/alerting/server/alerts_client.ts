@@ -29,7 +29,7 @@ import {
   CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../../plugins/security/server';
-import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../../plugins/task_manager/server';
 
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
@@ -45,7 +45,7 @@ interface ConstructorOptions {
   taskManager: TaskManagerStartContract;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
   spaceId?: string;
   namespace?: string;
   getUserName: () => Promise<string | null>;
@@ -120,7 +120,7 @@ export class AlertsClient {
   private readonly invalidateAPIKey: (
     params: InvalidateAPIKeyParams
   ) => Promise<InvalidateAPIKeyResult>;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
 
   constructor({
     alertTypeRegistry,
