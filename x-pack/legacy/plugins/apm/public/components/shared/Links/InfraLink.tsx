@@ -8,6 +8,7 @@ import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import { compact } from 'lodash';
 import React from 'react';
 import url from 'url';
+import { AppMountContext } from 'kibana/public';
 import { fromQuery } from './url_helpers';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
@@ -15,6 +16,7 @@ interface InfraQueryParams {
   time?: number;
   from?: number;
   to?: number;
+  filter?: string;
 }
 
 interface Props extends EuiLinkAnchorProps {
@@ -23,12 +25,24 @@ interface Props extends EuiLinkAnchorProps {
   children?: React.ReactNode;
 }
 
-export function InfraLink({ path, query = {}, ...rest }: Props) {
-  const { core } = useApmPluginContext();
+export const getInfraHref = ({
+  basePath,
+  query,
+  path
+}: {
+  basePath: AppMountContext['core']['http']['basePath'];
+  query: InfraQueryParams;
+  path?: string;
+}) => {
   const nextSearch = fromQuery(query);
-  const href = url.format({
-    pathname: core.http.basePath.prepend('/app/infra'),
+  return url.format({
+    pathname: basePath.prepend('/app/infra'),
     hash: compact([path, nextSearch]).join('?')
   });
+};
+
+export function InfraLink({ path, query = {}, ...rest }: Props) {
+  const { core } = useApmPluginContext();
+  const href = getInfraHref({ basePath: core.http.basePath, query, path });
   return <EuiLink {...rest} href={href} />;
 }

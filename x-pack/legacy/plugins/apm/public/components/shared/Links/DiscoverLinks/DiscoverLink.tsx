@@ -5,6 +5,8 @@
  */
 
 import { EuiLink } from '@elastic/eui';
+import { Location } from 'history';
+import { AppMountContext } from 'kibana/public';
 import React from 'react';
 import url from 'url';
 import rison, { RisonValue } from 'rison-node';
@@ -30,10 +32,15 @@ interface Props {
   children: React.ReactNode;
 }
 
-export function DiscoverLink({ query = {}, ...rest }: Props) {
-  const { core } = useApmPluginContext();
-  const location = useLocation();
-
+export const getDiscoveryHref = ({
+  basePath,
+  location,
+  query
+}: {
+  basePath: AppMountContext['core']['http']['basePath'];
+  location: Location;
+  query: Props['query'];
+}) => {
   const risonQuery = {
     _g: getTimepickerRisonData(location.search),
     _a: {
@@ -43,10 +50,22 @@ export function DiscoverLink({ query = {}, ...rest }: Props) {
   };
 
   const href = url.format({
-    pathname: core.http.basePath.prepend('/app/kibana'),
+    pathname: basePath.prepend('/app/kibana'),
     hash: `/discover?_g=${rison.encode(risonQuery._g)}&_a=${rison.encode(
       risonQuery._a as RisonValue
     )}`
+  });
+  return href;
+};
+
+export function DiscoverLink({ query = {}, ...rest }: Props) {
+  const { core } = useApmPluginContext();
+  const location = useLocation();
+
+  const href = getDiscoveryHref({
+    basePath: core.http.basePath,
+    query,
+    location
   });
 
   return <EuiLink {...rest} href={href} />;
