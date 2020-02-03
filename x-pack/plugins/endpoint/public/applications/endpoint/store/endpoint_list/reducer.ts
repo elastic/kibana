@@ -14,6 +14,7 @@ const initialState = (): ManagementState => {
     pageSize: 10,
     pageIndex: 0,
     total: 0,
+    loading: false,
   };
 };
 
@@ -34,6 +35,7 @@ export const endpointListReducer: Reducer<ManagementState, AppAction> = (
       total,
       pageSize,
       pageIndex,
+      loading: false,
     };
   }
 
@@ -45,6 +47,7 @@ export const endpointListReducer: Reducer<ManagementState, AppAction> = (
     return {
       ...state,
       ...action.payload,
+      loading: true,
     };
   }
 

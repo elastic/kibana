@@ -21,6 +21,7 @@ export interface ManagementState {
   total: number;
   pageSize: number;
   pageIndex: number;
+  loading: boolean;
 }
 
 export interface ManagementPagination {
