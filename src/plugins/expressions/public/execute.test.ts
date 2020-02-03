@@ -69,7 +69,7 @@ describe('ExpressionDataHandler', () => {
 
     it('allows passing in search context', () => {
       const expressionDataHandler = new ExpressionDataHandler(expressionString, {
-        searchContext: { type: 'kibana_context', filters: [] },
+        searchContext: { filters: [] },
       });
       expect(expressionDataHandler.getExpression()).toEqual(expressionString);
     });

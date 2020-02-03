@@ -350,7 +350,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private async updateHandler() {
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
-        type: 'kibana_context',
         timeRange: this.timeRange,
         query: this.input.query,
         filters: this.input.filters,

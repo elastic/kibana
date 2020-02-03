@@ -49,7 +49,7 @@ export function ExpressionWrapper({
             className="lnsExpressionRenderer__component"
             padding="m"
             expression={expression}
-            searchContext={{ ...context, type: 'kibana_context' }}
+            searchContext={{ ...context }}
             renderError={error => <div data-test-subj="expression-renderer-error">{error}</div>}
           />
         </div>

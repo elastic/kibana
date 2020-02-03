@@ -25,7 +25,6 @@ import {
   parseExpression,
   formatExpression,
   ExpressionValue,
-  ExpressionValueSearchContext,
 } from '../common';
 
 /**
@@ -57,17 +56,11 @@ export class ExpressionDataHandler {
     this.abortController = new AbortController();
     this.inspectorAdapters = params.inspectorAdapters || this.getActiveInspectorAdapters();
 
-    const search: ExpressionValueSearchContext = {
-      type: 'kibana_context',
-      ...params.searchContext,
-    };
-
-    const defaultContext = { type: 'null' };
-
+    const defaultInput = { type: 'null' };
     const interpreter = getInterpreter();
     this.promise = interpreter
-      .interpretAst<any, ExpressionValue>(this.ast, params.context || defaultContext, {
-        search,
+      .interpretAst<any, ExpressionValue>(this.ast, params.context || defaultInput, {
+        search: params.searchContext,
         inspectorAdapters: this.inspectorAdapters,
         abortSignal: this.abortController.signal,
         variables: params.variables,
