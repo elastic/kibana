@@ -99,7 +99,7 @@ export const configureAppAngularModule = (
     .value('esUrl', getEsUrl(newPlatform))
     .value('uiCapabilities', newPlatform.application.capabilities)
     .config(setupCompileProvider(newPlatform))
-    .config(setupLocationProvider(newPlatform))
+    .config(setupLocationProvider())
     .config($setupXsrfRequestInterceptor(newPlatform))
     .run(capture$httpLoadingCount(newPlatform))
     .run($setupBreadcrumbsAutoClear(newPlatform, isLocalAngular))
@@ -130,9 +130,7 @@ const setupCompileProvider = (newPlatform: LegacyCoreStart) => (
   }
 };
 
-const setupLocationProvider = (newPlatform: CoreStart) => (
-  $locationProvider: ILocationProvider
-) => {
+const setupLocationProvider = () => ($locationProvider: ILocationProvider) => {
   $locationProvider.html5Mode({
     enabled: false,
     requireBase: false,
@@ -173,9 +171,6 @@ export const $setupXsrfRequestInterceptor = (newPlatform: LegacyCoreStart) => {
  * and adds a root-level watcher that will capture the count of
  * active $http requests on each digest loop and expose the count to
  * the core.loadingCount api
- * @param  {Angular.Scope} $rootScope
- * @param  {HttpService} $http
- * @return {undefined}
  */
 const capture$httpLoadingCount = (newPlatform: CoreStart) => (
   $rootScope: IRootScopeService,
@@ -388,13 +383,13 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart, isLocalAngular: boole
     try {
       if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
         newPlatform.notifications.toasts.addWarning({
-          title: i18n.translate('common.ui.chrome.bigUrlWarningNotificationTitle', {
+          title: i18n.translate('kibana_legacy.bigUrlWarningNotificationTitle', {
             defaultMessage: 'The URL is big and Kibana might stop working',
           }),
           text: toMountPoint(
             <Fragment>
               <FormattedMessage
-                id="common.ui.chrome.bigUrlWarningNotificationMessage"
+                id="kibana_legacy.bigUrlWarningNotificationMessage"
                 defaultMessage="Either enable the {storeInSessionStorageParam} option
                   in {advancedSettingsLink} or simplify the onscreen visuals."
                 values={{
@@ -402,7 +397,7 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart, isLocalAngular: boole
                   advancedSettingsLink: (
                     <a href="#/management/kibana/settings">
                       <FormattedMessage
-                        id="common.ui.chrome.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
+                        id="kibana_legacy.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
                         defaultMessage="advanced settings"
                       />
                     </a>

@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 // browsers format Error.stack differently; always include message
 export function formatStack(err: Record<string, any>) {
   if (err.stack && err.stack.indexOf(err.message) === -1) {
-    return i18n.translate('common.ui.notify.toaster.errorMessage', {
+    return i18n.translate('kibana_legacy.notify.toaster.errorMessage', {
       defaultMessage: `Error: {errorMessage}
       {errorStack}`,
       values: {
