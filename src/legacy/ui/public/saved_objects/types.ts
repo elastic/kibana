@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import {
   ChromeStart,
   OverlayStart,
@@ -23,8 +24,11 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
 } from 'kibana/public';
-import { SearchSource, SearchSourceContract } from 'ui/courier';
-import { IIndexPattern, IndexPatternsContract } from '../../../../plugins/data/public';
+import {
+  IIndexPattern,
+  IndexPatternsContract,
+  ISearchSource,
+} from '../../../../plugins/data/public';
 
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
@@ -46,7 +50,7 @@ export interface SavedObject {
   lastSavedTitle: string;
   migrationVersion?: Record<string, any>;
   save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
-  searchSource?: SearchSourceContract;
+  searchSource?: ISearchSource;
   showInRecentlyAccessed: boolean;
   title: string;
 }
@@ -88,7 +92,7 @@ export interface SavedObjectConfig {
   mapping?: any;
   migrationVersion?: Record<string, any>;
   path?: string;
-  searchSource?: SearchSource | boolean;
+  searchSource?: ISearchSource | boolean;
   type?: string;
 }
 

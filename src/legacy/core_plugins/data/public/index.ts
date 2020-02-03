@@ -28,11 +28,13 @@ export function plugin() {
 
 /** @public types */
 export { DataStart };
-
-export { Field, FieldType, IFieldList, IndexPattern } from './index_patterns';
-export { SavedQuery, SavedQueryTimeFilter } from '../../../../plugins/data/public';
+export {
+  SavedQueryAttributes,
+  SavedQuery,
+  SavedQueryTimeFilter,
+} from '../../../../plugins/data/public';
 
 /** @public static code */
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
-export { getFromSavedObject, getRoutes, flattenHitWrapper } from './index_patterns';
+export { getRequestInspectorStats, getResponseInspectorStats } from './search';

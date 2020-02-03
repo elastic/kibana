@@ -5,19 +5,21 @@
  */
 
 import {
+  SERVICE_NAME,
   TRANSACTION_DURATION,
-  TRANSACTION_SAMPLED
+  TRANSACTION_SAMPLED,
+  TRANSACTION_NAME
 } from '../../../common/elasticsearch_fieldnames';
+import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
+import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { PromiseReturnType } from '../../../typings/common';
+import { SortOptions } from '../../../typings/elasticsearch/aggregations';
+import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters
 } from '../helpers/setup_request';
-import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import { SortOptions } from '../../../typings/elasticsearch/aggregations';
-import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 
 interface TopTransactionOptions {
   type: 'top_transactions';
@@ -38,7 +40,7 @@ export function transactionGroupsFetcher(
   options: Options,
   setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
-  const { client, config } = setup;
+  const { client } = setup;
 
   const projection = getTransactionGroupsProjection({
     setup,
@@ -50,6 +52,13 @@ export function transactionGroupsFetcher(
     { '@timestamp': { order: 'desc' as const } }
   ];
 
+  const isTopTraces = options.type === 'top_traces';
+
+  if (isTopTraces) {
+    // Delete the projection aggregation when searching for traces, as it should use the combined aggregation instead
+    delete projection.body.aggs;
+  }
+
   const params = mergeProjection(projection, {
     body: {
       size: 0,
@@ -60,19 +69,18 @@ export function transactionGroupsFetcher(
         }
       },
       aggs: {
-        transactions: {
-          terms: {
-            ...projection.body.aggs.transactions.terms,
-            order: { sum: 'desc' as const },
-            size: config['xpack.apm.ui.transactionGroupBucketSize']
+        transaction_groups: {
+          composite: {
+            size: 10000,
+            sources: [
+              ...(isTopTraces
+                ? [{ service: { terms: { field: SERVICE_NAME } } }]
+                : []),
+              { transaction: { terms: { field: TRANSACTION_NAME } } }
+            ]
           },
           aggs: {
-            sample: {
-              top_hits: {
-                size: 1,
-                sort
-              }
-            },
+            sample: { top_hits: { size: 1, sort } },
             avg: { avg: { field: TRANSACTION_DURATION } },
             p95: {
               percentiles: { field: TRANSACTION_DURATION, percents: [95] }

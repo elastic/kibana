@@ -7,15 +7,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  Axis,
-  Chart,
-  getAxisId,
-  niceTimeFormatter,
-  Position,
-  Settings,
-  TooltipValue,
-} from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings, TooltipValue } from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
@@ -94,7 +86,7 @@ export const MetricsExplorerChart = ({
         <EuiTitle size="xs">
           <EuiFlexGroup alignItems="center">
             <ChartTitle>
-              <EuiToolTip content={title}>
+              <EuiToolTip content={title} anchorClassName="metricsExplorerTitleAnchor">
                 <span>{title}</span>
               </EuiToolTip>
             </ChartTitle>
@@ -126,7 +118,7 @@ export const MetricsExplorerChart = ({
         </EuiFlexGroup>
       )}
       <div className="infrastructureChart" style={{ height, width }}>
-        {series.rows.length > 0 ? (
+        {metrics.length && series.rows.length > 0 ? (
           <Chart>
             {metrics.map((metric, id) => (
               <MetricExplorerSeriesChart
@@ -139,13 +131,13 @@ export const MetricsExplorerChart = ({
               />
             ))}
             <Axis
-              id={getAxisId('timestamp')}
+              id={'timestamp'}
               position={Position.Bottom}
               showOverlappingTicks={true}
               tickFormat={dateFormatter}
             />
             <Axis
-              id={getAxisId('values')}
+              id={'values'}
               position={Position.Left}
               tickFormat={yAxisFormater}
               domain={domain}
@@ -167,7 +159,7 @@ export const MetricsExplorerChart = ({
 };
 
 const ChartTitle = euiStyled.div`
-  width: 100%
+  width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

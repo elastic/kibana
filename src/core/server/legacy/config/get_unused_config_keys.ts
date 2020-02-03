@@ -20,10 +20,10 @@
 import { difference, get, set } from 'lodash';
 // @ts-ignore
 import { getTransform } from '../../../../legacy/deprecation/index';
-import { unset, getFlattenedObject } from '../../../../legacy/utils';
+import { unset } from '../../../../legacy/utils';
+import { getFlattenedObject } from '../../../utils';
 import { hasConfigPathIntersection } from '../../config';
-import { LegacyPluginSpec } from '../plugins/find_legacy_plugin_specs';
-import { LegacyConfig } from './types';
+import { LegacyPluginSpec, LegacyConfig, LegacyVars } from '../types';
 
 const getFlattenedKeys = (object: object) => Object.keys(getFlattenedObject(object));
 
@@ -37,7 +37,7 @@ export async function getUnusedConfigKeys({
   coreHandledConfigPaths: string[];
   pluginSpecs: LegacyPluginSpec[];
   disabledPluginSpecs: LegacyPluginSpec[];
-  settings: Record<string, any>;
+  settings: LegacyVars;
   legacyConfig: LegacyConfig;
 }) {
   // transform deprecated plugin settings

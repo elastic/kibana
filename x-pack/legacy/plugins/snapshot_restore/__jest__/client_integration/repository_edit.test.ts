@@ -22,9 +22,7 @@ jest.mock('ui/i18n', () => {
   return { I18nContext };
 });
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<RepositoryEdit />', () => {
+describe('<RepositoryEdit />', () => {
   let testBed: TestBed<RepositoryEditTestSubjects>;
   let testBedRepositoryAdd: TestBed<RepositoryAddTestSubjects>;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -101,7 +99,7 @@ describe.skip('<RepositoryEdit />', () => {
       const { find } = testBed;
 
       expect(find('locationInput').props().defaultValue).toBe(settings.location);
-      expect(find('compressToggle').props().checked).toBe(settings.compress);
+      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
       expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
       expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
         settings.maxSnapshotBytesPerSec
@@ -109,7 +107,7 @@ describe.skip('<RepositoryEdit />', () => {
       expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
         settings.maxRestoreBytesPerSec
       );
-      expect(find('readOnlyToggle').props().checked).toBe(settings.readonly);
+      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
     });
 
     it('readonly repository', async () => {
@@ -145,7 +143,7 @@ describe.skip('<RepositoryEdit />', () => {
       expect(find('clientInput').props().defaultValue).toBe(settings.client);
       expect(find('containerInput').props().defaultValue).toBe(settings.container);
       expect(find('basePathInput').props().defaultValue).toBe(settings.basePath);
-      expect(find('compressToggle').props().checked).toBe(settings.compress);
+      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
       expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
       expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
         settings.maxSnapshotBytesPerSec
@@ -154,7 +152,7 @@ describe.skip('<RepositoryEdit />', () => {
         settings.maxRestoreBytesPerSec
       );
       expect(find('locationModeSelect').props().value).toBe(settings.locationMode);
-      expect(find('readOnlyToggle').props().checked).toBe(settings.readonly);
+      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
     });
 
     it('gcs repository', async () => {
@@ -176,7 +174,7 @@ describe.skip('<RepositoryEdit />', () => {
       expect(find('clientInput').props().defaultValue).toBe(settings.client);
       expect(find('bucketInput').props().defaultValue).toBe(settings.bucket);
       expect(find('basePathInput').props().defaultValue).toBe(settings.basePath);
-      expect(find('compressToggle').props().checked).toBe(settings.compress);
+      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
       expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
       expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
         settings.maxSnapshotBytesPerSec
@@ -184,7 +182,7 @@ describe.skip('<RepositoryEdit />', () => {
       expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
         settings.maxRestoreBytesPerSec
       );
-      expect(find('readOnlyToggle').props().checked).toBe(settings.readonly);
+      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
     });
 
     it('hdfs repository', async () => {
@@ -209,8 +207,8 @@ describe.skip('<RepositoryEdit />', () => {
 
       expect(find('uriInput').props().defaultValue).toBe('elastic.co');
       expect(find('pathInput').props().defaultValue).toBe(settings.path);
-      expect(find('loadDefaultsToggle').props().checked).toBe(settings.loadDefault);
-      expect(find('compressToggle').props().checked).toBe(settings.compress);
+      expect(find('loadDefaultsToggle').props()['aria-checked']).toBe(settings.loadDefault);
+      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
       expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
       expect(find('securityPrincipalInput').props().defaultValue).toBe(
         settings['security.principal']
@@ -221,7 +219,7 @@ describe.skip('<RepositoryEdit />', () => {
       expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
         settings.maxRestoreBytesPerSec
       );
-      expect(find('readOnlyToggle').props().checked).toBe(settings.readonly);
+      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
 
       const codeEditor = testBed.component.find('EuiCodeEditor');
       expect(JSON.parse(codeEditor.props().value as string)).toEqual({
@@ -254,9 +252,9 @@ describe.skip('<RepositoryEdit />', () => {
       expect(find('clientInput').props().defaultValue).toBe(settings.client);
       expect(find('bucketInput').props().defaultValue).toBe(settings.bucket);
       expect(find('basePathInput').props().defaultValue).toBe(settings.basePath);
-      expect(find('compressToggle').props().checked).toBe(settings.compress);
+      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
       expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
-      expect(find('serverSideEncryptionToggle').props().checked).toBe(
+      expect(find('serverSideEncryptionToggle').props()['aria-checked']).toBe(
         settings.serverSideEncryption
       );
       expect(find('bufferSizeInput').props().defaultValue).toBe(settings.bufferSize);
@@ -268,7 +266,7 @@ describe.skip('<RepositoryEdit />', () => {
       expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
         settings.maxRestoreBytesPerSec
       );
-      expect(find('readOnlyToggle').props().checked).toBe(settings.readonly);
+      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
     });
   });
 });

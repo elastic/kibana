@@ -34,7 +34,7 @@ import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
 import { areFieldsDifferent } from '../../lib/charts';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
-import { isBackgroundDark } from '../../../../common/set_is_reversed';
+import { isBackgroundDark } from '../../../lib/set_is_reversed';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
 
 export class TimeseriesVisualization extends Component {
@@ -79,10 +79,14 @@ export class TimeseriesVisualization extends Component {
   static getYAxisDomain = model => {
     const axisMin = get(model, 'axis_min', '').toString();
     const axisMax = get(model, 'axis_max', '').toString();
+    const fit = model.series
+      ? model.series.filter(({ hidden }) => !hidden).every(({ fill }) => fill === '0')
+      : model.fill === '0';
 
     return {
       min: axisMin.length ? Number(axisMin) : undefined,
       max: axisMax.length ? Number(axisMax) : undefined,
+      fit,
     };
   };
 

@@ -7,9 +7,6 @@
 import React from 'react';
 import {
   ScaleType,
-  getSpecId,
-  DataSeriesColorsValues,
-  CustomSeriesColorsMap,
   AreaSeries,
   BarSeries,
   RecursivePartial,
@@ -45,13 +42,6 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack }: Pr
     colorTransformer(MetricsExplorerColor.color0);
 
   const yAccessor = `metric_${id}`;
-  const specId = getSpecId(yAccessor);
-  const colors: DataSeriesColorsValues = {
-    colorValues: [],
-    specId,
-  };
-  const customColors: CustomSeriesColorsMap = new Map();
-  customColors.set(colors, color);
   const chartId = `series-${series.id}-${yAccessor}`;
 
   const seriesAreaStyle: RecursivePartial<AreaSeriesStyle> = {
@@ -66,8 +56,8 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack }: Pr
   };
   return (
     <AreaSeries
+      id={yAccessor}
       key={chartId}
-      id={specId}
       name={createMetricLabel(metric)}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
@@ -76,7 +66,7 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack }: Pr
       data={series.rows}
       stackAccessors={stack ? ['timestamp'] : void 0}
       areaSeriesStyle={seriesAreaStyle}
-      customSeriesColors={customColors}
+      customSeriesColors={[color]}
     />
   );
 };
@@ -87,13 +77,6 @@ export const MetricsExplorerBarChart = ({ metric, id, series, stack }: Props) =>
     colorTransformer(MetricsExplorerColor.color0);
 
   const yAccessor = `metric_${id}`;
-  const specId = getSpecId(yAccessor);
-  const colors: DataSeriesColorsValues = {
-    colorValues: [],
-    specId,
-  };
-  const customColors: CustomSeriesColorsMap = new Map();
-  customColors.set(colors, color);
   const chartId = `series-${series.id}-${yAccessor}`;
 
   const seriesBarStyle: RecursivePartial<BarSeriesStyle> = {
@@ -108,8 +91,8 @@ export const MetricsExplorerBarChart = ({ metric, id, series, stack }: Props) =>
   };
   return (
     <BarSeries
+      id={yAccessor}
       key={chartId}
-      id={specId}
       name={createMetricLabel(metric)}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
@@ -118,7 +101,7 @@ export const MetricsExplorerBarChart = ({ metric, id, series, stack }: Props) =>
       data={series.rows}
       stackAccessors={stack ? ['timestamp'] : void 0}
       barSeriesStyle={seriesBarStyle}
-      customSeriesColors={customColors}
+      customSeriesColors={[color]}
     />
   );
 };

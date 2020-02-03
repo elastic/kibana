@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Field } from 'ui/index_patterns';
-import { AggConfig } from '../../../vis';
+import { Field } from 'src/plugins/data/public';
+import { AggConfig } from '../../agg_config';
 
 type AggTypeFieldFilter = (field: Field, aggConfig: AggConfig) => boolean;
 

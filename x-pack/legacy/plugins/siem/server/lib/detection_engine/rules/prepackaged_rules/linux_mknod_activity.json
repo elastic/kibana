@@ -1,68 +1,25 @@
 {
-  "rule_id": "61c31c14-507f-4627-8c31-072556b89a9c",
-  "risk_score": 50,
-  "description": "Linux: Mknod Activity",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Linux: Mknod Activity",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.name: mknod",
-  "language": "kuery",
-  "filters": [
-    {
-      "meta": {
-        "negate": false,
-        "type": "phrase",
-        "key": "event.action",
-        "value": "process_started",
-        "params": {
-          "query": "process_started"
-        },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
-      },
-      "query": {
-        "match": {
-          "event.action": {
-            "query": "process_started",
-            "type": "phrase"
-          }
-        }
-      },
-      "$state": {
-        "store": "appState"
-      }
-    },
-    {
-      "meta": {
-        "negate": false,
-        "type": "phrase",
-        "key": "event.dataset",
-        "value": "process",
-        "params": {
-          "query": "process"
-        },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
-      },
-      "query": {
-        "match": {
-          "event.dataset": {
-            "query": "process",
-            "type": "phrase"
-          }
-        }
-      },
-      "$state": {
-        "store": "appState"
-      }
-    }
+  "description": "The Linux mknod program is sometimes used in the command payload of remote command injection (RCI) and other exploits to export a command shell when the traditional version of netcat is not available to the payload.",
+  "false_positives": [
+    "Mknod is a Linux system program. Some normal use of this program, at varying levels of frequency, may originate from scripts, automation tools and frameworks. Usage by web servers is more likely to be suspicious."
   ],
-  "enabled": false,
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 33,
+  "name": "Mknod Process Activity",
+  "query": "process.name: mknod and event.action:executed",
+  "references": [
+    "https://pen-testing.sans.org/blog/2013/05/06/netcat-without-e-no-problem"
+  ],
+  "risk_score": 21,
+  "rule_id": "61c31c14-507f-4627-8c31-072556b89a9c",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "type": "query",
   "version": 1
 }

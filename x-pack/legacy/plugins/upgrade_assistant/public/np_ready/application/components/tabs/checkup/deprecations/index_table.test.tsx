@@ -23,68 +23,69 @@ describe('IndexDeprecationTable', () => {
   // expected.
   test('render', () => {
     expect(shallowWithIntl(<IndexDeprecationTableUI {...defaultProps} />)).toMatchInlineSnapshot(`
-<EuiBasicTable
-  columns={
-    Array [
-      Object {
-        "field": "index",
-        "name": "Index",
-        "sortable": true,
-      },
-      Object {
-        "field": "details",
-        "name": "Details",
-      },
-      Object {
-        "actions": Array [
+      <EuiBasicTable
+        columns={
+          Array [
+            Object {
+              "field": "index",
+              "name": "Index",
+              "sortable": true,
+            },
+            Object {
+              "field": "details",
+              "name": "Details",
+            },
+            Object {
+              "actions": Array [
+                Object {
+                  "render": [Function],
+                },
+              ],
+            },
+          ]
+        }
+        hasActions={false}
+        items={
+          Array [
+            Object {
+              "details": "Index 1 deets",
+              "index": "index1",
+              "reindex": true,
+            },
+            Object {
+              "details": "Index 2 deets",
+              "index": "index2",
+              "reindex": true,
+            },
+            Object {
+              "details": "Index 3 deets",
+              "index": "index3",
+              "reindex": true,
+            },
+          ]
+        }
+        noItemsMessage="No items found"
+        onChange={[Function]}
+        pagination={
           Object {
-            "render": [Function],
-          },
-        ],
-      },
-    ]
-  }
-  hasActions={false}
-  items={
-    Array [
-      Object {
-        "details": "Index 1 deets",
-        "index": "index1",
-        "reindex": true,
-      },
-      Object {
-        "details": "Index 2 deets",
-        "index": "index2",
-        "reindex": true,
-      },
-      Object {
-        "details": "Index 3 deets",
-        "index": "index3",
-        "reindex": true,
-      },
-    ]
-  }
-  noItemsMessage="No items found"
-  onChange={[Function]}
-  pagination={
-    Object {
-      "hidePerPageOptions": true,
-      "pageIndex": 0,
-      "pageSize": 10,
-      "pageSizeOptions": Array [],
-      "totalItemCount": 3,
-    }
-  }
-  responsive={true}
-  sorting={
-    Object {
-      "sort": Object {
-        "direction": "asc",
-        "field": "index",
-      },
-    }
-  }
-/>
-`);
+            "hidePerPageOptions": true,
+            "pageIndex": 0,
+            "pageSize": 10,
+            "pageSizeOptions": Array [],
+            "totalItemCount": 3,
+          }
+        }
+        responsive={true}
+        sorting={
+          Object {
+            "sort": Object {
+              "direction": "asc",
+              "field": "index",
+            },
+          }
+        }
+        tableLayout="fixed"
+      />
+    `);
   });
 });

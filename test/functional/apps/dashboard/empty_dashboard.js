@@ -44,13 +44,13 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    it('should display add button', async () => {
-      const addButtonExists = await testSubjects.exists('emptyDashboardAddPanelButton');
-      expect(addButtonExists).to.be(true);
+    it('should display empty widget', async () => {
+      const emptyWidgetExists = await testSubjects.exists('emptyDashboardWidget');
+      expect(emptyWidgetExists).to.be(true);
     });
 
     it.skip('should open add panel when add button is clicked', async () => {
-      await testSubjects.click('emptyDashboardAddPanelButton');
+      await testSubjects.click('dashboardAddPanelButton');
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);
     });

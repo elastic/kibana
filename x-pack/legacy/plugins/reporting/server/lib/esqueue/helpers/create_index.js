@@ -15,7 +15,7 @@ const schema = {
     properties: {
       /**
        * Type of object that is triggering this report. Should be either search, visualization or dashboard.
-       * Used for phone home stats only.
+       * Used for job listing and telemetry stats only.
        */
       objectType: {
         type: 'text',
@@ -78,13 +78,13 @@ export function createIndex(client, indexName, indexSettings = {}) {
   };
 
   return client
-    .callWithInternalUser('indices.exists', {
+    .callAsInternalUser('indices.exists', {
       index: indexName,
     })
     .then(exists => {
       if (!exists) {
         return client
-          .callWithInternalUser('indices.create', {
+          .callAsInternalUser('indices.create', {
             index: indexName,
             body: body,
           })

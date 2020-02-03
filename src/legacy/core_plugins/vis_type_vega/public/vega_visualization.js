@@ -16,22 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
 import { VegaView } from './vega_view/vega_view';
 import { VegaMapView } from './vega_view/vega_map_view';
-import { timefilter } from 'ui/timefilter';
-import { npStart } from 'ui/new_platform';
-
-import { findIndexPatternByTitle } from '../../data/public/index_patterns';
+import { getNotifications, getData, getSavedObjects } from './services';
 
 export const createVegaVisualization = ({ serviceSettings }) =>
   class VegaVisualization {
     constructor(el, vis) {
-      this.savedObjectsClient = chrome.getSavedObjectsClient();
       this._el = el;
       this._vis = vis;
+
+      this.savedObjectsClient = getSavedObjects();
+      this.dataPlugin = getData();
     }
 
     /**
@@ -40,9 +37,11 @@ export const createVegaVisualization = ({ serviceSettings }) =>
      * @returns {Promise<string>} index id
      */
     async findIndex(index) {
+      const { indexPatterns } = this.dataPlugin;
       let idxObj;
+
       if (index) {
-        idxObj = await findIndexPatternByTitle(this.savedObjectsClient, index);
+        idxObj = indexPatterns.findByTitle(this.savedObjectsClient, index);
         if (!idxObj) {
           throw new Error(
             i18n.translate('visTypeVega.visualization.indexNotFoundErrorMessage', {
@@ -52,7 +51,7 @@ export const createVegaVisualization = ({ serviceSettings }) =>
           );
         }
       } else {
-        idxObj = await npStart.plugins.data.indexPatterns.getDefault();
+        idxObj = await indexPatterns.getDefault();
         if (!idxObj) {
           throw new Error(
             i18n.translate('visTypeVega.visualization.unableToFindDefaultIndexErrorMessage', {
@@ -71,8 +70,10 @@ export const createVegaVisualization = ({ serviceSettings }) =>
      * @returns {Promise<void>}
      */
     async render(visData, visParams, status) {
+      const { toasts } = getNotifications();
+
       if (!visData && !this._vegaView) {
-        toastNotifications.addWarning(
+        toasts.addWarning(
           i18n.translate('visTypeVega.visualization.unableToRenderWithoutDataWarningMessage', {
             defaultMessage: 'Unable to render without data',
           })
@@ -86,7 +87,7 @@ export const createVegaVisualization = ({ serviceSettings }) =>
         if (this._vegaView) {
           this._vegaView.onError(error);
         } else {
-          toastNotifications.addError(error, {
+          toasts.addError(error, {
             title: i18n.translate('visTypeVega.visualization.renderErrorTitle', {
               defaultMessage: 'Vega error',
             }),
@@ -103,13 +104,14 @@ export const createVegaVisualization = ({ serviceSettings }) =>
           this._vegaView = null;
         }
 
-        const { filterManager } = npStart.plugins.data.query;
+        const { filterManager } = this.dataPlugin.query;
+        const { timefilter } = this.dataPlugin.query.timefilter;
         const vegaViewParams = {
           parentEl: this._el,
           vegaParser,
           serviceSettings,
-          queryfilter: filterManager,
-          timefilter: timefilter,
+          filterManager,
+          timefilter,
           findIndex: this.findIndex.bind(this),
         };
 

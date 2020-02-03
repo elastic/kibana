@@ -35,17 +35,27 @@ import optimizeMixin from '../../optimize';
 import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects/saved_objects_mixin';
-import { sampleDataMixin } from './sample_data';
 import { capabilitiesMixin } from './capabilities';
-import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 import { sassMixin } from './sass';
 import { i18nMixin } from './i18n';
 
+/**
+ * @typedef {import('./kbn_server').KibanaConfig} KibanaConfig
+ * @typedef {import('./kbn_server').KibanaCore} KibanaCore
+ * @typedef {import('./kbn_server').LegacyPlugins} LegacyPlugins
+ */
+
 const rootDir = fromRoot('.');
 
 export default class KbnServer {
+  /**
+   * @param {Record<string, any>} settings
+   * @param {KibanaConfig} config
+   * @param {KibanaCore} core
+   * @param {LegacyPlugins} legacyPlugins
+   */
   constructor(settings, config, core, legacyPlugins) {
     this.name = pkg.name;
     this.version = pkg.version;
@@ -111,12 +121,6 @@ export default class KbnServer {
 
         // setup capabilities routes
         capabilitiesMixin,
-
-        // setup routes for installing/uninstalling sample data sets
-        sampleDataMixin,
-
-        // setup routes for short urls
-        urlShorteningMixin,
 
         // ensure that all bundles are built, or that the
         // watch bundle server is running

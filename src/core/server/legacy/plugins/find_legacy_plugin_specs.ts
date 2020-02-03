@@ -19,28 +19,89 @@
 
 import { Observable, merge, forkJoin } from 'rxjs';
 import { toArray, tap, distinct, map } from 'rxjs/operators';
+
 import {
   findPluginSpecs,
   defaultConfig,
   // @ts-ignore
 } from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
-import { LoggerFactory } from '../../logging';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
-import { LegacyConfig, LegacyConfigDeprecationProvider } from '../config';
 
-export interface LegacyPluginPack {
-  getPath(): string;
+import { LoggerFactory } from '../../logging';
+import { PackageInfo } from '../../config';
+
+import {
+  LegacyUiExports,
+  LegacyNavLink,
+  LegacyPluginSpec,
+  LegacyPluginPack,
+  LegacyConfig,
+} from '../types';
+
+const REMOVE_FROM_ARRAY: LegacyNavLink[] = [];
+
+function getUiAppsNavLinks({ uiAppSpecs = [] }: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]) {
+  return uiAppSpecs.flatMap(spec => {
+    if (!spec) {
+      return REMOVE_FROM_ARRAY;
+    }
+
+    const id = spec.pluginId || spec.id;
+
+    if (!id) {
+      throw new Error('Every app must specify an id');
+    }
+
+    if (spec.pluginId && !pluginSpecs.some(plugin => plugin.getId() === spec.pluginId)) {
+      throw new Error(`Unknown plugin id "${spec.pluginId}"`);
+    }
+
+    const listed = typeof spec.listed === 'boolean' ? spec.listed : true;
+
+    if (spec.hidden || !listed) {
+      return REMOVE_FROM_ARRAY;
+    }
+
+    return {
+      id,
+      category: spec.category,
+      title: spec.title,
+      order: typeof spec.order === 'number' ? spec.order : 0,
+      icon: spec.icon,
+      euiIconType: spec.euiIconType,
+      url: spec.url || `/app/${id}`,
+      linkToLastSubUrl: spec.linkToLastSubUrl,
+    };
+  });
 }
 
-export interface LegacyPluginSpec {
-  getId: () => unknown;
-  getExpectedKibanaVersion: () => string;
-  getConfigPrefix: () => string;
-  getDeprecationsProvider: () => LegacyConfigDeprecationProvider | undefined;
+function getNavLinks(uiExports: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]) {
+  return (uiExports.navLinkSpecs || [])
+    .map<LegacyNavLink>(spec => ({
+      id: spec.id,
+      category: spec.category,
+      title: spec.title,
+      order: typeof spec.order === 'number' ? spec.order : 0,
+      url: spec.url,
+      subUrlBase: spec.subUrlBase || spec.url,
+      disableSubUrlTracking: spec.disableSubUrlTracking,
+      icon: spec.icon,
+      euiIconType: spec.euiIconType,
+      linkToLastSub: 'linkToLastSubUrl' in spec ? spec.linkToLastSubUrl : false,
+      hidden: 'hidden' in spec ? spec.hidden : false,
+      disabled: 'disabled' in spec ? spec.disabled : false,
+      tooltip: spec.tooltip || '',
+    }))
+    .concat(getUiAppsNavLinks(uiExports, pluginSpecs))
+    .sort((a, b) => a.order - b.order);
 }
 
-export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: LoggerFactory) {
+export async function findLegacyPluginSpecs(
+  settings: unknown,
+  loggerFactory: LoggerFactory,
+  packageInfo: PackageInfo
+) {
   const configToMutate: LegacyConfig = defaultConfig(settings);
   const {
     pack$,
@@ -100,8 +161,7 @@ export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: Lo
       map(spec => {
         const name = spec.getId();
         const pluginVersion = spec.getExpectedKibanaVersion();
-        // @ts-ignore
-        const kibanaVersion = settings.pkg.version;
+        const kibanaVersion = packageInfo.version;
         return `Plugin "${name}" was disabled because it expected Kibana version "${pluginVersion}", and found "${kibanaVersion}".`;
       }),
       distinct(),
@@ -128,11 +188,14 @@ export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: Lo
     spec$.pipe(toArray()),
     log$.pipe(toArray())
   ).toPromise();
+  const uiExports = collectLegacyUiExports(pluginSpecs);
+  const navLinks = getNavLinks(uiExports, pluginSpecs);
 
   return {
     disabledPluginSpecs,
     pluginSpecs,
     pluginExtendedConfig: configToMutate,
-    uiExports: collectLegacyUiExports(pluginSpecs),
+    uiExports,
+    navLinks,
   };
 }

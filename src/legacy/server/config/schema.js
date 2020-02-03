@@ -70,20 +70,6 @@ export default () =>
 
     server: Joi.object({
       name: Joi.string().default(os.hostname()),
-      defaultRoute: Joi.string().regex(/^\//, `start with a slash`),
-      customResponseHeaders: Joi.object()
-        .unknown(true)
-        .default({}),
-      xsrf: Joi.object({
-        disableProtection: Joi.boolean().default(false),
-        whitelist: Joi.array()
-          .items(Joi.string().regex(/^\//, 'start with a slash'))
-          .default([]),
-        token: Joi.string()
-          .optional()
-          .notes('Deprecated'),
-      }).default(),
-
       // keep them for BWC, remove when not used in Legacy.
       // validation should be in sync with one in New platform.
       // https://github.com/elastic/kibana/blob/master/src/core/server/http/http_config.ts
@@ -103,12 +89,14 @@ export default () =>
 
       autoListen: HANDLED_IN_NEW_PLATFORM,
       cors: HANDLED_IN_NEW_PLATFORM,
+      customResponseHeaders: HANDLED_IN_NEW_PLATFORM,
       keepaliveTimeout: HANDLED_IN_NEW_PLATFORM,
       maxPayloadBytes: HANDLED_IN_NEW_PLATFORM,
       socketTimeout: HANDLED_IN_NEW_PLATFORM,
       ssl: HANDLED_IN_NEW_PLATFORM,
       compression: HANDLED_IN_NEW_PLATFORM,
       uuid: HANDLED_IN_NEW_PLATFORM,
+      xsrf: HANDLED_IN_NEW_PLATFORM,
     }).default(),
 
     uiSettings: HANDLED_IN_NEW_PLATFORM,
@@ -193,7 +181,7 @@ export default () =>
         .default('localhost'),
       watchPrebuild: Joi.boolean().default(false),
       watchProxyTimeout: Joi.number().default(10 * 60000),
-      useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
+      useBundleCache: Joi.boolean().default(!!process.env.CODE_COVERAGE ? true : Joi.ref('$prod')),
       sourceMaps: Joi.when('$prod', {
         is: true,
         then: Joi.boolean().valid(false),
@@ -266,7 +254,11 @@ export default () =>
           )
           .default([]),
       }).default(),
-      manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.2/manifest'),
+      manifestServiceUrl: Joi.string()
+        .default('')
+        .allow(''),
+      emsFileApiUrl: Joi.string().default('https://vector-staging.maps.elastic.co'),
+      emsTileApiUrl: Joi.string().default('https://tiles.maps.elastic.co'),
       emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.4'),
       emsFontLibraryUrl: Joi.string().default(
         'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'

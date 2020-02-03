@@ -15,11 +15,10 @@ import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
 import React, { useCallback, useState, useEffect } from 'react';
 
-import { DEFAULT_KBN_VERSION } from '../../../../../../common/constants';
 import { enableRules } from '../../../../../containers/detection_engine/rules';
-import { useKibanaUiSetting } from '../../../../../lib/settings/use_kibana_ui_setting';
 import { enableRulesAction } from '../../all/actions';
 import { Action } from '../../all/reducer';
+import { useStateToaster } from '../../../../../components/toasters';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,
@@ -34,8 +33,10 @@ export interface RuleSwitchProps {
   dispatch?: React.Dispatch<Action>;
   id: string;
   enabled: boolean;
+  isDisabled?: boolean;
   isLoading?: boolean;
   optionLabel?: string;
+  onChange?: (enabled: boolean) => void;
 }
 
 /**
@@ -44,34 +45,38 @@ export interface RuleSwitchProps {
 export const RuleSwitchComponent = ({
   dispatch,
   id,
+  isDisabled,
   isLoading,
   enabled,
   optionLabel,
+  onChange,
 }: RuleSwitchProps) => {
   const [myIsLoading, setMyIsLoading] = useState(false);
   const [myEnabled, setMyEnabled] = useState(enabled ?? false);
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const [, dispatchToaster] = useStateToaster();
 
   const onRuleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {
       setMyIsLoading(true);
       if (dispatch != null) {
-        await enableRulesAction([id], event.target.checked!, dispatch, kbnVersion);
+        await enableRulesAction([id], event.target.checked!, dispatch, dispatchToaster);
       } else {
         try {
           const updatedRules = await enableRules({
             ids: [id],
             enabled: event.target.checked!,
-            kbnVersion,
           });
           setMyEnabled(updatedRules[0].enabled);
+          if (onChange != null) {
+            onChange(updatedRules[0].enabled);
+          }
         } catch {
           setMyIsLoading(false);
         }
       }
       setMyIsLoading(false);
     },
-    [dispatch, id, kbnVersion]
+    [dispatch, id]
   );
 
   useEffect(() => {
@@ -96,7 +101,7 @@ export const RuleSwitchComponent = ({
             data-test-subj="rule-switch"
             label={optionLabel ?? ''}
             showLabel={!isEmpty(optionLabel)}
-            disabled={false}
+            disabled={isDisabled}
             checked={myEnabled}
             onChange={onRuleStateChange}
           />

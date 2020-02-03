@@ -22,9 +22,11 @@ import { overlayFlyoutServiceMock } from './flyout/flyout_service.mock';
 import { overlayModalServiceMock } from './modal/modal_service.mock';
 
 const createStartContractMock = () => {
+  const overlayStart = overlayModalServiceMock.createStartContract();
   const startContract: DeeplyMockedKeys<OverlayStart> = {
     openFlyout: overlayFlyoutServiceMock.createStartContract().open,
-    openModal: overlayModalServiceMock.createStartContract().open,
+    openModal: overlayStart.open,
+    openConfirm: overlayStart.openConfirm,
     banners: overlayBannersServiceMock.createStartContract(),
   };
   return startContract;

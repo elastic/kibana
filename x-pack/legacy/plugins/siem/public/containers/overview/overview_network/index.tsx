@@ -9,9 +9,9 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetOverviewNetworkQuery, OverviewNetworkData } from '../../../graphql/types';
+import { useUiSetting } from '../../../lib/kibana';
 import { State } from '../../../store';
 import { inputsModel, inputsSelectors } from '../../../store/inputs';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
@@ -55,7 +55,7 @@ export const OverviewNetworkComponentQuery = React.memo<
         to: endDate,
       },
       filterQuery: createFilter(filterQuery),
-      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
       inspect: isInspected,
     }}
   >

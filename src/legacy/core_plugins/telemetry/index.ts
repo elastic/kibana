@@ -91,8 +91,8 @@ const telemetry = (kibana: any) => {
           isNamespaceAgnostic: true,
         },
       },
-      async replaceInjectedVars(originalInjectedVars: any, request: any) {
-        const telemetryInjectedVars = await replaceTelemetryInjectedVars(request);
+      async replaceInjectedVars(originalInjectedVars: any, request: any, server: any) {
+        const telemetryInjectedVars = await replaceTelemetryInjectedVars(request, server);
         return Object.assign({}, originalInjectedVars, telemetryInjectedVars);
       },
       injectDefaultVars(server: Server) {

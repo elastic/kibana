@@ -50,7 +50,7 @@ describe('createSpacesTutorialContextFactory', () => {
   it('should create context with the current space id for the default space', async () => {
     const spacesService = await service.setup({
       http: coreMock.createSetup().http,
-      elasticsearch: elasticsearchServiceMock.createSetupContract(),
+      elasticsearch: elasticsearchServiceMock.createSetup(),
       authorization: securityMock.createSetup().authz,
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of(spacesConfig),

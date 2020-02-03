@@ -27,6 +27,7 @@ import {
   mockContextService,
   mockEnsureValidConfiguration,
   mockUiSettingsService,
+  mockRenderingService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -59,6 +60,7 @@ test('sets up services on "setup"', async () => {
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.setup).not.toHaveBeenCalled();
   expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
+  expect(mockRenderingService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -68,6 +70,7 @@ test('sets up services on "setup"', async () => {
   expect(mockLegacyService.setup).toHaveBeenCalledTimes(1);
   expect(mockSavedObjectsService.setup).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.setup).toHaveBeenCalledTimes(1);
+  expect(mockRenderingService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -155,6 +158,7 @@ test(`doesn't setup core services if config validation fails`, async () => {
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
   expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
+  expect(mockRenderingService.setup).not.toHaveBeenCalled();
 });
 
 test(`doesn't setup core services if legacy config validation fails`, async () => {

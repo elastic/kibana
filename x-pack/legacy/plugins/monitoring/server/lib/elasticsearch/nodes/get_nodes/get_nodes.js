@@ -29,7 +29,7 @@ import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_me
  * @param {Object} shardStats: per-node information about shards
  * @return {Array} node info combined with metrics for each node from handle_response
  */
-export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, shardStats) {
+export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, nodesShardCount) {
   checkParam(esIndexPattern, 'esIndexPattern in getNodes');
 
   const start = moment.utc(req.payload.timeRange.min).valueOf();
@@ -44,7 +44,7 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, s
   const min = start;
 
   const bucketSize = Math.max(
-    config.get('xpack.monitoring.min_interval_seconds'),
+    config.get('monitoring.ui.min_interval_seconds'),
     calculateAuto(100, duration).asSeconds()
   );
 
@@ -59,7 +59,7 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, s
 
   const params = {
     index: esIndexPattern,
-    size: config.get('xpack.monitoring.max_bucket_size'),
+    size: config.get('monitoring.ui.max_bucket_size'),
     ignoreUnavailable: true,
     body: {
       query: createQuery({
@@ -78,7 +78,7 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, s
           terms: {
             field: `source_node.uuid`,
             include: uuidsToInclude,
-            size: config.get('xpack.monitoring.max_bucket_size'),
+            size: config.get('monitoring.ui.max_bucket_size'),
           },
           aggs: {
             by_date: {
@@ -104,5 +104,9 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, s
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
 
-  return handleResponse(response, clusterStats, shardStats, pageOfNodes, { min, max, bucketSize });
+  return handleResponse(response, clusterStats, nodesShardCount, pageOfNodes, {
+    min,
+    max,
+    bucketSize,
+  });
 }

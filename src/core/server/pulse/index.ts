@@ -34,7 +34,7 @@ import { PulseElasticsearchClient } from './client_wrappers/elasticsearch';
 import { registerPulseRoutes } from './routes';
 
 export interface InternalPulseService {
-  getChannel: (id: string) => PulseChannel;
+  getChannel: <T = PulseInstruction>(id: string) => PulseChannel<T>;
 }
 
 export interface PulseSetupDeps {
@@ -114,12 +114,12 @@ export class PulseService {
     }
 
     return {
-      getChannel: (id: string) => {
+      getChannel: <T = PulseInstruction>(id: string): PulseChannel<T> => {
         const channel = this.channels.get(id);
         if (!channel) {
           throw new Error(`Unknown channel: ${id}`);
         }
-        return channel;
+        return channel as any;
       },
     };
   }

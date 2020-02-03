@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'visEditor', 'header', 'timePicker']);
   const comboBox = getService('comboBox');
 
   describe('dynamic options', () => {
@@ -55,7 +55,7 @@ export default function({ getService, getPageObjects }) {
 
       it('should not fetch new options when non-string is filtered', async () => {
         await comboBox.set('fieldSelect-0', 'clientip');
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.clickGo();
 
         const initialOptions = await comboBox.getOptionsList('listControlSelect0');
         expect(

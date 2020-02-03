@@ -1,6 +1,12 @@
 # Kibana Conventions
 
-- [Plugin Structure](#plugin-structure)
+- [Kibana Conventions](#kibana-conventions)
+  - [Plugin Structure](#plugin-structure)
+    - [The PluginInitializer](#the-plugininitializer)
+    - [The Plugin class](#the-plugin-class)
+    - [Applications](#applications)
+    - [Services](#services)
+    - [Usage Collection](#usage-collection)
 
 ## Plugin Structure
 
@@ -32,6 +38,7 @@ my_plugin/
     ├── index.ts
     └── plugin.ts
 ```
+- [Manifest file](/docs/development/core/server/kibana-plugin-server.pluginmanifest.md) should be defined on top level.
 - Both `server` and `public` should have an `index.ts` and a `plugin.ts` file:
   - `index.ts` should only contain:
     - The `plugin` export

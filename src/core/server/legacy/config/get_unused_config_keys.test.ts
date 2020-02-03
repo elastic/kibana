@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { LegacyPluginSpec } from '../plugins/find_legacy_plugin_specs';
-import { LegacyConfig } from './types';
+import { LegacyPluginSpec, LegacyConfig, LegacyVars } from '../types';
 import { getUnusedConfigKeys } from './get_unused_config_keys';
 
 describe('getUnusedConfigKeys', () => {
@@ -26,7 +25,7 @@ describe('getUnusedConfigKeys', () => {
     jest.resetAllMocks();
   });
 
-  const getConfig = (values: Record<string, any> = {}): LegacyConfig =>
+  const getConfig = (values: LegacyVars = {}): LegacyConfig =>
     ({
       get: () => values as any,
     } as LegacyConfig);
@@ -199,6 +198,24 @@ describe('getUnusedConfigKeys', () => {
         legacyConfig: getConfig({}),
       })
     ).toEqual(['foo.dolly']);
+  });
+
+  it('handles array values', async () => {
+    expect(
+      await getUnusedConfigKeys({
+        coreHandledConfigPaths: ['core', 'array'],
+        pluginSpecs: [],
+        disabledPluginSpecs: [],
+        settings: {
+          core: {
+            prop: 'value',
+            array: [1, 2, 3],
+          },
+          array: ['some', 'values'],
+        },
+        legacyConfig: getConfig({}),
+      })
+    ).toEqual([]);
   });
 
   describe('using deprecation', () => {

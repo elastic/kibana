@@ -58,6 +58,7 @@ export default {
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
+    '^fixtures/(.*)': '<rootDir>/src/fixtures/$1',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/src/dev/jest/mocks/style_mock.js',
@@ -69,7 +70,7 @@ export default {
   ],
   setupFilesAfterEnv: ['<rootDir>/src/dev/jest/setup/mocks.js'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
-  coverageReporters: ['html', 'text'],
+  coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
   moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
   testMatch: ['**/*.test.{js,ts,tsx}'],

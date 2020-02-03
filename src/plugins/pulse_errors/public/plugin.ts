@@ -19,23 +19,30 @@
 
 import { Plugin, CoreSetup, CoreStart } from 'kibana/public';
 import { Subject, Subscription } from 'rxjs';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { takeUntil } from 'rxjs/operators';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { PulseChannel } from 'src/core/public/pulse/channel';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ErrorInstruction } from 'src/core/server/pulse/collectors/errors';
 import { errorChannelPayloads } from './mock_data/errors';
 
 export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseErrorsPluginStart> {
   private readonly stop$ = new Subject();
   private instructionsSubscription?: Subscription;
   private instructionsSeen = new Set(); // TODO: possibly change this to a map later to store more detailed info.
-  constructor() {}
+  private errorsChannel?: PulseChannel<ErrorInstruction>;
 
   public async setup(core: CoreSetup) {
+    this.errorsChannel = core.pulse.getChannel('errors');
     errorChannelPayloads.forEach(element => core.pulse.getChannel('errors').sendPulse(element));
   }
 
   public start(core: CoreStart) {
-    this.instructionsSubscription = core.pulse
-      .getChannel('errors')
+    if (!this.errorsChannel) {
+      throw Error('unable to find errors channel');
+    }
+
+    this.instructionsSubscription = this.errorsChannel
       .instructions$()
       .pipe(takeUntil(this.stop$))
       .subscribe(instructions => {

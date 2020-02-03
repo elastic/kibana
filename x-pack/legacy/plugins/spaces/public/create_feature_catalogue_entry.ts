@@ -9,7 +9,7 @@ import {
   FeatureCatalogueEntry,
   FeatureCatalogueCategory,
 } from '../../../../../src/plugins/home/public';
-import { getSpacesFeatureDescription } from './lib/constants';
+import { getSpacesFeatureDescription } from './constants';
 
 export const createSpacesFeatureCatalogueEntry = (): FeatureCatalogueEntry => {
   return {

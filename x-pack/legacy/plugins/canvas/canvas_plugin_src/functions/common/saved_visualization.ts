@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunction } from 'src/plugins/expressions/common/types';
-import { VisualizeInput } from 'src/legacy/core_plugins/kibana/public/visualize/embeddable';
+import { VisualizeInput } from 'src/legacy/core_plugins/visualizations/public/embeddable';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,

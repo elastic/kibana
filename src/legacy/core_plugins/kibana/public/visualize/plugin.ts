@@ -34,23 +34,14 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../../../p
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { VisualizationsStart } from '../../../visualizations/public';
-import { VisualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable/constants';
-import { VisualizeConstants } from './visualize_constants';
+import { VisualizeConstants } from './np_ready/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
-import { defaultEditor, VisEditorTypesRegistryProvider } from './legacy_imports';
-import { SavedVisualizations } from './types';
-
-export interface LegacyAngularInjectedDependencies {
-  legacyChrome: any;
-  editorTypes: any;
-  savedObjectRegistry: any;
-  savedVisualizations: SavedVisualizations;
-}
+import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
+import { Chrome } from './legacy_imports';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -62,10 +53,11 @@ export interface VisualizePluginStartDependencies {
 
 export interface VisualizePluginSetupDependencies {
   __LEGACY: {
-    getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
+    legacyChrome: Chrome;
   };
   home: HomePublicPluginSetup;
   kibana_legacy: KibanaLegacySetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export class VisualizePlugin implements Plugin {
@@ -80,7 +72,7 @@ export class VisualizePlugin implements Plugin {
 
   public async setup(
     core: CoreSetup,
-    { home, kibana_legacy, __LEGACY: { getAngularDependencies } }: VisualizePluginSetupDependencies
+    { home, kibana_legacy, __LEGACY, usageCollection }: VisualizePluginSetupDependencies
   ) {
     kibana_legacy.registerLegacyApp({
       id: 'visualize',
@@ -99,9 +91,8 @@ export class VisualizePlugin implements Plugin {
           share,
         } = this.startDependencies;
 
-        const angularDependencies = await getAngularDependencies();
         const deps: VisualizeKibanaServices = {
-          ...angularDependencies,
+          ...__LEGACY,
           addBasePath: contextCore.http.basePath.prepend,
           core: contextCore as LegacyCoreStart,
           chrome: contextCore.chrome,
@@ -112,16 +103,18 @@ export class VisualizePlugin implements Plugin {
           localStorage: new Storage(localStorage),
           navigation,
           savedObjectsClient,
+          savedVisualizations: visualizations.getSavedVisualizationsLoader(),
           savedQueryService: data.query.savedQueries,
           share,
           toastNotifications: contextCore.notifications.toasts,
           uiSettings: contextCore.uiSettings,
           visualizeCapabilities: contextCore.application.capabilities.visualize,
           visualizations,
+          usageCollection,
         };
         setServices(deps);
 
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./np_ready/application');
         return renderApp(params.element, params.appBasePath, deps);
       },
     });
@@ -138,24 +131,19 @@ export class VisualizePlugin implements Plugin {
       showOnHomePage: true,
       category: FeatureCatalogueCategory.DATA,
     });
-
-    VisEditorTypesRegistryProvider.register(defaultEditor);
   }
 
   public start(
-    { savedObjects: { client: savedObjectsClient } }: CoreStart,
+    core: CoreStart,
     { embeddables, navigation, data, share, visualizations }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       data,
       embeddables,
       navigation,
-      savedObjectsClient,
+      savedObjectsClient: core.savedObjects.client,
       share,
       visualizations,
     };
-
-    const embeddableFactory = new VisualizeEmbeddableFactory(visualizations.types);
-    embeddables.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
   }
 }

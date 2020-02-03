@@ -20,7 +20,7 @@ export const SelectWithPlaceholder: typeof EuiSelect = props => (
     {...props}
     options={[
       { text: props.placeholder, value: NO_SELECTION },
-      ...props.options
+      ...(props.options || [])
     ]}
     value={isEmpty(props.value) ? NO_SELECTION : props.value}
     onChange={e => {

@@ -5,7 +5,7 @@
  */
 
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { WithCopyToClipboard } from '../../../lib/clipboard/with_copy_to_clipboard';

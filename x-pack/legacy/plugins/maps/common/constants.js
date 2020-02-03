@@ -8,24 +8,28 @@ import { i18n } from '@kbn/i18n';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
 export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
-export const EMS_FILES_DEFAULT_JSON_PATH = 'ems/files/file';
-export const EMS_GLYPHS_PATH = 'ems/fonts';
-export const EMS_SPRITES_PATH = 'ems/sprites';
+export const EMS_FILES_API_PATH = 'ems/files';
+export const EMS_FILES_DEFAULT_JSON_PATH = 'file';
+export const EMS_GLYPHS_PATH = 'fonts';
+export const EMS_SPRITES_PATH = 'sprites';
 
 export const EMS_TILES_CATALOGUE_PATH = 'ems/tiles';
-export const EMS_TILES_RASTER_STYLE_PATH = 'ems/tiles/raster/style';
-export const EMS_TILES_RASTER_TILE_PATH = 'ems/tiles/raster/tile';
+export const EMS_TILES_API_PATH = 'ems/tiles';
+export const EMS_TILES_RASTER_STYLE_PATH = 'raster/style';
+export const EMS_TILES_RASTER_TILE_PATH = 'raster/tile';
 
-export const EMS_TILES_VECTOR_STYLE_PATH = 'ems/tiles/vector/style';
-export const EMS_TILES_VECTOR_SOURCE_PATH = 'ems/tiles/vector/source';
-export const EMS_TILES_VECTOR_TILE_PATH = 'ems/tiles/vector/tile';
+export const EMS_TILES_VECTOR_STYLE_PATH = 'vector/style';
+export const EMS_TILES_VECTOR_SOURCE_PATH = 'vector/source';
+export const EMS_TILES_VECTOR_TILE_PATH = 'vector/tile';
 
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
+export const TELEMETRY_TYPE = 'maps-telemetry';
 
 export const MAP_APP_PATH = `app/${APP_ID}`;
 export const GIS_API_PATH = `api/${APP_ID}`;
+export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 
 export const MAP_BASE_URL = `/${MAP_APP_PATH}#/${MAP_SAVED_OBJECT_TYPE}`;
 
@@ -69,7 +73,9 @@ export const MAX_ZOOM = 24;
 
 export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 export const ZOOM_PRECISION = 2;
-export const ES_SIZE_LIMIT = 10000;
+export const DEFAULT_MAX_RESULT_WINDOW = 10000;
+export const DEFAULT_MAX_INNER_RESULT_WINDOW = 100;
+export const DEFAULT_MAX_BUCKETS_LIMIT = 10000;
 
 export const FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
 export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn_isvisibleduetojoin__';
@@ -136,3 +142,19 @@ export const LAYER_STYLE_TYPE = {
   VECTOR: 'VECTOR',
   HEATMAP: 'HEATMAP',
 };
+
+export const COLOR_MAP_TYPE = {
+  CATEGORICAL: 'CATEGORICAL',
+  ORDINAL: 'ORDINAL',
+};
+
+export const COLOR_PALETTE_MAX_SIZE = 10;
+
+export const CATEGORICAL_DATA_TYPES = ['string', 'ip', 'boolean'];
+
+export const SYMBOLIZE_AS_TYPES = {
+  CIRCLE: 'circle',
+  ICON: 'icon',
+};
+
+export const DEFAULT_ICON = 'airfield';

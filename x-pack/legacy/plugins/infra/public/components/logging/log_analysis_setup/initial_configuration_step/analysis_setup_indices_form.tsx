@@ -13,11 +13,12 @@ import { LoadingOverlayWrapper } from '../../../loading_overlay_wrapper';
 import { ValidatedIndex, ValidationIndicesUIError } from './validation';
 
 export const AnalysisSetupIndicesForm: React.FunctionComponent<{
+  disabled?: boolean;
   indices: ValidatedIndex[];
   isValidating: boolean;
   onChangeSelectedIndices: (selectedIndices: ValidatedIndex[]) => void;
   valid: boolean;
-}> = ({ indices, isValidating, onChangeSelectedIndices, valid }) => {
+}> = ({ disabled = false, indices, isValidating, onChangeSelectedIndices, valid }) => {
   const handleCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onChangeSelectedIndices(
@@ -40,7 +41,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
             label={<EuiCode>{index.name}</EuiCode>}
             onChange={handleCheckboxChange}
             checked={index.validity === 'valid' && index.isSelected}
-            disabled={index.validity === 'invalid'}
+            disabled={disabled || index.validity === 'invalid'}
           />
         );
 
@@ -52,7 +53,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
           </div>
         );
       }),
-    [handleCheckboxChange, indices]
+    [disabled, handleCheckboxChange, indices]
   );
 
   return (

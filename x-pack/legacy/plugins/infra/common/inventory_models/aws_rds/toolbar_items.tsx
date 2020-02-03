@@ -6,17 +6,18 @@
 
 import React from 'react';
 import { ToolbarProps } from '../../../public/components/inventory/toolbars/toolbar';
-import { InfraSnapshotMetricType } from '../../../public/graphql/types';
+
 import { MetricsAndGroupByToolbarItems } from '../shared/compontents/metrics_and_groupby_toolbar_items';
 import { CloudToolbarItems } from '../shared/compontents/cloud_toolbar_items';
+import { SnapshotMetricType } from '../types';
 
 export const AwsRDSToolbarItems = (props: ToolbarProps) => {
-  const metricTypes = [
-    InfraSnapshotMetricType.cpu,
-    InfraSnapshotMetricType.rdsConnections,
-    InfraSnapshotMetricType.rdsQueriesExecuted,
-    InfraSnapshotMetricType.rdsActiveTransactions,
-    InfraSnapshotMetricType.rdsLatency,
+  const metricTypes: SnapshotMetricType[] = [
+    'cpu',
+    'rdsConnections',
+    'rdsQueriesExecuted',
+    'rdsActiveTransactions',
+    'rdsLatency',
   ];
   const groupByFields = [
     'cloud.availability_zone',

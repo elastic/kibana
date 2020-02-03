@@ -41,6 +41,7 @@ describe('serialize', () => {
           name: 'field1',
           selected: true,
           type: 'string',
+          aggregatable: true,
         },
         {
           color: 'black',
@@ -48,6 +49,7 @@ describe('serialize', () => {
           name: 'field2',
           selected: true,
           type: 'string',
+          aggregatable: true,
         },
       ],
       selectedIndex: {

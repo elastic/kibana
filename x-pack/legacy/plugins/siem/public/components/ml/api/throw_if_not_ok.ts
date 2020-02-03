@@ -10,11 +10,7 @@ import * as i18n from './translations';
 import { MlError } from '../types';
 import { SetupMlResponse } from '../../ml_popover/types';
 
-export interface MessageBody {
-  error?: string;
-  message?: string;
-  statusCode?: number;
-}
+export { MessageBody, parseJsonFromBody } from '../../../utils/api';
 
 export interface MlStartJobError {
   error: MlError;
@@ -34,15 +30,6 @@ export class ToasterErrors extends Error implements ToasterErrorsType {
     this.messages = messages;
   }
 }
-
-export const parseJsonFromBody = async (response: Response): Promise<MessageBody | null> => {
-  try {
-    const text = await response.text();
-    return JSON.parse(text);
-  } catch (error) {
-    return null;
-  }
-};
 
 export const tryParseResponse = (response: string): string => {
   try {

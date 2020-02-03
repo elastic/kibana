@@ -31,8 +31,6 @@ import { EventsProvider } from 'ui/events';
 import { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 import { PromiseServiceCreator } from 'ui/promises/promises';
-// @ts-ignore
-import { createEsService } from 'ui/es';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
 import { PrivateProvider } from 'ui/private/private';
@@ -66,27 +64,27 @@ import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 // @ts-ignore
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 import { configureAppAngularModule } from 'ui/legacy_compat';
-import { IndexPatterns } from '../../../../../plugins/data/public';
+import { IndexPatterns, DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
-import { createDocTableDirective } from './angular/doc_table/doc_table';
-import { createTableHeaderDirective } from './angular/doc_table/components/table_header';
+import { createDocTableDirective } from './np_ready/angular/doc_table/doc_table';
+import { createTableHeaderDirective } from './np_ready/angular/doc_table/components/table_header';
 import {
   createToolBarPagerButtonsDirective,
   createToolBarPagerTextDirective,
-} from './angular/doc_table/components/pager';
-import { createTableRowDirective } from './angular/doc_table/components/table_row';
-import { createPagerFactory } from './angular/doc_table/lib/pager/pager_factory';
-import { createInfiniteScrollDirective } from './angular/doc_table/infinite_scroll';
-import { createDocViewerDirective } from './angular/doc_viewer';
-import { createFieldSearchDirective } from './components/field_chooser/discover_field_search_directive';
-import { createIndexPatternSelectDirective } from './components/field_chooser/discover_index_pattern_directive';
-import { createStringFieldProgressBarDirective } from './components/field_chooser/string_progress_bar';
+} from './np_ready/angular/doc_table/components/pager';
+import { createTableRowDirective } from './np_ready/angular/doc_table/components/table_row';
+import { createPagerFactory } from './np_ready/angular/doc_table/lib/pager/pager_factory';
+import { createInfiniteScrollDirective } from './np_ready/angular/doc_table/infinite_scroll';
+import { createDocViewerDirective } from './np_ready/angular/doc_viewer';
+import { createFieldSearchDirective } from './np_ready/components/field_chooser/discover_field_search_directive';
+import { createIndexPatternSelectDirective } from './np_ready/components/field_chooser/discover_index_pattern_directive';
+import { createStringFieldProgressBarDirective } from './np_ready/components/field_chooser/string_progress_bar';
 // @ts-ignore
-import { createFieldChooserDirective } from './components/field_chooser/field_chooser';
+import { createFieldChooserDirective } from './np_ready/components/field_chooser/field_chooser';
 
 // @ts-ignore
-import { createDiscoverFieldDirective } from './components/field_chooser/discover_field';
+import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
 import { DiscoverStartPlugins } from './plugin';
 
 /**
@@ -94,7 +92,7 @@ import { DiscoverStartPlugins } from './plugin';
  * needs to render, so in the end the current 'kibana' angular module is no longer necessary
  */
 export function getInnerAngularModule(name: string, core: CoreStart, deps: DiscoverStartPlugins) {
-  const module = initializeInnerAngularModule(name, core, deps.navigation);
+  const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data);
   configureAppAngularModule(module, core as LegacyCoreStart, true);
   return module;
 }
@@ -107,7 +105,7 @@ export function getInnerAngularModuleEmbeddable(
   core: CoreStart,
   deps: DiscoverStartPlugins
 ) {
-  const module = initializeInnerAngularModule(name, core, deps.navigation, true);
+  const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data, true);
   configureAppAngularModule(module, core as LegacyCoreStart, true);
   return module;
 }
@@ -118,6 +116,7 @@ export function initializeInnerAngularModule(
   name = 'app/discover',
   core: CoreStart,
   navigation: NavigationStart,
+  data: DataPublicPluginStart,
   embeddable = false
 ) {
   if (!initialized) {
@@ -131,7 +130,7 @@ export function initializeInnerAngularModule(
     createLocalGlobalStateModule();
     createLocalAppStateModule();
     createLocalStorageModule();
-    createElasticSearchModule();
+    createElasticSearchModule(data);
     createIndexPatternsModule();
     createPagerFactoryModule();
     createDocTableModule();
@@ -163,7 +162,6 @@ export function initializeInnerAngularModule(
       'ngRoute',
       'react',
       'ui.bootstrap',
-      'elasticsearch',
       'discoverConfig',
       'discoverI18n',
       'discoverPrivate',
@@ -298,11 +296,13 @@ const createLocalStorageService = function(type: string) {
   };
 };
 
-function createElasticSearchModule() {
+function createElasticSearchModule(data: DataPublicPluginStart) {
   angular
-    .module('discoverEs', ['elasticsearch', 'discoverConfig'])
+    .module('discoverEs', ['discoverConfig'])
     // Elasticsearch client used for requesting data.  Connects to the /elasticsearch proxy
-    .service('es', createEsService);
+    .service('es', () => {
+      return data.search.__LEGACY.esClient;
+    });
 }
 
 function createIndexPatternsModule() {

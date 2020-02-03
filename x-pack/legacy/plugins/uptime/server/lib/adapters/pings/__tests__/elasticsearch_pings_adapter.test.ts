@@ -5,8 +5,7 @@
  */
 
 import { set } from 'lodash';
-import { elasticsearchPingsAdapter as adapter } from '../elasticsearch_pings_adapter';
-import { assertCloseTo } from '../../../helper';
+import { elasticsearchPingsAdapter as adapter } from '../es_pings';
 
 describe('ElasticsearchPingsAdapter class', () => {
   let mockHits: any[];
@@ -35,6 +34,7 @@ describe('ElasticsearchPingsAdapter class', () => {
             },
           },
         ],
+        interval: '1s',
       },
     },
   };
@@ -98,12 +98,11 @@ describe('ElasticsearchPingsAdapter class', () => {
       });
       const result = await adapter.getPingHistogram({
         callES: mockEsClient,
-        dateRangeStart: 'now-15m',
-        dateRangeEnd: 'now',
-        filters: null,
+        dateStart: 'now-15m',
+        dateEnd: 'now',
+        filters: '',
       });
-      assertCloseTo(result.interval, 36000, 100);
-      result.interval = 36000;
+      result.interval = '10s';
       expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
     });
@@ -116,12 +115,11 @@ describe('ElasticsearchPingsAdapter class', () => {
 
       const result = await adapter.getPingHistogram({
         callES: mockEsClient,
-        dateRangeStart: 'now-15m',
-        dateRangeEnd: 'now',
-        filters: null,
+        dateStart: 'now-15m',
+        dateEnd: 'now',
+        filters: '',
       });
-      assertCloseTo(result.interval, 36000, 100);
-      result.interval = 36000;
+      result.interval = '1m';
 
       expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
@@ -175,14 +173,13 @@ describe('ElasticsearchPingsAdapter class', () => {
       };
       const result = await adapter.getPingHistogram({
         callES: mockEsClient,
-        dateRangeStart: '1234',
-        dateRangeEnd: '5678',
+        dateStart: '1234',
+        dateEnd: '5678',
         filters: JSON.stringify(searchFilter),
         monitorId: undefined,
         statusFilter: 'down',
       });
-      assertCloseTo(result.interval, 5609564928000, 1000);
-      result.interval = 5609564928000;
+      result.interval = '1h';
 
       expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
@@ -229,13 +226,12 @@ describe('ElasticsearchPingsAdapter class', () => {
       const filters = `{"bool":{"must":[{"simple_query_string":{"query":"http"}}]}}`;
       const result = await adapter.getPingHistogram({
         callES: mockEsClient,
-        dateRangeStart: 'now-15m',
-        dateRangeEnd: 'now',
+        dateStart: 'now-15m',
+        dateEnd: 'now',
         filters,
       });
 
-      assertCloseTo(result.interval, 36000, 100);
-      result.interval = 36000;
+      result.interval = '1m';
       expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
     });
@@ -246,14 +242,14 @@ describe('ElasticsearchPingsAdapter class', () => {
       mockEsClient.mockReturnValue(standardMockResponse);
       const result = await adapter.getPingHistogram({
         callES: mockEsClient,
-        dateRangeStart: '1234',
-        dateRangeEnd: '5678',
+        dateStart: '1234',
+        dateEnd: '5678',
         filters: '',
         monitorId: undefined,
         statusFilter: 'down',
       });
-      assertCloseTo(result.interval, 5609564928000, 1000);
-      result.interval = 5609564928000;
+
+      result.interval = '1d';
 
       expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
@@ -267,8 +263,8 @@ describe('ElasticsearchPingsAdapter class', () => {
 
       const result = await adapter.getPingHistogram({
         callES: mockEsClient,
-        dateRangeStart: '1234',
-        dateRangeEnd: '5678',
+        dateStart: '1234',
+        dateEnd: '5678',
         filters: '',
         monitorId: undefined,
         statusFilter: 'up',
@@ -411,7 +407,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     });
   });
 
-  describe('getLatestMonitorDocs', () => {
+  describe('getLatestMonitorStatus', () => {
     let expectedGetLatestSearchParams: any;
     beforeEach(() => {
       expectedGetLatestSearchParams = {
@@ -429,7 +425,7 @@ describe('ElasticsearchPingsAdapter class', () => {
                   },
                 },
                 {
-                  term: { 'monitor.id': 'testmonitor' },
+                  term: { 'monitor.id': 'testMonitor' },
                 },
               ],
             },
@@ -467,7 +463,7 @@ describe('ElasticsearchPingsAdapter class', () => {
                         _source: {
                           '@timestamp': 123456,
                           monitor: {
-                            id: 'testmonitor',
+                            id: 'testMonitor',
                           },
                         },
                       },
@@ -483,17 +479,16 @@ describe('ElasticsearchPingsAdapter class', () => {
 
     it('returns data in expected shape', async () => {
       const mockEsClient = jest.fn(async (_request: any, _params: any) => mockEsSearchResult);
-      const result = await adapter.getLatestMonitorDocs({
+      const result = await adapter.getLatestMonitorStatus({
         callES: mockEsClient,
-        dateRangeStart: 'now-1h',
-        dateRangeEnd: 'now',
-        monitorId: 'testmonitor',
+        dateStart: 'now-1h',
+        dateEnd: 'now',
+        monitorId: 'testMonitor',
       });
-      expect(result).toHaveLength(1);
-      expect(result[0].timestamp).toBe(123456);
-      expect(result[0].monitor).not.toBeFalsy();
+      expect(result.timestamp).toBe(123456);
+      expect(result.monitor).not.toBeFalsy();
       // @ts-ignore monitor will be defined
-      expect(result[0].monitor.id).toBe('testmonitor');
+      expect(result.monitor.id).toBe('testMonitor');
       expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetLatestSearchParams);
     });
   });

@@ -56,6 +56,7 @@ export default async function({ readConfigFile }) {
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
       resolve(__dirname, './apps/transform'),
+      resolve(__dirname, './apps/endpoint'),
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
     ],
@@ -68,7 +69,7 @@ export default async function({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: [],
+      serverArgs: ['path.repo=/tmp/'],
     },
 
     kbnTestServer: {
@@ -86,6 +87,7 @@ export default async function({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
+        '--xpack.endpoint.enabled=true',
       ],
     },
     uiSettings: {
@@ -141,14 +143,6 @@ export default async function({ readConfigFile }) {
         pathname: '/app/canvas',
         hash: '/',
       },
-      code: {
-        pathname: '/app/code',
-        hash: '/admin',
-      },
-      codeSearch: {
-        pathname: '/app/code',
-        hash: '/search',
-      },
       uptime: {
         pathname: '/app/uptime',
       },
@@ -157,6 +151,10 @@ export default async function({ readConfigFile }) {
       },
       ml: {
         pathname: '/app/ml',
+      },
+      roleMappings: {
+        pathname: '/app/kibana',
+        hash: '/management/security/role_mappings',
       },
       rollupJob: {
         pathname: '/app/kibana',
@@ -196,6 +194,9 @@ export default async function({ readConfigFile }) {
       transform: {
         pathname: '/app/kibana/',
         hash: '/management/elasticsearch/transform',
+      },
+      endpoint: {
+        pathname: '/app/endpoint',
       },
     },
 

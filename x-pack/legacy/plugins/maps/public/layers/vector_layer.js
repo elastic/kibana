@@ -209,8 +209,8 @@ export class VectorLayer extends AbstractLayer {
     return [...numberFieldOptions, ...this._getJoinFields()];
   }
 
-  async getOrdinalFields() {
-    return [...(await this.getDateFields()), ...(await this.getNumberFields())];
+  async getCategoricalFields() {
+    return await this._source.getCategoricalFields();
   }
 
   async getFields() {
@@ -373,7 +373,6 @@ export class VectorLayer extends AbstractLayer {
     const requestToken = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
     const searchFilters = this._getSearchFilters(dataFilters);
     const prevDataRequest = this.getSourceDataRequest();
-
     const canSkipFetch = await canSkipSourceUpdate({
       source: this._source,
       prevDataRequest,

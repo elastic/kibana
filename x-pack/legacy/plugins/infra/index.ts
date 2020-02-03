@@ -18,11 +18,9 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/fea
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
 import { VisTypeTimeseriesSetup } from '../../../../src/plugins/vis_type_timeseries/server';
 import { APMPluginContract } from '../../../plugins/apm/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
-const APP_ID = 'infra';
-const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
-  defaultMessage: 'Logs',
-});
+export const APP_ID = 'infra';
 
 export function infra(kibana: any) {
   return new kibana.Plugin({
@@ -58,6 +56,7 @@ export function infra(kibana: any) {
             defaultMessage: 'Metrics',
           }),
           url: `/app/${APP_ID}#/infrastructure`,
+          category: DEFAULT_APP_CATEGORIES.observability,
         },
         {
           description: i18n.translate('xpack.infra.linkLogsDescription', {
@@ -71,6 +70,7 @@ export function infra(kibana: any) {
             defaultMessage: 'Logs',
           }),
           url: `/app/${APP_ID}#/logs`,
+          category: DEFAULT_APP_CATEGORIES.observability,
         },
       ],
       mappings: savedObjectMappings,
@@ -89,6 +89,7 @@ export function infra(kibana: any) {
       } as unknown) as PluginInitializerContext;
       // NP_TODO: Use real types from the other plugins as they are migrated
       const pluginDeps: InfraServerPluginDeps = {
+        home: legacyServer.newPlatform.setup.plugins.home,
         usageCollection: plugins.usageCollection as UsageCollectionSetup,
         indexPatterns: {
           indexPatternsServiceFactory: legacyServer.indexPatternsServiceFactory,
@@ -111,15 +112,6 @@ export function infra(kibana: any) {
         'defineInternalSourceConfiguration',
         libs.sources.defineInternalSourceConfiguration.bind(libs.sources)
       );
-
-      // NP_TODO: How do we move this to new platform?
-      legacyServer.addAppLinksToSampleDataset('logs', [
-        {
-          path: `/app/${APP_ID}#/logs`,
-          label: logsSampleDataLinkLabel,
-          icon: 'logsApp',
-        },
-      ]);
     },
   });
 }

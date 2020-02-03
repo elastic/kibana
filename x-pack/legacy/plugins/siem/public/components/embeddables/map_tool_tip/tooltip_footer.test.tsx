@@ -5,8 +5,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { ToolTipFooterComponent } from './tooltip_footer';
 
 describe('ToolTipFilter', () => {
@@ -27,7 +26,7 @@ describe('ToolTipFilter', () => {
         totalFeatures={100}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   describe('Lower bounds', () => {

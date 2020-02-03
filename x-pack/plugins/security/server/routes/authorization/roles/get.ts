@@ -14,7 +14,9 @@ export function defineGetRolesRoutes({ router, authz, clusterClient }: RouteDefi
   router.get(
     {
       path: '/api/security/role/{name}',
-      validate: { params: schema.object({ name: schema.string({ minLength: 1 }) }) },
+      validate: {
+        params: schema.object({ name: schema.string({ minLength: 1 }) }),
+      },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {

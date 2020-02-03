@@ -7,6 +7,7 @@
 import rison from 'rison-node';
 // @ts-ignore Untyped local.
 import { fetch } from '../../../../common/lib/fetch';
+import { getStartPlugins } from '../../../legacy';
 import { CanvasWorkpad } from '../../../../types';
 
 // type of the desired pdf output (print or preserve_layout)
@@ -25,7 +26,7 @@ interface PdfUrlData {
   createPdfPayload: { jobParams: string };
 }
 
-export function getPdfUrl(
+function getPdfUrlParts(
   { id, name: title, width, height }: CanvasWorkpad,
   { pageCount }: PageCount,
   addBasePath: (path: string) => string
@@ -68,7 +69,16 @@ export function getPdfUrl(
   };
 }
 
+export function getPdfUrl(...args: Arguments): string {
+  const urlParts = getPdfUrlParts(...args);
+
+  return `${urlParts.createPdfUri}?${getStartPlugins().__LEGACY.QueryString.param(
+    'jobParams',
+    urlParts.createPdfPayload.jobParams
+  )}`;
+}
+
 export function createPdf(...args: Arguments) {
-  const { createPdfUri, createPdfPayload } = getPdfUrl(...args);
+  const { createPdfUri, createPdfPayload } = getPdfUrlParts(...args);
   return fetch.post(createPdfUri, createPdfPayload);
 }

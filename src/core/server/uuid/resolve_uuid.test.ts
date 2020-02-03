@@ -17,31 +17,22 @@
  * under the License.
  */
 
-import { promises } from 'fs';
 import { join } from 'path';
+import { readFile, writeFile } from './fs';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { configServiceMock } from '../config/config_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { BehaviorSubject } from 'rxjs';
 import { Logger } from '../logging';
 
-const { readFile, writeFile } = promises;
-
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
 }));
 
-jest.mock('fs', () => {
-  const actual = jest.requireActual('fs');
-  return {
-    ...actual,
-    promises: {
-      ...actual.promises,
-      readFile: jest.fn(() => Promise.resolve('')),
-      writeFile: jest.fn(() => Promise.resolve('')),
-    },
-  };
-});
+jest.mock('./fs', () => ({
+  readFile: jest.fn(() => Promise.resolve('')),
+  writeFile: jest.fn(() => Promise.resolve('')),
+}));
 
 const DEFAULT_FILE_UUID = 'FILE_UUID';
 const DEFAULT_CONFIG_UUID = 'CONFIG_UUID';

@@ -133,10 +133,6 @@ export class JoinExpression extends Component {
       return null;
     }
 
-    const filterStringOrNumberFields = field => {
-      return field.type === 'string' || field.type === 'number';
-    };
-
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.layerPanel.joinExpression.rightFieldLabel', {
@@ -150,7 +146,6 @@ export class JoinExpression extends Component {
           placeholder={getSelectFieldPlaceholder()}
           value={this.props.rightValue}
           onChange={this.props.onRightFieldChange}
-          filterField={filterStringOrNumberFields}
           fields={getTermsFields(this.props.rightFields)}
           isClearable={false}
         />

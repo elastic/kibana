@@ -5,9 +5,8 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { ActionCreator } from 'typescript-fsa';
@@ -16,27 +15,17 @@ import '../../../mock/match_media';
 
 import { mocksSource } from '../../../containers/source/mock';
 import { FlowTarget } from '../../../graphql/types';
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../mock';
 import { useMountAppended } from '../../../utils/use_mount_appended';
-import { mockUiSettings } from '../../../mock/ui_settings';
 import { createStore, State } from '../../../store';
 import { InputsModelId } from '../../../store/inputs/constants';
 
 import { IPDetailsComponent, IPDetails } from './index';
 
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
-
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 
 type GlobalWithFetch = NodeJS.Global & { fetch: jest.Mock };
-
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: mockUiSettings,
-}));
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -106,12 +95,6 @@ const getMockProps = (ip: string) => ({
   setIpDetailsTablesActivePageToZero: (jest.fn() as unknown) as ActionCreator<null>,
 });
 
-jest.mock('ui/documentation_links', () => ({
-  documentationLinks: {
-    siem: 'http://www.example.com',
-  },
-}));
-
 describe('Ip Details', () => {
   const mount = useMountAppended();
 
@@ -145,7 +128,7 @@ describe('Ip Details', () => {
 
   test('it matches the snapshot', () => {
     const wrapper = shallow(<IPDetailsComponent {...getMockProps('123.456.78.90')} />);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders ipv6 headline', async () => {

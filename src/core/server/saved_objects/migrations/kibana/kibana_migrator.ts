@@ -36,7 +36,7 @@ import {
 } from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsConfigType } from '../../saved_objects_config';
-import { LegacyConfig } from '../../../legacy/config';
+import { LegacyConfig } from '../../../legacy';
 
 export interface KibanaMigratorOptions {
   callCluster: CallCluster;
@@ -107,24 +107,15 @@ export class KibanaMigrator {
    *    The promise resolves with an array of migration statuses, one for each
    *    elasticsearch index which was migrated.
    */
-  public runMigrations(skipMigrations: boolean = false): Promise<Array<{ status: string }>> {
+  public runMigrations(): Promise<Array<{ status: string }>> {
     if (this.migrationResult === undefined) {
-      this.migrationResult = this.runMigrationsInternal(skipMigrations);
+      this.migrationResult = this.runMigrationsInternal();
     }
 
     return this.migrationResult;
   }
 
-  private runMigrationsInternal(skipMigrations: boolean) {
-    if (skipMigrations) {
-      this.log.warn(
-        'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'
-      );
-      return Promise.resolve(
-        Object.keys(this.mappingProperties).map(() => ({ status: 'skipped' }))
-      );
-    }
-
+  private runMigrationsInternal() {
     const kibanaIndexName = this.kibanaConfig.index;
     const indexMap = createIndexMap({
       config: this.config,

@@ -22,13 +22,13 @@ import indentString from 'indent-string';
 import wrapAnsi from 'wrap-ansi';
 
 import { ICommand, ICommandConfig } from './commands';
-import { getProjectPaths, IProjectPathOptions } from './config';
 import { CliError } from './utils/errors';
 import { log } from './utils/log';
-import { buildProjectGraph, getProjects } from './utils/projects';
+import { buildProjectGraph } from './utils/projects';
 import { renderProjectsTree } from './utils/projects_tree';
+import { Kibana } from './utils/kibana';
 
-export async function runCommand(command: ICommand, config: ICommandConfig) {
+export async function runCommand(command: ICommand, config: Omit<ICommandConfig, 'kbn'>) {
   try {
     log.write(
       chalk.bold(
@@ -36,9 +36,10 @@ export async function runCommand(command: ICommand, config: ICommandConfig) {
       )
     );
 
-    const projectPaths = getProjectPaths(config.rootPath, config.options as IProjectPathOptions);
-
-    const projects = await getProjects(config.rootPath, projectPaths, {
+    const kbn = await Kibana.loadFrom(config.rootPath);
+    const projects = kbn.getFilteredProjects({
+      skipKibanaPlugins: Boolean(config.options['skip-kibana-plugins']),
+      ossOnly: Boolean(config.options.oss),
       exclude: toArray(config.options.exclude),
       include: toArray(config.options.include),
     });
@@ -57,7 +58,10 @@ export async function runCommand(command: ICommand, config: ICommandConfig) {
     log.write(chalk.bold(`Found [${chalk.green(projects.size.toString())}] projects:\n`));
     log.write(renderProjectsTree(config.rootPath, projects));
 
-    await command.run(projects, projectGraph, config);
+    await command.run(projects, projectGraph, {
+      ...config,
+      kbn,
+    });
   } catch (e) {
     log.write(chalk.bold.red(`\n[${command.name}] failed:\n`));
 

@@ -136,7 +136,6 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
     >
       <EuiPageContent
         horizontalPosition="center"
-        panelPaddingSize="l"
         verticalPosition="center"
       >
         <EuiPanel
@@ -1194,7 +1193,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
     >
       <EuiPageContent
         horizontalPosition="center"
-        panelPaddingSize="l"
         verticalPosition="center"
       >
         <EuiPanel
@@ -1665,7 +1663,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
     >
       <EuiPageContent
         horizontalPosition="center"
-        panelPaddingSize="l"
         verticalPosition="center"
       >
         <EuiPanel
@@ -2136,7 +2133,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
     >
       <EuiPageContent
         horizontalPosition="center"
-        panelPaddingSize="l"
         verticalPosition="center"
       >
         <EuiPanel
@@ -2602,7 +2598,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
     >
       <EuiPageContent
         horizontalPosition="center"
-        panelPaddingSize="l"
         verticalPosition="center"
       >
         <EuiPanel

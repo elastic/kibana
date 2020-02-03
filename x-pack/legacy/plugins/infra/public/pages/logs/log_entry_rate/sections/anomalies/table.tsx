@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
 import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo, useState } from 'react';
+
+import euiStyled from '../../../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import {
+  formatAnomalyScore,
+  getFriendlyNameForPartitionId,
+} from '../../../../../../common/log_analysis';
 import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { AnomaliesTableExpandedRow } from './expanded_row';
-import { formatAnomalyScore, getFriendlyNameForPartitionId } from '../helpers/data_formatters';
-import euiStyled from '../../../../../../../../common/eui_styled_components';
 
 interface TableItem {
   id: string;

@@ -5,7 +5,7 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { IIndexPattern } from 'src/plugins/data/public';
 

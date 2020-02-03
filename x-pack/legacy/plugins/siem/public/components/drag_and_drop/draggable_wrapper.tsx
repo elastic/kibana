@@ -13,15 +13,15 @@ import {
   Droppable,
 } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
 import { EuiPortal } from '@elastic/eui';
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import { DataProvider } from '../timeline/data_providers/data_provider';
-import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../timeline/helpers';
 import { TruncatableText } from '../truncatable_text';
 import { getDraggableId, getDroppableId } from './helpers';
+import { ProviderContainer } from './provider_container';
 
 // As right now, we do not know what we want there, we will keep it as a placeholder
 export const DragEffects = styled.div``;
@@ -42,142 +42,11 @@ const Wrapper = styled.div`
 
 Wrapper.displayName = 'Wrapper';
 
-const ProviderContainer = styled.div<{ isDragging: boolean }>`
-  &,
-  &::before,
-  &::after {
-    transition: background ${({ theme }) => theme.eui.euiAnimSpeedFast} ease,
-      color ${({ theme }) => theme.eui.euiAnimSpeedFast} ease;
+const ProviderContentWrapper = styled.span`
+  > span.euiToolTipAnchor {
+    display: block; /* allow EuiTooltip content to be truncatable */
   }
-
-  ${({ isDragging }) =>
-    !isDragging &&
-    css`
-      & {
-        border-radius: 2px;
-        padding: 0 4px 0 8px;
-        position: relative;
-        z-index: ${({ theme }) => theme.eui.euiZLevel0} !important;
-
-        &::before {
-          background-image: linear-gradient(
-              135deg,
-              ${({ theme }) => theme.eui.euiColorMediumShade} 25%,
-              transparent 25%
-            ),
-            linear-gradient(
-              -135deg,
-              ${({ theme }) => theme.eui.euiColorMediumShade} 25%,
-              transparent 25%
-            ),
-            linear-gradient(
-              135deg,
-              transparent 75%,
-              ${({ theme }) => theme.eui.euiColorMediumShade} 75%
-            ),
-            linear-gradient(
-              -135deg,
-              transparent 75%,
-              ${({ theme }) => theme.eui.euiColorMediumShade} 75%
-            );
-          background-position: 0 0, 1px 0, 1px -1px, 0px 1px;
-          background-size: 2px 2px;
-          bottom: 2px;
-          content: '';
-          display: block;
-          left: 2px;
-          position: absolute;
-          top: 2px;
-          width: 4px;
-        }
-      }
-
-      &:hover {
-        &,
-        & .euiBadge,
-        & .euiBadge__text {
-          cursor: move; /* Fallback for IE11 */
-          cursor: grab;
-        }
-      }
-
-      .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &,
-      tr:hover & {
-        background-color: ${({ theme }) => theme.eui.euiColorLightShade};
-
-        &::before {
-          background-image: linear-gradient(
-              135deg,
-              ${({ theme }) => theme.eui.euiColorDarkShade} 25%,
-              transparent 25%
-            ),
-            linear-gradient(
-              -135deg,
-              ${({ theme }) => theme.eui.euiColorDarkShade} 25%,
-              transparent 25%
-            ),
-            linear-gradient(
-              135deg,
-              transparent 75%,
-              ${({ theme }) => theme.eui.euiColorDarkShade} 75%
-            ),
-            linear-gradient(
-              -135deg,
-              transparent 75%,
-              ${({ theme }) => theme.eui.euiColorDarkShade} 75%
-            );
-        }
-      }
-
-      &:hover,
-      &:focus,
-      .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &:hover,
-      .${STATEFUL_EVENT_CSS_CLASS_NAME}:focus &:focus,
-      tr:hover &:hover,
-      tr:hover &:focus {
-        background-color: ${({ theme }) => theme.eui.euiColorPrimary};
-
-        &,
-        & a,
-        & a:hover {
-          color: ${({ theme }) => theme.eui.euiColorEmptyShade};
-        }
-
-        &::before {
-          background-image: linear-gradient(
-              135deg,
-              ${({ theme }) => theme.eui.euiColorEmptyShade} 25%,
-              transparent 25%
-            ),
-            linear-gradient(
-              -135deg,
-              ${({ theme }) => theme.eui.euiColorEmptyShade} 25%,
-              transparent 25%
-            ),
-            linear-gradient(
-              135deg,
-              transparent 75%,
-              ${({ theme }) => theme.eui.euiColorEmptyShade} 75%
-            ),
-            linear-gradient(
-              -135deg,
-              transparent 75%,
-              ${({ theme }) => theme.eui.euiColorEmptyShade} 75%
-            );
-        }
-      }
-    `}
-
-  ${({ isDragging }) =>
-    isDragging &&
-    css`
-      & {
-        z-index: 9999 !important;
-      }
-    `}
 `;
-
-ProviderContainer.displayName = 'ProviderContainer';
 
 interface OwnProps {
   dataProvider: DataProvider;
@@ -244,9 +113,11 @@ const DraggableWrapperComponent = React.memo<Props>(
                           {render(dataProvider, provided, snapshot)}
                         </TruncatableText>
                       ) : (
-                        <span data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}>
+                        <ProviderContentWrapper
+                          data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
+                        >
                           {render(dataProvider, provided, snapshot)}
-                        </span>
+                        </ProviderContentWrapper>
                       )}
                     </ProviderContainer>
                   </ConditionalPortal>

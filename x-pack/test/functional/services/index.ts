@@ -57,6 +57,7 @@ export const services = {
   ...kibanaFunctionalServices,
   ...commonServices,
 
+  supertest: kibanaApiIntegrationServices.supertest,
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   monitoringNoData: MonitoringNoDataProvider,
   monitoringClusterList: MonitoringClusterListProvider,

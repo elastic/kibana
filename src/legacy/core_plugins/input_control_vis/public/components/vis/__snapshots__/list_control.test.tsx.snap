@@ -8,10 +8,7 @@ exports[`disableMsg 1`] = `
   label="list control"
 >
   <EuiFieldText
-    compressed={false}
     disabled={true}
-    fullWidth={false}
-    isLoading={false}
     placeholder="Select..."
   />
 </FormRow>

@@ -5,8 +5,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../mock';
 import { createStore, State } from '../../../store';
@@ -63,7 +62,7 @@ describe('AddFilterToGlobalSearchBar Component', () => {
       </AddFilterToGlobalSearchBar>
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('Rendering tooltip', async () => {

@@ -10,8 +10,7 @@ import uuid from 'uuid/v4';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
-import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggConfigs } from 'ui/agg_types';
+import { AggConfigs, Schemas } from 'ui/agg_types';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
 import { VectorStyle } from '../../styles/vector/vector_style';
@@ -19,6 +18,7 @@ import {
   getDefaultDynamicProperties,
   VECTOR_STYLES,
 } from '../../styles/vector/vector_style_defaults';
+import { COLOR_GRADIENTS } from '../../styles/color_utils';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -26,8 +26,8 @@ import { GRID_RESOLUTION } from '../../grid_resolution';
 import {
   SOURCE_DATA_ID_ORIGIN,
   ES_GEO_GRID,
-  COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
+  COLOR_MAP_TYPE,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -251,11 +251,11 @@ export class ESGeoGridSource extends AbstractESAggSource {
         options: {
           ...defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options,
           field: {
-            label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
             origin: SOURCE_DATA_ID_ORIGIN,
           },
-          color: 'Blues',
+          color: COLOR_GRADIENTS[0].value,
+          type: COLOR_MAP_TYPE.ORDINAL,
         },
       },
       [VECTOR_STYLES.LINE_COLOR]: {
@@ -275,7 +275,16 @@ export class ESGeoGridSource extends AbstractESAggSource {
         options: {
           ...defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options,
           field: {
-            label: COUNT_PROP_LABEL,
+            name: COUNT_PROP_NAME,
+            origin: SOURCE_DATA_ID_ORIGIN,
+          },
+        },
+      },
+      [VECTOR_STYLES.LABEL_TEXT]: {
+        type: DynamicStyleProperty.type,
+        options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
+          field: {
             name: COUNT_PROP_NAME,
             origin: SOURCE_DATA_ID_ORIGIN,
           },

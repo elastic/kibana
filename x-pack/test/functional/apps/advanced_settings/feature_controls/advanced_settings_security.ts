@@ -54,7 +54,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
-        await kibanaServer.uiSettings.replace({});
+        await kibanaServer.uiSettings.replace({ pageNavigation: 'individual' });
         await PageObjects.settings.navigateTo();
       });
 
@@ -67,10 +67,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`allows settings to be changed`, async () => {
@@ -125,10 +123,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`does not allow settings to be changed`, async () => {
@@ -178,10 +174,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 
       it(`does not allow navigation to advanced settings; redirects to Kibana home`, async () => {

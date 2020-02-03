@@ -41,6 +41,7 @@
 
 import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
 import { HttpServiceSetup } from './http';
+import { IScopedRenderingClient } from './rendering';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
@@ -74,6 +75,7 @@ export { CspConfig, ICspConfig } from './csp';
 export {
   ClusterClient,
   IClusterClient,
+  ICustomClusterClient,
   Headers,
   ScopedClusterClient,
   IScopedClusterClient,
@@ -83,6 +85,7 @@ export {
   ElasticsearchServiceSetup,
   APICaller,
   FakeRequest,
+  ScopeableRequest,
 } from './elasticsearch';
 export * from './elasticsearch/api_types';
 export {
@@ -107,6 +110,7 @@ export {
   IKibanaSocket,
   IsAuthenticated,
   KibanaRequest,
+  KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   IKibanaResponse,
@@ -135,15 +139,22 @@ export {
   RouteRegistrar,
   RouteMethod,
   RouteConfigOptions,
-  RouteSchemas,
   RouteConfigOptionsBody,
   RouteContentType,
   validBodyOutput,
+  RouteValidatorConfig,
+  RouteValidationSpec,
+  RouteValidationFunction,
+  RouteValidatorOptions,
+  RouteValidatorFullConfig,
+  RouteValidationResultFactory,
+  RouteValidationError,
   SessionStorage,
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
 } from './http';
+export { RenderingServiceSetup, IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
@@ -170,6 +181,7 @@ export {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsClientFactory,
+  SavedObjectsClientFactoryProvider,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
@@ -185,6 +197,7 @@ export {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
+  SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,
   SavedObjectsSerializer,
@@ -207,6 +220,11 @@ export {
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
   UserProvidedValues,
+  ImageValidation,
+  DeprecationSettings,
+  StringValidation,
+  StringValidationRegex,
+  StringValidationRegexString,
 } from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';
@@ -224,12 +242,21 @@ export {
   SavedObjectsMigrationVersion,
 } from './types';
 
-export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
+export {
+  LegacyServiceSetupDeps,
+  LegacyServiceStartDeps,
+  LegacyServiceDiscoverPlugins,
+  LegacyConfig,
+  LegacyUiExports,
+  LegacyInternals,
+} from './legacy';
 
 /**
  * Plugin specific context passed to a route handler.
  *
  * Provides the following clients:
+ *    - {@link IScopedRenderingClient | rendering} - Rendering client
+ *      which uses the data of the incoming request
  *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
  *      which uses the credentials of the incoming request
  *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
@@ -243,6 +270,7 @@ export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
  */
 export interface RequestHandlerContext {
   core: {
+    rendering: IScopedRenderingClient;
     savedObjects: {
       client: SavedObjectsClientContract;
     };
@@ -261,7 +289,7 @@ export interface RequestHandlerContext {
  *
  * @public
  */
-export interface CoreSetup {
+export interface CoreSetup<TPluginsStart extends object = object> {
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
@@ -277,6 +305,13 @@ export interface CoreSetup {
   /** {@link UuidServiceSetup} */
   pulse: PulseServiceSetup;
   uuid: UuidServiceSetup;
+  /**
+   * Allows plugins to get access to APIs available in start inside async handlers.
+   * Promise will not resolve until Core and plugin dependencies have completed `start`.
+   * This should only be used inside handlers registered during `setup` that will only be executed
+   * after `start` lifecycle.
+   */
+  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
 }
 
 /**
@@ -297,6 +332,7 @@ export {
   CapabilitiesSetup,
   CapabilitiesStart,
   ContextSetup,
+  IScopedRenderingClient,
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,

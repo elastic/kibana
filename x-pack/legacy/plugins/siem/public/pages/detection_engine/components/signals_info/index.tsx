@@ -9,7 +9,7 @@ import { FormattedRelative } from '@kbn/i18n/react';
 import React, { useState, useEffect } from 'react';
 
 import { useQuerySignals } from '../../../../containers/detection_engine/signals/use_query';
-import { buildlastSignalsQuery } from './query.dsl';
+import { buildLastSignalsQuery } from './query.dsl';
 import { Aggs } from './types';
 
 interface SignalInfo {
@@ -22,18 +22,11 @@ export const useSignalInfo = ({ ruleId = null }: SignalInfo): Return => {
   const [lastSignals, setLastSignals] = useState<React.ReactElement | null>(
     <EuiLoadingSpinner size="m" />
   );
-  const [totalSignals, setTotalSignals] = useState<React.ReactElement>(
+  const [totalSignals, setTotalSignals] = useState<React.ReactElement | null>(
     <EuiLoadingSpinner size="m" />
   );
 
-  let query = '';
-  try {
-    query = JSON.stringify(buildlastSignalsQuery(ruleId));
-  } catch {
-    query = '';
-  }
-
-  const [, signals] = useQuerySignals<unknown, Aggs>(query);
+  const { loading, data: signals } = useQuerySignals<unknown, Aggs>(buildLastSignalsQuery(ruleId));
 
   useEffect(() => {
     if (signals != null) {
@@ -46,8 +39,11 @@ export const useSignalInfo = ({ ruleId = null }: SignalInfo): Return => {
         ) : null
       );
       setTotalSignals(<>{mySignals.hits.total.value}</>);
+    } else {
+      setLastSignals(null);
+      setTotalSignals(null);
     }
-  }, [signals]);
+  }, [loading, signals]);
 
   return [lastSignals, totalSignals];
 };

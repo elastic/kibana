@@ -22,7 +22,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
   };
 
   return {
-    testFiles: [require.resolve('./apis')],
+    testFiles: [require.resolve('./server')],
     servers,
     services,
     pageObjects,
@@ -43,7 +43,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalTestsConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.licensing.api_polling_frequency=300',
+        '--xpack.licensing.api_polling_frequency=100',
       ],
     },
 

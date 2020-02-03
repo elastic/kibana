@@ -5,15 +5,20 @@
  */
 
 import lowPolyLayerFeatures from './low_poly_layer.json';
-import { LocationPoint } from './embedded_map';
+import { LocationPoint } from './embedded_map.js';
+import { UptimeAppColors } from '../../../../uptime_app';
 
 /**
  * Returns `Source/Destination Point-to-point` Map LayerList configuration, with a source,
  * destination, and line layer for each of the provided indexPatterns
  *
  */
-export const getLayerList = (upPoints: LocationPoint[], downPoints: LocationPoint[]) => {
-  return [getLowPolyLayer(), getDownPointsLayer(downPoints), getUpPointsLayer(upPoints)];
+export const getLayerList = (
+  upPoints: LocationPoint[],
+  downPoints: LocationPoint[],
+  { danger }: Pick<UptimeAppColors, 'danger'>
+) => {
+  return [getLowPolyLayer(), getDownPointsLayer(downPoints, danger), getUpPointsLayer(upPoints)];
 };
 
 export const getLowPolyLayer = () => {
@@ -62,7 +67,7 @@ export const getLowPolyLayer = () => {
   };
 };
 
-export const getDownPointsLayer = (downPoints: LocationPoint[]) => {
+export const getDownPointsLayer = (downPoints: LocationPoint[], dangerColor: string) => {
   const features = downPoints?.map(point => ({
     type: 'feature',
     geometry: {
@@ -87,7 +92,7 @@ export const getDownPointsLayer = (downPoints: LocationPoint[]) => {
         fillColor: {
           type: 'STATIC',
           options: {
-            color: '#BC261E',
+            color: dangerColor,
           },
         },
         lineColor: {
