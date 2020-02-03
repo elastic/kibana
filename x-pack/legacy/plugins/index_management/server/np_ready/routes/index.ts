@@ -8,7 +8,7 @@ import { RouteDependencies } from '../types';
 
 import { registerIndicesRoutes } from './api/indices';
 // import { registerTemplateRoutes } from './api/templates';
-// import { registerMappingRoute } from './api/mapping';
+import { registerMappingRoute } from './api/mapping';
 // import { registerSettingsRoutes } from './api/settings';
 // import { registerStatsRoute } from './api/stats';
 
@@ -17,5 +17,5 @@ export const registerApiRoutes = (dependencies: RouteDependencies) => {
   // registerTemplateRoutes(dependencies);
   // registerSettingsRoutes(dependencies);
   // registerStatsRoute(dependencies);
-  // registerMappingRoute(dependencies);
+  registerMappingRoute(dependencies);
 };
