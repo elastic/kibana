@@ -5,9 +5,9 @@
  */
 
 export let toasts: any;
-export let fatalError: any;
+export let fatalErrors: any;
 
-export function init(_toasts: any, _fatalError: any): void {
+export function init(_toasts: any, _fatalErrors: any): void {
   toasts = _toasts;
-  fatalError = _fatalError;
+  fatalErrors = _fatalErrors;
 }

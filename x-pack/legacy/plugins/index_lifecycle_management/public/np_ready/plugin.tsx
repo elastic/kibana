@@ -14,9 +14,11 @@ interface PluginsSetup {
 
 export class IndexLifecycleManagementPlugin implements Plugin<void, void, any, any> {
   setup(core: CoreSetup, plugins: PluginsSetup) {
+    // Extract individual core dependencies.
     const {
       application,
       notifications: { toasts },
+      fatalErrors,
       http,
     } = core;
 
@@ -38,11 +40,13 @@ export class IndexLifecycleManagementPlugin implements Plugin<void, void, any, a
         const { element } = mountPoint;
         const { renderApp } = await import('./application');
 
+        // Inject all dependencies into our app.
         return renderApp({
           legacy: { ...__LEGACY },
           I18nContext,
           http,
           toasts,
+          fatalErrors,
           docLinks,
           element,
         });

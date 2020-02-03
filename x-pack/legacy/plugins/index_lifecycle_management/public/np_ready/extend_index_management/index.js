@@ -29,12 +29,12 @@ export const retryLifecycleActionExtension = ({
   indices,
   createUiStatsReporter,
   toasts,
-  fatalError,
+  fatalErrors,
 }) => {
   // These are hacks that we can remove once the New Platform migration is done. They're needed here
   // because API requests and API errors require them.
   initUiMetric(createUiStatsReporter);
-  initNotification(toasts, fatalError);
+  initNotification(toasts, fatalErrors);
 
   const allHaveErrors = every(indices, index => {
     return index.ilm && index.ilm.failed_step;
@@ -65,13 +65,13 @@ export const removeLifecyclePolicyActionExtension = ({
   reloadIndices,
   createUiStatsReporter,
   toasts,
-  fatalError,
+  fatalErrors,
   httpClient,
 }) => {
   // These are hacks that we can remove once the New Platform migration is done. They're needed here
   // because API requests and API errors require them.
   initUiMetric(createUiStatsReporter);
-  initNotification(toasts, fatalError);
+  initNotification(toasts, fatalErrors);
 
   const allHaveIlm = every(indices, index => {
     return index.ilm && index.ilm.managed;
@@ -105,13 +105,13 @@ export const addLifecyclePolicyActionExtension = ({
   reloadIndices,
   createUiStatsReporter,
   toasts,
-  fatalError,
+  fatalErrors,
   httpClient,
 }) => {
   // These are hacks that we can remove once the New Platform migration is done. They're needed here
   // because API requests and API errors require them.
   initUiMetric(createUiStatsReporter);
-  initNotification(toasts, fatalError);
+  initNotification(toasts, fatalErrors);
 
   if (indices.length !== 1) {
     return null;

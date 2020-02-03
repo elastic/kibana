@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { DocLinksStart, ToastsSetup, HttpSetup } from 'src/core/public';
+import { DocLinksStart, ToastsSetup, HttpSetup, FatalErrorsSetup } from 'src/core/public';
 
 import { App } from './app';
 import { indexLifecycleManagementStore } from './store';
@@ -19,7 +19,6 @@ import { init as initNotification } from './services/notification';
 
 export interface LegacySetup {
   redirect: any;
-  fatalError: any;
   createUiStatsReporter: any;
 }
 
@@ -28,16 +27,18 @@ interface AppDependencies {
   I18nContext: any;
   http: HttpSetup;
   toasts: ToastsSetup;
+  fatalErrors: FatalErrorsSetup;
   docLinks: DocLinksStart;
   element: HTMLElement;
 }
 
 export const renderApp = (appDependencies: AppDependencies) => {
   const {
-    legacy: { redirect, fatalError, createUiStatsReporter },
+    legacy: { redirect, createUiStatsReporter },
     I18nContext,
     http,
     toasts,
+    fatalErrors,
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
     element,
   } = appDependencies;
@@ -47,7 +48,7 @@ export const renderApp = (appDependencies: AppDependencies) => {
   initNavigation(redirect);
   initDocumentation(`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`);
   initUiMetric(createUiStatsReporter);
-  initNotification(toasts, fatalError);
+  initNotification(toasts, fatalErrors);
 
   render(
     <I18nContext>

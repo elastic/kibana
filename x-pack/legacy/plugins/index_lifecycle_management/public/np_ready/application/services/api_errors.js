@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fatalError, toasts } from './notification';
+import { fatalErrors, toasts } from './notification';
 
 function createToastConfig(error, errorTitle) {
   if (error && error.body) {
@@ -26,7 +26,7 @@ export function showApiWarning(error, errorTitle) {
 
   // This error isn't an HTTP error, so let the fatal error screen tell the user something
   // unexpected happened.
-  return fatalError(error, errorTitle);
+  return fatalErrors(error, errorTitle);
 }
 
 export function showApiError(error, errorTitle) {
@@ -38,5 +38,5 @@ export function showApiError(error, errorTitle) {
 
   // This error isn't an HTTP error, so let the fatal error screen tell the user something
   // unexpected happened.
-  fatalError(error, errorTitle);
+  fatalErrors.add(error, errorTitle);
 }

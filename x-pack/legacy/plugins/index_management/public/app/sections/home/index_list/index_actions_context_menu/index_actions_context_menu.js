@@ -32,6 +32,12 @@ import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../../common/constants';
 import { getActionExtensions } from '../../../../../index_management_extensions';
 
+// We will be able to remove this after the NP migration is complete and we can just inject the
+// NP fatalErrors service..
+const getNewPlatformCompatibleFatalErrorService = () => ({
+  add: fatalError.bind(fatalError),
+});
+
 export class IndexActionsContextMenu extends Component {
   constructor(props) {
     super(props);
@@ -226,7 +232,7 @@ export class IndexActionsContextMenu extends Component {
         // Once ILM and IM have been moved out of legacy this hack won't be necessary.
         createUiStatsReporter,
         toasts: toastNotifications,
-        fatalError,
+        fatalErrors: getNewPlatformCompatibleFatalErrorService(),
         httpClient: getNewPlatformCompatibleHttpClient(),
       });
 

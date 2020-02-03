@@ -11,7 +11,6 @@ import { npSetup, npStart } from 'ui/new_platform';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { management } from 'ui/management';
-import { fatalError } from 'ui/notify';
 import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 
 import { PLUGIN, BASE_PATH } from '../common/constants';
@@ -67,11 +66,12 @@ if (chrome.getInjected('ilmUiEnabled')) {
       constructor($scope: any, $route: any, kbnUrl: any, $rootScope: any) {
         $scope.$$postDigest(() => {
           const element = document.getElementById(REACT_ROOT_ID)!;
+          const { core } = npSetup;
 
           const coreDependencies = {
-            ...npSetup.core,
+            ...core,
             application: {
-              ...npSetup.core.application,
+              ...core.application,
               async register(app: App) {
                 const unmountApp = await app.mount({ ...npStart } as any, {
                   element,
@@ -92,7 +92,6 @@ if (chrome.getInjected('ilmUiEnabled')) {
                   kbnUrl.redirect(path);
                 });
               },
-              fatalError,
               createUiStatsReporter,
             },
           };
