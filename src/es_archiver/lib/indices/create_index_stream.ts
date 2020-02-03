@@ -84,7 +84,7 @@ export function createCreateIndexStream({
             mappings,
             aliases,
           },
-        });
+        } as any); // include_type_name is not properly defined
 
         stats.createdIndex(index, { settings });
       } catch (err) {
