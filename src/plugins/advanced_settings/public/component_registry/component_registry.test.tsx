@@ -50,13 +50,12 @@ describe('ComponentRegistry', () => {
       registry.setup.register(
         ComponentRegistry.componentType.PAGE_TITLE_COMPONENT,
         anotherComponent,
-        undefined,
         true
       );
 
-      expect(
-        registry.start.get$(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT).getValue()
-      ).toBe(anotherComponent);
+      expect(registry.start.get(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT)).toBe(
+        anotherComponent
+      );
     });
   });
 
@@ -65,13 +64,12 @@ describe('ComponentRegistry', () => {
       const registry = new ComponentRegistry();
       const component = () => <div />;
       registry.setup.register(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT, component);
-      expect(
-        registry.start.get$(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT).getValue()
-      ).toBe(component);
+      expect(registry.start.get(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT)).toBe(
+        component
+      );
     });
   });
 
-  // todo, look at these and add tests for enable / disabling state
   it('should set a displayName for the component if one does not exist', () => {
     const component: React.ComponentType = () => <div />;
     // component.displayName = ComponentRegistry.componentType.PAGE_TITLE_COMPONENT;

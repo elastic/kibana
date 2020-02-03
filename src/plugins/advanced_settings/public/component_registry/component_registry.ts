@@ -18,7 +18,6 @@
  */
 
 import { ComponentType } from 'react';
-import { BehaviorSubject } from 'rxjs';
 import { PageTitle } from './page_title';
 import { PageSubtitle } from './page_subtitle';
 import { PageFooter } from './page_footer';
@@ -34,14 +33,7 @@ const componentType: { [key: string]: Id } = {
   PAGE_FOOTER_COMPONENT: 'advanced_settings_page_footer' as Id,
 };
 
-export type RegistryComponent = ComponentType<Record<string, any> | undefined>;
-
-type ComponentStatus = boolean;
-
-interface RegistryComponentWithStatus {
-  component: RegistryComponent;
-  $updater: BehaviorSubject<boolean>;
-}
+type RegistryComponent = ComponentType<Record<string, any> | undefined>;
 
 export class ComponentRegistry {
   static readonly componentType = componentType;
@@ -51,7 +43,7 @@ export class ComponentRegistry {
     advanced_settings_page_footer: PageFooter,
   };
 
-  registry: { [key in Id]?: RegistryComponentWithStatus } = {};
+  registry: { [key in Id]?: RegistryComponent } = {};
 
   /**
    * Attempts to register the provided component, with the ability to optionally allow
@@ -63,13 +55,7 @@ export class ComponentRegistry {
    * @param {*} component the component
    * @param {*} allowOverride (default: false) - optional flag to allow this component to override a previously registered component
    */
-  private register(
-    id: Id,
-    component: RegistryComponent,
-    $updater: BehaviorSubject<ComponentStatus> = new BehaviorSubject(true as ComponentStatus),
-    allowOverride = false
-  ) {
-    // todo allow registration of observable
+  private register(id: Id, component: RegistryComponent, allowOverride = false) {
     if (!allowOverride && id in this.registry) {
       throw new Error(`Component with id ${id} is already registered.`);
     }
@@ -80,29 +66,17 @@ export class ComponentRegistry {
       component.displayName = id;
     }
 
-    this.registry[id] = { component, $updater };
+    this.registry[id] = component;
   }
 
   /**
    * Retrieve a registered component by its ID.
+   * If the component does not exist, then an exception is thrown.
    *
    * @param {*} id the ID of the component to retrieve
    */
-  private $get(id: Id): BehaviorSubject<RegistryComponent> {
-    const defaultComponent = ComponentRegistry.defaultRegistry[id];
-    const componentWithStatus = this.registry[id];
-    const isRegistered = !!componentWithStatus;
-    const getComponent = () => {
-      return isRegistered && componentWithStatus!.$updater.getValue()
-        ? componentWithStatus!.component
-        : defaultComponent;
-    };
-
-    const subj = new BehaviorSubject(getComponent());
-    if (isRegistered) {
-      componentWithStatus!.$updater.subscribe(() => subj.next(getComponent()));
-    }
-    return subj;
+  private get(id: Id): RegistryComponent {
+    return this.registry[id] || ComponentRegistry.defaultRegistry[id];
   }
 
   setup = {
@@ -112,6 +86,6 @@ export class ComponentRegistry {
 
   start = {
     componentType: ComponentRegistry.componentType,
-    get$: this.$get.bind(this),
+    get: this.get.bind(this),
   };
 }

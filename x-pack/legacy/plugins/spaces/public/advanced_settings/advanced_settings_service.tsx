@@ -21,13 +21,11 @@ export class AdvancedSettingsService {
     componentRegistry.register(
       componentRegistry.componentType.PAGE_TITLE_COMPONENT,
       PageTitle,
-      undefined,
       true
     );
     componentRegistry.register(
       componentRegistry.componentType.PAGE_SUBTITLE_COMPONENT,
       SubTitle,
-      undefined,
       true
     );
   }
