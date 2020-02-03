@@ -8,10 +8,10 @@ import { useEffect, useState } from 'react';
 
 import { useStateToaster } from '../components/toasters';
 import { errorToToaster } from '../components/ml/api/error_to_toaster';
-import { IndexPatternSavedObject } from '../components/ml_popover/types';
 
-import { getIndexPatterns } from './api/api';
 import * as i18n from './translations';
+import { IndexPatternSavedObject } from './types';
+import { getIndexPatterns } from './api/api';
 
 type Return = [boolean, IndexPatternSavedObject[]];
 
@@ -22,12 +22,11 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
 
   useEffect(() => {
     let isSubscribed = true;
-    const abortCtrl = new AbortController();
     setIsLoading(true);
 
     async function fetchIndexPatterns() {
       try {
-        const data = await getIndexPatterns(abortCtrl.signal);
+        const data = await getIndexPatterns();
 
         if (isSubscribed) {
           setIndexPatterns(data);
@@ -44,7 +43,6 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
     fetchIndexPatterns();
     return () => {
       isSubscribed = false;
-      abortCtrl.abort();
     };
   }, [refreshToggle]);
 
