@@ -3,25 +3,33 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
+import { schema } from '@kbn/config-schema';
 
-interface ReqPayload {
+import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../index';
+
+interface ReqBody {
   indices: string[];
 }
 
-const handler: RouterRouteHandler = async (request, callWithRequest, h) => {
-  const payload = request.payload as ReqPayload;
-  const { indices = [] } = payload;
+const bodySchema = schema.object({
+  indices: schema.arrayOf(schema.string()),
+});
 
-  const params = {
-    expandWildcards: 'none',
-    format: 'json',
-    index: indices,
-  };
-  await callWithRequest('indices.open', params);
-  return h.response();
-};
+export function registerOpenRoute({ router }: RouteDependencies) {
+  router.post(
+    { path: addBasePath('/indices/open'), validate: { body: bodySchema } },
+    async (ctx, req, res) => {
+      const body = req.body as ReqBody;
+      const { indices = [] } = body;
 
-export function registerOpenRoute(router: Router) {
-  router.post('indices/open', handler);
+      const params = {
+        expandWildcards: 'none',
+        format: 'json',
+        index: indices,
+      };
+      await await ctx.core.elasticsearch.adminClient.callAsCurrentUser('indices.open', params);
+      return res.ok();
+    }
+  );
 }
