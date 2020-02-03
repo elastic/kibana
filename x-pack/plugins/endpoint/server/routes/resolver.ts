@@ -7,10 +7,11 @@
 import { IRouter } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { EndpointAppContext, EndpointData } from '../types';
-import { events } from '../test_data/events';
-
-const phase0EntityPrefix = 'endgame-';
+import { ResolverPhase0Data, ResolverPhase1Data } from '../../common/types';
+import { EndpointAppContext } from '../types';
+import { ResolverNode, phase0EntityPrefix } from '../services/resolver/common';
+import { ResolverPhase0Node } from '../services/resolver/phase0_node';
+import { ResolverPhase1Node } from '../services/resolver/phase1_node';
 
 function buildPhase0ChildrenQuery(endpointID: string, uniquePID: string) {
   return {
@@ -74,18 +75,79 @@ function buildPhase1ChildrenQuery(entityID: string) {
   };
 }
 
-function getESChildrenQuery(entityID: string) {
-  if (entityID.includes(phase0EntityPrefix)) {
-    const fields = entityID.split('-');
-    if (fields.length !== 3) {
-      throw Error(
-        'Invalid entity_id received must be in the format endgame-<endpoint id>-<unique_pid>'
-      );
-    }
+function parsePhase0EntityID(entityID: string): [string, string] {
+  const fields = entityID.split('-');
+  if (fields.length !== 3) {
+    throw Error(
+      'Invalid entity_id received must be in the format endgame-<endpoint id>-<unique_pid>'
+    );
+  }
+  return [fields[1], fields[2]];
+}
 
-    return buildPhase0ChildrenQuery(fields[1], fields[2]);
+function isPhase0EntityID(entityID: string) {
+  return entityID.includes(phase0EntityPrefix);
+}
+
+function getESChildrenQuery(entityID: string) {
+  if (isPhase0EntityID(entityID)) {
+    const [endpointID, uniquePID] = parsePhase0EntityID(entityID);
+    return buildPhase0ChildrenQuery(endpointID, uniquePID);
   }
   return buildPhase1ChildrenQuery(entityID);
+}
+
+function isPhase0Data(data: ResolverPhase0Data | ResolverPhase1Data): data is ResolverPhase0Data {
+  return (data as ResolverPhase0Data).endgame?.unique_pid !== undefined;
+}
+
+function buildChildrenResponse(
+  originEntityID: string,
+  esResponse: SearchResponse<ResolverData>
+): ResolverChildrenResponse {
+  const nodes = new Map<string, ResolverData[]>();
+  const originEvents: ResolverData[] = [];
+  for (const hit of esResponse.hits.hits) {
+    const node = nodeCreator(hit._source);
+    const dataArray = nodes.get(node.entityID) || [];
+    dataArray.push(node.esData);
+    if (node.entityID === originEntityID) {
+      originEvents.push(node.esData);
+    }
+  }
+  const children: ResolverResponseNode[] = [];
+  for (const [entityID, events] of nodes) {
+    children.push({
+      entity_id: entityID,
+      events,
+    });
+  }
+  return {
+    origin: {
+      entity_id: originEntityID,
+      events: originEvents,
+    },
+    children,
+  };
+}
+
+function nodeCreator(data: ResolverData): ResolverNode {
+  if (isPhase0Data(data)) {
+    return new ResolverPhase0Node(data);
+  }
+  return new ResolverPhase1Node(data);
+}
+
+type ResolverData = ResolverPhase0Data | ResolverPhase1Data;
+
+interface ResolverResponseNode {
+  entity_id: string;
+  events: ResolverData[];
+}
+
+interface ResolverChildrenResponse {
+  origin: ResolverResponseNode;
+  children: ResolverResponseNode[];
 }
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
@@ -106,23 +168,14 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           query
-        )) as SearchResponse<EndpointMetadata>;
+        )) as SearchResponse<ResolverData>;
 
         if (response.hits.hits.length === 0) {
-          return res.notFound({ body: 'Endpoint Not Found' });
+          return res.notFound({ body: 'Node not found' });
         }
 
-        return res.ok({ body: response.hits.hits[0]._source });
-      } catch (err) {
-        return res.internalError({ body: err });
-      }
-
-      try {
         return res.ok({
-          body: {
-            origin,
-            children: [...children],
-          },
+          body: buildChildrenResponse(entityID, response),
         });
       } catch (err) {
         return res.internalError({ body: err });
@@ -130,7 +183,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
     }
   );
 
-  /*router.get(
+  router.get(
     {
       path: '/api/endpoint/resolver/ancestor',
       validate: {
@@ -141,19 +194,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       options: { authRequired: true },
     },
     async (context, req, res) => {
-      const entityID = req.query.entityID;
-      const origin = events.find(event => event.entityID === entityID);
-      const ancestor = events.find(event => event.parentEntityID === entityID);
-      try {
-        return res.ok({
-          body: {
-            ancestor,
-            origin,
-          },
-        });
-      } catch (err) {
-        return res.internalError({ body: err });
-      }
+      // TODO
     }
-  );*/
+  );
 }

@@ -92,6 +92,33 @@ export interface AlertData {
   };
 }
 
+export interface ResolverPhase0Data {
+  endgame: {
+    event_type_full: string;
+    event_subtype_full: string;
+    unique_pid: number;
+    unique_ppid: number;
+  };
+  labels: {
+    endpoint_id: string;
+  };
+}
+
+export interface ResolverPhase1Data {
+  event: {
+    category: string;
+    type: string;
+  };
+  endpoint: {
+    process: {
+      entity_id: string;
+      parent: {
+        entity_id: string;
+      };
+    };
+  };
+}
+
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */
