@@ -77,9 +77,11 @@ describe('IndexPatterns', () => {
 
   test('savedObjectCache pre-fetches only title', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
-    expect(savedObjectsClient.find).toHaveBeenCalledWith(
-      expect.objectContaining({ fields: ['title'] })
-    );
+    expect(savedObjectsClient.find).toHaveBeenCalledWith({
+      type: 'index-pattern',
+      fields: ['title'],
+      perPage: 10000,
+    });
   });
 
   test('caches saved objects', async () => {
