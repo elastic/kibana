@@ -374,9 +374,6 @@
     "xml2js": "^0.4.22",
     "xregexp": "4.2.4"
   },
-  "engines": {
-    "yarn": "^1.21.1"
-  },
   "workspaces": {
     "nohoist": [
       "**/mochawesome",
