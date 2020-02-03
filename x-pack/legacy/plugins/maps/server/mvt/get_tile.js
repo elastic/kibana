@@ -7,7 +7,11 @@
 import geojsonvt from 'geojson-vt';
 import vtpbf from 'vt-pbf';
 import _ from 'lodash';
-import { FEATURE_ID_PROPERTY_NAME, MVT_SOURCE_ID, KBN_TOO_MANY_FEATURES_PROPERTY } from '../../common/constants';
+import {
+  FEATURE_ID_PROPERTY_NAME,
+  MVT_SOURCE_ID,
+  KBN_TOO_MANY_FEATURES_PROPERTY,
+} from '../../common/constants';
 
 export async function getTile({
   server,
@@ -238,9 +242,11 @@ export async function getGridTile({
         }
       }
 
+      feature.properties[KBN_TOO_MANY_FEATURES_PROPERTY] = false;
+
       const centroid = {
         type: 'Point',
-        coordinates: [bucket['1'].location.lon, bucket['1'].location.lat],
+        coordinates: [parseFloat(bucket['1'].location.lon), parseFloat(bucket['1'].location.lat)],
       };
 
       feature.geometry = centroid;
@@ -254,7 +260,6 @@ export async function getGridTile({
     };
 
     server.log('info', `feature length ${featureCollection.features.length}`);
-    // server.log('info', featureCollection.features);
 
     const tileIndex = geojsonvt(featureCollection, {
       maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24
