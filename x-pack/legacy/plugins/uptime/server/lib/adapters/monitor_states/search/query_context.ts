@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { APICaller } from 'kibana/server';
 import { CursorPagination } from '../adapter_types';
 import { INDEX_NAMES } from '../../../../../common/constants';
@@ -97,7 +98,7 @@ export class QueryContext {
     // behavior.
 
     const tsEnd = parseRelativeDate(this.dateRangeEnd, { roundUp: true })!;
-    const tsStart = tsEnd.subtract(5, 'minutes');
+    const tsStart = moment(tsEnd).subtract(5, 'minutes');
 
     return {
       range: {
