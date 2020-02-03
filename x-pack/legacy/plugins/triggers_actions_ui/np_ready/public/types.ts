@@ -5,7 +5,6 @@
  */
 import { TypeRegistry } from './application/type_registry';
 import { SanitizedAlert as Alert } from '../../../alerting/common';
-import { AggregationType } from './common/types';
 export { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
 
 export type ActionTypeIndex = Record<string, ActionType>;

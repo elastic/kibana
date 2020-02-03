@@ -21,10 +21,10 @@ describe('threshold expression', () => {
         onChangeSelectedThresholdComparator={onChangeSelectedThresholdComparator}
       />
     );
-    expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]')).toMatchSnapshot(`
+    expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]')).toMatchInlineSnapshot(`
     <EuiSelect
-      onChange={[Function]}
       data-test-subj="comparatorOptionsComboBox"
+      onChange={[Function]}
       options={
         Array [
           Object {

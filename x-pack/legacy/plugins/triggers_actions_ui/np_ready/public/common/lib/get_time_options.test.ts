@@ -7,7 +7,7 @@ import { getTimeOptions, getTimeFieldOptions } from './get_time_options';
 
 describe('get_time_options', () => {
   test('if getTimeOptions return single unit time options', () => {
-    const timeUnitValue = getTimeOptions('1');
+    const timeUnitValue = getTimeOptions(1);
     expect(timeUnitValue).toMatchObject([
       { text: 'second', value: 's' },
       { text: 'minute', value: 'm' },
@@ -17,7 +17,7 @@ describe('get_time_options', () => {
   });
 
   test('if getTimeOptions return multiple unit time options', () => {
-    const timeUnitValue = getTimeOptions('10');
+    const timeUnitValue = getTimeOptions(10);
     expect(timeUnitValue).toMatchObject([
       { text: 'seconds', value: 's' },
       { text: 'minutes', value: 'm' },
