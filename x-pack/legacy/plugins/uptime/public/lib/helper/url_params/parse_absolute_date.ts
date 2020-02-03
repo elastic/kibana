@@ -6,8 +6,8 @@
 
 import DateMath from '@elastic/datemath';
 
-export const parseAbsoluteDate = (date: string, defaultValue: number): number => {
-  const momentWrapper = DateMath.parse(date);
+export const parseAbsoluteDate = (date: string, defaultValue: number, options = {}): number => {
+  const momentWrapper = DateMath.parse(date, options);
   if (momentWrapper) {
     return momentWrapper.valueOf();
   }
