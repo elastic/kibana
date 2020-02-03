@@ -19,9 +19,13 @@
 
 var execFileSync = require('child_process').execFileSync;
 var basename = require('path').basename;
+var glob = require('glob');
 
 process.argv.slice(2).forEach(function(file) {
-  if (basename(file)[0] === '_') return;
-  console.log(process.argv[0], file);
-  execFileSync(process.argv[0], [file], { stdio: 'inherit' });
+  var files = glob.sync(file);
+  files.forEach(function(file) {
+    if (basename(file)[0] === '_') return;
+    console.log(process.argv[0], file);
+    execFileSync(process.argv[0], [file], { stdio: 'inherit' });
+  });
 });
