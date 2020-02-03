@@ -126,7 +126,7 @@ const AuthenticationTableComponent = React.memo<AuthenticationTableProps>(
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getAuthenticationColumnsCurated(type)}
+        columns={columns}
         dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerTitle={i18n.AUTHENTICATIONS}
