@@ -14,21 +14,28 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiComboBox,
-  EuiComboBoxOptionProps,
 } from '@elastic/eui';
+import { buildInAggregationTypes } from '../constants';
+import { AggregationType } from '../types';
 
 interface OfExpressionProps {
+  aggType: string;
   aggField?: string;
   errors: { [key: string]: string[] };
   onChangeSelectedAggField: (selectedAggType?: string) => void;
-  fieldsOptions?: Array<EuiComboBoxOptionProps<any>>;
+  fields: Record<string, any>;
+  customAggTypesOptions?: {
+    [key: string]: AggregationType;
+  };
 }
 
 export const OfExpression = ({
+  aggType,
   aggField,
   errors,
   onChangeSelectedAggField,
-  fieldsOptions,
+  fields,
+  customAggTypesOptions,
 }: OfExpressionProps) => {
   const [aggFieldPopoverOpen, setAggFieldPopoverOpen] = useState(false);
   const firstFieldOption = {
@@ -40,18 +47,25 @@ export const OfExpression = ({
     ),
     value: '',
   };
+  const aggregationTypes = customAggTypesOptions ?? buildInAggregationTypes;
+
+  const availablefieldsOptions = fields.reduce((esFieldOptions: any[], field: any) => {
+    if (aggregationTypes[aggType].validNormalizedTypes.includes(field.normalizedType)) {
+      esFieldOptions.push({
+        label: field.name,
+      });
+    }
+    return esFieldOptions;
+  }, []);
 
   return (
     <EuiPopover
       id="aggFieldPopover"
       button={
         <EuiExpression
-          description={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertAdd.threshold.ofLabel',
-            {
-              defaultMessage: 'of',
-            }
-          )}
+          description={i18n.translate('xpack.triggersActionsUI.common.of.ofLabel', {
+            defaultMessage: 'of',
+          })}
           value={aggField || firstFieldOption.text}
           isActive={aggFieldPopoverOpen || !aggField}
           onClick={() => {
@@ -68,21 +82,22 @@ export const OfExpression = ({
     >
       <div>
         <EuiPopoverTitle>
-          {i18n.translate('xpack.triggersActionsUI.sections.alertAdd.threshold.ofButtonLabel', {
+          {i18n.translate('xpack.triggersActionsUI.common.of.ofButtonLabel', {
             defaultMessage: 'of',
           })}
         </EuiPopoverTitle>
         <EuiFlexGroup>
-          <EuiFlexItem grow={false} className="watcherThresholdAlertAggFieldContainer">
+          <EuiFlexItem grow={false}>
             <EuiFormRow
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}
               error={errors.aggField}
             >
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
+                data-test-subj="availablefieldsOptionsComboBox"
                 isInvalid={errors.aggField.length > 0 && aggField !== undefined}
                 placeholder={firstFieldOption.text}
-                options={fieldsOptions}
+                options={availablefieldsOptions}
                 selectedOptions={aggField ? [{ label: aggField }] : []}
                 onChange={selectedOptions => {
                   onChangeSelectedAggField(

@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './expression_items';
+export { WhenExpression } from './when';
+export { OfExpression } from './of';
+export { GroupByExpression } from './group_by_over';
+export { ThresholdExpression } from './threshold';
+export { ForLastExpression } from './for_the_last';

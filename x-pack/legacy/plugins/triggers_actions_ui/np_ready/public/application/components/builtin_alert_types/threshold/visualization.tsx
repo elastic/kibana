@@ -26,9 +26,9 @@ import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { npStart } from 'ui/new_platform';
 import { getThresholdAlertVisualizationData } from './lib/api';
-import { comparators, aggregationTypes } from './expression';
 import { useAppDependencies } from '../../../app_context';
-import { Alert } from '../../../../types';
+import { AggregationType, Comparator } from '../../../../common/types';
+import { IndexThresholdAlertParams } from '../types';
 
 const customTheme = () => {
   return {
@@ -76,13 +76,6 @@ const getDomain = (alertParams: any) => {
   };
 };
 
-const getThreshold = (alertParams: any) => {
-  return alertParams.threshold.slice(
-    0,
-    comparators[alertParams.thresholdComparator].requiredValues
-  );
-};
-
 const getTimeBuckets = (alertParams: any) => {
   const domain = getDomain(alertParams);
   const timeBuckets = new TimeBuckets();
@@ -91,10 +84,18 @@ const getTimeBuckets = (alertParams: any) => {
 };
 
 interface Props {
-  alert: Alert;
+  alertParams: IndexThresholdAlertParams;
+  aggregationTypes: { [key: string]: AggregationType };
+  comparators: {
+    [key: string]: Comparator;
+  };
 }
 
-export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }) => {
+export const ThresholdVisualization: React.FunctionComponent<Props> = ({
+  alertParams,
+  aggregationTypes,
+  comparators,
+}) => {
   const { http, uiSettings, toastNotifications } = useAppDependencies();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<undefined | any>(undefined);
@@ -104,8 +105,6 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
   const {
     index,
     timeField,
-    triggerIntervalSize,
-    triggerIntervalUnit,
     aggType,
     aggField,
     termSize,
@@ -115,9 +114,9 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
     timeWindowUnit,
     groupBy,
     threshold,
-  } = alert.params;
+  } = alertParams;
 
-  const domain = getDomain(alert.params);
+  const domain = getDomain(alertParams);
   const timeBuckets = new TimeBuckets();
   timeBuckets.setBounds(domain);
   const interval = timeBuckets.getInterval().expression;
@@ -129,7 +128,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
   };
 
   // Fetching visualization data is independent of alert actions
-  const alertWithoutActions = { ...alert.params, actions: [], type: 'threshold' };
+  const alertWithoutActions = { ...alertParams, actions: [], type: 'threshold' };
 
   useEffect(() => {
     (async () => {
@@ -158,8 +157,6 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
   }, [
     index,
     timeField,
-    triggerIntervalSize,
-    triggerIntervalUnit,
     aggType,
     aggField,
     termSize,
@@ -210,11 +207,18 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
     );
   }
 
+  const getThreshold = () => {
+    return alertParams.threshold.slice(
+      0,
+      comparators[alertParams.thresholdComparator].requiredValues
+    );
+  };
+
   if (visualizationData) {
     const alertVisualizationDataKeys = Object.keys(visualizationData);
     const timezone = getTimezone(uiSettings);
-    const actualThreshold = getThreshold(alert.params);
-    let maxY = actualThreshold[actualThreshold.length - 1];
+    const actualThreshold = getThreshold();
+    let maxY = actualThreshold[actualThreshold.length - 1] as any;
 
     (Object.values(visualizationData) as number[][][]).forEach(data => {
       data.forEach(([, y]) => {
@@ -226,7 +230,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
     const dateFormatter = (d: number) => {
       return moment(d)
         .tz(timezone)
-        .format(getTimeBuckets(alert.params).getScaledDateFormat());
+        .format(getTimeBuckets(alertParams).getScaledDateFormat());
     };
     const aggLabel = aggregationTypes[aggType].text;
     return (

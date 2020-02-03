@@ -22,16 +22,16 @@ import { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
 
 interface ForLastExpressionProps {
-  timeWindowSize: string;
-  timeWindowUnit: string;
+  timeWindowSize?: number;
+  timeWindowUnit?: string;
   errors: { [key: string]: string[] };
   onChangeWindowSize: (selectedWindowSize: number | '') => void;
   onChangeWindowUnit: (selectedWindowUnit: string) => void;
 }
 
 export const ForLastExpression = ({
-  timeWindowSize,
-  timeWindowUnit,
+  timeWindowSize = 1,
+  timeWindowUnit = 's',
   errors,
   onChangeWindowSize,
   onChangeWindowUnit,
@@ -51,9 +51,9 @@ export const ForLastExpression = ({
           )}
           value={`${timeWindowSize} ${getTimeUnitLabel(
             timeWindowUnit as TIME_UNITS,
-            parseInt(timeWindowSize, 10).toString()
+            timeWindowSize.toString()
           )}`}
-          isActive={alertDurationPopoverOpen || !timeWindowSize}
+          isActive={alertDurationPopoverOpen}
           onClick={() => {
             setAlertDurationPopoverOpen(true);
           }}
@@ -82,9 +82,10 @@ export const ForLastExpression = ({
               error={errors.timeWindowSize}
             >
               <EuiFieldNumber
+                data-test-subj="timeWindowSizeNumber"
                 isInvalid={errors.timeWindowSize.length > 0 && timeWindowSize !== undefined}
                 min={1}
-                value={timeWindowSize ? parseInt(timeWindowSize, 10) : 1}
+                value={timeWindowSize}
                 onChange={e => {
                   const { value } = e.target;
                   const timeWindowSizeVal = value !== '' ? parseInt(value, 10) : value;
@@ -95,6 +96,7 @@ export const ForLastExpression = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSelect
+              data-test-subj="timeWindowUnitSelect"
               value={timeWindowUnit}
               onChange={e => {
                 onChangeWindowUnit(e.target.value);

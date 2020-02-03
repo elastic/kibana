@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { COMPARATORS } from './comparators';
-export { AGGREGATION_TYPES } from './aggregation_types';
+export { COMPARATORS, buildinComparators } from './comparators';
+export { AGGREGATION_TYPES, buildInAggregationTypes } from './aggregation_types';
+export { buildinGroupByTypes } from './group_by_types';

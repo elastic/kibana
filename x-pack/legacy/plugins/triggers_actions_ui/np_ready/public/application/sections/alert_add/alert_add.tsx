@@ -367,11 +367,10 @@ export const AlertAdd = ({ refreshList }: Props) => {
       </EuiFlexGroup>
       {AlertParamsExpressionComponent ? (
         <AlertParamsExpressionComponent
-          alert={alert}
+          alertParams={alert.params}
           errors={errors}
           setAlertParams={setAlertParams}
           setAlertProperty={setAlertProperty}
-          hasErrors={hasErrors}
         />
       ) : null}
     </Fragment>
@@ -689,7 +688,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
                         fullWidth
                         compressed
                         value={alertIntervalUnit}
-                        options={getTimeOptions((alertInterval ? alertInterval : 1).toString())}
+                        options={getTimeOptions(alertInterval ?? 1)}
                         onChange={(e: any) => {
                           setAlertIntervalUnit(e.target.value);
                           setAlertProperty('schedule', {
@@ -724,7 +723,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
                       <EuiSelect
                         compressed
                         value={alert.renotifyIntervalUnit}
-                        options={getTimeOptions(alert.renotifyIntervalSize)}
+                        options={getTimeOptions(alert.renotifyIntervalSize ?? 1)}
                         onChange={(e: any) => {
                           setAlertThrottleUnit(e.target.value);
                           setAlertProperty('throttle', `${alertThrottle}${e.target.value}`);

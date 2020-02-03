@@ -16,15 +16,12 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiComboBox,
-  EuiFieldNumber,
   EuiComboBoxOptionProps,
-  EuiText,
   EuiFormRow,
   EuiCallOut,
 } from '@elastic/eui';
-import { AlertTypeModel, Alert, ValidationResult } from '../../../../types';
-import { Comparator, GroupByType } from '../../../../common/types';
-import { COMPARATORS } from '../../../../common/constants';
+import { AlertTypeModel, ValidationResult } from '../../../../types';
+import { COMPARATORS, buildinGroupByTypes, buildinComparators } from '../../../../common/constants';
 import {
   getMatchingIndicesForThresholdAlertType,
   getThresholdAlertTypeFields,
@@ -34,9 +31,14 @@ import { useAppDependencies } from '../../../app_context';
 import { getTimeFieldOptions } from '../../../../common/lib/get_time_options';
 import { ThresholdVisualization } from './visualization';
 import { WhenExpression } from '../../../../common';
-import { aggregationTypes } from '../../../../common/expression_items/when';
-import { OfExpression } from '../../../../common/expression_items/of';
-import { ForLastExpression } from '../../../../common/expression_items/for_the_last';
+import {
+  OfExpression,
+  ThresholdExpression,
+  ForLastExpression,
+  GroupByExpression,
+} from '../../../../common';
+import { buildInAggregationTypes } from '../../../../common/constants';
+import { IndexThresholdAlertParams } from '../types';
 
 const DEFAULT_VALUES = {
   AGGREGATION_TYPE: 'count',
@@ -61,7 +63,7 @@ const expressionFieldsWithValidation = [
   'timeWindowSize',
 ];
 
-const validateAlertType = (alert: Alert): ValidationResult => {
+const validateAlertType = (alertParams: IndexThresholdAlertParams): ValidationResult => {
   const {
     index,
     timeField,
@@ -72,7 +74,7 @@ const validateAlertType = (alert: Alert): ValidationResult => {
     termField,
     threshold,
     timeWindowSize,
-  } = alert.params;
+  } = alertParams;
   const validationResult = { errors: {} };
   const errors = {
     aggField: new Array<string>(),
@@ -99,7 +101,7 @@ const validateAlertType = (alert: Alert): ValidationResult => {
       })
     );
   }
-  if (aggType && aggregationTypes[aggType].fieldRequired && !aggField) {
+  if (aggType && buildInAggregationTypes[aggType].fieldRequired && !aggField) {
     errors.aggField.push(
       i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredAggFieldText', {
         defaultMessage: 'Aggregation field is required.',
@@ -113,7 +115,7 @@ const validateAlertType = (alert: Alert): ValidationResult => {
       })
     );
   }
-  if (groupBy && groupByTypes[groupBy].sizeRequired && !termField) {
+  if (groupBy && buildinGroupByTypes[groupBy].sizeRequired && !termField) {
     errors.termField.push(
       i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredtTermFieldText', {
         defaultMessage: 'Term field is required.',
@@ -154,98 +156,18 @@ export function getActionType(): AlertTypeModel {
   };
 }
 
-export const comparators: { [key: string]: Comparator } = {
-  [COMPARATORS.GREATER_THAN]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isAboveLabel',
-      {
-        defaultMessage: 'Is above',
-      }
-    ),
-    value: COMPARATORS.GREATER_THAN,
-    requiredValues: 1,
-  },
-  [COMPARATORS.GREATER_THAN_OR_EQUALS]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isAboveOrEqualsLabel',
-      {
-        defaultMessage: 'Is above or equals',
-      }
-    ),
-    value: COMPARATORS.GREATER_THAN_OR_EQUALS,
-    requiredValues: 1,
-  },
-  [COMPARATORS.LESS_THAN]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isBelowLabel',
-      {
-        defaultMessage: 'Is below',
-      }
-    ),
-    value: COMPARATORS.LESS_THAN,
-    requiredValues: 1,
-  },
-  [COMPARATORS.LESS_THAN_OR_EQUALS]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isBelowOrEqualsLabel',
-      {
-        defaultMessage: 'Is below or equals',
-      }
-    ),
-    value: COMPARATORS.LESS_THAN_OR_EQUALS,
-    requiredValues: 1,
-  },
-  [COMPARATORS.BETWEEN]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isBetweenLabel',
-      {
-        defaultMessage: 'Is between',
-      }
-    ),
-    value: COMPARATORS.BETWEEN,
-    requiredValues: 2,
-  },
-};
-
-export const groupByTypes: { [key: string]: GroupByType } = {
-  all: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.groupByLabel.allDocumentsLabel',
-      {
-        defaultMessage: 'all documents',
-      }
-    ),
-    sizeRequired: false,
-    value: 'all',
-    validNormalizedTypes: [],
-  },
-  top: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.groupByLabel.topLabel',
-      {
-        defaultMessage: 'top',
-      }
-    ),
-    sizeRequired: true,
-    value: 'top',
-    validNormalizedTypes: ['number', 'date', 'keyword'],
-  },
-};
-
-interface Props {
-  alert: Alert;
+interface IndexThresholdProps {
+  alertParams: IndexThresholdAlertParams;
   setAlertParams: (property: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
   errors: { [key: string]: string[] };
-  hasErrors?: boolean;
 }
 
-export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> = ({
-  alert,
+export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
+  alertParams,
   setAlertParams,
   setAlertProperty,
   errors,
-  hasErrors,
 }) => {
   const { http } = useAppDependencies();
 
@@ -261,7 +183,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
     threshold,
     timeWindowSize,
     timeWindowUnit,
-  } = alert.params;
+  } = alertParams;
 
   const firstFieldOption = {
     text: i18n.translate(
@@ -279,15 +201,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
   const [indexOptions, setIndexOptions] = useState<IOption[]>([]);
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
-  const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
-  const [groupByPopoverOpen, setGroupByPopoverOpen] = useState(false);
-
-  const andThresholdText = i18n.translate(
-    'xpack.triggersActionsUI.sections.alertAdd.threshold.andLabel',
-    {
-      defaultMessage: 'AND',
-    }
-  );
 
   const hasExpressionErrors = !!Object.keys(errors).find(
     errorKey => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
@@ -386,15 +299,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
     return options;
   };
 
-  const fieldsOptions = esFields.reduce((esFieldOptions: any[], field: any) => {
-    if (aggregationTypes[aggType].validNormalizedTypes.includes(field.normalizedType)) {
-      esFieldOptions.push({
-        label: field.name,
-      });
-    }
-    return esFieldOptions;
-  }, []);
-
   const indexPopover = (
     <Fragment>
       <EuiSpacer />
@@ -409,7 +313,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 defaultMessage="Indices to query"
               />
             }
-            isInvalid={hasErrors && index !== undefined}
+            isInvalid={errors.index.length > 0 && index !== undefined}
             error={errors.index}
             helpText={
               <FormattedMessage
@@ -422,7 +326,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
               fullWidth
               async
               isLoading={isIndiciesLoading}
-              isInvalid={hasErrors && index !== undefined}
+              isInvalid={errors.index.length > 0 && index !== undefined}
               noSuggestions={!indexOptions.length}
               options={indexOptions}
               data-test-subj="thresholdIndexesComboBox"
@@ -477,12 +381,12 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 defaultMessage="Time field"
               />
             }
-            isInvalid={hasErrors && timeField !== undefined}
+            isInvalid={errors.timeField.length > 0 && timeField !== undefined}
             error={errors.timeField}
           >
             <EuiSelect
               options={timeFieldOptions}
-              isInvalid={hasErrors && timeField !== undefined}
+              isInvalid={errors.timeField.length > 0 && timeField !== undefined}
               fullWidth
               name="watchTimeField"
               data-test-subj="watchTimeFieldSelect"
@@ -563,11 +467,12 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             }
           />
         </EuiFlexItem>
-        {aggType && aggregationTypes[aggType].fieldRequired ? (
+        {aggType && buildInAggregationTypes[aggType].fieldRequired ? (
           <EuiFlexItem grow={false}>
             <OfExpression
               aggField={aggField}
-              fieldsOptions={fieldsOptions}
+              fields={esFields}
+              aggType={aggType}
               errors={errors}
               onChangeSelectedAggField={(selectedAggField?: string) =>
                 setAlertParams('aggField', selectedAggField)
@@ -576,226 +481,40 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={false}>
-          <EuiPopover
-            id="groupByPopover"
-            button={
-              <EuiExpression
-                description={`${
-                  groupByTypes[groupBy || DEFAULT_VALUES.GROUP_BY].sizeRequired
-                    ? i18n.translate(
-                        'xpack.triggersActionsUI.sections.alertAdd.threshold.groupedOverLabel',
-                        {
-                          defaultMessage: 'grouped over',
-                        }
-                      )
-                    : i18n.translate(
-                        'xpack.triggersActionsUI.sections.alertAdd.threshold.overLabel',
-                        {
-                          defaultMessage: 'over',
-                        }
-                      )
-                }`}
-                value={`${groupByTypes[groupBy || DEFAULT_VALUES.GROUP_BY].text} ${
-                  groupByTypes[groupBy || DEFAULT_VALUES.GROUP_BY].sizeRequired
-                    ? `${termSize} ${termField ? `'${termField}'` : ''}`
-                    : ''
-                }`}
-                isActive={groupByPopoverOpen || (groupBy === 'top' && !(termSize && termField))}
-                onClick={() => {
-                  setGroupByPopoverOpen(true);
-                }}
-                color={groupBy === 'all' || (termSize && termField) ? 'secondary' : 'danger'}
-              />
+          <GroupByExpression
+            groupBy={groupBy}
+            termField={termField}
+            termSize={termSize}
+            defaultGroupBy={DEFAULT_VALUES.GROUP_BY}
+            errors={errors}
+            fields={esFields}
+            onChangeSelectedGroupBy={selectedGroupBy => setAlertParams('groupBy', selectedGroupBy)}
+            onChangeSelectedTermField={selectedTermField =>
+              setAlertParams('termField', selectedTermField)
             }
-            isOpen={groupByPopoverOpen}
-            closePopover={() => {
-              setGroupByPopoverOpen(false);
-            }}
-            ownFocus
-            withTitle
-            anchorPosition="downLeft"
-          >
-            <div>
-              <EuiPopoverTitle>
-                {i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.threshold.overButtonLabel',
-                  {
-                    defaultMessage: 'over',
-                  }
-                )}
-              </EuiPopoverTitle>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiSelect
-                    value={groupBy}
-                    onChange={e => {
-                      setAlertParams('termSize', null);
-                      setAlertParams('termField', null);
-                      setAlertParams('groupBy', e.target.value);
-                    }}
-                    options={Object.values(groupByTypes).map(({ text, value }) => {
-                      return {
-                        text,
-                        value,
-                      };
-                    })}
-                  />
-                </EuiFlexItem>
-
-                {groupByTypes[groupBy || DEFAULT_VALUES.GROUP_BY].sizeRequired ? (
-                  <Fragment>
-                    <EuiFlexItem grow={false}>
-                      <EuiFormRow isInvalid={hasErrors} error={errors.termSize}>
-                        <EuiFieldNumber
-                          isInvalid={hasErrors}
-                          value={termSize || 0}
-                          onChange={e => {
-                            const { value } = e.target;
-                            const termSizeVal = value !== '' ? parseFloat(value) : value;
-                            setAlertParams('termSize', termSizeVal);
-                          }}
-                          min={1}
-                        />
-                      </EuiFormRow>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiFormRow
-                        isInvalid={hasErrors && termField !== undefined}
-                        error={errors.termField}
-                      >
-                        <EuiSelect
-                          value={termField || ''}
-                          isInvalid={hasErrors && termField !== undefined}
-                          onChange={e => {
-                            setAlertParams('termField', e.target.value);
-                          }}
-                          options={esFields.reduce(
-                            (options: any, field: any) => {
-                              if (
-                                groupByTypes[
-                                  groupBy || DEFAULT_VALUES.GROUP_BY
-                                ].validNormalizedTypes.includes(field.normalizedType)
-                              ) {
-                                options.push({
-                                  text: field.name,
-                                  value: field.name,
-                                });
-                              }
-                              return options;
-                            },
-                            [firstFieldOption]
-                          )}
-                        />
-                      </EuiFormRow>
-                    </EuiFlexItem>
-                  </Fragment>
-                ) : null}
-              </EuiFlexGroup>
-            </div>
-          </EuiPopover>
+            onChangeSelectedTermSize={selectedTermSize =>
+              setAlertParams('termSize', selectedTermSize)
+            }
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiPopover
-            id="alertThresholdPopover"
-            button={
-              <EuiExpression
-                data-test-subj="alertThresholdPopover"
-                description={
-                  comparators[thresholdComparator || DEFAULT_VALUES.THRESHOLD_COMPARATOR].text
-                }
-                value={(threshold || [])
-                  .slice(
-                    0,
-                    comparators[thresholdComparator || DEFAULT_VALUES.THRESHOLD_COMPARATOR]
-                      .requiredValues
-                  )
-                  .join(` ${andThresholdText} `)}
-                isActive={Boolean(
-                  alertThresholdPopoverOpen ||
-                    (errors.threshold0 && errors.threshold0.length) ||
-                    (errors.threshold1 && errors.threshold1.length)
-                )}
-                onClick={() => {
-                  setAlertThresholdPopoverOpen(true);
-                }}
-                color={
-                  (errors.threshold0 && errors.threshold0.length) ||
-                  (errors.threshold1 && errors.threshold1.length)
-                    ? 'danger'
-                    : 'secondary'
-                }
-              />
+          <ThresholdExpression
+            thresholdComparator={thresholdComparator}
+            threshold={threshold}
+            defaultThresholdComparator={DEFAULT_VALUES.THRESHOLD_COMPARATOR}
+            errors={errors}
+            onChangeSelectedThreshold={selectedThresholds =>
+              setAlertParams('threshold', selectedThresholds)
             }
-            isOpen={alertThresholdPopoverOpen}
-            closePopover={() => {
-              setAlertThresholdPopoverOpen(false);
-            }}
-            ownFocus
-            withTitle
-            anchorPosition="downLeft"
-          >
-            <div>
-              <EuiPopoverTitle>
-                {comparators[thresholdComparator || DEFAULT_VALUES.THRESHOLD_COMPARATOR].text}
-              </EuiPopoverTitle>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiSelect
-                    value={thresholdComparator}
-                    onChange={e => {
-                      setAlertParams('thresholdComparator', e.target.value);
-                    }}
-                    options={Object.values(comparators).map(({ text, value }) => {
-                      return { text, value };
-                    })}
-                  />
-                </EuiFlexItem>
-                {Array.from(
-                  Array(
-                    comparators[thresholdComparator || DEFAULT_VALUES.THRESHOLD_COMPARATOR]
-                      .requiredValues
-                  )
-                ).map((_notUsed, i) => {
-                  return (
-                    <Fragment key={`threshold${i}`}>
-                      {i > 0 ? (
-                        <EuiFlexItem
-                          grow={false}
-                          className="alertThresholdWatchInBetweenComparatorText"
-                        >
-                          <EuiText>{andThresholdText}</EuiText>
-                          {hasErrors && <EuiSpacer />}
-                        </EuiFlexItem>
-                      ) : null}
-                      <EuiFlexItem grow={false}>
-                        <EuiFormRow isInvalid={hasErrors} error={errors[`threshold${i}`]}>
-                          <EuiFieldNumber
-                            data-test-subj="alertThresholdInput"
-                            isInvalid={hasErrors}
-                            value={!threshold || threshold[i] === null ? 0 : threshold[i]}
-                            min={0}
-                            step={0.1}
-                            onChange={e => {
-                              const { value } = e.target;
-                              const thresholdVal = value !== '' ? parseFloat(value) : value;
-                              const newThreshold = [...threshold];
-                              newThreshold[i] = thresholdVal;
-                              setAlertParams('threshold', newThreshold);
-                            }}
-                          />
-                        </EuiFormRow>
-                      </EuiFlexItem>
-                    </Fragment>
-                  );
-                })}
-              </EuiFlexGroup>
-            </div>
-          </EuiPopover>
+            onChangeSelectedThresholdComparator={selectedThresholdComparator =>
+              setAlertParams('thresholdComparator', selectedThresholdComparator)
+            }
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ForLastExpression
-            timeWindowSize={timeWindowSize}
-            timeWindowUnit={timeWindowUnit}
+            timeWindowSize={timeWindowSize || 1}
+            timeWindowUnit={timeWindowUnit || ''}
             errors={errors}
             onChangeWindowSize={(selectedWindowSize: any) =>
               setAlertParams('timeWindowSize', selectedWindowSize)
@@ -808,7 +527,11 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
       </EuiFlexGroup>
       {hasExpressionErrors ? null : (
         <Fragment>
-          <ThresholdVisualization alert={alert} />
+          <ThresholdVisualization
+            alertParams={alertParams}
+            aggregationTypes={buildInAggregationTypes}
+            comparators={buildinComparators}
+          />
         </Fragment>
       )}
     </Fragment>

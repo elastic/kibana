@@ -7,60 +7,30 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiExpression, EuiPopover, EuiPopoverTitle, EuiSelect } from '@elastic/eui';
-import { AGGREGATION_TYPES } from '../constants';
+import { buildInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
 
-export const aggregationTypes: { [key: string]: AggregationType } = {
-  count: {
-    text: 'count()',
-    fieldRequired: false,
-    value: AGGREGATION_TYPES.COUNT,
-    validNormalizedTypes: [],
-  },
-  avg: {
-    text: 'average()',
-    fieldRequired: true,
-    validNormalizedTypes: ['number'],
-    value: AGGREGATION_TYPES.AVERAGE,
-  },
-  sum: {
-    text: 'sum()',
-    fieldRequired: true,
-    validNormalizedTypes: ['number'],
-    value: AGGREGATION_TYPES.SUM,
-  },
-  min: {
-    text: 'min()',
-    fieldRequired: true,
-    validNormalizedTypes: ['number', 'date'],
-    value: AGGREGATION_TYPES.MIN,
-  },
-  max: {
-    text: 'max()',
-    fieldRequired: true,
-    validNormalizedTypes: ['number', 'date'],
-    value: AGGREGATION_TYPES.MAX,
-  },
-};
-
 interface WhenExpressionProps {
-  aggType: string;
+  aggType?: string;
   defaultAggType: string;
+  customAggTypesOptions?: { [key: string]: AggregationType };
   onChangeSelectedAggType: (selectedAggType: string) => void;
 }
 
 export const WhenExpression = ({
   aggType,
   defaultAggType,
+  customAggTypesOptions,
   onChangeSelectedAggType,
 }: WhenExpressionProps) => {
   const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
-
+  const aggregationTypes = customAggTypesOptions ?? buildInAggregationTypes;
   return (
     <EuiPopover
       id="aggTypePopover"
       button={
         <EuiExpression
+          data-test-subj="whenExpression"
           description={i18n.translate(
             'xpack.triggersActionsUI.sections.alertAdd.threshold.whenLabel',
             {
@@ -68,8 +38,8 @@ export const WhenExpression = ({
             }
           )}
           value={
-            aggregationTypes[aggType]
-              ? aggregationTypes[aggType].text
+            aggregationTypes[aggType ?? '']
+              ? aggregationTypes[aggType ?? ''].text
               : aggregationTypes[defaultAggType].text
           }
           isActive={aggTypePopoverOpen}
@@ -93,7 +63,8 @@ export const WhenExpression = ({
           })}
         </EuiPopoverTitle>
         <EuiSelect
-          value={aggType || ''}
+          data-test-subj="whenExpressionSelect"
+          value={aggType || defaultAggType}
           fullWidth
           onChange={e => {
             onChangeSelectedAggType(e.target.value);
