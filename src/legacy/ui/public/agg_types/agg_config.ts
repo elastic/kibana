@@ -58,6 +58,11 @@ const unknownSchema: Schema = {
   defaults: {},
   editor: false,
   group: AggGroupNames.Metrics,
+  aggSettings: {
+    top_hits: {
+      allowStrings: true,
+    },
+  },
 };
 
 const getTypeFromRegistry = (type: string): AggType => {
