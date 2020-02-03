@@ -19,9 +19,10 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { esFilters } from '../../../../../../plugins/data/public';
+import { deserializeAggConfig } from '../../search/expressions/utils';
 
-export function onBrushEvent(event) {
+export async function onBrushEvent(event, getIndexPatterns) {
   const isNumber = event.data.ordered;
   const isDate = isNumber && event.data.ordered.date;
 
@@ -29,9 +30,12 @@ export function onBrushEvent(event) {
   if (!xRaw) return [];
   const column = xRaw.table.columns[xRaw.column];
   if (!column) return [];
-  const aggConfig = event.aggConfigs[xRaw.column];
-  if (!aggConfig) return [];
-  const indexPattern = aggConfig.getIndexPattern();
+  if (!column.meta) return [];
+  const indexPattern = await getIndexPatterns().get(column.meta.indexPatternId);
+  const aggConfig = deserializeAggConfig({
+    ...column.meta,
+    indexPattern,
+  });
   const field = aggConfig.params.field;
   if (!field) return [];
 
