@@ -9,7 +9,7 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { DonutChartLegendRow } from './donut_chart_legend_row';
-import { UptimeSettingsContext } from '../../../contexts';
+import { UptimeThemeContext } from '../../../contexts';
 
 const LegendContainer = styled.div`
   max-width: 260px;
@@ -28,7 +28,7 @@ interface Props {
 export const DonutChartLegend = ({ down, up }: Props) => {
   const {
     colors: { gray, danger },
-  } = useContext(UptimeSettingsContext);
+  } = useContext(UptimeThemeContext);
   return (
     <LegendContainer>
       <DonutChartLegendRow

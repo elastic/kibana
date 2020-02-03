@@ -9,11 +9,11 @@ import React, { Fragment, useContext, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { MonitorCharts, PingList } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
-import { UptimeSettingsContext } from '../contexts';
+import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../infra/public';
-import { MonitorStatusDetails } from '../components/functional/monitor_status_details';
 import { PageHeader } from './page_header';
+import { MonitorStatusDetails } from '../components/connected';
 
 interface MonitorPageProps {
   setBreadcrumbs: UMUpdateBreadcrumbs;
@@ -25,7 +25,8 @@ export const MonitorPage = ({ setBreadcrumbs }: MonitorPageProps) => {
   monitorId = atob(monitorId || '');
 
   const [pingListPageCount, setPingListPageCount] = useState<number>(10);
-  const { colors, refreshApp } = useContext(UptimeSettingsContext);
+  const { colors } = useContext(UptimeThemeContext);
+  const { refreshApp } = useContext(UptimeRefreshContext);
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
@@ -48,20 +49,9 @@ export const MonitorPage = ({ setBreadcrumbs }: MonitorPageProps) => {
     <Fragment>
       <PageHeader setBreadcrumbs={setBreadcrumbs} />
       <EuiSpacer size="s" />
-      <MonitorStatusDetails
-        monitorId={monitorId}
-        variables={sharedVariables}
-        dateStart={absoluteDateRangeStart}
-        dateEnd={absoluteDateRangeEnd}
-      />
+      <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />
-      <MonitorCharts
-        {...colors}
-        monitorId={monitorId}
-        variables={sharedVariables}
-        dateRangeStart={dateRangeStart}
-        dateRangeEnd={dateRangeEnd}
-      />
+      <MonitorCharts {...colors} monitorId={monitorId} variables={sharedVariables} />
       <EuiSpacer size="s" />
       <PingList
         onPageCountChange={setPingListPageCount}

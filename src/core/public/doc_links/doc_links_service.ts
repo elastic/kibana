@@ -106,7 +106,10 @@ export class DocLinksService {
           introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
         },
         kibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
-        siem: `${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/index.html`,
+        siem: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/index.html`,
+          gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/install-siem.html`,
+        },
         query: {
           luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
           queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
@@ -199,7 +202,10 @@ export interface DocLinksStart {
       readonly introduction: string;
     };
     readonly kibana: string;
-    readonly siem: string;
+    readonly siem: {
+      readonly guide: string;
+      readonly gettingStarted: string;
+    };
     readonly query: {
       readonly luceneQuerySyntax: string;
       readonly queryDsl: string;
@@ -208,5 +214,6 @@ export interface DocLinksStart {
     readonly date: {
       readonly dateMath: string;
     };
+    readonly management: Record<string, string>;
   };
 }

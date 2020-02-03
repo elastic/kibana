@@ -378,6 +378,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
                       "example": null,
                       "format": "",
                       "indexes": Array [
+                        "apm-*-transaction*",
                         "auditbeat-*",
                         "endgame-*",
                         "filebeat-*",

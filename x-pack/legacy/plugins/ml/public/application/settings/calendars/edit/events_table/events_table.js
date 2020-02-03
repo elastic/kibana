@@ -63,6 +63,7 @@ export const EventsTable = injectI18n(function EventsTable({
       }),
       sortable: true,
       truncateText: true,
+      scope: 'row',
     },
     {
       field: 'start_time',

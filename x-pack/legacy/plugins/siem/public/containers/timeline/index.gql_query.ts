@@ -134,6 +134,9 @@ export const timelineQuery = gql`
                 name
                 ip
               }
+              rule {
+                reference
+              }
               source {
                 bytes
                 ip
@@ -188,6 +191,22 @@ export const timelineQuery = gql`
               geo {
                 region_name
                 country_iso_code
+              }
+              signal {
+                original_time
+                rule {
+                  id
+                  saved_id
+                  timeline_id
+                  timeline_title
+                  output_index
+                  from
+                  index
+                  language
+                  query
+                  to
+                  filters
+                }
               }
               suricata {
                 eve {

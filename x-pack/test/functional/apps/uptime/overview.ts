@@ -7,9 +7,9 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default ({ getPageObjects }: FtrProviderContext) => {
-  // TODO: add UI functional tests
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['uptime']);
+  const retry = getService('retry');
 
   describe('overview page', function() {
     const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
@@ -53,9 +53,6 @@ export default ({ getPageObjects }: FtrProviderContext) => {
     it('pagination is cleared when filter criteria changes', async () => {
       await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
       await pageObjects.uptime.changePage('next');
-      // there should now be pagination data in the URL
-      const contains = await pageObjects.uptime.pageUrlContains('pagination');
-      expect(contains).to.be(true);
       await pageObjects.uptime.pageHasExpectedIds([
         '0010-down',
         '0011-up',
@@ -68,10 +65,11 @@ export default ({ getPageObjects }: FtrProviderContext) => {
         '0018-up',
         '0019-up',
       ]);
+      await retry.tryForTime(12000, async () => {
+        // there should now be pagination data in the URL
+        await pageObjects.uptime.pageUrlContains('pagination');
+      });
       await pageObjects.uptime.setStatusFilter('up');
-      // ensure that pagination is removed from the URL
-      const doesNotContain = await pageObjects.uptime.pageUrlContains('pagination');
-      expect(doesNotContain).to.be(false);
       await pageObjects.uptime.pageHasExpectedIds([
         '0000-intermittent',
         '0001-up',
@@ -84,6 +82,10 @@ export default ({ getPageObjects }: FtrProviderContext) => {
         '0008-up',
         '0009-up',
       ]);
+      await retry.tryForTime(12000, async () => {
+        // ensure that pagination is removed from the URL
+        await pageObjects.uptime.pageUrlContains('pagination', false);
+      });
     });
 
     describe('snapshot counts', () => {
@@ -93,8 +95,11 @@ export default ({ getPageObjects }: FtrProviderContext) => {
           DEFAULT_DATE_END
         );
         await pageObjects.uptime.setStatusFilter('down');
-        const counts = await pageObjects.uptime.getSnapshotCount();
-        expect(counts).to.eql({ up: '0', down: '7' });
+
+        await retry.tryForTime(12000, async () => {
+          const counts = await pageObjects.uptime.getSnapshotCount();
+          expect(counts).to.eql({ up: '0', down: '7' });
+        });
       });
 
       it('updates the snapshot count when status filter is set to up', async () => {
@@ -103,8 +108,10 @@ export default ({ getPageObjects }: FtrProviderContext) => {
           DEFAULT_DATE_END
         );
         await pageObjects.uptime.setStatusFilter('up');
-        const counts = await pageObjects.uptime.getSnapshotCount();
-        expect(counts).to.eql({ up: '93', down: '0' });
+        await retry.tryForTime(12000, async () => {
+          const counts = await pageObjects.uptime.getSnapshotCount();
+          expect(counts).to.eql({ up: '93', down: '0' });
+        });
       });
     });
   });

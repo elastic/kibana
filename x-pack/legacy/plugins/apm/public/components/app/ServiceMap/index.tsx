@@ -4,38 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-import React, {
-  useMemo,
-  useEffect,
-  useState,
-  useRef,
-  useCallback
-} from 'react';
-import { find, isEqual } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
 import { ElementDefinition } from 'cytoscape';
+import { find, isEqual } from 'lodash';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ServiceMapAPIResponse } from '../../../../server/lib/service_map/get_service_map';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useCallApmApi } from '../../../hooks/useCallApmApi';
+import { useDeepObjectIdentity } from '../../../hooks/useDeepObjectIdentity';
 import { useLicense } from '../../../hooks/useLicense';
+import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
-import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
-import { useCallApmApi } from '../../../hooks/useCallApmApi';
-import { useDeepObjectIdentity } from '../../../hooks/useDeepObjectIdentity';
-import { useLocation } from '../../../hooks/useLocation';
-import { LoadingOverlay } from './LoadingOverlay';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { getCytoscapeElements } from './get_cytoscape_elements';
+import { LoadingOverlay } from './LoadingOverlay';
+import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
+import { Popover } from './Popover';
+import { useRefHeight } from './useRefHeight';
 
 interface ServiceMapProps {
   serviceName?: string;
 }
 
 const cytoscapeDivStyle = {
-  height: '85vh',
   background: `linear-gradient(
   90deg,
   ${theme.euiPageBackgroundColor}
@@ -51,7 +52,8 @@ linear-gradient(
 center,
 ${theme.euiColorLightShade}`,
   backgroundSize: `${theme.euiSizeL} ${theme.euiSizeL}`,
-  margin: `-${theme.gutterTypes.gutterLarge}`
+  margin: `-${theme.gutterTypes.gutterLarge}`,
+  marginTop: 0
 };
 
 const MAX_REQUESTS = 5;
@@ -197,16 +199,27 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     license?.isActive &&
     (license?.type === 'platinum' || license?.type === 'trial');
 
+  const [wrapperRef, height] = useRefHeight();
+
   return isValidPlatinumLicense ? (
-    <LoadingOverlay isLoading={isLoading} percentageLoaded={percentageLoaded}>
+    <div
+      style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) }}
+      ref={wrapperRef}
+    >
       <Cytoscape
         elements={renderedElements.current}
         serviceName={serviceName}
+        height={height}
         style={cytoscapeDivStyle}
       >
+        <LoadingOverlay
+          isLoading={isLoading}
+          percentageLoaded={percentageLoaded}
+        />
         <Controls />
+        <Popover focusedServiceName={serviceName} />
       </Cytoscape>
-    </LoadingOverlay>
+    </div>
   ) : (
     <PlatinumLicensePrompt />
   );

@@ -5,21 +5,25 @@
  */
 
 import React from 'react';
-import { documentationLinks } from 'ui/documentation_links';
 
 import { EmptyPage } from '../../components/empty_page';
 import * as i18n from './translations';
+import { useKibana } from '../../lib/kibana';
 
-export const DetectionEngineUserUnauthenticated = React.memo(() => (
-  <EmptyPage
-    actionPrimaryIcon="documents"
-    actionPrimaryLabel={i18n.GO_TO_DOCUMENTATION}
-    actionPrimaryUrl={documentationLinks.siem}
-    actionPrimaryTarget="_blank"
-    message={i18n.USER_UNAUTHENTICATED_MSG_BODY}
-    data-test-subj="no_index"
-    title={i18n.USER_UNAUTHENTICATED_TITLE}
-  />
-));
+export const DetectionEngineUserUnauthenticated = React.memo(() => {
+  const docLinks = useKibana().services.docLinks;
+
+  return (
+    <EmptyPage
+      actionPrimaryIcon="documents"
+      actionPrimaryLabel={i18n.GO_TO_DOCUMENTATION}
+      actionPrimaryUrl={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${docLinks.DOC_LINK_VERSION}/detection-engine-overview.html#detections-permissions`}
+      actionPrimaryTarget="_blank"
+      message={i18n.USER_UNAUTHENTICATED_MSG_BODY}
+      data-test-subj="no_index"
+      title={i18n.USER_UNAUTHENTICATED_TITLE}
+    />
+  );
+});
 
 DetectionEngineUserUnauthenticated.displayName = 'DetectionEngineUserUnauthenticated';

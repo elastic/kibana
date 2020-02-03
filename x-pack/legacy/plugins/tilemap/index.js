@@ -12,7 +12,7 @@ export const tilemap = kibana => {
   return new kibana.Plugin({
     id: 'tilemap',
     configPrefix: 'xpack.tilemap',
-    require: ['xpack_main', 'kbn_vislib_vis_types'],
+    require: ['xpack_main', 'vis_type_vislib'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       visTypeEnhancers: ['plugins/tilemap/vis_type_enhancers/update_tilemap_settings'],

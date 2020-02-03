@@ -6,9 +6,7 @@
 
 import {
   createMockServer,
-  createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
-  createMockServerWithoutActionOrAlertClientDecoration,
 } from '../__mocks__/_mock_server';
 
 import { ServerInjectOptions } from 'hapi';
@@ -20,6 +18,7 @@ import {
   getDeleteBulkRequestById,
   getDeleteAsPostBulkRequest,
   getDeleteAsPostBulkRequestById,
+  getFindResultStatus,
 } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
@@ -27,10 +26,10 @@ import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
 import { BulkError } from '../utils';
 
 describe('delete_rules', () => {
-  let { server, alertsClient } = createMockServer();
+  let { server, alertsClient, savedObjectsClient } = createMockServer();
 
   beforeEach(() => {
-    ({ server, alertsClient } = createMockServer());
+    ({ server, alertsClient, savedObjectsClient } = createMockServer());
     deleteRulesBulkRoute(server);
   });
 
@@ -83,6 +82,8 @@ describe('delete_rules', () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      savedObjectsClient.delete.mockResolvedValue({});
       const { payload } = await server.inject(getDeleteBulkRequest());
       const parsed: BulkError[] = JSON.parse(payload);
       const expected: BulkError[] = [
@@ -94,26 +95,10 @@ describe('delete_rules', () => {
       expect(parsed).toEqual(expected);
     });
 
-    test('returns 404 if actionClient is not available on the route', async () => {
-      const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      deleteRulesBulkRoute(serverWithoutActionClient);
-      const { statusCode } = await serverWithoutActionClient.inject(getDeleteBulkRequest());
-      expect(statusCode).toBe(404);
-    });
-
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
       deleteRulesBulkRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getDeleteBulkRequest());
-      expect(statusCode).toBe(404);
-    });
-
-    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
-      const {
-        serverWithoutActionOrAlertClient,
-      } = createMockServerWithoutActionOrAlertClientDecoration();
-      deleteRulesBulkRoute(serverWithoutActionOrAlertClient);
-      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getDeleteBulkRequest());
       expect(statusCode).toBe(404);
     });
   });

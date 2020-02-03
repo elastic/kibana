@@ -15,7 +15,7 @@ export interface AnomaliesResolversDeps {
 }
 
 type QueryAnomaliesOverTimeResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.AnomaliesOverTimeResolver>,
+  AppResolverOf<SourceResolvers.AnomaliesHistogramResolver>,
   QuerySourceResolver
 >;
 
@@ -23,14 +23,15 @@ export const createAnomaliesResolvers = (
   libs: AnomaliesResolversDeps
 ): {
   Source: {
-    AnomaliesOverTime: QueryAnomaliesOverTimeResolver;
+    AnomaliesHistogram: QueryAnomaliesOverTimeResolver;
   };
 } => ({
   Source: {
-    async AnomaliesOverTime(source, args, { req }, info) {
+    async AnomaliesHistogram(source, args, { req }, info) {
       const options = {
         ...createOptions(source, args, info),
         defaultIndex: args.defaultIndex,
+        stackByField: args.stackByField,
       };
       return libs.anomalies.getAnomaliesOverTime(req, options);
     },

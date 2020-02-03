@@ -10,6 +10,7 @@ export default function spaceSelectorFunctonalTests({
   getPageObjects,
 }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const listingTable = getService('listingTable');
   const PageObjects = getPageObjects([
     'common',
     'dashboard',
@@ -55,8 +56,8 @@ export default function spaceSelectorFunctonalTests({
       const sampleDataHash = '/home/tutorial_directory/sampleData';
 
       const expectDashboardRenders = async (dashName: string) => {
-        await PageObjects.dashboard.searchForDashboardWithName(dashName);
-        await PageObjects.dashboard.selectDashboard(dashName);
+        await listingTable.searchForItemWithName(dashName);
+        await listingTable.clickItemLink('dashboard', dashName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete(); // throws if all items are not rendered
       };

@@ -10,6 +10,23 @@ exports[`StatusByLocation component renders all locations are down 1`] = `
 </div>
 `;
 
+exports[`StatusByLocation component renders properly against props 1`] = `
+<EuiText>
+  <h2>
+    <FormattedMessage
+      defaultMessage="{status} in {loc} Locations"
+      id="xpack.uptime.monitorStatusBar.locations.upStatus"
+      values={
+        Object {
+          "loc": "2",
+          "status": "Up",
+        }
+      }
+    />
+  </h2>
+</EuiText>
+`;
+
 exports[`StatusByLocation component renders when down in some locations 1`] = `
 <div
   class="euiText euiText--medium"

@@ -36,7 +36,13 @@ describe('configuration deprecations', () => {
     await root.setup();
 
     const logs = loggingServiceMock.collect(mockLoggingService);
-    expect(logs.warn).toMatchInlineSnapshot(`Array []`);
+    const warnings = logs.warn.flatMap(i => i);
+    expect(warnings).not.toContain(
+      '"optimize.lazy" is deprecated and has been replaced by "optimize.watch"'
+    );
+    expect(warnings).not.toContain(
+      '"optimize.lazyPort" is deprecated and has been replaced by "optimize.watchPort"'
+    );
   });
 
   it('should log deprecation warnings for core deprecations', async () => {
@@ -50,15 +56,12 @@ describe('configuration deprecations', () => {
     await root.setup();
 
     const logs = loggingServiceMock.collect(mockLoggingService);
-    expect(logs.warn).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "\\"optimize.lazy\\" is deprecated and has been replaced by \\"optimize.watch\\"",
-        ],
-        Array [
-          "\\"optimize.lazyPort\\" is deprecated and has been replaced by \\"optimize.watchPort\\"",
-        ],
-      ]
-    `);
+    const warnings = logs.warn.flatMap(i => i);
+    expect(warnings).toContain(
+      '"optimize.lazy" is deprecated and has been replaced by "optimize.watch"'
+    );
+    expect(warnings).toContain(
+      '"optimize.lazyPort" is deprecated and has been replaced by "optimize.watchPort"'
+    );
   });
 });

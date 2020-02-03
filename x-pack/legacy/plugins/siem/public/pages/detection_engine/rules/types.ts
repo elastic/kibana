@@ -25,23 +25,20 @@ export interface EuiBasicTableOnChange {
 
 export interface TableData {
   id: string;
+  immutable: boolean;
   rule_id: string;
   rule: {
     href: string;
     name: string;
-    status: string;
   };
-  method: string;
+  risk_score: number;
   severity: string;
-  lastCompletedRun: string | undefined;
-  lastResponse: {
-    type: string;
-    message?: string;
-  };
   tags: string[];
   activate: boolean;
   isLoading: boolean;
   sourceRule: Rule;
+  status?: string | null;
+  statusDate?: string | null;
 }
 
 export enum RuleStep {
@@ -79,7 +76,7 @@ export interface AboutStepRule extends StepRuleData {
   falsePositives: string[];
   tags: string[];
   timeline: FieldValueTimeline;
-  threats: IMitreEnterpriseAttack[];
+  threat: IMitreEnterpriseAttack[];
 }
 
 export interface DefineStepRule extends StepRuleData {
@@ -112,7 +109,7 @@ export interface AboutStepRuleJson {
   tags: string[];
   timeline_id?: string;
   timeline_title?: string;
-  threats: IMitreEnterpriseAttack[];
+  threat: IMitreEnterpriseAttack[];
 }
 
 export interface ScheduleStepRuleJson {
@@ -137,5 +134,5 @@ export interface IMitreAttack {
 export interface IMitreEnterpriseAttack {
   framework: string;
   tactic: IMitreAttack;
-  techniques: IMitreAttack[];
+  technique: IMitreAttack[];
 }

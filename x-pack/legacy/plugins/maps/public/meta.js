@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GIS_API_PATH, EMS_CATALOGUE_PATH, EMS_GLYPHS_PATH } from '../common/constants';
+import {
+  GIS_API_PATH,
+  EMS_FILES_CATALOGUE_PATH,
+  EMS_TILES_CATALOGUE_PATH,
+  EMS_GLYPHS_PATH,
+} from '../common/constants';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { EMSClient } from '@elastic/ems-client';
@@ -41,18 +46,22 @@ export function getEMSClient() {
         'proxyElasticMapsServiceInMaps',
         false
       );
-      const proxyPath = proxyElasticMapsServiceInMaps ? relativeToAbsolute('..') : '';
-      const manifestServiceUrl = proxyElasticMapsServiceInMaps
-        ? relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_CATALOGUE_PATH}`)
-        : chrome.getInjected('emsManifestServiceUrl');
+      const proxyPath = '';
+      const tileApiUrl = proxyElasticMapsServiceInMaps
+        ? relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_TILES_CATALOGUE_PATH}`)
+        : chrome.getInjected('emsTileApiUrl');
+      const fileApiUrl = proxyElasticMapsServiceInMaps
+        ? relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_FILES_CATALOGUE_PATH}`)
+        : chrome.getInjected('emsFileApiUrl');
 
       emsClient = new EMSClient({
         language: i18n.getLocale(),
         kbnVersion: chrome.getInjected('kbnPkgVersion'),
-        manifestServiceUrl: manifestServiceUrl,
+        tileApiUrl,
+        fileApiUrl,
         landingPageUrl: chrome.getInjected('emsLandingPageUrl'),
         fetchFunction: fetchFunction, //import this from client-side, so the right instance is returned (bootstrapped from common/* would not work
-        proxyPath: proxyPath,
+        proxyPath,
       });
     } else {
       //EMS is turned off. Mock API.
@@ -80,7 +89,8 @@ export function getGlyphUrl() {
     return '';
   }
   return chrome.getInjected('proxyElasticMapsServiceInMaps', false)
-    ? relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_GLYPHS_PATH}`) + `/{fontstack}/{range}`
+    ? relativeToAbsolute(`../${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}/${EMS_GLYPHS_PATH}`) +
+        `/{fontstack}/{range}`
     : chrome.getInjected('emsFontLibraryUrl', true);
 }
 

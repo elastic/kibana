@@ -195,6 +195,7 @@ class AnomaliesTable extends Component {
       return {
         onMouseOver: () => this.onMouseOverRow(item),
         onMouseLeave: () => this.onMouseLeaveRow(),
+        'data-test-subj': `mlAnomaliesListRow row-${item.rowId}`,
       };
     };
 
