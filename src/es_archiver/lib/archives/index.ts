@@ -17,17 +17,6 @@
  * under the License.
  */
 
-export function unset(object: object, rawPath: string): void;
-
-export {
-  concatStreamProviders,
-  createConcatStream,
-  createFilterStream,
-  createIntersperseStream,
-  createListStream,
-  createMapStream,
-  createPromiseFromStreams,
-  createReduceStream,
-  createReplaceStream,
-  createSplitStream,
-} from './streams';
+export { isGzip, prioritizeMappings } from './filenames';
+export { createParseArchiveStreams } from './parse';
+export { createFormatArchiveStreams } from './format';

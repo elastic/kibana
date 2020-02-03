@@ -17,17 +17,24 @@
  * under the License.
  */
 
-export function unset(object: object, rawPath: string): void;
+import { Client } from 'elasticsearch';
+import { ToolingLog, KbnClient } from '@kbn/dev-utils';
 
-export {
-  concatStreamProviders,
-  createConcatStream,
-  createFilterStream,
-  createIntersperseStream,
-  createListStream,
-  createMapStream,
-  createPromiseFromStreams,
-  createReduceStream,
-  createReplaceStream,
-  createSplitStream,
-} from './streams';
+import { migrateKibanaIndex, deleteKibanaIndices, createStats } from '../lib';
+
+export async function emptyKibanaIndexAction({
+  client,
+  log,
+  kbnClient,
+}: {
+  client: Client;
+  log: ToolingLog;
+  kbnClient: KbnClient;
+}) {
+  const stats = createStats('emptyKibanaIndex', log);
+  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
+
+  await deleteKibanaIndices({ client, stats, log });
+  await migrateKibanaIndex({ client, log, kibanaPluginIds });
+  return stats;
+}

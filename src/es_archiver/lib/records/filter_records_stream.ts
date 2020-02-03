@@ -17,17 +17,19 @@
  * under the License.
  */
 
-export function unset(object: object, rawPath: string): void;
+import { Transform } from 'stream';
 
-export {
-  concatStreamProviders,
-  createConcatStream,
-  createFilterStream,
-  createIntersperseStream,
-  createListStream,
-  createMapStream,
-  createPromiseFromStreams,
-  createReduceStream,
-  createReplaceStream,
-  createSplitStream,
-} from './streams';
+export function createFilterRecordsStream(type: string) {
+  return new Transform({
+    writableObjectMode: true,
+    readableObjectMode: true,
+
+    transform(record, enc, callback) {
+      if (record && record.type === type) {
+        callback(undefined, record);
+      } else {
+        callback();
+      }
+    },
+  });
+}
