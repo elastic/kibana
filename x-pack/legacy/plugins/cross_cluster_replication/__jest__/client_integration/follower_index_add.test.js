@@ -7,7 +7,7 @@
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { RemoteClustersFormField } from '../../public/app/components';
 
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../src/legacy/ui/public/index_patterns';
+import { indexPatterns } from '../../../../../../src/plugins/data/public';
 
 jest.mock('ui/new_platform');
 
@@ -129,7 +129,7 @@ describe('Create Follower index', () => {
           );
         };
 
-        return INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
+        return indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
           return promise.then(() => expectInvalidChar(char));
         }, Promise.resolve());
       });
@@ -158,7 +158,7 @@ describe('Create Follower index', () => {
           );
         };
 
-        return INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
+        return indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
           return promise.then(() => expectInvalidChar(char));
         }, Promise.resolve());
       });

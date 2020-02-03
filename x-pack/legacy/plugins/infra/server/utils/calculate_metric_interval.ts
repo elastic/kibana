@@ -5,9 +5,9 @@
  */
 
 import { RequestHandlerContext } from 'src/core/server';
-import { InfraNodeType } from '../graphql/types';
 import { findInventoryModel } from '../../common/inventory_models';
 import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
+import { InventoryItemType } from '../../common/inventory_models/types';
 
 interface Options {
   indexPattern: string;
@@ -27,7 +27,7 @@ export const calculateMetricInterval = async (
   requestContext: RequestHandlerContext,
   options: Options,
   modules?: string[],
-  nodeType?: InfraNodeType // TODO: check that this type still makes sense
+  nodeType?: InventoryItemType // TODO: check that this type still makes sense
 ) => {
   let from = options.timerange.from;
   if (nodeType) {

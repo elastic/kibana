@@ -6,13 +6,13 @@
 import { ConditionalHeaders, ServerFacade } from '../../../types';
 
 export const getConditionalHeaders = <JobDocPayloadType>({
+  server,
   job,
   filteredHeaders,
-  server,
 }: {
+  server: ServerFacade;
   job: JobDocPayloadType;
   filteredHeaders: Record<string, string>;
-  server: ServerFacade;
 }) => {
   const config = server.config();
   const [hostname, port, basePath, protocol] = [
@@ -32,5 +32,5 @@ export const getConditionalHeaders = <JobDocPayloadType>({
     },
   };
 
-  return { job, conditionalHeaders, server };
+  return conditionalHeaders;
 };

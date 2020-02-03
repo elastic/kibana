@@ -6,7 +6,6 @@
 
 import { isEqual } from 'lodash/fp';
 import React, { memo, useState, useEffect, useMemo, useCallback } from 'react';
-import { IndexPattern } from 'ui/index_patterns';
 
 import {
   esFilters,
@@ -118,7 +117,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     );
 
     const CustomButton = <>{null}</>;
-    const indexPatterns = useMemo(() => [indexPattern as IndexPattern], [indexPattern]);
+    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
 
     const searchBarProps = savedQuery != null ? { savedQuery } : {};
 

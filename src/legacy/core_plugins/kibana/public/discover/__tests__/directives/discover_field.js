@@ -22,7 +22,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import { pluginInstance } from 'plugins/kibana/discover/index';
+import { pluginInstance } from 'plugins/kibana/discover/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 // Load the kibana app dependencies.

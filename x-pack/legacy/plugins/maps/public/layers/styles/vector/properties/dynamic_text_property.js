@@ -29,11 +29,7 @@ export class DynamicTextProperty extends DynamicStyleProperty {
     return false;
   }
 
-  isScaled() {
+  isOrdinalScaled() {
     return false;
-  }
-
-  renderHeader() {
-    return null;
   }
 }

@@ -17,14 +17,11 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 import { CorePluginAPluginSetup } from '../../core_plugin_a/public/plugin';
 
 declare global {
   interface Window {
-    corePluginB?: string;
-    hasAccessToInjectedMetadata?: boolean;
-    receivedStartServices?: boolean;
     env?: PluginInitializerContext['env'];
   }
 }
@@ -39,12 +36,6 @@ export class CorePluginBPlugin
     window.env = pluginContext.env;
   }
   public setup(core: CoreSetup, deps: CorePluginBDeps) {
-    window.corePluginB = `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
-    window.hasAccessToInjectedMetadata = 'getInjectedVar' in core.injectedMetadata;
-    core.getStartServices().then(([coreStart, plugins]) => {
-      window.receivedStartServices = 'overlays' in coreStart;
-    });
-
     core.application.register({
       id: 'bar',
       title: 'Bar',
@@ -53,9 +44,25 @@ export class CorePluginBPlugin
         return renderApp(context, params);
       },
     });
+
+    return {
+      sayHi() {
+        return `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
+      },
+    };
   }
 
-  public start() {}
+  public async start(core: CoreStart, deps: {}) {
+    return {
+      sendSystemRequest: async (asSystemRequest: boolean) => {
+        const response = await core.http.post<string>('/core_plugin_b/system_request', {
+          asSystemRequest,
+        });
+        return `/core_plugin_b/system_request says: "${response}"`;
+      },
+    };
+  }
+
   public stop() {}
 }
 

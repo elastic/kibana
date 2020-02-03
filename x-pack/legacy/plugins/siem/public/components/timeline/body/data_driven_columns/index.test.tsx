@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 
-import * as React from 'react';
+import React from 'react';
 
 import { mockTimelineData } from '../../../../mock';
 import { defaultHeaders } from '../column_headers/default_headers';
@@ -24,11 +23,12 @@ describe('Columns', () => {
         columnHeaders={headersSansTimestamp}
         columnRenderers={columnRenderers}
         data={mockTimelineData[0].data}
+        ecsData={mockTimelineData[0].ecs}
         onColumnResized={jest.fn()}
         timelineId="test"
       />
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

@@ -12,6 +12,8 @@ import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
 import { InfraBackendLibs } from './lib/infra_types';
 import {
+  initGetLogEntryCategoriesRoute,
+  initGetLogEntryCategoryDatasetsRoute,
   initGetLogEntryRateRoute,
   initValidateLogAnalysisIndicesRoute,
 } from './routes/log_analysis';
@@ -20,6 +22,8 @@ import { initMetadataRoute } from './routes/metadata';
 import { initSnapshotRoute } from './routes/snapshot';
 import { initNodeDetailsRoute } from './routes/node_details';
 import {
+  initLogEntriesRoute,
+  initLogEntriesHighlightsRoute,
   initLogEntriesSummaryRoute,
   initLogEntriesSummaryHighlightsRoute,
   initLogEntriesItemRoute,
@@ -39,10 +43,14 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   libs.framework.registerGraphQLEndpoint('/graphql', schema);
 
   initIpToHostName(libs);
+  initGetLogEntryCategoriesRoute(libs);
+  initGetLogEntryCategoryDatasetsRoute(libs);
   initGetLogEntryRateRoute(libs);
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
+  initLogEntriesRoute(libs);
+  initLogEntriesHighlightsRoute(libs);
   initLogEntriesSummaryRoute(libs);
   initLogEntriesSummaryHighlightsRoute(libs);
   initLogEntriesItemRoute(libs);

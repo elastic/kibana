@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-
+import React, { Fragment, useEffect } from 'react';
 import { LicenseStatus } from './license_status';
 import { RevertToBasic } from './revert_to_basic';
 import { StartTrial } from './start_trial';
@@ -15,8 +14,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCard, EuiButton } from '@elast
 import { HOURLY_COST } from '../../../../../common/constants';
 
 export const LicenseDashboard = ({ setBreadcrumb } = { setBreadcrumb: () => {} }) => {
-  setBreadcrumb('dashboard');
   const hourlyCost = localStorage.getItem(HOURLY_COST);
+  useEffect(() => {
+    setBreadcrumb('dashboard');
+  });
 
   return (
     <div>

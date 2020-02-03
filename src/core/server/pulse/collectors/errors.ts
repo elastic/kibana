@@ -24,9 +24,11 @@
 import moment from 'moment';
 import { PulseCollector, CollectorSetupContext } from '../types';
 
+export type ErrorInstruction = Omit<PulseErrorPayloadRecord, 'channel_id' | 'deployment_id'>;
+
 export interface Payload {
   deploymentId: string;
-  records: Array<Omit<PulseErrorPayloadRecord, 'channel_id' | 'deployment_id'>>;
+  records: ErrorInstruction[];
 }
 export interface PulseErrorPayloadRecord {
   channel_id: string;

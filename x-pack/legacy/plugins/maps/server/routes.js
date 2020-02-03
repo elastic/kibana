@@ -6,8 +6,10 @@
 
 import {
   EMS_CATALOGUE_PATH,
+  EMS_FILES_API_PATH,
   EMS_FILES_CATALOGUE_PATH,
   EMS_FILES_DEFAULT_JSON_PATH,
+  EMS_TILES_API_PATH,
   EMS_TILES_CATALOGUE_PATH,
   EMS_GLYPHS_PATH,
   EMS_TILES_RASTER_STYLE_PATH,
@@ -17,10 +19,12 @@ import {
   EMS_TILES_VECTOR_TILE_PATH,
   GIS_API_PATH,
   EMS_SPRITES_PATH,
+  INDEX_SETTINGS_API_PATH,
 } from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
+import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
 
 import Boom from 'boom';
 
@@ -35,9 +39,9 @@ export function initRoutes(server, licenseUid) {
     emsClient = new EMSClient({
       language: i18n.getLocale(),
       kbnVersion: serverConfig.get('pkg.version'),
-      manifestServiceUrl: mapConfig.manifestServiceUrl,
+      fileApiUrl: mapConfig.emsFileApiUrl,
+      tileApiUrl: mapConfig.emsTileApiUrl,
       landingPageUrl: mapConfig.emsLandingPageUrl,
-      proxyElasticMapsServiceInMaps: false,
     });
     emsClient.addQueryParams({ license: licenseUid });
   } else {
@@ -63,7 +67,7 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/${EMS_FILES_DEFAULT_JSON_PATH}`,
+    path: `${ROOT}/${EMS_FILES_API_PATH}/${EMS_FILES_DEFAULT_JSON_PATH}`,
     handler: async request => {
       checkEMSProxyConfig();
 
@@ -90,7 +94,7 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/${EMS_TILES_RASTER_TILE_PATH}`,
+    path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_RASTER_TILE_PATH}`,
     handler: async (request, h) => {
       checkEMSProxyConfig();
 
@@ -132,8 +136,8 @@ export function initRoutes(server, licenseUid) {
       };
 
       //rewrite the urls to the submanifest
-      const tileService = main.services.find(service => service.id === 'tiles');
-      const fileService = main.services.find(service => service.id === 'geo_layers');
+      const tileService = main.services.find(service => service.type === 'tms');
+      const fileService = main.services.find(service => service.type === 'file');
       if (tileService) {
         proxiedManifest.services.push({
           ...tileService,
@@ -152,7 +156,7 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/${EMS_FILES_CATALOGUE_PATH}`,
+    path: `${ROOT}/${EMS_FILES_CATALOGUE_PATH}/{emsVersion}/manifest`,
     handler: async () => {
       checkEMSProxyConfig();
 
@@ -160,7 +164,7 @@ export function initRoutes(server, licenseUid) {
       const layers = file.layers.map(layer => {
         const newLayer = { ...layer };
         const id = encodeURIComponent(layer.layer_id);
-        const newUrl = `${GIS_API_PATH}/${EMS_FILES_DEFAULT_JSON_PATH}?id=${id}`;
+        const newUrl = `${EMS_FILES_DEFAULT_JSON_PATH}?id=${id}`;
         newLayer.formats = [
           {
             ...layer.formats[0],
@@ -176,7 +180,7 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/${EMS_TILES_CATALOGUE_PATH}`,
+    path: `${ROOT}/${EMS_TILES_CATALOGUE_PATH}/{emsVersion}/manifest`,
     handler: async () => {
       checkEMSProxyConfig();
 
@@ -189,16 +193,15 @@ export function initRoutes(server, licenseUid) {
         newService.formats = [];
         const rasterFormats = service.formats.filter(format => format.format === 'raster');
         if (rasterFormats.length) {
-          const newUrl = `${GIS_API_PATH}/${EMS_TILES_RASTER_STYLE_PATH}?id=${service.id}`;
+          const newUrl = `${EMS_TILES_RASTER_STYLE_PATH}?id=${service.id}`;
           newService.formats.push({
             ...rasterFormats[0],
             url: newUrl,
           });
         }
-
         const vectorFormats = service.formats.filter(format => format.format === 'vector');
         if (vectorFormats.length) {
-          const newUrl = `${GIS_API_PATH}/${EMS_TILES_VECTOR_STYLE_PATH}?id=${service.id}`;
+          const newUrl = `${EMS_TILES_VECTOR_STYLE_PATH}?id=${service.id}`;
           newService.formats.push({
             ...vectorFormats[0],
             url: newUrl,
@@ -215,7 +218,7 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/${EMS_TILES_RASTER_STYLE_PATH}`,
+    path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_RASTER_STYLE_PATH}`,
     handler: async request => {
       checkEMSProxyConfig();
 
@@ -231,7 +234,7 @@ export function initRoutes(server, licenseUid) {
       }
       const style = await tmsService.getDefaultRasterStyle();
 
-      const newUrl = `${GIS_API_PATH}/${EMS_TILES_RASTER_TILE_PATH}?id=${request.query.id}&x={x}&y={y}&z={z}`;
+      const newUrl = `${EMS_TILES_RASTER_TILE_PATH}?id=${request.query.id}&x={x}&y={y}&z={z}`;
       return {
         ...style,
         tiles: [newUrl],
@@ -241,7 +244,7 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/${EMS_TILES_VECTOR_STYLE_PATH}`,
+    path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_STYLE_PATH}`,
     handler: async request => {
       checkEMSProxyConfig();
 
@@ -262,16 +265,16 @@ export function initRoutes(server, licenseUid) {
         if (vectorStyle.sources.hasOwnProperty(sourceId)) {
           newSources[sourceId] = {
             type: 'vector',
-            url: `${GIS_API_PATH}/${EMS_TILES_VECTOR_SOURCE_PATH}?id=${request.query.id}&sourceId=${sourceId}`,
+            url: `${EMS_TILES_VECTOR_SOURCE_PATH}?id=${request.query.id}&sourceId=${sourceId}`,
           };
         }
       }
 
-      const spritePath = `${GIS_API_PATH}/${EMS_SPRITES_PATH}/${request.query.id}/sprite`;
+      const spritePath = `${EMS_SPRITES_PATH}/${request.query.id}/sprite`;
 
       return {
         ...vectorStyle,
-        glyphs: `${GIS_API_PATH}/${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
+        glyphs: `${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
         sprite: spritePath,
         sources: newSources,
       };
@@ -280,7 +283,7 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/${EMS_TILES_VECTOR_SOURCE_PATH}`,
+    path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_SOURCE_PATH}`,
     handler: async request => {
       checkEMSProxyConfig();
 
@@ -301,7 +304,7 @@ export function initRoutes(server, licenseUid) {
       const vectorStyle = await tmsService.getVectorStyleSheet();
       const sourceManifest = vectorStyle.sources[request.query.sourceId];
 
-      const newUrl = `${GIS_API_PATH}/${EMS_TILES_VECTOR_TILE_PATH}?id=${request.query.id}&sourceId=${request.query.sourceId}&x={x}&y={y}&z={z}`;
+      const newUrl = `${EMS_TILES_VECTOR_TILE_PATH}?id=${request.query.id}&sourceId=${request.query.sourceId}&x={x}&y={y}&z={z}`;
       return {
         ...sourceManifest,
         tiles: [newUrl],
@@ -311,7 +314,7 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/${EMS_TILES_VECTOR_TILE_PATH}`,
+    path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_TILE_PATH}`,
     handler: async (request, h) => {
       checkEMSProxyConfig();
 
@@ -347,10 +350,9 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
+    path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
     handler: async (request, h) => {
       checkEMSProxyConfig();
-
       const url = mapConfig.emsFontLibraryUrl
         .replace('{fontstack}', request.params.fontstack)
         .replace('{range}', request.params.range);
@@ -361,7 +363,7 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/${EMS_SPRITES_PATH}/{id}/sprite{scaling}.{extension}`,
+    path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_SPRITES_PATH}/{id}/sprite{scaling?}.{extension}`,
     handler: async (request, h) => {
       checkEMSProxyConfig();
 
@@ -409,6 +411,33 @@ export function initRoutes(server, licenseUid) {
         const { count } = await callWithRequest(request, 'count', { index: query.index });
         return { count };
       } catch (error) {
+        return h.response().code(400);
+      }
+    },
+  });
+
+  server.route({
+    method: 'GET',
+    path: `/${INDEX_SETTINGS_API_PATH}`,
+    handler: async (request, h) => {
+      const { server, query } = request;
+
+      if (!query.indexPatternTitle) {
+        server.log('warning', `Required query parameter 'indexPatternTitle' not provided.`);
+        return h.response().code(400);
+      }
+
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+      try {
+        const resp = await callWithRequest(request, 'indices.getSettings', {
+          index: query.indexPatternTitle,
+        });
+        return getIndexPatternSettings(resp);
+      } catch (error) {
+        server.log(
+          'warning',
+          `Cannot load index settings for index pattern '${query.indexPatternTitle}', error: ${error.message}.`
+        );
         return h.response().code(400);
       }
     },

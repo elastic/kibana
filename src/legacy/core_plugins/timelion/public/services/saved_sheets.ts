@@ -19,43 +19,33 @@
 import { npStart } from 'ui/new_platform';
 import { SavedObjectLoader } from 'ui/saved_objects';
 // @ts-ignore
-import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
-// @ts-ignore
 import { uiModules } from 'ui/modules';
 import { createSavedSheetClass } from './_saved_sheet';
 
 const module = uiModules.get('app/sheet');
 
-// Register this service with the saved object registry so it can be
-// edited by the object editor.
-savedObjectManagementRegistry.register({
-  service: 'savedSheets',
-  title: 'sheets',
-});
+const savedObjectsClient = npStart.core.savedObjects.client;
+const services = {
+  savedObjectsClient,
+  indexPatterns: npStart.plugins.data.indexPatterns,
+  chrome: npStart.core.chrome,
+  overlays: npStart.core.overlays,
+};
+
+const SavedSheet = createSavedSheetClass(services, npStart.core.uiSettings);
+
+export const savedSheetLoader = new SavedObjectLoader(
+  SavedSheet,
+  savedObjectsClient,
+  npStart.core.chrome
+);
+savedSheetLoader.urlFor = id => `#/${encodeURIComponent(id)}`;
+// Customize loader properties since adding an 's' on type doesn't work for type 'timelion-sheet'.
+savedSheetLoader.loaderProperties = {
+  name: 'timelion-sheet',
+  noun: 'Saved Sheets',
+  nouns: 'saved sheets',
+};
 
 // This is the only thing that gets injected into controllers
-module.service('savedSheets', function() {
-  const savedObjectsClient = npStart.core.savedObjects.client;
-  const services = {
-    savedObjectsClient,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-  };
-
-  const SavedSheet = createSavedSheetClass(services, npStart.core.uiSettings);
-
-  const savedSheetLoader = new SavedObjectLoader(
-    SavedSheet,
-    savedObjectsClient,
-    npStart.core.chrome
-  );
-  savedSheetLoader.urlFor = id => `#/${encodeURIComponent(id)}`;
-  // Customize loader properties since adding an 's' on type doesn't work for type 'timelion-sheet'.
-  savedSheetLoader.loaderProperties = {
-    name: 'timelion-sheet',
-    noun: 'Saved Sheets',
-    nouns: 'saved sheets',
-  };
-  return savedSheetLoader;
-});
+module.service('savedSheets', () => savedSheetLoader);

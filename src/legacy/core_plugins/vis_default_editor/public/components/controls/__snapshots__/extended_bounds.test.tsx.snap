@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExtendedBoundsParamEditor should be rendered with default set of props 1`] = `
+<EuiFormRow
+  describedByIds={Array []}
+  display="row"
+  error="Min should be less than or equal to Max."
+  fullWidth={true}
+  hasChildLabel={true}
+  hasEmptyLabelSpace={false}
+  isInvalid={false}
+  labelType="label"
+>
+  <EuiFlexGroup
+    gutterSize="s"
+    responsive={false}
+  >
+    <EuiFlexItem>
+      <EuiFieldNumber
+        aria-label="Min"
+        compressed={true}
+        fullWidth={true}
+        isInvalid={false}
+        onChange={[Function]}
+        prepend="Min"
+        value=""
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiFieldNumber
+        aria-label="Max"
+        compressed={true}
+        fullWidth={true}
+        isInvalid={false}
+        onChange={[Function]}
+        prepend="Max"
+        value=""
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiFormRow>
+`;

@@ -23,7 +23,7 @@ import ngMock from 'ng_mock';
 import $ from 'jquery';
 import { createVegaVisualization } from '../vega_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { Vis } from 'ui/vis';
+import { Vis } from '../../../visualizations/public/np_ready/public/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 
 import vegaliteGraph from '!!raw-loader!./vegalite_graph.hjson';
@@ -43,6 +43,7 @@ import { SearchCache } from '../data_model/search_cache';
 
 import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 import { createVegaTypeDefinition } from '../vega_type';
+import { npStart } from 'ui/new_platform';
 
 const THRESHOLD = 0.1;
 const PIXEL_DIFF = 30;
@@ -60,9 +61,22 @@ describe('VegaVisualizations', () => {
   beforeEach(
     ngMock.inject((Private, $injector) => {
       vegaVisualizationDependencies = {
-        es: $injector.get('es'),
         serviceSettings: $injector.get('serviceSettings'),
-        uiSettings: $injector.get('config'),
+        core: {
+          uiSettings: npStart.core.uiSettings,
+        },
+        plugins: {
+          data: {
+            query: {
+              timefilter: {
+                timefilter: {},
+              },
+            },
+            __LEGACY: {
+              esClient: npStart.plugins.data.search.__LEGACY.esClient,
+            },
+          },
+        },
       };
 
       if (!visRegComplete) {

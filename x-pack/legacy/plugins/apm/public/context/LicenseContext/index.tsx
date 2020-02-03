@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { useObservable } from '../../../../../../../src/plugins/kibana_react/public';
+import useObservable from 'react-use/lib/useObservable';
 import { ILicense } from '../../../../../../plugins/licensing/public';
 import { useApmPluginContext } from '../../hooks/useApmPluginContext';
 import { InvalidLicenseNotification } from './InvalidLicenseNotification';
@@ -17,7 +17,8 @@ export const LicenseContext = React.createContext<ILicense | undefined>(
 export function LicenseProvider({ children }: { children: React.ReactChild }) {
   const { license$ } = useApmPluginContext().plugins.licensing;
   const license = useObservable(license$);
-  const hasInvalidLicense = !license?.isActive;
+  // if license is not loaded yet, consider it valid
+  const hasInvalidLicense = license?.isActive === false;
 
   // if license is invalid show an error message
   if (hasInvalidLicense) {

@@ -5,3 +5,5 @@
  */
 
 export { useUrlParams } from './use_url_params';
+export * from './use_telemetry';
+export * from './update_kuery_string';

@@ -13,6 +13,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { Span } from '../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
+import { APMError } from '../../../typings/es_schemas/ui/APMError';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
@@ -34,7 +35,7 @@ export async function getTraceItems(
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { terms: { [PROCESSOR_EVENT]: ['span', 'transaction'] } },
+            { terms: { [PROCESSOR_EVENT]: ['span', 'transaction', 'error'] } },
             { range: rangeFilter(start, end) }
           ],
           should: {
@@ -51,7 +52,7 @@ export async function getTraceItems(
     }
   };
 
-  const resp = await client.search<Transaction | Span>(params);
+  const resp = await client.search<Transaction | Span | APMError>(params);
 
   return {
     items: resp.hits.hits.map(hit => hit._source),

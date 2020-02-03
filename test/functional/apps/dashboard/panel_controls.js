@@ -24,7 +24,7 @@ import {
   AREA_CHART_VIS_NAME,
   LINE_CHART_VIS_NAME,
 } from '../../page_objects/dashboard_page';
-import { VisualizeConstants } from '../../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
+import { VisualizeConstants } from '../../../../src/legacy/core_plugins/kibana/public/visualize/np_ready/visualize_constants';
 
 export default function({ getService, getPageObjects }) {
   const browser = getService('browser');
@@ -33,7 +33,13 @@ export default function({ getService, getPageObjects }) {
   const dashboardReplacePanel = getService('dashboardReplacePanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const renderable = getService('renderable');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'discover']);
+  const PageObjects = getPageObjects([
+    'dashboard',
+    'header',
+    'visualize',
+    'discover',
+    'timePicker',
+  ]);
   const dashboardName = 'Dashboard Panel Controls Test';
 
   describe('dashboard panel controls', function viewEditModeTests() {
@@ -48,11 +54,12 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    describe('visualization object replace flyout', () => {
+    // unskip when issue is fixed https://github.com/elastic/kibana/issues/55992
+    describe.skip('visualization object replace flyout', () => {
       let intialDimensions;
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+        await PageObjects.timePicker.setHistoricalDataRange();
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         await dashboardAddPanel.addVisualization(LINE_CHART_VIS_NAME);
         intialDimensions = await PageObjects.dashboard.getPanelDimensions();
@@ -110,7 +117,7 @@ export default function({ getService, getPageObjects }) {
     describe('panel edit controls', function() {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+        await PageObjects.timePicker.setHistoricalDataRange();
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
       });
 

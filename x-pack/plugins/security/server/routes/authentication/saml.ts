@@ -60,7 +60,9 @@ export function defineSAMLRoutes({ router, logger, authc, csp, basePath }: Route
   router.get(
     {
       path: '/api/security/saml/start',
-      validate: { query: schema.object({ redirectURLFragment: schema.string() }) },
+      validate: {
+        query: schema.object({ redirectURLFragment: schema.string() }),
+      },
       options: { authRequired: false },
     },
     async (context, request, response) => {

@@ -5,25 +5,17 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { Direction } from '../../../graphql/types';
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { mockIndexPattern } from '../../../mock';
 import { TestProviders } from '../../../mock/test_providers';
-import { mockUiSettings } from '../../../mock/ui_settings';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 
 import { TimelineHeaderComponent } from '.';
 
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: mockUiSettings,
-  savedObjects: {},
-}));
+jest.mock('../../../lib/kibana');
 
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
@@ -51,7 +43,7 @@ describe('Header', () => {
           }}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders the data providers', () => {

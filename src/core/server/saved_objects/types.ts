@@ -33,6 +33,13 @@ export {
   SavedObjectsImportRetry,
 } from './import/types';
 
+import { SavedObjectAttributes } from '../../types';
+export {
+  SavedObjectAttributes,
+  SavedObjectAttribute,
+  SavedObjectAttributeSingle,
+} from '../../types';
+
 /**
  * Information about the migrations that have been applied to this SavedObject.
  * When Kibana starts up, KibanaMigrator detects outdated documents and
@@ -50,36 +57,6 @@ export {
  */
 export interface SavedObjectsMigrationVersion {
   [pluginName: string]: string;
-}
-
-/**
- * Don't use this type, it's simply a helper type for {@link SavedObjectAttribute}
- *
- * @public
- */
-export type SavedObjectAttributeSingle =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | SavedObjectAttributes;
-
-/**
- * Type definition for a Saved Object attribute value
- *
- * @public
- */
-export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
-
-/**
- * The data for a Saved Object is stored as an object in the `attributes`
- * property.
- *
- * @public
- */
-export interface SavedObjectAttributes {
-  [key: string]: SavedObjectAttribute;
 }
 
 /**
@@ -236,7 +213,6 @@ export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObj
  * @deprecated
  */
 export interface SavedObjectsLegacyUiExports {
-  unknown: [{ pluginSpec: { getId: () => unknown }; type: unknown }] | undefined;
   savedObjectMappings: SavedObjectsMapping[];
   savedObjectMigrations: MigrationDefinition;
   savedObjectSchemas: SavedObjectsSchemaDefinition;

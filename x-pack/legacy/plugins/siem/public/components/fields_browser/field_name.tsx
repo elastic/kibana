@@ -6,7 +6,6 @@
 
 import {
   EuiButtonIcon,
-  // @ts-ignore
   EuiHighlight,
   EuiIcon,
   EuiFlexGroup,

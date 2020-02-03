@@ -5,8 +5,11 @@
  */
 
 import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/public';
-import { IndexPattern as IndexPatternType } from 'ui/index_patterns';
-import { esQuery, IndexPatternsContract } from '../../../../../../../../src/plugins/data/public';
+import {
+  IndexPattern,
+  esQuery,
+  IndexPatternsContract,
+} from '../../../../../../../../src/plugins/data/public';
 
 type IndexPatternId = string;
 type SavedSearchId = string;
@@ -68,7 +71,7 @@ export function loadCurrentSavedSearch(savedSearches: any, savedSearchId: SavedS
 
 // Helper for creating the items used for searching and job creation.
 export function createSearchItems(
-  indexPattern: IndexPatternType | undefined,
+  indexPattern: IndexPattern | undefined,
   savedSearch: any,
   config: IUiSettingsClient
 ) {

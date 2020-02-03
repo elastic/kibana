@@ -5,8 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../../../mock';
 import { UserHostWorkingDir } from './user_host_working_dir';
@@ -27,7 +26,7 @@ describe('UserHostWorkingDir', () => {
           workingDirectory="[working-directory-123]"
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it returns null if userDomain, userName, hostName, and workingDirectory are all null', () => {

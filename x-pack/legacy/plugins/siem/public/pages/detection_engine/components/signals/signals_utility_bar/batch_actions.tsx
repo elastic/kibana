@@ -11,6 +11,15 @@ import { TimelineNonEcsData } from '../../../../../graphql/types';
 import { SendSignalsToTimeline, UpdateSignalsStatus } from '../types';
 import { FILTER_CLOSED, FILTER_OPEN } from '../signals_filter_group';
 
+interface GetBatchItems {
+  areEventsLoading: boolean;
+  allEventsSelected: boolean;
+  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  updateSignalsStatus: UpdateSignalsStatus;
+  sendSignalsToTimeline: SendSignalsToTimeline;
+  closePopover: () => void;
+  isFilteredToOpen: boolean;
+}
 /**
  * Returns ViewInTimeline / UpdateSignalStatus actions to be display within an EuiContextMenuPanel
  *
@@ -22,15 +31,15 @@ import { FILTER_CLOSED, FILTER_OPEN } from '../signals_filter_group';
  * @param closePopover
  * @param isFilteredToOpen currently selected filter options
  */
-export const getBatchItems = (
-  areEventsLoading: boolean,
-  allEventsSelected: boolean,
-  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>,
-  updateSignalsStatus: UpdateSignalsStatus,
-  sendSignalsToTimeline: SendSignalsToTimeline,
-  closePopover: () => void,
-  isFilteredToOpen: boolean
-) => {
+export const getBatchItems = ({
+  areEventsLoading,
+  allEventsSelected,
+  selectedEventIds,
+  updateSignalsStatus,
+  sendSignalsToTimeline,
+  closePopover,
+  isFilteredToOpen,
+}: GetBatchItems) => {
   const allDisabled = areEventsLoading || Object.keys(selectedEventIds).length === 0;
   const sendToTimelineDisabled = allEventsSelected || uniqueRuleCount(selectedEventIds) > 1;
   const filterString = isFilteredToOpen
@@ -52,7 +61,7 @@ export const getBatchItems = (
 
     <EuiContextMenuItem
       key={filterString}
-      icon={isFilteredToOpen ? 'indexClose' : 'indexOpen'}
+      icon={isFilteredToOpen ? 'securitySignalResolved' : 'securitySignalDetected'}
       disabled={allDisabled}
       onClick={async () => {
         closePopover();

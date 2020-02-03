@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { mockBrowserFields } from '../../../containers/source/mock';
 import { Direction } from '../../../graphql/types';
@@ -16,8 +16,6 @@ import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { wait } from '../../../lib/helpers';
 import { useMountAppended } from '../../../utils/use_mount_appended';
-
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];

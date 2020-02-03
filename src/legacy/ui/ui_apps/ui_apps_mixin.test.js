@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { LegacyInternals } from '../../../core/server';
+
 import { uiAppsMixin } from './ui_apps_mixin';
 
 jest.mock('./ui_app', () => ({
@@ -37,23 +39,21 @@ jest.mock('./ui_app', () => ({
 describe('UiAppsMixin', () => {
   let kbnServer;
   let server;
+  let uiExports;
 
   beforeEach(() => {
-    kbnServer = {
-      uiExports: {
-        uiAppSpecs: [
-          {
-            id: 'foo',
-            hidden: true,
-          },
-          {
-            id: 'bar',
-            hidden: false,
-          },
-        ],
-      },
+    uiExports = {
+      uiAppSpecs: [
+        {
+          id: 'foo',
+          hidden: true,
+        },
+        {
+          id: 'bar',
+          hidden: false,
+        },
+      ],
     };
-
     server = {
       decorate: jest.fn((type, name, value) => {
         if (type !== 'server') {
@@ -62,6 +62,14 @@ describe('UiAppsMixin', () => {
 
         server[name] = value;
       }),
+    };
+    kbnServer = {
+      uiExports,
+      newPlatform: {
+        __internals: {
+          legacy: new LegacyInternals(uiExports, {}, server),
+        },
+      },
     };
 
     uiAppsMixin(kbnServer, server);

@@ -3,22 +3,31 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import cytoscape from 'cytoscape';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { icons, defaultIcon } from './icons';
+import cytoscape from 'cytoscape';
+import { defaultIcon, iconForNode } from './icons';
+
+export const animationOptions: cytoscape.AnimationOptions = {
+  duration: parseInt(theme.euiAnimSpeedNormal, 10),
+  // @ts-ignore The cubic-bezier options here are not recognized by the cytoscape types
+  easing: theme.euiAnimSlightBounce
+};
+
+export const nodeHeight = parseInt(theme.avatarSizing.l.size, 10);
 
 const layout = {
-  animate: true,
-  animationEasing: theme.euiAnimSlightBounce as cytoscape.Css.TransitionTimingFunction,
-  animationDuration: parseInt(theme.euiAnimSpeedFast, 10),
   name: 'dagre',
   nodeDimensionsIncludeLabels: true,
   rankDir: 'LR',
-  spacingFactor: 2
+  animate: true,
+  animationEasing: animationOptions.easing,
+  animationDuration: animationOptions.duration,
+  fit: true,
+  padding: nodeHeight
 };
 
-function isDatabaseOrExternal(agentName: string) {
-  return agentName === 'database' || agentName === 'external';
+function isService(el: cytoscape.NodeSingular) {
+  return el.data('type') === 'service';
 }
 
 const style: cytoscape.Stylesheet[] = [
@@ -31,11 +40,11 @@ const style: cytoscape.Stylesheet[] = [
       //
       // @ts-ignore
       'background-image': (el: cytoscape.NodeSingular) =>
-        icons[el.data('agentName')] || defaultIcon,
+        iconForNode(el) ?? defaultIcon,
       'background-height': (el: cytoscape.NodeSingular) =>
-        isDatabaseOrExternal(el.data('agentName')) ? '40%' : '80%',
+        isService(el) ? '80%' : '40%',
       'background-width': (el: cytoscape.NodeSingular) =>
-        isDatabaseOrExternal(el.data('agentName')) ? '40%' : '80%',
+        isService(el) ? '80%' : '40%',
       'border-color': (el: cytoscape.NodeSingular) =>
         el.hasClass('primary')
           ? theme.euiColorSecondary
@@ -46,18 +55,18 @@ const style: cytoscape.Stylesheet[] = [
       // specifying a subset of the fonts for the label text.
       'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
       'font-size': theme.euiFontSizeXS,
-      height: theme.avatarSizing.l.size,
-      label: 'data(id)',
+      height: nodeHeight,
+      label: 'data(label)',
       'min-zoomed-font-size': theme.euiSizeL,
       'overlay-opacity': 0,
       shape: (el: cytoscape.NodeSingular) =>
-        isDatabaseOrExternal(el.data('agentName')) ? 'diamond' : 'ellipse',
+        isService(el) ? 'ellipse' : 'diamond',
       'text-background-color': theme.euiColorLightestShade,
       'text-background-opacity': 0,
       'text-background-padding': theme.paddingSizes.xs,
       'text-background-shape': 'roundrectangle',
       'text-margin-y': theme.paddingSizes.s,
-      'text-max-width': '85px',
+      'text-max-width': '200px',
       'text-valign': 'bottom',
       'text-wrap': 'ellipsis',
       width: theme.avatarSizing.l.size
@@ -76,14 +85,24 @@ const style: cytoscape.Stylesheet[] = [
       //
       // @ts-ignore
       'target-distance-from-node': theme.paddingSizes.xs,
-      width: 2
+      width: 1,
+      'source-arrow-shape': 'none'
+    }
+  },
+  {
+    selector: 'edge[bidirectional]',
+    style: {
+      'source-arrow-shape': 'triangle',
+      'target-arrow-shape': 'triangle',
+      // @ts-ignore
+      'source-distance-from-node': theme.paddingSizes.xs,
+      'target-distance-from-node': theme.paddingSizes.xs
     }
   }
 ];
 
 export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
   autoungrabify: true,
-  autounselectify: true,
   boxSelectionEnabled: false,
   layout,
   maxZoom: 3,

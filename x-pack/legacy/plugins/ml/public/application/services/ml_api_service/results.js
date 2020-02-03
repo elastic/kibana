@@ -75,4 +75,17 @@ export const results = {
       },
     });
   },
+
+  fetchPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs) {
+    return http$(`${basePath}/results/partition_fields_values`, {
+      method: 'POST',
+      body: {
+        jobId,
+        searchTerm,
+        criteriaFields,
+        earliestMs,
+        latestMs,
+      },
+    });
+  },
 };

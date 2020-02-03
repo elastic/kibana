@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { EuiContextMenuPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import {
   UtilityBar,
@@ -15,121 +15,106 @@ import {
   UtilityBarText,
 } from '../../../../../components/detection_engine/utility_bar';
 import * as i18n from './translations';
-import { getBatchItems } from './batch_actions';
-import { useKibanaUiSetting } from '../../../../../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../../../../../lib/kibana';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../../common/constants';
 import { TimelineNonEcsData } from '../../../../../graphql/types';
-import { SendSignalsToTimeline, UpdateSignalsStatus } from '../types';
+import { UpdateSignalsStatus } from '../types';
+import { FILTER_CLOSED, FILTER_OPEN } from '../signals_filter_group';
 
 interface SignalsUtilityBarProps {
+  canUserCRUD: boolean;
+  hasIndexWrite: boolean;
   areEventsLoading: boolean;
   clearSelection: () => void;
   isFilteredToOpen: boolean;
   selectAll: () => void;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
-  sendSignalsToTimeline: SendSignalsToTimeline;
   showClearSelection: boolean;
   totalCount: number;
   updateSignalsStatus: UpdateSignalsStatus;
 }
 
-export const SignalsUtilityBar = React.memo<SignalsUtilityBarProps>(
-  ({
-    areEventsLoading,
-    clearSelection,
-    totalCount,
-    selectedEventIds,
-    isFilteredToOpen,
-    selectAll,
-    showClearSelection,
-    updateSignalsStatus,
-    sendSignalsToTimeline,
-  }) => {
-    const [defaultNumberFormat] = useKibanaUiSetting(DEFAULT_NUMBER_FORMAT);
+const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
+  canUserCRUD,
+  hasIndexWrite,
+  areEventsLoading,
+  clearSelection,
+  totalCount,
+  selectedEventIds,
+  isFilteredToOpen,
+  selectAll,
+  showClearSelection,
+  updateSignalsStatus,
+}) => {
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-    const getBatchItemsPopoverContent = useCallback(
-      (closePopover: () => void) => (
-        <EuiContextMenuPanel
-          items={getBatchItems(
-            areEventsLoading,
-            showClearSelection,
-            selectedEventIds,
-            updateSignalsStatus,
-            sendSignalsToTimeline,
-            closePopover,
-            isFilteredToOpen
-          )}
-        />
-      ),
-      [
-        areEventsLoading,
-        selectedEventIds,
-        updateSignalsStatus,
-        sendSignalsToTimeline,
-        isFilteredToOpen,
-      ]
-    );
+  const handleUpdateStatus = useCallback(async () => {
+    await updateSignalsStatus({
+      signalIds: Object.keys(selectedEventIds),
+      status: isFilteredToOpen ? FILTER_CLOSED : FILTER_OPEN,
+    });
+  }, [selectedEventIds, updateSignalsStatus, isFilteredToOpen]);
 
-    const formattedTotalCount = numeral(totalCount).format(defaultNumberFormat);
-    const formattedSelectedEventsCount = numeral(Object.keys(selectedEventIds).length).format(
-      defaultNumberFormat
-    );
+  const formattedTotalCount = numeral(totalCount).format(defaultNumberFormat);
+  const formattedSelectedEventsCount = numeral(Object.keys(selectedEventIds).length).format(
+    defaultNumberFormat
+  );
 
-    return (
-      <>
-        <UtilityBar>
-          <UtilityBarSection>
-            <UtilityBarGroup>
-              <UtilityBarText>
-                {i18n.SHOWING_SIGNALS(formattedTotalCount, totalCount)}
-              </UtilityBarText>
-            </UtilityBarGroup>
+  return (
+    <>
+      <UtilityBar>
+        <UtilityBarSection>
+          <UtilityBarGroup>
+            <UtilityBarText>{i18n.SHOWING_SIGNALS(formattedTotalCount, totalCount)}</UtilityBarText>
+          </UtilityBarGroup>
 
-            <UtilityBarGroup>
-              {totalCount > 0 && (
-                <>
-                  <UtilityBarText>
-                    {i18n.SELECTED_SIGNALS(
-                      showClearSelection ? formattedTotalCount : formattedSelectedEventsCount,
-                      showClearSelection ? totalCount : Object.keys(selectedEventIds).length
-                    )}
-                  </UtilityBarText>
+          <UtilityBarGroup>
+            {canUserCRUD && hasIndexWrite && (
+              <>
+                <UtilityBarText>
+                  {i18n.SELECTED_SIGNALS(
+                    showClearSelection ? formattedTotalCount : formattedSelectedEventsCount,
+                    showClearSelection ? totalCount : Object.keys(selectedEventIds).length
+                  )}
+                </UtilityBarText>
 
-                  <UtilityBarAction
-                    iconSide="right"
-                    iconType="arrowDown"
-                    popoverContent={getBatchItemsPopoverContent}
-                  >
-                    {i18n.BATCH_ACTIONS}
-                  </UtilityBarAction>
+                <UtilityBarAction
+                  disabled={areEventsLoading || isEmpty(selectedEventIds)}
+                  iconType={isFilteredToOpen ? 'securitySignalResolved' : 'securitySignalDetected'}
+                  onClick={handleUpdateStatus}
+                >
+                  {isFilteredToOpen
+                    ? i18n.BATCH_ACTION_CLOSE_SELECTED
+                    : i18n.BATCH_ACTION_OPEN_SELECTED}
+                </UtilityBarAction>
 
-                  <UtilityBarAction
-                    iconType="listAdd"
-                    onClick={() => {
-                      if (!showClearSelection) {
-                        selectAll();
-                      } else {
-                        clearSelection();
-                      }
-                    }}
-                  >
-                    {showClearSelection
-                      ? i18n.CLEAR_SELECTION
-                      : i18n.SELECT_ALL_SIGNALS(formattedTotalCount, totalCount)}
-                  </UtilityBarAction>
-                </>
-              )}
-            </UtilityBarGroup>
-          </UtilityBarSection>
-        </UtilityBar>
-      </>
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.selectedEventIds === nextProps.selectedEventIds &&
-      prevProps.totalCount === nextProps.totalCount &&
-      prevProps.showClearSelection === nextProps.showClearSelection
-    );
-  }
+                <UtilityBarAction
+                  iconType={showClearSelection ? 'cross' : 'pagesSelect'}
+                  onClick={() => {
+                    if (!showClearSelection) {
+                      selectAll();
+                    } else {
+                      clearSelection();
+                    }
+                  }}
+                >
+                  {showClearSelection
+                    ? i18n.CLEAR_SELECTION
+                    : i18n.SELECT_ALL_SIGNALS(formattedTotalCount, totalCount)}
+                </UtilityBarAction>
+              </>
+            )}
+          </UtilityBarGroup>
+        </UtilityBarSection>
+      </UtilityBar>
+    </>
+  );
+};
+
+export const SignalsUtilityBar = React.memo(
+  SignalsUtilityBarComponent,
+  (prevProps, nextProps) =>
+    prevProps.selectedEventIds === nextProps.selectedEventIds &&
+    prevProps.totalCount === nextProps.totalCount &&
+    prevProps.showClearSelection === nextProps.showClearSelection
 );

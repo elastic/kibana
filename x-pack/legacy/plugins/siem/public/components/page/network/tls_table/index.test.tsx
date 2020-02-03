@@ -5,9 +5,8 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -17,8 +16,6 @@ import { createStore, networkModel, State } from '../../../../store';
 
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
-
-jest.mock('../../../../lib/settings/use_kibana_ui_setting');
 
 describe('Tls Table Component', () => {
   const loadPage = jest.fn();
@@ -49,7 +46,7 @@ describe('Tls Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper.find('Connect(TlsTableComponent)'))).toMatchSnapshot();
+      expect(wrapper.find('Connect(TlsTableComponent)')).toMatchSnapshot();
     });
   });
 

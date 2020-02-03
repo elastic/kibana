@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import {
   EuiBadge,
   EuiBasicTable,
@@ -21,15 +22,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
-import React, { Fragment, useEffect, useState } from 'react';
-// @ts-ignore formatNumber
-import { formatNumber } from '@elastic/eui/lib/services/format';
+import React, { Fragment, useState } from 'react';
+import styled from 'styled-components';
+import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { Ping, PingResults } from '../../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { pingsQuery } from '../../../queries';
 import { LocationName } from './../location_name';
-import { Criteria, Pagination } from './../monitor_list';
+import { Pagination } from './../monitor_list';
 import { PingListExpandedRowComponent } from './expanded_row';
 
 interface PingListQueryResult {
@@ -40,7 +41,6 @@ interface PingListProps {
   onSelectedStatusChange: (status: string | undefined) => void;
   onSelectedLocationChange: (location: any) => void;
   onPageCountChange: (itemCount: number) => void;
-  onUpdateApp: () => void;
   pageSize: number;
   selectedOption: string;
   selectedLocation: string | undefined;
@@ -70,22 +70,21 @@ export const toggleDetails = (
   setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
 };
 
+const SpanWithMargin = styled.span`
+  margin-right: 16px;
+`;
+
 export const PingListComponent = ({
   data,
   loading,
   onPageCountChange,
   onSelectedLocationChange,
   onSelectedStatusChange,
-  onUpdateApp,
   pageSize,
   selectedOption,
   selectedLocation,
 }: Props) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
-
-  useEffect(() => {
-    onUpdateApp();
-  }, [selectedOption]);
 
   const statusOptions = [
     {
@@ -116,6 +115,14 @@ export const PingListComponent = ({
         })
       );
 
+  const pings: Ping[] = data?.allPings?.pings ?? [];
+
+  const hasStatus: boolean = pings.reduce(
+    (hasHttpStatus: boolean, currentPing: Ping) =>
+      hasHttpStatus || !!currentPing.http?.response?.status_code,
+    false
+  );
+
   const columns: any[] = [
     {
       field: 'monitor.status',
@@ -145,7 +152,7 @@ export const PingListComponent = ({
       ),
     },
     {
-      align: 'center',
+      align: 'left',
       field: 'observer.geo.name',
       name: i18n.translate('xpack.uptime.pingList.locationNameColumnLabel', {
         defaultMessage: 'Location',
@@ -173,47 +180,57 @@ export const PingListComponent = ({
         }),
     },
     {
-      align: 'right',
+      align: hasStatus ? 'right' : 'center',
       field: 'error.type',
       name: i18n.translate('xpack.uptime.pingList.errorTypeColumnLabel', {
         defaultMessage: 'Error type',
       }),
       render: (error: string) => error ?? '-',
     },
+    // Only add this column is there is any status present in list
+    ...(hasStatus
+      ? [
+          {
+            field: 'http.response.status_code',
+            align: 'right',
+            name: (
+              <SpanWithMargin>
+                {i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
+                  defaultMessage: 'Response code',
+                })}
+              </SpanWithMargin>
+            ),
+            render: (statusCode: string) => (
+              <SpanWithMargin>
+                <EuiBadge>{statusCode}</EuiBadge>
+              </SpanWithMargin>
+            ),
+          },
+        ]
+      : []),
+    {
+      align: 'right',
+      width: '24px',
+      isExpander: true,
+      render: (item: Ping) => {
+        return (
+          <EuiButtonIcon
+            onClick={() => toggleDetails(item, itemIdToExpandedRowMap, setItemIdToExpandedRowMap)}
+            disabled={!item.error && !(item.http?.response?.body?.bytes > 0)}
+            aria-label={
+              itemIdToExpandedRowMap[item.id]
+                ? i18n.translate('xpack.uptime.pingList.collapseRow', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
+            }
+            iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          />
+        );
+      },
+    },
   ];
 
-  const pings: Ping[] = data?.allPings?.pings ?? [];
-
-  const hasStatus: boolean = pings.some(
-    (currentPing: Ping) => !!currentPing?.http?.response?.status_code
-  );
-  if (hasStatus) {
-    columns.push({
-      field: 'http.response.status_code',
-      align: 'center',
-      name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
-        defaultMessage: 'Response code',
-      }),
-      render: (statusCode: string) => <EuiBadge>{statusCode}</EuiBadge>,
-    });
-  }
-
-  columns.push({
-    align: 'right',
-    width: '24px',
-    isExpander: true,
-    render: (item: Ping) => (
-      <EuiButtonIcon
-        onClick={() => toggleDetails(item, itemIdToExpandedRowMap, setItemIdToExpandedRowMap)}
-        aria-label={
-          itemIdToExpandedRowMap[item.id]
-            ? i18n.translate('xpack.uptime.pingList.collapseRow', { defaultMessage: 'Collapse' })
-            : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
-        }
-        iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
-      />
-    ),
-  });
   const pagination: Pagination = {
     initialPageSize: 20,
     pageIndex: 0,
@@ -306,7 +323,9 @@ export const PingListComponent = ({
           itemId="id"
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           pagination={pagination}
-          onChange={(criteria: Criteria) => onPageCountChange(criteria.page!.size)}
+          onChange={(criteria: CriteriaWithPagination<Ping>) =>
+            onPageCountChange(criteria.page!.size)
+          }
         />
       </EuiPanel>
     </Fragment>

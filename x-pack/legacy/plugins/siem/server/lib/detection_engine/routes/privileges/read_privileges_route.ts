@@ -5,6 +5,7 @@
  */
 
 import Hapi from 'hapi';
+import { merge } from 'lodash/fp';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
 import { RulesRequest } from '../../rules/types';
 import { ServerFacade } from '../../../../types';
@@ -28,7 +29,11 @@ export const createReadPrivilegesRulesRoute = (server: ServerFacade): Hapi.Serve
         const callWithRequest = callWithRequestFactory(request, server);
         const index = getIndex(request, server);
         const permissions = await readPrivileges(callWithRequest, index);
-        return permissions;
+        const usingEphemeralEncryptionKey = server.usingEphemeralEncryptionKey;
+        return merge(permissions, {
+          is_authenticated: request?.auth?.isAuthenticated ?? false,
+          has_encryption_key: !usingEphemeralEncryptionKey,
+        });
       } catch (err) {
         return transformError(err);
       }

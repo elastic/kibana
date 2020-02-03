@@ -5,8 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../../../../mock';
 import { useMountAppended } from '../../../../../utils/use_mount_appended';
@@ -30,7 +29,7 @@ describe('SuricataSignature', () => {
           signature="ET SCAN ATTACK Hello"
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 

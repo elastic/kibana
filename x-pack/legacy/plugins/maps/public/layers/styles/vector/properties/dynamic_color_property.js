@@ -6,10 +6,23 @@
 
 import { DynamicStyleProperty } from './dynamic_style_property';
 import _ from 'lodash';
-import { getComputedFieldName } from '../style_util';
-import { getColorRampStops } from '../../color_utils';
+import { getComputedFieldName, getOtherCategoryLabel } from '../style_util';
+import { getOrdinalColorRampStops, getColorPalette } from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+  EuiTextColor,
+} from '@elastic/eui';
+import { Category } from '../components/legend/category';
+import { COLOR_MAP_TYPE } from '../../../../../common/constants';
+import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
+
+const EMPTY_STOPS = { stops: [], defaultColor: null };
 
 export class DynamicColorProperty extends DynamicStyleProperty {
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
@@ -52,7 +65,22 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'text-opacity', alpha);
   }
 
-  isCustomColorRamp() {
+  syncLabelBorderColorWithMb(mbLayerId, mbMap) {
+    const color = this._getMbColor();
+    mbMap.setPaintProperty(mbLayerId, 'text-halo-color', color);
+  }
+
+  isOrdinal() {
+    return (
+      typeof this._options.type === 'undefined' || this._options.type === COLOR_MAP_TYPE.ORDINAL
+    );
+  }
+
+  isCategorical() {
+    return this._options.type === COLOR_MAP_TYPE.CATEGORICAL;
+  }
+
+  isCustomOrdinalColorRamp() {
     return this._options.useCustomColorRamp;
   }
 
@@ -60,8 +88,16 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return true;
   }
 
-  isScaled() {
-    return !this.isCustomColorRamp();
+  isOrdinalScaled() {
+    return this.isOrdinal() && !this.isCustomOrdinalColorRamp();
+  }
+
+  isOrdinalRanged() {
+    return this.isOrdinal() && !this.isCustomOrdinalColorRamp();
+  }
+
+  hasOrdinalBreaks() {
+    return (this.isOrdinal() && this.isCustomOrdinalColorRamp()) || this.isCategorical();
   }
 
   _getMbColor() {
@@ -71,6 +107,15 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return null;
     }
 
+    const targetName = getComputedFieldName(this._styleName, this._options.field.name);
+    if (this.isCategorical()) {
+      return this._getMbDataDrivenCategoricalColor({ targetName });
+    } else {
+      return this._getMbDataDrivenOrdinalColor({ targetName });
+    }
+  }
+
+  _getMbDataDrivenOrdinalColor({ targetName }) {
     if (
       this._options.useCustomColorRamp &&
       (!this._options.customColorRamp || !this._options.customColorRamp.length)
@@ -78,15 +123,12 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return null;
     }
 
-    return this._getMBDataDrivenColor({
-      targetName: getComputedFieldName(this._styleName, this._options.field.name),
-      colorStops: this._getMBColorStops(),
-      isSteps: this._options.useCustomColorRamp,
-    });
-  }
+    const colorStops = this._getMbOrdinalColorStops();
+    if (!colorStops) {
+      return null;
+    }
 
-  _getMBDataDrivenColor({ targetName, colorStops, isSteps }) {
-    if (isSteps) {
+    if (this._options.useCustomColorRamp) {
       const firstStopValue = colorStops[0];
       const lessThenFirstStopValue = firstStopValue - 1;
       return [
@@ -96,7 +138,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         ...colorStops,
       ];
     }
-
     return [
       'interpolate',
       ['linear'],
@@ -107,21 +148,170 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     ];
   }
 
-  _getMBColorStops() {
+  _getColorPaletteStops() {
+    if (this._options.useCustomColorPalette && this._options.customColorPalette) {
+      if (isCategoricalStopsInvalid(this._options.customColorPalette)) {
+        return EMPTY_STOPS;
+      }
+
+      const stops = [];
+      for (let i = 1; i < this._options.customColorPalette.length; i++) {
+        const config = this._options.customColorPalette[i];
+        stops.push({
+          stop: config.stop,
+          color: config.color,
+        });
+      }
+
+      return {
+        defaultColor: this._options.customColorPalette[0].color,
+        stops,
+      };
+    }
+
+    const fieldMeta = this.getFieldMeta();
+    if (!fieldMeta || !fieldMeta.categories) {
+      return EMPTY_STOPS;
+    }
+
+    const colors = getColorPalette(this._options.colorCategory);
+    if (!colors) {
+      return EMPTY_STOPS;
+    }
+
+    const maxLength = Math.min(colors.length, fieldMeta.categories.length + 1);
+    const stops = [];
+
+    for (let i = 0; i < maxLength - 1; i++) {
+      stops.push({
+        stop: fieldMeta.categories[i].key,
+        color: colors[i],
+      });
+    }
+    return {
+      stops,
+      defaultColor: colors[maxLength - 1],
+    };
+  }
+
+  _getMbDataDrivenCategoricalColor() {
+    if (
+      this._options.useCustomColorPalette &&
+      (!this._options.customColorPalette || !this._options.customColorPalette.length)
+    ) {
+      return null;
+    }
+
+    const { stops, defaultColor } = this._getColorPaletteStops();
+    if (stops.length < 1) {
+      //occurs when no data
+      return null;
+    }
+
+    if (!defaultColor) {
+      return null;
+    }
+
+    const mbStops = [];
+    for (let i = 0; i < stops.length; i++) {
+      const stop = stops[i];
+      const branch = `${stop.stop}`;
+      if (typeof branch === 'string') {
+        mbStops.push(branch);
+        mbStops.push(stop.color);
+      }
+    }
+
+    mbStops.push(defaultColor); //last color is default color
+    return ['match', ['to-string', ['get', this._options.field.name]], ...mbStops];
+  }
+
+  _getMbOrdinalColorStops() {
     if (this._options.useCustomColorRamp) {
       return this._options.customColorRamp.reduce((accumulatedStops, nextStop) => {
         return [...accumulatedStops, nextStop.stop, nextStop.color];
       }, []);
+    } else {
+      return getOrdinalColorRampStops(this._options.color);
     }
-
-    return getColorRampStops(this._options.color);
   }
 
-  renderLegendHeader() {
+  renderRangeLegendHeader() {
     if (this._options.color) {
       return <ColorGradient colorRampName={this._options.color} />;
     } else {
       return null;
     }
+  }
+
+  _getColorRampStops() {
+    return this._options.useCustomColorRamp && this._options.customColorRamp
+      ? this._options.customColorRamp
+      : [];
+  }
+
+  _getColorStops() {
+    if (this.isOrdinal()) {
+      return {
+        stops: this._getColorRampStops(),
+        defaultColor: null,
+      };
+    } else if (this.isCategorical()) {
+      return this._getColorPaletteStops();
+    } else {
+      return EMPTY_STOPS;
+    }
+  }
+
+  renderBreakedLegend({ fieldLabel, isPointsOnly, isLinesOnly, symbolId }) {
+    const categories = [];
+    const { stops, defaultColor } = this._getColorStops();
+    stops.map(({ stop, color }) => {
+      categories.push(
+        <Category
+          key={stop}
+          styleName={this.getStyleName()}
+          label={this.formatField(stop)}
+          color={color}
+          isLinesOnly={isLinesOnly}
+          isPointsOnly={isPointsOnly}
+          symbolId={symbolId}
+        />
+      );
+    });
+
+    if (defaultColor) {
+      categories.push(
+        <Category
+          key="fallbackCategory"
+          styleName={this.getStyleName()}
+          label={<EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>}
+          color={defaultColor}
+          isLinesOnly={isLinesOnly}
+          isPointsOnly={isPointsOnly}
+          symbolId={symbolId}
+        />
+      );
+    }
+
+    return (
+      <div>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {categories}
+        </EuiFlexGroup>
+        <EuiFlexGroup gutterSize="xs" justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiToolTip position="top" title={this.getDisplayStyleName()} content={fieldLabel}>
+              <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
+                <small>
+                  <strong>{fieldLabel}</strong>
+                </small>
+              </EuiText>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    );
   }
 }

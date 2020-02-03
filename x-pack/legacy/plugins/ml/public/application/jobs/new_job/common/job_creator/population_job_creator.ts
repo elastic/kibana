@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { JobCreator } from './job_creator';
 import {
@@ -17,6 +16,7 @@ import { Job, Datafeed, Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 export class PopulationJobCreator extends JobCreator {
   // a population job has one overall over (split) field, which is the same for all detectors
@@ -135,7 +135,7 @@ export class PopulationJobCreator extends JobCreator {
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
     this.createdBy = CREATED_BY_LABEL.POPULATION;
-    const detectors = getRichDetectors(job, datafeed, this.scriptFields, false);
+    const detectors = getRichDetectors(job, datafeed, this.additionalFields, false);
 
     this.removeAllDetectors();
 

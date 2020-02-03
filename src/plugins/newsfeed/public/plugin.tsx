@@ -24,18 +24,20 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 // eslint-disable-next-line
-import { PulseChannel } from 'src/core/server/pulse/channel';
-import { NewsfeedPluginInjectedConfig } from '../types';
+import { PulseChannel } from 'src/core/public/pulse/channel';
+// eslint-disable-next-line
+import { NotificationInstruction } from 'src/core/server/pulse/collectors/notifications';
+import { FetchResult, NewsfeedPluginInjectedConfig } from '../types';
 import { NewsfeedNavButton, NewsfeedApiFetchResult } from './components/newsfeed_header_nav_button';
 import { getApi } from './lib/api';
 
-export type Setup = void;
-export type Start = void;
+export type Setup = object;
+export type Start = object;
 
 export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
   private readonly kibanaVersion: string;
   private readonly stop$ = new Rx.ReplaySubject(1);
-  private notificationsChannel?: PulseChannel;
+  private notificationsChannel?: PulseChannel<NotificationInstruction>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
@@ -43,6 +45,7 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
 
   public setup(core: CoreSetup): Setup {
     this.notificationsChannel = core.pulse.getChannel('notifications');
+    return {};
   }
 
   public start(core: CoreStart): Start {
@@ -51,6 +54,8 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
       order: 1000,
       mount: target => this.mount(api$, target),
     });
+
+    return {};
   }
 
   public stop() {
@@ -59,10 +64,14 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
 
   private fetchNewsfeed(core: CoreStart) {
     const { http, injectedMetadata } = core;
-    const config = injectedMetadata.getInjectedVar(
-      'newsfeed'
-    ) as NewsfeedPluginInjectedConfig['newsfeed'];
+    const config = injectedMetadata.getInjectedVar('newsfeed') as
+      | NewsfeedPluginInjectedConfig['newsfeed']
+      | undefined;
 
+    if (!config) {
+      // running in new platform, injected metadata not available
+      return new Rx.Observable<void | FetchResult | null>();
+    }
     return getApi(http, config, this.kibanaVersion).pipe(
       takeUntil(this.stop$), // stop the interval when stop method is called
       catchError(() => Rx.of(null)) // do not throw error

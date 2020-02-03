@@ -119,6 +119,7 @@ describe('editor_frame state management', () => {
         },
         {
           type: 'UPDATE_VISUALIZATION_STATE',
+          visualizationId: 'testVis',
           newState: newVisState,
         }
       );

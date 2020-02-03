@@ -18,15 +18,13 @@
  */
 
 import uuid from 'uuid';
-import { promises } from 'fs';
 import { join } from 'path';
 import { take } from 'rxjs/operators';
+import { readFile, writeFile } from './fs';
 import { IConfigService } from '../config';
 import { PathConfigType, config as pathConfigDef } from '../path';
 import { HttpConfigType, config as httpConfigDef } from '../http';
 import { Logger } from '../logging';
-
-const { readFile, writeFile } = promises;
 
 const FILE_ENCODING = 'utf8';
 const FILE_NAME = 'uuid';

@@ -5,7 +5,6 @@
  */
 
 export { getExportTypesRegistry } from './export_types_registry';
-// @ts-ignore untyped module
 export { checkLicenseFactory } from './check_license';
 export { LevelLogger } from './level_logger';
 export { cryptoFactory } from './crypto';

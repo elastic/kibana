@@ -24,7 +24,13 @@ export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const renderable = getService('renderable');
   const embedding = getService('embedding');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'visEditor',
+    'visChart',
+    'header',
+    'timePicker',
+  ]);
 
   describe('embedding', () => {
     describe('a data table', () => {
@@ -33,22 +39,22 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.visualize.clickBucket('Split rows');
-        await PageObjects.visualize.selectAggregation('Date Histogram');
-        await PageObjects.visualize.selectField('@timestamp');
-        await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickBucket('Split rows');
-        await PageObjects.visualize.selectAggregation('Histogram');
-        await PageObjects.visualize.selectField('bytes');
-        await PageObjects.visualize.setNumericInterval('2000', undefined, 3);
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.clickBucket('Split rows');
+        await PageObjects.visEditor.selectAggregation('Date Histogram');
+        await PageObjects.visEditor.selectField('@timestamp');
+        await PageObjects.visEditor.toggleOpenEditor(2, 'false');
+        await PageObjects.visEditor.clickBucket('Split rows');
+        await PageObjects.visEditor.selectAggregation('Histogram');
+        await PageObjects.visEditor.selectField('bytes');
+        await PageObjects.visEditor.setInterval('2000', { type: 'numeric', aggNth: 3 });
+        await PageObjects.visEditor.clickGo();
       });
 
       it('should allow opening table vis in embedded mode', async () => {
         await embedding.openInEmbeddedMode();
         await renderable.waitForRender();
 
-        const data = await PageObjects.visualize.getTableVisData();
+        const data = await PageObjects.visChart.getTableVisData();
         log.debug(data.split('\n'));
         expect(data.trim().split('\n')).to.be.eql([
           '2015-09-20 00:00',
@@ -89,7 +95,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
 
-        const data = await PageObjects.visualize.getTableVisData();
+        const data = await PageObjects.visChart.getTableVisData();
         log.debug(data.split('\n'));
         expect(data.trim().split('\n')).to.be.eql([
           '2015-09-21 00:00',
@@ -126,11 +132,11 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should allow to change timerange from the visualization in embedded mode', async () => {
-        await PageObjects.visualize.filterOnTableCell(1, 7);
+        await PageObjects.visChart.filterOnTableCell(1, 7);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
 
-        const data = await PageObjects.visualize.getTableVisData();
+        const data = await PageObjects.visChart.getTableVisData();
         log.debug(data.split('\n'));
         expect(data.trim().split('\n')).to.be.eql([
           '03:00',

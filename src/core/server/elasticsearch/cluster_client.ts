@@ -89,15 +89,35 @@ export interface FakeRequest {
 }
 
 /**
- * Represents an Elasticsearch cluster API client and allows to call API on behalf
- * of the internal Kibana user and the actual user that is derived from the request
- * headers (via `asScoped(...)`).
+ * Represents an Elasticsearch cluster API client created by the platform.
+ * It allows to call API on behalf of the internal Kibana user and
+ * the actual user that is derived from the request headers (via `asScoped(...)`).
  *
  * See {@link ClusterClient}.
  *
  * @public
  */
-export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
+export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+
+/**
+ * Represents an Elasticsearch cluster API client created by a plugin.
+ * It allows to call API on behalf of the internal Kibana user and
+ * the actual user that is derived from the request headers (via `asScoped(...)`).
+ *
+ * See {@link ClusterClient}.
+ *
+ * @public
+ */
+export type ICustomClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
+
+/**
+ A user credentials container.
+ * It accommodates the necessary auth credentials to impersonate the current user.
+ *
+ * @public
+ * See {@link KibanaRequest}.
+ */
+export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
 
 /**
  * {@inheritDoc IClusterClient}
@@ -174,7 +194,7 @@ export class ClusterClient implements IClusterClient {
    * @param request - Request the `IScopedClusterClient` instance will be scoped to.
    * Supports request optionality, Legacy.Request & FakeRequest for BWC with LegacyPlatform
    */
-  public asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient {
+  public asScoped(request?: ScopeableRequest): IScopedClusterClient {
     // It'd have been quite expensive to create and configure client for every incoming
     // request since it involves parsing of the config, reading of the SSL certificate and
     // key files etc. Moreover scoped client needs two Elasticsearch JS clients at the same

@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../mock';
 import { PreferenceFormattedBytes } from '../formatted_bytes';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { Bytes } from '.';
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('Bytes', () => {
   const mount = useMountAppended();

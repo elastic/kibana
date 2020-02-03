@@ -16,3 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+export { getRequestInspectorStats, getResponseInspectorStats } from './utils';

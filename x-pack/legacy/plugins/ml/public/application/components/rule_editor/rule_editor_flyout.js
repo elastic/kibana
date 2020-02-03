@@ -56,7 +56,7 @@ import { metadata } from 'ui/metadata';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 // metadata.branch corresponds to the version used in documentation links.
-const docsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-rules.html`;
+const docsUrl = `https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-rules.html`;
 
 export const RuleEditorFlyout = injectI18n(
   class RuleEditorFlyout extends Component {

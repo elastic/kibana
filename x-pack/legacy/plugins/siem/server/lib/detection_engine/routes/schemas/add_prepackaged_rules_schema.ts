@@ -21,6 +21,7 @@ import {
   language,
   saved_id,
   timeline_id,
+  timeline_title,
   meta,
   risk_score,
   max_signals,
@@ -29,7 +30,7 @@ import {
   tags,
   to,
   type,
-  threats,
+  threat,
   references,
   version,
 } from './schemas';
@@ -41,19 +42,23 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
  * Big differences between this schema and the createRulesSchema
  *  - rule_id is required here
  *  - output_index is not allowed (and instead the space index must be used)
- *  - immutable defaults to true instead of to false
+ *  - immutable is forbidden but defaults to true instead of to false and it can only ever be true
  *  - enabled defaults to false instead of true
  *  - version is a required field that must exist
+ *  - index is a required field that must exist
  */
 export const addPrepackagedRulesSchema = Joi.object({
   description: description.required(),
   enabled: enabled.default(false),
   false_positives: false_positives.default([]),
   filters,
-  from: from.required(),
+  from: from.default('now-6m'),
   rule_id: rule_id.required(),
-  immutable: immutable.default(true),
-  index,
+  immutable: immutable
+    .forbidden()
+    .default(true)
+    .valid(true),
+  index: index.required(),
   interval: interval.default('5m'),
   query: query.allow('').default(''),
   language: language.default('kuery'),
@@ -63,15 +68,16 @@ export const addPrepackagedRulesSchema = Joi.object({
     otherwise: Joi.forbidden(),
   }),
   timeline_id,
+  timeline_title,
   meta,
   risk_score: risk_score.required(),
   max_signals: max_signals.default(DEFAULT_MAX_SIGNALS),
   name: name.required(),
   severity: severity.required(),
   tags: tags.default([]),
-  to: to.required(),
+  to: to.default('now'),
   type: type.required(),
-  threats: threats.default([]),
+  threat: threat.default([]),
   references: references.default([]),
   version: version.required(),
 });

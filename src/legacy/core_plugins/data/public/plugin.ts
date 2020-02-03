@@ -18,10 +18,26 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import {
+  DataPublicPluginStart,
+  addSearchStrategy,
+  defaultSearchStrategy,
+} from '../../../../plugins/data/public';
+import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setFieldFormats } from '../../../../plugins/data/public/services';
+import {
+  setIndexPatterns,
+  setQueryService,
+  setUiSettings,
+  setInjectedMetadata,
+  setFieldFormats,
+  setSearchService,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/data/public/services';
+
+export interface DataPluginSetupDependencies {
+  expressions: ExpressionsSetup;
+}
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -32,8 +48,7 @@ export interface DataPluginStartDependencies {
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataStart {}
+export interface DataStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 /**
  * Data Plugin - public
@@ -47,12 +62,22 @@ export interface DataStart {}
  * or static code.
  */
 
-export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDependencies> {
-  public setup(core: CoreSetup) {}
+export class DataPlugin
+  implements Plugin<void, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
+  public setup(core: CoreSetup) {
+    setInjectedMetadata(core.injectedMetadata);
+
+    // This is to be deprecated once we switch to the new search service fully
+    addSearchStrategy(defaultSearchStrategy);
+  }
 
   public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
-    // This is required for when Angular code uses Field and FieldList.
+    setUiSettings(core.uiSettings);
+    setQueryService(data.query);
+    setIndexPatterns(data.indexPatterns);
     setFieldFormats(data.fieldFormats);
+    setSearchService(data.search);
+
     return {};
   }
 

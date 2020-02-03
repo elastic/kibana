@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'visEditor', 'header', 'timePicker']);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');
@@ -65,7 +65,7 @@ export default function({ getService, getPageObjects }) {
     it('should create a seperate filter pill for parent control and child control', async () => {
       await comboBox.set('listControlSelect1', '14.61.182.136');
 
-      await PageObjects.visualize.inputControlSubmit();
+      await PageObjects.visEditor.inputControlSubmit();
 
       const hasParentControlFilter = await filterBar.hasFilter('geo.src', 'BR');
       expect(hasParentControlFilter).to.equal(true);

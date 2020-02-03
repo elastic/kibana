@@ -26,9 +26,6 @@ import {
   Axis,
   BarSeries,
   Chart,
-  DataSeriesColorsValues,
-  getAxisId,
-  getSpecId,
   niceTimeFormatter,
   Position,
   ScaleType,
@@ -391,18 +388,11 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   }
 
   if (histogram && histogram.buckets.length) {
-    const specId = getSpecId(
-      i18n.translate('xpack.lens.indexPattern.fieldStatsCountLabel', {
-        defaultMessage: 'Count',
-      })
-    );
-    const colors: DataSeriesColorsValues = {
-      colorValues: [],
-      specId,
-    };
+    const specId = i18n.translate('xpack.lens.indexPattern.fieldStatsCountLabel', {
+      defaultMessage: 'Count',
+    });
     const expectedColor = getColorForDataType(field.type);
-
-    const seriesColors = new Map([[colors, expectedColor]]);
+    const seriesColors = expectedColor ? [expectedColor] : undefined;
 
     if (field.type === 'date') {
       return wrapInPopover(
@@ -422,7 +412,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
           />
 
           <Axis
-            id={getAxisId('key')}
+            id="key"
             position={Position.Bottom}
             tickFormat={
               fromDate && toDate
@@ -450,7 +440,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
           <Settings rotation={90} tooltip={{ type: TooltipType.None }} theme={chartTheme} />
 
           <Axis
-            id={getAxisId('key')}
+            id="key"
             position={Position.Left}
             showOverlappingTicks={true}
             tickFormat={d => formatter.convert(d)}

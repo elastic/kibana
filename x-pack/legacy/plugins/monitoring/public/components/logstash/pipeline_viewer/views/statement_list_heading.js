@@ -16,7 +16,7 @@ export function StatementListHeading({ iconType, title }) {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
-          <h4>{title}</h4>
+          <h2>{title}</h2>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
