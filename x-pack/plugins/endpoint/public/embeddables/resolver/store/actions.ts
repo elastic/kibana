@@ -7,11 +7,20 @@ import { ProcessEvent } from '../types';
 import { CameraAction } from './camera';
 import { DataAction } from './data';
 
+/**
+ * When the user wants to bring a process node front-and-center on the map.
+ */
 interface UserBroughtProcessIntoView {
   readonly type: 'userBroughtProcessIntoView';
   readonly payload: {
-    readonly time: Date;
+    /**
+     * Used to identify the process node that should be brought into view.
+     */
     readonly process: ProcessEvent;
+    /**
+     * The time when the action was dispatched.
+     */
+    readonly time: Date;
   };
 }
 
