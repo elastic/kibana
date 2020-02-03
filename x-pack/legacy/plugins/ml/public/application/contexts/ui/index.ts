@@ -7,3 +7,5 @@
 // We only export UiContext but not any custom hooks, because if we'd import them
 // from here, mocking the hook from jest tests won't work as expected.
 export { UiContext } from './ui_context';
+export { useUiChromeContext } from './use_ui_chrome_context';
+export { useUiSettingsContext } from './use_ui_settings_context';

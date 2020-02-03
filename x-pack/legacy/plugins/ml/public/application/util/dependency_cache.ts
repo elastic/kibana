@@ -6,13 +6,24 @@
 
 import { useEffect } from 'react';
 import { TimefilterSetup } from 'src/plugins/data/public';
-import { IUiSettingsClient, ChromeStart } from 'src/core/public';
+import {
+  IUiSettingsClient,
+  ChromeStart,
+  SavedObjectsClientContract,
+  ApplicationStart,
+} from 'src/core/public';
 import {
   IndexPatternsContract,
   FieldFormatsStart,
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
-import { DocLinksStart, ToastsStart, OverlayStart, ChromeRecentlyAccessed } from 'kibana/public';
+import {
+  DocLinksStart,
+  ToastsStart,
+  OverlayStart,
+  ChromeRecentlyAccessed,
+  IBasePath,
+} from 'kibana/public';
 import { PageDependencies } from '../routing/router';
 
 interface DependencyCache {
@@ -26,6 +37,11 @@ interface DependencyCache {
   recentlyAccessed: ChromeRecentlyAccessed | null;
   fieldFormats: FieldFormatsStart | null;
   autocomplete: DataPublicPluginStart['autocomplete'] | null;
+  basePath: IBasePath | null;
+  savedObjectsClient: SavedObjectsClientContract | null;
+  XSRF: string | null;
+  APP_URL: string | null;
+  application: ApplicationStart | null;
 }
 
 const cache: DependencyCache = {
@@ -39,6 +55,11 @@ const cache: DependencyCache = {
   recentlyAccessed: null,
   fieldFormats: null,
   autocomplete: null,
+  basePath: null,
+  savedObjectsClient: null,
+  XSRF: null,
+  APP_URL: null,
+  application: null,
 };
 
 export function useDependencyCache(deps: PageDependencies) {
@@ -52,6 +73,11 @@ export function useDependencyCache(deps: PageDependencies) {
   cache.recentlyAccessed = deps.recentlyAccessed;
   cache.fieldFormats = deps.fieldFormats;
   cache.autocomplete = deps.autocomplete;
+  cache.basePath = deps.basePath;
+  cache.savedObjectsClient = deps.savedObjectsClient;
+  cache.XSRF = deps.XSRF;
+  cache.APP_URL = deps.APP_URL;
+  cache.application = deps.application;
 
   useEffect(() => {
     return () => {
@@ -71,7 +97,12 @@ export function getDependencyCache(): Readonly<PageDependencies> {
     cache.overlays === null ||
     cache.recentlyAccessed === null ||
     cache.fieldFormats === null ||
-    cache.autocomplete === null
+    cache.autocomplete === null ||
+    cache.basePath === null ||
+    cache.savedObjectsClient === null ||
+    cache.XSRF === null ||
+    cache.APP_URL === null ||
+    cache.application === null
   ) {
     throw new Error();
   }
@@ -86,6 +117,11 @@ export function getDependencyCache(): Readonly<PageDependencies> {
     recentlyAccessed: cache.recentlyAccessed,
     fieldFormats: cache.fieldFormats,
     autocomplete: cache.autocomplete,
+    basePath: cache.basePath,
+    savedObjectsClient: cache.savedObjectsClient,
+    XSRF: cache.XSRF,
+    APP_URL: cache.APP_URL,
+    application: cache.application,
   };
 }
 
@@ -151,12 +187,47 @@ export function getAutocomplete() {
   return cache.autocomplete;
 }
 
-// export function getData() {
-//   if (cache.d === null) {
-//     throw new Error();
-//   }
-//   return cache.d;
-// }
+export function getChrome() {
+  if (cache.chrome === null) {
+    throw new Error();
+  }
+  return cache.chrome;
+}
+
+export function getBasePath() {
+  if (cache.basePath === null) {
+    throw new Error();
+  }
+  return cache.basePath;
+}
+
+export function getSavedObjectsClient() {
+  if (cache.savedObjectsClient === null) {
+    throw new Error();
+  }
+  return cache.savedObjectsClient;
+}
+
+export function getXSRF() {
+  if (cache.XSRF === null) {
+    throw new Error();
+  }
+  return cache.XSRF;
+}
+
+export function getAppUrl() {
+  if (cache.APP_URL === null) {
+    throw new Error();
+  }
+  return cache.APP_URL;
+}
+
+export function getApplication() {
+  if (cache.application === null) {
+    throw new Error();
+  }
+  return cache.application;
+}
 
 export function clearCache() {
   console.log('clearing cache'); // eslint-disable-line no-console

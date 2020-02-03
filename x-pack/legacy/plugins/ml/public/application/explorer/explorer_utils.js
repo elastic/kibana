@@ -12,7 +12,6 @@ import { chain, each, get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
 
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
@@ -37,8 +36,6 @@ import {
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
 import { getSwimlaneContainerWidth } from './legacy_utils';
-
-const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 // create new job objects based on standard job config objects
 // new job objects just contain job id, bucket span in seconds and a selected flag.
@@ -542,10 +539,6 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
       ? selectedCells.lanes
       : selectedJobs.map(d => d.id);
   const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
-
-  if (mlAnnotationsEnabled === false) {
-    return Promise.resolve([]);
-  }
 
   return new Promise(resolve => {
     ml.annotations

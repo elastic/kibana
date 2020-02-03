@@ -7,31 +7,33 @@
 // Service for querying filters, which hold lists of entities,
 // for example a list of known safe URL domains.
 
-import chrome from 'ui/chrome';
-
 import { http } from '../http_service';
 
-const basePath = chrome.addBasePath('/api/ml');
+import { getBasePath } from '../../util/dependency_cache';
+
+function basePath() {
+  return getBasePath().prepend('/api/ml');
+}
 
 export const filters = {
   filters(obj) {
     const filterId = obj && obj.filterId ? `/${obj.filterId}` : '';
     return http({
-      url: `${basePath}/filters${filterId}`,
+      url: `${basePath()}/filters${filterId}`,
       method: 'GET',
     });
   },
 
   filtersStats() {
     return http({
-      url: `${basePath}/filters/_stats`,
+      url: `${basePath()}/filters/_stats`,
       method: 'GET',
     });
   },
 
   addFilter(filterId, description, items) {
     return http({
-      url: `${basePath}/filters`,
+      url: `${basePath()}/filters`,
       method: 'PUT',
       data: {
         filterId,
@@ -54,7 +56,7 @@ export const filters = {
     }
 
     return http({
-      url: `${basePath}/filters/${filterId}`,
+      url: `${basePath()}/filters/${filterId}`,
       method: 'PUT',
       data,
     });
@@ -62,7 +64,7 @@ export const filters = {
 
   deleteFilter(filterId) {
     return http({
-      url: `${basePath}/filters/${filterId}`,
+      url: `${basePath()}/filters/${filterId}`,
       method: 'DELETE',
     });
   },

@@ -30,7 +30,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import chrome from 'ui/chrome';
 import { getToastNotifications } from '../util/dependency_cache';
 import { ResizeChecker } from '../../../../../../../src/plugins/kibana_utils/public';
 
@@ -79,8 +78,6 @@ import {
   processRecordScoreResults,
   getFocusData,
 } from './timeseriesexplorer_utils';
-
-const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -135,8 +132,8 @@ function getTimeseriesexplorerDefaultState() {
     loading: false,
     modelPlotEnabled: false,
     // Toggles display of annotations in the focus chart
-    showAnnotations: mlAnnotationsEnabled,
-    showAnnotationsCheckbox: mlAnnotationsEnabled,
+    showAnnotations: true,
+    showAnnotationsCheckbox: true,
     // Toggles display of forecast data in the focus chart
     showForecast: true,
     showForecastCheckbox: false,
@@ -216,11 +213,9 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   toggleShowAnnotationsHandler = () => {
-    if (mlAnnotationsEnabled) {
-      this.setState(prevState => ({
-        showAnnotations: !prevState.showAnnotations,
-      }));
-    }
+    this.setState(prevState => ({
+      showAnnotations: !prevState.showAnnotations,
+    }));
   };
 
   toggleShowForecastHandler = () => {

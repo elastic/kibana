@@ -5,14 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
 import { Query } from 'src/plugins/data/public';
 import {
   IndexPattern,
   IIndexPattern,
   IndexPatternsContract,
 } from '../../../../../../../src/plugins/data/public';
-import { getToastNotifications } from './dependency_cache';
+import { getToastNotifications, getSavedObjectsClient } from './dependency_cache';
 import { IndexPatternSavedObject, SavedSearchSavedObject } from '../../../common/types/kibana';
 
 let indexPatternCache: IndexPatternSavedObject[] = [];
@@ -21,7 +20,7 @@ let indexPatternsContract: IndexPatternsContract | null = null;
 
 export function loadIndexPatterns(indexPatterns: IndexPatternsContract) {
   indexPatternsContract = indexPatterns;
-  const savedObjectsClient = chrome.getSavedObjectsClient();
+  const savedObjectsClient = getSavedObjectsClient();
   return savedObjectsClient
     .find({
       type: 'index-pattern',
@@ -35,7 +34,7 @@ export function loadIndexPatterns(indexPatterns: IndexPatternsContract) {
 }
 
 export function loadSavedSearches() {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
+  const savedObjectsClient = getSavedObjectsClient();
   return savedObjectsClient
     .find({
       type: 'search',
@@ -48,7 +47,7 @@ export function loadSavedSearches() {
 }
 
 export async function loadSavedSearchById(id: string) {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
+  const savedObjectsClient = getSavedObjectsClient();
   const ss = await savedObjectsClient.get('search', id);
   return ss.error === undefined ? ss : null;
 }

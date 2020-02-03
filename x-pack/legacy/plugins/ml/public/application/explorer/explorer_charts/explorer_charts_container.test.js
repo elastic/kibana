@@ -48,7 +48,6 @@ jest.mock(
     getBasePath: () => {
       return '<basepath>';
     },
-    getInjected: () => true,
   }),
   { virtual: true }
 );

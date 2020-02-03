@@ -16,8 +16,6 @@ import _ from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
-import chrome from 'ui/chrome';
-
 import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
@@ -62,7 +60,6 @@ const contextChartLineTopMargin = 3;
 const chartSpacing = 25;
 const swimlaneHeight = 30;
 const margin = { top: 10, right: 10, bottom: 15, left: 40 };
-const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 const ZOOM_INTERVAL_OPTIONS = [
   { duration: moment.duration(1, 'h'), label: '1h' },
@@ -188,9 +185,7 @@ const TimeseriesChartIntl = injectI18n(
       this.fieldFormat = undefined;
 
       // Annotations Brush
-      if (mlAnnotationsEnabled) {
-        this.annotateBrush = getAnnotationBrush.call(this);
-      }
+      this.annotateBrush = getAnnotationBrush.call(this);
 
       // brush for focus brushing
       this.brush = d3.svg.brush();
@@ -239,7 +234,7 @@ const TimeseriesChartIntl = injectI18n(
 
       this.renderFocusChart();
 
-      if (mlAnnotationsEnabled && this.props.annotation === null) {
+      if (this.props.annotation === null) {
         const chartElement = d3.select(this.rootNode);
         chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
       }
@@ -365,20 +360,18 @@ const TimeseriesChartIntl = injectI18n(
         );
 
       // Mask to hide annotations overflow
-      if (mlAnnotationsEnabled) {
-        const annotationsMask = svg
-          .append('defs')
-          .append('mask')
-          .attr('id', ANNOTATION_MASK_ID);
+      const annotationsMask = svg
+        .append('defs')
+        .append('mask')
+        .attr('id', ANNOTATION_MASK_ID);
 
-        annotationsMask
-          .append('rect')
-          .attr('x', 0)
-          .attr('y', 0)
-          .attr('width', this.vizWidth)
-          .attr('height', focusHeight)
-          .style('fill', 'white');
-      }
+      annotationsMask
+        .append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', this.vizWidth)
+        .attr('height', focusHeight)
+        .style('fill', 'white');
 
       // Draw each of the component elements.
       createFocusChart(focus, this.vizWidth, focusHeight);
@@ -477,30 +470,28 @@ const TimeseriesChartIntl = injectI18n(
       this.createZoomInfoElements(zoomGroup, fcsWidth);
 
       // Create the elements for annotations
-      if (mlAnnotationsEnabled) {
-        const annotateBrush = this.annotateBrush.bind(this);
+      const annotateBrush = this.annotateBrush.bind(this);
 
-        let brushX = 0;
-        let brushWidth = 0;
+      let brushX = 0;
+      let brushWidth = 0;
 
-        if (this.props.annotation !== null) {
-          // If the annotation brush is showing, set it to the same position
-          brushX = this.focusXScale(this.props.annotation.timestamp);
-          brushWidth = getAnnotationWidth(this.props.annotation, this.focusXScale);
-        }
-
-        fcsGroup
-          .append('g')
-          .attr('class', 'mlAnnotationBrush')
-          .call(annotateBrush)
-          .selectAll('rect')
-          .attr('x', brushX)
-          .attr('y', focusZoomPanelHeight)
-          .attr('width', brushWidth)
-          .attr('height', focusChartHeight);
-
-        fcsGroup.append('g').classed('mlAnnotations', true);
+      if (this.props.annotation !== null) {
+        // If the annotation brush is showing, set it to the same position
+        brushX = this.focusXScale(this.props.annotation.timestamp);
+        brushWidth = getAnnotationWidth(this.props.annotation, this.focusXScale);
       }
+
+      fcsGroup
+        .append('g')
+        .attr('class', 'mlAnnotationBrush')
+        .call(annotateBrush)
+        .selectAll('rect')
+        .attr('x', brushX)
+        .attr('y', focusZoomPanelHeight)
+        .attr('width', brushWidth)
+        .attr('height', focusChartHeight);
+
+      fcsGroup.append('g').classed('mlAnnotations', true);
 
       // Add border round plot area.
       fcsGroup
@@ -689,7 +680,7 @@ const TimeseriesChartIntl = injectI18n(
 
         // if annotations are present, we extend yMax to avoid overlap
         // between annotation labels, chart lines and anomalies.
-        if (mlAnnotationsEnabled && focusAnnotationData && focusAnnotationData.length > 0) {
+        if (focusAnnotationData && focusAnnotationData.length > 0) {
           const levels = getAnnotationLevels(focusAnnotationData);
           const maxLevel = d3.max(Object.keys(levels).map(key => levels[key]));
           // TODO needs revisiting to be a more robust normalization
@@ -726,20 +717,18 @@ const TimeseriesChartIntl = injectI18n(
           .classed('hidden', !showModelBounds);
       }
 
-      if (mlAnnotationsEnabled) {
-        renderAnnotations(
-          focusChart,
-          focusAnnotationData,
-          focusZoomPanelHeight,
-          focusChartHeight,
-          this.focusXScale,
-          showAnnotations,
-          showFocusChartTooltip
-        );
+      renderAnnotations(
+        focusChart,
+        focusAnnotationData,
+        focusZoomPanelHeight,
+        focusChartHeight,
+        this.focusXScale,
+        showAnnotations,
+        showFocusChartTooltip
+      );
 
-        // disable brushing (creation of annotations) when annotations aren't shown
-        focusChart.select('.mlAnnotationBrush').style('display', showAnnotations ? null : 'none');
-      }
+      // disable brushing (creation of annotations) when annotations aren't shown
+      focusChart.select('.mlAnnotationBrush').style('display', showAnnotations ? null : 'none');
 
       focusChart.select('.values-line').attr('d', this.focusValuesLine(data));
       drawLineChartDots(data, focusChart, this.focusValuesLine);
@@ -1611,7 +1600,7 @@ const TimeseriesChartIntl = injectI18n(
         });
       }
 
-      if (mlAnnotationsEnabled && _.has(marker, 'annotation')) {
+      if (_.has(marker, 'annotation')) {
         tooltipData.length = 0;
         tooltipData.push({
           name: marker.annotation,

@@ -6,16 +6,17 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import chrome from 'ui/chrome';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { mlJobService } from '../../../../services/job_service';
 import { injectI18n } from '@kbn/i18n/react';
+import { getBasePath } from '../../../../util/dependency_cache';
 
 export function getLink(location, jobs) {
+  const basePath = getBasePath();
   const resultsPageUrl = mlJobService.createResultsUrlForJobs(jobs, location);
-  return `${chrome.getBasePath()}/app/ml${resultsPageUrl}`;
+  return `${basePath.get()}/app/ml${resultsPageUrl}`;
 }
 
 function ResultLinksUI({ jobs, intl }) {

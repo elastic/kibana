@@ -13,8 +13,7 @@ import React, { Component } from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-import chrome from 'ui/chrome';
-import { getToastNotifications } from '../../util/dependency_cache';
+import { getToastNotifications, getBasePath } from '../../util/dependency_cache';
 
 import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
 import { checkPermission } from '../../privilege/check_privilege';
@@ -29,7 +28,6 @@ import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_util
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 import { getIndexPatternIdFromName } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
-
 /*
  * Component for rendering the links menu inside a cell in the anomalies table.
  */
@@ -330,7 +328,8 @@ export const LinksMenu = injectI18n(
             const _a = rison.encode(appStateProps);
 
             // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.
-            let path = chrome.getBasePath();
+            const basePath = getBasePath();
+            let path = basePath.get();
             path += '/app/kibana#/discover';
             path += '?_g=' + _g;
             path += '&_a=' + encodeURIComponent(_a);

@@ -5,14 +5,10 @@
  */
 
 import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-
-export interface MlSetupDependencies {
-  data: DataPublicPluginStart;
-}
+import { MlDependencies } from './application/app';
 
 export class MlPlugin implements Plugin<Setup, Start> {
-  setup(core: CoreSetup, { data }: MlSetupDependencies) {
+  setup(core: CoreSetup, { data, __LEGACY }: MlDependencies) {
     core.application.register({
       id: 'ml',
       title: 'Machine learning',
@@ -24,6 +20,7 @@ export class MlPlugin implements Plugin<Setup, Start> {
           appBasePath: params.appBasePath,
           onAppLeave: params.onAppLeave,
           data,
+          __LEGACY,
         });
       },
     });

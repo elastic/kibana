@@ -12,6 +12,7 @@ import 'ace';
 import {
   AppMountParameters,
   CoreStart,
+  // IBasePath,
   // AppMountContext,
   // ChromeStart,
   // LegacyCoreStart,
@@ -28,6 +29,10 @@ import { MlRouter, PageDependencies } from './routing';
 
 export interface MlDependencies extends AppMountParameters {
   data: DataPublicPluginStart;
+  __LEGACY: {
+    XSRF: string;
+    APP_URL: string;
+  };
 }
 
 interface AppProps {
@@ -37,6 +42,7 @@ interface AppProps {
 
 const App: FC<AppProps> = ({ coreStart, deps }) => {
   const pageDeps: PageDependencies = {
+    // THIS WHOLE OBJECT DOESN'T NEED TO BE PASSED TO ROUTER
     indexPatterns: deps.data.indexPatterns,
     timefilter: deps.data.query.timefilter,
     config: coreStart.uiSettings!,
@@ -47,6 +53,11 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
     recentlyAccessed: coreStart.chrome!.recentlyAccessed,
     fieldFormats: deps.data.fieldFormats,
     autocomplete: deps.data.autocomplete,
+    basePath: coreStart.http.basePath,
+    savedObjectsClient: coreStart.savedObjects.client,
+    XSRF: deps.__LEGACY.XSRF,
+    APP_URL: deps.__LEGACY.APP_URL,
+    application: coreStart.application,
   };
 
   const services = {

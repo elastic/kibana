@@ -6,11 +6,11 @@
 
 // service for interacting with the server
 
-import chrome from 'ui/chrome';
-
 import { fromFetch } from 'rxjs/fetch';
 import { from, Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+
+import { getXSRF } from '../util/dependency_cache';
 
 export interface HttpOptions {
   url?: string;
@@ -20,7 +20,7 @@ function getResultHeaders(headers: HeadersInit): HeadersInit {
   return {
     asSystemRequest: false,
     'Content-Type': 'application/json',
-    'kbn-version': chrome.getXsrfToken(),
+    'kbn-version': getXSRF(),
     ...headers,
   } as HeadersInit;
 }

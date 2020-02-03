@@ -18,8 +18,6 @@ import { TimeseriesChart } from './timeseries_chart';
 jest.mock('ui/chrome', () => ({
   addBasePath: path => path,
   getBasePath: path => path,
-  // returns false for mlAnnotationsEnabled
-  getInjected: () => false,
   getUiSettingsClient: () => ({
     get: jest.fn(),
   }),

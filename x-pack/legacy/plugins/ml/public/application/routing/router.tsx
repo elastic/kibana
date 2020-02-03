@@ -8,13 +8,19 @@ import React, { FC } from 'react';
 import { HashRouter, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 
-import { IUiSettingsClient, ChromeStart } from 'src/core/public';
+import {
+  IUiSettingsClient,
+  ChromeStart,
+  SavedObjectsClientContract,
+  ApplicationStart,
+} from 'src/core/public';
 import {
   ChromeBreadcrumb,
   DocLinksStart,
   ToastsStart,
   OverlayStart,
   ChromeRecentlyAccessed,
+  IBasePath,
 } from 'kibana/public';
 import {
   IndexPatternsContract,
@@ -53,6 +59,11 @@ export interface PageDependencies {
   recentlyAccessed: ChromeRecentlyAccessed;
   fieldFormats: FieldFormatsStart;
   autocomplete: DataPublicPluginStart['autocomplete'];
+  basePath: IBasePath;
+  savedObjectsClient: SavedObjectsClientContract;
+  XSRF: string;
+  APP_URL: string;
+  application: ApplicationStart;
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
