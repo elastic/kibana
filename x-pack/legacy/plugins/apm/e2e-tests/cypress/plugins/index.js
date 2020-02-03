@@ -18,37 +18,11 @@
 // the project's config changing)
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-const wp = require('@cypress/webpack-preprocessor');
-const fs = require('fs');
+const webpack = require('@cypress/webpack-preprocessor');
 
 module.exports = on => {
-  // add typescript support
   const options = {
-    webpackOptions: {
-      resolve: {
-        extensions: ['.ts', '.tsx', '.js']
-      },
-      module: {
-        rules: [
-          {
-            test: /\.tsx?$/,
-            loader: 'ts-loader',
-            options: { transpileOnly: true }
-          }
-        ]
-      }
-    }
+    webpackOptions: require('../webpack.config.js')
   };
-  on('file:preprocessor', wp(options));
-
-  // readFileMaybe
-  on('task', {
-    readFileMaybe(filename) {
-      if (fs.existsSync(filename)) {
-        return fs.readFileSync(filename, 'utf8');
-      }
-
-      return null;
-    }
-  });
+  on('file:preprocessor', webpack(options));
 };

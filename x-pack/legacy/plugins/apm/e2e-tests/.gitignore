@@ -1,0 +1,4 @@
+cypress/ingest-data/events.json
+cypress/screenshots/*
+
+**/*-e2e-tests.xml
