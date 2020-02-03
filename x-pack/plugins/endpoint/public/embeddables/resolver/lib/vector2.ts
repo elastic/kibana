@@ -27,7 +27,7 @@ export function divide(a: Vector2, b: Vector2): Vector2 {
 }
 
 /**
- * Return `[a[0]*b[0], a[1] * b[1]]`
+ * Return `[ a[0] * b[0], a[1] * b[1] ]`
  */
 export function multiply(a: Vector2, b: Vector2): Vector2 {
   return [a[0] * b[0], a[1] * b[1]];
