@@ -9,10 +9,6 @@ import React from 'react';
 
 import { CalendarsListTable } from './table';
 
-jest.mock('ui/chrome', () => ({
-  getBasePath: jest.fn(),
-}));
-
 const calendars = [
   {
     calendar_id: 'farequote-calendar',

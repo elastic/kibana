@@ -9,6 +9,13 @@ import React from 'react';
 
 import { Overrides } from './overrides';
 
+jest.mock('../../../../util/dependency_cache', () => ({
+  getDocLinks: () => ({
+    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+  }),
+}));
+
 function getProps() {
   return {
     setOverrides: () => {},

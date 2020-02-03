@@ -29,6 +29,13 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
+jest.mock('../../../../../util/dependency_cache', () => ({
+  getDocLinks: () => ({
+    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+  }),
+}));
+
 describe('Data Frame Analytics: <CreateAnalyticsForm />', () => {
   test('Minimal initialization', () => {
     const { getLastHookValue } = getMountedHook();

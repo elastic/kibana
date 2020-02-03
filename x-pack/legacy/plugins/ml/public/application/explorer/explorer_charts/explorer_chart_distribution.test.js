@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './explorer_chart_distribution.test.mocks';
 import { chartData as mockChartData } from './__mocks__/mock_chart_data_rare';
 import seriesConfig from './__mocks__/mock_series_config_rare.json';
 
@@ -21,12 +20,6 @@ jest.mock('../../services/field_format_service', () => ({
   mlFieldFormatService: {
     getFieldFormat: jest.fn(),
   },
-}));
-jest.mock('ui/chrome', () => ({
-  getBasePath: path => path,
-  getUiSettingsClient: () => ({
-    get: () => null,
-  }),
 }));
 
 import { mountWithIntl } from 'test_utils/enzyme_helpers';

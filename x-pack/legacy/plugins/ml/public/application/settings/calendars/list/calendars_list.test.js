@@ -34,6 +34,12 @@ jest.mock('../../../services/ml_api_service', () => ({
     delete: jest.fn(),
   },
 }));
+jest.mock('../../../util/dependency_cache', () => ({
+  getDocLinks: () => ({
+    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+  }),
+}));
 
 const testingState = {
   loading: false,

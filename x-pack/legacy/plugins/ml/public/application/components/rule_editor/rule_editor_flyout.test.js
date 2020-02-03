@@ -49,6 +49,13 @@ jest.mock('../../privilege/check_privilege', () => ({
   checkPermission: () => true,
 }));
 
+jest.mock('../../util/dependency_cache', () => ({
+  getDocLinks: () => ({
+    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+  }),
+}));
+
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 

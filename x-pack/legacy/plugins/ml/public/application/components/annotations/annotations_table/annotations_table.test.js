@@ -6,17 +6,11 @@
 
 import jobConfig from '../../../../../common/types/__mocks__/job_config_farequote';
 import mockAnnotations from './__mocks__/mock_annotations.json';
-import './annotations_table.test.mocks';
 
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { AnnotationsTable } from './annotations_table';
-
-jest.mock('ui/chrome', () => ({
-  getBasePath: path => path,
-  addBasePath: () => {},
-}));
 
 jest.mock('../../../services/job_service', () => ({
   mlJobService: {

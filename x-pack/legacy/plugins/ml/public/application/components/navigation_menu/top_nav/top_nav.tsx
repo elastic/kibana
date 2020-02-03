@@ -14,7 +14,7 @@ import {
   mlTimefilterTimeChange$,
 } from '../../../services/timefilter_refresh_service';
 import { useUrlState } from '../../../util/url_state';
-import { getDependencyCache } from '../../../util/dependency_cache';
+import { getTimeHistory, getTimefilter, getUiSettings } from '../../../util/dependency_cache';
 
 interface Duration {
   start: string;
@@ -44,10 +44,10 @@ function updateLastRefresh(timeRange: OnRefreshProps) {
 }
 
 export const TopNav: FC = () => {
-  const {
-    config,
-    timefilter: { timefilter, history },
-  } = getDependencyCache();
+  const config = getUiSettings();
+  const timefilter = getTimefilter();
+  const history = getTimeHistory();
+
   const [globalState, setGlobalState] = useUrlState('_g');
   const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(history);
 

@@ -11,7 +11,6 @@ import { MlContext } from '../../../../../contexts/ml';
 import { kibanaContextValueMock } from '../../../../../contexts/ml/__mocks__/kibana_context_value';
 
 jest.mock('../../../../../contexts/ui/use_ui_chrome_context');
-jest.mock('ui/new_platform');
 
 import { Exploration } from './exploration';
 

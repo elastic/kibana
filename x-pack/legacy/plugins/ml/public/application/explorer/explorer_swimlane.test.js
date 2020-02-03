@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './explorer_swimlane.test.mocks';
 import mockOverallSwimlaneData from './__mocks__/mock_overall_swimlane.json';
 
 import moment from 'moment-timezone';
@@ -13,13 +12,6 @@ import React from 'react';
 
 import { dragSelect$ } from './explorer_dashboard_service';
 import { ExplorerSwimlane } from './explorer_swimlane';
-
-jest.mock('ui/chrome', () => ({
-  getBasePath: path => path,
-  getUiSettingsClient: () => ({
-    get: jest.fn(),
-  }),
-}));
 
 jest.mock('./explorer_dashboard_service', () => ({
   dragSelect$: {

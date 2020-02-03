@@ -20,6 +20,23 @@ uiTimefilterMock.enableTimeRangeSelector();
 
 jest.mock('../../../contexts/ui/use_ui_context');
 
+jest.mock('../../../util/dependency_cache', () => ({
+  getTimefilter: () => ({
+    disableTimeRangeSelector: jest.fn(),
+    disableAutoRefreshSelector: jest.fn(),
+    isAutoRefreshSelectorEnabled: () => true,
+    isTimeRangeSelectorEnabled: () => true,
+    getTime: () => ({ from: '', to: '' }),
+    getRefreshInterval: () => ({ pause: false }),
+    setRefreshInterval: jest.fn(),
+    getRefreshIntervalUpdate$: jest.fn(),
+    getTimeUpdate$: jest.fn(),
+    getEnabledUpdated$: jest.fn(),
+  }),
+  getTimeHistory: () => ({ get: jest.fn() }),
+  getUiSettings: () => ({ get: jest.fn() }),
+}));
+
 const noop = () => {};
 
 describe('Navigation Menu: <TopNav />', () => {

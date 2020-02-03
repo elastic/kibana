@@ -9,6 +9,13 @@ import React from 'react';
 
 import { CalendarsListHeader } from './header';
 
+jest.mock('../../../util/dependency_cache', () => ({
+  getDocLinks: () => ({
+    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+  }),
+}));
+
 describe('CalendarListsHeader', () => {
   const refreshCalendars = jest.fn(() => {});
 
