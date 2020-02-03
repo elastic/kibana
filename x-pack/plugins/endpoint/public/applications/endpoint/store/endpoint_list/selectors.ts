@@ -13,3 +13,5 @@ export const endpointListPageIndex = (state: ManagementState) => state.pageIndex
 export const endpointListPageSize = (state: ManagementState) => state.pageSize;
 
 export const endpointTotalHits = (state: ManagementState) => state.total;
+
+export const isLoading = (state: ManagementState) => state.loading;

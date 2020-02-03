@@ -23,6 +23,7 @@ import {
   endpointListPageIndex,
   endpointListPageSize,
   endpointTotalHits,
+  isLoading,
 } from '../../store/endpoint_list/selectors';
 import { EndpointListAction } from '../../store/endpoint_list/action';
 import { useEndpointListSelector } from './hooks';
@@ -35,6 +36,7 @@ export const EndpointList = () => {
   const pageIndex = useEndpointListSelector(endpointListPageIndex);
   const pageSize = useEndpointListSelector(endpointListPageSize);
   const totalItemCount = useEndpointListSelector(endpointTotalHits);
+  const loading = useEndpointListSelector(isLoading);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -129,6 +131,7 @@ export const EndpointList = () => {
           <EuiBasicTable
             items={endpointListResults}
             columns={columns}
+            loading={loading}
             pagination={paginationSetup}
             onChange={onTableChange}
           />
