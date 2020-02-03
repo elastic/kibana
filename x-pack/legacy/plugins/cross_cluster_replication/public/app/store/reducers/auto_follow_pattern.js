@@ -60,10 +60,12 @@ export const reducer = (state = initialState, action) => {
       return { ...state, byId };
     }
     case success(t.AUTO_FOLLOW_PATTERN_PAUSE): {
-      return { ...state, byId: setActiveForIds(action.payload, state.byId, false) };
+      const { itemsPaused } = action.payload;
+      return { ...state, byId: setActiveForIds(itemsPaused, state.byId, false) };
     }
     case success(t.AUTO_FOLLOW_PATTERN_RESUME): {
-      return { ...state, byId: setActiveForIds(action.payload, state.byId, false) };
+      const { itemsResumed } = action.payload;
+      return { ...state, byId: setActiveForIds(itemsResumed, state.byId, true) };
     }
     default:
       return state;

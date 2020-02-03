@@ -7,9 +7,7 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButton,
   EuiButtonIcon,
   EuiInMemoryTable,
   EuiLink,
@@ -19,7 +17,10 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK } from '../../../../../constants';
-import { AutoFollowPatternDeleteProvider } from '../../../../../components';
+import {
+  AutoFollowPatternDeleteProvider,
+  AutoFollowPatternActionMenu,
+} from '../../../../../components';
 import routing from '../../../../../services/routing';
 import { trackUiMetric, METRIC_TYPE } from '../../../../../services/track_ui_metric';
 
@@ -239,29 +240,18 @@ export class AutoFollowPatternTable extends PureComponent {
     };
 
     const selection = {
-      onSelectionChange: selectedItems => this.setState({ selectedItems }),
+      onSelectionChange: selectedItems =>
+        this.setState({ selectedItems: selectedItems.map(({ name }) => name) }),
     };
+
+    const items = this.getFilteredPatterns();
 
     const search = {
       toolsLeft: selectedItems.length ? (
-        <AutoFollowPatternDeleteProvider>
-          {deleteAutoFollowPattern => (
-            <EuiButton
-              iconType="trash"
-              color="danger"
-              onClick={() => deleteAutoFollowPattern(selectedItems.map(({ name }) => name))}
-              data-test-subj="bulkDeleteButton"
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.deleteAutoFollowPatternButtonLabel"
-                defaultMessage="Delete auto-follow {total, plural, one {pattern} other {patterns}}"
-                values={{
-                  total: selectedItems.length,
-                }}
-              />
-            </EuiButton>
-          )}
-        </AutoFollowPatternDeleteProvider>
+        <AutoFollowPatternActionMenu
+          arrowDirection="down"
+          patterns={this.state.selectedItems.map(name => items.find(item => item.name === name))}
+        />
       ) : (
         undefined
       ),
@@ -274,7 +264,7 @@ export class AutoFollowPatternTable extends PureComponent {
     return (
       <Fragment>
         <EuiInMemoryTable
-          items={this.getFilteredPatterns()}
+          items={items}
           itemId="name"
           columns={this.getTableColumns()}
           search={search}
