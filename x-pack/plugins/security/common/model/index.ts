@@ -20,7 +20,7 @@ export {
   isRoleReserved,
   isRoleEnabled,
   prepareRoleClone,
-  getRoleDeprecatedReason,
+  getExtendedRoleDeprecationNotice,
 } from './role';
 export { KibanaPrivileges } from './kibana_privileges';
 export {

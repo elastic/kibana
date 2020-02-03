@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiLink, EuiToolTip, EuiIcon, EuiLinkProps } from '@elastic/eui';
-import { Role, isRoleDeprecated } from '../../../common/model';
+import { Role, isRoleDeprecated, getExtendedRoleDeprecationNotice } from '../../../common/model';
 import { getEditRoleHref } from '../management_urls';
 
 interface Props {
@@ -23,7 +23,7 @@ export const RoleTableDisplay = ({ role }: Props) => {
   } else if (isRoleDeprecated(role)) {
     color = 'warning';
     content = (
-      <EuiToolTip content="This role is deprecated, you hear?">
+      <EuiToolTip content={getExtendedRoleDeprecationNotice(role)}>
         <span>
           {role.name} <EuiIcon type="alert" color="warning" size="s" className={'eui-alignTop'} />
         </span>

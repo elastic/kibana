@@ -26,13 +26,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
-import { getRoleDeprecatedReason } from '../../../../common/model/role';
 import {
   Role,
   isRoleEnabled,
   isRoleReadOnly,
   isRoleReserved,
   isRoleDeprecated,
+  getExtendedRoleDeprecationNotice,
 } from '../../../../common/model';
 import { RolesAPIClient } from '../roles_api_client';
 import { ConfirmDelete } from './confirm_delete';
@@ -298,7 +298,7 @@ export class RolesGridPage extends Component<Props, State> {
       badges.push(
         <DeprecatedBadge
           data-test-subj="roleDeprecated"
-          tooltipContent={this.getDeprecationText(role)}
+          tooltipContent={getExtendedRoleDeprecationNotice(role)}
         />
       );
     }
@@ -320,16 +320,6 @@ export class RolesGridPage extends Component<Props, State> {
       showDeleteConfirmation: false,
     });
     this.loadRoles();
-  };
-
-  private getDeprecationText = (role: Role) => {
-    return i18n.translate('xpack.security.management.roles.deprecationMessage', {
-      defaultMessage:
-        'This role has been deprecated, and should no longer be assigned to users. {reason}',
-      values: {
-        reason: getRoleDeprecatedReason(role),
-      },
-    });
   };
 
   private async loadRoles() {

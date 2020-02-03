@@ -48,10 +48,10 @@ import {
   isRoleReadOnly as checkIfRoleReadOnly,
   isRoleReserved as checkIfRoleReserved,
   isRoleDeprecated as checkIfRoleDeprecated,
-  getRoleDeprecatedReason,
   copyRole,
   prepareRoleClone,
   RoleIndexPrivilege,
+  getExtendedRoleDeprecationNotice,
 } from '../../../../common/model';
 import { ROLES_PATH } from '../../management_urls';
 import { RoleValidationResult, RoleValidator } from './validate_role';
@@ -585,15 +585,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
           <Fragment>
             <EuiSpacer size="s" />
             <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.security.management.editRole.deprecatedRoleCalloutTitle"
-                  defaultMessage="This role is deprecated, and should not be assigned to users. {reason}"
-                  values={{
-                    reason: getRoleDeprecatedReason(role),
-                  }}
-                />
-              }
+              title={getExtendedRoleDeprecationNotice(role)}
               color="warning"
               iconType="alert"
             />

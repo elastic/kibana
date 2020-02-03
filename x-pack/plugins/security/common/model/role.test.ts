@@ -12,7 +12,7 @@ import {
   isRoleReadOnly,
   copyRole,
   prepareRoleClone,
-  getRoleDeprecatedReason,
+  getExtendedRoleDeprecationNotice,
 } from '../../common/model';
 
 describe('role', () => {
@@ -91,17 +91,21 @@ describe('role', () => {
     });
   });
 
-  describe('getRoleDeprecatedReason', () => {
-    test('returns an empty string if a reason is not explicitly set', () => {
+  describe('getExtendedRoleDeprecationNotice', () => {
+    test('advises not to use the deprecated role', () => {
       const testRole = {};
-      expect(getRoleDeprecatedReason(testRole)).toEqual('');
+      expect(getExtendedRoleDeprecationNotice(testRole)).toMatchInlineSnapshot(
+        `"This role is deprecated and should no longer be assigned. "`
+      );
     });
 
-    test('returns the deprecation reason when provided', () => {
+    test('includes the deprecation reason when provided', () => {
       const testRole = {
-        metadata: { _deprecated_reason: "we just don't like this role anymore" },
+        metadata: { _deprecated_reason: "We just don't like this role anymore" },
       };
-      expect(getRoleDeprecatedReason(testRole)).toEqual(`we just don't like this role anymore`);
+      expect(getExtendedRoleDeprecationNotice(testRole)).toMatchInlineSnapshot(
+        `"This role is deprecated and should no longer be assigned. We just don't like this role anymore"`
+      );
     });
   });
 

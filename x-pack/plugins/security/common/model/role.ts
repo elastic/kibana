@@ -5,6 +5,7 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { FeaturesPrivileges } from './features_privileges';
 
 export interface RoleIndexPrivilege {
@@ -77,6 +78,20 @@ export function isRoleDeprecated(role: Partial<Role>) {
  */
 export function getRoleDeprecatedReason(role: Partial<Role>) {
   return role.metadata?._deprecated_reason ?? '';
+}
+
+/**
+ * Returns the extended deprecation notice for the provided role.
+ *
+ * @param role the Role as returned by roles API
+ */
+export function getExtendedRoleDeprecationNotice(role: Partial<Role>) {
+  return i18n.translate('xpack.security.common.extendedRoleDeprecationNotice', {
+    defaultMessage: `This role is deprecated and should no longer be assigned. {reason}`,
+    values: {
+      reason: getRoleDeprecatedReason(role),
+    },
+  });
 }
 
 /**
