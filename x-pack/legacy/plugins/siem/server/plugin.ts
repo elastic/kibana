@@ -10,7 +10,9 @@ import { SecurityPluginSetup as SecuritySetup } from '../../../../plugins/securi
 import { PluginSetupContract as FeaturesSetup } from '../../../../plugins/features/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
-import { initServerWithKibana } from './kibana.index';
+import { initRoutes } from './routes';
+import { isAlertExecutor } from './lib/detection_engine/signals/types';
+import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
@@ -40,6 +42,7 @@ export class Plugin {
 
   public setup(core: CoreSetup, plugins: SetupPlugins, __legacy: ServerFacade) {
     this.logger.debug('Shim plugin setup');
+
     plugins.features.registerFeature({
       id: this.name,
       name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
@@ -100,8 +103,18 @@ export class Plugin {
       },
     });
 
+    if (__legacy.plugins.alerting != null) {
+      const type = signalRulesAlertType({
+        logger: this.logger,
+        version: this.context.env.packageInfo.version,
+      });
+      if (isAlertExecutor(type)) {
+        __legacy.plugins.alerting.setup.registerType(type);
+      }
+    }
+
     const libs = compose(core, plugins, this.context.env);
     initServer(libs);
-    initServerWithKibana(this.context, __legacy);
+    initRoutes(core, plugins, __legacy);
   }
 }
