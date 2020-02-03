@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
+  EuiText,
+  EuiSuperDatePickerCommonRange,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
@@ -26,6 +32,7 @@ import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } f
 import { SavedViewsToolbarControls } from '../saved_views/toolbar_control';
 import { MetricExplorerViewState } from '../../pages/infrastructure/metrics_explorer/use_metric_explorer_state';
 import { metricsExplorerViewSavedObjectType } from '../../../common/saved_objects/metrics_explorer_view';
+import { useKibanaUiSetting } from '../../utils/use_kibana_ui_setting';
 
 interface Props {
   derivedIndexPattern: IIndexPattern;
@@ -41,6 +48,12 @@ interface Props {
   onAggregationChange: (aggregation: MetricsExplorerAggregation) => void;
   onChartOptionsChange: (chartOptions: MetricsExplorerChartOptions) => void;
   onViewStateChange: (vs: MetricExplorerViewState) => void;
+}
+
+interface QueryRange {
+  from: string;
+  to: string;
+  display: string;
 }
 
 export const MetricsExplorerToolbar = ({
@@ -59,6 +72,14 @@ export const MetricsExplorerToolbar = ({
   onViewStateChange,
 }: Props) => {
   const isDefaultOptions = options.aggregation === 'avg' && options.metrics.length === 0;
+  const [timepickerQuickRanges] = useKibanaUiSetting('timepicker:quickRanges');
+  const commonlyUsedRanges: EuiSuperDatePickerCommonRange[] = timepickerQuickRanges
+    ? timepickerQuickRanges.map((r: QueryRange) => ({
+        start: r.from,
+        end: r.to,
+        label: r.display,
+      }))
+    : [];
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center">
@@ -134,6 +155,7 @@ export const MetricsExplorerToolbar = ({
             end={timeRange.to}
             onTimeChange={({ start, end }) => onTimeChange(start, end)}
             onRefresh={onRefresh}
+            commonlyUsedRanges={commonlyUsedRanges}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
