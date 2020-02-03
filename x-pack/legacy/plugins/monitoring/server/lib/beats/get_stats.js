@@ -28,7 +28,7 @@ export async function getStats(req, beatsIndexPattern, clusterUuid) {
   const config = req.server.config();
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
-  const maxBucketSize = config.get('xpack.monitoring.max_bucket_size');
+  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
 
   const params = {
     index: beatsIndexPattern,

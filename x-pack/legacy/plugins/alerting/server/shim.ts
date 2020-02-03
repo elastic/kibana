@@ -15,10 +15,10 @@ import { getTaskManagerSetup, getTaskManagerStart } from '../../task_manager/ser
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import {
-  PluginSetupContract as EncryptedSavedObjectsSetupContract,
-  PluginStartContract as EncryptedSavedObjectsStartContract,
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
 } from '../../../../plugins/encrypted_saved_objects/server';
-import { PluginSetupContract as SecurityPlugin } from '../../../../plugins/security/server';
+import { SecurityPluginSetup } from '../../../../plugins/security/server';
 import {
   CoreSetup,
   LoggerFactory,
@@ -44,8 +44,8 @@ export interface Server extends Legacy.Server {
 /**
  * Shim what we're thinking setup and start contracts will look like
  */
-export type SecurityPluginSetupContract = Pick<SecurityPlugin, '__legacyCompat'>;
-export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
+export type SecurityPluginSetupContract = Pick<SecurityPluginSetup, '__legacyCompat'>;
+export type SecurityPluginStartContract = Pick<SecurityPluginSetup, 'authc'>;
 export type XPackMainPluginSetupContract = Pick<XPackMainPlugin, 'registerFeature'>;
 
 /**
@@ -71,14 +71,14 @@ export interface AlertingPluginsSetup {
   taskManager: TaskManagerSetupContract;
   actions: ActionsPluginSetupContract;
   xpack_main: XPackMainPluginSetupContract;
-  encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   licensing: LicensingPluginSetup;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
   security?: SecurityPluginStartContract;
   spaces: () => SpacesPluginStartContract | undefined;
-  encryptedSavedObjects: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
 }
 
@@ -120,7 +120,7 @@ export function shim(
     actions: newPlatform.setup.plugins.actions as ActionsPluginSetupContract,
     xpack_main: server.plugins.xpack_main,
     encryptedSavedObjects: newPlatform.setup.plugins
-      .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
+      .encryptedSavedObjects as EncryptedSavedObjectsPluginSetup,
     licensing: newPlatform.setup.plugins.licensing as LicensingPluginSetup,
   };
 
@@ -131,7 +131,7 @@ export function shim(
     // initializes after this function is called
     spaces: () => server.plugins.spaces,
     encryptedSavedObjects: newPlatform.start.plugins
-      .encryptedSavedObjects as EncryptedSavedObjectsStartContract,
+      .encryptedSavedObjects as EncryptedSavedObjectsPluginStart,
     taskManager: getTaskManagerStart(server)!,
   };
 
