@@ -19,7 +19,7 @@
 
 // @ts-ignore
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
+import { npStart } from 'ui/new_platform';
 import { AggConfig } from '../agg_config';
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 import { BaseParamType } from './base';
@@ -91,7 +91,7 @@ export class FieldParamType extends BaseParamType {
         (f: any) => f.name === fieldName
       );
       if (!validField) {
-        toastNotifications.addDanger(
+        npStart.core.notifications.toasts.addDanger(
           i18n.translate(
             'common.ui.aggTypes.paramTypes.field.invalidSavedFieldParameterErrorMessage',
             {

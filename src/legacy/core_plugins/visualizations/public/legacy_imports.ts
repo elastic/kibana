@@ -18,9 +18,12 @@
  */
 
 export { PersistedState } from '../../../ui/public/persisted_state';
-export { IAggConfig } from '../../../ui/public/agg_types';
-export { IAggConfigs } from '../../../ui/public/agg_types';
-export { isDateHistogramBucketAggConfig, setBounds } from '../../../ui/public/agg_types';
+export {
+  IAggConfig,
+  IAggConfigs,
+  isDateHistogramBucketAggConfig,
+  setBounds,
+} from '../../../ui/public/agg_types';
 export { createFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
 export { I18nContext } from '../../../ui/public/i18n';
 import chrome from '../../../ui/public/chrome';

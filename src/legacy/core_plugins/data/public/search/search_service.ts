@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from '../../../../../core/public';
+import { CoreSetup, CoreStart } from '../../../../../core/public';
 import {
   aggTypes,
   AggType,
@@ -62,7 +62,7 @@ export interface SearchStart {
  * Once it has been refactored to work with new platform services,
  * it will move into the existing search service in src/plugins/data/public/search
  */
-export class SearchService implements Plugin<SearchSetup, SearchStart> {
+export class SearchService {
   public setup(core: CoreSetup): SearchSetup {
     return {
       aggs: {
