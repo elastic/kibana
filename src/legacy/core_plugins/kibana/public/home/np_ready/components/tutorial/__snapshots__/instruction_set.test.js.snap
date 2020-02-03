@@ -22,11 +22,7 @@ exports[`render 1`] = `
       grow={false}
     />
   </EuiFlexGroup>
-  <EuiTabs
-    display="default"
-    expand={false}
-    size="m"
-  >
+  <EuiTabs>
     <EuiTab
       isSelected={true}
       key="0"
@@ -103,11 +99,7 @@ exports[`statusCheckState checking status 1`] = `
       grow={false}
     />
   </EuiFlexGroup>
-  <EuiTabs
-    display="default"
-    expand={false}
-    size="m"
-  >
+  <EuiTabs>
     <EuiTab
       isSelected={true}
       key="0"
@@ -214,11 +206,7 @@ exports[`statusCheckState failed status check - error 1`] = `
       grow={false}
     />
   </EuiFlexGroup>
-  <EuiTabs
-    display="default"
-    expand={false}
-    size="m"
-  >
+  <EuiTabs>
     <EuiTab
       isSelected={true}
       key="0"
@@ -329,11 +317,7 @@ exports[`statusCheckState failed status check - no data 1`] = `
       grow={false}
     />
   </EuiFlexGroup>
-  <EuiTabs
-    display="default"
-    expand={false}
-    size="m"
-  >
+  <EuiTabs>
     <EuiTab
       isSelected={true}
       key="0"
@@ -444,11 +428,7 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
       grow={false}
     />
   </EuiFlexGroup>
-  <EuiTabs
-    display="default"
-    expand={false}
-    size="m"
-  >
+  <EuiTabs>
     <EuiTab
       isSelected={true}
       key="0"
@@ -555,11 +535,7 @@ exports[`statusCheckState successful status check 1`] = `
       grow={false}
     />
   </EuiFlexGroup>
-  <EuiTabs
-    display="default"
-    expand={false}
-    size="m"
-  >
+  <EuiTabs>
     <EuiTab
       isSelected={true}
       key="0"

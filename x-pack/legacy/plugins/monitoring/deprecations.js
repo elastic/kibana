@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
+import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY, KIBANA_ALERTING_ENABLED } from './common/constants';
 
 /**
  * Re-writes deprecated user-defined config settings and logs warnings as a
@@ -21,10 +21,46 @@ export const deprecations = () => {
       const clusterAlertsEnabled = get(settings, 'cluster_alerts.enabled');
       const emailNotificationsEnabled =
         clusterAlertsEnabled && get(settings, 'cluster_alerts.email_notifications.enabled');
-      if (emailNotificationsEnabled && !get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
-        log(
-          `Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`
-        );
+      if (emailNotificationsEnabled) {
+        if (KIBANA_ALERTING_ENABLED) {
+          if (get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
+            log(
+              `Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" is deprecated. Please configure the email adddress through the Stack Monitoring UI instead."`
+            );
+          }
+        } else {
+          if (!get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
+            log(
+              `Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`
+            );
+          }
+        }
+      }
+    },
+    (settings, log) => {
+      const fromPath = 'monitoring.elasticsearch';
+      const es = get(settings, 'elasticsearch');
+      if (es) {
+        if (es.username === 'elastic') {
+          log(
+            `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana" user instead.`
+          );
+        }
+      }
+    },
+    (settings, log) => {
+      const fromPath = 'monitoring.elasticsearch.ssl';
+      const ssl = get(settings, 'elasticsearch.ssl');
+      if (ssl) {
+        if (ssl.key !== undefined && ssl.certificate === undefined) {
+          log(
+            `Setting [${fromPath}.key] without [${fromPath}.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
+          );
+        } else if (ssl.certificate !== undefined && ssl.key === undefined) {
+          log(
+            `Setting [${fromPath}.certificate] without [${fromPath}.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
+          );
+        }
       }
     },
   ];

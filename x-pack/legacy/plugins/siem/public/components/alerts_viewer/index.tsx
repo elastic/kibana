@@ -5,7 +5,7 @@
  */
 import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 
 import { AlertsComponentsQueryProps } from './types';
 import { AlertsTable } from './alerts_table';
@@ -13,14 +13,16 @@ import * as i18n from './translations';
 import { MatrixHistogramOption } from '../matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../containers/matrix_histogram';
 import { MatrixHistogramGqlQuery } from '../../containers/matrix_histogram/index.gql_query';
+import { useUiSetting$ } from '../../lib/kibana';
+import { DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
 const ID = 'alertsOverTimeQuery';
 export const alertsStackByOptions: MatrixHistogramOption[] = [
   {
-    text: i18n.CATEGORY,
+    text: 'event.category',
     value: 'event.category',
   },
   {
-    text: i18n.MODULE,
+    text: 'event.module',
     value: 'event.module',
   },
 ];
@@ -37,6 +39,8 @@ export const AlertsView = ({
   type,
   updateDateRange = noop,
 }: AlertsComponentsQueryProps) => {
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+
   useEffect(() => {
     return () => {
       if (deleteQuery) {
@@ -46,7 +50,10 @@ export const AlertsView = ({
   }, []);
 
   const getSubtitle = useCallback(
-    (totalCount: number) => `${i18n.SHOWING}: ${totalCount} ${i18n.UNIT(totalCount)}`,
+    (totalCount: number) =>
+      `${i18n.SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${i18n.UNIT(
+        totalCount
+      )}`,
     []
   );
 
@@ -54,7 +61,6 @@ export const AlertsView = ({
     <>
       <MatrixHistogramContainer
         dataKey={dataKey}
-        deleteQuery={deleteQuery}
         defaultStackByOption={alertsStackByOptions[1]}
         endDate={endDate}
         errorMessage={i18n.ERROR_FETCHING_ALERTS_DATA}
@@ -68,11 +74,10 @@ export const AlertsView = ({
         stackByOptions={alertsStackByOptions}
         startDate={startDate}
         subtitle={getSubtitle}
-        title={i18n.ALERTS_DOCUMENT_TYPE}
+        title={i18n.ALERTS_GRAPH_TITLE}
         type={type}
         updateDateRange={updateDateRange}
       />
-      <EuiSpacer size="l" />
       <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
     </>
   );

@@ -16,6 +16,8 @@ export {
   OnFormUpdateArg,
   SerializerFunc,
   UseField,
+  UseArray,
+  ArrayItem,
   useForm,
   useFormContext,
   UseMultiFields,
@@ -34,6 +36,7 @@ export {
   SuperSelectField,
   TextAreaField,
   TextField,
+  ComboBoxField,
   ToggleField,
   JsonEditorField,
 } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/components';

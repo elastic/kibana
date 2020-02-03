@@ -346,16 +346,18 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
     const result = await callES('search', params);
     const locations = result?.aggregations?.location?.buckets ?? [];
 
-    const getGeo = (locGeo: any) => {
+    const getGeo = (locGeo: { name: string; location?: string }) => {
       if (locGeo) {
         const { name, location } = locGeo;
-        const latLon = location.trim().split(',');
+        const latLon = location?.trim().split(',');
         return {
           name,
-          location: {
-            lat: latLon[0],
-            lon: latLon[1],
-          },
+          location: latLon
+            ? {
+                lat: latLon[0],
+                lon: latLon[1],
+              }
+            : undefined,
         };
       } else {
         return {

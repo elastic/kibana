@@ -6,7 +6,7 @@
 
 import { DynamicStyleProperty } from './dynamic_style_property';
 import _ from 'lodash';
-import { getComputedFieldName } from '../style_util';
+import { getComputedFieldName, getOtherCategoryLabel } from '../style_util';
 import { getOrdinalColorRampStops, getColorPalette } from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
@@ -18,13 +18,9 @@ import {
   EuiToolTip,
   EuiTextColor,
 } from '@elastic/eui';
-import { VectorIcon } from '../components/legend/vector_icon';
-import { VECTOR_STYLES } from '../vector_style_defaults';
+import { Category } from '../components/legend/category';
 import { COLOR_MAP_TYPE } from '../../../../../common/constants';
-import {
-  isCategoricalStopsInvalid,
-  getOtherCategoryLabel,
-} from '../components/color/color_stops_utils';
+import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
 
@@ -227,7 +223,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
 
     mbStops.push(defaultColor); //last color is default color
-    return ['match', ['get', this._options.field.name], ...mbStops];
+    return ['match', ['to-string', ['get', this._options.field.name]], ...mbStops];
   }
 
   _getMbOrdinalColorStops() {
@@ -246,28 +242,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     } else {
       return null;
     }
-  }
-
-  _renderStopIcon(color, isLinesOnly, isPointsOnly, symbolId) {
-    if (this.getStyleName() === VECTOR_STYLES.LABEL_COLOR) {
-      const style = { color: color };
-      return (
-        <EuiText size={'xs'} style={style}>
-          Tx
-        </EuiText>
-      );
-    }
-
-    const fillColor = this.getStyleName() === VECTOR_STYLES.FILL_COLOR ? color : 'none';
-    return (
-      <VectorIcon
-        fillColor={fillColor}
-        isPointsOnly={isPointsOnly}
-        isLinesOnly={isLinesOnly}
-        strokeColor={color}
-        symbolId={symbolId}
-      />
-    );
   }
 
   _getColorRampStops() {
@@ -289,48 +263,42 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
   }
 
-  _renderColorbreaks({ isLinesOnly, isPointsOnly, symbolId }) {
+  renderBreakedLegend({ fieldLabel, isPointsOnly, isLinesOnly, symbolId }) {
+    const categories = [];
     const { stops, defaultColor } = this._getColorStops();
-    const colorAndLabels = stops.map(config => {
-      return {
-        label: this.formatField(config.stop),
-        color: config.color,
-      };
+    stops.map(({ stop, color }) => {
+      categories.push(
+        <Category
+          key={stop}
+          styleName={this.getStyleName()}
+          label={this.formatField(stop)}
+          color={color}
+          isLinesOnly={isLinesOnly}
+          isPointsOnly={isPointsOnly}
+          symbolId={symbolId}
+        />
+      );
     });
 
     if (defaultColor) {
-      colorAndLabels.push({
-        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
-        color: defaultColor,
-      });
+      categories.push(
+        <Category
+          key="fallbackCategory"
+          styleName={this.getStyleName()}
+          label={<EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>}
+          color={defaultColor}
+          isLinesOnly={isLinesOnly}
+          isPointsOnly={isPointsOnly}
+          symbolId={symbolId}
+        />
+      );
     }
 
-    return colorAndLabels.map((config, index) => {
-      return (
-        <EuiFlexItem key={index}>
-          <EuiFlexGroup direction={'row'} gutterSize={'none'}>
-            <EuiFlexItem>
-              <EuiText size={'xs'}>{config.label}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {this._renderStopIcon(config.color, isLinesOnly, isPointsOnly, symbolId)}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      );
-    });
-  }
-
-  renderBreakedLegend({ fieldLabel, isPointsOnly, isLinesOnly, symbolId }) {
     return (
       <div>
         <EuiSpacer size="s" />
-        <EuiFlexGroup direction={'column'} gutterSize={'none'}>
-          {this._renderColorbreaks({
-            isPointsOnly,
-            isLinesOnly,
-            symbolId,
-          })}
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {categories}
         </EuiFlexGroup>
         <EuiFlexGroup gutterSize="xs" justifyContent="spaceAround">
           <EuiFlexItem grow={false}>

@@ -27,6 +27,7 @@
 import chrome from 'ui/chrome';
 
 export const legacyChrome = chrome;
+export { Chrome } from 'ui/chrome';
 
 // @ts-ignore
 export { AppState, AppStateProvider } from 'ui/state_management/app_state';
@@ -58,19 +59,15 @@ export { PromiseServiceCreator } from 'ui/promises/promises';
 export { confirmModalFactory } from 'ui/modals/confirm_modal';
 export { configureAppAngularModule, ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
-// @ts-ignore
-export { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 
 // @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 
-// @ts-ignore
-export { defaultEditor } from 'ui/vis/editors/default/default';
-export { VisType } from 'ui/vis';
 export { wrapInI18nContext } from 'ui/i18n';
 
 export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
 export { VisSavedObject } from '../../../visualizations/public/embeddable/visualize_embeddable';
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
+export { VisType } from '../../../visualizations/public';

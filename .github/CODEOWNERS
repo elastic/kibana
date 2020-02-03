@@ -12,24 +12,23 @@
 /src/legacy/core_plugins/kibana/public/discover/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/visualize/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
-/src/legacy/core_plugins/kibana/public/home/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
 /src/legacy/core_plugins/metrics/ @elastic/kibana-app
-/src/plugins/home/ @elastic/kibana-app
+/src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
+# Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
+/src/plugins/home/public @elastic/kibana-app
+/src/plugins/home/server/*.ts @elastic/kibana-app
+/src/plugins/home/server/services/ @elastic/kibana-app
+# Exclude tutorial resources folder for now because they are not owned by Kibana app and most will move out soon
+/src/legacy/core_plugins/kibana/public/home/*.ts @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/home/*.scss @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/home/np_ready/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/timelion/ @elastic/kibana-app
 /src/plugins/dev_tools/ @elastic/kibana-app
 
 # App Architecture
-/src/plugins/data/ @elastic/kibana-app-arch
-/src/plugins/embeddable/ @elastic/kibana-app-arch
-/src/plugins/expressions/ @elastic/kibana-app-arch
-/src/plugins/kibana_react/ @elastic/kibana-app-arch
-/src/plugins/kibana_utils/ @elastic/kibana-app-arch
-/src/plugins/navigation/ @elastic/kibana-app-arch
-/src/plugins/ui_actions/ @elastic/kibana-app-arch
-/src/plugins/visualizations/ @elastic/kibana-app-arch
-/x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
+/packages/kbn-interpreter/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/data/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/elasticsearch/lib/create_proxy.js @elastic/kibana-app-arch
 /src/legacy/core_plugins/embeddable_api/ @elastic/kibana-app-arch
@@ -41,11 +40,27 @@
 /src/legacy/core_plugins/kibana/server/routes/api/suggestions/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/visualizations/ @elastic/kibana-app-arch
 /src/legacy/server/index_patterns/ @elastic/kibana-app-arch
+/src/plugins/bfetch/ @elastic/kibana-app-arch
+/src/plugins/dashboard_embeddable_container/ @elastic/kibana-app-arch
+/src/plugins/data/ @elastic/kibana-app-arch
+/src/plugins/embeddable/ @elastic/kibana-app-arch
+/src/plugins/expressions/ @elastic/kibana-app-arch
+/src/plugins/inspector/ @elastic/kibana-app-arch
+/src/plugins/kibana_react/ @elastic/kibana-app-arch
+/src/plugins/kibana_utils/ @elastic/kibana-app-arch
+/src/plugins/management/ @elastic/kibana-app-arch
+/src/plugins/navigation/ @elastic/kibana-app-arch
+/src/plugins/ui_actions/ @elastic/kibana-app-arch
+/src/plugins/visualizations/ @elastic/kibana-app-arch
+/x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
 
 # APM
 /x-pack/legacy/plugins/apm/  @elastic/apm-ui
+/x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
 /src/legacy/core_plugins/apm_oss/  @elastic/apm-ui
+/src/plugins/apm_oss/  @elastic/apm-ui
+/src/apm.js @watson
 
 # Beats
 /x-pack/legacy/plugins/beats_management/  @elastic/beats
@@ -80,6 +95,7 @@
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
 /src/optimize/ @elastic/kibana-operations
+/src/es_archiver/ @elastic/kibana-operations
 /packages/*eslint*/ @elastic/kibana-operations
 /packages/*babel*/ @elastic/kibana-operations
 /packages/kbn-dev-utils*/ @elastic/kibana-operations
@@ -105,6 +121,7 @@
 /src/legacy/server/logging/ @elastic/kibana-platform
 /src/legacy/server/saved_objects/  @elastic/kibana-platform
 /src/legacy/server/status/ @elastic/kibana-platform
+/src/dev/run_check_core_api_changes.ts @elastic/kibana-platform
 
 # Security
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-platform
@@ -117,21 +134,22 @@
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 
 # Kibana Localization
-/src/dev/i18n @elastic/kibana-localization
+/src/dev/i18n/ @elastic/kibana-localization
 
 # Pulse
 /packages/kbn-analytics/ @elastic/pulse
 /src/legacy/core_plugins/ui_metric/ @elastic/pulse
 /src/plugins/usage_collection/ @elastic/pulse
-/x-pack/legacy/plugins/telemetry @elastic/pulse
+/x-pack/legacy/plugins/telemetry/ @elastic/pulse
 
 # Kibana Alerting Services
-/x-pack/legacy/plugins/alerting @elastic/kibana-alerting-services
-/x-pack/legacy/plugins/actions @elastic/kibana-alerting-services
-/x-pack/legacy/plugins/task_manager @elastic/kibana-alerting-services
-/x-pack/test/alerting_api_integration @elastic/kibana-alerting-services
-/x-pack/test/plugin_api_integration/plugins/task_manager @elastic/kibana-alerting-services
-/x-pack/test/plugin_api_integration/test_suites/task_manager @elastic/kibana-alerting-services
+/x-pack/legacy/plugins/alerting/ @elastic/kibana-alerting-services
+/x-pack/legacy/plugins/actions/ @elastic/kibana-alerting-services
+/x-pack/plugins/event_log/ @elastic/kibana-alerting-services
+/x-pack/plugins/task_manager/ @elastic/kibana-alerting-services
+/x-pack/test/alerting_api_integration/ @elastic/kibana-alerting-services
+/x-pack/test/plugin_api_integration/plugins/task_manager/ @elastic/kibana-alerting-services
+/x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/kibana-alerting-services
 /x-pack/legacy/plugins/triggers_actions_ui/ @elastic/kibana-alerting-services
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/kibana-alerting-services
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/kibana-alerting-services
@@ -140,15 +158,15 @@
 **/*.scss  @elastic/kibana-design
 
 # Elasticsearch UI
-/src/legacy/core_plugins/console/  @elastic/es-ui
+/src/plugins/console/  @elastic/es-ui
 /src/plugins/es_ui_shared/  @elastic/es-ui
-/x-pack/legacy/plugins/console_extensions/  @elastic/es-ui
+/x-pack/plugins/console_extensions/  @elastic/es-ui
 /x-pack/legacy/plugins/cross_cluster_replication/  @elastic/es-ui
 /x-pack/legacy/plugins/index_lifecycle_management/  @elastic/es-ui
 /x-pack/legacy/plugins/index_management/  @elastic/es-ui
 /x-pack/legacy/plugins/license_management/  @elastic/es-ui
 /x-pack/legacy/plugins/remote_clusters/  @elastic/es-ui
 /x-pack/legacy/plugins/rollup/  @elastic/es-ui
-/x-pack/legacy/plugins/searchprofiler/  @elastic/es-ui
+/x-pack/plugins/searchprofiler/  @elastic/es-ui
 /x-pack/legacy/plugins/snapshot_restore/  @elastic/es-ui
-/x-pack/legacy/plugins/watcher/  @elastic/es-ui
+/x-pack/plugins/watcher/  @elastic/es-ui

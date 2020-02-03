@@ -21,6 +21,7 @@ import {
   createBulkErrorObject,
 } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
+import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
 export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
@@ -37,25 +38,23 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
     },
     async handler(request: BulkRulesRequest, headers) {
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = isFunction(request.getActionsClient)
-        ? request.getActionsClient()
-        : null;
+      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
+        KibanaRequest.from((request as unknown) as Hapi.Request)
+      );
       const savedObjectsClient = isFunction(request.getSavedObjectsClient)
         ? request.getSavedObjectsClient()
         : null;
-      if (!alertsClient || !actionsClient || !savedObjectsClient) {
+      if (!alertsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
-      const rules = Promise.all(
+      const rules = await Promise.all(
         request.payload.map(async payloadRule => {
           const {
-            created_at: createdAt,
             description,
             enabled,
             false_positives: falsePositives,
             from,
-            immutable,
             query,
             language,
             output_index: outputIndex,
@@ -70,10 +69,9 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             name,
             severity,
             tags,
-            threats,
+            threat,
             to,
             type,
-            updated_at: updatedAt,
             references,
             timeline_id: timelineId,
             timeline_title: timelineTitle,
@@ -87,7 +85,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             if (!indexExists) {
               return createBulkErrorObject({
                 ruleId: ruleIdOrUuid,
-                statusCode: 409,
+                statusCode: 400,
                 message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
               });
             }
@@ -104,12 +102,11 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             const createdRule = await createRules({
               alertsClient,
               actionsClient,
-              createdAt,
               description,
               enabled,
               falsePositives,
               from,
-              immutable,
+              immutable: false,
               query,
               language,
               outputIndex: finalIndex,
@@ -128,8 +125,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               tags,
               to,
               type,
-              threats,
-              updatedAt,
+              threat,
               references,
               version,
             });

@@ -15,6 +15,7 @@ export interface LegacyNavLink
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [category](./kibana-plugin-public.legacynavlink.category.md) | <code>AppCategory</code> |  |
 |  [euiIconType](./kibana-plugin-public.legacynavlink.euiicontype.md) | <code>string</code> |  |
 |  [icon](./kibana-plugin-public.legacynavlink.icon.md) | <code>string</code> |  |
 |  [id](./kibana-plugin-public.legacynavlink.id.md) | <code>string</code> |  |

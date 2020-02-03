@@ -31,6 +31,7 @@ export type GetSubTitle = (count: number) => string;
 export type GetTitle = (matrixHistogramOption: MatrixHistogramOption) => string;
 
 export interface MatrixHistogramBasicProps {
+  chartHeight?: number;
   defaultIndex: string[];
   defaultStackByOption: MatrixHistogramOption;
   endDate: number;
@@ -39,6 +40,7 @@ export interface MatrixHistogramBasicProps {
   id: string;
   legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
+  panelHeight?: number;
   setQuery: SetQuery;
   sourceId: string;
   startDate: number;
@@ -64,8 +66,8 @@ export interface MatrixHistogramQueryProps {
   isAlertsHistogram?: boolean;
   isAnomaliesHistogram?: boolean;
   isAuthenticationsHistogram?: boolean;
-  isDNSHistogram?: boolean;
-  isEventsType?: boolean;
+  isDnsHistogram?: boolean;
+  isEventsHistogram?: boolean;
   isInspected: boolean;
   isPtrIncluded?: boolean;
   pagination?: PaginationInputPaginated;

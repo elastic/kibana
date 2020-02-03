@@ -113,9 +113,12 @@ function FieldListItemComponent(
       }
     );
 
-    const addChildButtonLabel = i18n.translate('xpack.idxMgmt.mappingsEditor.addChildButtonLabel', {
-      defaultMessage: 'Add child',
-    });
+    const addPropertyButtonLabel = i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.addPropertyButtonLabel',
+      {
+        defaultMessage: 'Add property',
+      }
+    );
 
     const editButtonLabel = i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldButtonLabel', {
       defaultMessage: 'Edit',
@@ -145,12 +148,12 @@ function FieldListItemComponent(
 
         {canHaveChildFields && (
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={addChildButtonLabel}>
+            <EuiToolTip content={addPropertyButtonLabel}>
               <EuiButtonIcon
                 iconType="plusInCircle"
                 onClick={addField}
-                data-test-subj="addChildButton"
-                aria-label={addChildButtonLabel}
+                data-test-subj="addPropertyButton"
+                aria-label={addPropertyButtonLabel}
               />
             </EuiToolTip>
           </EuiFlexItem>

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
+
 import {
   AddRulesProps,
   DeleteRulesProps,
@@ -19,14 +20,17 @@ import {
   ImportRulesProps,
   ExportRulesProps,
   RuleError,
-  RuleStatus,
+  RuleStatusResponse,
   ImportRulesResponse,
+  PrePackagedRulesStatusResponse,
 } from './types';
 import { throwIfNotOk } from '../../../hooks/api/api';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
-  DETECTION_ENGINE_RULES_STATUS,
+  DETECTION_ENGINE_RULES_STATUS_URL,
+  DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
+  DETECTION_ENGINE_TAGS_URL,
 } from '../../../../common/constants';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
 
@@ -37,91 +41,91 @@ import * as i18n from '../../../pages/detection_engine/rules/translations';
  * @param signal to cancel request
  */
 export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule> => {
-  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
+  const response = await npStart.core.http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
     method: rule.id != null ? 'PUT' : 'POST',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-xsrf': 'true',
-    },
     body: JSON.stringify(rule),
+    asResponse: true,
     signal,
   });
 
-  await throwIfNotOk(response);
-  return response.json();
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
- * Fetches all rules or single specified rule from the Detection Engine API
+ * Fetches all rules from the Detection Engine API
  *
  * @param filterOptions desired filters (e.g. filter/sortField/sortOrder)
  * @param pagination desired pagination options (e.g. page/perPage)
- * @param id if specified, will return specific rule if exists
  * @param signal to cancel request
+ *
  */
 export const fetchRules = async ({
   filterOptions = {
     filter: '',
     sortField: 'enabled',
     sortOrder: 'desc',
+    showCustomRules: false,
+    showElasticRules: false,
+    tags: [],
   },
   pagination = {
     page: 1,
     perPage: 20,
     total: 0,
   },
-  id,
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
-  const queryParams = [
-    `page=${pagination.page}`,
-    `per_page=${pagination.perPage}`,
-    `sort_field=${filterOptions.sortField}`,
-    `sort_order=${filterOptions.sortOrder}`,
-    ...(filterOptions.filter.length !== 0
-      ? [`filter=alert.attributes.name:%20${encodeURIComponent(filterOptions.filter)}`]
+  const filters = [
+    ...(filterOptions.filter.length ? [`alert.attributes.name: ${filterOptions.filter}`] : []),
+    ...(filterOptions.showCustomRules
+      ? [`alert.attributes.tags: "__internal_immutable:false"`]
       : []),
+    ...(filterOptions.showElasticRules
+      ? [`alert.attributes.tags: "__internal_immutable:true"`]
+      : []),
+    ...(filterOptions.tags?.map(t => `alert.attributes.tags: ${t}`) ?? []),
   ];
 
-  const endpoint =
-    id != null
-      ? `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id="${id}"`
-      : `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_find?${queryParams.join('&')}`;
+  const query = {
+    page: pagination.page,
+    per_page: pagination.perPage,
+    sort_field: filterOptions.sortField,
+    sort_order: filterOptions.sortOrder,
+    ...(filters.length ? { filter: filters.join(' AND ') } : {}),
+  };
 
-  const response = await fetch(endpoint, {
-    method: 'GET',
-    signal,
-  });
-  await throwIfNotOk(response);
-  return id != null
-    ? {
-        page: 0,
-        perPage: 1,
-        total: 1,
-        data: response.json(),
-      }
-    : response.json();
+  const response = await npStart.core.http.fetch<FetchRulesResponse>(
+    `${DETECTION_ENGINE_RULES_URL}/_find`,
+    {
+      method: 'GET',
+      query,
+      signal,
+      asResponse: true,
+    }
+  );
+
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
  * Fetch a Rule by providing a Rule ID
  *
  * @param id Rule ID's (not rule_id)
+ * @param signal to cancel request
+ *
  */
 export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> => {
-  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
+  const response = await npStart.core.http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'GET',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-xsrf': 'true',
-    },
+    query: { id },
+    asResponse: true,
     signal,
   });
-  await throwIfNotOk(response);
-  const rule: Rule = await response.json();
-  return rule;
+
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
@@ -133,21 +137,17 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
  * @throws An error if response is not OK
  */
 export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<Rule[]> => {
-  const response = await fetch(
-    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+  const response = await npStart.core.http.fetch<Rule[]>(
+    `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
     {
       method: 'PUT',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-xsrf': 'true',
-      },
       body: JSON.stringify(ids.map(id => ({ id, enabled }))),
+      asResponse: true,
     }
   );
 
-  await throwIfNotOk(response);
-  return response.json();
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
@@ -158,61 +158,55 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<R
  * @throws An error if response is not OK
  */
 export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Array<Rule | RuleError>> => {
-  const response = await fetch(
-    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+  const response = await npStart.core.http.fetch<Rule[]>(
+    `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
     {
-      method: 'DELETE',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-xsrf': 'true',
-      },
+      method: 'PUT',
       body: JSON.stringify(ids.map(id => ({ id }))),
+      asResponse: true,
     }
   );
 
-  await throwIfNotOk(response);
-  return response.json();
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
  * Duplicates provided Rules
  *
- * @param rule to duplicate
+ * @param rules to duplicate
  */
 export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Rule[]> => {
-  const requests = rules.map(rule =>
-    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
+  const response = await npStart.core.http.fetch<Rule[]>(
+    `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+    {
       method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-xsrf': 'true',
-      },
-      body: JSON.stringify({
-        ...rule,
-        name: `${rule.name} [${i18n.DUPLICATE}]`,
-        created_at: undefined,
-        created_by: undefined,
-        id: undefined,
-        rule_id: undefined,
-        updated_at: undefined,
-        updated_by: undefined,
-        enabled: rule.enabled,
-        immutable: false,
-        last_success_at: undefined,
-        last_success_message: undefined,
-        status: undefined,
-        status_date: undefined,
-      }),
-    })
+      body: JSON.stringify(
+        rules.map(rule => ({
+          ...rule,
+          name: `${rule.name} [${i18n.DUPLICATE}]`,
+          created_at: undefined,
+          created_by: undefined,
+          id: undefined,
+          rule_id: undefined,
+          updated_at: undefined,
+          updated_by: undefined,
+          enabled: rule.enabled,
+          immutable: undefined,
+          last_success_at: undefined,
+          last_success_message: undefined,
+          last_failure_at: undefined,
+          last_failure_message: undefined,
+          status: undefined,
+          status_date: undefined,
+        }))
+      ),
+      asResponse: true,
+    }
   );
 
-  const responses = await Promise.all(requests);
-  await responses.map(response => throwIfNotOk(response));
-  return Promise.all(
-    responses.map<Promise<Rule>>(response => response.json())
-  );
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
@@ -221,16 +215,13 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
  * @param signal AbortSignal for cancelling request
  */
 export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> => {
-  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_PREPACKAGED_URL}`, {
+  const response = await npStart.core.http.fetch<unknown>(DETECTION_ENGINE_PREPACKAGED_URL, {
     method: 'PUT',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-xsrf': 'true',
-    },
     signal,
+    asResponse: true,
   });
-  await throwIfNotOk(response);
+
+  await throwIfNotOk(response.response);
   return true;
 };
 
@@ -251,21 +242,19 @@ export const importRules = async ({
   const formData = new FormData();
   formData.append('file', fileToImport);
 
-  const response = await fetch(
-    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_import?overwrite=${overwrite}`,
+  const response = await npStart.core.http.fetch<ImportRulesResponse>(
+    `${DETECTION_ENGINE_RULES_URL}/_import`,
     {
       method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'kbn-xsrf': 'true',
-      },
+      query: { overwrite },
       body: formData,
+      asResponse: true,
       signal,
     }
   );
 
-  await throwIfNotOk(response);
-  return response.json();
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
@@ -289,30 +278,26 @@ export const exportRules = async ({
       ? JSON.stringify({ objects: ruleIds.map(rule => ({ rule_id: rule })) })
       : undefined;
 
-  const response = await fetch(
-    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_export?exclude_export_details=${excludeExportDetails}&file_name=${encodeURIComponent(
-      filename
-    )}`,
-    {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-xsrf': 'true',
-      },
-      body,
-      signal,
-    }
-  );
+  const response = await npStart.core.http.fetch<Blob>(`${DETECTION_ENGINE_RULES_URL}/_export`, {
+    method: 'POST',
+    body,
+    query: {
+      exclude_export_details: excludeExportDetails,
+      file_name: filename,
+    },
+    signal,
+    asResponse: true,
+  });
 
-  await throwIfNotOk(response);
-  return response.blob();
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
  * Get Rule Status provided Rule ID
  *
  * @param id string of Rule ID's (not rule_id)
+ * @param signal AbortSignal for cancelling request
  *
  * @throws An error if response is not OK
  */
@@ -322,22 +307,59 @@ export const getRuleStatusById = async ({
 }: {
   id: string;
   signal: AbortSignal;
-}): Promise<Record<string, RuleStatus[]>> => {
-  const response = await fetch(
-    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_STATUS}?ids=${encodeURIComponent(
-      JSON.stringify([id])
-    )}`,
+}): Promise<RuleStatusResponse> => {
+  const response = await npStart.core.http.fetch<RuleStatusResponse>(
+    DETECTION_ENGINE_RULES_STATUS_URL,
     {
       method: 'GET',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-xsrf': 'true',
-      },
+      query: { ids: JSON.stringify([id]) },
       signal,
+      asResponse: true,
     }
   );
 
-  await throwIfNotOk(response);
-  return response.json();
+  await throwIfNotOk(response.response);
+  return response.body!;
+};
+
+/**
+ * Fetch all unique Tags used by Rules
+ *
+ * @param signal to cancel request
+ *
+ */
+export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> => {
+  const response = await npStart.core.http.fetch<string[]>(DETECTION_ENGINE_TAGS_URL, {
+    method: 'GET',
+    signal,
+    asResponse: true,
+  });
+
+  await throwIfNotOk(response.response);
+  return response.body!;
+};
+
+/**
+ * Get pre packaged rules Status
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const getPrePackagedRulesStatus = async ({
+  signal,
+}: {
+  signal: AbortSignal;
+}): Promise<PrePackagedRulesStatusResponse> => {
+  const response = await npStart.core.http.fetch<PrePackagedRulesStatusResponse>(
+    DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
+    {
+      method: 'GET',
+      signal,
+      asResponse: true,
+    }
+  );
+
+  await throwIfNotOk(response.response);
+  return response.body!;
 };

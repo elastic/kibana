@@ -96,5 +96,6 @@ export interface Privilege {
       write: boolean;
     };
   };
-  isAuthenticated: boolean;
+  is_authenticated: boolean;
+  has_encryption_key: boolean;
 }
