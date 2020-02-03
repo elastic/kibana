@@ -37,10 +37,10 @@ export function mergeJobConfigurations(jobs = []) {
     throw new Error('No capabilities available');
   }
 
-  const allAggs = {};
+  const allAggs: { [key: string]: any } = {};
 
   // For each job, look through all of its fields
-  jobs.forEach(job => {
+  jobs.forEach((job: { fields: { [key: string]: any } }) => {
     const fields = job.fields;
     const fieldNames = Object.keys(fields);
 
@@ -49,7 +49,7 @@ export function mergeJobConfigurations(jobs = []) {
       const fieldAggs = fields[fieldName];
 
       // Look through each field's capabilities (aggregations)
-      fieldAggs.forEach(agg => {
+      fieldAggs.forEach((agg: { agg: string; interval: string }) => {
         const aggName = agg.agg;
         const aggDoesntExist = !allAggs[aggName];
         const fieldDoesntExist = allAggs[aggName] && !allAggs[aggName][fieldName];
