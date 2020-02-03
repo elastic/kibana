@@ -8,7 +8,9 @@ import { ResolverNode } from './common';
 
 export class ResolverPhase1Node implements ResolverNode {
   readonly entityID: string;
+  readonly parentEntityID: string;
   constructor(public readonly esData: ResolverPhase1Data) {
-    this.entityID = esData.entityID;
+    this.entityID = esData.endpoint.process.entity_id;
+    this.parentEntityID = esData.endpoint.process.parent.entity_id;
   }
 }
