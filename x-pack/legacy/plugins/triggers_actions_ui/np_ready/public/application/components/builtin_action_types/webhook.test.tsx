@@ -7,7 +7,7 @@ import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector, ActionParamsProps } from '../../../types';
+import { ActionTypeModel, ActionParamsProps } from '../../../types';
 import { WebhookActionParams, WebhookActionConnector } from './types';
 
 const ACTION_TYPE_ID = '.webhook';

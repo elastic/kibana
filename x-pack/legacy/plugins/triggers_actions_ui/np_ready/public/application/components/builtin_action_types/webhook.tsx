@@ -27,7 +27,6 @@ import { i18n } from '@kbn/i18n';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
-  ActionConnector,
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
