@@ -5,6 +5,6 @@
  */
 import React from 'react';
 
-export const IngestManagerOverview: React.FC = () => {
+export const IngestManagerOverview: React.FunctionComponent = () => {
   return <div>Ingest manager overview page</div>;
 };
