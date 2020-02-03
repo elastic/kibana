@@ -68,28 +68,9 @@
             ]
         },
         {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/saved_objects/index.js",
-            "total": 71,
-            "tags": [
-                "api_integration.apis.saved_objects.bulk_create",
-                "api_integration.apis.saved_objects.bulk_get",
-                "api_integration.apis.saved_objects.create",
-                "api_integration.apis.saved_objects.delete",
-                "api_integration.apis.saved_objects.export",
-                "api_integration.apis.saved_objects.find",
-                "api_integration.apis.saved_objects.get",
-                "api_integration.apis.saved_objects.import",
-                "api_integration.apis.saved_objects.resolve_import_errors",
-                "api_integration.apis.saved_objects.update",
-                "api_integration.apis.saved_objects.bulk_update",
-                "api_integration.apis.saved_objects.migrations"
-            ]
-        },
-        {
             "config": "test/functional/config.js",
             "index": "test/functional/apps/management/index.js",
-            "total": 69,
+            "total": 70,
             "tags": [
                 "functional.apps.management._create_index_pattern_wizard",
                 "functional.apps.management._index_pattern_create_delete",
@@ -129,31 +110,6 @@
             ]
         },
         {
-            "config": "test/plugin_functional/config.js",
-            "index": "test/plugin_functional/test_suites/core_plugins/index.ts",
-            "total": 36,
-            "tags": [
-                "plugin_functional.core_plugins.applications",
-                "plugin_functional.core_plugins.legacy_plugins",
-                "plugin_functional.core_plugins.server_plugins",
-                "plugin_functional.core_plugins.ui_plugins",
-                "plugin_functional.core_plugins.ui_settings",
-                "plugin_functional.core_plugins.top_nav",
-                "plugin_functional.core_plugins.application_leave_confirm",
-                "plugin_functional.core_plugins.application_status",
-                "plugin_functional.core_plugins.rendering"
-            ]
-        },
-        {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/management/saved_objects/index.js",
-            "total": 29,
-            "tags": [
-                "api_integration.apis.management.saved_objects.find",
-                "api_integration.apis.management.saved_objects.relationships"
-            ]
-        },
-        {
             "config": "test/functional/config.js",
             "index": "test/functional/apps/visualize/input_control_vis/index.js",
             "total": 24,
@@ -177,34 +133,6 @@
             ]
         },
         {
-            "config": "test/interpreter_functional/config.ts",
-            "index": "test/interpreter_functional/test_suites/run_pipeline/index.ts",
-            "total": 17,
-            "tags": [
-                "interpreter_functional.run_pipeline.basic",
-                "interpreter_functional.run_pipeline.tag_cloud",
-                "interpreter_functional.run_pipeline.metric"
-            ]
-        },
-        {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/index.js",
-            "total": 14,
-            "tags": [
-                "api_integration.apis.core",
-                "api_integration.apis.elasticsearch",
-                "api_integration.apis.shorten"
-            ]
-        },
-        {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/index_patterns/es_errors/index.js",
-            "total": 11,
-            "tags": [
-                "api_integration.apis.index_patterns.es_errors.errors"
-            ]
-        },
-        {
             "config": "test/functional/config.js",
             "index": "test/functional/apps/context/index.js",
             "total": 11,
@@ -217,26 +145,6 @@
             ]
         },
         {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/index_patterns/fields_for_time_pattern_route/index.js",
-            "total": 10,
-            "tags": [
-                "api_integration.apis.index_patterns.fields_for_time_pattern_route.errors",
-                "api_integration.apis.index_patterns.fields_for_time_pattern_route.pattern",
-                "api_integration.apis.index_patterns.fields_for_time_pattern_route.query_params"
-            ]
-        },
-        {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/index_patterns/fields_for_wildcard_route/index.js",
-            "total": 9,
-            "tags": [
-                "api_integration.apis.index_patterns.fields_for_wildcard_route.params",
-                "api_integration.apis.index_patterns.fields_for_wildcard_route.conflicts",
-                "api_integration.apis.index_patterns.fields_for_wildcard_route.response"
-            ]
-        },
-        {
             "config": "test/functional/config.js",
             "index": "test/functional/apps/getting_started/index.js",
             "total": 7,
@@ -245,71 +153,11 @@
             ]
         },
         {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/home/index.js",
-            "total": 7,
-            "tags": [
-                "api_integration.apis.home.sample_data"
-            ]
-        },
-        {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/stats/index.js",
-            "total": 7,
-            "tags": [
-                "api_integration.apis.stats.stats"
-            ]
-        },
-        {
             "config": "test/functional/config.js",
             "index": "test/functional/apps/timelion/index.js",
             "total": 7,
             "tags": [
                 "functional.apps.timelion._expression_typeahead"
-            ]
-        },
-        {
-            "config": "test/examples/config.js",
-            "index": "test/examples/embeddables/index.ts",
-            "total": 7,
-            "tags": [
-                "examples.embeddables.hello_world_embeddable",
-                "examples.embeddables.todo_embeddable",
-                "examples.embeddables.list_container"
-            ]
-        },
-        {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/kql_telemetry/index.js",
-            "total": 5,
-            "tags": [
-                "api_integration.apis.kql_telemetry.kql_telemetry"
-            ]
-        },
-        {
-            "config": "test/plugin_functional/config.js",
-            "index": "test/plugin_functional/test_suites/embeddable_explorer/index.js",
-            "total": 5,
-            "tags": [
-                "plugin_functional.embeddable_explorer.dashboard_container"
-            ]
-        },
-        {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/general/index.js",
-            "total": 5,
-            "tags": [
-                "api_integration.apis.general.cookies",
-                "api_integration.apis.general.csp",
-                "api_integration.apis.general.prototype_pollution"
-            ]
-        },
-        {
-            "config": "test/plugin_functional/config.js",
-            "index": "test/plugin_functional/test_suites/panel_actions/index.js",
-            "total": 4,
-            "tags": [
-                "plugin_functional.panel_actions.panel_actions"
             ]
         },
         {
@@ -329,90 +177,17 @@
             ]
         },
         {
-            "config": "test/plugin_functional/config.js",
-            "index": "test/plugin_functional/test_suites/management/index.js",
-            "total": 3,
-            "tags": [
-                "plugin_functional.management.management_plugin"
-            ]
-        },
-        {
-            "config": "test/plugin_functional/config.js",
-            "index": "test/plugin_functional/test_suites/custom_visualizations/index.js",
-            "total": 2,
-            "tags": [
-                "plugin_functional.custom_visualizations.self_changing_vis"
-            ]
-        },
-        {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/scripts/index.js",
-            "total": 2,
-            "tags": [
-                "api_integration.apis.scripts.languages"
-            ]
-        },
-        {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/suggestions/index.js",
-            "total": 2,
-            "tags": [
-                "api_integration.apis.suggestions.suggestions"
-            ]
-        },
-        {
-            "config": "test/plugin_functional/config.js",
-            "index": "test/plugin_functional/test_suites/bfetch_explorer/index.ts",
-            "total": 2,
-            "tags": [
-                "plugin_functional.bfetch_explorer.batched_function"
-            ]
-        },
-        {
-            "config": "test/examples/config.js",
-            "index": "test/examples/search/index.ts",
-            "total": 2,
-            "tags": [
-                "examples.search.demo_data",
-                "examples.search.es_search"
-            ]
-        },
-        {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/ui_metric/index.js",
-            "total": 2,
-            "tags": [
-                "api_integration.apis.ui_metric.ui_metric"
-            ]
-        },
-        {
             "config": "test/functional/config.js",
             "index": "test/functional/apps/status_page/index.js",
             "total": 1,
             "tags": [
                 "functional.apps.status_page"
             ]
-        },
-        {
-            "config": "test/plugin_functional/config.js",
-            "index": "test/plugin_functional/test_suites/app_plugins/index.js",
-            "total": 1,
-            "tags": [
-                "plugin_functional.app_plugins.app_navigation"
-            ]
-        },
-        {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/status/index.js",
-            "total": 1,
-            "tags": [
-                "api_integration.apis.status.status"
-            ]
         }
     ],
     "xpack": [
         {
-            "config": "test/saved_object_api_integration/security_and_spaces/config_trial.ts",
+            "config": "test/saved_object_api_integration/security_and_spaces/config_basic.ts",
             "index": "test/saved_object_api_integration/security_and_spaces/apis/index.ts",
             "total": 900,
             "tags": [
@@ -430,7 +205,7 @@
             ]
         },
         {
-            "config": "test/saved_object_api_integration/security_and_spaces/config_basic.ts",
+            "config": "test/saved_object_api_integration/security_and_spaces/config_trial.ts",
             "index": "test/saved_object_api_integration/security_and_spaces/apis/index.ts",
             "total": 900,
             "tags": [
@@ -743,7 +518,7 @@
         {
             "config": "test/functional/config.js",
             "index": "test/functional/apps/machine_learning/data_frame_analytics/index.ts",
-            "total": 38,
+            "total": 42,
             "tags": [
                 "functional.apps.machine_learning.data_frame_analytics.outlier_detection_creation",
                 "functional.apps.machine_learning.data_frame_analytics.regression_creation"
@@ -865,15 +640,12 @@
             ]
         },
         {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/management/index_management/index.js",
+            "config": "test/functional/config.js",
+            "index": "test/functional/apps/dev_tools/feature_controls/index.ts",
             "total": 26,
             "tags": [
-                "api_integration.apis.management.index_management.indices",
-                "api_integration.apis.management.index_management.mapping",
-                "api_integration.apis.management.index_management.settings",
-                "api_integration.apis.management.index_management.stats",
-                "api_integration.apis.management.index_management.templates"
+                "functional.apps.dev_tools.feature_controls.dev_tools_security",
+                "functional.apps.dev_tools.feature_controls.dev_tools_spaces"
             ]
         },
         {
@@ -885,12 +657,15 @@
             ]
         },
         {
-            "config": "test/functional/config.js",
-            "index": "test/functional/apps/dev_tools/feature_controls/index.ts",
+            "config": "test/api_integration/config.js",
+            "index": "test/api_integration/apis/management/index_management/index.js",
             "total": 26,
             "tags": [
-                "functional.apps.dev_tools.feature_controls.dev_tools_security",
-                "functional.apps.dev_tools.feature_controls.dev_tools_spaces"
+                "api_integration.apis.management.index_management.indices",
+                "api_integration.apis.management.index_management.mapping",
+                "api_integration.apis.management.index_management.settings",
+                "api_integration.apis.management.index_management.stats",
+                "api_integration.apis.management.index_management.templates"
             ]
         },
         {
@@ -953,14 +728,6 @@
             ]
         },
         {
-            "config": "test/plugin_api_integration/config.js",
-            "index": "test/plugin_api_integration/test_suites/encrypted_saved_objects/index.ts",
-            "total": 18,
-            "tags": [
-                "plugin_api_integration.encrypted_saved_objects.encrypted_saved_objects_api"
-            ]
-        },
-        {
             "config": "test/functional/config.js",
             "index": "test/functional/apps/dashboard_mode",
             "total": 18,
@@ -970,15 +737,11 @@
             ]
         },
         {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/uptime/graphql/index.js",
+            "config": "test/plugin_api_integration/config.js",
+            "index": "test/plugin_api_integration/test_suites/encrypted_saved_objects/index.ts",
             "total": 18,
             "tags": [
-                "api_integration.apis.uptime.graphql.doc_count",
-                "api_integration.apis.uptime.graphql.monitor_charts",
-                "api_integration.apis.uptime.graphql.monitor_states",
-                "api_integration.apis.uptime.graphql.ping_list",
-                "api_integration.apis.uptime.graphql.snapshot_histogram"
+                "plugin_api_integration.encrypted_saved_objects.encrypted_saved_objects_api"
             ]
         },
         {
@@ -993,14 +756,6 @@
             ]
         },
         {
-            "config": "test/oidc_api_integration/config.ts",
-            "index": "test/oidc_api_integration/apis/authorization_code_flow/index.js",
-            "total": 17,
-            "tags": [
-                "oidc_api_integration.apis.authorization_code_flow.oidc_auth"
-            ]
-        },
-        {
             "config": "test/functional/config.js",
             "index": "test/functional/apps/spaces",
             "total": 17,
@@ -1009,6 +764,30 @@
                 "functional.apps.spaces.feature_controls.spaces_security",
                 "functional.apps.spaces.spaces_selection",
                 "functional.apps.spaces.enter_space"
+            ]
+        },
+        {
+            "config": "test/oidc_api_integration/config.ts",
+            "index": "test/oidc_api_integration/apis/authorization_code_flow/index.js",
+            "total": 17,
+            "tags": [
+                "oidc_api_integration.apis.authorization_code_flow.oidc_auth"
+            ]
+        },
+        {
+            "config": "test/kerberos_api_integration/config.ts",
+            "index": "test/kerberos_api_integration/apis/security/index.ts",
+            "total": 16,
+            "tags": [
+                "kerberos_api_integration.apis.security.kerberos_login"
+            ]
+        },
+        {
+            "config": "test/plugin_api_integration/config.js",
+            "index": "test/plugin_api_integration/test_suites/task_manager/index.js",
+            "total": 16,
+            "tags": [
+                "plugin_api_integration.task_manager.task_manager_integration"
             ]
         },
         {
@@ -1030,19 +809,12 @@
             ]
         },
         {
-            "config": "test/plugin_api_integration/config.js",
-            "index": "test/plugin_api_integration/test_suites/task_manager/index.js",
-            "total": 16,
+            "config": "test/reporting/configs/generate_api.js",
+            "index": "test/reporting/api/generate/index.js",
+            "total": 15,
             "tags": [
-                "plugin_api_integration.task_manager.task_manager_integration"
-            ]
-        },
-        {
-            "config": "test/kerberos_api_integration/config.ts",
-            "index": "test/kerberos_api_integration/apis/security/index.ts",
-            "total": 16,
-            "tags": [
-                "kerberos_api_integration.apis.security.kerberos_login"
+                "reporting.api.generate.csv_saved_search",
+                "reporting.api.generate.csv_job_params"
             ]
         },
         {
@@ -1055,12 +827,23 @@
             ]
         },
         {
-            "config": "test/reporting/configs/generate_api.js",
-            "index": "test/reporting/api/generate/index.js",
+            "config": "test/functional/config.js",
+            "index": "test/functional/apps/graph/feature_controls/index.ts",
             "total": 15,
             "tags": [
-                "reporting.api.generate.csv_saved_search",
-                "reporting.api.generate.csv_job_params"
+                "functional.apps.graph.feature_controls.graph_security",
+                "functional.apps.graph.feature_controls.graph_spaces"
+            ]
+        },
+        {
+            "config": "test/api_integration/config.js",
+            "index": "test/api_integration/apis/uptime/graphql/index.js",
+            "total": 15,
+            "tags": [
+                "api_integration.apis.uptime.graphql.doc_count",
+                "api_integration.apis.uptime.graphql.monitor_charts",
+                "api_integration.apis.uptime.graphql.monitor_states",
+                "api_integration.apis.uptime.graphql.ping_list"
             ]
         },
         {
@@ -1084,12 +867,12 @@
             ]
         },
         {
-            "config": "test/functional/config.js",
-            "index": "test/functional/apps/graph/feature_controls/index.ts",
-            "total": 15,
+            "config": "test/api_integration/config.js",
+            "index": "test/api_integration/apis/apm/index.ts",
+            "total": 14,
             "tags": [
-                "functional.apps.graph.feature_controls.graph_security",
-                "functional.apps.graph.feature_controls.graph_spaces"
+                "api_integration.apis.apm.feature_controls",
+                "api_integration.apis.apm.agent_configuration"
             ]
         },
         {
@@ -1098,15 +881,6 @@
             "total": 14,
             "tags": [
                 "functional.apps.saved_objects_management.feature_controls.saved_objects_management_security"
-            ]
-        },
-        {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/apm/index.ts",
-            "total": 14,
-            "tags": [
-                "api_integration.apis.apm.feature_controls",
-                "api_integration.apis.apm.agent_configuration"
             ]
         },
         {
@@ -1136,6 +910,16 @@
             ]
         },
         {
+            "config": "test/api_integration/config.js",
+            "index": "test/api_integration/apis/lens/index.ts",
+            "total": 13,
+            "tags": [
+                "api_integration.apis.lens.existing_fields",
+                "api_integration.apis.lens.field_stats",
+                "api_integration.apis.lens.telemetry"
+            ]
+        },
+        {
             "config": "test/functional/config.js",
             "index": "test/functional/apps/timelion",
             "total": 13,
@@ -1156,12 +940,11 @@
             ]
         },
         {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/management/cross_cluster_replication/index.js",
+            "config": "test/pki_api_integration/config.ts",
+            "index": "test/pki_api_integration/apis/security/index.ts",
             "total": 12,
             "tags": [
-                "api_integration.apis.management.cross_cluster_replication.auto_follow_pattern",
-                "api_integration.apis.management.cross_cluster_replication.follower_indices"
+                "pki_api_integration.apis.security.pki_auth"
             ]
         },
         {
@@ -1174,22 +957,23 @@
             ]
         },
         {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/lens/index.ts",
-            "total": 12,
-            "tags": [
-                "api_integration.apis.lens.existing_fields",
-                "api_integration.apis.lens.field_stats",
-                "api_integration.apis.lens.telemetry"
-            ]
-        },
-        {
             "config": "test/functional/config.js",
             "index": "test/functional/apps/apm/feature_controls/index.ts",
             "total": 12,
             "tags": [
                 "functional.apps.apm.feature_controls.apm_security",
                 "functional.apps.apm.feature_controls.apm_spaces"
+            ]
+        },
+        {
+            "config": "test/api_integration/config.js",
+            "index": "test/api_integration/apis/uptime/rest/index.ts",
+            "total": 12,
+            "tags": [
+                "api_integration.apis.uptime.rest.snapshot",
+                "api_integration.apis.uptime.rest.monitor_latest_status",
+                "api_integration.apis.uptime.rest.selected_monitor",
+                "api_integration.apis.uptime.rest.ping_histogram"
             ]
         },
         {
@@ -1202,21 +986,12 @@
             ]
         },
         {
-            "config": "test/pki_api_integration/config.ts",
-            "index": "test/pki_api_integration/apis/security/index.ts",
+            "config": "test/api_integration/config.js",
+            "index": "test/api_integration/apis/management/cross_cluster_replication/index.js",
             "total": 12,
             "tags": [
-                "pki_api_integration.apis.security.pki_auth"
-            ]
-        },
-        {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/spaces/index.ts",
-            "total": 11,
-            "tags": [
-                "api_integration.apis.spaces.get_active_space",
-                "api_integration.apis.spaces.saved_objects",
-                "api_integration.apis.spaces.space_attributes"
+                "api_integration.apis.management.cross_cluster_replication.auto_follow_pattern",
+                "api_integration.apis.management.cross_cluster_replication.follower_indices"
             ]
         },
         {
@@ -1230,12 +1005,12 @@
         },
         {
             "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/uptime/rest/index.ts",
-            "total": 9,
+            "index": "test/api_integration/apis/spaces/index.ts",
+            "total": 11,
             "tags": [
-                "api_integration.apis.uptime.rest.snapshot",
-                "api_integration.apis.uptime.rest.monitor_latest_status",
-                "api_integration.apis.uptime.rest.selected_monitor"
+                "api_integration.apis.spaces.get_active_space",
+                "api_integration.apis.spaces.saved_objects",
+                "api_integration.apis.spaces.space_attributes"
             ]
         },
         {
@@ -1250,12 +1025,21 @@
             ]
         },
         {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/uptime/index.js",
+            "config": "test/ui_capabilities/spaces_only/config.ts",
+            "index": "test/ui_capabilities/spaces_only/tests/index.ts",
             "total": 9,
             "tags": [
-                "api_integration.apis.uptime.feature_controls",
-                "api_integration.apis.uptime.get_all_pings"
+                "ui_capabilities.spaces_only.tests.catalogue",
+                "ui_capabilities.spaces_only.tests.foo",
+                "ui_capabilities.spaces_only.tests.nav_links"
+            ]
+        },
+        {
+            "config": "test/functional/config.js",
+            "index": "test/functional/apps/machine_learning",
+            "total": 9,
+            "tags": [
+                "functional.apps.machine_learning.pages"
             ]
         },
         {
@@ -1269,21 +1053,12 @@
             ]
         },
         {
-            "config": "test/functional/config.js",
-            "index": "test/functional/apps/machine_learning",
+            "config": "test/api_integration/config.js",
+            "index": "test/api_integration/apis/uptime/index.js",
             "total": 9,
             "tags": [
-                "functional.apps.machine_learning.pages"
-            ]
-        },
-        {
-            "config": "test/ui_capabilities/spaces_only/config.ts",
-            "index": "test/ui_capabilities/spaces_only/tests/index.ts",
-            "total": 9,
-            "tags": [
-                "ui_capabilities.spaces_only.tests.catalogue",
-                "ui_capabilities.spaces_only.tests.foo",
-                "ui_capabilities.spaces_only.tests.nav_links"
+                "api_integration.apis.uptime.feature_controls",
+                "api_integration.apis.uptime.get_all_pings"
             ]
         },
         {
@@ -1304,6 +1079,24 @@
             ]
         },
         {
+            "config": "test/api_integration/config.js",
+            "index": "test/api_integration/apis/console/index.ts",
+            "total": 8,
+            "tags": [
+                "api_integration.apis.console.feature_controls"
+            ]
+        },
+        {
+            "config": "test/functional/config.js",
+            "index": "test/functional/apps/uptime",
+            "total": 8,
+            "tags": [
+                "functional.apps.uptime.locations",
+                "functional.apps.uptime.overview",
+                "functional.apps.uptime.monitor"
+            ]
+        },
+        {
             "config": "test/functional/config.js",
             "index": "test/functional/apps/machine_learning/feature_controls/index.ts",
             "total": 7,
@@ -1313,19 +1106,11 @@
             ]
         },
         {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/console/index.ts",
+            "config": "test/reporting/configs/chromium_api.js",
+            "index": "test/reporting/api/chromium_tests.js",
             "total": 7,
             "tags": [
-                "api_integration.apis.console.feature_controls"
-            ]
-        },
-        {
-            "config": "test/api_integration/config.js",
-            "index": "test/api_integration/apis/short_urls/index.ts",
-            "total": 7,
-            "tags": [
-                "api_integration.apis.short_urls.feature_controls"
+                "reporting.api.usage"
             ]
         },
         {
@@ -1341,14 +1126,6 @@
             ]
         },
         {
-            "config": "test/reporting/configs/chromium_api.js",
-            "index": "test/reporting/api/chromium_tests.js",
-            "total": 7,
-            "tags": [
-                "reporting.api.usage"
-            ]
-        },
-        {
             "config": "test/functional/config.js",
             "index": "test/functional/apps/graph",
             "total": 7,
@@ -1357,12 +1134,11 @@
             ]
         },
         {
-            "config": "test/functional/config.js",
-            "index": "test/functional/apps/uptime",
+            "config": "test/api_integration/config.js",
+            "index": "test/api_integration/apis/short_urls/index.ts",
             "total": 7,
             "tags": [
-                "functional.apps.uptime.overview",
-                "functional.apps.uptime.monitor"
+                "api_integration.apis.short_urls.feature_controls"
             ]
         },
         {
