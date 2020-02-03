@@ -19,7 +19,7 @@ const bodySchema = schema.object({
 export function registerClearCacheRoute({ router }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/clear_cache'), validate: { body: bodySchema } },
-    async (context, req, res) => {
+    async (ctx, req, res) => {
       const payload = req.body as ReqBody;
       const { indices = [] } = payload;
 
@@ -29,7 +29,7 @@ export function registerClearCacheRoute({ router }: RouteDependencies) {
         index: indices,
       };
 
-      await context.core.elasticsearch.adminClient.callAsInternalUser('indices.clearCache', params);
+      await ctx.core.elasticsearch.adminClient.callAsCurrentUser('indices.clearCache', params);
       return res.ok();
     }
   );

@@ -12,7 +12,7 @@ import { registerClearCacheRoute } from './register_clear_cache_route';
 import { registerListRoute } from './register_list_route';
 // import { registerOpenRoute } from './register_open_route';
 // import { registerRefreshRoute } from './register_refresh_route';
-// import { registerReloadRoute } from './register_reload_route';
+import { registerReloadRoute } from './register_reload_route';
 // import { registerDeleteRoute } from './register_delete_route';
 // import { registerFreezeRoute } from './register_freeze_route';
 // import { registerUnfreezeRoute } from './register_unfreeze_route';
@@ -25,7 +25,7 @@ export function registerIndicesRoutes(dependencies: RouteDependencies) {
   registerListRoute(dependencies);
   // registerOpenRoute(dependencies);
   // registerRefreshRoute(dependencies);
-  // registerReloadRoute(dependencies);
+  registerReloadRoute(dependencies);
   // registerDeleteRoute(dependencies);
   // registerFreezeRoute(dependencies);
   // registerUnfreezeRoute(dependencies);
