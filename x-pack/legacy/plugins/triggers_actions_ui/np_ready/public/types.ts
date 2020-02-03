@@ -3,10 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { capabilities } from 'ui/capabilities';
 import { TypeRegistry } from './application/type_registry';
-import { SanitizedAlert as Alert } from '../../../alerting/common';
-export { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
+import { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
+import { ActionType } from '../../../../../plugins/actions/common';
+
+export { Alert, AlertAction };
+export { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Record<string, AlertType>;
@@ -46,11 +48,6 @@ export interface ActionTypeModel {
 
 export interface ValidationResult {
   errors: Record<string, any>;
-}
-
-export interface ActionType {
-  id: string;
-  name: string;
 }
 
 export interface ActionConnector {
@@ -94,5 +91,4 @@ export interface IErrorObject {
 
 export interface LegacyDependencies {
   MANAGEMENT_BREADCRUMB: { text: string; href?: string };
-  capabilities: typeof capabilities;
 }

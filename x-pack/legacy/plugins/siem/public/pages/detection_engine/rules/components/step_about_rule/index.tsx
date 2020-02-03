@@ -168,7 +168,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                     min: 0,
                     fullWidth: false,
                     disabled: isLoading,
-                    options: severityOptions,
                     showTicks: true,
                     tickInterval: 25,
                   },
@@ -227,20 +226,25 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               }}
             />
             <UseField
-              path="threats"
+              path="threat"
               component={AddMitreThreat}
               componentProps={{
-                idAria: 'detectionEngineStepAboutRuleMitreThreats',
+                idAria: 'detectionEngineStepAboutRuleMitreThreat',
                 isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepAboutRuleMitreThreats',
+                dataTestSubj: 'detectionEngineStepAboutRuleMitreThreat',
               }}
             />
           </AdvancedSettingsAccordion>
           <FormDataProvider pathsToWatch="severity">
             {({ severity }) => {
               const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
+              const severityField = form.getFields().severity;
               const riskScoreField = form.getFields().riskScore;
-              if (newRiskScore != null && riskScoreField.value !== newRiskScore) {
+              if (
+                severityField.value !== severity &&
+                newRiskScore != null &&
+                riskScoreField.value !== newRiskScore
+              ) {
                 riskScoreField.setValue(newRiskScore);
               }
               return null;

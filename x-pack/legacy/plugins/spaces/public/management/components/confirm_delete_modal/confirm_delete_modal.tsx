@@ -9,8 +9,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  // @ts-ignore
-  EuiConfirmModal,
   EuiFieldText,
   EuiFormRow,
   EuiModal,
@@ -89,7 +87,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
     // This is largely the same as the built-in EuiConfirmModal component, but we needed the ability
     // to disable the buttons since this could be a long-running operation
 
-    const modalProps: EuiModalProps & CommonProps = {
+    const modalProps: Omit<EuiModalProps, 'children'> & CommonProps = {
       onClose: onCancel,
       className: 'spcConfirmDeleteModal',
       initialFocus: 'input[name="confirmDeleteSpaceInput"]',

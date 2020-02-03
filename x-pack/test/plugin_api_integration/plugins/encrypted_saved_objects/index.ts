@@ -8,8 +8,8 @@ import { Request } from 'hapi';
 import { boomify, badRequest } from 'boom';
 import { Legacy } from 'kibana';
 import {
-  PluginSetupContract,
-  PluginStartContract,
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
 } from '../../../../plugins/encrypted_saved_objects/server';
 
 const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
@@ -26,7 +26,7 @@ export default function esoPlugin(kibana: any) {
         path: '/api/saved_objects/get-decrypted-as-internal-user/{id}',
         async handler(request: Request) {
           const encryptedSavedObjectsStart = server.newPlatform.start.plugins
-            .encryptedSavedObjects as PluginStartContract;
+            .encryptedSavedObjects as EncryptedSavedObjectsPluginStart;
           const namespace = server.plugins.spaces && server.plugins.spaces.getSpaceId(request);
           try {
             return await encryptedSavedObjectsStart.getDecryptedAsInternalUser(
@@ -44,7 +44,8 @@ export default function esoPlugin(kibana: any) {
         },
       });
 
-      (server.newPlatform.setup.plugins.encryptedSavedObjects as PluginSetupContract).registerType({
+      (server.newPlatform.setup.plugins
+        .encryptedSavedObjects as EncryptedSavedObjectsPluginSetup).registerType({
         type: SAVED_OBJECT_WITH_SECRET_TYPE,
         attributesToEncrypt: new Set(['privateProperty']),
         attributesToExcludeFromAAD: new Set(['publicPropertyExcludedFromAAD']),

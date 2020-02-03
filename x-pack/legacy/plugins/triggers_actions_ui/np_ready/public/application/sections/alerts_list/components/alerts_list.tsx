@@ -15,19 +15,23 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
 
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_add';
-import { BulkActionPopover } from './bulk_action_popover';
-import { CollapsedItemActions } from './collapsed_item_actions';
+import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
+import { AlertQuickEditButtonsWithApi as AlertQuickEditButtons } from '../../common/components/alert_quick_edit_buttons';
+import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { loadAlerts, loadAlertTypes } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
+import { routeToAlertDetails } from '../../../constants';
 
 const ENTER_KEY = 13;
 
@@ -43,14 +47,10 @@ interface AlertState {
 }
 
 export const AlertsList: React.FunctionComponent = () => {
-  const {
-    http,
-    injectedMetadata,
-    toastNotifications,
-    legacy: { capabilities },
-  } = useAppDependencies();
-  const canDelete = hasDeleteAlertsCapability(capabilities.get());
-  const canSave = hasSaveAlertsCapability(capabilities.get());
+  const history = useHistory();
+  const { http, injectedMetadata, toastNotifications, capabilities } = useAppDependencies();
+  const canDelete = hasDeleteAlertsCapability(capabilities);
+  const canSave = hasSaveAlertsCapability(capabilities);
   const createAlertUiEnabled = injectedMetadata.getInjectedVar('createAlertUiEnabled');
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
@@ -156,6 +156,18 @@ export const AlertsList: React.FunctionComponent = () => {
       sortable: false,
       truncateText: true,
       'data-test-subj': 'alertsTableCell-name',
+      render: (name: string, alert: AlertTableItem) => {
+        return (
+          <EuiLink
+            title={name}
+            onClick={() => {
+              history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
+            }}
+          >
+            {name}
+          </EuiLink>
+        );
+      },
     },
     {
       field: 'tagsText',
@@ -241,17 +253,19 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiFlexGroup>
             {selectedIds.length > 0 && canDelete && (
               <EuiFlexItem grow={false}>
-                <BulkActionPopover
-                  selectedItems={convertAlertsToTableItems(
-                    filterAlertsById(alertsState.data, selectedIds),
-                    alertTypesState.data
-                  )}
-                  onPerformingAction={() => setIsPerformingAction(true)}
-                  onActionPerformed={() => {
-                    loadAlertsData();
-                    setIsPerformingAction(false);
-                  }}
-                />
+                <BulkOperationPopover>
+                  <AlertQuickEditButtons
+                    selectedItems={convertAlertsToTableItems(
+                      filterAlertsById(alertsState.data, selectedIds),
+                      alertTypesState.data
+                    )}
+                    onPerformingAction={() => setIsPerformingAction(true)}
+                    onActionPerformed={() => {
+                      loadAlertsData();
+                      setIsPerformingAction(false);
+                    }}
+                  />
+                </BulkOperationPopover>
               </EuiFlexItem>
             )}
             <EuiFlexItem>

@@ -27,7 +27,6 @@
  * This class seems to interface with ES primarily through the es Angular
  * service and the saved object api.
  */
-import { npStart } from 'ui/new_platform';
 import { SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from './types';
 import { buildSavedObject } from './helpers/build_saved_object';
 
@@ -50,14 +49,4 @@ export function createSavedObjectClass(services: SavedObjectKibanaServices) {
   }
 
   return SavedObjectClass as new (config: SavedObjectConfig) => SavedObject;
-}
-// the old angular way, should be removed once no longer used
-export function SavedObjectProvider() {
-  const services = {
-    savedObjectsClient: npStart.core.savedObjects.client,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-  };
-  return createSavedObjectClass(services);
 }
