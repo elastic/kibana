@@ -32,7 +32,6 @@ import {
   SIGNALS_INDEX_KEY,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
-import { initServerWithKibana } from './server/kibana.index';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -169,9 +168,7 @@ export const siem = (kibana: any) => {
         route: route.bind(server),
       };
       // @ts-ignore-next-line: setup.plugins is too loosely typed
-      plugin(initializerContext).setup(setup.core, setup.plugins);
-
-      initServerWithKibana(initializerContext, serverFacade);
+      plugin(initializerContext).setup(setup.core, setup.plugins, serverFacade);
     },
     config(Joi: Root) {
       // See x-pack/plugins/siem/server/config.ts if you're adding another

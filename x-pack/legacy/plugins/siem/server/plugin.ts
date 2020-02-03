@@ -10,12 +10,14 @@ import { SecurityPluginSetup } from '../../../../plugins/security/server';
 import { PluginSetupContract as FeaturesSetupContract } from '../../../../plugins/features/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
+import { initServerWithKibana } from './kibana.index';
 import {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
   ruleStatusSavedObjectType,
 } from './saved_objects';
+import { ServerFacade } from './types';
 
 export type SiemPluginSecurity = Pick<SecurityPluginSetup, 'authc'>;
 
@@ -36,7 +38,7 @@ export class Plugin {
     this.logger.debug('Shim plugin initialized');
   }
 
-  public setup(core: CoreSetup, plugins: PluginsSetup) {
+  public setup(core: CoreSetup, plugins: PluginsSetup, __legacy: ServerFacade) {
     this.logger.debug('Shim plugin setup');
     plugins.features.registerFeature({
       id: this.name,
@@ -100,5 +102,6 @@ export class Plugin {
 
     const libs = compose(core, plugins, this.context.env);
     initServer(libs);
+    initServerWithKibana(this.context, __legacy);
   }
 }
