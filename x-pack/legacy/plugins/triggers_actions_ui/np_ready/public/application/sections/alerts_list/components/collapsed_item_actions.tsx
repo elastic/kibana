@@ -20,32 +20,29 @@ import { AlertTableItem } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
 import {
-  deleteAlerts,
-  disableAlerts,
-  enableAlerts,
-  muteAlerts,
-  unmuteAlerts,
-} from '../../../lib/alert_api';
+  ComponentOpts as BulkOperationsComponentOpts,
+  withBulkAlertOperations,
+} from '../../common/components/with_bulk_alert_api_operations';
 
-export interface ComponentOpts {
+export type ComponentOpts = {
   item: AlertTableItem;
   onAlertChanged: () => void;
-}
+} & BulkOperationsComponentOpts;
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   item,
   onAlertChanged,
+  disableAlert,
+  enableAlert,
+  unmuteAlert,
+  muteAlert,
+  deleteAlert,
 }: ComponentOpts) => {
-  const {
-    http,
-    legacy: { capabilities },
-  } = useAppDependencies();
+  const { capabilities } = useAppDependencies();
 
-  const canDelete = hasDeleteAlertsCapability(capabilities.get());
-  const canSave = hasSaveAlertsCapability(capabilities.get());
+  const canDelete = hasDeleteAlertsCapability(capabilities);
+  const canSave = hasSaveAlertsCapability(capabilities);
 
-  const [isEnabled, setIsEnabled] = useState<boolean>(item.enabled);
-  const [isMuted, setIsMuted] = useState<boolean>(item.muteAll);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const button = (
@@ -72,15 +69,13 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         <EuiSwitch
           name="enable"
           disabled={!canSave}
-          checked={isEnabled}
+          checked={item.enabled}
           data-test-subj="enableSwitch"
           onChange={async () => {
-            if (isEnabled) {
-              setIsEnabled(false);
-              await disableAlerts({ http, ids: [item.id] });
+            if (item.enabled) {
+              await disableAlert(item);
             } else {
-              setIsEnabled(true);
-              await enableAlerts({ http, ids: [item.id] });
+              await enableAlert(item);
             }
             onAlertChanged();
           }}
@@ -95,16 +90,14 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       <EuiFormRow>
         <EuiSwitch
           name="mute"
-          checked={isMuted}
-          disabled={!canSave || !isEnabled}
+          checked={item.muteAll}
+          disabled={!(canSave && item.enabled)}
           data-test-subj="muteSwitch"
           onChange={async () => {
-            if (isMuted) {
-              setIsMuted(false);
-              await unmuteAlerts({ http, ids: [item.id] });
+            if (item.muteAll) {
+              await unmuteAlert(item);
             } else {
-              setIsMuted(true);
-              await muteAlerts({ http, ids: [item.id] });
+              await muteAlert(item);
             }
             onAlertChanged();
           }}
@@ -124,7 +117,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             color="text"
             data-test-subj="deleteAlert"
             onClick={async () => {
-              await deleteAlerts({ http, ids: [item.id] });
+              await deleteAlert(item);
               onAlertChanged();
             }}
           >
@@ -138,3 +131,5 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     </EuiPopover>
   );
 };
+
+export const CollapsedItemActionsWithApi = withBulkAlertOperations(CollapsedItemActions);

@@ -38,7 +38,7 @@ export default function({ getService }: FtrProviderContext) {
       await getService('esSupertest')
         .post('/_security/role_mapping/krb5')
         .send({
-          roles: ['kibana_user'],
+          roles: ['kibana_admin'],
           enabled: true,
           rules: { field: { 'realm.name': 'kerb1' } },
         })
@@ -119,7 +119,7 @@ export default function({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(200, {
             username: 'tester@TEST.ELASTIC.CO',
-            roles: ['kibana_user'],
+            roles: ['kibana_admin'],
             full_name: null,
             email: null,
             metadata: {
@@ -344,8 +344,7 @@ export default function({ getService }: FtrProviderContext) {
       });
     });
 
-    // FAILING: https://github.com/elastic/kibana/issues/52969
-    describe.skip('API access with missing access token document or expired refresh token.', () => {
+    describe('API access with missing access token document or expired refresh token.', () => {
       let sessionCookie: Cookie;
 
       beforeEach(async () => {

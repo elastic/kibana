@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React, { Fragment } from 'react';
 import { FieldSelect } from '../field_select';
 import { SizeRangeSelector } from './size_range_selector';
@@ -50,7 +49,7 @@ export function DynamicSizeForm({
         <EuiFlexItem>
           <FieldSelect
             fields={fields}
-            selectedFieldName={_.get(styleOptions, 'field.name')}
+            selectedFieldName={styleProperty.getFieldName()}
             onChange={onFieldChange}
             compressed
           />

@@ -115,8 +115,8 @@
         <button
           class="kuiTab"
           ng-repeat="editSection in editSections"
-          ng-class="{ 'kuiTab-isSelected': state.tab === editSection.index }"
-          ng-click="changeTab(editSection)"
+          ng-class="{ 'kuiTab-isSelected': getCurrentTab() === editSection.index }"
+          ng-click="setCurrentTab(editSection.index)"
           data-test-subj="tab-{{ editSection.index }}"
         >
           {{ editSection.title }}
@@ -152,7 +152,7 @@
 
         <div
           class="kuiFieldGroupSection"
-          ng-if="state.tab == 'indexedFields' && indexedFieldTypes.length > 0"
+          ng-if="getCurrentTab() == 'indexedFields' && indexedFieldTypes.length > 0"
         >
           <select
             data-test-subj="indexedFieldTypeFilterDropdown"
@@ -169,7 +169,7 @@
 
         <div
           class="kuiFieldGroupSection"
-          ng-if="state.tab == 'scriptedFields' && scriptedFieldLanguages.length > 0"
+          ng-if="getCurrentTab() == 'scriptedFields' && scriptedFieldLanguages.length > 0"
         >
           <select
             data-test-subj="scriptedFieldLanguageFilterDropdown"

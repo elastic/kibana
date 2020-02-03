@@ -26,12 +26,13 @@ import React, {
   MutableRefObject,
 } from 'react';
 
-import { AppUnmount, Mounter, AppLeaveHandler } from '../types';
+import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 
 interface Props {
   appId: string;
   mounter?: Mounter;
+  appStatus: AppStatus;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
 }
 
@@ -39,6 +40,7 @@ export const AppContainer: FunctionComponent<Props> = ({
   mounter,
   appId,
   setAppLeaveHandler,
+  appStatus,
 }: Props) => {
   const [appNotFound, setAppNotFound] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
@@ -51,27 +53,29 @@ export const AppContainer: FunctionComponent<Props> = ({
         unmountRef.current = null;
       }
     };
+
+    if (!mounter || appStatus !== AppStatus.accessible) {
+      return setAppNotFound(true);
+    }
+    setAppNotFound(false);
+
+    if (mounter.unmountBeforeMounting) {
+      unmount();
+    }
+
     const mount = async () => {
-      if (!mounter) {
-        return setAppNotFound(true);
-      }
-
-      if (mounter.unmountBeforeMounting) {
-        unmount();
-      }
-
       unmountRef.current =
         (await mounter.mount({
           appBasePath: mounter.appBasePath,
           element: elementRef.current!,
           onAppLeave: handler => setAppLeaveHandler(appId, handler),
         })) || null;
-      setAppNotFound(false);
     };
 
     mount();
+
     return unmount;
-  }, [appId, mounter, setAppLeaveHandler]);
+  }, [appId, appStatus, mounter, setAppLeaveHandler]);
 
   return (
     <Fragment>

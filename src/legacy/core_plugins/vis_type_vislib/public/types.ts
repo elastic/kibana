@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { ColorSchemas } from './legacy_imports';
 import { TimeMarker } from './vislib/visualizations/time_marker';
 import {
   Positions,
@@ -30,6 +29,7 @@ import {
   ScaleTypes,
   ThresholdLineStyles,
 } from './utils/collections';
+import { ColorSchemas } from '../../../../plugins/charts/public';
 
 export interface CommonVislibParams {
   addTooltip: boolean;

@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.5.2>>
 * <<release-notes-7.5.1>>
 * <<release-notes-7.5.0>>
 * <<release-notes-7.4.2>>
@@ -29,6 +30,61 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-beta1>>
 * <<release-notes-7.0.0-alpha2>>
 * <<release-notes-7.0.0-alpha1>>
+
+--
+[[release-notes-7.5.2]]
+== {kib} 7.5.2
+
+See <<breaking-changes-7.5, breaking changes in 7.5>>.
+
+[float]
+[[bug-7.5.2]]
+=== Bug fixes
+
+Console::
+* Handles double quote special case {pull}54474[#54474]
+
+Dashboard, Discover, Visualize::
+* Fixes icon path in tutorial introduction {pull}49684[#49684]
+* Fixes filter pill label for filters with negated alias {pull}50743[#50743]
+* Adds domain fit option for 0 opacity TSVB line charts {pull}54314[#54314]
+
+Machine Learning::
+* Corrects URL of the create job tips docs page {pull}53576[#53576]
+
+Management::
+* {kib} 7.0.0 URL field formatter doesn't render relative hyperlinks properly {pull}53789[#53789]
+* Fixes index pattern without timefield filter application {pull}54757[#54757]
+
+Maps::
+* Fixes regression that prevents maps telemetry from populating. Removes unneeded task manager logic {pull}52834[#52834]
+
+Monitoring::
+* Adds error state for unstructured logs {pull}53299[#53299]
+* Ensures setup mode works in a ccs environment {pull}54361[#54361]
+
+Security::
+* Fixes search field visibility on space selector screen {pull}54115[#54115]
+* Forces line break if username is a solid long string {pull}50807[#50807]
+
+[float]
+[[regression-7.5.2]]
+=== Regression
+Watcher::
+* Passes termOrder and hasTermsAgg properties to serializeThresholdWatch function {pull}54391[#54391]
++
+A regression was introduced into 7.5.0 that caused a particular configuration of Threshold Watches
+to fail or erroneously trigger if they were created or edited in 7.5. If you've
+created or edited a Threshold Watch with a "GROUPED OVER" condition set to `top` with {kib} 7.5.0,
+you'll need to upgrade to a version of {kib} that contains this fix and recreate
+these watches.
++
+The easiest way to do this is to go to the edit screen of the
+Threshold Watch in the UI and simply click the *Save* button. This will recreate the
+watch with the proper configuration. No other changes to the watch will be necessary on your part.
++
+[role="screenshot"]
+image::images/rn_7.5.2.png[]
 
 [[release-notes-7.5.1]]
 == {kib} 7.5.1
@@ -66,12 +122,12 @@ Machine Learning::
 * Fixes lat_long anomalies table links menu and value formatting {pull}50916[#50916]
 * Fixes loading of data visualizer with KQL saved search {pull}51882[#51882]
 Maps::
-* Fixes a cross-site scripting (XSS) flaw in Coordinate and Region Map 
-visualizations. An attacker could create a malicious visualization that 
-executes JavaScript in a victim’s browser when the visualization, or dashboard 
-containing the visualization, was viewed. Since Kibana 7.0.0, Content Security 
-Policy (CSP), which prevents attackers from using this flaw, is enabled by 
-default. However, an attacker can still inject arbitrary HTML into the page. 
+* Fixes a cross-site scripting (XSS) flaw in Coordinate and Region Map
+visualizations. An attacker could create a malicious visualization that
+executes JavaScript in a victim’s browser when the visualization, or dashboard
+containing the visualization, was viewed. Since Kibana 7.0.0, Content Security
+Policy (CSP), which prevents attackers from using this flaw, is enabled by
+default. However, an attacker can still inject arbitrary HTML into the page.
 See https://www.elastic.co/community/security/, CVE-2019-7621.
 * Prevents users from overflowing URL when filtering by shape {pull}50747[#50747]
 * Delays vector tile layer syncing until spritesheet is loaded {pull}48955[#48955]
@@ -89,7 +145,6 @@ Uptime::
 Lens::
 * Shows keyword fields for pre-7.3 index patterns {pull}52410[#52410]
 
---
 [[release-notes-7.5.0]]
 == {kib} 7.5.0
 

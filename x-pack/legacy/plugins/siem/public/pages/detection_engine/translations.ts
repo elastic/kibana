@@ -6,8 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.pageTitle', {
-  defaultMessage: 'Detection engine',
+export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.detectionsPageTitle', {
+  defaultMessage: 'Detections',
 });
 
 export const LAST_SIGNAL = i18n.translate('xpack.siem.detectionEngine.lastSignalTitle', {
@@ -19,11 +19,15 @@ export const TOTAL_SIGNAL = i18n.translate('xpack.siem.detectionEngine.totalSign
 });
 
 export const SIGNAL = i18n.translate('xpack.siem.detectionEngine.signalTitle', {
-  defaultMessage: 'Signals',
+  defaultMessage: 'Signals (SIEM Detections)',
+});
+
+export const ALERT = i18n.translate('xpack.siem.detectionEngine.alertTitle', {
+  defaultMessage: 'External alerts',
 });
 
 export const BUTTON_MANAGE_RULES = i18n.translate('xpack.siem.detectionEngine.buttonManageRules', {
-  defaultMessage: 'Manage rules',
+  defaultMessage: 'Manage signal detection rules',
 });
 
 export const PANEL_SUBTITLE_SHOWING = i18n.translate(

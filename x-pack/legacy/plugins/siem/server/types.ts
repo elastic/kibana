@@ -8,7 +8,10 @@ import { Legacy } from 'kibana';
 
 export interface ServerFacade {
   config: Legacy.Server['config'];
+  usingEphemeralEncryptionKey: boolean;
   plugins: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    actions: any; // We have to do this at the moment because the types are not compatible
     alerting?: Legacy.Server['plugins']['alerting'];
     elasticsearch: Legacy.Server['plugins']['elasticsearch'];
     spaces: Legacy.Server['plugins']['spaces'];

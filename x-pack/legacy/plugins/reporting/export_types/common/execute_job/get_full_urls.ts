@@ -30,7 +30,14 @@ export function getFullUrls<JobDocPayloadType>({
   server: ServerFacade;
   job: JobDocPayloadPDF | JobDocPayloadPNG;
 }) {
-  const getAbsoluteUrl = getAbsoluteUrlFactory(server);
+  const config = server.config();
+
+  const getAbsoluteUrl = getAbsoluteUrlFactory({
+    defaultBasePath: config.get('server.basePath'),
+    protocol: config.get('xpack.reporting.kibanaServer.protocol') || server.info.protocol,
+    hostname: config.get('xpack.reporting.kibanaServer.hostname') || config.get('server.host'),
+    port: config.get('xpack.reporting.kibanaServer.port') || config.get('server.port'),
+  });
 
   // PDF and PNG job params put in the url differently
   let relativeUrls: string[] = [];

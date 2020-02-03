@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiSpacer } from '@elastic/eui';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../../store/hosts';
@@ -20,12 +19,16 @@ const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
 export const eventsStackByOptions: MatrixHistogramOption[] = [
   {
-    text: i18n.NAVIGATION_EVENTS_STACK_BY_EVENT_ACTION,
+    text: 'event.action',
     value: 'event.action',
   },
   {
-    text: i18n.NAVIGATION_EVENTS_STACK_BY_EVENT_DATASET,
+    text: 'event.dataset',
     value: 'event.dataset',
+  },
+  {
+    text: 'event.module',
+    value: 'event.module',
   },
 ];
 
@@ -50,7 +53,6 @@ export const EventsQueryTabBody = ({
       <MatrixHistogramContainer
         dataKey="EventsHistogram"
         defaultStackByOption={eventsStackByOptions[0]}
-        deleteQuery={deleteQuery}
         endDate={endDate}
         isEventsHistogram={true}
         errorMessage={i18n.ERROR_FETCHING_EVENTS_DATA}
@@ -66,7 +68,6 @@ export const EventsQueryTabBody = ({
         updateDateRange={updateDateRange}
         id={EVENTS_HISTOGRAM_ID}
       />
-      <EuiSpacer size="l" />
       <StatefulEventsViewer
         defaultModel={eventsDefaultModel}
         end={endDate}

@@ -10,15 +10,15 @@ import { mount, shallow } from 'enzyme';
 import { noop } from 'lodash/fp';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
+import { autocomplete } from '../../../../../../../src/plugins/data/public';
 
 import { TestProviders } from '../../mock';
 
 import { AutocompleteField } from '.';
 
-const mockAutoCompleteData: AutocompleteSuggestion[] = [
+const mockAutoCompleteData: autocomplete.QuerySuggestion[] = [
   {
-    type: 'field',
+    type: autocomplete.QuerySuggestionsTypes.Field,
     text: 'agent.ephemeral_id ',
     description:
       '<p>Filter results that contain <span class="suggestionItem__callout">agent.ephemeral_id</span></p>',
@@ -26,7 +26,7 @@ const mockAutoCompleteData: AutocompleteSuggestion[] = [
     end: 1,
   },
   {
-    type: 'field',
+    type: autocomplete.QuerySuggestionsTypes.Field,
     text: 'agent.hostname ',
     description:
       '<p>Filter results that contain <span class="suggestionItem__callout">agent.hostname</span></p>',
@@ -34,7 +34,7 @@ const mockAutoCompleteData: AutocompleteSuggestion[] = [
     end: 1,
   },
   {
-    type: 'field',
+    type: autocomplete.QuerySuggestionsTypes.Field,
     text: 'agent.id ',
     description:
       '<p>Filter results that contain <span class="suggestionItem__callout">agent.id</span></p>',
@@ -42,7 +42,7 @@ const mockAutoCompleteData: AutocompleteSuggestion[] = [
     end: 1,
   },
   {
-    type: 'field',
+    type: autocomplete.QuerySuggestionsTypes.Field,
     text: 'agent.name ',
     description:
       '<p>Filter results that contain <span class="suggestionItem__callout">agent.name</span></p>',
@@ -50,7 +50,7 @@ const mockAutoCompleteData: AutocompleteSuggestion[] = [
     end: 1,
   },
   {
-    type: 'field',
+    type: autocomplete.QuerySuggestionsTypes.Field,
     text: 'agent.type ',
     description:
       '<p>Filter results that contain <span class="suggestionItem__callout">agent.type</span></p>',
@@ -58,7 +58,7 @@ const mockAutoCompleteData: AutocompleteSuggestion[] = [
     end: 1,
   },
   {
-    type: 'field',
+    type: autocomplete.QuerySuggestionsTypes.Field,
     text: 'agent.version ',
     description:
       '<p>Filter results that contain <span class="suggestionItem__callout">agent.version</span></p>',
@@ -66,7 +66,7 @@ const mockAutoCompleteData: AutocompleteSuggestion[] = [
     end: 1,
   },
   {
-    type: 'field',
+    type: autocomplete.QuerySuggestionsTypes.Field,
     text: 'agent.test1 ',
     description:
       '<p>Filter results that contain <span class="suggestionItem__callout">agent.test1</span></p>',
@@ -74,7 +74,7 @@ const mockAutoCompleteData: AutocompleteSuggestion[] = [
     end: 1,
   },
   {
-    type: 'field',
+    type: autocomplete.QuerySuggestionsTypes.Field,
     text: 'agent.test2 ',
     description:
       '<p>Filter results that contain <span class="suggestionItem__callout">agent.test2</span></p>',
@@ -82,7 +82,7 @@ const mockAutoCompleteData: AutocompleteSuggestion[] = [
     end: 1,
   },
   {
-    type: 'field',
+    type: autocomplete.QuerySuggestionsTypes.Field,
     text: 'agent.test3 ',
     description:
       '<p>Filter results that contain <span class="suggestionItem__callout">agent.test3</span></p>',
@@ -90,7 +90,7 @@ const mockAutoCompleteData: AutocompleteSuggestion[] = [
     end: 1,
   },
   {
-    type: 'field',
+    type: autocomplete.QuerySuggestionsTypes.Field,
     text: 'agent.test4 ',
     description:
       '<p>Filter results that contain <span class="suggestionItem__callout">agent.test4</span></p>',

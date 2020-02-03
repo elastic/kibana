@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import querystring from 'querystring';
 import { API_BASE_URL } from '../../common/constants';
-import { ServerFacade, RequestFacade, ReportingResponseToolkit } from '../../types';
+import { ServerFacade, ReportingResponseToolkit, Logger } from '../../types';
+import { ReportingSetupDeps } from '../plugin';
 import {
   getRouteConfigFactoryReportingPre,
   GetRouteConfigFactoryFn,
@@ -20,10 +22,12 @@ const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerLegacy(
   server: ServerFacade,
+  plugins: ReportingSetupDeps,
   handler: HandlerFunction,
-  handleError: HandlerErrorFunction
+  handleError: HandlerErrorFunction,
+  logger: Logger
 ) {
-  const getRouteConfig = getRouteConfigFactoryReportingPre(server);
+  const getRouteConfig = getRouteConfigFactoryReportingPre(server, plugins, logger);
 
   function createLegacyPdfRoute({ path, objectType }: { path: string; objectType: string }) {
     const exportTypeId = 'printablePdf';
@@ -31,9 +35,9 @@ export function registerLegacy(
       path,
       method: 'POST',
       options: getStaticFeatureConfig(getRouteConfig, exportTypeId),
-      handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
+      handler: async (request: Legacy.Request, h: ReportingResponseToolkit) => {
         const message = `The following URL is deprecated and will stop working in the next major version: ${request.url.path}`;
-        server.log(['warning', 'reporting', 'deprecation'], message);
+        logger.warn(message, ['deprecation']);
 
         try {
           const savedObjectId = request.params.savedId;

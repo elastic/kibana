@@ -20,7 +20,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { parseEsInterval } from '../../../../data/public';
-import { GTE_INTERVAL_RE } from '../../../common/interval_regexp';
+import { GTE_INTERVAL_RE } from '../../../../../../plugins/vis_type_timeseries/common/interval_regexp';
 
 export const AUTO_INTERVAL = 'auto';
 

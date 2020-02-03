@@ -373,6 +373,14 @@
         ],
       },
       {
+        groupSlug: 'flot',
+        groupName: 'flot related packages',
+        packageNames: [
+          'flot',
+          '@types/flot',
+        ],
+      },
+      {
         groupSlug: 'getopts',
         groupName: 'getopts related packages',
         packageNames: [
@@ -730,6 +738,14 @@
         packageNames: [
           'memoize-one',
           '@types/memoize-one',
+        ],
+      },
+      {
+        groupSlug: 'numeral',
+        groupName: 'numeral related packages',
+        packageNames: [
+          'numeral',
+          '@types/numeral',
         ],
       },
       {

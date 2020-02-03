@@ -28,6 +28,7 @@ export interface FieldDataColumnType<T> {
   render?: RenderFunc;
   footer?: string | ReactElement | FooterFunc;
   textOnly?: boolean;
+  scope?: 'col' | 'row' | 'colgroup' | 'rowgroup';
   'data-test-subj'?: string;
 }
 

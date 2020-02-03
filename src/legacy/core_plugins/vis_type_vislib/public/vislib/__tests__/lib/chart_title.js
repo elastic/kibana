@@ -19,14 +19,14 @@
 
 import d3 from 'd3';
 import _ from 'lodash';
-import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 
 import { ChartTitle } from '../../lib/chart_title';
 import { VisConfig } from '../../lib/vis_config';
+import { getMockUiState } from './fixtures/_vis_fixture';
 
 describe('Vislib ChartTitle Class Test Suite', function() {
-  let persistedState;
+  let mockUiState;
   let chartTitle;
   let el;
   const data = {
@@ -88,36 +88,32 @@ describe('Vislib ChartTitle Class Test Suite', function() {
     yAxisLabel: 'Count',
   };
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function($injector) {
-      persistedState = new ($injector.get('PersistedState'))();
+  beforeEach(() => {
+    mockUiState = getMockUiState();
+    el = d3
+      .select('body')
+      .append('div')
+      .attr('class', 'visWrapper')
+      .datum(data);
 
-      el = d3
-        .select('body')
-        .append('div')
-        .attr('class', 'visWrapper')
-        .datum(data);
+    el.append('div')
+      .attr('class', 'chart-title')
+      .style('height', '20px');
 
-      el.append('div')
-        .attr('class', 'chart-title')
-        .style('height', '20px');
-
-      const visConfig = new VisConfig(
-        {
-          type: 'histogram',
-          title: {
-            text: 'rows',
-          },
+    const visConfig = new VisConfig(
+      {
+        type: 'histogram',
+        title: {
+          text: 'rows',
         },
-        data,
-        persistedState,
-        el.node(),
-        () => undefined
-      );
-      chartTitle = new ChartTitle(visConfig);
-    })
-  );
+      },
+      data,
+      mockUiState,
+      el.node(),
+      () => undefined
+    );
+    chartTitle = new ChartTitle(visConfig);
+  });
 
   afterEach(function() {
     el.remove();

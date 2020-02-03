@@ -67,7 +67,8 @@ export class EditSettingsJson extends React.PureComponent {
       const editor = (this.editor = createAceEditor(this.aceDiv, prettyJson, false, settingsKeys));
       const session = editor.getSession();
       session.on('changeAnnotation', () => {
-        this.setState({ valid: session.getAnnotations().length === 0 });
+        const isEmptyString = session.getValue() === '';
+        this.setState({ valid: !isEmptyString && session.getAnnotations().length === 0 });
       });
     }
   }

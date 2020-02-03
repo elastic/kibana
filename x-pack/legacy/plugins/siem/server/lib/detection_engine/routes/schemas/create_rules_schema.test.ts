@@ -79,7 +79,7 @@ describe('create rules schema', () => {
         from: 'now-5m',
         to: 'now',
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
       }).error
     ).toBeTruthy();
   });
@@ -92,7 +92,7 @@ describe('create rules schema', () => {
         from: 'now-5m',
         to: 'now',
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         type: 'query',
       }).error
     ).toBeTruthy();
@@ -106,7 +106,7 @@ describe('create rules schema', () => {
         from: 'now-5m',
         to: 'now',
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
       }).error
@@ -121,7 +121,7 @@ describe('create rules schema', () => {
         from: 'now-5m',
         to: 'now',
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         type: 'query',
         interval: '5m',
         index: ['index-1'],
@@ -138,7 +138,7 @@ describe('create rules schema', () => {
         from: 'now-5m',
         to: 'now',
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         type: 'query',
         query: 'some query',
         index: ['index-1'],
@@ -156,7 +156,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         query: 'some query',
@@ -175,7 +175,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         query: 'some query',
@@ -195,7 +195,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         query: 'some query',
@@ -213,7 +213,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         risk_score: 50,
@@ -232,14 +232,14 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
       }).error
     ).toBeFalsy();
   });
 
-  test('You can send in an empty array to threats', () => {
+  test('You can send in an empty array to threat', () => {
     expect(
       createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
         rule_id: 'rule-1',
@@ -250,19 +250,19 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [],
+        threat: [],
       }).error
     ).toBeFalsy();
   });
 
-  test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threats] does validate', () => {
+  test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
     expect(
       createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
         rule_id: 'rule-1',
@@ -273,10 +273,10 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
-        threats: [
+        threat: [
           {
             framework: 'someFramework',
             tactic: {
@@ -284,7 +284,7 @@ describe('create rules schema', () => {
               name: 'fakeName',
               reference: 'fakeRef',
             },
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -308,7 +308,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -329,7 +329,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         query: 'some-query',
@@ -351,7 +351,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         query: 'some-query',
@@ -375,7 +375,7 @@ describe('create rules schema', () => {
           to: 'now',
           index: [5],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           query: 'some-query',
@@ -398,7 +398,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         type: 'query',
       }).value.interval
     ).toEqual('5m');
@@ -415,7 +415,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
       }).value.max_signals
@@ -433,7 +433,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'saved_query',
       }).error.message
@@ -451,7 +451,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'saved_query',
         saved_id: 'some id',
@@ -470,7 +470,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'saved_query',
         saved_id: 'some id',
@@ -492,7 +492,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'saved_query',
         saved_id: 'some id',
@@ -512,7 +512,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -533,7 +533,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -554,7 +554,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -575,7 +575,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -597,7 +597,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -619,7 +619,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -641,7 +641,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -664,7 +664,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -678,11 +678,11 @@ describe('create rules schema', () => {
     );
   });
 
-  test('You cannot send in an array of threats that are missing "framework"', () => {
+  test('You cannot send in an array of threat that are missing "framework"', () => {
     expect(
       createRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'framework'>>>;
+        Partial<Omit<RuleAlertParamsRest, 'threat'>> & {
+          threat: Array<Partial<Omit<ThreatParams, 'framework'>>>;
         }
       >({
         rule_id: 'rule-1',
@@ -693,21 +693,21 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [
+        threat: [
           {
             tactic: {
               id: 'fakeId',
               name: 'fakeName',
               reference: 'fakeRef',
             },
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -718,15 +718,15 @@ describe('create rules schema', () => {
         ],
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "framework" fails because ["framework" is required]]]'
+      'child "threat" fails because ["threat" at position 0 fails because [child "framework" fails because ["framework" is required]]]'
     );
   });
 
-  test('You cannot send in an array of threats that are missing "tactic"', () => {
+  test('You cannot send in an array of threat that are missing "tactic"', () => {
     expect(
       createRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
+        Partial<Omit<RuleAlertParamsRest, 'threat'>> & {
+          threat: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
         }
       >({
         rule_id: 'rule-1',
@@ -737,17 +737,17 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [
+        threat: [
           {
             framework: 'fake',
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -758,15 +758,15 @@ describe('create rules schema', () => {
         ],
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "tactic" fails because ["tactic" is required]]]'
+      'child "threat" fails because ["threat" at position 0 fails because [child "tactic" fails because ["tactic" is required]]]'
     );
   });
 
-  test('You cannot send in an array of threats that are missing "techniques"', () => {
+  test('You cannot send in an array of threat that are missing "technique"', () => {
     expect(
       createRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'technique'>>>;
+        Partial<Omit<RuleAlertParamsRest, 'threat'>> & {
+          threat: Array<Partial<Omit<ThreatParams, 'technique'>>>;
         }
       >({
         rule_id: 'rule-1',
@@ -777,14 +777,14 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [
+        threat: [
           {
             framework: 'fake',
             tactic: {
@@ -796,7 +796,7 @@ describe('create rules schema', () => {
         ],
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "techniques" fails because ["techniques" is required]]]'
+      'child "threat" fails because ["threat" at position 0 fails because [child "technique" fails because ["technique" is required]]]'
     );
   });
 
@@ -812,7 +812,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -837,7 +837,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -864,7 +864,7 @@ describe('create rules schema', () => {
         immutable: 5,
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -884,10 +884,9 @@ describe('create rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -907,10 +906,9 @@ describe('create rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -932,7 +930,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -954,7 +952,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -976,7 +974,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -999,10 +997,9 @@ describe('create rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -1025,7 +1022,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -1047,7 +1044,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -1070,7 +1067,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -1092,7 +1089,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -1115,7 +1112,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -1138,7 +1135,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -1161,7 +1158,7 @@ describe('create rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -1170,5 +1167,61 @@ describe('create rules schema', () => {
         timeline_title: 'some-title',
       }).error.message
     ).toEqual('child "timeline_title" fails because ["timeline_title" is not allowed]');
+  });
+
+  test('The default for "from" will be "now-6m"', () => {
+    expect(
+      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).value.from
+    ).toEqual('now-6m');
+  });
+
+  test('The default for "to" will be "now"', () => {
+    expect(
+      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).value.to
+    ).toEqual('now');
+  });
+
+  test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
+    expect(
+      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'junk',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "severity" fails because ["severity" must be one of [low, medium, high, critical]]'
+    );
   });
 });
