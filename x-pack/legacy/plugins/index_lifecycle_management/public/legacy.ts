@@ -22,10 +22,8 @@ if (chrome.getInjected('ilmUiEnabled')) {
   // be available in Index Management unless the user visits ILM first.
   addAllExtensions();
 
-  /*
-  This method handles the cleanup needed when route is scope is destroyed.  It also prevents Angular
-  from destroying scope when route changes and both old route and new route are this same route.
-  */
+  // This method handles the cleanup needed when route is scope is destroyed.  It also prevents Angular
+  // from destroying scope when route changes and both old route and new route are this same route.
   const manageAngularLifecycle = ($scope: any, $route: any, unmount: () => void) => {
     const lastRoute = $route.current;
     const deregister = $scope.$on('$locationChangeSuccess', () => {
@@ -44,6 +42,8 @@ if (chrome.getInjected('ilmUiEnabled')) {
     });
   };
 
+  // Once this app no longer depends upon Angular's routing (e.g. for the "redirect" service), we can
+  // use the Management plugin's API to register this app within the Elasticsearch section.
   const esSection = management.getSection('elasticsearch');
   esSection.register('index_lifecycle_policies', {
     visible: true,
