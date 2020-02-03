@@ -6,7 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiErrorBoundary } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiErrorBoundary, EuiHideFor } from '@elastic/eui';
 import { LocationStatusTags } from './location_status_tags';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
 import { MonitorLocations, MonitorLocation } from '../../../../common/runtime_types';
@@ -18,7 +18,28 @@ import { LocationMissingWarning } from './location_missing';
 const MapPanel = styled.div`
   height: 240px;
   width: 520px;
-  margin-right: 20px;
+  @media (min-width: 1300px) {
+    margin-right: 20px;
+  }
+  @media (max-width: 574px) {
+    height: 250px;
+    width: 100%;
+    margin-right: 0;
+  }
+`;
+
+const EuiFlexItemTags = styled(EuiFlexItem)`
+  padding-top: 5px;
+  @media (max-width: 850px) {
+    order: 1;
+    text-align: center;
+  }
+`;
+
+const FlexGroup = styled(EuiFlexGroup)`
+  @media (max-width: 850px) {
+    justify-content: center;
+  }
 `;
 
 interface LocationMapProps {
@@ -52,19 +73,22 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
       }
     });
   }
+
   return (
     <EuiErrorBoundary>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
+      <FlexGroup wrap={true} gutterSize="none">
+        <EuiFlexItemTags>
           <LocationStatusTags locations={monitorLocations?.locations || []} />
+        </EuiFlexItemTags>
+        <EuiFlexItem grow={false}>
+          <EuiHideFor sizes={['xs']}>
+            {isGeoInfoMissing && <LocationMissingWarning />}
+            <MapPanel>
+              <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
+            </MapPanel>
+          </EuiHideFor>
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          {isGeoInfoMissing && <LocationMissingWarning />}
-          <MapPanel>
-            <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
-          </MapPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      </FlexGroup>
     </EuiErrorBoundary>
   );
 };

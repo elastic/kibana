@@ -12,7 +12,6 @@
 /src/legacy/core_plugins/kibana/public/discover/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/visualize/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
-/src/legacy/core_plugins/kibana/public/home/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
 /src/legacy/core_plugins/metrics/ @elastic/kibana-app
 /src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
@@ -21,6 +20,10 @@
 /src/plugins/home/public @elastic/kibana-app
 /src/plugins/home/server/*.ts @elastic/kibana-app
 /src/plugins/home/server/services/ @elastic/kibana-app
+# Exclude tutorial resources folder for now because they are not owned by Kibana app and most will move out soon
+/src/legacy/core_plugins/kibana/public/home/*.ts @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/home/*.scss @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/home/np_ready/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/timelion/ @elastic/kibana-app
 /src/plugins/dev_tools/ @elastic/kibana-app
