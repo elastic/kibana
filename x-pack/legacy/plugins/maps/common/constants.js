@@ -151,3 +151,10 @@ export const COLOR_MAP_TYPE = {
 export const COLOR_PALETTE_MAX_SIZE = 10;
 
 export const CATEGORICAL_DATA_TYPES = ['string', 'ip', 'boolean'];
+
+export const SYMBOLIZE_AS_TYPES = {
+  CIRCLE: 'circle',
+  ICON: 'icon',
+};
+
+export const DEFAULT_ICON = 'airfield';

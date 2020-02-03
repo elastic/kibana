@@ -12,6 +12,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const log = getService('log');
   const browser = getService('browser');
+  const alerting = getService('alerting');
 
   describe('Home page', function() {
     before(async () => {
@@ -54,6 +55,43 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Verify content
         await testSubjects.existOrFail('alertsList');
+      });
+
+      it('navigates to an alert details page', async () => {
+        const action = await alerting.actions.createAction({
+          name: `server-log-${Date.now()}`,
+          actionTypeId: '.server-log',
+          config: {},
+          secrets: {},
+        });
+
+        const alert = await alerting.alerts.createAlwaysFiringWithAction(
+          `test-alert-${Date.now()}`,
+          {
+            id: action.id,
+            group: 'default',
+            params: {
+              message: 'from alert 1s',
+              level: 'warn',
+            },
+          }
+        );
+
+        // refresh to see alert
+        await browser.refresh();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        // Verify url
+        expect(await browser.getCurrentUrl()).to.contain(`/alert/${alert.id}`);
+
+        await alerting.alerts.deleteAlert(alert.id);
       });
     });
   });

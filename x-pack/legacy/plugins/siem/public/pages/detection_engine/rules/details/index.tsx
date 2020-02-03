@@ -24,7 +24,11 @@ import { ActionCreator } from 'typescript-fsa';
 import { connect } from 'react-redux';
 import { FiltersGlobal } from '../../../../components/filters_global';
 import { FormattedDate } from '../../../../components/formatted_date';
-import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
+import {
+  getEditRuleUrl,
+  getRulesUrl,
+  DETECTION_ENGINE_PAGE_NAME,
+} from '../../../../components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../components/search_bar';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { useRule } from '../../../../containers/detection_engine/rules';
@@ -50,7 +54,7 @@ import * as detectionI18n from '../../translations';
 import { ReadOnlyCallOut } from '../components/read_only_callout';
 import { RuleSwitch } from '../components/rule_switch';
 import { StepPanel } from '../components/step_panel';
-import { getStepsData } from '../helpers';
+import { getStepsData, redirectToDetections } from '../helpers';
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { GlobalTime } from '../../../../containers/global_time';
@@ -109,6 +113,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     loading,
     isSignalIndexExists,
     isAuthenticated,
+    hasEncryptionKey,
     canUserCRUD,
     hasManageApiKey,
     hasIndexWrite,
@@ -232,11 +237,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     [ruleEnabled, setRuleEnabled]
   );
 
-  if (
-    isSignalIndexExists != null &&
-    isAuthenticated != null &&
-    (!isSignalIndexExists || !isAuthenticated)
-  ) {
+  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
   }
 
@@ -257,7 +258,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
                   <WrapperPage>
                     <DetectionEngineHeaderPage
                       backOptions={{
-                        href: `#${DETECTION_ENGINE_PAGE_NAME}/rules`,
+                        href: getRulesUrl(),
                         text: i18n.BACK_TO_RULES,
                       }}
                       border
@@ -291,7 +292,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
                           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                             <EuiFlexItem grow={false}>
                               <EuiButton
-                                href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}/edit`}
+                                href={getEditRuleUrl(ruleId ?? '')}
                                 iconType="visControls"
                                 isDisabled={(userHasNoPermissions || rule?.immutable) ?? true}
                               >

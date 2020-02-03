@@ -19,11 +19,10 @@
 
 // @ts-ignore
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from '../../vis';
+import { AggConfig } from '../agg_config';
 import { SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
-import { FieldParamEditor } from '../../vis/editors/default/controls/field';
 import { BaseParamType } from './base';
-import { toastNotifications } from '../../notify';
+import { npStart } from '../../new_platform';
 import { propFilter } from '../filter';
 import { Field, IFieldList } from '../../../../../plugins/data/public';
 import { isNestedField } from '../../../../../plugins/data/public';
@@ -31,7 +30,6 @@ import { isNestedField } from '../../../../../plugins/data/public';
 const filterByType = propFilter('type');
 
 export class FieldParamType extends BaseParamType {
-  editorComponent = FieldParamEditor;
   required = true;
   scriptable = true;
   filterFieldTypes: string;
@@ -91,7 +89,7 @@ export class FieldParamType extends BaseParamType {
         (f: any) => f.name === fieldName
       );
       if (!validField) {
-        toastNotifications.addDanger(
+        npStart.core.notifications.toasts.addDanger(
           i18n.translate(
             'common.ui.aggTypes.paramTypes.field.invalidSavedFieldParameterErrorMessage',
             {
