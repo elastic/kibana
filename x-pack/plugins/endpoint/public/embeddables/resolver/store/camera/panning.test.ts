@@ -54,7 +54,10 @@ describe('panning interaction', () => {
         });
         describe('when the user then stops panning', () => {
           beforeEach(() => {
-            const action: CameraAction = { type: 'userStoppedPanning' };
+            const action: CameraAction = {
+              type: 'userStoppedPanning',
+              payload: { time: new Date(0) },
+            };
             store.dispatch(action);
           });
           it('should still have a translation of [-50, -50]', () => {

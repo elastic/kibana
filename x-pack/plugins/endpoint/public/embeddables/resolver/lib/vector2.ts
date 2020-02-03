@@ -77,7 +77,6 @@ export function scale(a: Vector2, n: number): Vector2 {
  * `t` represents progress and:
  * 0 <= `t` <= 1
  */
-// TODO is this used?
 export function lerp(a: Vector2, b: Vector2, t: number): Vector2 {
   return add(scale(a, 1 - t), scale(b, t));
 }

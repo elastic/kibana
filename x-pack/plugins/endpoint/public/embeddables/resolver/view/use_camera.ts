@@ -10,12 +10,17 @@ import { Matrix3 } from '../types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
 
-// TODO, consider this design:
-// receive camera state, don't use `useSelector`. make `camera` a top level module that exports hook, reducer, selectors, types, etc.
-// could be a good separation of concerns. could be premature tho.
 export function useCamera(): {
+  /**
+   * A function to pass to a React element's `ref` property. Used to attach
+   * native event listeners and to measure the DOM node.
+   */
   ref: (node: HTMLDivElement | null) => void;
   onMouseDown: React.MouseEventHandler<HTMLElement>;
+  /**
+   * A 3x3 transformation matrix used to convert a `vector2` from 'world' coordinates
+   * to screen coordinates.
+   */
   projectionMatrix: Matrix3;
 } {
   const dispatch = useResolverDispatch();
@@ -103,6 +108,9 @@ export function useCamera(): {
     if (userIsPanning) {
       dispatch({
         type: 'userStoppedPanning',
+        payload: {
+          time: new Date(),
+        },
       });
     }
   }, [dispatch, userIsPanning]);

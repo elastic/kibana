@@ -304,23 +304,6 @@ export const clippingPlanes: (
 );
 
 /**
- * TODO update comment, possibly do this differently?
- * The camera has a translation value (not counting any current panning.) This is initialized to (0, 0) and
- * updating any time panning ends.
- *
- * When the user is panning, we keep the initial position of the pointer and the current position of the
- * pointer. The difference between these values equals the panning vector.
- *
- * When the user is panning, the translation of the camera is found by adding the panning vector to the
- * translationNotCountingCurrentPanning.
- *
- * We could update the translation as the user moved the mouse but floating point drift (round-off error) could occur.
- */
-export const translationWhenNotAnimating: (
-  state: CameraStateWhenPanning | CameraStateWhenNotAnimatingOrPanning
-) => Vector2 = (state: CameraState) => translation(state)(new Date(0));
-
-/**
  * Whether or not the camera is animating, at a given time.
  */
 export const isAnimating: (state: CameraState) => (time: Date) => boolean = createSelector(

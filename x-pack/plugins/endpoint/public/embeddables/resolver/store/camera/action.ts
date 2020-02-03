@@ -76,6 +76,13 @@ interface UserStartedPanning {
 
 interface UserStoppedPanning {
   readonly type: 'userStoppedPanning';
+
+  readonly payload: {
+    /**
+     * Time when this action was dispatched.
+     */
+    readonly time: Date;
+  };
 }
 
 interface UserNudgedCamera {

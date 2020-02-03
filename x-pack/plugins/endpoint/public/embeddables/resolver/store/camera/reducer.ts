@@ -133,20 +133,12 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
     /**
      * When the user stops panning (by letting up on the mouse) we calculate the new translation of the camera.
      */
-    if (state.panning) {
-      const nextState: CameraState = {
-        ...state,
-        /**
-         * User is panning, therefore animation is not happening and is not needed to calculate
-         * translation.
-         */
-        translationNotCountingCurrentPanning: selectors.translationWhenNotAnimating(state),
-        panning: undefined,
-      };
-      return nextState;
-    } else {
-      return state;
-    }
+    const nextState: CameraState = {
+      ...state,
+      translationNotCountingCurrentPanning: selectors.translation(state)(action.payload.time),
+      panning: undefined,
+    };
+    return nextState;
   } else if (action.type === 'userNudgedCamera') {
     const { direction, time } = action.payload;
     /**
