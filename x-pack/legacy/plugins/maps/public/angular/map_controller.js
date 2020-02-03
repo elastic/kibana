@@ -568,7 +568,7 @@ app.controller(
                     objectType={MAP_SAVED_OBJECT_TYPE}
                   />
                 );
-                showSaveModal(saveModal, npStart.i18n.Context);
+                showSaveModal(saveModal, npStart.core.i18n.Context);
               },
             },
           ]
