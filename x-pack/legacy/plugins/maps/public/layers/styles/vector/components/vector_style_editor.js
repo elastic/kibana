@@ -18,6 +18,7 @@ import { OrientationEditor } from './orientation/orientation_editor';
 import {
   getDefaultDynamicProperties,
   getDefaultStaticProperties,
+  LABEL_BORDER_SIZES,
   VECTOR_STYLES,
 } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
@@ -145,9 +146,33 @@ export class VectorStyleEditor extends Component {
     this.props.handlePropertyChange(propertyName, styleDescriptor);
   };
 
-  _renderFillColor() {
+  _hasBorder() {
+    const width = this.props.styleProperties[VECTOR_STYLES.LINE_WIDTH];
+    return width.isDynamic() ? width.isComplete() : width.getOptions().size !== 0;
+  }
+
+  _hasMarkerOrIcon() {
+    const iconSize = this.props.styleProperties[VECTOR_STYLES.ICON_SIZE];
+    return !iconSize.isDynamic() && iconSize.getOptions().size > 0;
+  }
+
+  _hasLabel() {
+    const label = this.props.styleProperties[VECTOR_STYLES.LABEL_TEXT];
+    return label.isDynamic()
+      ? label.isComplete()
+      : label.getOptions().value != null && label.getOptions().value.length;
+  }
+
+  _hasLabelBorder() {
+    const labelBorderSize = this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_SIZE];
+    return labelBorderSize.getOptions().size !== LABEL_BORDER_SIZES.NONE;
+  }
+
+  _renderFillColor(isPointFillColor = false) {
     return (
       <VectorStyleColorEditor
+        disabled={isPointFillColor && !this._hasMarkerOrIcon()}
+        disabledBy={VECTOR_STYLES.ICON_SIZE}
         swatches={DEFAULT_FILL_COLORS}
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
@@ -163,9 +188,12 @@ export class VectorStyleEditor extends Component {
     );
   }
 
-  _renderLineColor() {
+  _renderLineColor(isPointBorderColor = false) {
+    const disabledByIconSize = isPointBorderColor && !this._hasMarkerOrIcon();
     return (
       <VectorStyleColorEditor
+        disabled={disabledByIconSize || !this._hasBorder()}
+        disabledBy={disabledByIconSize ? VECTOR_STYLES.ICON_SIZE : VECTOR_STYLES.LINE_WIDTH}
         swatches={DEFAULT_LINE_COLORS}
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
@@ -181,9 +209,11 @@ export class VectorStyleEditor extends Component {
     );
   }
 
-  _renderLineWidth() {
+  _renderLineWidth(isPointBorderWidth = false) {
     return (
       <VectorStyleSizeEditor
+        disabled={isPointBorderWidth && !this._hasMarkerOrIcon()}
+        disabledBy={VECTOR_STYLES.ICON_SIZE}
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
         styleProperty={this.props.styleProperties[VECTOR_STYLES.LINE_WIDTH]}
@@ -198,24 +228,9 @@ export class VectorStyleEditor extends Component {
     );
   }
 
-  _renderSymbolSize() {
-    return (
-      <VectorStyleSizeEditor
-        onStaticStyleChange={this._onStaticStyleChange}
-        onDynamicStyleChange={this._onDynamicStyleChange}
-        styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON_SIZE]}
-        fields={this._getOrdinalFields()}
-        defaultStaticStyleOptions={
-          this.state.defaultStaticProperties[VECTOR_STYLES.ICON_SIZE].options
-        }
-        defaultDynamicStyleOptions={
-          this.state.defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options
-        }
-      />
-    );
-  }
-
   _renderLabelProperties() {
+    const hasLabel = this._hasLabel();
+    const hasLabelBorder = this._hasLabelBorder();
     return (
       <Fragment>
         <VectorStyleLabelEditor
@@ -233,6 +248,8 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         <VectorStyleColorEditor
+          disabled={!hasLabel}
+          disabledBy={VECTOR_STYLES.LABEL_TEXT}
           swatches={DEFAULT_LINE_COLORS}
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
@@ -248,6 +265,8 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         <VectorStyleSizeEditor
+          disabled={!hasLabel}
+          disabledBy={VECTOR_STYLES.LABEL_TEXT}
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_SIZE]}
@@ -262,6 +281,8 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         <VectorStyleColorEditor
+          disabled={!hasLabel || !hasLabelBorder}
+          disabledBy={hasLabel ? VECTOR_STYLES.LABEL_BORDER_SIZE : VECTOR_STYLES.LABEL_TEXT}
           swatches={DEFAULT_LINE_COLORS}
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
@@ -277,6 +298,8 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         <VectorStyleLabelBorderSizeEditor
+          disabled={!hasLabel}
+          disabledBy={VECTOR_STYLES.LABEL_TEXT}
           handlePropertyChange={this.props.handlePropertyChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_SIZE]}
         />
@@ -286,12 +309,15 @@ export class VectorStyleEditor extends Component {
   }
 
   _renderPointProperties() {
+    const hasMarkerOrIcon = this._hasMarkerOrIcon();
     let iconOrientationEditor;
     let iconEditor;
     if (this.props.styleProperties[VECTOR_STYLES.SYMBOLIZE_AS].isSymbolizedAsIcon()) {
       iconOrientationEditor = (
         <Fragment>
           <OrientationEditor
+            disabled={!hasMarkerOrIcon}
+            disabledBy={VECTOR_STYLES.ICON_SIZE}
             onStaticStyleChange={this._onStaticStyleChange}
             onDynamicStyleChange={this._onDynamicStyleChange}
             styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON_ORIENTATION]}
@@ -309,6 +335,8 @@ export class VectorStyleEditor extends Component {
       iconEditor = (
         <Fragment>
           <VectorStyleIconEditor
+            disabled={!hasMarkerOrIcon}
+            disabledBy={VECTOR_STYLES.ICON_SIZE}
             onStaticStyleChange={this._onStaticStyleChange}
             onDynamicStyleChange={this._onDynamicStyleChange}
             styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON]}
@@ -328,6 +356,8 @@ export class VectorStyleEditor extends Component {
     return (
       <Fragment>
         <VectorStyleSymbolizeAsEditor
+          disabled={!hasMarkerOrIcon}
+          disabledBy={VECTOR_STYLES.ICON_SIZE}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.SYMBOLIZE_AS]}
           handlePropertyChange={this.props.handlePropertyChange}
         />
@@ -335,18 +365,29 @@ export class VectorStyleEditor extends Component {
 
         {iconEditor}
 
-        {this._renderFillColor()}
+        {this._renderFillColor(true)}
         <EuiSpacer size="m" />
 
-        {this._renderLineColor()}
+        {this._renderLineColor(true)}
         <EuiSpacer size="m" />
 
-        {this._renderLineWidth()}
+        {this._renderLineWidth(true)}
         <EuiSpacer size="m" />
 
         {iconOrientationEditor}
 
-        {this._renderSymbolSize()}
+        <VectorStyleSizeEditor
+          onStaticStyleChange={this._onStaticStyleChange}
+          onDynamicStyleChange={this._onDynamicStyleChange}
+          styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON_SIZE]}
+          fields={this._getOrdinalFields()}
+          defaultStaticStyleOptions={
+            this.state.defaultStaticProperties[VECTOR_STYLES.ICON_SIZE].options
+          }
+          defaultDynamicStyleOptions={
+            this.state.defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options
+          }
+        />
         <EuiSpacer size="m" />
 
         {this._renderLabelProperties()}
