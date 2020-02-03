@@ -5,7 +5,13 @@
  */
 
 import { Legacy } from 'kibana';
-import { CoreSetup, CoreStart, ElasticsearchServiceSetup, LoggerFactory, Plugin } from 'src/core/server';
+import {
+  CoreSetup,
+  CoreStart,
+  ElasticsearchServiceSetup,
+  LoggerFactory,
+  Plugin,
+} from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { SecurityPluginSetup } from '../../../../plugins/security/server';
