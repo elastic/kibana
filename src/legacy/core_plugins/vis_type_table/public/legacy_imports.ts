@@ -27,7 +27,6 @@ export { PaginateDirectiveProvider } from 'ui/directives/paginate';
 // @ts-ignore
 export { PaginateControlsDirectiveProvider } from 'ui/directives/paginate';
 // @ts-ignore
-export { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
 // @ts-ignore
 export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 export { configureAppAngularModule } from 'ui/legacy_compat';
@@ -35,4 +34,7 @@ export { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns';
 // @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
 // @ts-ignore
-export { watchMultiDecorator } from '../../../../plugins/kibana_legacy/public';
+export {
+  watchMultiDecorator,
+  KbnAccessibleClickProvider,
+} from '../../../../plugins/kibana_legacy/public';

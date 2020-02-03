@@ -37,7 +37,6 @@ import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
 import { registerListenEventListener } from 'ui/directives/listen/listen';
 // @ts-ignore
-import { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
 // @ts-ignore
 import { FieldNameDirectiveProvider } from 'ui/directives/field_name';
 // @ts-ignore
@@ -79,13 +78,14 @@ import { createIndexPatternSelectDirective } from './np_ready/components/field_c
 import { createStringFieldProgressBarDirective } from './np_ready/components/field_chooser/string_progress_bar';
 // @ts-ignore
 import { createFieldChooserDirective } from './np_ready/components/field_chooser/field_chooser';
-
 // @ts-ignore
 import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
 import { DiscoverStartPlugins } from './plugin';
-import { PromiseServiceCreator } from '../../../../../plugins/kibana_legacy/public';
-// @ts-ignore
-import { watchMultiDecorator } from '../../../../../plugins/kibana_legacy/public';
+import {
+  watchMultiDecorator,
+  PromiseServiceCreator,
+  KbnAccessibleClickProvider,
+} from '../../../../../plugins/kibana_legacy/public';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
