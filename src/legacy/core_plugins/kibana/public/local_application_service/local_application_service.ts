@@ -50,7 +50,7 @@ export class LocalApplicationService {
    * @param angularRouteManager The current `ui/routes` instance
    */
   attachToAngular(angularRouteManager: UIRoutes) {
-    npStart.plugins.kibana_legacy.getApps().forEach(app => {
+    npStart.plugins.kibanaLegacy.getApps().forEach(app => {
       const wrapperElementId = this.idGenerator();
       angularRouteManager.when(matchAllWithPrefix(app), {
         outerAngularWrapperRoute: true,
@@ -81,7 +81,7 @@ export class LocalApplicationService {
       });
     });
 
-    npStart.plugins.kibana_legacy.getForwards().forEach(({ legacyAppId, newAppId, keepPrefix }) => {
+    npStart.plugins.kibanaLegacy.getForwards().forEach(({ legacyAppId, newAppId, keepPrefix }) => {
       angularRouteManager.when(matchAllWithPrefix(legacyAppId), {
         resolveRedirectTo: ($location: ILocationService) => {
           const url = $location.url();

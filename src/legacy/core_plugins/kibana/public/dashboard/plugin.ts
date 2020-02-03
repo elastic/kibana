@@ -58,7 +58,7 @@ export interface DashboardPluginSetupDependencies {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
   };
   home: HomePublicPluginSetup;
-  kibana_legacy: KibanaLegacySetup;
+  kibanaLegacy: KibanaLegacySetup;
 }
 
 export class DashboardPlugin implements Plugin {
@@ -72,7 +72,7 @@ export class DashboardPlugin implements Plugin {
 
   public setup(
     core: CoreSetup,
-    { __LEGACY: { getAngularDependencies }, home, kibana_legacy }: DashboardPluginSetupDependencies
+    { __LEGACY: { getAngularDependencies }, home, kibanaLegacy }: DashboardPluginSetupDependencies
   ) {
     const app: App = {
       id: '',
@@ -116,8 +116,8 @@ export class DashboardPlugin implements Plugin {
         return renderApp(params.element, params.appBasePath, deps);
       },
     };
-    kibana_legacy.registerLegacyApp({ ...app, id: 'dashboard' });
-    kibana_legacy.registerLegacyApp({ ...app, id: 'dashboards' });
+    kibanaLegacy.registerLegacyApp({ ...app, id: 'dashboard' });
+    kibanaLegacy.registerLegacyApp({ ...app, id: 'dashboards' });
 
     home.featureCatalogue.register({
       id: 'dashboard',

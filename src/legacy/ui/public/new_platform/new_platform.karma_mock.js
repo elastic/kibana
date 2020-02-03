@@ -116,7 +116,7 @@ export const npSetup = {
     devTools: {
       register: () => {},
     },
-    kibana_legacy: {
+    kibanaLegacy: {
       registerLegacyApp: () => {},
       forwardApp: () => {},
     },
@@ -193,7 +193,7 @@ export const npStart = {
     devTools: {
       getSortedDevTools: () => [],
     },
-    kibana_legacy: {
+    kibanaLegacy: {
       getApps: () => [],
       getForwards: () => [],
     },
