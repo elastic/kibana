@@ -31,7 +31,5 @@ export type AggregationRestrictions = Record<
 
 export interface TypeMeta {
   aggs?: Record<string, AggregationRestrictions>;
-  params?: {
-    [key: string]: any;
-  };
+  [key: string]: any;
 }

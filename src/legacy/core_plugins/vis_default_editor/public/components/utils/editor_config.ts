@@ -100,7 +100,7 @@ export function getEditorConfig(
           interval: {
             base: interval,
             help: i18n.translate('visDefaultEditor.editorConfig.histogram.interval.helpText', {
-              defaultMessage: 'Must be a multiple of rollup configuration interval: {interval}',
+              defaultMessage: 'Must be a multiple of configuration interval: {interval}',
               values: { interval },
             }),
           },
@@ -108,7 +108,7 @@ export function getEditorConfig(
       : {};
   }
 
-  // Set date histogram time zone based on rollup capabilities
+  // Set date histogram time zone based on agg restrictions
   if (aggTypeName === 'date_histogram') {
     // Interval is deprecated on date_histogram rollups, but may still be present
     // See https://github.com/elastic/kibana/pull/36310
