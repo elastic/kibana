@@ -86,6 +86,8 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
   return mock;
 }
 
+type CoreSetupMockType = MockedKeys<CoreSetup> & jest.Mocked<Pick<CoreSetup, 'getStartServices'>>;
+
 function createCoreSetupMock() {
   const httpService = httpServiceMock.createSetupContract();
   const httpMock: jest.Mocked<CoreSetup['http']> = {
@@ -99,13 +101,17 @@ function createCoreSetupMock() {
     isTlsEnabled: httpService.isTlsEnabled,
     createRouter: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
+    auth: {
+      get: httpService.auth.get,
+      isAuthenticated: httpService.auth.isAuthenticated,
+    },
   };
   httpMock.createRouter.mockImplementation(() => httpService.createRouter(''));
 
   const uiSettingsMock = {
     register: uiSettingsServiceMock.createSetupContract().register,
   };
-  const mock: MockedKeys<CoreSetup> = {
+  const mock: CoreSetupMockType = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetup(),
@@ -113,6 +119,9 @@ function createCoreSetupMock() {
     savedObjects: savedObjectsServiceMock.createSetupContract(),
     uiSettings: uiSettingsMock,
     uuid: uuidServiceMock.createSetupContract(),
+    getStartServices: jest
+      .fn<Promise<[ReturnType<typeof createCoreStartMock>, object]>, []>()
+      .mockResolvedValue([createCoreStartMock(), {}]),
   };
 
   return mock;

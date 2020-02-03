@@ -755,6 +755,8 @@ export interface Ecs {
 
   network?: Maybe<NetworkEcsField>;
 
+  rule?: Maybe<RuleEcsField>;
+
   signal?: Maybe<SignalField>;
 
   source?: Maybe<SourceEcsFields>;
@@ -934,6 +936,10 @@ export interface NetworkEcsField {
   transport?: Maybe<string[] | string>;
 }
 
+export interface RuleEcsField {
+  reference?: Maybe<string[] | string>;
+}
+
 export interface SignalField {
   rule?: Maybe<RuleField>;
 
@@ -979,7 +985,7 @@ export interface RuleField {
 
   tags?: Maybe<string[] | string>;
 
-  threats?: Maybe<ToAny>;
+  threat?: Maybe<ToAny>;
 
   type?: Maybe<string[] | string>;
 
@@ -1819,7 +1825,9 @@ export interface OverviewHostData {
 
   filebeatSystemModule?: Maybe<number>;
 
-  winlogbeat?: Maybe<number>;
+  winlogbeatSecurity?: Maybe<number>;
+
+  winlogbeatMWSysmonOperational?: Maybe<number>;
 
   inspect?: Maybe<Inspect>;
 }
@@ -4053,6 +4061,8 @@ export namespace EcsResolvers {
 
     network?: NetworkResolver<Maybe<NetworkEcsField>, TypeParent, TContext>;
 
+    rule?: RuleResolver<Maybe<RuleEcsField>, TypeParent, TContext>;
+
     signal?: SignalResolver<Maybe<SignalField>, TypeParent, TContext>;
 
     source?: SourceResolver<Maybe<SourceEcsFields>, TypeParent, TContext>;
@@ -4129,6 +4139,11 @@ export namespace EcsResolvers {
   > = Resolver<R, Parent, TContext>;
   export type NetworkResolver<
     R = Maybe<NetworkEcsField>,
+    Parent = Ecs,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type RuleResolver<
+    R = Maybe<RuleEcsField>,
     Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4709,6 +4724,18 @@ export namespace NetworkEcsFieldResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
+export namespace RuleEcsFieldResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = RuleEcsField> {
+    reference?: ReferenceResolver<Maybe<string[] | string>, TypeParent, TContext>;
+  }
+
+  export type ReferenceResolver<
+    R = Maybe<string[] | string>,
+    Parent = RuleEcsField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
 export namespace SignalFieldResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SignalField> {
     rule?: RuleResolver<Maybe<RuleField>, TypeParent, TContext>;
@@ -4768,7 +4795,7 @@ export namespace RuleFieldResolvers {
 
     tags?: TagsResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    threats?: ThreatsResolver<Maybe<ToAny>, TypeParent, TContext>;
+    threat?: ThreatResolver<Maybe<ToAny>, TypeParent, TContext>;
 
     type?: TypeResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
@@ -4886,7 +4913,7 @@ export namespace RuleFieldResolvers {
     Parent = RuleField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ThreatsResolver<
+  export type ThreatResolver<
     R = Maybe<ToAny>,
     Parent = RuleField,
     TContext = SiemContext
@@ -7633,7 +7660,13 @@ export namespace OverviewHostDataResolvers {
 
     filebeatSystemModule?: FilebeatSystemModuleResolver<Maybe<number>, TypeParent, TContext>;
 
-    winlogbeat?: WinlogbeatResolver<Maybe<number>, TypeParent, TContext>;
+    winlogbeatSecurity?: WinlogbeatSecurityResolver<Maybe<number>, TypeParent, TContext>;
+
+    winlogbeatMWSysmonOperational?: WinlogbeatMwSysmonOperationalResolver<
+      Maybe<number>,
+      TypeParent,
+      TContext
+    >;
 
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
@@ -7708,7 +7741,12 @@ export namespace OverviewHostDataResolvers {
     Parent = OverviewHostData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type WinlogbeatResolver<
+  export type WinlogbeatSecurityResolver<
+    R = Maybe<number>,
+    Parent = OverviewHostData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type WinlogbeatMwSysmonOperationalResolver<
     R = Maybe<number>,
     Parent = OverviewHostData,
     TContext = SiemContext
@@ -9016,6 +9054,7 @@ export type IResolvers<TContext = SiemContext> = {
   EndgameEcsFields?: EndgameEcsFieldsResolvers.Resolvers<TContext>;
   EventEcsFields?: EventEcsFieldsResolvers.Resolvers<TContext>;
   NetworkEcsField?: NetworkEcsFieldResolvers.Resolvers<TContext>;
+  RuleEcsField?: RuleEcsFieldResolvers.Resolvers<TContext>;
   SignalField?: SignalFieldResolvers.Resolvers<TContext>;
   RuleField?: RuleFieldResolvers.Resolvers<TContext>;
   SuricataEcsFields?: SuricataEcsFieldsResolvers.Resolvers<TContext>;

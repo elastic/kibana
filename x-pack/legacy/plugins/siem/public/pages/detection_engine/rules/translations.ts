@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const BACK_TO_DETECTION_ENGINE = i18n.translate(
   'xpack.siem.detectionEngine.rules.backOptionsHeader',
   {
-    defaultMessage: 'Back to detection engine',
+    defaultMessage: 'Back to detections',
   }
 );
 
@@ -18,11 +18,19 @@ export const IMPORT_RULE = i18n.translate('xpack.siem.detectionEngine.rules.impo
 });
 
 export const ADD_NEW_RULE = i18n.translate('xpack.siem.detectionEngine.rules.addNewRuleTitle', {
-  defaultMessage: 'Add new rule',
+  defaultMessage: 'Create new rule',
 });
 
 export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.pageTitle', {
   defaultMessage: 'Signal detection rules',
+});
+
+export const ADD_PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.addPageTitle', {
+  defaultMessage: 'Create',
+});
+
+export const EDIT_PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.editPageTitle', {
+  defaultMessage: 'Edit',
 });
 
 export const REFRESH = i18n.translate('xpack.siem.detectionEngine.rules.allRules.refreshTitle', {
@@ -32,7 +40,7 @@ export const REFRESH = i18n.translate('xpack.siem.detectionEngine.rules.allRules
 export const BATCH_ACTIONS = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.batchActionsTitle',
   {
-    defaultMessage: 'Batch actions',
+    defaultMessage: 'Bulk actions',
   }
 );
 
@@ -205,10 +213,10 @@ export const COLUMN_RULE = i18n.translate(
   }
 );
 
-export const COLUMN_METHOD = i18n.translate(
-  'xpack.siem.detectionEngine.rules.allRules.columns.methodTitle',
+export const COLUMN_RISK_SCORE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.riskScoreTitle',
   {
-    defaultMessage: 'Method',
+    defaultMessage: 'Risk score',
   }
 );
 
@@ -243,20 +251,46 @@ export const COLUMN_TAGS = i18n.translate(
 export const COLUMN_ACTIVATE = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.columns.activateTitle',
   {
-    defaultMessage: 'Activate',
+    defaultMessage: 'Activated',
   }
 );
 
-export const COLUMN_STATUS = i18n.translate(
-  'xpack.siem.detectionEngine.rules.allRules.columns.currentStatusTitle',
+export const CUSTOM_RULES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.filters.customRulesTitle',
   {
-    defaultMessage: 'Current status',
+    defaultMessage: 'Custom rules',
   }
 );
-export const NO_STATUS = i18n.translate(
-  'xpack.siem.detectionEngine.rules.allRules.columns.unknownStatusDescription',
+
+export const ELASTIC_RULES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.filters.elasticRulesTitle',
   {
-    defaultMessage: 'Unknown',
+    defaultMessage: 'Elastic rules',
+  }
+);
+
+export const TAGS = i18n.translate('xpack.siem.detectionEngine.rules.allRules.filters.tagsLabel', {
+  defaultMessage: 'Tags',
+});
+
+export const NO_TAGS_AVAILABLE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.filters.noTagsAvailableDescription',
+  {
+    defaultMessage: 'No tags available',
+  }
+);
+
+export const NO_RULES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.filters.noRulesTitle',
+  {
+    defaultMessage: 'No rules found',
+  }
+);
+
+export const NO_RULES_BODY = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.filters.noRulesBodyTitle',
+  {
+    defaultMessage: "We weren't able to find any rules with the above filters.",
   }
 );
 
@@ -302,3 +336,17 @@ export const UPDATE = i18n.translate('xpack.siem.detectionEngine.rules.updateBut
 export const DELETE = i18n.translate('xpack.siem.detectionEngine.rules.deleteDescription', {
   defaultMessage: 'Delete',
 });
+
+export const LOAD_PREPACKAGED_RULES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.loadPrePackagedRulesButton',
+  {
+    defaultMessage: 'Load Elastic prebuilt rules',
+  }
+);
+
+export const RELOAD_MISSING_PREPACKAGED_RULES = (missingRules: number) =>
+  i18n.translate('xpack.siem.detectionEngine.rules.reloadMissingPrePackagedRulesButton', {
+    values: { missingRules },
+    defaultMessage:
+      'Reload {missingRules} deleted Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} ',
+  });

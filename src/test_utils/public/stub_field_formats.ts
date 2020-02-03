@@ -17,48 +17,13 @@
  * under the License.
  */
 import { CoreSetup } from 'kibana/public';
-
-import {
-  FieldFormatRegisty,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  StringFormat,
-  TruncateFormat,
-  UrlFormat,
-} from '../../plugins/data/public/';
+import { fieldFormats } from '../../plugins/data/public';
 
 export const getFieldFormatsRegistry = (core: CoreSetup) => {
-  const fieldFormats = new FieldFormatRegisty();
+  const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+  const getConfig = core.uiSettings.get.bind(core.uiSettings);
 
-  fieldFormats.register([
-    BoolFormat,
-    BytesFormat,
-    ColorFormat,
-    DateFormat,
-    DateNanosFormat,
-    DurationFormat,
-    IpFormat,
-    NumberFormat,
-    PercentFormat,
-    RelativeDateFormat,
-    SourceFormat,
-    StaticLookupFormat,
-    StringFormat,
-    TruncateFormat,
-    UrlFormat,
-  ]);
+  fieldFormatsRegistry.init(getConfig, {});
 
-  fieldFormats.init(core);
-
-  return fieldFormats;
+  return fieldFormatsRegistry;
 };

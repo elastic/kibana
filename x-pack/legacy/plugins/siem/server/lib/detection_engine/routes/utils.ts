@@ -52,6 +52,16 @@ export const createBulkErrorObject = ({
   };
 };
 
+export interface ImportRuleResponse {
+  rule_id: string;
+  status_code?: number;
+  message?: string;
+  error?: {
+    status_code: number;
+    message: string;
+  };
+}
+
 export interface ImportSuccessError {
   success: boolean;
   success_count: number;

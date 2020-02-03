@@ -23,7 +23,7 @@ import { EuiPanel, EuiTitle, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from '../../../legacy_imports';
+import { VisOptionsProps } from '../../../../../vis_default_editor/public';
 import { BasicVislibParams } from '../../../types';
 import { ChartOptions } from './chart_options';
 import { SetParamByIndex, ChangeValueAxis } from './';
@@ -41,7 +41,7 @@ function SeriesPanel(props: SeriesPanelProps) {
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="kbnVislibVisTypes.controls.pointSeries.series.metricsTitle"
+            id="visTypeVislib.controls.pointSeries.series.metricsTitle"
             defaultMessage="Metrics"
           />
         </h3>
@@ -57,7 +57,7 @@ function SeriesPanel(props: SeriesPanelProps) {
           buttonContent={chart.data.label}
           buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
           aria-label={i18n.translate(
-            'kbnVislibVisTypes.controls.pointSeries.seriesAccordionAriaLabel',
+            'visTypeVislib.controls.pointSeries.seriesAccordionAriaLabel',
             {
               defaultMessage: 'Toggle {agg} options',
               values: { agg: chart.data.label },

@@ -20,7 +20,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { VisOptionsProps } from '../../legacy_imports';
+import { VisOptionsProps } from '../../../../vis_default_editor/public';
 import { SwitchOption } from './switch';
 import { SelectOption } from './select';
 
@@ -37,7 +37,7 @@ function BasicOptions<VisParams extends BasicOptionsParams>({
   return (
     <>
       <SelectOption
-        label={i18n.translate('kbnVislibVisTypes.controls.vislibBasicOptions.legendPositionLabel', {
+        label={i18n.translate('visTypeVislib.controls.vislibBasicOptions.legendPositionLabel', {
           defaultMessage: 'Legend position',
         })}
         options={vis.type.editorConfig.collections.legendPositions}
@@ -46,7 +46,7 @@ function BasicOptions<VisParams extends BasicOptionsParams>({
         setValue={setValue}
       />
       <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.vislibBasicOptions.showTooltipLabel', {
+        label={i18n.translate('visTypeVislib.controls.vislibBasicOptions.showTooltipLabel', {
           defaultMessage: 'Show tooltip',
         })}
         paramName="addTooltip"

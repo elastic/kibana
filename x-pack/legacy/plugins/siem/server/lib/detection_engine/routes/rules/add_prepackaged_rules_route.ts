@@ -18,6 +18,7 @@ import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
+import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
 export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
@@ -33,11 +34,13 @@ export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerR
     },
     async handler(request: RequestFacade, headers) {
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = isFunction(request.getActionsClient)
-        ? request.getActionsClient()
+      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
+        KibanaRequest.from((request as unknown) as Hapi.Request)
+      );
+      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+        ? request.getSavedObjectsClient()
         : null;
-
-      if (!alertsClient || !actionsClient) {
+      if (!alertsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
@@ -58,8 +61,16 @@ export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerR
             );
           }
         }
-        await installPrepackagedRules(alertsClient, actionsClient, rulesToInstall, spaceIndex);
-        await updatePrepackagedRules(alertsClient, actionsClient, rulesToUpdate, spaceIndex);
+        await Promise.all(
+          installPrepackagedRules(alertsClient, actionsClient, rulesToInstall, spaceIndex)
+        );
+        await updatePrepackagedRules(
+          alertsClient,
+          actionsClient,
+          savedObjectsClient,
+          rulesToUpdate,
+          spaceIndex
+        );
         return {
           rules_installed: rulesToInstall.length,
           rules_updated: rulesToUpdate.length,

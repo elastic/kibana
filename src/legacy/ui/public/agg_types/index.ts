@@ -39,7 +39,7 @@ import { histogramBucketAgg } from './buckets/histogram';
 import { rangeBucketAgg } from './buckets/range';
 import { dateRangeBucketAgg } from './buckets/date_range';
 import { ipRangeBucketAgg } from './buckets/ip_range';
-import { termsBucketAgg } from './buckets/terms';
+import { termsBucketAgg, termsAggFilter } from './buckets/terms';
 import { filterBucketAgg } from './buckets/filter';
 import { filtersBucketAgg } from './buckets/filters';
 import { significantTermsBucketAgg } from './buckets/significant_terms';
@@ -94,6 +94,10 @@ export const aggTypes = {
 export { AggParam } from './agg_params';
 export { AggConfig } from './agg_config';
 export { AggConfigs } from './agg_configs';
+export { AggGroupNames, aggGroupNamesMap } from './agg_groups';
 export { FieldParamType } from './param_types';
+export { BUCKET_TYPES } from './buckets/bucket_agg_types';
+export { METRIC_TYPES } from './metrics/metric_agg_types';
+export { ISchemas, Schema, Schemas } from './schemas';
 
-export { setBounds };
+export { setBounds, termsAggFilter };

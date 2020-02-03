@@ -753,6 +753,8 @@ export interface Ecs {
 
   network?: Maybe<NetworkEcsField>;
 
+  rule?: Maybe<RuleEcsField>;
+
   signal?: Maybe<SignalField>;
 
   source?: Maybe<SourceEcsFields>;
@@ -932,6 +934,10 @@ export interface NetworkEcsField {
   transport?: Maybe<string[]>;
 }
 
+export interface RuleEcsField {
+  reference?: Maybe<string[]>;
+}
+
 export interface SignalField {
   rule?: Maybe<RuleField>;
 
@@ -977,7 +983,7 @@ export interface RuleField {
 
   tags?: Maybe<string[]>;
 
-  threats?: Maybe<ToAny>;
+  threat?: Maybe<ToAny>;
 
   type?: Maybe<string[]>;
 
@@ -1817,7 +1823,9 @@ export interface OverviewHostData {
 
   filebeatSystemModule?: Maybe<number>;
 
-  winlogbeat?: Maybe<number>;
+  winlogbeatSecurity?: Maybe<number>;
+
+  winlogbeatMWSysmonOperational?: Maybe<number>;
 
   inspect?: Maybe<Inspect>;
 }
@@ -3850,7 +3858,9 @@ export namespace GetOverviewHostQuery {
 
     filebeatSystemModule: Maybe<number>;
 
-    winlogbeat: Maybe<number>;
+    winlogbeatSecurity: Maybe<number>;
+
+    winlogbeatMWSysmonOperational: Maybe<number>;
 
     inspect: Maybe<Inspect>;
   };
@@ -4273,6 +4283,8 @@ export namespace GetTimelineQuery {
 
     host: Maybe<Host>;
 
+    rule: Maybe<Rule>;
+
     source: Maybe<_Source>;
 
     destination: Maybe<Destination>;
@@ -4488,6 +4500,12 @@ export namespace GetTimelineQuery {
     ip: Maybe<string[]>;
   };
 
+  export type Rule = {
+    __typename?: 'RuleEcsField';
+
+    reference: Maybe<string[]>;
+  };
+
   export type _Source = {
     __typename?: 'SourceEcsFields';
 
@@ -4609,10 +4627,10 @@ export namespace GetTimelineQuery {
 
     original_time: Maybe<string[]>;
 
-    rule: Maybe<Rule>;
+    rule: Maybe<_Rule>;
   };
 
-  export type Rule = {
+  export type _Rule = {
     __typename?: 'RuleField';
 
     id: Maybe<string[]>;

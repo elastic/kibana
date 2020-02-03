@@ -23,7 +23,7 @@ import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from '../../../legacy_imports';
+import { VisOptionsProps } from '../../../../../vis_default_editor/public';
 import { BasicVislibParams, Axis } from '../../../types';
 import { SelectOption, SwitchOption } from '../../common';
 import { LabelOptions } from './label_options';
@@ -62,7 +62,7 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.xAxisTitle"
+            id="visTypeVislib.controls.pointSeries.categoryAxis.xAxisTitle"
             defaultMessage="X-axis"
           />
         </h3>
@@ -70,17 +70,18 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
       <EuiSpacer size="s" />
 
       <SelectOption
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.categoryAxis.positionLabel', {
+        label={i18n.translate('visTypeVislib.controls.pointSeries.categoryAxis.positionLabel', {
           defaultMessage: 'Position',
         })}
         options={vis.type.editorConfig.collections.positions}
         paramName="position"
         value={axis.position}
         setValue={setPosition}
+        data-test-subj="categoryAxisPosition"
       />
 
       <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.categoryAxis.showLabel', {
+        label={i18n.translate('visTypeVislib.controls.pointSeries.categoryAxis.showLabel', {
           defaultMessage: 'Show axis lines and labels',
         })}
         paramName="show"
