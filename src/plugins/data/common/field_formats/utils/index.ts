@@ -19,3 +19,5 @@
 
 export { asPrettyString } from './as_pretty_string';
 export { getHighlightHtml, getHighlightRequest } from './highlight';
+export { FormatFactory, deserializeFieldFormat } from './deserialize';
+export { serializeFieldFormat } from './serialize';
