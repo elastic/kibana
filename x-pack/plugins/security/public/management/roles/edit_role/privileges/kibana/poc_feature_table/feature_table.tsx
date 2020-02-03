@@ -195,7 +195,13 @@ export class FeatureTable extends Component<Props, State> {
 
           let warningIcon = <EuiIconTip type="empty" content={null} />;
           if (this.props.privilegeCalculator.hasNonSupersededSubFeaturePrivileges(feature.id)) {
-            warningIcon = <EuiIconTip type="alert" color="warning" content="AHHHH" />;
+            warningIcon = (
+              <EuiIconTip
+                type="alert"
+                color="warning"
+                content="This message explains that you have sub-feature privilege customizations, and should expand the row for more information"
+              />
+            );
           }
 
           return (

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent, EuiText } from '@elastic/eui';
 import {
   SecuredFeature,
@@ -38,6 +38,20 @@ export const FeatureTableExpandedRow = ({
       )
       .some(p => selectedFeaturePrivileges.includes(p.id));
   });
+
+  useEffect(() => {
+    const hasMinimalFeaturePrivilegeSelected = feature.allPrivileges
+      .filter(
+        ap =>
+          ap instanceof SubFeaturePrivilege ||
+          (ap instanceof PrimaryFeaturePrivilege && ap.isMinimalFeaturePrivilege())
+      )
+      .some(p => selectedFeaturePrivileges.includes(p.id));
+
+    if (!hasMinimalFeaturePrivilegeSelected && isCustomizing) {
+      setIsCustomizing(false);
+    }
+  }, [feature.allPrivileges, isCustomizing, selectedFeaturePrivileges]);
 
   const onCustomizeSubFeatureChange = (e: EuiSwitchEvent) => {
     onChange(
