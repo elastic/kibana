@@ -14,11 +14,11 @@ import { PersonalInfo } from './personal_info';
 
 interface Props {
   authc: AuthenticationServiceSetup;
-  apiClient: PublicMethodsOf<UserAPIClient>;
+  userAPIClient: PublicMethodsOf<UserAPIClient>;
   notifications: NotificationsStart;
 }
 
-export const AccountManagementPage = ({ apiClient, authc, notifications }: Props) => {
+export const AccountManagementPage = ({ userAPIClient, authc, notifications }: Props) => {
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   useEffect(() => {
     authc.getCurrentUser().then(setCurrentUser);
@@ -40,7 +40,11 @@ export const AccountManagementPage = ({ apiClient, authc, notifications }: Props
 
           <PersonalInfo user={currentUser} />
 
-          <ChangePassword user={currentUser} apiClient={apiClient} notifications={notifications} />
+          <ChangePassword
+            user={currentUser}
+            userAPIClient={userAPIClient}
+            notifications={notifications}
+          />
         </EuiPanel>
       </EuiPageBody>
     </EuiPage>

@@ -49,7 +49,7 @@ describe('<AccountManagementPage>', () => {
       <AccountManagementPage
         authc={getSecuritySetupMock({ currentUser: user }).authc}
         notifications={coreMock.createStart().notifications}
-        apiClient={userAPIClientMock.create()}
+        userAPIClient={userAPIClientMock.create()}
       />
     );
 
@@ -71,7 +71,7 @@ describe('<AccountManagementPage>', () => {
       <AccountManagementPage
         authc={getSecuritySetupMock({ currentUser: user }).authc}
         notifications={coreMock.createStart().notifications}
-        apiClient={userAPIClientMock.create()}
+        userAPIClient={userAPIClientMock.create()}
       />
     );
 
@@ -89,7 +89,7 @@ describe('<AccountManagementPage>', () => {
       <AccountManagementPage
         authc={getSecuritySetupMock({ currentUser: user }).authc}
         notifications={coreMock.createStart().notifications}
-        apiClient={userAPIClientMock.create()}
+        userAPIClient={userAPIClientMock.create()}
       />
     );
 
@@ -107,7 +107,7 @@ describe('<AccountManagementPage>', () => {
       <AccountManagementPage
         authc={getSecuritySetupMock({ currentUser: user }).authc}
         notifications={coreMock.createStart().notifications}
-        apiClient={userAPIClientMock.create()}
+        userAPIClient={userAPIClientMock.create()}
       />
     );
 
@@ -126,7 +126,7 @@ describe('<AccountManagementPage>', () => {
       <AccountManagementPage
         authc={getSecuritySetupMock({ currentUser: user }).authc}
         notifications={coreMock.createStart().notifications}
-        apiClient={userAPIClientMock.create()}
+        userAPIClient={userAPIClientMock.create()}
       />
     );
 
