@@ -424,14 +424,6 @@
         ],
       },
       {
-        groupSlug: 'js-search',
-        groupName: 'js-search related packages',
-        packageNames: [
-          'js-search',
-          '@types/js-search',
-        ],
-      },
-      {
         groupSlug: 'js-yaml',
         groupName: 'js-yaml related packages',
         packageNames: [
@@ -870,14 +862,6 @@
         ],
       },
       {
-        groupSlug: 'tar',
-        groupName: 'tar related packages',
-        packageNames: [
-          'tar',
-          '@types/tar',
-        ],
-      },
-      {
         groupSlug: 'tar-fs',
         groupName: 'tar-fs related packages',
         packageNames: [
@@ -991,14 +975,6 @@
         packageNames: [
           'xml2js',
           '@types/xml2js',
-        ],
-      },
-      {
-        groupSlug: 'yauzl',
-        groupName: 'yauzl related packages',
-        packageNames: [
-          'yauzl',
-          '@types/yauzl',
         ],
       },
       {
