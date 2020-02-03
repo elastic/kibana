@@ -7,19 +7,16 @@ export default function Header() {
       {/*<img src={logo} className="App-logo" alt="logo"/>*/}
       <a
         className="App-link"
-        href={gcpLink()}
+        href={buildStatsLink()}
         target="_blank"
         rel="noopener noreferrer"
       >
-        Header
+        Some build stats link or something :)
       </a>
     </header>
   );
 }
 
-function gcpLink() {
-  return `
-https://console.cloud.google.com/storage/browser/kibana-ci-artifacts/
-jobs/elastic+kibana+code-coverage/254/2020-01-29T21-23-03Z/?authuser=1
-`;
+function buildStatsLink() {
+  return 'some build stats url'
 }

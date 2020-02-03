@@ -20,7 +20,9 @@
 import React from 'react';
 import './app.css';
 import Header from './header';
+import BuildStats from './build_stats';
 import TestRunnerItemList from './test_runner_item_list';
+import HistoricalList from './historical_list';
 import Footer from './footer';
 
 export default function App({ items }) {
@@ -28,7 +30,9 @@ export default function App({ items }) {
     <div>
       <Header />
       <div>
+        <BuildStats />
         <TestRunnerItemList items={items} />
+        <HistoricalList />
       </div>
       <Footer/>
     </div>
