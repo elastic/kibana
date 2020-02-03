@@ -21,6 +21,9 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { ExpressionValueSearchContext } from '../../expression_types';
 
+const toArray = <T>(query: undefined | T | T[]): T[] =>
+  !query ? [] : Array.isArray(query) ? query : [query];
+
 export type ExpressionFunctionKibana = ExpressionFunctionDefinition<
   'kibana',
   ExpressionValueSearchContext | null,
@@ -48,17 +51,14 @@ export const kibana: ExpressionFunctionKibana = {
     }
 
     const output: ExpressionValueSearchContext = {
+      // TODO: This spread is left here for legacy reasons, possibly Lens uses it.
+      // TODO: But it should not be need.
       ...input,
       type: 'kibana_context',
-      // query: ...
-      filters: [...(search.filters || []), ...((input && input.filters) || [])],
+      query: [...toArray(search.query), ...toArray((input || {}).query)],
+      filters: [...(search.filters || []), ...((input || {}).filters || [])],
       timeRange: search.timeRange || (input ? input.timeRange : undefined),
     };
-
-    // TODO: FIX THIS.
-    // if (input && input.query && search.query) {
-    // output.query = [...search.query, ...input.query];
-    // }
 
     return output;
   },

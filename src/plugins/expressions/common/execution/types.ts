@@ -67,6 +67,6 @@ export interface DefaultInspectorAdapters {
 
 export interface ExecutionContextSearch {
   filters?: esFilters.Filter[];
-  query?: Query;
+  query?: Query | Query[];
   timeRange?: TimeRange;
 }
