@@ -297,6 +297,7 @@ function createGeometryFilterWithMeta({
     type: SPATIAL_FILTER_TYPE,
     negate: false,
     index: indexPatternId,
+    key: geoFieldName,
     alias: `${geoFieldName} ${relationLabel} ${geometryLabel}`,
   };
 
