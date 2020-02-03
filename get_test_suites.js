@@ -18,7 +18,7 @@
  */
 import fs from 'fs';
 import { getTests } from '@kbn/test';
-import { ALL as ALL_OSS } from './test/all_configs';
+import { CI as ALL_OSS } from './test/all_configs';
 import { ALL as ALL_XPACK } from './x-pack/test/all_configs';
 
 module.exports = async () => {

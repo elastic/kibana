@@ -33,4 +33,8 @@ const onlyNotInCoverageTests = [
 module.exports = {
   ALL: [...alwaysImportedTests, ...onlyNotInCoverageTests],
   FOR_COVERAGE: alwaysImportedTests,
+  CI: [
+    require.resolve('./functional/config.js'),
+    require.resolve('./ui_capabilities/newsfeed_err/config.ts'),
+  ],
 };

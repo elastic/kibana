@@ -287,6 +287,7 @@ def doSetup() {
 }
 
 def buildOss() {
+  sh 'cp -R ./test/scripts/. ../kibana-oss/test/scripts'
   return
   sh 'cp -R ./. ../kibana-oss'
   dir('../kibana-oss') {
