@@ -366,7 +366,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
    *
    * @api {get} /api/ml/data_frame/analytics/:analyticsId/messages Get analytics job messages
    * @apiName GetDataFrameAnalyticsMessages
-   * @apiDescription Returns the list of messages of data frame analytics job.
+   * @apiDescription Returns the list of audit messages for data frame analytics jobs.
    *
    * @apiParam {String} analyticsId Analytics ID.
    */
