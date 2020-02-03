@@ -17,17 +17,10 @@
  * under the License.
  */
 
-export function unset(object: object, rawPath: string): void;
+import { readdir } from 'fs';
+import { fromNode } from 'bluebird';
 
-export {
-  concatStreamProviders,
-  createConcatStream,
-  createFilterStream,
-  createIntersperseStream,
-  createListStream,
-  createMapStream,
-  createPromiseFromStreams,
-  createReduceStream,
-  createReplaceStream,
-  createSplitStream,
-} from './streams';
+export async function readDirectory(path: string) {
+  const allNames = await fromNode<string[]>(cb => readdir(path, cb));
+  return allNames.filter(name => !name.startsWith('.'));
+}
