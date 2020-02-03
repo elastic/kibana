@@ -80,7 +80,7 @@ export default function loggingConfiguration(config) {
       request: ['headers', 'payload'],
     },
     reporters: {
-      logReporter: [loggerStream],
+      logReporter: loggerStream,
     },
   };
   return options;

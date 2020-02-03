@@ -1997,15 +1997,14 @@
     async-retry "^1.2.3"
     strip-ansi "^5.2.0"
 
-"@elastic/good@8.1.1-kibana4":
-  version "8.1.1-kibana4"
-  resolved "https://registry.yarnpkg.com/@elastic/good/-/good-8.1.1-kibana4.tgz#572a63298780c7c58e20417e92dd27a1a85a8dd6"
-  integrity sha512-EssP4ETo2Mpk6fmA4JMzabA5Trls7YENRTQTfqr9ncs98C2MScBVWxKm5t49Ke4Ra0Vi/5lD61lowea/miYTvg==
+"@elastic/good@8.1.1-kibana5":
+  version "8.1.1-kibana5"
+  resolved "https://registry.yarnpkg.com/@elastic/good/-/good-8.1.1-kibana5.tgz#ca03215b73a3faaef9bb95451657346f43da3ef3"
+  integrity sha512-rhG4U0UrUyd78IMBKwiJKBOOy2agPMjGLC61qOpMP/p6g3Yhi4VeqRef3+3ELFwvmB5lZVvts32KmKTDQOxRog==
   dependencies:
     hoek "5.x.x"
     joi "13.x.x"
     oppsy "2.x.x"
-    pumpify "^2.0.1"
 
 "@elastic/makelogs@^5.0.0":
   version "5.0.0"
@@ -11734,16 +11733,6 @@ duplexify@^3.2.0, duplexify@^3.4.2, duplexify@^3.6.0:
     end-of-stream "^1.0.0"
     inherits "^2.0.1"
     readable-stream "^2.0.0"
-    stream-shift "^1.0.0"
-
-duplexify@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/duplexify/-/duplexify-4.1.1.tgz#7027dc374f157b122a8ae08c2d3ea4d2d953aa61"
-  integrity sha512-DY3xVEmVHTv1wSzKNbwoU6nVjzI369Y6sPoqfYr0/xlx3IdX2n94xIszTcjPO8W8ZIv0Wb0PXNcjuZyT4wiICA==
-  dependencies:
-    end-of-stream "^1.4.1"
-    inherits "^2.0.3"
-    readable-stream "^3.1.1"
     stream-shift "^1.0.0"
 
 each-async@^1.1.1:
@@ -23626,15 +23615,6 @@ pumpify@^1.3.3, pumpify@^1.3.5:
     duplexify "^3.6.0"
     inherits "^2.0.3"
     pump "^2.0.0"
-
-pumpify@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/pumpify/-/pumpify-2.0.1.tgz#abfc7b5a621307c728b551decbbefb51f0e4aa1e"
-  integrity sha512-m7KOje7jZxrmutanlkS1daj1dS6z6BgslzOXmcSEpIlCxM3VJH7lG5QLeck/6hgF6F4crFf01UtQmNsJfweTAw==
-  dependencies:
-    duplexify "^4.1.1"
-    inherits "^2.0.3"
-    pump "^3.0.0"
 
 punycode@1.3.2:
   version "1.3.2"
