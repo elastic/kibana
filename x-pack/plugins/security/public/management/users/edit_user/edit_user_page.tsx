@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
-import { User, EditUser, Role, isDeprecatedRole } from '../../../../common/model';
+import { User, EditUser, Role, isRoleDeprecated } from '../../../../common/model';
 import { AuthenticationServiceSetup } from '../../../authentication';
 import { USERS_PATH } from '../../management_urls';
 import { RolesAPIClient } from '../../roles';
@@ -378,7 +378,7 @@ export class EditUserPage extends Component<Props, State> {
 
     const hasAnyDeprecatedRolesAssigned = selectedRoles.some(selected => {
       const role = roles.find(r => r.name === selected);
-      return role && isDeprecatedRole(role);
+      return role && isRoleDeprecated(role);
     });
 
     const roleHelpText = hasAnyDeprecatedRolesAssigned ? (

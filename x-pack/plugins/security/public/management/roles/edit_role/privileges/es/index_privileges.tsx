@@ -8,7 +8,7 @@ import React, { Component, Fragment } from 'react';
 import {
   Role,
   RoleIndexPrivilege,
-  isReadOnlyRole,
+  isRoleReadOnly,
   isRoleEnabled,
 } from '../../../../../../common/model';
 import { SecurityLicense } from '../../../../../../common/licensing';
@@ -57,7 +57,7 @@ export class IndexPrivileges extends Component<Props, State> {
       // doesn't permit FLS/DLS).
       allowDocumentLevelSecurity: allowRoleDocumentLevelSecurity || !isRoleEnabled(this.props.role),
       allowFieldLevelSecurity: allowRoleFieldLevelSecurity || !isRoleEnabled(this.props.role),
-      isReadOnlyRole: isReadOnlyRole(this.props.role),
+      isRoleReadOnly: isRoleReadOnly(this.props.role),
     };
 
     const forms = indices.map((indexPrivilege: RoleIndexPrivilege, idx) => (
@@ -143,7 +143,7 @@ export class IndexPrivileges extends Component<Props, State> {
 
   public loadAvailableFields(privileges: RoleIndexPrivilege[]) {
     // readonly roles cannot be edited, and therefore do not need to fetch available fields.
-    if (isReadOnlyRole(this.props.role)) {
+    if (isRoleReadOnly(this.props.role)) {
       return;
     }
 

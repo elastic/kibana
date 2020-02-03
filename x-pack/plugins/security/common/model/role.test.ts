@@ -7,11 +7,12 @@
 import {
   Role,
   isRoleEnabled,
-  isReservedRole,
-  isDeprecatedRole,
-  isReadOnlyRole,
+  isRoleReserved,
+  isRoleDeprecated,
+  isRoleReadOnly,
   copyRole,
   prepareRoleClone,
+  getRoleDeprecatedReason,
 } from '../../common/model';
 
 describe('role', () => {
@@ -40,14 +41,14 @@ describe('role', () => {
     });
   });
 
-  describe('isReservedRole', () => {
+  describe('isRoleReserved', () => {
     test('should return false if role is explicitly not reserved', () => {
       const testRole = {
         metadata: {
           _reserved: false,
         },
       };
-      expect(isReservedRole(testRole)).toBe(false);
+      expect(isRoleReserved(testRole)).toBe(false);
     });
 
     test('should return true if role is explicitly reserved', () => {
@@ -56,24 +57,23 @@ describe('role', () => {
           _reserved: true,
         },
       };
-      expect(isReservedRole(testRole)).toBe(true);
+      expect(isRoleReserved(testRole)).toBe(true);
     });
 
     test('should return false if role is NOT explicitly reserved or not reserved', () => {
       const testRole = {};
-      expect(isReservedRole(testRole)).toBe(false);
+      expect(isRoleReserved(testRole)).toBe(false);
     });
   });
 
-  // TODO: unskip
-  describe.skip('isDeprecatedRole', () => {
+  describe('isRoleDeprecated', () => {
     test('should return false if role is explicitly not deprecated', () => {
       const testRole = {
         metadata: {
           _deprecated: false,
         },
       };
-      expect(isDeprecatedRole(testRole)).toBe(false);
+      expect(isRoleDeprecated(testRole)).toBe(false);
     });
 
     test('should return true if role is explicitly deprecated', () => {
@@ -82,30 +82,44 @@ describe('role', () => {
           _deprecated: true,
         },
       };
-      expect(isDeprecatedRole(testRole)).toBe(true);
+      expect(isRoleDeprecated(testRole)).toBe(true);
     });
 
     test('should return false if role is NOT explicitly deprecated or not deprecated', () => {
       const testRole = {};
-      expect(isDeprecatedRole(testRole)).toBe(false);
+      expect(isRoleDeprecated(testRole)).toBe(false);
     });
   });
 
-  describe('isReadOnlyRole', () => {
+  describe('getRoleDeprecatedReason', () => {
+    test('returns an empty string if a reason is not explicitly set', () => {
+      const testRole = {};
+      expect(getRoleDeprecatedReason(testRole)).toEqual('');
+    });
+
+    test('returns the deprecation reason when provided', () => {
+      const testRole = {
+        metadata: { _deprecated_reason: "we just don't like this role anymore" },
+      };
+      expect(getRoleDeprecatedReason(testRole)).toEqual(`we just don't like this role anymore`);
+    });
+  });
+
+  describe('isRoleReadOnly', () => {
     test('returns true for reserved roles', () => {
       const testRole = {
         metadata: {
           _reserved: true,
         },
       };
-      expect(isReadOnlyRole(testRole)).toBe(true);
+      expect(isRoleReadOnly(testRole)).toBe(true);
     });
 
     test('returns true for roles with transform errors', () => {
       const testRole = {
         _transform_error: ['kibana'],
       };
-      expect(isReadOnlyRole(testRole)).toBe(true);
+      expect(isRoleReadOnly(testRole)).toBe(true);
     });
 
     test('returns false for disabled roles', () => {
@@ -114,12 +128,12 @@ describe('role', () => {
           enabled: false,
         },
       };
-      expect(isReadOnlyRole(testRole)).toBe(false);
+      expect(isRoleReadOnly(testRole)).toBe(false);
     });
 
     test('returns false for all other roles', () => {
       const testRole = {};
-      expect(isReadOnlyRole(testRole)).toBe(false);
+      expect(isRoleReadOnly(testRole)).toBe(false);
     });
   });
 

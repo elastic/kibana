@@ -57,7 +57,7 @@ export function isRoleEnabled(role: Partial<Role>) {
  *
  * @param role Role as returned by roles API
  */
-export function isReservedRole(role: Partial<Role>) {
+export function isRoleReserved(role: Partial<Role>) {
   return (role.metadata?._reserved as boolean) ?? false;
 }
 
@@ -66,11 +66,16 @@ export function isReservedRole(role: Partial<Role>) {
  *
  * @param {role} the Role as returned by roles API
  */
-export function isDeprecatedRole(role: Partial<Role>) {
+export function isRoleDeprecated(role: Partial<Role>) {
   return role.metadata?._deprecated ?? false;
 }
 
-export function getDeprecatedReason(role: Partial<Role>) {
+/**
+ * Returns the reason this role is deprecated.
+ *
+ * @param role the Role as returned by roles API
+ */
+export function getRoleDeprecatedReason(role: Partial<Role>) {
   return role.metadata?._deprecated_reason ?? '';
 }
 
@@ -79,8 +84,8 @@ export function getDeprecatedReason(role: Partial<Role>) {
  *
  * @param role the Role as returned by roles API
  */
-export function isReadOnlyRole(role: Partial<Role>): boolean {
-  return isReservedRole(role) || (role._transform_error?.length ?? 0) > 0;
+export function isRoleReadOnly(role: Partial<Role>): boolean {
+  return isRoleReserved(role) || (role._transform_error?.length ?? 0) > 0;
 }
 
 /**

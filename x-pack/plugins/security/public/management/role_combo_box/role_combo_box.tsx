@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiText } from '@elastic/eui';
-import { Role, isDeprecatedRole } from '../../../common/model';
+import { Role, isRoleDeprecated } from '../../../common/model';
 
 interface Props {
   availableRoles: Role[];
@@ -25,7 +25,7 @@ export const RoleComboBox = (props: Props) => {
 
   const roleNameToOption = (roleName: string) => {
     const roleDefinition = props.availableRoles.find(role => role.name === roleName);
-    const isDeprecated = roleDefinition && isDeprecatedRole(roleDefinition);
+    const isDeprecated = roleDefinition && isRoleDeprecated(roleDefinition);
     return {
       color: isDeprecated ? 'warning' : 'default',
       'data-test-subj': `roleOption-${roleName}`,

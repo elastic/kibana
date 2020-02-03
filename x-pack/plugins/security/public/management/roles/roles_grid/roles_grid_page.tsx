@@ -26,13 +26,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
-import { getDeprecatedReason } from '../../../../common/model/role';
+import { getRoleDeprecatedReason } from '../../../../common/model/role';
 import {
   Role,
   isRoleEnabled,
-  isReadOnlyRole,
-  isReservedRole,
-  isDeprecatedRole,
+  isRoleReadOnly,
+  isRoleReserved,
+  isRoleDeprecated,
 } from '../../../../common/model';
 import { RolesAPIClient } from '../roles_api_client';
 import { ConfirmDelete } from './confirm_delete';
@@ -195,7 +195,7 @@ export class RolesGridPage extends Component<Props, State> {
         name: i18n.translate('xpack.security.management.roles.statusColumnName', {
           defaultMessage: 'Status',
         }),
-        sortable: (role: Role) => isRoleEnabled(role) && !isDeprecatedRole(role),
+        sortable: (role: Role) => isRoleEnabled(role) && !isRoleDeprecated(role),
         render: (metadata: Role['metadata'], record: Role) => {
           return this.getRoleStatusBadges(record);
         },
@@ -207,7 +207,7 @@ export class RolesGridPage extends Component<Props, State> {
         width: '150px',
         actions: [
           {
-            available: (role: Role) => !isReadOnlyRole(role),
+            available: (role: Role) => !isRoleReadOnly(role),
             render: (role: Role) => {
               const title = i18n.translate('xpack.security.management.roles.editRoleActionName', {
                 defaultMessage: `Edit {roleName}`,
@@ -227,7 +227,7 @@ export class RolesGridPage extends Component<Props, State> {
             },
           },
           {
-            available: (role: Role) => !isReservedRole(role),
+            available: (role: Role) => !isRoleReserved(role),
             render: (role: Role) => {
               const title = i18n.translate('xpack.security.management.roles.cloneRoleActionName', {
                 defaultMessage: `Clone {roleName}`,
@@ -259,7 +259,7 @@ export class RolesGridPage extends Component<Props, State> {
       const normalizedQuery = filter.toLowerCase();
       return (
         normalized.indexOf(normalizedQuery) !== -1 &&
-        (includeReservedRoles || !isReservedRole(role))
+        (includeReservedRoles || !isRoleReserved(role))
       );
     });
   };
@@ -272,8 +272,8 @@ export class RolesGridPage extends Component<Props, State> {
 
   private getRoleStatusBadges = (role: Role) => {
     const enabled = isRoleEnabled(role);
-    const deprecated = isDeprecatedRole(role);
-    const reserved = isReservedRole(role);
+    const deprecated = isRoleDeprecated(role);
+    const reserved = isRoleReserved(role);
 
     const badges = [];
     if (enabled) {
@@ -327,7 +327,7 @@ export class RolesGridPage extends Component<Props, State> {
       defaultMessage:
         'This role has been deprecated, and should no longer be assigned to users. {reason}',
       values: {
-        reason: getDeprecatedReason(role),
+        reason: getRoleDeprecatedReason(role),
       },
     });
   };

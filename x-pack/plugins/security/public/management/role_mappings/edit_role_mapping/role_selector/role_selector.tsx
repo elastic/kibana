@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
-import { RoleMapping, Role, isDeprecatedRole } from '../../../../../common/model';
+import { RoleMapping, Role, isRoleDeprecated } from '../../../../../common/model';
 import { RolesAPIClient } from '../../../roles';
 import { AddRoleTemplateButton } from './add_role_template_button';
 import { RoleTemplateEditor } from './role_template_editor';
@@ -148,7 +148,7 @@ export class RoleSelector extends React.Component<Props, State> {
   private hasDeprecatedRolesAssigned = () => {
     return (
       this.props.roleMapping.roles?.some(r =>
-        this.state.roles.some(role => role.name === r && isDeprecatedRole(role))
+        this.state.roles.some(role => role.name === r && isRoleDeprecated(role))
       ) ?? false
     );
   };
