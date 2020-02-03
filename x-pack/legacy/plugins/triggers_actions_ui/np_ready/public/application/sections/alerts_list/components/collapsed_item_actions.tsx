@@ -20,23 +20,25 @@ import { AlertTableItem } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
 import {
-  deleteAlerts,
-  disableAlerts,
-  enableAlerts,
-  muteAlerts,
-  unmuteAlerts,
-} from '../../../lib/alert_api';
+  ComponentOpts as BulkOperationsComponentOpts,
+  withBulkAlertOperations,
+} from '../../common/components/with_bulk_alert_api_operations';
 
-export interface ComponentOpts {
+export type ComponentOpts = {
   item: AlertTableItem;
   onAlertChanged: () => void;
-}
+} & BulkOperationsComponentOpts;
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   item,
   onAlertChanged,
+  disableAlert,
+  enableAlert,
+  unmuteAlert,
+  muteAlert,
+  deleteAlert,
 }: ComponentOpts) => {
-  const { http, capabilities } = useAppDependencies();
+  const { capabilities } = useAppDependencies();
 
   const canDelete = hasDeleteAlertsCapability(capabilities);
   const canSave = hasSaveAlertsCapability(capabilities);
@@ -71,9 +73,9 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           data-test-subj="enableSwitch"
           onChange={async () => {
             if (item.enabled) {
-              await disableAlerts({ http, ids: [item.id] });
+              await disableAlert(item);
             } else {
-              await enableAlerts({ http, ids: [item.id] });
+              await enableAlert(item);
             }
             onAlertChanged();
           }}
@@ -93,9 +95,9 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           data-test-subj="muteSwitch"
           onChange={async () => {
             if (item.muteAll) {
-              await unmuteAlerts({ http, ids: [item.id] });
+              await unmuteAlert(item);
             } else {
-              await muteAlerts({ http, ids: [item.id] });
+              await muteAlert(item);
             }
             onAlertChanged();
           }}
@@ -115,7 +117,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             color="text"
             data-test-subj="deleteAlert"
             onClick={async () => {
-              await deleteAlerts({ http, ids: [item.id] });
+              await deleteAlert(item);
               onAlertChanged();
             }}
           >
@@ -129,3 +131,5 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     </EuiPopover>
   );
 };
+
+export const CollapsedItemActionsWithApi = withBulkAlertOperations(CollapsedItemActions);
