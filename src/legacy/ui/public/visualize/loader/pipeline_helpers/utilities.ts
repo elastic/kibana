@@ -18,19 +18,8 @@
  */
 
 import { npStart } from 'ui/new_platform';
-import { IAggConfig } from 'ui/agg_types';
-import { Vis } from '../../../../../core_plugins/visualizations/public';
-import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import { fieldFormats } from '../../../../../../plugins/data/public';
 import { SerializedFieldFormat } from '../../../../../../plugins/expressions/common/types';
-
-export const getTableAggs = (vis: Vis): IAggConfig[] => {
-  if (!vis.aggs || !vis.aggs.getResponseAggs) {
-    return [];
-  }
-  const columns = tabifyGetColumns(vis.aggs.getResponseAggs(), !vis.isHierarchical());
-  return columns.map(c => c.aggConfig);
-};
 
 const createFormat = fieldFormats.serializeFieldFormat;
 const getFormat = (mapping?: SerializedFieldFormat) => {
