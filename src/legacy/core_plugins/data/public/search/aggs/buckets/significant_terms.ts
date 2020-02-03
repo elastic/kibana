@@ -24,7 +24,7 @@ import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exc
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
-const significantTermsTitle = i18n.translate('common.ui.aggTypes.buckets.significantTermsTitle', {
+const significantTermsTitle = i18n.translate('data.search.aggs.buckets.significantTermsTitle', {
   defaultMessage: 'Significant Terms',
 });
 
@@ -32,7 +32,7 @@ export const significantTermsBucketAgg = new BucketAggType({
   name: BUCKET_TYPES.SIGNIFICANT_TERMS,
   title: significantTermsTitle,
   makeLabel(aggConfig) {
-    return i18n.translate('common.ui.aggTypes.buckets.significantTermsLabel', {
+    return i18n.translate('data.search.aggs.buckets.significantTermsLabel', {
       defaultMessage: 'Top {size} unusual terms in {fieldName}',
       values: {
         size: aggConfig.params.size,
@@ -54,7 +54,7 @@ export const significantTermsBucketAgg = new BucketAggType({
     },
     {
       name: 'exclude',
-      displayName: i18n.translate('common.ui.aggTypes.buckets.significantTerms.excludeLabel', {
+      displayName: i18n.translate('data.search.aggs.buckets.significantTerms.excludeLabel', {
         defaultMessage: 'Exclude',
       }),
       type: 'string',
@@ -64,7 +64,7 @@ export const significantTermsBucketAgg = new BucketAggType({
     },
     {
       name: 'include',
-      displayName: i18n.translate('common.ui.aggTypes.buckets.significantTerms.includeLabel', {
+      displayName: i18n.translate('data.search.aggs.buckets.significantTerms.includeLabel', {
         defaultMessage: 'Include',
       }),
       type: 'string',

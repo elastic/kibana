@@ -28,10 +28,10 @@ export const AggGroupNames = Object.freeze({
 export type AggGroupNames = $Values<typeof AggGroupNames>;
 
 export const aggGroupNamesMap = () => ({
-  [AggGroupNames.Metrics]: i18n.translate('common.ui.aggTypes.aggGroups.metricsText', {
+  [AggGroupNames.Metrics]: i18n.translate('data.search.aggs.aggGroups.metricsText', {
     defaultMessage: 'Metrics',
   }),
-  [AggGroupNames.Buckets]: i18n.translate('common.ui.aggTypes.aggGroups.bucketsText', {
+  [AggGroupNames.Buckets]: i18n.translate('data.search.aggs.aggGroups.bucketsText', {
     defaultMessage: 'Buckets',
   }),
 });

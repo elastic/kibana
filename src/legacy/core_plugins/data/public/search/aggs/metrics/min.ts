@@ -21,7 +21,7 @@ import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
-const minTitle = i18n.translate('common.ui.aggTypes.metrics.minTitle', {
+const minTitle = i18n.translate('data.search.aggs.metrics.minTitle', {
   defaultMessage: 'Min',
 });
 
@@ -29,7 +29,7 @@ export const minMetricAgg = new MetricAggType({
   name: METRIC_TYPES.MIN,
   title: minTitle,
   makeLabel(aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.minLabel', {
+    return i18n.translate('data.search.aggs.metrics.minLabel', {
       defaultMessage: 'Min {field}',
       values: { field: aggConfig.getFieldDisplayName() },
     });

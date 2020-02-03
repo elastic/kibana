@@ -23,11 +23,11 @@ import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { METRIC_TYPES } from './metric_agg_types';
 
-const derivativeLabel = i18n.translate('common.ui.aggTypes.metrics.derivativeLabel', {
+const derivativeLabel = i18n.translate('data.search.aggs.metrics.derivativeLabel', {
   defaultMessage: 'derivative',
 });
 
-const derivativeTitle = i18n.translate('common.ui.aggTypes.metrics.derivativeTitle', {
+const derivativeTitle = i18n.translate('data.search.aggs.metrics.derivativeTitle', {
   defaultMessage: 'Derivative',
 });
 

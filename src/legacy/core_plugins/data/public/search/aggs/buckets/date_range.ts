@@ -26,7 +26,7 @@ import { createFilterDateRange } from './create_filter/date_range';
 
 import { KBN_FIELD_TYPES, fieldFormats } from '../../../../../../../plugins/data/public';
 
-const dateRangeTitle = i18n.translate('common.ui.aggTypes.buckets.dateRangeTitle', {
+const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',
 });
 

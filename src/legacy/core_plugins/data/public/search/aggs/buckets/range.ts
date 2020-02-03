@@ -27,7 +27,7 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 const keyCaches = new WeakMap();
 const formats = new WeakMap();
 
-const rangeTitle = i18n.translate('common.ui.aggTypes.buckets.rangeTitle', {
+const rangeTitle = i18n.translate('data.search.aggs.buckets.rangeTitle', {
   defaultMessage: 'Range',
 });
 
@@ -36,7 +36,7 @@ export const rangeBucketAgg = new BucketAggType({
   title: rangeTitle,
   createFilter: createFilterRange,
   makeLabel(aggConfig) {
-    return i18n.translate('common.ui.aggTypes.buckets.rangesLabel', {
+    return i18n.translate('data.search.aggs.aggTypesLabel', {
       defaultMessage: '{fieldName} ranges',
       values: {
         fieldName: aggConfig.getFieldDisplayName(),
@@ -69,7 +69,7 @@ export const rangeBucketAgg = new BucketAggType({
       const format = agg.fieldOwnFormatter();
       const gte = '\u2265';
       const lt = '\u003c';
-      return i18n.translate('common.ui.aggTypes.buckets.ranges.rangesFormatMessage', {
+      return i18n.translate('data.search.aggs.aggTypes.rangesFormatMessage', {
         defaultMessage: '{gte} {from} and {lt} {to}',
         values: {
           gte,

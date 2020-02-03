@@ -24,7 +24,7 @@ import { METRIC_TYPES } from './metric_agg_types';
 import { percentilesMetricAgg } from './percentiles';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
-const medianTitle = i18n.translate('common.ui.aggTypes.metrics.medianTitle', {
+const medianTitle = i18n.translate('data.search.aggs.metrics.medianTitle', {
   defaultMessage: 'Median',
 });
 
@@ -33,7 +33,7 @@ export const medianMetricAgg = new MetricAggType({
   dslName: 'percentiles',
   title: medianTitle,
   makeLabel(aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.medianLabel', {
+    return i18n.translate('data.search.aggs.metrics.medianLabel', {
       defaultMessage: 'Median {field}',
       values: { field: aggConfig.getFieldDisplayName() },
     });

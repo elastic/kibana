@@ -363,7 +363,7 @@ export class AggConfig {
 
     if (!this.type) return '';
     return percentageMode
-      ? i18n.translate('common.ui.vis.aggConfig.percentageOfLabel', {
+      ? i18n.translate('data.search.aggs.percentageOfLabel', {
           defaultMessage: 'Percentage of {label}',
           values: { label: this.type.makeLabel(this) },
         })

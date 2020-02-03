@@ -27,7 +27,7 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterIpRange } from './create_filter/ip_range';
 import { KBN_FIELD_TYPES, fieldFormats } from '../../../../../../../plugins/data/public';
 
-const ipRangeTitle = i18n.translate('common.ui.aggTypes.buckets.ipRangeTitle', {
+const ipRangeTitle = i18n.translate('data.search.aggs.buckets.ipRangeTitle', {
   defaultMessage: 'IPv4 Range',
 });
 
@@ -57,7 +57,7 @@ export const ipRangeBucketAgg = new BucketAggType({
     return new IpRangeFormat();
   },
   makeLabel(aggConfig) {
-    return i18n.translate('common.ui.aggTypes.buckets.ipRangeLabel', {
+    return i18n.translate('data.search.aggs.buckets.ipRangeLabel', {
       defaultMessage: '{fieldName} IP ranges',
       values: {
         fieldName: aggConfig.getFieldDisplayName(),

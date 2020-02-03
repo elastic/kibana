@@ -25,11 +25,11 @@ import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 import { METRIC_TYPES } from './metric_agg_types';
 
-const overallAverageLabel = i18n.translate('common.ui.aggTypes.metrics.overallAverageLabel', {
+const overallAverageLabel = i18n.translate('data.search.aggs.metrics.overallAverageLabel', {
   defaultMessage: 'overall average',
 });
 
-const averageBucketTitle = i18n.translate('common.ui.aggTypes.metrics.averageBucketTitle', {
+const averageBucketTitle = i18n.translate('data.search.aggs.metrics.averageBucketTitle', {
   defaultMessage: 'Average Bucket',
 });
 

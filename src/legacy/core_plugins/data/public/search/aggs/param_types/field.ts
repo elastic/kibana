@@ -49,15 +49,12 @@ export class FieldParamType extends BaseParamType {
 
         if (!field) {
           throw new TypeError(
-            i18n.translate(
-              'common.ui.aggTypes.paramTypes.field.requiredFieldParameterErrorMessage',
-              {
-                defaultMessage: '{fieldParameter} is a required parameter',
-                values: {
-                  fieldParameter: '"field"',
-                },
-              }
-            )
+            i18n.translate('data.search.aggs.paramTypes.field.requiredFieldParameterErrorMessage', {
+              defaultMessage: '{fieldParameter} is a required parameter',
+              values: {
+                fieldParameter: '"field"',
+              },
+            })
           );
         }
 
@@ -93,7 +90,7 @@ export class FieldParamType extends BaseParamType {
       if (!validField) {
         npStart.core.notifications.toasts.addDanger(
           i18n.translate(
-            'common.ui.aggTypes.paramTypes.field.invalidSavedFieldParameterErrorMessage',
+            'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
             {
               defaultMessage:
                 'Saved {fieldParameter} parameter is now invalid. Please select a new field.',
