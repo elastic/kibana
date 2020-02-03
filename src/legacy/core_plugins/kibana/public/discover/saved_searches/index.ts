@@ -18,4 +18,3 @@
  */
 
 export * from './saved_searches';
-import './saved_searches_register';

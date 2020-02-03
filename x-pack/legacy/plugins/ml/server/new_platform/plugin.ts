@@ -41,13 +41,11 @@ import { makeMlUsageCollector } from '../lib/ml_telemetry';
 import { notificationRoutes } from '../routes/notification_settings';
 // @ts-ignore: could not find declaration file for module
 import { systemRoutes } from '../routes/system';
-// @ts-ignore: could not find declaration file for module
 import { dataFrameAnalyticsRoutes } from '../routes/data_frame_analytics';
 // @ts-ignore: could not find declaration file for module
 import { dataRecognizer } from '../routes/modules';
 // @ts-ignore: could not find declaration file for module
 import { dataVisualizerRoutes } from '../routes/data_visualizer';
-// @ts-ignore: could not find declaration file for module
 import { calendars } from '../routes/calendars';
 // @ts-ignore: could not find declaration file for module
 import { fieldsService } from '../routes/fields_service';

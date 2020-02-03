@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { PLUGIN_ID } from '../../common/constants';
 import { ExportTypesRegistry, HeadlessChromiumDriverFactory } from '../../types';
 import { CancellationToken } from '../../common/cancellation_token';
@@ -17,10 +18,10 @@ import {
   JobSource,
   RequestFacade,
   ServerFacade,
+  Logger,
 } from '../../types';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
-import { LevelLogger } from './level_logger';
 
 interface CreateWorkerFactoryOpts {
   exportTypesRegistry: ExportTypesRegistry;
@@ -29,11 +30,12 @@ interface CreateWorkerFactoryOpts {
 
 export function createWorkerFactory<JobParamsType>(
   server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  logger: Logger,
   { exportTypesRegistry, browserDriverFactory }: CreateWorkerFactoryOpts
 ) {
   type JobDocPayloadType = JobDocPayload<JobParamsType>;
   const config = server.config();
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue-worker']);
   const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
   const kibanaName: string = config.get('server.name');
   const kibanaId: string = config.get('server.uuid');
@@ -50,7 +52,9 @@ export function createWorkerFactory<JobParamsType>(
       ExportTypeDefinition<JobParamsType, any, any, any>
     >) {
       // TODO: the executeJobFn should be unwrapped in the register method of the export types registry
-      const jobExecutor = exportType.executeJobFactory(server, { browserDriverFactory });
+      const jobExecutor = exportType.executeJobFactory(server, elasticsearch, logger, {
+        browserDriverFactory,
+      });
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
 

@@ -39,8 +39,8 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         language,
         output_index: outputIndex,
         saved_id: savedId,
-        timeline_id: timelineId,
-        timeline_title: timelineTitle,
+        timeline_id: timelineId = null,
+        timeline_title: timelineTitle = null,
         meta,
         filters,
         rule_id: ruleId,
@@ -54,7 +54,7 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         tags,
         to,
         type,
-        threats,
+        threat,
         references,
         version,
       } = request.payload;
@@ -98,7 +98,7 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           tags,
           to,
           type,
-          threats,
+          threat,
           references,
           version,
         });

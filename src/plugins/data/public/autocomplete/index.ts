@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import * as autocomplete from './static';
+export { AutocompleteService, AutocompleteSetup, AutocompleteStart } from './autocomplete_service';
 
-export { AutocompleteService } from './autocomplete_service';
-export { QuerySuggestion, QuerySuggestionType, QuerySuggestionsGetFn } from './types';
+export { autocomplete };

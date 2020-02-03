@@ -14,6 +14,9 @@ export const pod: InventoryModel = {
   displayName: i18n.translate('xpack.infra.inventoryModel.pod.displayName', {
     defaultMessage: 'Kubernetes Pods',
   }),
+  singularDisplayName: i18n.translate('xpack.infra.inventoryModels.pod.singularDisplayName', {
+    defaultMessage: 'Kubernetes Pod',
+  }),
   requiredModule: 'kubernetes',
   crosslinkSupport: {
     details: true,

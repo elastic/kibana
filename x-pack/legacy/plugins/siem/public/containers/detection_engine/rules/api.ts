@@ -217,6 +217,8 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
           immutable: undefined,
           last_success_at: undefined,
           last_success_message: undefined,
+          last_failure_at: undefined,
+          last_failure_message: undefined,
           status: undefined,
           status_date: undefined,
         }))
@@ -389,6 +391,7 @@ export const getPrePackagedRulesStatus = async ({
 }: {
   signal: AbortSignal;
 }): Promise<{
+  rules_custom_installed: number;
   rules_installed: number;
   rules_not_installed: number;
   rules_not_updated: number;

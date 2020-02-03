@@ -18,7 +18,7 @@
  */
 
 import { groupBy } from 'lodash';
-import { AggConfig } from '../../vis/';
+import { AggConfig } from '../../agg_types';
 
 export interface AggColumn {
   aggConfig: AggConfig;

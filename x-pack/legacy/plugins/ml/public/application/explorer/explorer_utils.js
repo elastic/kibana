@@ -222,6 +222,19 @@ export function getSelectionInfluencers(selectedCells, fieldName) {
   return [];
 }
 
+export function getSelectionJobIds(selectedCells, selectedJobs) {
+  if (
+    selectedCells !== undefined &&
+    selectedCells.type !== SWIMLANE_TYPE.OVERALL &&
+    selectedCells.viewByFieldName !== undefined &&
+    selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
+  ) {
+    return selectedCells.lanes;
+  }
+
+  return selectedJobs.map(d => d.id);
+}
+
 export function getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth) {
   // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
   // and the max bucket span for the jobs shown in the chart.
@@ -587,10 +600,7 @@ export async function loadAnomaliesTableData(
   tableSeverity,
   influencersFilterQuery
 ) {
-  const jobIds =
-    selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
-      ? selectedCells.lanes
-      : selectedJobs.map(d => d.id);
+  const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
   const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
 

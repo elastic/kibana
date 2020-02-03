@@ -53,7 +53,7 @@ export const MonitorBarSeries = ({
   const id = 'downSeries';
 
   return seriesHasDownValues(histogramSeries) ? (
-    <div style={{ height: 50, width: '100%', maxWidth: '1200px' }}>
+    <div style={{ height: 50, width: '100%', maxWidth: '1200px', marginRight: 15 }}>
       <Chart>
         <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} />
         <Axis

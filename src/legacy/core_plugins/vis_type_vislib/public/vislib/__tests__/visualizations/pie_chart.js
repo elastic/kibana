@@ -22,13 +22,13 @@ import _ from 'lodash';
 import $ from 'jquery';
 import expect from '@kbn/expect';
 
-import { vislibSlicesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
-
 import fixtures from 'fixtures/fake_hierarchical_data';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
+import { Vis } from '../../../../../visualizations/public';
 import { getVis, getMockUiState } from '../lib/fixtures/_vis_fixture';
-import { Vis, tabifyAggResponse } from '../../../legacy_imports';
+import { tabifyAggResponse } from '../../../legacy_imports';
+import { vislibSlicesResponseHandler } from '../../response_handler';
 
 const rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -130,7 +130,7 @@ describe('No global chart settings', function() {
     chart1 = getVis(visLibParams1);
     mockUiState = getMockUiState();
     indexPattern = new FixturesStubbedLogstashIndexPatternProvider();
-    responseHandler = vislibSlicesResponseHandlerProvider().handler;
+    responseHandler = vislibSlicesResponseHandler;
 
     let id1 = 1;
     stubVis1 = new Vis(indexPattern, {
@@ -219,7 +219,7 @@ describe('Vislib PieChart Class Test Suite', function() {
         vis = getVis(visLibParams);
         mockUiState = getMockUiState();
         indexPattern = new FixturesStubbedLogstashIndexPatternProvider();
-        responseHandler = vislibSlicesResponseHandlerProvider().handler;
+        responseHandler = vislibSlicesResponseHandler;
 
         let id = 1;
         stubVis = new Vis(indexPattern, {
