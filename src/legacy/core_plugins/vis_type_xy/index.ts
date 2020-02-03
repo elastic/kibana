@@ -22,7 +22,7 @@ import { Legacy } from 'kibana';
 
 import { LegacyPluginApi, LegacyPluginInitializer } from '../../types';
 
-export interface ConfigShema {
+export interface ConfigSchema {
   visTypeXy: {
     enabled: boolean;
   };
@@ -35,7 +35,7 @@ const visTypeXyPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyP
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       hacks: [resolve(__dirname, 'public/legacy')],
-      injectDefaultVars(server): ConfigShema {
+      injectDefaultVars(server): ConfigSchema {
         const config = server.config();
 
         return {
