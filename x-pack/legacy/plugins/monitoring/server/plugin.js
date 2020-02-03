@@ -24,6 +24,7 @@ export class Plugin {
       plugins,
       _kbnServer: kbnServer,
       log,
+      logger,
       getOSInfo,
       _hapi: hapiServer,
       events,
@@ -169,11 +170,11 @@ export class Plugin {
       }
 
       function getLogger(contexts) {
-        return core.logger.get('plugins', LOGGING_TAG, ...contexts);
+        return logger.get('plugins', LOGGING_TAG, ...contexts);
       }
       plugins.alerting.setup.registerType(
         getLicenseExpiration(
-          core._hapi,
+          hapiServer,
           getMonitoringCluster,
           getLogger,
           config.get('xpack.monitoring.ccs.enabled')

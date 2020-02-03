@@ -7,10 +7,11 @@
 import { resolve } from 'path';
 import { Server } from 'src/legacy/server/kbn_server';
 import KbnServer from 'src/legacy/server/kbn_server';
-import { i18n } from '@kbn/i18n';
 import { LegacyPluginApi, LegacyPluginSpec } from 'src/legacy/plugin_discovery/types';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { KIBANA_ALERTING_ENABLED } from './common/constants';
 
+// @ts-ignore
+import { getUiExports } from './ui_exports';
 // @ts-ignore
 import { config as configDefaults } from './config';
 // @ts-ignore
@@ -24,25 +25,10 @@ type InfraPlugin = any; // TODO
 type PluginsSetup = any; // TODO
 type LegacySetup = any; // TODO
 
-const uiExports = {
-  app: {
-    title: i18n.translate('xpack.monitoring.stackMonitoringTitle', {
-      defaultMessage: 'Stack Monitoring',
-    }),
-    order: 9002,
-    description: i18n.translate('xpack.monitoring.uiExportsDescription', {
-      defaultMessage: 'Monitoring for Elastic Stack',
-    }),
-    icon: 'plugins/monitoring/icons/monitoring.svg',
-    euiIconType: 'monitoringApp',
-    linkToLastSubUrl: false,
-    main: 'plugins/monitoring/legacy',
-    category: DEFAULT_APP_CATEGORIES.management,
-  },
-  hacks: ['plugins/monitoring/hacks/toggle_app_link_in_nav'],
-  home: ['plugins/monitoring/register_feature'],
-  styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-};
+const deps = ['kibana', 'elasticsearch', 'xpack_main'];
+if (KIBANA_ALERTING_ENABLED) {
+  deps.push(...['alerting', 'actions']);
+}
 
 const validConfigOptions: string[] = [
   'monitoring.ui.enabled',
@@ -75,12 +61,12 @@ const validConfigOptions: string[] = [
  */
 export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: deps,
     id: 'monitoring',
     configPrefix: 'monitoring',
     publicDir: resolve(__dirname, 'public'),
     config: configDefaults,
-    uiExports,
+    uiExports: getUiExports(),
     deprecations,
 
     init(server: Server) {
@@ -100,6 +86,7 @@ export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
         }),
         injectUiAppVars,
         log,
+        logger: server.newPlatform.coreContext.logger,
         getOSInfo,
         events: {
           on: (...args: Parameters<typeof server.events.on>) => server.events.on(...args),
@@ -112,7 +99,7 @@ export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
       };
 
       const legacyPlugins = plugins as Partial<typeof plugins> & { infra?: InfraPlugin };
-      const { xpack_main, elasticsearch, infra } = legacyPlugins;
+      const { xpack_main, elasticsearch, infra, alerting } = legacyPlugins;
       const {
         core: coreSetup,
         plugins: { usageCollection, licensing },
@@ -129,6 +116,7 @@ export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
           xpack_main,
           elasticsearch,
           infra,
+          alerting,
         },
       };
 
