@@ -104,7 +104,6 @@ describe('embeddable', () => {
     embeddable.render(mountpoint);
 
     expect(expressionRenderer.mock.calls[0][0].searchContext).toEqual({
-      type: 'kibana_context',
       timeRange,
       query,
       filters,
