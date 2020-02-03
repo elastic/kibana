@@ -14,10 +14,12 @@ Object {
       },
     },
   ],
-  "query": Object {
-    "language": "lucene",
-    "query": "geo.src:US",
-  },
+  "query": Array [
+    Object {
+      "language": "lucene",
+      "query": "geo.src:US",
+    },
+  ],
   "timeRange": Object {
     "from": "2",
     "to": "3",

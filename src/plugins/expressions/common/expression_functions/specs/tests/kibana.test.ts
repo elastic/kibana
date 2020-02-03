@@ -20,17 +20,17 @@
 import { functionWrapper } from './utils';
 import { kibana } from '../kibana';
 import { ExecutionContext } from '../../../execution/types';
-import { KibanaContext } from '../../../expression_types';
+import { KibanaContext, ExpressionValueSearchContext } from '../../../expression_types';
 
 describe('interpreter/functions#kibana', () => {
   const fn = functionWrapper(kibana);
   let input: Partial<KibanaContext>;
-  let initialInput: KibanaContext;
+  let search: ExpressionValueSearchContext;
   let context: ExecutionContext;
 
   beforeEach(() => {
     input = { timeRange: { from: '0', to: '1' } };
-    initialInput = {
+    search = {
       type: 'kibana_context',
       query: { language: 'lucene', query: 'geo.src:US' },
       filters: [
@@ -46,6 +46,7 @@ describe('interpreter/functions#kibana', () => {
       timeRange: { from: '2', to: '3' },
     };
     context = {
+      search,
       getInitialInput: () => input,
       types: {},
       variables: {},
@@ -59,13 +60,13 @@ describe('interpreter/functions#kibana', () => {
     expect(actual).toMatchSnapshot();
   });
 
-  it('uses timeRange from context if not provided in initialContext', () => {
-    initialInput.timeRange = undefined;
+  it('uses timeRange from input if not provided in search context', () => {
+    search.timeRange = undefined;
     const actual = fn(input, {}, context);
     expect(actual.timeRange).toEqual({ from: '0', to: '1' });
   });
 
-  it('combines filters from context with initialContext', () => {
+  it('combines filters from input with search context', () => {
     input.filters = [
       {
         meta: {
