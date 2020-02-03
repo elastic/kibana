@@ -1,31 +1,37 @@
-def withWorkers(machineName, preWorkerClosure = {}, workerClosures = [:]) {
+def withWorkers(machineName, preWorkerClosure = {}, inParallel = {}, workerClosures = [:]) {
   return {
-    jobRunner('tests-xl', true) {
+    jobRunner('tests-64', true) {
       withGcsArtifactUpload(machineName, {
         withPostBuildReporting {
           doSetup()
-          preWorkerClosure()
 
-          def nextWorker = 1
-          def worker = { workerClosure ->
-            def workerNumber = nextWorker
-            nextWorker++
+          parallel([
+            one: {
+              preWorkerClosure()
 
-            return {
-              // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
-              def delay = (workerNumber-1)*20
-              sleep(delay)
+              def nextWorker = 1
+              def worker = { workerClosure ->
+                def workerNumber = nextWorker
+                nextWorker++
 
-              workerClosure(workerNumber)
-            }
-          }
+                return {
+                  // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
+                  def delay = (workerNumber-1)*7 // TODO
+                  sleep(delay)
 
-          def workers = [:]
-          workerClosures.each { workerName, workerClosure ->
-            workers[workerName] = worker(workerClosure)
-          }
+                  workerClosure(workerNumber)
+                }
+              }
 
-          parallel(workers)
+              def workers = [:]
+              workerClosures.each { workerName, workerClosure ->
+                workers[workerName] = worker(workerClosure)
+              }
+
+              parallel(workers)
+            },
+            two: inParallel
+          ])
         }
       })
     }
@@ -170,6 +176,7 @@ def jobRunner(label, useRamDisk, closure) {
 }
 
 def uploadGcsArtifact(uploadPrefix, pattern) {
+  return
   googleStorageUpload(
     credentialsId: 'kibana-ci-gcs-plugin',
     bucket: "gs://${uploadPrefix}",
@@ -224,7 +231,8 @@ def withGcsArtifactUpload(workerName, closure) {
 }
 
 def publishJunit() {
-  junit(testResults: 'target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
+  junit(testResults: '../kibana-oss/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
+  junit(testResults: '../kibana-xpack/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
 }
 
 def sendMail() {
@@ -274,15 +282,24 @@ def bash(script, label) {
 }
 
 def doSetup() {
+  return
   runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
 }
 
 def buildOss() {
-  runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+  return
+  sh 'cp -R ./. ../kibana-oss'
+  dir('../kibana-oss') {
+    runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+  }
 }
 
 def buildXpack() {
-  runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+  return
+  sh 'cp -R ./. ../kibana-xpack'
+  dir('../kibana-xpack') {
+    runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+  }
 }
 
 def runErrorReporter() {
@@ -297,62 +314,131 @@ def runErrorReporter() {
     "Report failed tests, if necessary"
   )
 }
+def processOssQueue(queue, finishedSuites, workerNumber) {
+  while(!queue.isEmpty()) {
+    def testSuite
+    try {
+      testSuite = queue.pop()
+    } catch (ex) {
+      print ex.toString()
+      continue
+    }
 
-def getFunctionalQueueWorker(queue, finishedSuites, ciGroup) {
-  return getPostBuildWorker("xpack-ciGroup" + ciGroup, {
-    while(!queue.isEmpty()) {
-      def testSuite
-      try {
-        testSuite = queue.pop()
-      } catch (ex) {
-        print ex.toString()
-        continue
-      }
+    withEnv([
+      "CI_GROUP=${workerNumber}",
+      "JOB=kibana-ciGroup${workerNumber}",
+      "REMOVE_KIBANA_INSTALL_DIR=1",
+    ]) {
+      catchError {
+        retryable("kibana-ciGroup${workerNumber}") {
+          testSuite.startTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+          testSuite.success = null
+          def tagString = testSuite.tags.collect { "--include-tag '${it}'" }.join(' ')
 
-      withEnv([
-        "CI_GROUP=${ciGroup}",
-        "JOB=xpack-kibana-ciGroup${ciGroup}",
-        "REMOVE_KIBANA_INSTALL_DIR=1",
-      ]) {
-        catchError {
-          retryable("xpack-kibana-ciGroup${ciGroup}") {
-            testSuite.startTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
-            testSuite.success = null
-            def tagString = testSuite.tags.collect { "--include-tag '${it}'" }.join(' ')
-
-            try {
-              // runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${ciGroup}")
-              bash(
-                """
-                  source test/scripts/jenkins_test_setup_xpack.sh
-                  node scripts/functional_tests \
-                    --config '${testSuite.config}' \
-                    --debug --bail \
-                    --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
-                    ${tagString}
-                """, "Execute x-pack tests"
-              )
-              testSuite.success = true
-            } catch (ex) {
-              testSuite.success = false
-              throw ex
-            } finally {
-              testSuite.endTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
-            }
+          try {
+            // runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${workerNumber}")
+            bash(
+              """
+                source test/scripts/jenkins_test_setup_oss.sh
+                node scripts/functional_tests \
+                  --config '${testSuite.config}' \
+                  --debug --bail \
+                  --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
+                  ${tagString}
+              """, "Execute oss tests"
+            )
+            testSuite.success = true
+          } catch (ex) {
+            testSuite.success = false
+            throw ex
+          } finally {
+            testSuite.endTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
           }
         }
       }
+    }
+    catchError {
+      print testSuite
+      finishedSuites << testSuite
+    }
+  }
+}
+
+def processXpackQueue(queue, finishedSuites, workerNumber) {
+  while(!queue.isEmpty()) {
+    def testSuite
+    try {
+      testSuite = queue.pop()
+    } catch (ex) {
+      print ex.toString()
+      continue
+    }
+
+    withEnv([
+      "CI_GROUP=${workerNumber}",
+      "JOB=xpack-kibana-ciGroup${workerNumber}",
+      "REMOVE_KIBANA_INSTALL_DIR=1",
+    ]) {
       catchError {
-        print testSuite
-        finishedSuites << testSuite
+        retryable("xpack-kibana-ciGroup${workerNumber}") {
+          testSuite.startTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+          testSuite.success = null
+          def tagString = testSuite.tags.collect { "--include-tag '${it}'" }.join(' ')
+
+          try {
+            // runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${workerNumber}")
+            bash(
+              """
+                source test/scripts/jenkins_test_setup_xpack.sh
+                node scripts/functional_tests \
+                  --config '${testSuite.config}' \
+                  --debug --bail \
+                  --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
+                  ${tagString}
+              """, "Execute x-pack tests"
+            )
+            testSuite.success = true
+          } catch (ex) {
+            testSuite.success = false
+            throw ex
+          } finally {
+            testSuite.endTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+          }
+        }
       }
+    }
+    catchError {
+      print testSuite
+      finishedSuites << testSuite
+    }
+  }
+}
+
+def getFunctionalQueueWorker(queue, finishedSuites, workerNumber) {
+  return getPostBuildWorker("functional-test-queue-" + workerNumber, {
+    dir('../kibana-oss') {
+      processOssQueue(queue.oss, finishedSuites.oss, workerNumber)
+    }
+
+    // timeout
+    while(!queue.containsKey('xpack')) {
+      sleep 15
+    }
+
+    dir('../kibana-xpack') {
+      processXpackQueue(queue.xpack, finishedSuites.xpack, workerNumber)
     }
   })
 }
 
-def prepareXpackTestQueue(queue) {
+def prepareOssTestQueue(queue) {
   def items = toJSON(readFile(file: 'test-suites-for-ci.json'))
-  queue.addAll(items.xpack.reverse()) // .reverse() is used here because an older version of groovy, .pop() removes from the end instead of the beginning
+  queue.oss = items.oss.reverse() // .reverse() is used here because an older version of groovy, .pop() removes from the end instead of the beginning
+}
+
+def prepareXpackTestQueue(queue) {
+  def items = toJSON(readFile(file: 'test-suites-for-ci-sorted.json'))
+  queue.xpack = items.xpack.reverse() // .reverse() is used here because an older version of groovy, .pop() removes from the end instead of the beginning
 }
 
 return this
