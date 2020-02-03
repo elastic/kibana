@@ -7,7 +7,7 @@
 import { Legacy } from 'kibana';
 import { CoreSetup, CoreStart, Plugin, LoggerFactory } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { PluginSetupContract as SecurityPluginSetup } from '../../../../plugins/security/server';
+import { SecurityPluginSetup } from '../../../../plugins/security/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
