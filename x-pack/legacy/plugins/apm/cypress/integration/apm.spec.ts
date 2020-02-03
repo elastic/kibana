@@ -11,9 +11,6 @@ describe('When clicking opbeans-go service', () => {
     // open service overview page
     loginAndWaitForPage(`/app/apm#/services`);
 
-    // show loading text for services
-    cy.contains('Loading...');
-
     // click opbeans-go service
     cy.get(':contains(opbeans-go)')
       .last()
