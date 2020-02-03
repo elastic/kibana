@@ -22,7 +22,7 @@ import {
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_INTERVAL_TYPE,
 } from '../../common/constants';
-import { getServices } from '../lib/kibana';
+import { KibanaServices } from '../lib/kibana';
 import { Policy } from '../store/inputs/model';
 
 // Change the constants to be static values so we can test against those instead of
@@ -41,7 +41,7 @@ jest.mock('../../common/constants', () => ({
 }));
 
 jest.mock('../lib/kibana');
-const mockGetServices = getServices as jest.Mock;
+const mockGetServices = KibanaServices.get as jest.Mock;
 
 /**
  * We utilize the internal chrome mocking that is built in to be able to mock different time range

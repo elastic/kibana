@@ -16,7 +16,7 @@ import {
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
 } from '../../common/constants';
-import { getServices } from '../lib/kibana';
+import { KibanaServices } from '../lib/kibana';
 import { Policy } from '../store/inputs/model';
 
 interface DefaultTimeRange {
@@ -44,7 +44,7 @@ const DEFAULT_TO_MOMENT = moment();
  */
 export const getTimeRangeSettings = (uiSettings = true) => {
   const timeRange = uiSettings
-    ? getServices().uiSettings.get<DefaultTimeRangeSetting>(DEFAULT_SIEM_TIME_RANGE)
+    ? KibanaServices.get().uiSettings.get<DefaultTimeRangeSetting>(DEFAULT_SIEM_TIME_RANGE)
     : null;
 
   const fromStr = (isString(timeRange?.from) && timeRange?.from) || DEFAULT_FROM;
@@ -62,7 +62,7 @@ export const getTimeRangeSettings = (uiSettings = true) => {
  */
 export const getIntervalSettings = (uiSettings = true): Policy => {
   const interval = uiSettings
-    ? getServices().uiSettings.get<DefaultIntervalSetting>(DEFAULT_SIEM_REFRESH_INTERVAL)
+    ? KibanaServices.get().uiSettings.get<DefaultIntervalSetting>(DEFAULT_SIEM_REFRESH_INTERVAL)
     : null;
 
   const duration = (isNumber(interval?.value) && interval?.value) || DEFAULT_INTERVAL_VALUE;

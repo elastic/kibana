@@ -7,20 +7,21 @@
 import { StartServices } from '../../plugin';
 
 type GlobalServices = Pick<StartServices, 'http' | 'uiSettings'>;
-let _services: GlobalServices | null = null;
 
-export const initServices = (services: StartServices) => {
-  const { http, uiSettings } = services;
+export class KibanaServices {
+  private static services?: GlobalServices;
 
-  _services = { http, uiSettings };
-};
-
-export const getServices = (): GlobalServices => {
-  if (!_services) {
-    throw new Error(
-      'Kibana services not set - are you trying to import this module from outside of the SIEM app?'
-    );
+  public static init({ http, uiSettings }: StartServices) {
+    this.services = { http, uiSettings };
   }
 
-  return _services;
-};
+  public static get(): GlobalServices {
+    if (!this.services) {
+      throw new Error(
+        'Kibana services not set - are you trying to import this module from outside of the SIEM app?'
+      );
+    }
+
+    return this.services;
+  }
+}

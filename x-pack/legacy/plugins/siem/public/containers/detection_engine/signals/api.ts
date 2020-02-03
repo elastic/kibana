@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getServices } from '../../../lib/kibana';
+import { KibanaServices } from '../../../lib/kibana';
 import { throwIfNotOk } from '../../../hooks/api/api';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -32,7 +32,7 @@ export const fetchQuerySignals = async <Hit, Aggregations>({
   query,
   signal,
 }: QuerySignals): Promise<SignalSearchResponse<Hit, Aggregations>> => {
-  const response = await getServices().http.fetch<SignalSearchResponse<Hit, Aggregations>>(
+  const response = await KibanaServices.get().http.fetch<SignalSearchResponse<Hit, Aggregations>>(
     DETECTION_ENGINE_QUERY_SIGNALS_URL,
     {
       method: 'POST',
@@ -58,7 +58,7 @@ export const updateSignalStatus = async ({
   status,
   signal,
 }: UpdateSignalStatusProps): Promise<unknown> => {
-  const response = await getServices().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
+  const response = await KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
     method: 'POST',
     body: JSON.stringify({ status, ...query }),
     asResponse: true,
@@ -76,7 +76,7 @@ export const updateSignalStatus = async ({
  */
 export const getSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsIndex> => {
   try {
-    return await getServices().http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
+    return await KibanaServices.get().http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
       method: 'GET',
       signal,
     });
@@ -94,11 +94,14 @@ export const getSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsI
  * @param signal AbortSignal for cancelling request
  */
 export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privilege> => {
-  const response = await getServices().http.fetch<Privilege>(DETECTION_ENGINE_PRIVILEGES_URL, {
-    method: 'GET',
-    signal,
-    asResponse: true,
-  });
+  const response = await KibanaServices.get().http.fetch<Privilege>(
+    DETECTION_ENGINE_PRIVILEGES_URL,
+    {
+      method: 'GET',
+      signal,
+      asResponse: true,
+    }
+  );
 
   await throwIfNotOk(response.response);
   return response.body!;
@@ -111,7 +114,7 @@ export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privil
  */
 export const createSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsIndex> => {
   try {
-    return await getServices().http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
+    return await KibanaServices.get().http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
       method: 'POST',
       signal,
     });

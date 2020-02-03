@@ -19,7 +19,7 @@ import { Start as InspectorStart } from '../../../../../src/plugins/inspector/pu
 import { IUiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { initTelemetry } from './lib/telemetry';
-import { initServices } from './lib/kibana';
+import { KibanaServices } from './lib/kibana';
 
 export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
 
@@ -67,7 +67,7 @@ export class Plugin implements IPlugin<Setup, Start> {
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
-    initServices({ ...core, ...plugins });
+    KibanaServices.init({ ...core, ...plugins });
 
     return {};
   }

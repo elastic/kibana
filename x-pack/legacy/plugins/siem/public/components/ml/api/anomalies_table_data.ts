@@ -6,7 +6,7 @@
 
 import { Anomalies, InfluencerInput, CriteriaFields } from '../types';
 import { throwIfNotOk } from '../../../hooks/api/api';
-import { getServices } from '../../../lib/kibana';
+import { KibanaServices } from '../../../lib/kibana';
 
 export interface Body {
   jobIds: string[];
@@ -22,7 +22,7 @@ export interface Body {
 }
 
 export const anomaliesTableData = async (body: Body, signal: AbortSignal): Promise<Anomalies> => {
-  const response = await getServices().http.fetch<Anomalies>(
+  const response = await KibanaServices.get().http.fetch<Anomalies>(
     '/api/ml/results/anomalies_table_data',
     {
       method: 'POST',

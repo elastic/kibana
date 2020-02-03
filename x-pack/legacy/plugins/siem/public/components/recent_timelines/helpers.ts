@@ -5,11 +5,11 @@
  */
 
 import { throwIfNotOk } from '../../hooks/api/api';
-import { getServices } from '../../lib/kibana';
+import { KibanaServices } from '../../lib/kibana';
 import { MeApiResponse } from './recent_timelines';
 
 export const fetchUsername = async () => {
-  const response = await getServices().http.fetch<MeApiResponse>('/internal/security/me', {
+  const response = await KibanaServices.get().http.fetch<MeApiResponse>('/internal/security/me', {
     method: 'GET',
     credentials: 'same-origin',
     asResponse: true,
