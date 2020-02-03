@@ -5,6 +5,7 @@
  */
 import { fetchAliases } from './fetch_aliases';
 import { getIndexManagementDataEnrichers } from '../index_management_data';
+
 interface Hit {
   health: string;
   status: string;

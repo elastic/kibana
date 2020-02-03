@@ -3,8 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IndexMgmtPlugin } from './plugin';
 
-export function plugin() {
-  return new IndexMgmtPlugin();
-}
+export { PLUGIN, API_BASE_PATH } from './constants';

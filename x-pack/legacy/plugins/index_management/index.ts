@@ -5,19 +5,15 @@
  */
 
 import { resolve } from 'path';
-import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
-import { createRouter } from '../../server/lib/create_router';
-import { registerLicenseChecker } from '../../server/lib/register_license_checker';
-import { PLUGIN, API_BASE_PATH } from './common/constants';
-import { LegacySetup } from './server/plugin';
-import { plugin as initServerPlugin } from './server';
+import { PLUGIN } from './common/constants';
+import { plugin as initServerPlugin, Dependencies } from './server/np_ready';
 
 export type ServerFacade = Legacy.Server;
 
 export function indexManagement(kibana: any) {
   return new kibana.Plugin({
-    id: PLUGIN.ID,
+    id: PLUGIN.id,
     configPrefix: 'xpack.index_management',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
@@ -30,26 +26,19 @@ export function indexManagement(kibana: any) {
     init(server: ServerFacade) {
       const coreSetup = server.newPlatform.setup.core;
 
-      const pluginsSetup = {};
-
-      const __LEGACY: LegacySetup = {
-        router: createRouter(server, PLUGIN.ID, `${API_BASE_PATH}/`),
-        plugins: {
-          license: {
-            registerLicenseChecker: registerLicenseChecker.bind(
-              null,
-              server,
-              PLUGIN.ID,
-              PLUGIN.getI18nName(i18n),
-              PLUGIN.MINIMUM_LICENSE_REQUIRED as 'basic'
-            ),
-          },
-          elasticsearch: server.plugins.elasticsearch,
-        },
+      const pluginDependencies: Dependencies = {
+        elasticsearch: server.plugins.elasticsearch,
+        licensing: {} as any,
       };
 
-      const serverPlugin = initServerPlugin();
-      const indexMgmtSetup = serverPlugin.setup(coreSetup, pluginsSetup, __LEGACY);
+      const mockLogger = {
+        get: () => ({
+          info() {},
+        }),
+      };
+
+      const serverPlugin = initServerPlugin({ logger: mockLogger } as any);
+      const indexMgmtSetup = serverPlugin.setup(coreSetup, pluginDependencies);
 
       server.expose(
         'addIndexManagementDataEnricher',
