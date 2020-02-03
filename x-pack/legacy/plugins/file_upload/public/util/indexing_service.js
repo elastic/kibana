@@ -115,13 +115,13 @@ function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
 }
 
 async function writeToIndex(indexingDetails) {
-  const query = indexingDetails.id ? { id: indexingDetails.id} : null;
+  const query = indexingDetails.id ? { id: indexingDetails.id } : null;
   const { appName, index, data, settings, mappings, ingestPipeline } = indexingDetails;
 
   return await httpService({
     url: `/api/fileupload/import`,
     method: 'POST',
-    ...(query ? { query }: {}),
+    ...(query ? { query } : {}),
     data: {
       index,
       data,
