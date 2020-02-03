@@ -18,7 +18,8 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiCode, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export interface Props {
   statusCode: number;
@@ -74,16 +75,28 @@ export const NetworkRequestStatusBar: FunctionComponent<Props> = ({
           }`}</EuiText>
         }
       >
-        <EuiBadge
-          color={mapStatusCodeToBadgeColor(statusCode)}
-        >{`${statusCode} - ${statusText}`}</EuiBadge>
+        <EuiBadge color={mapStatusCodeToBadgeColor(statusCode)}>
+          {/*  Use &nbsp; to ensure that no matter the width we don't allow line breaks */}
+          {statusCode}&nbsp;-&nbsp;{statusText}
+        </EuiBadge>
       </EuiToolTip>
     </EuiFlexItem>
 
     <EuiFlexItem grow={false} className="conApp__outputNetworkRequestStatusBar__item">
-      <EuiToolTip position="top" content={<EuiText size="s">{`Time Elapsed`}</EuiText>}>
+      <EuiToolTip
+        position="top"
+        content={
+          <EuiText size="s">
+            {i18n.translate('console.requestTimeElapasedBadgeTooltipContent', {
+              defaultMessage: 'Time Elapsed',
+            })}
+          </EuiText>
+        }
+      >
         <EuiText size="s">
-          <EuiCode paddingSize="none">{`${timeElapsedMs} ms`}</EuiCode>
+          <EuiBadge color="default">
+            {timeElapsedMs}&nbsp;{'ms'}
+          </EuiBadge>
         </EuiText>
       </EuiToolTip>
     </EuiFlexItem>
