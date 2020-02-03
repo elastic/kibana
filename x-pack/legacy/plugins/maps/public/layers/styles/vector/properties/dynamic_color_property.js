@@ -127,12 +127,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     let getFunction;
     let propFieldName;
     if (this._style.isBackedByTileSource()) {
-      console.log(
-        'This style is backed by a tilesource, need to do some fuzzy shiat for ',
-        targetName,
-        fieldName
-      );
-
       const fieldMeta = this._getFieldMeta(fieldName);
       if (!fieldMeta) {
         return null;

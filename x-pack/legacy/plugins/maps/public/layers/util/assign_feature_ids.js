@@ -51,7 +51,6 @@ export function assignFeatureIds(featureCollection) {
       },
       id: numericId, // Mapbox feature state id, must be integer
     };
-    console.log('n', nf);
     features.push(nf);
   }
 

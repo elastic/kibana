@@ -68,7 +68,6 @@ export class ESMVTGeoGridSource extends ESGeoGridSource {
 
       const sourceDescriptor = ESMVTGeoGridSource.createDescriptor(sourceConfig);
       const source = new ESMVTGeoGridSource(sourceDescriptor, inspectorAdapters);
-      console.log('shoudl preview', source);
       onPreviewSource(source);
     };
 
@@ -106,7 +105,6 @@ export class ESMVTGeoGridSource extends ESGeoGridSource {
   }
 
   async getUrlTemplate(searchFilters) {
-    console.log('should get url template for sf', searchFilters);
 
     const indexPattern = await this.getIndexPattern();
 
@@ -114,18 +112,14 @@ export class ESMVTGeoGridSource extends ESGeoGridSource {
 
     const { searchSource, aggConfigs } = await this._makeSearchSourceWithAggConfigs(searchFilters);
 
-    console.log(searchSource);
 
     const dsl = await searchSource.getSearchRequestBody();
-    console.log('dsl', dsl);
     const risonDsl = rison.encode(dsl);
-    console.log('r', risonDsl);
 
     const aggConfigNames = aggConfigs.aggs.map(config => config.id);
     const aggNames = aggConfigNames.join(',');
     const ipTitle = indexPattern.title;
 
-    console.log('a', aggNames);
 
     return `../${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}?x={x}&y={y}&z={z}&geometryFieldName=${geoFieldName}&aggNames=${aggNames}&indexPattern=${ipTitle}&requestBody=${risonDsl}`;
   }

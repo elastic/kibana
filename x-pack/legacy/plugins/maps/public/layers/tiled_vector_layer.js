@@ -75,10 +75,7 @@ export class TiledVectorLayer extends VectorLayer {
       nextMeta: searchFilters,
     });
     if (canSkip) {
-      console.log('mvt Can skip update!');
       return null;
-    } else {
-      console.log('mvt cannot skip');
     }
 
     startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
