@@ -201,7 +201,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
 
     // Fire onQuerySubmit on query or timerange change
     useEffect(() => {
-      if (onQuerySubmit)
+      if (props.useDefaultBehaviors && onQuerySubmit)
         onQuerySubmit(
           {
             dateRange: timeRange,
@@ -209,7 +209,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           },
           true
         );
-    }, [onQuerySubmit, query, timeRange]);
+    }, [onQuerySubmit, props.useDefaultBehaviors, query, timeRange]);
 
     // Handle saved queries
     const [savedQuery, setSavedQuery] = useState<SavedQuery>();
