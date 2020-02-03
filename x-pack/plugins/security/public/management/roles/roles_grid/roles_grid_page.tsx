@@ -21,6 +21,10 @@ import {
   EuiSwitchEvent,
   EuiSwitch,
   EuiIconTip,
+  EuiToolTip,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -189,14 +193,18 @@ export class RolesGridPage extends Component<Props, State> {
               <EuiLink data-test-subj="roleRowName" href={getRoleManagementHref('edit', name)}>
                 {name}
               </EuiLink>
-              {!isRoleEnabled(record) && (
-                <FormattedMessage
-                  id="xpack.security.management.roles.disabledTooltip"
-                  defaultMessage=" (disabled)"
-                />
-              )}
             </EuiText>
           );
+        },
+      },
+      {
+        field: 'metadata._deprecated',
+        name: i18n.translate('xpack.security.management.roles.statusColumnName', {
+          defaultMessage: 'Status',
+        }),
+        sortable: (role: Role) => isRoleEnabled(role) && !isDeprecatedRole(role),
+        render: (metadata: Role['metadata'], record: Role) => {
+          return this.getRoleStatusBadges(record);
         },
       },
       {
@@ -212,13 +220,7 @@ export class RolesGridPage extends Component<Props, State> {
           const isDeprecated = isDeprecatedRole(record);
 
           const label = isDeprecated
-            ? i18n.translate('xpack.security.management.roles.reservedDeprecatedRoleIconLabel', {
-                defaultMessage:
-                  'This role has been deprecated, and should no longer be assigned to users. {reason}',
-                values: {
-                  reason: getDeprecatedReason(record),
-                },
-              })
+            ? this.getDeprecationText(record)
             : i18n.translate('xpack.security.management.roles.reservedRoleIconLabel', {
                 defaultMessage: 'Reserved roles are built-in and cannot be removed or modified.',
               });
@@ -303,12 +305,70 @@ export class RolesGridPage extends Component<Props, State> {
     });
   };
 
+  private getRoleStatusBadges = (role: Role) => {
+    const enabled = isRoleEnabled(role);
+    const deprecated = isDeprecatedRole(role);
+
+    const badges = [];
+    if (enabled) {
+      badges.push(
+        <EuiBadge data-test-subj="roleEnabled" color="secondary">
+          <FormattedMessage
+            id="xpack.security.management.roles.enabledBadge"
+            defaultMessage="Enabled"
+          />
+        </EuiBadge>
+      );
+    } else {
+      badges.push(
+        <EuiBadge data-test-subj="roleDisabled" color="hollow">
+          <FormattedMessage
+            id="xpack.security.management.roles.disabledBadge"
+            defaultMessage="Disabled"
+          />
+        </EuiBadge>
+      );
+    }
+    if (deprecated) {
+      badges.push(
+        <EuiToolTip content={this.getDeprecationText(role)}>
+          <EuiBadge color="warning">
+            <FormattedMessage
+              id="xpack.security.management.roles.deprecatedBadge"
+              defaultMessage="Deprecated"
+            />
+          </EuiBadge>
+        </EuiToolTip>
+      );
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="xs">
+        {badges.map((badge, index) => (
+          <EuiFlexItem key={index} grow={false}>
+            {badge}
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  };
+
   private handleDelete = () => {
     this.setState({
       selection: [],
       showDeleteConfirmation: false,
     });
     this.loadRoles();
+  };
+
+  private getDeprecationText = (role: Role) => {
+    return i18n.translate('xpack.security.management.roles.deprecationMessage', {
+      defaultMessage:
+        'This role has been deprecated, and should no longer be assigned to users. {reason}',
+      values: {
+        reason: getDeprecatedReason(role),
+      },
+    });
   };
 
   private async loadRoles() {
