@@ -18,7 +18,10 @@ import { GlobalTime } from '../../containers/global_time';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { AlertsTable } from '../../components/alerts_viewer/alerts_table';
 import { FiltersGlobal } from '../../components/filters_global';
-import { DETECTION_ENGINE_PAGE_NAME } from '../../components/link_to/redirect_to_detection_engine';
+import {
+  getDetectionEngineTabUrl,
+  getRulesUrl,
+} from '../../components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../components/search_bar';
 import { WrapperPage } from '../../components/wrapper_page';
 import { State } from '../../store';
@@ -30,6 +33,7 @@ import { InputsRange } from '../../store/inputs/model';
 import { AlertsByCategory } from '../overview/alerts_by_category';
 import { useSignalInfo } from './components/signals_info';
 import { SignalsTable } from './components/signals';
+import { NoApiIntegrationKeyCallOut } from './components/no_api_integration_callout';
 import { NoWriteSignalsCallOut } from './components/no_write_signals_callout';
 import { SignalsHistogramPanel } from './components/signals_histogram_panel';
 import { signalsHistogramOptions } from './components/signals_histogram_panel/config';
@@ -79,6 +83,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
     loading,
     isSignalIndexExists,
     isAuthenticated: isUserAuthenticated,
+    hasEncryptionKey,
     canUserCRUD,
     signalIndexName,
     hasIndexWrite,
@@ -101,7 +106,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
             isSelected={tab.id === tabName}
             disabled={tab.disabled}
             key={tab.id}
-            href={`#/${DETECTION_ENGINE_PAGE_NAME}/${tab.id}`}
+            href={getDetectionEngineTabUrl(tab.id)}
           >
             {tab.name}
           </EuiTab>
@@ -110,6 +115,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
     ),
     [detectionsTabs, tabName]
   );
+
+  const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
+    signalIndexName,
+  ]);
 
   if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
@@ -130,8 +139,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
 
   return (
     <>
+      {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
-      <WithSource sourceId="default">
+      <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indicesExist, indexPattern }) => {
           return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <StickyContainer>
@@ -151,7 +161,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
                   }
                   title={i18n.PAGE_TITLE}
                 >
-                  <EuiButton fill href="#/detections/rules" iconType="gear">
+                  <EuiButton fill href={getRulesUrl()} iconType="gear">
                     {i18n.BUTTON_MANAGE_RULES}
                   </EuiButton>
                 </DetectionEngineHeaderPage>
@@ -164,10 +174,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
                       {tabName === DetectionEngineTab.signals && (
                         <>
                           <SignalsHistogramPanel
+                            deleteQuery={deleteQuery}
                             filters={filters}
                             from={from}
                             loadingInitial={loading}
                             query={query}
+                            setQuery={setQuery}
+                            showTotalSignalsCount={true}
+                            signalIndexName={signalIndexName}
                             stackByOptions={signalsHistogramOptions}
                             to={to}
                             updateDateRange={updateDateRangeCallback}
@@ -176,7 +190,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
                           <SignalsTable
                             loading={loading}
                             hasIndexWrite={hasIndexWrite ?? false}
-                            canUserCRUD={canUserCRUD ?? false}
+                            canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}
                             from={from}
                             signalsIndex={signalIndexName ?? ''}
                             to={to}
@@ -196,7 +210,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
                             setQuery={setQuery}
                             to={to}
                           />
-                          <EuiSpacer size="l" />
                           <AlertsTable endDate={to} startDate={from} />
                         </>
                       )}

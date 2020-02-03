@@ -307,7 +307,7 @@ export const signalFieldsMap: Readonly<Record<string, string>> = {
   'signal.rule.references': 'signal.rule.references',
   'signal.rule.severity': 'signal.rule.severity',
   'signal.rule.tags': 'signal.rule.tags',
-  'signal.rule.threats': 'signal.rule.threats',
+  'signal.rule.threat': 'signal.rule.threat',
   'signal.rule.type': 'signal.rule.type',
   'signal.rule.size': 'signal.rule.size',
   'signal.rule.enabled': 'signal.rule.enabled',
@@ -316,6 +316,10 @@ export const signalFieldsMap: Readonly<Record<string, string>> = {
   'signal.rule.created_by': 'signal.rule.created_by',
   'signal.rule.updated_by': 'signal.rule.updated_by',
   'signal.rule.version': 'signal.rule.version',
+};
+
+export const ruleFieldsMap: Readonly<Record<string, string>> = {
+  'rule.reference': 'rule.reference',
 };
 
 export const eventFieldsMap: Readonly<Record<string, string>> = {
@@ -331,6 +335,7 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...geoFieldsMap },
   ...{ ...hostFieldsMap },
   ...{ ...networkFieldsMap },
+  ...{ ...ruleFieldsMap },
   ...{ ...signalFieldsMap },
   ...{ ...sourceFieldsMap },
   ...{ ...suricataFieldsMap },

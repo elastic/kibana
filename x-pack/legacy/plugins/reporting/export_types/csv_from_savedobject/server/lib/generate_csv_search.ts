@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ElasticsearchServiceSetup, KibanaRequest } from '../../../../../../../../src/core/server';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import { ServerFacade, RequestFacade, Logger } from '../../../../types';
@@ -56,12 +57,15 @@ const getUiSettings = async (config: any) => {
 export async function generateCsvSearch(
   req: RequestFacade,
   server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
   logger: Logger,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
 ): Promise<CsvResultFromSearch> {
   const { savedObjects, uiSettingsServiceFactory } = server;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(req.getRawRequest());
+  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+    KibanaRequest.from(req.getRawRequest())
+  );
   const { indexPatternSavedObjectId, timerange } = searchPanel;
   const savedSearchObjectAttr = searchPanel.attributes as SavedSearchObjectAttributes;
   const { indexPatternSavedObject } = await getDataSource(
@@ -148,8 +152,11 @@ export async function generateCsvSearch(
       sort: sortConfig,
     },
   };
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  const callCluster = (...params: [string, object]) => callWithRequest(req, ...params);
+
+  const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
+    KibanaRequest.from(req.getRawRequest())
+  );
+  const callCluster = (...params: [string, object]) => callAsCurrentUser(...params);
   const config = server.config();
   const uiSettings = await getUiSettings(uiConfig);
 

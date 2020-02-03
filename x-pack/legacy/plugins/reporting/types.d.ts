@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseObject } from 'hapi';
 import { EventEmitter } from 'events';
+import { ResponseObject } from 'hapi';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { Legacy } from 'kibana';
-import {
-  ElasticsearchPlugin,
-  CallCluster,
-} from '../../../../src/legacy/core_plugins/elasticsearch';
+import { CallCluster } from '../../../../src/legacy/core_plugins/elasticsearch';
 import { CancellationToken } from './common/cancellation_token';
-import { LevelLogger } from './server/lib/level_logger';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
-import { LegacySetup } from './server/plugin';
+import { LevelLogger } from './server/lib/level_logger';
+import { LegacySetup, ReportingSetupDeps } from './server/plugin';
 
 export type ReportingPlugin = object; // For Plugin contract
 
@@ -74,7 +72,6 @@ export type ServerFacade = LegacySetup;
 export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
 
 export type EnqueueJobFn = <JobParamsType>(
-  parentLogger: LevelLogger,
   exportTypeId: string,
   jobParams: JobParamsType,
   user: string,
@@ -200,18 +197,6 @@ export interface JobDocPayload<JobParamsType> {
   type: string | null;
 }
 
-export interface JobDocOutput {
-  content: string; // encoded content
-  contentType: string;
-}
-
-export interface JobDocExecuted<JobParamsType> {
-  jobtype: string;
-  output: JobDocOutputExecuted;
-  payload: JobDocPayload<JobParamsType>;
-  status: string; // completed, failed, etc
-}
-
 export interface JobSource<JobParamsType> {
   _id: string;
   _source: {
@@ -222,21 +207,9 @@ export interface JobSource<JobParamsType> {
   };
 }
 
-/*
- * A snake_cased field is the only significant difference in structure of
- * JobDocOutputExecuted vs JobDocOutput.
- *
- * JobDocOutput is the structure of the object returned by getDocumentPayload
- *
- * data in the _source fields of the
- * Reporting index.
- *
- * The ESQueueWorker internals have executed job objects returned with this
- * structure. See `_formatOutput` in reporting/server/lib/esqueue/worker.js
- */
-export interface JobDocOutputExecuted {
-  content_type: string; // vs `contentType` above
-  content: string | null; // defaultOutput is null
+export interface JobDocOutput {
+  content_type: string;
+  content: string | null;
   max_size_reached: boolean;
   size: number;
 }
@@ -279,7 +252,7 @@ export type ImmediateExecuteFn<JobParamsType> = (
   jobId: null,
   job: JobDocPayload<JobParamsType>,
   request: RequestFacade
-) => Promise<JobDocOutputExecuted>;
+) => Promise<JobDocOutput>;
 
 export interface ESQueueWorkerOptions {
   kibanaName: string;
@@ -292,7 +265,7 @@ export interface ESQueueWorkerOptions {
 type GenericWorkerFn<JobParamsType> = (
   jobSource: JobSource<JobParamsType>,
   ...workerRestArgs: any[]
-) => void | Promise<JobDocOutputExecuted>;
+) => void | Promise<JobDocOutput>;
 
 export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
   registerWorker: (
@@ -302,9 +275,15 @@ export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
   ) => ESQueueWorker;
 }
 
-export type CreateJobFactory<CreateJobFnType> = (server: ServerFacade) => CreateJobFnType;
+export type CreateJobFactory<CreateJobFnType> = (
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  logger: LevelLogger
+) => CreateJobFnType;
 export type ExecuteJobFactory<ExecuteJobFnType> = (
   server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  logger: LevelLogger,
   opts: {
     browserDriverFactory: HeadlessChromiumDriverFactory;
   }
@@ -326,10 +305,10 @@ export interface ExportTypeDefinition<
   validLicenses: string[];
 }
 
-export { ExportTypesRegistry } from './server/lib/export_types_registry';
+export { CancellationToken } from './common/cancellation_token';
 export { HeadlessChromiumDriver } from './server/browsers/chromium/driver';
 export { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
-export { CancellationToken } from './common/cancellation_token';
+export { ExportTypesRegistry } from './server/lib/export_types_registry';
 
 // Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`
 export { LevelLogger as Logger };
@@ -354,10 +333,4 @@ export interface InterceptedRequest {
   };
   frameId: string;
   resourceType: string;
-}
-
-export interface FieldFormats {
-  getConfig: number;
-  getInstance: (config: any) => any;
-  getDefaultInstance: (key: string) => any;
 }
