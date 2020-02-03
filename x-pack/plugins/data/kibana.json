@@ -1,5 +1,5 @@
 {
-  "id": "data_xpack",
+  "id": "data_enhanced",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": [

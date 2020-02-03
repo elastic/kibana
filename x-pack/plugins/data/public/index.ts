@@ -5,16 +5,16 @@
  */
 import { PluginInitializer } from 'kibana/public';
 import {
-  DataPublicPlugin as Plugin,
-  DataPublicSetup,
-  DataPublicStart,
-  DataPublicSetupDependencies,
-  DataPublicStartDependencies,
+  DataEnhancedPublicPlugin as Plugin,
+  DataEnhancedPublicSetup,
+  DataEnhancedPublicStart,
+  DataEnhancedPublicSetupDependencies,
+  DataEnhancedPublicStartDependencies,
 } from './plugin';
 
 export const plugin: PluginInitializer<
-  DataPublicSetup,
-  DataPublicStart,
-  DataPublicSetupDependencies,
-  DataPublicStartDependencies
+  DataEnhancedPublicSetup,
+  DataEnhancedPublicStart,
+  DataEnhancedPublicSetupDependencies,
+  DataEnhancedPublicStartDependencies
 > = () => new Plugin();
