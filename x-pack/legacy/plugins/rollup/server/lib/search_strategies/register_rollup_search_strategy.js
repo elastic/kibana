@@ -31,7 +31,7 @@ export const registerRollupSearchStrategy = (kbnServer, server) =>
     addSearchStrategy(
       new RollupSearchStrategy({
         ...server,
-        coreElasticsearch: kbnServer.newPlatform.setup.core.elasticsearch,
+        newPlatform: kbnServer.newPlatform,
       })
     );
   });
