@@ -32,7 +32,7 @@ interface AppDependencies {
   element: HTMLElement;
 }
 
-export const boot = (appDependencies: AppDependencies) => {
+export const renderApp = (appDependencies: AppDependencies) => {
   const {
     legacy: { redirect, fatalError, createUiStatsReporter },
     I18nContext,

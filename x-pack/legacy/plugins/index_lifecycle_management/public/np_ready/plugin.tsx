@@ -36,9 +36,9 @@ export class IndexLifecycleManagementPlugin implements Plugin<void, void, any, a
         } = config;
 
         const { element } = mountPoint;
-        const { boot } = await import('./application');
+        const { renderApp } = await import('./application');
 
-        return boot({
+        return renderApp({
           legacy: { ...__LEGACY },
           I18nContext,
           http,
