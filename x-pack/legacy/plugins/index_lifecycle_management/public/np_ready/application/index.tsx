@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { DocLinksStart, ToastsSetup } from 'src/core/public';
+import { DocLinksStart, ToastsSetup, HttpSetup } from 'src/core/public';
 
 import { App } from './app';
 import { indexLifecycleManagementStore } from './store';
@@ -18,7 +18,6 @@ import { init as initUiMetric } from './services/ui_metric';
 import { init as initNotification } from './services/notification';
 
 export interface LegacySetup {
-  http: any;
   redirect: any;
   fatalError: any;
   createUiStatsReporter: any;
@@ -27,24 +26,24 @@ export interface LegacySetup {
 interface AppDependencies {
   legacy: LegacySetup;
   I18nContext: any;
+  http: HttpSetup;
   toasts: ToastsSetup;
-  prependBasePath: any;
   docLinks: DocLinksStart;
   element: HTMLElement;
 }
 
 export const boot = (appDependencies: AppDependencies) => {
   const {
-    legacy: { http, redirect, fatalError, createUiStatsReporter },
+    legacy: { redirect, fatalError, createUiStatsReporter },
     I18nContext,
+    http,
     toasts,
-    prependBasePath,
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
     element,
   } = appDependencies;
 
   // Initialize services
-  initHttp(http, prependBasePath);
+  initHttp(http);
   initNavigation(redirect);
   initDocumentation(`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`);
   initUiMetric(createUiStatsReporter);

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { npStart } from 'ui/new_platform';
+
 import {
   API_BASE_PATH,
   UIM_UPDATE_SETTINGS,
@@ -47,6 +49,35 @@ export const setHttpClient = (client: ng.IHttpService) => {
 
 export const getHttpClient = () => {
   return httpClient;
+};
+
+/**
+ * ILM uses the NP http service internally, so we need to inject an adapater around Angular's
+ * $http service that provides the same interface. We can replace this with the NP http service
+ * once Index Management has been migrated.
+ */
+export const getNewPlatformCompatibleHttpClient = () => {
+  const prependBasePath = npStart.core.http.basePath.prepend;
+
+  return {
+    post: async (path: string, payload: any): Promise<any> => {
+      const parsedPayload = JSON.parse(payload.body);
+      const prependedPath = prependBasePath(path);
+      const response = await httpClient.post(prependedPath, parsedPayload);
+      return response.data;
+    },
+    get: async (path: string, payload: any): Promise<any> => {
+      const parsedQuery = payload && payload.query ? payload.query : '';
+      const prependedPath = `${prependBasePath(path)}${parsedQuery}`;
+      const response = await httpClient.get(prependedPath);
+      return response.data;
+    },
+    delete: async (path: string): Promise<any> => {
+      const prependedPath = prependBasePath(path);
+      const response = await httpClient.delete(prependedPath);
+      return response.data;
+    },
+  };
 };
 
 export async function loadIndices() {

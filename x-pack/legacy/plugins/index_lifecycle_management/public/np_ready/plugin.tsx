@@ -17,9 +17,7 @@ export class IndexLifecycleManagementPlugin implements Plugin<void, void, any, a
     const {
       application,
       notifications: { toasts },
-      http: {
-        basePath: { prepend: prependBasePath },
-      },
+      http,
     } = core;
 
     // The Plugin interface won't allow us to pass __LEGACY as a third argument, so we'll just
@@ -43,8 +41,8 @@ export class IndexLifecycleManagementPlugin implements Plugin<void, void, any, a
         return boot({
           legacy: { ...__LEGACY },
           I18nContext,
+          http,
           toasts,
-          prependBasePath,
           docLinks,
           element,
         });

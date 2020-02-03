@@ -25,9 +25,8 @@ import {
 
 // We will be able to remove these after the NP migration is complete.
 import { toastNotifications, fatalError } from 'ui/notify';
-import { npStart } from 'ui/new_platform';
 import { createUiStatsReporter } from '../../../../../../../../../../src/legacy/core_plugins/ui_metric/public';
-import { getHttpClient } from '../../../../services/api';
+import { getNewPlatformCompatibleHttpClient } from '../../../../services/api';
 
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../../common/constants';
@@ -220,16 +219,15 @@ export class IndexActionsContextMenu extends Component {
       const actionExtensionDefinition = actionExtension({
         indices,
         reloadIndices,
-        // These config options can probably be removed once the NP migration is complete.
+        // These config options can be removed once the NP migration is complete.
         // They're needed for now because ILM's extensions make API calls which require these
         // dependencies, but they're not available unless the app's "setup" lifecycle stage occurs.
         // Within the old platform, "setup" only occurs once the user actually visits the app.
         // Once ILM and IM have been moved out of legacy this hack won't be necessary.
-        prependBasePath: npStart.core.http.basePath.prepend,
         createUiStatsReporter,
         toasts: toastNotifications,
         fatalError,
-        httpClient: getHttpClient(),
+        httpClient: getNewPlatformCompatibleHttpClient(),
       });
 
       if (actionExtensionDefinition) {

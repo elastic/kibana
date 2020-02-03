@@ -16,7 +16,6 @@ import {
   addFilterExtension,
 } from '../../../../index_management/public/index_management_extensions';
 
-import { init as initHttp } from '../application/services/http';
 import { init as initUiMetric } from '../application/services/ui_metric';
 import { init as initNotification } from '../application/services/notification';
 import { retryLifecycleForIndex } from '../application/services/api';
@@ -28,14 +27,12 @@ const stepPath = 'ilm.step';
 
 export const retryLifecycleActionExtension = ({
   indices,
-  prependBasePath,
   createUiStatsReporter,
   toasts,
   fatalError,
 }) => {
   // These are hacks that we can remove once the New Platform migration is done. They're needed here
   // because API requests and API errors require them.
-  initHttp(undefined, prependBasePath);
   initUiMetric(createUiStatsReporter);
   initNotification(toasts, fatalError);
 
@@ -66,7 +63,6 @@ export const retryLifecycleActionExtension = ({
 export const removeLifecyclePolicyActionExtension = ({
   indices,
   reloadIndices,
-  prependBasePath,
   createUiStatsReporter,
   toasts,
   fatalError,
@@ -74,7 +70,6 @@ export const removeLifecyclePolicyActionExtension = ({
 }) => {
   // These are hacks that we can remove once the New Platform migration is done. They're needed here
   // because API requests and API errors require them.
-  initHttp(undefined, prependBasePath);
   initUiMetric(createUiStatsReporter);
   initNotification(toasts, fatalError);
 
@@ -108,7 +103,6 @@ export const removeLifecyclePolicyActionExtension = ({
 export const addLifecyclePolicyActionExtension = ({
   indices,
   reloadIndices,
-  prependBasePath,
   createUiStatsReporter,
   toasts,
   fatalError,
@@ -116,7 +110,6 @@ export const addLifecyclePolicyActionExtension = ({
 }) => {
   // These are hacks that we can remove once the New Platform migration is done. They're needed here
   // because API requests and API errors require them.
-  initHttp(undefined, prependBasePath);
   initUiMetric(createUiStatsReporter);
   initNotification(toasts, fatalError);
 

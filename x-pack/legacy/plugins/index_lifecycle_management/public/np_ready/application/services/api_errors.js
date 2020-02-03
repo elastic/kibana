@@ -7,9 +7,9 @@
 import { fatalError, toasts } from './notification';
 
 function createToastConfig(error, errorTitle) {
-  // Expect an error in the shape provided by Angular's $http service.
-  if (error && error.data) {
-    const { error: errorString, statusCode, message } = error.data;
+  if (error && error.body) {
+    const { error: errorString, statusCode, message } = error.body;
+
     return {
       title: errorTitle,
       text: `${statusCode}: ${errorString}. ${message}`,

@@ -64,7 +64,7 @@ if (chrome.getInjected('ilmUiEnabled')) {
     template,
     controllerAs: 'indexLifecycleManagement',
     controller: class IndexLifecycleManagementController {
-      constructor($scope: any, $route: any, $http: any, kbnUrl: any, $rootScope: any) {
+      constructor($scope: any, $route: any, kbnUrl: any, $rootScope: any) {
         $scope.$$postDigest(() => {
           const element = document.getElementById(REACT_ROOT_ID)!;
 
@@ -87,9 +87,6 @@ if (chrome.getInjected('ilmUiEnabled')) {
           // sneak it inside of the plugins argument for now.
           const pluginDependencies = {
             __LEGACY: {
-              // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
-              // e.g. to check license status per request.
-              http: $http,
               redirect: (path: string) => {
                 $scope.$evalAsync(() => {
                   kbnUrl.redirect(path);

@@ -5,15 +5,13 @@
  */
 
 let _httpClient: any;
-let _prependBasePath: any;
 
-export function init(httpClient: any, prependBasePath: any): void {
+export function init(httpClient: any): void {
   _httpClient = httpClient;
-  _prependBasePath = prependBasePath;
 }
 
 function getFullPath(path: string): string {
-  const apiPrefix = _prependBasePath('/api/index_lifecycle_management');
+  const apiPrefix = '/api/index_lifecycle_management';
 
   if (path) {
     return `${apiPrefix}/${path}`;
@@ -25,15 +23,11 @@ function getFullPath(path: string): string {
 // The extend_index_management module requires that we support an injected httpClient here.
 
 export function sendPost(path: string, payload: any, httpClient = _httpClient): any {
-  return httpClient.post(getFullPath(path), payload);
+  return httpClient.post(getFullPath(path), { body: JSON.stringify(payload) });
 }
 
-export function sendGet(path: string, httpClient = _httpClient): any {
-  return httpClient.get(getFullPath(path));
-}
-
-export function sendPut(path: string, payload: any, httpClient = _httpClient): any {
-  return httpClient.put(getFullPath(path), payload);
+export function sendGet(path: string, query: any, httpClient = _httpClient): any {
+  return httpClient.get(getFullPath(path), { query });
 }
 
 export function sendDelete(path: string, httpClient = _httpClient): any {
