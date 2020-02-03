@@ -1953,10 +1953,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@18.2.1":
-  version "18.2.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-18.2.1.tgz#6ce6d0bd1d0541052d21f2918305524d71e91678"
-  integrity sha512-6C5tnWJTlBB++475i0vRoCsnz4JaYznb4zMNFLc+z5GY3vA3/E3AXTjmmBwybEicCCi3h1SnpJxZsgMakiZwRA==
+"@elastic/eui@18.3.0":
+  version "18.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-18.3.0.tgz#e21c6246624f694e2ae1c7c1f1a11b612faf260a"
+  integrity sha512-Rkj1rTtDa6iZMUF7pxYRojku1sLXzTU0FK1D9i0XE3H//exy3VyTV6qUlbdkiKXjO7emrgQqfzKDeXT+ZYztgg==
   dependencies:
     "@types/chroma-js" "^1.4.3"
     "@types/lodash" "^4.14.116"
