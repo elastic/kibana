@@ -17,6 +17,7 @@ import {
 
 import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
 import { LegacyAPI } from '../../plugin';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 describe('onRequestInterceptor', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
@@ -104,7 +105,9 @@ describe('onRequestInterceptor', () => {
     routes: 'legacy' | 'new-platform';
   }
   async function setup(opts: SetupOpts = { basePath: '/', routes: 'legacy' }) {
-    const { http } = await root.setup();
+    const { http, elasticsearch } = await root.setup();
+    // Mock esNodesCompatibility$ to prevent `root.start()` from blocking on ES version check
+    elasticsearch.esNodesCompatibility$ = elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
 
     initSpacesOnRequestInterceptor({
       getLegacyAPI: () =>
