@@ -69,7 +69,7 @@ export default function({ getService }) {
         .get(`/api/sample_tasks/task/${task}`)
         .send({ task })
         .expect(200)
-        .then(response => response.body.docs[0]);
+        .then(response => response.body);
     }
 
     function historyDocs(taskId) {
@@ -434,9 +434,7 @@ export default function({ getService }) {
       expect(successfulRunNowResult).to.eql({ id: originalTask.id });
 
       await retry.try(async () => {
-        const [task] = (await currentTasks()).docs.filter(
-          taskDoc => taskDoc.id === originalTask.id
-        );
+        const task = await currentTask(originalTask.id);
         expect(task.state.count).to.eql(2);
       });
 

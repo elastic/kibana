@@ -24,6 +24,14 @@ const taskManagerQuery = {
 };
 
 export function initRoutes(server, taskManager, legacyTaskManager, taskTestingEvents) {
+  const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+
+  async function ensureIndexIsRefreshed() {
+    return await callCluster('indices.refresh', {
+      index: '.kibana_task_manager',
+    });
+  }
+
   server.route({
     path: '/api/sample_tasks/schedule',
     method: 'POST',
@@ -198,19 +206,8 @@ export function initRoutes(server, taskManager, legacyTaskManager, taskTestingEv
     method: 'GET',
     async handler(request) {
       try {
-        return taskManager.fetch({
-          query: {
-            bool: {
-              must: [
-                {
-                  ids: {
-                    values: [`task:${request.params.taskId}`],
-                  },
-                },
-              ],
-            },
-          },
-        });
+        await ensureIndexIsRefreshed();
+        return await taskManager.get(request.params.taskId);
       } catch (err) {
         return err;
       }
