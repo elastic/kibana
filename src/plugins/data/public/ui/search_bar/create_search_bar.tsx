@@ -190,7 +190,10 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       const fetchSavedQuery = async () => {
         if (props.savedQueryId) {
           const newSavedQuery = await savedQueries.getSavedQuery(props.savedQueryId);
-          if (newSavedQuery) setSavedQuery(newSavedQuery);
+          // Make sure we set the saved query to the most recent one
+          if (newSavedQuery && newSavedQuery.id === props.savedQueryId) {
+            setSavedQuery(newSavedQuery);
+          }
         }
       };
       fetchSavedQuery();
@@ -199,17 +202,14 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
     // timerange
     const [timeRange, setTimerange] = useState(timefilter.timefilter.getTime());
     useEffect(() => {
-      let isSubscribed = true;
       const subscriptions = new Subscription();
 
       subscriptions.add(
         timefilter.timefilter.getRefreshIntervalUpdate$().subscribe({
           next: () => {
-            if (isSubscribed) {
-              const newRefreshInterval = timefilter.timefilter.getRefreshInterval();
-              setRefreshInterval(newRefreshInterval.value);
-              setRefreshPaused(newRefreshInterval.pause);
-            }
+            const newRefreshInterval = timefilter.timefilter.getRefreshInterval();
+            setRefreshInterval(newRefreshInterval.value);
+            setRefreshPaused(newRefreshInterval.pause);
           },
         })
       );
@@ -217,15 +217,12 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       subscriptions.add(
         timefilter.timefilter.getTimeUpdate$().subscribe({
           next: () => {
-            if (isSubscribed) {
-              setTimerange(timefilter.timefilter.getTime());
-            }
+            setTimerange(timefilter.timefilter.getTime());
           },
         })
       );
 
       return () => {
-        isSubscribed = false;
         subscriptions.unsubscribe();
       };
     }, [timefilter.timefilter]);
@@ -233,22 +230,18 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
     // filters
     const [filters, setFilters] = useState(filterManager.getFilters());
     useEffect(() => {
-      let isSubscribed = true;
       const subscriptions = new Subscription();
 
       subscriptions.add(
         filterManager.getUpdates$().subscribe({
           next: () => {
-            if (isSubscribed) {
-              const newFilters = filterManager.getFilters();
-              setFilters(newFilters);
-            }
+            const newFilters = filterManager.getFilters();
+            setFilters(newFilters);
           },
         })
       );
 
       return () => {
-        isSubscribed = false;
         subscriptions.unsubscribe();
       };
     }, [filterManager]);
