@@ -23,8 +23,6 @@ import {
   Plugin,
   IUiSettingsClient,
   PluginInitializerContext,
-  MountPoint,
-  UnmountCallback,
 } from 'kibana/public';
 
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
@@ -34,7 +32,6 @@ import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 export interface VisTypeXyDependencies {
   uiSettings: IUiSettingsClient;
   charts: ChartsPluginSetup;
-  mountBanner: (mount: MountPoint<HTMLElement>) => UnmountCallback;
 }
 
 /** @internal */
@@ -60,12 +57,13 @@ export class VisTypeXyPlugin implements Plugin<Promise<void>, void> {
     core: VisTypeXyCoreSetup,
     { expressions, visualizations, charts }: VisTypeXyPluginSetupDependencies
   ) {
-    const [{ overlays }] = await core.getStartServices();
-    const mountBanner: VisTypeXyDependencies['mountBanner'] = mountBannerOnce(overlays);
-
+    // eslint-disable-next-line no-console
+    console.warn(
+      'The visTypeXy plugin is enabled\n\n',
+      'This may negatively alter existing vislib visualization configurations if saved.'
+    );
     const visualizationDependencies: Readonly<VisTypeXyDependencies> = {
       uiSettings: core.uiSettings,
-      mountBanner,
       charts,
     };
 
@@ -82,24 +80,3 @@ export class VisTypeXyPlugin implements Plugin<Promise<void>, void> {
     // nothing to do here
   }
 }
-
-/**
- * Helper method used to display warning using `vis_type_kbn` plugin over `vis_type_vislib`
- */
-const mountBannerOnce = ({ banners }: CoreStart['overlays']) => {
-  let count = 0;
-  let id: string;
-
-  return (mount: MountPoint<HTMLElement>) => {
-    count++;
-
-    if (count === 1) {
-      id = banners.add(mount);
-    }
-    return () => {
-      count--;
-
-      if (count === 0) banners.remove(id);
-    };
-  };
-};

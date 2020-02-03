@@ -30,7 +30,7 @@ export interface ConfigShema {
 
 const visTypeXyPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
-    id: 'vis_type_xy',
+    id: 'visTypeXy',
     require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
@@ -40,7 +40,7 @@ const visTypeXyPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyP
 
         return {
           visTypeXy: {
-            enabled: config.get('vis_type_xy.enabled') as boolean,
+            enabled: config.get('visTypeXy.enabled') as boolean,
           },
         };
       },
