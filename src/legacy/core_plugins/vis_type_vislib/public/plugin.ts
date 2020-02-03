@@ -39,7 +39,7 @@ import {
   createGoalVisTypeDefinition,
 } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
-import { ConfigShema as VisTypeXyConfigShema } from '../../vis_type_xy';
+import { ConfigSchema as VisTypeXyConfigSchema } from '../../vis_type_xy';
 
 export interface VisTypeVislibDependencies {
   uiSettings: IUiSettingsClient;
@@ -86,7 +86,7 @@ export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
     const vislibFns = [createVisTypeVislibVisFn, createPieVisFn];
 
     const visTypeXy = core.injectedMetadata.getInjectedVar('visTypeXy') as
-      | VisTypeXyConfigShema['visTypeXy']
+      | VisTypeXyConfigSchema['visTypeXy']
       | undefined;
 
     // if visTypeXy plugin is disabled it's config will be undefined
