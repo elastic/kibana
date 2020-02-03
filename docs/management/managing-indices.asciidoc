@@ -1,6 +1,6 @@
 [role="xpack"]
 [[managing-indices]]
-== Index management
+== Index Management
 
 *Index Management* enables you to view index settings,
 mappings, and statistics and perform index-level operations.
@@ -127,7 +127,7 @@ under the *Mapped fields* tab as follows:
 image::images/management-index-templates-mappings.png[Mapped fields page]
 
 You can create additional mapping configurations in the *Dynamic templates* and
-*Advanced options* tabs. No additional mappings are required for this example. 
+*Advanced options* tabs. No additional mappings are required for this example.
 
 In the fourth step, define an alias named `logstash`.
 
