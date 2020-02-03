@@ -194,18 +194,31 @@ app.controller(
 
     $scope.$watch(
       () => $state.savedQuery,
-      newSavedQueryId => {
+      async newSavedQueryId => {
         if (!newSavedQueryId) {
           $scope.savedQuery = undefined;
           return;
-        }
-        if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
-          savedQueryService.getSavedQuery(newSavedQueryId).then(savedQuery => {
+        } else if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
+          try {
+            const savedQuery = await savedQueryService.getSavedQuery(newSavedQueryId);
             $scope.$evalAsync(() => {
               $scope.savedQuery = savedQuery;
               updateStateFromSavedQuery(savedQuery);
             });
-          });
+          } catch (error) {
+            toastNotifications.addWarning({
+              title: i18n.translate('xpack.maps.unableToGetSavedQueryToastTitle', {
+                defaultMessage: 'Unable to load saved query {newSavedQueryId}',
+                values: { newSavedQueryId },
+              }),
+              text: `${error.message}`,
+            });
+            $scope.$evalAsync(() => {
+              delete $scope.savedQuery;
+              delete $state.savedQuery;
+              $state.save();
+            });
+          }
         }
       }
     );
