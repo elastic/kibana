@@ -103,7 +103,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     if (checks && checks.length > 0) {
       for (const check of checks) {
         const { method, options, path, value } = check;
-        const esClient = await elasticsearch.adminClient$.pipe(take(1)).toPromise();
+        const esClient = elasticsearch.adminClient;
         const result = await esClient.callAsInternalUser(method, options);
         const currentValue = path.length ? get(result, path) : result;
         const comparison = Object.entries(value).reduce((acc, [operator, val]) => {
