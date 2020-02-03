@@ -11,7 +11,7 @@ import { registerCloseRoute } from './register_close_route';
 // import { registerForcemergeRoute } from './register_forcemerge_route';
 import { registerListRoute } from './register_list_route';
 import { registerOpenRoute } from './register_open_route';
-// import { registerRefreshRoute } from './register_refresh_route';
+import { registerRefreshRoute } from './register_refresh_route';
 import { registerReloadRoute } from './register_reload_route';
 // import { registerDeleteRoute } from './register_delete_route';
 // import { registerFreezeRoute } from './register_freeze_route';
@@ -24,7 +24,7 @@ export function registerIndicesRoutes(dependencies: RouteDependencies) {
   // registerForcemergeRoute(dependencies);
   registerListRoute(dependencies);
   registerOpenRoute(dependencies);
-  // registerRefreshRoute(dependencies);
+  registerRefreshRoute(dependencies);
   registerReloadRoute(dependencies);
   // registerDeleteRoute(dependencies);
   // registerFreezeRoute(dependencies);
