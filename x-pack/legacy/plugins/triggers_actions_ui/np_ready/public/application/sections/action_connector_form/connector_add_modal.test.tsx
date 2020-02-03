@@ -69,6 +69,7 @@ describe('connector_add_modal', () => {
     const actionType = {
       id: 'my-action-type',
       name: 'test',
+      enabled: true,
     };
 
     const wrapper = mountWithIntl(
@@ -79,7 +80,9 @@ describe('connector_add_modal', () => {
             setAddFlyoutVisibility: state => {},
             editFlyoutVisible: false,
             setEditFlyoutVisibility: state => {},
-            actionTypesIndex: { 'my-action-type': { id: 'my-action-type', name: 'test' } },
+            actionTypesIndex: {
+              'my-action-type': { id: 'my-action-type', name: 'test', enabled: true },
+            },
             reloadConnectors: () => {
               return new Promise<void>(() => {});
             },
