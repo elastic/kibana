@@ -33,7 +33,7 @@ import { RolesAPIClient } from '../../roles';
 import { UserAPIClient } from '..';
 
 interface Props {
-  apiClient: PublicMethodsOf<UserAPIClient>;
+  userAPIClient: PublicMethodsOf<UserAPIClient>;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   notifications: NotificationsStart;
 }
@@ -246,7 +246,7 @@ export class UsersGridPage extends Component<Props, State> {
                 onCancel={this.onCancelDelete}
                 usersToDelete={selection.map(user => user.username)}
                 callback={this.handleDelete}
-                apiClient={this.props.apiClient}
+                userAPIClient={this.props.userAPIClient}
                 notifications={this.props.notifications}
               />
             ) : null}
@@ -285,7 +285,7 @@ export class UsersGridPage extends Component<Props, State> {
   private async loadUsersAndRoles() {
     try {
       const [users, roles] = await Promise.all([
-        this.props.apiClient.getUsers(),
+        this.props.userAPIClient.getUsers(),
         this.props.rolesAPIClient.getRoles(),
       ]);
       this.setState({ users, roles });

@@ -39,7 +39,7 @@ import { UserAPIClient } from '..';
 
 interface Props {
   username?: string;
-  apiClient: PublicMethodsOf<UserAPIClient>;
+  userAPIClient: PublicMethodsOf<UserAPIClient>;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   authc: AuthenticationServiceSetup;
   notifications: NotificationsStart;
@@ -99,12 +99,12 @@ export class EditUserPage extends Component<Props, State> {
   }
 
   private async setCurrentUser() {
-    const { username, apiClient, rolesAPIClient, notifications, authc } = this.props;
+    const { username, userAPIClient, rolesAPIClient, notifications, authc } = this.props;
     let { user, currentUser } = this.state;
     if (username) {
       try {
         user = {
-          ...(await apiClient.getUser(username)),
+          ...(await userAPIClient.getUser(username)),
           password: '',
           confirmPassword: '',
         };
@@ -160,7 +160,7 @@ export class EditUserPage extends Component<Props, State> {
       this.setState({
         formError: null,
       });
-      const { apiClient } = this.props;
+      const { userAPIClient } = this.props;
       const { user, isNewUser, selectedRoles } = this.state;
       const userToSave: EditUser = { ...user };
       if (!isNewUser) {
@@ -169,7 +169,7 @@ export class EditUserPage extends Component<Props, State> {
       delete userToSave.confirmPassword;
       userToSave.roles = [...selectedRoles];
       try {
-        await apiClient.saveUser(userToSave);
+        await userAPIClient.saveUser(userToSave);
         this.props.notifications.toasts.addSuccess(
           i18n.translate(
             'xpack.security.management.users.editUser.userSuccessfullySavedNotificationMessage',
@@ -265,7 +265,7 @@ export class EditUserPage extends Component<Props, State> {
           user={this.state.user}
           isUserChangingOwnPassword={userIsLoggedInUser}
           onChangePassword={this.toggleChangePasswordForm}
-          apiClient={this.props.apiClient}
+          userAPIClient={this.props.userAPIClient}
           notifications={this.props.notifications}
         />
       </Fragment>
@@ -436,7 +436,7 @@ export class EditUserPage extends Component<Props, State> {
                 onCancel={this.onCancelDelete}
                 usersToDelete={[user.username]}
                 callback={this.handleDelete}
-                apiClient={this.props.apiClient}
+                userAPIClient={this.props.userAPIClient}
                 notifications={this.props.notifications}
               />
             ) : null}

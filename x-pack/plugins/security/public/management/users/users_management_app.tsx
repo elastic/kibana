@@ -45,7 +45,7 @@ export const usersManagementApp = Object.freeze({
           return (
             <UsersGridPage
               notifications={notifications}
-              apiClient={userAPIClient}
+              userAPIClient={userAPIClient}
               rolesAPIClient={rolesAPIClient}
             />
           );
@@ -68,7 +68,7 @@ export const usersManagementApp = Object.freeze({
           return (
             <EditUserPage
               authc={authc}
-              apiClient={userAPIClient}
+              userAPIClient={userAPIClient}
               rolesAPIClient={new RolesAPIClient(http)}
               notifications={notifications}
               username={username}

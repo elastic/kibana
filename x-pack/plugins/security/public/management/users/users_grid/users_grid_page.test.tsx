@@ -40,7 +40,7 @@ describe('UsersGridPage', () => {
 
     const wrapper = mountWithIntl(
       <UsersGridPage
-        apiClient={apiClientMock}
+        userAPIClient={apiClientMock}
         rolesAPIClient={rolesAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
       />
@@ -59,7 +59,7 @@ describe('UsersGridPage', () => {
 
     const wrapper = mountWithIntl(
       <UsersGridPage
-        apiClient={apiClient}
+        userAPIClient={apiClient}
         rolesAPIClient={rolesAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
       />
