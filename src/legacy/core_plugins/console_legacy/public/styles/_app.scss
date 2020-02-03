@@ -35,12 +35,16 @@
 .conApp__output {
   display: flex;
   flex: 1 1 1px;
+  height: calc(100% - #{$euiSizeXXL});
+}
+
+.conApp__editorContent {
+  height: calc(100% - #{$euiSizeXXL});
 }
 
 .conApp__textAreaLabelHack,
 .conApp__editorContent,
 .conApp__outputContent {
-  height: calc(100% - #{$euiSizeL});
   flex: 1 1 1px;
 }
 
