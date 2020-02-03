@@ -17,17 +17,17 @@
  * under the License.
  */
 
-export function unset(object: object, rawPath: string): void;
+import { createGzip, Z_BEST_COMPRESSION } from 'zlib';
+import { PassThrough } from 'stream';
+import stringify from 'json-stable-stringify';
 
-export {
-  concatStreamProviders,
-  createConcatStream,
-  createFilterStream,
-  createIntersperseStream,
-  createListStream,
-  createMapStream,
-  createPromiseFromStreams,
-  createReduceStream,
-  createReplaceStream,
-  createSplitStream,
-} from './streams';
+import { createMapStream, createIntersperseStream } from '../../../legacy/utils';
+import { RECORD_SEPARATOR } from './constants';
+
+export function createFormatArchiveStreams({ gzip = false }: { gzip?: boolean } = {}) {
+  return [
+    createMapStream(record => stringify(record, { space: '  ' })),
+    createIntersperseStream(RECORD_SEPARATOR),
+    gzip ? createGzip({ level: Z_BEST_COMPRESSION }) : new PassThrough(),
+  ];
+}

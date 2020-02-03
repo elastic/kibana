@@ -17,17 +17,28 @@
  * under the License.
  */
 
-export function unset(object: object, rawPath: string): void;
+export { createIndexDocRecordsStream, createGenerateDocRecordsStream } from './docs';
 
 export {
-  concatStreamProviders,
-  createConcatStream,
-  createFilterStream,
-  createIntersperseStream,
-  createListStream,
-  createMapStream,
-  createPromiseFromStreams,
-  createReduceStream,
-  createReplaceStream,
-  createSplitStream,
-} from './streams';
+  createCreateIndexStream,
+  createDeleteIndexStream,
+  createGenerateIndexRecordsStream,
+  deleteKibanaIndices,
+  migrateKibanaIndex,
+  createDefaultSpace,
+} from './indices';
+
+export { createFilterRecordsStream } from './records';
+
+export { createStats, Stats } from './stats';
+
+export {
+  isGzip,
+  prioritizeMappings,
+  createParseArchiveStreams,
+  createFormatArchiveStreams,
+} from './archives';
+
+export { readDirectory } from './directory';
+
+export { Progress } from './progress';
