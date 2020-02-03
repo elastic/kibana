@@ -28,7 +28,7 @@ exports[`<SpaceAwarePrivilegeSection> with user profile disabling "manageSpaces"
       id="xpack.security.management.editRole.spaceAwarePrivilegeForm.ensureAccountHasAllPrivilegesGrantedDescription"
       values={
         Object {
-          "kibanaUser": <strong>
+          "kibanaAdmin": <strong>
             <FormattedMessage
               defaultMessage="kibana_admin"
               id="xpack.security.management.editRole.spaceAwarePrivilegeForm.kibanaAdminTitle"
