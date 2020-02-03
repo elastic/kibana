@@ -21,6 +21,7 @@ import { Observable } from 'rxjs';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { IClusterClient, ICustomClusterClient } from './cluster_client';
+import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 /**
  * @public
@@ -77,4 +78,5 @@ export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceS
   readonly legacy: {
     readonly config$: Observable<ElasticsearchConfig>;
   };
+  esNodesCompatibility$: Observable<NodesVersionCompatibility>;
 }
