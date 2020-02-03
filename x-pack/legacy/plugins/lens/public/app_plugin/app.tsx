@@ -39,7 +39,6 @@ interface State {
     toDate: string;
   };
   query: Query;
-  filters: esFilters.Filter[];
   savedQuery?: SavedQuery;
 }
 
@@ -76,7 +75,6 @@ export function App({
         fromDate: currentRange.from,
         toDate: currentRange.to,
       },
-      filters: [],
     };
   });
 
@@ -84,12 +82,13 @@ export function App({
 
   useEffect(() => {
     // Clear app-specific filters when navigating to Lens. Necessary because Lens
-    // can be loaded without a full page refresh
-    data.query.filterManager.setAppFilters([]);
+    // can be loaded without a full page refresh, using the same singleton
+    if (data.query.filterManager.getAppFilters().length) {
+      data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
+    }
 
     const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
-        setState(s => ({ ...s, filters: data.query.filterManager.getFilters() }));
         trackUiEvent('app_filters_updated');
       },
     });
@@ -127,8 +126,16 @@ export function App({
             core.notifications
           )
             .then(indexPatterns => {
-              // Don't overwrite any pinned filters
-              data.query.filterManager.setAppFilters(doc.state.filters);
+              // Keep any pinned filters and set app filters from doc
+              data.query.filterManager.setFilters(
+                data.query.filterManager
+                  .getGlobalFilters()
+                  .concat(
+                    doc.state.filters.filter(
+                      filter => filter.$state?.store === esFilters.FilterStateStore.APP_STATE
+                    )
+                  )
+              );
               setState(s => ({
                 ...s,
                 isLoading: false,
@@ -244,7 +251,7 @@ export function App({
                 setState(s => ({ ...s, savedQuery }));
               }}
               onSavedQueryUpdated={savedQuery => {
-                data.query.filterManager.setFilters(savedQuery.attributes.filters || state.filters);
+                data.query.filterManager.setFilters(savedQuery.attributes.filters || []);
                 setState(s => ({
                   ...s,
                   savedQuery: { ...savedQuery }, // Shallow query for reference issues
@@ -261,7 +268,6 @@ export function App({
                 setState(s => ({
                   ...s,
                   savedQuery: undefined,
-                  filters: [],
                   query: {
                     query: '',
                     language:
@@ -283,7 +289,7 @@ export function App({
               nativeProps={{
                 dateRange: state.dateRange,
                 query: state.query,
-                filters: state.filters,
+                filters: data.query.filterManager.getFilters(),
                 savedQuery: state.savedQuery,
                 doc: state.persistedDoc,
                 onError,

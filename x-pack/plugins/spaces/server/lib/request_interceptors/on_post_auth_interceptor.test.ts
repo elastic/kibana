@@ -107,7 +107,10 @@ describe('onPostAuthInterceptor', () => {
     availableSpaces: any[],
     testOptions = { simulateGetSpacesFailure: false, simulateGetSingleSpaceFailure: false }
   ) {
-    const { http } = await root.setup();
+    const { http, elasticsearch } = await root.setup();
+
+    // Mock esNodesCompatibility$ to prevent `root.start()` from blocking on ES version check
+    elasticsearch.esNodesCompatibility$ = elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
 
     const loggingMock = loggingServiceMock
       .create()
