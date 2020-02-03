@@ -21,10 +21,7 @@ import {
   UpdatedCaseType,
   UpdatedCommentType,
 } from '../routes/api/types';
-import {
-  AuthenticatedUser,
-  PluginSetupContract as SecurityPluginSetup,
-} from '../../../security/server';
+import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
 
 interface ClientArgs {
   client: SavedObjectsClientContract;
