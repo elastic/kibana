@@ -40,12 +40,11 @@ export default function({
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    // TODO@myasonik unskip
-    it.skip('can add fields to the table', async function() {
-      const defaultColumnsCount = await PageObjects.discover.getDataGridHeaders().length;
+    it('can add fields to the table', async function() {
+      const defaultColumnsCount = await PageObjects.discover.getDataGridHeaders();
       await PageObjects.discover.clickFieldListItemAdd('bytes');
-      const updatedColumnsCount = await PageObjects.discover.getDataGridHeaders().length;
-      expect(defaultColumnsCount + 1).to.be(updatedColumnsCount);
+      const updatedColumnsCount = await PageObjects.discover.getDataGridHeaders();
+      expect(defaultColumnsCount.length + 1).to.be(updatedColumnsCount.length);
     });
   });
 }

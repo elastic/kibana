@@ -330,7 +330,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getDataGridHeaders() {
       const $ = await (await testSubjects.find('dataGridHeader')).parseDomContent();
-      return await $('[role="columnheader"]').toArray();
+      return await $('[role="columnheader"]');
     }
   }
 

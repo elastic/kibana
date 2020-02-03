@@ -22,9 +22,7 @@ import expect from '@kbn/expect';
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 
 // eslint-disable-next-line
-import {
-  DEFAULT_PANEL_WIDTH
-} from '../../../../src/plugins/dashboard_embeddable_container/public/embeddable/dashboard_constants';
+import { DEFAULT_PANEL_WIDTH } from '../../../../src/plugins/dashboard_embeddable_container/public/embeddable/dashboard_constants';
 
 export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects([
@@ -35,6 +33,8 @@ export default function({ getService, getPageObjects }) {
     'tileMap',
     'visChart',
     'timePicker',
+    'settings',
+    'common',
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -49,6 +49,8 @@ export default function({ getService, getPageObjects }) {
     before(async function() {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
+      await PageObjects.settings.toggleDiscoverDataGrid();
+      await PageObjects.common.navigateToApp('dashboard');
     });
 
     after(async function() {
