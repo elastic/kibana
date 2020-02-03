@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
@@ -12,8 +13,8 @@ import {
   ICustomClusterClient,
 } from 'kibana/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
-import { PluginStartContract as EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
-import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
+import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
+import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { PLUGIN_ID } from './constants';
 import { licenseService, configService, appContextService } from './services';
@@ -89,9 +90,9 @@ export class IngestManagerPlugin implements Plugin {
     registerDatasourceRoutes(router);
 
     // Optional route registration depending on Kibana config
-    // TODO: Use this.config$ + if security is enabled to register conditional routing
-    registerEPMRoutes(router);
-    registerFleetSetupRoutes(router);
+    const config = await this.config$.pipe(first()).toPromise();
+    if (config.epm.enabled) registerEPMRoutes(router);
+    if (config.fleet.enabled) registerFleetSetupRoutes(router);
   }
 
   public async start(

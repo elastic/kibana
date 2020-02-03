@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export {
+  // Registry
+  DEFAULT_REGISTRY_URL,
   // Routes
   PLUGIN_ID,
   EPM_API_ROUTES,
@@ -20,5 +22,3 @@ export {
   DEFAULT_OUTPUT_ID,
   DEFAULT_OUTPUT,
 } from '../../common';
-
-export const DEFAULT_REGISTRY_URL = 'https://epr-staging.elastic.co';

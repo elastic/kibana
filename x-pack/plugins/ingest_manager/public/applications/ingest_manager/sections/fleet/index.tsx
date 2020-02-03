@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { useConfig } from '../../hooks';
 
-export const FleetApp: React.FC = () => <div>hello world - fleet app</div>;
+export const FleetApp: React.FunctionComponent = () => {
+  const { fleet } = useConfig();
+  return fleet.enabled ? <div>hello world - fleet app</div> : null;
+};

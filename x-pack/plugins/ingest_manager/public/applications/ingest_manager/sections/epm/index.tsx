@@ -5,5 +5,9 @@
  */
 
 import React from 'react';
+import { useConfig } from '../../hooks';
 
-export const EPMApp: React.FC = () => <div>hello world - epm app</div>;
+export const EPMApp: React.FunctionComponent = () => {
+  const { epm } = useConfig();
+  return epm.enabled ? <div>hello world - epm app</div> : null;
+};

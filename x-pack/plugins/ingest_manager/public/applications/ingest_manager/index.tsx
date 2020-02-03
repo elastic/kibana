@@ -6,7 +6,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { useObservable } from 'react-use';
-import { HashRouter as Router, Switch, Route } from 'react-router-dom';
+import { HashRouter as Router, Redirect, Switch, Route, RouteProps } from 'react-router-dom';
 import { CoreStart, AppMountParameters } from 'kibana/public';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
@@ -14,36 +14,53 @@ import { IngestManagerSetupDeps, IngestManagerConfigType } from '../../plugin';
 import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from './constants';
 import { DefaultLayout } from './layouts';
 import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp } from './sections';
-import { CoreContext, DepsContext, ConfigContext, setHttpClient } from './hooks';
+import { CoreContext, DepsContext, ConfigContext, setHttpClient, useConfig } from './hooks';
 
-const IngestManagerRoutes = ({ ...rest }) => (
-  <EuiErrorBoundary>
-    <Router {...rest}>
-      <Switch>
-        <Route path={EPM_PATH}>
-          <DefaultLayout section="epm">
-            <EPMApp />
-          </DefaultLayout>
-        </Route>
-        <Route path={AGENT_CONFIG_PATH}>
-          <DefaultLayout section="agent_config">
-            <AgentConfigApp />
-          </DefaultLayout>
-        </Route>
-        <Route path={FLEET_PATH}>
-          <DefaultLayout section="fleet">
-            <FleetApp />
-          </DefaultLayout>
-        </Route>
-        <Route path="/">
-          <DefaultLayout section="overview">
-            <IngestManagerOverview />
-          </DefaultLayout>
-        </Route>
-      </Switch>
-    </Router>
-  </EuiErrorBoundary>
-);
+export interface ProtectedRouteProps extends RouteProps {
+  isAllowed?: boolean;
+  restrictedPath?: string;
+}
+
+export const ProtectedRoute: React.FunctionComponent<ProtectedRouteProps> = ({
+  isAllowed = false,
+  restrictedPath = '/',
+  ...routeProps
+}: ProtectedRouteProps) => {
+  return isAllowed ? <Route {...routeProps} /> : <Redirect to={{ pathname: restrictedPath }} />;
+};
+
+const IngestManagerRoutes = ({ ...rest }) => {
+  const { epm, fleet } = useConfig();
+
+  return (
+    <EuiErrorBoundary>
+      <Router {...rest}>
+        <Switch>
+          <ProtectedRoute path={EPM_PATH} isAllowed={epm.enabled}>
+            <DefaultLayout section="epm">
+              <EPMApp />
+            </DefaultLayout>
+          </ProtectedRoute>
+          <Route path={AGENT_CONFIG_PATH}>
+            <DefaultLayout section="agent_config">
+              <AgentConfigApp />
+            </DefaultLayout>
+          </Route>
+          <ProtectedRoute path={FLEET_PATH} isAllowed={fleet.enabled}>
+            <DefaultLayout section="fleet">
+              <FleetApp />
+            </DefaultLayout>
+          </ProtectedRoute>
+          <Route path="/">
+            <DefaultLayout section="overview">
+              <IngestManagerOverview />
+            </DefaultLayout>
+          </Route>
+        </Switch>
+      </Router>
+    </EuiErrorBoundary>
+  );
+};
 
 const IngestManagerApp = ({
   coreStart,

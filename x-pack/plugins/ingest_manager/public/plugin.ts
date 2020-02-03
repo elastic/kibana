@@ -15,7 +15,10 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID } from '../common/constants';
+import { IngestManagerConfigType } from '../common/types';
 import { BASE_PATH } from './applications/ingest_manager/constants';
+
+export { IngestManagerConfigType } from '../common/types';
 
 export type IngestManagerSetup = void;
 export type IngestManagerStart = void;
@@ -23,16 +26,6 @@ export type IngestManagerStart = void;
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
   data: DataPublicPluginSetup;
-}
-
-// Redeclare config type as to not reach into server/ code
-export interface IngestManagerConfigType {
-  epm: {
-    enabled: boolean;
-  };
-  fleet: {
-    enabled: boolean;
-  };
 }
 
 export class IngestManagerPlugin implements Plugin {
