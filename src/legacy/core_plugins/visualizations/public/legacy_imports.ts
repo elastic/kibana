@@ -19,6 +19,7 @@
 
 export { PersistedState } from '../../../ui/public/persisted_state';
 export {
+  AggConfigs,
   IAggConfig,
   IAggConfigs,
   isDateHistogramBucketAggConfig,
