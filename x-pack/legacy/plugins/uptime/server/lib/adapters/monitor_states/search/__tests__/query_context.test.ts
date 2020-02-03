@@ -19,10 +19,7 @@ describe(QueryContext, () => {
   };
 
   let qc: QueryContext;
-  const makeQueryContext = () => {
-    return new QueryContext({}, rangeStart, rangeEnd, pagination, null, 10);
-  };
-  beforeEach(() => (qc = makeQueryContext()));
+  beforeEach(() => (qc = new QueryContext({}, rangeStart, rangeEnd, pagination, null, 10)));
 
   describe('dateRangeFilter()', () => {
     const expectedRange = {
@@ -36,7 +33,7 @@ describe(QueryContext, () => {
     describe('when hasTimespan() is true', () => {
       it('should create a date range filter including the timespan', async () => {
         const mockHasTimespan = jest.fn();
-        mockHasTimespan.mockReturnValue(Promise.resolve(true));
+        mockHasTimespan.mockReturnValue(true);
         qc.hasTimespan = mockHasTimespan;
 
         expect(await qc.dateRangeFilter()).toEqual({
@@ -60,7 +57,7 @@ describe(QueryContext, () => {
     describe('when hasTimespan() is false', () => {
       it('should only use the timestamp fields in the returned filter', async () => {
         const mockHasTimespan = jest.fn();
-        mockHasTimespan.mockReturnValue(Promise.resolve(false));
+        mockHasTimespan.mockReturnValue(false);
         qc.hasTimespan = mockHasTimespan;
 
         expect(await qc.dateRangeFilter()).toEqual(expectedRange);
