@@ -4,26 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
+import { schema } from '@kbn/config-schema';
 
-interface ReqPayload {
+import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../index';
+
+interface ReqBody {
   indices: string[];
 }
 
-const handler: RouterRouteHandler = async (request, callWithRequest, h) => {
-  const payload = request.payload as ReqPayload;
-  const { indices = [] } = payload;
+const bodySchema = schema.object({
+  indices: schema.arrayOf(schema.string()),
+});
 
-  const params = {
-    expandWildcards: 'none',
-    format: 'json',
-    index: indices,
-  };
+export function registerFlushRoute({ router }: RouteDependencies) {
+  router.post(
+    { path: addBasePath('/indices/flush'), validate: { body: bodySchema } },
+    async (ctx, req, res) => {
+      const body = req.body as ReqBody;
+      const { indices = [] } = body;
 
-  await callWithRequest('indices.flush', params);
-  return h.response();
-};
+      const params = {
+        expandWildcards: 'none',
+        format: 'json',
+        index: indices,
+      };
 
-export function registerFlushRoute(router: Router) {
-  router.post('indices/flush', handler);
+      await ctx.core.elasticsearch.adminClient.callAsCurrentUser('indices.flush', params);
+      return res.ok();
+    }
+  );
 }

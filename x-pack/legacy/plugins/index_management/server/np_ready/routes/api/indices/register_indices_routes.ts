@@ -7,8 +7,8 @@ import { RouteDependencies } from '../../../types';
 
 import { registerClearCacheRoute } from './register_clear_cache_route';
 import { registerCloseRoute } from './register_close_route';
-// import { registerFlushRoute } from './register_flush_route';
-// import { registerForcemergeRoute } from './register_forcemerge_route';
+import { registerFlushRoute } from './register_flush_route';
+import { registerForcemergeRoute } from './register_forcemerge_route';
 import { registerListRoute } from './register_list_route';
 import { registerOpenRoute } from './register_open_route';
 import { registerRefreshRoute } from './register_refresh_route';
@@ -20,8 +20,8 @@ import { registerUnfreezeRoute } from './register_unfreeze_route';
 export function registerIndicesRoutes(dependencies: RouteDependencies) {
   registerClearCacheRoute(dependencies);
   registerCloseRoute(dependencies);
-  // registerFlushRoute(dependencies);
-  // registerForcemergeRoute(dependencies);
+  registerFlushRoute(dependencies);
+  registerForcemergeRoute(dependencies);
   registerListRoute(dependencies);
   registerOpenRoute(dependencies);
   registerRefreshRoute(dependencies);

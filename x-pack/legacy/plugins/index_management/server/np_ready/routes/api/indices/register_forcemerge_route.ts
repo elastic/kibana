@@ -4,34 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
+import { schema } from '@kbn/config-schema';
 
-interface ForceMergeReqPayload {
-  maxNumSegments: number;
+import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../index';
+
+interface ReqBody {
   indices: string[];
+  maxNumSegments: number;
 }
 
-interface Params {
-  expandWildcards: string;
-  index: ForceMergeReqPayload['indices'];
-  max_num_segments?: ForceMergeReqPayload['maxNumSegments'];
-}
+const bodySchema = schema.object({
+  indices: schema.arrayOf(schema.string()),
+  maxNumSegments: schema.number(),
+});
 
-const handler: RouterRouteHandler = async (request, callWithRequest, h) => {
-  const { maxNumSegments, indices = [] } = request.payload as ForceMergeReqPayload;
-  const params: Params = {
-    expandWildcards: 'none',
-    index: indices,
-  };
+export function registerForcemergeRoute({ router }: RouteDependencies) {
+  router.post(
+    {
+      path: addBasePath('/indices/forcemerge'),
+      validate: {
+        body: bodySchema,
+      },
+    },
+    async (ctx, req, res) => {
+      const { maxNumSegments, indices = [] } = req.body as ReqBody;
+      const params = {
+        expandWildcards: 'none',
+        index: indices,
+      };
 
-  if (maxNumSegments) {
-    params.max_num_segments = maxNumSegments;
-  }
+      if (maxNumSegments) {
+        (params as any).max_num_segments = maxNumSegments;
+      }
 
-  await callWithRequest('indices.forcemerge', params);
-  return h.response();
-};
-
-export function registerForcemergeRoute(router: Router) {
-  router.post('indices/forcemerge', handler);
+      await ctx.core.elasticsearch.adminClient.callAsCurrentUser('indices.forcemerge', params);
+      return res.ok();
+    }
+  );
 }
