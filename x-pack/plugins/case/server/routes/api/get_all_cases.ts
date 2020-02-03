@@ -6,15 +6,15 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
-import { wrapError } from './utils';
-import { SavedOptionsFindOptionsSchema } from './schema';
+import { formatSavedOptionsFind, wrapError } from './utils';
+import { SavedObjectsFindOptionsSchema } from './schema';
 
 export function initGetAllCasesApi({ caseService, router }: RouteDeps) {
   router.get(
     {
       path: '/api/cases',
       validate: {
-        query: schema.nullable(SavedOptionsFindOptionsSchema),
+        query: schema.nullable(SavedObjectsFindOptionsSchema),
       },
     },
     async (context, request, response) => {
@@ -22,7 +22,7 @@ export function initGetAllCasesApi({ caseService, router }: RouteDeps) {
         const args = request.query
           ? {
               client: context.core.savedObjects.client,
-              options: request.query,
+              options: formatSavedOptionsFind(request.query),
             }
           : {
               client: context.core.savedObjects.client,

@@ -31,6 +31,7 @@ import { flattenSavedObjects } from './utils';
 import { fetchCases } from './api';
 
 const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
+  let getTypedPayload;
   switch (action.type) {
     case FETCH_INIT:
       return {
@@ -39,7 +40,7 @@ const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
         isError: false,
       };
     case FETCH_SUCCESS:
-      const getTypedPayload = (a: Action['payload']) => a as FlattenedCasesSavedObjects;
+      getTypedPayload = (a: Action['payload']) => a as FlattenedCasesSavedObjects;
       return {
         ...state,
         isLoading: false,
@@ -61,9 +62,10 @@ const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
         },
       };
     case UPDATE_FILTER_OPTIONS:
+      getTypedPayload = (a: Action['payload']) => a as FilterOptions;
       return {
         ...state,
-        filterOptions: action.payload,
+        filterOptions: getTypedPayload(action.payload),
       };
     default:
       throw new Error();
@@ -85,9 +87,7 @@ export const useGetCases = (): [
     isError: false,
     data: initialData,
     filterOptions: {
-      filter: '',
-      sortField: 'enabled',
-      sortOrder: 'desc',
+      search: '',
     },
     pagination: {
       page: DEFAULT_TABLE_ACTIVE_PAGE,

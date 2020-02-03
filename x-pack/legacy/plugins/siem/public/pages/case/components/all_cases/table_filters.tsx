@@ -24,16 +24,16 @@ interface CasesTableFiltersProps {
  * @param onFilterChanged change listener to be notified on filter changes
  */
 const CasesTableFiltersComponent = ({ onFilterChanged }: CasesTableFiltersProps) => {
-  const [filter, setFilter] = useState<string>('');
+  const [search, setSearch] = useState<string>('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [{ isLoading, data }] = useGetTags();
 
   // Propagate filter changes to parent
   useEffect(() => {
-    onFilterChanged({ filter, tags: selectedTags });
-  }, [filter, selectedTags, onFilterChanged]);
+    onFilterChanged({ search, tags: selectedTags });
+  }, [search, selectedTags, onFilterChanged]);
 
-  const handleOnSearch = useCallback(filterString => setFilter(filterString.trim()), [setFilter]);
+  const handleOnSearch = useCallback(searchString => setSearch(searchString.trim()), [setSearch]);
 
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">

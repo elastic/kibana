@@ -12,9 +12,7 @@ import { CASES_URL } from './constants';
 
 export const fetchCases = async ({
   filterOptions = {
-    filter: '',
-    sortField: 'enabled',
-    sortOrder: 'desc',
+    search: '',
     tags: [],
   },
   pagination = {
@@ -28,15 +26,16 @@ export const fetchCases = async ({
     (acc, [key, value]) => `${acc}${key}=${value}&`,
     '?'
   );
-
-  const filters = [
+  const tags = [
     ...(filterOptions.tags?.map(t => `case-workflow.attributes.tags:${encodeURIComponent(t)}`) ??
       []),
   ];
 
-  const filterParams = `filter=${filters.join('%20AND%20')}`;
-  queryParams = `${queryParams}${filterParams}`;
-
+  const tagParams = `filter=${tags.join('%20AND%20')}&`;
+  const searchParams = `search=${
+    filterOptions.search // filterOptions.search.length > 0 ? `*${filterOptions.search}*` : filterOptions.search
+  }&`;
+  queryParams = `${queryParams}${tagParams}${searchParams}`;
   const response = await fetch(`${chrome.getBasePath()}${CASES_URL}${queryParams}`, {
     method: 'GET',
     credentials: 'same-origin',

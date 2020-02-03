@@ -70,9 +70,7 @@ export interface Action {
 }
 
 export interface FilterOptions {
-  filter: string;
-  sortField: string;
-  sortOrder: 'asc' | 'desc';
+  search: string;
   tags?: string[];
 }
 

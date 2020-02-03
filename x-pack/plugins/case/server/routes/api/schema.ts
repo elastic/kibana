@@ -41,7 +41,19 @@ export const UpdatedCaseSchema = schema.object({
   case_type: schema.maybe(schema.string()),
 });
 
-export const SavedOptionsFindOptionsSchema = schema.object({
+export const SavedObjectsFindOptionsSchema = schema.object({
+  defaultSearchOperator: schema.maybe(schema.oneOf([schema.literal('AND'), schema.literal('OR')])),
+  fields: schema.maybe(schema.string()),
+  filter: schema.maybe(schema.string()),
+  page: schema.maybe(schema.number()),
+  perPage: schema.maybe(schema.number()),
+  search: schema.maybe(schema.string()),
+  searchFields: schema.maybe(schema.string()),
+  sortField: schema.maybe(schema.string()),
+  sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
+});
+
+export const SavedObjectsFindOptionsSchemaFormatted = schema.object({
   defaultSearchOperator: schema.maybe(schema.oneOf([schema.literal('AND'), schema.literal('OR')])),
   fields: schema.maybe(schema.arrayOf(schema.string())),
   filter: schema.maybe(schema.string()),

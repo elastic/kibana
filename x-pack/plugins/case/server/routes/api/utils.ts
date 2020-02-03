@@ -11,6 +11,8 @@ import {
   NewCaseFormatted,
   NewCommentType,
   NewCommentFormatted,
+  SavedObjectsFindOptionsType,
+  SavedObjectsFindOptionsTypeFormatted,
   UserType,
 } from './types';
 
@@ -47,3 +49,27 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
     statusCode: boom.output.statusCode,
   };
 }
+
+export const formatSavedOptionsFind = (
+  savedObjectsFindOptions: SavedObjectsFindOptionsType
+): SavedObjectsFindOptionsTypeFormatted => {
+  let options = { ...savedObjectsFindOptions };
+  if (savedObjectsFindOptions.fields && savedObjectsFindOptions.fields.length > 0) {
+    options = {
+      ...options,
+      fields: JSON.parse(savedObjectsFindOptions.fields),
+    };
+  } else {
+    delete options.fields;
+  }
+  if (savedObjectsFindOptions.searchFields && savedObjectsFindOptions.searchFields.length > 0) {
+    options = {
+      ...options,
+      searchFields: JSON.parse(savedObjectsFindOptions.searchFields),
+    };
+  } else {
+    delete options.searchFields;
+  }
+  // wtf ts
+  return options;
+};
