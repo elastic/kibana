@@ -58,6 +58,7 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
     XSRF: deps.__LEGACY.XSRF,
     APP_URL: deps.__LEGACY.APP_URL,
     application: coreStart.application,
+    http: coreStart.http,
   };
 
   const services = {

@@ -13,6 +13,7 @@ import {
   ChromeStart,
   SavedObjectsClientContract,
   ApplicationStart,
+  HttpStart,
 } from 'src/core/public';
 import {
   ChromeBreadcrumb,
@@ -64,6 +65,7 @@ export interface PageDependencies {
   XSRF: string;
   APP_URL: string;
   application: ApplicationStart;
+  http: HttpStart;
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {

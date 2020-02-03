@@ -11,6 +11,7 @@ import {
   ChromeStart,
   SavedObjectsClientContract,
   ApplicationStart,
+  HttpStart,
 } from 'src/core/public';
 import {
   IndexPatternsContract,
@@ -42,6 +43,7 @@ interface DependencyCache {
   XSRF: string | null;
   APP_URL: string | null;
   application: ApplicationStart | null;
+  http: HttpStart | null;
 }
 
 const cache: DependencyCache = {
@@ -60,6 +62,7 @@ const cache: DependencyCache = {
   XSRF: null,
   APP_URL: null,
   application: null,
+  http: null,
 };
 
 export function useDependencyCache(deps: PageDependencies) {
@@ -78,6 +81,7 @@ export function useDependencyCache(deps: PageDependencies) {
   cache.XSRF = deps.XSRF;
   cache.APP_URL = deps.APP_URL;
   cache.application = deps.application;
+  cache.http = deps.http;
 
   useEffect(() => {
     return () => {
@@ -86,6 +90,7 @@ export function useDependencyCache(deps: PageDependencies) {
   }, []);
 }
 
+// this isn't used and might never be needed
 export function getDependencyCache(): Readonly<PageDependencies> {
   if (
     cache.timefilter === null ||
@@ -102,7 +107,8 @@ export function getDependencyCache(): Readonly<PageDependencies> {
     cache.savedObjectsClient === null ||
     cache.XSRF === null ||
     cache.APP_URL === null ||
-    cache.application === null
+    cache.application === null ||
+    cache.http === null
   ) {
     throw new Error();
   }
@@ -122,6 +128,7 @@ export function getDependencyCache(): Readonly<PageDependencies> {
     XSRF: cache.XSRF,
     APP_URL: cache.APP_URL,
     application: cache.application,
+    http: cache.http,
   };
 }
 
@@ -227,6 +234,13 @@ export function getApplication() {
     throw new Error();
   }
   return cache.application;
+}
+
+export function getHttp() {
+  if (cache.http === null) {
+    throw new Error();
+  }
+  return cache.http;
 }
 
 export function clearCache() {
