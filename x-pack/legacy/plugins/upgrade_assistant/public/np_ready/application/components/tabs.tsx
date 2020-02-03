@@ -23,6 +23,7 @@ import { LatestMinorBanner } from './latest_minor_banner';
 import { CheckupTab } from './tabs/checkup';
 import { OverviewTab } from './tabs/overview';
 import { LoadingState, TelemetryState, UpgradeAssistantTabProps } from './types';
+import { UpgradeGuideTab } from './tabs/upgrade_guide';
 
 enum ClusterUpgradeState {
   needsUpgrade,
@@ -187,6 +188,14 @@ export class UpgradeAssistantTabsUI extends React.Component<Props, TabsState> {
     };
 
     return [
+      {
+        id: 'guide',
+        name: intl.formatMessage({
+          id: 'xpack.upgradeAssistant.guideTab.guideTabTitle',
+          defaultMessage: 'Upgrade guide',
+        }),
+        content: <UpgradeGuideTab http={this.props.http} {...commonProps} />,
+      },
       {
         id: 'overview',
         name: intl.formatMessage({

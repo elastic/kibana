@@ -24,7 +24,7 @@ export const RootComponent = (deps: AppDependencies) => {
               <h1>
                 <FormattedMessage
                   id="xpack.upgradeAssistant.appTitle"
-                  defaultMessage="{version} Upgrade Assistant"
+                  defaultMessage="Upgrade Assistant"
                   values={{ version: `${NEXT_MAJOR_VERSION}.0` }}
                 />
               </h1>

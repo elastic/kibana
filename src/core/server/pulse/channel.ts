@@ -27,9 +27,9 @@ import { PulseElasticsearchClient } from './client_wrappers/elasticsearch';
 import { IClusterClient } from '../elasticsearch';
 
 export interface PulseInstruction {
-  owner: string;
-  id: string;
-  value: unknown;
+  owner?: string;
+  id?: string;
+  value?: unknown;
 }
 
 export interface ChannelConfig<I = PulseInstruction> {
