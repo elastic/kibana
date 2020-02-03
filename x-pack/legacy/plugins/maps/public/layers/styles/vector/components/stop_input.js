@@ -70,7 +70,7 @@ export class StopInput extends Component {
 
   render() {
     const suggestionOptions = this.state.suggestions.map(suggestion => {
-      return { label: suggestion };
+      return { label: `${suggestion}` };
     });
 
     const selectedOptions = [];
