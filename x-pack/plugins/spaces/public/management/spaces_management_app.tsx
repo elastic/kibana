@@ -113,7 +113,7 @@ export const spacesManagementApp = Object.freeze({
                 <Route path="/create">
                   <CreateSpacePageWithBreadcrumbs />
                 </Route>
-                <Route path="/edit/:spaceId?">
+                <Route path="/edit/:spaceId">
                   <EditSpacePageWithBreadcrumbs />
                 </Route>
               </Switch>

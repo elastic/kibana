@@ -10,7 +10,7 @@ import { SecurityPlugin, SecurityPluginSetup, SecurityPluginStart } from './plug
 export { SecurityPluginSetup, SecurityPluginStart };
 export { SessionInfo } from './types';
 export { AuthenticatedUser } from '../common/model';
-export { SecurityLicense } from '../common/licensing';
+export { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
 
 export const plugin: PluginInitializer<SecurityPluginSetup, SecurityPluginStart> = () =>
   new SecurityPlugin();
