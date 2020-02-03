@@ -226,7 +226,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
             // Clear saved query
             setSavedQuery(undefined);
             core.notifications.toasts.addWarning({
-              title: i18n.translate('xpack.maps.unableToGetSavedQueryToastTitle', {
+              title: i18n.translate('data.search.unableToGetSavedQueryToastTitle', {
                 defaultMessage: 'Unable to load saved query {savedQueryId}',
                 values: { savedQueryId },
               }),
