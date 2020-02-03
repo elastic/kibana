@@ -87,12 +87,22 @@ export type ExecutionContainer<Output = ExpressionValue> = StateContainer<
   ExecutionPureTransitions<Output>
 >;
 
+const freeze = <T>(state: T): T => state;
+
 export const createExecutionContainer = <Output = ExpressionValue>(
   state: ExecutionState<Output> = executionDefaultState
 ): ExecutionContainer<Output> => {
-  const container = createStateContainer<ExecutionState<Output>, ExecutionPureTransitions<Output>>(
+  const container = createStateContainer<
+    ExecutionState<Output>,
+    ExecutionPureTransitions<Output>,
+    object
+  >(
     state,
-    executionPureTransitions
+    executionPureTransitions,
+    {},
+    {
+      freeze,
+    }
   );
   return container;
 };

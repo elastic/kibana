@@ -36,13 +36,29 @@ const isProduction =
     ? process.env.NODE_ENV === 'production'
     : !process.env.NODE_ENV || process.env.NODE_ENV === 'production';
 
-const freeze: <T>(value: T) => T = isProduction
+const defaultFreeze: <T>(value: T) => T = isProduction
   ? <T>(value: T) => value as T
   : <T>(value: T): T => {
       const isFreezable = value !== null && typeof value === 'object';
       if (isFreezable) return deepFreeze(value) as T;
       return value as T;
     };
+
+export interface CreateStateContainerOptions {
+  /**
+   * Function to use when freezing state. Supply identity function
+   *
+   * ```ts
+   * {
+   *   freeze: state => state,
+   * }
+   * ```
+   *
+   * if you expect that your state will be mutated externally an you cannot
+   * prevent that.
+   */
+  freeze?: <T>(state: T) => T;
+}
 
 export function createStateContainer<State extends BaseState>(
   defaultState: State
@@ -58,7 +74,8 @@ export function createStateContainer<
 >(
   defaultState: State,
   pureTransitions: PureTransitions,
-  pureSelectors: PureSelectors
+  pureSelectors: PureSelectors,
+  options?: CreateStateContainerOptions
 ): ReduxLikeStateContainer<State, PureTransitions, PureSelectors>;
 export function createStateContainer<
   State extends BaseState,
@@ -67,8 +84,10 @@ export function createStateContainer<
 >(
   defaultState: State,
   pureTransitions: PureTransitions = {} as PureTransitions,
-  pureSelectors: PureSelectors = {} as PureSelectors
+  pureSelectors: PureSelectors = {} as PureSelectors,
+  options: CreateStateContainerOptions = {}
 ): ReduxLikeStateContainer<State, PureTransitions, PureSelectors> {
+  const { freeze = defaultFreeze } = options;
   const data$ = new BehaviorSubject<State>(freeze(defaultState));
   const state$ = data$.pipe(skip(1));
   const get = () => data$.getValue();
