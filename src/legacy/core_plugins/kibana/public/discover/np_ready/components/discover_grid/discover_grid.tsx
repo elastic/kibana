@@ -45,6 +45,7 @@ import { shortenDottedString } from '../../../../../../../../plugins/data/common
 
 type Direction = 'asc' | 'desc';
 type SortArr = [string, Direction];
+const KibanaJSON = 'kibana-json';
 interface SortObj {
   id: string;
   direction: Direction;
@@ -169,7 +170,7 @@ export function DiscoverGrid({
           break;
         case '_source':
         case 'object':
-          column.schema = 'json';
+          column.schema = KibanaJSON;
           break;
       }
 
@@ -335,6 +336,22 @@ export function DiscoverGrid({
         gridStyle={{
           border: 'horizontal',
         }}
+        schemaDetectors={[
+          {
+            type: KibanaJSON,
+            detector() {
+              return 0; // this schema is always explicitly defined
+            },
+            comparator(a, b, direction) {
+              // Eventually this column will be non-sortable: https://github.com/elastic/eui/issues/2623
+              return 1;
+            },
+            sortTextAsc: '', // Eventually this column will be non-sortable: https://github.com/elastic/eui/issues/2623
+            sortTextDesc: '', // Eventually this column will be non-sortable: https://github.com/elastic/eui/issues/2623
+            icon: '', // Eventually this column will be non-sortable: https://github.com/elastic/eui/issues/2623
+            color: '', // Eventually this column will be non-sortable: https://github.com/elastic/eui/issues/2623
+          },
+        ]}
       />
       {showDisclaimer && (
         <>

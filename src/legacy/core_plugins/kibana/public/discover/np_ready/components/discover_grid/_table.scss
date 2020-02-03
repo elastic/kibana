@@ -1,3 +1,5 @@
+@import '../../mixins';
+
 .dscTable__footer {
   background-color: $euiColorLightShade;
   padding: $euiSize / 2 $euiSize;
@@ -7,4 +9,9 @@
 
 .dscTable__flyoutHeader {
   white-space: nowrap;
+}
+
+.euiDataGridRowCell__popover,
+.euiDataGridRowCell__truncate {
+  @include dscDocSourceStyle();
 }
