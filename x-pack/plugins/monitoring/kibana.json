@@ -1,0 +1,9 @@
+{
+  "id": "monitoring",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["monitoring"],
+  "requiredPlugins": ["usageCollection", "licensing"],
+  "server": true,
+  "ui": false
+}
