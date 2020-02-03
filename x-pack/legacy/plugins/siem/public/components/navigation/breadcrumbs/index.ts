@@ -103,11 +103,6 @@ export const getBreadcrumbsForRoute = (
     ];
   }
   if (isCaseRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'network', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-    if (spyState.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
-    }
     return [...siemRootBreadcrumb, ...getCaseDetailsBreadcrumbs(spyState)];
   }
   if (

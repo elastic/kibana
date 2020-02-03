@@ -5,7 +5,7 @@
  */
 
 import { Breadcrumb } from 'ui/chrome';
-import { getCaseDetailsUrl, getCaseUrl } from '../../components/link_to';
+import { getCaseDetailsUrl, getCaseUrl, getCreateCaseUrl } from '../../components/link_to';
 import { RouteSpyState } from '../../utils/route/types';
 import * as i18n from './translations';
 
@@ -16,7 +16,15 @@ export const getBreadcrumbs = (params: RouteSpyState): Breadcrumb[] => {
       href: getCaseUrl(),
     },
   ];
-  if (params.detailName != null) {
+  if (params.detailName === 'create') {
+    breadcrumb = [
+      ...breadcrumb,
+      {
+        text: i18n.CREATE_TITLE,
+        href: getCreateCaseUrl(),
+      },
+    ];
+  } else if (params.detailName != null) {
     breadcrumb = [
       ...breadcrumb,
       {

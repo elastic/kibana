@@ -8,18 +8,21 @@ import React from 'react';
 
 import { Route, Switch, RouteComponentProps } from 'react-router-dom';
 import { SiemPageName } from '../home/types';
-import { CasesPage } from './case';
 import { CaseDetailsPage } from './case_details';
+import { CasesPage } from './case';
+import { CreateCasePage } from './create_case';
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
 const casesPagePath = `/:pageName(${SiemPageName.case})`;
 const caseDetailsPagePath = `${casesPagePath}/:detailName`;
+const createCasePagePath = `${casesPagePath}/create`;
 
 const CaseContainerComponent: React.FC<Props> = () => {
   return (
     <Switch>
       <Route strict exact path={casesPagePath} render={() => <CasesPage />} />
+      <Route strict exact path={createCasePagePath} render={() => <CreateCasePage />} />
       <Route
         strict
         path={caseDetailsPagePath}

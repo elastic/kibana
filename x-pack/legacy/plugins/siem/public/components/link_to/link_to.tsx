@@ -20,7 +20,7 @@ import { RedirectToHostsPage, RedirectToHostDetailsPage } from './redirect_to_ho
 import { RedirectToNetworkPage } from './redirect_to_network';
 import { RedirectToOverviewPage } from './redirect_to_overview';
 import { RedirectToTimelinesPage } from './redirect_to_timelines';
-import { RedirectToCasePage } from './redirect_to_case';
+import { RedirectToCasePage, RedirectToCreatePage } from './redirect_to_case';
 import { DetectionEngineTab } from '../../pages/detection_engine/types';
 
 interface LinkToPageProps {
@@ -37,6 +37,11 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
       exact
       component={RedirectToCasePage}
       path={`${match.url}/:pageName(${SiemPageName.case})`}
+    />
+    <Route
+      exact
+      component={RedirectToCreatePage}
+      path={`${match.url}/:pageName(${SiemPageName.case})/create`}
     />
     <Route
       component={RedirectToCasePage}

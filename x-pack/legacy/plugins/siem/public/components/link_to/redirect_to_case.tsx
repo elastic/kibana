@@ -23,7 +23,10 @@ export const RedirectToCasePage = ({
   />
 );
 
+export const RedirectToCreatePage = () => <RedirectWrapper to={`/${SiemPageName.case}/create`} />;
+
 const baseCaseUrl = `#/link-to/${SiemPageName.case}`;
 
 export const getCaseUrl = () => baseCaseUrl;
 export const getCaseDetailsUrl = (detailName: string) => `${baseCaseUrl}/${detailName}`;
+export const getCreateCaseUrl = () => `${baseCaseUrl}/create`;

@@ -10,6 +10,10 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.case.pageTitle', {
   defaultMessage: 'Case Workflows',
 });
 
+export const CREATE_TITLE = i18n.translate('xpack.siem.case.create.title', {
+  defaultMessage: 'Create',
+});
+
 export const PAGE_SUBTITLE = i18n.translate('xpack.siem.case.casePage.pageSubtitle', {
   defaultMessage: 'Case Workflow Management within the Elastic SIEM',
 });

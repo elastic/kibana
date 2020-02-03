@@ -8,7 +8,12 @@ import { EuiLink } from '@elastic/eui';
 import React from 'react';
 
 import { encodeIpv6 } from '../../lib/helpers';
-import { getCaseDetailsUrl, getHostDetailsUrl, getIPDetailsUrl } from '../link_to';
+import {
+  getCaseDetailsUrl,
+  getHostDetailsUrl,
+  getIPDetailsUrl,
+  getCreateCaseUrl,
+} from '../link_to';
 import { FlowTarget, FlowTargetSourceDest } from '../../graphql/types';
 
 // Internal Links
@@ -45,6 +50,12 @@ const CaseDetailsLinkComponent: React.FC<{ children?: React.ReactNode; detailNam
 );
 export const CaseDetailsLink = React.memo(CaseDetailsLinkComponent);
 CaseDetailsLink.displayName = 'CaseDetailsLink';
+
+export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ children }) => (
+  <EuiLink href={getCreateCaseUrl()}>{children}</EuiLink>
+));
+
+CreateCaseLink.displayName = 'CreateCaseLink';
 
 // External Links
 export const GoogleLink = React.memo<{ children?: React.ReactNode; link: string }>(
