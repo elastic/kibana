@@ -22,10 +22,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
-  CommonProps,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiContextMenuPanelProps,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFilterButton,
@@ -50,17 +48,7 @@ import {
   CoreStart,
   IUiSettingsClient,
   SavedObjectsStart,
-} from 'src/core/public';
-
-// TODO the typings for EuiListGroup are incorrect - maxWidth is missing. This can be removed when the types are adjusted
-const FixedEuiListGroup = (EuiListGroup as any) as React.FunctionComponent<
-  CommonProps & { maxWidth: boolean }
->;
-
-// TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
-const FixedEuiContextMenuPanel = (EuiContextMenuPanel as any) as React.FunctionComponent<
-  EuiContextMenuPanelProps & { watchedItemProps: string[] }
->;
+} from '../../../core/public';
 
 export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
   type: string;
@@ -393,7 +381,7 @@ class SavedObjectFinderUi extends React.Component<
                 </EuiFilterButton>
               }
             >
-              <FixedEuiContextMenuPanel
+              <EuiContextMenuPanel
                 watchedItemProps={['icon', 'disabled']}
                 items={this.getSortOptions()}
               />
@@ -425,7 +413,7 @@ class SavedObjectFinderUi extends React.Component<
                   </EuiFilterButton>
                 }
               >
-                <FixedEuiContextMenuPanel
+                <EuiContextMenuPanel
                   watchedItemProps={['icon', 'disabled']}
                   items={this.props.savedObjectMetaData.map(metaData => (
                     <EuiContextMenuItem
@@ -469,7 +457,7 @@ class SavedObjectFinderUi extends React.Component<
           </EuiFlexGroup>
         )}
         {items.length > 0 ? (
-          <FixedEuiListGroup data-test-subj="savedObjectFinderItemList" maxWidth={false}>
+          <EuiListGroup data-test-subj="savedObjectFinderItemList" maxWidth={false}>
             {items.map(item => {
               const currentSavedObjectMetaData = savedObjectMetaData.find(
                 metaData => metaData.type === item.type
@@ -500,7 +488,7 @@ class SavedObjectFinderUi extends React.Component<
                 />
               );
             })}
-          </FixedEuiListGroup>
+          </EuiListGroup>
         ) : (
           !this.state.isFetchingItems && <EuiEmptyPrompt body={this.props.noItemsMessage} />
         )}
