@@ -16,7 +16,7 @@ const suggestion: autocomplete.QuerySuggestion = {
   end: 3,
   start: 1,
   text: 'Text...',
-  type: 'value',
+  type: autocomplete.QuerySuggestionsTypes.Value,
 };
 
 storiesOf('components/SuggestionItem', module).add('example', () => (

@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export default function ({ loadTestFile, getService }) {
+export default function({ loadTestFile, getService }) {
   const browser = getService('browser');
-  describe('dashboard app', function () {
+  describe('dashboard app', function() {
     before(async () => {
       await browser.setWindowSize(1200, 800);
     });
     loadTestFile(require.resolve('./dashboard'));
   });
-};
-
+}

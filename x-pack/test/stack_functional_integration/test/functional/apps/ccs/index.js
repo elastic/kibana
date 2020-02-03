@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export default function ({ loadTestFile }) {
-  describe('ccs test', function () {
+export default function({ loadTestFile }) {
+  describe('ccs test', function() {
     loadTestFile(require.resolve('./ccs'));
   });
 }

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'settings', 'visualize']);
   const log = getService('log');
   const screenshot = getService('screenshots');
@@ -15,10 +15,11 @@ export default function ({ getService, getPageObjects }) {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
-    before(function () {
+    before(function() {
       log.debug('navigateToApp visualize');
-      return PageObjects.common.navigateToApp('visualize')
-        .then(function () {
+      return PageObjects.common
+        .navigateToApp('visualize')
+        .then(function() {
           log.debug('clickDataTable');
           return PageObjects.visualize.clickDataTable();
         })
@@ -27,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.visualize.clickNewSearch();
         })
         .then(function setAbsoluteRange() {
-          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+          log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
           return PageObjects.header.setAbsoluteRange(fromTime, toTime);
         })
         .then(function clickBucket() {
@@ -49,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
         .then(function clickGo() {
           return PageObjects.visualize.clickGo();
         })
-        .then(function () {
+        .then(function() {
           return PageObjects.header.getSpinnerDone();
         });
     });
@@ -58,37 +59,44 @@ export default function ({ getService, getPageObjects }) {
       const vizName1 = 'Visualization DataTable';
 
       it('should be able to save and load', function pageHeader() {
-        return PageObjects.visualize.saveVisualization(vizName1)
-          .then(function (message) {
+        return PageObjects.visualize
+          .saveVisualization(vizName1)
+          .then(function(message) {
             log.debug('Saved viz message = ' + message);
-            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+            expect(message).to.be('Visualization Editor: Saved Visualization "' + vizName1 + '"');
           })
           .then(function testVisualizeWaitForToastMessageGone() {
             return PageObjects.visualize.waitForToastMessageGone();
           })
-          .then(function () {
+          .then(function() {
             return PageObjects.visualize.loadSavedVisualization(vizName1);
           })
-          .then(function () {
+          .then(function() {
             return PageObjects.visualize.waitForVisualization();
           });
       });
 
       it('should show correct data, take screenshot', function pageHeader() {
-        const expectedChartData = ['0 2,088', '2,000 2,748', '4,000 2,707', '6,000 2,876',
-          '8,000 2,863', '10,000 147', '12,000 148', '14,000 129', '16,000 161', '18,000 137',
+        const expectedChartData = [
+          '0 2,088',
+          '2,000 2,748',
+          '4,000 2,707',
+          '6,000 2,876',
+          '8,000 2,863',
+          '10,000 147',
+          '12,000 148',
+          '14,000 129',
+          '16,000 161',
+          '18,000 137',
         ];
 
-        return PageObjects.visualize.getDataTableData()
-          .then(function showData(data) {
-            log.debug(data.split('\n'));
-            return screenshot.take('Visualize-data-table')
-              .then(() => {
-                expect(data.split('\n')).to.eql(expectedChartData);
-              });
+        return PageObjects.visualize.getDataTableData().then(function showData(data) {
+          log.debug(data.split('\n'));
+          return screenshot.take('Visualize-data-table').then(() => {
+            expect(data.split('\n')).to.eql(expectedChartData);
           });
+        });
       });
-
     });
   });
-};
+}

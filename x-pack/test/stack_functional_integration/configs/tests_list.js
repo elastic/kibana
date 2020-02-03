@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 // testsList :: {} -> list
 export default envObj => {
   const xs = [];
@@ -11,7 +17,7 @@ export default envObj => {
   // get the opt in/out banner out of the way early
   if (envObj.XPACK === 'YES') {
     xs.push('telemetry');
-//         apps.push('code'); Code is off by default in 7.3.0
+    //         apps.push('code'); Code is off by default in 7.3.0
   }
 
   if (envObj.BEATS.includes('metricbeat')) {
@@ -29,9 +35,9 @@ export default envObj => {
   if (envObj.BEATS.includes('heartbeat')) {
     xs.push('heartbeat');
   }
-//      if (envObj.PRODUCTS.includes('apm-server')) {
-//        apps.push('apm');
-//      }
+  //      if (envObj.PRODUCTS.includes('apm-server')) {
+  //        apps.push('apm');
+  //      }
 
   if (envObj.VM === 'ubuntu16_tar_ccs') {
     xs.push('ccs');
@@ -49,7 +55,6 @@ export default envObj => {
   // }
 
   if (envObj.XPACK === 'YES' && ['TRIAL', 'GOLD', 'PLATINUM'].includes(envObj.LICENSE)) {
-
     // we can't test enabling monitoring on this config because we already enable it through cluster settings for both clusters.
     if (envObj.VM !== 'ubuntu16_tar_ccs') {
       // monitoring is last because we switch to the elastic superuser here

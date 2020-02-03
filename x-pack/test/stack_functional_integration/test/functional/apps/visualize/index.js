@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile, getService }) {
+export default function({ loadTestFile, getService }) {
   const browser = getService('browser');
 
   before(async () => {
     await browser.setWindowSize(1200, 800);
   });
 
-  describe('visualize app', function () {
+  describe('visualize app', function() {
     loadTestFile(require.resolve('./_chart_types'));
     loadTestFile(require.resolve('./_area_chart'));
     loadTestFile(require.resolve('./_line_chart'));
