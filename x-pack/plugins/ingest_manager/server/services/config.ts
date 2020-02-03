@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable, Subscription } from 'rxjs';
-import { IngestManagerConfigType } from '../';
+import { IngestManagerConfigType } from '../../common';
 
 /**
  * Kibana config observable service, *NOT* agent config

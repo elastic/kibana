@@ -24,7 +24,7 @@ import {
   registerAgentConfigRoutes,
   registerFleetSetupRoutes,
 } from './routes';
-import { IngestManagerConfigType } from './';
+import { IngestManagerConfigType } from '../common';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
