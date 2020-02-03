@@ -113,10 +113,16 @@ export class TelemetryManagementSection extends Component<Props, State> {
               setting={
                 {
                   type: 'boolean',
+                  name: i18n.translate('telemetry.provideUsageStatisticsTitle', {
+                    defaultMessage: 'telemetry:enabled',
+                  }),
+                  displayName: i18n.translate('telemetry.provideUsageStatisticsTitle', {
+                    defaultMessage: 'Provide usage statistics',
+                  }),
                   value: telemetryService.getIsOptedIn(),
                   description: this.renderDescription(),
                   defVal: true,
-                  ariaName: i18n.translate('telemetry.provideUsageStatisticsLabel', {
+                  ariaName: i18n.translate('telemetry.provideUsageStatisticsAriaName', {
                     defaultMessage: 'Provide usage statistics',
                   }),
                 } as any
