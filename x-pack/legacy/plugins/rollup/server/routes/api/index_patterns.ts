@@ -100,10 +100,27 @@ export function registerFieldsForWildcardRoute(deps: RouteDependencies, legacy: 
       validate: {
         query: schema.object({
           pattern: schema.string(),
-          meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+          meta_fields: schema.arrayOf(schema.string(), {
             defaultValue: [],
           }),
-          params: schema.string(),
+          params: schema.string({
+            validate(value) {
+              try {
+                const params = JSON.parse(value);
+                const keys = Object.keys(params);
+                const { rollup_index: rollupIndex } = params;
+
+                if (!rollupIndex) {
+                  return '[request query.params]: "rollup_index" is required';
+                } else if (keys.length > 1) {
+                  const invalidParams = keys.filter(key => key !== 'rollup_index');
+                  return `[request query.params]: ${invalidParams.join(', ')} is not allowed`;
+                }
+              } catch (err) {
+                return '[request query.params]: expected JSON string';
+              }
+            },
+          }),
         }),
       },
     },
