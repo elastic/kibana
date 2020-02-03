@@ -26,6 +26,7 @@ import { Search } from './components/search';
 import { Form } from './components/form';
 import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
 import { IUiSettingsClient } from '../../../../../../../core/public/';
+import { RegistryComponent } from '../../../../../../../plugins/advanced_settings/public';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
@@ -40,6 +41,9 @@ interface AdvancedSettingsState {
   footerQueryMatched: boolean;
   query: IQuery;
   filteredSettings: Record<string, FieldSetting[]>;
+  PageTitle: RegistryComponent;
+  PageSubtitle: RegistryComponent;
+  PageFooter: RegistryComponent;
 }
 
 type GroupedSettings = Record<string, FieldSetting[]>;
@@ -62,11 +66,27 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     this.categories = this.initCategories(this.groupedSettings);
     this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
 
+    const componentRegistry = npStart.plugins.advancedSettings.component;
+    const $PageTitle = componentRegistry.get$(componentRegistry.componentType.PAGE_TITLE_COMPONENT);
+    const $PageSubtitle = componentRegistry.get$(
+      componentRegistry.componentType.PAGE_SUBTITLE_COMPONENT
+    );
+    const $PageFooter = componentRegistry.get$(
+      componentRegistry.componentType.PAGE_FOOTER_COMPONENT
+    );
+
     this.state = {
       query: parsedQuery,
       footerQueryMatched: false,
       filteredSettings: this.mapSettings(Query.execute(parsedQuery, this.settings)),
+      PageTitle: $PageTitle.getValue(),
+      PageSubtitle: $PageSubtitle.getValue(),
+      PageFooter: $PageFooter.getValue(),
     };
+
+    $PageTitle.subscribe(PageTitle => this.setState({ PageTitle }));
+    $PageSubtitle.subscribe(PageSubtitle => this.setState({ PageSubtitle }));
+    $PageFooter.subscribe(PageFooter => this.setState({ PageFooter }));
   }
 
   init(config: IUiSettingsClient) {
@@ -155,14 +175,14 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   };
 
   render() {
-    const { filteredSettings, query, footerQueryMatched } = this.state;
-    const componentRegistry = npStart.plugins.advancedSettings.component;
-
-    const PageTitle = componentRegistry.get(componentRegistry.componentType.PAGE_TITLE_COMPONENT);
-    const PageSubtitle = componentRegistry.get(
-      componentRegistry.componentType.PAGE_SUBTITLE_COMPONENT
-    );
-    const PageFooter = componentRegistry.get(componentRegistry.componentType.PAGE_FOOTER_COMPONENT);
+    const {
+      filteredSettings,
+      query,
+      footerQueryMatched,
+      PageTitle,
+      PageSubtitle,
+      PageFooter,
+    } = this.state;
 
     return (
       <div>

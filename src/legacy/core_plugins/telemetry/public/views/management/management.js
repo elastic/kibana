@@ -40,6 +40,7 @@ routes.defaults(/\/management/, {
       componentRegistry.register(
         componentRegistry.componentType.PAGE_FOOTER_COMPONENT,
         Component,
+        undefined,
         true
       );
     },

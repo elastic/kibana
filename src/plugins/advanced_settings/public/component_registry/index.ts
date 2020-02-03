@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { ComponentRegistry } from './component_registry';
+export { ComponentRegistry, RegistryComponent } from './component_registry';
