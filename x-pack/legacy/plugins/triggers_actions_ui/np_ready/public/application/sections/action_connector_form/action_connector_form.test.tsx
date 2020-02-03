@@ -82,7 +82,11 @@ describe('action_connector_form', () => {
               editFlyoutVisible: false,
               setEditFlyoutVisibility: () => {},
               actionTypesIndex: {
-                'my-action-type': { id: 'my-action-type', name: 'my-action-type-name' },
+                'my-action-type': {
+                  id: 'my-action-type',
+                  name: 'my-action-type-name',
+                  enabled: true,
+                },
               },
               reloadConnectors: () => {
                 return new Promise<void>(() => {});
