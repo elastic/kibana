@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _, { get } from 'lodash';
 import { PersistedState } from 'ui/persisted_state';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
@@ -46,7 +46,6 @@ import {
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
 import { Vis } from '../np_ready/public';
-import { queryGeohashBounds } from './query_geohash_bounds';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -253,17 +252,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.savedVisualization.vis._setUiState(this.uiState);
     this.uiState = this.savedVisualization.vis.getUiState();
 
-    // This is a hack to give maps visualizations access to data in the
-    // globalState, since they can no longer access it via searchSource.
-    // TODO: Remove this as a part of elastic/kibana#30593
-    this.vis.API.getGeohashBounds = () => {
-      return queryGeohashBounds(this.savedVisualization.vis, {
-        filters: this.filters,
-        query: this.query,
-        searchSource: this.savedVisualization.searchSource,
-      });
-    };
-
     // this is a hack to make editor still work, will be removed once we clean up editor
     this.vis.hasInspector = () => {
       const visTypesWithoutInspector = [
@@ -290,6 +278,17 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async event => {
+        // maps hack, remove once esaggs function is cleaned up and ready to accept variables
+        if (event.name === 'bounds') {
+          const agg = this.vis.getAggConfig().aggs.find((a: any) => {
+            return get(a, 'type.dslName') === 'geohash_grid';
+          });
+          agg.params.boundingBox = event.boundingBox;
+          agg.params.precision = event.precision;
+          this.reload();
+          return;
+        }
+
         const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
 
         npStart.plugins.uiActions.executeTriggerActions(eventName, {
@@ -356,7 +355,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         filters: this.input.filters,
       },
       extraHandlers: {
-        vis: this.vis,
         uiState: this.uiState,
       },
     };

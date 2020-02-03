@@ -18,69 +18,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { geohashColumns } from 'ui/vis/map/decode_geo_hash';
-import chrome from 'ui/chrome';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-
-import { geoContains, scaleBounds, GeoBoundingBox } from './lib/geo_utils';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { AggGroupNames } from '../agg_groups';
 
-const config = chrome.getUiSettingsClient();
+const defaultBoundingBox = {
+  top_left: { lat: 1, lon: 1 },
+  bottom_right: { lat: 0, lon: 0 },
+};
 
 const defaultPrecision = 2;
-const maxPrecision = parseInt(config.get('visualization:tileMap:maxPrecision'), 10) || 12;
-/**
- * Map Leaflet zoom levels to geohash precision levels.
- * The size of a geohash column-width on the map should be at least `minGeohashPixels` pixels wide.
- */
-const zoomPrecision: any = {};
-const minGeohashPixels = 16;
-
-for (let zoom = 0; zoom <= 21; zoom += 1) {
-  const worldPixels = 256 * Math.pow(2, zoom);
-  zoomPrecision[zoom] = 1;
-  for (let precision = 2; precision <= maxPrecision; precision += 1) {
-    const columns = geohashColumns(precision);
-    if (worldPixels / columns >= minGeohashPixels) {
-      zoomPrecision[zoom] = precision;
-    } else {
-      break;
-    }
-  }
-}
-
-function getPrecision(val: string) {
-  let precision = parseInt(val, 10);
-
-  if (Number.isNaN(precision)) {
-    precision = defaultPrecision;
-  }
-
-  if (precision > maxPrecision) {
-    return maxPrecision;
-  }
-
-  return precision;
-}
-
-const isOutsideCollar = (bounds: GeoBoundingBox, collar: MapCollar) =>
-  bounds && collar && !geoContains(collar, bounds);
 
 const geohashGridTitle = i18n.translate('data.search.aggs.buckets.geohashGridTitle', {
   defaultMessage: 'Geohash',
 });
 
-interface MapCollar extends GeoBoundingBox {
-  zoom?: unknown;
-}
-
-export interface IBucketGeoHashGridAggConfig extends IBucketAggConfig {
-  lastMapCollar: MapCollar;
-}
-
-export const geoHashBucketAgg = new BucketAggType<IBucketGeoHashGridAggConfig>({
+export const geoHashBucketAgg = new BucketAggType<IBucketAggConfig>({
   name: BUCKET_TYPES.GEOHASH_GRID,
   title: geohashGridTitle,
   params: [
@@ -97,13 +50,8 @@ export const geoHashBucketAgg = new BucketAggType<IBucketGeoHashGridAggConfig>({
     {
       name: 'precision',
       default: defaultPrecision,
-      deserialize: getPrecision,
       write(aggConfig, output) {
-        const currZoom = aggConfig.params.mapZoom;
-        const autoPrecisionVal = zoomPrecision[currZoom];
-        output.params.precision = aggConfig.params.autoPrecision
-          ? autoPrecisionVal
-          : getPrecision(aggConfig.params.precision);
+        output.params.precision = aggConfig.params.precision;
       },
     },
     {
@@ -117,17 +65,7 @@ export const geoHashBucketAgg = new BucketAggType<IBucketGeoHashGridAggConfig>({
       write: () => {},
     },
     {
-      name: 'mapZoom',
-      default: 2,
-      write: () => {},
-    },
-    {
-      name: 'mapCenter',
-      default: [0, 0],
-      write: () => {},
-    },
-    {
-      name: 'mapBounds',
+      name: 'boundingBox',
       default: null,
       write: () => {},
     },
@@ -137,46 +75,22 @@ export const geoHashBucketAgg = new BucketAggType<IBucketGeoHashGridAggConfig>({
     const params = agg.params;
 
     if (params.isFilteredByCollar && agg.getField()) {
-      const { mapBounds, mapZoom } = params;
-      if (mapBounds) {
-        let mapCollar: MapCollar;
-
-        if (
-          mapBounds &&
-          (!agg.lastMapCollar ||
-            agg.lastMapCollar.zoom !== mapZoom ||
-            isOutsideCollar(mapBounds, agg.lastMapCollar))
-        ) {
-          mapCollar = scaleBounds(mapBounds);
-          mapCollar.zoom = mapZoom;
-          agg.lastMapCollar = mapCollar;
-        } else {
-          mapCollar = agg.lastMapCollar;
-        }
-        const boundingBox = {
-          ignore_unmapped: true,
-          [agg.getField().name]: {
-            top_left: mapCollar.top_left,
-            bottom_right: mapCollar.bottom_right,
-          },
-        };
-        aggs.push(
-          agg.aggConfigs.createAggConfig(
-            {
-              type: 'filter',
-              id: 'filter_agg',
-              enabled: true,
-              params: {
-                geo_bounding_box: boundingBox,
+      aggs.push(
+        agg.aggConfigs.createAggConfig(
+          {
+            type: 'filter',
+            id: 'filter_agg',
+            enabled: true,
+            params: {
+              geo_bounding_box: {
+                ignore_unmapped: true,
+                [agg.getField().name]: params.boundingBox || defaultBoundingBox,
               },
-              schema: {
-                group: AggGroupNames.Buckets,
-              },
-            } as any,
-            { addToAggConfigs: false }
-          )
-        );
-      }
+            },
+          } as any,
+          { addToAggConfigs: false }
+        )
+      );
     }
 
     aggs.push(agg);
@@ -196,6 +110,6 @@ export const geoHashBucketAgg = new BucketAggType<IBucketGeoHashGridAggConfig>({
       );
     }
 
-    return aggs as IBucketGeoHashGridAggConfig[];
+    return aggs;
   },
 });

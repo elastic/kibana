@@ -37,5 +37,5 @@ visualizationsSetup.types.registerAlias({
 });
 
 if (!showMapVisualizationTypes) {
-  visualizationsSetup.types.hideTypes(['region_map', 'tile_map']);
+  //visualizationsSetup.types.hideTypes(['region_map', 'tile_map']);
 }
