@@ -26,10 +26,13 @@ export default function({ getService, getPageObjects }) {
   const fromTime = 'Sep 22, 2019 @ 20:31:44.000';
   const toTime = 'Sep 23, 2019 @ 03:31:44.000';
 
-  describe('date_nanos', function() {
+  describe('date_nanos foo', function() {
     before(async function() {
       await esArchiver.loadIfNeeded('date_nanos');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'date-nanos' });
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'date-nanos',
+        'doc_table:legacyTable': true,
+      });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
