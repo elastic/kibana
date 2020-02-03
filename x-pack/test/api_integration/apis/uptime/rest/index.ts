@@ -19,6 +19,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       after('unload', () => esArchiver.unload('uptime/full_heartbeat'));
       loadTestFile(require.resolve('./monitor_latest_status'));
       loadTestFile(require.resolve('./selected_monitor'));
+      loadTestFile(require.resolve('./ping_histogram'));
     });
   });
 }
