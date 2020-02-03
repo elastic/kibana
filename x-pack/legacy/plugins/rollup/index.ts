@@ -46,6 +46,7 @@ export function rollup(kibana: any) {
 
       const initContext = ({
         config: rollupSetup.__legacy.config,
+        logger: rollupSetup.__legacy.logger,
       } as unknown) as PluginInitializerContext;
 
       const rollupPluginInstance = plugin(initContext);

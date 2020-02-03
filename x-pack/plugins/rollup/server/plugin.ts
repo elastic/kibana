@@ -17,6 +17,7 @@ export class RollupPlugin implements Plugin<RollupSetup> {
     return {
       __legacy: {
         config: this.initContext.config,
+        logger: this.initContext.logger,
       },
     };
   }
@@ -29,5 +30,6 @@ export interface RollupSetup {
   /** @deprecated */
   __legacy: {
     config: PluginInitializerContext['config'];
+    logger: PluginInitializerContext['logger'];
   };
 }

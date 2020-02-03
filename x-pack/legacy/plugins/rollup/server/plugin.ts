@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, Plugin, PluginInitializerContext, Logger } from 'src/core/server';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 
@@ -26,7 +26,11 @@ import { rollupDataEnricher } from './rollup_data_enricher';
 import { registerRollupSearchStrategy } from './lib/search_strategies';
 
 export class RollupsServerPlugin implements Plugin<void, void, any, any> {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  log: Logger;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.log = initializerContext.logger.get();
+  }
 
   async setup(
     { http, elasticsearch: elasticsearchService }: CoreSetup,
@@ -68,9 +72,7 @@ export class RollupsServerPlugin implements Plugin<void, void, any, any> {
           registerRollupUsageCollector(usageCollection, config.kibana.index);
         })
         .catch(e => {
-          this.initializerContext.logger
-            .get('rollup')
-            .warn(`Registering Rollup collector failed: ${e}`);
+          this.log.warn(`Registering Rollup collector failed: ${e}`);
         });
     }
 
