@@ -69,8 +69,8 @@ async function getPagingProperties(
 }
 
 function buildQueryBody(request: KibanaRequest<any, any, any>): Record<string, any> {
-  if (request?.body?.filters && typeof request.body.filters === 'string') {
-    return toElasticsearchQuery(fromKueryExpression(request.body.filters));
+  if (typeof request?.body?.filter === 'string') {
+    return toElasticsearchQuery(fromKueryExpression(request.body.filter));
   }
   return {
     match_all: {},

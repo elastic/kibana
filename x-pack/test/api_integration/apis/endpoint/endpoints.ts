@@ -107,7 +107,7 @@ export default function({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .post('/api/endpoint/endpoints')
           .set('kbn-xsrf', 'xxx')
-          .send({ filters: 'not host.ip:10.101.149.26' })
+          .send({ filter: 'not host.ip:10.101.149.26' })
           .expect(200);
         expect(body.total).to.eql(2);
         expect(body.endpoints.length).to.eql(2);
@@ -128,7 +128,7 @@ export default function({ getService }: FtrProviderContext) {
                 page_index: 1,
               },
             ],
-            filters: 'not host.ip:10.101.149.26',
+            filter: 'not host.ip:10.101.149.26',
           })
           .expect(200);
         expect(body.total).to.eql(2);

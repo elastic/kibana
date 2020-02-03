@@ -59,7 +59,7 @@ describe('query builder', () => {
     it('test default query params for all endpoints when no params or body is provided', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {
-          filters: 'not host.ip:10.140.73.246',
+          filter: 'not host.ip:10.140.73.246',
         },
       });
       const query = await kibanaRequestToEndpointListQuery(mockRequest, {

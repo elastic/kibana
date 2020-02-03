@@ -136,7 +136,7 @@ describe('test endpoint route', () => {
           },
         ],
 
-        filters: 'not host.ip:10.140.73.246',
+        filter: 'not host.ip:10.140.73.246',
       },
     });
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
