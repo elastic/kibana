@@ -55,7 +55,7 @@ export function getShardAllocation(
   const metric = ElasticsearchMetric.getMetricFields();
   const params = {
     index: esIndexPattern,
-    size: config.get('xpack.monitoring.max_bucket_size'),
+    size: config.get('monitoring.ui.max_bucket_size'),
     ignoreUnavailable: true,
     body: {
       query: createQuery({ type: 'shards', clusterUuid, metric, filters }),
