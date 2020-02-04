@@ -10,6 +10,7 @@ import { Chrome } from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { CoreSetup, CoreStart, Plugin } from '../../../../../src/core/public';
+import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 // @ts-ignore: Untyped Local
 import { CapabilitiesStrings } from '../i18n';
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
@@ -27,6 +28,7 @@ import { getDocumentationLinks } from './lib/documentation_links';
 
 // @ts-ignore: untyped local
 import { initClipboard } from './lib/clipboard';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
 
 export { CoreStart };
 /**
@@ -34,7 +36,9 @@ export { CoreStart };
  * @internal
  */
 // This interface will be built out as we require other plugins for setup
-export interface CanvasSetupDeps {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface CanvasSetupDeps {
+  home: HomePublicPluginSetup;
+}
 export interface CanvasStartDeps {
   __LEGACY: {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
@@ -79,6 +83,9 @@ export class CanvasPlugin
         return renderApp(coreStart, depsStart, params, canvasStore);
       },
     });
+
+    plugins.home.featureCatalogue.register(featureCatalogueEntry);
+
     return {};
   }
 

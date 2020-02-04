@@ -22,7 +22,9 @@ const shimCoreSetup = {
 const shimCoreStart = {
   ...npStart.core,
 };
-const shimSetupPlugins = {};
+const shimSetupPlugins = {
+  home: npSetup.plugins.home,
+};
 
 const shimStartPlugins: CanvasStartDeps = {
   ...npStart.plugins,
