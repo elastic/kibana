@@ -73,8 +73,6 @@ describe('MonitorCharts component', () => {
           range="range"
           success="success"
           monitorId="something"
-          dateRangeStart="2011-12-03T10:15:30+01:00"
-          dateRangeEnd="2011-12-03T10:15:30+01:00"
         />
       )
     );

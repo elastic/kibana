@@ -45,7 +45,6 @@ export const createRules = ({
       alertTypeId: SIGNALS_ID,
       consumer: APP_ID,
       params: {
-        createdAt: new Date().toISOString(),
         description,
         ruleId,
         index,
@@ -66,7 +65,6 @@ export const createRules = ({
         threat,
         to,
         type,
-        updatedAt: new Date().toISOString(),
         references,
         version,
       },

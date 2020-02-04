@@ -32,12 +32,13 @@ export interface ISyncSearchRequest extends IKibanaSearchRequest {
 export const syncSearchStrategyProvider: TSearchStrategyProvider<typeof SYNC_SEARCH_STRATEGY> = (
   context: ISearchContext
 ): ISearchStrategy<typeof SYNC_SEARCH_STRATEGY> => {
+  const loadingCount$ = new BehaviorSubject(0);
+  context.core.http.addLoadingCountSource(loadingCount$);
+
   const search: ISearch<typeof SYNC_SEARCH_STRATEGY> = (
     request: ISyncSearchRequest,
     options: ISearchOptions = {}
   ) => {
-    const loadingCount$ = new BehaviorSubject(0);
-    context.core.http.addLoadingCountSource(loadingCount$);
     loadingCount$.next(loadingCount$.getValue() + 1);
 
     const response: Promise<IKibanaSearchResponse> = context.core.http.fetch({

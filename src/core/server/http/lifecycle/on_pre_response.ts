@@ -120,8 +120,8 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
               ...(result.headers as any), // hapi types don't specify string[] as valid value
             };
           } else {
+            findHeadersIntersection(response.headers, result.headers, log);
             for (const [headerName, headerValue] of Object.entries(result.headers)) {
-              findHeadersIntersection(response.headers, result.headers, log);
               response.header(headerName, headerValue as any); // hapi types don't specify string[] as valid value
             }
           }
