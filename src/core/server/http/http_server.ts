@@ -35,7 +35,7 @@ import {
 import { IsAuthenticated, AuthStateStorage, GetAuthState } from './auth_state_storage';
 import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
-import { HttpServiceSetup } from './types';
+import { HttpServiceSetup, HttpServerInfo } from './types';
 
 /** @internal */
 export interface HttpServerSetup {
@@ -58,6 +58,7 @@ export interface HttpServerSetup {
     get: GetAuthState;
     isAuthenticated: IsAuthenticated;
   };
+  getServerInfo: () => HttpServerInfo;
 }
 
 /** @internal */
@@ -122,6 +123,12 @@ export class HttpServer {
         isAuthenticated: this.authState.isAuthenticated,
       },
       getAuthHeaders: this.authRequestHeaders.get,
+      getServerInfo: () => ({
+        name: config.name,
+        host: config.host,
+        port: config.port,
+        protocol: this.server!.info.protocol,
+      }),
       isTlsEnabled: config.ssl.enabled,
       // Return server instance with the connection options so that we can properly
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't
