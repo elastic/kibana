@@ -51,8 +51,14 @@ export const useLogEntryCategoryExamples = ({
     [getLogEntryCategoryExamplesRequest.state]
   );
 
+  const hasFailedLoadingLogEntryCategoryExamples = useMemo(
+    () => getLogEntryCategoryExamplesRequest.state === 'rejected',
+    [getLogEntryCategoryExamplesRequest.state]
+  );
+
   return {
     getLogEntryCategoryExamples,
+    hasFailedLoadingLogEntryCategoryExamples,
     isLoadingLogEntryCategoryExamples,
     logEntryCategoryExamples,
   };

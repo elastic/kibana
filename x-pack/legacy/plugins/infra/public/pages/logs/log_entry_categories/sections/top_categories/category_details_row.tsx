@@ -10,6 +10,7 @@ import euiStyled from '../../../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../../../common/http_api/shared';
 import { useLogEntryCategoryExamples } from '../../use_log_entry_category_examples';
 import { CategoryExampleMessage, useExampleColumnWidths } from './category_example_message';
+import { CategoryExampleMessagesFailureIndicator } from './category_example_messages_failure_indicator';
 import { CategoryExampleMessagesLoadingIndicator } from './category_example_messages_loading_indicator';
 
 const exampleCount = 5;
@@ -21,6 +22,7 @@ export const CategoryDetailsRow: React.FunctionComponent<{
 }> = ({ categoryId, timeRange, sourceId }) => {
   const {
     getLogEntryCategoryExamples,
+    hasFailedLoadingLogEntryCategoryExamples,
     isLoadingLogEntryCategoryExamples,
     logEntryCategoryExamples,
   } = useLogEntryCategoryExamples({
@@ -43,6 +45,8 @@ export const CategoryDetailsRow: React.FunctionComponent<{
       <CategoryExampleMessages>
         {isLoadingLogEntryCategoryExamples ? (
           <CategoryExampleMessagesLoadingIndicator exampleCount={exampleCount} />
+        ) : hasFailedLoadingLogEntryCategoryExamples ? (
+          <CategoryExampleMessagesFailureIndicator onRetry={getLogEntryCategoryExamples} />
         ) : (
           logEntryCategoryExamples.map((categoryExample, categoryExampleIndex) => (
             <CategoryExampleMessage
