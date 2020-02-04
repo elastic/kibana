@@ -53,8 +53,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('pagination is cleared when filter criteria changes', async () => {
       await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
       await pageObjects.uptime.changePage('next');
-      // there should now be pagination data in the URL
-      await pageObjects.uptime.pageUrlContains('pagination');
       await pageObjects.uptime.pageHasExpectedIds([
         '0010-down',
         '0011-up',
@@ -67,9 +65,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '0018-up',
         '0019-up',
       ]);
+      await retry.tryForTime(12000, async () => {
+        // there should now be pagination data in the URL
+        await pageObjects.uptime.pageUrlContains('pagination');
+      });
       await pageObjects.uptime.setStatusFilter('up');
-      // ensure that pagination is removed from the URL
-      await pageObjects.uptime.pageUrlContains('pagination', false);
       await pageObjects.uptime.pageHasExpectedIds([
         '0000-intermittent',
         '0001-up',
@@ -82,6 +82,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '0008-up',
         '0009-up',
       ]);
+      await retry.tryForTime(12000, async () => {
+        // ensure that pagination is removed from the URL
+        await pageObjects.uptime.pageUrlContains('pagination', false);
+      });
     });
 
     describe('snapshot counts', () => {
