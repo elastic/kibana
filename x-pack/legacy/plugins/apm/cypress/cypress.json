@@ -12,7 +12,7 @@
   "useRelativeSnapshots": true,
   "reporter": "junit",
   "reporterOptions": {
-    "mochaFile": "[hash]-e2e-tests.xml",
+    "mochaFile": "./cypress/test-results/[hash]-e2e-tests.xml",
     "toConsole": false
   },
   "testFiles": "**/*.{feature,features}"
