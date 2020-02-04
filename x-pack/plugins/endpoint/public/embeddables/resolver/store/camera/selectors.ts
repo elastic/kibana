@@ -61,7 +61,7 @@ function animationIsActive(animation: CameraAnimationState, time: Date): boolean
  *
  *   If the scale is low, the camera is zoomed out, objects look further away, and so they move
  *   across the screen slower at a given camera speed. Therefore we can control the speed at
- *   hich objects move across the screen without changing the camera speed. We do this by changing scale.
+ *   which objects move across the screen without changing the camera speed. We do this by changing scale.
  *
  *   Changing the scale abruptly isn't acceptable because it would be visually jarring. Also, the
  *   change in scale should be temporary, and the original scale should be resumed after the animation.
