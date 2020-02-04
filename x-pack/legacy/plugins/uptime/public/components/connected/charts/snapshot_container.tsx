@@ -29,6 +29,7 @@ interface StoreProps {
   count: SnapshotType;
   lastRefresh: number;
   loading: boolean;
+  esKuery: string;
 }
 
 /**
@@ -49,14 +50,15 @@ export const Container: React.FC<Props> = ({
   height,
   lastRefresh,
   loading,
+  esKuery,
   loadSnapshotCount,
 }: Props) => {
   const [getUrlParams] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd, statusFilter, filters } = getUrlParams();
+  const { dateRangeStart, dateRangeEnd, statusFilter } = getUrlParams();
 
   useEffect(() => {
-    loadSnapshotCount(dateRangeStart, dateRangeEnd, filters, statusFilter);
-  }, [dateRangeStart, dateRangeEnd, filters, lastRefresh, loadSnapshotCount, statusFilter]);
+    loadSnapshotCount(dateRangeStart, dateRangeEnd, esKuery, statusFilter);
+  }, [dateRangeStart, dateRangeEnd, esKuery, lastRefresh, loadSnapshotCount, statusFilter]);
   return <SnapshotComponent count={count} height={height} loading={loading} />;
 };
 
@@ -66,11 +68,12 @@ export const Container: React.FC<Props> = ({
  */
 const mapStateToProps = ({
   snapshot: { count, loading },
-  ui: { lastRefresh },
+  ui: { lastRefresh, esKuery },
 }: AppState): StoreProps => ({
   count,
   lastRefresh,
   loading,
+  esKuery,
 });
 
 /**
