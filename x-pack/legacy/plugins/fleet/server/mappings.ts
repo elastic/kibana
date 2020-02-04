@@ -22,6 +22,10 @@ export const mappings = {
       access_api_key_id: {
         type: 'keyword',
       },
+      // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
+      default_api_key: {
+        type: 'keyword',
+      },
       version: {
         type: 'keyword',
       },
@@ -40,12 +44,16 @@ export const mappings = {
       last_checkin: {
         type: 'date',
       },
+      config_updated_at: {
+        type: 'date',
+      },
       updated_at: {
         type: 'date',
       },
       current_error_events: {
         type: 'text',
       },
+      // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
       actions: {
         type: 'nested',
         properties: {

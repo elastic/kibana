@@ -91,14 +91,11 @@ export class ApiKeyLib {
     }
   }
 
-  public async generateAccessApiKey(
-    agentId: string,
-    policyId?: string
-  ): Promise<{ key: string; id: string }> {
-    const name = this._getAccesstApiKeyName(agentId);
-
+  public async generateOutputApiKey(outputId: string, agentId: string): Promise<string> {
+    const name = this._getAgentOutputApiKeyName(outputId, agentId);
     const key = await this._createAPIKey(name, {
-      'fleet-agent': {
+      'fleet-output': {
+        cluster: ['monitor'],
         index: [
           {
             names: ['logs-*', 'metrics-*'],
@@ -106,6 +103,23 @@ export class ApiKeyLib {
           },
         ],
       },
+    });
+
+    if (!key) {
+      throw new Error('Unable to create an output api key');
+    }
+
+    return `${key.id}:${key.api_key}`;
+  }
+
+  public async generateAccessApiKey(
+    agentId: string,
+    policyId?: string
+  ): Promise<{ key: string; id: string }> {
+    const name = this._getAccessApiKeyName(agentId);
+
+    const key = await this._createAPIKey(name, {
+      'fleet-agent': {},
     });
 
     if (!key) {
@@ -212,8 +226,12 @@ export class ApiKeyLib {
     return name ? `${name} (${id})` : id;
   }
 
-  private _getAccesstApiKeyName(agentId: string): string {
+  private _getAccessApiKeyName(agentId: string): string {
     return agentId;
+  }
+
+  private _getAgentOutputApiKeyName(outputId: string, agentId: string): string {
+    return `${agentId}:${outputId}`;
   }
 
   public async addEnrollmentRule(

@@ -13,6 +13,7 @@ import { FrameworkRequest } from '../../adapters/framework/adapter_types';
 import { ReturnTypeCheckin } from '../../../common/return_types';
 import { FleetServerLib } from '../../libs/types';
 import { AgentEvent, RuntimeAgentEvent } from '../../../common/types/domain_data';
+import { agentCheckin } from '../../libs/agents/checkin';
 
 type CheckinRequest = FrameworkRequest<{
   payload: {
@@ -48,7 +49,8 @@ export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
       res.accessApiKeyId
     );
 
-    const { actions, policy } = await libs.agents.checkin(
+    const { actions } = await agentCheckin(
+      libs,
       request.user,
       agent,
       events,
@@ -58,7 +60,6 @@ export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
     return {
       action: 'checkin',
       success: true,
-      policy,
       actions: actions.map(a => ({
         type: a.type,
         data: a.data ? JSON.parse(a.data) : a.data,

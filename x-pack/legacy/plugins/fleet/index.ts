@@ -57,7 +57,7 @@ export function fleet(kibana: any) {
     config: () => config,
     configPrefix: CONFIG_PREFIX,
     init(server: any) {
-      // TODO https://github.com/elastic/kibana/issues/53199
+      // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
       // server.newPlatform.setup.plugins.encryptedSavedObjects.registerType({
       //   type: 'enrollment_api_keys',
       //   // attributesToEncrypt: new Set(['api_key']),

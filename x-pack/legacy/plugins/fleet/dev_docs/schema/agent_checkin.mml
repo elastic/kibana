@@ -12,6 +12,13 @@ sequenceDiagram
   Note right of SavedObjects: encrypted SO here
   end
 
+  alt If configuration updated since last checkin
+    Fleet API->>SavedObjects: getAgentConfiguration(configId)
+
+    opt If there is not API Key for default output
+      Fleet API->>Elasticsearch: createAgentESApiKey()
+    end
+  end
 
   rect rgba(191, 223, 255, .2)
   Note over Fleet API,Elasticsearch: Process agent events<br/>(going to move to the agent directly)
