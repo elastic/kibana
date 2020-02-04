@@ -4,7 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { EuiAccordion, EuiPanel } from '@elastic/eui';
+import styled, { StyledComponent } from 'styled-components';
 
-export const Create = React.memo(() => <p>{`Hello create case`}</p>);
+const CreateCaseAccordion: StyledComponent<
+  typeof EuiAccordion,
+  any, // eslint-disable-line
+  { ref: React.MutableRefObject<EuiAccordion | null> },
+  never
+> = styled(EuiAccordion)`
+  .euiAccordion__childWrapper {
+    overflow: visible;
+  }
+`;
+
+CreateCaseAccordion.displayName = 'CreateCaseAccordion';
+
+export const Create = React.memo(() => <EuiPanel>{`helo`}</EuiPanel>);
 
 Create.displayName = 'Create';

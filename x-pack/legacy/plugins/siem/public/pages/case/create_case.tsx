@@ -4,19 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 
 import { WrapperPage } from '../../components/wrapper_page';
 import { Create } from './components/create';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { HeaderPage } from '../../components/header_page';
+import * as i18n from './translations';
+import { getCaseUrl } from '../../components/link_to';
 
 export const CreateCasePage = React.memo(() => (
   <>
-    <WrapperPage>
-      <EuiFlexGroup>
-        <Create />
-      </EuiFlexGroup>
+    <WrapperPage restrictWidth>
+      {' '}
+      <HeaderPage
+        backOptions={{
+          href: getCaseUrl(),
+          text: i18n.BACK_TO_ALL,
+        }}
+        badgeOptions={{
+          beta: true,
+          text: i18n.PAGE_BADGE_LABEL,
+          tooltip: i18n.PAGE_BADGE_TOOLTIP,
+        }}
+        title={i18n.CREATE_TITLE}
+      />
+      <Create />
     </WrapperPage>
     <SpyRoute />
   </>

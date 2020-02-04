@@ -11,7 +11,15 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.case.pageTitle', {
 });
 
 export const CREATE_TITLE = i18n.translate('xpack.siem.case.create.title', {
+  defaultMessage: 'Create new case',
+});
+
+export const CREATE_BC_TITLE = i18n.translate('xpack.siem.case.create.breadcrumb', {
   defaultMessage: 'Create',
+});
+
+export const BACK_TO_ALL = i18n.translate('xpack.siem.case.back.label', {
+  defaultMessage: 'Back to all cases',
 });
 
 export const PAGE_SUBTITLE = i18n.translate('xpack.siem.case.casePage.pageSubtitle', {

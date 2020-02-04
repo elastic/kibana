@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { HeaderPage } from '../../../../components/header_page';
@@ -79,10 +79,15 @@ export const CaseView = React.memo(({ caseId }: Props) => {
     </EuiFlexGroup>
   ) : (
     <EuiFlexItem>
-      <EuiText>
-        <EuiLink href={getCaseUrl()}>{i18n.BACK_LABEL}</EuiLink>
-      </EuiText>
-      <HeaderPage border subtitle={caseId} title={data.title} />
+      <HeaderPage
+        backOptions={{
+          href: getCaseUrl(),
+          text: i18n.BACK_TO_ALL,
+        }}
+        border
+        subtitle={caseId}
+        title={data.title}
+      />
       <EuiText>
         <dl className="eui-definitionListReverse">
           {caseDetailsDefinitions.map((dictionaryItem, key) =>
