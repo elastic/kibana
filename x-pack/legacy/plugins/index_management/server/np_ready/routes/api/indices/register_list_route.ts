@@ -8,9 +8,12 @@ import { fetchIndices } from '../../../lib/fetch_indices';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-export function registerListRoute({ router }: RouteDependencies) {
-  router.get({ path: addBasePath('/indices'), validate: false }, async (ctx, req, res) => {
-    const indices = await fetchIndices(ctx.core.elasticsearch.dataClient.callAsCurrentUser);
-    return res.ok({ body: indices });
-  });
+export function registerListRoute({ router, license }: RouteDependencies) {
+  router.get(
+    { path: addBasePath('/indices'), validate: false },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const indices = await fetchIndices(ctx.core.elasticsearch.dataClient.callAsCurrentUser);
+      return res.ok({ body: indices });
+    })
+  );
 }

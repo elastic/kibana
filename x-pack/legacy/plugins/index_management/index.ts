@@ -29,7 +29,15 @@ export function indexManagement(kibana: any) {
       const pluginDependencies: Dependencies = {
         licensing: {
           license$: {
-            subscribe() {},
+            subscribe(handler: any) {
+              return handler({
+                check() {
+                  return {
+                    state: 'VALID',
+                  };
+                },
+              });
+            },
           },
         } as any,
       };
