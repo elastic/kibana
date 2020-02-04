@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import { CallAPIOptions, RequestHandlerContext } from 'kibana/server';
 import _ from 'lodash';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
@@ -107,10 +107,15 @@ type BatchStats =
   | FieldExamples;
 
 export class DataVisualizer {
-  context: RequestHandlerContext;
+  callAsCurrentUser: (
+    endpoint: string,
+    clientParams: Record<string, any>,
+    options?: CallAPIOptions
+  ) => Promise<any>;
 
-  constructor(context: RequestHandlerContext) {
-    this.context = context;
+  constructor(client: RequestHandlerContext | (() => any)) {
+    this.callAsCurrentUser =
+      typeof client === 'object' ? client.ml!.mlClient.callAsCurrentUser : client;
   }
 
   // Obtains overall stats on the fields in the supplied index pattern, returning an object
@@ -367,7 +372,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
+    const resp = await this.callAsCurrentUser('search', {
       index,
       rest_total_hits_as_int: true,
       size,
@@ -434,7 +439,7 @@ export class DataVisualizer {
     };
     filterCriteria.push({ exists: { field } });
 
-    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
+    const resp = await this.callAsCurrentUser('search', {
       index,
       rest_total_hits_as_int: true,
       size,
@@ -476,7 +481,7 @@ export class DataVisualizer {
       aggs,
     };
 
-    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
+    const resp = await this.callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -579,7 +584,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
+    const resp = await this.callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -700,7 +705,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
+    const resp = await this.callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -774,7 +779,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
+    const resp = await this.callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -841,7 +846,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
+    const resp = await this.callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -903,7 +908,7 @@ export class DataVisualizer {
       },
     };
 
-    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
+    const resp = await this.callAsCurrentUser('search', {
       index,
       rest_total_hits_as_int: true,
       size,
