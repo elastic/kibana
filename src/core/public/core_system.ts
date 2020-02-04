@@ -293,6 +293,52 @@ export class CoreSystem {
         targetDomElement: coreUiTargetDomElement,
       });
 
+
+      let sequence = 0;
+      const clicks: Array<Record<string, any>> = [];
+      $('body').on('click', 'a', (event) => {
+        handleClick($(event.currentTarget));
+      });
+      $('body').on('click', 'button', (event) => {
+        handleClick($(event.currentTarget));
+      });
+
+      let currentAppId: string | undefined;
+      application.currentAppId$.subscribe(appId => currentAppId = appId);
+
+      function handleClick(element: any) {
+        clicks.push({
+          timestamp: new Date().toISOString(),
+          id: element.attr('id'),
+          class: element.attr('class'),
+          app: currentAppId,
+          sequence: ++sequence,
+          sessionHash: 'foo',
+        });
+      }
+
+      async function sendClicks() {
+        if (clicks.length === 0) {
+          return;
+        }
+        const promise = http.post('/api/ui_clicks', {
+          body: JSON.stringify({ clicks }),
+          headers: { 'Content-Type': 'application/json' },
+        });
+        clicks.splice(0); // zero out clicks
+        await promise; // await but disregard response
+        return;
+      }
+
+      function bufferAndSendClicks() {
+        setTimeout(() => {
+          sendClicks().then(() => bufferAndSendClicks());
+        }, 5000);
+      }
+
+      bufferAndSendClicks();
+
+
       await this.legacy.start({
         core,
         plugins: mapToObject(plugins.contracts),
