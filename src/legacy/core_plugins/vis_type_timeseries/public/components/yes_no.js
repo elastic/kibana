@@ -24,7 +24,7 @@ import { EuiRadio, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function YesNo(props) {
-  const { name, value, disabled } = props;
+  const { name, value, disabled, 'data-test-subj': dataTestSubj } = props;
   const handleChange = value => {
     const { name } = props;
     return () => {
@@ -38,6 +38,7 @@ export function YesNo(props) {
     <div>
       <EuiRadio
         id={htmlId('yes')}
+        data-test-subj={`${dataTestSubj}-yes`}
         label={
           <FormattedMessage
             id="visTypeTimeseries.yesButtonLabel"
@@ -55,6 +56,7 @@ export function YesNo(props) {
       &emsp;
       <EuiRadio
         id={htmlId('no')}
+        data-test-subj={`${dataTestSubj}-no`}
         label={
           <FormattedMessage
             id="visTypeTimeseries.noButtonLabel"
