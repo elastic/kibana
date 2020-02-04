@@ -21,27 +21,22 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n/react';
-import { IUiSettingsClient, SavedObjectsStart } from 'kibana/public';
 import { NewVisModal } from './new_vis_modal';
-import { TypesStart } from '../types';
-import { UsageCollectionSetup } from '../../../../../../../plugins/usage_collection/public';
+import { getHttp, getSavedObjects, getTypes, getUISettings, getUsageCollector } from '../services';
 
-interface ShowNewVisModalParams {
+export interface ShowNewVisModalParams {
   editorParams?: string[];
+  onClose?: () => void;
 }
 
-export function showNewVisModal(
-  visTypeRegistry: TypesStart,
-  { editorParams = [] }: ShowNewVisModalParams = {},
-  addBasePath: (path: string) => string,
-  uiSettings: IUiSettingsClient,
-  savedObjects: SavedObjectsStart,
-  usageCollection?: UsageCollectionSetup
-) {
+export function showNewVisModal({ editorParams = [], onClose }: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
-  const onClose = () => {
+  const handleClose = () => {
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
+    if (onClose) {
+      onClose();
+    }
   };
 
   document.body.appendChild(container);
@@ -49,13 +44,13 @@ export function showNewVisModal(
     <I18nProvider>
       <NewVisModal
         isOpen={true}
-        onClose={onClose}
-        visTypesRegistry={visTypeRegistry}
+        onClose={handleClose}
         editorParams={editorParams}
-        addBasePath={addBasePath}
-        uiSettings={uiSettings}
-        savedObjects={savedObjects}
-        usageCollection={usageCollection}
+        visTypesRegistry={getTypes()}
+        addBasePath={getHttp().basePath.prepend}
+        uiSettings={getUISettings()}
+        savedObjects={getSavedObjects()}
+        usageCollection={getUsageCollector()}
       />
     </I18nProvider>
   );

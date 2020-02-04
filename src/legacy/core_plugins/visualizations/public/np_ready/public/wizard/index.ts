@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { NewVisModal } from './new_vis_modal';
 export { showNewVisModal } from './show_new_vis';

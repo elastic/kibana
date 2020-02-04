@@ -53,4 +53,3 @@ export { buildPipeline, buildVislibDimensions, SchemaConfig } from './legacy/bui
 export { updateOldState } from './legacy/vis_update_state';
 export { calculateObjectHash } from './legacy/calculate_object_hash';
 export { createSavedVisLoader } from '../../saved_visualizations/saved_visualizations';
-export { showNewVisModal, NewVisModal } from '../public/wizard';
