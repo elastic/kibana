@@ -7,6 +7,7 @@ exports[`Configuration shallow view should render step 1 1`] = `
     fullWidth={false}
     hasDividers={true}
     isInvalid={false}
+    isLoading={false}
     onChange={[Function]}
     options={
       Array [
