@@ -8,13 +8,13 @@ import { RouteDependencies } from '../../../types';
 
 import { registerGetAllRoute, registerGetOneRoute } from './register_get_routes';
 // import { registerDeleteRoute } from './register_delete_route';
-// import { registerCreateRoute } from './register_create_route';
-// import { registerUpdateRoute } from './register_update_route';
+import { registerCreateRoute } from './register_create_route';
+import { registerUpdateRoute } from './register_update_route';
 
 export function registerTemplateRoutes(dependencies: RouteDependencies) {
   registerGetAllRoute(dependencies);
   registerGetOneRoute(dependencies);
   // registerDeleteRoute(router);
-  // registerCreateRoute(router);
-  // registerUpdateRoute(router);
+  registerCreateRoute(dependencies);
+  registerUpdateRoute(dependencies);
 }
