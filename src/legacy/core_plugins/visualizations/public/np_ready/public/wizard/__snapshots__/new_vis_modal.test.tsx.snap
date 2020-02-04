@@ -442,7 +442,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
       <EuiModal
         aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
         className="visNewVisDialog"
-        maxWidth={true}
         onClose={[Function]}
         role="menu"
       >
@@ -2179,7 +2178,6 @@ exports[`NewVisModal should render as expected 1`] = `
       <EuiModal
         aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
         className="visNewVisDialog"
-        maxWidth={true}
         onClose={[Function]}
         role="menu"
       >
@@ -2897,7 +2895,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                         value=""
                                       >
                                         <EuiFormControlLayout
-                                          clear={null}
                                           compressed={false}
                                           fullWidth={true}
                                           icon="search"
@@ -2922,7 +2919,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 />
                                               </EuiValidatableControl>
                                               <EuiFormControlLayoutIcons
-                                                clear={null}
                                                 icon="search"
                                                 isLoading={false}
                                               >
