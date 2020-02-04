@@ -73,7 +73,7 @@ export class ClusterManager {
       // run @kbn/optimizer and write it's state to kbnOptimizerReady$
       runKbnOptimizer(opts, config)
         .pipe(
-          map(state => state.type === 'compiler success'),
+          map(state => state.summary === 'success' || state.summary === 'issue'),
           tap({
             error: error => {
               this.log.bad('New platform optimizer error', error.stack);

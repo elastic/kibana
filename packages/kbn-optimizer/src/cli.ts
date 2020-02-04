@@ -83,10 +83,8 @@ run(
       inspectWorkers,
     });
 
-    await new Optimizer(config)
-      .run()
-      .pipe(logOptimizerState(log, config))
-      .toPromise();
+    const state$ = await new Optimizer(config).run();
+    await state$.pipe(logOptimizerState(log, config)).toPromise();
   },
   {
     flags: {

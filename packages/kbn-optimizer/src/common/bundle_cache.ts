@@ -20,11 +20,15 @@
 import Fs from 'fs';
 import Path from 'path';
 
-const DEFAULT_STATE = JSON.stringify({});
-
 interface State {
-  moduleCounts: { [key: string]: number | undefined };
+  optimizerVersion?: string;
+  key?: string;
+  moduleCount?: number;
+  files?: string[];
 }
+
+const DEFAULT_STATE: State = {};
+const DEFAULT_STATE_JSON = JSON.stringify(DEFAULT_STATE);
 
 /**
  * Helper to read and update metadata for bundles.
@@ -33,11 +37,15 @@ interface State {
  * us to assign bundles to workers in a way that ensures an even
  * distribution of modules to be built
  */
-export class OptimizerCache {
+export class BundleCache {
   private state: State | undefined = undefined;
   constructor(private readonly path: string | false) {}
 
-  private getState() {
+  refresh() {
+    this.state = undefined;
+  }
+
+  get() {
     if (!this.state) {
       let json;
       try {
@@ -52,49 +60,46 @@ export class OptimizerCache {
 
       let partialCache: Partial<State>;
       try {
-        partialCache = JSON.parse(json || DEFAULT_STATE);
+        partialCache = JSON.parse(json || DEFAULT_STATE_JSON);
       } catch (error) {
         partialCache = {};
       }
 
       this.state = {
-        moduleCounts: partialCache.moduleCounts || {},
+        ...DEFAULT_STATE,
+        ...partialCache,
       };
     }
 
     return this.state;
   }
 
-  getBundleModuleCount(bundleId: string) {
-    const state = this.getState();
-    return state.moduleCounts[bundleId];
+  update(updater: (state: State) => State) {
+    this.set(updater(this.get()));
   }
 
-  saveBundleModuleCount(bundleId: string, count: number) {
-    const current = this.getState();
-
-    this.setState({
-      ...current,
-      moduleCounts: {
-        ...current.moduleCounts,
-        [bundleId]: count,
-      },
-    });
-  }
-
-  private scheduledWrite = false;
-  private setState(updated: State) {
+  set(updated: State) {
     this.state = updated;
-
-    if (!this.scheduledWrite && this.path) {
-      const path = this.path;
-      const directory = Path.dirname(path);
-      this.scheduledWrite = true;
-      process.nextTick(() => {
-        this.scheduledWrite = false;
-        Fs.mkdirSync(directory, { recursive: true });
-        Fs.writeFileSync(path, JSON.stringify(this.state, null, 2));
-      });
+    if (this.path) {
+      const directory = Path.dirname(this.path);
+      Fs.mkdirSync(directory, { recursive: true });
+      Fs.writeFileSync(this.path, JSON.stringify(this.state, null, 2));
     }
+  }
+
+  public getModuleCount() {
+    return this.get().moduleCount;
+  }
+
+  public getReferencedFiles() {
+    return this.get().files;
+  }
+
+  public getKey() {
+    return this.get().key;
+  }
+
+  public getOptimizerVersion() {
+    return this.get().optimizerVersion;
   }
 }

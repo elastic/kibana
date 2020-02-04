@@ -17,23 +17,47 @@
  * under the License.
  */
 
-import * as Rx from 'rxjs';
-import { mergeMap, map, tap } from 'rxjs/operators';
-import { createFailError } from '@kbn/dev-utils';
+import { createHash } from 'crypto';
+import { inspect } from 'util';
 
-import { observeWorker, WorkerStdio } from './observe_worker';
+import * as Rx from 'rxjs';
+import { map, mergeMap, share } from 'rxjs/operators';
+
+import { observeWorker, WorkerStatus } from './observe_worker';
 import { OptimizerConfig } from './optimizer_config';
-import { CompilerState, WorkerMessage, pipeClosure } from './common';
+import { getOptimizerVersion } from './get_optimizer_version';
+import { CompilerState, WorkerMessage, pipeClosure, Bundle, ascending, maybeMap } from './common';
+import { assignBundlesToWorkers } from './assign_bundles_to_workers';
+import { Watcher, ChangesStarted, Changes } from './watcher';
+import { getMtimes } from './get_mtimes';
 
 export interface OptimizerStateSummary {
-  type: CompilerState['type'];
+  summary: 'initialized' | 'success' | 'running' | 'issue';
+  version: string;
+  startTime: number;
   durSec: number;
   compilerStates: CompilerState[];
+  onlineBundles: Bundle[];
+  offlineBundles: Bundle[];
+  event?: ChangesStarted | Changes | WorkerMessage | WorkerStatus;
 }
 
-export type OptimizerState = OptimizerStateSummary | WorkerStdio;
+export interface OptimizerStartedWorker {
+  type: 'worker started';
+  bundles: Bundle[];
+}
 
-const getSummaryType = (states: CompilerState[]) => {
+export interface OptimizerComingOnline {
+  type: 'bringing bundle online';
+  bundle: Bundle;
+}
+
+export { ChangesStarted };
+export type OptimizerNotif = OptimizerStartedWorker;
+
+const msToSec = (ms: number) => Math.round(ms / 100) / 10;
+
+const getSummary = (states: CompilerState[]): OptimizerStateSummary['summary'] => {
   const types = states.map(s => s.type);
 
   if (types.includes('running')) {
@@ -41,11 +65,11 @@ const getSummaryType = (states: CompilerState[]) => {
   }
 
   if (types.includes('compiler issue')) {
-    return 'compiler issue';
+    return 'issue';
   }
 
   if (types.every(s => s === 'compiler success')) {
-    return 'compiler success';
+    return 'success';
   }
 
   throw new Error(`unable to summarize bundle states: ${JSON.stringify(states)}`);
@@ -54,65 +78,213 @@ const getSummaryType = (states: CompilerState[]) => {
 export class Optimizer {
   constructor(private readonly config: OptimizerConfig) {}
 
-  run() {
-    return Rx.from(this.config.workers).pipe(
-      mergeMap(worker => observeWorker(this.config, worker)),
-      pipeClosure(msg$ => {
-        let prevSummaryType: OptimizerStateSummary['type'] | undefined;
-        let startTime = Date.now();
-        const compilerStates: CompilerState[] = [];
+  async getCachedBundles(optimizerVersion: string) {
+    const eligible = this.config.bundles.filter(
+      // only get the mtimes for files if the bundle was built
+      // with our version of the optimizer and there is a cache key
+      b => b.cache.getOptimizerVersion() === optimizerVersion && !!b.cache.getKey()
+    );
 
-        return msg$.pipe(
-          map(
-            (msg: WorkerMessage | WorkerStdio): OptimizerState => {
-              if (msg.type === 'worker stdio') {
-                return msg;
-              }
+    if (!eligible.length) {
+      return [];
+    }
 
-              if (msg.type === 'worker error' || msg.type === 'compiler error') {
-                const error = new Error(msg.errorMessage);
-                error.stack = msg.errorStack;
-                throw error;
-              }
+    const mtimes = await getMtimes(
+      new Set<string>(
+        eligible.reduce(
+          (acc: string[], bundle) => [...acc, ...(bundle.cache.getReferencedFiles() || [])],
+          []
+        )
+      )
+    );
 
-              const existingIndex = compilerStates.findIndex(s => s.id === msg.id);
-              if (existingIndex === -1) {
-                compilerStates.push(msg);
-              } else {
-                compilerStates.splice(existingIndex, 1, msg);
-              }
+    return eligible.filter(bundle => {
+      const cacheKey = createHash('sha1')
+        .update(
+          (bundle.cache.getReferencedFiles() || [])
+            .map(p => `${p}:${mtimes.get(p)}`)
+            .sort(ascending(l => l))
+            .join('\n')
+        )
+        .digest('hex');
 
-              if (msg.type === 'compiler success') {
-                this.config.cache.saveBundleModuleCount(msg.id, msg.moduleCount);
-              }
+      return cacheKey === bundle.cache.getKey();
+    });
+  }
 
-              const type = getSummaryType(compilerStates);
-              if (prevSummaryType !== 'running' && type === 'running') {
-                // reset start time now that we are running again
-                startTime = Date.now();
-              }
+  /**
+   * Produce an observable that emits bundle objects when they
+   * should become "online", meaning that the cache on disk is
+   * no longer valid
+   */
+  watchBundlesForChanges$(bundles: Iterable<Bundle>) {
+    return Watcher.using(watcher => {
+      // copy the list of offline bundles
+      const stillOffline = new Set(bundles);
 
-              // stash summary type so we can reset startTime
-              prevSummaryType = type;
-
-              return {
-                type,
-                durSec: Math.round((Date.now() - startTime) / 100) / 10,
-                compilerStates: Array.from(compilerStates),
-              };
+      // recursively watch for changes in offline bundles until all the
+      // offline bundles have gone online
+      const nextBundlesToBringOnline$ = Rx.defer(() =>
+        stillOffline.size ? watcher.getNextChange(stillOffline) : Rx.EMPTY
+      ).pipe(
+        mergeMap(
+          (event): ReturnType<Watcher['getNextChange']> => {
+            if (event.type === 'changes detected') {
+              return Rx.of(event);
             }
-          ),
-          tap({
-            complete: () => {
-              if (this.config.watch) {
-                throw new Error('workers unexpected closed in watch mode');
-              }
 
-              if (prevSummaryType !== 'compiler success') {
-                throw createFailError('compilation failed');
-              }
-            },
-          })
+            for (const bundle of event.bundles) {
+              stillOffline.delete(bundle);
+            }
+
+            return Rx.concat([event], nextBundlesToBringOnline$);
+          }
+        )
+      );
+
+      return nextBundlesToBringOnline$;
+    });
+  }
+
+  run() {
+    return Rx.defer(
+      async (): Promise<OptimizerStateSummary> => {
+        const startTime = Date.now();
+        const version = await getOptimizerVersion();
+        const offlineBundles = await this.getCachedBundles(version);
+        const onlineBundles = this.config.bundles.filter(b => !offlineBundles.includes(b));
+
+        return {
+          summary: onlineBundles.length || this.config.watch ? 'initialized' : 'success',
+          version,
+          compilerStates: [],
+          durSec: msToSec(Date.now() - startTime),
+          offlineBundles,
+          onlineBundles,
+          startTime,
+        };
+      }
+    ).pipe(
+      mergeMap(init => {
+        if (init.summary === 'success') {
+          return [init];
+        }
+
+        const change$ = this.config.watch
+          ? this.watchBundlesForChanges$(init.offlineBundles).pipe(share())
+          : Rx.EMPTY;
+
+        const workerMsg$ = Rx.concat(
+          // first batch is all the workers which weren't initially cached
+          Rx.of(init.onlineBundles),
+          // subsequent batches are defined by our change listener
+          change$.pipe(maybeMap(c => (c.type === 'changes' ? c.bundles : undefined)))
+        ).pipe(
+          mergeMap(bundles =>
+            Rx.from(assignBundlesToWorkers(bundles, this.config.maxWorkerCount)).pipe(
+              mergeMap(assignment =>
+                observeWorker(
+                  this.config,
+                  this.config.getWorkerConfig(init.version),
+                  assignment.bundles
+                )
+              )
+            )
+          )
+        );
+
+        return Rx.concat(
+          Rx.of(init),
+          Rx.merge(change$, workerMsg$).pipe(
+            pipeClosure(event$ => {
+              let prev = init;
+
+              const nextUpdate = (
+                event: NonNullable<OptimizerStateSummary['event']>,
+                changes?: Partial<Omit<OptimizerStateSummary, 'event' | 'version' | 'durSec'>>
+              ): OptimizerStateSummary => {
+                const startTime = changes?.startTime ?? prev.startTime;
+                const next = {
+                  ...prev,
+                  ...changes,
+                  event,
+                  startTime,
+                  durSec: msToSec(Date.now() - startTime),
+                };
+                prev = next;
+                return next;
+              };
+
+              return event$.pipe(
+                map(
+                  (event): OptimizerStateSummary => {
+                    if (event.type === 'worker error' || event.type === 'compiler error') {
+                      // unrecoverable error states
+                      const error = new Error(event.errorMessage);
+                      error.stack = event.errorStack;
+                      throw error;
+                    }
+
+                    if (event.type === 'worker stdio' || event.type === 'worker started') {
+                      return nextUpdate(event);
+                    }
+
+                    if (event.type === 'changes detected') {
+                      // switch to running early, before workers are started, so that
+                      // base path proxy can prevent requests in the delay between changes
+                      // and workers started
+                      return nextUpdate(event, {
+                        summary: 'running',
+                      });
+                    }
+
+                    if (event.type === 'changes') {
+                      const onlineBundles: Bundle[] = [];
+                      const offlineBundles: Bundle[] = [];
+                      for (const bundle of this.config.bundles) {
+                        if (prev.onlineBundles.includes(bundle) || event.bundles.includes(bundle)) {
+                          onlineBundles.push(bundle);
+                        } else {
+                          offlineBundles.push(bundle);
+                        }
+                      }
+
+                      return nextUpdate(event, {
+                        summary: 'running',
+                        onlineBundles,
+                        offlineBundles,
+                        startTime: prev.summary === 'running' ? prev.startTime : Date.now(),
+                      });
+                    }
+
+                    if (
+                      event.type === 'compiler issue' ||
+                      event.type === 'compiler success' ||
+                      event.type === 'running'
+                    ) {
+                      const compilerStates: CompilerState[] = [
+                        ...prev.compilerStates.filter(c => c.bundleId !== event.bundleId),
+                        event,
+                      ];
+                      const summary = getSummary(compilerStates);
+                      const newStartTime =
+                        prev.summary !== 'running' && summary === 'running'
+                          ? Date.now()
+                          : prev.startTime;
+
+                      return nextUpdate(event, {
+                        summary,
+                        compilerStates,
+                        startTime: newStartTime,
+                      });
+                    }
+
+                    throw new Error(`unexpected optimizer event ${inspect(event)}`);
+                  }
+                )
+              );
+            })
+          )
         );
       })
     );

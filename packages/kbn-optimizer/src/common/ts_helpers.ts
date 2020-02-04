@@ -17,18 +17,10 @@
  * under the License.
  */
 
-export const VALID_BUNDLE_TYPES = ['plugin' as const];
-
-export interface BundleDefinition {
-  readonly type: typeof VALID_BUNDLE_TYPES[0];
-  /** Unique id for this bundle */
-  readonly id: string;
-  /** Webpack entry request for this plugin, relative to the contextDir */
-  readonly entry: string;
-  /** Absolute path to the plugin source directory */
-  readonly contextDir: string;
-  /** Absolute path to the root of the repository */
-  readonly sourceRoot: string;
-  /** Absolute path to the directory where output should be written */
-  readonly outputDir: string;
-}
+/**
+ * Convert an object type into an object with the same keys
+ * but with each value type replaced with `unknown`
+ */
+export type UnknownVals<T extends object> = {
+  [k in keyof T]: unknown;
+};

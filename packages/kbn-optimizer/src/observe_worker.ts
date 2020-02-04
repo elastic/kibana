@@ -24,7 +24,7 @@ import { inspect } from 'util';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
-import { isWorkerMessage, WorkerMessage, WorkerConfig } from './common';
+import { isWorkerMessage, WorkerConfig, WorkerMessage, Bundle } from './common';
 import { OptimizerConfig } from './optimizer_config';
 
 export interface WorkerStdio {
@@ -32,6 +32,13 @@ export interface WorkerStdio {
   stream: 'stdout' | 'stderr';
   chunk: Buffer;
 }
+
+export interface WorkerStarted {
+  type: 'worker started';
+  bundles: Bundle[];
+}
+
+export type WorkerStatus = WorkerStdio | WorkerStarted;
 
 interface ProcResource extends Rx.Unsubscribable {
   proc: ChildProcess;
@@ -60,22 +67,25 @@ if (inspectFlagIndex !== -1) {
 
 function usingWorkerProc<T>(
   config: OptimizerConfig,
-  worker: WorkerConfig,
+  workerConfig: WorkerConfig,
+  bundles: Bundle[],
   fn: (proc: ChildProcess) => Rx.Observable<T>
 ) {
   return Rx.using(
     (): ProcResource => {
-      const proc = fork(require.resolve('./worker/run_worker'), [JSON.stringify(worker)], {
+      const args = [JSON.stringify(workerConfig), JSON.stringify(bundles.map(b => b.toSpec()))];
+
+      const proc = fork(require.resolve('./worker/run_worker'), args, {
         stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
         execArgv: [
           ...(inspectFlag && config.inspectWorkers
             ? [`${inspectFlag}=${inspectPortCounter++}`]
             : []),
-          ...(config.workers.length <= 2 ? ['--max-old-space-size=2048'] : []),
+          ...(config.maxWorkerCount <= 3 ? ['--max-old-space-size=2048'] : []),
         ],
         env: {
           ...process.env,
-          BROWSERSLIST_ENV: worker.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
+          BROWSERSLIST_ENV: config.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
         },
       });
 
@@ -118,12 +128,17 @@ function observeStdio$(stream: Readable, name: WorkerStdio['stream']) {
 
 export function observeWorker(
   config: OptimizerConfig,
-  worker: WorkerConfig
-): Rx.Observable<WorkerMessage | WorkerStdio> {
-  return usingWorkerProc(config, worker, proc => {
+  workerConfig: WorkerConfig,
+  bundles: Bundle[]
+): Rx.Observable<WorkerMessage | WorkerStatus> {
+  return usingWorkerProc(config, workerConfig, bundles, proc => {
     let lastMessage: WorkerMessage;
 
     return Rx.merge(
+      Rx.of({
+        type: 'worker started',
+        bundles,
+      }),
       observeStdio$(proc.stdout!, 'stdout'),
       observeStdio$(proc.stderr!, 'stderr'),
       Rx.fromEvent<[unknown]>(proc, 'message')
@@ -156,7 +171,7 @@ export function observeWorker(
                     'worker error',
                   ];
 
-                  if (!worker.watch) {
+                  if (!config.watch) {
                     terminalMsgTypes.push('compiler issue', 'compiler success');
                   }
 

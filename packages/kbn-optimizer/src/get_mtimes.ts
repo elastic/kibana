@@ -17,22 +17,33 @@
  * under the License.
  */
 
-import Path from 'path';
+import Fs from 'fs';
+import { promisify } from 'util';
 
-import { NewPlatformPlugin } from './new_platform_plugins';
-import { BundleDefinition } from './common';
+import { concurrentMap } from './common';
 
-export function getBundleDefinitions(plugins: NewPlatformPlugin[], repoRoot: string) {
-  return plugins
-    .filter(p => p.isUiPlugin)
-    .map(
-      (p): BundleDefinition => ({
-        type: 'plugin',
-        id: p.id,
-        entry: './public/index',
-        sourceRoot: repoRoot,
-        contextDir: p.directory,
-        outputDir: Path.resolve(p.directory, 'target/public'),
-      })
-    );
+const statAsync = promisify(Fs.stat);
+
+/**
+ * get mtimes of referenced paths concurrently, limit concurrency to 100
+ */
+export async function getMtimes(paths: Iterable<string>) {
+  return new Map(
+    await concurrentMap(
+      paths,
+      async path => {
+        try {
+          const stat = await statAsync(path);
+          return [path, stat.mtimeMs] as const;
+        } catch (error) {
+          if (error?.code === 'ENOENT') {
+            return [path, undefined] as const;
+          }
+
+          throw error;
+        }
+      },
+      100
+    )
+  );
 }

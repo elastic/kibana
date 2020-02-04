@@ -17,8 +17,31 @@
  * under the License.
  */
 
-export interface Log {
-  info(tmpl: string, ...args: any[]): void;
-  success(tmpl: string, ...args: any[]): void;
-  error(error: string | Error): void;
-}
+jest.mock('fs');
+
+import { getMtimes } from './get_mtimes';
+
+const { stat }: { stat: jest.Mock } = jest.requireMock('fs');
+
+it('returns mtimes Map', async () => {
+  stat.mockImplementation((path, cb) => {
+    if (path.includes('missing')) {
+      const error = new Error('file not found');
+      (error as any).code = 'ENOENT';
+      cb(error);
+    } else {
+      cb(null, {
+        mtimeMs: 1234,
+      });
+    }
+  });
+
+  await expect(getMtimes(['/foo/bar', '/foo/missing', '/foo/baz', '/foo/bar'])).resolves
+    .toMatchInlineSnapshot(`
+    Map {
+      "/foo/bar" => 1234,
+      "/foo/missing" => undefined,
+      "/foo/baz" => 1234,
+    }
+  `);
+});

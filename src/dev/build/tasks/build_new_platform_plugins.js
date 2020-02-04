@@ -24,7 +24,7 @@ export const BuildNewPlatformPluginsTask = {
   async run(_, log, build) {
     const optimizerConfig = OptimizerConfig.create({
       repoRoot: build.resolvePath(),
-      optimizerCachePath: false,
+      cache: false,
       oss: build.isOss(),
       examples: false,
       watch: false,

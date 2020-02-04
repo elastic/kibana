@@ -17,12 +17,23 @@
  * under the License.
  */
 
-export * from './bundle';
-export * from './bundle_cache';
-export * from './worker_config';
-export * from './worker_messages';
-export * from './compiler_messages';
-export * from './ts_helpers';
-export * from './rxjs_helpers';
-export * from './promise_helpers';
-export * from './array_helpers';
+import * as Rx from 'rxjs';
+import { mergeMap, toArray } from 'rxjs/operators';
+import { maybe } from './rxjs_helpers';
+
+/**
+ * Concurrently iterate over an array of items, resolving the promises returned from each call to fn,
+ * limit concurrency, items are sorted in resolution order so be sure to sort after the fact.
+ */
+export const concurrentMap = async <T1, T2>(
+  array: Iterable<T1>,
+  fn: (item: T1) => Promise<T2 | undefined>,
+  concurrency = 100
+) =>
+  await Rx.from(array)
+    .pipe(
+      mergeMap(async item => await fn(item), concurrency),
+      maybe(),
+      toArray()
+    )
+    .toPromise();

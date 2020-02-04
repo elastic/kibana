@@ -99,3 +99,56 @@ export interface WebpackResolveData {
     path: string;
   };
 }
+
+interface Dependency {
+  type: 'null' | 'cjs require';
+  module: unknown;
+}
+
+/** used for standard js/ts modules */
+export interface WebpackNormalModule {
+  type: string;
+  /** absolute path to file on disk */
+  resource: string;
+  buildInfo: {
+    cacheable: boolean;
+    fileDependencies: Set<string>;
+  };
+  dependencies: Dependency[];
+}
+
+export function isNormalModule(module: any): module is WebpackNormalModule {
+  return module?.constructor?.name === 'NormalModule';
+}
+
+/** module used for ignored code */
+export interface WebpackIgnoredModule {
+  type: string;
+  /** unique string to identify this module with (starts with `ignored`) */
+  identifierStr: string;
+  /** human readable identifier */
+  readableIdentifierStr: string;
+}
+
+export function isIgnoredModule(module: any): module is WebpackIgnoredModule {
+  return module?.constructor?.name === 'RawModule' && module.identifierStr?.startsWith('ignored ');
+}
+
+/** module replacing imports for webpack externals */
+export interface WebpackExternalModule {
+  type: string;
+  id: string;
+  /** JS used to get instance of External */
+  request: string;
+  /** module name that is handled by externals */
+  userRequest: string;
+}
+
+export function isExternalModule(module: any): module is WebpackExternalModule {
+  return module?.constructor?.name === 'ExternalModule';
+}
+
+export function getModulePath(module: WebpackNormalModule) {
+  const queryIndex = module.resource.indexOf('?');
+  return queryIndex === -1 ? module.resource : module.resource.slice(0, queryIndex);
+}

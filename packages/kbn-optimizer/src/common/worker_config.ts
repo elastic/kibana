@@ -19,83 +19,68 @@
 
 import Path from 'path';
 
-import { BundleDefinition, VALID_BUNDLE_TYPES } from './bundle_definition';
+import { UnknownVals } from './ts_helpers';
 
 export interface WorkerConfig {
   readonly repoRoot: string;
   readonly watch: boolean;
   readonly dist: boolean;
-  readonly bundles: BundleDefinition[];
+  readonly cache: boolean;
   readonly profileWebpack: boolean;
+  readonly optimizerVersion: string;
 }
 
-type UnknownVals<T extends object> = {
-  [k in keyof T]: unknown;
-};
-
-export function parseWorkerConfig(json: string) {
+export function parseWorkerConfig(json: string): WorkerConfig {
   try {
     if (typeof json !== 'string') {
-      throw new Error('expected config to be a JSON string');
+      throw new Error('expected worker config to be a JSON string');
     }
 
     const parsed: UnknownVals<WorkerConfig> = JSON.parse(json);
-    if (!(parsed && typeof parsed === 'object')) {
+
+    if (!(typeof parsed === 'object' && parsed)) {
       throw new Error('config must be an object');
     }
 
-    if (!(parsed.watch === undefined || typeof parsed.watch === 'boolean')) {
-      throw new Error('`watch` config must be a boolean when defined');
+    const repoRoot = parsed.repoRoot;
+    if (typeof repoRoot !== 'string' || !Path.isAbsolute(repoRoot)) {
+      throw new Error('`repoRoot` config must be an absolute path');
     }
 
-    if (!(parsed.dist === undefined || typeof parsed.dist === 'boolean')) {
-      throw new Error('`dist` config must be a boolean when defined');
+    const cache = parsed.cache;
+    if (typeof cache !== 'boolean') {
+      throw new Error('`cache` config must be a boolean');
     }
 
-    if (typeof parsed.profileWebpack !== 'boolean') {
+    const watch = parsed.watch;
+    if (typeof watch !== 'boolean') {
+      throw new Error('`watch` config must be a boolean');
+    }
+
+    const dist = parsed.dist;
+    if (typeof dist !== 'boolean') {
+      throw new Error('`dist` config must be a boolean');
+    }
+
+    const profileWebpack = parsed.profileWebpack;
+    if (typeof profileWebpack !== 'boolean') {
       throw new Error('`profileWebpack` must be a boolean');
     }
 
-    if (!Array.isArray(parsed.bundles)) {
-      throw new Error('config.bundles must be an array');
-    }
-
-    for (const parsedBundle of parsed.bundles as Array<UnknownVals<BundleDefinition>>) {
-      if (!(parsedBundle && typeof parsedBundle === 'object')) {
-        throw new Error('config.bundles[] must be an object');
-      }
-
-      if (!VALID_BUNDLE_TYPES.includes(parsedBundle.type as any)) {
-        throw new Error('config.bundles[] must have a valid `type`');
-      }
-
-      if (!(typeof parsedBundle.id === 'string')) {
-        throw new Error('config.bundles[] must have a string `id` property');
-      }
-
-      if (!(typeof parsedBundle.entry === 'string')) {
-        throw new Error('config.bundles[] must have a string `entry` property');
-      }
-
-      if (typeof parsedBundle.outputDir !== 'string') {
-        throw new Error('`outputDir` config must be a string');
-      }
-
-      if (
-        !(typeof parsedBundle.contextDir === 'string' && Path.isAbsolute(parsedBundle.contextDir))
-      ) {
-        throw new Error('config.bundles[] must have a string `contextDir` property');
-      }
+    const optimizerVersion = parsed.optimizerVersion;
+    if (typeof optimizerVersion !== 'string') {
+      throw new Error('`optimizerVersion` must be a string');
     }
 
     return {
-      error: undefined,
-      workerConfig: parsed as WorkerConfig,
+      repoRoot,
+      cache,
+      watch,
+      dist,
+      profileWebpack,
+      optimizerVersion,
     };
   } catch (error) {
-    return {
-      error: new Error(`unable to parse worker config: ${error.message}`),
-      workerConfig: undefined,
-    };
+    throw new Error(`unable to parse worker config: ${error.message}`);
   }
 }

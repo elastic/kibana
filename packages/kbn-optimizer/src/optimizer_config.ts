@@ -20,11 +20,9 @@
 import Path from 'path';
 import Os from 'os';
 
-import { findNewPlatformPlugins } from './new_platform_plugins';
-import { BundleDefinition, WorkerConfig } from './common';
-import { OptimizerCache } from './optimizer_cache';
-import { assignBundlesToWorkers } from './assign_bundles_to_workers';
-import { getBundleDefinitions } from './get_bundle_definitions';
+import { findNewPlatformPlugins, NewPlatformPlugin } from './new_platform_plugins';
+import { Bundle, WorkerConfig } from './common';
+import { getBundles } from './get_bundles';
 
 interface Options {
   /** absolute path to root of the repo/build */
@@ -33,8 +31,8 @@ interface Options {
   watch?: boolean;
   /** the maximum number of workers that will be created */
   maxWorkerCount?: number;
-  /** absolute path to the file where the optimizer cache will be written */
-  optimizerCachePath?: string | false;
+  /** set to false to disabling writing/reading of caches */
+  cache?: false;
   /** build assets suitable for use in the distributable */
   dist?: boolean;
   /** enable webpack profiling, writes stats.json files to the root of each plugin's output dir */
@@ -59,7 +57,7 @@ interface ParsedOptions {
   watch: boolean;
   maxWorkerCount: number;
   profileWebpack: boolean;
-  optimizerCachePath: string | false;
+  cache: boolean;
   dist: boolean;
   pluginPaths: string[];
   pluginScanDirs: string[];
@@ -74,6 +72,7 @@ export class OptimizerConfig {
     const examples = !!options.examples;
     const profileWebpack = !!options.profileWebpack;
     const inspectWorkers = !!options.inspectWorkers;
+    const cache = options.cache !== false;
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
@@ -109,22 +108,13 @@ export class OptimizerConfig {
       throw new TypeError('worker count must be a number');
     }
 
-    const optimizerCachePath =
-      options.optimizerCachePath === false
-        ? false
-        : options.optimizerCachePath ||
-          Path.resolve(options.repoRoot, 'data/.kbn-optimizer-cache.json');
-    if (optimizerCachePath && !Path.isAbsolute(optimizerCachePath)) {
-      throw new TypeError('optimizerCachePath must be absolute');
-    }
-
     return {
       watch,
       dist,
       repoRoot,
       maxWorkerCount,
       profileWebpack,
-      optimizerCachePath,
+      cache,
       pluginScanDirs,
       pluginPaths,
       inspectWorkers,
@@ -133,37 +123,42 @@ export class OptimizerConfig {
 
   static create(inputOptions: Options) {
     const options = OptimizerConfig.parseOptions(inputOptions);
-
     const plugins = findNewPlatformPlugins(options.pluginScanDirs, options.pluginPaths);
-
-    const cache = new OptimizerCache(options.optimizerCachePath);
-
-    const bundles = getBundleDefinitions(plugins, options.repoRoot);
-
-    const workers = assignBundlesToWorkers({
-      bundles,
-      cache,
-      maxWorkerCount: options.maxWorkerCount,
-      repoRoot: options.repoRoot,
-      watch: options.watch,
-      dist: options.dist,
-      profileWebpack: options.profileWebpack,
-    });
+    const bundles = getBundles(plugins, options.repoRoot);
 
     return new OptimizerConfig(
-      cache,
       bundles,
-      workers.map(w => w.config),
+      options.cache,
       options.watch,
-      options.inspectWorkers
+      options.inspectWorkers,
+      plugins,
+      options.repoRoot,
+      options.maxWorkerCount,
+      options.dist,
+      options.profileWebpack
     );
   }
 
   constructor(
-    public readonly cache: OptimizerCache,
-    public readonly bundles: BundleDefinition[],
-    public readonly workers: WorkerConfig[],
+    public readonly bundles: Bundle[],
+    public readonly cache: boolean,
     public readonly watch: boolean,
-    public readonly inspectWorkers: boolean
+    public readonly inspectWorkers: boolean,
+    public readonly plugins: NewPlatformPlugin[],
+    public readonly repoRoot: string,
+    public readonly maxWorkerCount: number,
+    public readonly dist: boolean,
+    public readonly profileWebpack: boolean
   ) {}
+
+  getWorkerConfig(optimizerVersion: string): WorkerConfig {
+    return {
+      cache: this.cache,
+      dist: this.dist,
+      profileWebpack: this.profileWebpack,
+      repoRoot: this.repoRoot,
+      watch: this.watch,
+      optimizerVersion,
+    };
+  }
 }

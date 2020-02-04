@@ -18,7 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { mergeMap, tap, debounceTime, map } from 'rxjs/operators';
 
 type Operator<T1, T2> = (source: Rx.Observable<T1>) => Rx.Observable<T2>;
 type MapFn<T1, T2> = (item: T1, index: number) => T2;
@@ -42,6 +42,14 @@ export const pipeClosure = <T1, T2>(fn: Operator<T1, T2>): Operator<T1, T2> => {
 };
 
 /**
+ * An operator that filters out undefined values from the stream while
+ * supporting TypeScript
+ */
+export const maybe = <T1>(): Operator<T1 | undefined, T1> => {
+  return mergeMap(item => (item === undefined ? Rx.EMPTY : [item]));
+};
+
+/**
  * An operator like map(), but undefined values are filered out automatically
  * with TypeScript support. For some reason TS doesn't have great support for
  * filter's without defining an explicit type assertion in the signature of
@@ -50,6 +58,44 @@ export const pipeClosure = <T1, T2>(fn: Operator<T1, T2>): Operator<T1, T2> => {
 export const maybeMap = <T1, T2>(fn: MapFn<T1, undefined | T2>): Operator<T1, T2> => {
   return mergeMap((item, index) => {
     const result = fn(item, index);
-    return result === undefined ? [] : [result];
+    return result === undefined ? Rx.EMPTY : [result];
+  });
+};
+
+/**
+ * Debounce received notifications and write them to a buffer. Once the source
+ * has been silent for `ms` milliseconds the buffer is flushed as a single array
+ * to the destination stream
+ */
+export const debounceTimeBuffer = <T>(ms: number) =>
+  pipeClosure((source$: Rx.Observable<T>) => {
+    const buffer = new Set<T>();
+    return source$.pipe(
+      tap(item => buffer.add(item)),
+      debounceTime(ms),
+      map(() => {
+        const items = Array.from(buffer);
+        buffer.clear();
+        return items;
+      })
+    );
+  });
+
+/**
+ * Basically the same as the `scan()` function from RxJS but with the seed
+ * argument first and the types working properly.
+ */
+export const scanBetter = <T1, T2, T3>(
+  seed: T1,
+  fn: (acc: T1 | T3, item: T2) => T3
+): Operator<T2, T3> => {
+  return pipeClosure(source$ => {
+    let acc: T1 | T3 = seed;
+    return source$.pipe(
+      map(item => {
+        acc = fn(acc, item);
+        return acc;
+      })
+    );
   });
 };

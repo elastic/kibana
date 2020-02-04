@@ -104,6 +104,21 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/bar/target/public/bar.plugin.js'), 'utf8')
   ).toMatchSnapshot('bar bundle');
 
-  expect(config.cache.getBundleModuleCount('foo')).toBe(3);
-  expect(config.cache.getBundleModuleCount('bar')).toBe(2);
+  const foo = config.bundles.find(b => b.id === 'foo')!;
+  expect(foo).toBeTruthy();
+  foo.cache.refresh();
+  expect(foo.getModuleCount()).toBe(3);
+  expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`Array []`);
+
+  const bar = config.bundles.find(b => b.id === 'bar')!;
+  expect(bar).toBeTruthy();
+  bar.cache.refresh();
+  expect(bar.getModuleCount()).toBe(5);
+  expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
+    Array [
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
+    ]
+  `);
 });

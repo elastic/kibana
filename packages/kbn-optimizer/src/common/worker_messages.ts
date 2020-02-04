@@ -42,12 +42,12 @@ export interface WorkerErrorMessage {
   errorStack?: string;
 }
 
-const WORKER_STATE_TYPES: Array<WorkerMessage['type']> = [
+const WORKER_STATE_TYPES: ReadonlyArray<WorkerMessage['type']> = [
   'running',
-  'compiler success',
   'compiler issue',
-  'worker error',
+  'compiler success',
   'compiler error',
+  'worker error',
 ];
 
 export const isWorkerMessage = (value: any): value is WorkerMessage =>

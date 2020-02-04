@@ -17,4 +17,6 @@
  * under the License.
  */
 
+import { fooLibFn } from '../../foo/public/index';
 export * from './lib';
+export { fooLibFn };

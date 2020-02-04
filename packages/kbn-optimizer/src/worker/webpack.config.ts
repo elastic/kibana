@@ -29,41 +29,41 @@ import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import * as SharedDeps from '@kbn/ui-shared-deps';
 
-import { BundleDefinition, WorkerConfig } from '../common';
-// import { BlockLegacyCodePlugin } from './block_legacy_code_plugin';
+import { Bundle, WorkerConfig } from '../common';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const PUBLIC_PATH_PLACEHOLDER = '__REPLACE_WITH_PUBLIC_PATH__';
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
-export function getWebpackConfig(def: BundleDefinition, worker: WorkerConfig) {
+export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
   const commonConfig: webpack.Configuration = {
     node: { fs: 'empty' },
-    context: def.contextDir,
+    context: bundle.contextDir,
     cache: true,
     entry: {
-      [def.id]: def.entry,
+      [bundle.id]: bundle.entry,
     },
 
     devtool: worker.dist ? false : '#cheap-source-map',
     profile: worker.profileWebpack,
 
     output: {
-      path: def.outputDir,
+      path: bundle.outputDir,
       filename: '[name].plugin.js',
       publicPath: PUBLIC_PATH_PLACEHOLDER,
       devtoolModuleFilenameTemplate: info =>
-        `/${def.type}:${def.id}/${Path.relative(def.sourceRoot, info.absoluteResourcePath)}${
-          info.query
-        }`,
-      jsonpFunction: `${def.id}_bundle_jsonpfunction`,
-      ...(def.type === 'plugin'
+        `/${bundle.type}:${bundle.id}/${Path.relative(
+          bundle.sourceRoot,
+          info.absoluteResourcePath
+        )}${info.query}`,
+      jsonpFunction: `${bundle.id}_bundle_jsonpfunction`,
+      ...(bundle.type === 'plugin'
         ? {
             // When the entry point is loaded, assign it's exported `plugin`
             // value to a key on the global `__kbnBundles__` object.
             // NOTE: Only actually used by new platform plugins
-            library: ['__kbnBundles__', `plugin/${def.id}`],
+            library: ['__kbnBundles__', `plugin/${bundle.id}`],
             libraryExport: 'plugin',
           }
         : {}),
@@ -77,7 +77,7 @@ export function getWebpackConfig(def: BundleDefinition, worker: WorkerConfig) {
       ...SharedDeps.externals,
     },
 
-    plugins: [new CleanWebpackPlugin() /* , new BlockLegacyCodePlugin(def) */],
+    plugins: [new CleanWebpackPlugin()],
 
     module: {
       // no parse rules for a few known large packages which have no require() statements
@@ -148,7 +148,7 @@ export function getWebpackConfig(def: BundleDefinition, worker: WorkerConfig) {
                       return {
                         outputStyle: 'nested',
                         includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
-                        sourceMapRoot: `/${def.type}:${def.id}`,
+                        sourceMapRoot: `/${bundle.type}:${bundle.id}`,
                         importer: (url: string) => {
                           if (darkMode && url.includes('eui_colors_light')) {
                             return { file: url.replace('eui_colors_light', 'eui_colors_dark') };

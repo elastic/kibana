@@ -17,12 +17,23 @@
  * under the License.
  */
 
-export * from './bundle';
-export * from './bundle_cache';
-export * from './worker_config';
-export * from './worker_messages';
-export * from './compiler_messages';
-export * from './ts_helpers';
-export * from './rxjs_helpers';
-export * from './promise_helpers';
-export * from './array_helpers';
+import Path from 'path';
+
+import { NewPlatformPlugin } from './new_platform_plugins';
+import { Bundle } from './common';
+
+export function getBundles(plugins: NewPlatformPlugin[], repoRoot: string) {
+  return plugins
+    .filter(p => p.isUiPlugin)
+    .map(
+      p =>
+        new Bundle({
+          type: 'plugin',
+          id: p.id,
+          entry: './public/index',
+          sourceRoot: repoRoot,
+          contextDir: p.directory,
+          outputDir: Path.resolve(p.directory, 'target/public'),
+        })
+    );
+}

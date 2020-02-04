@@ -34,7 +34,7 @@ export interface CompilerErrorMessage {
  */
 export interface CompilerRunningMessage {
   type: 'running';
-  id: string;
+  bundleId: string;
 }
 
 /**
@@ -45,7 +45,7 @@ export interface CompilerRunningMessage {
  */
 export interface CompilerIssueMessage {
   type: 'compiler issue';
-  id: string;
+  bundleId: string;
   failure: string;
 }
 
@@ -55,7 +55,7 @@ export interface CompilerIssueMessage {
  */
 export interface CompilerSuccessMessage {
   type: 'compiler success';
-  id: string;
+  bundleId: string;
   moduleCount: number;
 }
 
@@ -66,14 +66,14 @@ export class CompilerMessages {
 
   running(): CompilerRunningMessage {
     return {
-      id: this.bundle,
+      bundleId: this.bundle,
       type: 'running',
     };
   }
 
   compilerFailure(options: { failure: string }): CompilerIssueMessage {
     return {
-      id: this.bundle,
+      bundleId: this.bundle,
       type: 'compiler issue',
       failure: options.failure,
     };
@@ -81,7 +81,7 @@ export class CompilerMessages {
 
   compilerSuccess(options: { moduleCount: number }): CompilerSuccessMessage {
     return {
-      id: this.bundle,
+      bundleId: this.bundle,
       type: 'compiler success',
       moduleCount: options.moduleCount,
     };

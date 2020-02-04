@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { getBundleDefinitions } from './get_bundle_definitions';
-import { OptimizerCache } from './optimizer_cache';
-import { assignBundlesToWorkers, Worker, Options } from './assign_bundles_to_workers';
-import { BundleDefinition } from './common';
+import { getBundles } from './get_bundles';
+import { assignBundlesToWorkers, Assignments } from './assign_bundles_to_workers';
+import { Bundle } from './common';
 
 const REPO = '/repo';
 const BIG_BUNDLES = 'dqv'.split('');
@@ -43,19 +42,15 @@ const pluginsWithoutCounts = (n: number) =>
       isUiPlugin: true,
     }));
 
-const cache = new OptimizerCache(false);
-jest
-  .spyOn(cache, 'getBundleModuleCount')
-  .mockImplementation(id =>
-    ALPHABET.includes(id)
-      ? (ALPHABET.indexOf(id) + 1) * (BIG_BUNDLES.includes(id) ? 10 : 1)
-      : undefined
-  );
+jest.spyOn(Bundle.prototype, 'getModuleCount').mockImplementation(function(this: Bundle) {
+  return ALPHABET.includes(this.id)
+    ? (ALPHABET.indexOf(this.id) + 1) * (BIG_BUNDLES.includes(this.id) ? 10 : 1)
+    : undefined;
+});
 
-const moduleCount = (b: BundleDefinition) => cache.getBundleModuleCount(b.id);
-const hasModuleCount = (b: BundleDefinition) => moduleCount(b) !== undefined;
-const noModuleCount = (b: BundleDefinition) => moduleCount(b) === undefined;
-const summarizeBundles = (w: Worker) =>
+const hasModuleCount = (b: Bundle) => b.getModuleCount() !== undefined;
+const noModuleCount = (b: Bundle) => b.getModuleCount() === undefined;
+const summarizeBundles = (w: Assignments) =>
   [
     w.moduleCount ? `${w.moduleCount} known modules` : '',
     w.newBundles ? `${w.newBundles} new bundles` : '',
@@ -63,48 +58,29 @@ const summarizeBundles = (w: Worker) =>
     .filter(Boolean)
     .join(', ');
 
-const readConfigs = (workers: Worker[]) =>
+const readConfigs = (workers: Assignments[]) =>
   workers.map(
-    (w, i) => `worker ${i} (${summarizeBundles(w)}) => ${w.config.bundles.map(b => b.id).join(',')}`
+    (w, i) => `worker ${i} (${summarizeBundles(w)}) => ${w.bundles.map(b => b.id).join(',')}`
   );
 
-const assertReturnVal = (workers: Worker[]) => {
+const assertReturnVal = (workers: Assignments[]) => {
   expect(workers).toBeInstanceOf(Array);
   for (const worker of workers) {
     expect(worker).toEqual({
       moduleCount: expect.any(Number),
       newBundles: expect.any(Number),
-      config: {
-        repoRoot: REPO,
-        watch: expect.any(Boolean),
-        dist: expect.any(Boolean),
-        profileWebpack: expect.any(Boolean),
-        bundles: expect.any(Array),
-      },
+      bundles: expect.any(Array),
     });
 
-    expect(worker.config.bundles.filter(noModuleCount).length).toBe(worker.newBundles);
+    expect(worker.bundles.filter(noModuleCount).length).toBe(worker.newBundles);
     expect(
-      worker.config.bundles.filter(hasModuleCount).reduce((sum, b) => sum + moduleCount(b)!, 0)
+      worker.bundles.filter(hasModuleCount).reduce((sum, b) => sum + b.getModuleCount()!, 0)
     ).toBe(worker.moduleCount);
   }
 };
 
-const defaultOptions: Omit<Options, 'bundles'> = {
-  maxWorkerCount: 4,
-  watch: false,
-  dist: false,
-  cache,
-  repoRoot: REPO,
-  profileWebpack: false,
-};
-
 it('creates less workers if maxWorkersCount is larger than bundle count', () => {
-  const workers = assignBundlesToWorkers({
-    ...defaultOptions,
-    bundles: getBundleDefinitions(pluginsWithCounts(2), REPO),
-    maxWorkerCount: 10,
-  });
+  const workers = assignBundlesToWorkers(getBundles(pluginsWithCounts(2), REPO), 10);
 
   assertReturnVal(workers);
   expect(workers.length).toBe(2);
@@ -117,14 +93,10 @@ it('creates less workers if maxWorkersCount is larger than bundle count', () => 
 });
 
 it('assigns unknown plugin counts as evenly as possible', () => {
-  const configs = assignBundlesToWorkers({
-    ...defaultOptions,
-    bundles: getBundleDefinitions(pluginsWithoutCounts(10), REPO),
-    maxWorkerCount: 3,
-  });
+  const workers = assignBundlesToWorkers(getBundles(pluginsWithoutCounts(10), REPO), 3);
 
-  assertReturnVal(configs);
-  expect(readConfigs(configs)).toMatchInlineSnapshot(`
+  assertReturnVal(workers);
+  expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
       "worker 0 (4 new bundles) => foo9,foo6,foo3,foo1",
       "worker 1 (3 new bundles) => foo8,foo5,foo2",
@@ -134,13 +106,11 @@ it('assigns unknown plugin counts as evenly as possible', () => {
 });
 
 it('distributes bundles without module counts evenly after assigning modules with known counts evenly', () => {
-  const configs = assignBundlesToWorkers({
-    ...defaultOptions,
-    bundles: getBundleDefinitions([...pluginsWithCounts(16), ...pluginsWithoutCounts(10)], REPO),
-  });
+  const bundles = getBundles([...pluginsWithCounts(16), ...pluginsWithoutCounts(10)], REPO);
+  const workers = assignBundlesToWorkers(bundles, 4);
 
-  assertReturnVal(configs);
-  expect(readConfigs(configs)).toMatchInlineSnapshot(`
+  assertReturnVal(workers);
+  expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
       "worker 0 (42 known modules, 3 new bundles) => n,m,h,g,foo9,foo5,foo10",
       "worker 1 (43 known modules, 3 new bundles) => o,l,i,f,a,foo8,foo4,foo1",
@@ -151,13 +121,10 @@ it('distributes bundles without module counts evenly after assigning modules wit
 });
 
 it('distributes 2 bundles to workers evenly', () => {
-  const configs = assignBundlesToWorkers({
-    ...defaultOptions,
-    bundles: getBundleDefinitions(pluginsWithCounts(2), REPO),
-  });
+  const workers = assignBundlesToWorkers(getBundles(pluginsWithCounts(2), REPO), 4);
 
-  assertReturnVal(configs);
-  expect(readConfigs(configs)).toMatchInlineSnapshot(`
+  assertReturnVal(workers);
+  expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
       "worker 0 (1 known modules) => a",
       "worker 1 (2 known modules) => b",
@@ -166,13 +133,10 @@ it('distributes 2 bundles to workers evenly', () => {
 });
 
 it('distributes 5 bundles to workers evenly', () => {
-  const configs = assignBundlesToWorkers({
-    ...defaultOptions,
-    bundles: getBundleDefinitions(pluginsWithCounts(5), REPO),
-  });
+  const workers = assignBundlesToWorkers(getBundles(pluginsWithCounts(5), REPO), 4);
 
-  assertReturnVal(configs);
-  expect(readConfigs(configs)).toMatchInlineSnapshot(`
+  assertReturnVal(workers);
+  expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
       "worker 0 (3 known modules) => b,a",
       "worker 1 (3 known modules) => c",
@@ -183,13 +147,10 @@ it('distributes 5 bundles to workers evenly', () => {
 });
 
 it('distributes 10 bundles to workers evenly', () => {
-  const configs = assignBundlesToWorkers({
-    ...defaultOptions,
-    bundles: getBundleDefinitions(pluginsWithCounts(10), REPO),
-  });
+  const workers = assignBundlesToWorkers(getBundles(pluginsWithCounts(10), REPO), 4);
 
-  assertReturnVal(configs);
-  expect(readConfigs(configs)).toMatchInlineSnapshot(`
+  assertReturnVal(workers);
+  expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
       "worker 0 (16 known modules) => h,g,a",
       "worker 1 (17 known modules) => i,f,b",
@@ -200,13 +161,10 @@ it('distributes 10 bundles to workers evenly', () => {
 });
 
 it('distributes 15 bundles to workers evenly', () => {
-  const configs = assignBundlesToWorkers({
-    ...defaultOptions,
-    bundles: getBundleDefinitions(pluginsWithCounts(15), REPO),
-  });
+  const workers = assignBundlesToWorkers(getBundles(pluginsWithCounts(15), REPO), 4);
 
-  assertReturnVal(configs);
-  expect(readConfigs(configs)).toMatchInlineSnapshot(`
+  assertReturnVal(workers);
+  expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
       "worker 0 (38 known modules) => m,l,g,f",
       "worker 1 (39 known modules) => n,k,h,e,a",
@@ -217,13 +175,10 @@ it('distributes 15 bundles to workers evenly', () => {
 });
 
 it('distributes 20 bundles to workers evenly', () => {
-  const configs = assignBundlesToWorkers({
-    ...defaultOptions,
-    bundles: getBundleDefinitions(pluginsWithCounts(20), REPO),
-  });
+  const workers = assignBundlesToWorkers(getBundles(pluginsWithCounts(20), REPO), 4);
 
-  assertReturnVal(configs);
-  expect(readConfigs(configs)).toMatchInlineSnapshot(`
+  assertReturnVal(workers);
+  expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
       "worker 0 (76 known modules) => d,m,j,h,e",
       "worker 1 (76 known modules) => s,r,n,l,g,f",
@@ -234,13 +189,10 @@ it('distributes 20 bundles to workers evenly', () => {
 });
 
 it('distributes 25 bundles to workers evenly', () => {
-  const configs = assignBundlesToWorkers({
-    ...defaultOptions,
-    bundles: getBundleDefinitions(pluginsWithCounts(25), REPO),
-  });
+  const workers = assignBundlesToWorkers(getBundles(pluginsWithCounts(25), REPO), 4);
 
-  assertReturnVal(configs);
-  expect(readConfigs(configs)).toMatchInlineSnapshot(`
+  assertReturnVal(workers);
+  expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
       "worker 0 (161 known modules) => d,w,t,r,o,m,k,i,f,e,a",
       "worker 1 (161 known modules) => y,x,u,s,p,n,l,j,h,g,c,b",
@@ -251,13 +203,10 @@ it('distributes 25 bundles to workers evenly', () => {
 });
 
 it('distributes 30 bundles to workers evenly', () => {
-  const configs = assignBundlesToWorkers({
-    ...defaultOptions,
-    bundles: getBundleDefinitions(pluginsWithCounts(30), REPO),
-  });
+  const workers = assignBundlesToWorkers(getBundles(pluginsWithCounts(30), REPO), 4);
 
-  assertReturnVal(configs);
-  expect(readConfigs(configs)).toMatchInlineSnapshot(`
+  assertReturnVal(workers);
+  expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
       "worker 0 (172 known modules) => z,y,w,t,r,o,m,k,i,g,e",
       "worker 1 (173 known modules) => q,b,a",

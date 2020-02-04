@@ -19,13 +19,13 @@
 
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
-import { getBundleDefinitions } from './get_bundle_definitions';
+import { getBundles } from './get_bundles';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer('/repo'));
 
 it('returns a bundle for each plugin', () => {
   expect(
-    getBundleDefinitions(
+    getBundles(
       [
         {
           directory: '/repo/plugins/foo',
@@ -44,7 +44,7 @@ it('returns a bundle for each plugin', () => {
         },
       ],
       '/repo'
-    )
+    ).map(b => b.toSpec())
   ).toMatchInlineSnapshot(`
     Array [
       Object {

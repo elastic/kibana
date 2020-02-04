@@ -19,8 +19,7 @@
 
 jest.mock('./assign_bundles_to_workers.ts');
 jest.mock('./new_platform_plugins.ts');
-jest.mock('./optimizer_cache.ts');
-jest.mock('./get_bundle_definitions.ts');
+jest.mock('./get_bundles.ts');
 
 import Path from 'path';
 import Os from 'os';
@@ -28,7 +27,6 @@ import Os from 'os';
 import { REPO_ROOT, createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import { OptimizerConfig } from './optimizer_config';
-import { OptimizerCache as OC } from './optimizer_cache';
 
 jest.spyOn(Os, 'cpus').mockReturnValue(['foo'] as any);
 
@@ -82,15 +80,6 @@ describe('OptimizerConfig::parseOptions()', () => {
     }).toThrowErrorMatchingInlineSnapshot(`"worker count must be a number"`);
   });
 
-  it('validates that bundleMetdataPath is absolute', () => {
-    expect(() => {
-      OptimizerConfig.parseOptions({
-        repoRoot: REPO_ROOT,
-        optimizerCachePath: 'foo/bar',
-      });
-    }).toThrowErrorMatchingInlineSnapshot(`"optimizerCachePath must be absolute"`);
-  });
-
   it('applies defaults', () => {
     expect(
       OptimizerConfig.parseOptions({
@@ -98,10 +87,10 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "cache": true,
         "dist": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
-        "optimizerCachePath": <absolute path>/data/.kbn-optimizer-cache.json,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
@@ -117,14 +106,14 @@ describe('OptimizerConfig::parseOptions()', () => {
     expect(
       OptimizerConfig.parseOptions({
         repoRoot: REPO_ROOT,
-        optimizerCachePath: false,
+        cache: false,
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "cache": false,
         "dist": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
-        "optimizerCachePath": false,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
@@ -144,10 +133,10 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "cache": true,
         "dist": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
-        "optimizerCachePath": <absolute path>/data/.kbn-optimizer-cache.json,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
@@ -168,10 +157,10 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "cache": true,
         "dist": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
-        "optimizerCachePath": <absolute path>/data/.kbn-optimizer-cache.json,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
@@ -190,10 +179,10 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "cache": true,
         "dist": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
-        "optimizerCachePath": <absolute path>/data/.kbn-optimizer-cache.json,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/x/y/z,
@@ -213,10 +202,10 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "cache": true,
         "dist": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
-        "optimizerCachePath": <absolute path>/data/.kbn-optimizer-cache.json,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
@@ -237,10 +226,7 @@ describe('OptimizerConfig::create()', () => {
     .assignBundlesToWorkers;
   const findNewPlatformPlugins: jest.Mock = jest.requireMock('./new_platform_plugins.ts')
     .findNewPlatformPlugins;
-  const OptimizerCache: jest.MockedClass<typeof OC> = jest.requireMock('./optimizer_cache.ts')
-    .OptimizerCache;
-  const getBundleDefinitions: jest.Mock = jest.requireMock('./get_bundle_definitions.ts')
-    .getBundleDefinitions;
+  const getBundles: jest.Mock = jest.requireMock('./get_bundles.ts').getBundles;
 
   beforeEach(() => {
     if ('mock' in OptimizerConfig.parseOptions) {
@@ -252,10 +238,10 @@ describe('OptimizerConfig::create()', () => {
       { config: Symbol('worker config 2') },
     ]);
     findNewPlatformPlugins.mockReturnValue(Symbol('new platform plugins'));
-    getBundleDefinitions.mockReturnValue(Symbol('bundle definitions'));
+    getBundles.mockReturnValue(Symbol('bundles'));
 
     jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation((): any => ({
-      optimizerCachePath: Symbol('parsed bundle metadata path'),
+      cache: Symbol('parsed cache'),
       dist: Symbol('parsed dist'),
       maxWorkerCount: Symbol('parsed max worker count'),
       pluginPaths: Symbol('parsed plugin paths'),
@@ -263,29 +249,26 @@ describe('OptimizerConfig::create()', () => {
       repoRoot: Symbol('parsed repo root'),
       watch: Symbol('parsed watch'),
       inspectWorkers: Symbol('parsed inspect workers'),
+      profileWebpack: Symbol('parsed profile webpack'),
     }));
   });
 
-  it('passes parsed options to findNewPlatformPlugins, OptimizerCache, getBundleDefinitions, and assignBundlesToWorkers', () => {
+  it('passes parsed options to findNewPlatformPlugins, getBundles, and assignBundlesToWorkers', () => {
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
     });
 
     expect(config).toMatchInlineSnapshot(`
       OptimizerConfig {
-        "bundles": Symbol(bundle definitions),
-        "cache": OptimizerCache {
-          "getBundleModuleCount": [MockFunction],
-          "getState": [MockFunction],
-          "saveBundleModuleCount": [MockFunction],
-          "setState": [MockFunction],
-        },
+        "bundles": Symbol(bundles),
+        "cache": Symbol(parsed cache),
+        "dist": Symbol(parsed dist),
         "inspectWorkers": Symbol(parsed inspect workers),
+        "maxWorkerCount": Symbol(parsed max worker count),
+        "plugins": Symbol(new platform plugins),
+        "profileWebpack": Symbol(parsed profile webpack),
+        "repoRoot": Symbol(parsed repo root),
         "watch": Symbol(parsed watch),
-        "workers": Array [
-          Symbol(worker config 1),
-          Symbol(worker config 2),
-        ],
       }
     `);
 
@@ -301,7 +284,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          8,
+          7,
         ],
         "results": Array [
           Object {
@@ -312,34 +295,7 @@ describe('OptimizerConfig::create()', () => {
       }
     `);
 
-    expect(OptimizerCache.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Symbol(parsed bundle metadata path),
-          ],
-        ],
-        "instances": Array [
-          OptimizerCache {
-            "getBundleModuleCount": [MockFunction],
-            "getState": [MockFunction],
-            "saveBundleModuleCount": [MockFunction],
-            "setState": [MockFunction],
-          },
-        ],
-        "invocationCallOrder": Array [
-          9,
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      }
-    `);
-
-    expect(getBundleDefinitions.mock).toMatchInlineSnapshot(`
+    expect(getBundles.mock).toMatchInlineSnapshot(`
       Object {
         "calls": Array [
           Array [
@@ -351,54 +307,12 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          10,
+          8,
         ],
         "results": Array [
           Object {
             "type": "return",
-            "value": Symbol(bundle definitions),
-          },
-        ],
-      }
-    `);
-
-    expect(assignBundlesToWorkers.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Object {
-              "bundles": Symbol(bundle definitions),
-              "cache": OptimizerCache {
-                "getBundleModuleCount": [MockFunction],
-                "getState": [MockFunction],
-                "saveBundleModuleCount": [MockFunction],
-                "setState": [MockFunction],
-              },
-              "dist": Symbol(parsed dist),
-              "maxWorkerCount": Symbol(parsed max worker count),
-              "profileWebpack": undefined,
-              "repoRoot": Symbol(parsed repo root),
-              "watch": Symbol(parsed watch),
-            },
-          ],
-        ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          11,
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Array [
-              Object {
-                "config": Symbol(worker config 1),
-              },
-              Object {
-                "config": Symbol(worker config 2),
-              },
-            ],
+            "value": Symbol(bundles),
           },
         ],
       }
