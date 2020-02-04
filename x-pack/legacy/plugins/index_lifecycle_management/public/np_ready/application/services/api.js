@@ -18,37 +18,31 @@ import { sendGet, sendPost, sendDelete } from './http';
 // The extend_index_management module that we support an injected httpClient here.
 
 export async function loadNodes(httpClient) {
-  const response = await sendGet(`nodes/list`, httpClient);
-  return response;
+  return await sendGet(`nodes/list`, httpClient);
 }
 
 export async function loadNodeDetails(selectedNodeAttrs, httpClient) {
-  const response = await sendGet(`nodes/${selectedNodeAttrs}/details`, httpClient);
-  return response;
+  return await sendGet(`nodes/${selectedNodeAttrs}/details`, httpClient);
 }
 
 export async function loadIndexTemplates(httpClient) {
-  const response = await sendGet(`templates`, httpClient);
-  return response;
+  return await sendGet(`templates`, httpClient);
 }
 
 export async function loadIndexTemplate(templateName, httpClient) {
   if (!templateName) {
     return {};
   }
-  const response = await sendGet(`templates/${templateName}`, httpClient);
-  return response;
+  return await sendGet(`templates/${templateName}`, httpClient);
 }
 
 export async function loadPolicies(withIndices, httpClient) {
   const query = withIndices ? '?withIndices=true' : '';
-  const response = await sendGet('policies', query, httpClient);
-  return response;
+  return await sendGet('policies', query, httpClient);
 }
 
 export async function savePolicy(policy, httpClient) {
-  const response = await sendPost(`policies`, policy, httpClient);
-  return response;
+  return await sendPost(`policies`, policy, httpClient);
 }
 
 export async function deletePolicy(policyName, httpClient) {
