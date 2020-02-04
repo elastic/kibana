@@ -21,7 +21,9 @@ interface SingleBulkCreateParams {
   id: string;
   signalsIndex: string;
   name: string;
+  createdAt: string;
   createdBy: string;
+  updatedAt: string;
   updatedBy: string;
   interval: string;
   enabled: boolean;
@@ -59,7 +61,9 @@ export const singleBulkCreate = async ({
   id,
   signalsIndex,
   name,
+  createdAt,
   createdBy,
+  updatedAt,
   updatedBy,
   interval,
   enabled,
@@ -91,7 +95,19 @@ export const singleBulkCreate = async ({
         ),
       },
     },
-    buildBulkBody({ doc, ruleParams, id, name, createdBy, updatedBy, interval, enabled, tags }),
+    buildBulkBody({
+      doc,
+      ruleParams,
+      id,
+      name,
+      createdAt,
+      createdBy,
+      updatedAt,
+      updatedBy,
+      interval,
+      enabled,
+      tags,
+    }),
   ]);
   const start = performance.now();
   const response: BulkResponse = await services.callCluster('bulk', {

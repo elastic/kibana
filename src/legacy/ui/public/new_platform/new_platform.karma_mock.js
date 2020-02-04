@@ -119,6 +119,9 @@ export const npSetup = {
     kibana_legacy: {
       registerLegacyApp: () => {},
       forwardApp: () => {},
+      config: {
+        defaultAppId: 'home',
+      },
     },
     inspector: {
       registerView: () => undefined,
@@ -139,6 +142,22 @@ export const npSetup = {
       },
       environment: {
         update: sinon.fake(),
+      },
+      config: {
+        disableWelcomeScreen: false,
+      },
+    },
+    charts: {
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
+      },
+    },
+    management: {
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
+        }),
       },
     },
   },
@@ -161,6 +180,11 @@ export const npStart = {
           hasItem: sinon.fake(),
         }),
       },
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
+        }),
+      },
     },
     embeddable: {
       getEmbeddableFactory: sinon.fake(),
@@ -178,6 +202,9 @@ export const npStart = {
     kibana_legacy: {
       getApps: () => [],
       getForwards: () => [],
+      config: {
+        defaultAppId: 'home',
+      },
     },
     data: {
       autocomplete: {
@@ -276,10 +303,22 @@ export const npStart = {
       featureCatalogue: {
         register: sinon.fake(),
       },
+      environment: {
+        get: sinon.fake(),
+      },
+      config: {
+        disableWelcomeScreen: false,
+      },
     },
     navigation: {
       ui: {
         TopNavMenu: mockComponent,
+      },
+    },
+    charts: {
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
       },
     },
   },
