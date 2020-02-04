@@ -8,6 +8,7 @@ import React, { useEffect } from 'react';
 
 import { TimeRange } from '../../../../../../common/http_api/shared';
 import { useLogEntryCategoryExamples } from '../../use_log_entry_category_examples';
+import { CategoryExampleMessage, useExampleColumnWidths } from './category_example_message';
 
 export const CategoryDetailsRow: React.FunctionComponent<{
   categoryId: number;
@@ -26,11 +27,21 @@ export const CategoryDetailsRow: React.FunctionComponent<{
     getLogEntryCategoryExamples();
   }, [getLogEntryCategoryExamples]);
 
+  const { columnWidths, CharacterDimensionsProbe } = useExampleColumnWidths();
+
   return (
-    <div>
-      {logEntryCategoryExamples.map(categoryExample => (
-        <div>{categoryExample.message}</div>
-      ))}
-    </div>
+    <>
+      <CharacterDimensionsProbe />
+      <div>
+        {logEntryCategoryExamples.map((categoryExample, categoryExampleIndex) => (
+          <CategoryExampleMessage
+            columnWidths={columnWidths}
+            key={categoryExampleIndex}
+            message={categoryExample.message}
+            timestamp={categoryExample.timestamp}
+          />
+        ))}
+      </div>
+    </>
   );
 };
