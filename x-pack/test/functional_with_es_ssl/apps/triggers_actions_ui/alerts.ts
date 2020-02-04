@@ -16,7 +16,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const supertest = getService('supertest');
-  const retry = getService('retry');
   const find = getService('find');
 
   async function createAlert() {

@@ -123,14 +123,12 @@ describe('alerts_list component empty', () => {
   });
 
   it('renders empty list', () => {
-    expect(
-      wrapper.find('[data-test-subj="createFirstConnectorEmptyPrompt"]').exists()
-    ).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="createFirstAlertEmptyPrompt"]').exists()).toBeTruthy();
   });
 
   it('renders Create alert button', () => {
     expect(
-      wrapper.find('[data-test-subj="createFirstActionButton"]').find('EuiButton')
+      wrapper.find('[data-test-subj="createFirstAlertButton"]').find('EuiButton')
     ).toHaveLength(1);
     expect(wrapper.find('AlertAdd')).toHaveLength(1);
   });
