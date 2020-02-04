@@ -17,4 +17,10 @@
  * under the License.
  */
 
-import './collapsible_sidebar';
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export const configSchema = schema.object({
+  defaultAppId: schema.string({ defaultValue: 'home' }),
+});
+
+export type ConfigSchema = TypeOf<typeof configSchema>;
