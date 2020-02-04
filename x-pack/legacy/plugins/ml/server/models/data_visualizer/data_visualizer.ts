@@ -733,16 +733,6 @@ export class DataVisualizer {
             : samplerShardSize,
       };
 
-      stats.topValues = _.get(aggregations, [...topAggsPath, 'buckets'], []);
-      stats.topValuesSampleSize = _.get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0);
-      stats.topValuesSamplerShardSize =
-        field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD
-          ? SAMPLER_TOP_TERMS_SHARD_SIZE
-          : samplerShardSize;
-      stats.topValues.forEach(bucket => {
-        stats.topValuesSampleSize += bucket.doc_count;
-      });
-
       batchStats.push(stats);
     });
 
