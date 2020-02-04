@@ -7,7 +7,7 @@ exports[`PageTitle should render normally 1`] = `
   >
     <FormattedMessage
       defaultMessage="Settings"
-      id="kbn.management.settings.pageTitle"
+      id="advancedSettings.pageTitle"
       values={Object {}}
     />
   </h1>
