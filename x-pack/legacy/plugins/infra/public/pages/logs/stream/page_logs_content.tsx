@@ -44,7 +44,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
   const { applyLogFilterQuery } = useContext(LogFilterState.Context);
   const {
-    isAutoReloading,
+    isStreaming,
     targetPosition,
     visibleMidpointTime,
     visibleTimeInterval,
@@ -94,7 +94,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
               hasMoreBeforeStart={hasMoreBeforeStart}
               isLoadingMore={isLoadingMore}
               isReloading={isReloading}
-              isStreaming={isAutoReloading}
+              isStreaming={isStreaming}
               items={items}
               jumpToTarget={jumpToTargetPosition}
               lastLoadedTime={lastLoadedTime}

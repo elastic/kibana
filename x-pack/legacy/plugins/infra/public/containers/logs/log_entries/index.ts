@@ -56,11 +56,11 @@ interface LogEntriesProps {
   pagesBeforeStart: number | null;
   pagesAfterEnd: number | null;
   sourceId: string;
-  isAutoReloading: boolean;
+  isStreaming: boolean;
   jumpToTargetPosition: (position: TimeKey) => void;
 }
 
-type FetchEntriesParams = Omit<LogEntriesProps, 'isAutoReloading'>;
+type FetchEntriesParams = Omit<LogEntriesProps, 'isStreaming'>;
 type FetchMoreEntriesParams = Pick<LogEntriesProps, 'pagesBeforeStart' | 'pagesAfterEnd'>;
 
 export interface LogEntriesStateParams {
@@ -214,7 +214,7 @@ const useFetchEntriesEffect = (
     pick(props, ['sourceId', 'filterQuery', 'timeKey', 'startTimestamp', 'endTimestamp'])
   );
   const fetchNewEntriesEffect = () => {
-    if (props.isAutoReloading) return;
+    if (props.isStreaming) return;
     if (shouldFetchNewEntries({ ...props, ...state, prevParams })) {
       runFetchNewEntriesRequest();
     }
@@ -226,7 +226,7 @@ const useFetchEntriesEffect = (
     Object.values(pick(state, ['hasMoreBeforeStart', 'hasMoreAfterEnd'])),
   ];
   const fetchMoreEntriesEffect = () => {
-    if (state.isLoadingMore || props.isAutoReloading) return;
+    if (state.isLoadingMore || props.isStreaming) return;
     const direction = shouldFetchMoreEntries(props, state);
     switch (direction) {
       case ShouldFetchMoreEntries.Before:
@@ -244,13 +244,13 @@ const useFetchEntriesEffect = (
   );
 
   const streamEntriesEffectDependencies = [
-    props.isAutoReloading,
+    props.isStreaming,
     state.isLoadingMore,
     state.isReloading,
   ];
   const streamEntriesEffect = () => {
     (async () => {
-      if (props.isAutoReloading && !state.isLoadingMore && !state.isReloading) {
+      if (props.isStreaming && !state.isLoadingMore && !state.isReloading) {
         if (startedStreaming) {
           await new Promise(res => setTimeout(res, props.liveStreamingInterval));
         } else {
@@ -266,7 +266,7 @@ const useFetchEntriesEffect = (
         if (newEntriesEnd) {
           props.jumpToTargetPosition(newEntriesEnd);
         }
-      } else if (!props.isAutoReloading) {
+      } else if (!props.isStreaming) {
         setStartedStreaming(false);
       }
     })();

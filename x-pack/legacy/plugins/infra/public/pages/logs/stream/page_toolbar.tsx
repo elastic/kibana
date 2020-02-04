@@ -56,7 +56,7 @@ export const LogsToolbar = () => {
   } = useContext(LogHighlightsState.Context);
   const {
     visibleMidpointTime,
-    isAutoReloading,
+    isStreaming,
     jumpToTargetPositionTime,
     startLiveStreaming,
     stopLiveStreaming,
@@ -140,7 +140,7 @@ export const LogsToolbar = () => {
             start={startDate}
             end={endDate}
             onTimeChange={handleTimeChange}
-            isPaused={!isAutoReloading}
+            isPaused={!isStreaming}
             refreshInterval={liveStreamingInterval}
             onRefresh={() => {}}
             onRefreshChange={({ refreshInterval, isPaused }) => {

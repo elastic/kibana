@@ -36,7 +36,7 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
     targetPosition,
     pagesBeforeStart,
     pagesAfterEnd,
-    isAutoReloading,
+    isStreaming,
     jumpToTargetPosition,
     liveStreamingInterval,
   } = useContext(LogPositionState.Context);
@@ -53,7 +53,7 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
     pagesAfterEnd,
     filterQuery,
     sourceId,
-    isAutoReloading,
+    isStreaming,
     jumpToTargetPosition,
   };
   return <LogEntriesState.Provider {...entriesProps}>{children}</LogEntriesState.Provider>;

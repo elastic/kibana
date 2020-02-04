@@ -26,7 +26,7 @@ interface VisiblePositions {
 
 export interface LogPositionStateParams {
   targetPosition: TimeKeyOrNull;
-  isAutoReloading: boolean;
+  isStreaming: boolean;
   liveStreamingInterval: number;
   firstVisiblePosition: TimeKeyOrNull;
   pagesBeforeStart: number;
@@ -76,7 +76,7 @@ const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrN
 
 export const useLogPositionState: () => LogPositionStateParams & LogPositionCallbacks = () => {
   const [targetPosition, jumpToTargetPosition] = useState<TimeKey | null>(null);
-  const [isAutoReloading, setIsAutoReloading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const [liveStreamingInterval, setLiveStreamingInterval] = useState(10000);
   const [visiblePositions, reportVisiblePositions] = useState<VisiblePositions>({
     endKey: null,
@@ -135,7 +135,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
 
   const state = {
     targetPosition,
-    isAutoReloading,
+    isStreaming,
     firstVisiblePosition: startKey,
     pagesBeforeStart,
     pagesAfterEnd,
@@ -155,8 +155,8 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
       [jumpToTargetPosition]
     ),
     reportVisiblePositions,
-    startLiveStreaming: useCallback(() => setIsAutoReloading(true), [setIsAutoReloading]),
-    stopLiveStreaming: useCallback(() => setIsAutoReloading(false), [setIsAutoReloading]),
+    startLiveStreaming: useCallback(() => setIsStreaming(true), [setIsStreaming]),
+    stopLiveStreaming: useCallback(() => setIsStreaming(false), [setIsStreaming]),
     updateDateRange,
     setLiveStreamingInterval,
   };

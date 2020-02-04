@@ -25,7 +25,7 @@ interface LogPositionUrlState {
 export const WithLogPositionUrlState = () => {
   const {
     visibleMidpoint,
-    isAutoReloading,
+    isStreaming,
     jumpToTargetPosition,
     jumpToTargetPositionTime,
     startLiveStreaming,
@@ -37,11 +37,11 @@ export const WithLogPositionUrlState = () => {
   const urlState = useMemo(
     () => ({
       position: visibleMidpoint ? pickTimeKey(visibleMidpoint) : null,
-      streamLive: isAutoReloading,
+      streamLive: isStreaming,
       start: startDate,
       end: endDate,
     }),
-    [visibleMidpoint, isAutoReloading, startDate, endDate]
+    [visibleMidpoint, isStreaming, startDate, endDate]
   );
   return (
     <UrlStateContainer
