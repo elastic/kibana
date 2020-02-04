@@ -84,7 +84,7 @@ describe('connector_edit_flyout', () => {
             editFlyoutVisible: true,
             setEditFlyoutVisibility: state => {},
             actionTypesIndex: {
-              'test-action-type-id': { id: 'test-action-type-id', name: 'test' },
+              'test-action-type-id': { id: 'test-action-type-id', name: 'test', enabled: true },
             },
             reloadConnectors: () => {
               return new Promise<void>(() => {});

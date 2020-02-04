@@ -721,6 +721,7 @@ describe('Auth', () => {
       res.ok({
         headers: {
           'www-authenticate': 'from handler',
+          'another-header': 'yet another header',
         },
       })
     );
