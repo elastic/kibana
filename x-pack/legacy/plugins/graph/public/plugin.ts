@@ -50,6 +50,7 @@ export class GraphPlugin implements Plugin {
           config: contextCore.uiSettings,
           toastNotifications: contextCore.notifications.toasts,
           indexPatterns: this.npDataStart!.indexPatterns,
+          overlays: contextCore.overlays,
         });
       },
     });
