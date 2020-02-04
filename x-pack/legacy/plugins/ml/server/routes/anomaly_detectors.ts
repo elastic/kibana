@@ -13,7 +13,20 @@ import {
   anomalyDetectionUpdateJobSchema,
 } from '../new_platform/anomaly_detectors_schema';
 
+/**
+ * Routes for the anomaly detectors
+ */
 export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {get} /api/ml/anomaly_detectors Get anomaly detectors data
+   * @apiName GetAnomalyDetectors
+   * @apiDescription Returns the list of anomaly detection jobs.
+   *
+   * @apiSuccess {Number} count
+   * @apiSuccess {Object[]} jobs
+   */
   router.get(
     {
       path: '/api/ml/anomaly_detectors',
@@ -31,6 +44,15 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {get} /api/ml/anomaly_detectors/:jobId Get anomaly detection data by id
+   * @apiName GetAnomalyDetectorsById
+   * @apiDescription Returns the anomaly detection job.
+   *
+   * @apiParam {String} jobId Job ID.
+   */
   router.get(
     {
       path: '/api/ml/anomaly_detectors/{jobId}',
@@ -53,6 +75,16 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {get} /api/ml/anomaly_detectors/_stats Get anomaly detection stats
+   * @apiName GetAnomalyDetectorsStats
+   * @apiDescription Returns anomaly detection jobs statistics.
+   *
+   * @apiSuccess {Number} count
+   * @apiSuccess {Object[]} jobs
+   */
   router.get(
     {
       path: '/api/ml/anomaly_detectors/_stats',
@@ -70,6 +102,15 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {get} /api/ml/anomaly_detectors/:jobId/_stats Get stats for requested anomaly detection job
+   * @apiName GetAnomalyDetectorsStatsById
+   * @apiDescription Returns anomaly detection job statistics.
+   *
+   * @apiParam {String} jobId Job ID.
+   */
   router.get(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_stats',
@@ -92,6 +133,16 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {put} /api/ml/anomaly_detectors/:jobId Instantiate an anomaly detection job
+   * @apiName CreateAnomalyDetectors
+   * @apiDescription This API creates an anomaly detection job that performs an analysis
+   *                 on the source index and stores the outcome in a destination index.
+   *
+   * @apiParam {String} jobId Job ID.
+   */
   router.put(
     {
       path: '/api/ml/anomaly_detectors/{jobId}',
@@ -118,6 +169,15 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {put} /api/ml/anomaly_detectors/:jobId/_update Update an anomaly detection job
+   * @apiName UpdateAnomalyDetectors
+   * @apiDescription This API updates an anomaly detection job
+   *
+   * @apiParam {String} jobId Job ID.
+   */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_update',
@@ -144,6 +204,15 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {post} /api/ml/anomaly_detectors/:jobId/_open Open specified job
+   * @apiName OpenAnomalyDetectorsJob
+   * @apiDescription Opens an anomaly detection job.
+   *
+   * @apiParam {String} jobId Job ID.
+   */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_open',
@@ -168,6 +237,15 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {post} /api/ml/anomaly_detectors/:jobId/_close Close specified job
+   * @apiName CloseAnomalyDetectorsJob
+   * @apiDescription Closes an anomaly detection job.
+   *
+   * @apiParam {String} jobId Job ID.
+   */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_close',
@@ -196,6 +274,15 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {delete} /api/ml/anomaly_detectors/:jobId Delete specified job
+   * @apiName DeleteAnomalyDetectorsJob
+   * @apiDescription Deletes specified anomaly detection job.
+   *
+   * @apiParam {String} jobId Job ID.
+   */
   router.delete(
     {
       path: '/api/ml/anomaly_detectors/{jobId}',
@@ -224,6 +311,15 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {post} /api/ml/anomaly_detectors/_validate/detector Validate detector
+   * @apiName ValidateAnomalyDetector
+   * @apiDescription Validates specified detector.
+   *
+   * @apiParam {String} jobId Job ID.
+   */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/_validate/detector',
@@ -245,6 +341,15 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {post} /api/ml/anomaly_detectors/:jobId/_forecast Create forecast for specified job
+   * @apiName ForecastAnomalyDetector
+   * @apiDescription Creates forecast for specified anomaly detection job.
+   *
+   * @apiParam {String} jobId Job ID.
+   */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_forecast',
@@ -272,6 +377,18 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {post} /api/ml/anomaly_detectors/:jobId/results/overall_buckets  Obtain overall bucket scores for the specified job ID
+   * @apiName ForecastAnomalyDetector
+   * @apiDescription Creates forecast for specified anomaly detection job.
+   *
+   * @apiParam {String} jobId Job ID.
+   *
+   * @apiSuccess {Number} count
+   * @apiSuccess {Object[]} overall_buckets
+   */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/results/overall_buckets',
@@ -305,6 +422,16 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {get} /api/ml/anomaly_detectors/:jobId/results/categories/{categoryId} Get results category data by job id and category id
+   * @apiName GetCategoryByJobId
+   * @apiDescription Returns the categories results for the specified id and category id.
+   *
+   * @apiParam {String} jobId Job ID.
+   * @apiParam {String} categoryId Category ID.
+   */
   router.get(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/results/categories/{categoryId}',
