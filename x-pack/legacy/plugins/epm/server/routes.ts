@@ -5,7 +5,6 @@
  */
 import { PLUGIN } from '../common/constants';
 import * as CommonRoutes from '../common/routes';
-import * as Datasources from './datasources/handlers';
 import * as Packages from './packages/handlers';
 import { ServerRoute } from './types';
 
@@ -46,11 +45,5 @@ export const routes: ServerRoute[] = [
     path: CommonRoutes.API_DELETE_PATTERN,
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
     handler: Packages.handleRequestDelete,
-  },
-  {
-    method: 'POST',
-    path: CommonRoutes.API_INSTALL_DATASOURCE_PATTERN,
-    options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
-    handler: Datasources.handleRequestInstallDatasource,
   },
 ];

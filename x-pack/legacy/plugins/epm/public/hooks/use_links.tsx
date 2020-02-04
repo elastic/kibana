@@ -55,7 +55,5 @@ export function useLinks() {
       const path = generatePath(patterns.DETAIL_VIEW, params);
       return withAppRoot ? appRoot(path) : path;
     },
-    toAddDataSourceView: ({ name, version }: { name: string; version: string }) =>
-      appRoot(generatePath(patterns.ADD_DATA_SOURCE_VIEW, { pkgkey: `${name}-${version}` })),
   };
 }

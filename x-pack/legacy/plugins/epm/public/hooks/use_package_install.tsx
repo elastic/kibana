@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import createContainer from 'constate';
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { NotificationsStart } from 'src/core/public';
 import { useLinks } from '.';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
@@ -26,7 +25,7 @@ type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'>;
 
 function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
   const [packages, setPackage] = useState<PackagesInstall>({});
-  const { toAddDataSourceView, toDetailView } = useLinks();
+  const { toDetailView } = useLinks();
 
   const setPackageInstallStatus = useCallback(
     ({ name, status }: { name: PackageInfo['name']; status: InstallStatus }) => {
@@ -46,21 +45,8 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
       try {
         await fetchInstallPackage(pkgkey);
         setPackageInstallStatus({ name, status: InstallStatus.installed });
-        const packageDataSourceUrl = toAddDataSourceView({ name, version });
-        const SuccessMsg = (
-          <Fragment>
-            <p>Next, create a data source to begin sending data to your Elasticsearch cluster.</p>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                {/* Would like to add a loading indicator here but, afaict,
-                 notifications are static. i.e. they won't re-render with new state */}
-                <EuiButton href={packageDataSourceUrl} size="s">
-                  Add data source
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </Fragment>
-        );
+        const SuccessMsg = <p>Successfully installed {name}</p>;
+
         notifications.toasts.addSuccess({
           title: `Installed ${title} package`,
           text: toMountPoint(SuccessMsg),
@@ -87,7 +73,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         });
       }
     },
-    [notifications.toasts, setPackageInstallStatus, toAddDataSourceView, toDetailView]
+    [notifications.toasts, setPackageInstallStatus, toDetailView]
   );
 
   const getPackageInstallStatus = useCallback(
