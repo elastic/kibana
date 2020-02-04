@@ -17,19 +17,25 @@
  * under the License.
  */
 
-export function injectVars(server) {
-  const serverConfig = server.config();
+import { CoreSetup, CoreStart, PluginConfigDescriptor } from 'kibana/server';
 
-  // Get types that are import and exportable, by default yes unless isImportableAndExportable is set to false
-  const { types: allTypes } = server.savedObjects;
-  const savedObjectsManagement = server.getSavedObjectsManagement();
-  const importAndExportableTypes = allTypes.filter(type =>
-    savedObjectsManagement.isImportAndExportable(type)
-  );
+import { configSchema, ConfigSchema } from '../config';
 
-  return {
-    importAndExportableTypes,
-    autocompleteTerminateAfter: serverConfig.get('kibana.autocompleteTerminateAfter'),
-    autocompleteTimeout: serverConfig.get('kibana.autocompleteTimeout'),
-  };
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    defaultAppId: true,
+  },
+  schema: configSchema,
+  deprecations: ({ renameFromRoot }) => [
+    // TODO: Remove deprecation once defaultAppId is deleted
+    renameFromRoot('kibana.defaultAppId', 'kibana_legacy.defaultAppId', true),
+  ],
+};
+
+class Plugin {
+  public setup(core: CoreSetup) {}
+
+  public start(core: CoreStart) {}
 }
+
+export const plugin = () => new Plugin();

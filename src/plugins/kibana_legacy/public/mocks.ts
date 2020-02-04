@@ -17,19 +17,28 @@
  * under the License.
  */
 
-export function injectVars(server) {
-  const serverConfig = server.config();
+import { KibanaLegacyPlugin } from './plugin';
 
-  // Get types that are import and exportable, by default yes unless isImportableAndExportable is set to false
-  const { types: allTypes } = server.savedObjects;
-  const savedObjectsManagement = server.getSavedObjectsManagement();
-  const importAndExportableTypes = allTypes.filter(type =>
-    savedObjectsManagement.isImportAndExportable(type)
-  );
+export type Setup = jest.Mocked<ReturnType<KibanaLegacyPlugin['setup']>>;
+export type Start = jest.Mocked<ReturnType<KibanaLegacyPlugin['start']>>;
 
-  return {
-    importAndExportableTypes,
-    autocompleteTerminateAfter: serverConfig.get('kibana.autocompleteTerminateAfter'),
-    autocompleteTimeout: serverConfig.get('kibana.autocompleteTimeout'),
-  };
-}
+const createSetupContract = (): Setup => ({
+  forwardApp: jest.fn(),
+  registerLegacyApp: jest.fn(),
+  config: {
+    defaultAppId: 'home',
+  },
+});
+
+const createStartContract = (): Start => ({
+  getApps: jest.fn(),
+  getForwards: jest.fn(),
+  config: {
+    defaultAppId: 'home',
+  },
+});
+
+export const kibanaLegacyPluginMock = {
+  createSetupContract,
+  createStartContract,
+};
