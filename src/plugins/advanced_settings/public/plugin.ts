@@ -17,6 +17,23 @@
  * under the License.
  */
 
-export { MANAGEMENT_BREADCRUMB } from './breadcrumbs';
-import { npStart } from 'ui/new_platform';
-export const management = npStart.plugins.management.legacy;
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { ComponentRegistry } from './component_registry';
+import { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
+
+const component = new ComponentRegistry();
+
+export class AdvancedSettingsPlugin
+  implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart> {
+  public setup(core: CoreSetup) {
+    return {
+      component: component.setup,
+    };
+  }
+
+  public start(core: CoreStart) {
+    return {
+      component: component.start,
+    };
+  }
+}
