@@ -222,7 +222,7 @@ exports[`CheckupTab render with deprecations 1`] = `
               "actions": Array [
                 Object {
                   "label": "Reindex in Console",
-                  "url": "/app/kibana#/devTools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter.json",
+                  "url": "/app/kibana#/dev_tools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter.json",
                 },
               ],
               "details": "Reindexing is irreversible, so always back up your index before proceeding.",
@@ -242,7 +242,7 @@ exports[`CheckupTab render with deprecations 1`] = `
               "actions": Array [
                 Object {
                   "label": "Reindex in Console",
-                  "url": "/app/kibana#/devTools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2F.reindex-status.json",
+                  "url": "/app/kibana#/dev_tools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2F.reindex-status.json",
                 },
               ],
               "details": "Reindexing is irreversible, so always back up your index before proceeding.",
@@ -255,7 +255,7 @@ exports[`CheckupTab render with deprecations 1`] = `
               "actions": Array [
                 Object {
                   "label": "Reindex in Console",
-                  "url": "/app/kibana#/devTools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter2.json",
+                  "url": "/app/kibana#/dev_tools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter2.json",
                 },
               ],
               "details": "Reindexing is irreversible, so always back up your index before proceeding.",

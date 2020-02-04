@@ -141,7 +141,7 @@ Because the `read` privilege does not define the `save` capability, users with r
 init(server) {
   const xpackMainPlugin = server.plugins.xpack_main;
   xpackMainPlugin.registerFeature({
-    id: 'devTools',
+    id: 'dev_tools',
     name: i18n.translate('xpack.features.devToolsFeatureName', {
       defaultMessage: 'Dev Tools',
     }),
