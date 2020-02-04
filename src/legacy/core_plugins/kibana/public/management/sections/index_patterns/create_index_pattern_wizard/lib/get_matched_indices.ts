@@ -19,19 +19,21 @@
 
 import { MAX_NUMBER_OF_MATCHING_INDICES } from '../constants';
 
-function isSystemIndex(index) {
+function isSystemIndex(index: string): boolean {
   if (index.startsWith('.')) {
     return true;
   }
 
   if (index.includes(':')) {
-    return index.split(':').reduce((isSystem, index) => isSystem || isSystemIndex(index), false);
+    return index
+      .split(':')
+      .reduce((isSystem: boolean, idx) => isSystem || isSystemIndex(idx), false);
   }
 
   return false;
 }
 
-function filterSystemIndices(indices, isIncludingSystemIndices) {
+function filterSystemIndices(indices: MatchedIndex[], isIncludingSystemIndices: boolean) {
   if (!indices) {
     return indices;
   }
@@ -62,12 +64,15 @@ function filterSystemIndices(indices, isIncludingSystemIndices) {
     This is the result of searching against a query that already ends in `*`.
     We call this `exact` matches because ES is telling us exactly what it matches
  */
+
+import { MatchedIndex } from '../types';
+
 export function getMatchedIndices(
-  unfilteredAllIndices,
-  unfilteredPartialMatchedIndices,
-  unfilteredExactMatchedIndices,
-  query,
-  isIncludingSystemIndices
+  unfilteredAllIndices: MatchedIndex[],
+  unfilteredPartialMatchedIndices: MatchedIndex[],
+  unfilteredExactMatchedIndices: MatchedIndex[],
+  query: string, // todo apears unused
+  isIncludingSystemIndices: boolean = false
 ) {
   const allIndices = filterSystemIndices(unfilteredAllIndices, isIncludingSystemIndices);
   const partialMatchedIndices = filterSystemIndices(

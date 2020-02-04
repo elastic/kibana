@@ -17,6 +17,26 @@
  * under the License.
  */
 
-export function containsIllegalCharacters(pattern, illegalCharacters) {
-  return illegalCharacters.some(char => pattern.includes(char));
-}
+import { canAppendWildcard } from '../can_append_wildcard';
+
+describe('canAppendWildcard', () => {
+  test('ignores symbols', () => {
+    expect(canAppendWildcard('%')).toBeFalsy();
+  });
+
+  test('accepts numbers', () => {
+    expect(canAppendWildcard('1')).toBeTruthy();
+  });
+
+  test('accepts letters', () => {
+    expect(canAppendWildcard('b')).toBeTruthy();
+  });
+
+  test('accepts uppercase letters', () => {
+    expect(canAppendWildcard('B')).toBeTruthy();
+  });
+
+  test('ignores if more than one key pressed', () => {
+    expect(canAppendWildcard('ab')).toBeFalsy();
+  });
+});

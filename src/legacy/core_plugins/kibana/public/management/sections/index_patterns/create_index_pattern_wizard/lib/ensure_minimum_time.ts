@@ -27,7 +27,7 @@
 export const DEFAULT_MINIMUM_TIME_MS = 300;
 
 export async function ensureMinimumTime(
-  promiseOrPromises,
+  promiseOrPromises: Promise<any> | Array<Promise<any>>,
   minimumTimeMs = DEFAULT_MINIMUM_TIME_MS
 ) {
   let returnValue;

@@ -23,18 +23,26 @@ jest.mock('../../constants', () => ({
   MAX_NUMBER_OF_MATCHING_INDICES: 6,
 }));
 
+const tags: string[] = [];
 const indices = [
-  { name: 'kibana' },
-  { name: 'es' },
-  { name: 'logstash' },
-  { name: 'packetbeat' },
-  { name: 'metricbeat' },
-  { name: '.kibana' },
+  { name: 'kibana', tags },
+  { name: 'es', tags },
+  { name: 'logstash', tags },
+  { name: 'packetbeat', tags },
+  { name: 'metricbeat', tags },
+  { name: '.kibana', tags },
 ];
 
-const partialIndices = [{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }];
+const partialIndices = [
+  { name: 'kibana', tags },
+  { name: 'es', tags },
+  { name: '.kibana', tags },
+];
 
-const exactIndices = [{ name: 'kibana' }, { name: '.kibana' }];
+const exactIndices = [
+  { name: 'kibana', tags },
+  { name: '.kibana', tags },
+];
 
 describe('getMatchedIndices', () => {
   it('should return all indices', () => {
@@ -46,23 +54,29 @@ describe('getMatchedIndices', () => {
     } = getMatchedIndices(indices, partialIndices, exactIndices, '*', true);
 
     expect(allIndices).toEqual([
-      { name: 'kibana' },
-      { name: 'es' },
-      { name: 'logstash' },
-      { name: 'packetbeat' },
-      { name: 'metricbeat' },
-      { name: '.kibana' },
+      { name: 'kibana', tags },
+      { name: 'es', tags },
+      { name: 'logstash', tags },
+      { name: 'packetbeat', tags },
+      { name: 'metricbeat', tags },
+      { name: '.kibana', tags },
     ]);
 
-    expect(exactMatchedIndices).toEqual([{ name: 'kibana' }, { name: '.kibana' }]);
+    expect(exactMatchedIndices).toEqual([
+      { name: 'kibana', tags },
+      { name: '.kibana', tags },
+    ]);
 
     expect(partialMatchedIndices).toEqual([
-      { name: 'kibana' },
-      { name: 'es' },
-      { name: '.kibana' },
+      { name: 'kibana', tags },
+      { name: 'es', tags },
+      { name: '.kibana', tags },
     ]);
 
-    expect(visibleIndices).toEqual([{ name: 'kibana' }, { name: '.kibana' }]);
+    expect(visibleIndices).toEqual([
+      { name: 'kibana', tags },
+      { name: '.kibana', tags },
+    ]);
   });
 
   it('should return all indices except for system indices', () => {
@@ -74,24 +88,31 @@ describe('getMatchedIndices', () => {
     } = getMatchedIndices(indices, partialIndices, exactIndices, '*', false);
 
     expect(allIndices).toEqual([
-      { name: 'kibana' },
-      { name: 'es' },
-      { name: 'logstash' },
-      { name: 'packetbeat' },
-      { name: 'metricbeat' },
+      { name: 'kibana', tags },
+      { name: 'es', tags },
+      { name: 'logstash', tags },
+      { name: 'packetbeat', tags },
+      { name: 'metricbeat', tags },
     ]);
 
-    expect(exactMatchedIndices).toEqual([{ name: 'kibana' }]);
+    expect(exactMatchedIndices).toEqual([{ name: 'kibana', tags }]);
 
-    expect(partialMatchedIndices).toEqual([{ name: 'kibana' }, { name: 'es' }]);
+    expect(partialMatchedIndices).toEqual([
+      { name: 'kibana', tags },
+      { name: 'es', tags },
+    ]);
 
-    expect(visibleIndices).toEqual([{ name: 'kibana' }]);
+    expect(visibleIndices).toEqual([{ name: 'kibana', tags }]);
   });
 
   it('should return partial matches as visible if there are no exact', () => {
     const { visibleIndices } = getMatchedIndices(indices, partialIndices, [], '*', true);
 
-    expect(visibleIndices).toEqual([{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }]);
+    expect(visibleIndices).toEqual([
+      { name: 'kibana', tags },
+      { name: 'es', tags },
+      { name: '.kibana', tags },
+    ]);
   });
 
   it('should return all indices as visible if there are no exact or partial', () => {

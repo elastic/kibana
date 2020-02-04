@@ -18,8 +18,15 @@
  */
 
 import { get, sortBy } from 'lodash';
+import { IndexPatternCreationConfig } from '../../../../../../../management/public';
+import { DataPublicPluginStart } from '../../../../../../../../../plugins/data/public';
 
-export async function getIndices(es, indexPatternCreationType, rawPattern, limit) {
+export async function getIndices(
+  es: DataPublicPluginStart['search']['__LEGACY']['esClient'], // todo consider move to new platform api
+  indexPatternCreationType: IndexPatternCreationConfig,
+  rawPattern: string,
+  limit: number
+) {
   const pattern = rawPattern.trim();
 
   // Searching for `*:` fails for CCS environments. The search request
@@ -38,11 +45,6 @@ export async function getIndices(es, indexPatternCreationType, rawPattern, limit
   // ES does not like just a `,*` and will throw a `[string_index_out_of_bounds_exception] String index out of range: 0`
   if (pattern.startsWith(',')) {
     return [];
-  }
-
-  // We need to always provide a limit and not rely on the default
-  if (!limit) {
-    throw new Error('`getIndices()` was called without the required `limit` parameter.');
   }
 
   const params = {
@@ -70,13 +72,14 @@ export async function getIndices(es, indexPatternCreationType, rawPattern, limit
 
     return sortBy(
       response.aggregations.indices.buckets
-        .map(bucket => {
+        // todo find shared type
+        .map((bucket: { key: string; doc_count: number }) => {
           return bucket.key;
         })
-        .map(indexName => {
+        .map((indexName: string) => {
           return {
             name: indexName,
-            tags: indexPatternCreationType.getIndexTags(indexName),
+            tags: indexPatternCreationType.getIndexTags(indexName), // todo just returns empty array
           };
         }),
       'name'
