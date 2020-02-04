@@ -293,6 +293,7 @@ export class LegacyService implements CoreService {
         },
         csp: setupDeps.core.http.csp,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
+        getServerInfo: setupDeps.core.http.getServerInfo,
       },
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
