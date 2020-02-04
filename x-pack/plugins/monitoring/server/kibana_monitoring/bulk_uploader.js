@@ -5,17 +5,10 @@
  */
 
 import { defaultsDeep, uniq, compact } from 'lodash';
-import { callClusterFactory } from '../../../xpack_main';
 
-import {
-  LOGGING_TAG,
-  KIBANA_MONITORING_LOGGING_TAG,
-  TELEMETRY_COLLECTION_INTERVAL,
-} from '../../common/constants';
+import { TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
 
 import { sendBulkPayload, monitoringBulk, getKibanaInfoForStats } from './lib';
-
-const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
 
 /*
  * Handles internal Kibana stats collection and uploading data to Monitoring
@@ -34,7 +27,15 @@ const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor({ config, log, interval, elasticsearchPlugin, kbnServerStatus, kbnServerVersion }) {
+  constructor({
+    config,
+    log,
+    interval,
+    elasticsearchPlugin,
+    callClusterFactory,
+    kbnServerStatus,
+    kbnServerVersion,
+  }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
@@ -49,12 +50,7 @@ export class BulkUploader {
     // Limit sending and fetching usage to once per day once usage is successfully stored
     // into the monitoring indices.
     this._usageInterval = TELEMETRY_COLLECTION_INTERVAL;
-
-    this._log = {
-      debug: message => log(['debug', ...LOGGING_TAGS], message),
-      info: message => log(['info', ...LOGGING_TAGS], message),
-      warn: message => log(['warning', ...LOGGING_TAGS], message),
-    };
+    this._log = log;
 
     this._cluster = elasticsearchPlugin.createCluster('admin', {
       plugins: [monitoringBulk],

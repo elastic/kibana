@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../../../../common/constants';
 import { EventRoller } from './event_roller';
 import { CloudDetector } from '../../../cloud';
 
@@ -26,7 +25,7 @@ export function opsBuffer({ config, log, getOSInfo }) {
   return {
     push(event) {
       eventRoller.addEvent(event);
-      log(['debug', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG], 'Received Kibana Ops event data');
+      log.debug('Received Kibana Ops event data');
     },
 
     hasEvents() {

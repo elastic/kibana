@@ -36,7 +36,9 @@ uiRoutes.when('/overview', {
       const kbnUrl = $injector.get('kbnUrl');
       const monitoringClusters = $injector.get('monitoringClusters');
       const globalState = $injector.get('globalState');
-      const showLicenseExpiration = $injector.get('showLicenseExpiration');
+      // TODO: NP
+      const showLicenseExpiration = () => {};
+      // const showLicenseExpiration = $injector.get('showLicenseExpiration');
       const config = $injector.get('config');
 
       super({

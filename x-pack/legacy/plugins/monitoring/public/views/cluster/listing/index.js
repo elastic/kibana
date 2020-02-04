@@ -55,7 +55,10 @@ uiRoutes
         const kbnUrl = $injector.get('kbnUrl');
         const globalState = $injector.get('globalState');
         const storage = $injector.get('localStorage');
-        const showLicenseExpiration = $injector.get('showLicenseExpiration');
+        // TODO: NP
+        const showLicenseExpiration = () => {};
+        // const showLicenseExpiration = $injector.get('showLicenseExpiration');
+
         this.data = $route.current.locals.clusters;
 
         $scope.$watch(

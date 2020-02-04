@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  LOGGING_TAG,
-  KIBANA_MONITORING_LOGGING_TAG,
-  KIBANA_STATS_TYPE_MONITORING,
-} from '../../../common/constants';
+import { KIBANA_STATS_TYPE_MONITORING } from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
 import Oppsy from 'oppsy';
 import { cloneDeep } from 'lodash';
@@ -50,10 +46,9 @@ class OpsMonitor {
  */
 export function getOpsStatsCollector(
   usageCollection,
-  { elasticsearchPlugin, kbnServerConfig, log, config, getOSInfo, hapiServer }
+  { elasticsearchPlugin, interval, log, config, getOSInfo, hapiServer }
 ) {
   const buffer = opsBuffer({ log, config, getOSInfo });
-  const interval = kbnServerConfig.get('ops.interval');
   const opsMonitor = new OpsMonitor(hapiServer, buffer, interval);
 
   /* Handle stopping / restarting the event listener if Elasticsearch stops and restarts
@@ -65,17 +60,11 @@ export function getOpsStatsCollector(
 
   // `process` is a NodeJS global, and is always available without using require/import
   process.on('SIGHUP', () => {
-    log(
-      ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
-      'Re-initializing Kibana Monitoring due to SIGHUP'
-    );
+    log.info('Re-initializing Kibana Monitoring due to SIGHUP');
     setTimeout(() => {
       opsMonitor.stop();
       opsMonitor.start();
-      log(
-        ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
-        'Re-initializing Kibana Monitoring due to SIGHUP'
-      );
+      log.info('Re-initializing Kibana Monitoring due to SIGHUP');
     }, 5 * 1000); // wait 5 seconds to avoid race condition with reloading logging configuration
   });
 

@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { telemetryCollectionManager } from '../../../../../../src/legacy/core_plugins/telemetry/server';
 // @ts-ignore
 import { getAllStats } from './get_all_stats';
 import { getClusterUuids } from './get_cluster_uuids';
 
-export function registerMonitoringCollection() {
+export function registerMonitoringCollection(telemetryCollectionManager: any) {
   telemetryCollectionManager.setCollection({
     esCluster: 'monitoring',
     title: 'monitoring',

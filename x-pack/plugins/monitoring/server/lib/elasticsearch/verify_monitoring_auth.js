@@ -16,8 +16,6 @@ import { INDEX_PATTERN } from '../../../common/constants';
  * @param req {Object} the server route handler request object
  */
 export async function verifyMonitoringAuth(req) {
-  // TODO: NP
-  return;
   const xpackInfo = get(req.server.plugins.monitoring, 'info');
 
   if (xpackInfo) {
