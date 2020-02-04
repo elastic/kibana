@@ -33,7 +33,7 @@ export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 
 export const MAP_BASE_URL = `/${MAP_APP_PATH}#/${MAP_SAVED_OBJECT_TYPE}`;
 
-export function createMapPath(id) {
+export function createMapPath(id: string) {
   return `${MAP_BASE_URL}/${id}`;
 }
 
@@ -91,6 +91,7 @@ export const ES_SPATIAL_RELATIONS = {
   INTERSECTS: 'INTERSECTS',
   DISJOINT: 'DISJOINT',
   WITHIN: 'WITHIN',
+  CONTAINS: 'CONTAINS',
 };
 
 export const GEO_JSON_TYPE = {

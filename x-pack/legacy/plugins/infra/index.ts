@@ -42,7 +42,7 @@ export function infra(kibana: any) {
         url: `/app/${APP_ID}#/infrastructure`,
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      home: ['plugins/infra/register_feature'],
+      home: ['plugins/infra/legacy_register_feature'],
       links: [
         {
           description: i18n.translate('xpack.infra.linkInfrastructureDescription', {
