@@ -45,14 +45,10 @@ export const kibana: ExpressionFunctionKibana = {
 
   args: {},
 
-  fn(input, _, { search }) {
-    if (!search) {
-      throw new Error('`search` context not provided in ExecutionContext.');
-    }
-
+  fn(input, _, { search = {} }) {
     const output: ExpressionValueSearchContext = {
       // TODO: This spread is left here for legacy reasons, possibly Lens uses it.
-      // TODO: But it should not be need.
+      // TODO: But it shouldn't be need.
       ...input,
       type: 'kibana_context',
       query: [...toArray(search.query), ...toArray((input || {}).query)],
