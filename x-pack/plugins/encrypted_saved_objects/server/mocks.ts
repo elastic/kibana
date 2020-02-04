@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginSetupContract, PluginStartContract } from './plugin';
+import { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
 
 function createEncryptedSavedObjectsSetupMock() {
   return {
     registerType: jest.fn(),
     __legacyCompat: { registerLegacyAPI: jest.fn() },
-  } as jest.Mocked<PluginSetupContract>;
+    usingEphemeralEncryptionKey: true,
+  } as jest.Mocked<EncryptedSavedObjectsPluginSetup>;
 }
 
 function createEncryptedSavedObjectsStartMock() {
   return {
     isEncryptionError: jest.fn(),
     getDecryptedAsInternalUser: jest.fn(),
-  } as jest.Mocked<PluginStartContract>;
+  } as jest.Mocked<EncryptedSavedObjectsPluginStart>;
 }
 
 export const encryptedSavedObjectsMock = {
