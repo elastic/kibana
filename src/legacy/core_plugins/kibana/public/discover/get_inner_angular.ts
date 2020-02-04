@@ -31,8 +31,7 @@ import { EventsProvider } from 'ui/events';
 import { PersistedState } from 'ui/persisted_state';
 
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-// @ts-ignore
-import { PrivateProvider } from 'ui/private/private';
+
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
 import { registerListenEventListener } from 'ui/directives/listen/listen';
@@ -85,6 +84,7 @@ import {
   watchMultiDecorator,
   PromiseServiceCreator,
   KbnAccessibleClickProvider,
+  PrivateProvider,
 } from '../../../../../plugins/kibana_legacy/public';
 
 /**

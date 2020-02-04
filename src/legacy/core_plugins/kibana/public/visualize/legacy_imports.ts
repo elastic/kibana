@@ -41,14 +41,11 @@ export { PersistedState } from 'ui/persisted_state';
 
 export { npSetup, npStart } from 'ui/new_platform';
 export { IPrivate } from 'ui/private';
-// @ts-ignore
-export { PrivateProvider } from 'ui/private/private';
 
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-export { migrateLegacyQuery } from '../../../../../plugins/kibana_legacy/public/utils/migrate_legacy_query';
 // @ts-ignore
 export { EventsProvider } from 'ui/events';
 // @ts-ignore
@@ -71,3 +68,4 @@ export { VisSavedObject } from '../../../visualizations/public/embeddable/visual
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
 export { PromiseServiceCreator } from '../../../../../plugins/kibana_legacy/public';
 export { VisType } from '../../../visualizations/public';
+export { migrateLegacyQuery, PrivateProvider } from '../../../../../plugins/kibana_legacy/public';

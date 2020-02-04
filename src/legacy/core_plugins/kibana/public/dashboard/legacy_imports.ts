@@ -35,10 +35,9 @@ export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
 export { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
-export { migrateLegacyQuery } from '../../../../../plugins/kibana_legacy/public/utils/migrate_legacy_query';
 export { KbnUrl } from 'ui/url/kbn_url';
 // @ts-ignore
-export { PrivateProvider } from 'ui/private/private';
+
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 // @ts-ignore
@@ -54,3 +53,4 @@ export { SavedObjectLoader } from 'ui/saved_objects';
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
+export { migrateLegacyQuery, PrivateProvider } from '../../../../../plugins/kibana_legacy/public';

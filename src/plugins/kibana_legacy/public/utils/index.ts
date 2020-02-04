@@ -22,3 +22,5 @@ export * from './system_api';
 export * from './url_overflow_service';
 // @ts-ignore
 export { KbnAccessibleClickProvider } from './kbn_accessible_click';
+// @ts-ignore
+export { PrivateProvider } from './private';
