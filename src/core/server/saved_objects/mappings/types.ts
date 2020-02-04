@@ -97,6 +97,9 @@ export interface SavedObjectsMappingProperties {
 /**
  * Describe a {@link SavedObjectsTypeMappingDefinition | saved object type mapping} field.
  *
+ * Please refer to {@link https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html | elasticsearch documentation}
+ * For the mapping documentation
+ *
  * @public
  */
 export type SavedObjectsFieldMapping =
@@ -118,7 +121,11 @@ export interface IndexMappingMeta {
   migrationMappingPropertyHashes?: { [k: string]: string };
 }
 
-/** @public */
+/**
+ * See {@link SavedObjectsFieldMapping} for documentation.
+ *
+ * @public
+ */
 export interface SavedObjectsCoreFieldMapping {
   type: string;
   index?: boolean;
@@ -130,7 +137,11 @@ export interface SavedObjectsCoreFieldMapping {
   };
 }
 
-/** @public */
+/**
+ * See {@link SavedObjectsFieldMapping} for documentation.
+ *
+ * @public
+ */
 export interface SavedObjectsComplexFieldMapping {
   dynamic?: string;
   type?: string;

@@ -50,10 +50,10 @@ export class SavedObjectsSerializer {
     const { type, namespace } = rawDoc._source;
     const namespacePrefix =
       namespace && !this.registry.isNamespaceAgnostic(type) ? `${namespace}:` : '';
-    return (
+    return Boolean(
       type &&
-      rawDoc._id.startsWith(`${namespacePrefix}${type}:`) &&
-      rawDoc._source.hasOwnProperty(type)
+        rawDoc._id.startsWith(`${namespacePrefix}${type}:`) &&
+        rawDoc._source.hasOwnProperty(type)
     );
   }
 
