@@ -96,7 +96,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
 
   public setup(core: CoreSetup, { kibanaLegacy }: { kibanaLegacy: KibanaLegacySetup }) {
     kibanaLegacy.registerLegacyApp({
-      id: 'devTools',
+      id: 'dev_tools',
       title: 'Dev Tools',
       mount: async (appMountContext, params) => {
         if (!this.getSortedDevTools) {
