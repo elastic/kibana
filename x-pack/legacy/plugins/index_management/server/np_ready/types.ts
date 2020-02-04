@@ -5,6 +5,7 @@
  */
 import { IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../../../../plugins/licensing/server';
+import { License } from './services/license';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
@@ -13,12 +14,6 @@ export interface Dependencies {
 export interface RouteDependencies {
   router: IRouter;
   plugins: {
-    license: {
-      getStatus: () => LicenseStatus;
-    };
+    license: License;
   };
-}
-export interface LicenseStatus {
-  isValid: boolean;
-  message?: string;
 }
