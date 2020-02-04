@@ -17,13 +17,29 @@
  * under the License.
  */
 
-export { createBulkCreateRoute } from './bulk_create';
-export { createBulkGetRoute } from './bulk_get';
-export { createDeleteRoute } from './delete';
-export { createFindRoute } from './find';
-export { createImportRoute } from './import';
-export { createLogLegacyImportRoute } from './log_legacy_import';
-export { createResolveImportErrorsRoute } from './resolve_import_errors';
-export { createUpdateRoute } from './update';
-export { createBulkUpdateRoute } from './bulk_update';
-export { createExportRoute } from './export';
+import { ContextService } from '../../context';
+import { createHttpServer, createCoreContext } from '../../http/test_utils';
+import { coreMock } from '../../mocks';
+
+const coreId = Symbol('core');
+
+export const setupServer = async () => {
+  const coreContext = createCoreContext({ coreId });
+  const contextService = new ContextService(coreContext);
+
+  const server = createHttpServer(coreContext);
+  const httpSetup = await server.setup({
+    context: contextService.setup({ pluginDependencies: new Map() }),
+  });
+  const handlerContext = coreMock.createRequestHandlerContext();
+
+  httpSetup.registerRouteHandlerContext(coreId, 'core', async (ctx, req, res) => {
+    return handlerContext;
+  });
+
+  return {
+    server,
+    httpSetup,
+    handlerContext,
+  };
+};
