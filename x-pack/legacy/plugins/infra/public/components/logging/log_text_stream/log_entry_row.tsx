@@ -36,8 +36,9 @@ interface LogEntryRowProps {
   isActiveHighlight: boolean;
   isHighlighted: boolean;
   logEntry: LogEntry;
-  openFlyoutWithItem: (id: string) => void;
+  openFlyoutWithItem?: (id: string) => void;
   scale: TextScale;
+  showActions?: boolean;
   wrap: boolean;
 }
 
@@ -51,6 +52,7 @@ export const LogEntryRow = ({
   logEntry,
   openFlyoutWithItem,
   scale,
+  showActions = true,
   wrap,
 }: LogEntryRowProps) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -63,7 +65,7 @@ export const LogEntryRow = ({
     setIsHovered(false);
   }, []);
 
-  const openFlyout = useCallback(() => openFlyoutWithItem(logEntry.gid), [
+  const openFlyout = useCallback(() => openFlyoutWithItem?.(logEntry.gid), [
     openFlyoutWithItem,
     logEntry.gid,
   ]);
@@ -195,7 +197,7 @@ interface LogEntryRowWrapperProps {
   scale: TextScale;
 }
 
-const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
+export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
   role: 'row',
 }))<LogEntryRowWrapperProps>`
   align-items: stretch;
