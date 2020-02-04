@@ -17,17 +17,11 @@
  * under the License.
  */
 
-import { tryRegisterSettingsComponent } from './component_registry';
-import { PageTitle } from './page_title';
-import { PageSubtitle } from './page_subtitle';
-import { PageFooter } from './page_footer';
+import { PluginInitializerContext } from 'kibana/public';
+import { AdvancedSettingsPlugin } from './plugin';
+export { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
+export { ComponentRegistry } from './component_registry';
 
-export const PAGE_TITLE_COMPONENT = 'advanced_settings_page_title';
-export const PAGE_SUBTITLE_COMPONENT = 'advanced_settings_page_subtitle';
-export const PAGE_FOOTER_COMPONENT = 'advanced_settings_page_footer';
-
-export function registerDefaultComponents() {
-  tryRegisterSettingsComponent(PAGE_TITLE_COMPONENT, PageTitle);
-  tryRegisterSettingsComponent(PAGE_SUBTITLE_COMPONENT, PageSubtitle);
-  tryRegisterSettingsComponent(PAGE_FOOTER_COMPONENT, PageFooter);
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new AdvancedSettingsPlugin();
 }
