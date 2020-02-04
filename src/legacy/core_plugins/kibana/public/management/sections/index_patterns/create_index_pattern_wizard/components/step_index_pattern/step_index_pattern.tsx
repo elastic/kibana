@@ -84,10 +84,14 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   constructor(props: StepIndexPatternProps) {
     super(props);
     const { indexPatternCreationType } = this.props;
+    /*
     this.setState({
       query: uiSettings.get('indexPattern:placeholder'),
       indexPatternName: indexPatternCreationType.getIndexPatternName(),
     });
+    */
+    this.state.query = uiSettings.get('indexPattern:placeholder');
+    this.state.indexPatternName = indexPatternCreationType.getIndexPatternName();
   }
 
   async UNSAFE_componentWillMount() {
