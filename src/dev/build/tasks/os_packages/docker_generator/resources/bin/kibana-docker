@@ -18,6 +18,11 @@ kibana_vars=(
     console.enabled
     console.proxyConfig
     console.proxyFilter
+    cpu.cgroup.path.override
+    cpuacct.cgroup.path.override
+    csp.rules
+    csp.strict
+    csp.warnLegacyBrowsers
     elasticsearch.customHeaders
     elasticsearch.hosts
     elasticsearch.logQueries
@@ -30,6 +35,7 @@ kibana_vars=(
     elasticsearch.sniffInterval
     elasticsearch.sniffOnConnectionFault
     elasticsearch.sniffOnStart
+    elasticsearch.ssl.alwaysPresentCertificate
     elasticsearch.ssl.certificate
     elasticsearch.ssl.certificateAuthorities
     elasticsearch.ssl.key
@@ -42,9 +48,13 @@ kibana_vars=(
     elasticsearch.startupTimeout
     elasticsearch.username
     i18n.locale
+    interpreter.enableInVisualize
+    kibana.autocompleteTerminateAfter
+    kibana.autocompleteTimeout
     kibana.defaultAppId
     kibana.index
     logging.dest
+    logging.json
     logging.quiet
     logging.rotate.enabled
     logging.rotate.everyBytes
@@ -55,18 +65,32 @@ kibana_vars=(
     logging.useUTC
     logging.verbose
     map.includeElasticMapsService
+    map.proxyElasticMapsServiceInMaps
+    map.regionmap
+    map.tilemap.options.attribution
+    map.tilemap.options.maxZoom
+    map.tilemap.options.minZoom
+    map.tilemap.options.subdomains
+    map.tilemap.url
+    newsfeed.enabled
     ops.interval
     path.data
     pid.file
     regionmap
     server.basePath
     server.customResponseHeaders
+    server.compression.enabled
+    server.compression.referrerWhitelist
+    server.cors
+    server.cors.origin
     server.defaultRoute
     server.host
+    server.keepAliveTimeout
     server.maxPayloadBytes
     server.name
     server.port
     server.rewriteBasePath
+    server.socketTimeout
     server.ssl.cert
     server.ssl.certificate
     server.ssl.certificateAuthorities
@@ -82,6 +106,7 @@ kibana_vars=(
     server.ssl.truststore.password
     server.ssl.redirectHttpFromPort
     server.ssl.supportedProtocols
+    server.xsrf.disableProtection
     server.xsrf.whitelist
     status.allowAnonymous
     status.v6ApiFormat
@@ -96,11 +121,13 @@ kibana_vars=(
     xpack.apm.serviceMapEnabled
     xpack.apm.ui.enabled
     xpack.apm.ui.maxTraceItems
+    xpack.apm.ui.transactionGroupBucketSize
     apm_oss.apmAgentConfigurationIndex
     apm_oss.indexPattern
     apm_oss.errorIndices
     apm_oss.onboardingIndices
     apm_oss.spanIndices
+    apm_oss.sourcemapIndices
     apm_oss.transactionIndices
     apm_oss.metricsIndices
     xpack.canvas.enabled
@@ -116,6 +143,8 @@ kibana_vars=(
     xpack.code.security.gitHostWhitelist
     xpack.code.security.gitProtocolWhitelist
     xpack.graph.enabled
+    xpack.graph.canEditDrillDownUrls
+    xpack.graph.savePolicy
     xpack.grokdebugger.enabled
     xpack.infra.enabled
     xpack.infra.query.partitionFactor
@@ -128,11 +157,14 @@ kibana_vars=(
     xpack.infra.sources.default.fields.timestamp
     xpack.infra.sources.default.logAlias
     xpack.infra.sources.default.metricAlias
+    xpack.license_management.enabled
     xpack.ml.enabled
+    xpack.monitoring.cluster_alerts.email_notifications.email_address
     xpack.monitoring.elasticsearch.password
     xpack.monitoring.elasticsearch.pingTimeout
     xpack.monitoring.elasticsearch.hosts
     xpack.monitoring.elasticsearch.username
+    xpack.monitoring.elasticsearch.logFetchCount
     xpack.monitoring.elasticsearch.ssl.certificateAuthorities
     xpack.monitoring.elasticsearch.ssl.verificationMode
     xpack.monitoring.enabled
@@ -166,6 +198,7 @@ kibana_vars=(
     xpack.reporting.csv.maxSizeBytes
     xpack.reporting.csv.scroll.duration
     xpack.reporting.csv.scroll.size
+    xpack.reporting.capture.maxAttempts
     xpack.reporting.enabled
     xpack.reporting.encryptionKey
     xpack.reporting.index
@@ -183,6 +216,8 @@ kibana_vars=(
     xpack.reporting.queue.pollIntervalErrorMultiplier
     xpack.reporting.queue.timeout
     xpack.reporting.roles.allow
+    xpack.rollup.enabled
+    xpack.security.audit.enabled
     xpack.searchprofiler.enabled
     xpack.security.authc.providers
     xpack.security.authc.oidc.realm
@@ -196,7 +231,10 @@ kibana_vars=(
     xpack.security.session.idleTimeout
     xpack.security.session.lifespan
     xpack.security.loginAssistanceMessage
+    telemetry.allowChangingOptInStatus
     telemetry.enabled
+    telemetry.optIn
+    telemetry.optInStatusUrl
     telemetry.sendUsageFrom
 )
 

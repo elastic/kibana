@@ -95,6 +95,7 @@ class FilterEditorUI extends Component<Props, State> {
                 defaultMessage="Edit filter"
               />
             </EuiFlexItem>
+            <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty size="xs" onClick={this.toggleCustomEditor}>
                 {this.state.isCustomEditorOpen ? (

@@ -89,6 +89,14 @@ module.exports = {
       },
     },
     {
+      files: [
+        'src/legacy/core_plugins/vis_default_editor/public/components/controls/**/*.{ts,tsx}',
+      ],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
       files: ['src/legacy/ui/public/vis/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -244,15 +252,15 @@ module.exports = {
               {
                 target: [
                   '(src|x-pack)/plugins/**/*',
-                  '!(src|x-pack)/plugins/*/server/**/*',
+                  '!(src|x-pack)/plugins/**/server/**/*',
 
                   'src/legacy/core_plugins/**/*',
-                  '!src/legacy/core_plugins/*/server/**/*',
-                  '!src/legacy/core_plugins/*/index.{js,ts,tsx}',
+                  '!src/legacy/core_plugins/**/server/**/*',
+                  '!src/legacy/core_plugins/**/index.{js,ts,tsx}',
 
                   'x-pack/legacy/plugins/**/*',
-                  '!x-pack/legacy/plugins/*/server/**/*',
-                  '!x-pack/legacy/plugins/*/index.{js,ts,tsx}',
+                  '!x-pack/legacy/plugins/**/server/**/*',
+                  '!x-pack/legacy/plugins/**/index.{js,ts,tsx}',
 
                   'examples/**/*',
                   '!examples/**/server/**/*',
@@ -635,6 +643,18 @@ module.exports = {
         // '@typescript-eslint/unbound-method': 'error',
       },
     },
+    // {
+    //   // will introduced after the other warns are fixed
+    //   // typescript and javascript for front end react performance
+    //   files: ['x-pack/legacy/plugins/siem/public/**/!(*.test).{js,ts,tsx}'],
+    //   plugins: ['react-perf'],
+    //   rules: {
+    //     // 'react-perf/jsx-no-new-object-as-prop': 'error',
+    //     // 'react-perf/jsx-no-new-array-as-prop': 'error',
+    //     // 'react-perf/jsx-no-new-function-as-prop': 'error',
+    //     // 'react/jsx-no-bind': 'error',
+    //   },
+    // },
     {
       // typescript and javascript for front and back end
       files: ['x-pack/legacy/plugins/siem/**/*.{js,ts,tsx}'],
@@ -739,8 +759,6 @@ module.exports = {
         // will introduced after the other warns are fixed
         // 'react/sort-comp': 'error',
         'react/void-dom-elements-no-children': 'error',
-        // will introduced after the other warns are fixed
-        // 'react/jsx-no-bind': 'error',
         'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',

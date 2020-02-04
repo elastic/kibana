@@ -23,7 +23,20 @@
             }
           },
           "ancestors": {
-            "type": "object"
+            "properties": {
+              "rule": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "depth": {
+                "type": "long"
+              }
+            }
           },
           "rule": {
             "properties": {
@@ -87,8 +100,38 @@
               "tags": {
                 "type": "keyword"
               },
-              "threats": {
-                "type": "object"
+              "threat": {
+                "properties": {
+                  "framework": {
+                    "type": "keyword"
+                  },
+                  "tactic": {
+                    "properties": {
+                      "id": {
+                        "type": "keyword"
+                      },
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "reference": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "technique": {
+                    "properties": {
+                      "id": {
+                        "type": "keyword"
+                      },
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "reference": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
               },
               "type": {
                 "type": "keyword"

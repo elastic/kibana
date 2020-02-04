@@ -25,7 +25,6 @@ import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { getPercentileValue } from './percentiles_get_value';
-import { PercentilesEditor } from '../../vis/editors/default/controls/percentiles';
 
 // @ts-ignore
 import { ordinalSuffix } from './lib/ordinal_suffix';
@@ -63,7 +62,6 @@ export const percentilesMetricAgg = new MetricAggType<IPercentileAggConfig>({
     },
     {
       name: 'percents',
-      editorComponent: PercentilesEditor,
       default: [1, 5, 25, 50, 75, 95, 99],
     },
     {

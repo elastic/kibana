@@ -509,7 +509,7 @@ export type ConfigDeprecation = (config: Record<string, any>, fromPath: string, 
 // @public
 export interface ConfigDeprecationFactory {
     rename(oldKey: string, newKey: string): ConfigDeprecation;
-    renameFromRoot(oldKey: string, newKey: string): ConfigDeprecation;
+    renameFromRoot(oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation;
     unused(unusedKey: string): ConfigDeprecation;
     unusedFromRoot(unusedKey: string): ConfigDeprecation;
 }
@@ -706,9 +706,9 @@ export interface FakeRequest {
 export type GetAuthHeaders = (request: KibanaRequest | LegacyRequest) => AuthHeaders | undefined;
 
 // @public
-export type GetAuthState = (request: KibanaRequest | LegacyRequest) => {
+export type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest) => {
     status: AuthStatus;
-    state: unknown;
+    state: T;
 };
 
 // @public
@@ -736,12 +736,26 @@ export interface HttpResponseOptions {
 // @public
 export type HttpResponsePayload = undefined | string | Record<string, any> | Buffer | Stream;
 
+// @public (undocumented)
+export interface HttpServerInfo {
+    host: string;
+    name: string;
+    port: number;
+    protocol: 'http' | 'https' | 'socket';
+}
+
 // @public
 export interface HttpServiceSetup {
+    // (undocumented)
+    auth: {
+        get: GetAuthState;
+        isAuthenticated: IsAuthenticated;
+    };
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     createRouter: () => IRouter;
     csp: ICspConfig;
+    getServerInfo: () => HttpServerInfo;
     isTlsEnabled: boolean;
     registerAuth: (handler: AuthenticationHandler) => void;
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
@@ -883,6 +897,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     // @internal
     static from<P, Q, B>(req: Request, routeSchemas?: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P, Q, B, any>;
     readonly headers: Headers;
+    readonly isSystemRequest: boolean;
     // (undocumented)
     readonly params: Params;
     // (undocumented)

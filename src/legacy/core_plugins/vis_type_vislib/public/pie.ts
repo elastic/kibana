@@ -24,7 +24,7 @@ import { PieOptions } from './components/options';
 import { getPositions, Positions } from './utils/collections';
 import { createVislibVisController } from './vis_controller';
 import { CommonVislibParams } from './types';
-import { KbnVislibVisTypesDependencies } from './plugin';
+import { VisTypeVislibDependencies } from './plugin';
 
 export interface PieVisParams extends CommonVislibParams {
   type: 'pie';
@@ -38,7 +38,7 @@ export interface PieVisParams extends CommonVislibParams {
   };
 }
 
-export const createPieVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
+export const createPieVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'pie',
   title: i18n.translate('visTypeVislib.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',

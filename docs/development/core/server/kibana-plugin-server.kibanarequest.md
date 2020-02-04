@@ -25,6 +25,7 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 |  [body](./kibana-plugin-server.kibanarequest.body.md) |  | <code>Body</code> |  |
 |  [events](./kibana-plugin-server.kibanarequest.events.md) |  | <code>KibanaRequestEvents</code> | Request events [KibanaRequestEvents](./kibana-plugin-server.kibanarequestevents.md) |
 |  [headers](./kibana-plugin-server.kibanarequest.headers.md) |  | <code>Headers</code> | Readonly copy of incoming request headers. |
+|  [isSystemRequest](./kibana-plugin-server.kibanarequest.issystemrequest.md) |  | <code>boolean</code> | Whether or not the request is a "system request" rather than an application-level request. Can be set on the client using the <code>HttpFetchOptions#asSystemRequest</code> option. |
 |  [params](./kibana-plugin-server.kibanarequest.params.md) |  | <code>Params</code> |  |
 |  [query](./kibana-plugin-server.kibanarequest.query.md) |  | <code>Query</code> |  |
 |  [route](./kibana-plugin-server.kibanarequest.route.md) |  | <code>RecursiveReadonly&lt;KibanaRequestRoute&lt;Method&gt;&gt;</code> | matched route details |

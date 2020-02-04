@@ -18,6 +18,8 @@
  */
 import { IContextProvider, IContextContainer } from '../context';
 import { ICspConfig } from '../csp';
+import { GetAuthState, IsAuthenticated } from './auth_state_storage';
+import { GetAuthHeaders } from './auth_headers_storage';
 import { RequestHandler, IRouter } from './router';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
@@ -183,6 +185,19 @@ export interface HttpServiceSetup {
    */
   basePath: IBasePath;
 
+  auth: {
+    /**
+     * Gets authentication state for a request. Returned by `auth` interceptor.
+     * {@link GetAuthState}
+     */
+    get: GetAuthState;
+    /**
+     * Returns authentication status for a request.
+     * {@link IsAuthenticated}
+     */
+    isAuthenticated: IsAuthenticated;
+  };
+
   /**
    * The CSP config used for Kibana.
    */
@@ -237,6 +252,11 @@ export interface HttpServiceSetup {
     contextName: T,
     provider: RequestHandlerContextProvider<T>
   ) => RequestHandlerContextContainer;
+
+  /**
+   * Provides common {@link HttpServerInfo | information} about the running http server.
+   */
+  getServerInfo: () => HttpServerInfo;
 }
 
 /** @internal */
@@ -245,6 +265,7 @@ export interface InternalHttpServiceSetup
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
   createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+  getAuthHeaders: GetAuthHeaders;
   registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
@@ -256,4 +277,16 @@ export interface InternalHttpServiceSetup
 export interface HttpServiceStart {
   /** Indicates if http server is listening on a given port */
   isListening: (port: number) => boolean;
+}
+
+/** @public */
+export interface HttpServerInfo {
+  /** The name of the Kibana server */
+  name: string;
+  /** The hostname of the server */
+  host: string;
+  /** The port the server is listening on */
+  port: number;
+  /** The protocol used by the server */
+  protocol: 'http' | 'https' | 'socket';
 }

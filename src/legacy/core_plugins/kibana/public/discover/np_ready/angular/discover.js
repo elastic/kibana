@@ -25,9 +25,10 @@ import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import '../components/field_chooser/field_chooser';
 
+import { RequestAdapter } from '../../../../../../../plugins/inspector/public';
 // doc table
 import './doc_table';
-import { getSort } from './doc_table/lib/get_sort';
+import { getSortArray } from './doc_table/lib/get_sort';
 import { getSortForSearchSource } from './doc_table/lib/get_sort_for_search_source';
 import * as columnActions from './doc_table/actions/columns';
 
@@ -45,20 +46,18 @@ import {
   getServices,
   hasSearchStategyForIndexPattern,
   intervalOptions,
-  isDefaultTypeIndexPattern,
   migrateLegacyQuery,
-  RequestAdapter,
   showSaveModal,
   unhashUrl,
   stateMonitorFactory,
   subscribeWithScope,
   tabifyAggResponse,
-  Vis,
   SavedObjectSaveModal,
   getAngularModule,
   ensureDefaultIndexPattern,
   registerTimefilterWithGlobalStateFactory,
 } from '../../kibana_services';
+import { Vis } from '../../../../../visualizations/public';
 
 const {
   core,
@@ -73,7 +72,10 @@ const {
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
-import { generateFilters } from '../../../../../../../plugins/data/public';
+import {
+  generateFilters,
+  indexPatterns as indexPatternsUtils,
+} from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { FilterStateManager } from '../../../../../data/public';
 
@@ -400,7 +402,8 @@ function discoverController(
 
   // searchSource which applies time range
   const timeRangeSearchSource = savedSearch.searchSource.create();
-  if (isDefaultTypeIndexPattern($scope.indexPattern)) {
+
+  if (indexPatternsUtils.isDefault($scope.indexPattern)) {
     timeRangeSearchSource.setField('filter', () => {
       return timefilter.createFilter($scope.indexPattern);
     });
@@ -522,7 +525,7 @@ function discoverController(
           language:
             localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
         },
-      sort: getSort.array(savedSearch.sort, $scope.indexPattern),
+      sort: getSortArray(savedSearch.sort, $scope.indexPattern),
       columns:
         savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
@@ -534,7 +537,7 @@ function discoverController(
   }
 
   $state.index = $scope.indexPattern.id;
-  $state.sort = getSort.array($state.sort, $scope.indexPattern);
+  $state.sort = getSortArray($state.sort, $scope.indexPattern);
 
   $scope.getBucketIntervalToolTipText = () => {
     return i18n.translate('kbn.discover.bucketIntervalTooltip', {
@@ -561,7 +564,8 @@ function discoverController(
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
-    timefield: isDefaultTypeIndexPattern($scope.indexPattern) && $scope.indexPattern.timeFieldName,
+    timefield:
+      indexPatternsUtils.isDefault($scope.indexPattern) && $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
   };
@@ -615,10 +619,7 @@ function discoverController(
         if (!sort) return;
 
         // get the current sort from searchSource as array of arrays
-        const currentSort = getSort.array(
-          $scope.searchSource.getField('sort'),
-          $scope.indexPattern
-        );
+        const currentSort = getSortArray($scope.searchSource.getField('sort'), $scope.indexPattern);
 
         // if the searchSource doesn't know, tell it so
         if (!angular.equals(sort, currentSort)) $scope.fetch();
@@ -1162,7 +1163,7 @@ function discoverController(
   // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
   // supported.
   $scope.isUnsupportedIndexPattern =
-    !isDefaultTypeIndexPattern($route.current.locals.savedObjects.ip.loaded) &&
+    !indexPatternsUtils.isDefault($route.current.locals.savedObjects.ip.loaded) &&
     !hasSearchStategyForIndexPattern($route.current.locals.savedObjects.ip.loaded);
 
   if ($scope.isUnsupportedIndexPattern) {

@@ -31,8 +31,6 @@ import { EventsProvider } from 'ui/events';
 import { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 import { PromiseServiceCreator } from 'ui/promises/promises';
-// @ts-ignore
-import { createEsService } from 'ui/es';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
 import { PrivateProvider } from 'ui/private/private';
@@ -44,21 +42,9 @@ import { registerListenEventListener } from 'ui/directives/listen/listen';
 // @ts-ignore
 import { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
 // @ts-ignore
-import { FieldNameDirectiveProvider } from 'ui/directives/field_name';
-// @ts-ignore
-import { CollapsibleSidebarProvider } from 'ui/collapsible_sidebar/collapsible_sidebar';
-// @ts-ignore
-import { CssTruncateProvide } from 'ui/directives/css_truncate';
-// @ts-ignore
-import { FixedScrollProvider } from 'ui/fixed_scroll';
-// @ts-ignore
-import { DebounceProviderTimeout } from 'ui/directives/debounce/debounce';
-// @ts-ignore
 import { AppStateProvider } from 'ui/state_management/app_state';
 // @ts-ignore
 import { GlobalStateProvider } from 'ui/state_management/global_state';
-// @ts-ignore
-import { createRenderCompleteDirective } from 'ui/render_complete/directive';
 // @ts-ignore
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 // @ts-ignore
@@ -66,7 +52,7 @@ import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 // @ts-ignore
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 import { configureAppAngularModule } from 'ui/legacy_compat';
-import { IndexPatterns } from '../../../../../plugins/data/public';
+import { IndexPatterns, DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { createDocTableDirective } from './np_ready/angular/doc_table/doc_table';
@@ -83,18 +69,26 @@ import { createFieldSearchDirective } from './np_ready/components/field_chooser/
 import { createIndexPatternSelectDirective } from './np_ready/components/field_chooser/discover_index_pattern_directive';
 import { createStringFieldProgressBarDirective } from './np_ready/components/field_chooser/string_progress_bar';
 // @ts-ignore
+import { FieldNameDirectiveProvider } from './np_ready/angular/directives/field_name';
+// @ts-ignore
 import { createFieldChooserDirective } from './np_ready/components/field_chooser/field_chooser';
-
 // @ts-ignore
 import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
+import { CollapsibleSidebarProvider } from './np_ready/angular/directives/collapsible_sidebar/collapsible_sidebar';
 import { DiscoverStartPlugins } from './plugin';
+import { createCssTruncateDirective } from './np_ready/angular/directives/css_truncate';
+// @ts-ignore
+import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll';
+// @ts-ignore
+import { DebounceProviderTimeout } from './np_ready/angular/directives/debounce/debounce';
+import { createRenderCompleteDirective } from './np_ready/angular/directives/render_complete';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
  * needs to render, so in the end the current 'kibana' angular module is no longer necessary
  */
 export function getInnerAngularModule(name: string, core: CoreStart, deps: DiscoverStartPlugins) {
-  const module = initializeInnerAngularModule(name, core, deps.navigation);
+  const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data);
   configureAppAngularModule(module, core as LegacyCoreStart, true);
   return module;
 }
@@ -107,7 +101,7 @@ export function getInnerAngularModuleEmbeddable(
   core: CoreStart,
   deps: DiscoverStartPlugins
 ) {
-  const module = initializeInnerAngularModule(name, core, deps.navigation, true);
+  const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data, true);
   configureAppAngularModule(module, core as LegacyCoreStart, true);
   return module;
 }
@@ -118,6 +112,7 @@ export function initializeInnerAngularModule(
   name = 'app/discover',
   core: CoreStart,
   navigation: NavigationStart,
+  data: DataPublicPluginStart,
   embeddable = false
 ) {
   if (!initialized) {
@@ -131,7 +126,7 @@ export function initializeInnerAngularModule(
     createLocalGlobalStateModule();
     createLocalAppStateModule();
     createLocalStorageModule();
-    createElasticSearchModule();
+    createElasticSearchModule(data);
     createIndexPatternsModule();
     createPagerFactoryModule();
     createDocTableModule();
@@ -163,7 +158,6 @@ export function initializeInnerAngularModule(
       'ngRoute',
       'react',
       'ui.bootstrap',
-      'elasticsearch',
       'discoverConfig',
       'discoverI18n',
       'discoverPrivate',
@@ -183,7 +177,7 @@ export function initializeInnerAngularModule(
     .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
     .directive('fieldName', FieldNameDirectiveProvider)
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
-    .directive('cssTruncate', CssTruncateProvide)
+    .directive('cssTruncate', createCssTruncateDirective)
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverFieldSearch', createFieldSearchDirective)
@@ -298,11 +292,13 @@ const createLocalStorageService = function(type: string) {
   };
 };
 
-function createElasticSearchModule() {
+function createElasticSearchModule(data: DataPublicPluginStart) {
   angular
-    .module('discoverEs', ['elasticsearch', 'discoverConfig'])
+    .module('discoverEs', ['discoverConfig'])
     // Elasticsearch client used for requesting data.  Connects to the /elasticsearch proxy
-    .service('es', createEsService);
+    .service('es', () => {
+      return data.search.__LEGACY.esClient;
+    });
 }
 
 function createIndexPatternsModule() {
