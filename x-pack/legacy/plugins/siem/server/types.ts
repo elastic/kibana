@@ -15,7 +15,6 @@ export interface ServerFacade {
     actions: any; // We have to do this at the moment because the types are not compatible
     alerting?: Legacy.Server['plugins']['alerting'];
     elasticsearch: Legacy.Server['plugins']['elasticsearch'];
-    spaces: Legacy.Server['plugins']['spaces'];
     savedObjects: Legacy.Server['savedObjects']['SavedObjectsClient'];
   };
   route: Legacy.Server['route'];

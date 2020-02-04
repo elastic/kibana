@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext, Logger } from '../../../../../src/core/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../../../plugins/security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../../../plugins/features/server';
+import { SpacesPluginSetup as SpacesSetup } from '../../../../plugins/spaces/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { initRoutes } from './routes';
@@ -26,6 +27,7 @@ export { CoreSetup, Logger, PluginInitializerContext };
 export interface SetupPlugins {
   features: FeaturesSetup;
   security: SecuritySetup;
+  spaces: SpacesSetup;
 }
 
 export type SetupServices = CoreSetup & SetupPlugins;

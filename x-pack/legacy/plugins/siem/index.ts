@@ -162,7 +162,6 @@ export const siem = (kibana: any) => {
           alerting: plugins.alerting,
           actions: newPlatform.start.plugins.actions,
           elasticsearch: plugins.elasticsearch,
-          spaces: plugins.spaces,
           savedObjects: server.savedObjects.SavedObjectsClient,
         },
         route: route.bind(server),

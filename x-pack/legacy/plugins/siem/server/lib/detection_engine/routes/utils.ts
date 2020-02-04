@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
 import { ServerFacade, RequestFacade } from '../../../types';
+import { LegacySetupServices } from '../../../plugin';
 
 export const transformError = (err: Error & { statusCode?: number }) => {
   if (Boom.isBoom(err)) {
@@ -157,12 +158,9 @@ export const transformBulkError = (
   }
 };
 
-export const getIndex = (
-  request: RequestFacade | Omit<RequestFacade, 'query'>,
-  server: ServerFacade
-): string => {
-  const spaceId = server.plugins.spaces.getSpaceId(request);
-  const signalsIndex = server.config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
+export const getIndex = (request: RequestFacade, services: LegacySetupServices): string => {
+  const spaceId = services.spaces.spacesService.getSpaceId(request);
+  const signalsIndex = services.config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
   return `${signalsIndex}-${spaceId}`;
 };
 
