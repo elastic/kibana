@@ -190,7 +190,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('nodevTools privileges', () => {
+    describe('no devTools privileges', () => {
       before(async () => {
         await security.role.create('no_devTools_privileges_role', {
           kibana: [

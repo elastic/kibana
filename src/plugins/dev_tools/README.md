@@ -1,6 +1,6 @@
 # Dev tools plugin
 
-The ui/registry/devTools is removed in favor of the `devTools` plugin which exposes a register method in the setup contract.
+The ui/registry/dev_tools is removed in favor of the `devTools` plugin which exposes a register method in the setup contract.
 Registering app works mostly the same as registering apps in core.application.register.
 Routing will be handled by the id of the dev tool - your dev tool will be mounted when the URL matches `/app/kibana#/devTools/<YOUR ID>`.
 This API doesn't support angular, for registering angular dev tools, bootstrap a local module on mount into the given HTML element.
