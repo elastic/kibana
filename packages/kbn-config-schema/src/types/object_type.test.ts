@@ -30,9 +30,9 @@ test('returns value by default', () => {
   expect(type.validate(value)).toEqual({ name: 'test' });
 });
 
-test('fails if undefined', () => {
+test('returns empty object if undefined', () => {
   const type = schema.object({});
-  expect(() => type.validate(undefined)).toThrow();
+  expect(type.validate(undefined)).toEqual({});
 });
 
 test('fails if missing required value', () => {
@@ -86,7 +86,11 @@ test('undefined object within object', () => {
     }),
   });
 
-  expect(() => type.validate({})).toThrow();
+  expect(type.validate({})).toEqual({
+    foo: {
+      bar: 'hello world',
+    },
+  });
 
   expect(type.validate({ foo: {} })).toEqual({
     foo: {
@@ -261,4 +265,21 @@ test('does not allow unknown keys when allowUnknowns = false', () => {
       bar: 'baz',
     })
   ).toThrowErrorMatchingSnapshot();
+});
+
+// TODO: way more tests here
+test('applyDefaults', () => {
+  const type = schema.object({ foo: schema.string({ defaultValue: 'bar' }) });
+
+  // @ts-ignore
+  expect(type.validate()).toEqual({ foo: 'bar' });
+  expect(type.validate({})).toEqual({ foo: 'bar' });
+});
+
+test('ap2', () => {
+  const type = schema.object({ foo: schema.string() });
+
+  // @ts-ignore
+  expect(() => type.validate()).toThrow();
+  expect(() => type.validate({})).toThrow();
 });
