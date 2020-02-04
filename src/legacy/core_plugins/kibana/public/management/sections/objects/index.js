@@ -23,10 +23,8 @@ import './_view';
 import './_objects';
 import 'ace';
 import { uiModules } from 'ui/modules';
-import {
-  FeatureCatalogueRegistryProvider,
-  FeatureCatalogueCategory,
-} from 'ui/registry/feature_catalogue';
+import { npSetup } from 'ui/new_platform';
+import { FeatureCatalogueCategory } from '../../../../../../../plugins/home/public';
 
 // add the module deps to this module
 uiModules.get('apps/management');
@@ -39,19 +37,17 @@ management.getSection('kibana').register('objects', {
   url: '#/management/kibana/objects',
 });
 
-FeatureCatalogueRegistryProvider.register(() => {
-  return {
-    id: 'saved_objects',
-    title: i18n.translate('kbn.management.objects.savedObjectsTitle', {
-      defaultMessage: 'Saved Objects',
-    }),
-    description: i18n.translate('kbn.management.objects.savedObjectsDescription', {
-      defaultMessage:
-        'Import, export, and manage your saved searches, visualizations, and dashboards.',
-    }),
-    icon: 'savedObjectsApp',
-    path: '/app/kibana#/management/kibana/objects',
-    showOnHomePage: true,
-    category: FeatureCatalogueCategory.ADMIN,
-  };
+npSetup.plugins.home.register({
+  id: 'saved_objects',
+  title: i18n.translate('kbn.management.objects.savedObjectsTitle', {
+    defaultMessage: 'Saved Objects',
+  }),
+  description: i18n.translate('kbn.management.objects.savedObjectsDescription', {
+    defaultMessage:
+      'Import, export, and manage your saved searches, visualizations, and dashboards.',
+  }),
+  icon: 'savedObjectsApp',
+  path: '/app/kibana#/management/kibana/objects',
+  showOnHomePage: true,
+  category: FeatureCatalogueCategory.ADMIN,
 });

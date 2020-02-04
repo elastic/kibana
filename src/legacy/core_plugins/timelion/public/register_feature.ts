@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
+import { FeatureCatalogueCategory } from '../../../../plugins/home/public';
 
 export const registerFeature = () => {
   return {
