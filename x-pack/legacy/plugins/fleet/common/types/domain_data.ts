@@ -175,28 +175,6 @@ export type PolicyUpdatedEvent =
       policyId: string;
     };
 
-export const RuntimeEnrollmentRuleData = t.partial(
-  {
-    ip_ranges: t.array(t.string),
-    window_duration: t.interface(
-      {
-        from: t.string,
-        to: t.string,
-      },
-      'WindowDuration'
-    ),
-    types: t.array(RuntimeAgentType),
-  },
-  'EnrollmentRuleData'
-);
-
-export type EnrollmentRuleData = t.TypeOf<typeof RuntimeEnrollmentRuleData>;
-
-export type EnrollmentRule = EnrollmentRuleData & {
-  id: string;
-  created_at: string;
-  updated_at?: string;
-};
 export interface EnrollmentApiKey {
   id: string;
   api_key_id: string;
@@ -205,7 +183,6 @@ export interface EnrollmentApiKey {
   created_at: string;
   expire_at?: string;
   active: boolean;
-  enrollment_rules: EnrollmentRule[];
   policy_id?: string;
   [k: string]: any; // allow to use it as saved object attributes type
 }

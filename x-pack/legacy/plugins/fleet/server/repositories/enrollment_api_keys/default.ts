@@ -84,7 +84,6 @@ export class EnrollmentApiKeysRepository implements EnrollmentApiKeysRepositoryT
       policy_id: policyId,
       expire_at,
       active,
-      enrollment_rules: [],
       name,
     });
 

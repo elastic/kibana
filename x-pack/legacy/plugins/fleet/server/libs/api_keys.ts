@@ -15,11 +15,7 @@ import {
 } from '../repositories/enrollment_api_keys/types';
 import { FrameworkUser, internalAuthData } from '../adapters/framework/adapter_types';
 import { DEFAULT_POLICY_ID } from '../../common/constants';
-import {
-  EnrollmentApiKey,
-  EnrollmentRuleData,
-  EnrollmentRule,
-} from '../../common/types/domain_data';
+import { EnrollmentApiKey } from '../../common/types/domain_data';
 import { FleetServerLib } from './types';
 import { FleetPluginsStart } from '../shim';
 
@@ -233,90 +229,6 @@ export class ApiKeyLib {
   private _getAgentOutputApiKeyName(outputId: string, agentId: string): string {
     return `${agentId}:${outputId}`;
   }
-
-  public async addEnrollmentRule(
-    user: FrameworkUser,
-    enrollmentApiKeyId: string,
-    ruleData: EnrollmentRuleData
-  ) {
-    const enrollmentApiKey = await this.enrollmentApiKeysRepository.getById(
-      user,
-      enrollmentApiKeyId
-    );
-    if (!enrollmentApiKey) {
-      throw Boom.notFound('Enrollment api key not found.');
-    }
-
-    const rule = {
-      ...ruleData,
-      id: uuid(),
-      created_at: new Date().toISOString(),
-    };
-
-    await this.enrollmentApiKeysRepository.update(user, enrollmentApiKey.id, {
-      enrollment_rules: enrollmentApiKey.enrollment_rules.concat([rule]),
-    });
-
-    return rule;
-  }
-
-  public async updateEnrollmentRuleForPolicy(
-    user: FrameworkUser,
-    enrollmentApiKeyId: string,
-    ruleId: string,
-    ruleData: EnrollmentRuleData
-  ): Promise<EnrollmentRule> {
-    const enrollmentApiKey = await this._getEnrollemntApiKeyByIdOrThrow(user, enrollmentApiKeyId);
-
-    const ruleToUpdate = enrollmentApiKey.enrollment_rules.find(rule => rule.id === ruleId);
-    if (!ruleToUpdate) {
-      throw Boom.notFound(`Rule not found: ${ruleId}`);
-    }
-    const ruleIndex = enrollmentApiKey.enrollment_rules.indexOf(ruleToUpdate);
-
-    const rule = {
-      ...ruleToUpdate,
-      ...ruleData,
-      updated_at: new Date().toISOString(),
-    };
-
-    await this.enrollmentApiKeysRepository.update(user, enrollmentApiKey.id, {
-      enrollment_rules: [
-        ...enrollmentApiKey.enrollment_rules.slice(0, ruleIndex),
-        rule,
-        ...enrollmentApiKey.enrollment_rules.slice(ruleIndex + 1),
-      ],
-    });
-
-    return rule;
-  }
-
-  public async deleteEnrollmentRule(
-    user: FrameworkUser,
-    enrollmentApiKeyId: string,
-    ruleId: string
-  ) {
-    const enrollmentApiKey = await this._getEnrollemntApiKeyByIdOrThrow(user, enrollmentApiKeyId);
-    const ruleIndex = enrollmentApiKey.enrollment_rules.findIndex(rule => rule.id === ruleId);
-    if (ruleIndex < 0) {
-      throw Boom.notFound(`Rule not found: ${ruleId}`);
-    }
-
-    await this.enrollmentApiKeysRepository.update(user, enrollmentApiKey.id, {
-      enrollment_rules: [
-        ...enrollmentApiKey.enrollment_rules.slice(0, ruleIndex),
-        ...enrollmentApiKey.enrollment_rules.slice(ruleIndex + 1),
-      ],
-    });
-  }
-
-  public async deleteAllEnrollmentRules(user: FrameworkUser, enrollmentApiKeyId: string) {
-    const enrollmentApiKey = await this._getEnrollemntApiKeyByIdOrThrow(user, enrollmentApiKeyId);
-    await this.enrollmentApiKeysRepository.update(user, enrollmentApiKey.id, {
-      enrollment_rules: [],
-    });
-  }
-
   private async _invalidateAPIKey(id: string) {
     const adminUser = await this.pluginsStart.ingest.outputs.getAdminUser();
     const request: FakeRequest = {
@@ -358,13 +270,5 @@ export class ApiKeyLib {
     if (!res) {
       throw new Error('ApiKey is not valid: impossible to authicate user');
     }
-  }
-
-  private async _getEnrollemntApiKeyByIdOrThrow(user: FrameworkUser, id: string) {
-    const apiKey = await this.enrollmentApiKeysRepository.getById(user, id);
-    if (!apiKey) {
-      throw Boom.notFound(`No enrollment api key found`);
-    }
-    return apiKey;
   }
 }

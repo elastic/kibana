@@ -12,11 +12,6 @@ import { createCheckinAgentsRoute } from './agents/checkin';
 import { FleetServerLib } from '../libs/types';
 import { HapiFrameworkAdapter } from '../adapters/framework/hapi_framework_adapter';
 import { createAgentsAddActionRoute } from './agents/actions';
-import {
-  createDeleteEnrollmentRuleRoute,
-  createGetEnrollmentRulesRoute,
-  createPostEnrollmentRulesRoute,
-} from './enrollment_api_keys/rules';
 import { createGETArtifactsRoute } from './artifacts';
 import { createGETAgentEventsRoute } from './agents/events';
 import { createGETInstallScript } from './install';
@@ -61,9 +56,4 @@ function createEnrollmentApiKeysRoutes(adapter: HapiFrameworkAdapter, libs: Flee
   adapter.registerRoute(createPOSTEnrollmentApiKeysRoute(libs));
   adapter.registerRoute(createDELETEEnrollmentApiKeyRoute(libs));
   adapter.registerRoute(createGETEnrollmentApiKeyRoute(libs));
-
-  // enrollment rules
-  adapter.registerRoute(createDeleteEnrollmentRuleRoute(libs));
-  adapter.registerRoute(createGetEnrollmentRulesRoute(libs));
-  adapter.registerRoute(createPostEnrollmentRulesRoute(libs));
 }
