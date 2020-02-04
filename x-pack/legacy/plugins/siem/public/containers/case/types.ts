@@ -13,7 +13,7 @@ interface FormData {
 
 export interface NewCase extends FormData {
   description: string;
-  tags: string[] | [];
+  tags: string[];
   title: string;
   case_type: string;
 }
@@ -28,7 +28,7 @@ interface Case {
   created_by: ElasticUser;
   description: string;
   state: string;
-  tags: string[] | [];
+  tags: string[];
   title: string;
   updated_at: number;
 }
@@ -53,7 +53,7 @@ export interface CaseResult {
   created_by: ElasticUser;
   description: string;
   state: string;
-  tags: string[] | [];
+  tags: string[];
   title: string;
   updated_at: number;
 }

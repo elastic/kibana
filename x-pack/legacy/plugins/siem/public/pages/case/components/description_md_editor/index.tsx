@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem, EuiPanel, EuiTabbedContent, EuiTextArea } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiTabbedContent } from '@elastic/eui';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
@@ -30,12 +30,6 @@ const MarkdownContainer = styled(EuiPanel)<{ height: number }>`
 `;
 
 MarkdownContainer.displayName = 'MarkdownContainer';
-
-const TextArea = styled(EuiTextArea)<{ height: number }>`
-  min-height: ${({ height }) => `${height}px`};
-  width: 100%;
-`;
-TextArea.displayName = 'TextArea';
 
 /** An input for entering a new case description  */
 export const DescriptionMarkdown = React.memo<{
