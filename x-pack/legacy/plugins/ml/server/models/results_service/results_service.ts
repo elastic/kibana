@@ -6,7 +6,8 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-
+import { RequestHandlerContext } from 'kibana/server';
+// @ts-ignore
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
@@ -17,7 +18,9 @@ import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
 
 const DEFAULT_MAX_EXAMPLES = 500;
 
-export function resultsServiceProvider(callWithRequest) {
+export function resultsServiceProvider(client: RequestHandlerContext | (() => any)) {
+  const callAsCurrentUser =
+    typeof client === 'object' ? client.ml!.mlClient.callAsCurrentUser : client;
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
   // Return an Object with properties 'anomalies' and 'interval' (interval used to aggregate anomalies,
   // one of day, hour or second. Note 'auto' can be provided as the aggregationInterval in the request,
@@ -25,21 +28,21 @@ export function resultsServiceProvider(callWithRequest) {
   // last anomalies),  plus an examplesByJobId property if any of the
   // anomalies are categorization anomalies in mlcategory.
   async function getAnomaliesTableData(
-    jobIds,
-    criteriaFields,
-    influencers,
-    aggregationInterval,
-    threshold,
-    earliestMs,
-    latestMs,
-    dateFormatTz,
-    maxRecords = ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
-    maxExamples = DEFAULT_MAX_EXAMPLES,
-    influencersFilterQuery
+    jobIds: string[],
+    criteriaFields: any[],
+    influencers: any[],
+    aggregationInterval: any,
+    threshold: any,
+    earliestMs: number,
+    latestMs: number,
+    dateFormatTz: any,
+    maxRecords: number = ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
+    maxExamples: number = DEFAULT_MAX_EXAMPLES,
+    influencersFilterQuery: any
   ) {
     // Build the query to return the matching anomaly record results.
     // Add criteria for the time range, record score, plus any specified job IDs.
-    const boolCriteria = [
+    const boolCriteria: any = [
       {
         range: {
           timestamp: {
@@ -120,7 +123,7 @@ export function resultsServiceProvider(callWithRequest) {
       });
     }
 
-    const resp = await callWithRequest('search', {
+    const resp: any = await callAsCurrentUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       rest_total_hits_as_int: true,
       size: maxRecords,
@@ -146,10 +149,10 @@ export function resultsServiceProvider(callWithRequest) {
       },
     });
 
-    const tableData = { anomalies: [], interval: 'second' };
+    const tableData: any = { anomalies: [], interval: 'second' };
     if (resp.hits.total !== 0) {
-      let records = [];
-      resp.hits.hits.forEach(hit => {
+      let records: any = [];
+      resp.hits.hits.forEach((hit: any) => {
         records.push(hit._source);
       });
 
@@ -168,14 +171,14 @@ export function resultsServiceProvider(callWithRequest) {
       tableData.anomalies = buildAnomalyTableItems(records, tableData.interval, dateFormatTz);
 
       // Load examples for any categorization anomalies.
-      const categoryAnomalies = tableData.anomalies.filter(
-        item => item.entityName === 'mlcategory'
+      const categoryAnomalies: any = tableData.anomalies.filter(
+        (item: any) => item.entityName === 'mlcategory'
       );
       if (categoryAnomalies.length > 0) {
         tableData.examplesByJobId = {};
 
-        const categoryIdsByJobId = {};
-        categoryAnomalies.forEach(anomaly => {
+        const categoryIdsByJobId: any = {};
+        categoryAnomalies.forEach((anomaly: any) => {
           if (!_.has(categoryIdsByJobId, anomaly.jobId)) {
             categoryIdsByJobId[anomaly.jobId] = [];
           }
@@ -202,10 +205,10 @@ export function resultsServiceProvider(callWithRequest) {
   }
 
   // Returns the maximum anomaly_score for result_type:bucket over jobIds for the interval passed in
-  async function getMaxAnomalyScore(jobIds = [], earliestMs, latestMs) {
+  async function getMaxAnomalyScore(jobIds: string[] = [], earliestMs: number, latestMs: number) {
     // Build the criteria to use in the bool filter part of the request.
     // Adds criteria for the time range plus any specified job IDs.
-    const boolCriteria = [
+    const boolCriteria: any = [
       {
         range: {
           timestamp: {
@@ -265,7 +268,7 @@ export function resultsServiceProvider(callWithRequest) {
       },
     };
 
-    const resp = await callWithRequest('search', query);
+    const resp = await callAsCurrentUser('search', query);
     const maxScore = _.get(resp, ['aggregations', 'max_score', 'value'], null);
 
     return { maxScore };
@@ -275,7 +278,7 @@ export function resultsServiceProvider(callWithRequest) {
   // Returns data over all jobs unless an optional list of job IDs of interest is supplied.
   // Returned response consists of latest bucket timestamps (ms since Jan 1 1970) against job ID
   async function getLatestBucketTimestampByJob(jobIds = []) {
-    const filter = [
+    const filter: any = [
       {
         term: {
           result_type: 'bucket',
@@ -303,7 +306,7 @@ export function resultsServiceProvider(callWithRequest) {
     // Size of job terms agg, consistent with maximum number of jobs supported by Java endpoints.
     const maxJobs = 10000;
 
-    const resp = await callWithRequest('search', {
+    const resp = await callAsCurrentUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
@@ -331,8 +334,9 @@ export function resultsServiceProvider(callWithRequest) {
     });
 
     const bucketsByJobId = _.get(resp, ['aggregations', 'byJobId', 'buckets'], []);
-    const timestampByJobId = {};
+    const timestampByJobId: any = {};
     bucketsByJobId.forEach(bucket => {
+      // @ts-ignore
       timestampByJobId[bucket.key] = bucket.maxTimestamp.value;
     });
 
@@ -342,8 +346,8 @@ export function resultsServiceProvider(callWithRequest) {
   // Obtains the categorization examples for the categories with the specified IDs
   // from the given index and job ID.
   // Returned response consists of a list of examples against category ID.
-  async function getCategoryExamples(jobId, categoryIds, maxExamples) {
-    const resp = await callWithRequest('search', {
+  async function getCategoryExamples(jobId: string, categoryIds: any, maxExamples: number) {
+    const resp = await callAsCurrentUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       rest_total_hits_as_int: true,
       size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
@@ -356,9 +360,9 @@ export function resultsServiceProvider(callWithRequest) {
       },
     });
 
-    const examplesByCategoryId = {};
+    const examplesByCategoryId: any = {};
     if (resp.hits.total !== 0) {
-      resp.hits.hits.forEach(hit => {
+      resp.hits.hits.forEach((hit: any) => {
         if (maxExamples) {
           examplesByCategoryId[hit._source.category_id] = _.slice(
             hit._source.examples,
@@ -377,8 +381,8 @@ export function resultsServiceProvider(callWithRequest) {
   // Obtains the definition of the category with the specified ID and job ID.
   // Returned response contains four properties - categoryId, regex, examples
   // and terms (space delimited String of the common tokens matched in values of the category).
-  async function getCategoryDefinition(jobId, categoryId) {
-    const resp = await callWithRequest('search', {
+  async function getCategoryDefinition(jobId: string, categoryId: string) {
+    const resp = await callAsCurrentUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       rest_total_hits_as_int: true,
       size: 1,
@@ -409,6 +413,6 @@ export function resultsServiceProvider(callWithRequest) {
     getCategoryExamples,
     getLatestBucketTimestampByJob,
     getMaxAnomalyScore,
-    getPartitionFieldsValues: getPartitionFieldsValuesFactory(callWithRequest),
+    getPartitionFieldsValues: getPartitionFieldsValuesFactory(callAsCurrentUser),
   };
 }
