@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TextObject } from '../text_object';
+import { TextObject } from '../../common/text_object';
 
 export interface IdObject {
   id: string;

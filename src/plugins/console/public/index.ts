@@ -21,6 +21,8 @@ import { ConsoleUIPlugin } from './plugin';
 
 export { ConsoleUIPlugin as Plugin };
 
+export { ObjectStorageClient, IdObject } from './types';
+
 export function plugin() {
   return new ConsoleUIPlugin();
 }

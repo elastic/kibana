@@ -18,7 +18,7 @@
  */
 
 import uuid from 'uuid';
-import { ObjectStorage, IdObject } from '../../../common/types';
+import { ObjectStorage, IdObject } from '../../types';
 import { Storage } from '../../services';
 
 export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> {

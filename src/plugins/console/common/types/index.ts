@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from './models';
 export * from './plugin_config';

@@ -22,3 +22,4 @@ export * from './core_editor';
 export * from './token';
 export * from './tokens_provider';
 export * from './common';
+export * from './object_storage';
