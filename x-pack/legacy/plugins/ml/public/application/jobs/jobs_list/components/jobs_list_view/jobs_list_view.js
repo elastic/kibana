@@ -7,7 +7,16 @@
 import React, { Component } from 'react';
 import { timefilter } from 'ui/timefilter';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPage,
+  EuiPageBody,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { ml } from '../../../../services/ml_api_service';
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
@@ -348,109 +357,18 @@ export class JobsListView extends Component {
 
   renderManagementJobsListComponents() {
     const {
+      isRefreshing,
       loading,
       itemIdToExpandedRowMap,
+      jobsSummaryList,
       filteredJobsSummaryList,
       fullJobsList,
       selectedJobs,
     } = this.state;
     return (
-      <div className="managementJobsList">
-        <div>
-          <JobFilterBar setFilters={this.setFilters} />
-        </div>
-        <JobsList
-          jobsSummaryList={filteredJobsSummaryList}
-          fullJobsList={fullJobsList}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          toggleRow={this.toggleRow}
-          selectJobChange={this.selectJobChange}
-          selectedJobsCount={selectedJobs.length}
-          loading={loading}
-          isManagementTable={true}
-          isMlEnabledInSpace={this.props.isMlEnabledInSpace}
-        />
-      </div>
-    );
-  }
-
-  renderJobsListComponents() {
-    const { loading, jobsSummaryList } = this.state;
-    const jobIds = jobsSummaryList.map(j => j.id);
-    return (
-      <div>
-        <div className="actions-bar">
-          <MultiJobActions
-            selectedJobs={this.state.selectedJobs}
-            allJobIds={jobIds}
-            showStartDatafeedModal={this.showStartDatafeedModal}
-            showDeleteJobModal={this.showDeleteJobModal}
-            refreshJobs={() => this.refreshJobSummaryList(true)}
-          />
-          <JobFilterBar setFilters={this.setFilters} />
-        </div>
-        <JobsList
-          jobsSummaryList={this.state.filteredJobsSummaryList}
-          fullJobsList={this.state.fullJobsList}
-          itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
-          toggleRow={this.toggleRow}
-          selectJobChange={this.selectJobChange}
-          showEditJobFlyout={this.showEditJobFlyout}
-          showDeleteJobModal={this.showDeleteJobModal}
-          showStartDatafeedModal={this.showStartDatafeedModal}
-          refreshJobs={() => this.refreshJobSummaryList(true)}
-          selectedJobsCount={this.state.selectedJobs.length}
-          loading={loading}
-        />
-        <EditJobFlyout
-          setShowFunction={this.setShowEditJobFlyoutFunction}
-          unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
-          refreshJobs={() => this.refreshJobSummaryList(true)}
-          allJobIds={jobIds}
-        />
-        <DeleteJobModal
-          setShowFunction={this.setShowDeleteJobModalFunction}
-          unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-          refreshJobs={() => this.refreshJobSummaryList(true)}
-        />
-        <StartDatafeedModal
-          setShowFunction={this.setShowStartDatafeedModalFunction}
-          unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-          getShowCreateWatchFlyoutFunction={this.getShowCreateWatchFlyoutFunction}
-          refreshJobs={() => this.refreshJobSummaryList(true)}
-        />
-        <CreateWatchFlyout
-          setShowFunction={this.setShowCreateWatchFlyoutFunction}
-          unsetShowFunction={this.unsetShowCreateWatchFlyoutFunction}
-        />
-      </div>
-    );
-  }
-
-  render() {
-    const { isRefreshing, jobsSummaryList } = this.state;
-    const { isManagementTable } = this.props;
-
-    return (
       <div className="job-management" data-test-subj="ml-jobs-list">
-        {!isManagementTable && (
-          <>
-            <EuiTitle>
-              <h1>
-                <FormattedMessage
-                  id="xpack.ml.jobsList.title"
-                  defaultMessage="Anomaly detection jobs"
-                />
-              </h1>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-          </>
-        )}
-
         <NodeAvailableWarning />
-
         <UpgradeWarning />
-
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <JobStatsBar jobsSummaryList={jobsSummaryList} />
@@ -463,19 +381,133 @@ export class JobsListView extends Component {
                   isRefreshing={isRefreshing}
                 />
               </EuiFlexItem>
-              {!isManagementTable && (
-                <EuiFlexItem grow={false}>
-                  <NewJobButton />
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-
         <EuiSpacer size="s" />
+        <div className="managementJobsList">
+          <div>
+            <JobFilterBar setFilters={this.setFilters} />
+          </div>
+          <JobsList
+            jobsSummaryList={filteredJobsSummaryList}
+            fullJobsList={fullJobsList}
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            toggleRow={this.toggleRow}
+            selectJobChange={this.selectJobChange}
+            selectedJobsCount={selectedJobs.length}
+            loading={loading}
+            isManagementTable={true}
+            isMlEnabledInSpace={this.props.isMlEnabledInSpace}
+          />
+        </div>
+      </div>
+    );
+  }
 
-        {!isManagementTable && this.renderJobsListComponents()}
-        {isManagementTable && this.renderManagementJobsListComponents()}
+  renderJobsListComponents() {
+    const { isRefreshing, loading, jobsSummaryList } = this.state;
+    const jobIds = jobsSummaryList.map(j => j.id);
+    return (
+      <EuiPage data-test-subj="ml-jobs-list">
+        <EuiPageBody>
+          <EuiPageHeader>
+            <EuiPageHeaderSection>
+              <EuiTitle>
+                <h1>
+                  <FormattedMessage
+                    id="xpack.ml.jobsList.title"
+                    defaultMessage="Anomaly detection jobs"
+                  />
+                </h1>
+              </EuiTitle>
+            </EuiPageHeaderSection>
+          </EuiPageHeader>
+
+          <NodeAvailableWarning />
+
+          <UpgradeWarning />
+
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <JobStatsBar jobsSummaryList={jobsSummaryList} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <RefreshJobsListButton
+                    onRefreshClick={this.onRefreshClick}
+                    isRefreshing={isRefreshing}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <NewJobButton />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="s" />
+
+          <div>
+            <div className="actions-bar">
+              <MultiJobActions
+                selectedJobs={this.state.selectedJobs}
+                allJobIds={jobIds}
+                showStartDatafeedModal={this.showStartDatafeedModal}
+                showDeleteJobModal={this.showDeleteJobModal}
+                refreshJobs={() => this.refreshJobSummaryList(true)}
+              />
+              <JobFilterBar setFilters={this.setFilters} />
+            </div>
+            <JobsList
+              jobsSummaryList={this.state.filteredJobsSummaryList}
+              fullJobsList={this.state.fullJobsList}
+              itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
+              toggleRow={this.toggleRow}
+              selectJobChange={this.selectJobChange}
+              showEditJobFlyout={this.showEditJobFlyout}
+              showDeleteJobModal={this.showDeleteJobModal}
+              showStartDatafeedModal={this.showStartDatafeedModal}
+              refreshJobs={() => this.refreshJobSummaryList(true)}
+              selectedJobsCount={this.state.selectedJobs.length}
+              loading={loading}
+            />
+            <EditJobFlyout
+              setShowFunction={this.setShowEditJobFlyoutFunction}
+              unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
+              refreshJobs={() => this.refreshJobSummaryList(true)}
+              allJobIds={jobIds}
+            />
+            <DeleteJobModal
+              setShowFunction={this.setShowDeleteJobModalFunction}
+              unsetShowFunction={this.unsetShowDeleteJobModalFunction}
+              refreshJobs={() => this.refreshJobSummaryList(true)}
+            />
+            <StartDatafeedModal
+              setShowFunction={this.setShowStartDatafeedModalFunction}
+              unsetShowFunction={this.unsetShowDeleteJobModalFunction}
+              getShowCreateWatchFlyoutFunction={this.getShowCreateWatchFlyoutFunction}
+              refreshJobs={() => this.refreshJobSummaryList(true)}
+            />
+            <CreateWatchFlyout
+              setShowFunction={this.setShowCreateWatchFlyoutFunction}
+              unsetShowFunction={this.unsetShowCreateWatchFlyoutFunction}
+            />
+          </div>
+        </EuiPageBody>
+      </EuiPage>
+    );
+  }
+
+  render() {
+    const { isManagementTable } = this.props;
+
+    return (
+      <div>
+        {!isManagementTable
+          ? this.renderJobsListComponents()
+          : this.renderManagementJobsListComponents()}
       </div>
     );
   }

@@ -144,7 +144,7 @@ const Title: FC<{ 'data-test-subj': string }> = ({ 'data-test-subj': dataTestSub
   return (
     <Fragment>
       <EuiTitle size="s">
-        <h3 data-test-subj={dataTestSubj}>{children}</h3>
+        <h2 data-test-subj={dataTestSubj}>{children}</h2>
       </EuiTitle>
       <EuiSpacer />
     </Fragment>

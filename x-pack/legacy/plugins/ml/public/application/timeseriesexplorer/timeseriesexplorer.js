@@ -20,14 +20,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiCallOut,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiText,
-  EuiCallOut,
+  EuiTitle,
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
@@ -1206,157 +1206,167 @@ export class TimeSeriesExplorer extends React.Component {
           jobs.length > 0 &&
           (fullRefresh === false || loading === false) &&
           hasResults === true && (
-            <div>
+            <div className="results-container">
               {/* Make sure ChartTooltip is inside this plain wrapping element without padding so positioning can be inferred correctly. */}
               <ChartTooltip />
-              <EuiText className="results-container">
-                <span className="panel-title">
-                  {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
-                    defaultMessage: 'Single time series analysis of {functionLabel}',
-                    values: { functionLabel: chartDetails.functionLabel },
-                  })}
-                </span>
-                &nbsp;
-                {chartDetails.entityData.count === 1 && (
-                  <span className="entity-count-text">
-                    {chartDetails.entityData.entities.length > 0 && '('}
-                    {chartDetails.entityData.entities
-                      .map(entity => {
-                        return `${entity.fieldName}: ${entity.fieldValue}`;
-                      })
-                      .join(', ')}
-                    {chartDetails.entityData.entities.length > 0 && ')'}
-                  </span>
-                )}
-                {chartDetails.entityData.count !== 1 && (
-                  <span className="entity-count-text">
-                    {chartDetails.entityData.entities.map((countData, i) => {
-                      return (
-                        <Fragment key={countData.fieldName}>
-                          {i18n.translate(
-                            'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
-                            {
-                              defaultMessage:
-                                '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
-                              values: {
-                                openBrace: i === 0 ? '(' : '',
-                                closeBrace:
-                                  i === chartDetails.entityData.entities.length - 1 ? ')' : '',
-                                cardinalityValue:
-                                  countData.cardinality === 0
-                                    ? allValuesLabel
-                                    : countData.cardinality,
-                                cardinality: countData.cardinality,
-                                fieldName: countData.fieldName,
-                              },
-                            }
-                          )}
-                          {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
-                        </Fragment>
-                      );
+
+              <EuiTitle className="panel-title">
+                <h2 style={{ display: 'inline' }}>
+                  <span>
+                    {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
+                      defaultMessage: 'Single time series analysis of {functionLabel}',
+                      values: { functionLabel: chartDetails.functionLabel },
                     })}
                   </span>
-                )}
-                <EuiFlexGroup style={{ float: 'right' }}>
-                  {showModelBoundsCheckbox && (
-                    <EuiFlexItem grow={false}>
-                      <EuiCheckbox
-                        id="toggleModelBoundsCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
-                          defaultMessage: 'show model bounds',
-                        })}
-                        checked={showModelBounds}
-                        onChange={this.toggleShowModelBoundsHandler}
-                      />
-                    </EuiFlexItem>
+                  &nbsp;
+                  {chartDetails.entityData.count === 1 && (
+                    <span className="entity-count-text">
+                      {chartDetails.entityData.entities.length > 0 && '('}
+                      {chartDetails.entityData.entities
+                        .map(entity => {
+                          return `${entity.fieldName}: ${entity.fieldValue}`;
+                        })
+                        .join(', ')}
+                      {chartDetails.entityData.entities.length > 0 && ')'}
+                    </span>
                   )}
-
-                  {showAnnotationsCheckbox && (
-                    <EuiFlexItem grow={false}>
-                      <EuiCheckbox
-                        id="toggleAnnotationsCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
-                          defaultMessage: 'annotations',
-                        })}
-                        checked={showAnnotations}
-                        onChange={this.toggleShowAnnotationsHandler}
-                      />
-                    </EuiFlexItem>
-                  )}
-
-                  {showForecastCheckbox && (
-                    <EuiFlexItem grow={false}>
-                      <EuiCheckbox
-                        id="toggleShowForecastCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                          defaultMessage: 'show forecast',
-                        })}
-                        checked={showForecast}
-                        onChange={this.toggleShowForecastHandler}
-                      />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-                <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
-                  <TimeseriesChart
-                    {...chartProps}
-                    bounds={bounds}
-                    detectorIndex={selectedDetectorIndex}
-                    renderFocusChartOnly={renderFocusChartOnly}
-                    selectedJob={selectedJob}
-                    showAnnotations={showAnnotations}
-                    showForecast={showForecast}
-                    showModelBounds={showModelBounds}
-                  />
-                </div>
-                {showAnnotations && focusAnnotationData.length > 0 && (
-                  <div>
-                    <span className="panel-title">
-                      {i18n.translate('xpack.ml.timeSeriesExplorer.annotationsTitle', {
-                        defaultMessage: 'Annotations',
+                  {chartDetails.entityData.count !== 1 && (
+                    <span className="entity-count-text">
+                      {chartDetails.entityData.entities.map((countData, i) => {
+                        return (
+                          <Fragment key={countData.fieldName}>
+                            {i18n.translate(
+                              'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
+                              {
+                                defaultMessage:
+                                  '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
+                                values: {
+                                  openBrace: i === 0 ? '(' : '',
+                                  closeBrace:
+                                    i === chartDetails.entityData.entities.length - 1 ? ')' : '',
+                                  cardinalityValue:
+                                    countData.cardinality === 0
+                                      ? allValuesLabel
+                                      : countData.cardinality,
+                                  cardinality: countData.cardinality,
+                                  fieldName: countData.fieldName,
+                                },
+                              }
+                            )}
+                            {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
+                          </Fragment>
+                        );
                       })}
                     </span>
-                    <AnnotationsTable
-                      annotations={focusAnnotationData}
-                      isSingleMetricViewerLinkVisible={false}
-                      isNumberBadgeVisible={true}
+                  )}
+                </h2>
+              </EuiTitle>
+
+              <EuiFlexGroup style={{ float: 'right' }}>
+                {showModelBoundsCheckbox && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCheckbox
+                      id="toggleModelBoundsCheckbox"
+                      label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
+                        defaultMessage: 'show model bounds',
+                      })}
+                      checked={showModelBounds}
+                      onChange={this.toggleShowModelBoundsHandler}
                     />
-                    <EuiSpacer size="l" />
-                  </div>
+                  </EuiFlexItem>
                 )}
-                <AnnotationFlyout />
-                <span className="panel-title">
-                  {i18n.translate('xpack.ml.timeSeriesExplorer.anomaliesTitle', {
-                    defaultMessage: 'Anomalies',
-                  })}
-                </span>
-                <EuiFlexGroup
-                  direction="row"
-                  gutterSize="l"
-                  responsive={true}
-                  className="ml-anomalies-controls"
-                >
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.ml.timeSeriesExplorer.severityThresholdLabel', {
-                        defaultMessage: 'Severity threshold',
+
+                {showAnnotationsCheckbox && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCheckbox
+                      id="toggleAnnotationsCheckbox"
+                      label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
+                        defaultMessage: 'annotations',
                       })}
-                    >
-                      <SelectSeverity />
-                    </EuiFormRow>
+                      checked={showAnnotations}
+                      onChange={this.toggleShowAnnotationsHandler}
+                    />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.ml.timeSeriesExplorer.intervalLabel', {
-                        defaultMessage: 'Interval',
+                )}
+
+                {showForecastCheckbox && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCheckbox
+                      id="toggleShowForecastCheckbox"
+                      label={i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
+                        defaultMessage: 'show forecast',
                       })}
-                    >
-                      <SelectInterval />
-                    </EuiFormRow>
+                      checked={showForecast}
+                      onChange={this.toggleShowForecastHandler}
+                    />
                   </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="m" />
-              </EuiText>
+                )}
+              </EuiFlexGroup>
+              <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
+                <TimeseriesChart
+                  {...chartProps}
+                  bounds={bounds}
+                  detectorIndex={selectedDetectorIndex}
+                  renderFocusChartOnly={renderFocusChartOnly}
+                  selectedJob={selectedJob}
+                  showAnnotations={showAnnotations}
+                  showForecast={showForecast}
+                  showModelBounds={showModelBounds}
+                />
+              </div>
+              {showAnnotations && focusAnnotationData.length > 0 && (
+                <div>
+                  <EuiTitle className="panel-title">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.ml.timeSeriesExplorer.annotationsTitle"
+                        defaultMessage="Annotations"
+                      />
+                    </h2>
+                  </EuiTitle>
+                  <AnnotationsTable
+                    annotations={focusAnnotationData}
+                    isSingleMetricViewerLinkVisible={false}
+                    isNumberBadgeVisible={true}
+                  />
+                  <EuiSpacer size="l" />
+                </div>
+              )}
+              <AnnotationFlyout />
+              <EuiTitle className="panel-title">
+                <h2>
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.anomaliesTitle"
+                    defaultMessage="Anomalies"
+                  />
+                </h2>
+              </EuiTitle>
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="l"
+                responsive={true}
+                className="ml-anomalies-controls"
+              >
+                <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                  <EuiFormRow
+                    label={i18n.translate('xpack.ml.timeSeriesExplorer.severityThresholdLabel', {
+                      defaultMessage: 'Severity threshold',
+                    })}
+                  >
+                    <SelectSeverity />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                  <EuiFormRow
+                    label={i18n.translate('xpack.ml.timeSeriesExplorer.intervalLabel', {
+                      defaultMessage: 'Interval',
+                    })}
+                  >
+                    <SelectInterval />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
             </div>
           )}
         {arePartitioningFieldsProvided && jobs.length > 0 && hasResults === true && (

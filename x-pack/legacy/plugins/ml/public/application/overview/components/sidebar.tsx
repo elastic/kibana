@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { metadata } from 'ui/metadata';
@@ -39,13 +39,16 @@ function getCreateJobLink(createAnomalyDetectionJobDisabled: boolean) {
 
 export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }) => (
   <EuiFlexItem grow={1}>
-    <EuiText className="mlOverview__sidebar">
-      <h2>
+    <EuiTitle size="m">
+      <h1>
         <FormattedMessage
           id="xpack.ml.overview.gettingStartedSectionTitle"
           defaultMessage="Getting started"
         />
-      </h2>
+      </h1>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+    <EuiText className="mlOverview__sidebar">
       <p>
         <FormattedMessage
           id="xpack.ml.overview.gettingStartedSectionText"

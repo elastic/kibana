@@ -32,16 +32,14 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
 
   return (
     <div>
-      <EuiText size="s">
-        <h6>
-          <FormattedMessage
-            id="xpack.ml.fieldDataCard.cardText.examplesTitle"
-            defaultMessage="{numExamples, plural, one {value} other {examples}}"
-            values={{
-              numExamples: examples.length,
-            }}
-          />
-        </h6>
+      <EuiText className="mlFieldDataCard__valuesTitle">
+        <FormattedMessage
+          id="xpack.ml.fieldDataCard.cardText.examplesTitle"
+          defaultMessage="{numExamples, plural, one {value} other {examples}}"
+          values={{
+            numExamples: examples.length,
+          }}
+        />
       </EuiText>
       <EuiSpacer size="s" />
       <EuiListGroup flush={true} showToolTips={true}>

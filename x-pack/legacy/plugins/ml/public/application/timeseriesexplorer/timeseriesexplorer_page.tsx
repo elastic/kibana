@@ -6,7 +6,9 @@
 
 import React, { FC } from 'react';
 
-import { EuiProgress } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { EuiPage, EuiPageBody, EuiProgress, EuiScreenReaderOnly } from '@elastic/eui';
 
 import { JobSelector } from '../components/job_selector';
 import { NavigationMenu } from '../components/navigation_menu';
@@ -47,7 +49,19 @@ export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
         ref={resizeRef}
         data-test-subj="mlPageSingleMetricViewer"
       >
-        {children}
+        <EuiPage style={{ padding: '0px', background: 'none' }}>
+          <EuiPageBody>
+            <EuiScreenReaderOnly>
+              <h1>
+                <FormattedMessage
+                  id="xpack.ml.timeSeriesExplorer.pageTitle"
+                  defaultMessage="Single Metric Viewer"
+                />
+              </h1>
+            </EuiScreenReaderOnly>
+            {children}
+          </EuiPageBody>
+        </EuiPage>
       </div>
     </>
   );

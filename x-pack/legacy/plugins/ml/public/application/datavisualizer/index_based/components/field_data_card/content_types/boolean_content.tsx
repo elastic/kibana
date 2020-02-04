@@ -50,15 +50,13 @@ export const BooleanContent: FC<FieldDataCardProps> = ({ config }) => {
       <EuiSpacer size="m" />
 
       <div>
-        <EuiText size="s">
-          <h6>
-            <FormattedMessage
-              id="xpack.ml.fieldDataCard.cardBoolean.valuesLabel"
-              defaultMessage="Values"
-            />
-          </h6>
+        <EuiText className="mlFieldDataCard__valuesTitle">
+          <FormattedMessage
+            id="xpack.ml.fieldDataCard.cardBoolean.valuesLabel"
+            defaultMessage="Values"
+          />
         </EuiText>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="xs" />
         <Chart renderer="canvas" className="story-chart" size={{ height: 200 }}>
           <Axis id="bottom" position="bottom" showOverlappingTicks />
           <Settings

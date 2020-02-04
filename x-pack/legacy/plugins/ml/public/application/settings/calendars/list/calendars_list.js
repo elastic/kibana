@@ -11,6 +11,7 @@ import {
   EuiConfirmModal,
   EuiOverlayMask,
   EuiPage,
+  EuiPageBody,
   EuiPageContent,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
@@ -149,27 +150,29 @@ export const CalendarsList = injectI18n(
         <Fragment>
           <NavigationMenu tabId="settings" />
           <EuiPage className="mlCalendarList">
-            <EuiPageContent
-              className="mlCalendarList__content"
-              verticalPosition="center"
-              horizontalPosition="center"
-            >
-              <CalendarsListHeader
-                totalCount={calendars.length}
-                refreshCalendars={this.loadCalendars}
-              />
-              <CalendarsListTable
-                loading={loading}
-                calendarsList={this.addRequiredFieldsToList(calendars)}
-                onDeleteClick={this.showDestroyModal}
-                canCreateCalendar={canCreateCalendar}
-                canDeleteCalendar={canDeleteCalendar}
-                mlNodesAvailable={nodesAvailable}
-                setSelectedCalendarList={this.setSelectedCalendarList}
-                itemsSelected={selectedForDeletion.length > 0}
-              />
-            </EuiPageContent>
-            {destroyModal}
+            <EuiPageBody>
+              <EuiPageContent
+                className="mlCalendarList__content"
+                verticalPosition="center"
+                horizontalPosition="center"
+              >
+                <CalendarsListHeader
+                  totalCount={calendars.length}
+                  refreshCalendars={this.loadCalendars}
+                />
+                <CalendarsListTable
+                  loading={loading}
+                  calendarsList={this.addRequiredFieldsToList(calendars)}
+                  onDeleteClick={this.showDestroyModal}
+                  canCreateCalendar={canCreateCalendar}
+                  canDeleteCalendar={canDeleteCalendar}
+                  mlNodesAvailable={nodesAvailable}
+                  setSelectedCalendarList={this.setSelectedCalendarList}
+                  itemsSelected={selectedForDeletion.length > 0}
+                />
+              </EuiPageContent>
+              {destroyModal}
+            </EuiPageBody>
           </EuiPage>
         </Fragment>
       );

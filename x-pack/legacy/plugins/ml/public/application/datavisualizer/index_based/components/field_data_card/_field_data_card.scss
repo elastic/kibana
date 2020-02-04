@@ -100,4 +100,10 @@
     padding: $euiSizeS $euiSizeS 0px $euiSizeS;
     text-align: center;
   }
+
+  .mlFieldDataCard__valuesTitle {
+    @include fontSize($euiFontSizeXS - 1px);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
 }

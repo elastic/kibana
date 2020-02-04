@@ -57,16 +57,13 @@ export const KeywordContent: FC<FieldDataCardProps> = ({ config }) => {
       <EuiSpacer size="m" />
 
       <div>
-        <EuiText size="s">
-          <h6>
-            <FormattedMessage
-              id="xpack.ml.fieldDataCard.cardKeyword.topValuesLabel"
-              defaultMessage="Top values"
-            />
-          </h6>
+        <EuiText className="mlFieldDataCard__valuesTitle">
+          <FormattedMessage
+            id="xpack.ml.fieldDataCard.cardKeyword.topValuesLabel"
+            defaultMessage="Top values"
+          />
         </EuiText>
-
-        <EuiSpacer size="s" />
+        <EuiSpacer size="xs" />
         <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
       </div>
     </div>
