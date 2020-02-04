@@ -51,6 +51,6 @@ const demodata: Datatable = {
   ],
 };
 
-storiesOf('renderers/Multifilter', module).add('default', () => (
-  <MultiFilter datatable={demodata} onChange={values => action('onChange')} />
+storiesOf('renderers/MultiFilter', module).add('default', () => (
+  <MultiFilter datatable={demodata} onChange={action('onChange')} />
 ));

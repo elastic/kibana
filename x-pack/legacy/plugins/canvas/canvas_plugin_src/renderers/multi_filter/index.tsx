@@ -9,13 +9,15 @@ import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { RendererFactory, Datatable } from '../../../types';
-import { MultiFilter } from './component';
+import { MultiFilter, MultiFilterValue } from './component';
 import { RendererStrings } from '../../../i18n';
 
 const { dropdownFilter: strings } = RendererStrings;
 
 interface Config {
   datatable: Datatable;
+  columns?: string[];
+  filterGroup: string;
 }
 
 const MATCH_ALL = '%%CANVAS_MATCH_ALL%%';
@@ -72,9 +74,37 @@ export const multiFilter: RendererFactory<Config> = () => ({
     //   }
     // };
 
-    const { datatable } = config;
+    const onChange = (options: MultiFilterValue[]) => {
+      if (options.length === 0) {
+        handlers.setFilter('');
+      } else {
+        const column = options.map(option => option.column);
+        const value = options.map(option => option.value);
+        const newFilterAST: Ast = {
+          type: 'expression',
+          chain: [
+            {
+              type: 'function',
+              function: 'exactly',
+              arguments: {
+                value,
+                column,
+                filterGroup: [config.filterGroup],
+              },
+            },
+          ],
+        };
 
-    ReactDOM.render(<MultiFilter datatable={datatable} />, domNode, () => handlers.done());
+        const newFilter = toExpression(newFilterAST);
+        handlers.setFilter(newFilter);
+      }
+    };
+
+    const { datatable, columns } = config;
+
+    ReactDOM.render(<MultiFilter {...{ onChange, datatable, columns }} />, domNode, () =>
+      handlers.done()
+    );
 
     handlers.onDestroy(() => {
       ReactDOM.unmountComponentAtNode(domNode);

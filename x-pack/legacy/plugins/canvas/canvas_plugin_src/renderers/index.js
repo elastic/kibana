@@ -12,6 +12,7 @@ import { error } from './error';
 import { image } from './image';
 import { markdown } from './markdown';
 import { metric } from './metric';
+import { multiFilter } from './multi_filter';
 import { pie } from './pie';
 import { plot } from './plot';
 import { progress } from './progress';
@@ -31,6 +32,7 @@ export const renderFunctions = [
   image,
   markdown,
   metric,
+  multiFilter,
   pie,
   plot,
   progress,
