@@ -13,11 +13,9 @@ import {
   OverviewPageParsingErrorCallout,
   StatusPanel,
 } from '../components/functional';
-import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
-import { PageHeader } from './page_header';
 import { DataPublicPluginStart, IIndexPattern } from '../../../../../../src/plugins/data/public';
 import { UptimeThemeContext } from '../contexts';
 import { FilterGroup, KueryBar } from '../components/connected';
@@ -25,7 +23,6 @@ import { useUpdateKueryString } from '../hooks';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginStart['autocomplete'];
-  setBreadcrumbs: UMUpdateBreadcrumbs;
   indexPattern: IIndexPattern;
 }
 
@@ -40,7 +37,7 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPageComponent = ({ autocomplete, setBreadcrumbs, indexPattern }: Props) => {
+export const OverviewPageComponent = ({ autocomplete, indexPattern }: Props) => {
   const { colors } = useContext(UptimeThemeContext);
   const [getUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
@@ -71,7 +68,6 @@ export const OverviewPageComponent = ({ autocomplete, setBreadcrumbs, indexPatte
 
   return (
     <>
-      <PageHeader setBreadcrumbs={setBreadcrumbs} />
       <EmptyState implementsCustomErrorState={true} variables={{}}>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>

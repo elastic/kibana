@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import DateMath from '@elastic/datemath';
 import React, { useState, Fragment } from 'react';
 import { useUrlParams, UptimeUrlParamsHook } from '../use_url_params';
 import { UptimeRefreshContext } from '../../contexts';
-import { renderWithRouter } from '../../lib';
+import { mountWithRouter } from '../../lib';
 import { createMemoryHistory } from 'history';
 
 interface MockUrlParamsComponentProps {
@@ -51,13 +50,11 @@ describe('useUrlParams', () => {
     const history = createMemoryHistory();
     jest.spyOn(history, 'push');
 
-    const component = mountWithIntl(
-      renderWithRouter(
-        <UptimeRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: jest.fn() }}>
-          <UseUrlParamsTestComponent hook={useUrlParams} />
-        </UptimeRefreshContext.Provider>,
-        history
-      )
+    const component = mountWithRouter(
+      <UptimeRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: jest.fn() }}>
+        <UseUrlParamsTestComponent hook={useUrlParams} />
+      </UptimeRefreshContext.Provider>,
+      history
     );
 
     const setUrlParamsButton = component.find('#setUrlParams');
@@ -69,17 +66,15 @@ describe('useUrlParams', () => {
   });
 
   it('gets the expected values using the context', () => {
-    const component = mountWithIntl(
-      renderWithRouter(
-        <UptimeRefreshContext.Provider
-          value={{
-            lastRefresh: 123,
-            refreshApp: jest.fn(),
-          }}
-        >
-          <UseUrlParamsTestComponent hook={useUrlParams} />
-        </UptimeRefreshContext.Provider>
-      )
+    const component = mountWithRouter(
+      <UptimeRefreshContext.Provider
+        value={{
+          lastRefresh: 123,
+          refreshApp: jest.fn(),
+        }}
+      >
+        <UseUrlParamsTestComponent hook={useUrlParams} />
+      </UptimeRefreshContext.Provider>
     );
 
     const getUrlParamsButton = component.find('#getUrlParams');
@@ -95,18 +90,16 @@ describe('useUrlParams', () => {
     history.location.key = 'test';
 
     jest.spyOn(history, 'push');
-    const component = mountWithIntl(
-      renderWithRouter(
-        <UptimeRefreshContext.Provider
-          value={{
-            lastRefresh: 123,
-            refreshApp: jest.fn(),
-          }}
-        >
-          <UseUrlParamsTestComponent hook={useUrlParams} updateParams={{ pagination: '' }} />
-        </UptimeRefreshContext.Provider>,
-        history
-      )
+    const component = mountWithRouter(
+      <UptimeRefreshContext.Provider
+        value={{
+          lastRefresh: 123,
+          refreshApp: jest.fn(),
+        }}
+      >
+        <UseUrlParamsTestComponent hook={useUrlParams} updateParams={{ pagination: '' }} />
+      </UptimeRefreshContext.Provider>,
+      history
     );
 
     const getUrlParamsButton = component.find('#getUrlParams');

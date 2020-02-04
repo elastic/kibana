@@ -4,19 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl, renderWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { UptimeDatePicker } from '../uptime_date_picker';
-import { renderWithRouter } from '../../../lib';
+import { renderWithRouter, shallowWithRouter } from '../../../lib';
 
 describe('UptimeDatePicker component', () => {
   it('validates props with shallow render', () => {
-    const component = shallowWithIntl(renderWithRouter(<UptimeDatePicker />));
+    const component = shallowWithRouter(<UptimeDatePicker />);
     expect(component).toMatchSnapshot();
   });
 
   it('renders properly with mock data', () => {
-    const component = renderWithIntl(renderWithRouter(<UptimeDatePicker />));
+    const component = renderWithRouter(<UptimeDatePicker />);
     expect(component).toMatchSnapshot();
   });
 });
