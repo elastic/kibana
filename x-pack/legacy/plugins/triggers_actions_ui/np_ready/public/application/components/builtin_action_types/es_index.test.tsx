@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector } from '../../../types';
+import { ActionTypeModel, ActionParamsProps } from '../../../types';
+import { IndexActionParams, EsIndexActionConnector } from './types';
 
 const ACTION_TYPE_ID = '.index';
 let actionTypeModel: ActionTypeModel;
@@ -38,7 +39,7 @@ describe('index connector validation', () => {
       config: {
         index: 'test_es_index',
       },
-    } as ActionConnector;
+    } as EsIndexActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {},
@@ -87,14 +88,13 @@ describe('IndexActionConnectorFields renders', () => {
       config: {
         index: 'test',
       },
-    } as ActionConnector;
+    } as EsIndexActionConnector;
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}
         errors={{}}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        hasErrors={false}
       />
     );
     expect(wrapper.find('[data-test-subj="indexInput"]').length > 0).toBeTruthy();
@@ -113,7 +113,9 @@ describe('IndexParamsFields renders', () => {
     if (!actionTypeModel.actionParamsFields) {
       return;
     }
-    const ParamsFields = actionTypeModel.actionParamsFields;
+    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
+      ActionParamsProps<IndexActionParams>
+    >;
     const actionParams = {
       index: 'test_index',
       refresh: false,
@@ -121,11 +123,10 @@ describe('IndexParamsFields renders', () => {
     };
     const wrapper = mountWithIntl(
       <ParamsFields
-        action={actionParams}
-        errors={{}}
+        actionParams={actionParams}
+        errors={{ index: [] }}
         editAction={() => {}}
         index={0}
-        hasErrors={false}
       />
     );
     expect(wrapper.find('[data-test-subj="indexInput"]').length > 0).toBeTruthy();

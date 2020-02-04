@@ -24,6 +24,7 @@ import angular from 'angular';
 
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { History } from 'history';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
@@ -77,7 +78,11 @@ import {
   SavedObjectFinderProps,
   SavedObjectFinderUi,
 } from '../../../../../../plugins/kibana_react/public';
-import { removeQueryParam, unhashUrl } from '../../../../../../plugins/kibana_utils/public';
+import {
+  IKbnUrlStateStorage,
+  removeQueryParam,
+  unhashUrl,
+} from '../../../../../../plugins/kibana_utils/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -85,8 +90,9 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   $routeParams: any;
   indexPatterns: IndexPatternsContract;
   dashboardConfig: any;
-  config: any;
   confirmModal: ConfirmModalFn;
+  history: History;
+  kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 export class DashboardAppController {
@@ -102,7 +108,6 @@ export class DashboardAppController {
     dashboardConfig,
     localStorage,
     indexPatterns,
-    config,
     confirmModal,
     savedQueryService,
     embeddables,
@@ -369,7 +374,7 @@ export class DashboardAppController {
       dashboardStateManager.getQuery() || {
         query: '',
         language:
-          localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
+          localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
       },
       queryFilter.getFilters()
     );
@@ -486,7 +491,7 @@ export class DashboardAppController {
         {
           query: '',
           language:
-            localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
+            localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
         },
         queryFilter.getGlobalFilters()
       );

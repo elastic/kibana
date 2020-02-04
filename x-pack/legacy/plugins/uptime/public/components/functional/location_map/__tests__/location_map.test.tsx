@@ -87,4 +87,20 @@ describe('LocationMap component', () => {
     const warningComponent = component.find(LocationMissingWarning);
     expect(warningComponent).toHaveLength(0);
   });
+
+  it('renders named locations that have missing geo data', () => {
+    monitorLocations = {
+      monitorId: 'wapo',
+      locations: [
+        {
+          summary: { up: 4, down: 0 },
+          geo: { name: 'New York', location: undefined },
+          timestamp: '2020-01-13T22:50:06.536Z',
+        },
+      ],
+    };
+
+    const component = shallowWithIntl(<LocationMap monitorLocations={monitorLocations} />);
+    expect(component).toMatchSnapshot();
+  });
 });

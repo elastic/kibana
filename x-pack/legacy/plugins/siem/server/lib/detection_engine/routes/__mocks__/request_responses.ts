@@ -84,7 +84,7 @@ export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestP
 });
 
 export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
-  query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
+  query: { bool: { filter: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } } } },
   status: 'closed',
 });
 
@@ -269,8 +269,6 @@ export const getResult = (): RuleAlertType => ({
   alertTypeId: 'siem.signals',
   consumer: 'siem',
   params: {
-    createdAt: '2019-12-13T16:40:33.400Z',
-    updatedAt: '2019-12-13T16:40:33.400Z',
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -392,6 +390,7 @@ export const getMockPrivileges = () => ({
   },
   application: {},
   is_authenticated: false,
+  has_encryption_key: true,
 });
 
 export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({

@@ -3,17 +3,23 @@
   "false_positives": [
     "Security tools and device drivers may run these programs in order to load legitimate kernel modules. Use of these programs by ordinary users is uncommon."
   ],
-  "index": ["auditbeat-*"],
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "kuery",
   "max_signals": 33,
   "name": "Persistence via Kernel Module Modification",
   "query": "process.name: (insmod or kmod or modprobe or rmod) and event.action:executed",
   "references": [
     "https://www.hackers-arise.com/single-post/2017/11/03/Linux-for-Hackers-Part-10-Loadable-Kernel-Modules-LKM"
   ],
-  "risk_score": 25,
+  "risk_score": 21,
   "rule_id": "81cc58f5-8062-49a2-ba84-5cc4b4d31c40",
   "severity": "low",
-  "tags": ["Elastic", "auditbeat"],
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
   "threat": [
     {
       "framework": "MITRE ATT&CK",

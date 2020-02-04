@@ -164,8 +164,12 @@ export const getSourceLayer = (
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbol: {
-        options: { symbolizeAs: 'icon', symbolId: 'home' },
+      symbolizeAs: {
+        options: { value: 'icon' },
+      },
+      icon: {
+        type: 'STATIC',
+        options: { value: 'home' },
       },
     },
   },
@@ -223,8 +227,12 @@ export const getDestinationLayer = (
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbol: {
-        options: { symbolizeAs: 'icon', symbolId: 'marker' },
+      symbolizeAs: {
+        options: { value: 'icon' },
+      },
+      icon: {
+        type: 'STATIC',
+        options: { value: 'marker' },
       },
     },
   },
@@ -303,8 +311,12 @@ export const getLineLayer = (
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbol: {
-        options: { symbolizeAs: 'circle', symbolId: 'airfield' },
+      symbolizeAs: {
+        options: { value: 'icon' },
+      },
+      icon: {
+        type: 'STATIC',
+        options: { value: 'airfield' },
       },
     },
   },
