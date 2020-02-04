@@ -5,7 +5,6 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
   <EuiModal
     className="spcConfirmDeleteModal"
     initialFocus="input[name=\\"confirmDeleteSpaceInput\\"]"
-    maxWidth={true}
     onClose={[MockFunction]}
   >
     <EuiModalHeader>
