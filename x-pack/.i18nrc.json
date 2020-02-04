@@ -17,7 +17,7 @@
     "xpack.grokDebugger": "legacy/plugins/grokdebugger",
     "xpack.idxMgmt": "legacy/plugins/index_management",
     "xpack.indexLifecycleMgmt": "legacy/plugins/index_lifecycle_management",
-    "xpack.infra": "legacy/plugins/infra",
+    "xpack.infra": "plugins/infra",
     "xpack.kueryAutocomplete": "legacy/plugins/kuery_autocomplete",
     "xpack.lens": "legacy/plugins/lens",
     "xpack.licenseMgmt": "legacy/plugins/license_management",
