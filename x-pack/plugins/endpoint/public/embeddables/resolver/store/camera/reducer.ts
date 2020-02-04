@@ -152,12 +152,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
     return animatePanning(
       state,
       time,
-      vector2.add(
-        // TODO, this assumes the camera isn't panning. assert that instead, and test it
-        // TODO, does this work when the camera is being animated?
-        state.translationNotCountingCurrentPanning,
-        nudge
-      ),
+      vector2.add(state.translationNotCountingCurrentPanning, nudge),
       nudgeAnimationDuration
     );
   } else if (action.type === 'userSetRasterSize') {
@@ -172,7 +167,6 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
     return nextState;
   } else if (action.type === 'userMovedPointer') {
     let stateWithUpdatedPanning: CameraState = state;
-    // Using a ternary prevent static analysis from working here
     if (state.panning) {
       stateWithUpdatedPanning = {
         ...state,

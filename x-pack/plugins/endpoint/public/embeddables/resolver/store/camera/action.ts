@@ -46,7 +46,7 @@ interface UserSetRasterSize {
 }
 
 /**
- * This is currently only used in tests. The 'back to center' button will use this action, and more tests around its behavior will need to be added.
+ * When the user warps the camera to an exact point instantly.
  */
 interface UserSetPositionOfCamera {
   readonly type: 'userSetPositionOfCamera';

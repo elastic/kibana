@@ -19,6 +19,9 @@ export function animatePanning(
 ): CameraState {
   const nextState: CameraState = {
     ...state,
+    /**
+     * This cancels panning if any was taking place.
+     */
     panning: undefined,
     translationNotCountingCurrentPanning: targetTranslation,
     animation: {

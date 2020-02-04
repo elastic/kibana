@@ -79,7 +79,12 @@ describe('panning interaction', () => {
       store.dispatch(action);
     });
     it('the camera eventually moves up so that objects appear closer to the bottom of the screen', () => {
-      const actual: Vector2 = translation(store.getState())(new Date(100));
+      const aBitIntoTheFuture = new Date(time.getTime() + 100);
+
+      /**
+       * Check the position once the animation has advanced 100ms
+       */
+      const actual: Vector2 = translation(store.getState())(aBitIntoTheFuture);
       expect(actual).toMatchInlineSnapshot(`
         Array [
           0,

@@ -42,7 +42,6 @@ export function useCamera(): {
    * changes each frame during an animation, so the rAF loop would be causing
    * itself to reinit on each frame. This would necessarily cause a drop in FPS as there
    * would be a dead zone between when the rAF loop stopped and restarted itself.
-   * TODO prove this.
    */
   const projectionMatrixAtTimeRef = useRef<typeof projectionMatrixAtTime>();
 
