@@ -49,12 +49,12 @@ function createMockFilterManager() {
   let filters: esFilters.Filter[] = [
     {
       meta: { alias: null, negate: false, disabled: false },
-      query: { match_all: {} },
+      query: { match_phrase: { global: 'yes' } },
       $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
     },
     {
       meta: { alias: null, negate: false, disabled: false },
-      query: { match_all: {} },
+      query: { match_phrase: { test: 'yes' } },
       $state: { store: esFilters.FilterStateStore.APP_STATE },
     },
   ];
@@ -192,7 +192,9 @@ describe('Lens App', () => {
                   "negate": false,
                 },
                 "query": Object {
-                  "match_all": Object {},
+                  "match_phrase": Object {
+                    "global": "yes",
+                  },
                 },
               },
               Object {
@@ -205,7 +207,9 @@ describe('Lens App', () => {
                   "negate": false,
                 },
                 "query": Object {
-                  "match_all": Object {},
+                  "match_phrase": Object {
+                    "test": "yes",
+                  },
                 },
               },
             ],
@@ -313,7 +317,7 @@ describe('Lens App', () => {
             expression: 'valid expression',
             state: {
               query: 'fake query',
-              filters: args.data.query.filterManager.getGlobalFilters().concat([savedFilter]),
+              filters: [savedFilter],
               datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
             },
           },
@@ -758,7 +762,7 @@ describe('Lens App', () => {
       );
     });
 
-    it('updates the filters when the user changes them', () => {
+    it('updates the filters when the user changes them', async () => {
       const args = defaultArgs;
       args.editorFrame = frame;
 
@@ -766,14 +770,19 @@ describe('Lens App', () => {
       const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
       const field = ({ name: 'myfield' } as unknown) as IFieldType;
 
-      args.data.query.filterManager.setFilters([esFilters.buildExistsFilter(field, indexPattern)]);
+      await waitForPromises();
+      const filter = {
+        ...esFilters.buildExistsFilter(field, indexPattern),
+        $state: { store: esFilters.FilterStateStore.APP_STATE },
+      };
+      args.data.query.filterManager.setFilters([filter]);
 
       instance.update();
 
       expect(frame.mount).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
-          filters: [esFilters.buildExistsFilter(field, indexPattern)],
+          filters: [filter],
         })
       );
     });

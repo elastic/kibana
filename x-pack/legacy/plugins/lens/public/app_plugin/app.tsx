@@ -89,6 +89,8 @@ export function App({
 
     const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
+        // Trigger a re-render, since filters are no longer tracked on state
+        setState(s => ({ ...s }));
         trackUiEvent('app_filters_updated');
       },
     });
@@ -131,11 +133,12 @@ export function App({
                 data.query.filterManager
                   .getGlobalFilters()
                   .concat(
-                    doc.state.filters.filter(
+                    (doc.state.filters || []).filter(
                       filter => filter.$state?.store === esFilters.FilterStateStore.APP_STATE
                     )
                   )
               );
+
               setState(s => ({
                 ...s,
                 isLoading: false,
