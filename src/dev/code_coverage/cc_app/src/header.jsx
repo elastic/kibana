@@ -1,5 +1,4 @@
 import React from "react";
-// import logo from './logo.svg';
 
 export default function Header() {
   return (
@@ -18,5 +17,5 @@ export default function Header() {
 }
 
 function buildStatsLink() {
-  return 'some build stats url'
+  return 'https://build-stats.elastic.co/app/kibana#/dashboard/02b9d310-9513-11e8-a9c0-db5f285c257f?_g=(refreshInterval%3A(pause%3A!f%2Cvalue%3A10000)%2Ctime%3A(from%3Anow%2Fd%2Cmode%3Aquick%2Cto%3Anow%2Fd))'
 }
