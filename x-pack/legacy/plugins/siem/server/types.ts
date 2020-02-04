@@ -5,6 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
+import { LegacyRequest } from '../../../../../src/core/server';
 
 export interface ServerFacade {
   config: Legacy.Server['config'];
@@ -20,14 +21,9 @@ export interface ServerFacade {
   route: Legacy.Server['route'];
 }
 
-export interface RequestFacade {
-  auth: Legacy.Request['auth'];
-  getAlertsClient?: Legacy.Request['getAlertsClient'];
-  getActionsClient?: Legacy.Request['getActionsClient'];
-  getSavedObjectsClient?: Legacy.Request['getSavedObjectsClient'];
-  headers: Legacy.Request['headers'];
-  method: Legacy.Request['method'];
-  params: Legacy.Request['params'];
-  payload: unknown;
-  query: Legacy.Request['query'];
+export interface RequestFacade
+  extends Omit<LegacyRequest, 'getAlertsClient' | 'getActionsClient' | 'getSavedObjectsClient'> {
+  getAlertsClient?: LegacyRequest['getAlertsClient'];
+  getActionsClient?: LegacyRequest['getActionsClient'];
+  getSavedObjectsClient?: LegacyRequest['getSavedObjectsClient'];
 }
