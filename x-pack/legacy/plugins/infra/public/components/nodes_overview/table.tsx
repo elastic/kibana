@@ -42,7 +42,6 @@ export const TableView = (props: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<string[]>([]);
   const openPopoverFor = useCallback(
     (id: string) => () => {
-      document.getElementById(ROOT_ELEMENT_ID)!.style.overflowY = 'hidden';
       setIsPopoverOpen([...isPopoverOpen, id]);
     },
     [isPopoverOpen]
@@ -51,7 +50,6 @@ export const TableView = (props: Props) => {
   const closePopoverFor = useCallback(
     (id: string) => () => {
       setIsPopoverOpen([...isPopoverOpen, id]);
-      document.getElementById(ROOT_ELEMENT_ID)!.style.overflowY = 'auto';
       if (isPopoverOpen.includes(id)) {
         setIsPopoverOpen(isPopoverOpen.filter(subject => subject !== id));
       }
