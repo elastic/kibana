@@ -25,9 +25,9 @@ const componentType = ComponentRegistry.componentType;
 
 export const advancedSettingsMock = {
   createSetupContract() {
-    return { register, componentType };
+    return { component: { register, componentType } };
   },
   createStartContract() {
-    return { get, componentType };
+    return { component: { get, componentType } };
   },
 };

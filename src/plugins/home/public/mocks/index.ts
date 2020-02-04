@@ -19,10 +19,12 @@
 
 import { featureCatalogueRegistryMock } from '../services/feature_catalogue/feature_catalogue_registry.mock';
 import { environmentServiceMock } from '../services/environment/environment.mock';
+import { configSchema } from '../../config';
 
 const createSetupContract = () => ({
   featureCatalogue: featureCatalogueRegistryMock.createSetup(),
   environment: environmentServiceMock.createSetup(),
+  config: configSchema.validate({}),
 });
 
 const createStartContract = () => ({

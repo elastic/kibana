@@ -8,7 +8,7 @@ import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { SavedObjectsManagementAction } from 'src/legacy/core_plugins/management/public';
 import { ManagementStart, ManagementSetup } from 'src/plugins/management/public';
-import React from 'react';
+import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
 import { SecurityPluginStart, SecurityPluginSetup } from '../../security/public';
 import { SpacesManager } from './spaces_manager';
 import { initSpacesNavControl } from './nav_control';
@@ -19,6 +19,7 @@ import { ManagementService } from './management';
 import { spaceSelectorApp } from './space_selector';
 
 export interface PluginsSetup {
+  advancedSettings?: AdvancedSettingsSetup;
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
   security?: SecurityPluginSetup;
@@ -31,11 +32,6 @@ export interface PluginsStart {
 
 interface LegacyAPI {
   registerSavedObjectsManagementAction: (action: SavedObjectsManagementAction) => void;
-  registerSettingsComponent: (
-    id: string,
-    component: string | React.FC<any>,
-    allowOverride: boolean
-  ) => void;
 }
 
 export type SpacesPluginSetup = ReturnType<SpacesPlugin['setup']>;
@@ -64,6 +60,14 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       });
     }
 
+    if (plugins.advancedSettings) {
+      const advancedSettingsService = new AdvancedSettingsService();
+      advancedSettingsService.setup({
+        getActiveSpace: () => this.spacesManager.getActiveSpace(),
+        componentRegistry: plugins.advancedSettings.component,
+      });
+    }
+
     spaceSelectorApp.create({ application: core.application, spacesManager: this.spacesManager });
 
     return {
@@ -85,12 +89,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
             },
           },
           notificationsSetup: core.notifications,
-        });
-
-        const advancedSettingsService = new AdvancedSettingsService();
-        advancedSettingsService.setup({
-          getActiveSpace: () => this.spacesManager.getActiveSpace(),
-          registerSettingsComponent: legacyAPI.registerSettingsComponent,
         });
       },
     };

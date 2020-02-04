@@ -8,6 +8,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { SpacesPlugin } from './plugin';
 import { homePluginMock } from '../../../../src/plugins/home/public/mocks';
 import { managementPluginMock } from '../../../../src/plugins/management/public/mocks';
+import { advancedSettingsMock } from '../../../../src/plugins/advanced_settings/public/mocks';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
@@ -53,6 +54,29 @@ describe('Spaces plugin', () => {
           showOnHomePage: true,
         })
       );
+    });
+
+    it('should register the advanced settings components if the advanced_settings plugin is available', () => {
+      const coreSetup = coreMock.createSetup();
+      const advancedSettings = advancedSettingsMock.createSetupContract();
+
+      const plugin = new SpacesPlugin();
+      plugin.setup(coreSetup, { advancedSettings });
+
+      expect(advancedSettings.component.register.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "advanced_settings_page_title",
+            [Function],
+            true,
+          ],
+          Array [
+            "advanced_settings_page_subtitle",
+            [Function],
+            true,
+          ],
+        ]
+      `);
     });
   });
 

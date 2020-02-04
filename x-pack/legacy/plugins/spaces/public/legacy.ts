@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npSetup, npStart } from 'ui/new_platform';
+import { SavedObjectsManagementAction } from 'src/legacy/core_plugins/management/public';
+import { npSetup } from 'ui/new_platform';
+import { SpacesPluginSetup } from '../../../../plugins/spaces/public';
 import { setup as managementSetup } from '../../../../../src/legacy/core_plugins/management/public/legacy';
 
-const spacesPlugin: SpacesPlugin = plugin();
-
-const pluginsSetup: PluginsSetup = {
-  home: npSetup.plugins.home,
-  management: managementSetup,
-  advancedSettings: npSetup.plugins.advancedSettings,
+const legacyAPI = {
+  registerSavedObjectsManagementAction: (action: SavedObjectsManagementAction) => {
+    managementSetup.savedObjects.registry.register(action);
+  },
 };
+
+((npSetup.plugins as any).spaces as SpacesPluginSetup).registerLegacyAPI(legacyAPI);
