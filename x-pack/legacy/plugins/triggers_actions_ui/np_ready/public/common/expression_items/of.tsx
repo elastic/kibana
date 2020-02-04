@@ -15,7 +15,7 @@ import {
   EuiFormRow,
   EuiComboBox,
 } from '@elastic/eui';
-import { buildInAggregationTypes } from '../constants';
+import { buildinAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
 
 interface OfExpressionProps {
@@ -47,7 +47,7 @@ export const OfExpression = ({
     ),
     value: '',
   };
-  const aggregationTypes = customAggTypesOptions ?? buildInAggregationTypes;
+  const aggregationTypes = customAggTypesOptions ?? buildinAggregationTypes;
 
   const availablefieldsOptions = fields.reduce((esFieldOptions: any[], field: any) => {
     if (aggregationTypes[aggType].validNormalizedTypes.includes(field.normalizedType)) {

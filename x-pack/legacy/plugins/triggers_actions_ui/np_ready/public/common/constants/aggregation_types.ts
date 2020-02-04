@@ -14,7 +14,7 @@ export enum AGGREGATION_TYPES {
   MAX = 'max',
 }
 
-export const buildInAggregationTypes: { [key: string]: AggregationType } = {
+export const buildinAggregationTypes: { [key: string]: AggregationType } = {
   count: {
     text: 'count()',
     fieldRequired: false,

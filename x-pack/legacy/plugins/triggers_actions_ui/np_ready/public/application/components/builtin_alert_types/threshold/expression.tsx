@@ -20,8 +20,7 @@ import {
   EuiFormRow,
   EuiCallOut,
 } from '@elastic/eui';
-import { AlertTypeModel, ValidationResult } from '../../../../types';
-import { COMPARATORS, buildinGroupByTypes, buildinComparators } from '../../../../common/constants';
+import { COMPARATORS, buildinComparators } from '../../../../common/constants';
 import {
   getMatchingIndicesForThresholdAlertType,
   getThresholdAlertTypeFields,
@@ -37,7 +36,7 @@ import {
   ForLastExpression,
   GroupByExpression,
 } from '../../../../common';
-import { buildInAggregationTypes } from '../../../../common/constants';
+import { buildinAggregationTypes } from '../../../../common/constants';
 import { IndexThresholdAlertParams } from '../types';
 
 const DEFAULT_VALUES = {
@@ -113,7 +112,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     errorKey =>
       expressionFieldsWithValidation.includes(errorKey) &&
       errors[errorKey].length >= 1 &&
-      alert.params[errorKey] !== undefined
+      (alertParams as { [key: string]: any })[errorKey] !== undefined
   );
 
   const canShowVizualization = !!Object.keys(errors).find(
@@ -382,7 +381,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
             }
           />
         </EuiFlexItem>
-        {aggType && buildInAggregationTypes[aggType].fieldRequired ? (
+        {aggType && buildinAggregationTypes[aggType].fieldRequired ? (
           <EuiFlexItem grow={false}>
             <OfExpression
               aggField={aggField}
@@ -444,7 +443,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         <Fragment>
           <ThresholdVisualization
             alertParams={alertParams}
-            aggregationTypes={buildInAggregationTypes}
+            aggregationTypes={buildinAggregationTypes}
             comparators={buildinComparators}
           />
         </Fragment>

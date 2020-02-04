@@ -42,9 +42,9 @@ import {
   ActionConnector,
   AlertTypeIndex,
 } from '../../../types';
-import { getTimeOptions } from '../../lib/get_time_options';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from '../action_connector_form/connector_add_modal';
+import { getTimeOptions } from '../../../common/lib/get_time_options';
 
 export function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
@@ -609,7 +609,7 @@ export const AlertForm = ({
       </EuiFlexGroup>
       {AlertParamsExpressionComponent ? (
         <AlertParamsExpressionComponent
-          alert={alert}
+          alertParams={alert.params}
           errors={errors}
           setAlertParams={setAlertParams}
           setAlertProperty={setAlertProperty}
@@ -774,7 +774,7 @@ export const AlertForm = ({
                   fullWidth
                   compressed
                   value={alertIntervalUnit}
-                  options={getTimeOptions((alertInterval ? alertInterval : 1).toString())}
+                  options={getTimeOptions(alertInterval ?? 1)}
                   onChange={e => {
                     setAlertIntervalUnit(e.target.value);
                     setScheduleProperty('interval', `${alertInterval}${e.target.value}`);
@@ -806,7 +806,7 @@ export const AlertForm = ({
                 <EuiSelect
                   compressed
                   value={alertThrottleUnit}
-                  options={getTimeOptions((alertThrottle ? alertThrottle : 1).toString())}
+                  options={getTimeOptions(alertThrottle ?? 1)}
                   onChange={e => {
                     setAlertThrottleUnit(e.target.value);
                     setAlertProperty('throttle', `${alertThrottle}${e.target.value}`);

@@ -5,5 +5,5 @@
  */
 
 export { COMPARATORS, buildinComparators } from './comparators';
-export { AGGREGATION_TYPES, buildInAggregationTypes } from './aggregation_types';
+export { AGGREGATION_TYPES, buildinAggregationTypes } from './aggregation_types';
 export { buildinGroupByTypes } from './group_by_types';

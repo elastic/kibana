@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiExpression, EuiPopover, EuiPopoverTitle, EuiSelect } from '@elastic/eui';
-import { buildInAggregationTypes } from '../constants';
+import { buildinAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
 
 interface WhenExpressionProps {
@@ -24,7 +24,7 @@ export const WhenExpression = ({
   onChangeSelectedAggType,
 }: WhenExpressionProps) => {
   const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
-  const aggregationTypes = customAggTypesOptions ?? buildInAggregationTypes;
+  const aggregationTypes = customAggTypesOptions ?? buildinAggregationTypes;
   return (
     <EuiPopover
       id="aggTypePopover"
