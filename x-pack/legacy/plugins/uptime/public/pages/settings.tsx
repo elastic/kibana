@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiForm,
   EuiTitle,
@@ -34,22 +34,38 @@ interface DispatchProps {
   loadDynamicSettings: typeof getDynamicSettings;
 }
 
-export const SettingsPageComponent = ({
+export const SettingsPageContainer = ({
   dynamicSettingsState: dss,
   loadDynamicSettings,
 }: Props & DispatchProps) => {
   useEffect(() => {
     loadDynamicSettings({});
-  }, [loadDynamicSettings]);
+  }, []);
 
   if (dss.loading) {
     return <EuiText>Loading...</EuiText>;
   }
 
+  return <SettingsPagePresentation dynamicSettingsState={dss} />
+};
+
+export const SettingsPagePresentation = ({
+  dynamicSettingsState: dss,
+}: Props) => {
+  const [formFields, setFormFields] = useState<{[key: string]: any}>(dss.settings || {});
+
+  const onChangeFormField = (field: string, value: any) => {
+    formFields[field] = value;
+    setFormFields(formFields);
+  }
+
+  const onApply = () => {
+    console.log("SAVE", formFields);
+  }
+
   return (
-    <>
+    <EuiForm>
       <EuiPanel>
-        <EuiForm>
           <EuiTitle size="s">
             <h3>
               <FormattedMessage
@@ -106,12 +122,12 @@ export const SettingsPageComponent = ({
                 disabled={dss.loading}
                 isLoading={dss.loading}
                 defaultValue={dss.settings?.heartbeatIndexName}
+                onChange={(event: any) => onChangeFormField('heartbeatIndexName', event.currentTarget.value)}
                 // readOnly={readOnly}
                 // {...uptimeAliasFieldProps}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
-        </EuiForm>
       </EuiPanel>
 
       <EuiSpacer size="m" />
@@ -136,10 +152,11 @@ export const SettingsPageComponent = ({
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj="applySettingsButton"
+            type="submit"
             color="primary"
             // isDisabled={!isFormDirty || !isFormValid}
             fill
-            // onClick={persistUpdates}
+            onClick={onApply}
           >
             <FormattedMessage
               id="xpack.infra.sourceConfiguration.applySettingsButtonLabel"
@@ -148,7 +165,7 @@ export const SettingsPageComponent = ({
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </EuiForm>
   );
 };
 
@@ -162,4 +179,4 @@ const mapDispatchToProps = (dispatch: any) => ({
   },
 });
 
-export const SettingsPage = connect(mapStateToProps, mapDispatchToProps)(SettingsPageComponent);
+export const SettingsPage = connect(mapStateToProps, mapDispatchToProps)(SettingsPageContainer);

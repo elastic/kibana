@@ -9,7 +9,7 @@ import { fetchMonitorDetailsEffect } from './monitor';
 import { fetchOverviewFiltersEffect } from './overview_filters';
 import { fetchSnapshotCountEffect } from './snapshot';
 import { fetchMonitorStatusEffect } from './monitor_status';
-import { fetchDynamicSettingsEffect } from './dynamic_settings';
+import { fetchDynamicSettingsEffect, setDynamicSettingsEffect } from './dynamic_settings';
 
 export function* rootEffect() {
   yield fork(fetchMonitorDetailsEffect);
@@ -17,4 +17,5 @@ export function* rootEffect() {
   yield fork(fetchOverviewFiltersEffect);
   yield fork(fetchMonitorStatusEffect);
   yield fork(fetchDynamicSettingsEffect);
+  yield fork(setDynamicSettingsEffect);
 }

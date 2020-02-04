@@ -8,6 +8,7 @@ import {
   getDynamicSettings,
   getDynamicSettingsSuccess,
   getDynamicSettingsFail,
+  setDynamicSettings,
 } from '../actions/dynamic_settings';
 import { DynamicSettings } from '../../../common/runtime_types';
 
@@ -40,6 +41,10 @@ export const dynamicSettingsReducer = handleActions<DynamicSettingsState, Dynami
         settings: action.payload,
       };
     },
+    [String(setDynamicSettings)]: state => ({
+      ...state,
+      loading: true
+    })
   },
   initialState
 );
