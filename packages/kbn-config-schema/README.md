@@ -237,6 +237,7 @@ __Options:__
   * `defaultValue: TObject | Reference<TObject> | (() => TObject)` - defines a default value, see [Default values](#default-values) section for more details.
   * `validate: (value: TObject) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
   * `allowUnknowns: boolean` - indicates whether unknown object properties should be allowed. It's `false` by default.
+  * `applyDefaults: boolean` - indicates whether object property schema `defaultValue` should be used if not specified. It's `true` by default.
 
 __Usage:__
 ```typescript
