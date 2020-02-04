@@ -29,7 +29,7 @@ import { errorChannelPayloads } from './mock_data/errors';
 export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseErrorsPluginStart> {
   private readonly stop$ = new Subject();
   private instructionsSubscription?: Subscription;
-  private instructionsSeen = new Set(); // TODO: possibly change this to a map later to store more detailed info.
+  private noFixedVersionsSeen: Set<string> = new Set();
   private errorsChannel?: PulseChannel<ErrorInstruction>;
 
   public async setup(core: CoreSetup) {
@@ -49,17 +49,15 @@ export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseEr
         if (instructions && instructions.length) {
           instructions.forEach((instruction: any) => {
             // @ts-ignore-next-line this should be refering to the instruction, not the raw es document
-            if (
-              instruction &&
-              instruction.status === 'new' &&
-              !this.instructionsSeen.has(instruction.hash)
-            )
-              core.notifications.toasts.addError(new Error(JSON.stringify(instruction)), {
-                // @ts-ignore-next-line
-                title: `Error:${instruction.hash}`,
-                toastMessage: `An error occurred: ${instruction.message}. Pulse message:${instruction.pulseMessage}`,
-              });
-            this.instructionsSeen.add(instruction.hash);
+            if (instruction) {
+              if (!instruction.fixedVersion && !this.noFixedVersionsSeen.has(instruction.hash))
+                core.notifications.toasts.addError(new Error(JSON.stringify(instruction)), {
+                  // @ts-ignore-next-line
+                  title: `Error:${instruction.hash}`,
+                  toastMessage: `An error occurred: ${instruction.message}. The error has been reported to Pulse`,
+                });
+              this.noFixedVersionsSeen.add(instruction.hash);
+            }
           });
         }
       });
