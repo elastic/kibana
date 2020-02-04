@@ -19,7 +19,14 @@
                 "functional.apps.visualize._metric_chart",
                 "functional.apps.visualize._line_chart",
                 "functional.apps.visualize._pie_chart",
-                "functional.apps.visualize._region_map",
+                "functional.apps.visualize._region_map"
+            ]
+          },
+          {
+            "config": "test/functional/config.js",
+            "index": "test/functional/apps/visualize/index.ts",
+            "total": 242,
+            "tags": [
                 "functional.apps.visualize._point_series_options",
                 "functional.apps.visualize._markdown_vis",
                 "functional.apps.visualize._shared_item",
@@ -53,7 +60,14 @@
                 "functional.apps.dashboard.full_screen_mode",
                 "functional.apps.dashboard.dashboard_filter_bar",
                 "functional.apps.dashboard.dashboard_filtering",
-                "functional.apps.dashboard.panel_expand_toggle",
+                "functional.apps.dashboard.panel_expand_toggle"
+            ]
+          },
+          {
+            "config": "test/functional/config.js",
+            "index": "test/functional/apps/dashboard/index.js",
+            "total": 171,
+            "tags": [
                 "functional.apps.dashboard.dashboard_grid",
                 "functional.apps.dashboard.view_edit",
                 "functional.apps.dashboard.dashboard_snapshots",
@@ -397,7 +411,14 @@
                 "functional.apps.monitoring.elasticsearch.node_detail",
                 "functional.apps.monitoring.elasticsearch.indices",
                 "functional.apps.monitoring.elasticsearch.index_detail",
-                "functional.apps.monitoring.elasticsearch.shards",
+                "functional.apps.monitoring.elasticsearch.shards"
+            ]
+          },
+          {
+            "config": "test/functional/config.js",
+            "index": "test/functional/apps/monitoring",
+            "total": 71,
+            "tags": [
                 "functional.apps.monitoring.kibana.overview",
                 "functional.apps.monitoring.kibana.instances",
                 "functional.apps.monitoring.kibana.instance",

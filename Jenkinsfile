@@ -26,7 +26,9 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                     kibanaPipeline.buildXpack()
                     kibanaPipeline.prepareXpackTestQueue(queue)
                   } finally {
-                    queue.xpack = []
+                    if (!queue.containsKey('xpack')) {
+                      queue.xpack = []
+                    }
                   }
                 }, [
                 'xpack-functional-1': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 1),

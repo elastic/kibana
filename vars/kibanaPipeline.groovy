@@ -282,13 +282,13 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  return
+  // return
   runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
 }
 
 def buildOss() {
-  sh 'cp -R ./test/scripts/. ../kibana-oss/test/scripts'
-  return
+  // sh 'cp ./test-suites-for-ci.json ../kibana-oss/test-suites-for-ci.json'
+  // return
   sh 'cp -R ./. ../kibana-oss'
   dir('../kibana-oss') {
     runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
@@ -296,7 +296,7 @@ def buildOss() {
 }
 
 def buildXpack() {
-  return
+  // return
   sh 'cp -R ./. ../kibana-xpack'
   dir('../kibana-xpack') {
     runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
@@ -346,7 +346,7 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
                   --debug --bail \
                   --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
                   ${tagString}
-              """, "Execute oss tests"
+              """, "OSS tests: ${testSuite.index}"
             )
             testSuite.success = true
           } catch (ex) {
@@ -396,7 +396,7 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
                   --debug --bail \
                   --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
                   ${tagString}
-              """, "Execute x-pack tests"
+              """, "X-Pack tests: ${testSuite.index}"
             )
             testSuite.success = true
           } catch (ex) {
