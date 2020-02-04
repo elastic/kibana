@@ -227,7 +227,7 @@ export class CreateSourceEditor extends Component {
             label={i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
               defaultMessage: `Dynamically filter for data in the visible map area`,
             })}
-            checked={this.props.filterByMapBounds}
+            checked={this.state.filterByMapBounds}
             onChange={this.onFilterByMapBoundsChange}
           />
         </EuiFormRow>
