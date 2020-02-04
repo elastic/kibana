@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { PluginInitializerContext } from 'kibana/public';
+
 export {
   FeatureCatalogueSetup,
   FeatureCatalogueStart,
@@ -26,4 +28,5 @@ export {
 export { FeatureCatalogueEntry, FeatureCatalogueCategory, Environment } from './services';
 import { HomePublicPlugin } from './plugin';
 
-export const plugin = () => new HomePublicPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new HomePublicPlugin(initializerContext);
