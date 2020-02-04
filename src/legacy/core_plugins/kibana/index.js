@@ -25,7 +25,6 @@ import { migrations } from './migrations';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import { managementApi } from './server/routes/api/management';
-import { registerFieldFormats } from './server/field_formats/register';
 import * as systemApi from './server/lib/system_api';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
@@ -43,9 +42,7 @@ export default function(kibana) {
     config: function(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        defaultAppId: Joi.string().default('home'),
         index: Joi.string().default('.kibana'),
-        disableWelcomeScreen: Joi.boolean().default(false),
         autocompleteTerminateAfter: Joi.number()
           .integer()
           .min(1)
@@ -65,7 +62,6 @@ export default function(kibana) {
         'plugins/kibana/visualize/legacy',
         'plugins/kibana/dashboard/legacy',
       ],
-      savedObjectTypes: ['plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register'],
       app: {
         id: 'kibana',
         title: 'Kibana',
@@ -331,7 +327,6 @@ export default function(kibana) {
       importApi(server);
       exportApi(server);
       managementApi(server);
-      registerFieldFormats(server);
       registerCspCollector(usageCollection, server);
       server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));

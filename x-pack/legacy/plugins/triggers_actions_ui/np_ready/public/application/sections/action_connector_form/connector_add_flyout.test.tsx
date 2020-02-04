@@ -20,7 +20,13 @@ describe('connector_add_flyout', () => {
 
   beforeAll(async () => {
     const mockes = coreMock.createSetup();
-    const [{ chrome, docLinks }] = await mockes.getStartServices();
+    const [
+      {
+        chrome,
+        docLinks,
+        application: { capabilities },
+      },
+    ] = await mockes.getStartServices();
     const deps = {
       chrome,
       docLinks,
@@ -28,18 +34,15 @@ describe('connector_add_flyout', () => {
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      capabilities: {
+        ...capabilities,
+        actions: {
+          delete: true,
+          save: true,
+          show: true,
+        },
+      },
       legacy: {
-        capabilities: {
-          get() {
-            return {
-              actions: {
-                delete: true,
-                save: true,
-                show: true,
-              },
-            };
-          },
-        } as any,
         MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
       },
       actionTypeRegistry: actionTypeRegistry as any,
@@ -55,7 +58,9 @@ describe('connector_add_flyout', () => {
               setAddFlyoutVisibility: state => {},
               editFlyoutVisible: false,
               setEditFlyoutVisibility: state => {},
-              actionTypesIndex: { 'my-action-type': { id: 'my-action-type', name: 'test' } },
+              actionTypesIndex: {
+                'my-action-type': { id: 'my-action-type', name: 'test', enabled: true },
+              },
               reloadConnectors: () => {
                 return new Promise<void>(() => {});
               },

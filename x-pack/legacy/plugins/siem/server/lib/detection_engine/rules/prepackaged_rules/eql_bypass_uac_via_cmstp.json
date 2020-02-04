@@ -1,20 +1,20 @@
 {
-  "description": "Identifies User Account Control (UAC) bypass via cmstp.  Attackers bypass UAC to stealthily execute code with elevated permissions.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "Identifies User Account Control (UAC) bypass via cmstp.exe.  Attackers bypass UAC to stealthily execute code with elevated permissions.",
+  "index": [
+    "winlogbeat-*"
+  ],
   "language": "kuery",
-  "name": "Bypass UAC via CMSTP",
+  "max_signals": 33,
+  "name": "Bypass UAC via Cmstp",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.name:\"cmstp.exe\" and process.parent.args:(\"/s\" and \"/au\")",
-  "risk_score": 25,
+  "risk_score": 21,
   "rule_id": "2f7403da-1a4c-46bb-8ecc-c1a596e10cd0",
   "severity": "low",
   "tags": [
-    "EIA"
+    "Elastic",
+    "Windows"
   ],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -22,7 +22,7 @@
         "name": "Privilege Escalation",
         "reference": "https://attack.mitre.org/tactics/TA0004/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1088",
           "name": "Bypass User Account Control",
@@ -31,7 +31,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

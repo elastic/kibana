@@ -28,6 +28,8 @@ import {
   KibanaDatatableColumn,
 } from 'src/plugins/expressions/public';
 import {
+  ISearchSource,
+  SearchSource,
   Query,
   TimeRange,
   esFilters,
@@ -43,8 +45,8 @@ import { PersistedState } from '../../../../../ui/public/persisted_state';
 import { Adapters } from '../../../../../../plugins/inspector/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getQueryService, getIndexPatterns } from '../../../../../../plugins/data/public/services';
-import { ISearchSource, getRequestInspectorStats, getResponseInspectorStats } from '../..';
-import { SearchSource } from '../search_source';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../..';
+import { serializeAggConfig } from './utils';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
@@ -288,6 +290,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
         const cleanedColumn: KibanaDatatableColumn = {
           id: column.id,
           name: column.name,
+          meta: serializeAggConfig(column.aggConfig),
         };
         if (args.includeFormatHints) {
           cleanedColumn.formatHint = createFormat(column.aggConfig);

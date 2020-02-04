@@ -61,7 +61,8 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     expect(stats.isDirectory()).toBe(true);
   });
 
-  it(`should create an internationalization config file with a blank line appended to satisfy the parser`, async () => {
+  // skipped until internationalization is re-introduced
+  it.skip(`should create an internationalization config file with a blank line appended to satisfy the parser`, async () => {
     // Link to the error that happens when the blank line is not there:
     // https://github.com/elastic/kibana/pull/45044#issuecomment-530092627
     const intlFile = `${generatedPath}/.i18nrc.json`;
@@ -78,16 +79,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       });
     });
 
-    it(`'yarn test:server' should exit 0`, async () => {
-      await execa('yarn', ['test:server'], {
-        cwd: generatedPath,
-        env: {
-          DISABLE_JUNIT_REPORTER: '1',
-        },
-      });
-    });
-
-    it(`'yarn build' should exit 0`, async () => {
+    it.skip(`'yarn build' should exit 0`, async () => {
       await execa('yarn', ['build'], { cwd: generatedPath });
     });
 
@@ -109,7 +101,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
               '--migrations.skip=true',
             ],
             cwd: generatedPath,
-            wait: /ispec_plugin.+Status changed from uninitialized to green - Ready/,
+            wait: new RegExp('\\[ispecPlugin\\]\\[plugins\\] Setting up plugin'),
           });
           await proc.stop('kibana');
         });
@@ -120,7 +112,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       await execa('yarn', ['preinstall'], { cwd: generatedPath });
     });
 
-    it(`'yarn lint' should exit 0`, async () => {
+    it.skip(`'yarn lint' should exit 0`, async () => {
       await execa('yarn', ['lint'], { cwd: generatedPath });
     });
 
