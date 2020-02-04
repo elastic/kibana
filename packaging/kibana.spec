@@ -1,4 +1,4 @@
-# Copyright 2019 LogRhythm, Inc
+# Copyright 2020 LogRhythm, Inc
 # Licensed under the LogRhythm Global End User License Agreement,
 # which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
 
@@ -24,19 +24,19 @@ mkdir %{name}
 cd %{name}
 
 #extract sources
-tar xzf %_sourcedir/%{name}-%{version}.tar.gz
+tar xf %_sourcedir/%{name}-%{version}.tar
 if [ $? -ne 0 ]; then
    exit $?
 fi
 
 #extract dlumbrer/kbn_network plugin, following the renaming and file modification steps from github repo
-unzip -q resources/plugins/kbn_network*.zip -d plugins/
-if [ $? -ne 0 ]; then
-   echo "Exiting build. Could not unzip plugin."
-   exit 1
-fi
-mv plugins/kbn_network* plugins/network_vis
-rm -rf plugins/network_vis/images/
+#unzip -q resources/plugins/kbn_network*.zip -d plugins/
+#if [ $? -ne 0 ]; then
+#   echo "Exiting build. Could not unzip plugin."
+#   exit 1
+#fi
+#mv plugins/kbn_network* plugins/network_vis
+#rm -rf plugins/network_vis/images/
 
 %build
 #must install kibana dependencies before running build due to a `yarn kbn bootstrap` bug that strips auth
@@ -44,11 +44,11 @@ cd %{name}
 /usr/bin/yarn
 
 #plugin has a package.json that must also be installed before running build
-cd plugins/network_vis/
+#cd plugins/network_vis/
 /usr/bin/yarn
 
 #run the build
-cd ../../
+#cd ../../
 /usr/bin/yarn kbn bootstrap
 node scripts/build --rpm --oss --skip-archives --release --verbose
 
@@ -65,7 +65,7 @@ mkdir -p %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
 cp scripts/exportAssets.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
 cp scripts/configureKibana.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
 cp scripts/util.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
-cp -a plugins/ %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/
+#cp -a plugins/ %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/
 
 mkdir -p %{buildroot}/usr/local/www/probe/
 ln -sf /usr/local/%{name}-%{kibana_version}-linux-x86_64 %{buildroot}/usr/local/www/probe/%{name}-%{kibana_version}-linux-x86_64
