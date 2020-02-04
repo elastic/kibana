@@ -5,9 +5,11 @@
   "license": "MIT",
   "scripts": {
     "cypress:open": "cypress open",
-    "cypress:bdd": "cypress run --spec **/*.feature",
-    "cypress:run": "cypress run",
-    "lint": "node ../../../../../scripts/eslint --fix"
+    "cypress:run": "cypress run --spec **/*.feature",
+    "lint": "tslint --project ./tsconfig.json --fix",
+    "postlint": "npm run tsc",
+    "precypress:run": "npm run lint",
+    "tsc": "tsc --pretty --noEmit"
   },
   "dependencies": {
     "@cypress/snapshot": "^2.1.3",
@@ -21,7 +23,8 @@
     "js-yaml": "^3.13.1",
     "p-limit": "^2.2.1",
     "ts-loader": "^6.1.0",
-    "typescript": "3.7.2",
+    "tslint": "6.0.0",
+    "typescript": "3.7.5",
     "webpack": "^4.40.2"
   }
 }
