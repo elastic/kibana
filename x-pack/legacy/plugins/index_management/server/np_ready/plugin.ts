@@ -25,7 +25,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexMgmtSetup, void, any, 
   constructor({ logger }: PluginInitializerContext) {
     this.log = logger.get();
     this.apiRoutes = new ApiRoutes();
-    this.license = new License(this.log);
+    this.license = new License();
   }
 
   setup({ http }: CoreSetup, { licensing }: Dependencies): IndexMgmtSetup {
@@ -39,7 +39,10 @@ export class IndexMgmtServerPlugin implements Plugin<IndexMgmtSetup, void, any, 
           defaultMessage: 'License check failed',
         }),
       },
-      { licensing }
+      {
+        licensing,
+        logger: this.log,
+      }
     );
 
     this.apiRoutes.setup({

@@ -27,17 +27,14 @@ interface SetupSettings {
 }
 
 export class License {
-  private licenseStatus: LicenseStatus;
-  private log: Logger;
-
-  constructor(logger: Logger) {
-    this.log = logger;
-    this.licenseStatus = { isValid: false, message: 'Invalid License' };
-  }
+  private licenseStatus: LicenseStatus = {
+    isValid: false,
+    message: 'Invalid License',
+  };
 
   setup(
     { pluginId, minimumLicenseType, defaultErrorMessage }: SetupSettings,
-    { licensing }: { licensing: LicensingPluginSetup }
+    { licensing, logger }: { licensing: LicensingPluginSetup; logger: Logger }
   ) {
     licensing.license$.subscribe(license => {
       const { state, message } = license.check(pluginId, minimumLicenseType);
@@ -51,7 +48,7 @@ export class License {
           message: message || defaultErrorMessage,
         };
         if (message) {
-          this.log.info(message);
+          logger.info(message);
         }
       }
     });
