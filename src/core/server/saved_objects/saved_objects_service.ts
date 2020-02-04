@@ -33,7 +33,7 @@ import { InternalElasticsearchServiceSetup, APICaller } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
 import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { SavedObjectsConfigType } from './saved_objects_config';
-import { KibanaRequest } from '../http';
+import { InternalHttpServiceSetup, KibanaRequest } from '../http';
 import { SavedObjectsClientContract } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
@@ -45,6 +45,7 @@ import { SavedObjectsMapping } from './mappings';
 import { MigrationDefinition } from './migrations/core/document_migrator';
 import { SavedObjectsSchemaDefinition } from './schema';
 import { PropertyValidators } from './validation';
+import { registerRoutes } from './routes';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -187,6 +188,7 @@ export interface SavedObjectsRepositoryFactory {
 export interface SavedObjectsSetupDeps {
   legacyPlugins: LegacyServiceDiscoverPlugins;
   elasticsearch: InternalElasticsearchServiceSetup;
+  http: InternalHttpServiceSetup;
 }
 
 interface WrappedClientFactoryWrapper {
@@ -231,6 +233,8 @@ export class SavedObjectsService
     this.migrations = savedObjectMigrations;
     this.schemas = savedObjectsSchemasDefinition;
     this.validations = savedObjectValidations;
+
+    registerRoutes(setupDeps.http);
 
     return {
       setClientFactoryProvider: provider => {

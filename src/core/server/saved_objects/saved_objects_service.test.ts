@@ -30,6 +30,7 @@ import { Env } from '../config';
 import { configServiceMock } from '../mocks';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { legacyServiceMock } from '../legacy/legacy_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
 import { BehaviorSubject } from 'rxjs';
 import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
@@ -38,6 +39,7 @@ describe('SavedObjectsService', () => {
   const createSetupDeps = () => {
     const elasticsearchMock = elasticsearchServiceMock.createInternalSetup();
     return {
+      http: httpServiceMock.createSetupContract(),
       elasticsearch: elasticsearchMock,
       legacyPlugins: legacyServiceMock.createDiscoverPlugins(),
     };

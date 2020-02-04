@@ -17,14 +17,10 @@
  * under the License.
  */
 
-export { createBulkCreateRoute } from './bulk_create';
-export { createBulkGetRoute } from './bulk_get';
-export { createCreateRoute } from './create';
-export { createDeleteRoute } from './delete';
-export { createFindRoute } from './find';
-export { createImportRoute } from './import';
-export { createLogLegacyImportRoute } from './log_legacy_import';
-export { createResolveImportErrorsRoute } from './resolve_import_errors';
-export { createUpdateRoute } from './update';
-export { createBulkUpdateRoute } from './bulk_update';
-export { createExportRoute } from './export';
+import { InternalHttpServiceSetup } from '../../http';
+import { registerGetRoute } from './get';
+
+export function registerRoutes(http: InternalHttpServiceSetup) {
+  const router = http.createRouter('');
+  registerGetRoute(router);
+}
