@@ -442,6 +442,13 @@ export const viewableBoundingBox: (state: CameraState) => (time: Date) => AABB =
   }
 );
 
+// prettier-ignore
+const fromNDCtoZeroToTwo: Matrix3 = [
+  0, 0, 1,
+  0, 0, 1,
+  0, 0, 0
+]
+
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
  * See https://en.wikipedia.org/wiki/Orthographic_projection
@@ -464,7 +471,7 @@ export const projectionMatrix: (state: CameraState) => (time: Date) => Matrix3 =
         scalingTransformation([renderWidth / 2, renderHeight / 2]),
         addMatrix(
           // 4. add one to change range from -1->1 to 0->2
-          [0, 0, 1, 0, 0, 1, 0, 0, 0],
+          fromNDCtoZeroToTwo,
           multiply(
             // 3. invert y since CSS has inverted y
             scalingTransformation([1, -1]),
