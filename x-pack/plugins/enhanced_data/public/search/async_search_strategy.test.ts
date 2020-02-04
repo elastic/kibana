@@ -8,6 +8,7 @@ import { of } from 'rxjs';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { asyncSearchStrategyProvider } from './async_search_strategy';
 import { IAsyncSearchOptions } from './types';
+import { AbortController } from 'abort-controller';
 
 describe('Async search strategy', () => {
   let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
@@ -76,13 +77,8 @@ describe('Async search strategy', () => {
     const promise = asyncSearch.search(mockRequest, options).toPromise();
     abortController.abort();
 
-    expect.assertions(2);
-
-    try {
-      await promise;
-    } catch (e) {
-      expect(mockSearch).toBeCalledTimes(1);
-      expect(mockCoreSetup.http.delete).toBeCalled();
-    }
+    await promise;
+    expect(mockSearch).toBeCalledTimes(2);
+    expect(mockCoreSetup.http.delete).toBeCalled();
   });
 });
