@@ -77,7 +77,7 @@ export const ActionConnectorForm = ({
           title={i18n.translate(
             'xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionTypeConfigurationWarningTitleText',
             {
-              defaultMessage: 'Action type may not be configured',
+              defaultMessage: 'Action type not registered',
             }
           )}
           color="warning"

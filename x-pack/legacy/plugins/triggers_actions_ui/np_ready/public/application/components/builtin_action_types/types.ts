@@ -42,7 +42,7 @@ export interface IndexActionParams {
   index?: string;
   refresh?: boolean;
   executionTimeField?: string;
-  documents?: string[];
+  documents: string[];
 }
 
 export enum ServerLogLevelOptions {
@@ -55,7 +55,7 @@ export enum ServerLogLevelOptions {
 }
 
 export interface ServerLogActionParams {
-  level: ServerLogLevelOptions;
+  level?: ServerLogLevelOptions;
   message: string;
 }
 

@@ -6,14 +6,6 @@
 import { ActionType } from '../../../../../plugins/actions/common';
 import { TypeRegistry } from './application/type_registry';
 import { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
-import {
-  EmailActionParams,
-  PagerDutyActionParams,
-  IndexActionParams,
-  ServerLogActionParams,
-  WebhookActionParams,
-  SlackActionParams,
-} from './application/components/builtin_action_types/types';
 export { Alert, AlertAction };
 export { ActionType };
 
@@ -51,14 +43,7 @@ export interface ActionTypeModel {
   validateConnector: (connector: any) => ValidationResult;
   validateParams: (actionParams: any) => ValidationResult;
   actionConnectorFields: React.FunctionComponent<any> | null;
-  actionParamsFields:
-    | React.FunctionComponent<ActionParamsProps<EmailActionParams>>
-    | React.FunctionComponent<ActionParamsProps<IndexActionParams>>
-    | React.FunctionComponent<ActionParamsProps<PagerDutyActionParams>>
-    | React.FunctionComponent<ActionParamsProps<ServerLogActionParams>>
-    | React.FunctionComponent<ActionParamsProps<SlackActionParams>>
-    | React.FunctionComponent<ActionParamsProps<WebhookActionParams>>
-    | null;
+  actionParamsFields: any;
 }
 
 export interface ValidationResult {
