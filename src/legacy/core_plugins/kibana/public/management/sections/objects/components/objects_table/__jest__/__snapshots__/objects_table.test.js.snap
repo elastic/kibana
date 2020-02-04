@@ -78,7 +78,6 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
 
 exports[`ObjectsTable export should allow the user to choose when exporting all 1`] = `
 <EuiModal
-  maxWidth={true}
   onClose={[Function]}
 >
   <EuiModalHeader>
