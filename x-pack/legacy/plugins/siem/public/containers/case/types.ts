@@ -7,6 +7,21 @@
 import { SavedObjectsBaseOptions } from 'kibana/server';
 import { Direction } from '../../graphql/types';
 
+interface FormData {
+  isNew?: boolean;
+}
+
+export interface NewCase extends FormData {
+  description: string;
+  tags: string[] | [];
+  title: string;
+  case_type: string;
+}
+
+export interface NewCaseFormatted extends NewCase {
+  state: string;
+}
+
 interface Case {
   case_type: string;
   created_at: number;

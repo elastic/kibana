@@ -35,6 +35,10 @@ export const PAGE_BADGE_TOOLTIP = i18n.translate('xpack.siem.case.casePage.pageB
     'Case Workflow is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
 });
 
-export const BACK_LABEL = i18n.translate('xpack.siem.case.casePage.pageBackLabel', {
-  defaultMessage: '< Back to all cases',
+export const OPTIONAL = i18n.translate('xpack.siem.case.casePage.optional', {
+  defaultMessage: 'Optional',
+});
+
+export const SUBMIT = i18n.translate('xpack.siem.case.casePage.optional', {
+  defaultMessage: 'Submit',
 });

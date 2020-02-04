@@ -7,8 +7,8 @@
 import { schema } from '@kbn/config-schema';
 
 export const UserSchema = schema.object({
-  username: schema.string(),
   full_name: schema.maybe(schema.string()),
+  username: schema.string(),
 });
 
 export const NewCommentSchema = schema.object({
@@ -26,19 +26,19 @@ export const UpdatedCommentSchema = schema.object({
 });
 
 export const NewCaseSchema = schema.object({
+  case_type: schema.string(),
   description: schema.string(),
-  title: schema.string(),
   state: schema.oneOf([schema.literal('open'), schema.literal('closed')], { defaultValue: 'open' }),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  case_type: schema.string(),
+  title: schema.string(),
 });
 
 export const UpdatedCaseSchema = schema.object({
+  case_type: schema.maybe(schema.string()),
   description: schema.maybe(schema.string()),
-  title: schema.maybe(schema.string()),
   state: schema.maybe(schema.oneOf([schema.literal('open'), schema.literal('closed')])),
   tags: schema.maybe(schema.arrayOf(schema.string())),
-  case_type: schema.maybe(schema.string()),
+  title: schema.maybe(schema.string()),
 });
 
 export const SavedObjectsFindOptionsSchema = schema.object({

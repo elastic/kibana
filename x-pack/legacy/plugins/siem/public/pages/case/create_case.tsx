@@ -15,8 +15,7 @@ import { getCaseUrl } from '../../components/link_to';
 
 export const CreateCasePage = React.memo(() => (
   <>
-    <WrapperPage restrictWidth>
-      {' '}
+    <WrapperPage>
       <HeaderPage
         backOptions={{
           href: getCaseUrl(),

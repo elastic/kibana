@@ -37,11 +37,7 @@ import {
 } from '../../../../components/detection_engine/utility_bar';
 
 export const AllCases = React.memo(() => {
-  const [
-    { data, isLoading, isError, pagination, filterOptions },
-    doFetch,
-    setFilters,
-  ] = useGetCases();
+  const [{ data, isLoading, pagination, filterOptions }, doFetch, setFilters] = useGetCases();
 
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
