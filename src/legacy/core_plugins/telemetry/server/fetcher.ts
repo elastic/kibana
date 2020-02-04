@@ -24,7 +24,6 @@ import { telemetryCollectionManager } from './collection_manager';
 import { getTelemetryOptIn, getTelemetrySendUsageFrom } from './telemetry_config';
 import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry_repository';
 import { REPORT_INTERVAL_MS } from '../common/constants';
-import { getXpackConfigWithDeprecated } from '../common/get_xpack_config_with_deprecated';
 
 export class FetcherTask {
   private readonly checkDurationMs = 60 * 1000 * 5;
@@ -52,7 +51,7 @@ export class FetcherTask {
     const configTelemetrySendUsageFrom = config.get('telemetry.sendUsageFrom');
     const allowChangingOptInStatus = config.get('telemetry.allowChangingOptInStatus');
     const configTelemetryOptIn = config.get('telemetry.optIn');
-    const telemetryUrl = getXpackConfigWithDeprecated(config, 'telemetry.url') as string;
+    const telemetryUrl = config.get('telemetry.url') as string;
 
     return {
       telemetryOptIn: getTelemetryOptIn({

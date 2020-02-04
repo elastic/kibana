@@ -24,7 +24,6 @@ import { dirname, join } from 'path';
 
 // look for telemetry.yml in the same places we expect kibana.yml
 import { ensureDeepObject } from './ensure_deep_object';
-import { getXpackConfigWithDeprecated } from '../../../common/get_xpack_config_with_deprecated';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
 
 /**
@@ -85,7 +84,7 @@ export function createTelemetryUsageCollector(
     isReady: () => true,
     fetch: async () => {
       const config = server.config();
-      const configPath = getXpackConfigWithDeprecated(config, 'telemetry.config') as string;
+      const configPath = config.get('telemetry.config') as string;
       const telemetryPath = join(dirname(configPath), 'telemetry.yml');
       return await readTelemetryFile(telemetryPath);
     },

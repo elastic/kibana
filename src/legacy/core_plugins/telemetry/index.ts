@@ -26,7 +26,6 @@ import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { getConfigPath } from '../../../core/server/path';
 // @ts-ignore
 import mappings from './mappings.json';
-import { getXpackConfigWithDeprecated } from './common/get_xpack_config_with_deprecated';
 import {
   telemetryPlugin,
   replaceTelemetryInjectedVars,
@@ -92,11 +91,11 @@ const telemetry = (kibana: any) => {
       injectDefaultVars(server: Server) {
         const config = server.config();
         return {
-          telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
-          telemetryUrl: getXpackConfigWithDeprecated(config, 'telemetry.url'),
+          telemetryEnabled: config.get('telemetry.enabled'),
+          telemetryUrl: config.get('telemetry.url'),
           telemetryBanner:
             config.get('telemetry.allowChangingOptInStatus') !== false &&
-            getXpackConfigWithDeprecated(config, 'telemetry.banner'),
+            config.get('telemetry.banner'),
           telemetryOptedIn: config.get('telemetry.optIn'),
           telemetryOptInStatusUrl: config.get('telemetry.optInStatusUrl'),
           allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),

@@ -35,7 +35,6 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
     overlays,
     application,
   }: CoreStart): TelemetryPluginStart {
-    const isPluginEnabled = injectedMetadata.getInjectedVar('telemetryEnabled') as boolean;
     const telemetryBanner = injectedMetadata.getInjectedVar('telemetryBanner') as boolean;
     const sendUsageFrom = injectedMetadata.getInjectedVar('telemetrySendUsageFrom') as
       | 'browser'
@@ -62,7 +61,6 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
 
       this.maybeStartTelemetryPoller({
         telemetrySender,
-        isPluginEnabled,
         sendUsageFrom,
       });
 
@@ -90,14 +88,12 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
 
   private maybeStartTelemetryPoller({
     telemetrySender,
-    isPluginEnabled,
     sendUsageFrom,
   }: {
     telemetrySender: TelemetrySender;
-    isPluginEnabled: boolean;
     sendUsageFrom: string;
   }) {
-    if (isPluginEnabled && sendUsageFrom === 'browser') {
+    if (sendUsageFrom === 'browser') {
       telemetrySender.startChecking();
     }
   }
