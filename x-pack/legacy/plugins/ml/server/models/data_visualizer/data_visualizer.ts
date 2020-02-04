@@ -347,7 +347,7 @@ export class DataVisualizer {
 
     // Value count aggregation faster way of checking if field exists than using
     // filter aggregation with exists query.
-    const aggs: { [key: string]: any } = {};
+    const aggs: Aggs = {};
     aggregatableFields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
       aggs[`${safeFieldName}_count`] = {

@@ -30,8 +30,8 @@ const PARTITION_FIELD_CARDINALITY_THRESHOLD = 1000;
 const BY_FIELD_CARDINALITY_THRESHOLD = 1000;
 const MODEL_PLOT_THRESHOLD_HIGH = 100;
 
-const validateFactory = (callWithRequest, job) => {
-  const dv = new DataVisualizer(callWithRequest);
+const validateFactory = (context, job) => {
+  const dv = new DataVisualizer(context);
 
   const modelPlotConfigTerms = _.get(job, ['model_plot_config', 'terms'], '');
   const modelPlotConfigFieldCount =
@@ -55,7 +55,7 @@ const validateFactory = (callWithRequest, job) => {
         const uniqueFieldNames = _.uniq(relevantDetectors.map(f => f[fieldName]));
 
         // use fieldCaps endpoint to get data about whether fields are aggregatable
-        const fieldCaps = await callWithRequest('fieldCaps', {
+        const fieldCaps = await context.ml.mlClient.callAsCurrentUser('fieldCaps', {
           index: job.datafeed_config.indices.join(','),
           fields: uniqueFieldNames,
         });
@@ -129,7 +129,7 @@ const validateFactory = (callWithRequest, job) => {
   };
 };
 
-export async function validateCardinality(callWithRequest, job) {
+export async function validateCardinality(context, job) {
   const messages = [];
 
   validateJobObject(job);
@@ -144,7 +144,7 @@ export async function validateCardinality(callWithRequest, job) {
   }
 
   // validate({ type, isInvalid }) asynchronously returns an array of validation messages
-  const validate = validateFactory(callWithRequest, job);
+  const validate = validateFactory(context, job);
 
   const modelPlotEnabled =
     (job.model_plot_config && job.model_plot_config.enabled === true) || false;
