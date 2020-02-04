@@ -18,11 +18,11 @@
 // the project's config changing)
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-const webpack = require('@cypress/webpack-preprocessor');
+const wp = require('@cypress/webpack-preprocessor');
 
 module.exports = on => {
   const options = {
     webpackOptions: require('../webpack.config.js')
   };
-  on('file:preprocessor', webpack(options));
+  on('file:preprocessor', wp(options));
 };
