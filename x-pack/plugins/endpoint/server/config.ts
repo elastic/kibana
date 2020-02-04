@@ -15,6 +15,8 @@ export const EndpointConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   endpointResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
   endpointResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
+  resolverResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
+  resolverResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
 });
 
 export function createConfig$(context: PluginInitializerContext) {

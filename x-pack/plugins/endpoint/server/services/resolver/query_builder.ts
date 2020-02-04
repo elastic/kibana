@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isPhase0EntityID, parsePhase0EntityID } from './common';
+import { EndpointAppContext } from '../../types';
+
+export interface PaginationInfo {
+  page: number;
+  pageSize: number;
+}
 
 function buildPhase0ChildrenQuery(endpointID: string, uniquePID: string) {
   return {
@@ -19,7 +25,7 @@ function buildPhase0ChildrenQuery(endpointID: string, uniquePID: string) {
                       term: { 'endgame.unique_pid': uniquePID },
                     },
                     {
-                      match: { 'agent.id': endpointID },
+                      term: { 'agent.id': endpointID },
                     },
                   ],
                 },
@@ -31,7 +37,7 @@ function buildPhase0ChildrenQuery(endpointID: string, uniquePID: string) {
                       term: { 'endgame.unique_ppid': uniquePID },
                     },
                     {
-                      match: { 'agent.id': endpointID },
+                      term: { 'agent.id': endpointID },
                     },
                   ],
                 },
@@ -65,7 +71,23 @@ function buildPhase1ChildrenQuery(entityID: string) {
   };
 }
 
-export function getESChildrenQuery(entityID: string) {
+export async function getESChildrenQuery(
+  context: EndpointAppContext,
+  entityID: string,
+  paginationInfo: PaginationInfo
+) {
+  if (isPhase0EntityID(entityID)) {
+    const [endpointID, uniquePID] = parsePhase0EntityID(entityID);
+    return await buildSearchBody(
+      context,
+      buildPhase0ChildrenQuery(endpointID, uniquePID),
+      paginationInfo
+    );
+  }
+  return await buildSearchBody(context, buildPhase1ChildrenQuery(entityID), paginationInfo);
+}
+
+export function getESChildrenCountQuery(entityID: string) {
   if (isPhase0EntityID(entityID)) {
     const [endpointID, uniquePID] = parsePhase0EntityID(entityID);
     return buildPhase0ChildrenQuery(endpointID, uniquePID);
@@ -85,9 +107,7 @@ function buildPhase0NodeQuery(endpointID: string, uniquePID: string) {
             term: { 'endgame.unique_pid': uniquePID },
           },
           {
-            // TODO figure out if the labels.endpoint_id needs to be defined in the mapping otherwise
-            // this has to be match instead of a term
-            match: { 'agent.id': endpointID },
+            term: { 'agent.id': endpointID },
           },
         ],
       },
@@ -107,7 +127,60 @@ function buildPhase1NodeQuery(entityID: string) {
   };
 }
 
-export function getESNodeQuery(entityID: string) {
+export async function getPagination(
+  endpointAppContext: EndpointAppContext,
+  paginationInfo: PaginationInfo
+) {
+  const config = await endpointAppContext.config();
+  const page = paginationInfo.page || config.resolverResultListDefaultFirstPageIndex;
+  const pageSize = paginationInfo.pageSize || config.resolverResultListDefaultPageSize;
+  return {
+    page,
+    pageSize,
+    from: page * pageSize,
+  };
+}
+
+async function buildSearchBody(
+  endpointAppContext: EndpointAppContext,
+  query: any,
+  paginationInfo: PaginationInfo
+) {
+  const { pageSize: size, from } = await getPagination(endpointAppContext, paginationInfo);
+  // Need to address https://github.com/elastic/endpoint-app-team/issues/147 here
+  // use the default value of 10k here and if it results in a gte perform a count if need be
+  const trackTotal = 10000;
+
+  return {
+    body: {
+      query,
+      sort: [{ '@timestamp': { order: 'asc' } }],
+    },
+    from,
+    size,
+    // check to see if there is more than the client is requesting so we can indicate they should request the next
+    // page
+    track_total_hits: trackTotal,
+  };
+}
+
+export async function getESNodeQuery(
+  context: EndpointAppContext,
+  entityID: string,
+  paginationInfo: PaginationInfo
+) {
+  if (isPhase0EntityID(entityID)) {
+    const [endpointID, uniquePID] = parsePhase0EntityID(entityID);
+    return await buildSearchBody(
+      context,
+      buildPhase0NodeQuery(endpointID, uniquePID),
+      paginationInfo
+    );
+  }
+  return await buildSearchBody(context, buildPhase1NodeQuery(entityID), paginationInfo);
+}
+
+export function getESNodeCountQuery(entityID: string) {
   if (isPhase0EntityID(entityID)) {
     const [endpointID, uniquePID] = parsePhase0EntityID(entityID);
     return buildPhase0NodeQuery(endpointID, uniquePID);

@@ -24,6 +24,7 @@ export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
 export class EndpointAppConstants {
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
+  static RESOLVER_INDEX_NAME = 'endpoint-event-*';
 }
 
 export interface EndpointResultList {
@@ -117,6 +118,30 @@ export interface ResolverPhase1Data {
       };
     };
   };
+}
+
+export type ResolverData = ResolverPhase0Data | ResolverPhase1Data;
+
+export interface ResolverResponseNode {
+  entity_id: string;
+  parent_entity_id: string;
+  events: ResolverData[];
+}
+
+export interface ResolverChildrenResponse extends Pagination {
+  origin: ResolverResponseNode;
+  children: ResolverResponseNode[];
+}
+
+export interface ResolverNodeDetailsResponse extends Pagination {
+  node: ResolverResponseNode;
+}
+
+interface Pagination {
+  total: number;
+  request_page_size: number;
+  request_page_index: number;
+  request_from_index: number;
 }
 
 /**
