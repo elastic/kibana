@@ -367,7 +367,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.context.core.elasticsearch.dataClient.callAsCurrentUser('search', {
+    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
       index,
       rest_total_hits_as_int: true,
       size,
@@ -434,7 +434,7 @@ export class DataVisualizer {
     };
     filterCriteria.push({ exists: { field } });
 
-    const resp = await this.context.core.elasticsearch.dataClient.callAsCurrentUser('search', {
+    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
       index,
       rest_total_hits_as_int: true,
       size,
@@ -476,7 +476,7 @@ export class DataVisualizer {
       aggs,
     };
 
-    const resp = await this.context.core.elasticsearch.dataClient.callAsCurrentUser('search', {
+    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -579,7 +579,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.context.core.elasticsearch.dataClient.callAsCurrentUser('search', {
+    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -700,7 +700,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.context.core.elasticsearch.dataClient.callAsCurrentUser('search', {
+    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -784,7 +784,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.context.core.elasticsearch.dataClient.callAsCurrentUser('search', {
+    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -851,7 +851,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.context.core.elasticsearch.dataClient.callAsCurrentUser('search', {
+    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -913,7 +913,7 @@ export class DataVisualizer {
       },
     };
 
-    const resp = await this.context.core.elasticsearch.dataClient.callAsCurrentUser('search', {
+    const resp = await this.context.ml!.mlClient.callAsCurrentUser('search', {
       index,
       rest_total_hits_as_int: true,
       size,
