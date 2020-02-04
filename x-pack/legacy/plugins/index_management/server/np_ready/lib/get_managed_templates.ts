@@ -7,10 +7,10 @@
 // Cloud has its own system for managing templates and we want to make
 // this clear in the UI when a template is used in a Cloud deployment.
 export const getManagedTemplatePrefix = async (
-  callWithInternalUser: any
+  callAsCurrentUser: any
 ): Promise<string | undefined> => {
   try {
-    const { persistent, transient, defaults } = await callWithInternalUser('cluster.getSettings', {
+    const { persistent, transient, defaults } = await callAsCurrentUser('cluster.getSettings', {
       filterPath: '*.*managed_index_templates',
       flatSettings: true,
       includeDefaults: true,
