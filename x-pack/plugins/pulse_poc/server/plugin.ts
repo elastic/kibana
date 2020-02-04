@@ -153,15 +153,12 @@ export class PulsePocPlugin {
       }
     );
 
-    await Promise.all(
-      this.channels.reduce((promises, { id, checks }) => {
-        const index = PulsePocPlugin.getIndexName(id);
-        return [
-          ...checks.map(async ({ setup }) => setup && (await setup(esClient, index))),
-          ...promises,
-        ];
-      }, [] as Array<Promise<void>>)
-    );
+    for (const { id, checks } of this.channels) {
+      const index = PulsePocPlugin.getIndexName(id);
+      for (const { setup } of checks) {
+        await (setup && setup(esClient, index));
+      }
+    }
   }
 
   public start() {}
