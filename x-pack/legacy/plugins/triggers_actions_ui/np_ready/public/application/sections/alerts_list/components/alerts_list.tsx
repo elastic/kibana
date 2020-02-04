@@ -249,7 +249,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const emptyPrompt = (
     <EuiEmptyPrompt
       iconType="watchesApp"
-      data-test-subj="createFirstConnectorEmptyPrompt"
+      data-test-subj="createFirstAlertEmptyPrompt"
       title={
         <h2>
           <FormattedMessage
@@ -268,7 +268,7 @@ export const AlertsList: React.FunctionComponent = () => {
       }
       actions={
         <EuiButton
-          data-test-subj="createFirstActionButton"
+          data-test-subj="createFirstAlertButton"
           key="create-action"
           fill
           iconType="plusInCircle"

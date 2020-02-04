@@ -89,7 +89,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should search for alert', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
@@ -105,7 +105,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should search for tags', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(`${createdAlert.name} foo`);
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
@@ -121,7 +121,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should disable single alert', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
@@ -139,7 +139,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should re-enable single alert', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
@@ -163,7 +163,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should mute single alert', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
@@ -181,7 +181,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should unmute single alert', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
@@ -205,24 +205,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should delete single alert', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
       await testSubjects.click('deleteAlert');
-
-      await retry.try(async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-        const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-        expect(searchResults.length).to.eql(0);
-      });
+      const emptyPrompt = await find.byCssSelector(
+        '[data-test-subj="createFirstAlertEmptyPrompt"]'
+      );
+      expect(await emptyPrompt.elementHasClass('euiEmptyPrompt')).to.be(true);
     });
 
     it('should mute all selection', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
@@ -245,7 +242,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should unmute all selection', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
@@ -270,7 +267,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should disable all selection', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
@@ -293,7 +290,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should enable all selection', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
@@ -318,7 +315,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should delete all selection', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
@@ -327,12 +324,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('deleteAll');
 
-      await retry.try(async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-        const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-        expect(searchResults.length).to.eql(0);
-      });
+      const emptyPrompt = await find.byCssSelector(
+        '[data-test-subj="createFirstAlertEmptyPrompt"]'
+      );
+      expect(await emptyPrompt.elementHasClass('euiEmptyPrompt')).to.be(true);
     });
   });
 };

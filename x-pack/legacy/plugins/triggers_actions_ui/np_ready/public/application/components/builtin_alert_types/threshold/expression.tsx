@@ -213,7 +213,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState([]);
   const [esFields, setEsFields] = useState<Record<string, any>>([]);
-  const [indexOptions, setIndexOptions] = useState<IOption[]>([]);
+  const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionProps[]>([]);
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
   const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
@@ -229,6 +229,13 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
   );
 
   const hasExpressionErrors = !!Object.keys(errors).find(
+    errorKey =>
+      expressionFieldsWithValidation.includes(errorKey) &&
+      errors[errorKey].length >= 1 &&
+      alert.params[errorKey] !== undefined
+  );
+
+  const canShowVizualization = !!Object.keys(errors).find(
     errorKey => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
   );
 
@@ -900,7 +907,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {hasExpressionErrors ? null : (
+      {canShowVizualization ? null : (
         <Fragment>
           <ThresholdVisualization alert={alert} />
         </Fragment>
