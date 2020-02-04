@@ -15,45 +15,58 @@ import { getPingHistogram } from '../../../state/actions';
 import { selectPingHistogram } from '../../../state/selectors';
 import { withResponsiveWrapper, ResponsiveWrapperProps } from '../../higher_order';
 import { GetPingHistogramParams } from '../../../../common/types';
+import { useUrlParams } from '../../../hooks';
 
-type Props = GetPingHistogramParams &
-  ResponsiveWrapperProps &
-  PingHistogramComponentProps &
+type Props = ResponsiveWrapperProps &
+  Pick<PingHistogramComponentProps, 'height' | 'data' | 'loading'> &
   PropsFromRedux;
 
 const PingHistogramContainer: React.FC<Props> = ({
   data,
   loadData,
-  statusFilter,
-  filters,
-  dateStart,
-  dateEnd,
-  absoluteStartDate,
-  absoluteEndDate,
   monitorId,
   lastRefresh,
-  ...props
+  height,
+  loading,
 }) => {
+  const [getUrlParams] = useUrlParams();
+  const {
+    absoluteDateRangeStart,
+    absoluteDateRangeEnd,
+    dateRangeStart: dateStart,
+    dateRangeEnd: dateEnd,
+    statusFilter,
+    filters,
+  } = getUrlParams();
+
   useEffect(() => {
     loadData({ monitorId, dateStart, dateEnd, statusFilter, filters });
   }, [loadData, dateStart, dateEnd, monitorId, filters, statusFilter, lastRefresh]);
   return (
     <PingHistogramComponent
       data={data}
-      absoluteStartDate={absoluteStartDate}
-      absoluteEndDate={absoluteEndDate}
-      {...props}
+      absoluteStartDate={absoluteDateRangeStart}
+      absoluteEndDate={absoluteDateRangeEnd}
+      height={height}
+      loading={loading}
     />
   );
 };
 
 const mapStateToProps = (state: AppState) => ({ ...selectPingHistogram(state) });
 
-const mapDispatchToProps = {
-  loadData: getPingHistogram,
-};
+const mapDispatchToProps = (dispatch: any) => ({
+  loadData: (params: GetPingHistogramParams) => {
+    return dispatch(getPingHistogram(params));
+  },
+});
 
-const connector = connect(mapStateToProps, mapDispatchToProps);
+const connector = connect<
+  StateProps,
+  DispatchProps,
+  Pick<PingHistogramComponentProps, 'height'>,
+  AppState
+>(mapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
