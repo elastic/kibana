@@ -95,23 +95,6 @@ export const mappings = {
       active: {
         type: 'boolean',
       },
-      enrollment_rules: {
-        type: 'nested',
-        properties: {
-          id: { type: 'keyword' },
-          ip_ranges: { type: 'keyword' },
-          window_duration: {
-            type: 'nested',
-            properties: {
-              from: { type: 'date' },
-              to: { type: 'date' },
-            },
-          },
-          types: { type: 'keyword' },
-          created_at: { type: 'date' },
-          updated_at: { type: 'date' },
-        },
-      },
     },
   },
   agent_events: {

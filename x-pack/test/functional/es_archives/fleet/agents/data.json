@@ -100,12 +100,7 @@
         "name": "FleetEnrollmentKey:1",
         "api_key_id" : "key",
         "policy_id" : "policy:1",
-        "active" : true,
-        "enrollment_rules" : [{
-          "id": "rule:1",
-          "ip_ranges": ["0.0.0.0/0"],
-          "created_at" : "2019-09-20T01:57:50.986Z"
-        }]
+        "active" : true
       },
       "type" : "enrollment_api_keys",
       "references": []
