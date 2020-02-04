@@ -173,7 +173,7 @@ management.getSection('kibana').register('index_patterns', {
   url: '#/management/kibana/index_patterns/',
 });
 
-npSetup.plugins.home.register({
+npSetup.plugins.home.featureCatalogue.register({
   id: 'index_patterns',
   title: i18n.translate('kbn.management.indexPatternHeader', {
     defaultMessage: 'Index Patterns',

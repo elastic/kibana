@@ -168,7 +168,7 @@ uiModules.get('apps/management').directive('kbnManagementLanding', function(kbnV
   };
 });
 
-npSetup.plugins.home.register({
+npSetup.plugins.home.featureCatalogue.register({
   id: 'stack-management',
   title: i18n.translate('kbn.stackManagement.managementLabel', {
     defaultMessage: 'Stack Management',

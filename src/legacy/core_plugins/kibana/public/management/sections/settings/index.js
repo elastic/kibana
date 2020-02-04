@@ -82,7 +82,7 @@ management.getSection('kibana').register('settings', {
   url: '#/management/kibana/settings',
 });
 
-npSetup.plugins.home.register({
+npSetup.plugins.home.featureCatalogue.register({
   id: 'advanced_settings',
   title: i18n.translate('kbn.management.settings.advancedSettingsLabel', {
     defaultMessage: 'Advanced Settings',

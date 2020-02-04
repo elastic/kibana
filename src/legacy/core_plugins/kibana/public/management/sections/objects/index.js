@@ -37,7 +37,7 @@ management.getSection('kibana').register('objects', {
   url: '#/management/kibana/objects',
 });
 
-npSetup.plugins.home.register({
+npSetup.plugins.home.featureCatalogue.register({
   id: 'saved_objects',
   title: i18n.translate('kbn.management.objects.savedObjectsTitle', {
     defaultMessage: 'Saved Objects',
