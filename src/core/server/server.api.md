@@ -509,7 +509,7 @@ export type ConfigDeprecation = (config: Record<string, any>, fromPath: string, 
 // @public
 export interface ConfigDeprecationFactory {
     rename(oldKey: string, newKey: string): ConfigDeprecation;
-    renameFromRoot(oldKey: string, newKey: string): ConfigDeprecation;
+    renameFromRoot(oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation;
     unused(unusedKey: string): ConfigDeprecation;
     unusedFromRoot(unusedKey: string): ConfigDeprecation;
 }
