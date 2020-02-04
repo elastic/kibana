@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector } from '../../../types';
+import { ActionTypeModel, ActionParamsProps } from '../../../types';
+import { SlackActionParams, SlackActionConnector } from './types';
 
 const ACTION_TYPE_ID = '.slack';
 let actionTypeModel: ActionTypeModel;
@@ -38,7 +39,7 @@ describe('slack connector validation', () => {
       actionTypeId: '.email',
       name: 'email',
       config: {},
-    } as ActionConnector;
+    } as SlackActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
@@ -54,7 +55,7 @@ describe('slack connector validation', () => {
       actionTypeId: '.email',
       name: 'email',
       config: {},
-    } as ActionConnector;
+    } as SlackActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
@@ -91,7 +92,7 @@ describe('SlackActionFields renders', () => {
       actionTypeId: '.email',
       name: 'email',
       config: {},
-    } as ActionConnector;
+    } as SlackActionConnector;
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}
@@ -116,23 +117,24 @@ describe('SlackParamsFields renders', () => {
     if (!actionTypeModel.actionParamsFields) {
       return;
     }
-    const ParamsFields = actionTypeModel.actionParamsFields;
+    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
+      ActionParamsProps<SlackActionParams>
+    >;
     const actionParams = {
       message: 'test message',
     };
     const wrapper = mountWithIntl(
       <ParamsFields
-        action={actionParams}
+        actionParams={actionParams}
         errors={{ message: [] }}
         editAction={() => {}}
         index={0}
-        hasErrors={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="slackMessageTextarea"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="slackMessageTextArea"]').length > 0).toBeTruthy();
     expect(
       wrapper
-        .find('[data-test-subj="slackMessageTextarea"]')
+        .find('[data-test-subj="slackMessageTextArea"]')
         .first()
         .prop('value')
     ).toStrictEqual('test message');

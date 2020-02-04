@@ -9,8 +9,6 @@ import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
 import { AlertsClient } from '../../../../../alerting';
 import { findRules } from '../rules/find_rules';
 
-const DEFAULT_PER_PAGE: number = 1000;
-
 export interface TagType {
   id: string;
   tags: string[];
@@ -42,39 +40,37 @@ export const convertTagsToSet = (tagObjects: object[]): Set<string> => {
 // Ref: https://www.elastic.co/guide/en/kibana/master/saved-objects-api.html
 export const readTags = async ({
   alertsClient,
-  perPage = DEFAULT_PER_PAGE,
 }: {
   alertsClient: AlertsClient;
-  perPage?: number;
 }): Promise<string[]> => {
-  const tags = await readRawTags({ alertsClient, perPage });
+  const tags = await readRawTags({ alertsClient });
   return tags.filter(tag => !tag.startsWith(INTERNAL_IDENTIFIER));
 };
 
 export const readRawTags = async ({
   alertsClient,
-  perPage = DEFAULT_PER_PAGE,
 }: {
   alertsClient: AlertsClient;
   perPage?: number;
 }): Promise<string[]> => {
-  const firstTags = await findRules({ alertsClient, fields: ['tags'], perPage, page: 1 });
-  const firstSet = convertTagsToSet(firstTags.data);
-  const totalPages = Math.ceil(firstTags.total / firstTags.perPage);
-  if (totalPages <= 1) {
-    return Array.from(firstSet);
-  } else {
-    const returnTags = await Array(totalPages - 1)
-      .fill({})
-      .map((_, page) => {
-        // page index starts at 2 as we already got the first page and we have more pages to go
-        return findRules({ alertsClient, fields: ['tags'], perPage, page: page + 2 });
-      })
-      .reduce<Promise<Set<string>>>(async (accum, nextTagPage) => {
-        const tagArray = convertToTags((await nextTagPage).data);
-        return new Set([...(await accum), ...tagArray]);
-      }, Promise.resolve(firstSet));
-
-    return Array.from(returnTags);
-  }
+  // Get just one record so we can get the total count
+  const firstTags = await findRules({
+    alertsClient,
+    fields: ['tags'],
+    perPage: 1,
+    page: 1,
+    sortField: 'createdAt',
+    sortOrder: 'desc',
+  });
+  // Get all the rules to aggregate over all the tags of the rules
+  const rules = await findRules({
+    alertsClient,
+    fields: ['tags'],
+    perPage: firstTags.total,
+    sortField: 'createdAt',
+    sortOrder: 'desc',
+    page: 1,
+  });
+  const tagSet = convertTagsToSet(rules.data);
+  return Array.from(tagSet);
 };

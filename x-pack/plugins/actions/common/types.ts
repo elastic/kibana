@@ -9,3 +9,10 @@ export interface ActionType {
   name: string;
   enabled: boolean;
 }
+
+export interface ActionResult {
+  id: string;
+  actionTypeId: string;
+  name: string;
+  config: Record<string, any>;
+}

@@ -30,7 +30,7 @@ import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../../kibana_services';
 export function HomeApp({ directories }) {
   const {
-    getInjected,
+    config,
     savedObjectsClient,
     getBasePath,
     addBasePath,
@@ -41,7 +41,7 @@ export function HomeApp({ directories }) {
   const mlEnabled = environment.ml;
   const apmUiEnabled = environment.apmUi;
 
-  const defaultAppId = getInjected('kbnDefaultAppId', 'discover');
+  const defaultAppId = config.defaultAppId || 'discover';
 
   const renderTutorialDirectory = props => {
     return (
