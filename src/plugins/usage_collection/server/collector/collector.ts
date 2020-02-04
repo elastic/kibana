@@ -70,7 +70,7 @@ export class Collector<T = unknown, U = T> {
     this.type = type;
     this.init = init;
     this.fetch = fetch;
-    this.isReady = isReady;
+    this.isReady = typeof isReady === 'function' ? isReady : () => true;
     this._formatForBulkUpload = formatForBulkUpload;
   }
 
