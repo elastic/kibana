@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export { MANAGEMENT_BREADCRUMB } from './breadcrumbs';
-import { npStart } from 'ui/new_platform';
-export const management = npStart.plugins.management.legacy;
+export { ComponentRegistry } from './component_registry';

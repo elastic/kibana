@@ -17,6 +17,17 @@
  * under the License.
  */
 
-export { MANAGEMENT_BREADCRUMB } from './breadcrumbs';
-import { npStart } from 'ui/new_platform';
-export const management = npStart.plugins.management.legacy;
+import { ComponentRegistry } from './component_registry';
+
+const register = jest.fn();
+const get = jest.fn();
+const componentType = ComponentRegistry.componentType;
+
+export const advancedSettingsMock = {
+  createSetupContract() {
+    return { register, componentType };
+  },
+  createStartContract() {
+    return { get, componentType };
+  },
+};

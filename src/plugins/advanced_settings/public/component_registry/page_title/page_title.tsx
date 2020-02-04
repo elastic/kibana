@@ -25,7 +25,7 @@ export const PageTitle = () => {
   return (
     <EuiText>
       <h1 data-test-subj="managementSettingsTitle">
-        <FormattedMessage id="kbn.management.settings.pageTitle" defaultMessage="Settings" />
+        <FormattedMessage id="advancedSettings.pageTitle" defaultMessage="Settings" />
       </h1>
     </EuiText>
   );
