@@ -63,99 +63,6 @@ const expressionFieldsWithValidation = [
   'timeWindowSize',
 ];
 
-const validateAlertType = (alertParams: IndexThresholdAlertParams): ValidationResult => {
-  const {
-    index,
-    timeField,
-    aggType,
-    aggField,
-    groupBy,
-    termSize,
-    termField,
-    threshold,
-    timeWindowSize,
-  } = alertParams;
-  const validationResult = { errors: {} };
-  const errors = {
-    aggField: new Array<string>(),
-    termSize: new Array<string>(),
-    termField: new Array<string>(),
-    timeWindowSize: new Array<string>(),
-    threshold0: new Array<string>(),
-    threshold1: new Array<string>(),
-    index: new Array<string>(),
-    timeField: new Array<string>(),
-  };
-  validationResult.errors = errors;
-  if (!index) {
-    errors.index.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredIndexText', {
-        defaultMessage: 'Index is required.',
-      })
-    );
-  }
-  if (!timeField) {
-    errors.timeField.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredTimeFieldText', {
-        defaultMessage: 'Time field is required.',
-      })
-    );
-  }
-  if (aggType && buildInAggregationTypes[aggType].fieldRequired && !aggField) {
-    errors.aggField.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredAggFieldText', {
-        defaultMessage: 'Aggregation field is required.',
-      })
-    );
-  }
-  if (!termSize) {
-    errors.termSize.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredTermSizedText', {
-        defaultMessage: 'Term size is required.',
-      })
-    );
-  }
-  if (groupBy && buildinGroupByTypes[groupBy].sizeRequired && !termField) {
-    errors.termField.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredtTermFieldText', {
-        defaultMessage: 'Term field is required.',
-      })
-    );
-  }
-  if (!timeWindowSize) {
-    errors.timeWindowSize.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredTimeWindowSizeText', {
-        defaultMessage: 'Time window size is required.',
-      })
-    );
-  }
-  if (threshold && threshold.length > 0 && !threshold[0]) {
-    errors.threshold0.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredThreshold0Text', {
-        defaultMessage: 'Threshold0, is required.',
-      })
-    );
-  }
-  if (threshold && threshold.length > 1 && !threshold[1]) {
-    errors.threshold1.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredThreshold1Text', {
-        defaultMessage: 'Threshold1 is required.',
-      })
-    );
-  }
-  return validationResult;
-};
-
-export function getActionType(): AlertTypeModel {
-  return {
-    id: 'threshold',
-    name: 'Index Threshold',
-    iconClass: 'alert',
-    alertParamsExpression: IndexThresholdAlertTypeExpression,
-    validate: validateAlertType,
-  };
-}
-
 interface IndexThresholdProps {
   alertParams: IndexThresholdAlertParams;
   setAlertParams: (property: string, value: any) => void;
@@ -198,11 +105,18 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState([]);
   const [esFields, setEsFields] = useState<Record<string, any>>([]);
-  const [indexOptions, setIndexOptions] = useState<IOption[]>([]);
+  const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionProps[]>([]);
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
 
   const hasExpressionErrors = !!Object.keys(errors).find(
+    errorKey =>
+      expressionFieldsWithValidation.includes(errorKey) &&
+      errors[errorKey].length >= 1 &&
+      alert.params[errorKey] !== undefined
+  );
+
+  const canShowVizualization = !!Object.keys(errors).find(
     errorKey => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
   );
 
@@ -373,7 +287,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow
-            id="timeField"
+            id="thresholdTimeField"
             fullWidth
             label={
               <FormattedMessage
@@ -388,8 +302,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
               options={timeFieldOptions}
               isInvalid={errors.timeField.length > 0 && timeField !== undefined}
               fullWidth
-              name="watchTimeField"
-              data-test-subj="watchTimeFieldSelect"
+              name="thresholdTimeField"
+              data-test-subj="thresholdAlertTimeFieldSelect"
               value={timeField}
               onChange={e => {
                 setAlertParams('timeField', e.target.value);
@@ -422,6 +336,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
             id="indexPopover"
             button={
               <EuiExpression
+                data-test-subj="selectIndexExpression"
                 description={i18n.translate(
                   'xpack.triggersActionsUI.sections.alertAdd.threshold.indexLabel',
                   {
@@ -525,7 +440,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {hasExpressionErrors ? null : (
+      {canShowVizualization ? null : (
         <Fragment>
           <ThresholdVisualization
             alertParams={alertParams}

@@ -246,10 +246,10 @@ export function initDashboardApp(app, deps) {
         },
       })
       .when(`dashboard/:tail*?`, {
-        redirectTo: `/${deps.core.injectedMetadata.getInjectedVar('kbnDefaultAppId')}`,
+        redirectTo: `/${deps.config.defaultAppId}`,
       })
       .when(`dashboards/:tail*?`, {
-        redirectTo: `/${deps.core.injectedMetadata.getInjectedVar('kbnDefaultAppId')}`,
+        redirectTo: `/${deps.config.defaultAppId}`,
       });
   });
 }
