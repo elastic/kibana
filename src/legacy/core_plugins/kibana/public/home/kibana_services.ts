@@ -29,8 +29,13 @@ import {
   UiSettingsState,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
-import { Environment, FeatureCatalogueEntry } from '../../../../../plugins/home/public';
 import { TelemetryPluginStart } from '../../../../../plugins/telemetry/public';
+import {
+  Environment,
+  FeatureCatalogueEntry,
+  HomePublicPluginSetup,
+} from '../../../../../plugins/home/public';
+import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
@@ -51,6 +56,8 @@ export interface HomeKibanaServices {
   getInjected: (name: string, defaultValue?: any) => unknown;
   chrome: ChromeStart;
   uiSettings: IUiSettingsClient;
+  config: KibanaLegacySetup['config'];
+  homeConfig: HomePublicPluginSetup['config'];
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];

@@ -29,6 +29,7 @@ exports.run = function run(argv) {
   const options = getopts(argv, {
     alias: {
       h: 'help',
+      i: 'internal',
     },
   });
 
@@ -40,17 +41,22 @@ exports.run = function run(argv) {
   if (options.help) {
     console.log(
       dedent(chalk`
-        {dim usage:} node scripts/generate-plugin {bold [name]}
-
-        generate a fresh Kibana plugin in the plugins/ directory
+        # {dim Usage:} 
+        node scripts/generate-plugin {bold [name]}
+        Generate a fresh Kibana plugin in the plugins/ directory
+        
+        # {dim Core Kibana plugins:}
+        node scripts/generate-plugin {bold [name]} -i
+        To generate a core Kibana plugin inside the src/plugins/ directory, add the -i flag.
       `) + '\n'
     );
     process.exit(1);
   }
 
   const name = options._[0];
+  const isKibanaPlugin = options.internal;
   const template = resolve(__dirname, './sao_template');
-  const kibanaPlugins = resolve(__dirname, '../../plugins');
+  const kibanaPlugins = resolve(__dirname, isKibanaPlugin ? '../../src/plugins' : '../../plugins');
   const targetPath = resolve(kibanaPlugins, snakeCase(name));
 
   sao({
@@ -58,6 +64,8 @@ exports.run = function run(argv) {
     targetPath: targetPath,
     configOptions: {
       name,
+      isKibanaPlugin,
+      targetPath,
     },
   }).catch(error => {
     console.error(chalk`{red fatal error}!`);
