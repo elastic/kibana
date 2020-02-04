@@ -21,10 +21,10 @@ export type Get<T> = () => T;
 export type Set<T> = (value: T) => void;
 
 export const createGetterSetter = <T>(name: string): [Get<T>, Set<T>] => {
-  let value: T;
+  let value: T | undefined;
 
   const get: Get<T> = () => {
-    if (!value) throw new Error(`${name} was not set.`);
+    if (value === undefined) throw new Error(`${name} was not set.`);
     return value;
   };
 
