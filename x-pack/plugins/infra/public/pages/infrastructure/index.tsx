@@ -71,7 +71,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                 title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
                   defaultMessage: 'Metrics Explorer',
                 }),
-                path: `${match.path}/metrics-explorer`,
+                path: `${match.path}/explorer`,
               },
               {
                 title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
@@ -86,7 +86,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
         <Switch>
           <Route path={`${match.path}/inventory`} component={SnapshotPage} />
           <Route
-            path={`${match.path}/metrics-explorer`}
+            path={`${match.path}/explorer`}
             render={props => (
               <WithSource>
                 {({ configuration, createDerivedIndexPattern }) => (

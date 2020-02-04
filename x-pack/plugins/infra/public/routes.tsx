@@ -26,37 +26,33 @@ export const PageRouter: React.FC<RouterProps> = ({ history }) => {
     <Router history={history}>
       <Switch>
         {uiCapabilities?.infrastructure?.show && (
-          <RedirectWithQueryParams from="/" exact={true} to="/infrastructure/inventory" />
+          <RedirectWithQueryParams from="/" exact={true} to="/metrics/inventory" />
+        )}
+        {uiCapabilities?.infrastructure?.show && (
+          <RedirectWithQueryParams from="/metrics" exact={true} to="/metrics/inventory" />
+        )}
+        {uiCapabilities?.infrastructure?.show && (
+          <RedirectWithQueryParams from="/metrics/snapshot" exact={true} to="/metrics/inventory" />
+        )}
+        {uiCapabilities?.infrastructure?.show && (
+          <RedirectWithQueryParams from="/home" exact={true} to="/metrics/inventory" />
         )}
         {uiCapabilities?.infrastructure?.show && (
           <RedirectWithQueryParams
-            from="/infrastructure"
+            from="/metrics/metrics-explorer"
             exact={true}
-            to="/infrastructure/inventory"
+            to="/metrics/explorer"
           />
         )}
         {uiCapabilities?.infrastructure?.show && (
-          <RedirectWithQueryParams
-            from="/infrastructure/snapshot"
-            exact={true}
-            to="/infrastructure/inventory"
-          />
-        )}
-        {uiCapabilities?.infrastructure?.show && (
-          <RedirectWithQueryParams from="/home" exact={true} to="/infrastructure/inventory" />
-        )}
-        {uiCapabilities?.infrastructure?.show && (
-          <Route path="/infrastructure/metrics/:type/:node" component={MetricDetail} />
-        )}
-        {uiCapabilities?.infrastructure?.show && (
-          <RedirectWithQueryParams from="/metrics" to="/infrastructure/metrics" />
+          <Route path="/metrics/detail/:type/:node" component={MetricDetail} />
         )}
         {uiCapabilities?.logs?.show && (
           <RedirectWithQueryParams from="/logs" exact={true} to="/logs/stream" />
         )}
         {uiCapabilities?.logs?.show && <Route path="/logs" component={LogsPage} />}
         {uiCapabilities?.infrastructure?.show && (
-          <Route path="/infrastructure" component={InfrastructurePage} />
+          <Route path="/metrics" component={InfrastructurePage} />
         )}
         <Route path="/link-to" component={LinkToPage} />
         <Route component={NotFoundPage} />
