@@ -46,13 +46,10 @@ export class CreateSourceEditor extends Component {
     onSourceConfigChange: PropTypes.func.isRequired,
   };
 
-  static defaultProps = {
-    filterByMapBounds: DEFAULT_FILTER_BY_MAP_BOUNDS,
-  };
-
   state = {
     isLoadingIndexPattern: false,
     noGeoIndexPatternsExist: false,
+    filterByMapBounds: DEFAULT_FILTER_BY_MAP_BOUNDS,
     ...RESET_INDEX_PATTERN_STATE,
   };
 
@@ -231,7 +228,7 @@ export class CreateSourceEditor extends Component {
             label={i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
               defaultMessage: `Dynamically filter for data in the visible map area`,
             })}
-            checked={this.props.filterByMapBounds}
+            checked={this.state.filterByMapBounds}
             onChange={this.onFilterByMapBoundsChange}
           />
         </EuiFormRow>
