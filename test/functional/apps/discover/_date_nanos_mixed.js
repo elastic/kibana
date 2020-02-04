@@ -29,7 +29,10 @@ export default function({ getService, getPageObjects }) {
   describe('date_nanos_mixed', function() {
     before(async function() {
       await esArchiver.loadIfNeeded('date_nanos_mixed');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'timestamp-*' });
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'timestamp-*',
+        'doc_table:legacyTable': true,
+      });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });

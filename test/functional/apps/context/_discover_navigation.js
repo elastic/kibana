@@ -34,7 +34,7 @@ export default function({ getService, getPageObjects }) {
   describe('context link in discover', function contextSize() {
     this.tags('smoke');
     before(async function() {
-      await PageObjects.settings.toggleDiscoverDataGrid();
+      await PageObjects.settings.setLegacyDiscoverTable();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await Promise.all(

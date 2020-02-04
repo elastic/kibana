@@ -20,7 +20,7 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('security/dlstest');
       await browser.setWindowSize(1600, 1000);
-      await PageObjects.settings.toggleDiscoverDataGrid();
+      await PageObjects.settings.setLegacyDiscoverTable();
       await PageObjects.settings.createIndexPattern('dlstest', null);
 
       await PageObjects.settings.navigateTo();

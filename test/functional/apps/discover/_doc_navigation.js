@@ -35,7 +35,7 @@ export default function({ getService, getPageObjects }) {
     this.tags('smoke');
     before(async function() {
       await esArchiver.loadIfNeeded('logstash_functional');
-      await PageObjects.settings.toggleDiscoverDataGrid();
+      await PageObjects.settings.setLegacyDiscoverTable();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await Promise.all(

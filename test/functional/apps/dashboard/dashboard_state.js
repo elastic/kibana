@@ -49,7 +49,7 @@ export default function({ getService, getPageObjects }) {
     before(async function() {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.settings.toggleDiscoverDataGrid();
+      await PageObjects.settings.setLegacyDiscoverTable();
       await PageObjects.common.navigateToApp('dashboard');
     });
 
