@@ -156,7 +156,7 @@ describe('CollectorSet', () => {
       expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',
-          result: { test: 2 },
+          result: { test: 1 }, // It matches the return of `fetch`. `formatForBulkUpload` is used later on
         },
       ]);
     });
