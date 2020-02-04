@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, PluginInitializerContext, Logger } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext, Logger } from '../../../../../src/core/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../../../plugins/security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../../../plugins/features/server';
 import { initServer } from './init_server';
