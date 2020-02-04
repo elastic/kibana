@@ -542,8 +542,6 @@ export interface ApplicationSetup {
     contextName: T,
     provider: IContextProvider<AppMountDeprecated, T>
   ): void;
-
-  currentAppId$: Observable;
 }
 
 /** @internal */
@@ -615,12 +613,18 @@ export interface ApplicationStart {
     provider: IContextProvider<AppMountDeprecated, T>
   ): void;
 
+  /**
+   * An observable that emits the current application id and each subsequent id update.
+   */
   currentAppId$: Observable<string | undefined>;
 }
 
 /** @internal */
 export interface InternalApplicationStart
-  extends Pick<ApplicationStart, 'capabilities' | 'navigateToApp' | 'getUrlForApp'> {
+  extends Pick<
+    ApplicationStart,
+    'capabilities' | 'navigateToApp' | 'getUrlForApp' | 'currentAppId$'
+  > {
   /**
    * Apps available based on the current capabilities.
    * Should be used to show navigation links and make routing decisions.
@@ -643,7 +647,6 @@ export interface InternalApplicationStart
     provider: IContextProvider<AppMountDeprecated, T>
   ): void;
 
-  currentAppId$: Observable<string | undefined>;
   // Internal APIs
   getComponent(): JSX.Element | null;
 }
