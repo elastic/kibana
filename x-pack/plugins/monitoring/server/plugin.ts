@@ -94,6 +94,7 @@ export class Plugin {
     // ];
 
     const router = core.http.createRouter();
+    const serverInfo = core.http.getServerInfo();
     const monitoringCore = {
       config: () => ({
         get: (key: string): string => {
@@ -101,9 +102,8 @@ export class Plugin {
           if (has(config, stripped)) {
             return get(config, stripped);
           }
-          // TODO: NP
-          if (key === 'server.port') return '5601';
-          if (key === 'server.host') return 'localhost';
+          if (key === 'server.port') return serverInfo.port;
+          if (key === 'server.host') return serverInfo.host;
           if (key === 'server.uuid') return core.uuid;
           throw new Error(`Unknown key '${key}'`);
         },
