@@ -18,7 +18,7 @@
  */
 
 import { Storage } from '../../services';
-import { ObjectStorageClient } from '../../../common/types';
+import { ObjectStorageClient } from '../../types';
 import { TextObject, textObjectTypeName } from '../../../common/text_object';
 import { LocalObjectStorage } from './local_storage_object_client';
 

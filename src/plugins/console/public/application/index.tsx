@@ -40,7 +40,7 @@ export interface BootDependencies {
   elasticsearchUrl: string;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;
-  getObjectStorageClient: () => ObjectStorageClient;
+  getObjectStorageClient: () => ObjectStorageClient | null;
 }
 
 export function renderApp({

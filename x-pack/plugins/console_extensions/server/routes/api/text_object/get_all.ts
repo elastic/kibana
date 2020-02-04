@@ -12,7 +12,7 @@ import { withCurrentUsername } from './with_current_username';
 export const createHandler = ({
   getInternalSavedObjectsClient,
   username,
-}: AuthcHandlerArgs): RequestHandler<any, unknown> => async (ctx, request, response) => {
+}: AuthcHandlerArgs): RequestHandler => async (ctx, request, response) => {
   const client = getInternalSavedObjectsClient();
   const result = await client.find({
     type: TEXT_OBJECT.type,
@@ -35,10 +35,10 @@ export const registerGetAllRoute = ({
 }: RouteDependencies) => {
   router.get(
     { path: `${APP.apiPathBase}/text_objects/get_all`, validate: false },
-    withCurrentUsername({
+    withCurrentUsername<AuthcHandlerArgs>({
       authc,
       passThroughDeps: { getInternalSavedObjectsClient },
-      userHandler: createHandler,
+      handlerFactory: createHandler,
     })
   );
 };

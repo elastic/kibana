@@ -18,7 +18,7 @@
  */
 
 import { History } from '../../../services';
-import { ObjectStorageClient } from '../../../../common/types';
+import { ObjectStorageClient } from '../../../types';
 
 export interface Dependencies {
   history: History;

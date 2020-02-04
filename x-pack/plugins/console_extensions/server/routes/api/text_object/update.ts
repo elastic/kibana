@@ -24,23 +24,23 @@ const routeValidation = {
   }),
 };
 
-type UpdateRouteValidation = TypeOf<typeof routeValidation>;
+type UpdateRouteValidationBody = TypeOf<typeof routeValidation.body>;
 
 export const createHandler = ({
   getInternalSavedObjectsClient,
   username,
-}: AuthcHandlerArgs): RequestHandler<unknown, unknown, UpdateRouteValidation> => async (
+}: AuthcHandlerArgs): RequestHandler<unknown, unknown, UpdateRouteValidationBody> => async (
   ctx,
   request,
   response
 ) => {
   const client = getInternalSavedObjectsClient();
   const { id, ...rest } = request.body;
-  const result = await client.update(TEXT_OBJECT.type, id, {
+  await client.update(TEXT_OBJECT.type, id, {
     userId: username,
     ...rest,
   });
-  return response.ok({ body: result });
+  return response.noContent();
 };
 
 export const registerUpdateRoute = ({
@@ -50,10 +50,10 @@ export const registerUpdateRoute = ({
 }: RouteDependencies) => {
   router.put(
     { path: `${APP.apiPathBase}/text_objects/update`, validate: routeValidation },
-    withCurrentUsername({
+    withCurrentUsername<AuthcHandlerArgs>({
       authc,
       passThroughDeps: { getInternalSavedObjectsClient },
-      userHandler: createHandler,
+      handlerFactory: createHandler,
     })
   );
 };

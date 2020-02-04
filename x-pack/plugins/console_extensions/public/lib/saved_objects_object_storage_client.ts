@@ -19,22 +19,18 @@ import { APP } from '../../common/constants';
 class SavedObjectsObjectStorage<O extends IdObject> implements ObjectStorage<O> {
   constructor(private readonly http: HttpSetup) {}
 
-  update(obj: O) {
-    return this.http.put(`${APP.apiPathBase}/text_objects/update`, { body: JSON.stringify(obj) });
+  async update(obj: O) {
+    await this.http.put(`${APP.apiPathBase}/text_objects/update`, { body: JSON.stringify(obj) });
   }
 
   findAll() {
     return this.http.get(`${APP.apiPathBase}/text_objects/get_all`);
   }
 
-  async create(obj: Omit<O, 'id'>) {
-    const result = await this.http.post<>(`${APP.apiPathBase}/text_objects/create`, {
+  create(obj: Omit<O, 'id'>) {
+    return this.http.post(`${APP.apiPathBase}/text_objects/create`, {
       body: JSON.stringify(obj),
     });
-    return {
-      id: result.id,
-      ...result.attributes,
-    };
   }
 }
 

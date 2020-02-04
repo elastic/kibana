@@ -7,20 +7,24 @@
 import { RequestHandler } from 'kibana/server';
 import { Authentication } from '../../../../../security/server';
 
-interface WithCurrentUsernameArgs<P = Record<string, any>> {
+interface WithCurrentUsernameArgs<D> {
   authc: Authentication;
-  userHandler: (deps: P & { username: string }) => RequestHandler;
-  passThroughDeps: P;
+  handlerFactory: (deps: D & { username: string }) => any;
+  passThroughDeps: Partial<D>;
 }
 
-export const withCurrentUsername = ({
+export const withCurrentUsername = <D = { [key: string]: any }>({
   authc,
-  userHandler,
+  handlerFactory,
   passThroughDeps,
-}: WithCurrentUsernameArgs): RequestHandler => async (ctx, request, response) => {
+}: WithCurrentUsernameArgs<D>): RequestHandler => async (ctx, request, response) => {
   const username = await authc.getCurrentUser(request);
   if (!username) {
     return response.forbidden({ body: 'Could not find current username' });
   }
-  return userHandler({ username: username.username, ...passThroughDeps })(ctx, request, response);
+  const handler = handlerFactory({ username: username.username, ...passThroughDeps } as D & {
+    username: string;
+  });
+
+  return handler(ctx, request, response);
 };

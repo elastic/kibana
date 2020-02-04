@@ -10,7 +10,6 @@ import { APP } from '../../../../common/constants';
 import { TEXT_OBJECT } from './constants';
 import { RouteDependencies, AuthcHandlerArgs } from './types';
 import { withCurrentUsername } from './with_current_username';
-import { TextObject } from '../../../../../../../src/plugins/console/common/text_object';
 
 const routeValidation = {
   body: schema.object({
@@ -20,12 +19,12 @@ const routeValidation = {
   }),
 };
 
-type CreateRouteValidation = TypeOf<typeof routeValidation>;
+type CreateRouteValidationBody = TypeOf<typeof routeValidation.body>;
 
 export const createHandler = ({
   getInternalSavedObjectsClient,
   username,
-}: AuthcHandlerArgs): RequestHandler<unknown, unknown, CreateRouteValidation> => async (
+}: AuthcHandlerArgs): RequestHandler<unknown, unknown, CreateRouteValidationBody> => async (
   ctx,
   request,
   response
@@ -48,10 +47,10 @@ export const registerCreateRoute = ({
 }: RouteDependencies) => {
   router.post(
     { path: `${APP.apiPathBase}/text_objects/create`, validate: routeValidation },
-    withCurrentUsername({
+    withCurrentUsername<AuthcHandlerArgs>({
       authc,
       passThroughDeps: { getInternalSavedObjectsClient },
-      userHandler: createHandler,
+      handlerFactory: createHandler,
     })
   );
 };

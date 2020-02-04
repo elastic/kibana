@@ -77,7 +77,7 @@ export class ConsoleUIPlugin implements Plugin<ConsoleSetup, void, AppSetupUIPlu
     });
 
     return {
-      setObjectStorageClient: client => {
+      setObjectStorageClient: (client: ObjectStorageClient) => {
         if (this.objectStorageClientOverride) {
           throw new Error('Object storage client has already been set');
         }
