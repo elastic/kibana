@@ -29,7 +29,7 @@ export function registerClearCacheRoute({ router }: RouteDependencies) {
         index: indices,
       };
 
-      await ctx.core.elasticsearch.adminClient.callAsCurrentUser('indices.clearCache', params);
+      await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.clearCache', params);
       return res.ok();
     }
   );

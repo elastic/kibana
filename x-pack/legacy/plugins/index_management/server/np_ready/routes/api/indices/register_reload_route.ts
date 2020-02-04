@@ -24,7 +24,7 @@ export function registerReloadRoute({ router }: RouteDependencies) {
       const { indexNames = [] } = req.body as ReqBody;
 
       const indices = await fetchIndices(
-        ctx.core.elasticsearch.adminClient.callAsCurrentUser,
+        ctx.core.elasticsearch.dataClient.callAsCurrentUser,
         indexNames
       );
       return res.ok({ body: indices });

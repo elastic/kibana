@@ -29,7 +29,7 @@ export function registerFreezeRoute({ router }: RouteDependencies) {
         method: 'POST',
       };
 
-      await await ctx.core.elasticsearch.adminClient.callAsCurrentUser('transport.request', params);
+      await await ctx.core.elasticsearch.dataClient.callAsCurrentUser('transport.request', params);
       return res.ok();
     }
   );

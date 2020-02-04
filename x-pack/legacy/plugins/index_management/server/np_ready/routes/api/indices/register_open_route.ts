@@ -28,7 +28,7 @@ export function registerOpenRoute({ router }: RouteDependencies) {
         format: 'json',
         index: indices,
       };
-      await await ctx.core.elasticsearch.adminClient.callAsCurrentUser('indices.open', params);
+      await await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.open', params);
       return res.ok();
     }
   );

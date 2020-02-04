@@ -30,7 +30,7 @@ export function registerFlushRoute({ router }: RouteDependencies) {
         index: indices,
       };
 
-      await ctx.core.elasticsearch.adminClient.callAsCurrentUser('indices.flush', params);
+      await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.flush', params);
       return res.ok();
     }
   );

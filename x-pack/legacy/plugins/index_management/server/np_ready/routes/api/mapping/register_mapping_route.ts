@@ -29,7 +29,7 @@ export function registerMappingRoute({ router }: RouteDependencies) {
         index: indexName,
       };
 
-      const hit = await ctx.core.elasticsearch.adminClient.callAsCurrentUser(
+      const hit = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
         'indices.getMapping',
         params
       );

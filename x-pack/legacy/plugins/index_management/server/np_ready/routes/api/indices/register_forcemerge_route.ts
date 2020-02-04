@@ -38,7 +38,7 @@ export function registerForcemergeRoute({ router }: RouteDependencies) {
         (params as any).max_num_segments = maxNumSegments;
       }
 
-      await ctx.core.elasticsearch.adminClient.callAsCurrentUser('indices.forcemerge', params);
+      await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.forcemerge', params);
       return res.ok();
     }
   );

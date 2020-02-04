@@ -29,7 +29,7 @@ export function registerCloseRoute({ router }: RouteDependencies) {
         index: indices,
       };
 
-      await ctx.core.elasticsearch.adminClient.callAsCurrentUser('indices.close', params);
+      await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.close', params);
       return res.ok();
     }
   );

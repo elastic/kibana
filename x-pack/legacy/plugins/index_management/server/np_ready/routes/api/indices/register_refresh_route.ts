@@ -30,7 +30,7 @@ export function registerRefreshRoute({ router }: RouteDependencies) {
         index: indices,
       };
 
-      await ctx.core.elasticsearch.adminClient.callAsCurrentUser('indices.refresh', params);
+      await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.refresh', params);
       return res.ok();
     }
   );

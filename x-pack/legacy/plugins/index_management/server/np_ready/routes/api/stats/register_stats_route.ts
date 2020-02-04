@@ -30,7 +30,7 @@ export function registerStatsRoute({ router }: RouteDependencies) {
         expand_wildcards: 'none',
         index: indexName,
       };
-      const hit = await ctx.core.elasticsearch.adminClient.callAsCurrentUser(
+      const hit = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
         'indices.stats',
         params
       );

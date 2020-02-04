@@ -30,7 +30,7 @@ export function registerDeleteRoute({ router }: RouteDependencies) {
         index: indices,
       };
 
-      await ctx.core.elasticsearch.adminClient.callAsCurrentUser('indices.delete', params);
+      await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.delete', params);
       return res.ok();
     }
   );
