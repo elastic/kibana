@@ -66,6 +66,7 @@ describe('get_export_by_object_ids', () => {
       const objects = [{ rule_id: 'rule-1' }];
       const exports = await getRulesFromObjects(unsafeCast, objects);
       const expected: RulesErrors = {
+        exportedCount: 1,
         missingRules: [],
         rules: [
           {
@@ -141,6 +142,7 @@ describe('get_export_by_object_ids', () => {
       const objects = [{ rule_id: 'rule-1' }];
       const exports = await getRulesFromObjects(unsafeCast, objects);
       const expected: RulesErrors = {
+        exportedCount: 0,
         missingRules: [{ rule_id: 'rule-1' }],
         rules: [],
       };
@@ -164,6 +166,7 @@ describe('get_export_by_object_ids', () => {
       const objects = [{ rule_id: 'rule-1' }];
       const exports = await getRulesFromObjects(unsafeCast, objects);
       const expected: RulesErrors = {
+        exportedCount: 0,
         missingRules: [{ rule_id: 'rule-1' }],
         rules: [],
       };

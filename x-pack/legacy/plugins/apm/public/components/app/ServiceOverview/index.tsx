@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
@@ -94,23 +94,26 @@ export function ServiceOverview() {
   );
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <LocalUIFilters {...localFiltersConfig} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={7}>
-        <EuiPanel>
-          <ServiceList
-            items={data.items}
-            noItemsMessage={
-              <NoServicesMessage
-                historicalDataFound={data.hasHistoricalData}
-                status={status}
-              />
-            }
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <LocalUIFilters {...localFiltersConfig} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={7}>
+          <EuiPanel>
+            <ServiceList
+              items={data.items}
+              noItemsMessage={
+                <NoServicesMessage
+                  historicalDataFound={data.hasHistoricalData}
+                  status={status}
+                />
+              }
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }

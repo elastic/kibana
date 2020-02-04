@@ -160,7 +160,7 @@ const ErrorGroupList: React.FC<Props> = props => {
       items={items}
       columns={columns}
       initialPageSize={25}
-      initialSortField="latestOccurrenceAt"
+      initialSortField="occurrenceCount"
       initialSortDirection="desc"
       sortItems={false}
     />

@@ -20,8 +20,8 @@ import {
 } from '../../../../src/core/server';
 
 import {
-  PluginSetupContract as EncryptedSavedObjectsSetupContract,
-  PluginStartContract as EncryptedSavedObjectsStartContract,
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
 } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -67,13 +67,13 @@ export interface PluginStartContract {
 
 export interface ActionsPluginsSetup {
   taskManager: TaskManagerSetupContract;
-  encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   licensing: LicensingPluginSetup;
   spaces?: SpacesPluginSetup;
   event_log: IEventLogService;
 }
 export interface ActionsPluginsStart {
-  encryptedSavedObjects: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
 }
 
@@ -191,9 +191,11 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     });
 
     taskRunnerFactory!.initialize({
+      logger,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
       spaceIdToNamespace: this.spaceIdToNamespace,
+      getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
     });
 
     return {
