@@ -8,6 +8,7 @@ import {
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
   DATASOURCE_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
+  AGENT_SAVED_OBJECT_TYPE,
 } from './constants';
 
 /*
@@ -16,6 +17,33 @@ import {
  * Please update typings in `/common/types` if mappings are updated.
  */
 export const savedObjectMappings = {
+  [AGENT_SAVED_OBJECT_TYPE]: {
+    properties: {
+      shared_id: { type: 'keyword' },
+      type: { type: 'keyword' },
+      active: { type: 'boolean' },
+      enrolled_at: { type: 'date' },
+      access_api_key_id: { type: 'keyword' },
+      version: { type: 'keyword' },
+      user_provided_metadata: { type: 'text' },
+      local_metadata: { type: 'text' },
+      policy_id: { type: 'keyword' },
+      last_updated: { type: 'date' },
+      last_checkin: { type: 'date' },
+      updated_at: { type: 'date' },
+      current_error_events: { type: 'text' },
+      actions: {
+        type: 'nested',
+        properties: {
+          id: { type: 'keyword' },
+          type: { type: 'keyword' },
+          data: { type: 'text' },
+          sent_at: { type: 'date' },
+          created_at: { type: 'date' },
+        },
+      },
+    },
+  },
   [AGENT_CONFIG_SAVED_OBJECT_TYPE]: {
     properties: {
       id: { type: 'keyword' },

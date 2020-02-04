@@ -7,3 +7,4 @@ export { registerRoutes as registerAgentConfigRoutes } from './agent_config';
 export { registerRoutes as registerDatasourceRoutes } from './datasource';
 export { registerRoutes as registerEPMRoutes } from './epm';
 export { registerRoutes as registerFleetSetupRoutes } from './fleet_setup';
+export { registerRoutes as registerAgentRoutes } from './agent';

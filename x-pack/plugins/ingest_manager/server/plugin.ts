@@ -22,6 +22,7 @@ import {
   registerDatasourceRoutes,
   registerAgentConfigRoutes,
   registerFleetSetupRoutes,
+  registerAgentRoutes,
 } from './routes';
 import { IngestManagerConfigType } from './';
 
@@ -92,6 +93,7 @@ export class IngestManagerPlugin implements Plugin {
     // TODO: Use this.config$ + if security is enabled to register conditional routing
     registerEPMRoutes(router);
     registerFleetSetupRoutes(router);
+    registerAgentRoutes(router);
   }
 
   public async start(

@@ -3,11 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export * from './plugin';
-export * from './routes';
 
-export * from './agent';
-export * from './agent_config';
-export * from './datasource';
-export * from './epm';
-export * from './output';
+export const AGENT_SAVED_OBJECT_TYPE = 'agents';

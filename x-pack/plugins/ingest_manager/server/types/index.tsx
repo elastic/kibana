@@ -5,6 +5,8 @@
  */
 export {
   // Object types
+  Agent,
+  AgentSOAttributes,
   Datasource,
   NewDatasource,
   AgentConfig,
@@ -21,6 +23,10 @@ export {
   GetOneDatasourceRequestSchema,
   CreateDatasourceRequestSchema,
   UpdateDatasourceRequestSchema,
+  // Agent schemas
+  GetAgentsRequestSchema,
+  GetOneAgentRequestSchema,
+  UpdateAgentRequestSchema,
   // Agent config schemas
   GetAgentConfigsRequestSchema,
   GetAgentConfigsResponse,
