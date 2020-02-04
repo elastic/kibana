@@ -41,6 +41,8 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
+import { getEndpointFromPosition } from '../../../../../lib/autocomplete/get_endpoint_from_position';
+
 import { useServicesContext, useEditorReadContext } from '../../../../contexts';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { ConsoleMenu } from '../../../../components';
@@ -211,16 +213,40 @@ function EditorUI({ initialTextValue }: EditorProps) {
       openDocumentation,
     });
   }, [sendCurrentRequestToES, openDocumentation]);
+  const [pulseNotificationIsOpen, setPulseNotificationIsOpen] = useState(false);
+  const [pulseNotificationShowBell, setPulseNotificationShowBell] = useState(false);
+
+  useEffect(() => {
+    const { current: editor } = editorInstanceRef;
+    if (!editor) return;
+    const coreEditor = editor.getCoreEditor();
+    const endpointDescription = getEndpointFromPosition(
+      coreEditor,
+      coreEditor.getCurrentPosition(),
+      editor.parser
+    );
+    if (endpointDescription) {
+      // eslint-disable-next-line
+      console.log('endpointDescription!231231::', endpointDescription);
+    }
+  });
 
   const pulseButton = (
     <EuiButtonIcon
       size="s"
       style={{ minHeight: '18px', paddingRight: '2px' }}
-      className="conApp__editorActionButton conApp__editorActionButton--success"
+      className="animate-ring conApp__editorActionButton conApp__editorActionButton--success"
       iconType="bell"
-      onClick={() => {}}
+      onClick={() => {
+        setPulseNotificationIsOpen(true);
+      }}
     />
   );
+
+  if (!pulseNotificationShowBell) {
+    setPulseNotificationShowBell(true);
+  }
+
   return (
     <div style={abs} className="conApp">
       <div className="conApp__editor">
@@ -232,35 +258,39 @@ function EditorUI({ initialTextValue }: EditorProps) {
           responsive={false}
         >
           <EuiFlexItem>
-            <EuiPopover
-              id="pulse_popover"
-              button={pulseButton}
-              isOpen={true}
-              closePopover={() => {}}
-            >
-              <EuiPopoverTitle>Pulse Recommendation</EuiPopoverTitle>
-              <div style={{ width: '300px' }}>
-                <EuiText size="s">
-                  <p>
-                    You can now use the{' '}
-                    <EuiLink
-                      href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
-                      target="_blank"
-                    >
-                      Snapshot and Restore
-                    </EuiLink>{' '}
-                    UI to manage taking snapshots.
-                  </p>
-                </EuiText>
-              </div>
-              <EuiSpacer />
-              <div style={{ textAlign: 'right' }}>
-                <EuiButtonEmpty size="s">disable</EuiButtonEmpty>
-                <EuiButton size="s" fill color="primary" style={{ marginLeft: '10px' }}>
-                  Take me there!
-                </EuiButton>
-              </div>
-            </EuiPopover>
+            {pulseNotificationShowBell && (
+              <EuiPopover
+                id="pulse_popover"
+                button={pulseButton}
+                isOpen={pulseNotificationIsOpen}
+                closePopover={() => {
+                  setPulseNotificationIsOpen(false);
+                }}
+              >
+                <EuiPopoverTitle>Pulse Recommendation</EuiPopoverTitle>
+                <div style={{ width: '300px' }}>
+                  <EuiText size="s">
+                    <p>
+                      You can now use the{' '}
+                      <EuiLink
+                        href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
+                        target="_blank"
+                      >
+                        Snapshot and Restore
+                      </EuiLink>{' '}
+                      UI to manage taking snapshots.
+                    </p>
+                  </EuiText>
+                </div>
+                <EuiSpacer />
+                <div style={{ textAlign: 'right' }}>
+                  <EuiButtonEmpty size="s">disable</EuiButtonEmpty>
+                  <EuiButton size="s" fill color="primary" style={{ marginLeft: '10px' }}>
+                    Take me there!
+                  </EuiButton>
+                </div>
+              </EuiPopover>
+            )}
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiToolTip

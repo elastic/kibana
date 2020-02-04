@@ -1,0 +1,49 @@
+.animate-ring {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  -moz-transition: all 0.2s ease-in-out;
+  -webkit-transition: all 0.2s ease-in-out;
+  animation: road-animates 1s linear infinite;
+  -webkit-animation: swing 1s linear infinite;
+  -moz-animation: swing 1s linear infinite;
+  -o-animation: swing 1s linear infinite;
+  transform-origin:center top;
+  -moz-transform-origin: center top;
+  -webkit-transform-origin:center top;
+}
+@-webkit-keyframes swing {
+0% {
+  -webkit-transform: rotateZ(-5deg);
+  transform: rotateZ(-5deg);
+}
+50% {
+  -webkit-transform: rotateZ(5deg);
+  transform: rotateZ(5deg);
+}
+100%{
+  transform: rotateZ(-5deg);
+  -webkit-transform: rotateZ(-5deg);
+}
+}
+@keyframes swing {
+0% {
+  transform: rotateZ(-5deg);
+}
+50% {
+  transform: rotateZ(5deg);
+}
+100%{
+  transform: rotateZ(-5deg);
+}
+}
+@-moz-keyframes swing {
+0% {
+  transform: rotate(-5deg);
+}
+50% {
+  transform: rotate(5deg);
+}
+100%{
+  transform: rotate(-5deg);
+}
+}

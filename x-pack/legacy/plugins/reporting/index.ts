@@ -38,6 +38,7 @@ export const reporting = (kibana: any) => {
       ],
       embeddableActions: ['plugins/reporting/panel_actions/get_csv_panel_action'],
       home: ['plugins/reporting/register_feature'],
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: ['plugins/reporting/views/management'],
       injectDefaultVars(server: Legacy.Server, options?: ReportingConfigOptions) {
         const config = server.config();
