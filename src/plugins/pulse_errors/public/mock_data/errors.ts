@@ -48,10 +48,10 @@ export const errorChannelPayloads: PulseErrorPayloadRecord[] = [
     message: 'The SampleDataSetCard [key=ecommerce] component failed to mount',
     hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 1',
     status: 'new',
-    fixedVersion: 'v7.5.2',
+    fixedVersion: 'v7.4.2',
     currentKibanaVersion: 'v7.x',
     timestamp: moment()
-      .add(60, 'seconds')
+      .add(15, 'seconds')
       .toDate(),
   },
   {
@@ -60,10 +60,34 @@ export const errorChannelPayloads: PulseErrorPayloadRecord[] = [
     message: '[Error]: Test',
     hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 2',
     status: 'new',
-    // fixedVersion: 'v7.5.2',
+    fixedVersion: 'v7.5.2',
     currentKibanaVersion: 'v7.x',
     timestamp: moment()
-      .add(90, 'seconds')
+      .add(20, 'seconds')
+      .toDate(),
+  },
+  {
+    channel_id: 'errors',
+    deployment_id: '123',
+    message: 'The SampleDataSetCard [key=ecommerce] component failed to mount',
+    hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 3',
+    status: 'new',
+    fixedVersion: 'v7.5.1',
+    currentKibanaVersion: 'v7.x',
+    timestamp: moment()
+      .add(25, 'seconds')
+      .toDate(),
+  },
+  {
+    channel_id: 'errors',
+    deployment_id: '123',
+    message: '[Error]: Test2',
+    hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 4',
+    status: 'new',
+    fixedVersion: 'v7.5.2',
+    currentKibanaVersion: 'v7.x',
+    timestamp: moment()
+      .add(30, 'seconds')
       .toDate(),
   },
 ];

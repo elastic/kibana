@@ -27,7 +27,7 @@ import { channelNames } from './config';
 import { Fetcher, sendPulse, sendUsageFrom } from '../../server/pulse/send_pulse';
 
 export interface PulseServiceContext {
-  getChannel: <T = PulseInstruction>(id: string) => PulseChannel<T>;
+  getChannel: <T extends PulseInstruction>(id: string) => PulseChannel<T>;
 }
 export type PulseServiceSetup = PulseServiceContext;
 export type PulseServiceStart = object;
@@ -59,12 +59,12 @@ export class PulseService {
     // poll for instructions every second for this deployment
 
     return {
-      getChannel: <T = PulseInstruction>(id: string): PulseChannel<T> => {
+      getChannel: <T extends PulseInstruction>(id: string): PulseChannel<T> => {
         const channel = this.channels.get(id);
         if (!channel) {
           throw new Error(`Unknown channel: ${id}`);
         }
-        return channel as any;
+        return (channel as unknown) as PulseChannel<T>;
       },
     };
   }
@@ -87,7 +87,15 @@ export class PulseService {
       }, 1000);
     }
 
-    return {};
+    return {
+      getChannel: <T extends PulseInstruction>(id: string) => {
+        const channel = this.channels.get(id);
+        if (!channel) {
+          throw new Error(`Unknown channel: ${id}`);
+        }
+        return (channel as unknown) as PulseChannel<T>;
+      },
+    };
   }
 
   public stop() {
