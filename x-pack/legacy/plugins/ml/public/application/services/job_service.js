@@ -421,7 +421,7 @@ class JobService {
         return { success: true };
       })
       .catch(err => {
-        msgs.error(
+        msgs.notify.error(
           i18n.translate('xpack.ml.jobService.couldNotUpdateJobErrorMessage', {
             defaultMessage: 'Could not update job: {jobId}',
             values: { jobId },
@@ -440,7 +440,7 @@ class JobService {
         return { success: true, messages };
       })
       .catch(err => {
-        msgs.error(
+        msgs.notify.error(
           i18n.translate('xpack.ml.jobService.jobValidationErrorMessage', {
             defaultMessage: 'Job Validation Error: {errorMessage}',
             values: { errorMessage: err.message },
@@ -633,7 +633,7 @@ class JobService {
         return { success: true };
       })
       .catch(err => {
-        msgs.error(
+        msgs.notify.error(
           i18n.translate('xpack.ml.jobService.couldNotUpdateDatafeedErrorMessage', {
             defaultMessage: 'Could not update datafeed: {datafeedId}',
             values: { datafeedId },
@@ -664,7 +664,7 @@ class JobService {
         })
         .catch(err => {
           console.log('jobService error starting datafeed:', err);
-          msgs.error(
+          msgs.notify.error(
             i18n.translate('xpack.ml.jobService.couldNotStartDatafeedErrorMessage', {
               defaultMessage: 'Could not start datafeed for {jobId}',
               values: { jobId },
@@ -697,15 +697,15 @@ class JobService {
           );
 
           if (err.statusCode === 500) {
-            msgs.error(couldNotStopDatafeedErrorMessage);
-            msgs.error(
+            msgs.notify.error(couldNotStopDatafeedErrorMessage);
+            msgs.notify.error(
               i18n.translate('xpack.ml.jobService.requestMayHaveTimedOutErrorMessage', {
                 defaultMessage:
                   'Request may have timed out and may still be running in the background.',
               })
             );
           } else {
-            msgs.error(couldNotStopDatafeedErrorMessage, err);
+            msgs.notify.error(couldNotStopDatafeedErrorMessage, err);
           }
           reject(err);
         });
