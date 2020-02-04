@@ -32,4 +32,4 @@ const plugins: Readonly<MetricsPluginSetupDependencies> = {
 const pluginInstance = plugin({} as PluginInitializerContext);
 
 export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core);
+export const start = pluginInstance.start(npStart.core, npStart.plugins);

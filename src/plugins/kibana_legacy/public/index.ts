@@ -24,3 +24,5 @@ export const plugin = (initializerContext: PluginInitializerContext) =>
   new KibanaLegacyPlugin(initializerContext);
 
 export * from './plugin';
+
+export { initAngularBootstrap } from './angular_bootstrap';

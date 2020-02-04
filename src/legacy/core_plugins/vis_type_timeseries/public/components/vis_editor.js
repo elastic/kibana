@@ -30,13 +30,11 @@ import { createBrushHandler } from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../../../../../plugins/vis_type_timeseries/common/extract_index_patterns';
 import { esKuery } from '../../../../../plugins/data/public';
-
-import { npStart } from 'ui/new_platform';
+import { getSavedObjectsClient, getUISettings, getDataStart, getCoreStart } from '../services';
 
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
-import { timefilter } from 'ui/timefilter';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';
@@ -52,7 +50,7 @@ export class VisEditor extends Component {
       visFields: props.visFields,
       extractedIndexPatterns: [''],
     };
-    this.onBrush = createBrushHandler(timefilter);
+    this.onBrush = createBrushHandler(getDataStart().query.timefilter);
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
 
@@ -60,8 +58,8 @@ export class VisEditor extends Component {
     // core dependencies required by React components downstream.
     this.coreContext = {
       appName: APP_NAME,
-      uiSettings: npStart.core.uiSettings,
-      savedObjectsClient: npStart.core.savedObjects.client,
+      uiSettings: getUISettings(),
+      savedObjectsClient: getSavedObjectsClient(),
       store: this.localStorage,
     };
   }
@@ -175,8 +173,8 @@ export class VisEditor extends Component {
           services={{
             appName: APP_NAME,
             storage: this.localStorage,
-            data: npStart.plugins.data,
-            ...npStart.core,
+            data: getDataStart(),
+            ...getCoreStart(),
           }}
         >
           <div className="tvbEditor" data-test-subj="tvbVisEditor">

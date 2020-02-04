@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { npStart } from 'ui/new_platform';
 import { createTickFormatter } from './tick_formatter';
 import { getFieldFormatsRegistry } from '../../../../../../test_utils/public/stub_field_formats';
+import { setFieldFormats } from '../../services';
 
 const mockUiSettings = {
   get: item => {
@@ -46,9 +46,7 @@ const mockCore = {
 };
 
 describe('createTickFormatter(format, template)', () => {
-  npStart.plugins.data = {
-    fieldFormats: getFieldFormatsRegistry(mockCore),
-  };
+  setFieldFormats(getFieldFormatsRegistry(mockCore));
 
   test('returns a number with two decimal place by default', () => {
     const fn = createTickFormatter();

@@ -20,7 +20,7 @@
 export type Get<T> = () => T;
 export type Set<T> = (value: T) => void;
 
-export const createGetterSetter = <T extends object>(name: string): [Get<T>, Set<T>] => {
+export const createGetterSetter = <T>(name: string): [Get<T>, Set<T>] => {
   let value: T;
 
   const get: Get<T> = () => {

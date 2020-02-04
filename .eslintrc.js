@@ -302,6 +302,8 @@ module.exports = {
                   'test/plugin_functional/plugins/**/public/np_ready/**/*',
                   'test/plugin_functional/plugins/**/server/np_ready/**/*',
                   'src/legacy/core_plugins/**/public/np_ready/**/*',
+                  'src/legacy/core_plugins/vis_type_*/public/**/*',
+                  '!src/legacy/core_plugins/vis_type_*/public/legacy*',
                   'src/legacy/core_plugins/**/server/np_ready/**/*',
                   'x-pack/legacy/plugins/**/public/np_ready/**/*',
                   'x-pack/legacy/plugins/**/server/np_ready/**/*',

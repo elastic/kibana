@@ -21,6 +21,7 @@ import { SavedObjectsStart } from 'kibana/public';
 import { NotificationsStart } from 'src/core/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
+import { IUiSettingsClient } from '../../../../core/public';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
 
@@ -28,6 +29,16 @@ export const [getNotifications, setNotifications] = createGetterSetter<Notificat
   'Notifications'
 );
 
+export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
+
 export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObjectsStart>(
   'SavedObjects'
 );
+
+export const [getEsShardTimeout, setEsShardTimeout] = createGetterSetter<number>('EsShardTimeout');
+
+export const [getEnableExternalUrls, setEnableExternalUrls] = createGetterSetter<boolean>(
+  'EnableExternalUrls'
+);
+
+export const [getEmsTileLayerId, setEmsTileLayerId] = createGetterSetter<unknown>('EmsTileLayerId');

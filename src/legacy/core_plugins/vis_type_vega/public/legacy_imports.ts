@@ -17,30 +17,9 @@
  * under the License.
  */
 
-import { createUiNewPlatformMock } from 'ui/new_platform/__mocks__/helpers';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
-import { injectedMetadataServiceMock } from '../../../../core/public/mocks';
-
-jest.doMock('ui/new_platform', () => {
-  const npMock = createUiNewPlatformMock();
-  return {
-    npSetup: {
-      ...npMock.npSetup,
-      core: {
-        ...npMock.npSetup.core,
-        injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
-      },
-    },
-    npStart: {
-      ...npMock.npStart,
-      core: {
-        ...npMock.npStart.core,
-        injectedMetadata: injectedMetadataServiceMock.createStartContract(),
-      },
-    },
-  };
-});
-
-Object.assign(window, {
-  sessionStorage: new StubBrowserStorage(),
-});
+// @ts-ignore
+export { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
+// @ts-ignore
+export { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
+// @ts-ignore
+export { KibanaMap } from 'ui/vis/map/kibana_map';

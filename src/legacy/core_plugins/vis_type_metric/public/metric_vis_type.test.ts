@@ -19,6 +19,9 @@
 
 import $ from 'jquery';
 
+// TODO This is an integration test and thus requires a running platform. When moving to the new platform,
+// this test has to be migrated to the newly created integration test environment.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { npStart } from 'ui/new_platform';
 // @ts-ignore
 import getStubIndexPattern from 'fixtures/stubbed_logstash_index_pattern';

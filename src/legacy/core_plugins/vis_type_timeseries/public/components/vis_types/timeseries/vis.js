@@ -22,7 +22,6 @@ import React, { Component } from 'react';
 import reactCSS from 'reactcss';
 
 import { startsWith, get, cloneDeep, map } from 'lodash';
-import { toastNotifications } from 'ui/notify';
 import { htmlIdGenerator } from '@elastic/eui';
 import { ScaleType } from '@elastic/charts';
 
@@ -36,6 +35,7 @@ import { areFieldsDifferent } from '../../lib/charts';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 import { isBackgroundDark } from '../../../lib/set_is_reversed';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
+import { getCoreStart } from '../../../services';
 
 export class TimeseriesVisualization extends Component {
   static propTypes = {
@@ -108,6 +108,7 @@ export class TimeseriesVisualization extends Component {
     createTickFormatter(get(model, 'formatter'), get(model, 'value_template'), getConfig);
 
   componentDidUpdate() {
+    const toastNotifications = getCoreStart().notifications.toasts;
     if (
       this.showToastNotification &&
       this.notificationReason !== this.showToastNotification.reason

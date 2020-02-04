@@ -21,10 +21,10 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ValidatedDualRange } from 'ui/validated_range';
 import { VisOptionsProps } from '../../../vis_default_editor/public';
 import { SelectOption, SwitchOption } from '../../../vis_type_vislib/public';
 import { TagCloudVisParams } from '../types';
+import { ValidatedDualRange } from '../legacy_imports';
 
 function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps<TagCloudVisParams>) {
   const handleFontSizeChange = ([minFontSize, maxFontSize]: [string | number, string | number]) => {

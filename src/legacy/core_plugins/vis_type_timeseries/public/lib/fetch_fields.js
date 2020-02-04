@@ -16,19 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { kfetch } from 'ui/kfetch';
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { extractIndexPatterns } from '../../../../../plugins/vis_type_timeseries/common/extract_index_patterns';
+import { getCoreStart } from '../services';
 
 export async function fetchFields(indexPatterns = ['*']) {
   const patterns = Array.isArray(indexPatterns) ? indexPatterns : [indexPatterns];
   try {
     const indexFields = await Promise.all(
       patterns.map(pattern => {
-        return kfetch({
-          method: 'GET',
-          pathname: '/api/metrics/fields',
+        return getCoreStart().http.get('/api/metrics/fields', {
           query: {
             index: pattern,
           },
@@ -43,7 +40,7 @@ export async function fetchFields(indexPatterns = ['*']) {
     }, {});
     return fields;
   } catch (error) {
-    toastNotifications.addDanger({
+    getCoreStart().notifications.toasts.addDanger({
       title: i18n.translate('visTypeTimeseries.fetchFields.loadIndexPatternFieldsErrorMessage', {
         defaultMessage: 'Unable to load index_pattern fields',
       }),

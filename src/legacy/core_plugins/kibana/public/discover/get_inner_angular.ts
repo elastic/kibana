@@ -21,7 +21,6 @@
 // these are necessary to bootstrap the local angular.
 // They can stay even after NP cutover
 import angular from 'angular';
-import 'ui/angular-bootstrap';
 import { IPrivate } from 'ui/private';
 import { EuiIcon } from '@elastic/eui';
 // @ts-ignore
@@ -86,12 +85,14 @@ import { createFieldChooserDirective } from './np_ready/components/field_chooser
 // @ts-ignore
 import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
 import { DiscoverStartPlugins } from './plugin';
+import { initAngularBootstrap } from '../../../../../plugins/kibana_legacy/public';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
  * needs to render, so in the end the current 'kibana' angular module is no longer necessary
  */
 export function getInnerAngularModule(name: string, core: CoreStart, deps: DiscoverStartPlugins) {
+  initAngularBootstrap();
   const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data);
   configureAppAngularModule(module, core as LegacyCoreStart, true);
   return module;

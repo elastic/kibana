@@ -21,6 +21,7 @@ import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { aggResponseIndex } from 'ui/agg_response';
 
 import { vislibSeriesResponseHandler } from '../response_handler';

@@ -43,6 +43,9 @@ import { SearchCache } from '../data_model/search_cache';
 
 import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 import { createVegaTypeDefinition } from '../vega_type';
+// TODO This is an integration test and thus requires a running platform. When moving to the new platform,
+// this test has to be migrated to the newly created integration test environment.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { npStart } from 'ui/new_platform';
 
 const THRESHOLD = 0.1;
