@@ -31,10 +31,6 @@ export default function({ getService }) {
           expect(body.os.uptime_ms).to.be.greaterThan(0);
           expect(body.usage).to.be(undefined);
         });
-
-        it('should return 401 for extended', async () => {
-          await supertestNoAuth.get('/api/stats?extended').expect(401);
-        });
       });
 
       describe('with auth', () => {
