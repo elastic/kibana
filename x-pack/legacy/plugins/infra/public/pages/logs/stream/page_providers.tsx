@@ -29,6 +29,8 @@ const LogFilterStateProvider: React.FC = ({ children }) => {
 const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { sourceId } = useContext(Source.Context);
   const {
+    startDate,
+    endDate,
     startTimestamp,
     endTimestamp,
     targetPosition,
@@ -36,12 +38,16 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
     pagesAfterEnd,
     isAutoReloading,
     jumpToTargetPosition,
+    liveStreamingInterval,
   } = useContext(LogPositionState.Context);
   const { filterQuery } = useContext(LogFilterState.Context);
 
   const entriesProps = {
+    startDate,
+    endDate,
     startTimestamp,
     endTimestamp,
+    liveStreamingInterval,
     timeKey: targetPosition,
     pagesBeforeStart,
     pagesAfterEnd,

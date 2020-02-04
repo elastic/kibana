@@ -46,8 +46,11 @@ type ActionObj = ReceiveEntriesAction | FetchOrErrorAction;
 type Dispatch = (action: ActionObj) => void;
 
 interface LogEntriesProps {
+  startDate: string | null;
+  endDate: string | null;
   startTimestamp: number | null;
   endTimestamp: number | null;
+  liveStreamingInterval: number;
   filterQuery: string | null;
   timeKey: TimeKey | null;
   pagesBeforeStart: number | null;
@@ -101,16 +104,16 @@ const shouldFetchNewEntries = ({
   filterQuery,
   topCursor,
   bottomCursor,
-  startTimestamp,
-  endTimestamp,
+  startDate,
+  endDate,
 }: FetchEntriesParams & LogEntriesStateParams & { prevParams: FetchEntriesParams }) => {
-  const shouldLoadWithNewTimestamps =
-    startTimestamp !== prevParams.startTimestamp || endTimestamp !== prevParams.endTimestamp;
+  const shouldLoadWithNewDates =
+    startDate !== prevParams.startDate || endDate !== prevParams.endDate;
 
   const shouldLoadWithNewFilter = filterQuery !== prevParams.filterQuery;
   const shouldLoadAroundNewPosition =
     timeKey && (!topCursor || !bottomCursor || !timeKeyIsBetween(topCursor, bottomCursor, timeKey));
-  return shouldLoadWithNewTimestamps || shouldLoadWithNewFilter || shouldLoadAroundNewPosition;
+  return shouldLoadWithNewDates || shouldLoadWithNewFilter || shouldLoadAroundNewPosition;
 };
 
 enum ShouldFetchMoreEntries {
@@ -249,7 +252,7 @@ const useFetchEntriesEffect = (
     (async () => {
       if (props.isAutoReloading && !state.isLoadingMore && !state.isReloading) {
         if (startedStreaming) {
-          await new Promise(res => setTimeout(res, 5000));
+          await new Promise(res => setTimeout(res, props.liveStreamingInterval));
         } else {
           const endTimestamp = Date.now();
           props.jumpToTargetPosition({ tiebreaker: 0, time: endTimestamp });

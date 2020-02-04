@@ -113,6 +113,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
         return;
       }
 
+      jumpToTargetPosition(null);
       setDateRange(previousDateRange => {
         return {
           startDate: newDateRange.startDate || previousDateRange.startDate,
@@ -123,10 +124,14 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     [dateRange]
   );
 
-  const [startTimestamp, endTimestamp] = useMemo(
-    () => [datemathToEpochMillis(dateRange.startDate), datemathToEpochMillis(dateRange.endDate)],
-    [dateRange]
-  );
+  const startTimestamp = useMemo(() => datemathToEpochMillis(dateRange.startDate), [
+    dateRange.startDate,
+  ]);
+
+  // endTimestamp needs to be synced to `now` to allow auto-streaming
+  const endTimestampDep = dateRange.endDate === 'now' ? Date.now() : dateRange.endDate;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const endTimestamp = useMemo(() => datemathToEpochMillis(dateRange.endDate), [endTimestampDep]);
 
   const state = {
     targetPosition,
