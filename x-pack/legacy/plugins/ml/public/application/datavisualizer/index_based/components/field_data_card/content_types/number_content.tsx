@@ -16,11 +16,11 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import numeral from '@elastic/numeral';
 
 import { FieldDataCardProps } from '../field_data_card';
 import { DisplayValue } from '../../../../../components/display_value';
 import { kibanaFieldFormat } from '../../../../../formatters/kibana_field_format';
+import { numberAsOrdinal } from '../../../../../formatters/number_as_ordinal';
 import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
 import {
   MetricDistributionChart,
@@ -37,11 +37,6 @@ enum DETAILS_MODE {
 const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 210;
 const DEFAULT_TOP_VALUES_THRESHOLD = 100;
-
-function numberAsOrdinal(num: number) {
-  const int = Math.floor(num);
-  return `${numeral(int).format('0o')}`;
-}
 
 export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats, fieldFormat } = config;
