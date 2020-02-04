@@ -30,6 +30,7 @@ jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
     getInjected: () => '',
+    homeConfig: { disableWelcomeScreen: false },
   }),
 }));
 

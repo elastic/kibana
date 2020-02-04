@@ -103,6 +103,10 @@ export default () =>
 
     logging: Joi.object()
       .keys({
+        appenders: HANDLED_IN_NEW_PLATFORM,
+        loggers: HANDLED_IN_NEW_PLATFORM,
+        root: HANDLED_IN_NEW_PLATFORM,
+
         silent: Joi.boolean().default(false),
 
         quiet: Joi.boolean().when('silent', {
