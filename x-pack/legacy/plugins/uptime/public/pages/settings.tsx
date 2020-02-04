@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { connect } from 'react-redux';
+import { isEqual } from 'lodash';
 import { AppState } from '../state';
 import { selectDynamicSettings } from '../state/selectors';
 import { DynamicSettingsState } from '../state/reducers/dynamic_settings';
@@ -45,10 +46,6 @@ export const SettingsPageContainer = ({
     loadDynamicSettings({});
   }, [loadDynamicSettings]);
 
-  if (dss.loading) {
-    return <EuiText>Loading...</EuiText>;
-  }
-
   return (
     <SettingsPagePresentation
       dynamicSettingsState={dss}
@@ -63,16 +60,25 @@ export const SettingsPagePresentation = ({
   saveDynamicSettings,
 }: Props & DispatchProps) => {
   const [formFields, setFormFields] = useState<{ [key: string]: any }>(dss.settings || {});
+  if (dss.settings && Object.entries(formFields).length === 0) {
+    setFormFields({ ...dss.settings });
+  }
 
   const onChangeFormField = (field: string, value: any) => {
     formFields[field] = value;
-    setFormFields(formFields);
+    setFormFields({ ...formFields });
   };
 
   const onApply = () => {
     // @ts-ignore figure out this cast later
     saveDynamicSettings(formFields);
   };
+
+  const resetForm = () => {
+    setFormFields({ ...dss.settings });
+  };
+
+  const isFormDirty = dss.settings ? !isEqual(dss.settings, formFields) : true;
 
   return (
     <EuiForm>
@@ -132,12 +138,10 @@ export const SettingsPagePresentation = ({
               fullWidth
               disabled={dss.loading}
               isLoading={dss.loading}
-              defaultValue={dss.settings?.heartbeatIndexName}
+              value={formFields.heartbeatIndexName || ''}
               onChange={(event: any) =>
                 onChangeFormField('heartbeatIndexName', event.currentTarget.value)
               }
-              // readOnly={readOnly}
-              // {...uptimeAliasFieldProps}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -151,9 +155,9 @@ export const SettingsPagePresentation = ({
             data-test-subj="discardSettingsButton"
             color="danger"
             iconType="cross"
-            isDisabled={dss.loading}
+            isDisabled={!isFormDirty || dss.loading}
             onClick={() => {
-              // resetForm();
+              resetForm();
             }}
           >
             <FormattedMessage
@@ -167,7 +171,7 @@ export const SettingsPagePresentation = ({
             data-test-subj="applySettingsButton"
             type="submit"
             color="primary"
-            // isDisabled={!isFormDirty || !isFormValid}
+            isDisabled={!isFormDirty || dss.loading}
             fill
             onClick={onApply}
           >

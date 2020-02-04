@@ -26,7 +26,7 @@ export function* fetchDynamicSettingsEffect() {
 }
 
 export function* setDynamicSettingsEffect() {
-  yield takeLatest(String(getDynamicSettings), function*(action: Action<DynamicSettings>) {
+  yield takeLatest(String(setDynamicSettings), function*(action: Action<DynamicSettings>) {
     try {
       if (!action.payload) {
         yield put(
