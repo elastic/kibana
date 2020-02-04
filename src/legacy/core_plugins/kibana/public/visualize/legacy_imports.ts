@@ -66,6 +66,9 @@ export { wrapInI18nContext } from 'ui/i18n';
 export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
 export { VisSavedObject } from '../../../visualizations/public/embeddable/visualize_embeddable';
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
-export { PromiseServiceCreator } from '../../../../../plugins/kibana_legacy/public';
 export { VisType } from '../../../visualizations/public';
-export { migrateLegacyQuery, PrivateProvider } from '../../../../../plugins/kibana_legacy/public';
+export {
+  migrateLegacyQuery,
+  PrivateProvider,
+  PromiseServiceCreator,
+} from '../../../../../plugins/kibana_legacy/public';
