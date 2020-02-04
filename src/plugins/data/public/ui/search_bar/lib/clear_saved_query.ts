@@ -16,18 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { CoreStart } from 'kibana/public';
 import { QueryStart } from '../../../query';
 
 export const clearStateFromSavedQuery = (
   queryService: QueryStart,
   setQueryStringState: Function,
-  uiSettings: CoreStart['uiSettings']
+  defaultLanguage: string
 ) => {
   queryService.filterManager.removeAll();
   setQueryStringState({
     query: '',
-    language: uiSettings.get('search:queryLanguage'),
+    language: defaultLanguage,
   });
 };

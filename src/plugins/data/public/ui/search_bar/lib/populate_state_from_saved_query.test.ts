@@ -21,7 +21,7 @@ import { populateStateFromSavedQuery } from './populate_state_from_saved_query';
 
 import { dataPluginMock } from '../../../mocks';
 import { DataPublicPluginStart } from '../../../types';
-import { SavedQuery, Query, esFilters } from '../../..';
+import { SavedQuery, esFilters } from '../../..';
 import { getFilter } from '../../../query/filter_manager/test_helpers/get_stub_filter';
 
 describe('populateStateFromSavedQuery', () => {
@@ -50,7 +50,7 @@ describe('populateStateFromSavedQuery', () => {
     const savedQuery: SavedQuery = {
       ...baseSavedQuery,
     };
-    populateStateFromSavedQuery(dataMock.query, savedQuery, setQueryState);
+    populateStateFromSavedQuery(dataMock.query, setQueryState, savedQuery);
     expect(setQueryState).toHaveBeenCalled();
   });
 
@@ -61,7 +61,7 @@ describe('populateStateFromSavedQuery', () => {
     };
     const f1 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'age', 34);
     savedQuery.attributes.filters = [f1];
-    populateStateFromSavedQuery(dataMock.query, savedQuery, setQueryState);
+    populateStateFromSavedQuery(dataMock.query, setQueryState, savedQuery);
     expect(setQueryState).toHaveBeenCalled();
     expect(dataMock.query.filterManager.setFilters).toHaveBeenCalledWith([f1]);
   });
@@ -81,7 +81,7 @@ describe('populateStateFromSavedQuery', () => {
     };
     const f1 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'age', 34);
     savedQuery.attributes.filters = [f1];
-    populateStateFromSavedQuery(dataMock.query, savedQuery, setQueryState);
+    populateStateFromSavedQuery(dataMock.query, setQueryState, savedQuery);
     expect(setQueryState).toHaveBeenCalled();
     expect(dataMock.query.filterManager.setFilters).toHaveBeenCalledWith([globalFilter, f1]);
   });
@@ -102,7 +102,7 @@ describe('populateStateFromSavedQuery', () => {
     dataMock.query.timefilter.timefilter.setTime = jest.fn();
     dataMock.query.timefilter.timefilter.setRefreshInterval = jest.fn();
 
-    populateStateFromSavedQuery(dataMock.query, savedQuery, jest.fn());
+    populateStateFromSavedQuery(dataMock.query, jest.fn(), savedQuery);
 
     expect(dataMock.query.timefilter.timefilter.setTime).toHaveBeenCalledWith({
       from: savedQuery.attributes.timefilter.from,

@@ -19,14 +19,16 @@
 
 import { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart, esFilters } from '../../..';
 
 interface UseFilterManagerProps {
+  filters?: esFilters.Filter[];
   filterManager: DataPublicPluginStart['query']['filterManager'];
 }
 
 export const useFilterManager = (props: UseFilterManagerProps) => {
-  const [filters, setFilters] = useState(props.filterManager.getFilters());
+  // Filters should be either what's passed in the initial state or the current state of the filter manager
+  const [filters, setFilters] = useState(props.filters || props.filterManager.getFilters());
   useEffect(() => {
     const subscriptions = new Subscription();
 

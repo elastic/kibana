@@ -92,10 +92,10 @@ const defaultOnQuerySubmit = (
 };
 
 // Respond to user clearing a saved query
-const defaultOnClearSavedQuery = (props: StatefulSearchBarProps, setSavedQuery: Function) => {
+const defaultOnClearSavedQuery = (props: StatefulSearchBarProps, clearSavedQuery: Function) => {
   if (!props.useDefaultBehaviors) return props.onClearSavedQuery;
   return () => {
-    setSavedQuery(undefined);
+    clearSavedQuery();
     if (props.onSavedQueryIdChange) props.onSavedQueryIdChange();
   };
 };
@@ -127,13 +127,16 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
 
     // handle service state updates.
     // i.e. filters being added from a visualization directly to filterManager.
-    const { filters } = useFilterManager({ filterManager: data.query.filterManager });
+    const { filters } = useFilterManager({
+      filters: props.filters,
+      filterManager: data.query.filterManager,
+    });
     const { timeRange, refreshInterval } = useTimefilter({
       timefilter: data.query.timefilter.timefilter,
     });
 
     // Fetch and update UI from saved query
-    const [savedQuery, setSavedQuery] = useSavedQuery({
+    const { savedQuery, setSavedQuery, clearSavedQuery } = useSavedQuery({
       queryService: data.query,
       setQuery,
       savedQueryId: props.savedQueryId,
@@ -183,7 +186,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}
           onQuerySubmit={defaultOnQuerySubmit(props, data.query, query, setQuery)}
-          onClearSavedQuery={defaultOnClearSavedQuery(props, setSavedQuery)}
+          onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           {...overrideDefaultBehaviors(props)}

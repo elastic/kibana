@@ -20,13 +20,12 @@
 import { clearStateFromSavedQuery } from './clear_saved_query';
 
 import { dataPluginMock } from '../../../mocks';
-import { coreMock } from '../../../../../../core/public/mocks';
 import { DataPublicPluginStart } from '../../../types';
 import { Query } from '../../..';
 
 describe('clearStateFromSavedQuery', () => {
+  const DEFAULT_LANGUAGE = 'banana';
   let dataMock: jest.Mocked<DataPublicPluginStart>;
-  const core = coreMock.createStart();
 
   beforeEach(() => {
     dataMock = dataPluginMock.createStartContract();
@@ -35,21 +34,17 @@ describe('clearStateFromSavedQuery', () => {
   it('should clear filters and query', async () => {
     const setQueryState = jest.fn();
     dataMock.query.filterManager.removeAll = jest.fn();
-    clearStateFromSavedQuery(dataMock.query, setQueryState, core.uiSettings);
+    clearStateFromSavedQuery(dataMock.query, setQueryState, DEFAULT_LANGUAGE);
     expect(setQueryState).toHaveBeenCalled();
     expect(dataMock.query.filterManager.removeAll).toHaveBeenCalled();
   });
 
   it('should use search:queryLanguage', async () => {
-    const LANGUAGE = 'banana';
     const setQueryState = jest.fn();
     dataMock.query.filterManager.removeAll = jest.fn();
-    core.uiSettings.get.mockImplementation((key: string) => {
-      return key === 'search:queryLanguage' ? LANGUAGE : undefined;
-    });
-    clearStateFromSavedQuery(dataMock.query, setQueryState, core.uiSettings);
+    clearStateFromSavedQuery(dataMock.query, setQueryState, DEFAULT_LANGUAGE);
     expect(setQueryState).toHaveBeenCalled();
-    expect((setQueryState.mock.calls[0][0] as Query).language).toBe(LANGUAGE);
+    expect((setQueryState.mock.calls[0][0] as Query).language).toBe(DEFAULT_LANGUAGE);
     expect(dataMock.query.filterManager.removeAll).toHaveBeenCalled();
   });
 });

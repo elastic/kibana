@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useState, useEffect, SetStateAction, Dispatch } from 'react';
+import { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import { SavedQuery } from '../../../query';
@@ -33,55 +33,62 @@ interface UseSavedQueriesProps {
   savedQueryId?: string;
 }
 
-type UseSavedQueriesRet = [
-  SavedQuery | undefined,
-  Dispatch<SetStateAction<SavedQuery | undefined>>
-];
+interface UseSavedQueriesReturn {
+  savedQuery?: SavedQuery;
+  setSavedQuery: (savedQuery: SavedQuery) => void;
+  clearSavedQuery: () => void;
+}
 
-export const useSavedQuery = (props: UseSavedQueriesProps): UseSavedQueriesRet => {
+export const useSavedQuery = (props: UseSavedQueriesProps): UseSavedQueriesReturn => {
   // Handle saved queries
-  const [savedQuery, setSavedQuery] = useState<SavedQuery>();
+  const defaultLanguage = props.uiSettings.get('search:queryLanguage');
+  const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>();
 
+  // Effect is used to convert a saved query id into an object
   useEffect(() => {
-    const fetchSavedQuery = async () => {
-      if (props.savedQueryId) {
-        try {
-          // fetch saved query
-          const newSavedQuery = await props.queryService.savedQueries.getSavedQuery(
-            props.savedQueryId
-          );
-          // Make sure we set the saved query to the most recent one
-          if (newSavedQuery && newSavedQuery.id === props.savedQueryId) {
-            setSavedQuery(newSavedQuery);
-          }
-        } catch (error) {
-          // Clear saved query
-          setSavedQuery(undefined);
-          // notify of saving error
-          props.notifications.toasts.addWarning({
-            title: i18n.translate('data.search.unableToGetSavedQueryToastTitle', {
-              defaultMessage: 'Unable to load saved query {savedQueryId}',
-              values: { savedQueryId: props.savedQueryId },
-            }),
-            text: `${error.message}`,
-          });
+    const fetchSavedQuery = async (savedQueryId: string) => {
+      try {
+        // fetch saved query
+        const newSavedQuery = await props.queryService.savedQueries.getSavedQuery(savedQueryId);
+        // Make sure we set the saved query to the most recent one
+        if (newSavedQuery && newSavedQuery.id === savedQueryId) {
+          setSavedQuery(newSavedQuery);
+          populateStateFromSavedQuery(props.queryService, props.setQuery, newSavedQuery);
         }
-      } else {
+      } catch (error) {
         // Clear saved query
         setSavedQuery(undefined);
+        clearStateFromSavedQuery(props.queryService, props.setQuery, defaultLanguage);
+        // notify of saving error
+        props.notifications.toasts.addWarning({
+          title: i18n.translate('data.search.unableToGetSavedQueryToastTitle', {
+            defaultMessage: 'Unable to load saved query {savedQueryId}',
+            values: { savedQueryId },
+          }),
+          text: `${error.message}`,
+        });
       }
     };
 
-    fetchSavedQuery();
-  }, [props.notifications.toasts, props.queryService.savedQueries, props.savedQueryId]);
+    if (props.savedQueryId) fetchSavedQuery(props.savedQueryId);
+  }, [
+    defaultLanguage,
+    props.notifications.toasts,
+    props.queryService,
+    props.queryService.savedQueries,
+    props.savedQueryId,
+    props.setQuery,
+  ]);
 
-  useEffect(() => {
-    if (savedQuery) {
-      populateStateFromSavedQuery(props.queryService, savedQuery, props.setQuery);
-    } else {
-      clearStateFromSavedQuery(props.queryService, props.setQuery, props.uiSettings);
-    }
-  }, [savedQuery, props.queryService, props.setQuery, props.uiSettings]);
-
-  return [savedQuery, setSavedQuery];
+  return {
+    savedQuery,
+    setSavedQuery: (q: SavedQuery) => {
+      setSavedQuery(q);
+      populateStateFromSavedQuery(props.queryService, props.setQuery, q);
+    },
+    clearSavedQuery: () => {
+      setSavedQuery(undefined);
+      clearStateFromSavedQuery(props.queryService, props.setQuery, defaultLanguage);
+    },
+  };
 };

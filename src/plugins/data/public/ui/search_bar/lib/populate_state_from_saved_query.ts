@@ -21,8 +21,8 @@ import { QueryStart, SavedQuery } from '../../..';
 
 export const populateStateFromSavedQuery = (
   queryService: QueryStart,
-  savedQuery: SavedQuery,
-  setQueryStringState: Function
+  setQueryStringState: Function,
+  savedQuery: SavedQuery
 ) => {
   const {
     timefilter: { timefilter },
