@@ -8,11 +8,11 @@ import Hapi from 'hapi';
 import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../../types';
+import { LegacySetupServices, RequestFacade } from '../../../../plugin';
 import { transformError, getIndex, callWithRequestFactory } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 
-export const createReadIndexRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createReadIndexRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
   return {
     method: 'GET',
     path: DETECTION_ENGINE_INDEX_URL,
@@ -26,8 +26,8 @@ export const createReadIndexRoute = (server: ServerFacade): Hapi.ServerRoute => 
     },
     async handler(request: RequestFacade, headers) {
       try {
-        const index = getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request, server);
+        const index = getIndex(request, services);
+        const callWithRequest = callWithRequestFactory(request, services);
         const indexExists = await getIndexExists(callWithRequest, index);
         if (indexExists) {
           // head request is used for if you want to get if the index exists
@@ -52,6 +52,6 @@ export const createReadIndexRoute = (server: ServerFacade): Hapi.ServerRoute => 
   };
 };
 
-export const readIndexRoute = (server: ServerFacade) => {
-  server.route(createReadIndexRoute(server));
+export const readIndexRoute = (services: LegacySetupServices) => {
+  services.route(createReadIndexRoute(services));
 };

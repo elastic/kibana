@@ -11,7 +11,7 @@ import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
-import { ServerFacade } from '../../../../types';
+import { LegacySetupServices } from '../../../../plugin';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -64,6 +64,6 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
   },
 };
 
-export const readRulesRoute = (server: ServerFacade) => {
-  server.route(createReadRulesRoute);
+export const readRulesRoute = (services: LegacySetupServices) => {
+  services.route(createReadRulesRoute);
 };

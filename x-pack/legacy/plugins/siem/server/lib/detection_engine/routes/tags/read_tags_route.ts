@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_TAGS_URL } from '../../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../../types';
+import { LegacySetupServices, RequestFacade } from '../../../../plugin';
 import { transformError } from '../utils';
 import { readTags } from '../../tags/read_tags';
 
@@ -39,6 +39,6 @@ export const createReadTagsRoute: Hapi.ServerRoute = {
   },
 };
 
-export const readTagsRoute = (server: ServerFacade) => {
-  server.route(createReadTagsRoute);
+export const readTagsRoute = (services: LegacySetupServices) => {
+  services.route(createReadTagsRoute);
 };

@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import { isFunction, snakeCase } from 'lodash/fp';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { ServerFacade } from '../../../../types';
+import { LegacySetupServices } from '../../../../plugin';
 import { findRulesStatusesSchema } from '../schemas/find_rules_statuses_schema';
 import {
   FindRulesStatusesRequest,
@@ -53,7 +53,7 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
 
     // build return object with ids as keys and errors as values.
     /* looks like this
-        { 
+        {
             "someAlertId": [{"myerrorobject": "some error value"}, etc..],
             "anotherAlertId": ...
         }
@@ -88,6 +88,6 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
   },
 };
 
-export const findRulesStatusesRoute = (server: ServerFacade): void => {
-  server.route(createFindRulesStatusRoute);
+export const findRulesStatusesRoute = (services: LegacySetupServices): void => {
+  services.route(createFindRulesStatusRoute);
 };

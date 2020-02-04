@@ -9,15 +9,15 @@ import { isFunction } from 'lodash/fp';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
-import { ServerFacade } from '../../../../types';
+import { LegacySetupServices } from '../../../../plugin';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import { KibanaRequest, LegacyRequest } from '../../../../../../../../../src/core/server';
 
-export const createDeleteRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createDeleteRulesRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
   return {
     method: 'DELETE',
     path: DETECTION_ENGINE_RULES_URL,
@@ -33,8 +33,8 @@ export const createDeleteRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
     async handler(request: QueryRequest, headers) {
       const { id, rule_id: ruleId } = request.query;
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
+      const actionsClient = await services.plugins.actions.getActionsClientWithRequest(
+        KibanaRequest.from((request as unknown) as LegacyRequest)
       );
       const savedObjectsClient = isFunction(request.getSavedObjectsClient)
         ? request.getSavedObjectsClient()
@@ -73,6 +73,6 @@ export const createDeleteRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const deleteRulesRoute = (server: ServerFacade): void => {
-  server.route(createDeleteRulesRoute(server));
+export const deleteRulesRoute = (services: LegacySetupServices): void => {
+  services.route(createDeleteRulesRoute(services));
 };

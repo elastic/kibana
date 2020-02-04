@@ -10,7 +10,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { findRules } from '../../rules/find_rules';
 import { FindRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { findRulesSchema } from '../schemas/find_rules_schema';
-import { ServerFacade } from '../../../../types';
+import { LegacySetupServices } from '../../../../plugin';
 import { transformFindAlertsOrError } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -70,6 +70,6 @@ export const createFindRulesRoute = (): Hapi.ServerRoute => {
   };
 };
 
-export const findRulesRoute = (server: ServerFacade) => {
-  server.route(createFindRulesRoute());
+export const findRulesRoute = (services: LegacySetupServices) => {
+  services.route(createFindRulesRoute());
 };

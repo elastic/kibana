@@ -9,7 +9,7 @@ import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import signalsPolicy from './signals_policy.json';
-import { ServerFacade, RequestFacade } from '../../../../types';
+import { LegacySetupServices, RequestFacade } from '../../../../plugin';
 import { transformError, getIndex, callWithRequestFactory } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getPolicyExists } from '../../index/get_policy_exists';
@@ -19,7 +19,7 @@ import { getSignalsTemplate } from './get_signals_template';
 import { getTemplateExists } from '../../index/get_template_exists';
 import { createBootstrapIndex } from '../../index/create_bootstrap_index';
 
-export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createCreateIndexRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: DETECTION_ENGINE_INDEX_URL,
@@ -33,8 +33,8 @@ export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
     },
     async handler(request: RequestFacade) {
       try {
-        const index = getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request, server);
+        const index = getIndex(request, services);
+        const callWithRequest = callWithRequestFactory(request, services);
         const indexExists = await getIndexExists(callWithRequest, index);
         if (indexExists) {
           return new Boom(`index: "${index}" already exists`, { statusCode: 409 });
@@ -58,6 +58,6 @@ export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const createIndexRoute = (server: ServerFacade) => {
-  server.route(createCreateIndexRoute(server));
+export const createIndexRoute = (services: LegacySetupServices) => {
+  services.route(createCreateIndexRoute(services));
 };

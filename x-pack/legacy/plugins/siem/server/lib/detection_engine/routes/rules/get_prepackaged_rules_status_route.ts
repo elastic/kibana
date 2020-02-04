@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../../types';
+import { LegacySetupServices, RequestFacade } from '../../../../plugin';
 import { transformError } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
@@ -61,6 +61,6 @@ export const createGetPrepackagedRulesStatusRoute = (): Hapi.ServerRoute => {
   };
 };
 
-export const getPrepackagedRulesStatusRoute = (server: ServerFacade): void => {
-  server.route(createGetPrepackagedRulesStatusRoute());
+export const getPrepackagedRulesStatusRoute = (services: LegacySetupServices): void => {
+  services.route(createGetPrepackagedRulesStatusRoute());
 };

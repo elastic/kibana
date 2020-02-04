@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../../types';
+import { LegacySetupServices, RequestFacade } from '../../../../plugin';
 import { transformError, getIndex, callWithRequestFactory } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getPolicyExists } from '../../index/get_policy_exists';
@@ -27,7 +27,7 @@ import { deleteTemplate } from '../../index/delete_template';
  *
  * And ensuring they're all gone
  */
-export const createDeleteIndexRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createDeleteIndexRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
   return {
     method: 'DELETE',
     path: DETECTION_ENGINE_INDEX_URL,
@@ -41,8 +41,8 @@ export const createDeleteIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
     },
     async handler(request: RequestFacade) {
       try {
-        const index = getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request, server);
+        const index = getIndex(request, services);
+        const callWithRequest = callWithRequestFactory(request, services);
         const indexExists = await getIndexExists(callWithRequest, index);
         if (!indexExists) {
           return new Boom(`index: "${index}" does not exist`, { statusCode: 404 });
@@ -65,6 +65,6 @@ export const createDeleteIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const deleteIndexRoute = (server: ServerFacade) => {
-  server.route(createDeleteIndexRoute(server));
+export const deleteIndexRoute = (services: LegacySetupServices) => {
+  services.route(createDeleteIndexRoute(services));
 };

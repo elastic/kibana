@@ -9,7 +9,7 @@ import { isFunction } from 'lodash/fp';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
-import { ServerFacade } from '../../../../types';
+import { LegacySetupServices } from '../../../../plugin';
 import { queryRulesBulkSchema } from '../schemas/query_rules_bulk_schema';
 import { transformOrBulkError, getIdBulkError } from './utils';
 import { transformBulkError } from '../utils';
@@ -17,7 +17,7 @@ import { QueryBulkRequest, IRuleSavedAttributesSavedObjectAttributes } from '../
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createDeleteRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createDeleteRulesBulkRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
   return {
     method: ['POST', 'DELETE'], // allow both POST and DELETE in case their client does not support bodies in DELETE
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
@@ -32,8 +32,8 @@ export const createDeleteRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
     },
     async handler(request: QueryBulkRequest, headers) {
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
+      const actionsClient = await services.plugins.actions.getActionsClientWithRequest(
+        KibanaRequest.from(request)
       );
       const savedObjectsClient = isFunction(request.getSavedObjectsClient)
         ? request.getSavedObjectsClient()
@@ -78,6 +78,6 @@ export const createDeleteRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
   };
 };
 
-export const deleteRulesBulkRoute = (server: ServerFacade): void => {
-  server.route(createDeleteRulesBulkRoute(server));
+export const deleteRulesBulkRoute = (services: LegacySetupServices): void => {
+  services.route(createDeleteRulesBulkRoute(services));
 };

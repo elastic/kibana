@@ -12,7 +12,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
 import { RulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { createRulesSchema } from '../schemas/create_rules_schema';
-import { ServerFacade } from '../../../../types';
+import { LegacySetupServices } from '../../../../plugin';
 import { readRules } from '../../rules/read_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { transformOrError } from './utils';
@@ -20,7 +20,7 @@ import { getIndexExists } from '../../index/get_index_exists';
 import { callWithRequestFactory, getIndex, transformError } from '../utils';
 import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createCreateRulesRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: DETECTION_ENGINE_RULES_URL,
@@ -61,8 +61,8 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         references,
       } = request.payload;
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
+      const actionsClient = await services.plugins.actions.getActionsClientWithRequest(
+        KibanaRequest.from(request)
       );
       const savedObjectsClient = isFunction(request.getSavedObjectsClient)
         ? request.getSavedObjectsClient()
@@ -72,8 +72,8 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       }
 
       try {
-        const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request, server);
+        const finalIndex = outputIndex != null ? outputIndex : getIndex(request, services);
+        const callWithRequest = callWithRequestFactory(request, services);
         const indexExists = await getIndexExists(callWithRequest, finalIndex);
         if (!indexExists) {
           return Boom.badRequest(
@@ -134,6 +134,6 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const createRulesRoute = (server: ServerFacade): void => {
-  server.route(createCreateRulesRoute(server));
+export const createRulesRoute = (services: LegacySetupServices): void => {
+  services.route(createCreateRulesRoute(services));
 };

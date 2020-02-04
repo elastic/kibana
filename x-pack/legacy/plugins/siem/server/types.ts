@@ -20,9 +20,4 @@ export interface ServerFacade {
   route: Legacy.Server['route'];
 }
 
-export interface RequestFacade
-  extends Omit<LegacyRequest, 'getAlertsClient' | 'getActionsClient' | 'getSavedObjectsClient'> {
-  getAlertsClient?: LegacyRequest['getAlertsClient'];
-  getActionsClient?: LegacyRequest['getActionsClient'];
-  getSavedObjectsClient?: LegacyRequest['getSavedObjectsClient'];
-}
+export type RequestFacade = LegacyRequest;

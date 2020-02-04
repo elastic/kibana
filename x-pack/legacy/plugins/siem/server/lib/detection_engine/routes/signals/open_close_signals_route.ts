@@ -8,10 +8,10 @@ import Hapi from 'hapi';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 import { SignalsStatusRequest } from '../../signals/types';
 import { setSignalsStatusSchema } from '../schemas/set_signal_status_schema';
-import { ServerFacade } from '../../../../types';
+import { LegacySetupServices } from '../../../../plugin';
 import { transformError, getIndex } from '../utils';
 
-export const setSignalsStatusRouteDef = (server: ServerFacade): Hapi.ServerRoute => {
+export const setSignalsStatusRouteDef = (services: LegacySetupServices): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -26,8 +26,8 @@ export const setSignalsStatusRouteDef = (server: ServerFacade): Hapi.ServerRoute
     },
     async handler(request: SignalsStatusRequest) {
       const { signal_ids: signalIds, query, status } = request.payload;
-      const index = getIndex(request, server);
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+      const index = getIndex(request, services);
+      const { callWithRequest } = services.plugins.elasticsearch.getCluster('data');
       let queryObject;
       if (signalIds) {
         queryObject = { ids: { values: signalIds } };
@@ -58,6 +58,6 @@ export const setSignalsStatusRouteDef = (server: ServerFacade): Hapi.ServerRoute
   };
 };
 
-export const setSignalsStatusRoute = (server: ServerFacade) => {
-  server.route(setSignalsStatusRouteDef(server));
+export const setSignalsStatusRoute = (services: LegacySetupServices) => {
+  services.route(setSignalsStatusRouteDef(services));
 };

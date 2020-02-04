@@ -9,11 +9,13 @@ import Hapi from 'hapi';
 import { chunk, isEmpty, isFunction } from 'lodash/fp';
 import { extname } from 'path';
 import uuid from 'uuid';
+
+import { KibanaRequest } from '../../../../../../../../../src/core/server';
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { LegacySetupServices, RequestFacade } from '../../../../plugin';
 import { createRules } from '../../rules/create_rules';
 import { ImportRulesRequest } from '../../rules/types';
-import { ServerFacade } from '../../../../types';
 import { readRules } from '../../rules/read_rules';
 import { getIndexExists } from '../../index/get_index_exists';
 import {
@@ -26,7 +28,6 @@ import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_fro
 import { ImportRuleAlertRest } from '../../types';
 import { updateRules } from '../../rules/update_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -38,14 +39,14 @@ type PromiseFromStreams = ImportRuleAlertRest | Error;
  */
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
-export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createImportRulesRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: `${DETECTION_ENGINE_RULES_URL}/_import`,
     options: {
       tags: ['access:siem'],
       payload: {
-        maxBytes: server.config().get('savedObjects.maxImportPayloadBytes'),
+        maxBytes: services.config().get('savedObjects.maxImportPayloadBytes'),
         output: 'stream',
         allow: 'multipart/form-data',
       },
@@ -59,8 +60,8 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
     },
     async handler(request: ImportRulesRequest, headers) {
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
+      const actionsClient = await services.plugins.actions.getActionsClientWithRequest(
+        KibanaRequest.from((request as unknown) as RequestFacade)
       );
       const savedObjectsClient = isFunction(request.getSavedObjectsClient)
         ? request.getSavedObjectsClient()
@@ -74,7 +75,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         return Boom.badRequest(`Invalid file extension ${fileExtension}`);
       }
 
-      const objectLimit = server.config().get<number>('savedObjects.maxImportExportSize');
+      const objectLimit = services.config().get<number>('savedObjects.maxImportExportSize');
       const readStream = createRulesStreamFromNdJson(request.payload.file, objectLimit);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([readStream]);
 
@@ -148,8 +149,8 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                   version,
                 } = parsedRule;
                 try {
-                  const finalIndex = getIndex(request, server);
-                  const callWithRequest = callWithRequestFactory(request, server);
+                  const finalIndex = getIndex((request as unknown) as RequestFacade, services);
+                  const callWithRequest = callWithRequestFactory(request, services);
                   const indexExists = await getIndexExists(callWithRequest, finalIndex);
                   if (!indexExists) {
                     resolve(
@@ -263,6 +264,6 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const importRulesRoute = (server: ServerFacade): void => {
-  server.route(createImportRulesRoute(server));
+export const importRulesRoute = (services: LegacySetupServices): void => {
+  services.route(createImportRulesRoute(services));
 };

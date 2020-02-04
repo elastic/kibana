@@ -9,13 +9,13 @@ import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { ExportRulesRequest } from '../../rules/types';
-import { ServerFacade } from '../../../../types';
+import { LegacySetupServices } from '../../../../plugin';
 import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
 import { exportRulesSchema, exportRulesQuerySchema } from '../schemas/export_rules_schema';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';
 
-export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createExportRulesRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: `${DETECTION_ENGINE_RULES_URL}/_export`,
@@ -37,7 +37,7 @@ export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       }
 
       try {
-        const exportSizeLimit = server.config().get<number>('savedObjects.maxImportExportSize');
+        const exportSizeLimit = services.config().get<number>('savedObjects.maxImportExportSize');
         if (request.payload?.objects != null && request.payload.objects.length > exportSizeLimit) {
           return Boom.badRequest(`Can't export more than ${exportSizeLimit} rules`);
         } else {
@@ -66,6 +66,6 @@ export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const exportRulesRoute = (server: ServerFacade): void => {
-  server.route(createExportRulesRoute(server));
+export const exportRulesRoute = (services: LegacySetupServices): void => {
+  services.route(createExportRulesRoute(services));
 };

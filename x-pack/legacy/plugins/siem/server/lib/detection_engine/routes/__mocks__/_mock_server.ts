@@ -10,8 +10,10 @@ import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { savedObjectsClientMock } from '../../../../../../../../../src/core/server/mocks';
 import { alertsClientMock } from '../../../../../../alerting/server/alerts_client.mock';
 import { actionsClientMock } from '../../../../../../../../plugins/actions/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { spacesServiceMock } from '../../../../../../../../plugins/spaces/server/spaces_service/spaces_service.mock';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../../common/constants';
-import { ServerFacade } from '../../../../types';
+import { LegacySetupServices } from '../../../../plugin';
 
 const defaultConfig = {
   'kibana.index': '.kibana',
@@ -52,6 +54,7 @@ export const createMockServer = (config: Record<string, string> = defaultConfig)
   const actionsClient = actionsClientMock.create();
   const alertsClient = alertsClientMock.create();
   const savedObjectsClient = savedObjectsClientMock.create();
+  const spaces = spacesServiceMock.createSetupContract();
   const elasticsearch = {
     getCluster: jest.fn().mockImplementation(() => ({
       callWithRequest: jest.fn(),
@@ -59,14 +62,15 @@ export const createMockServer = (config: Record<string, string> = defaultConfig)
   };
   server.decorate('request', 'getAlertsClient', () => alertsClient);
   server.plugins.elasticsearch = (elasticsearch as unknown) as ElasticsearchPlugin;
-  server.plugins.spaces = { getSpaceId: () => 'default' };
   server.plugins.actions = {
     getActionsClientWithRequest: () => actionsClient,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any; // The types have really bad conflicts at the moment so I have to use any
   server.decorate('request', 'getSavedObjectsClient', () => savedObjectsClient);
+
   return {
-    server: server as ServerFacade & Hapi.Server,
+    server,
+    spaces,
     alertsClient,
     actionsClient,
     elasticsearch,
@@ -90,10 +94,12 @@ export const createMockServerWithoutAlertClientDecoration = (
   } as any; // The types have really bad conflicts at the moment so I have to use any
 
   const actionsClient = actionsClientMock.create();
+  const spaces = spacesServiceMock.createSetupContract();
 
   return {
-    serverWithoutAlertClient: serverWithoutAlertClient as ServerFacade & Hapi.Server,
+    serverWithoutAlertClient,
     actionsClient,
+    spaces,
   };
 };
 

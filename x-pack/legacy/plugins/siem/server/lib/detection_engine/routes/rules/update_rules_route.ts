@@ -10,13 +10,13 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { updateRules } from '../../rules/update_rules';
 import { UpdateRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { updateRulesSchema } from '../schemas/update_rules_schema';
-import { ServerFacade } from '../../../../types';
+import { LegacySetupServices } from '../../../../plugin';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createUpdateRulesRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
   return {
     method: 'PUT',
     path: DETECTION_ENGINE_RULES_URL,
@@ -60,8 +60,8 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       } = request.payload;
 
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
+      const actionsClient = await services.plugins.actions.getActionsClientWithRequest(
+        KibanaRequest.from(request)
       );
       const savedObjectsClient = isFunction(request.getSavedObjectsClient)
         ? request.getSavedObjectsClient()
@@ -124,6 +124,6 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const updateRulesRoute = (server: ServerFacade) => {
-  server.route(createUpdateRulesRoute(server));
+export const updateRulesRoute = (services: LegacySetupServices) => {
+  services.route(createUpdateRulesRoute(services));
 };

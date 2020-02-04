@@ -20,9 +20,9 @@ import {
   timelineSavedObjectType,
   ruleStatusSavedObjectType,
 } from './saved_objects';
-import { ServerFacade } from './types';
+import { RequestFacade, ServerFacade } from './types';
 
-export { CoreSetup, Logger, PluginInitializerContext };
+export { CoreSetup, Logger, PluginInitializerContext, RequestFacade };
 
 export interface SetupPlugins {
   features: FeaturesSetup;
