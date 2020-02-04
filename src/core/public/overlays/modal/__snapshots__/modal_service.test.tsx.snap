@@ -14,7 +14,6 @@ Array [
     <EuiOverlayMask>
       <mockConstructor>
         <EuiConfirmModal
-          buttonColor="primary"
           cancelButtonText="Cancel"
           confirmButtonText="Confirm"
           onCancel={[Function]}
@@ -40,7 +39,6 @@ Array [
     <EuiOverlayMask>
       <mockConstructor>
         <EuiConfirmModal
-          buttonColor="primary"
           cancelButtonText="Cancel"
           confirmButtonText="Confirm"
           onCancel={[Function]}
@@ -63,7 +61,6 @@ Array [
     <EuiOverlayMask>
       <mockConstructor>
         <EuiConfirmModal
-          buttonColor="primary"
           cancelButtonText="Cancel"
           confirmButtonText="Confirm"
           onCancel={[Function]}
@@ -79,7 +76,6 @@ Array [
     <EuiOverlayMask>
       <mockConstructor>
         <EuiConfirmModal
-          buttonColor="primary"
           cancelButtonText="Cancel"
           confirmButtonText="Confirm"
           onCancel={[Function]}
@@ -100,7 +96,6 @@ Array [
     <EuiOverlayMask>
       <mockConstructor>
         <EuiModal
-          maxWidth={true}
           onClose={[Function]}
         >
           <MountWrapper
@@ -116,7 +111,6 @@ Array [
     <EuiOverlayMask>
       <mockConstructor>
         <EuiConfirmModal
-          buttonColor="primary"
           cancelButtonText="Cancel"
           confirmButtonText="Confirm"
           onCancel={[Function]}
@@ -137,7 +131,6 @@ Array [
     <EuiOverlayMask>
       <mockConstructor>
         <EuiModal
-          maxWidth={true}
           onClose={[Function]}
         >
           <MountWrapper
@@ -160,7 +153,6 @@ Array [
     <EuiOverlayMask>
       <mockConstructor>
         <EuiConfirmModal
-          buttonColor="primary"
           cancelButtonText="Cancel"
           confirmButtonText="Confirm"
           onCancel={[Function]}
@@ -176,7 +168,6 @@ Array [
     <EuiOverlayMask>
       <mockConstructor>
         <EuiConfirmModal
-          buttonColor="primary"
           cancelButtonText="Cancel"
           confirmButtonText="Confirm"
           onCancel={[Function]}
@@ -197,7 +188,6 @@ Array [
     <EuiOverlayMask>
       <mockConstructor>
         <EuiModal
-          maxWidth={true}
           onClose={[Function]}
         >
           <MountWrapper
@@ -213,7 +203,6 @@ Array [
     <EuiOverlayMask>
       <mockConstructor>
         <EuiModal
-          maxWidth={true}
           onClose={[Function]}
         >
           <MountWrapper

@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { App } from 'kibana/public';
+import { App, PluginInitializerContext } from 'kibana/public';
+
+import { ConfigSchema } from '../config';
 
 interface ForwardDefinition {
   legacyAppId: string;
@@ -28,6 +30,8 @@ interface ForwardDefinition {
 export class KibanaLegacyPlugin {
   private apps: App[] = [];
   private forwards: ForwardDefinition[] = [];
+
+  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup() {
     return {
@@ -77,6 +81,8 @@ export class KibanaLegacyPlugin {
       ) => {
         this.forwards.push({ legacyAppId, newAppId, ...options });
       },
+
+      config: this.initializerContext.config.get(),
     };
   }
 
@@ -92,6 +98,7 @@ export class KibanaLegacyPlugin {
        * Just exported for wiring up with legacy platform, should not be used.
        */
       getForwards: () => this.forwards,
+      config: this.initializerContext.config.get(),
     };
   }
 }

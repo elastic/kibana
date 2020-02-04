@@ -75,7 +75,7 @@ describe('Plugin Context', () => {
       .pipe(first())
       .toPromise();
     expect(configObject).toStrictEqual({
-      kibana: { defaultAppId: 'home', index: '.kibana' },
+      kibana: { index: '.kibana' },
       elasticsearch: {
         shardTimeout: duration(30, 's'),
         requestTimeout: duration(30, 's'),
