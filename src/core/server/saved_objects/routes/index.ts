@@ -20,10 +20,12 @@
 import { InternalHttpServiceSetup } from '../../http';
 import { registerGetRoute } from './get';
 import { registerCreateRoute } from './create';
+import { registerDeleteRoute } from './delete';
 
 export function registerRoutes(http: InternalHttpServiceSetup) {
   const router = http.createRouter('');
 
   registerGetRoute(router);
   registerCreateRoute(router);
+  registerDeleteRoute(router);
 }

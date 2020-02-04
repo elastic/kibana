@@ -17,12 +17,24 @@
  * under the License.
  */
 
-export { createBulkCreateRoute } from './bulk_create';
-export { createBulkGetRoute } from './bulk_get';
-export { createFindRoute } from './find';
-export { createImportRoute } from './import';
-export { createLogLegacyImportRoute } from './log_legacy_import';
-export { createResolveImportErrorsRoute } from './resolve_import_errors';
-export { createUpdateRoute } from './update';
-export { createBulkUpdateRoute } from './bulk_update';
-export { createExportRoute } from './export';
+import { schema } from '@kbn/config-schema';
+import { IRouter } from '../../http';
+
+export const registerDeleteRoute = (router: IRouter) => {
+  router.delete(
+    {
+      path: '/api/saved_objects/{type}/{id}',
+      validate: {
+        params: schema.object({
+          type: schema.string(),
+          id: schema.string(),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const { type, id } = req.params;
+      const result = await context.core.savedObjects.client.delete(type, id);
+      return res.ok({ body: result });
+    })
+  );
+};

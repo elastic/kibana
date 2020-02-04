@@ -17,55 +17,47 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
-import { createMockServer } from './_mock_server';
-import { createDeleteRoute } from './delete';
+import supertest from 'supertest';
+import { UnwrapPromise } from '@kbn/utility-types';
+import { registerDeleteRoute } from './delete';
 import { savedObjectsClientMock } from '../../../../core/server/mocks';
+import { setupServer } from './test_utils';
+
+type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('DELETE /api/saved_objects/{type}/{id}', () => {
-  let server: Hapi.Server;
-  const savedObjectsClient = savedObjectsClientMock.create();
+  let server: setupServerReturn['server'];
+  let httpSetup: setupServerReturn['httpSetup'];
+  let handlerContext: setupServerReturn['handlerContext'];
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
-  beforeEach(() => {
-    savedObjectsClient.delete.mockImplementation(() => Promise.resolve('{}'));
-    server = createMockServer();
+  beforeEach(async () => {
+    ({ server, httpSetup, handlerContext } = await setupServer());
+    savedObjectsClient = handlerContext.savedObjects.client;
 
-    const prereqs = {
-      getSavedObjectsClient: {
-        assign: 'savedObjectsClient',
-        method() {
-          return savedObjectsClient;
-        },
-      },
-    };
+    const router = httpSetup.createRouter('');
+    registerDeleteRoute(router);
 
-    server.route(createDeleteRoute(prereqs));
+    await server.start();
   });
 
-  afterEach(() => {
-    savedObjectsClient.delete.mockReset();
+  afterEach(async () => {
+    await server.stop();
   });
 
   it('formats successful response', async () => {
-    const request = {
-      method: 'DELETE',
-      url: '/api/saved_objects/index-pattern/logstash-*',
-    };
+    const result = await supertest(httpSetup.server.listener)
+      .delete('/api/saved_objects/index-pattern/logstash-*')
+      .expect(200);
 
-    const { payload, statusCode } = await server.inject(request);
-    const response = JSON.parse(payload);
-
-    expect(statusCode).toBe(200);
-    expect(response).toEqual({});
+    expect(result.body).toEqual({});
   });
 
   it('calls upon savedObjectClient.delete', async () => {
-    const request = {
-      method: 'DELETE',
-      url: '/api/saved_objects/index-pattern/logstash-*',
-    };
+    await supertest(httpSetup.server.listener)
+      .delete('/api/saved_objects/index-pattern/logstash-*')
+      .expect(200);
 
-    await server.inject(request);
     expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*');
   });
 });
