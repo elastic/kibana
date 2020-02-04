@@ -542,6 +542,8 @@ export interface ApplicationSetup {
     contextName: T,
     provider: IContextProvider<AppMountDeprecated, T>
   ): void;
+
+  currentAppId$: Observable;
 }
 
 /** @internal */
@@ -612,6 +614,8 @@ export interface ApplicationStart {
     contextName: T,
     provider: IContextProvider<AppMountDeprecated, T>
   ): void;
+
+  currentAppId$: Observable<string | undefined>;
 }
 
 /** @internal */
@@ -639,8 +643,8 @@ export interface InternalApplicationStart
     provider: IContextProvider<AppMountDeprecated, T>
   ): void;
 
-  // Internal APIs
   currentAppId$: Observable<string | undefined>;
+  // Internal APIs
   getComponent(): JSX.Element | null;
 }
 

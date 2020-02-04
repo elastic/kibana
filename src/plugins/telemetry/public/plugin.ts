@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Plugin, CoreSetup, CoreStart, HttpSetup } from '../../../core/public';
+import { Plugin, CoreStart, HttpStart } from '../../../core/public';
 
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 
@@ -26,17 +26,14 @@ export interface TelemetryPluginStart {
 }
 
 export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
-  private isUnauthenticated: boolean = true;
-
-  public setup({ http }: CoreSetup) {
-    this.isUnauthenticated = this.getIsUnauthenticated(http);
-  }
+  public setup() {}
 
   public start({
     injectedMetadata,
     http,
     notifications,
     overlays,
+    application,
   }: CoreStart): TelemetryPluginStart {
     const isPluginEnabled = injectedMetadata.getInjectedVar('telemetryEnabled') as boolean;
     const telemetryBanner = injectedMetadata.getInjectedVar('telemetryBanner') as boolean;
@@ -55,20 +52,26 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
       telemetryService,
     });
 
-    this.maybeStartTelemetryPoller({
-      telemetryService,
-      isPluginEnabled,
-      sendUsageFrom,
-    });
+    application.currentAppId$.subscribe(appId => {
+      const isUnauthenticated = this.getIsUnauthenticated(http);
+      if (isUnauthenticated) {
+        return;
+      }
+      this.maybeStartTelemetryPoller({
+        telemetryService,
+        isPluginEnabled,
+        sendUsageFrom,
+      });
 
-    if (telemetryBanner) {
-      this.maybeShowOptedInNotificationBanner({
-        telemetryNotifications,
-      });
-      this.maybeShowOptInBanner({
-        telemetryNotifications,
-      });
-    }
+      if (telemetryBanner) {
+        this.maybeShowOptedInNotificationBanner({
+          telemetryNotifications,
+        });
+        this.maybeShowOptInBanner({
+          telemetryNotifications,
+        });
+      }
+    });
 
     return {
       telemetryService,
@@ -76,7 +79,7 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
     };
   }
 
-  private getIsUnauthenticated(http: HttpSetup) {
+  private getIsUnauthenticated(http: HttpStart) {
     const { anonymousPaths } = http;
     return anonymousPaths.isAnonymous(window.location.pathname);
   }
@@ -92,10 +95,7 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
   }) {
     if (isPluginEnabled && sendUsageFrom === 'browser') {
       const sender = new TelemetrySender(telemetryService);
-
-      if (!this.isUnauthenticated) {
-        sender.startChecking();
-      }
+      sender.startChecking();
     }
   }
 
@@ -104,10 +104,6 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
   }: {
     telemetryNotifications: TelemetryNotifications;
   }) {
-    if (this.isUnauthenticated) {
-      return;
-    }
-
     const shouldShowBanner = telemetryNotifications.shouldShowOptedInNoticeBanner();
     if (shouldShowBanner) {
       telemetryNotifications.renderOptedInNoticeBanner();
@@ -119,10 +115,6 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
   }: {
     telemetryNotifications: TelemetryNotifications;
   }) {
-    if (this.isUnauthenticated) {
-      return;
-    }
-
     const shouldShowBanner = telemetryNotifications.shouldShowOptInBanner();
     if (shouldShowBanner) {
       telemetryNotifications.renderOptInBanner();
