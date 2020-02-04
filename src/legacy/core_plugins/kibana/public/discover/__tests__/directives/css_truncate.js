@@ -20,7 +20,7 @@
 import angular from 'angular';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import 'plugins/kibana/discover/legacy';
+import { pluginInstance } from 'plugins/kibana/discover/legacy';
 
 let $parentScope;
 
@@ -30,7 +30,9 @@ let $elem;
 
 const init = function(expandable) {
   // Load the application
-  ngMock.module('kibana');
+  pluginInstance.initializeServices();
+  pluginInstance.initializeInnerAngular();
+  ngMock.module('app/discover');
 
   // Create the scope
   ngMock.inject(function($rootScope, $compile) {

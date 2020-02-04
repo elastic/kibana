@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { IIndexPattern } from '../../../../../../../../../plugins/data/public';
-import { SortOrder } from '../components/table_header/helpers';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export function getSort(
-  sort?: SortOrder[],
-  indexPattern?: IIndexPattern,
-  defaultSortOrder?: SortOrder
-): any;
+export const configSchema = schema.object({
+  disableWelcomeScreen: schema.boolean({ defaultValue: false }),
+});
+
+export type ConfigSchema = TypeOf<typeof configSchema>;
