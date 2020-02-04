@@ -8,7 +8,6 @@
     "cypress:run": "cypress run --spec **/*.feature",
     "lint": "tslint --project ./tsconfig.json --fix",
     "postlint": "npm run tsc",
-    "precypress:run": "npm run lint",
     "tsc": "tsc --pretty --noEmit"
   },
   "dependencies": {
