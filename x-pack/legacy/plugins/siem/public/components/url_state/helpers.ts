@@ -5,15 +5,24 @@
  */
 
 import { decode, encode, RisonValue } from 'rison-node';
-import { Location } from 'history';
+import * as H from 'history';
 import { QueryString } from 'ui/utils/query_string';
 import { Query, esFilters } from 'src/plugins/data/public';
 
-import { inputsSelectors, State, timelineSelectors } from '../../store';
+import { isEmpty } from 'lodash/fp';
 import { SiemPageName } from '../../pages/home/types';
+import { inputsSelectors, State, timelineSelectors } from '../../store';
+import { UrlInputsModel } from '../../store/inputs/model';
+import { formatDate } from '../super_date_picker';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
-import { LocationTypes, UrlStateContainerPropTypes } from './types';
+import {
+  LocationTypes,
+  UrlStateContainerPropTypes,
+  ReplaceStateInLocation,
+  Timeline,
+  UpdateUrlStateString,
+} from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
@@ -30,7 +39,7 @@ export const decodeRisonUrlState = (value: string | undefined): RisonValue | any
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const encodeRisonUrlState = (state: any) => encode(state);
 
-export const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
+export const getQueryStringFromLocation = (search: string) => search.substring(1);
 
 export const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
   const queryParam = QueryString.decode(queryString)[key];
@@ -60,8 +69,11 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   });
 };
 
-export const replaceQueryStringInLocation = (location: Location, queryString: string): Location => {
-  if (queryString === getQueryStringFromLocation(location)) {
+export const replaceQueryStringInLocation = (
+  location: H.Location,
+  queryString: string
+): H.Location => {
+  if (queryString === getQueryStringFromLocation(location.search)) {
     return location;
   } else {
     return {
@@ -172,4 +184,92 @@ export const makeMapStateToProps = () => {
   };
 
   return mapStateToProps;
+};
+
+export const updateTimerangeUrl = (timeRange: UrlInputsModel): UrlInputsModel => {
+  if (timeRange.global.timerange.kind === 'relative') {
+    timeRange.global.timerange.from = formatDate(timeRange.global.timerange.fromStr);
+    timeRange.global.timerange.to = formatDate(timeRange.global.timerange.toStr);
+  }
+  if (timeRange.timeline.timerange.kind === 'relative') {
+    timeRange.timeline.timerange.from = formatDate(timeRange.timeline.timerange.fromStr);
+    timeRange.timeline.timerange.to = formatDate(timeRange.timeline.timerange.toStr);
+  }
+  return timeRange;
+};
+
+export const updateUrlStateString = ({
+  history,
+  newUrlStateString,
+  pathName,
+  search,
+  urlKey,
+}: UpdateUrlStateString): string => {
+  const queryState: Query | Timeline | esFilters.Filter[] | UrlInputsModel = decodeRisonUrlState(
+    newUrlStateString
+  );
+  if (urlKey === CONSTANTS.appQuery && queryState != null && (queryState as Query).query === '') {
+    return replaceStateInLocation({
+      history,
+      pathName,
+      search,
+      urlStateToReplace: '',
+      urlStateKey: urlKey,
+    });
+  } else if (
+    urlKey === CONSTANTS.timerange &&
+    queryState != null &&
+    (queryState as UrlInputsModel).global != null
+  ) {
+    return replaceStateInLocation({
+      history,
+      pathName,
+      search,
+      urlStateToReplace: updateTimerangeUrl(queryState as UrlInputsModel),
+      urlStateKey: urlKey,
+    });
+  } else if (urlKey === CONSTANTS.filters && isEmpty(queryState)) {
+    return replaceStateInLocation({
+      history,
+      pathName,
+      search,
+      urlStateToReplace: '',
+      urlStateKey: urlKey,
+    });
+  } else if (
+    urlKey === CONSTANTS.timeline &&
+    queryState != null &&
+    (queryState as Timeline).id === ''
+  ) {
+    return replaceStateInLocation({
+      history,
+      pathName,
+      search,
+      urlStateToReplace: '',
+      urlStateKey: urlKey,
+    });
+  }
+  return search;
+};
+
+export const replaceStateInLocation = ({
+  history,
+  urlStateToReplace,
+  urlStateKey,
+  pathName,
+  search,
+}: ReplaceStateInLocation) => {
+  const newLocation = replaceQueryStringInLocation(
+    {
+      hash: '',
+      pathname: pathName,
+      search,
+      state: '',
+    },
+    replaceStateKeyInQueryString(urlStateKey, urlStateToReplace)(getQueryStringFromLocation(search))
+  );
+  if (history) {
+    history.replace(newLocation);
+  }
+  return newLocation.search;
 };

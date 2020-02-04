@@ -5,6 +5,7 @@
  */
 
 import ApolloClient from 'apollo-client';
+import * as H from 'history';
 import { ActionCreator } from 'typescript-fsa';
 import { IIndexPattern, Query, esFilters } from 'src/plugins/data/public';
 
@@ -136,3 +137,19 @@ export type DispatchSetInitialStateFromUrl = <TCache>({
   updateTimelineIsLoading,
   urlStateToUpdate,
 }: SetInitialStateFromUrl<TCache>) => () => void;
+
+export interface ReplaceStateInLocation {
+  history?: H.History;
+  urlStateToReplace: UrlInputsModel | Query | esFilters.Filter[] | Timeline | string;
+  urlStateKey: string;
+  pathName: string;
+  search: string;
+}
+
+export interface UpdateUrlStateString {
+  history?: H.History;
+  newUrlStateString: string;
+  pathName: string;
+  search: string;
+  urlKey: KeyUrlState;
+}
