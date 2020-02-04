@@ -24,6 +24,7 @@ describe('EventLogService', () => {
     return new EventLogService({
       esContext,
       systemLogger,
+      kibanaUUID: '42',
       config: {
         enabled,
         logEntries,
@@ -67,6 +68,7 @@ describe('EventLogService', () => {
     const params = {
       esContext,
       systemLogger,
+      kibanaUUID: '42',
       config: {
         enabled: true,
         logEntries: true,
@@ -103,6 +105,7 @@ describe('EventLogService', () => {
     const params = {
       esContext,
       systemLogger,
+      kibanaUUID: '42',
       config: {
         enabled: true,
         logEntries: true,

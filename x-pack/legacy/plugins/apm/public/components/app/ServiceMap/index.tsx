@@ -30,13 +30,13 @@ import { getCytoscapeElements } from './get_cytoscape_elements';
 import { LoadingOverlay } from './LoadingOverlay';
 import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import { Popover } from './Popover';
+import { useRefHeight } from './useRefHeight';
 
 interface ServiceMapProps {
   serviceName?: string;
 }
 
 const cytoscapeDivStyle = {
-  height: '85vh',
   background: `linear-gradient(
   90deg,
   ${theme.euiPageBackgroundColor}
@@ -52,7 +52,8 @@ linear-gradient(
 center,
 ${theme.euiColorLightShade}`,
   backgroundSize: `${theme.euiSizeL} ${theme.euiSizeL}`,
-  margin: `-${theme.gutterTypes.gutterLarge}`
+  margin: `-${theme.gutterTypes.gutterLarge}`,
+  marginTop: 0
 };
 
 const MAX_REQUESTS = 5;
@@ -198,17 +199,27 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     license?.isActive &&
     (license?.type === 'platinum' || license?.type === 'trial');
 
+  const [wrapperRef, height] = useRefHeight();
+
   return isValidPlatinumLicense ? (
-    <LoadingOverlay isLoading={isLoading} percentageLoaded={percentageLoaded}>
+    <div
+      style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) }}
+      ref={wrapperRef}
+    >
       <Cytoscape
         elements={renderedElements.current}
         serviceName={serviceName}
+        height={height}
         style={cytoscapeDivStyle}
       >
+        <LoadingOverlay
+          isLoading={isLoading}
+          percentageLoaded={percentageLoaded}
+        />
         <Controls />
         <Popover focusedServiceName={serviceName} />
       </Cytoscape>
-    </LoadingOverlay>
+    </div>
   ) : (
     <PlatinumLicensePrompt />
   );

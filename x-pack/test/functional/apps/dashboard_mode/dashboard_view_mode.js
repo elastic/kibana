@@ -58,6 +58,61 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('Dashboard viewer', () => {
+      before('Create logstash data role', async () => {
+        await PageObjects.settings.navigateTo();
+        await testSubjects.click('roles');
+        await PageObjects.security.clickCreateNewRole();
+
+        await testSubjects.setValue('roleFormNameInput', 'logstash-data');
+        await PageObjects.security.addIndexToRole('logstash-*');
+        await PageObjects.security.addPrivilegeToRole('read');
+        await PageObjects.security.clickSaveEditRole();
+      });
+
+      before('Create dashboard only mode user', async () => {
+        await PageObjects.settings.navigateTo();
+        await PageObjects.security.clickUsersSection();
+        await PageObjects.security.clickCreateNewUser();
+        await testSubjects.setValue('userFormUserNameInput', 'dashuser');
+        await testSubjects.setValue('passwordInput', '123456');
+        await testSubjects.setValue('passwordConfirmationInput', '123456');
+        await testSubjects.setValue('userFormFullNameInput', 'dashuser');
+        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
+        await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
+        await PageObjects.security.assignRoleToUser('logstash-data');
+
+        await PageObjects.security.clickSaveEditUser();
+      });
+
+      before('Create user with mixes roles', async () => {
+        await PageObjects.security.clickCreateNewUser();
+
+        await testSubjects.setValue('userFormUserNameInput', 'mixeduser');
+        await testSubjects.setValue('passwordInput', '123456');
+        await testSubjects.setValue('passwordConfirmationInput', '123456');
+        await testSubjects.setValue('userFormFullNameInput', 'mixeduser');
+        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
+        await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
+        await PageObjects.security.assignRoleToUser('kibana_admin');
+        await PageObjects.security.assignRoleToUser('logstash-data');
+
+        await PageObjects.security.clickSaveEditUser();
+      });
+
+      before('Create user with dashboard and superuser role', async () => {
+        await PageObjects.security.clickCreateNewUser();
+
+        await testSubjects.setValue('userFormUserNameInput', 'mysuperuser');
+        await testSubjects.setValue('passwordInput', '123456');
+        await testSubjects.setValue('passwordConfirmationInput', '123456');
+        await testSubjects.setValue('userFormFullNameInput', 'mixeduser');
+        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
+        await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
+        await PageObjects.security.assignRoleToUser('superuser');
+
+        await PageObjects.security.clickSaveEditUser();
+      });
+
       after('logout', async () => {
         await security.testUser.restoreDefaults();
       });
