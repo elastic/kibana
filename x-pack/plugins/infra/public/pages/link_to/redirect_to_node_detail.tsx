@@ -27,7 +27,7 @@ export const RedirectToNodeDetail = ({
     getToFromLocation(location)
   )('');
 
-  return <Redirect to={`/infrastructure/metrics/${nodeType}/${nodeId}?${searchString}`} />;
+  return <Redirect to={`/metrics/detail/${nodeType}/${nodeId}?${searchString}`} />;
 };
 
 export const getNodeDetailUrl = ({

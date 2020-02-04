@@ -59,13 +59,13 @@ export class Plugin
     pluginsSetup.data.autocomplete.addQuerySuggestionProvider('kuery', kueryProvider);
 
     core.application.register({
-      id: 'infra:logs',
+      id: 'logs',
       title: i18n.translate('xpack.infra.logs.pluginTitle', {
         defaultMessage: 'Logs',
       }),
       euiIconType: 'logsApp',
       order: 8001,
-      appRoute: '/app/infra/logs',
+      appRoute: '/app/logs',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
@@ -76,13 +76,13 @@ export class Plugin
     });
 
     core.application.register({
-      id: 'infra:home',
+      id: 'metrics',
       title: i18n.translate('xpack.infra.metrics.pluginTitle', {
         defaultMessage: 'Metrics',
       }),
       euiIconType: 'metricsApp',
       order: 8000,
-      appRoute: '/app/infra/infrastructure',
+      appRoute: '/app/metrics',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
