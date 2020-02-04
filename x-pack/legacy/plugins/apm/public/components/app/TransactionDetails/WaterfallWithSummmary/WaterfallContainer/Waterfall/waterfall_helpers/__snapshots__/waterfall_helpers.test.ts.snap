@@ -24,6 +24,77 @@ Object {
       "name": "GET /api",
     },
   },
+  "errorItems": Array [
+    Object {
+      "doc": Object {
+        "agent": Object {
+          "name": "ruby",
+          "version": "2",
+        },
+        "error": Object {
+          "grouping_key": "errorGroupingKey1",
+          "id": "error1",
+          "log": Object {
+            "message": "error message",
+          },
+        },
+        "parent": Object {
+          "id": "myTransactionId1",
+        },
+        "processor": Object {
+          "event": "error",
+        },
+        "service": Object {
+          "name": "opbeans-ruby",
+        },
+        "timestamp": Object {
+          "us": 1549324795810000,
+        },
+        "trace": Object {
+          "id": "myTraceId",
+        },
+        "transaction": Object {
+          "id": "myTransactionId1",
+        },
+      },
+      "docType": "error",
+      "duration": 0,
+      "id": "error1",
+      "offset": 25994,
+      "parent": Object {
+        "doc": Object {
+          "processor": Object {
+            "event": "transaction",
+          },
+          "service": Object {
+            "name": "opbeans-node",
+          },
+          "timestamp": Object {
+            "us": 1549324795784006,
+          },
+          "trace": Object {
+            "id": "myTraceId",
+          },
+          "transaction": Object {
+            "duration": Object {
+              "us": 49660,
+            },
+            "id": "myTransactionId1",
+            "name": "GET /api",
+          },
+        },
+        "docType": "transaction",
+        "duration": 49660,
+        "id": "myTransactionId1",
+        "offset": 0,
+        "parent": undefined,
+        "parentId": undefined,
+        "skew": 0,
+      },
+      "parentId": "myTransactionId1",
+      "skew": 0,
+    },
+  ],
   "errorsCount": 1,
   "errorsPerTransaction": Object {
     "myTransactionId1": 2,
@@ -716,75 +787,6 @@ Object {
       "parentId": "mySpanIdA",
       "skew": 0,
     },
-    Object {
-      "doc": Object {
-        "agent": Object {
-          "name": "ruby",
-          "version": "2",
-        },
-        "error": Object {
-          "grouping_key": "errorGroupingKey1",
-          "id": "error1",
-          "log": Object {
-            "message": "error message",
-          },
-        },
-        "parent": Object {
-          "id": "myTransactionId1",
-        },
-        "processor": Object {
-          "event": "error",
-        },
-        "service": Object {
-          "name": "opbeans-ruby",
-        },
-        "timestamp": Object {
-          "us": 1549324795810000,
-        },
-        "trace": Object {
-          "id": "myTraceId",
-        },
-        "transaction": Object {
-          "id": "myTransactionId1",
-        },
-      },
-      "docType": "error",
-      "duration": 0,
-      "id": "error1",
-      "offset": 25994,
-      "parent": Object {
-        "doc": Object {
-          "processor": Object {
-            "event": "transaction",
-          },
-          "service": Object {
-            "name": "opbeans-node",
-          },
-          "timestamp": Object {
-            "us": 1549324795784006,
-          },
-          "trace": Object {
-            "id": "myTraceId",
-          },
-          "transaction": Object {
-            "duration": Object {
-              "us": 49660,
-            },
-            "id": "myTransactionId1",
-            "name": "GET /api",
-          },
-        },
-        "docType": "transaction",
-        "duration": 49660,
-        "id": "myTransactionId1",
-        "offset": 0,
-        "parent": undefined,
-        "parentId": undefined,
-        "skew": 0,
-      },
-      "parentId": "myTransactionId1",
-      "skew": 0,
-    },
   ],
   "rootTransaction": Object {
     "processor": Object {
@@ -848,6 +850,7 @@ Object {
       "name": "Api::ProductsController#index",
     },
   },
+  "errorItems": Array [],
   "errorsCount": 0,
   "errorsPerTransaction": Object {
     "myTransactionId1": 2,

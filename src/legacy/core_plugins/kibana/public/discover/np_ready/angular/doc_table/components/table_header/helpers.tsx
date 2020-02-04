@@ -17,8 +17,7 @@
  * under the License.
  */
 import { IndexPattern } from '../../../../../kibana_services';
-// @ts-ignore
-import { shortenDottedString } from '../../../../../../../common/utils/shorten_dotted_string';
+import { shortenDottedString } from '../../../../../../../../../../plugins/data/common/utils';
 
 export type SortOrder = [string, string];
 export interface ColumnProps {
