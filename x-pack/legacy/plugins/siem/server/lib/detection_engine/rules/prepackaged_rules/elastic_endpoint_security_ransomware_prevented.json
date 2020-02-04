@@ -1,8 +1,10 @@
 {
   "description": "Elastic Endpoint prevented Ransomware. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.",
+  "from": "now-660s",
   "index": [
     "endgame-*"
   ],
+  "interval": "10m",
   "language": "kuery",
   "max_signals": 100,
   "name": "Ransomware - Prevented - Elastic Endpoint",
