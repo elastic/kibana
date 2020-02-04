@@ -16,36 +16,31 @@ interface GetBarchartConfigsProps {
   from: number;
   legendPosition?: Position;
   to: number;
-  scaleType: ScaleType;
   onBrushEnd: UpdateDateRange;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
 }
 
 export const DEFAULT_CHART_HEIGHT = 174;
+export const DEFAULT_Y_TICK_FORMATTER = (value: string | number): string => value.toLocaleString();
 
 export const getBarchartConfigs = ({
   chartHeight,
   from,
   legendPosition,
   to,
-  scaleType,
   onBrushEnd,
   yTickFormatter,
   showLegend,
 }: GetBarchartConfigsProps) => ({
   series: {
-    xScaleType: scaleType || ScaleType.Time,
+    xScaleType: ScaleType.Time,
     yScaleType: ScaleType.Linear,
     stackAccessors: ['g'],
   },
   axis: {
-    xTickFormatter:
-      scaleType === ScaleType.Time ? histogramDateTimeFormatter([from, to]) : undefined,
-    yTickFormatter:
-      yTickFormatter != null
-        ? yTickFormatter
-        : (value: string | number): string => value.toLocaleString(),
+    xTickFormatter: histogramDateTimeFormatter([from, to]),
+    yTickFormatter: yTickFormatter != null ? yTickFormatter : DEFAULT_Y_TICK_FORMATTER,
     tickSize: 8,
   },
   settings: {

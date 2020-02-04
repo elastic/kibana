@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Position, ScaleType } from '@elastic/charts';
+import { Position } from '@elastic/charts';
 import styled from 'styled-components';
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
@@ -85,7 +85,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   legendPosition,
   mapping,
   panelHeight = DEFAULT_PANEL_HEIGHT,
-  scaleType = ScaleType.Time,
   setQuery,
   showLegend,
   stackByOptions,
@@ -101,7 +100,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     legendPosition,
     to: endDate,
     onBrushEnd: updateDateRange,
-    scaleType,
     yTickFormatter,
     showLegend,
   });
