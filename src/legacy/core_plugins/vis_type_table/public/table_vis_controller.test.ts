@@ -89,9 +89,6 @@ describe('Table Vis - Controller', () => {
   };
 
   beforeEach(initLocalAngular);
-  // beforeAll(() => {
-  //   visualizationsSetup.types.createBaseVisualization(tableVisTypeDefinition);
-  // });
   beforeEach(angular.mock.module('kibana/table_vis'));
 
   beforeEach(
@@ -103,9 +100,6 @@ describe('Table Vis - Controller', () => {
   );
 
   beforeEach(() => {
-    // setFieldFormats(({
-    //   getDefaultInstance: jest.fn(),
-    // } as unknown) as any);
     stubIndexPattern = new StubIndexPattern(
       'logstash-*',
       (cfg: any) => cfg,
