@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE_PACKAGES } from '../../common/constants';
-import { Installation, Installed, NotInstalled } from '../../common/types';
+import { Installation, Installed, NotInstalled, InstallationStatus } from '../../common/types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
@@ -46,6 +46,19 @@ export async function getPackages(
     )
     .sort(sortByName);
   return packageList;
+}
+
+export async function getPackageKeysByStatus(
+  savedObjectsClient: SavedObjectsClientContract,
+  status: InstallationStatus
+) {
+  const allPackages = await getPackages({ savedObjectsClient });
+  return allPackages.reduce<string[]>((acc, pkg) => {
+    if (pkg.status === status) {
+      acc.push(`${pkg.name}-${pkg.version}`);
+    }
+    return acc;
+  }, []);
 }
 
 export async function getPackageInfo(options: {

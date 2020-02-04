@@ -5,10 +5,11 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { KibanaAssetType } from '../../../../common/types';
-import { RegistryPackage, Dataset } from '../../../../common/types';
+import { SAVED_OBJECT_TYPE_INDEX_PATTERN } from '../../../../common/constants';
 import * as Registry from '../../../registry';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
+import { getPackageKeysByStatus } from '../../../packages/get';
+import { InstallationStatus, RegistryPackage } from '../../../../common/types';
 
 interface FieldFormatMap {
   [key: string]: FieldFormatMapItem;
@@ -62,69 +63,97 @@ export interface IndexPatternField {
   script?: string;
   lang?: string;
 }
-interface KibanaIndexPattern {
-  [key: string]: string;
-}
-enum IndexPatternType {
+export enum IndexPatternType {
   logs = 'logs',
   metrics = 'metrics',
 }
 
 export async function installIndexPatterns(
-  pkgkey: string,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  pkgkey?: string
 ) {
-  const registryPackageInfo = await Registry.fetchInfo(pkgkey);
-  const registryDatasets = registryPackageInfo.datasets;
-  if (!registryDatasets) return;
+  // get all user installed packages
+  const installedPackages = await getPackageKeysByStatus(
+    savedObjectsClient,
+    InstallationStatus.installed
+  );
+  // add this package
+  if (pkgkey) installedPackages.push(pkgkey);
 
+  // get each package's registry info
+  const installedPackagesFetchInfoPromise = installedPackages.map(pkg => Registry.fetchInfo(pkg));
+  const installedPackagesInfo = await Promise.all(installedPackagesFetchInfoPromise);
+
+  // for each index pattern type, create an index pattern
   const indexPatternTypes = [IndexPatternType.logs, IndexPatternType.metrics];
-
   indexPatternTypes.forEach(async indexPatternType => {
-    const datasets = registryDatasets.filter(dataset => dataset.type === indexPatternType);
-    await createIndexPattern({
-      datasetType: indexPatternType,
-      datasets,
-      registryPackageInfo,
-      savedObjectsClient,
+    // if this is an update because a package is being unisntalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
+    if (!pkgkey && installedPackages.length === 0) {
+      try {
+        await savedObjectsClient.delete(
+          SAVED_OBJECT_TYPE_INDEX_PATTERN,
+          `epm-ip-${indexPatternType}`
+        );
+      } catch (err) {
+        // index pattern was probably deleted by the user already
+      }
+      return;
+    }
+
+    // get all dataset fields from all installed packages
+    const fields = await getAllDatasetFieldsByType(installedPackagesInfo, indexPatternType);
+
+    const kibanaIndexPattern = createIndexPattern(indexPatternType, fields);
+    // create or overwrite the index pattern
+    await savedObjectsClient.create(SAVED_OBJECT_TYPE_INDEX_PATTERN, kibanaIndexPattern, {
+      id: `epm-ip-${indexPatternType}`,
+      overwrite: true,
     });
   });
 }
 
-// loop through each dataset, get all the fields, create index pattern by type.
-const createIndexPattern = async ({
-  datasetType,
-  datasets,
-  registryPackageInfo,
-  savedObjectsClient,
-}: {
-  datasetType: string;
-  datasets: Dataset[];
-  registryPackageInfo: RegistryPackage;
-  savedObjectsClient: SavedObjectsClientContract;
-}) => {
-  const loadingFields = datasets.map(dataset =>
-    loadFieldsFromYaml(registryPackageInfo, dataset.name)
-  );
-  const nestedResults = await Promise.all(loadingFields);
-  const allFields = nestedResults.flat();
+// loops through all given packages and returns an array
+// of all fields from all datasets matching datasetType
+export const getAllDatasetFieldsByType = async (
+  packages: RegistryPackage[],
+  datasetType: IndexPatternType
+): Promise<Fields> => {
+  const datasetsPromises = packages.reduce<Array<Promise<Field[]>>>((acc, pkg) => {
+    if (pkg.datasets) {
+      // filter out datasets by datasetType
+      const matchingDatasets = pkg.datasets.filter(dataset => dataset.type === datasetType);
+      matchingDatasets.forEach(dataset => acc.push(loadFieldsFromYaml(pkg, dataset.name)));
+    }
+    return acc;
+  }, []);
 
-  const kibanaIndexPattern = makeKibanaIndexPattern(allFields, datasetType);
-  await savedObjectsClient.create(KibanaAssetType.indexPattern, kibanaIndexPattern);
+  // get all the datasets for each installed package into one array
+  const allDatasetFields: Fields[] = await Promise.all(datasetsPromises);
+  return allDatasetFields.flat();
 };
 
-const makeKibanaIndexPattern = (fields: Fields, datasetType: string): KibanaIndexPattern => {
+// creates or updates index pattern
+export const createIndexPattern = (indexPatternType: string, fields: Fields) => {
+  const { indexPatternFields, fieldFormatMap } = createIndexPatternFields(fields);
+
+  return {
+    title: `${indexPatternType}-*`,
+    timeFieldName: '@timestamp',
+    fields: JSON.stringify(indexPatternFields),
+    fieldFormatMap: JSON.stringify(fieldFormatMap),
+  };
+};
+
+// takes fields from yaml files and transforms into Kibana Index Pattern fields
+// and also returns the fieldFormatMap
+export const createIndexPatternFields = (
+  fields: Fields
+): { indexPatternFields: IndexPatternField[]; fieldFormatMap: FieldFormatMap } => {
   const dedupedFields = dedupeFields(fields);
   const flattenedFields = flattenFields(dedupedFields);
   const fieldFormatMap = createFieldFormatMap(flattenedFields);
   const transformedFields = flattenedFields.map(transformField);
-
-  return {
-    title: datasetType + '-*',
-    timeFieldName: '@timestamp',
-    fields: JSON.stringify(transformedFields),
-    fieldFormatMap: JSON.stringify(fieldFormatMap),
-  };
+  return { indexPatternFields: transformedFields, fieldFormatMap };
 };
 
 export const dedupeFields = (fields: Fields) => {

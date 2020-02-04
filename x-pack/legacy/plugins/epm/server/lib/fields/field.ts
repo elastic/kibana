@@ -93,10 +93,12 @@ const isFields = (path: string) => {
  * Gets all field files, optionally filtered by dataset, extracts .yml files, merges them together
  */
 
-export const loadFieldsFromYaml = async (pkg: RegistryPackage, datasetName?: string) => {
+export const loadFieldsFromYaml = async (
+  pkg: RegistryPackage,
+  datasetName?: string
+): Promise<Field[]> => {
   // Fetch all field definition files
   const fieldDefinitionFiles = await getAssetsData(pkg, isFields, datasetName);
-
   return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
     // Make sure it is defined as it is optional. Should never happen.
     if (file.buffer) {
