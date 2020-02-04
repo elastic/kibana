@@ -133,16 +133,13 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
     });
 
     // Fetch and update UI from saved query
-    const [savedQuery, setSavedQuery] = useSavedQuery(
-      {
-        queryService: data.query,
-        setQuery,
-        savedQueryId: props.savedQueryId,
-        notifications: core.notifications,
-        uiSettings: core.uiSettings,
-      },
-      [props.savedQueryId]
-    );
+    const [savedQuery, setSavedQuery] = useSavedQuery({
+      queryService: data.query,
+      setQuery,
+      savedQueryId: props.savedQueryId,
+      notifications: core.notifications,
+      uiSettings: core.uiSettings,
+    });
 
     // Fire onQuerySubmit on query or timerange change
     useEffect(() => {

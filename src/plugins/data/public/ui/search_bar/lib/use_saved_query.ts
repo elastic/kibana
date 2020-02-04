@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useState, useMemo, useEffect, DependencyList, SetStateAction, Dispatch } from 'react';
+import { useState, useEffect, SetStateAction, Dispatch } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import { SavedQuery } from '../../../query';
@@ -38,13 +38,11 @@ type UseSavedQueriesRet = [
   Dispatch<SetStateAction<SavedQuery | undefined>>
 ];
 
-export const useSavedQuery = (
-  props: UseSavedQueriesProps,
-  deps: DependencyList
-): UseSavedQueriesRet => {
+export const useSavedQuery = (props: UseSavedQueriesProps): UseSavedQueriesRet => {
   // Handle saved queries
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
-  useMemo(() => {
+
+  useEffect(() => {
     const fetchSavedQuery = async () => {
       if (props.savedQueryId) {
         try {
