@@ -15,16 +15,16 @@ import {
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { SecurityPluginSetup } from '../../../../plugins/security/server';
-import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
+import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import { PLUGIN_ID } from '../common/constants';
 import { logConfiguration } from '../log_configuration';
 import { ReportingPluginSpecOptions } from '../types.d';
 import { createBrowserDriverFactory } from './browsers';
 import { checkLicenseFactory, getExportTypesRegistry, LevelLogger, runValidations } from './lib';
-import { registerReportingUsageCollector } from './usage';
 import { registerRoutes } from './routes';
+import { registerReportingUsageCollector } from './usage';
 
 export interface ReportingInitializerContext {
   logger: LoggerFactory;

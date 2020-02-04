@@ -28,7 +28,7 @@ interface CreateJobFnOpts {
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
->> = function createJobFactoryFn(server: ServerFacade, logger: Logger) {
+>> = function createJobFactoryFn(server: ServerFacade, elasticsearch: unknown, logger: Logger) {
   const compatibilityShim = compatibilityShimFactory(server, logger);
   const crypto = cryptoFactory(server);
 
@@ -42,14 +42,14 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
     validateUrls(relativeUrls);
 
     return {
-      type: objectType, // Note: this changes the shape of the job params object
-      title,
-      objects: relativeUrls.map(u => ({ relativeUrl: u })),
-      headers: serializedEncryptedHeaders,
-      browserTimezone,
-      layout,
       basePath: request.getBasePath(),
+      browserTimezone,
       forceNow: new Date().toISOString(),
+      headers: serializedEncryptedHeaders,
+      layout,
+      objects: relativeUrls.map(u => ({ relativeUrl: u })),
+      title,
+      type: objectType, // Note: this changes the shape of the job params object
     };
   });
 };
