@@ -88,3 +88,12 @@ pattern: `*:logstash-*`.
 
 Once an index pattern is configured using the {ccs} syntax, all searches and
 aggregations using that index pattern in {kib} take advantage of {ccs}.
+
+
+[float]
+[[reload-fields]]
+=== Manage your index pattern
+
+To drill down into the fields and associated data types in an index pattern,
+click its name in the *Index patterns* overview page.
+For more information, refer to <<managing-fields, Index Patterns and Fields>>.

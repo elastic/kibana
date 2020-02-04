@@ -66,7 +66,7 @@ next major version of {es}, and reindex, if needed.
 | <<watcher-ui, *Watcher*>>
 
 Detect changes in your data by creating, managing, and monitoring alerts.
-Create an alert when the maximum total CPU usage on a machine goes
+For example, create an alert when the maximum total CPU usage on a machine goes
 above a certain percentage.
 
 |===
@@ -125,9 +125,9 @@ include::{kib-repo-dir}/management/index-lifecycle-policies/example-index-lifecy
 
 include::{kib-repo-dir}/management/managing-indices.asciidoc[]
 
-include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
-
 include::{kib-repo-dir}/management/managing-fields.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-remote-clusters.asciidoc[]
 
