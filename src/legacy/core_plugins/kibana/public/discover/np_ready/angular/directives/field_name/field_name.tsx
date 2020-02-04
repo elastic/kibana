@@ -18,9 +18,8 @@
  */
 import React from 'react';
 import classNames from 'classnames';
-// @ts-ignore
-import { shortenDottedString } from '../../../../core_plugins/kibana/common/utils/shorten_dotted_string';
-import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public';
+import { FieldIcon } from '../../../../../../../../../plugins/kibana_react/public';
+import { shortenDottedString } from '../../../../../../../../../plugins/data/common/utils';
 import { getFieldTypeName } from './field_type_name';
 
 // property field is provided at discover's field chooser

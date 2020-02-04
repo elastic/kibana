@@ -18,11 +18,8 @@
  */
 
 import _ from 'lodash';
-import { uiModules } from '../../modules';
 // Debounce service, angularized version of lodash debounce
 // borrowed heavily from https://github.com/shahata/angular-debounce
-
-const module = uiModules.get('kibana');
 
 export function DebounceProviderTimeout($timeout) {
   return function(func, wait, options) {
@@ -69,8 +66,6 @@ export function DebounceProviderTimeout($timeout) {
     return debounce;
   };
 }
-
-module.service('debounce', ['$timeout', DebounceProviderTimeout]);
 
 export function DebounceProvider(debounce) {
   return debounce;

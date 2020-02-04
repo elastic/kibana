@@ -20,14 +20,17 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { DebounceProvider } from '..';
+import { DebounceProvider } from '../index';
+import { pluginInstance } from 'plugins/kibana/discover/legacy';
 
 let debounce;
 let debounceFromProvider;
 let $timeout;
 
 function init() {
-  ngMock.module('kibana');
+  pluginInstance.initializeServices();
+  pluginInstance.initializeInnerAngular();
+  ngMock.module('app/discover');
 
   ngMock.inject(function($injector, _$timeout_, Private) {
     $timeout = _$timeout_;
