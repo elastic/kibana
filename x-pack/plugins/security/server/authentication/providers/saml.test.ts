@@ -350,7 +350,7 @@ describe('SAMLAuthenticationProvider', () => {
         });
 
         expect(authenticationResult.redirected()).toBe(true);
-        expect(authenticationResult.redirectURL).toBe('/base-path/overwritten_session');
+        expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/overwritten_session');
       });
     });
 

@@ -124,7 +124,7 @@ describe('TokenAuthenticationProvider', () => {
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe(
-        '/base-path/login?next=%2Fbase-path%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
+        '/mock-server-basepath/login?next=%2Fbase-path%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
       );
     });
 
@@ -320,7 +320,7 @@ describe('TokenAuthenticationProvider', () => {
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe(
-        '/base-path/login?next=%2Fbase-path%2Fsome-path'
+        '/mock-server-basepath/login?next=%2Fbase-path%2Fsome-path'
       );
       expect(authenticationResult.user).toBeUndefined();
       expect(authenticationResult.state).toEqual(null);
@@ -432,7 +432,7 @@ describe('TokenAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(mockOptions.tokens.invalidate, tokenPair);
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/base-path/login?msg=LOGGED_OUT');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/login?msg=LOGGED_OUT');
     });
 
     it('redirects to /login with optional search parameters if tokens are invalidated successfully', async () => {
@@ -447,7 +447,7 @@ describe('TokenAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(mockOptions.tokens.invalidate, tokenPair);
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/base-path/login?yep=nope');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/login?yep=nope');
     });
   });
 });

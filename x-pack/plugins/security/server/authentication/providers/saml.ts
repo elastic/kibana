@@ -390,7 +390,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         'Login initiated by Identity Provider is for a different user than currently authenticated.'
       );
       return AuthenticationResult.redirectTo(
-        `${this.options.basePath.get(request)}/overwritten_session`,
+        `${this.options.basePath.serverBasePath}/overwritten_session`,
         { state: newState }
       );
     }

@@ -134,7 +134,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
 
     const queryString = request.url.search || `?msg=LOGGED_OUT`;
     return DeauthenticationResult.redirectTo(
-      `${this.options.basePath.get(request)}/login${queryString}`
+      `${this.options.basePath.serverBasePath}/login${queryString}`
     );
   }
 
@@ -248,6 +248,6 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private getLoginPageURL(request: KibanaRequest) {
     const nextURL = encodeURIComponent(`${this.options.basePath.get(request)}${request.url.path}`);
-    return `${this.options.basePath.get(request)}/login?next=${nextURL}`;
+    return `${this.options.basePath.serverBasePath}/login?next=${nextURL}`;
   }
 }

@@ -85,7 +85,7 @@ describe('BasicAuthenticationProvider', () => {
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe(
-        '/base-path/login?next=%2Fbase-path%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
+        '/mock-server-basepath/login?next=%2Fbase-path%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
       );
     });
 
@@ -193,7 +193,7 @@ describe('BasicAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const deauthenticateResult = await provider.logout(request);
       expect(deauthenticateResult.redirected()).toBe(true);
-      expect(deauthenticateResult.redirectURL).toBe('/base-path/login?msg=LOGGED_OUT');
+      expect(deauthenticateResult.redirectURL).toBe('/mock-server-basepath/login?msg=LOGGED_OUT');
     });
 
     it('passes query string parameters to the login page.', async () => {
@@ -203,7 +203,7 @@ describe('BasicAuthenticationProvider', () => {
       const deauthenticateResult = await provider.logout(request);
       expect(deauthenticateResult.redirected()).toBe(true);
       expect(deauthenticateResult.redirectURL).toBe(
-        '/base-path/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED'
+        '/mock-server-basepath/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED'
       );
     });
   });

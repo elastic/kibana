@@ -88,7 +88,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
         `${this.options.basePath.get(request)}${request.url.path}`
       );
       authenticationResult = AuthenticationResult.redirectTo(
-        `${this.options.basePath.get(request)}/login?next=${nextURL}`
+        `${this.options.basePath.serverBasePath}/login?next=${nextURL}`
       );
     }
 
@@ -104,7 +104,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
     // logout reason that login page may need to know.
     const queryString = request.url.search || `?msg=LOGGED_OUT`;
     return DeauthenticationResult.redirectTo(
-      `${this.options.basePath.get(request)}/login${queryString}`
+      `${this.options.basePath.serverBasePath}/login${queryString}`
     );
   }
 
