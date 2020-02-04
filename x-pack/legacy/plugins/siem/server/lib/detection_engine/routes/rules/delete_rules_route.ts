@@ -7,15 +7,15 @@
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 
+import { KibanaRequest } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
-import { LegacySetupServices } from '../../../../plugin';
+import { LegacySetupServices, RequestFacade } from '../../../../plugin';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest, LegacyRequest } from '../../../../../../../../../src/core/server';
 
 export const createDeleteRulesRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
   return {
@@ -30,11 +30,11 @@ export const createDeleteRulesRoute = (services: LegacySetupServices): Hapi.Serv
         query: queryRulesSchema,
       },
     },
-    async handler(request: QueryRequest, headers) {
+    async handler(request: QueryRequest & RequestFacade, headers) {
       const { id, rule_id: ruleId } = request.query;
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
       const actionsClient = await services.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as LegacyRequest)
+        KibanaRequest.from(request)
       );
       const savedObjectsClient = isFunction(request.getSavedObjectsClient)
         ? request.getSavedObjectsClient()

@@ -58,10 +58,10 @@ export const createImportRulesRoute = (services: LegacySetupServices): Hapi.Serv
         payload: importRulesPayloadSchema,
       },
     },
-    async handler(request: ImportRulesRequest, headers) {
+    async handler(request: ImportRulesRequest & RequestFacade, headers) {
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
       const actionsClient = await services.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as RequestFacade)
+        KibanaRequest.from(request)
       );
       const savedObjectsClient = isFunction(request.getSavedObjectsClient)
         ? request.getSavedObjectsClient()
@@ -149,7 +149,7 @@ export const createImportRulesRoute = (services: LegacySetupServices): Hapi.Serv
                   version,
                 } = parsedRule;
                 try {
-                  const finalIndex = getIndex((request as unknown) as RequestFacade, services);
+                  const finalIndex = getIndex(request, services);
                   const callWithRequest = callWithRequestFactory(request, services);
                   const indexExists = await getIndexExists(callWithRequest, finalIndex);
                   if (!indexExists) {

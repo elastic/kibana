@@ -6,8 +6,7 @@
 
 import Boom from 'boom';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../types';
-import { LegacySetupServices } from '../../../plugin';
+import { LegacySetupServices, RequestFacade } from '../../../plugin';
 
 export const transformError = (err: Error & { statusCode?: number }) => {
   if (Boom.isBoom(err)) {
@@ -164,11 +163,8 @@ export const getIndex = (request: RequestFacade, services: LegacySetupServices):
   return `${signalsIndex}-${spaceId}`;
 };
 
-export const callWithRequestFactory = (
-  request: RequestFacade | Omit<RequestFacade, 'query'>,
-  server: ServerFacade
-) => {
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+export const callWithRequestFactory = (request: RequestFacade, services: LegacySetupServices) => {
+  const { callWithRequest } = services.plugins.elasticsearch.getCluster('data');
   return <T, U>(endpoint: string, params: T, options?: U) => {
     return callWithRequest(request, endpoint, params, options);
   };
