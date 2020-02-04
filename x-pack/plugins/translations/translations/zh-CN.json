@@ -1198,8 +1198,6 @@
     "kbn.embeddable.inspectorRequestDataTitle": "数据",
     "kbn.embeddable.inspectorRequestDescription": "此请求将查询 Elasticsearch 以获取搜索的数据。",
     "kbn.embeddable.search.displayName": "搜索",
-    "kbn.home.addData.addDataToKibanaDescription": "使用这些解决方案可快速将您的数据转换成预建仪表板和监测系统。",
-    "kbn.home.addData.addDataToKibanaTitle": "将数据添加到 Kibana",
     "kbn.home.addData.apm.addApmButtonLabel": "添加 APM",
     "kbn.home.addData.apm.nameDescription": "APM 自动从您的应用程序内收集深入全面的性能指标和错误。",
     "kbn.home.addData.apm.nameTitle": "APM",
