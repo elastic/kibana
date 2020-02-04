@@ -25,16 +25,17 @@ import TestRunnerItemList from './test_runner_item_list';
 import HistoricalList from './historical_list';
 import Footer from './footer';
 
-export default function App({ items }) {
+export default function App({ items, buildStats }) {
+  const { url } = buildStats;
   return (
     <div>
-      <Header />
+      <Header url={url} />
       <div>
         <BuildStats />
         <TestRunnerItemList items={items} />
         <HistoricalList />
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 }
