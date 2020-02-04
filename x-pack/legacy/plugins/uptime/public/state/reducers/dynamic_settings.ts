@@ -43,8 +43,8 @@ export const dynamicSettingsReducer = handleActions<DynamicSettingsState, Dynami
     },
     [String(setDynamicSettings)]: state => ({
       ...state,
-      loading: true
-    })
+      loading: true,
+    }),
   },
   initialState
 );

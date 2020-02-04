@@ -45,7 +45,6 @@ export const setDynamicSettings = async ({
   basePath,
   settings,
 }: SaveApiRequest): Promise<DynamicSettingsSaveResponse> => {
-  console.log("DO THE API");
   const url = getApiPath(plainApiPath, basePath);
   const response = await fetch(url, {
     method: 'POST',
