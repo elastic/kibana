@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
 import { TimefilterSetup } from 'src/plugins/data/public';
 import {
   IUiSettingsClient,
@@ -25,9 +24,27 @@ import {
   ChromeRecentlyAccessed,
   IBasePath,
 } from 'kibana/public';
-import { PageDependencies } from '../routing/router';
 
-interface DependencyCache {
+// export interface AppDependencies {
+//   config: IUiSettingsClient;
+//   indexPatterns: IndexPatternsContract;
+//   timefilter: TimefilterSetup;
+//   chrome: ChromeStart;
+//   docLinks: DocLinksStart;
+//   toastNotifications: ToastsStart;
+//   overlays: OverlayStart;
+//   recentlyAccessed: ChromeRecentlyAccessed;
+//   fieldFormats: FieldFormatsStart;
+//   autocomplete: DataPublicPluginStart['autocomplete'];
+//   basePath: IBasePath;
+//   savedObjectsClient: SavedObjectsClientContract;
+//   XSRF: string;
+//   APP_URL: string;
+//   application: ApplicationStart;
+//   http: HttpStart;
+// }
+
+export interface DependencyCache {
   timefilter: TimefilterSetup | null;
   config: IUiSettingsClient | null;
   indexPatterns: IndexPatternsContract | null;
@@ -65,7 +82,7 @@ const cache: DependencyCache = {
   http: null,
 };
 
-export function useDependencyCache(deps: PageDependencies) {
+export function setDependencyCache(deps: DependencyCache) {
   cache.timefilter = deps.timefilter;
   cache.config = deps.config;
   cache.chrome = deps.chrome;
@@ -82,16 +99,10 @@ export function useDependencyCache(deps: PageDependencies) {
   cache.APP_URL = deps.APP_URL;
   cache.application = deps.application;
   cache.http = deps.http;
-
-  useEffect(() => {
-    return () => {
-      clearCache();
-    };
-  }, []);
 }
 
 // this isn't used and might never be needed
-export function getDependencyCache(): Readonly<PageDependencies> {
+export function getDependencyCache(): Readonly<DependencyCache> {
   if (
     cache.timefilter === null ||
     cache.config === null ||

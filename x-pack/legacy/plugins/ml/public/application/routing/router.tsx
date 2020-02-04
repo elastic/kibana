@@ -11,23 +11,23 @@ import { Location } from 'history';
 import {
   IUiSettingsClient,
   ChromeStart,
-  SavedObjectsClientContract,
-  ApplicationStart,
-  HttpStart,
+  // SavedObjectsClientContract,
+  // ApplicationStart,
+  // HttpStart,
 } from 'src/core/public';
 import {
   ChromeBreadcrumb,
-  DocLinksStart,
-  ToastsStart,
-  OverlayStart,
-  ChromeRecentlyAccessed,
-  IBasePath,
+  // DocLinksStart,
+  // ToastsStart,
+  // OverlayStart,
+  // ChromeRecentlyAccessed,
+  // IBasePath,
 } from 'kibana/public';
 import {
   IndexPatternsContract,
-  TimefilterSetup,
-  FieldFormatsStart,
-  DataPublicPluginStart,
+  // TimefilterSetup,
+  // FieldFormatsStart,
+  // DataPublicPluginStart,
 } from 'src/plugins/data/public';
 import { MlContext, MlContextValue } from '../contexts/ml';
 
@@ -40,32 +40,19 @@ interface MlRouteProps extends RouteProps {
 
 export interface MlRoute {
   path: string;
-  render(props: MlRouteProps, deps: PageDependencies): JSX.Element;
+  render(props: MlRouteProps, deps: PageDependencies2): JSX.Element;
   breadcrumbs: ChromeBreadcrumb[];
 }
 
 export interface PageProps {
   location: Location;
-  deps: PageDependencies;
+  deps: PageDependencies2;
 }
 
-export interface PageDependencies {
-  config: IUiSettingsClient;
+interface PageDependencies2 {
+  setBreadcrumbs: ChromeStart['setBreadcrumbs'];
   indexPatterns: IndexPatternsContract;
-  timefilter: TimefilterSetup;
-  chrome: ChromeStart;
-  docLinks: DocLinksStart;
-  toastNotifications: ToastsStart;
-  overlays: OverlayStart;
-  recentlyAccessed: ChromeRecentlyAccessed;
-  fieldFormats: FieldFormatsStart;
-  autocomplete: DataPublicPluginStart['autocomplete'];
-  basePath: IBasePath;
-  savedObjectsClient: SavedObjectsClientContract;
-  XSRF: string;
-  APP_URL: string;
-  application: ApplicationStart;
-  http: HttpStart;
+  config: IUiSettingsClient;
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
@@ -74,8 +61,8 @@ export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children 
   );
 };
 
-export const MlRouter: FC<{ pageDeps: PageDependencies }> = ({ pageDeps }) => {
-  const setBreadcrumbs = pageDeps.chrome.setBreadcrumbs;
+export const MlRouter: FC<{ pageDeps: PageDependencies2 }> = ({ pageDeps }) => {
+  const setBreadcrumbs = pageDeps.setBreadcrumbs;
 
   return (
     <HashRouter>

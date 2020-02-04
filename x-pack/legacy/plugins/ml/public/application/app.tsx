@@ -21,11 +21,32 @@ import {
   // IUiSettingsClient,
   // DocLinksStart,
 } from 'kibana/public';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { useDependencyCache } from './util/dependency_cache';
 
-import { MlRouter, PageDependencies } from './routing';
+// import {
+//   IUiSettingsClient,
+//   ChromeStart,
+//   SavedObjectsClientContract,
+//   ApplicationStart,
+//   HttpStart,
+// } from 'src/core/public';
+// import {
+//   DocLinksStart,
+//   ToastsStart,
+//   OverlayStart,
+//   ChromeRecentlyAccessed,
+//   IBasePath,
+// } from 'kibana/public';
+import {
+  // IndexPatternsContract,
+  // TimefilterSetup,
+  // FieldFormatsStart,
+  DataPublicPluginStart,
+} from 'src/plugins/data/public';
+
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { setDependencyCache, clearCache } from './util/dependency_cache';
+
+import { MlRouter } from './routing';
 
 export interface MlDependencies extends AppMountParameters {
   data: DataPublicPluginStart;
@@ -41,8 +62,7 @@ interface AppProps {
 }
 
 const App: FC<AppProps> = ({ coreStart, deps }) => {
-  const pageDeps: PageDependencies = {
-    // THIS WHOLE OBJECT DOESN'T NEED TO BE PASSED TO ROUTER
+  setDependencyCache({
     indexPatterns: deps.data.indexPatterns,
     timefilter: deps.data.query.timefilter,
     config: coreStart.uiSettings!,
@@ -59,6 +79,16 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
     APP_URL: deps.__LEGACY.APP_URL,
     application: coreStart.application,
     http: coreStart.http,
+  });
+  deps.onAppLeave(actions => {
+    clearCache();
+    return actions.default();
+  });
+
+  const pageDeps = {
+    indexPatterns: deps.data.indexPatterns,
+    config: coreStart.uiSettings!,
+    setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
   };
 
   const services = {
@@ -66,8 +96,6 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
     data: deps.data,
     ...coreStart,
   };
-
-  useDependencyCache(pageDeps);
 
   const I18nContext = coreStart.i18n.Context;
   return (
