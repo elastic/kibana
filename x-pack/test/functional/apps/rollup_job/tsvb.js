@@ -12,6 +12,7 @@ export default function({ getService, getPageObjects }) {
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'settings',
@@ -77,12 +78,14 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
       await PageObjects.timePicker.openQuickSelectTimeMenu();
+      await testSubjects.click('superDatePickerCommonlyUsed_Last_24 hours');
       await PageObjects.visualBuilder.clickMetric();
       await PageObjects.visualBuilder.checkMetricTabIsPresent();
       await PageObjects.visualBuilder.clickPanelOptions('metric');
       await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName);
       await PageObjects.visualBuilder.setIntervalValue('1d');
       await PageObjects.visualBuilder.setDropLastBucket(false);
+      await PageObjects.common.sleep(3000);
       const newValue = await PageObjects.visualBuilder.getMetricValue();
       expect(newValue).to.eql('3');
     });
