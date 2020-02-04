@@ -9,25 +9,21 @@ import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { fetchIndices } from '../../../lib/fetch_indices';
 
-interface ReqBody {
-  indexNames: string[];
-}
-
 const bodySchema = schema.object({
   indexNames: schema.arrayOf(schema.string()),
 });
 
-export function registerReloadRoute({ router }: RouteDependencies) {
+export function registerReloadRoute({ router, license }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/reload'), validate: { body: bodySchema } },
-    async (ctx, req, res) => {
-      const { indexNames = [] } = req.body as ReqBody;
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { indexNames = [] } = req.body as typeof bodySchema.type;
 
       const indices = await fetchIndices(
         ctx.core.elasticsearch.dataClient.callAsCurrentUser,
         indexNames
       );
       return res.ok({ body: indices });
-    }
+    })
   );
 }

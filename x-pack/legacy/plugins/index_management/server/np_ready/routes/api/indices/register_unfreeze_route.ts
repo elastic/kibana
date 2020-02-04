@@ -9,19 +9,15 @@ import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-interface ReqBody {
-  indices: string[];
-}
-
 const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerUnfreezeRoute({ router }: RouteDependencies) {
+export function registerUnfreezeRoute({ router, license }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/unfreeze'), validate: { body: bodySchema } },
-    async (ctx, req, res) => {
-      const { indices = [] } = req.body as ReqBody;
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { indices = [] } = req.body as typeof bodySchema.type;
       const params = {
         path: `/${encodeURIComponent(indices.join(','))}/_unfreeze`,
         method: 'POST',
@@ -29,6 +25,6 @@ export function registerUnfreezeRoute({ router }: RouteDependencies) {
 
       await ctx.core.elasticsearch.dataClient.callAsCurrentUser('transport.request', params);
       return res.ok();
-    }
+    })
   );
 }

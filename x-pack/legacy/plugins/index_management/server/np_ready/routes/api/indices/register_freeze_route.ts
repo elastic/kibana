@@ -9,19 +9,15 @@ import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-interface ReqBody {
-  indices: string[];
-}
-
 const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerFreezeRoute({ router }: RouteDependencies) {
+export function registerFreezeRoute({ router, license }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/freeze'), validate: { body: bodySchema } },
-    async (ctx, req, res) => {
-      const body = req.body as ReqBody;
+    license.guardApiRoute(async (ctx, req, res) => {
+      const body = req.body as typeof bodySchema.type;
       const { indices = [] } = body;
 
       const params = {
@@ -31,6 +27,6 @@ export function registerFreezeRoute({ router }: RouteDependencies) {
 
       await await ctx.core.elasticsearch.dataClient.callAsCurrentUser('transport.request', params);
       return res.ok();
-    }
+    })
   );
 }

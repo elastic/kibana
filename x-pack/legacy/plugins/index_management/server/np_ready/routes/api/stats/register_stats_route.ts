@@ -21,11 +21,11 @@ function formatHit(hit: { _shards: any; indices: { [key: string]: any } }, index
   };
 }
 
-export function registerStatsRoute({ router }: RouteDependencies) {
+export function registerStatsRoute({ router, license }: RouteDependencies) {
   router.get(
     { path: addBasePath('/stats/{indexName}'), validate: { params: paramsSchema } },
-    async (ctx, req, res) => {
-      const { indexName } = req.params;
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { indexName } = req.params as typeof paramsSchema.type;
       const params = {
         expand_wildcards: 'none',
         index: indexName,
@@ -36,6 +36,6 @@ export function registerStatsRoute({ router }: RouteDependencies) {
       );
 
       return res.ok({ body: formatHit(hit, indexName) });
-    }
+    })
   );
 }

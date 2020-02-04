@@ -14,10 +14,10 @@ import { templateSchema } from './validate_schemas';
 
 const bodySchema = templateSchema;
 
-export function registerCreateRoute({ router }: RouteDependencies) {
+export function registerCreateRoute({ router, license }: RouteDependencies) {
   router.put(
     { path: addBasePath('/templates'), validate: { body: bodySchema } },
-    async (ctx, req, res) => {
+    license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const template = req.body as Template;
       const serializedTemplate = serializeTemplate(template) as TemplateEs;
@@ -62,6 +62,6 @@ export function registerCreateRoute({ router }: RouteDependencies) {
       });
 
       return res.ok({ body: response });
-    }
+    })
   );
 }

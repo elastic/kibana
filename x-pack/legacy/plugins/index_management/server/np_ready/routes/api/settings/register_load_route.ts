@@ -19,11 +19,11 @@ function formatHit(hit: { [key: string]: {} }) {
   return hit[key];
 }
 
-export function registerLoadRoute({ router }: RouteDependencies) {
+export function registerLoadRoute({ router, license }: RouteDependencies) {
   router.get(
     { path: addBasePath('/settings/{indexName}'), validate: { params: paramsSchema } },
-    async (ctx, req, res) => {
-      const { indexName } = req.params;
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { indexName } = req.params as typeof paramsSchema.type;
       const params = {
         expandWildcards: 'none',
         flatSettings: false,
@@ -37,6 +37,6 @@ export function registerLoadRoute({ router }: RouteDependencies) {
         params
       );
       return res.ok({ body: formatHit(hit) });
-    }
+    })
   );
 }

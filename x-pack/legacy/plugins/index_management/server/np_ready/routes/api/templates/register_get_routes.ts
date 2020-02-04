@@ -25,11 +25,11 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export function registerGetOneRoute({ router }: RouteDependencies) {
+export function registerGetOneRoute({ router, license }: RouteDependencies) {
   router.get(
     { path: addBasePath('/templates/{name}'), validate: { params: paramsSchema } },
-    async (ctx, req, res) => {
-      const { name } = req.params;
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { name } = req.params as typeof paramsSchema.type;
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
 
       const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
@@ -42,6 +42,6 @@ export function registerGetOneRoute({ router }: RouteDependencies) {
       }
 
       return res.notFound();
-    }
+    })
   );
 }

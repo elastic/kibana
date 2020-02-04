@@ -19,11 +19,11 @@ function formatHit(hit: { [key: string]: { mappings: any } }, indexName: string)
   };
 }
 
-export function registerMappingRoute({ router }: RouteDependencies) {
+export function registerMappingRoute({ router, license }: RouteDependencies) {
   router.get(
     { path: addBasePath('/mapping/{indexName}'), validate: { params: paramsSchema } },
-    async (ctx, req, res) => {
-      const { indexName } = req.params;
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { indexName } = req.params as typeof paramsSchema.type;
       const params = {
         expand_wildcards: 'none',
         index: indexName,
@@ -35,6 +35,6 @@ export function registerMappingRoute({ router }: RouteDependencies) {
       );
       const response = formatHit(hit, indexName);
       return res.ok({ body: response });
-    }
+    })
   );
 }

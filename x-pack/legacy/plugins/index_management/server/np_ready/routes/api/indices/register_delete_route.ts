@@ -9,19 +9,15 @@ import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-interface ReqBody {
-  indices: string[];
-}
-
 const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerDeleteRoute({ router }: RouteDependencies) {
+export function registerDeleteRoute({ router, license }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/delete'), validate: { body: bodySchema } },
-    async (ctx, req, res) => {
-      const body = req.body as ReqBody;
+    license.guardApiRoute(async (ctx, req, res) => {
+      const body = req.body as typeof bodySchema.type;
       const { indices = [] } = body;
 
       const params = {
@@ -32,6 +28,6 @@ export function registerDeleteRoute({ router }: RouteDependencies) {
 
       await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.delete', params);
       return res.ok();
-    }
+    })
   );
 }

@@ -16,11 +16,11 @@ const paramsSchema = schema.object({
   names: schema.string(),
 });
 
-export function registerDeleteRoute({ router }: RouteDependencies) {
+export function registerDeleteRoute({ router, license }: RouteDependencies) {
   router.delete(
     { path: addBasePath('/templates/{names}'), validate: { params: paramsSchema } },
-    async (ctx, req, res) => {
-      const { names } = req.params;
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { names } = req.params as typeof paramsSchema.type;
       const templateNames = names.split(',');
       const response: { templatesDeleted: Array<Template['name']>; errors: any[] } = {
         templatesDeleted: [],
@@ -44,6 +44,6 @@ export function registerDeleteRoute({ router }: RouteDependencies) {
       );
 
       return res.ok({ body: response });
-    }
+    })
   );
 }

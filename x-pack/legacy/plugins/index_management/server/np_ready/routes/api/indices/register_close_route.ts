@@ -8,19 +8,15 @@ import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-interface ReqBody {
-  indices: string[];
-}
-
 const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerCloseRoute({ router }: RouteDependencies) {
+export function registerCloseRoute({ router, license }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/close'), validate: { body: bodySchema } },
-    async (ctx, req, res) => {
-      const payload = req.body as ReqBody;
+    license.guardApiRoute(async (ctx, req, res) => {
+      const payload = req.body as typeof bodySchema.type;
       const { indices = [] } = payload;
 
       const params = {
@@ -31,6 +27,6 @@ export function registerCloseRoute({ router }: RouteDependencies) {
 
       await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.close', params);
       return res.ok();
-    }
+    })
   );
 }

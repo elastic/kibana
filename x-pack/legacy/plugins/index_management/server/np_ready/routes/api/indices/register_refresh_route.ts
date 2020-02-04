@@ -9,19 +9,15 @@ import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-interface ReqBody {
-  indices: string[];
-}
-
 const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerRefreshRoute({ router }: RouteDependencies) {
+export function registerRefreshRoute({ router, license }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/refresh'), validate: { body: bodySchema } },
-    async (ctx, req, res) => {
-      const body = req.body as ReqBody;
+    license.guardApiRoute(async (ctx, req, res) => {
+      const body = req.body as typeof bodySchema.type;
       const { indices = [] } = body;
 
       const params = {
@@ -32,6 +28,6 @@ export function registerRefreshRoute({ router }: RouteDependencies) {
 
       await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.refresh', params);
       return res.ok();
-    }
+    })
   );
 }

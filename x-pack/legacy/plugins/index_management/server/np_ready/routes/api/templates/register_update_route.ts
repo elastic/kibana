@@ -16,15 +16,15 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export function registerUpdateRoute({ router }: RouteDependencies) {
+export function registerUpdateRoute({ router, license }: RouteDependencies) {
   router.put(
     {
       path: addBasePath('/templates/{name}'),
       validate: { body: bodySchema, params: paramsSchema },
     },
-    async (ctx, req, res) => {
+    license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
-      const { name } = req.params;
+      const { name } = req.params as typeof paramsSchema.type;
       const template = req.body as Template;
       const serializedTemplate = serializeTemplate(template) as TemplateEs;
 
@@ -51,6 +51,6 @@ export function registerUpdateRoute({ router }: RouteDependencies) {
       });
 
       return res.ok({ body: response });
-    }
+    })
   );
 }
