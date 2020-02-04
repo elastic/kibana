@@ -64,6 +64,8 @@ export {
   SavedObjectsTypeMappingDefinitions,
 } from './mappings';
 
+export { SavedObjectMigrationMap, SavedObjectMigrationFn } from './migrations';
+
 export { SavedObjectsType } from './types';
 
 export { config } from './saved_objects_config';

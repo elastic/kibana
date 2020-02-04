@@ -220,6 +220,8 @@ export {
   SavedObjectsMappingProperties,
   SavedObjectTypeRegistry,
   SavedObjectsType,
+  SavedObjectMigrationMap,
+  SavedObjectMigrationFn,
 } from './saved_objects';
 
 export {

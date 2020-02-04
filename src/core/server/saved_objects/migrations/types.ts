@@ -20,11 +20,32 @@
 import { SavedObjectUnsanitizedDoc } from '../serialization';
 import { SavedObjectsMigrationLogger } from './core/migration_logger';
 
+/**
+ * A migration function defined for a {@link SavedObjectsType | saved objects type}
+ * used to migrate it's {@link SavedObjectUnsanitizedDoc | documents}
+ */
 export type SavedObjectMigrationFn = (
   doc: SavedObjectUnsanitizedDoc,
   log: SavedObjectsMigrationLogger
 ) => SavedObjectUnsanitizedDoc;
 
+/**
+ * A map of {@link SavedObjectMigrationFn | migration functions} to be used for a given type.
+ * The map's keys must be valid semver versions.
+ *
+ * Migrations will be executed in order, starting from the lowest matching an higher version that the document
+ * current version, and ending with the highest one.
+ *
+ * @example
+ * ```typescript
+ * const migrations: SavedObjectMigrationMap = {
+ *   '1.0.0': migrateToV1,
+ *   '2.1.0': migrateToV21
+ * }
+ * ```
+ *
+ * @public
+ */
 export interface SavedObjectMigrationMap {
   [version: string]: SavedObjectMigrationFn;
 }

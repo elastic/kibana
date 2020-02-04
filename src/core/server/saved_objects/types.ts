@@ -211,16 +211,39 @@ export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObj
 /**
  * @remarks This is only internal for now, and will only be public when we expose the registerType API
  *
- * @internal
+ * @public
  */
 export interface SavedObjectsType {
+  /**
+   * The name of the type, which is also used as the internal id.
+   */
   name: string;
+  /**
+   * Is the type hidden by default. If true, repositories will not have access to this type unless explicitly
+   * declared as an `extraType` when creating the repository.
+   *
+   * See {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}.
+   */
   hidden: boolean;
+  /**
+   * Is the type global, or namespaced.
+   */
   namespaceAgnostic: boolean;
+  /**
+   * If defined, the type instances will be stored in the given index instead of the default one.
+   */
   indexPattern?: string;
+  /**
+   * If defined, will be used to convert the type to an alias.
+   */
   convertToAliasScript?: string;
-
+  /**
+   * The {@link SavedObjectsTypeMappingDefinition | mapping definition} for the type.
+   */
   mappings: SavedObjectsTypeMappingDefinition;
+  /**
+   * An optional map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
+   */
   migrations?: SavedObjectMigrationMap;
 }
 
