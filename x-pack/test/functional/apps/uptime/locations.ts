@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { makeChecksWithStatus } from '../../../api_integration/apis/uptime/graphql/helpers/make_checks';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['uptime']);
+  const retry = getService('retry');
 
   describe('location', () => {
     const start = new Date().toISOString();
@@ -28,21 +30,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         }
         return d;
       };
+      const esService = getService('legacyEs');
+      await makeChecksWithStatus(esService, MONITOR_ID, 5, 2, 10000, {}, 'up', mogrifyNoLocation);
       await makeChecksWithStatus(
-        getService('legacyEs'),
-        MONITOR_ID,
-        5,
-        2,
+        esService,
+        'filter-testing',
+        50,
+        1,
         10000,
         {},
-        'up',
-        mogrifyNoLocation
+        'down',
+        (d: any) => {
+          d.observer.geo.name = 'filter-test';
+          return d;
+        }
       );
     });
 
     it('renders the location missing popover when monitor has location name, but no geo data', async () => {
       await pageObjects.uptime.loadDataAndGoToMonitorPage(start, end, MONITOR_ID);
       await pageObjects.uptime.locationMissingIsDisplayed();
+    });
+
+    it('adds a second location filter option and filters the overview', async () => {
+      await pageObjects.uptime.goToUptimePageAndSetDateRange(start, end);
+      await pageObjects.uptime.selectFilterItems({ location: ['filter-test'] });
+      await retry.tryForTime(12000, async () => {
+        const snapshotCount = await pageObjects.uptime.getSnapshotCount();
+        expect(snapshotCount).to.eql({ up: '0', down: '1' });
+      });
     });
   });
 };
