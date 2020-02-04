@@ -3,18 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCard,
-  EuiIcon,
-  EuiFlexGrid,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiButtonEmpty,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid } from '@elastic/eui';
 import { ActionType } from '../../../types';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { useAppDependencies } from '../../app_context';
@@ -25,7 +15,7 @@ interface Props {
 
 export const ActionTypeMenu = ({ onActionTypeChange }: Props) => {
   const { actionTypeRegistry } = useAppDependencies();
-  const { actionTypesIndex, setAddFlyoutVisibility } = useActionsConnectorsContext();
+  const { actionTypesIndex } = useActionsConnectorsContext();
   if (!actionTypesIndex) {
     return null;
   }
@@ -45,7 +35,7 @@ export const ActionTypeMenu = ({ onActionTypeChange }: Props) => {
 
   const cardNodes = actionTypes
     .sort((a, b) => a.name.localeCompare(b.name))
-    .map((item, index): any => {
+    .map((item, index) => {
       return (
         <EuiFlexItem key={index}>
           <EuiCard
@@ -59,25 +49,5 @@ export const ActionTypeMenu = ({ onActionTypeChange }: Props) => {
       );
     });
 
-  return (
-    <Fragment>
-      <EuiFlyoutBody>
-        <EuiFlexGrid columns={2}>{cardNodes}</EuiFlexGrid>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => setAddFlyoutVisibility(false)}>
-              {i18n.translate(
-                'xpack.triggersActionsUI.sections.actionConnectorForm.cancelButtonLabel',
-                {
-                  defaultMessage: 'Cancel',
-                }
-              )}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </Fragment>
-  );
+  return <EuiFlexGrid columns={2}>{cardNodes}</EuiFlexGrid>;
 };
