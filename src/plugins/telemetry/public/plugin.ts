@@ -52,13 +52,16 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
       telemetryService,
     });
 
+    const telemetrySender = new TelemetrySender(telemetryService);
+
     application.currentAppId$.subscribe(appId => {
       const isUnauthenticated = this.getIsUnauthenticated(http);
       if (isUnauthenticated) {
         return;
       }
+
       this.maybeStartTelemetryPoller({
-        telemetryService,
+        telemetrySender,
         isPluginEnabled,
         sendUsageFrom,
       });
@@ -67,6 +70,7 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
         this.maybeShowOptedInNotificationBanner({
           telemetryNotifications,
         });
+
         this.maybeShowOptInBanner({
           telemetryNotifications,
         });
@@ -85,17 +89,16 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
   }
 
   private maybeStartTelemetryPoller({
-    telemetryService,
+    telemetrySender,
     isPluginEnabled,
     sendUsageFrom,
   }: {
-    telemetryService: TelemetryService;
+    telemetrySender: TelemetrySender;
     isPluginEnabled: boolean;
     sendUsageFrom: string;
   }) {
     if (isPluginEnabled && sendUsageFrom === 'browser') {
-      const sender = new TelemetrySender(telemetryService);
-      sender.startChecking();
+      telemetrySender.startChecking();
     }
   }
 

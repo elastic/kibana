@@ -40,7 +40,8 @@ export class TelemetryNotifications {
 
   public shouldShowOptedInNoticeBanner = (): boolean => {
     const userHasSeenOptedInNotice = this.telemetryService.getUserHasSeenOptedInNotice();
-    return userHasSeenOptedInNotice;
+    const bannerOnScreen = typeof this.optedInNoticeBannerId !== 'undefined';
+    return !bannerOnScreen && userHasSeenOptedInNotice;
   };
 
   public renderOptedInNoticeBanner = (): void => {
@@ -54,7 +55,8 @@ export class TelemetryNotifications {
 
   public shouldShowOptInBanner = (): boolean => {
     const isOptedIn = this.telemetryService.getIsOptedIn();
-    return isOptedIn === null;
+    const bannerOnScreen = typeof this.optInBannerId !== 'undefined';
+    return !bannerOnScreen && isOptedIn === null;
   };
 
   public renderOptInBanner = (): void => {
@@ -69,6 +71,7 @@ export class TelemetryNotifications {
   private onSetOptInClick = async (isOptIn: boolean) => {
     if (this.optInBannerId) {
       this.overlays.banners.remove(this.optInBannerId);
+      this.optInBannerId = undefined;
     }
 
     await this.telemetryService.setOptIn(isOptIn);
@@ -77,6 +80,7 @@ export class TelemetryNotifications {
   public setOptedInNoticeSeen = async (): Promise<void> => {
     if (this.optedInNoticeBannerId) {
       this.overlays.banners.remove(this.optedInNoticeBannerId);
+      this.optedInNoticeBannerId = undefined;
     }
 
     await this.telemetryService.setUserHasSeenNotice();

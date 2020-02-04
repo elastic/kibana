@@ -26,6 +26,7 @@ export class TelemetrySender {
   private isSending: boolean = false;
   private lastReported?: string;
   private readonly storage: Storage;
+  private intervalId?: number;
 
   constructor(telemetryService: TelemetryService) {
     this.telemetryService = telemetryService;
@@ -92,6 +93,8 @@ export class TelemetrySender {
   };
 
   public startChecking = () => {
-    return setInterval(this.sendIfDue, 60000);
+    if (typeof this.intervalId === 'undefined') {
+      this.intervalId = window.setInterval(this.sendIfDue, 60000);
+    }
   };
 }
