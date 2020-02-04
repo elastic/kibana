@@ -90,7 +90,7 @@ describe('saved object conversion', () => {
     });
 
     test('it converts the id and type properties, and retains migrationVersion', () => {
-      const now = new Date();
+      const now = String(new Date());
       const serializer = new SavedObjectsSerializer(typeRegistry);
       const actual = serializer.rawToSavedObject({
         _id: 'hello:world',
@@ -251,7 +251,7 @@ describe('saved object conversion', () => {
             hello: {
               world: 'earth',
             },
-          },
+          } as any,
         })
       ).toThrow(/Expected "undefined" to be a saved object type/);
     });
@@ -273,7 +273,7 @@ describe('saved object conversion', () => {
             bar: '9.8.7',
           },
           namespace: 'foo-namespace',
-          updated_at: new Date(),
+          updated_at: String(new Date()),
           references: [],
         },
       };
@@ -702,7 +702,7 @@ describe('saved object conversion', () => {
             _id: 'hello:world',
             _source: {
               hello: {},
-            },
+            } as any,
           })
         ).toBeFalsy();
       });
@@ -827,7 +827,7 @@ describe('saved object conversion', () => {
             _source: {
               hello: {},
               namespace: 'foo',
-            },
+            } as any,
           })
         ).toBeFalsy();
       });
@@ -946,7 +946,7 @@ describe('saved object conversion', () => {
             _source: {
               hello: {},
               namespace: 'foo',
-            },
+            } as any,
           })
         ).toBeFalsy();
       });

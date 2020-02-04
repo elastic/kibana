@@ -26,10 +26,21 @@ import { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
  */
 export interface SavedObjectsRawDoc {
   _id: string;
-  _source: any;
+  _source: SavedObjectsRawDocSource;
   _type?: string;
   _seq_no?: number;
   _primary_term?: number;
+}
+
+/** @public */
+export interface SavedObjectsRawDocSource {
+  type: string;
+  namespace?: string;
+  migrationVersion?: SavedObjectsMigrationVersion;
+  updated_at?: string;
+  references?: SavedObjectReference[];
+
+  [typeMapping: string]: any;
 }
 
 /**

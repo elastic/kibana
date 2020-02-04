@@ -77,7 +77,7 @@ export interface SavedObjectsTypeMappingDefinition {
 
  * }
  * ```
- * @remark This is the format for a `mappings.json` savedObject mapping file.
+ * @remark This is the format for the legacy `mappings.json` savedObject mapping file.
  *
  * @internal
  */
