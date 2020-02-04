@@ -13,11 +13,14 @@ import { translation } from './selectors';
 describe('panning interaction', () => {
   let store: Store<CameraState, CameraAction>;
   let translationShouldBeCloseTo: (expectedTranslation: Vector2) => void;
+  let time: Date;
 
   beforeEach(() => {
+    // The time isn't relevant as we don't use animations in this suite.
+    time = new Date(0);
     store = createStore(cameraReducer, undefined);
     translationShouldBeCloseTo = expectedTranslation => {
-      const actualTranslation = translation(store.getState())(new Date(0));
+      const actualTranslation = translation(store.getState())(time);
       expect(expectedTranslation[0]).toBeCloseTo(actualTranslation[0]);
       expect(expectedTranslation[1]).toBeCloseTo(actualTranslation[1]);
     };
@@ -34,7 +37,7 @@ describe('panning interaction', () => {
       beforeEach(() => {
         const action: CameraAction = {
           type: 'userStartedPanning',
-          payload: { screenCoordinates: [100, 100], time: new Date(0) },
+          payload: { screenCoordinates: [100, 100], time },
         };
         store.dispatch(action);
       });
@@ -45,7 +48,7 @@ describe('panning interaction', () => {
         beforeEach(() => {
           const action: CameraAction = {
             type: 'userMovedPointer',
-            payload: { screenCoordinates: [150, 50], time: new Date(0) },
+            payload: { screenCoordinates: [150, 50], time },
           };
           store.dispatch(action);
         });
@@ -56,7 +59,7 @@ describe('panning interaction', () => {
           beforeEach(() => {
             const action: CameraAction = {
               type: 'userStoppedPanning',
-              payload: { time: new Date(0) },
+              payload: { time },
             };
             store.dispatch(action);
           });
@@ -71,7 +74,7 @@ describe('panning interaction', () => {
     beforeEach(() => {
       const action: CameraAction = {
         type: 'userNudgedCamera',
-        payload: { direction: [0, 1], time: new Date(0) },
+        payload: { direction: [0, 1], time },
       };
       store.dispatch(action);
     });
