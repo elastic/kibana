@@ -3,7 +3,6 @@
 exports[`ConfirmAlterActiveSpaceModal renders as expected 1`] = `
 <EuiOverlayMask>
   <EuiConfirmModal
-    buttonColor="primary"
     cancelButtonText="Cancel"
     confirmButtonText="Update space"
     defaultFocusedButton="confirm"
