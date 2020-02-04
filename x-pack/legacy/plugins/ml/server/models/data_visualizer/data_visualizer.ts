@@ -209,7 +209,7 @@ export class DataVisualizer {
     latestMs: number,
     interval: number,
     maxExamples: number
-  ) {
+  ): Promise<BatchStats[]> {
     // Batch up fields by type, getting stats for multiple fields at a time.
     const batches: Field[][] = [];
     const batchedFields: { [key: string]: Field[][] } = {};

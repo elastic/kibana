@@ -11,14 +11,14 @@ export const dataVisualizerFieldStatsSchema = {
     indexPatternTitle: schema.string(),
   }),
   body: schema.object({
-    query: schema.string(),
-    fields: schema.number(),
+    query: schema.any(),
+    fields: schema.arrayOf(schema.any()),
     samplerShardSize: schema.number(),
     timeFieldName: schema.string(),
     earliest: schema.number(),
     latest: schema.number(),
-    interval: schema.number(),
-    maxExample: schema.number(),
+    interval: schema.maybe(schema.string()),
+    maxExamples: schema.number(),
   }),
 };
 
@@ -27,7 +27,7 @@ export const dataVisualizerOverallStatsSchema = {
     indexPatternTitle: schema.string(),
   }),
   body: schema.object({
-    query: schema.string(),
+    query: schema.any(),
     aggregatableFields: schema.arrayOf(schema.string()),
     nonAggregatableFields: schema.arrayOf(schema.string()),
     samplerShardSize: schema.number(),

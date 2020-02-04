@@ -5,7 +5,7 @@
  */
 
 import { RequestHandlerContext } from 'kibana/server';
-import { wrapError } from '../client/errors';
+import { wrapError } from '../client/error_wrapper';
 import { DataVisualizer } from '../models/data_visualizer';
 import { Field } from '../models/data_visualizer/data_visualizer';
 import {
@@ -25,7 +25,7 @@ function getOverallStats(
   timeFieldName: string,
   earliestMs: number,
   latestMs: number
-): Promise<any> {
+) {
   const dv = new DataVisualizer(context);
   return dv.getOverallStats(
     indexPatternTitle,
@@ -50,7 +50,7 @@ function getStatsForFields(
   latestMs: number,
   interval: number,
   maxExamples: number
-): Promise<any> {
+) {
   const dv = new DataVisualizer(context);
   return dv.getStatsForFields(
     indexPatternTitle,
@@ -65,7 +65,19 @@ function getStatsForFields(
   );
 }
 
+/**
+ * Routes for the index data visualizer.
+ */
 export function dataVisualizerRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+  /**
+   * @apiGroup DataVisualizer
+   *
+   * @api {post} /api/ml/data_visualizer/get_field_stats/:indexPatternTitle Get stats for fields
+   * @apiName GetStatsForFields
+   * @apiDescription Returns fields stats of the index pattern.
+   *
+   * @apiParam {String} indexPatternTitle Index pattern title.
+   */
   router.post(
     {
       path: '/api/ml/data_visualizer/get_field_stats/{indexPatternTitle}',
@@ -101,7 +113,7 @@ export function dataVisualizerRoutes({ xpackMainPlugin, router }: RouteInitializ
         );
 
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -109,6 +121,15 @@ export function dataVisualizerRoutes({ xpackMainPlugin, router }: RouteInitializ
     })
   );
 
+  /**
+   * @apiGroup DataVisualizer
+   *
+   * @api {post} /api/ml/data_visualizer/get_overall_stats/:indexPatternTitle Get overall stats
+   * @apiName GetOverallStats
+   * @apiDescription Returns overall stats of the index pattern.
+   *
+   * @apiParam {String} indexPatternTitle Index pattern title.
+   */
   router.post(
     {
       path: '/api/ml/data_visualizer/get_overall_stats/{indexPatternTitle}',
@@ -142,7 +163,7 @@ export function dataVisualizerRoutes({ xpackMainPlugin, router }: RouteInitializ
         );
 
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
