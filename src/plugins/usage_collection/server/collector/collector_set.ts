@@ -25,7 +25,7 @@ import { UsageCollector } from './usage_collector';
 
 interface CollectorSetConfig {
   logger: Logger;
-  maximumWaitTimeForAllCollectorsInS: number;
+  maximumWaitTimeForAllCollectorsInS?: number;
   collectors?: Array<Collector<any, any>>;
 }
 
