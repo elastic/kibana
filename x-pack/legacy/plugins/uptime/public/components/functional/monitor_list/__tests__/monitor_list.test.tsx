@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { MonitorSummaryResult } from '../../../../../common/graphql/types';
 import { MonitorListComponent } from '../monitor_list';
@@ -110,16 +110,14 @@ describe('MonitorList component', () => {
   });
 
   it('renders the monitor list', () => {
-    const component = renderWithIntl(
-      renderWithRouter(
-        <MonitorListComponent
-          dangerColor="danger"
-          data={{ monitorStates: result }}
-          hasActiveFilters={false}
-          loading={false}
-          successColor="primary"
-        />
-      )
+    const component = renderWithRouter(
+      <MonitorListComponent
+        dangerColor="danger"
+        data={{ monitorStates: result }}
+        hasActiveFilters={false}
+        loading={false}
+        successColor="primary"
+      />
     );
 
     expect(component).toMatchSnapshot();

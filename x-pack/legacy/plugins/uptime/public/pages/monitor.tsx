@@ -11,7 +11,7 @@ import { MonitorCharts, PingList } from '../components/functional';
 import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../infra/public';
-import { MonitorStatusDetails } from '../components/functional/monitor_status_details';
+import { MonitorStatusDetails } from '../components/connected';
 
 export const MonitorPage = () => {
   // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
