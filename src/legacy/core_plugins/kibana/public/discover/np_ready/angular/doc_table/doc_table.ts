@@ -83,23 +83,6 @@ export function createDocTableDirective(
         $scope.limit += 50;
       };
 
-      // This exists to fix the problem of an empty initial column list not playing nice with watchCollection.
-      $scope.$watch('columns', function(columns: string[]) {
-        if (columns.length !== 0) return;
-
-        const $state = getAppState();
-        $scope.columns.push('_source');
-        if ($state) $state.replace();
-      });
-
-      $scope.$watchCollection('columns', function(columns: string[], oldColumns: string[]) {
-        if (oldColumns.length === 1 && oldColumns[0] === '_source' && $scope.columns.length > 1) {
-          _.pull($scope.columns, '_source');
-        }
-
-        if ($scope.columns.length === 0) $scope.columns.push('_source');
-      });
-
       $scope.$watch('hits', (hits: any) => {
         if (!hits) return;
 

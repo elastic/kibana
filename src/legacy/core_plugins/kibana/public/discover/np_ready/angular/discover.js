@@ -566,6 +566,14 @@ function discoverController(
     const tableColumns = [...columns];
     const { timeFieldName } = $scope.indexPattern;
 
+    if (tableColumns.length > 1 && tableColumns.find(id => id === '_source')) {
+      $state.columns = tableColumns.filter(id => id !== '_source');
+      $state.replace();
+    } else if (tableColumns.length === 0) {
+      $state.columns = ['_source'];
+      $state.replace();
+    }
+
     if (!config.get('doc_table:hideTimeColumn') && timeFieldName) {
       tableColumns.unshift(timeFieldName);
     }

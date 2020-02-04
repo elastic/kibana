@@ -219,6 +219,7 @@ export function DiscoverGrid({
    */
   const [visibleColumns, setVisibleColumns] = useState(dataGridColumns.map(obj => obj.id));
   useEffect(() => {
+    // every time a column is added, make it visible
     setVisibleColumns(dataGridColumns.map(obj => obj.id));
   }, [dataGridColumns.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
