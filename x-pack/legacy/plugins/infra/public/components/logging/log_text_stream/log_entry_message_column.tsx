@@ -20,17 +20,19 @@ import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './h
 import { LogEntryColumnContent } from './log_entry_column';
 import { hoveredContentStyle } from './text_styles';
 
+type WrapMode = 'none' | 'original' | 'long';
+
 interface LogEntryMessageColumnProps {
   columnValue: LogEntryColumn;
   highlights: LogEntryHighlightColumn[];
   isActiveHighlight: boolean;
   isHighlighted: boolean;
   isHovered: boolean;
-  isWrapped: boolean;
+  wrapMode: WrapMode;
 }
 
 export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
-  ({ columnValue, highlights, isActiveHighlight, isHighlighted, isHovered, isWrapped }) => {
+  ({ columnValue, highlights, isActiveHighlight, isHighlighted, isHovered, wrapMode }) => {
     const message = useMemo(
       () =>
         isMessageColumn(columnValue)
@@ -40,32 +42,33 @@ export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
     );
 
     return (
-      <MessageColumnContent
-        isHighlighted={isHighlighted}
-        isHovered={isHovered}
-        isWrapped={isWrapped}
-      >
+      <MessageColumnContent isHighlighted={isHighlighted} isHovered={isHovered} wrapMode={wrapMode}>
         {message}
       </MessageColumnContent>
     );
   }
 );
 
-const wrappedContentStyle = css`
+const longWrappedContentStyle = css`
   overflow: visible;
   white-space: pre-wrap;
   word-break: break-all;
 `;
 
-const unwrappedContentStyle = css`
+const originalWrappedContentStyle = css`
   overflow: hidden;
   white-space: pre;
+`;
+
+const unwrappedContentStyle = css`
+  overflow: hidden;
+  white-space: nowrap;
 `;
 
 interface MessageColumnContentProps {
   isHovered: boolean;
   isHighlighted: boolean;
-  isWrapped?: boolean;
+  wrapMode: WrapMode;
 }
 
 const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnContentProps>`
@@ -73,7 +76,12 @@ const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnConte
   text-overflow: ellipsis;
 
   ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
-  ${props => (props.isWrapped ? wrappedContentStyle : unwrappedContentStyle)};
+  ${props =>
+    props.wrapMode === 'long'
+      ? longWrappedContentStyle
+      : props.wrapMode === 'original'
+      ? originalWrappedContentStyle
+      : unwrappedContentStyle};
 `;
 
 const formatMessageSegments = (

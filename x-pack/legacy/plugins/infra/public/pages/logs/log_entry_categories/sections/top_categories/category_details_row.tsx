@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { TimeRange } from '../../../../../../common/http_api/shared';
 import { useLogEntryCategoryExamples } from '../../use_log_entry_category_examples';
 import { CategoryExampleMessage, useExampleColumnWidths } from './category_example_message';
+import euiStyled from '../../../../../../../../common/eui_styled_components';
 
 export const CategoryDetailsRow: React.FunctionComponent<{
   categoryId: number;
@@ -32,7 +33,7 @@ export const CategoryDetailsRow: React.FunctionComponent<{
   return (
     <>
       <CharacterDimensionsProbe />
-      <div>
+      <CategoryExampleMessages>
         {logEntryCategoryExamples.map((categoryExample, categoryExampleIndex) => (
           <CategoryExampleMessage
             columnWidths={columnWidths}
@@ -41,7 +42,14 @@ export const CategoryDetailsRow: React.FunctionComponent<{
             timestamp={categoryExample.timestamp}
           />
         ))}
-      </div>
+      </CategoryExampleMessages>
     </>
   );
 };
+
+const CategoryExampleMessages = euiStyled.div`
+  align-items: stretch;
+  flex-direction: row;
+  flex: 1 0 0%;
+  overflow: hidden;
+`;

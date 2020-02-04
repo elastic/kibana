@@ -50,13 +50,11 @@ export const TopCategoriesTable = euiStyled(
           (aggregatedCategoryRows, categoryId) => ({
             ...aggregatedCategoryRows,
             [categoryId]: (
-              <div>
-                <CategoryDetailsRow
-                  categoryId={categoryId}
-                  sourceId={sourceId}
-                  timeRange={timeRange}
-                />
-              </div>
+              <CategoryDetailsRow
+                categoryId={categoryId}
+                sourceId={sourceId}
+                timeRange={timeRange}
+              />
             ),
           }),
           {}

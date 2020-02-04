@@ -150,7 +150,7 @@ export const LogEntryRow = ({
                   isHighlighted={isHighlighted}
                   isActiveHighlight={isActiveHighlight}
                   isHovered={isHovered}
-                  isWrapped={wrap}
+                  wrapMode={wrap ? 'long' : 'original'}
                 />
               ) : null}
             </LogEntryColumn>

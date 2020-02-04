@@ -47,7 +47,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
           isHovered={false}
           isHighlighted={false}
           isActiveHighlight={false}
-          isWrapped={false}
+          wrapMode="none"
         />
       </LogEntryColumn>
     </LogEntryRowWrapper>
