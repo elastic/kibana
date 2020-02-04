@@ -9,6 +9,7 @@ interface CommandType {
   type:
     | 'setAlert'
     | 'setProperty'
+    | 'setScheduleProperty'
     | 'setAlertParams'
     | 'setAlertActionParams'
     | 'setAlertActionProperty';
@@ -53,6 +54,23 @@ export const alertReducer = (state: any, action: AlertReducerAction) => {
           alert: {
             ...alert,
             [key]: value,
+          },
+        };
+      }
+    }
+    case 'setScheduleProperty': {
+      const { key, value } = payload;
+      if (isEqual(alert.schedule[key], value)) {
+        return state;
+      } else {
+        return {
+          ...state,
+          alert: {
+            ...alert,
+            schedule: {
+              ...alert.schedule,
+              [key]: value,
+            },
           },
         };
       }
