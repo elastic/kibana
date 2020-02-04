@@ -11,15 +11,16 @@ import { PLUGIN } from '../../common';
 import { Dependencies, RouteDependencies, LicenseStatus } from './types';
 
 import { addIndexManagementDataEnricher } from './index_management_data';
-import { registerApiRoutes } from './routes';
+import { ApiRoutes } from './routes';
 
 export interface IndexMgmtSetup {
   addIndexManagementDataEnricher: (enricher: any) => void;
 }
 
 export class IndexMgmtServerPlugin implements Plugin<IndexMgmtSetup, void, any, any> {
-  licenseStatus: LicenseStatus;
-  log: Logger;
+  private readonly apiRoutes = new ApiRoutes();
+  private licenseStatus: LicenseStatus;
+  private log: Logger;
 
   constructor({ logger }: PluginInitializerContext) {
     this.log = logger.get();
@@ -31,9 +32,14 @@ export class IndexMgmtServerPlugin implements Plugin<IndexMgmtSetup, void, any, 
 
     const routeDependencies: RouteDependencies = {
       router,
+      plugins: {
+        license: {
+          getStatus: () => this.licenseStatus,
+        },
+      },
     };
 
-    registerApiRoutes(routeDependencies);
+    this.apiRoutes.setup(routeDependencies);
 
     licensing.license$.subscribe(license => {
       const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);

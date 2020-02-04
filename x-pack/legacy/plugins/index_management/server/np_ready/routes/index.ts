@@ -12,10 +12,15 @@ import { registerMappingRoute } from './api/mapping';
 import { registerSettingsRoutes } from './api/settings';
 import { registerStatsRoute } from './api/stats';
 
-export const registerApiRoutes = (dependencies: RouteDependencies) => {
-  registerIndicesRoutes(dependencies);
-  registerTemplateRoutes(dependencies);
-  registerSettingsRoutes(dependencies);
-  registerStatsRoute(dependencies);
-  registerMappingRoute(dependencies);
-};
+export class ApiRoutes {
+  setup(dependencies: RouteDependencies) {
+    registerIndicesRoutes(dependencies);
+    registerTemplateRoutes(dependencies);
+    registerSettingsRoutes(dependencies);
+    registerStatsRoute(dependencies);
+    registerMappingRoute(dependencies);
+  }
+
+  start() {}
+  stop() {}
+}

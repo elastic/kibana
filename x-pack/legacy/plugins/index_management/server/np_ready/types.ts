@@ -12,6 +12,11 @@ export interface Dependencies {
 
 export interface RouteDependencies {
   router: IRouter;
+  plugins: {
+    license: {
+      getStatus: () => LicenseStatus;
+    };
+  };
 }
 export interface LicenseStatus {
   isValid: boolean;
