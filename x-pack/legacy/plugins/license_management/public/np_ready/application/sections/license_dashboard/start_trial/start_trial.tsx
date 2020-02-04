@@ -26,12 +26,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
 import { EXTERNAL_LINKS } from '../../../../../../common/constants';
 import { getDocLinks } from '../../../lib/docs_links';
-import { TelemetryPluginStart, shouldShowTelemetryOptIn } from '../../../lib/telemetry';
+import { TelemetryPluginSetup, shouldShowTelemetryOptIn } from '../../../lib/telemetry';
 
 interface Props {
   loadTrialStatus: () => void;
   startLicenseTrial: () => void;
-  telemetry?: TelemetryPluginStart;
+  telemetry?: TelemetryPluginSetup;
   shouldShowStartTrial: boolean;
 }
 
@@ -71,6 +71,7 @@ export class StartTrial extends Component<Props, State> {
   acknowledgeModal() {
     const { showConfirmation, isOptingInToTelemetry } = this.state;
     const { telemetry } = this.props;
+
     if (!showConfirmation) {
       return null;
     }

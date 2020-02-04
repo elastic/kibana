@@ -18,7 +18,7 @@
  */
 
 import { TelemetryPlugin } from './plugin';
-export { TelemetryPluginStart } from './plugin';
+export { TelemetryPluginStart, TelemetryPluginSetup } from './plugin';
 
 export function plugin() {
   return new TelemetryPlugin();

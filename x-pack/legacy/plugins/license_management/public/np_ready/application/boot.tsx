@@ -12,6 +12,7 @@ import * as history from 'history';
 import { DocLinksStart, HttpSetup, ToastsSetup, ChromeStart } from 'src/core/public';
 
 // @ts-ignore
+import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import { App } from './app.container';
 // @ts-ignore
 import { licenseManagementStore } from './store';
@@ -34,10 +35,11 @@ interface AppDependencies {
   toasts: ToastsSetup;
   docLinks: DocLinksStart;
   http: HttpSetup;
+  telemetry?: TelemetryPluginSetup;
 }
 
 export const boot = (deps: AppDependencies) => {
-  const { I18nContext, element, legacy, toasts, docLinks, http, chrome } = deps;
+  const { I18nContext, element, legacy, toasts, docLinks, http, chrome, telemetry } = deps;
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
   const securityDocumentationLink = `${esBase}/security-settings.html`;
@@ -56,15 +58,17 @@ export const boot = (deps: AppDependencies) => {
     toasts,
     http,
     chrome,
+    telemetry,
     MANAGEMENT_BREADCRUMB: legacy.MANAGEMENT_BREADCRUMB,
   };
 
   const store = licenseManagementStore(initialState, services);
+
   render(
     <I18nContext>
       <Provider store={store}>
         <HashRouter>
-          <App />
+          <App telemetry={telemetry} />
         </HashRouter>
       </Provider>
     </I18nContext>,

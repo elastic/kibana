@@ -11,6 +11,7 @@ import { loadTrialStatus, startLicenseTrial } from '../../../store/actions/start
 import { shouldShowStartTrial } from '../../../store/reducers/license_management';
 
 const mapStateToProps = state => {
+  console.log('state!@#!@', state);
   return {
     shouldShowStartTrial: shouldShowStartTrial(state),
   };

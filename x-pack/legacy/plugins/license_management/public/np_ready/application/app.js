@@ -18,7 +18,7 @@ export class App extends Component {
   }
 
   render() {
-    const { hasPermission, permissionsLoading, permissionsError } = this.props;
+    const { hasPermission, permissionsLoading, permissionsError, telemetry } = this.props;
 
     if (permissionsLoading) {
       return (
@@ -85,11 +85,12 @@ export class App extends Component {
       );
     }
 
+    const withTelemetry = Component => props => <Component {...props} telemetry={telemetry} />;
     return (
       <EuiPageBody>
         <Switch>
-          <Route path={`${BASE_PATH}upload_license`} component={UploadLicense} />
-          <Route path={BASE_PATH} component={LicenseDashboard} />
+          <Route path={`${BASE_PATH}upload_license`} component={withTelemetry(UploadLicense)} />
+          <Route path={BASE_PATH} component={withTelemetry(LicenseDashboard)} />
         </Switch>
       </EuiPageBody>
     );

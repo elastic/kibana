@@ -8,8 +8,6 @@ import { connect } from 'react-redux';
 import { setBreadcrumb } from '../../store/actions/set_breadcrumb';
 import { uploadLicense, uploadLicenseStatus } from '../../store/actions/upload_license';
 import { addUploadErrorMessage } from '../../store/actions/add_error_message';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { npStart } from 'ui/new_platform';
 
 import {
   getUploadErrorMessage,
@@ -29,7 +27,6 @@ const mapStateToProps = state => {
     errorMessage: getUploadErrorMessage(state),
     applying: isApplying(state),
     currentLicenseType: getLicenseType(state) || '',
-    telemetry: npStart.plugins.telemetry,
   };
 };
 const mapDispatchToProps = {

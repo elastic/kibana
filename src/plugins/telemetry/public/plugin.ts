@@ -16,42 +16,52 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Plugin, CoreStart, HttpStart } from '../../../core/public';
+import { Plugin, CoreStart, CoreSetup, HttpStart } from '../../../core/public';
 
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
+
+export interface TelemetryPluginSetup {
+  telemetryService: TelemetryService;
+}
 
 export interface TelemetryPluginStart {
   telemetryService: TelemetryService;
   telemetryNotifications: TelemetryNotifications;
 }
 
-export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
-  public setup() {}
+export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
+  private telemetrySender?: TelemetrySender;
+  private telemetryNotifications?: TelemetryNotifications;
+  private telemetryService?: TelemetryService;
 
-  public start({
-    injectedMetadata,
-    http,
-    notifications,
-    overlays,
-    application,
-  }: CoreStart): TelemetryPluginStart {
-    const telemetryBanner = injectedMetadata.getInjectedVar('telemetryBanner') as boolean;
-    const sendUsageFrom = injectedMetadata.getInjectedVar('telemetrySendUsageFrom') as
-      | 'browser'
-      | 'server';
-
-    const telemetryService = new TelemetryService({
+  public setup({ http, injectedMetadata, notifications }: CoreSetup): TelemetryPluginSetup {
+    this.telemetryService = new TelemetryService({
       http,
       injectedMetadata,
       notifications,
     });
 
-    const telemetryNotifications = new TelemetryNotifications({
-      overlays,
-      telemetryService,
-    });
+    this.telemetrySender = new TelemetrySender(this.telemetryService);
 
-    const telemetrySender = new TelemetrySender(telemetryService);
+    return {
+      telemetryService: this.telemetryService,
+    };
+  }
+
+  public start({ injectedMetadata, http, overlays, application }: CoreStart): TelemetryPluginStart {
+    if (!this.telemetryService) {
+      throw Error('Telemetry plugin failed to initialize properly.');
+    }
+
+    const telemetryBanner = injectedMetadata.getInjectedVar('telemetryBanner') as boolean;
+    const sendUsageFrom = injectedMetadata.getInjectedVar('telemetrySendUsageFrom') as
+      | 'browser'
+      | 'server';
+
+    this.telemetryNotifications = new TelemetryNotifications({
+      overlays,
+      telemetryService: this.telemetryService,
+    });
 
     application.currentAppId$.subscribe(appId => {
       const isUnauthenticated = this.getIsUnauthenticated(http);
@@ -59,25 +69,16 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
         return;
       }
 
-      this.maybeStartTelemetryPoller({
-        telemetrySender,
-        sendUsageFrom,
-      });
-
+      this.maybeStartTelemetryPoller({ sendUsageFrom });
       if (telemetryBanner) {
-        this.maybeShowOptedInNotificationBanner({
-          telemetryNotifications,
-        });
-
-        this.maybeShowOptInBanner({
-          telemetryNotifications,
-        });
+        this.maybeShowOptedInNotificationBanner();
+        this.maybeShowOptInBanner();
       }
     });
 
     return {
-      telemetryService,
-      telemetryNotifications,
+      telemetryService: this.telemetryService,
+      telemetryNotifications: this.telemetryNotifications,
     };
   }
 
@@ -86,37 +87,32 @@ export class TelemetryPlugin implements Plugin<void, TelemetryPluginStart> {
     return anonymousPaths.isAnonymous(window.location.pathname);
   }
 
-  private maybeStartTelemetryPoller({
-    telemetrySender,
-    sendUsageFrom,
-  }: {
-    telemetrySender: TelemetrySender;
-    sendUsageFrom: string;
-  }) {
+  private maybeStartTelemetryPoller({ sendUsageFrom }: { sendUsageFrom: string }) {
+    if (!this.telemetrySender) {
+      return;
+    }
     if (sendUsageFrom === 'browser') {
-      telemetrySender.startChecking();
+      this.telemetrySender.startChecking();
     }
   }
 
-  private maybeShowOptedInNotificationBanner({
-    telemetryNotifications,
-  }: {
-    telemetryNotifications: TelemetryNotifications;
-  }) {
-    const shouldShowBanner = telemetryNotifications.shouldShowOptedInNoticeBanner();
+  private maybeShowOptedInNotificationBanner() {
+    if (!this.telemetryNotifications) {
+      return;
+    }
+    const shouldShowBanner = this.telemetryNotifications.shouldShowOptedInNoticeBanner();
     if (shouldShowBanner) {
-      telemetryNotifications.renderOptedInNoticeBanner();
+      this.telemetryNotifications.renderOptedInNoticeBanner();
     }
   }
 
-  private maybeShowOptInBanner({
-    telemetryNotifications,
-  }: {
-    telemetryNotifications: TelemetryNotifications;
-  }) {
-    const shouldShowBanner = telemetryNotifications.shouldShowOptInBanner();
+  private maybeShowOptInBanner() {
+    if (!this.telemetryNotifications) {
+      return;
+    }
+    const shouldShowBanner = this.telemetryNotifications.shouldShowOptInBanner();
     if (shouldShowBanner) {
-      telemetryNotifications.renderOptInBanner();
+      this.telemetryNotifications.renderOptInBanner();
     }
   }
 }

@@ -42,7 +42,7 @@ export async function handleOldSettings(server: Server) {
   const oldAllowReportSetting = await uiSettings.get(CONFIG_ALLOW_REPORT);
   let legacyOptInValue = null;
 
-  if (typeof oldTelemetrySetting === 'boolean' && uiSettings.isOverridden(CONFIG_TELEMETRY)) {
+  if (typeof oldTelemetrySetting === 'boolean') {
     legacyOptInValue = oldTelemetrySetting;
   } else if (
     typeof oldAllowReportSetting === 'boolean' &&

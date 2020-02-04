@@ -74,6 +74,7 @@ if (licenseManagementUiEnabled) {
               },
             },
             {
+              telemetry: (npSetup.plugins as any).telemetry,
               __LEGACY: { xpackInfo, refreshXpack, MANAGEMENT_BREADCRUMB },
             }
           );
