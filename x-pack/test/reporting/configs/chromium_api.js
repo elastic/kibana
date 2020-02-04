@@ -27,6 +27,7 @@ export default async function({ readConfigFile }) {
         '--logging.events.log',
         '["info","warning","error","fatal","optimize","reporting"]',
         '--xpack.endpoint.enabled=true',
+        '--xpack.ingestManager.enabled=true',
         '--xpack.reporting.csv.enablePanelActionDownload=true',
         '--xpack.reporting.capture.maxAttempts=1',
         '--xpack.security.session.idleTimeout=3600000',

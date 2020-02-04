@@ -41,6 +41,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
         '--xpack.endpoint.enabled=true',
+        '--xpack.ingestManager.enabled=true',
       ],
     },
     uiSettings: xpackFunctionalConfig.get('uiSettings'),

@@ -24,6 +24,7 @@ export default async function({ readConfigFile }) {
         '--logging.events.log',
         '["info","warning","error","fatal","optimize","reporting"]',
         '--xpack.endpoint.enabled=true',
+        '--xpack.ingestManager.enabled=true',
         '--xpack.reporting.csv.enablePanelActionDownload=true',
         '--xpack.reporting.csv.checkForFormulas=false',
         '--xpack.reporting.csv.maxSizeBytes=25000000',
