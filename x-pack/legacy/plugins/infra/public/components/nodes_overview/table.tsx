@@ -22,7 +22,6 @@ interface Props {
   nodeType: InventoryItemType;
   options: InfraWaffleMapOptions;
   currentTime: number;
-  onOpen(): void;
   formatter: (subject: string | number) => string;
   onFilter: (filter: string) => void;
 }
