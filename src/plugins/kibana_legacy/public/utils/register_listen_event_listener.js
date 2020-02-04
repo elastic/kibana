@@ -16,13 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export * from './migrate_legacy_query';
-export * from './system_api';
-export * from './url_overflow_service';
-// @ts-ignore
-export { KbnAccessibleClickProvider } from './kbn_accessible_click';
-// @ts-ignore
-export { PrivateProvider } from './private';
-// @ts-ignore
-export { registerListenEventListener } from './register_listen_event_listener';
+export function registerListenEventListener($rootScope) {
+  /**
+   * Helper that registers an event listener, and removes that listener when
+   * the $scope is destroyed.
+   *
+   * @param  {SimpleEmitter} emitter - the event emitter to listen to
+   * @param  {string} eventName - the event name
+   * @param  {Function} handler - the event handler
+   * @return {undefined}
+   */
+  $rootScope.constructor.prototype.$listen = function(emitter, eventName, handler) {
+    emitter.on(eventName, handler);
+    this.$on('$destroy', function() {
+      emitter.off(eventName, handler);
+    });
+  };
+}

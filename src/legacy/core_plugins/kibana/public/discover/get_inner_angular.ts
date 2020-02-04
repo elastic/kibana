@@ -34,9 +34,6 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
-import { registerListenEventListener } from 'ui/directives/listen/listen';
-// @ts-ignore
-// @ts-ignore
 import { FieldNameDirectiveProvider } from 'ui/directives/field_name';
 // @ts-ignore
 import { CollapsibleSidebarProvider } from 'ui/collapsible_sidebar/collapsible_sidebar';
@@ -85,6 +82,7 @@ import {
   PromiseServiceCreator,
   KbnAccessibleClickProvider,
   PrivateProvider,
+  registerListenEventListener,
 } from '../../../../../plugins/kibana_legacy/public';
 
 /**
