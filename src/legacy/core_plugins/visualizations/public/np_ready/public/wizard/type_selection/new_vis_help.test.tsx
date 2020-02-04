@@ -49,7 +49,7 @@ describe('NewVisHelp', () => {
         <p>
           <FormattedMessage
             defaultMessage="Start creating your visualization by selecting a type for that visualization."
-            id="kbn.visualize.newVisWizard.helpText"
+            id="visualizations.newVisWizard.helpText"
             values={Object {}}
           />
         </p>

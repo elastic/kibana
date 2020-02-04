@@ -1155,7 +1155,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                           >
                             <FormattedMessage
                               defaultMessage="New Visualization"
-                              id="kbn.visualize.newVisWizard.title"
+                              id="visualizations.newVisWizard.title"
                               values={Object {}}
                             >
                               New Visualization
@@ -1345,7 +1345,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         >
                                           <FormattedMessage
                                             defaultMessage="{resultCount} {resultCount, plural, one {type} other {types} } found"
-                                            id="kbn.visualize.newVisWizard.resultsFound"
+                                            id="visualizations.newVisWizard.resultsFound"
                                             values={
                                               Object {
                                                 "resultCount": 2,
@@ -1694,7 +1694,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 >
                                   <FormattedMessage
                                     defaultMessage="Select a visualization type"
-                                    id="kbn.visualize.newVisWizard.selectVisType"
+                                    id="visualizations.newVisWizard.selectVisType"
                                     values={Object {}}
                                   >
                                     Select a visualization type
@@ -1719,7 +1719,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                     <p>
                                       <FormattedMessage
                                         defaultMessage="Start creating your visualization by selecting a type for that visualization."
-                                        id="kbn.visualize.newVisWizard.helpText"
+                                        id="visualizations.newVisWizard.helpText"
                                         values={Object {}}
                                       >
                                         Start creating your visualization by selecting a type for that visualization.
@@ -2846,7 +2846,7 @@ exports[`NewVisModal should render as expected 1`] = `
                           >
                             <FormattedMessage
                               defaultMessage="New Visualization"
-                              id="kbn.visualize.newVisWizard.title"
+                              id="visualizations.newVisWizard.title"
                               values={Object {}}
                             >
                               New Visualization
@@ -3321,7 +3321,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                 >
                                   <FormattedMessage
                                     defaultMessage="Select a visualization type"
-                                    id="kbn.visualize.newVisWizard.selectVisType"
+                                    id="visualizations.newVisWizard.selectVisType"
                                     values={Object {}}
                                   >
                                     Select a visualization type
@@ -3346,7 +3346,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                     <p>
                                       <FormattedMessage
                                         defaultMessage="Start creating your visualization by selecting a type for that visualization."
-                                        id="kbn.visualize.newVisWizard.helpText"
+                                        id="visualizations.newVisWizard.helpText"
                                         values={Object {}}
                                       >
                                         Start creating your visualization by selecting a type for that visualization.

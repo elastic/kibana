@@ -79,7 +79,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     }
 
     const visNewVisDialogAriaLabel = i18n.translate(
-      'kbn.visualize.newVisWizard.helpTextAriaLabel',
+      'visualizations.newVisWizard.helpTextAriaLabel',
       {
         defaultMessage:
           'Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further.',

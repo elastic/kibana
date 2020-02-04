@@ -33,7 +33,7 @@ export function NewVisHelp(props: Props) {
     <EuiText>
       <p>
         <FormattedMessage
-          id="kbn.visualize.newVisWizard.helpText"
+          id="visualizations.newVisWizard.helpText"
           defaultMessage="Start creating your visualization by selecting a type for that visualization."
         />
       </p>
