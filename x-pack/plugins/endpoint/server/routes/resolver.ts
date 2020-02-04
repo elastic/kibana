@@ -85,7 +85,8 @@ class ResolverSearchHandler {
   ): Promise<ResolverChildrenResponse> {
     const nodes = new Map<string, ParentAndResolverData>();
     const originEvents: ResolverData[] = [];
-    // handle the case where the origin didn't come back for some reason
+    // it is possible that at this position in the pagination we won't have any events for the origin
+    // yet so just return null for those related fields
     let originParentEntityID: string | undefined;
     for (const hit of esResponse.hits.hits) {
       const node = ResolverSearchHandler.nodeCreator(hit._source);
@@ -109,9 +110,7 @@ class ResolverSearchHandler {
         events: parentAndData.events,
       });
     }
-    if (originParentEntityID === undefined) {
-      throw new Error('Unable to find origin information');
-    }
+
     const pagination = await this.buildPagination(
       // total is an object in kibana >=7.0
       // see https://github.com/elastic/kibana/issues/56694
@@ -141,9 +140,6 @@ class ResolverSearchHandler {
       parentEntityID = node.parentEntityID;
     }
 
-    if (parentEntityID === undefined) {
-      throw new Error('Unable to find origin information');
-    }
     const pagination = await this.buildPagination(
       // total is an object in kibana >=7.0
       // see https://github.com/elastic/kibana/issues/56694

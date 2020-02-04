@@ -123,8 +123,8 @@ export interface ResolverPhase1Data {
 export type ResolverData = ResolverPhase0Data | ResolverPhase1Data;
 
 export interface ResolverResponseNode {
-  entity_id: string;
-  parent_entity_id: string;
+  entity_id: string | undefined;
+  parent_entity_id: string | undefined;
   events: ResolverData[];
 }
 
