@@ -6,10 +6,7 @@
 import { KibanaRequest } from 'kibana/server';
 import { EndpointAppConstants } from '../../../common/types';
 import { EndpointAppContext } from '../../types';
-import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-} from '../../../../../../src/plugins/data/common/es_query/kuery/ast';
+import { esKuery } from '../../../../../../src/plugins/data/server';
 
 export const kibanaRequestToEndpointListQuery = async (
   request: KibanaRequest<any, any, any>,
@@ -70,7 +67,7 @@ async function getPagingProperties(
 
 function buildQueryBody(request: KibanaRequest<any, any, any>): Record<string, any> {
   if (typeof request?.body?.filter === 'string') {
-    return toElasticsearchQuery(fromKueryExpression(request.body.filter));
+    return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(request.body.filter));
   }
   return {
     match_all: {},
