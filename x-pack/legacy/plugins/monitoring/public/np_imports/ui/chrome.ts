@@ -7,30 +7,15 @@
 import angular from 'angular';
 import { npStart, npSetup } from '../legacy_imports';
 
+type OptionalInjector = void | angular.auto.IInjectorService;
+
 class Chrome {
-  private getRootElement = (): Promise<HTMLElement> => {
-    return new Promise(resolve => {
-      const element = document.getElementById('monitoring-angular-app');
-      if (element) {
-        resolve(element);
-      } else {
-        setTimeout(() => resolve(this.getRootElement()), 100);
-      }
-    });
-  };
+  private injector?: OptionalInjector;
 
-  public dangerouslyGetActiveInjector = async (): Promise<angular.auto.IInjectorService> => {
-    const targetDomElement: HTMLElement = await this.getRootElement();
-    const $injector = angular.element(targetDomElement).injector();
-    if (!$injector) {
-      return Promise.reject('targetDomElement had no angular context after bootstrapping');
-    }
-    return Promise.resolve($injector);
-  };
+  public setInjector = (injector: OptionalInjector): void => void (this.injector = injector);
+  public dangerouslyGetActiveInjector = (): OptionalInjector => this.injector;
 
-  public getBasePath = (): string => {
-    return npStart.core.http.basePath.get();
-  };
+  public getBasePath = (): string => npStart.core.http.basePath.get();
 
   public getInjected = (name?: string, defaultValue?: any): string | unknown => {
     const { getInjectedVar, getInjectedVars } = npSetup.core.injectedMetadata;

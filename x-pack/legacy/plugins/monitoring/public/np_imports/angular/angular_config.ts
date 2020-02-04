@@ -38,7 +38,7 @@ export const configureAppAngularModule = (angularModule: IModule, newPlatform: L
     .value('esUrl', getEsUrl(newPlatform))
     .value('uiCapabilities', newPlatform.application.capabilities)
     .config(setupCompileProvider(newPlatform))
-    .config(setupLocationProvider(newPlatform))
+    .config(setupLocationProvider())
     .config($setupXsrfRequestInterceptor(newPlatform))
     .run(capture$httpLoadingCount(newPlatform))
     .run($setupUICapabilityRedirect(newPlatform));
@@ -65,9 +65,7 @@ const setupCompileProvider = (newPlatform: LegacyCoreStart) => (
   }
 };
 
-const setupLocationProvider = (newPlatform: CoreStart) => (
-  $locationProvider: ILocationProvider
-) => {
+const setupLocationProvider = () => ($locationProvider: ILocationProvider) => {
   $locationProvider.html5Mode({
     enabled: false,
     requireBase: false,

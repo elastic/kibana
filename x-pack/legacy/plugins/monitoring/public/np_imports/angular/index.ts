@@ -11,6 +11,8 @@ import { AppMountContext, LegacyCoreStart } from 'kibana/public';
 // @ts-ignore TODO: change to absolute path
 import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
 // @ts-ignore TODO: change to absolute path
+import chrome from 'plugins/monitoring/np_imports/ui/chrome';
+// @ts-ignore TODO: change to absolute path
 import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
 // @ts-ignore TODO: change to absolute path
 import { registerTimefilterWithGlobalState } from 'plugins/monitoring/np_imports/ui/timefilter';
@@ -32,11 +34,10 @@ export class AngularApp {
     registerTimefilterWithGlobalState(app);
     const appElement = document.createElement('div');
     appElement.setAttribute('style', 'height: 100%');
-    appElement.innerHTML = `<div ng-app="monitoring">
-        <div ng-view style="height: 100%" id="monitoring-angular-app"></div>
-      </div>`;
+    appElement.innerHTML = '<div ng-view style="height: 100%" id="monitoring-angular-app"></div>';
     this.injector = angular.bootstrap(appElement, [appModuleName]);
-    element.appendChild(appElement);
+    chrome.setInjector(this.injector);
+    angular.element(element).append(appElement);
   }
 
   public destroy = () => {

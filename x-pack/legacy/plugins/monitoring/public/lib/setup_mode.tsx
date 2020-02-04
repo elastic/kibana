@@ -207,12 +207,12 @@ export const initSetupModeState = async ($scope: any, $injector: any, callback?:
   }
 };
 
-export const isInSetupMode = async () => {
+export const isInSetupMode = () => {
   if (setupModeState.enabled) {
     return true;
   }
 
-  const $injector = angularState.injector || (await chrome.dangerouslyGetActiveInjector());
+  const $injector = angularState.injector || chrome.dangerouslyGetActiveInjector();
   const globalState = $injector.get('globalState');
   return globalState.inSetupMode;
 };
