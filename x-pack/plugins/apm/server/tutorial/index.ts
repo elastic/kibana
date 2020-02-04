@@ -84,7 +84,7 @@ It allows you to monitor the performance of thousands of applications in real ti
           '{config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html',
       },
     }),
-    euiIconType: 'logoAPM',
+    euiIconType: 'apmApp',
     artifacts,
     onPrem: onPremInstructions(indices),
     elasticCloud: createElasticCloudInstructions(cloud),
