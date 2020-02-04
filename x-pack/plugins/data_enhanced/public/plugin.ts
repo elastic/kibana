@@ -9,25 +9,25 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/pl
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
 
-export interface DataEnhancedPublicSetupDependencies {
+export interface DataEnhancedSetupDependencies {
   data: DataPublicPluginSetup;
 }
-export interface DataEnhancedPublicStartDependencies {
+export interface DataEnhancedStartDependencies {
   data: DataPublicPluginStart;
 }
 
-export type DataEnhancedPublicSetup = ReturnType<DataEnhancedPublicPlugin['setup']>;
-export type DataEnhancedPublicStart = ReturnType<DataEnhancedPublicPlugin['start']>;
+export type DataEnhancedSetup = ReturnType<DataEnhancedPlugin['setup']>;
+export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 
-export class DataEnhancedPublicPlugin implements Plugin {
-  public setup(core: CoreSetup, plugins: DataEnhancedPublicSetupDependencies) {
+export class DataEnhancedPlugin implements Plugin {
+  public setup(core: CoreSetup, plugins: DataEnhancedSetupDependencies) {
     plugins.data.autocomplete.addQuerySuggestionProvider(
       KUERY_LANGUAGE_NAME,
       setupKqlQuerySuggestionProvider(core)
     );
   }
 
-  public start(core: CoreStart, plugins: DataEnhancedPublicStartDependencies) {
+  public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
     setAutocompleteService(plugins.data.autocomplete);
   }
 }
