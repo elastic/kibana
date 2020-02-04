@@ -119,41 +119,44 @@ export function TransactionOverview() {
   }
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <LocalUIFilters {...localFiltersConfig}>
-          <TransactionTypeFilter transactionTypes={serviceTransactionTypes} />
-          <EuiSpacer size="xl" />
-          <EuiHorizontalRule margin="none" />
-        </LocalUIFilters>
-      </EuiFlexItem>
-      <EuiFlexItem grow={7}>
-        <ChartsSyncContextProvider>
-          <TransactionBreakdown initialIsOpen={true} />
+    <>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <LocalUIFilters {...localFiltersConfig}>
+            <TransactionTypeFilter transactionTypes={serviceTransactionTypes} />
+            <EuiSpacer size="xl" />
+            <EuiHorizontalRule margin="none" />
+          </LocalUIFilters>
+        </EuiFlexItem>
+        <EuiFlexItem grow={7}>
+          <ChartsSyncContextProvider>
+            <TransactionBreakdown initialIsOpen={true} />
+
+            <EuiSpacer size="s" />
+
+            <TransactionCharts
+              hasMLJob={hasMLJob}
+              charts={transactionCharts}
+              location={location}
+              urlParams={urlParams}
+            />
+          </ChartsSyncContextProvider>
 
           <EuiSpacer size="s" />
 
-          <TransactionCharts
-            hasMLJob={hasMLJob}
-            charts={transactionCharts}
-            location={location}
-            urlParams={urlParams}
-          />
-        </ChartsSyncContextProvider>
-
-        <EuiSpacer size="s" />
-
-        <EuiPanel>
-          <EuiTitle size="xs">
-            <h3>Transactions</h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <TransactionList
-            isLoading={transactionListStatus === 'loading'}
-            items={transactionListData}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <EuiPanel>
+            <EuiTitle size="xs">
+              <h3>Transactions</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <TransactionList
+              isLoading={transactionListStatus === 'loading'}
+              items={transactionListData}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }

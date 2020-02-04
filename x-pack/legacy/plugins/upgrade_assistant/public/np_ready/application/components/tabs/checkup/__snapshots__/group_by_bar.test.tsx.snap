@@ -6,24 +6,16 @@ exports[`GroupByBar renders 1`] = `
 >
   <EuiFilterGroup>
     <EuiFilterButton
-      color="text"
-      grow={true}
       hasActiveFilters={true}
-      iconSide="right"
       key="message"
       onClick={[Function]}
-      type="button"
     >
       by issue
     </EuiFilterButton>
     <EuiFilterButton
-      color="text"
-      grow={true}
       hasActiveFilters={false}
-      iconSide="right"
       key="index"
       onClick={[Function]}
-      type="button"
     >
       by index
     </EuiFilterButton>

@@ -28,10 +28,10 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { AggType } from './agg_type';
-import { AggGroupNames } from '../vis/editors/default/agg_groups';
+import { AggGroupNames } from './agg_groups';
 import { writeParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
-import { Schema } from '../vis/editors/default/schemas';
+import { Schema } from './schemas';
 import {
   ISearchSource,
   FetchOptions,
@@ -63,7 +63,7 @@ const unknownSchema: Schema = {
 const getTypeFromRegistry = (type: string): AggType => {
   // We need to inline require here, since we're having a cyclic dependency
   // from somewhere inside agg_types back to AggConfig.
-  const aggTypes = require('../agg_types').aggTypes;
+  const aggTypes = require('./agg_types').aggTypes;
   const registeredType =
     aggTypes.metrics.find((agg: AggType) => agg.name === type) ||
     aggTypes.buckets.find((agg: AggType) => agg.name === type);

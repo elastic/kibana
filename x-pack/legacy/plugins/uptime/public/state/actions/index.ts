@@ -8,3 +8,5 @@ export * from './overview_filters';
 export * from './snapshot';
 export * from './ui';
 export * from './monitor_status';
+export * from './index_patternts';
+export * from './ping';
