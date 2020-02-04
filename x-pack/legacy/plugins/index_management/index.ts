@@ -27,8 +27,11 @@ export function indexManagement(kibana: any) {
       const coreSetup = server.newPlatform.setup.core;
 
       const pluginDependencies: Dependencies = {
-        elasticsearch: server.plugins.elasticsearch,
-        licensing: {} as any,
+        licensing: {
+          license$: {
+            subscribe() {},
+          },
+        } as any,
       };
 
       const mockLogger = {
