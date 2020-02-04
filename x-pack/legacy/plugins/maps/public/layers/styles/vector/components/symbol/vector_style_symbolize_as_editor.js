@@ -6,11 +6,12 @@
 
 import React from 'react';
 
-import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { SYMBOLIZE_AS_TYPES } from '../../../../../../common/constants';
 import { VECTOR_STYLES } from '../../vector_style_defaults';
+import { getDisabledByMessage } from '../get_vector_style_label';
 
 const SYMBOLIZE_AS_OPTIONS = [
   {
@@ -27,7 +28,12 @@ const SYMBOLIZE_AS_OPTIONS = [
   },
 ];
 
-export function VectorStyleSymbolizeAsEditor({ styleProperty, handlePropertyChange }) {
+export function VectorStyleSymbolizeAsEditor({
+  disabled,
+  disabledBy,
+  styleProperty,
+  handlePropertyChange,
+}) {
   const styleOptions = styleProperty.getOptions();
   const selectedOption = SYMBOLIZE_AS_OPTIONS.find(({ id }) => {
     return id === styleOptions.value;
@@ -42,7 +48,7 @@ export function VectorStyleSymbolizeAsEditor({ styleProperty, handlePropertyChan
     handlePropertyChange(VECTOR_STYLES.SYMBOLIZE_AS, styleDescriptor);
   };
 
-  return (
+  const symbolizeAsForm = (
     <EuiFormRow
       label={i18n.translate('xpack.maps.vector.symbolLabel', {
         defaultMessage: 'Symbol type',
@@ -50,6 +56,7 @@ export function VectorStyleSymbolizeAsEditor({ styleProperty, handlePropertyChan
       display="columnCompressed"
     >
       <EuiButtonGroup
+        isDisabled={disabled}
         buttonSize="compressed"
         options={SYMBOLIZE_AS_OPTIONS}
         idSelected={selectedOption ? selectedOption.id : undefined}
@@ -57,5 +64,18 @@ export function VectorStyleSymbolizeAsEditor({ styleProperty, handlePropertyChan
         isFullWidth
       />
     </EuiFormRow>
+  );
+
+  if (!disabled) {
+    return symbolizeAsForm;
+  }
+
+  return (
+    <EuiToolTip
+      anchorClassName="mapStyleFormDisabledTooltip"
+      content={getDisabledByMessage(disabledBy)}
+    >
+      {symbolizeAsForm}
+    </EuiToolTip>
   );
 }

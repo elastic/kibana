@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import DateMath from '@elastic/datemath';
+import moment from 'moment';
 import { APICaller } from 'src/core/server';
-import { CursorPagination } from './types';
 import { INDEX_NAMES } from '../../../../common/constants';
+import { CursorPagination } from './types';
+import { parseRelativeDate } from '../../helper';
 
 export class QueryContext {
   callES: APICaller;
@@ -95,8 +96,9 @@ export class QueryContext {
     // latencies and slowdowns that's dangerous. Making this value larger makes things
     // only slower, but only marginally so, and prevents people from seeing weird
     // behavior.
-    const tsStart = DateMath.parse(this.dateRangeEnd)!.subtract(5, 'minutes');
-    const tsEnd = DateMath.parse(this.dateRangeEnd)!;
+
+    const tsEnd = parseRelativeDate(this.dateRangeEnd, { roundUp: true })!;
+    const tsStart = moment(tsEnd).subtract(5, 'minutes');
 
     return {
       range: {
