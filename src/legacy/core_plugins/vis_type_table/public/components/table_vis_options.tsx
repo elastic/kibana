@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'src/legacy/core_plugins/vis_default_editor/public';
+import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { tabifyGetColumns } from '../legacy_imports';
 import { NumberInputOption, SwitchOption, SelectOption } from '../../../vis_type_vislib/public';
 import { TableVisParams } from '../types';
@@ -44,7 +45,9 @@ function TableOptions({
         }),
       },
       ...tabifyGetColumns(aggs.getResponseAggs(), true)
-        .filter(col => isAggConfigNumeric(get(col, 'aggConfig.type.name'), stateParams.dimensions))
+        .filter(col =>
+          isAggConfigNumeric(get(col, 'aggConfig.type.name'), createFormat(col.aggConfig))
+        )
         .map(({ name }) => ({ value: name, text: name })),
     ],
     [aggs, stateParams.percentageCol, stateParams.dimensions]
