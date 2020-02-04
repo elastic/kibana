@@ -18,6 +18,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { AbortController } from 'abort-controller';
 import { IRouter } from '../../../../core/server';
 
 export function registerSearchRoute(router: IRouter): void {
@@ -35,8 +36,15 @@ export function registerSearchRoute(router: IRouter): void {
     async (context, request, res) => {
       const searchRequest = request.body;
       const strategy = request.params.strategy;
+
+      const controller = new AbortController();
+      const { signal } = controller;
+      request.events.aborted$.subscribe(() => {
+        controller.abort();
+      });
+
       try {
-        const response = await context.search!.search(searchRequest, {}, strategy);
+        const response = await context.search!.search(searchRequest, { signal }, strategy);
         return res.ok({ body: response });
       } catch (err) {
         return res.customError({
