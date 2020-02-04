@@ -23,10 +23,12 @@ export const WithSummary = ({
 }) => {
   const { sourceId } = useContext(Source.Context);
   const { filterQuery } = useContext(LogFilterState.Context);
-  const { startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
+  const { startDate, endDate, startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
 
   const { buckets, start, end } = useLogSummary(
     sourceId,
+    startDate,
+    endDate,
     startTimestamp,
     endTimestamp,
     filterQuery

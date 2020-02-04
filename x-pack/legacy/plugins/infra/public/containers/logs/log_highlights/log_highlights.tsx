@@ -26,9 +26,14 @@ export const useLogHighlightsState = ({
   filterQuery: string | null;
 }) => {
   const [highlightTerms, setHighlightTerms] = useState<string[]>([]);
-  const { visibleMidpoint, jumpToTargetPosition, startTimestamp, endTimestamp } = useContext(
-    LogPositionState.Context
-  );
+  const {
+    visibleMidpoint,
+    jumpToTargetPosition,
+    startDate,
+    endDate,
+    startTimestamp,
+    endTimestamp,
+  } = useContext(LogPositionState.Context);
 
   const {
     logEntryHighlights,
@@ -46,6 +51,8 @@ export const useLogHighlightsState = ({
   const { logSummaryHighlights, loadLogSummaryHighlightsRequest } = useLogSummaryHighlights(
     sourceId,
     sourceVersion,
+    startDate,
+    endDate,
     startTimestamp,
     endTimestamp,
     filterQuery,

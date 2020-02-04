@@ -15,6 +15,8 @@ export type LogSummaryBuckets = LogEntriesSummaryResponse['data']['buckets'];
 
 export const useLogSummary = (
   sourceId: string,
+  startDate: string | null,
+  endDate: string | null,
   startTimestamp: number | null,
   endTimestamp: number | null,
   filterQuery: string | null
@@ -22,7 +24,6 @@ export const useLogSummary = (
   const [logSummaryBuckets, setLogSummaryBuckets] = useState<LogSummaryBuckets>([]);
 
   const bucketSize = useBucketSize(startTimestamp, endTimestamp);
-
   useCancellableEffect(
     getIsCancelled => {
       if (startTimestamp === null || endTimestamp === null || bucketSize === null) {
@@ -41,7 +42,10 @@ export const useLogSummary = (
         }
       });
     },
-    [sourceId, filterQuery, startTimestamp, endTimestamp, bucketSize]
+    // Use `*Timestamp` values in the fetch.
+    // Use `*Date` to decide if it should refetch or not. `endTimestamp` updates
+    // frequently when `endDate` is `"now"` and triggers a lot of re-renders.
+    [sourceId, filterQuery, startDate, endDate]
   );
 
   return {
