@@ -45,7 +45,7 @@ describe('getPaginatedNodes', () => {
       }),
     },
   };
-  const esIndexPattern = '.monitoring-es-*,monitoring-es-*';
+  const esIndexPattern = '.monitoring-es-*';
   const clusterUuid = '1abc';
   const metricSet = ['foo', 'bar'];
   const pagination = { index: 0, size: 10 };
