@@ -6,6 +6,8 @@
 
 Describe a [saved object type mapping](./kibana-plugin-server.savedobjectstypemappingdefinition.md) field.
 
+Please refer to [elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html) For the mapping documentation
+
 <b>Signature:</b>
 
 ```typescript

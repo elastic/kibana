@@ -4,6 +4,7 @@
 
 ## SavedObjectsCoreFieldMapping interface
 
+See [SavedObjectsFieldMapping](./kibana-plugin-server.savedobjectsfieldmapping.md) for documentation.
 
 <b>Signature:</b>
 

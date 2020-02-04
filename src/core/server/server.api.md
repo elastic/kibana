@@ -1421,6 +1421,19 @@ export interface SavedObjectAttributes {
 // @public
 export type SavedObjectAttributeSingle = string | number | boolean | null | undefined | SavedObjectAttributes;
 
+// Warning: (ae-forgotten-export) The symbol "SavedObjectUnsanitizedDoc" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "SavedObjectMigrationFn" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "SavedObjectUnsanitizedDoc"
+//
+// @public
+export type SavedObjectMigrationFn = (doc: SavedObjectUnsanitizedDoc, log: SavedObjectsMigrationLogger) => SavedObjectUnsanitizedDoc;
+
+// @public
+export interface SavedObjectMigrationMap {
+    // (undocumented)
+    [version: string]: SavedObjectMigrationFn;
+}
+
 // @public
 export interface SavedObjectReference {
     // (undocumented)
@@ -1540,7 +1553,7 @@ export interface SavedObjectsClientWrapperOptions {
     request: KibanaRequest;
 }
 
-// @public (undocumented)
+// @public
 export interface SavedObjectsComplexFieldMapping {
     // (undocumented)
     dynamic?: string;
@@ -1550,7 +1563,7 @@ export interface SavedObjectsComplexFieldMapping {
     type?: string;
 }
 
-// @public (undocumented)
+// @public
 export interface SavedObjectsCoreFieldMapping {
     // (undocumented)
     enabled?: boolean;
@@ -1841,6 +1854,8 @@ export interface SavedObjectsMigrationLogger {
     // (undocumented)
     info: (msg: string) => void;
     // (undocumented)
+    warn: (msg: string) => void;
+    // @deprecated (undocumented)
     warning: (msg: string) => void;
 }
 
@@ -1858,8 +1873,10 @@ export interface SavedObjectsRawDoc {
     _primary_term?: number;
     // (undocumented)
     _seq_no?: number;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsRawDocSource" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    _source: any;
+    _source: SavedObjectsRawDocSource;
     // (undocumented)
     _type?: string;
 }
@@ -1928,10 +1945,12 @@ export class SavedObjectsSchema {
 
 // @public
 export class SavedObjectsSerializer {
+    // Warning: (ae-forgotten-export) The symbol "ISavedObjectTypeRegistry" needs to be exported by the entry point index.d.ts
+    //
     // @internal
-    constructor(registry: SavedObjectTypeRegistry);
+    constructor(registry: ISavedObjectTypeRegistry);
     generateRawId(namespace: string | undefined, type: string, id?: string): string;
-    isRawSavedObject(rawDoc: SavedObjectsRawDoc): any;
+    isRawSavedObject(rawDoc: SavedObjectsRawDoc): boolean;
     rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc;
     savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc;
     }
@@ -1950,23 +1969,14 @@ export interface SavedObjectsServiceStart {
     getScopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
 }
 
-// @internal (undocumented)
+// @public (undocumented)
 export interface SavedObjectsType {
-    // (undocumented)
     convertToAliasScript?: string;
-    // (undocumented)
     hidden: boolean;
-    // (undocumented)
     indexPattern?: string;
-    // (undocumented)
     mappings: SavedObjectsTypeMappingDefinition;
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectMigrationMap" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     migrations?: SavedObjectMigrationMap;
-    // (undocumented)
     name: string;
-    // (undocumented)
     namespaceAgnostic: boolean;
 }
 

@@ -4,6 +4,11 @@
 
 ## SavedObjectsMigrationLogger.warning property
 
+> Warning: This API is now obsolete.
+> 
+> Use `warn` instead.
+> 
+
 <b>Signature:</b>
 
 ```typescript

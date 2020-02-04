@@ -9,7 +9,7 @@ Determines whether or not the raw document can be converted to a saved object.
 <b>Signature:</b>
 
 ```typescript
-isRawSavedObject(rawDoc: SavedObjectsRawDoc): any;
+isRawSavedObject(rawDoc: SavedObjectsRawDoc): boolean;
 ```
 
 ## Parameters
@@ -20,5 +20,5 @@ isRawSavedObject(rawDoc: SavedObjectsRawDoc): any;
 
 <b>Returns:</b>
 
-`any`
+`boolean`
 
