@@ -13,6 +13,10 @@ class NotificationService {
     this.toasts = notifications.toasts;
   }
 
+  public get toasts() {
+    return toasts;
+  }
+
   private addToasts = (title: string, type: 'danger' | 'warning' | 'success', text?: string) => {
     this.toasts.add({
       title,

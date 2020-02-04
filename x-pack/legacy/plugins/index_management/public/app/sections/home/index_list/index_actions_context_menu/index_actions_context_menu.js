@@ -24,9 +24,10 @@ import {
 } from '@elastic/eui';
 
 // We will be able to remove these after the NP migration is complete.
-import { toastNotifications, fatalError } from 'ui/notify';
+import { fatalError } from 'ui/notify';
 import { createUiStatsReporter } from '../../../../../../../../../../src/legacy/core_plugins/ui_metric/public';
-import { getNewPlatformCompatibleHttpClient } from '../../../../services/api';
+import { httpService } from '../../../../services/http';
+import { notificationService } from '../../../../services/notification';
 
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../../common/constants';
@@ -225,15 +226,15 @@ export class IndexActionsContextMenu extends Component {
       const actionExtensionDefinition = actionExtension({
         indices,
         reloadIndices,
-        // These config options can be removed once the NP migration is complete.
+        // These config options can be removed once the NP migration out of legacy is complete.
         // They're needed for now because ILM's extensions make API calls which require these
         // dependencies, but they're not available unless the app's "setup" lifecycle stage occurs.
         // Within the old platform, "setup" only occurs once the user actually visits the app.
         // Once ILM and IM have been moved out of legacy this hack won't be necessary.
         createUiStatsReporter,
-        toasts: toastNotifications,
+        toasts: notificationService.toasts,
         fatalErrors: getNewPlatformCompatibleFatalErrorService(),
-        httpClient: getNewPlatformCompatibleHttpClient(),
+        httpClient: httpService.httpClient,
       });
 
       if (actionExtensionDefinition) {
