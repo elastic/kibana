@@ -98,7 +98,7 @@ export class HomePlugin implements Plugin {
           getBasePath: core.http.basePath.get,
           indexPatternService: this.dataStart!.indexPatterns,
           environment: this.environment!,
-          config: kibana_legacy.config,
+          config: kibanaLegacy.config,
           homeConfig: home.config,
           ...angularDependencies,
         });

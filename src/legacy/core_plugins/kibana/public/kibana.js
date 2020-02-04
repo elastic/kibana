@@ -63,7 +63,7 @@ localApplicationService.attachToAngular(routes);
 
 routes.enable();
 
-const { config } = npSetup.plugins.kibana_legacy;
+const { config } = npSetup.plugins.kibanaLegacy;
 routes.otherwise({
   redirectTo: `/${config.defaultAppId || 'discover'}`,
 });

@@ -60,7 +60,7 @@ uiModules.get('kibana').run(showAppRedirectNotification);
  * show that dashboard, otherwise, we'll show the default dasbhoard landing page.
  */
 function defaultUrl() {
-  const defaultAppId = npStart.plugins.kibana_legacy.config.defaultAppId || '';
+  const defaultAppId = npStart.plugins.kibanaLegacy.config.defaultAppId || '';
   const isDashboardId = defaultAppId.startsWith(dashboardAppIdPrefix());
   return isDashboardId ? `/${defaultAppId}` : DashboardConstants.LANDING_PAGE_PATH;
 }
