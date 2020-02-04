@@ -17,14 +17,12 @@ import {
 import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
 import { CoreSetup, SetupPlugins, PluginInitializerContext } from '../../plugin';
-import { RequestFacade } from '../../types';
 
 import {
   FrameworkAdapter,
   FrameworkIndexPatternsService,
   FrameworkRequest,
   internalFrameworkRequest,
-  WrappableRequest,
 } from './types';
 
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
@@ -82,7 +80,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
           const user = await this.getCurrentUserInfo(request);
           const gqlResponse = await runHttpQuery([request], {
             method: 'POST',
-            options: (req: RequestFacade) => ({
+            options: (req: KibanaRequest) => ({
               context: { req: wrapRequest(req, context, user) },
               schema,
             }),
@@ -116,7 +114,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
             const { query } = request;
             const gqlResponse = await runHttpQuery([request], {
               method: 'GET',
-              options: (req: RequestFacade) => ({
+              options: (req: KibanaRequest) => ({
                 context: { req: wrapRequest(req, context, user) },
                 schema,
               }),
@@ -206,20 +204,15 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 }
 
-export function wrapRequest<InternalRequest extends WrappableRequest>(
-  req: InternalRequest,
+export function wrapRequest(
+  request: KibanaRequest,
   context: RequestHandlerContext,
   user: AuthenticatedUser | null
-): FrameworkRequest<InternalRequest> {
-  const { auth, params, payload, query } = req;
-
+): FrameworkRequest {
   return {
-    [internalFrameworkRequest]: req,
-    auth,
+    [internalFrameworkRequest]: request,
+    body: request.body,
     context,
-    params,
-    payload,
-    query,
     user,
   };
 }
