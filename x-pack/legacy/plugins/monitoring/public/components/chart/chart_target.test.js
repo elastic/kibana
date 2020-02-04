@@ -9,8 +9,6 @@ import expect from '@kbn/expect';
 import { shallow } from 'enzyme';
 import { ChartTarget } from './chart_target';
 
-import { coreMock, notificationServiceMock } from '../../../../../../../src/core/public/mocks';
-
 const props = {
   seriesToShow: ['Max Heap', 'Max Heap Used'],
   series: [
@@ -52,18 +50,7 @@ jest.mock('../../np_imports/ui/chrome', () => {
 });
 
 // TODO: Skipping for now, seems flaky in New Platform (needs more investigation)
-describe.skip('Test legends to toggle series: ', () => {
-  beforeEach(async () => {
-    jest.doMock('ui/new_platform', () => ({
-      npSetup: {
-        core: {
-          ...coreMock.createSetup(),
-          notifications: notificationServiceMock.createStartContract(),
-        },
-      },
-    }));
-  });
-
+describe('Test legends to toggle series: ', () => {
   const ids = props.series.map(item => item.id);
 
   describe('props.series: ', () => {
