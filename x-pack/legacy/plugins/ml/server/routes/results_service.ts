@@ -9,6 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
+import {
+  anomaliesTableDataSchema,
+  partitionFieldValuesSchema,
+} from '../new_platform/results_service_schema';
+// @ts-ignore // TODO: fix
 import { resultsServiceProvider } from '../models/results_service';
 
 function getAnomaliesTableData(context: RequestHandlerContext, payload: any) {
@@ -69,13 +74,11 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
     {
       path: '/api/ml/results/anomalies_table_data',
       validate: {
-        body: schema.any(),
+        body: schema.object({ ...anomaliesTableDataSchema }),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
-        // eslint-disable-next-line
-        console.log('----- ANOMALIES TABLE DATA ---', JSON.stringify(request.body, null, 2));
         const resp = await getAnomaliesTableData(context, request.body);
 
         return response.ok({
@@ -91,13 +94,14 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
     {
       path: '/api/ml/results/category_definition',
       validate: {
-        body: schema.any(),
+        body: schema.object({
+          jobId: schema.maybe(schema.string()),
+          categoryId: schema.string(),
+        }),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
-        // eslint-disable-next-line
-        console.log('----- CATEGORY DEFINITION ---', JSON.stringify(request.body, null, 2));
         const resp = await getCategoryDefinition(context, request.body);
 
         return response.ok({
@@ -113,13 +117,15 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
     {
       path: '/api/ml/results/max_anomaly_score',
       validate: {
-        body: schema.any(),
+        body: schema.object({
+          jobIds: schema.arrayOf(schema.string()),
+          earliestMs: schema.number(),
+          latestMs: schema.number(),
+        }),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
-        // eslint-disable-next-line
-        console.log('----- MAX ANOMALY SCORE ---', JSON.stringify(request.body, null, 2));
         const resp = await getMaxAnomalyScore(context, request.body);
 
         return response.ok({
@@ -135,13 +141,15 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
     {
       path: '/api/ml/results/category_examples',
       validate: {
-        body: schema.any(),
+        body: schema.object({
+          jobId: schema.string(),
+          categoryIds: schema.arrayOf(schema.string()),
+          maxExamples: schema.number(),
+        }),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
-        // eslint-disable-next-line
-        console.log('----- CATEGORY EXAMPLES ---', JSON.stringify(request.body, null, 2));
         const resp = await getCategoryExamples(context, request.body);
 
         return response.ok({
@@ -157,13 +165,11 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
     {
       path: '/api/ml/results/partition_fields_values',
       validate: {
-        body: schema.any(),
+        body: schema.object({ ...partitionFieldValuesSchema }),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
-        // eslint-disable-next-line
-        console.log('----- PARTITION FIELD VALUES ---', JSON.stringify(request.body, null, 2));
         const resp = await getPartitionFieldsValues(context, request.body);
 
         return response.ok({

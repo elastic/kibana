@@ -18,6 +18,12 @@ import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
 
 const DEFAULT_MAX_EXAMPLES = 500;
 
+export interface CriteriaField {
+  fieldType?: string;
+  fieldName: string;
+  fieldValue: any;
+}
+
 export function resultsServiceProvider(client: RequestHandlerContext | (() => any)) {
   const callAsCurrentUser =
     typeof client === 'object' ? client.ml!.mlClient.callAsCurrentUser : client;
@@ -29,13 +35,13 @@ export function resultsServiceProvider(client: RequestHandlerContext | (() => an
   // anomalies are categorization anomalies in mlcategory.
   async function getAnomaliesTableData(
     jobIds: string[],
-    criteriaFields: any[],
+    criteriaFields: CriteriaField[],
     influencers: any[],
-    aggregationInterval: any,
-    threshold: any,
+    aggregationInterval: string,
+    threshold: number,
     earliestMs: number,
     latestMs: number,
-    dateFormatTz: any,
+    dateFormatTz: string,
     maxRecords: number = ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
     maxExamples: number = DEFAULT_MAX_EXAMPLES,
     influencersFilterQuery: any
