@@ -10,7 +10,6 @@ import { resolve } from 'path';
 import { Server } from 'hapi';
 import { Root } from 'joi';
 
-import { PluginInitializerContext } from '../../../../src/core/server';
 import { plugin } from './server';
 import { savedObjectMappings } from './server/saved_objects';
 
@@ -152,7 +151,7 @@ export const siem = (kibana: any) => {
     init(server: Server) {
       const { config, newPlatform, plugins, route } = server;
       const { coreContext, env, setup } = newPlatform;
-      const initializerContext = { ...coreContext, env } as PluginInitializerContext;
+      const initializerContext = { ...coreContext, env };
       const serverFacade = {
         config,
         usingEphemeralEncryptionKey:
@@ -166,7 +165,7 @@ export const siem = (kibana: any) => {
         },
         route: route.bind(server),
       };
-      // @ts-ignore-next-line: setup.plugins is too loosely typed
+      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
       plugin(initializerContext).setup(setup.core, setup.plugins, serverFacade);
     },
     config(Joi: Root) {
